@@ -1153,7 +1153,8 @@ export default function Library() {
     }
   }
 
-  const base = import.meta.env.BASE_URL || "/";
+  const rawBase = String(import.meta.env.BASE_URL || "/");
+  const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
   return (
     <>

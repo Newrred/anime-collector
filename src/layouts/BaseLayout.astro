@@ -1,12 +1,14 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
-const base = import.meta.env.BASE_URL;
+const rawBase = String(import.meta.env.BASE_URL || "/");
+const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 const isProd = import.meta.env.PROD;
 const normalize = (p: string | null | undefined) =>
   (String(p || "").endsWith("/") ? String(p) : `${String(p)}/`);
+const toBasePath = (p: string = "") => `${base}${String(p).replace(/^\/+/, "")}`;
 const isIndexPage = normalize(Astro.url.pathname) === normalize(base);
-const isTierPage = normalize(Astro.url.pathname) === normalize(`${base}tier/`);
+const isTierPage = normalize(Astro.url.pathname) === normalize(toBasePath("tier/"));
 ---
 <html lang="ko">
   <head>
@@ -16,20 +18,20 @@ const isTierPage = normalize(Astro.url.pathname) === normalize(`${base}tier/`);
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="애니 라이브러리" />
-    <link rel="manifest" href={`${base}manifest.webmanifest`} />
+    <link rel="manifest" href={toBasePath("manifest.webmanifest")} />
     <title>애니 라이브러리</title>
   </head>
   <body>
     <ClientRouter />
     {!isIndexPage && !isTierPage && (
       <nav class="nav">
-        <a href={`${base}`}>목록</a>
-        <a href={`${base}tier/`}>티어</a>
+        <a href={base}>목록</a>
+        <a href={toBasePath("tier/")}>티어</a>
       </nav>
     )}
     <main class="container">
       <slot />
     </main>
-    {isProd && <script is:inline type="module" src={`${base}register-sw.js`}></script>}
+    {isProd && <script is:inline type="module" src={toBasePath("register-sw.js")}></script>}
   </body>
 </html>
