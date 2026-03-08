@@ -8,7 +8,11 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:e2e": "playwright test",
-    "test:e2e:live": "playwright test tests/live-search.spec.ts --project=desktop-chromium --workers=1 --output=test-results-live"
+    "test:e2e:live": "playwright test tests/live-search.spec.ts --project=desktop-chromium --workers=1 --output=test-results-live",
+    "collect:anilife:first-season": "node scripts/collect-anilife-first-season.mjs",
+    "collect:anilife:2010-2027": "node scripts/collect-anilife-seasons.mjs --from=2010 --to=2027",
+    "build:aliases:auto": "node scripts/build-aliases-from-anilife.mjs",
+    "build:aliases:auto:sample": "node scripts/build-aliases-from-anilife.mjs --limit=120"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

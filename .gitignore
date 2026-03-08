@@ -33,3 +33,14 @@ playwright-report/
 test-results/
 test-results-*/
 test-results*
+
+# local scraping cache
+.cache/
+scripts/build-aliases-from-anilife.mjs
+scripts/collect-anilife-first-season.mjs
+scripts/collect-anilife-seasons.mjs
+src/data/aliases.auto.1979-2009.json
+src/data/aliases.auto.json
+src/data/aliases.review-needed.1979-2009.json
+src/data/aliases.review-needed.json
+src/data/anilife-1979-2009-title-pairs.json
