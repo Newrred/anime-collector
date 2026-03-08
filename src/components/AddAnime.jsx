@@ -182,12 +182,16 @@ export default function AddAnime({ items, setItems }) {
     }
 
     let alive = true;
+    let fallbackRows = [];
     setLoading(true);
     setLoadingStage("검색 시작");
 
     (async () => {
       const setStage = (v) => {
         if (alive) setLoadingStage(v);
+      };
+      const rememberRows = (rows) => {
+        if (Array.isArray(rows) && rows.length > 0) fallbackRows = rows;
       };
 
       function buildMergedResults(ids, candidateMap, mediaMap) {
@@ -232,7 +236,9 @@ export default function AddAnime({ items, setItems }) {
         function renderQuick(rows, stage) {
           if (!alive || hasQuickRendered || rows.length === 0) return;
           hasQuickRendered = true;
-          setResults(rows.slice(0, 10));
+          const quickRows = rows.slice(0, 10);
+          rememberRows(quickRows);
+          setResults(quickRows);
           setStage(stage);
           setLoading(false);
         }
@@ -365,6 +371,7 @@ export default function AddAnime({ items, setItems }) {
         if (!alive) return;
         const fastMerged = buildMergedResults(fastIds, candidateMap, mediaMap).slice(0, 10);
         if (fastMerged.length > 0) {
+          rememberRows(fastMerged);
           setResults(fastMerged);
           setStage(tailIds.length ? "추가 결과 보강" : "결과 정리");
           setLoading(false);
@@ -381,8 +388,15 @@ export default function AddAnime({ items, setItems }) {
 
         if (!alive) return;
         const finalList = merged.slice(0, 10);
-        setSearchCacheEntry(cacheRef.current, key, finalList);
-        setResults(finalList);
+        if (finalList.length > 0) {
+          rememberRows(finalList);
+          setSearchCacheEntry(cacheRef.current, key, finalList);
+          setResults(finalList);
+        } else if (!fallbackRows.length) {
+          // 아무 결과도 없을 때만 비움 처리
+          setSearchCacheEntry(cacheRef.current, key, []);
+          setResults([]);
+        }
         setLoading(false);
         setLoadingStage("");
         return;
@@ -428,6 +442,12 @@ export default function AddAnime({ items, setItems }) {
     })().catch((e) => {
       console.error(e);
       if (!alive) return;
+      if (fallbackRows.length > 0) {
+        setResults(fallbackRows);
+        setLoading(false);
+        setLoadingStage("");
+        return;
+      }
       setResults([]);
       setLoading(false);
       setLoadingStage("오류");
