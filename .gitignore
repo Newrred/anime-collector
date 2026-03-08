@@ -44,3 +44,10 @@ src/data/aliases.auto.json
 src/data/aliases.review-needed.1979-2009.json
 src/data/aliases.review-needed.json
 src/data/anilife-1979-2009-title-pairs.json
+src/data/aliases.auto.paged.json
+src/data/aliases.review-needed.paged.json
+src/data/anilife-1979-2009-title-pairs.paged.json
+src/data/anilife-1979-2027-title-pairs.paged.json
+src/data/anilife-2010-2027-title-pairs.json
+src/data/anilife-2010-2027-title-pairs.paged.json
+src/data/anilife-2021-recheck.json
