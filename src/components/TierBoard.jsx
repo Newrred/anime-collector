@@ -1,202 +1,59 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
+import {
+  DEFAULT_TIERS,
+  dedupeByAnilistId,
+  makeEmptyTierState,
+  mergeTierState,
+  normalizeImportList,
+  normalizeItem,
+  normalizeTierState,
+  sameItem,
+} from "../domain/animeState";
+import { useStoredState } from "../hooks/useStoredState";
+import { STORAGE_KEYS } from "../storage/keys";
+import { markManualBackupExported } from "../repositories/backupRepo";
+import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
+import { readTierStatePreferred, writeTierState } from "../repositories/tierRepo";
+import { mergeWatchLogs, readAllWatchLogsSnapshot, replaceWatchLogs } from "../repositories/watchLogRepo";
+import { mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
+import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
+import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
-function useLocalStorageState(key, initialValue) {
-  const [state, setState] = useState(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
+const SEASON_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
 
-  useEffect(() => {
-    try {
-      // 객체/배열은 stringify해서 저장
-      localStorage.setItem(key, JSON.stringify(state));
-    } catch {}
-  }, [key, state]);
+function extractYearFromLog(log) {
+  const start = String(log?.watchedAtStart || "");
+  const mStart = start.match(/^(\d{4})-\d{2}-\d{2}$/);
+  if (mStart) return Number(mStart[1]);
 
-  return [state, setState];
+  const value = String(log?.watchedAtValue || "");
+  const mValue = value.match(/^(\d{4})/);
+  if (mValue) return Number(mValue[1]);
+
+  return null;
 }
 
-const DEFAULT_TIERS = ["S", "A", "B", "C", "D"];
-const LIST_STORAGE_KEY = "anime:list:v1";
-const TIER_STORAGE_KEY = "anime:tier:v1";
-const LAST_EXPORT_AT_KEY = "anime:lastBackupAt:v1";
-const SCORE_MAX = 5;
-const SCORE_STEP = 0.5;
-const REWATCH_COUNT_MAX = 999;
-
-function clamp(n, min, max) {
-  return Math.min(max, Math.max(min, n));
+function seasonByMonth(month) {
+  const m = Number(month);
+  if (m >= 3 && m <= 5) return "Spring";
+  if (m >= 6 && m <= 8) return "Summer";
+  if (m >= 9 && m <= 11) return "Fall";
+  return "Winter";
 }
 
-function normalizeScoreValue(raw) {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return null;
-  const scaled = n > SCORE_MAX ? n / 2 : n;
-  const rounded = Math.round(scaled / SCORE_STEP) * SCORE_STEP;
-  return clamp(rounded, 0, SCORE_MAX);
-}
-
-function normalizeRewatchCount(raw) {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return 0;
-  return clamp(Math.round(n), 0, REWATCH_COUNT_MAX);
-}
-
-function normalizeRewatchDate(raw) {
-  const s = String(raw || "").trim();
-  if (!s) return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-
-  const [yy, mm, dd] = s.split("-").map((x) => Number(x));
-  if (!Number.isFinite(yy) || !Number.isFinite(mm) || !Number.isFinite(dd)) return null;
-
-  const dt = new Date(Date.UTC(yy, mm - 1, dd));
-  if (
-    dt.getUTCFullYear() !== yy ||
-    dt.getUTCMonth() !== mm - 1 ||
-    dt.getUTCDate() !== dd
-  ) {
-    return null;
-  }
-  return s;
-}
-
-function sameItem(a, b) {
-  return (
-    a?.anilistId === b?.anilistId &&
-    (a?.koTitle ?? null) === (b?.koTitle ?? null) &&
-    (a?.status ?? "미분류") === (b?.status ?? "미분류") &&
-    (a?.score ?? null) === (b?.score ?? null) &&
-    (a?.memo ?? "") === (b?.memo ?? "") &&
-    (a?.rewatchCount ?? 0) === (b?.rewatchCount ?? 0) &&
-    (a?.lastRewatchAt ?? null) === (b?.lastRewatchAt ?? null) &&
-    (a?.addedAt ?? 0) === (b?.addedAt ?? 0)
-  );
-}
-
-function dedupeByAnilistId(list) {
-  const source = Array.isArray(list) ? list : [];
-  const map = new Map();
-  for (const it of source) {
-    const id = Number(it?.anilistId);
-    if (!Number.isFinite(id)) continue;
-
-    if (!map.has(id)) {
-      map.set(id, { ...it, anilistId: id });
-      continue;
-    }
-
-    const prev = map.get(id);
-    map.set(id, {
-      ...prev,
-      ...it,
-      addedAt: Math.max(prev.addedAt ?? 0, it.addedAt ?? 0),
-      koTitle: it.koTitle || prev.koTitle || null,
-    });
-  }
-  return [...map.values()];
-}
-
-function normalizeItem(it, fallbackAddedAt = 0) {
-  const anilistId = Number(it?.anilistId);
-  const addedAtNum = Number(it?.addedAt);
-  return {
-    anilistId,
-    koTitle: it?.koTitle ?? null,
-    status: it?.status ?? "미분류",
-    score: normalizeScoreValue(it?.score),
-    memo: it?.memo ?? "",
-    rewatchCount: normalizeRewatchCount(it?.rewatchCount),
-    lastRewatchAt: normalizeRewatchDate(it?.lastRewatchAt),
-    addedAt: Number.isFinite(addedAtNum) ? addedAtNum : fallbackAddedAt,
-  };
-}
-
-function normalizeImportList(rawList) {
-  const baseTs = Date.now();
-  return dedupeByAnilistId(
-    (rawList || []).map((it, idx) => normalizeItem(it, baseTs + idx))
-  );
-}
-
-function toUniqueIdArray(arr) {
-  const out = [];
-  const seen = new Set();
-  for (const x of arr || []) {
-    const n = Number(x);
-    if (!Number.isFinite(n) || seen.has(n)) continue;
-    seen.add(n);
-    out.push(n);
-  }
-  return out;
-}
-
-function normalizeTierState(rawTier) {
-  const tier = rawTier && typeof rawTier === "object" ? rawTier : {};
-  const tiers = {};
-  for (const [k, v] of Object.entries(tier?.tiers || {})) {
-    tiers[k] = toUniqueIdArray(v);
-  }
-  return {
-    unranked: toUniqueIdArray(tier?.unranked || []),
-    tiers,
-  };
-}
-
-function mergeTierState(currentTier, incomingTier) {
-  const a = normalizeTierState(currentTier);
-  const b = normalizeTierState(incomingTier);
-  const keys = new Set([...Object.keys(a.tiers), ...Object.keys(b.tiers)]);
-
-  const tiers = {};
-  for (const k of keys) {
-    tiers[k] = toUniqueIdArray([...(a.tiers[k] || []), ...(b.tiers[k] || [])]);
+function extractSeasonFromLog(log) {
+  const value = String(log?.watchedAtValue || "");
+  const direct = value.match(/^\d{4}-(Spring|Summer|Fall|Winter)$/i);
+  if (direct) {
+    return `${direct[1][0].toUpperCase()}${direct[1].slice(1).toLowerCase()}`;
   }
 
-  const ranked = new Set();
-  for (const ids of Object.values(tiers)) {
-    for (const id of ids) ranked.add(id);
-  }
-
-  const unranked = toUniqueIdArray([...(a.unranked || []), ...(b.unranked || [])]).filter(
-    (id) => !ranked.has(id)
-  );
-
-  return { unranked, tiers };
-}
-
-function SegTabButton({ active, onClick, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        border: "none",
-        borderRadius: 10,
-        padding: "8px 12px",
-        cursor: "pointer",
-        color: active ? "#0b0c10" : "rgba(255,255,255,0.92)",
-        background: active ? "rgba(255,255,255,.88)" : "transparent",
-        fontWeight: active ? 700 : 500,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-// ✅ 초기 상태는 ids 배열을 복사해두는 게 안전(참조 공유 방지)
-function makeEmptyTierState(ids) {
-  return {
-    unranked: [...ids],
-    tiers: Object.fromEntries(DEFAULT_TIERS.map((t) => [t, []])),
-  };
+  const start = String(log?.watchedAtStart || "");
+  const m = start.match(/^\d{4}-(\d{2})-\d{2}$/);
+  if (m) return seasonByMonth(Number(m[1]));
+  return null;
 }
 
 function firstHangulSynonym(media) {
@@ -207,7 +64,7 @@ function firstHangulSynonym(media) {
 
 export default function TierBoard() {
   // ✅ 라이브러리(localStorage) 읽어서 ids를 만든다 (새로 추가된 애니 자동 반영)
-  const [library, setLibrary] = useLocalStorageState(LIST_STORAGE_KEY, myListSeed);
+  const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, myListSeed);
 
   useEffect(() => {
     setLibrary((prev) => {
@@ -265,18 +122,79 @@ export default function TierBoard() {
   const [mediaMap, setMediaMap] = useState(new Map());
 
   // ✅ tierState는 localStorage에 저장
-  const [tierState, setTierState] = useLocalStorageState(
-    TIER_STORAGE_KEY,
+  const [tierState, setTierState] = useStoredState(
+    STORAGE_KEYS.tier,
     makeEmptyTierState(ids)
   );
-  const fileRef = useRef(null);
-  const dataMenuRef = useRef(null);
-  const [dataTab, setDataTab] = useState("export");
-  const [dataMenuOpen, setDataMenuOpen] = useState(false);
-  const [importMode, setImportMode] = useState("merge");
-  const [importText, setImportText] = useState("");
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
+  const [watchLogsSnapshot, setWatchLogsSnapshot] = useState([]);
+  const [logFilter, setLogFilter] = useState("all"); // all | year | season | rewatch | character
+  const [logYear, setLogYear] = useState(String(new Date().getUTCFullYear()));
+  const [logSeason, setLogSeason] = useState("Spring");
+
+  function refreshWatchLogsSnapshot() {
+    const rows = readAllWatchLogsSnapshot();
+    setWatchLogsSnapshot(Array.isArray(rows) ? rows : []);
+  }
+
+  useEffect(() => {
+    refreshWatchLogsSnapshot();
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      await ensureLegacyStorageMigrated().catch(() => {});
+      const [preferredLibrary, preferredTier] = await Promise.all([
+        readLibraryListPreferred(myListSeed).catch(() => null),
+        readTierStatePreferred(null).catch(() => null),
+      ]);
+      if (!alive) return;
+
+      if (Array.isArray(preferredLibrary)) {
+        setLibrary((prev) => {
+          const source = Array.isArray(prev) ? prev : [];
+          const next = dedupeByAnilistId(
+            preferredLibrary.map((it, idx) =>
+              normalizeItem(
+                it,
+                Number.isFinite(Number(it?.addedAt)) ? Number(it.addedAt) : idx
+              )
+            )
+          );
+          if (
+            source.length === next.length &&
+            next.every((it, idx) => sameItem(it, source[idx]))
+          ) {
+            return prev;
+          }
+          return next;
+        });
+      }
+
+      if (preferredTier && typeof preferredTier === "object") {
+        setTierState((prev) => {
+          const next = normalizeTierState(preferredTier);
+          const same =
+            JSON.stringify(prev?.unranked || []) === JSON.stringify(next?.unranked || []) &&
+            JSON.stringify(prev?.tiers || {}) === JSON.stringify(next?.tiers || {});
+          return same ? prev : next;
+        });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [setLibrary, setTierState]);
+
+  useEffect(() => {
+    writeLibraryList(library, { mirrorOnly: true });
+  }, [library]);
+
+  useEffect(() => {
+    writeTierState(tierState, { mirrorOnly: true });
+  }, [tierState]);
 
   // AniList 메타 로드(캐시 우선)
   useEffect(() => {
@@ -284,7 +202,7 @@ export default function TierBoard() {
 
     let alive = true;
     (async () => {
-      const map = await fetchAnimeByIdsCached(ids);
+      const map = await fetchAnimeByIdsCached(ids, { includeCharacters: false });
       if (alive) setMediaMap(map);
     })().catch(console.error);
 
@@ -331,15 +249,6 @@ export default function TierBoard() {
       return next;
     });
   }, [idsKey, setTierState]);
-
-  useEffect(() => {
-    function onDocDown(e) {
-      if (!dataMenuRef.current) return;
-      if (!dataMenuRef.current.contains(e.target)) setDataMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onDocDown);
-    return () => document.removeEventListener("mousedown", onDocDown);
-  }, []);
 
   useEffect(() => {
     function syncInstallState() {
@@ -418,6 +327,7 @@ export default function TierBoard() {
   }
 
   function onDropToEnd(e, to) {
+    if (logFilter !== "all") return;
     e.preventDefault();
     const payload = parsePayload(e);
     if (!payload) return;
@@ -429,6 +339,7 @@ export default function TierBoard() {
   }
 
   function onDropToItem(e, to, toIndex) {
+    if (logFilter !== "all") return;
     e.preventDefault();
     e.stopPropagation();
     const payload = parsePayload(e);
@@ -458,17 +369,17 @@ export default function TierBoard() {
   function buildBackupPayload() {
     return {
       app: "ani-site",
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(library),
       tier: tierState,
+      watchLogs: readAllWatchLogsSnapshot(),
+      characterPins: readCharacterPinsSnapshot(),
     };
   }
 
   function markBackupExported(message) {
-    try {
-      localStorage.setItem(LAST_EXPORT_AT_KEY, new Date().toISOString());
-    } catch {}
+    markManualBackupExported(new Date().toISOString());
     setBackupMsg(message);
   }
 
@@ -562,12 +473,35 @@ export default function TierBoard() {
       setTierState(nextTier);
     }
 
+    const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
+    if (Array.isArray(incomingLogs)) {
+      if (isOverwrite) {
+        await replaceWatchLogs(incomingLogs);
+      } else {
+        await mergeWatchLogs(incomingLogs);
+      }
+      refreshWatchLogsSnapshot();
+    } else if (isOverwrite) {
+      await replaceWatchLogs([]);
+      refreshWatchLogsSnapshot();
+    }
+
+    const incomingPins = !Array.isArray(json) ? json?.characterPins : null;
+    if (Array.isArray(incomingPins)) {
+      if (isOverwrite) {
+        await replaceCharacterPins(incomingPins);
+      } else {
+        await mergeCharacterPins(incomingPins);
+      }
+    } else if (isOverwrite) {
+      await replaceCharacterPins([]);
+    }
+
     setBackupMsg(
       isOverwrite
         ? "가져오기 완료! 기존 목록을 덮어썼어요."
         : "가져오기 완료! 기존 목록과 병합했어요."
     );
-    setDataMenuOpen(false);
   }
 
   async function importBackup(file, mode = "merge") {
@@ -576,8 +510,8 @@ export default function TierBoard() {
     await importBackupFromJson(json, mode);
   }
 
-  async function onImportText() {
-    const raw = String(importText || "").trim();
+  async function importBackupText(rawText, mode = "merge") {
+    const raw = String(rawText || "").trim();
     if (!raw) {
       setBackupMsg("붙여넣은 JSON 텍스트가 비어 있어요.");
       return;
@@ -585,157 +519,92 @@ export default function TierBoard() {
 
     try {
       const json = JSON.parse(raw);
-      await importBackupFromJson(json, importMode);
-      setImportText("");
-      setDataMenuOpen(false);
+      await importBackupFromJson(json, mode);
     } catch (err) {
       console.error(err);
       setBackupMsg(`붙여넣기 가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      throw err;
     }
   }
 
-  async function onPickImport(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function importBackupFile(file, mode = "merge") {
     try {
-      await importBackup(file, importMode);
+      await importBackup(file, mode);
     } catch (err) {
       console.error(err);
       setBackupMsg(`가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
-    } finally {
-      e.target.value = "";
+      throw err;
     }
   }
 
   // ---- Render ----
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+  const canEditTierBoard = logFilter === "all";
+  const eligibleIdSet = useMemo(() => {
+    if (logFilter === "all") return null;
+    const logs = Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : [];
+    const out = new Set();
+
+    for (const log of logs) {
+      const id = Number(log?.anilistId);
+      if (!Number.isFinite(id)) continue;
+
+      if (logFilter === "year") {
+        const y = extractYearFromLog(log);
+        if (Number.isFinite(y) && String(y) === String(logYear)) out.add(id);
+        continue;
+      }
+
+      if (logFilter === "season") {
+        const y = extractYearFromLog(log);
+        const season = extractSeasonFromLog(log);
+        if (
+          Number.isFinite(y) &&
+          String(y) === String(logYear) &&
+          season === logSeason
+        ) {
+          out.add(id);
+        }
+        continue;
+      }
+
+      if (logFilter === "rewatch") {
+        if (String(log?.eventType || "") === "재시청") out.add(id);
+        continue;
+      }
+
+      if (logFilter === "character") {
+        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+        if (refs.length > 0) out.add(id);
+      }
+    }
+    return out;
+  }, [logFilter, logSeason, logYear, watchLogsSnapshot]);
+
+  function filterIdsByLog(idsList) {
+    if (!eligibleIdSet) return Array.isArray(idsList) ? idsList : [];
+    return (Array.isArray(idsList) ? idsList : []).filter((id) => eligibleIdSet.has(id));
+  }
+
+  const totalPlacedCount =
+    (Array.isArray(tierState?.unranked) ? tierState.unranked.length : 0) +
+    DEFAULT_TIERS.reduce((acc, t) => acc + (Array.isArray(tierState?.tiers?.[t]) ? tierState.tiers[t].length : 0), 0);
+  const visiblePlacedCount =
+    filterIdsByLog(tierState?.unranked).length +
+    DEFAULT_TIERS.reduce((acc, t) => acc + filterIdsByLog(tierState?.tiers?.[t]).length, 0);
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <section
-        className="nav"
-        style={{
-          margin: "calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) 12px",
-          padding: "10px var(--page-pad)",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>목록</a>
-          <a href={`${base}tier/`}>티어</a>
-        </div>
-
-        <div ref={dataMenuRef} style={{ position: "relative", marginLeft: "auto" }}>
-          <button
-            type="button"
-            onClick={() => setDataMenuOpen((v) => !v)}
-            aria-expanded={dataMenuOpen}
-            aria-controls="tier-data-menu-panel"
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "inherit",
-              cursor: "pointer",
-              padding: "8px 10px",
-              borderRadius: 10,
-              fontSize: 14,
-            }}
-          >
-            내보내기/불러오기
-          </button>
-
-          {dataMenuOpen && (
-            <div
-              id="tier-data-menu-panel"
-              style={{
-                position: "absolute",
-                top: "calc(100% + 6px)",
-                right: 0,
-                width: 360,
-                maxWidth: "min(94vw, 360px)",
-                zIndex: 70,
-                border: "1px solid rgba(255,255,255,.12)",
-                background: "rgba(15,17,23,.98)",
-                borderRadius: 12,
-                padding: 10,
-                boxShadow: "0 10px 30px rgba(0,0,0,.35)",
-              }}
-            >
-              <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, background: "rgba(0,0,0,.18)" }}>
-                <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>내보내기</SegTabButton>
-                <SegTabButton active={dataTab === "import"} onClick={() => setDataTab("import")}>불러오기</SegTabButton>
-              </div>
-
-              {dataTab === "export" ? (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      exportBackup();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    JSON 파일 저장
-                  </button>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      exportBackupMobile();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    모바일 공유/복사
-                  </button>
-                  {canInstallPwa && (
-                    <button
-                      className="btn"
-                      onClick={() => {
-                        onClickInstallPwa();
-                        setDataMenuOpen(false);
-                      }}
-                    >
-                      홈 화면 설치
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.10)", borderRadius: 12, background: "rgba(0,0,0,.18)" }}>
-                    <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>병합</SegTabButton>
-                    <SegTabButton active={importMode === "overwrite"} onClick={() => setImportMode("overwrite")}>덮어쓰기</SegTabButton>
-                  </div>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      fileRef.current?.click();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    JSON 파일 선택
-                  </button>
-                  <textarea
-                    className="textarea"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder="모바일에서는 백업 JSON을 복사해서 여기에 붙여넣고 불러오세요."
-                    style={{ minHeight: 100 }}
-                  />
-                  <button className="btn" onClick={onImportText}>
-                    붙여넣기 불러오기
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: "none" }}
-        onChange={onPickImport}
+      <TopNavDataMenu
+        base={base}
+        panelId="tier-data-menu-panel"
+        canInstallPwa={canInstallPwa}
+        onExportFile={exportBackup}
+        onExportMobile={exportBackupMobile}
+        onInstallPwa={onClickInstallPwa}
+        onImportJsonFile={importBackupFile}
+        onImportJsonText={importBackupText}
       />
       {backupMsg && <div className="small" style={{ opacity: 0.9 }}>{backupMsg}</div>}
 
@@ -743,6 +612,85 @@ export default function TierBoard() {
         <button className="btn" onClick={reset}>초기화</button>
         <span className="small">Drag & Drop</span>
       </div>
+
+      <section
+        style={{
+          border: "1px solid rgba(255,255,255,.1)",
+          background: "rgba(255,255,255,.03)",
+          borderRadius: 5,
+          padding: 10,
+          display: "grid",
+          gap: 8,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ fontWeight: 700 }}>로그 기반 필터</div>
+          <div className="small" style={{ opacity: 0.86 }}>
+            표시 {visiblePlacedCount} / 전체 {totalPlacedCount}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[
+            { key: "all", label: "전체" },
+            { key: "year", label: "올해/연도" },
+            { key: "season", label: "시즌" },
+            { key: "rewatch", label: "재시청 기록" },
+            { key: "character", label: "캐릭터 기록" },
+          ].map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              className="btn"
+              onClick={() => setLogFilter(opt.key)}
+              style={{
+                border: "1px solid rgba(255,255,255,.2)",
+                background: logFilter === opt.key ? "rgba(255,255,255,.82)" : "transparent",
+                color: logFilter === opt.key ? "#0b0c10" : "inherit",
+                fontWeight: logFilter === opt.key ? 700 : 500,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {(logFilter === "year" || logFilter === "season") && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <input
+              className="input"
+              type="number"
+              min={1950}
+              max={2099}
+              value={logYear}
+              onChange={(e) => setLogYear(String(e.target.value || "").replace(/[^\d]/g, "").slice(0, 4))}
+              aria-label="로그 연도 필터"
+              style={{ width: 100 }}
+            />
+            {logFilter === "season" && (
+              <select
+                className="select"
+                value={logSeason}
+                onChange={(e) => setLogSeason(SEASON_OPTIONS.includes(e.target.value) ? e.target.value : "Spring")}
+                aria-label="로그 시즌 필터"
+                style={{ width: 140 }}
+              >
+                {SEASON_OPTIONS.map((term) => (
+                  <option key={term} value={term}>
+                    {term}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
+
+        {!canEditTierBoard && (
+          <div className="small" style={{ opacity: 0.85 }}>
+            필터가 켜진 상태에서는 안전하게 보기 전용입니다. 드래그 편집은 `전체`에서 가능합니다.
+          </div>
+        )}
+      </section>
 
       {DEFAULT_TIERS.map((t) => (
         <div
@@ -765,14 +713,17 @@ export default function TierBoard() {
           <div style={{ fontWeight: 800, fontSize: 48 }}>{t}</div>
 
           <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
-            {(tierState.tiers?.[t] || []).map((id, idx) => {
+            {filterIdsByLog(tierState.tiers?.[t] || []).map((id, idx) => {
               const m = mediaMap.get(id);
               const title = titleFor(id, m);
               return (
                 <div
                   key={id}
-                  draggable
-                  onDragStart={(e) => onDragStart(e, id, t, idx)}
+                  draggable={canEditTierBoard}
+                  onDragStart={(e) => {
+                    if (!canEditTierBoard) return;
+                    onDragStart(e, id, t, idx);
+                  }}
                   onDragOver={allowDrop}
                   onDrop={(e) => onDropToItem(e, t, idx)}
                   title={title}
@@ -782,7 +733,7 @@ export default function TierBoard() {
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,.10)",
                     background: "rgba(255,255,255,.04)",
-                    cursor: "grab",
+                    cursor: canEditTierBoard ? "grab" : "default",
                   }}
                 >
                   <img
@@ -800,7 +751,7 @@ export default function TierBoard() {
               );
             })}
 
-            {(tierState.tiers?.[t] || []).length === 0 && (
+            {filterIdsByLog(tierState.tiers?.[t] || []).length === 0 && (
               <div className="small" style={{ opacity: 0.7, padding: "6px 0" }} />
             )}
           </div>
@@ -822,14 +773,17 @@ export default function TierBoard() {
         <div style={{ fontWeight: 700, marginBottom: 10 }}>미분류</div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {(tierState.unranked || []).map((id, idx) => {
+          {filterIdsByLog(tierState.unranked || []).map((id, idx) => {
             const m = mediaMap.get(id);
             const title = titleFor(id, m);
             return (
               <div
                 key={id}
-                draggable
-                onDragStart={(e) => onDragStart(e, id, "unranked", idx)}
+                draggable={canEditTierBoard}
+                onDragStart={(e) => {
+                  if (!canEditTierBoard) return;
+                  onDragStart(e, id, "unranked", idx);
+                }}
                 onDragOver={allowDrop}
                 onDrop={(e) => onDropToItem(e, "unranked", idx)}
                 title={title}
@@ -839,7 +793,7 @@ export default function TierBoard() {
                   overflow: "hidden",
                   border: "1px solid rgba(255,255,255,.10)",
                   background: "rgba(255,255,255,.04)",
-                  cursor: "grab",
+                  cursor: canEditTierBoard ? "grab" : "default",
                 }}
               >
                 <img

@@ -1,92 +1,89 @@
-# 애니 라이브러리 (Ani Library)
+# anime-collector
 
-Astro + React 기반 개인용 애니 목록/티어 관리 웹앱입니다.  
-서버 DB 없이 브라우저 `localStorage`만으로 동작하며, AniList + Wikidata 조합으로 한글 검색을 보강합니다.
+개인용 애니 라이브러리 웹앱입니다.  
+서버 없이 브라우저 저장소(IndexedDB + localStorage mirror)로 동작하며, 회상/목록/티어/데이터 센터를 제공합니다.
+
+## 주요 기능
+
+- 상단 공통 IA: `회상 | 목록 | 티어 | 데이터`
+- 데이터 메뉴: 내보내기/불러오기(병합/덮어쓰기), 모바일 공유/복사, PWA 설치
+- 회상 홈(`/`): 최근 기록, 이맘때 본 작품, 기억 없는 작품, 최근 자주 기록한 캐릭터, 핀 캐릭터
+- 목록(`/library`):
+  - 한글 강화 검색(aliases + AniList + Wikidata 보강)
+  - 정렬/필터(텍스트, 장르, 상태), 카드 밀도 슬라이더, 포스터/정보 뷰 전환
+  - 상세 모달 편집(별점 0~5, 0.5 단위, 메모, 정주행 횟수/마지막 날짜)
+  - 정주행 완료 버튼 자동 기록(+1)
+  - 퀵 로그(일/월/분기/연도/미상 정밀도 + 캐릭터 최대 3명 + 태그/메모)
+  - 통계 대시보드(상태, 장르 TOP5, 정주행 TOP5, 평균 점수)
+- 티어(`/tier`):
+  - Drag & Drop 티어 편집
+  - 로그 기반 필터(연도/시즌/재시청/캐릭터 기록)
+- 데이터 센터(`/data`):
+  - 저장 엔진, 용량 사용량, 저장 보호(persist) 상태 확인
+
+## 라우트
+
+- `/` : 회상 홈
+- `/library/` : 목록/검색/상세/통계
+- `/tier/` : 티어 보드
+- `/data/` : 데이터 센터
 
 ## 기술 스택
 
 - Astro 5
 - React 19 (`client:only`)
 - AniList GraphQL API
-- Wikidata API + WDQS(SPARQL)
-- Playwright E2E
-- PWA (Web App Manifest + Service Worker)
+- Wikidata API / WDQS(SPARQL)
+- PWA (`public/manifest.webmanifest`, `public/sw.js`)
 
-## 현재 구현 기능
+## 저장 구조
 
-- 상단 Sticky 네비게이션: `목록 | 티어` + `내보내기/불러오기` 팝오버 메뉴
-- 목록 페이지
-- 애니 검색 추가(영문/한글 강화 검색)
-- 상태별 분류 / 시청 장르 상위 5 / 정주행 TOP 5 / 평균 점수
-- 라이브러리 정렬(추가/제목/점수/연도/장르)
-- 라이브러리 검색(제목/장르), 장르 다중 선택, 상태 필터 칩
-- 카드 뷰 모드 전환(포스터/정보, 포스터만)
-- 반응형 카드 그리드 + 줄당 포스터 수 슬라이더
-- 카드 하단 상태 배지 + 별점 미니 표시 + 장르 태그(최대 3개)
-- 포스터 클릭 모달 상세 편집
-- 별점 5점 만점(0.5 단위), 별 UI 클릭/드래그 입력, 호버 프리뷰
-- 상태/메모/정주행 횟수/마지막 정주행 날짜 수정
-- `정주행 완료! +1` 버튼(횟수 증가 + 오늘 날짜 기록)
-- 캐릭터 얼굴/이름 표시(한글 우선 시도)
-- 티어 페이지
-- S/A/B/C/D + 미분류 Drag & Drop
-- 목록 변경사항과 티어 데이터 동기화
-- 목록/티어 공통 데이터 메뉴
-- JSON 내보내기/불러오기(파일 + 모바일 붙여넣기)
-- 불러오기 모드: `병합` / `덮어쓰기`
-- PWA 설치 버튼(브라우저 `beforeinstallprompt` 지원 시)
-- 자동 로컬 백업 스냅샷 + 마지막 수동 백업 리마인드
+### localStorage keys
 
-## 검색 로직 요약
+- `anime:list:v1`
+- `anime:tier:v1`
+- `anime:watchLogs:v1`
+- `anime:characterPins:v1`
+- `anime:searchCache:v1`
+- `anime:lastBackupAt:v1`
+- `anime:autoBackup:v1`
+- `anime:autoBackup:meta:v1`
+- `anime:grid:perRowBase:v1`
 
-`src/components/AddAnime.jsx`
+### IndexedDB stores
 
-- 디바운스: `200ms`
-- 로딩 상태 텍스트 + 점 애니메이션(`. .. ...`)
-- 검색 결과 캐시: `anime:searchCache:v1` (localStorage, TTL 3일)
-- 한글 검색
-- alias 사전 매칭
-- Wikidata 확장 탐색(쿼리 길이에 따라 깊이 조절)
-- AniList 직접 검색 병렬 실행으로 빠른 1차 결과 선표시
-- 후보 상위 먼저 조회 후 tail 보강
-- 비한글 검색
-- AniList 결과를 먼저 즉시 표시
-- 이후 Wikidata 기반 한글 제목 보강 반영
+- `library_items`
+- `watch_logs`
+- `character_pins`
+- `tier_state`
+- `media_cache`
+- `search_cache`
+- `meta`
 
-## 점수/정주행 규칙
+## 백업 포맷
 
-- 점수 범위: `0 ~ 5` (step `0.5`)
-- 레거시 10점 데이터는 로드 시 자동 5점 스케일로 보정
-- 정주행 횟수: 정수(최대 999)
-- 마지막 정주행 날짜: `YYYY-MM-DD`
+현재 내보내기 포맷은 `version: 2`입니다.
 
-## 데이터 모델
-
-목록 아이템(`anime:list:v1`)
-
-```ts
+```json
 {
-  anilistId: number;
-  koTitle: string | null;
-  status: "완료" | "보는중" | "보류" | "하차" | "미분류";
-  score: number | null;        // 0~5, step 0.5
-  memo: string;
-  rewatchCount: number;        // 0~999
-  lastRewatchAt: string | null; // YYYY-MM-DD
-  addedAt: number;
+  "app": "ani-site",
+  "version": 2,
+  "exportedAt": "2026-03-09T12:34:56.000Z",
+  "list": [],
+  "tier": {},
+  "watchLogs": [],
+  "characterPins": [],
+  "preferences": {
+    "cardsPerRowBase": 5,
+    "cardView": "meta"
+  }
 }
 ```
 
-## 로컬 저장 키
-
-- `anime:list:v1`: 목록 데이터
-- `anime:tier:v1`: 티어 데이터
-- `anime:mediaCache:v1`: AniList 메타 캐시(TTL 7일)
-- `anime:searchCache:v1`: 검색 결과 캐시(TTL 3일)
-- `anime:lastBackupAt:v1`: 마지막 수동 내보내기 시각
-- `anime:autoBackup:v1`: 자동 로컬 스냅샷
-- `anime:autoBackup:meta:v1`: 자동 스냅샷 메타
-- `anime:grid:perRowBase:v1`: 카드 열 수 기본값
+- `v1`(list/tier 중심 구버전) import 호환
+- import 모드:
+  - `merge`: 기존 데이터와 병합
+  - `overwrite`: 기존 데이터 덮어쓰기
 
 ## 실행
 
@@ -95,31 +92,34 @@ npm install
 npm run dev
 ```
 
-- 개발 서버: `http://localhost:4321`
+- 기본 개발 서버: `http://localhost:4321`
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## 테스트
+## 배포
 
-```bash
-npm run test:e2e
-```
+GitHub Pages 배포 워크플로:
 
-라이브 외부 API 측정 테스트
+- 파일: `.github/workflows/astro.yml`
+- 트리거: `master` 브랜치 push 시 자동 빌드/배포
 
-```bash
-# PowerShell
-$env:LIVE_E2E='1'; npm run test:e2e:live
-```
+## 데이터 수집/별칭 스크립트
 
-- `tests/library.spec.ts`: 목록 페이지 UI/기능 회귀
-- `tests/tier.spec.ts`: 티어 페이지 UI/기능 회귀
-- `tests/live-search.spec.ts`: 실시간 AniList/Wikidata 응답 품질/지연 측정
+- `npm run collect:anilife:first-season`
+- `npm run collect:anilife:2010-2027`
+- `npm run build:aliases:auto`
+- `npm run build:aliases:auto:sample`
 
-## 프로젝트 성격
+관련 데이터 파일은 `src/data` 아래 JSON으로 관리됩니다.
 
-- 이 프로젝트는 서버 없는 클라이언트 사이드 웹 애플리케이션(PWA)입니다.
-- 계정/프로필 공유 기능(멀티유저, 서버 DB)은 아직 미구현입니다.
+## 디렉터리 가이드
+
+- `src/components`: 화면 컴포넌트
+- `src/pages`: 라우트 엔트리
+- `src/domain`: 정규화/도메인 로직
+- `src/storage`: IndexedDB/localStorage 계층
+- `src/repositories`: 저장소 접근 API
+
