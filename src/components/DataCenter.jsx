@@ -121,7 +121,6 @@ export default function DataCenter() {
           <a href={`${base}`}>회상</a>
           <a href={`${base}library/`}>목록</a>
           <a href={`${base}tier/`}>티어</a>
-          <a href={`${base}data/`}>데이터</a>
         </div>
       </section>
 

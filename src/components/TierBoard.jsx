@@ -17,7 +17,7 @@ import { markManualBackupExported } from "../repositories/backupRepo";
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
 import { readTierStatePreferred, writeTierState } from "../repositories/tierRepo";
 import { mergeWatchLogs, readAllWatchLogsSnapshot, replaceWatchLogs } from "../repositories/watchLogRepo";
-import { mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
+import { listCharacterPinsPreferred, mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
@@ -129,17 +129,31 @@ export default function TierBoard() {
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [watchLogsSnapshot, setWatchLogsSnapshot] = useState([]);
-  const [logFilter, setLogFilter] = useState("all"); // all | year | season | rewatch | character
+  const [logFilter, setLogFilter] = useState("all"); // all | year | season | rewatch | primary | favorite | pinned | reasonTag | character
   const [logYear, setLogYear] = useState(String(new Date().getUTCFullYear()));
   const [logSeason, setLogSeason] = useState("Spring");
+  const [characterPinsSnapshot, setCharacterPinsSnapshot] = useState([]);
+  const [reasonTagFilter, setReasonTagFilter] = useState("");
+  const [characterFilterId, setCharacterFilterId] = useState("");
 
   function refreshWatchLogsSnapshot() {
     const rows = readAllWatchLogsSnapshot();
     setWatchLogsSnapshot(Array.isArray(rows) ? rows : []);
   }
 
+  function refreshCharacterPinsSnapshot() {
+    const rows = readCharacterPinsSnapshot();
+    setCharacterPinsSnapshot(Array.isArray(rows) ? rows : []);
+  }
+
   useEffect(() => {
     refreshWatchLogsSnapshot();
+    refreshCharacterPinsSnapshot();
+    listCharacterPinsPreferred()
+      .then((rows) => {
+        setCharacterPinsSnapshot(Array.isArray(rows) ? rows : []);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -369,7 +383,7 @@ export default function TierBoard() {
   function buildBackupPayload() {
     return {
       app: "ani-site",
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(library),
       tier: tierState,
@@ -493,8 +507,10 @@ export default function TierBoard() {
       } else {
         await mergeCharacterPins(incomingPins);
       }
+      refreshCharacterPinsSnapshot();
     } else if (isOverwrite) {
       await replaceCharacterPins([]);
+      refreshCharacterPinsSnapshot();
     }
 
     setBackupMsg(
@@ -574,13 +590,88 @@ export default function TierBoard() {
         continue;
       }
 
-      if (logFilter === "character") {
+      if (logFilter === "primary") {
         const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-        if (refs.length > 0) out.add(id);
+        const hasPrimary = refs.some((ref) => ref?.isPrimary === true);
+        if (hasPrimary || refs.length === 1) out.add(id);
+        continue;
+      }
+
+      if (logFilter === "favorite") {
+        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+        const hasFavorite = refs.some((ref) => String(ref?.affinity || "") === "최애");
+        if (hasFavorite) out.add(id);
+        continue;
+      }
+
+      if (logFilter === "reasonTag") {
+        const selectedTag = String(reasonTagFilter || "").trim();
+        if (!selectedTag) continue;
+        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+        const hasTag = refs.some((ref) =>
+          Array.isArray(ref?.reasonTags) && ref.reasonTags.includes(selectedTag)
+        );
+        if (hasTag) out.add(id);
+        continue;
+      }
+
+      if (logFilter === "character") {
+        const selectedId = Number(characterFilterId);
+        if (!Number.isFinite(selectedId)) continue;
+        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+        const hasCharacter = refs.some((ref) => Number(ref?.characterId) === selectedId);
+        if (hasCharacter) out.add(id);
+      }
+    }
+
+    if (logFilter === "pinned") {
+      for (const pin of Array.isArray(characterPinsSnapshot) ? characterPinsSnapshot : []) {
+        const mediaId = Number(pin?.mediaId);
+        if (Number.isFinite(mediaId)) out.add(mediaId);
       }
     }
     return out;
-  }, [logFilter, logSeason, logYear, watchLogsSnapshot]);
+  }, [characterFilterId, characterPinsSnapshot, logFilter, logSeason, logYear, reasonTagFilter, watchLogsSnapshot]);
+
+  const reasonTagOptions = useMemo(() => {
+    const map = new Map();
+    for (const log of Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : []) {
+      const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+      for (const ref of refs) {
+        const tags = Array.isArray(ref?.reasonTags) ? ref.reasonTags : [];
+        for (const tagRaw of tags) {
+          const tag = String(tagRaw || "").trim();
+          if (!tag) continue;
+          map.set(tag, (map.get(tag) || 0) + 1);
+        }
+      }
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"))
+      .map(([tag, count]) => ({ tag, count }));
+  }, [watchLogsSnapshot]);
+
+  const characterFilterOptions = useMemo(() => {
+    const map = new Map();
+    for (const log of Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : []) {
+      const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
+      for (const ref of refs) {
+        const id = Number(ref?.characterId);
+        if (!Number.isFinite(id)) continue;
+        const cur = map.get(id) || {
+          id,
+          name: String(ref?.nameSnapshot || `#${id}`).trim() || `#${id}`,
+          count: 0,
+        };
+        cur.count += 1;
+        if (!cur.name && ref?.nameSnapshot) cur.name = String(ref.nameSnapshot).trim();
+        map.set(id, cur);
+      }
+    }
+    return [...map.values()]
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ko"))
+      .slice(0, 100);
+  }, [watchLogsSnapshot]);
 
   function filterIdsByLog(idsList) {
     if (!eligibleIdSet) return Array.isArray(idsList) ? idsList : [];
@@ -636,7 +727,11 @@ export default function TierBoard() {
             { key: "year", label: "올해/연도" },
             { key: "season", label: "시즌" },
             { key: "rewatch", label: "재시청 기록" },
-            { key: "character", label: "캐릭터 기록" },
+            { key: "primary", label: "대표 캐릭터" },
+            { key: "favorite", label: "최애 태그" },
+            { key: "pinned", label: "핀 포함 작품" },
+            { key: "reasonTag", label: "이유 태그" },
+            { key: "character", label: "특정 캐릭터" },
           ].map((opt) => (
             <button
               key={opt.key}
@@ -682,6 +777,44 @@ export default function TierBoard() {
                 ))}
               </select>
             )}
+          </div>
+        )}
+
+        {logFilter === "reasonTag" && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <select
+              className="select"
+              value={reasonTagFilter}
+              onChange={(e) => setReasonTagFilter(String(e.target.value || ""))}
+              aria-label="이유 태그 필터"
+              style={{ width: 200 }}
+            >
+              <option value="">태그 선택</option>
+              {reasonTagOptions.map((row) => (
+                <option key={row.tag} value={row.tag}>
+                  {row.tag} ({row.count})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {logFilter === "character" && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <select
+              className="select"
+              value={characterFilterId}
+              onChange={(e) => setCharacterFilterId(String(e.target.value || ""))}
+              aria-label="특정 캐릭터 필터"
+              style={{ width: 260 }}
+            >
+              <option value="">캐릭터 선택</option>
+              {characterFilterOptions.map((row) => (
+                <option key={row.id} value={String(row.id)}>
+                  {row.name} ({row.count})
+                </option>
+              ))}
+            </select>
           </div>
         )}
 

@@ -13,6 +13,11 @@ function normalizePin(raw) {
   if (!Number.isFinite(characterId) || !Number.isFinite(mediaId)) return null;
   const id = String(raw?.id || `${characterId}:${mediaId}`).trim();
   if (!id) return null;
+  const pinnedFromLogId = raw?.pinnedFromLogId
+    ? String(raw.pinnedFromLogId)
+    : raw?.sourceLogId
+      ? String(raw.sourceLogId)
+      : null;
   return {
     id,
     characterId,
@@ -21,6 +26,8 @@ function normalizePin(raw) {
     imageSnapshot: raw?.imageSnapshot || null,
     note: String(raw?.note || ""),
     sourceLogId: raw?.sourceLogId ? String(raw.sourceLogId) : null,
+    pinReason: String(raw?.pinReason || "").trim(),
+    pinnedFromLogId,
     pinnedAt: Number.isFinite(Number(raw?.pinnedAt)) ? Number(raw.pinnedAt) : Date.now(),
   };
 }

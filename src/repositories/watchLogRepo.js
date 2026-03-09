@@ -31,6 +31,44 @@ function dateUtcMs(year, month, day) {
   return Date.UTC(year, month - 1, day, 0, 0, 0, 0);
 }
 
+function normalizeCharacterRefs(rawRefs) {
+  const refs = toArray(rawRefs)
+    .map((raw, idx) => {
+      const characterId = Number(raw?.characterId);
+      if (!Number.isFinite(characterId)) return null;
+      const reasonTags = toArray(raw?.reasonTags)
+        .map((x) => String(x || "").trim())
+        .filter(Boolean)
+        .slice(0, 6);
+      return {
+        characterId,
+        mediaId: Number.isFinite(Number(raw?.mediaId)) ? Number(raw.mediaId) : null,
+        order: Number.isFinite(Number(raw?.order)) ? Number(raw.order) : idx,
+        nameSnapshot: String(raw?.nameSnapshot || "").trim() || `#${characterId}`,
+        imageSnapshot: raw?.imageSnapshot || null,
+        role: String(raw?.role || ""),
+        affinity: String(raw?.affinity || "기억남음"),
+        reasonTags,
+        note: String(raw?.note || "").trim().slice(0, 200),
+        isPrimary: raw?.isPrimary === true,
+      };
+    })
+    .filter(Boolean);
+
+  if (!refs.length) return [];
+
+  // v1/v2 migration: primary marker가 없는 기존 데이터는 첫 항목을 대표로 승격
+  const primaryIndex = refs.findIndex((x) => x.isPrimary === true);
+  if (primaryIndex < 0) {
+    refs[0].isPrimary = true;
+  } else {
+    refs.forEach((row, idx) => {
+      row.isPrimary = idx === primaryIndex;
+    });
+  }
+  return refs;
+}
+
 export function buildWatchedRange(value, precision, fallbackMs) {
   const raw = String(value || "").trim();
   const p = String(precision || "").toLowerCase();
@@ -90,6 +128,13 @@ function normalizeWatchLog(raw) {
   const createdAt = Number(raw?.createdAt);
   const safeCreatedAt = Number.isFinite(createdAt) ? createdAt : Date.now();
   const sort = Number(raw?.watchedAtSort);
+  const characterRefs = normalizeCharacterRefs(raw?.characterRefs);
+  const incomingCharacterIds = toArray(raw?.characterIds)
+    .map((x) => Number(x))
+    .filter(Number.isFinite);
+  const characterIds = incomingCharacterIds.length
+    ? incomingCharacterIds
+    : characterRefs.map((x) => Number(x.characterId)).filter(Number.isFinite);
 
   return {
     id: String(raw?.id || makeId()),
@@ -106,8 +151,8 @@ function normalizeWatchLog(raw) {
     scoreAtThatTime: Number.isFinite(Number(raw?.scoreAtThatTime))
       ? Number(raw.scoreAtThatTime)
       : null,
-    characterIds: toArray(raw?.characterIds).map((x) => Number(x)).filter(Number.isFinite),
-    characterRefs: toArray(raw?.characterRefs),
+    characterIds,
+    characterRefs,
     createdAt: safeCreatedAt,
     updatedAt: Number.isFinite(Number(raw?.updatedAt)) ? Number(raw.updatedAt) : safeCreatedAt,
   };

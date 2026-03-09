@@ -85,7 +85,6 @@ export default function TopNavDataMenu({
           <a href={`${base}`}>회상</a>
           <a href={`${base}library/`}>목록</a>
           <a href={`${base}tier/`}>티어</a>
-          <a href={`${base}data/`}>데이터</a>
         </div>
 
         <div ref={dataMenuRef} style={{ position: "relative", marginLeft: "auto" }}>
@@ -94,6 +93,7 @@ export default function TopNavDataMenu({
             onClick={() => setDataMenuOpen((v) => !v)}
             aria-expanded={dataMenuOpen}
             aria-controls={panelId}
+            aria-label="유틸 메뉴"
             style={{
               border: "none",
               background: "transparent",
@@ -104,7 +104,7 @@ export default function TopNavDataMenu({
               fontSize: 14,
             }}
           >
-            내보내기/불러오기
+            유틸
           </button>
 
           {dataMenuOpen && (

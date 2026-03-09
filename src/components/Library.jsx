@@ -394,12 +394,13 @@ export default function Library() {
   const [quickLogDraft, setQuickLogDraft] = useState(null);
   const [quickLogCandidates, setQuickLogCandidates] = useState([]);
   const [quickLogCharacterIds, setQuickLogCharacterIds] = useState([]);
+  const [quickLogPrimaryCharacterId, setQuickLogPrimaryCharacterId] = useState(null);
   const [quickLogCharacterMeta, setQuickLogCharacterMeta] = useState({});
 
   const [backupMsg, setBackupMsg] = useState("");
   const [backupReminder, setBackupReminder] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(true);
+  const [statsOpen, setStatsOpen] = useState(false);
   const [addTab, setAddTab] = useState("search"); // search | recommend
   const [cardView, setCardView] = useState("meta"); // meta | poster
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
@@ -472,7 +473,7 @@ export default function Library() {
 
     return {
       app: "ani-site",
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(items),
       tier,
@@ -673,7 +674,7 @@ export default function Library() {
 
     let alive = true;
     (async () => {
-      const map = await fetchAnimeByIdsCached(ids);
+      const map = await fetchAnimeByIdsCached(ids, { includeCharacters: false });
       if (alive) setMediaMap(map);
     })().catch(console.error);
     return () => {
@@ -1061,6 +1062,11 @@ export default function Library() {
     );
     return ids.map((id) => byId.get(id) || { id, name: `#${id}`, image: "", role: "" });
   }, [quickLogCandidates, quickLogCharacterIds]);
+  const quickLogPrimaryCharacterIdSafe = useMemo(() => {
+    const id = Number(quickLogPrimaryCharacterId);
+    if (!Number.isFinite(id)) return null;
+    return quickLogSelectedCharacters.some((c) => Number(c.id) === id) ? id : null;
+  }, [quickLogPrimaryCharacterId, quickLogSelectedCharacters]);
 
   useEffect(() => {
     let alive = true;
@@ -1151,6 +1157,20 @@ export default function Library() {
     const existingIds = Array.isArray(log.characterIds)
       ? log.characterIds.map((x) => Number(x)).filter(Number.isFinite)
       : existingRefs.map((x) => Number(x?.characterId)).filter(Number.isFinite);
+    const existingPrimary = Number(
+      existingRefs.find((x) => x?.isPrimary === true)?.characterId
+    );
+    const primaryId = Number.isFinite(existingPrimary) ? existingPrimary : null;
+    const initialIds = existingIds.slice(0, 3);
+    if (Number.isFinite(primaryId) && !initialIds.includes(primaryId)) {
+      initialIds.unshift(primaryId);
+    }
+    const compactIds = [...new Set(initialIds)].slice(0, 3);
+    const resolvedPrimaryId = Number.isFinite(primaryId)
+      ? primaryId
+      : compactIds.length
+        ? compactIds[0]
+        : null;
     const nextMeta = {};
     for (const id of existingIds) {
       const ref = existingRefs.find((x) => Number(x?.characterId) === id);
@@ -1170,7 +1190,8 @@ export default function Library() {
       cue: String(log.cue || "").slice(0, 120),
       note: String(log.note || ""),
     });
-    setQuickLogCharacterIds(existingIds.slice(0, 3));
+    setQuickLogCharacterIds(compactIds);
+    setQuickLogPrimaryCharacterId(resolvedPrimaryId);
     setQuickLogCharacterMeta(nextMeta);
     setQuickLogOpen(true);
     ensureQuickLogCharacters(log.anilistId, fallbackMedia).catch(() => {});
@@ -1181,6 +1202,7 @@ export default function Library() {
     setQuickLogDraft(null);
     setQuickLogCandidates([]);
     setQuickLogCharacterIds([]);
+    setQuickLogPrimaryCharacterId(null);
     setQuickLogCharacterMeta({});
   }
 
@@ -1303,15 +1325,32 @@ export default function Library() {
           delete next[id];
           return next;
         });
-        return arr.filter((x) => x !== id);
+        const nextIds = arr.filter((x) => x !== id);
+        setQuickLogPrimaryCharacterId((prevPrimary) => {
+          const cur = Number(prevPrimary);
+          if (Number.isFinite(cur) && cur !== id && nextIds.includes(cur)) return cur;
+          return nextIds.length ? nextIds[0] : null;
+        });
+        return nextIds;
       }
       if (arr.length >= 3) return arr;
       setQuickLogCharacterMeta((metaPrev) => ({
         ...metaPrev,
         [id]: metaPrev?.[id] || { affinity: "기억남음", reasonTags: [], note: "" },
       }));
-      return [...arr, id];
+      const nextIds = [...arr, id];
+      setQuickLogPrimaryCharacterId((prevPrimary) =>
+        Number.isFinite(Number(prevPrimary)) ? Number(prevPrimary) : id
+      );
+      return nextIds;
     });
+  }
+
+  function setQuickLogPrimaryCharacter(characterId) {
+    const id = Number(characterId);
+    if (!Number.isFinite(id)) return;
+    if (!Array.isArray(quickLogCharacterIds) || !quickLogCharacterIds.includes(id)) return;
+    setQuickLogPrimaryCharacterId(id);
   }
 
   function setQuickLogPrecision(nextPrecisionRaw) {
@@ -1354,7 +1393,7 @@ export default function Library() {
         ...prev,
         [id]: {
           affinity: cur.affinity || "기억남음",
-          reasonTags: nextTags.slice(0, 6),
+          reasonTags: nextTags.slice(0, 3),
           note: String(cur.note || ""),
         },
       };
@@ -1370,7 +1409,7 @@ export default function Library() {
         ...prev,
         [id]: {
           affinity: cur.affinity || "기억남음",
-          reasonTags: Array.isArray(cur.reasonTags) ? cur.reasonTags.slice(0, 6) : [],
+          reasonTags: Array.isArray(cur.reasonTags) ? cur.reasonTags.slice(0, 3) : [],
           note: String(note || "").slice(0, 200),
         },
       };
@@ -1404,9 +1443,11 @@ export default function Library() {
           ? quickLogCharacterMeta[c.id].reasonTags
           : [],
         note: String(quickLogCharacterMeta?.[c.id]?.note || ""),
+        isPrimary:
+          Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ||
+          (!Number.isFinite(Number(quickLogPrimaryCharacterIdSafe)) && idx === 0),
       }));
-
-    await updateWatchLog(quickLogDraft.logId, {
+    const saved = await updateWatchLog(quickLogDraft.logId, {
       watchedAtPrecision: watchedInput.precision,
       watchedAtValue: watchedInput.value,
       watchedAtStart: watchedMeta.watchedAtStart,
@@ -1417,6 +1458,36 @@ export default function Library() {
       characterIds: selectedRefs.map((x) => x.characterId),
       characterRefs: selectedRefs,
     });
+
+    const primaryRef = selectedRefs.find((x) => x.isPrimary);
+    if (saved && primaryRef) {
+      const pinId = buildCharacterPinId(primaryRef.characterId, quickLogDraft.anilistId);
+      const alreadyPinned = pinnedCharacterKeySet.has(pinId);
+      if (!alreadyPinned) {
+        const reasonSeed =
+          (Array.isArray(primaryRef.reasonTags) ? primaryRef.reasonTags[0] : "") ||
+          String(primaryRef.note || "").trim() ||
+          String(quickLogDraft.cue || "").trim();
+        const shouldPin = window.confirm(
+          `대표 캐릭터 "${primaryRef.nameSnapshot}"를 핀에 추가할까요?`
+        );
+        if (shouldPin) {
+          await upsertCharacterPin({
+            id: pinId,
+            characterId: primaryRef.characterId,
+            mediaId: Number(quickLogDraft.anilistId),
+            nameSnapshot: primaryRef.nameSnapshot,
+            imageSnapshot: primaryRef.imageSnapshot || null,
+            note: String(primaryRef.note || ""),
+            sourceLogId: saved.id,
+            pinnedFromLogId: saved.id,
+            pinReason: String(reasonSeed || ""),
+            pinnedAt: Date.now(),
+          }).catch(() => {});
+          refreshCharacterPins();
+        }
+      }
+    }
 
     if (selectedId && Number(selectedId) === Number(quickLogDraft.anilistId)) {
       const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
@@ -1450,6 +1521,8 @@ export default function Library() {
       imageSnapshot: character?.image || null,
       note: "",
       sourceLogId: null,
+      pinnedFromLogId: null,
+      pinReason: "",
       pinnedAt: Date.now(),
     }).catch(() => {});
     refreshCharacterPins();
@@ -2385,31 +2458,51 @@ export default function Library() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {quickLogCandidates.map((c) => {
                       const active = quickLogCharacterIds.includes(c.id);
+                      const isPrimary = Number(c.id) === Number(quickLogPrimaryCharacterIdSafe);
                       return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => toggleQuickLogCharacter(c.id)}
-                          style={{
-                            border: `1px solid ${active ? "rgba(120,220,255,.9)" : "rgba(255,255,255,.16)"}`,
-                            borderRadius: 999,
-                            background: active ? "rgba(120,220,255,.2)" : "rgba(255,255,255,.06)",
-                            color: "inherit",
-                            padding: "6px 10px",
-                            cursor: "pointer",
-                            maxWidth: 220,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                          title={c.name}
-                        >
-                          {c.name}
-                        </button>
+                        <div key={c.id} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => toggleQuickLogCharacter(c.id)}
+                            style={{
+                              border: `1px solid ${active ? "rgba(120,220,255,.9)" : "rgba(255,255,255,.16)"}`,
+                              borderRadius: 999,
+                              background: active ? "rgba(120,220,255,.2)" : "rgba(255,255,255,.06)",
+                              color: "inherit",
+                              padding: "6px 10px",
+                              cursor: "pointer",
+                              maxWidth: 220,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                            title={c.name}
+                          >
+                            {isPrimary ? "★ " : ""}{c.name}
+                          </button>
+                          {active && (
+                            <button
+                              type="button"
+                              className="btn"
+                              onClick={() => setQuickLogPrimaryCharacter(c.id)}
+                              style={{
+                                padding: "4px 8px",
+                                borderColor: isPrimary ? "rgba(255,215,107,.9)" : "rgba(255,255,255,.2)",
+                                background: isPrimary ? "rgba(255,215,107,.2)" : "transparent",
+                              }}
+                              title="대표 캐릭터 지정"
+                            >
+                              {isPrimary ? "대표" : "대표로"}
+                            </button>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
                 )}
+                <div className="small" style={{ opacity: 0.8 }}>
+                  대표 캐릭터는 1명만 지정됩니다.
+                </div>
               </div>
 
               {quickLogSelectedCharacters.length > 0 && (
@@ -2455,6 +2548,25 @@ export default function Library() {
                             <div style={{ fontWeight: 600, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {c.name}
                             </div>
+                            <button
+                              type="button"
+                              className="btn"
+                              onClick={() => setQuickLogPrimaryCharacter(c.id)}
+                              style={{
+                                marginLeft: "auto",
+                                padding: "4px 8px",
+                                borderColor:
+                                  Number(c.id) === Number(quickLogPrimaryCharacterIdSafe)
+                                    ? "rgba(255,215,107,.9)"
+                                    : "rgba(255,255,255,.2)",
+                                background:
+                                  Number(c.id) === Number(quickLogPrimaryCharacterIdSafe)
+                                    ? "rgba(255,215,107,.2)"
+                                    : "transparent",
+                              }}
+                            >
+                              {Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ? "대표" : "대표로"}
+                            </button>
                           </div>
 
                           <div style={{ display: "grid", gap: 6 }}>
@@ -2473,7 +2585,7 @@ export default function Library() {
                           </div>
 
                           <div style={{ display: "grid", gap: 6 }}>
-                            <div className="small">기억 태그</div>
+                            <div className="small">기억 태그 (최대 3)</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                               {REASON_TAG_OPTIONS.map((tag) => (
                                 <Chip
