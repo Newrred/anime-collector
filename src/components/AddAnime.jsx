@@ -5,6 +5,12 @@ import {
   wikidataGetKoTitlesByAniListIds,
 } from "../lib/wikidata";
 import aliasSeed from "../data/aliases.json";
+import {
+  isFreshSearchCacheEntry,
+  loadSearchCacheMap,
+  persistSearchCacheMap,
+  setSearchCacheEntry,
+} from "../repositories/searchCacheRepo";
 
 function isHangulQuery(q) {
   return /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(q);
@@ -87,53 +93,8 @@ const WD_DEPTH2_LIMIT = 24;
 const MAX_CANDIDATE_FETCH = 28;
 const FAST_CANDIDATE_FETCH = 12;
 const SEARCH_DEBOUNCE_MS = 200;
-const SEARCH_CACHE_KEY = "anime:searchCache:v1";
-const SEARCH_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3일
-const SEARCH_CACHE_MAX_ENTRIES = 120;
 
-function pruneSearchCacheObject(obj) {
-  const now = Date.now();
-  const rows = [];
-
-  for (const [key, entry] of Object.entries(obj || {})) {
-    const ts = Number(entry?.ts);
-    const results = Array.isArray(entry?.results) ? entry.results : null;
-    if (!Number.isFinite(ts) || !results) continue;
-    if (now - ts > SEARCH_CACHE_TTL_MS) continue;
-    rows.push([key, { ts, results }]);
-  }
-
-  rows.sort((a, b) => b[1].ts - a[1].ts);
-  return Object.fromEntries(rows.slice(0, SEARCH_CACHE_MAX_ENTRIES));
-}
-
-function loadSearchCacheMap() {
-  try {
-    if (typeof window === "undefined") return new Map();
-    const raw = localStorage.getItem(SEARCH_CACHE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    const pruned = pruneSearchCacheObject(parsed);
-    localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(pruned));
-    return new Map(Object.entries(pruned));
-  } catch {
-    return new Map();
-  }
-}
-
-function saveSearchCacheMap(cacheMap) {
-  try {
-    if (typeof window === "undefined") return;
-    const pruned = pruneSearchCacheObject(Object.fromEntries(cacheMap.entries()));
-    localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(pruned));
-  } catch {}
-}
-
-function setSearchCacheEntry(cacheMap, key, results) {
-  cacheMap.set(key, { ts: Date.now(), results });
-  saveSearchCacheMap(cacheMap);
-}
-
-export default function AddAnime({ items, setItems }) {
+export default function AddAnime({ items, setItems, onAnimeAdded }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -154,10 +115,20 @@ export default function AddAnime({ items, setItems }) {
     return () => clearTimeout(t);
   }, [q]);
 
-  const cacheRef = useRef(null); // key -> { ts, results }
-  if (cacheRef.current == null) {
-    cacheRef.current = loadSearchCacheMap();
-  }
+  const cacheRef = useRef(new Map()); // key -> { ts, results }
+
+  useEffect(() => {
+    let alive = true;
+    loadSearchCacheMap()
+      .then((map) => {
+        if (!alive || !(map instanceof Map)) return;
+        cacheRef.current = map;
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     const query = dq;
@@ -171,7 +142,7 @@ export default function AddAnime({ items, setItems }) {
     const key = `${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
     const cached = cacheRef.current.get(key);
     if (cached) {
-      const isFresh = Number.isFinite(cached.ts) && Date.now() - cached.ts <= SEARCH_CACHE_TTL_MS;
+      const isFresh = isFreshSearchCacheEntry(cached, Date.now());
       if (isFresh) {
         setResults(cached.results);
         setLoading(false);
@@ -179,6 +150,7 @@ export default function AddAnime({ items, setItems }) {
         return;
       }
       cacheRef.current.delete(key);
+      persistSearchCacheMap(cacheRef.current).catch(() => {});
     }
 
     let alive = true;
@@ -391,10 +363,20 @@ export default function AddAnime({ items, setItems }) {
         if (finalList.length > 0) {
           rememberRows(finalList);
           setSearchCacheEntry(cacheRef.current, key, finalList);
+          persistSearchCacheMap(cacheRef.current)
+            .then((nextMap) => {
+              if (nextMap instanceof Map) cacheRef.current = nextMap;
+            })
+            .catch(() => {});
           setResults(finalList);
         } else if (!fallbackRows.length) {
           // 아무 결과도 없을 때만 비움 처리
           setSearchCacheEntry(cacheRef.current, key, []);
+          persistSearchCacheMap(cacheRef.current)
+            .then((nextMap) => {
+              if (nextMap instanceof Map) cacheRef.current = nextMap;
+            })
+            .catch(() => {});
           setResults([]);
         }
         setLoading(false);
@@ -436,6 +418,11 @@ export default function AddAnime({ items, setItems }) {
 
       if (!alive) return;
       setSearchCacheEntry(cacheRef.current, key, merged);
+      persistSearchCacheMap(cacheRef.current)
+        .then((nextMap) => {
+          if (nextMap instanceof Map) cacheRef.current = nextMap;
+        })
+        .catch(() => {});
       setResults(merged);
       setLoading(false);
       setLoadingStage("");
@@ -485,23 +472,31 @@ export default function AddAnime({ items, setItems }) {
   function addAnime(r) {
     const id = r.id;
     const koTitle = r.ko || null;
+    if (hasId(id)) {
+      setQ("");
+      setOpen(false);
+      return;
+    }
 
+    let addedItem = null;
     setItems((prev) => {
       if (prev.some((x) => x.anilistId === id)) return prev;
-      return [
-        ...prev,
-        {
-          anilistId: id,
-          koTitle,
-          status: "미분류",
-          score: null,
-          memo: "",
-          rewatchCount: 0,
-          lastRewatchAt: null,
-          addedAt: Date.now(),
-        },
-      ];
+      addedItem = {
+        anilistId: id,
+        koTitle,
+        status: "미분류",
+        score: null,
+        memo: "",
+        rewatchCount: 0,
+        lastRewatchAt: null,
+        addedAt: Date.now(),
+      };
+      return [...prev, addedItem];
     });
+
+    if (addedItem && typeof onAnimeAdded === "function") {
+      onAnimeAdded(addedItem, r?.media || null);
+    }
 
     setQ("");
     setOpen(false);

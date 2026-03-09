@@ -2,29 +2,49 @@
 import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import AddAnime from "./AddAnime.jsx";
-
-function dedupeByAnilistId(list) {
-  const source = Array.isArray(list) ? list : [];
-  const map = new Map();
-  for (const it of source) {
-    const id = Number(it?.anilistId);
-    if (!Number.isFinite(id)) continue;
-
-    if (!map.has(id)) {
-      map.set(id, { ...it, anilistId: id });
-      continue;
-    }
-
-    const prev = map.get(id);
-    map.set(id, {
-      ...prev,
-      ...it,
-      addedAt: Math.max(prev.addedAt ?? 0, it.addedAt ?? 0),
-      koTitle: it.koTitle || prev.koTitle || null,
-    });
-  }
-  return [...map.values()];
-}
+import {
+  clamp,
+  dedupeByAnilistId,
+  mergeTierState,
+  normalizeImportList,
+  normalizeItem,
+  normalizeRewatchCount,
+  normalizeRewatchDate,
+  normalizeScoreValue,
+  normalizeTierState,
+  sameItem,
+  SCORE_MAX,
+  SCORE_STEP,
+} from "../domain/animeState";
+import { useStoredState } from "../hooks/useStoredState";
+import { STORAGE_KEYS } from "../storage/keys";
+import { readTierState, writeTierState, pruneTierByAnimeId } from "../repositories/tierRepo";
+import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
+import {
+  markManualBackupExported,
+  readLastExportAtMs,
+  writeAutoBackupSnapshot,
+} from "../repositories/backupRepo";
+import {
+  appendWatchLog,
+  buildWatchedRange,
+  createWatchLog,
+  listWatchLogsByAnimeId,
+  mergeWatchLogs,
+  readAllWatchLogsSnapshot,
+  replaceWatchLogs,
+  updateWatchLog,
+} from "../repositories/watchLogRepo";
+import {
+  listCharacterPinsPreferred,
+  mergeCharacterPins,
+  readCharacterPinsSnapshot,
+  removeCharacterPin,
+  replaceCharacterPins,
+  upsertCharacterPin,
+} from "../repositories/characterPinRepo";
+import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
+import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
 function firstHangulSynonym(media) {
   const arr = media?.synonyms;
@@ -44,45 +64,6 @@ function pickCardTitle(item, media) {
     media?.title?.native ||
     (item?.anilistId ? `#${item.anilistId}` : "Unknown")
   );
-}
-
-function useLocalStorageState(key, initialValue) {
-  const [state, setState] = useState(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(state));
-    } catch {}
-  }, [key, state]);
-
-  return [state, setState];
-}
-
-function pruneTierStorage(removedId) {
-  try {
-    const raw = localStorage.getItem("anime:tier:v1");
-    if (!raw) return;
-
-    const ts = JSON.parse(raw);
-    ts.unranked = (ts.unranked || []).filter((id) => id !== removedId);
-
-    if (ts.tiers) {
-      for (const k of Object.keys(ts.tiers)) {
-        ts.tiers[k] = (ts.tiers[k] || []).filter((id) => id !== removedId);
-      }
-    }
-
-    localStorage.setItem("anime:tier:v1", JSON.stringify(ts));
-  } catch {
-    // ignore
-  }
 }
 
 /** AniList 장르(영문) -> 한글 매핑 */
@@ -119,142 +100,10 @@ function safeGenres(media) {
   return Array.isArray(arr) ? arr.filter(Boolean) : [];
 }
 
-const LIST_STORAGE_KEY = "anime:list:v1";
-const TIER_STORAGE_KEY = "anime:tier:v1";
-const LAST_EXPORT_AT_KEY = "anime:lastBackupAt:v1";
-const AUTO_BACKUP_KEY = "anime:autoBackup:v1";
-const AUTO_BACKUP_META_KEY = "anime:autoBackup:meta:v1";
 const BACKUP_REMIND_DAYS = 7;
-const SCORE_MAX = 5;
-const SCORE_STEP = 0.5;
-const REWATCH_COUNT_MAX = 999;
-
-function normalizeScoreValue(raw) {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return null;
-
-  // Backward-compat: legacy 10-point scores are converted to 5-point.
-  const scaled = n > SCORE_MAX ? n / 2 : n;
-  const rounded = Math.round(scaled / SCORE_STEP) * SCORE_STEP;
-  return clamp(rounded, 0, SCORE_MAX);
-}
-
-function normalizeRewatchCount(raw) {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return 0;
-  return clamp(Math.round(n), 0, REWATCH_COUNT_MAX);
-}
-
-function normalizeRewatchDate(raw) {
-  const s = String(raw || "").trim();
-  if (!s) return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-
-  const [yy, mm, dd] = s.split("-").map((x) => Number(x));
-  if (!Number.isFinite(yy) || !Number.isFinite(mm) || !Number.isFinite(dd)) return null;
-
-  const dt = new Date(Date.UTC(yy, mm - 1, dd));
-  if (
-    dt.getUTCFullYear() !== yy ||
-    dt.getUTCMonth() !== mm - 1 ||
-    dt.getUTCDate() !== dd
-  ) {
-    return null;
-  }
-  return s;
-}
-
-function sameItem(a, b) {
-  return (
-    a?.anilistId === b?.anilistId &&
-    (a?.koTitle ?? null) === (b?.koTitle ?? null) &&
-    (a?.status ?? "미분류") === (b?.status ?? "미분류") &&
-    (a?.score ?? null) === (b?.score ?? null) &&
-    (a?.memo ?? "") === (b?.memo ?? "") &&
-    (a?.rewatchCount ?? 0) === (b?.rewatchCount ?? 0) &&
-    (a?.lastRewatchAt ?? null) === (b?.lastRewatchAt ?? null) &&
-    (a?.addedAt ?? 0) === (b?.addedAt ?? 0)
-  );
-}
-
-function normalizeItem(it, fallbackAddedAt = 0) {
-  const anilistId = Number(it?.anilistId);
-  const addedAtNum = Number(it?.addedAt);
-  return {
-    anilistId,
-    koTitle: it?.koTitle ?? null,
-    status: it?.status ?? "미분류",
-    score: normalizeScoreValue(it?.score),
-    memo: it?.memo ?? "",
-    rewatchCount: normalizeRewatchCount(it?.rewatchCount),
-    lastRewatchAt: normalizeRewatchDate(it?.lastRewatchAt),
-    addedAt: Number.isFinite(addedAtNum) ? addedAtNum : fallbackAddedAt,
-  };
-}
-
-function normalizeImportList(rawList) {
-  const baseTs = Date.now();
-  return dedupeByAnilistId(
-    (rawList || []).map((it, idx) => normalizeItem(it, baseTs + idx))
-  );
-}
-
-function toUniqueIdArray(arr) {
-  const out = [];
-  const seen = new Set();
-  for (const x of arr || []) {
-    const n = Number(x);
-    if (!Number.isFinite(n) || seen.has(n)) continue;
-    seen.add(n);
-    out.push(n);
-  }
-  return out;
-}
-
-function normalizeTierState(rawTier) {
-  const tier = rawTier && typeof rawTier === "object" ? rawTier : {};
-  const tiers = {};
-  for (const [k, v] of Object.entries(tier?.tiers || {})) {
-    tiers[k] = toUniqueIdArray(v);
-  }
-  return {
-    unranked: toUniqueIdArray(tier?.unranked || []),
-    tiers,
-  };
-}
-
-function mergeTierState(currentTier, incomingTier) {
-  const a = normalizeTierState(currentTier);
-  const b = normalizeTierState(incomingTier);
-  const keys = new Set([...Object.keys(a.tiers), ...Object.keys(b.tiers)]);
-
-  const tiers = {};
-  for (const k of keys) {
-    tiers[k] = toUniqueIdArray([...(a.tiers[k] || []), ...(b.tiers[k] || [])]);
-  }
-
-  const ranked = new Set();
-  for (const ids of Object.values(tiers)) {
-    for (const id of ids) ranked.add(id);
-  }
-
-  const unranked = toUniqueIdArray([...(a.unranked || []), ...(b.unranked || [])]).filter(
-    (id) => !ranked.has(id)
-  );
-
-  return { unranked, tiers };
-}
-
-function readLastExportAt() {
-  try {
-    const raw = localStorage.getItem(LAST_EXPORT_AT_KEY);
-    if (!raw) return null;
-    const ms = Date.parse(raw);
-    return Number.isFinite(ms) ? ms : null;
-  } catch {
-    return null;
-  }
-}
+const AFFINITY_OPTIONS = ["최애", "기억남음", "불호지만강렬"];
+const REASON_TAG_OPTIONS = ["성장", "관계성", "대사", "연출", "디자인", "성우", "기타"];
+const SEASON_TERM_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
 
 function formatAgo(ms) {
   if (!Number.isFinite(ms)) return "기록 없음";
@@ -266,8 +115,73 @@ function formatAgo(ms) {
   return `${days}일 전`;
 }
 
-function clamp(n, min, max) {
-  return Math.min(max, Math.max(min, n));
+function formatWatchLogDate(log) {
+  const value = String(log?.watchedAtValue || "").trim();
+  if (value) return value;
+  const createdAt = Number(log?.createdAt);
+  if (!Number.isFinite(createdAt)) return "날짜 미상";
+  return new Date(createdAt).toISOString().slice(0, 10);
+}
+
+function parseSeasonValue(value) {
+  const raw = String(value || "").trim();
+  const m = raw.match(/^(\d{4})-(Spring|Summer|Fall|Winter)$/i);
+  if (!m) return null;
+  return { year: m[1], term: `${m[2][0].toUpperCase()}${m[2].slice(1).toLowerCase()}` };
+}
+
+function normalizeQuickLogPrecision(raw) {
+  const p = String(raw || "").toLowerCase();
+  if (["day", "month", "season", "year", "unknown"].includes(p)) return p;
+  return "day";
+}
+
+function defaultQuickLogValue(precision) {
+  const nowIso = new Date().toISOString().slice(0, 10);
+  if (precision === "day") return nowIso;
+  if (precision === "month") return nowIso.slice(0, 7);
+  if (precision === "year") return nowIso.slice(0, 4);
+  if (precision === "season") return `${nowIso.slice(0, 4)}-Spring`;
+  return "";
+}
+
+function coerceQuickLogValue(precision, rawValue) {
+  const raw = String(rawValue || "").trim();
+  if (precision === "day") {
+    return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : defaultQuickLogValue("day");
+  }
+  if (precision === "month") {
+    return /^\d{4}-\d{2}$/.test(raw) ? raw : defaultQuickLogValue("month");
+  }
+  if (precision === "year") {
+    return /^\d{4}$/.test(raw) ? raw : defaultQuickLogValue("year");
+  }
+  if (precision === "season") {
+    const season = parseSeasonValue(raw);
+    const year = season?.year || defaultQuickLogValue("year");
+    const term = season?.term || "Spring";
+    return `${year}-${term}`;
+  }
+  return "";
+}
+
+function buildQuickLogInputByPrecision(draft) {
+  const precision = normalizeQuickLogPrecision(draft?.watchedAtPrecision);
+  const raw = String(draft?.watchedAtValue || "").trim();
+
+  if (precision === "day") {
+    return { precision, value: coerceQuickLogValue("day", raw) };
+  }
+  if (precision === "month") {
+    return { precision, value: coerceQuickLogValue("month", raw) };
+  }
+  if (precision === "year") {
+    return { precision, value: coerceQuickLogValue("year", raw) };
+  }
+  if (precision === "season") {
+    return { precision, value: coerceQuickLogValue("season", raw) };
+  }
+  return { precision: "unknown", value: "" };
 }
 
 function isHangulText(s) {
@@ -460,7 +374,7 @@ export default function Library() {
   const [sortKey, setSortKey] = useState("addedAt"); // addedAt | title | score | year | genre
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
-  const [items, setItems] = useLocalStorageState(LIST_STORAGE_KEY, myListSeed);
+  const [items, setItems] = useStoredState(STORAGE_KEYS.list, myListSeed);
   const [mediaMap, setMediaMap] = useState(new Map());
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("전체");
@@ -473,22 +387,60 @@ export default function Library() {
   const [memoDraft, setMemoDraft] = useState("");
   const [rewatchCountDraft, setRewatchCountDraft] = useState(0);
   const [lastRewatchAtDraft, setLastRewatchAtDraft] = useState("");
+  const [selectedLogs, setSelectedLogs] = useState([]);
+  const [characterPins, setCharacterPins] = useState([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const [quickLogDraft, setQuickLogDraft] = useState(null);
+  const [quickLogCandidates, setQuickLogCandidates] = useState([]);
+  const [quickLogCharacterIds, setQuickLogCharacterIds] = useState([]);
+  const [quickLogCharacterMeta, setQuickLogCharacterMeta] = useState({});
 
-  const fileRef = useRef(null);
-  const dataMenuRef = useRef(null);
   const [backupMsg, setBackupMsg] = useState("");
   const [backupReminder, setBackupReminder] = useState("");
-  const [importMode, setImportMode] = useState("merge"); // merge | overwrite
-  const [importText, setImportText] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [dataTab, setDataTab] = useState("export"); // export | import
-  const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(true);
   const [addTab, setAddTab] = useState("search"); // search | recommend
   const [cardView, setCardView] = useState("meta"); // meta | poster
-  const [cardsPerRowBase, setCardsPerRowBase] = useLocalStorageState("anime:grid:perRowBase:v1", 5);
+  const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      await ensureLegacyStorageMigrated().catch(() => {});
+      const preferred = await readLibraryListPreferred(myListSeed).catch(() => null);
+      if (!alive || !Array.isArray(preferred)) return;
+
+      setItems((prev) => {
+        const source = Array.isArray(prev) ? prev : [];
+        const next = dedupeByAnilistId(
+          preferred.map((it, idx) =>
+            normalizeItem(
+              it,
+              Number.isFinite(Number(it?.addedAt)) ? Number(it.addedAt) : idx
+            )
+          )
+        );
+
+        if (
+          source.length === next.length &&
+          next.every((it, idx) => sameItem(it, source[idx]))
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [setItems]);
+
+  useEffect(() => {
+    writeLibraryList(items, { mirrorOnly: true });
+  }, [items]);
 
   useEffect(() => {
     setItems((prev) => {
@@ -516,26 +468,25 @@ export default function Library() {
   }, [setItems]);
 
   function buildBackupPayload() {
-    let tier = null;
-    try {
-      const raw = localStorage.getItem(TIER_STORAGE_KEY);
-      tier = raw ? JSON.parse(raw) : null;
-    } catch {}
+    const tier = readTierState(null);
 
     return {
       app: "ani-site",
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(items),
       tier,
+      watchLogs: readAllWatchLogsSnapshot(),
+      characterPins: readCharacterPinsSnapshot(),
+      preferences: {
+        cardsPerRowBase,
+        cardView,
+      },
     };
   }
 
   function markBackupExported(message) {
-    try {
-      const nowIso = new Date().toISOString();
-      localStorage.setItem(LAST_EXPORT_AT_KEY, nowIso);
-    } catch {}
+    markManualBackupExported(new Date().toISOString());
     setBackupMsg(message);
   }
 
@@ -622,14 +573,51 @@ export default function Library() {
 
     const incomingTier = !Array.isArray(json) ? json?.tier : null;
     if (incomingTier) {
-      try {
-        const currentRaw = localStorage.getItem(TIER_STORAGE_KEY);
-        const currentTier = currentRaw ? JSON.parse(currentRaw) : null;
-        const nextTier = isOverwrite
-          ? normalizeTierState(incomingTier)
-          : mergeTierState(currentTier, incomingTier);
-        localStorage.setItem(TIER_STORAGE_KEY, JSON.stringify(nextTier));
-      } catch {}
+      const currentTier = readTierState(null);
+      const nextTier = isOverwrite
+        ? normalizeTierState(incomingTier)
+        : mergeTierState(currentTier, incomingTier);
+      writeTierState(nextTier);
+    }
+
+    const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
+    if (Array.isArray(incomingLogs)) {
+      if (isOverwrite) {
+        await replaceWatchLogs(incomingLogs);
+      } else {
+        await mergeWatchLogs(incomingLogs);
+      }
+      if (selectedId) {
+        const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
+        setSelectedLogs(Array.isArray(rows) ? rows : []);
+      }
+    } else if (isOverwrite) {
+      await replaceWatchLogs([]);
+      setSelectedLogs([]);
+    }
+
+    const incomingPins = !Array.isArray(json) ? json?.characterPins : null;
+    if (Array.isArray(incomingPins)) {
+      if (isOverwrite) {
+        await replaceCharacterPins(incomingPins);
+      } else {
+        await mergeCharacterPins(incomingPins);
+      }
+      refreshCharacterPins();
+    } else if (isOverwrite) {
+      await replaceCharacterPins([]);
+      refreshCharacterPins();
+    }
+
+    const incomingPrefs = !Array.isArray(json) ? json?.preferences : null;
+    if (incomingPrefs && typeof incomingPrefs === "object") {
+      if (Object.prototype.hasOwnProperty.call(incomingPrefs, "cardsPerRowBase")) {
+        setCardsPerRowBase(incomingPrefs.cardsPerRowBase);
+      }
+      if (Object.prototype.hasOwnProperty.call(incomingPrefs, "cardView")) {
+        const cv = String(incomingPrefs.cardView || "");
+        if (cv === "meta" || cv === "poster") setCardView(cv);
+      }
     }
 
     setBackupMsg(
@@ -638,7 +626,6 @@ export default function Library() {
         : "가져오기 완료! 기존 목록과 병합했어요."
     );
     setSelectedId(null);
-    setDataMenuOpen(false);
   }
 
   async function importBackup(file, mode = "merge") {
@@ -647,8 +634,8 @@ export default function Library() {
     await importBackupFromJson(json, mode);
   }
 
-  async function onImportText() {
-    const raw = String(importText || "").trim();
+  async function importBackupText(rawText, mode = "merge") {
+    const raw = String(rawText || "").trim();
     if (!raw) {
       setBackupMsg("붙여넣은 JSON 텍스트가 비어 있어요.");
       return;
@@ -656,26 +643,21 @@ export default function Library() {
 
     try {
       const json = JSON.parse(raw);
-      await importBackupFromJson(json, importMode);
-      setImportText("");
-      setDataMenuOpen(false);
+      await importBackupFromJson(json, mode);
     } catch (err) {
       console.error(err);
       setBackupMsg(`붙여넣기 가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      throw err;
     }
   }
 
-  async function onPickImport(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function importBackupFile(file, mode = "merge") {
     try {
-      await importBackup(file, importMode);
+      await importBackup(file, mode);
     } catch (err) {
       console.error(err);
       setBackupMsg(`가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
-    } finally {
-      e.target.value = "";
+      throw err;
     }
   }
 
@@ -714,26 +696,19 @@ export default function Library() {
   }, []);
 
   useEffect(() => {
-    try {
-      const rawTier = localStorage.getItem(TIER_STORAGE_KEY);
-      const tier = rawTier ? JSON.parse(rawTier) : null;
-      const snapshot = {
-        app: "ani-site",
-        version: 1,
-        savedAt: new Date().toISOString(),
-        list: items,
-        tier,
-      };
-      localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(snapshot));
-      localStorage.setItem(
-        AUTO_BACKUP_META_KEY,
-        JSON.stringify({ savedAt: snapshot.savedAt, count: items.length })
-      );
-    } catch {}
+    const tier = readTierState(null);
+    const snapshot = {
+      app: "ani-site",
+      version: 1,
+      savedAt: new Date().toISOString(),
+      list: items,
+      tier,
+    };
+    writeAutoBackupSnapshot(snapshot);
   }, [items]);
 
   useEffect(() => {
-    const last = readLastExportAt();
+    const last = readLastExportAtMs();
     if (!items.length) {
       setBackupReminder("");
       return;
@@ -771,15 +746,6 @@ export default function Library() {
       window.removeEventListener("pwa-install-ready", onInstallReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, []);
-
-  useEffect(() => {
-    function onDocDown(e) {
-      if (!dataMenuRef.current) return;
-      if (!dataMenuRef.current.contains(e.target)) setDataMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onDocDown);
-    return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
   useEffect(() => {
@@ -845,7 +811,7 @@ export default function Library() {
     if (!ok) return;
 
     setItems((prev) => prev.filter((x) => x.anilistId !== id));
-    pruneTierStorage(id);
+    pruneTierByAnimeId(id);
     setSelectedId(null);
   }
 
@@ -1070,6 +1036,153 @@ export default function Library() {
     () => getCharacterRows(selectedMedia, 8),
     [selectedMedia]
   );
+  const pinnedCharacterKeySet = useMemo(() => {
+    const s = new Set();
+    for (const pin of Array.isArray(characterPins) ? characterPins : []) {
+      const cid = Number(pin?.characterId);
+      const mid = Number(pin?.mediaId);
+      if (!Number.isFinite(cid) || !Number.isFinite(mid)) continue;
+      s.add(`${cid}:${mid}`);
+    }
+    return s;
+  }, [characterPins]);
+  const quickLogAnime = quickLogDraft
+    ? items.find((x) => x.anilistId === Number(quickLogDraft.anilistId)) || null
+    : null;
+  const quickLogMedia = quickLogDraft ? mediaMap.get(Number(quickLogDraft.anilistId)) : null;
+  const quickLogTitle = quickLogDraft ? pickCardTitle(quickLogAnime, quickLogMedia) : "";
+  const quickLogSelectedCharacters = useMemo(() => {
+    const ids = Array.isArray(quickLogCharacterIds)
+      ? quickLogCharacterIds.map((x) => Number(x)).filter(Number.isFinite).slice(0, 3)
+      : [];
+    if (!ids.length) return [];
+    const byId = new Map(
+      (Array.isArray(quickLogCandidates) ? quickLogCandidates : []).map((c) => [Number(c.id), c])
+    );
+    return ids.map((id) => byId.get(id) || { id, name: `#${id}`, image: "", role: "" });
+  }, [quickLogCandidates, quickLogCharacterIds]);
+
+  useEffect(() => {
+    let alive = true;
+    if (!selectedId) {
+      setSelectedLogs([]);
+      setLogsLoading(false);
+      return undefined;
+    }
+
+    setLogsLoading(true);
+    listWatchLogsByAnimeId(selectedId)
+      .then((rows) => {
+        if (!alive) return;
+        setSelectedLogs(Array.isArray(rows) ? rows : []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setSelectedLogs([]);
+      })
+      .finally(() => {
+        if (!alive) return;
+        setLogsLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [selectedId]);
+
+  function refreshCharacterPins() {
+    const rows = readCharacterPinsSnapshot();
+    setCharacterPins(Array.isArray(rows) ? rows : []);
+  }
+
+  useEffect(() => {
+    refreshCharacterPins();
+    listCharacterPinsPreferred()
+      .then((rows) => {
+        setCharacterPins(Array.isArray(rows) ? rows : []);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function ensureQuickLogCharacters(anilistId, fallbackMedia = null) {
+    const id = Number(anilistId);
+    if (!Number.isFinite(id)) {
+      setQuickLogCandidates([]);
+      return;
+    }
+
+    const pickFromMedia = (media) => getCharacterRows(media, 8);
+
+    const fromFallback = fallbackMedia ? pickFromMedia(fallbackMedia) : [];
+    if (fromFallback.length) {
+      setQuickLogCandidates(fromFallback);
+      return;
+    }
+
+    const existing = mediaMap.get(id);
+    const fromExisting = pickFromMedia(existing);
+    if (fromExisting.length) {
+      setQuickLogCandidates(fromExisting);
+      return;
+    }
+
+    try {
+      const map = await fetchAnimeByIdsCached([id], { includeCharacters: true });
+      const media = map.get(id);
+      if (media) {
+        setMediaMap((prev) => {
+          const next = new Map(prev);
+          next.set(id, media);
+          return next;
+        });
+      }
+      setQuickLogCandidates(pickFromMedia(media));
+    } catch {
+      setQuickLogCandidates([]);
+    }
+  }
+
+  function openQuickLogSheet(log, fallbackMedia = null) {
+    if (!log) return;
+    const precision = normalizeQuickLogPrecision(log.watchedAtPrecision || "day");
+    const value = coerceQuickLogValue(precision, log.watchedAtValue);
+
+    const existingRefs = Array.isArray(log.characterRefs) ? log.characterRefs : [];
+    const existingIds = Array.isArray(log.characterIds)
+      ? log.characterIds.map((x) => Number(x)).filter(Number.isFinite)
+      : existingRefs.map((x) => Number(x?.characterId)).filter(Number.isFinite);
+    const nextMeta = {};
+    for (const id of existingIds) {
+      const ref = existingRefs.find((x) => Number(x?.characterId) === id);
+      nextMeta[id] = {
+        affinity: ref?.affinity || "기억남음",
+        reasonTags: Array.isArray(ref?.reasonTags) ? ref.reasonTags.filter(Boolean) : [],
+        note: String(ref?.note || ""),
+      };
+    }
+
+    setQuickLogDraft({
+      logId: log.id,
+      anilistId: log.anilistId,
+      eventType: log.eventType,
+      watchedAtPrecision: precision,
+      watchedAtValue: value,
+      cue: String(log.cue || "").slice(0, 120),
+      note: String(log.note || ""),
+    });
+    setQuickLogCharacterIds(existingIds.slice(0, 3));
+    setQuickLogCharacterMeta(nextMeta);
+    setQuickLogOpen(true);
+    ensureQuickLogCharacters(log.anilistId, fallbackMedia).catch(() => {});
+  }
+
+  function closeQuickLogSheet() {
+    setQuickLogOpen(false);
+    setQuickLogDraft(null);
+    setQuickLogCandidates([]);
+    setQuickLogCharacterIds([]);
+    setQuickLogCharacterMeta({});
+  }
 
   useEffect(() => {
     if (!selectedId) return undefined;
@@ -1103,6 +1216,243 @@ export default function Library() {
   function closeSelectedModal() {
     commitModalDraft();
     setSelectedId(null);
+  }
+
+  function appendSelectedWatchLog(eventType, overrides = {}, options = {}) {
+    if (!selectedId) return Promise.resolve(null);
+    const today = new Date().toISOString().slice(0, 10);
+    const log = createWatchLog({
+      anilistId: selectedId,
+      eventType,
+      watchedAtPrecision: "day",
+      watchedAtValue: today,
+      cue: overrides.cue || "",
+      note: overrides.note || "",
+      scoreAtThatTime: selectedScoreRaw ?? null,
+      contextTags: overrides.contextTags || [],
+      characterIds: [],
+      characterRefs: [],
+    });
+    return appendWatchLog(log)
+      .then((saved) => listWatchLogsByAnimeId(selectedId).then((rows) => ({ saved, rows })))
+      .then(({ saved, rows }) => {
+        if (options?.openQuickSheet && saved) {
+          openQuickLogSheet(saved, selectedMedia || null);
+        }
+        return { saved, rows };
+      })
+      .then(({ rows, saved }) => {
+        setSelectedLogs(Array.isArray(rows) ? rows : []);
+        return saved;
+      })
+      .catch(() => null);
+  }
+
+  function onAddAnimeFromSearch(addedItem, addedMedia) {
+    const id = Number(addedItem?.anilistId);
+    if (!Number.isFinite(id)) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const log = createWatchLog({
+      anilistId: id,
+      eventType: "시작",
+      watchedAtPrecision: "day",
+      watchedAtValue: today,
+      cue: "라이브러리에 추가",
+      note: "",
+      scoreAtThatTime: null,
+      contextTags: ["추가"],
+      characterIds: [],
+      characterRefs: [],
+    });
+    appendWatchLog(log)
+      .then((saved) => {
+        if (!saved) return;
+        openQuickLogSheet(saved, addedMedia || null);
+      })
+      .catch(() => {});
+  }
+
+  function onSelectedStatusChange(nextStatus) {
+    const prevStatus = selected?.status || "미분류";
+    updateSelected({ status: nextStatus });
+
+    if (nextStatus === prevStatus) return;
+    const eventType =
+      nextStatus === "보는중"
+        ? "시작"
+        : nextStatus === "완료"
+          ? "완료"
+          : nextStatus === "하차"
+            ? "하차"
+            : null;
+    if (!eventType) return;
+    appendSelectedWatchLog(eventType, {
+      cue: `상태 변경: ${prevStatus} → ${nextStatus}`,
+    }, { openQuickSheet: true });
+  }
+
+  function toggleQuickLogCharacter(characterId) {
+    const id = Number(characterId);
+    if (!Number.isFinite(id)) return;
+    setQuickLogCharacterIds((prev) => {
+      const arr = Array.isArray(prev) ? prev : [];
+      const exists = arr.includes(id);
+      if (exists) {
+        setQuickLogCharacterMeta((metaPrev) => {
+          const next = { ...metaPrev };
+          delete next[id];
+          return next;
+        });
+        return arr.filter((x) => x !== id);
+      }
+      if (arr.length >= 3) return arr;
+      setQuickLogCharacterMeta((metaPrev) => ({
+        ...metaPrev,
+        [id]: metaPrev?.[id] || { affinity: "기억남음", reasonTags: [], note: "" },
+      }));
+      return [...arr, id];
+    });
+  }
+
+  function setQuickLogPrecision(nextPrecisionRaw) {
+    const nextPrecision = normalizeQuickLogPrecision(nextPrecisionRaw);
+    setQuickLogDraft((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        watchedAtPrecision: nextPrecision,
+        watchedAtValue: coerceQuickLogValue(nextPrecision, prev.watchedAtValue),
+      };
+    });
+  }
+
+  function setQuickLogCharacterAffinity(characterId, affinity) {
+    const id = Number(characterId);
+    if (!Number.isFinite(id)) return;
+    const value = AFFINITY_OPTIONS.includes(affinity) ? affinity : "기억남음";
+    setQuickLogCharacterMeta((prev) => ({
+      ...prev,
+      [id]: {
+        affinity: value,
+        reasonTags: Array.isArray(prev?.[id]?.reasonTags) ? prev[id].reasonTags : [],
+        note: String(prev?.[id]?.note || ""),
+      },
+    }));
+  }
+
+  function toggleQuickLogReasonTag(characterId, tag) {
+    const id = Number(characterId);
+    if (!Number.isFinite(id)) return;
+    const safeTag = String(tag || "").trim();
+    if (!safeTag) return;
+    setQuickLogCharacterMeta((prev) => {
+      const cur = prev?.[id] || { affinity: "기억남음", reasonTags: [], note: "" };
+      const curTags = Array.isArray(cur.reasonTags) ? cur.reasonTags : [];
+      const exists = curTags.includes(safeTag);
+      const nextTags = exists ? curTags.filter((x) => x !== safeTag) : [...curTags, safeTag];
+      return {
+        ...prev,
+        [id]: {
+          affinity: cur.affinity || "기억남음",
+          reasonTags: nextTags.slice(0, 6),
+          note: String(cur.note || ""),
+        },
+      };
+    });
+  }
+
+  function setQuickLogCharacterNote(characterId, note) {
+    const id = Number(characterId);
+    if (!Number.isFinite(id)) return;
+    setQuickLogCharacterMeta((prev) => {
+      const cur = prev?.[id] || { affinity: "기억남음", reasonTags: [], note: "" };
+      return {
+        ...prev,
+        [id]: {
+          affinity: cur.affinity || "기억남음",
+          reasonTags: Array.isArray(cur.reasonTags) ? cur.reasonTags.slice(0, 6) : [],
+          note: String(note || "").slice(0, 200),
+        },
+      };
+    });
+  }
+
+  async function saveQuickLogDraft() {
+    if (!quickLogDraft?.logId || !Number.isFinite(Number(quickLogDraft?.anilistId))) {
+      closeQuickLogSheet();
+      return;
+    }
+
+    const watchedInput = buildQuickLogInputByPrecision(quickLogDraft);
+    const watchedMeta = buildWatchedRange(
+      watchedInput.value,
+      watchedInput.precision,
+      Date.now()
+    );
+
+    const selectedRefs = quickLogSelectedCharacters
+      .slice(0, 3)
+      .map((c, idx) => ({
+        characterId: Number(c.id),
+        mediaId: Number(quickLogDraft.anilistId),
+        order: idx,
+        nameSnapshot: c.name || `#${c.id}`,
+        imageSnapshot: c.image || null,
+        role: c.role || "",
+        affinity: quickLogCharacterMeta?.[c.id]?.affinity || "기억남음",
+        reasonTags: Array.isArray(quickLogCharacterMeta?.[c.id]?.reasonTags)
+          ? quickLogCharacterMeta[c.id].reasonTags
+          : [],
+        note: String(quickLogCharacterMeta?.[c.id]?.note || ""),
+      }));
+
+    await updateWatchLog(quickLogDraft.logId, {
+      watchedAtPrecision: watchedInput.precision,
+      watchedAtValue: watchedInput.value,
+      watchedAtStart: watchedMeta.watchedAtStart,
+      watchedAtEnd: watchedMeta.watchedAtEnd,
+      watchedAtSort: watchedMeta.watchedAtSort,
+      cue: String(quickLogDraft.cue || "").slice(0, 120),
+      note: String(quickLogDraft.note || ""),
+      characterIds: selectedRefs.map((x) => x.characterId),
+      characterRefs: selectedRefs,
+    });
+
+    if (selectedId && Number(selectedId) === Number(quickLogDraft.anilistId)) {
+      const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
+      setSelectedLogs(Array.isArray(rows) ? rows : []);
+    }
+    closeQuickLogSheet();
+  }
+
+  function buildCharacterPinId(characterId, mediaId) {
+    return `${Number(characterId)}:${Number(mediaId)}`;
+  }
+
+  async function toggleCharacterPin(character) {
+    const cid = Number(character?.id);
+    const mid = Number(selectedId);
+    if (!Number.isFinite(cid) || !Number.isFinite(mid)) return;
+
+    const pinId = buildCharacterPinId(cid, mid);
+    const isPinned = pinnedCharacterKeySet.has(pinId);
+    if (isPinned) {
+      await removeCharacterPin(pinId).catch(() => {});
+      refreshCharacterPins();
+      return;
+    }
+
+    await upsertCharacterPin({
+      id: pinId,
+      characterId: cid,
+      mediaId: mid,
+      nameSnapshot: character?.name || `#${cid}`,
+      imageSnapshot: character?.image || null,
+      note: "",
+      sourceLogId: null,
+      pinnedAt: Date.now(),
+    }).catch(() => {});
+    refreshCharacterPins();
   }
 
   function updateSelected(patch) {
@@ -1158,126 +1508,16 @@ export default function Library() {
 
   return (
     <>
-      <section
-        className="nav"
-        style={{
-          margin: "calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) 12px",
-          padding: "10px var(--page-pad)",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>목록</a>
-          <a href={`${base}tier/`}>티어</a>
-        </div>
-
-        <div
-          ref={dataMenuRef}
-          style={{ position: "relative", marginLeft: "auto" }}
-        >
-          <button
-            type="button"
-            onClick={() => setDataMenuOpen((v) => !v)}
-            aria-expanded={dataMenuOpen}
-            aria-controls="data-menu-panel"
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "inherit",
-              cursor: "pointer",
-              padding: "8px 10px",
-              borderRadius: 10,
-              fontSize: 14,
-            }}
-          >
-            내보내기/불러오기
-          </button>
-
-          {dataMenuOpen && (
-            <div
-              id="data-menu-panel"
-              style={{
-                position: "absolute",
-                top: "calc(100% + 6px)",
-                right: 0,
-                width: 360,
-                maxWidth: "min(94vw, 360px)",
-                zIndex: 70,
-                border: "1px solid rgba(255,255,255,.12)",
-                background: "rgba(15,17,23,.98)",
-                borderRadius: 12,
-                padding: 10,
-                boxShadow: "0 10px 30px rgba(0,0,0,.35)",
-              }}
-            >
-              <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, background: "rgba(0,0,0,.18)" }}>
-                <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>내보내기</SegTabButton>
-                <SegTabButton active={dataTab === "import"} onClick={() => setDataTab("import")}>불러오기</SegTabButton>
-              </div>
-
-              {dataTab === "export" ? (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      exportBackup();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    JSON 파일 저장
-                  </button>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      exportBackupMobile();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    모바일 공유/복사
-                  </button>
-                  {canInstallPwa && (
-                    <button
-                      className="btn"
-                      onClick={() => {
-                        onClickInstallPwa();
-                        setDataMenuOpen(false);
-                      }}
-                    >
-                      홈 화면 설치
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.10)", borderRadius: 12, background: "rgba(0,0,0,.18)" }}>
-                    <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>병합</SegTabButton>
-                    <SegTabButton active={importMode === "overwrite"} onClick={() => setImportMode("overwrite")}>덮어쓰기</SegTabButton>
-                  </div>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      fileRef.current?.click();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    JSON 파일 선택
-                  </button>
-                  <textarea
-                    className="textarea"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder="모바일에서는 백업 JSON을 복사해서 여기에 붙여넣고 불러오세요."
-                    style={{ minHeight: 100 }}
-                  />
-                  <button className="btn" onClick={onImportText}>
-                    붙여넣기 불러오기
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
+      <TopNavDataMenu
+        base={base}
+        panelId="data-menu-panel"
+        canInstallPwa={canInstallPwa}
+        onExportFile={exportBackup}
+        onExportMobile={exportBackupMobile}
+        onInstallPwa={onClickInstallPwa}
+        onImportJsonFile={importBackupFile}
+        onImportJsonText={importBackupText}
+      />
 
       <section style={{ marginBottom: 14 }}>
         <h1 style={{ margin: "0 0 4px" }}>애니 목록</h1>
@@ -1290,21 +1530,13 @@ export default function Library() {
         {backupMsg && <div className="small" style={{ opacity: 0.9, marginTop: 4 }}>{backupMsg}</div>}
       </section>
 
-      <input
-        ref={fileRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: "none" }}
-        onChange={onPickImport}
-      />
-
       <section style={{ border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.03)", borderRadius: 5, padding: 12, marginBottom: 5 }}>
         <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.12)", borderRadius: 5, background: "rgba(0,0,0,.18)", width: "fit-content", marginBottom: 5 }}>
           <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>애니 검색</SegTabButton>
           <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>AI 추천</SegTabButton>
         </div>
         {addTab === "search" ? (
-          <AddAnime items={items} setItems={setItems} />
+          <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} />
         ) : (
           <div style={{ border: "1px dashed rgba(255,255,255,.2)", borderRadius: 5, padding: 12, margin: "14px 0px 10px", background: "rgba(255,255,255,.02)" }}>
             <div className="small" style={{ opacity: 0.9}}>
@@ -1677,7 +1909,7 @@ export default function Library() {
                   <select
                     className="select"
                     value={selected.status || "미분류"}
-                    onChange={(e) => updateSelected({ status: e.target.value })}
+                    onChange={(e) => onSelectedStatusChange(e.target.value)}
                   >
                     <option>완료</option>
                     <option>보는중</option>
@@ -1770,6 +2002,9 @@ export default function Library() {
                           setRewatchCountDraft(nextCount);
                           setLastRewatchAtDraft(today);
                           updateSelected({ rewatchCount: nextCount, lastRewatchAt: today });
+                          appendSelectedWatchLog("재시청", {
+                            cue: `정주행 완료 (${nextCount}회차)`,
+                          }, { openQuickSheet: true });
                         }}
                       >
                         정주행 완료!  +1
@@ -1809,6 +2044,40 @@ export default function Library() {
                       onBlur={commitModalDraft}
                       placeholder="보고 난 뒤 한 줄 메모.."
                     />
+                </div>
+
+                <div className="row">
+                  <div className="small">기억 로그</div>
+                  <div style={{ display: "grid", gap: 6 }}>
+                    {logsLoading ? (
+                      <div className="small" style={{ opacity: 0.85 }}>불러오는 중...</div>
+                    ) : selectedLogs.length === 0 ? (
+                      <div className="small" style={{ opacity: 0.85 }}>
+                        아직 로그가 없습니다. 상태 변경/정주행 완료 시 자동 기록됩니다.
+                      </div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 6, maxHeight: 180, overflowY: "auto", paddingRight: 4 }}>
+                        {selectedLogs.slice(0, 20).map((log) => (
+                          <div
+                            key={log.id}
+                            style={{
+                              border: "1px solid rgba(255,255,255,.1)",
+                              borderRadius: 10,
+                              padding: "8px 10px",
+                              background: "rgba(255,255,255,.03)",
+                            }}
+                          >
+                            <div className="small" style={{ opacity: 0.9 }}>
+                              {formatWatchLogDate(log)} · {log.eventType || "기록"}
+                            </div>
+                            <div style={{ fontSize: 13, marginTop: 2 }}>
+                              {log.cue || "메모 없음"}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ marginTop: 14 }}>
@@ -1858,7 +2127,7 @@ export default function Library() {
                               }}
                             />
                           )}
-                          <div style={{ minWidth: 0 }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
                             <div
                               style={{
                                 fontSize: 13,
@@ -1886,12 +2155,361 @@ export default function Library() {
                               </div>
                             )}
                           </div>
+                          <button
+                            type="button"
+                            className="btn"
+                            onClick={() => toggleCharacterPin(c)}
+                            title={pinnedCharacterKeySet.has(`${c.id}:${selectedId}`) ? "핀 해제" : "핀"}
+                            style={{
+                              width: 34,
+                              height: 34,
+                              padding: 0,
+                              borderRadius: "50%",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderColor: "rgba(255,255,255,.22)",
+                              background: pinnedCharacterKeySet.has(`${c.id}:${selectedId}`)
+                                ? "rgba(255,215,107,.22)"
+                                : "transparent",
+                            }}
+                          >
+                            {pinnedCharacterKeySet.has(`${c.id}:${selectedId}`) ? "★" : "☆"}
+                          </button>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {quickLogOpen && quickLogDraft && (
+        <div
+          onClick={closeQuickLogSheet}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.45)",
+            display: "grid",
+            alignItems: "end",
+            zIndex: 1300,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(780px, 100vw)",
+              margin: "0 auto",
+              border: "1px solid rgba(255,255,255,.14)",
+              borderRadius: "16px 16px 0 0",
+              background: "rgba(15,17,23,.98)",
+              padding: 14,
+              maxHeight: "78vh",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginBottom: 8 }}>
+              <div>
+                <div style={{ fontWeight: 700 }}>퀵 로그</div>
+                <div className="small" style={{ opacity: 0.85 }}>
+                  {quickLogTitle || `#${quickLogDraft.anilistId}`} · {quickLogDraft.eventType}
+                </div>
+              </div>
+              <button type="button" className="btn" onClick={closeQuickLogSheet}>
+                닫기
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gap: 10 }}>
+              <div className="row">
+                <div className="small">기록 정밀도</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {[
+                    { key: "day", label: "일" },
+                    { key: "month", label: "월" },
+                    { key: "season", label: "분기" },
+                    { key: "year", label: "연도" },
+                    { key: "unknown", label: "미상" },
+                  ].map((opt) => (
+                    <Chip
+                      key={opt.key}
+                      active={quickLogDraft.watchedAtPrecision === opt.key}
+                      onClick={() => setQuickLogPrecision(opt.key)}
+                    >
+                      {opt.label}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+
+              <div className="row">
+                <div className="small">
+                  {quickLogDraft.watchedAtPrecision === "day"
+                    ? "시청 날짜"
+                    : quickLogDraft.watchedAtPrecision === "month"
+                      ? "시청 월"
+                      : quickLogDraft.watchedAtPrecision === "season"
+                        ? "시청 분기"
+                        : quickLogDraft.watchedAtPrecision === "year"
+                          ? "시청 연도"
+                          : "시점"}
+                </div>
+                {quickLogDraft.watchedAtPrecision === "day" && (
+                  <input
+                    className="input"
+                    type="date"
+                    value={coerceQuickLogValue("day", quickLogDraft.watchedAtValue)}
+                    onChange={(e) =>
+                      setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
+                    }
+                    aria-label="퀵 로그 날짜"
+                  />
+                )}
+                {quickLogDraft.watchedAtPrecision === "month" && (
+                  <input
+                    className="input"
+                    type="month"
+                    value={coerceQuickLogValue("month", quickLogDraft.watchedAtValue)}
+                    onChange={(e) =>
+                      setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
+                    }
+                    aria-label="퀵 로그 월"
+                  />
+                )}
+                {quickLogDraft.watchedAtPrecision === "season" && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <input
+                      className="input"
+                      type="number"
+                      min={1950}
+                      max={2099}
+                      value={(parseSeasonValue(quickLogDraft.watchedAtValue)?.year || "").slice(0, 4)}
+                      onChange={(e) => {
+                        const year = String(e.target.value || "").replace(/[^\d]/g, "").slice(0, 4);
+                        const term = parseSeasonValue(quickLogDraft.watchedAtValue)?.term || "Spring";
+                        setQuickLogDraft((prev) => ({
+                          ...prev,
+                          watchedAtValue: year ? `${year}-${term}` : "",
+                        }));
+                      }}
+                      placeholder="YYYY"
+                      aria-label="퀵 로그 분기 연도"
+                    />
+                    <select
+                      className="select"
+                      value={parseSeasonValue(quickLogDraft.watchedAtValue)?.term || "Spring"}
+                      onChange={(e) => {
+                        const term = SEASON_TERM_OPTIONS.includes(e.target.value)
+                          ? e.target.value
+                          : "Spring";
+                        const year =
+                          parseSeasonValue(quickLogDraft.watchedAtValue)?.year || defaultQuickLogValue("year");
+                        setQuickLogDraft((prev) => ({
+                          ...prev,
+                          watchedAtValue: `${year}-${term}`,
+                        }));
+                      }}
+                      aria-label="퀵 로그 분기"
+                    >
+                      {SEASON_TERM_OPTIONS.map((term) => (
+                        <option key={term} value={term}>
+                          {term}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {quickLogDraft.watchedAtPrecision === "year" && (
+                  <input
+                    className="input"
+                    type="number"
+                    min={1950}
+                    max={2099}
+                    value={coerceQuickLogValue("year", quickLogDraft.watchedAtValue)}
+                    onChange={(e) =>
+                      setQuickLogDraft((prev) => ({
+                        ...prev,
+                        watchedAtValue: String(e.target.value || "")
+                          .replace(/[^\d]/g, "")
+                          .slice(0, 4),
+                      }))
+                    }
+                    placeholder="YYYY"
+                    aria-label="퀵 로그 연도"
+                  />
+                )}
+                {quickLogDraft.watchedAtPrecision === "unknown" && (
+                  <div className="small" style={{ opacity: 0.85 }}>
+                    정확한 시점을 모를 때 선택하세요. 정렬은 기록 생성 시점 기준으로 처리됩니다.
+                  </div>
+                )}
+              </div>
+
+              <div className="row">
+                <div className="small">기억할 한 줄</div>
+                <input
+                  className="input"
+                  value={quickLogDraft.cue}
+                  maxLength={120}
+                  onChange={(e) =>
+                    setQuickLogDraft((prev) => ({ ...prev, cue: e.target.value }))
+                  }
+                  placeholder="예: 캐릭터 연출이 인상적이었음"
+                  aria-label="기억할 한 줄"
+                />
+              </div>
+
+              <div className="row">
+                <div className="small">메모</div>
+                <textarea
+                  className="textarea"
+                  value={quickLogDraft.note}
+                  onChange={(e) =>
+                    setQuickLogDraft((prev) => ({ ...prev, note: e.target.value }))
+                  }
+                  placeholder="선택 입력"
+                />
+              </div>
+
+              <div className="row">
+                <div className="small">기억난 캐릭터 (최대 3)</div>
+                {quickLogCandidates.length === 0 ? (
+                  <div className="small" style={{ opacity: 0.8 }}>
+                    캐릭터 후보를 아직 불러오지 못했습니다.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {quickLogCandidates.map((c) => {
+                      const active = quickLogCharacterIds.includes(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => toggleQuickLogCharacter(c.id)}
+                          style={{
+                            border: `1px solid ${active ? "rgba(120,220,255,.9)" : "rgba(255,255,255,.16)"}`,
+                            borderRadius: 999,
+                            background: active ? "rgba(120,220,255,.2)" : "rgba(255,255,255,.06)",
+                            color: "inherit",
+                            padding: "6px 10px",
+                            cursor: "pointer",
+                            maxWidth: 220,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                          title={c.name}
+                        >
+                          {c.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {quickLogSelectedCharacters.length > 0 && (
+                <div className="row">
+                  <div className="small">선택 캐릭터 상세</div>
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {quickLogSelectedCharacters.map((c) => {
+                      const meta = quickLogCharacterMeta?.[c.id] || {
+                        affinity: "기억남음",
+                        reasonTags: [],
+                        note: "",
+                      };
+                      return (
+                        <div
+                          key={c.id}
+                          style={{
+                            border: "1px solid rgba(255,255,255,.12)",
+                            borderRadius: 12,
+                            padding: 10,
+                            display: "grid",
+                            gap: 8,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {c.image ? (
+                              <img
+                                src={c.image}
+                                alt={c.name}
+                                loading="lazy"
+                                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+                              />
+                            ) : (
+                              <div
+                                aria-hidden
+                                style={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: "50%",
+                                  background: "rgba(255,255,255,.1)",
+                                }}
+                              />
+                            )}
+                            <div style={{ fontWeight: 600, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {c.name}
+                            </div>
+                          </div>
+
+                          <div style={{ display: "grid", gap: 6 }}>
+                            <div className="small">친밀도</div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                              {AFFINITY_OPTIONS.map((aff) => (
+                                <Chip
+                                  key={aff}
+                                  active={meta.affinity === aff}
+                                  onClick={() => setQuickLogCharacterAffinity(c.id, aff)}
+                                >
+                                  {aff}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ display: "grid", gap: 6 }}>
+                            <div className="small">기억 태그</div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                              {REASON_TAG_OPTIONS.map((tag) => (
+                                <Chip
+                                  key={`${c.id}-${tag}`}
+                                  active={Array.isArray(meta.reasonTags) && meta.reasonTags.includes(tag)}
+                                  onClick={() => toggleQuickLogReasonTag(c.id, tag)}
+                                >
+                                  {tag}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+
+                          <input
+                            className="input"
+                            value={String(meta.note || "")}
+                            maxLength={200}
+                            onChange={(e) => setQuickLogCharacterNote(c.id, e.target.value)}
+                            placeholder="캐릭터 메모 (선택)"
+                            aria-label={`${c.name} 메모`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <button type="button" className="btn" onClick={closeQuickLogSheet}>
+                나중에
+              </button>
+              <button type="button" className="btn" onClick={saveQuickLogDraft}>
+                저장
+              </button>
             </div>
           </div>
         </div>

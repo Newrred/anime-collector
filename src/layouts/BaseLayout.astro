@@ -9,6 +9,7 @@ const normalize = (p: string | null | undefined) =>
 const toBasePath = (p: string = "") => `${base}${String(p).replace(/^\/+/, "")}`;
 const isIndexPage = normalize(Astro.url.pathname) === normalize(base);
 const isTierPage = normalize(Astro.url.pathname) === normalize(toBasePath("tier/"));
+const isLibraryPage = normalize(Astro.url.pathname) === normalize(toBasePath("library/"));
 ---
 <html lang="ko">
   <head>
@@ -23,10 +24,12 @@ const isTierPage = normalize(Astro.url.pathname) === normalize(toBasePath("tier/
   </head>
   <body>
     <ClientRouter />
-    {!isIndexPage && !isTierPage && (
+    {!isIndexPage && !isTierPage && !isLibraryPage && (
       <nav class="nav">
-        <a href={base}>목록</a>
+        <a href={base}>회상</a>
+        <a href={toBasePath("library/")}>목록</a>
         <a href={toBasePath("tier/")}>티어</a>
+        <a href={toBasePath("data/")}>데이터</a>
       </nav>
     )}
     <main class="container">
