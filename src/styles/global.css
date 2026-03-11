@@ -1,24 +1,49 @@
 :root {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     --page-pad: 20px;
+    --text-1: #f4f5f7;
+    --text-2: rgba(244,245,247,.86);
+    --text-3: rgba(244,245,247,.7);
+    --line-1: rgba(255,255,255,.12);
+    --line-2: rgba(255,255,255,.08);
+    --panel-1: rgba(255,255,255,.04);
+    --panel-2: rgba(255,255,255,.03);
 }
 html { scrollbar-gutter: stable; }
-body { margin: 0; background: #0b0c10; color: #e8e8ea; }
+body { margin: 0; background: #0b0c10; color: #e8e8ea; line-height: 1.45; }
 a { color: inherit; text-decoration: none; }
 .container { max-width: 1200px; margin: 0 auto; padding: var(--page-pad); }
+h1, h2, h3 { letter-spacing: -0.01em; }
+
+.pageHeader {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+.pageTitle {
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.2;
+    color: var(--text-1);
+}
+.pageLead {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-3);
+}
 
 .nav {
     display: flex; gap: 12px; align-items: center;
     position: sticky; top: 0; z-index: 10;
     background: rgba(11,12,16,.85); backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid var(--line-2);
     padding: 12px 20px;
 }
 .nav a { padding: 8px 10px; border-radius: 10px; }
 .nav a:hover { background: rgba(255,255,255,.08); }
 
 .btn {
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     background: rgba(255,255,255,.06);
     color: #fff; border-radius: 5px;
     padding: 8px 10px; cursor: pointer;
@@ -26,7 +51,7 @@ a { color: inherit; text-decoration: none; }
 .btn:hover { background: rgba(255,255,255,.10); }
 
 .removeBtn {
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     background: rgba(255, 0, 0, 0.2);
     color: #fff; border-radius: 12px;
     padding: 8px 10px; cursor: pointer;
@@ -37,7 +62,7 @@ a { color: inherit; text-decoration: none; }
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     background: rgba(255,255,255,.06);
     color: #fff;
     border-radius: 12px;
@@ -48,7 +73,7 @@ a { color: inherit; text-decoration: none; }
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     background: rgba(255,255,255,.06);
     color: #fff;
     border-radius: 12px;
@@ -127,9 +152,32 @@ a { color: inherit; text-decoration: none; }
 }
 .modalBody > * { min-width: 0; }
 .modalCover img { width: 100%; border-radius: 12px; }
+.modalMain { display: grid; gap: 10px; }
+.modalTitle { margin: 4px 0 0; font-size: clamp(22px, 2.5vw, 28px); line-height: 1.2; color: var(--text-1); }
+.modalMeta { color: var(--text-3); }
 .row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: center; margin: 10px 0; }
 .row > * { min-width: 0; }
-.small { justify-content: center; align-items: center; font-size: 12px; opacity: .75; }
+.small { font-size: 12px; line-height: 1.35; opacity: .78; color: var(--text-3); }
+
+.modal .row {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    background: var(--panel-2);
+    align-items: flex-start;
+    grid-template-columns: 96px minmax(0, 1fr);
+}
+.modal .row + .row { margin-top: 10px; }
+.modal .row > .small:first-child {
+    padding-top: 2px;
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    opacity: .72;
+}
+.modal .textarea { min-height: 96px; }
 
 /* 자동완성 드롭다운 */
 .suggestWrap { position: relative; }
@@ -165,7 +213,7 @@ a { color: inherit; text-decoration: none; }
 .badge {
     font-size: 11px;
     opacity: .85;
-    border: 1px solid rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.18);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -175,6 +223,7 @@ a { color: inherit; text-decoration: none; }
     .modal { max-height: calc(100vh - 20px); max-height: calc(100svh - 20px); }
     .modalBody { grid-template-columns: 1fr; }
     .row { grid-template-columns: 1fr; }
+    .modal .row { grid-template-columns: 1fr; }
     /* iOS/모바일에서 input focus 시 자동 확대로 인한 화면 점프 방지 */
     .input, .select, .textarea { font-size: 16px; }
 }
@@ -188,3 +237,4 @@ a { color: inherit; text-decoration: none; }
         max-height: 50vh;
     }
 }
+

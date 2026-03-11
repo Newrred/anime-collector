@@ -295,10 +295,25 @@ const RELATION_TYPE_KO = {
   CONTAINS: "포함",
 };
 
+const ANIME_MEDIA_FORMATS = new Set([
+  "TV",
+  "TV_SHORT",
+  "MOVIE",
+  "SPECIAL",
+  "OVA",
+  "ONA",
+  "MUSIC",
+]);
+
 function relationTypeKo(type) {
   const key = String(type || "").trim();
   if (!key) return "연관";
   return RELATION_TYPE_KO[key] || key.replace(/_/g, " ").toLowerCase();
+}
+
+function isAnimeMediaFormat(format) {
+  const key = String(format || "").trim().toUpperCase();
+  return ANIME_MEDIA_FORMATS.has(key);
 }
 
 function pickMediaTitle(media) {
@@ -1627,6 +1642,10 @@ export default function Library() {
   function addRelatedSeriesToLibrary(row) {
     const id = Number(row?.id);
     if (!Number.isFinite(id)) return;
+    if (!isAnimeMediaFormat(row?.format)) {
+      setBackupMsg("애니 형식이 아닌 항목은 라이브러리에 추가하지 않습니다.");
+      return;
+    }
     if (libraryIdSet.has(id)) {
       setSelectedId(id);
       return;
@@ -1939,9 +1958,9 @@ export default function Library() {
         onImportJsonText={importBackupText}
       />
 
-      <section style={{ marginBottom: 14 }}>
-        <h1 style={{ margin: "0 0 4px" }}>애니 목록</h1>
-        <p className="small" style={{ margin: 0, opacity: 0.82 }}>지금까지 본 애니를 추가하고 정렬하는 개인 라이브러리</p>
+      <section className="pageHeader">
+        <h1 className="pageTitle">애니 목록</h1>
+        <p className="pageLead">지금까지 본 애니를 추가하고 정렬하는 개인 라이브러리</p>
         <div style={{ marginTop: 6 }}>
           <span className="small" style={{ opacity: 0.9 }}>
             {backupReminder || "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다."}
@@ -2293,7 +2312,7 @@ export default function Library() {
               onClick={closeSelectedModal}
               aria-label="닫기"
             >
-              X
+              ×
             </button>
             <div className="modalBody">
               <div className="modalCover">
@@ -2308,9 +2327,9 @@ export default function Library() {
                 </div>
               </div>
 
-              <div>
-                <h2 style={{ margin: "6px 0 4px" }}>{selectedTitle}</h2>
-                <div className="small">
+              <div className="modalMain">
+                <h2 className="modalTitle">{selectedTitle}</h2>
+                <div className="small modalMeta">
                   {selectedMedia?.seasonYear ? `${selectedMedia.seasonYear} · ` : ""}
                   {selectedMedia?.format || ""}
                   {selectedMedia?.episodes ? ` · ${selectedMedia.episodes}화` : ""}
@@ -2334,6 +2353,7 @@ export default function Library() {
                     ) : (
                       selectedRelatedSeries.map((row) => {
                         const inLibrary = libraryIdSet.has(row.id);
+                        const canAddToLibrary = isAnimeMediaFormat(row.format);
                         const libraryItem = inLibrary
                           ? items.find((x) => Number(x?.anilistId) === row.id) || null
                           : null;
@@ -2395,7 +2415,7 @@ export default function Library() {
                                   <button type="button" className="btn" onClick={() => setSelectedId(row.id)}>
                                     상세 열기
                                   </button>
-                                ) : (
+                                ) : canAddToLibrary ? (
                                   <button
                                     type="button"
                                     className="btn"
@@ -2416,7 +2436,7 @@ export default function Library() {
                                   >
                                     +
                                   </button>
-                                )}
+                                ) : null}
                                 {row.siteUrl && (
                                   <a className="btn" href={row.siteUrl} target="_blank" rel="noreferrer">
                                     AniList

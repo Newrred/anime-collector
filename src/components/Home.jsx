@@ -257,9 +257,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ marginBottom: 6 }}>
-        <h1 style={{ margin: "0 0 4px" }}>회상 홈</h1>
-        <p className="small" style={{ margin: 0, opacity: 0.82 }}>
+      <section className="pageHeader" style={{ marginBottom: 6 }}>
+        <h1 className="pageTitle">회상 홈</h1>
+        <p className="pageLead">
           검색 후 기록하고, 나중에 다시 떠올릴 수 있는 개인 회상 허브
         </p>
       </section>

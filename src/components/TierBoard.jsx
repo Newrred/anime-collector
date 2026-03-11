@@ -699,6 +699,11 @@ export default function TierBoard() {
       />
       {backupMsg && <div className="small" style={{ opacity: 0.9 }}>{backupMsg}</div>}
 
+      <section className="pageHeader" style={{ marginBottom: 4 }}>
+        <h1 className="pageTitle">티어 보드</h1>
+        <p className="pageLead">로그 기반 필터로 회고하며 현재 티어를 관리합니다.</p>
+      </section>
+
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <button className="btn" onClick={reset}>초기화</button>
         <span className="small">Drag & Drop</span>

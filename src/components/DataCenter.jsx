@@ -117,9 +117,9 @@ export default function DataCenter() {
           gap: 12,
         }}
       >
-        <div>
-          <h1 style={{ margin: "0 0 4px" }}>데이터 센터</h1>
-          <p className="small" style={{ margin: 0, opacity: 0.85 }}>
+        <div className="pageHeader" style={{ marginBottom: 0 }}>
+          <h1 className="pageTitle">데이터 센터</h1>
+          <p className="pageLead">
             저장 상태와 용량을 점검하고, 장치 저장 보호 상태를 확인합니다.
           </p>
         </div>
