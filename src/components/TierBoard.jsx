@@ -424,7 +424,7 @@ export default function TierBoard() {
       const file = new File([text], filename, { type: "application/json" });
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: "애니 라이브러리 백업",
+          title: "애니 보관함 백업",
           files: [file],
         });
         markBackupExported("백업 JSON 파일을 공유했어요.");
@@ -440,7 +440,7 @@ export default function TierBoard() {
     try {
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
         await navigator.share({
-          title: "애니 라이브러리 백업(JSON)",
+          title: "애니 보관함 백업(JSON)",
           text,
         });
         markBackupExported("백업 JSON 텍스트를 공유했어요.");
@@ -472,7 +472,7 @@ export default function TierBoard() {
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
-      const ok = window.confirm("현재 목록을 모두 덮어쓰고 가져올까요?");
+      const ok = window.confirm("지금 보관함 데이터를 모두 바꾸고 불러올까요?");
       if (!ok) return;
       setLibrary(incomingNormalized);
     } else {
@@ -515,8 +515,8 @@ export default function TierBoard() {
 
     setBackupMsg(
       isOverwrite
-        ? "가져오기 완료! 기존 목록을 덮어썼어요."
-        : "가져오기 완료! 기존 목록과 병합했어요."
+        ? "불러오기 완료! 지금 보관함 데이터로 교체했어요."
+        : "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요."
     );
   }
 
@@ -701,7 +701,7 @@ export default function TierBoard() {
 
       <section className="pageHeader" style={{ marginBottom: 4 }}>
         <h1 className="pageTitle">티어 보드</h1>
-        <p className="pageLead">로그 기반 필터로 회고하며 현재 티어를 관리합니다.</p>
+        <p className="pageLead">감상 기록을 기준으로 다시 정리해 보는 티어 보드입니다.</p>
       </section>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -720,7 +720,7 @@ export default function TierBoard() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700 }}>로그 기반 필터</div>
+          <div style={{ fontWeight: 700 }}>감상 기록 필터</div>
           <div className="small" style={{ opacity: 0.86 }}>
             표시 {visiblePlacedCount} / 전체 {totalPlacedCount}
           </div>
@@ -732,11 +732,11 @@ export default function TierBoard() {
             { key: "year", label: "올해/연도" },
             { key: "season", label: "시즌" },
             { key: "rewatch", label: "재시청 기록" },
-            { key: "primary", label: "대표 캐릭터" },
-            { key: "favorite", label: "최애 태그" },
-            { key: "pinned", label: "핀 포함 작품" },
-            { key: "reasonTag", label: "이유 태그" },
-            { key: "character", label: "특정 캐릭터" },
+            { key: "primary", label: "대표캐 있는 작품" },
+            { key: "favorite", label: "최애캐가 있는 작품" },
+            { key: "pinned", label: "고정한 캐릭터가 있는 작품" },
+            { key: "reasonTag", label: "포인트 태그" },
+            { key: "character", label: "캐릭터 선택" },
           ].map((opt) => (
             <button
               key={opt.key}
@@ -791,10 +791,10 @@ export default function TierBoard() {
               className="select"
               value={reasonTagFilter}
               onChange={(e) => setReasonTagFilter(String(e.target.value || ""))}
-              aria-label="이유 태그 필터"
+              aria-label="포인트 태그 필터"
               style={{ width: 200 }}
             >
-              <option value="">태그 선택</option>
+              <option value="">포인트 태그 선택</option>
               {reasonTagOptions.map((row) => (
                 <option key={row.tag} value={row.tag}>
                   {row.tag} ({row.count})
@@ -810,7 +810,7 @@ export default function TierBoard() {
               className="select"
               value={characterFilterId}
               onChange={(e) => setCharacterFilterId(String(e.target.value || ""))}
-              aria-label="특정 캐릭터 필터"
+              aria-label="캐릭터 선택 필터"
               style={{ width: 260 }}
             >
               <option value="">캐릭터 선택</option>
@@ -825,7 +825,7 @@ export default function TierBoard() {
 
         {!canEditTierBoard && (
           <div className="small" style={{ opacity: 0.85 }}>
-            필터가 켜진 상태에서는 안전하게 보기 전용입니다. 드래그 편집은 `전체`에서 가능합니다.
+            필터를 쓰는 동안에는 보기만 할 수 있어요. 드래그 편집은 `전체`에서 해주세요.
           </div>
         )}
       </section>

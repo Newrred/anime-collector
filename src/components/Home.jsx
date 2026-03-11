@@ -199,8 +199,8 @@ export default function Home() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>회상</a>
-          <a href={`${base}library/`}>목록</a>
+          <a href={`${base}`}>홈</a>
+          <a href={`${base}library/`}>보관함</a>
           <a href={`${base}tier/`}>티어</a>
         </div>
         <div ref={utilRef} style={{ position: "relative", marginLeft: "auto" }}>
@@ -208,10 +208,10 @@ export default function Home() {
             type="button"
             onClick={() => setUtilOpen((v) => !v)}
             style={{ border: "none", background: "transparent", color: "inherit", cursor: "pointer", padding: "8px 10px", borderRadius: 10, fontSize: 14 }}
-            aria-label="유틸 메뉴"
+            aria-label="관리 메뉴"
             aria-expanded={utilOpen}
           >
-            유틸
+            관리
           </button>
           {utilOpen && (
             <div
@@ -237,7 +237,7 @@ export default function Home() {
                 style={{ textAlign: "center", textDecoration: "none" }}
                 onClick={() => setUtilOpen(false)}
               >
-                목록에서 백업/가져오기
+                보관함에서 백업/불러오기
               </a>
               <a
                 href={`${base}data/`}
@@ -245,7 +245,7 @@ export default function Home() {
                 style={{ textAlign: "center", textDecoration: "none" }}
                 onClick={() => setUtilOpen(false)}
               >
-                데이터 센터
+                데이터 관리
               </a>
               {canInstallPwa && (
                 <button type="button" className="btn" onClick={onClickInstallPwa}>
@@ -258,9 +258,9 @@ export default function Home() {
       </section>
 
       <section className="pageHeader" style={{ marginBottom: 6 }}>
-        <h1 className="pageTitle">회상 홈</h1>
+        <h1 className="pageTitle">기록 홈</h1>
         <p className="pageLead">
-          검색 후 기록하고, 나중에 다시 떠올릴 수 있는 개인 회상 허브
+          검색하고 기록한 작품을 나중에 다시 꺼내보는 개인 홈
         </p>
       </section>
 
@@ -279,7 +279,7 @@ export default function Home() {
             작품 {items.length}개
           </div>
           <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
-            로그 {logs.length}개
+            감상 기록 {logs.length}개
           </div>
           <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
             {formatBackupAgo(lastBackupMs)}

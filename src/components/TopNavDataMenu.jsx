@@ -177,8 +177,8 @@ export default function TopNavDataMenu({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>회상</a>
-          <a href={`${base}library/`}>목록</a>
+          <a href={`${base}`}>홈</a>
+          <a href={`${base}library/`}>보관함</a>
           <a href={`${base}tier/`}>티어</a>
         </div>
 
@@ -188,7 +188,7 @@ export default function TopNavDataMenu({
             onClick={() => setDataMenuOpen((v) => !v)}
             aria-expanded={dataMenuOpen}
             aria-controls={panelId}
-            aria-label="유틸 메뉴"
+            aria-label="관리 메뉴"
             style={{
               border: "none",
               background: "transparent",
@@ -201,7 +201,7 @@ export default function TopNavDataMenu({
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <IconGear />
-              <span>유틸</span>
+              <span>관리</span>
             </span>
           </button>
 
@@ -251,7 +251,7 @@ export default function TopNavDataMenu({
                       setDataMenuOpen(false);
                     }}
                   >
-                    <ActionLabel icon={<IconFile />}>JSON 파일 저장</ActionLabel>
+                    <ActionLabel icon={<IconFile />}>백업 파일 저장</ActionLabel>
                   </button>
                   <button
                     className="btn"
@@ -260,7 +260,7 @@ export default function TopNavDataMenu({
                       setDataMenuOpen(false);
                     }}
                   >
-                    <ActionLabel icon={<IconMobile />}>모바일 공유/복사</ActionLabel>
+                    <ActionLabel icon={<IconMobile />}>모바일로 보내기/복사</ActionLabel>
                   </button>
                   {canInstallPwa && (
                     <button
@@ -279,7 +279,7 @@ export default function TopNavDataMenu({
                     style={{ textAlign: "center", textDecoration: "none" }}
                     onClick={() => setDataMenuOpen(false)}
                   >
-                    <ActionLabel icon={<IconDatabase />}>저장 상태 보기</ActionLabel>
+                    <ActionLabel icon={<IconDatabase />}>저장 상태</ActionLabel>
                   </a>
                 </div>
               ) : (
@@ -295,10 +295,10 @@ export default function TopNavDataMenu({
                     }}
                   >
                     <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>
-                      병합
+                      이어서 불러오기
                     </SegTabButton>
                     <SegTabButton active={importMode === "overwrite"} onClick={() => setImportMode("overwrite")}>
-                      덮어쓰기
+                      지금 데이터 대신 불러오기
                     </SegTabButton>
                   </div>
                   <button
@@ -308,17 +308,17 @@ export default function TopNavDataMenu({
                       setDataMenuOpen(false);
                     }}
                   >
-                    <ActionLabel icon={<IconFile />}>JSON 파일 선택</ActionLabel>
+                    <ActionLabel icon={<IconFile />}>백업 파일 선택</ActionLabel>
                   </button>
                   <textarea
                     className="textarea"
                     value={importText}
                     onChange={(e) => setImportText(e.target.value)}
-                    placeholder="모바일에서는 백업 JSON을 복사해서 여기에 붙여넣고 불러오세요."
+                    placeholder="모바일에서는 백업 내용을 복사해 여기에 붙여넣고 불러오세요."
                     style={{ minHeight: 100 }}
                   />
                   <button className="btn" onClick={handleImportText}>
-                    <ActionLabel icon={<IconClipboard />}>붙여넣기 불러오기</ActionLabel>
+                    <ActionLabel icon={<IconClipboard />}>붙여넣은 내용 불러오기</ActionLabel>
                   </button>
                 </div>
               )}

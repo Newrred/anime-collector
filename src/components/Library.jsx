@@ -113,6 +113,20 @@ function safeGenres(media) {
 const BACKUP_REMIND_DAYS = 7;
 const AFFINITY_OPTIONS = ["최애", "기억남음", "불호지만강렬"];
 const REASON_TAG_OPTIONS = ["성장", "관계성", "대사", "연출", "디자인", "성우", "기타"];
+const AFFINITY_LABELS = {
+  최애: "최애",
+  기억남음: "인상 깊었음",
+  불호지만강렬: "불호인데 강렬함",
+};
+const REASON_TAG_LABELS = {
+  성장: "서사",
+  관계성: "관계성",
+  대사: "대사",
+  연출: "연출",
+  디자인: "비주얼",
+  성우: "성우연기",
+  기타: "기타",
+};
 const SEASON_TERM_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
 const STATUS_UNCLASSIFIED = "\uBBF8\uBD84\uB958";
 const STATUS_WATCHING = "\uBCF4\uB294\uC911";
@@ -161,8 +175,16 @@ function formatWatchLogDate(log) {
   const value = String(log?.watchedAtValue || "").trim();
   if (value) return value;
   const createdAt = Number(log?.createdAt);
-  if (!Number.isFinite(createdAt)) return "날짜 미상";
+  if (!Number.isFinite(createdAt)) return "날짜 잘 모름";
   return new Date(createdAt).toISOString().slice(0, 10);
+}
+
+function affinityLabel(value) {
+  return AFFINITY_LABELS[String(value || "").trim()] || String(value || "").trim() || "인상 깊었음";
+}
+
+function reasonTagLabel(value) {
+  return REASON_TAG_LABELS[String(value || "").trim()] || String(value || "").trim();
 }
 
 function parseSeasonValue(value) {
@@ -671,7 +693,7 @@ export default function Library() {
       const file = new File([text], filename, { type: "application/json" });
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: "애니 라이브러리 백업",
+          title: "애니 보관함 백업",
           files: [file],
         });
         markBackupExported("백업 JSON 파일을 공유했어요.");
@@ -687,7 +709,7 @@ export default function Library() {
     try {
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
         await navigator.share({
-          title: "애니 라이브러리 백업(JSON)",
+          title: "애니 보관함 백업(JSON)",
           text,
         });
         markBackupExported("백업 JSON 텍스트를 공유했어요.");
@@ -718,7 +740,7 @@ export default function Library() {
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
-      const ok = window.confirm("현재 목록을 모두 덮어쓰고 가져올까요?");
+      const ok = window.confirm("지금 보관함 데이터를 모두 바꾸고 불러올까요?");
       if (!ok) return;
       setItems(incomingNormalized);
     } else {
@@ -776,8 +798,8 @@ export default function Library() {
 
     setBackupMsg(
       isOverwrite
-        ? "가져오기 완료! 기존 목록을 덮어썼어요."
-        : "가져오기 완료! 기존 목록과 병합했어요."
+        ? "불러오기 완료! 지금 보관함 데이터로 교체했어요."
+        : "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요."
     );
     setSelectedId(null);
   }
@@ -997,7 +1019,7 @@ export default function Library() {
   }
 
   function removeAnime(id) {
-    const ok = window.confirm("이 애니를 라이브러리에서 삭제할까요?\n(점수/메모 포함된 모든 데이터가 사라집니다)");
+    const ok = window.confirm("이 작품을 보관함에서 삭제할까요?\n(점수/메모 포함된 모든 데이터가 사라집니다)");
     if (!ok) return;
 
     setItems((prev) => prev.filter((x) => x.anilistId !== id));
@@ -1643,7 +1665,7 @@ export default function Library() {
     const id = Number(row?.id);
     if (!Number.isFinite(id)) return;
     if (!isAnimeMediaFormat(row?.format)) {
-      setBackupMsg("애니 형식이 아닌 항목은 라이브러리에 추가하지 않습니다.");
+      setBackupMsg("애니 형식이 아닌 항목은 보관함에 추가하지 않습니다.");
       return;
     }
     if (libraryIdSet.has(id)) {
@@ -1676,7 +1698,7 @@ export default function Library() {
       });
     }
     setSelectedId(id);
-    setBackupMsg("관련 시리즈를 라이브러리에 추가하고 상세를 열었습니다.");
+    setBackupMsg("관련 시리즈를 보관함에 추가하고 상세를 열었습니다.");
   }
 
   function toggleQuickLogCharacter(characterId) {
@@ -1835,7 +1857,7 @@ export default function Library() {
           String(primaryRef.note || "").trim() ||
           String(quickLogDraft.cue || "").trim();
         const shouldPin = window.confirm(
-          `대표 캐릭터 "${primaryRef.nameSnapshot}"를 핀에 추가할까요?`
+          `이 캐릭터("${primaryRef.nameSnapshot}")를 최애로 고정할까요?`
         );
         if (shouldPin) {
           await upsertCharacterPin({
@@ -1959,8 +1981,8 @@ export default function Library() {
       />
 
       <section className="pageHeader">
-        <h1 className="pageTitle">애니 목록</h1>
-        <p className="pageLead">지금까지 본 애니를 추가하고 정렬하는 개인 라이브러리</p>
+        <h1 className="pageTitle">애니 보관함</h1>
+        <p className="pageLead">지금까지 본 작품을 모아 두고 다시 꺼내보는 개인 보관함</p>
         <div style={{ marginTop: 6 }}>
           <span className="small" style={{ opacity: 0.9 }}>
             {backupReminder || "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다."}
@@ -2045,9 +2067,9 @@ export default function Library() {
               <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} />
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: 10, background: "rgba(255,255,255,.02)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>정주행 TOP 5</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>재주행 TOP 5</div>
               {dashboard.rewatchRows.length === 0 ? (
-                <div className="small">정주행 기록이 없습니다.</div>
+                <div className="small">재주행 기록이 없습니다.</div>
               ) : (
                 <div style={{ display: "grid", gap: 6 }}>
                   {dashboard.rewatchRows.map((row) => {
@@ -2123,14 +2145,14 @@ export default function Library() {
         <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "stretch", flexWrap: "wrap" }}>
           <input
             className="input"
-            placeholder="라이브러리 검색 (제목/장르)"
+            placeholder="보관함 검색 (제목/장르)"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             style={{ minWidth: 220, flex: "1 1 320px" }}
           />
           <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.10)", borderRadius: 5, background: "rgba(0,0,0,.18)", marginLeft: "auto", flex: "0 0 auto" }}>
-            <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>포스터/정보</SegTabButton>
-            <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터</SegTabButton>
+            <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>정보 함께</SegTabButton>
+            <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터만</SegTabButton>
           </div>
         </div>
 
@@ -2168,7 +2190,7 @@ export default function Library() {
         </div>
 
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-          <div className="small" style={{ whiteSpace: "nowrap", opacity: 0.9, border: 0 }}>한 줄 포스터 수</div>
+          <div className="small" style={{ whiteSpace: "nowrap", opacity: 0.9, border: 0 }}>카드 크기</div>
           <input
             type="range"
             min={2}
@@ -2537,7 +2559,7 @@ export default function Library() {
                 </div>
 
                 <div className="row">
-                  <div className="small">정주행</div>
+                  <div className="small">재주행</div>
                   <div style={{ display: "grid", gap: 8 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                       <button
@@ -2550,14 +2572,14 @@ export default function Library() {
                           setLastRewatchAtDraft(today);
                           updateSelected({ rewatchCount: nextCount, lastRewatchAt: today });
                           appendSelectedWatchLog(EVENT_REWATCH, {
-                            cue: `\uC815\uC8FC\uD589 \uC644\uB8CC (${nextCount}\uD68C\uCC28)`,
+                            cue: `\uC7AC\uC8FC\uD589 \uC644\uB8CC (${nextCount}\uD68C\uCC28)`,
                           }, {
                             openQuickSheet: true,
                             quickContext: { source: "rewatch-plus", isAuto: true, status: STATUS_COMPLETED },
                           });
                         }}
                       >
-                        정주행 완료!  +1
+                        재주행 +1
                       </button>
                       <input
                         className="input"
@@ -2568,7 +2590,7 @@ export default function Library() {
                         onChange={(e) => setRewatchCountDraft(normalizeRewatchCount(e.target.value))}
                         onBlur={commitModalDraft}
                         style={{ width: 50, textAlign: "center" }}
-                        aria-label="정주행 횟수"
+                        aria-label="재주행 횟수"
                       />
 
                       <input
@@ -2578,24 +2600,24 @@ export default function Library() {
                         onChange={(e) => setLastRewatchAtDraft(e.target.value)}
                         onBlur={commitModalDraft}
                         style={{ width: 200 }}
-                        aria-label="마지막 정주행 날짜"
+                        aria-label="마지막 재주행"
                       />
                     </div>
                   </div>
                 </div>
                 <div className="row">
-                    <div className="small">메모</div>
+                    <div className="small">자세한 메모</div>
                     <textarea
                       className="textarea"
                       value={memoDraft}
                       onChange={(e) => setMemoDraft(e.target.value)}
                       onBlur={commitModalDraft}
-                      placeholder="보고 난 뒤 한 줄 메모.."
+                      placeholder="보고 난 뒤 한줄 메모"
                     />
                 </div>
 
                 <div className="row">
-                  <div className="small">기억 로그</div>
+                  <div className="small">감상 기록</div>
                   <div style={{ display: "grid", gap: 6 }}>
                     {logsLoading ? (
                       <div className="small" style={{ opacity: 0.85 }}>불러오는 중...</div>
@@ -2762,7 +2784,7 @@ export default function Library() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginBottom: 8 }}>
               <div>
-                <div style={{ fontWeight: 700 }}>퀵 로그</div>
+                <div style={{ fontWeight: 700 }}>빠른 기록</div>
                 <div className="small" style={{ opacity: 0.85 }}>
                   {quickLogTitle || `#${quickLogDraft.anilistId}`} · {quickLogDraft.eventType}
                 </div>
@@ -2798,14 +2820,14 @@ export default function Library() {
                 </div>
               )}
               <div className="row">
-                <div className="small">기록 정밀도</div>
+                <div className="small">언제 봤는지</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {[
-                    { key: "day", label: "일" },
+                    { key: "day", label: "날짜" },
                     { key: "month", label: "월" },
-                    { key: "season", label: "분기" },
+                    { key: "season", label: "시즌" },
                     { key: "year", label: "연도" },
-                    { key: "unknown", label: "미상" },
+                    { key: "unknown", label: "잘 모름" },
                   ].map((opt) => (
                     <Chip
                       key={opt.key}
@@ -2821,14 +2843,14 @@ export default function Library() {
               <div className="row">
                 <div className="small">
                   {quickLogDraft.watchedAtPrecision === "day"
-                    ? "시청 날짜"
+                    ? "본 날짜"
                     : quickLogDraft.watchedAtPrecision === "month"
-                      ? "시청 월"
+                      ? "본 달"
                       : quickLogDraft.watchedAtPrecision === "season"
-                        ? "시청 분기"
+                        ? "본 시즌"
                         : quickLogDraft.watchedAtPrecision === "year"
-                          ? "시청 연도"
-                          : "시점"}
+                          ? "본 연도"
+                          : "언제 봤는지"}
                 </div>
                 {quickLogDraft.watchedAtPrecision === "day" && (
                   <input
@@ -2838,7 +2860,7 @@ export default function Library() {
                     onChange={(e) =>
                       setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
                     }
-                    aria-label="퀵 로그 날짜"
+                    aria-label="빠른 기록 날짜"
                   />
                 )}
                 {quickLogDraft.watchedAtPrecision === "month" && (
@@ -2849,7 +2871,7 @@ export default function Library() {
                     onChange={(e) =>
                       setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
                     }
-                    aria-label="퀵 로그 월"
+                    aria-label="빠른 기록 월"
                   />
                 )}
                 {quickLogDraft.watchedAtPrecision === "season" && (
@@ -2869,7 +2891,7 @@ export default function Library() {
                         }));
                       }}
                       placeholder="YYYY"
-                      aria-label="퀵 로그 분기 연도"
+                      aria-label="빠른 기록 시즌 연도"
                     />
                     <select
                       className="select"
@@ -2885,7 +2907,7 @@ export default function Library() {
                           watchedAtValue: `${year}-${term}`,
                         }));
                       }}
-                      aria-label="퀵 로그 분기"
+                      aria-label="빠른 기록 시즌"
                     >
                       {SEASON_TERM_OPTIONS.map((term) => (
                         <option key={term} value={term}>
@@ -2911,18 +2933,18 @@ export default function Library() {
                       }))
                     }
                     placeholder="YYYY"
-                    aria-label="퀵 로그 연도"
+                    aria-label="빠른 기록 연도"
                   />
                 )}
                 {quickLogDraft.watchedAtPrecision === "unknown" && (
                   <div className="small" style={{ opacity: 0.85 }}>
-                    정확한 시점을 모를 때 선택하세요. 정렬은 기록 생성 시점 기준으로 처리됩니다.
+                    정확한 날짜가 기억나지 않으면 이 항목을 선택하세요. 정렬은 기록한 시점을 기준으로 맞춰집니다.
                   </div>
                 )}
               </div>
 
               <div className="row">
-                <div className="small">기억할 한 줄</div>
+                <div className="small">한줄 감상</div>
                 <input
                   className="input"
                   value={quickLogDraft.cue}
@@ -2931,12 +2953,12 @@ export default function Library() {
                     setQuickLogDraft((prev) => ({ ...prev, cue: e.target.value }))
                   }
                   placeholder="예: 캐릭터 연출이 인상적이었음"
-                  aria-label="기억할 한 줄"
+                  aria-label="한줄 감상"
                 />
               </div>
 
               <div className="row">
-                <div className="small">메모</div>
+                <div className="small">자세한 메모</div>
                 <textarea
                   className="textarea"
                   value={quickLogDraft.note}
@@ -2948,7 +2970,7 @@ export default function Library() {
               </div>
 
               <div className="row">
-                <div className="small">기억난 캐릭터 (최대 3)</div>
+                <div className="small">기억에 남은 캐릭터 (최대 3)</div>
                 {quickLogCandidates.length === 0 ? (
                   <div className="small" style={{ opacity: 0.8 }}>
                     캐릭터 후보를 아직 불러오지 못했습니다.
@@ -2989,9 +3011,9 @@ export default function Library() {
                                 borderColor: isPrimary ? "rgba(255,215,107,.9)" : "rgba(255,255,255,.2)",
                                 background: isPrimary ? "rgba(255,215,107,.2)" : "transparent",
                               }}
-                              title="대표 캐릭터 지정"
+                              title="대표캐 지정"
                             >
-                              {isPrimary ? "대표" : "대표로"}
+                              {isPrimary ? "대표캐" : "대표캐로"}
                             </button>
                           )}
                         </div>
@@ -3000,13 +3022,13 @@ export default function Library() {
                   </div>
                 )}
                 <div className="small" style={{ opacity: 0.8 }}>
-                  대표 캐릭터는 1명만 지정됩니다.
+                  대표캐는 한 명만 고를 수 있어요.
                 </div>
               </div>
 
               {quickLogSelectedCharacters.length > 0 && (
                 <div className="row">
-                  <div className="small">선택 캐릭터 상세</div>
+                  <div className="small">캐릭터별 기록</div>
                   <div style={{ display: "grid", gap: 10 }}>
                     {quickLogSelectedCharacters.map((c) => {
                       const meta = quickLogCharacterMeta?.[c.id] || {
@@ -3064,12 +3086,12 @@ export default function Library() {
                                     : "transparent",
                               }}
                             >
-                              {Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ? "대표" : "대표로"}
+                              {Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ? "대표캐" : "대표캐로"}
                             </button>
                           </div>
 
                           <div style={{ display: "grid", gap: 6 }}>
-                            <div className="small">친밀도</div>
+                            <div className="small">감정 태그</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                               {AFFINITY_OPTIONS.map((aff) => (
                                 <Chip
@@ -3077,14 +3099,14 @@ export default function Library() {
                                   active={meta.affinity === aff}
                                   onClick={() => setQuickLogCharacterAffinity(c.id, aff)}
                                 >
-                                  {aff}
+                                  {affinityLabel(aff)}
                                 </Chip>
                               ))}
                             </div>
                           </div>
 
                           <div style={{ display: "grid", gap: 6 }}>
-                            <div className="small">기억 태그 (최대 3)</div>
+                            <div className="small">꽂힌 포인트 (최대 3)</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                               {REASON_TAG_OPTIONS.map((tag) => (
                                 <Chip
@@ -3092,7 +3114,7 @@ export default function Library() {
                                   active={Array.isArray(meta.reasonTags) && meta.reasonTags.includes(tag)}
                                   onClick={() => toggleQuickLogReasonTag(c.id, tag)}
                                 >
-                                  {tag}
+                                  {reasonTagLabel(tag)}
                                 </Chip>
                               ))}
                             </div>
@@ -3103,7 +3125,7 @@ export default function Library() {
                             value={String(meta.note || "")}
                             maxLength={200}
                             onChange={(e) => setQuickLogCharacterNote(c.id, e.target.value)}
-                            placeholder="캐릭터 메모 (선택)"
+                            placeholder="캐릭터 한줄 (선택)"
                             aria-label={`${c.name} 메모`}
                           />
                         </div>

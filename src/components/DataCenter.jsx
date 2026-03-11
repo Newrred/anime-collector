@@ -118,7 +118,7 @@ export default function DataCenter() {
         }}
       >
         <div className="pageHeader" style={{ marginBottom: 0 }}>
-          <h1 className="pageTitle">데이터 센터</h1>
+          <h1 className="pageTitle">데이터 관리</h1>
           <p className="pageLead">
             저장 상태와 용량을 점검하고, 장치 저장 보호 상태를 확인합니다.
           </p>
@@ -152,19 +152,19 @@ export default function DataCenter() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>라이브러리 항목</div>
+            <div className="small" style={{ opacity: 0.8 }}>보관 작품 수</div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.library}</div>
           </div>
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>티어 보드 항목</div>
+            <div className="small" style={{ opacity: 0.8 }}>티어에 올린 작품 수</div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.tierPlaced}</div>
           </div>
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>기억 로그 수</div>
+            <div className="small" style={{ opacity: 0.8 }}>감상 기록 수</div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.watchLogs}</div>
           </div>
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>캐릭터 핀 수</div>
+            <div className="small" style={{ opacity: 0.8 }}>고정한 캐릭터 수</div>
             <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.characterPins}</div>
           </div>
         </div>

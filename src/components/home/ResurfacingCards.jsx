@@ -65,7 +65,7 @@ export default function ResurfacingCards({
     <>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
         <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 기록</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 기록</div>
           {resurfacing.recentLogs.length === 0 ? (
             <div className="small">아직 기록이 없습니다.</div>
           ) : (
@@ -87,7 +87,7 @@ export default function ResurfacingCards({
         </div>
 
         <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>기억 없는 작품</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>아직 기록 안 남긴 작품</div>
           {resurfacing.missingMemory.length === 0 ? (
             <div className="small">모든 작품에 최소 1개 이상의 기록이 있습니다.</div>
           ) : (
@@ -109,9 +109,9 @@ export default function ResurfacingCards({
         </div>
 
         <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 기록의 대표 캐릭터</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 대표캐</div>
           {resurfacing.recentPrimaryCharacters.length === 0 ? (
-            <div className="small">대표 캐릭터가 있는 로그를 아직 남기지 않았습니다.</div>
+            <div className="small">대표캐를 남긴 기록이 아직 없어요.</div>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {resurfacing.recentPrimaryCharacters.map((row) => (
@@ -151,7 +151,7 @@ export default function ResurfacingCards({
 
         {resurfacing.repeatedCharacters.length > 0 && (
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>반복해서 남긴 캐릭터</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>자꾸 생각난 캐릭터</div>
             <div style={{ display: "grid", gap: 8 }}>
               {resurfacing.repeatedCharacters.map((row) => (
                 <button
@@ -191,7 +191,7 @@ export default function ResurfacingCards({
 
         {resurfacing.thisTime.length > 0 && (
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 본 작품</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 봤던 작품</div>
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.thisTime.map((row) => (
                 <div key={row.id}>
@@ -211,7 +211,7 @@ export default function ResurfacingCards({
 
       {resurfacing.pinnedHighlights.length > 0 && (
         <section style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>핀 캐릭터</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>최애로 고정한 캐릭터</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
             {resurfacing.pinnedHighlights.map((p) => (
               <button

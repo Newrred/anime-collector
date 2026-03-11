@@ -59,7 +59,7 @@ export default function CharacterInsightSheet({
                 {characterInsight?.name || selectedCharacter?.name || `#${selectedCharacter.characterId}`}
               </div>
               <div className="small" style={{ opacity: 0.82 }}>
-                이 캐릭터로 남긴 로그 {characterInsight?.total || 0}개
+                이 캐릭터로 남긴 감상 기록 {characterInsight?.total || 0}개
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function CharacterInsightSheet({
 
         {characterInsight?.reasonTags?.length > 0 && (
           <section style={{ marginBottom: 12 }}>
-            <div className="small" style={{ marginBottom: 6 }}>자주 붙는 이유 태그</div>
+            <div className="small" style={{ marginBottom: 6 }}>자주 붙는 포인트 태그</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {characterInsight.reasonTags.map((row) => (
                 <span
@@ -118,7 +118,7 @@ export default function CharacterInsightSheet({
           </div>
 
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ marginBottom: 8 }}>최근 로그 타임라인</div>
+            <div className="small" style={{ marginBottom: 8 }}>최근 기록 타임라인</div>
             {characterInsight?.recentLogs?.length ? (
               <div style={{ display: "grid", gap: 8 }}>
                 {characterInsight.recentLogs.map((row) => (
@@ -151,7 +151,7 @@ export default function CharacterInsightSheet({
 
         <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
           <a href={insightCtaHref} className="btn" style={{ textDecoration: "none" }}>
-            목록에서 상세 보기
+            보관함에서 상세 보기
           </a>
         </div>
       </div>
