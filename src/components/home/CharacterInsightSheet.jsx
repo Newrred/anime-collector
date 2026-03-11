@@ -6,6 +6,16 @@ export default function CharacterInsightSheet({
   onClose,
 }) {
   if (!selectedCharacter) return null;
+  function buildLibraryDetailHref(anilistId) {
+    const id = Number(anilistId);
+    if (!Number.isFinite(id)) return `${base}library/`;
+    return `${base}library/?animeId=${encodeURIComponent(String(id))}`;
+  }
+
+  const topRelatedAnimeId = Number(characterInsight?.relatedAnime?.[0]?.anilistId);
+  const insightCtaHref = Number.isFinite(topRelatedAnimeId)
+    ? buildLibraryDetailHref(topRelatedAnimeId)
+    : `${base}library/`;
 
   return (
     <div
@@ -91,9 +101,13 @@ export default function CharacterInsightSheet({
               <div style={{ display: "grid", gap: 6 }}>
                 {characterInsight.relatedAnime.map((row) => (
                   <div key={row.anilistId} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
-                    <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <a
+                      href={buildLibraryDetailHref(row.anilistId)}
+                      className="small"
+                      style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "inherit" }}
+                    >
                       {row.title}
-                    </div>
+                    </a>
                     <div className="small" style={{ opacity: 0.9 }}>{row.count}회</div>
                   </div>
                 ))}
@@ -114,7 +128,12 @@ export default function CharacterInsightSheet({
                       {row.reasonTag ? ` · ${row.reasonTag}` : ""}
                     </div>
                     <div className="small" style={{ opacity: 0.94 }}>
-                      {titleById.get(Number(row.anilistId)) || `#${row.anilistId}`}
+                      <a
+                        href={buildLibraryDetailHref(row.anilistId)}
+                        style={{ color: "inherit" }}
+                      >
+                        {titleById.get(Number(row.anilistId)) || `#${row.anilistId}`}
+                      </a>
                     </div>
                     {row.cue && (
                       <div className="small" style={{ opacity: 0.82 }}>
@@ -131,7 +150,7 @@ export default function CharacterInsightSheet({
         </section>
 
         <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-          <a href={`${base}library/`} className="btn" style={{ textDecoration: "none" }}>
+          <a href={insightCtaHref} className="btn" style={{ textDecoration: "none" }}>
             목록에서 상세 보기
           </a>
         </div>

@@ -406,6 +406,7 @@ export default function Library() {
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
+  const deepLinkHandledRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -668,6 +669,24 @@ export default function Library() {
     setItems((prev) => dedupeByAnilistId(prev));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (deepLinkHandledRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = Number(params.get("animeId"));
+    if (!Number.isFinite(fromQuery)) {
+      deepLinkHandledRef.current = true;
+      return;
+    }
+
+    const exists = items.some((x) => Number(x?.anilistId) === fromQuery);
+    if (!exists) return;
+
+    setSelectedId(fromQuery);
+    deepLinkHandledRef.current = true;
+  }, [items]);
 
   useEffect(() => {
     setMediaMap(getCachedAnimeMap(ids));

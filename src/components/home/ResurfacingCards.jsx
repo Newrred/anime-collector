@@ -1,10 +1,16 @@
+function buildLibraryDetailHref(base, anilistId) {
+  const id = Number(anilistId);
+  if (!Number.isFinite(id)) return `${base}library/`;
+  return `${base}library/?animeId=${encodeURIComponent(String(id))}`;
+}
+
 function renderAnimeRow({ base, anilistId, metaTop, metaBottom = "", mediaMap, titleById }) {
   const media = mediaMap.get(Number(anilistId));
   const title = titleById.get(Number(anilistId)) || `#${anilistId}`;
   const poster = media?.coverImage?.large || "";
   return (
     <a
-      href={`${base}library/`}
+      href={buildLibraryDetailHref(base, anilistId)}
       style={{
         display: "grid",
         gridTemplateColumns: "42px 1fr",
