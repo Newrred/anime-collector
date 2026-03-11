@@ -178,6 +178,9 @@ h1, h2, h3 { letter-spacing: -0.01em; }
     opacity: .72;
 }
 .modal .textarea { min-height: 96px; }
+.modal .input,
+.modal .select,
+.modal .textarea { max-width: 100%; }
 
 /* 자동완성 드롭다운 */
 .suggestWrap { position: relative; }

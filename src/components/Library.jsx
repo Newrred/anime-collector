@@ -1804,6 +1804,25 @@ export default function Library() {
     });
   }
 
+  async function deleteSelectedWatchLog(logId) {
+    const key = String(logId || "").trim();
+    if (!key) return;
+    const ok = window.confirm("이 감상 기록을 삭제할까요?");
+    if (!ok) return;
+
+    try {
+      const all = readAllWatchLogsSnapshot();
+      const next = Array.isArray(all) ? all.filter((row) => String(row?.id || "") !== key) : [];
+      await replaceWatchLogs(next);
+      const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
+      setSelectedLogs(Array.isArray(rows) ? rows : []);
+      if (quickLogDraft?.logId && String(quickLogDraft.logId) === key) closeQuickLogSheet();
+      setBackupMsg("감상 기록을 삭제했습니다.");
+    } catch {
+      setBackupMsg("감상 기록 삭제 중 오류가 발생했습니다.");
+    }
+  }
+
   async function saveQuickLogDraft() {
     if (!quickLogDraft?.logId || !Number.isFinite(Number(quickLogDraft?.anilistId))) {
       closeQuickLogSheet();
@@ -2394,7 +2413,7 @@ export default function Library() {
                               padding: 8,
                             }}
                           >
-                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                               {row.cover ? (
                                 <img
                                   src={row.cover}
@@ -2413,7 +2432,7 @@ export default function Library() {
                                   }}
                                 />
                               )}
-                              <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ minWidth: 0, flex: "1 1 180px" }}>
                                 <div
                                   style={{
                                     fontSize: 13,
@@ -2432,7 +2451,16 @@ export default function Library() {
                                   {row.episodes ? ` · ${row.episodes}화` : ""}
                                 </div>
                               </div>
-                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 6,
+                                  flexWrap: "wrap",
+                                  justifyContent: "flex-end",
+                                  marginLeft: "auto",
+                                  flex: "0 0 auto",
+                                }}
+                              >
                                 {inLibrary ? (
                                   <button type="button" className="btn" onClick={() => setSelectedId(row.id)}>
                                     상세 열기
@@ -2491,7 +2519,7 @@ export default function Library() {
                 <div className="row">
                   <div className="small">점수</div>
                   <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
                       <div
                         style={{
                           position: "relative",
@@ -2589,7 +2617,7 @@ export default function Library() {
                         value={rewatchCountDraft}
                         onChange={(e) => setRewatchCountDraft(normalizeRewatchCount(e.target.value))}
                         onBlur={commitModalDraft}
-                        style={{ width: 50, textAlign: "center" }}
+                        style={{ width: 72, maxWidth: "100%", textAlign: "center", flex: "0 0 72px" }}
                         aria-label="재주행 횟수"
                       />
 
@@ -2599,7 +2627,7 @@ export default function Library() {
                         value={lastRewatchAtDraft}
                         onChange={(e) => setLastRewatchAtDraft(e.target.value)}
                         onBlur={commitModalDraft}
-                        style={{ width: 200 }}
+                        style={{ width: "min(220px, 100%)", maxWidth: "100%", flex: "1 1 180px" }}
                         aria-label="마지막 재주행"
                       />
                     </div>
@@ -2626,7 +2654,7 @@ export default function Library() {
                         {"\uC544\uC9C1 \uB85C\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4. \uCD94\uAC00 \uC2DC \uC120\uD0DD\uD55C \uCD08\uAE30 \uC0C1\uD0DC\uC640 \uC0C1\uD0DC \uBCC0\uACBD/\uC815\uC8FC\uD589 \uC644\uB8CC \uC2DC \uC790\uB3D9 \uAE30\uB85D\uB429\uB2C8\uB2E4."}
                       </div>
                     ) : (
-                      <div style={{ display: "grid", gap: 6, maxHeight: 180, overflowY: "auto", paddingRight: 4 }}>
+                      <div style={{ display: "grid", gap: 6, maxHeight: 220, overflowY: "auto", paddingRight: 4 }}>
                         {selectedLogs.slice(0, 20).map((log) => (
                           <div
                             key={log.id}
@@ -2637,11 +2665,39 @@ export default function Library() {
                               background: "rgba(255,255,255,.03)",
                             }}
                           >
-                            <div className="small" style={{ opacity: 0.9 }}>
-                              {formatWatchLogDate(log)} · {log.eventType || "기록"}
+                            <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
+                              <div className="small" style={{ opacity: 0.9 }}>
+                                {formatWatchLogDate(log)} · {log.eventType || "기록"}
+                              </div>
+                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  onClick={() => openQuickLogSheet(log, selectedMedia || null, { source: "manual-edit", isAuto: false })}
+                                  style={{ padding: "4px 8px" }}
+                                >
+                                  기록 편집
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  onClick={() => deleteSelectedWatchLog(log.id)}
+                                  style={{ padding: "4px 8px" }}
+                                >
+                                  기록 삭제
+                                </button>
+                              </div>
                             </div>
-                            <div style={{ fontSize: 13, marginTop: 2 }}>
-                              {log.cue || "메모 없음"}
+                            <div style={{ fontSize: 13, marginTop: 2, wordBreak: "break-word" }}>
+                              {log.cue || "한줄 감상 없음"}
+                            </div>
+                            {String(log.note || "").trim() && (
+                              <div className="small" style={{ opacity: 0.82, marginTop: 2, wordBreak: "break-word" }}>
+                                {log.note}
+                              </div>
+                            )}
+                            <div className="small" style={{ opacity: 0.7, marginTop: 2 }}>
+                              시점: {formatWatchLogDate(log)}
                             </div>
                           </div>
                         ))}
@@ -2772,7 +2828,7 @@ export default function Library() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "min(780px, 100vw)",
+              width: "min(780px, calc(100vw - 16px))",
               margin: "0 auto",
               border: "1px solid rgba(255,255,255,.14)",
               borderRadius: "16px 16px 0 0",
@@ -2780,6 +2836,7 @@ export default function Library() {
               padding: 14,
               maxHeight: "78vh",
               overflowY: "auto",
+              boxSizing: "border-box",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginBottom: 8 }}>
