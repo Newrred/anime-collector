@@ -104,26 +104,9 @@ export default function DataCenter() {
     if (!Number.isFinite(usage) || !Number.isFinite(quota) || quota <= 0) return null;
     return Math.min(100, Math.max(0, (usage / quota) * 100));
   }, [usage, quota]);
-  const rawBase = String(import.meta.env.BASE_URL || "/");
-  const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <section
-        className="nav"
-        style={{
-          margin: "calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) 0",
-          padding: "10px var(--page-pad)",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>회상</a>
-          <a href={`${base}library/`}>목록</a>
-          <a href={`${base}tier/`}>티어</a>
-        </div>
-      </section>
-
       <section
         style={{
           border: "1px solid rgba(255,255,255,.12)",

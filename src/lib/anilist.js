@@ -94,15 +94,19 @@ const CARD_FIELDS = `
   episodes
 `;
 
-async function fetchAnimeByIdsInternal(ids, { includeCharacters = true } = {}) {
+async function fetchAnimeByIdsInternal(
+  ids,
+  { includeCharacters = true, includeRelations = false } = {}
+) {
   const unique = Array.from(new Set(ids))
     .map((x) => Number(x))
     .filter(Number.isFinite);
 
   if (!unique.length) return new Map();
 
-  const extraFields = includeCharacters
-    ? `
+  const extraParts = [];
+  if (includeCharacters) {
+    extraParts.push(`
       characters(page: 1, perPage: 12, sort: [ROLE, RELEVANCE]) {
         edges {
           role
@@ -113,8 +117,28 @@ async function fetchAnimeByIdsInternal(ids, { includeCharacters = true } = {}) {
           }
         }
       }
-    `
-    : "";
+    `);
+  }
+  if (includeRelations) {
+    extraParts.push(`
+      relations {
+        edges {
+          relationType
+          node {
+            id
+            siteUrl
+            title { romaji english native }
+            synonyms
+            coverImage { large }
+            seasonYear
+            format
+            episodes
+          }
+        }
+      }
+    `);
+  }
+  const extraFields = extraParts.join("\n");
 
   const QUERY = `
     query ($ids: [Int]) {
@@ -267,6 +291,7 @@ export async function fetchAnimeCardsByIds(ids) {
 // 캐시 + 누락분만 네트워크 조회해서 Map 반환
 export async function fetchAnimeByIdsCached(ids, options = {}) {
   const includeCharacters = options?.includeCharacters !== false;
+  const includeRelations = options?.includeRelations === true;
   const cache = loadMediaCache();
   const now = Date.now();
   const need = [];
@@ -277,6 +302,7 @@ export async function fetchAnimeByIdsCached(ids, options = {}) {
     // ✅ 새로 추가: genres가 없는 캐시는 한 번 갱신해서 채우기
     const missingGenres = !!e?.media && !Array.isArray(e.media.genres);
     const missingCharacters = includeCharacters && !!e?.media && !e.media.characters;
+    const missingRelations = includeRelations && !!e?.media && !e.media.relations;
 
     if (!isFreshCacheEntry(e, now)) {
       need.push(id);
@@ -290,6 +316,10 @@ export async function fetchAnimeByIdsCached(ids, options = {}) {
       need.push(id);
       continue;
     }
+    if (missingRelations) {
+      need.push(id);
+      continue;
+    }
   }
 
   const map = new Map();
@@ -299,9 +329,10 @@ export async function fetchAnimeByIdsCached(ids, options = {}) {
   }
 
   if (need.length) {
-    const freshMap = includeCharacters
-      ? await fetchAnimeByIds(need)
-      : await fetchAnimeCardsByIds(need);
+    const freshMap = await fetchAnimeByIdsInternal(need, {
+      includeCharacters,
+      includeRelations,
+    });
     const patch = {};
     for (const [id, media] of freshMap.entries()) {
       patch[id] = { ts: Date.now(), media };

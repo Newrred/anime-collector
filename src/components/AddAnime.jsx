@@ -23,6 +23,18 @@ function firstHangulSynonym(media) {
   return hit || null;
 }
 
+function isHangulText(value) {
+  return /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(String(value || ""));
+}
+
+function inferKoTitleFromMedia(media) {
+  const synKo = firstHangulSynonym(media);
+  if (synKo) return synKo;
+  const nativeTitle = String(media?.title?.native || "").trim();
+  if (isHangulText(nativeTitle)) return nativeTitle;
+  return null;
+}
+
 function normalizeSearchText(s) {
   return String(s || "")
     .toLowerCase()
@@ -93,6 +105,19 @@ const WD_DEPTH2_LIMIT = 24;
 const MAX_CANDIDATE_FETCH = 28;
 const FAST_CANDIDATE_FETCH = 12;
 const SEARCH_DEBOUNCE_MS = 200;
+const STATUS_UNCLASSIFIED = "\uBBF8\uBD84\uB958";
+const INITIAL_STATUS_OPTIONS = [
+  STATUS_UNCLASSIFIED,
+  "\uBCF4\uB294\uC911",
+  "\uBCF4\uB958",
+  "\uC644\uB8CC",
+  "\uD558\uCC28",
+];
+
+function normalizeInitialStatus(raw) {
+  const value = String(raw || "").trim();
+  return INITIAL_STATUS_OPTIONS.includes(value) ? value : STATUS_UNCLASSIFIED;
+}
 
 export default function AddAnime({ items, setItems, onAnimeAdded }) {
   const [q, setQ] = useState("");
@@ -100,6 +125,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
   const [loading, setLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
   const [loadingDots, setLoadingDots] = useState("");
+  const [addStatus, setAddStatus] = useState(STATUS_UNCLASSIFIED);
   const [results, setResults] = useState([]); // [{id, ko, media, src}]
   const boxRef = useRef(null);
   const aliasEntries = useMemo(() => buildAliasEntries(aliasSeed), []);
@@ -144,10 +170,13 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
     if (cached) {
       const isFresh = isFreshSearchCacheEntry(cached, Date.now());
       if (isFresh) {
-        setResults(cached.results);
-        setLoading(false);
-        setLoadingStage("캐시");
-        return;
+        const cachedResults = Array.isArray(cached.results) ? cached.results : [];
+        if (cachedResults.length > 0) {
+          setResults(cachedResults);
+          setLoading(false);
+          setLoadingStage("캐시");
+          return;
+        }
       }
       cacheRef.current.delete(key);
       persistSearchCacheMap(cacheRef.current).catch(() => {});
@@ -371,12 +400,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
           setResults(finalList);
         } else if (!fallbackRows.length) {
           // 아무 결과도 없을 때만 비움 처리
-          setSearchCacheEntry(cacheRef.current, key, []);
-          persistSearchCacheMap(cacheRef.current)
-            .then((nextMap) => {
-              if (nextMap instanceof Map) cacheRef.current = nextMap;
-            })
-            .catch(() => {});
+          cacheRef.current.delete(key);
           setResults([]);
         }
         setLoading(false);
@@ -469,9 +493,10 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
     return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
-  function addAnime(r) {
+  function addAnime(r, statusOverride = addStatus) {
     const id = r.id;
-    const koTitle = r.ko || null;
+    const koTitle = r.ko || inferKoTitleFromMedia(r?.media) || null;
+    const initialStatus = normalizeInitialStatus(statusOverride);
     if (hasId(id)) {
       setQ("");
       setOpen(false);
@@ -484,7 +509,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
       addedItem = {
         anilistId: id,
         koTitle,
-        status: "미분류",
+        status: initialStatus,
         score: null,
         memo: "",
         rewatchCount: 0,
@@ -495,7 +520,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
     });
 
     if (addedItem && typeof onAnimeAdded === "function") {
-      onAnimeAdded(addedItem, r?.media || null);
+      onAnimeAdded(addedItem, r?.media || null, { initialStatus });
     }
 
     setQ("");
@@ -505,7 +530,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
   function onKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (results.length > 0) addAnime(results[0]); // ✅ 객체로
+      if (results.length > 0) addAnime(results[0], addStatus); // ✅ 객체로
     }
     if (e.key === "Escape") setOpen(false);
   }
@@ -528,6 +553,35 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
         />
+        <div
+          style={{
+            display: "grid",
+            gap: 6,
+            gridTemplateColumns: "auto minmax(140px, 220px)",
+            alignItems: "center",
+          }}
+        >
+          <label className="small" htmlFor="add-status-select" style={{ opacity: 0.9 }}>
+            {"\uCD94\uAC00 \uC2DC \uC0C1\uD0DC"}
+          </label>
+          <select
+            id="add-status-select"
+            className="select"
+            value={addStatus}
+            onChange={(e) => setAddStatus(normalizeInitialStatus(e.target.value))}
+            style={{ width: "100%" }}
+            aria-label="\uCD94\uAC00 \uC2DC \uC0C1\uD0DC"
+          >
+            {INITIAL_STATUS_OPTIONS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+          <div className="small" style={{ gridColumn: "1 / -1", opacity: 0.78 }}>
+            {"\uBBF8\uBD84\uB958/\uBCF4\uB958\uB294 \uC790\uB3D9 \uB85C\uADF8 \uC5C6\uC74C, \uBCF4\uB294\uC911/\uC644\uB8CC/\uD558\uCC28\uB294 \uB85C\uADF8\uAC00 \uC790\uB3D9 \uC0DD\uC131\uB429\uB2C8\uB2E4."}
+          </div>
+        </div>
       </div>
 
       {open && dq.length >= 2 && (
@@ -603,3 +657,4 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
     </div>
   );
 }
+

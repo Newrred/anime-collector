@@ -1,5 +1,6 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import myListSeed from "../data/myAnime.json";
+import aliasSeed from "../data/aliases.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import AddAnime from "./AddAnime.jsx";
 import {
@@ -44,6 +45,7 @@ import {
   upsertCharacterPin,
 } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
+import { wikidataGetKoTitlesByAniListIds } from "../lib/wikidata";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
 function firstHangulSynonym(media) {
@@ -52,16 +54,24 @@ function firstHangulSynonym(media) {
   return arr.find((s) => /[\uAC00-\uD7A3]/.test(String(s || ""))) || null;
 }
 
+function deriveKoTitleFromMedia(media) {
+  const synKo = firstHangulSynonym(media);
+  if (synKo) return synKo;
+  const nativeTitle = String(media?.title?.native || "").trim();
+  if (isHangulText(nativeTitle)) return nativeTitle;
+  return null;
+}
+
 function pickCardTitle(item, media) {
   if (item?.koTitle) return item.koTitle;
 
-  const synKo = firstHangulSynonym(media);
-  if (synKo) return synKo;
+  const derivedKo = deriveKoTitleFromMedia(media);
+  if (derivedKo) return derivedKo;
 
   return (
+    media?.title?.native ||
     media?.title?.english ||
     media?.title?.romaji ||
-    media?.title?.native ||
     (item?.anilistId ? `#${item.anilistId}` : "Unknown")
   );
 }
@@ -104,6 +114,38 @@ const BACKUP_REMIND_DAYS = 7;
 const AFFINITY_OPTIONS = ["최애", "기억남음", "불호지만강렬"];
 const REASON_TAG_OPTIONS = ["성장", "관계성", "대사", "연출", "디자인", "성우", "기타"];
 const SEASON_TERM_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
+const STATUS_UNCLASSIFIED = "\uBBF8\uBD84\uB958";
+const STATUS_WATCHING = "\uBCF4\uB294\uC911";
+const STATUS_HOLD = "\uBCF4\uB958";
+const STATUS_COMPLETED = "\uC644\uB8CC";
+const STATUS_DROPPED = "\uD558\uCC28";
+const EVENT_START = "\uC2DC\uC791";
+const EVENT_COMPLETE = "\uC644\uB8CC";
+const EVENT_REWATCH = "\uC7AC\uC2DC\uCCAD";
+const EVENT_DROP = "\uD558\uCC28";
+
+function formatLocalDate(date = new Date()) {
+  const y = String(date.getFullYear());
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function normalizeStatusValue(rawStatus) {
+  const value = String(rawStatus || "").trim();
+  if (value === STATUS_WATCHING) return STATUS_WATCHING;
+  if (value === STATUS_HOLD) return STATUS_HOLD;
+  if (value === STATUS_COMPLETED) return STATUS_COMPLETED;
+  if (value === STATUS_DROPPED) return STATUS_DROPPED;
+  return STATUS_UNCLASSIFIED;
+}
+
+function eventTypeFromStatus(status) {
+  if (status === STATUS_WATCHING) return EVENT_START;
+  if (status === STATUS_COMPLETED) return EVENT_COMPLETE;
+  if (status === STATUS_DROPPED) return EVENT_DROP;
+  return null;
+}
 
 function formatAgo(ms) {
   if (!Number.isFinite(ms)) return "기록 없음";
@@ -137,7 +179,7 @@ function normalizeQuickLogPrecision(raw) {
 }
 
 function defaultQuickLogValue(precision) {
-  const nowIso = new Date().toISOString().slice(0, 10);
+  const nowIso = formatLocalDate(new Date());
   if (precision === "day") return nowIso;
   if (precision === "month") return nowIso.slice(0, 7);
   if (precision === "year") return nowIso.slice(0, 4);
@@ -236,6 +278,99 @@ function getCharacterRows(media, limit = 8) {
   }
   return out;
 }
+
+const RELATION_TYPE_KO = {
+  ADAPTATION: "원작 연계",
+  PREQUEL: "전편",
+  SEQUEL: "속편",
+  PARENT: "본편",
+  SIDE_STORY: "외전",
+  CHARACTER: "캐릭터",
+  SUMMARY: "총집편",
+  ALTERNATIVE: "대체 설정",
+  SPIN_OFF: "스핀오프",
+  OTHER: "기타",
+  SOURCE: "원작",
+  COMPILATION: "편집본",
+  CONTAINS: "포함",
+};
+
+function relationTypeKo(type) {
+  const key = String(type || "").trim();
+  if (!key) return "연관";
+  return RELATION_TYPE_KO[key] || key.replace(/_/g, " ").toLowerCase();
+}
+
+function pickMediaTitle(media) {
+  const synKo = firstHangulSynonym(media);
+  if (synKo) return synKo;
+  const nativeTitle = String(media?.title?.native || "").trim();
+  const englishTitle = String(media?.title?.english || "").trim();
+  const romajiTitle = String(media?.title?.romaji || "").trim();
+  if (isHangulText(nativeTitle)) return nativeTitle;
+  return nativeTitle || englishTitle || romajiTitle || (Number.isFinite(Number(media?.id)) ? `#${media.id}` : "Unknown");
+}
+
+function getRelatedSeriesRows(media, currentId, limit = 12) {
+  const edges = media?.relations?.edges;
+  if (!Array.isArray(edges)) return [];
+
+  const current = Number(currentId);
+  const seen = new Set();
+  const out = [];
+  for (const edge of edges) {
+    const node = edge?.node;
+    const id = Number(node?.id);
+    if (!Number.isFinite(id)) continue;
+    if (Number.isFinite(current) && id === current) continue;
+    if (seen.has(id)) continue;
+    seen.add(id);
+
+    const seasonYear = Number(node?.seasonYear);
+    const episodes = Number(node?.episodes);
+    out.push({
+      id,
+      relationType: String(edge?.relationType || ""),
+      relationLabel: relationTypeKo(edge?.relationType),
+      title: pickMediaTitle(node),
+      siteUrl: String(node?.siteUrl || ""),
+      cover: node?.coverImage?.large || "",
+      seasonYear: Number.isFinite(seasonYear) ? seasonYear : null,
+      format: String(node?.format || ""),
+      episodes: Number.isFinite(episodes) && episodes > 0 ? episodes : null,
+      media: node,
+    });
+
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function buildAliasKoTitleMap(seed) {
+  const out = new Map();
+  if (!Array.isArray(seed)) return out;
+
+  for (const row of seed) {
+    const id = Number(row?.anilistId);
+    if (!Number.isFinite(id) || out.has(id)) continue;
+
+    const ko = String(row?.ko || "").trim();
+    if (ko) {
+      out.set(id, ko);
+      continue;
+    }
+
+    const aliases = Array.isArray(row?.aliases) ? row.aliases : [];
+    const koAlias = aliases
+      .map((v) => String(v || "").trim())
+      .find((v) => v && /[\uAC00-\uD7A3]/.test(v));
+    if (koAlias) out.set(id, koAlias);
+  }
+
+  return out;
+}
+
+const ALIAS_KO_TITLE_MAP = buildAliasKoTitleMap(aliasSeed);
 
 function Chip({ active, onClick, children, title }) {
   return (
@@ -396,6 +531,8 @@ export default function Library() {
   const [quickLogCharacterIds, setQuickLogCharacterIds] = useState([]);
   const [quickLogPrimaryCharacterId, setQuickLogPrimaryCharacterId] = useState(null);
   const [quickLogCharacterMeta, setQuickLogCharacterMeta] = useState({});
+  const [quickLogContext, setQuickLogContext] = useState(null);
+  const [relatedKoTitleById, setRelatedKoTitleById] = useState({});
 
   const [backupMsg, setBackupMsg] = useState("");
   const [backupReminder, setBackupReminder] = useState("");
@@ -714,6 +851,24 @@ export default function Library() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!items.length) return;
+    setItems((prev) => {
+      let changed = false;
+      const next = prev.map((item) => {
+        if (String(item?.koTitle || "").trim()) return item;
+        const id = Number(item?.anilistId);
+        const aliasKo = Number.isFinite(id) ? String(ALIAS_KO_TITLE_MAP.get(id) || "").trim() : "";
+        const media = mediaMap.get(id);
+        const koTitle = aliasKo || deriveKoTitleFromMedia(media);
+        if (!koTitle) return item;
+        changed = true;
+        return { ...item, koTitle };
+      });
+      return changed ? next : prev;
+    });
+  }, [items.length, mediaMap, setItems]);
 
   useEffect(() => {
     const tier = readTierState(null);
@@ -1056,6 +1211,24 @@ export default function Library() {
     () => getCharacterRows(selectedMedia, 8),
     [selectedMedia]
   );
+  const selectedRelatedSeries = useMemo(
+    () => getRelatedSeriesRows(selectedMedia, selectedId, 12),
+    [selectedMedia, selectedId]
+  );
+  const itemKoTitleMap = useMemo(() => {
+    const m = new Map();
+    for (const item of items) {
+      const id = Number(item?.anilistId);
+      if (!Number.isFinite(id)) continue;
+      const koTitle = String(item?.koTitle || "").trim();
+      if (koTitle) m.set(id, koTitle);
+    }
+    return m;
+  }, [items]);
+  const libraryIdSet = useMemo(
+    () => new Set(items.map((x) => Number(x?.anilistId)).filter(Number.isFinite)),
+    [items]
+  );
   const pinnedCharacterKeySet = useMemo(() => {
     const s = new Set();
     for (const pin of Array.isArray(characterPins) ? characterPins : []) {
@@ -1115,6 +1288,96 @@ export default function Library() {
     };
   }, [selectedId]);
 
+  useEffect(() => {
+    const id = Number(selectedId);
+    if (!Number.isFinite(id)) return undefined;
+
+    const media = mediaMap.get(id);
+    const hasCharacters = Array.isArray(media?.characters?.edges);
+    const hasRelations = Array.isArray(media?.relations?.edges);
+    if (hasCharacters && hasRelations) return undefined;
+
+    let alive = true;
+    fetchAnimeByIdsCached([id], { includeCharacters: true, includeRelations: true })
+      .then((map) => {
+        if (!alive) return;
+        const full = map.get(id);
+        if (!full) return;
+        setMediaMap((prev) => {
+          const current = prev.get(id);
+          const currentHasCharacters = Array.isArray(current?.characters?.edges);
+          const currentHasRelations = Array.isArray(current?.relations?.edges);
+          if (currentHasCharacters && currentHasRelations) return prev;
+          const next = new Map(prev);
+          next.set(id, full);
+          return next;
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [selectedId, mediaMap]);
+
+  useEffect(() => {
+    const ids = selectedRelatedSeries
+      .map((row) => Number(row?.id))
+      .filter(Number.isFinite);
+    if (!ids.length) return undefined;
+
+    const need = ids.filter((id) => {
+      const existingKo = String(relatedKoTitleById[id] || "").trim();
+      if (existingKo) return false;
+      if (itemKoTitleMap.has(id)) return false;
+      if (ALIAS_KO_TITLE_MAP.has(id)) return false;
+
+      const media = mediaMap.get(id) || selectedRelatedSeries.find((row) => Number(row?.id) === id)?.media;
+      return !deriveKoTitleFromMedia(media);
+    });
+    if (!need.length) return undefined;
+
+    let alive = true;
+    wikidataGetKoTitlesByAniListIds(need)
+      .then((koMap) => {
+        if (!alive) return;
+        if (!(koMap instanceof Map) || koMap.size === 0) return;
+
+        setRelatedKoTitleById((prev) => {
+          let changed = false;
+          const next = { ...prev };
+          for (const [rawId, rawTitle] of koMap.entries()) {
+            const id = Number(rawId);
+            const title = String(rawTitle || "").trim();
+            if (!Number.isFinite(id) || !title) continue;
+            if (next[id] === title) continue;
+            next[id] = title;
+            changed = true;
+          }
+          return changed ? next : prev;
+        });
+
+        setItems((prev) => {
+          let changed = false;
+          const next = prev.map((item) => {
+            if (String(item?.koTitle || "").trim()) return item;
+            const id = Number(item?.anilistId);
+            if (!Number.isFinite(id)) return item;
+            const title = String(koMap.get(id) || "").trim();
+            if (!title) return item;
+            changed = true;
+            return { ...item, koTitle: title };
+          });
+          return changed ? next : prev;
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [selectedRelatedSeries, relatedKoTitleById, itemKoTitleMap, mediaMap, setItems]);
+
   function refreshCharacterPins() {
     const rows = readCharacterPinsSnapshot();
     setCharacterPins(Array.isArray(rows) ? rows : []);
@@ -1167,7 +1430,7 @@ export default function Library() {
     }
   }
 
-  function openQuickLogSheet(log, fallbackMedia = null) {
+  function openQuickLogSheet(log, fallbackMedia = null, context = null) {
     if (!log) return;
     const precision = normalizeQuickLogPrecision(log.watchedAtPrecision || "day");
     const value = coerceQuickLogValue(precision, log.watchedAtValue);
@@ -1212,6 +1475,7 @@ export default function Library() {
     setQuickLogCharacterIds(compactIds);
     setQuickLogPrimaryCharacterId(resolvedPrimaryId);
     setQuickLogCharacterMeta(nextMeta);
+    setQuickLogContext(context && typeof context === "object" ? context : null);
     setQuickLogOpen(true);
     ensureQuickLogCharacters(log.anilistId, fallbackMedia).catch(() => {});
   }
@@ -1223,6 +1487,7 @@ export default function Library() {
     setQuickLogCharacterIds([]);
     setQuickLogPrimaryCharacterId(null);
     setQuickLogCharacterMeta({});
+    setQuickLogContext(null);
   }
 
   useEffect(() => {
@@ -1261,7 +1526,7 @@ export default function Library() {
 
   function appendSelectedWatchLog(eventType, overrides = {}, options = {}) {
     if (!selectedId) return Promise.resolve(null);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = formatLocalDate(new Date());
     const log = createWatchLog({
       anilistId: selectedId,
       eventType,
@@ -1278,7 +1543,7 @@ export default function Library() {
       .then((saved) => listWatchLogsByAnimeId(selectedId).then((rows) => ({ saved, rows })))
       .then(({ saved, rows }) => {
         if (options?.openQuickSheet && saved) {
-          openQuickLogSheet(saved, selectedMedia || null);
+          openQuickLogSheet(saved, selectedMedia || null, options?.quickContext || null);
         }
         return { saved, rows };
       })
@@ -1286,50 +1551,113 @@ export default function Library() {
         setSelectedLogs(Array.isArray(rows) ? rows : []);
         return saved;
       })
-      .catch(() => null);
+      .catch(() => {
+        setBackupMsg("\uB85C\uADF8 \uC800\uC7A5 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.");
+        return null;
+      });
   }
 
-  function onAddAnimeFromSearch(addedItem, addedMedia) {
+  function onAddAnimeFromSearch(addedItem, addedMedia, options = {}) {
     const id = Number(addedItem?.anilistId);
     if (!Number.isFinite(id)) return;
-    const today = new Date().toISOString().slice(0, 10);
+
+    const initialStatus = normalizeStatusValue(options?.initialStatus || addedItem?.status);
+    const eventType = eventTypeFromStatus(initialStatus);
+    if (!eventType) return;
+
+    const today = formatLocalDate(new Date());
+    const cueByStatus = {
+      [STATUS_WATCHING]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uBCF4\uB294\uC911 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+      [STATUS_COMPLETED]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uC644\uB8CC \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+      [STATUS_DROPPED]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uD558\uCC28 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+    };
     const log = createWatchLog({
       anilistId: id,
-      eventType: "시작",
+      eventType,
       watchedAtPrecision: "day",
       watchedAtValue: today,
-      cue: "라이브러리에 추가",
+      cue: cueByStatus[initialStatus] || "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uCD94\uAC00",
       note: "",
       scoreAtThatTime: null,
-      contextTags: ["추가"],
+      contextTags: ["\uCD94\uAC00", "\uCD08\uAE30\uC0C1\uD0DC"],
       characterIds: [],
       characterRefs: [],
     });
+    const quickContext = {
+      source:
+        initialStatus === STATUS_COMPLETED
+          ? "add-completed"
+          : initialStatus === STATUS_DROPPED
+            ? "add-dropped"
+            : "add-watching",
+      isAuto: true,
+      status: initialStatus,
+    };
+    const shouldOpenQuickSheet =
+      initialStatus === STATUS_COMPLETED || initialStatus === STATUS_DROPPED;
+
     appendWatchLog(log)
       .then((saved) => {
         if (!saved) return;
-        openQuickLogSheet(saved, addedMedia || null);
+        if (shouldOpenQuickSheet) {
+          openQuickLogSheet(saved, addedMedia || null, quickContext);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        setBackupMsg("\uCD08\uAE30 \uC0C1\uD0DC \uB85C\uADF8 \uC0DD\uC131\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.");
+      });
   }
 
   function onSelectedStatusChange(nextStatus) {
-    const prevStatus = selected?.status || "미분류";
-    updateSelected({ status: nextStatus });
+    const normalizedNext = normalizeStatusValue(nextStatus);
+    const prevStatus = normalizeStatusValue(selected?.status);
+    updateSelected({ status: normalizedNext });
 
-    if (nextStatus === prevStatus) return;
-    const eventType =
-      nextStatus === "보는중"
-        ? "시작"
-        : nextStatus === "완료"
-          ? "완료"
-          : nextStatus === "하차"
-            ? "하차"
-            : null;
+    if (normalizedNext === prevStatus) return;
+    const eventType = eventTypeFromStatus(normalizedNext);
     if (!eventType) return;
     appendSelectedWatchLog(eventType, {
-      cue: `상태 변경: ${prevStatus} → ${nextStatus}`,
-    }, { openQuickSheet: true });
+      cue: `\uC0C1\uD0DC \uBCC0\uACBD: ${prevStatus} -> ${normalizedNext}`,
+    }, {
+      openQuickSheet: true,
+      quickContext: { source: "status-change", isAuto: true, status: normalizedNext },
+    });
+  }
+
+  function addRelatedSeriesToLibrary(row) {
+    const id = Number(row?.id);
+    if (!Number.isFinite(id)) return;
+    if (libraryIdSet.has(id)) {
+      setSelectedId(id);
+      return;
+    }
+
+    const derivedKoTitle =
+      String(ALIAS_KO_TITLE_MAP.get(id) || "").trim() ||
+      String(relatedKoTitleById[id] || "").trim() ||
+      deriveKoTitleFromMedia(row?.media);
+
+    const nextItem = normalizeItem({
+      anilistId: id,
+      koTitle: derivedKoTitle,
+      status: STATUS_UNCLASSIFIED,
+      score: null,
+      memo: "",
+      rewatchCount: 0,
+      lastRewatchAt: null,
+      addedAt: Date.now(),
+    });
+    setItems((prev) => dedupeByAnilistId([...prev, nextItem]));
+    if (row?.media && typeof row.media === "object") {
+      setMediaMap((prev) => {
+        const next = new Map(prev);
+        const previousMedia = next.get(id) || {};
+        next.set(id, { ...previousMedia, ...row.media });
+        return next;
+      });
+    }
+    setSelectedId(id);
+    setBackupMsg("관련 시리즈를 라이브러리에 추가하고 상세를 열었습니다.");
   }
 
   function toggleQuickLogCharacter(characterId) {
@@ -1997,6 +2325,113 @@ export default function Library() {
                 />
 
                 <div className="row">
+                  <div className="small">관련 시리즈</div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {selectedRelatedSeries.length === 0 ? (
+                      <div className="small" style={{ opacity: 0.85 }}>
+                        관련 시리즈 정보가 없거나 불러오는 중입니다.
+                      </div>
+                    ) : (
+                      selectedRelatedSeries.map((row) => {
+                        const inLibrary = libraryIdSet.has(row.id);
+                        const libraryItem = inLibrary
+                          ? items.find((x) => Number(x?.anilistId) === row.id) || null
+                          : null;
+                        const cachedMedia = mediaMap.get(row.id) || null;
+                        const mappedKoTitle = String(
+                          itemKoTitleMap.get(row.id) || ALIAS_KO_TITLE_MAP.get(row.id) || relatedKoTitleById[row.id] || ""
+                        ).trim();
+                        const displayTitle = mappedKoTitle || pickCardTitle(libraryItem, cachedMedia || row.media || null);
+                        return (
+                          <div
+                            key={`${row.id}:${row.relationType}`}
+                            style={{
+                              border: "1px solid rgba(255,255,255,.1)",
+                              borderRadius: 10,
+                              background: "rgba(255,255,255,.03)",
+                              padding: 8,
+                            }}
+                          >
+                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              {row.cover ? (
+                                <img
+                                  src={row.cover}
+                                  alt={displayTitle}
+                                  style={{ width: 40, height: 56, borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
+                                />
+                              ) : (
+                                <div
+                                  aria-hidden
+                                  style={{
+                                    width: 40,
+                                    height: 56,
+                                    borderRadius: 6,
+                                    background: "rgba(255,255,255,.08)",
+                                    flexShrink: 0,
+                                  }}
+                                />
+                              )}
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {displayTitle}
+                                </div>
+                                <div className="small" style={{ opacity: 0.86 }}>
+                                  {row.relationLabel}
+                                  {row.seasonYear ? ` · ${row.seasonYear}` : ""}
+                                  {row.format ? ` · ${row.format}` : ""}
+                                  {row.episodes ? ` · ${row.episodes}화` : ""}
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                                {inLibrary ? (
+                                  <button type="button" className="btn" onClick={() => setSelectedId(row.id)}>
+                                    상세 열기
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="btn"
+                                    onClick={() => addRelatedSeriesToLibrary(row)}
+                                    aria-label={`${displayTitle} 추가 후 상세 열기`}
+                                    title="추가 후 열기"
+                                    style={{
+                                      width: 34,
+                                      minWidth: 34,
+                                      padding: 0,
+                                      fontSize: 22,
+                                      lineHeight: 1,
+                                      fontWeight: 700,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    +
+                                  </button>
+                                )}
+                                {row.siteUrl && (
+                                  <a className="btn" href={row.siteUrl} target="_blank" rel="noreferrer">
+                                    AniList
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                <div className="row">
                   <div className="small">상태</div>
                   <select
                     className="select"
@@ -2090,13 +2525,16 @@ export default function Library() {
                         className="btn"
                         onClick={() => {
                           const nextCount = normalizeRewatchCount(rewatchCountDraft + 1);
-                          const today = new Date().toISOString().slice(0, 10);
+                          const today = formatLocalDate(new Date());
                           setRewatchCountDraft(nextCount);
                           setLastRewatchAtDraft(today);
                           updateSelected({ rewatchCount: nextCount, lastRewatchAt: today });
-                          appendSelectedWatchLog("재시청", {
-                            cue: `정주행 완료 (${nextCount}회차)`,
-                          }, { openQuickSheet: true });
+                          appendSelectedWatchLog(EVENT_REWATCH, {
+                            cue: `\uC815\uC8FC\uD589 \uC644\uB8CC (${nextCount}\uD68C\uCC28)`,
+                          }, {
+                            openQuickSheet: true,
+                            quickContext: { source: "rewatch-plus", isAuto: true, status: STATUS_COMPLETED },
+                          });
                         }}
                       >
                         정주행 완료!  +1
@@ -2112,19 +2550,17 @@ export default function Library() {
                         style={{ width: 50, textAlign: "center" }}
                         aria-label="정주행 횟수"
                       />
-                      
+
                       <input
-                      className="input"
-                      type="date"
-                      value={lastRewatchAtDraft}
-                      onChange={(e) => setLastRewatchAtDraft(e.target.value)}
-                      onBlur={commitModalDraft}
-                      style={{ width: 200 }}
-                      aria-label="마지막 정주행 날짜"
+                        className="input"
+                        type="date"
+                        value={lastRewatchAtDraft}
+                        onChange={(e) => setLastRewatchAtDraft(e.target.value)}
+                        onBlur={commitModalDraft}
+                        style={{ width: 200 }}
+                        aria-label="마지막 정주행 날짜"
                       />
                     </div>
-
-
                   </div>
                 </div>
                 <div className="row">
@@ -2145,7 +2581,7 @@ export default function Library() {
                       <div className="small" style={{ opacity: 0.85 }}>불러오는 중...</div>
                     ) : selectedLogs.length === 0 ? (
                       <div className="small" style={{ opacity: 0.85 }}>
-                        아직 로그가 없습니다. 상태 변경/정주행 완료 시 자동 기록됩니다.
+                        {"\uC544\uC9C1 \uB85C\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4. \uCD94\uAC00 \uC2DC \uC120\uD0DD\uD55C \uCD08\uAE30 \uC0C1\uD0DC\uC640 \uC0C1\uD0DC \uBCC0\uACBD/\uC815\uC8FC\uD589 \uC644\uB8CC \uC2DC \uC790\uB3D9 \uAE30\uB85D\uB429\uB2C8\uB2E4."}
                       </div>
                     ) : (
                       <div style={{ display: "grid", gap: 6, maxHeight: 180, overflowY: "auto", paddingRight: 4 }}>
@@ -2317,6 +2753,30 @@ export default function Library() {
             </div>
 
             <div style={{ display: "grid", gap: 10 }}>
+              {quickLogContext?.isAuto && (
+                <div
+                  className="small"
+                  style={{
+                    border: "1px solid rgba(255,255,255,.14)",
+                    borderRadius: 8,
+                    padding: "8px 10px",
+                    background: "rgba(255,255,255,.05)",
+                    opacity: 0.9,
+                  }}
+                >
+                  {"\uC790\uB3D9 \uC0DD\uC131\uB41C \uAE30\uB85D\uC785\uB2C8\uB2E4. \uC9C0\uAE08 \uB0B4\uC6A9\uC744 \uBCF4\uC644\uD558\uC9C0 \uC54A\uC544\uB3C4 \uAE30\uBCF8\uAC12\uC73C\uB85C \uC800\uC7A5\uB429\uB2C8\uB2E4."}
+                </div>
+              )}
+              {quickLogContext?.source === "add-completed" && (
+                <div className="small" style={{ opacity: 0.88 }}>
+                  {"\uC644\uB8CC \uC0C1\uD0DC\uB85C \uCD94\uAC00\uD55C \uAE30\uB85D\uC774\uB77C \uC2DC\uCCAD \uC2DC\uC810/\uD55C \uC904 \uAE30\uC5B5\uC744 \uAC00\uB2A5\uD55C \uBC94\uC704\uC5D0\uC11C \uD568\uAED8 \uB0A8\uAE30\uB294 \uAC83\uC744 \uAD8C\uC7A5\uD569\uB2C8\uB2E4."}
+                </div>
+              )}
+              {quickLogContext?.source === "add-dropped" && (
+                <div className="small" style={{ opacity: 0.88 }}>
+                  {"\uD558\uCC28 \uC0C1\uD0DC \uAE30\uB85D\uC740 \uC774\uC720 \uD0DC\uADF8/\uBA54\uBAA8\uB97C \uD568\uAED8 \uB0A8\uAE30\uBA74 \uB098\uC911\uC5D0 \uBCF5\uAE30 \uD310\uB2E8\uC5D0 \uB3C4\uC6C0\uC774 \uB429\uB2C8\uB2E4."}
+                </div>
+              )}
               <div className="row">
                 <div className="small">기록 정밀도</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -2636,7 +3096,7 @@ export default function Library() {
 
             <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 8 }}>
               <button type="button" className="btn" onClick={closeQuickLogSheet}>
-                나중에
+                {"\uAE30\uBCF8\uAC12 \uC720\uC9C0"}
               </button>
               <button type="button" className="btn" onClick={saveQuickLogDraft}>
                 저장
@@ -2648,5 +3108,3 @@ export default function Library() {
     </>
   );
 }
-
-
