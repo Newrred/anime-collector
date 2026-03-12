@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
@@ -12,6 +12,7 @@ import { buildYearRecap, listRecapYears } from "../domain/recapSelectors";
 import YearRecapPanel from "./home/YearRecapPanel";
 import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
+import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
 function pickTitle(item, media) {
   if (item?.koTitle) return item.koTitle;
@@ -43,10 +44,8 @@ export default function Home() {
   const [lastBackupMs, setLastBackupMs] = useState(null);
   const [persisted, setPersisted] = useState(null);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [utilOpen, setUtilOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [recapYear, setRecapYear] = useState(null);
-  const utilRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -102,15 +101,6 @@ export default function Home() {
       window.removeEventListener("pwa-install-ready", onInstallReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, []);
-
-  useEffect(() => {
-    function onDocDown(e) {
-      if (!utilRef.current) return;
-      if (!utilRef.current.contains(e.target)) setUtilOpen(false);
-    }
-    document.addEventListener("mousedown", onDocDown);
-    return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
   const resurfacing = useMemo(
@@ -198,7 +188,6 @@ export default function Home() {
     try {
       await window.__promptPwaInstall();
     } catch {}
-    setUtilOpen(false);
   }
 
   function openCharacterSheet(characterId, name = "", image = "") {
@@ -213,72 +202,12 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      <section
-        className="nav"
-        style={{
-          margin: "calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) 12px",
-          padding: "10px var(--page-pad)",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>홈</a>
-          <a href={`${base}library/`}>보관함</a>
-          <a href={`${base}tier/`}>티어</a>
-        </div>
-        <div ref={utilRef} style={{ position: "relative", marginLeft: "auto" }}>
-          <button
-            type="button"
-            onClick={() => setUtilOpen((v) => !v)}
-            style={{ border: "none", background: "transparent", color: "inherit", cursor: "pointer", padding: "8px 10px", borderRadius: 10, fontSize: 14 }}
-            aria-label="관리 메뉴"
-            aria-expanded={utilOpen}
-          >
-            관리
-          </button>
-          {utilOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "calc(100% + 6px)",
-                right: 0,
-                width: 280,
-                maxWidth: "min(92vw, 280px)",
-                zIndex: 70,
-                border: "1px solid rgba(255,255,255,.12)",
-                background: "rgba(15,17,23,.98)",
-                borderRadius: 12,
-                padding: 10,
-                boxShadow: "0 10px 30px rgba(0,0,0,.35)",
-                display: "grid",
-                gap: 8,
-              }}
-            >
-              <a
-                href={`${base}library/`}
-                className="btn"
-                style={{ textAlign: "center", textDecoration: "none" }}
-                onClick={() => setUtilOpen(false)}
-              >
-                보관함에서 백업/불러오기
-              </a>
-              <a
-                href={`${base}data/`}
-                className="btn"
-                style={{ textAlign: "center", textDecoration: "none" }}
-                onClick={() => setUtilOpen(false)}
-              >
-                데이터 관리
-              </a>
-              {canInstallPwa && (
-                <button type="button" className="btn" onClick={onClickInstallPwa}>
-                  홈 화면 설치
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
+      <TopNavDataMenu
+        base={base}
+        panelId="home-data-menu-panel"
+        canInstallPwa={canInstallPwa}
+        onInstallPwa={onClickInstallPwa}
+      />
 
       <section className="pageHeader" style={{ marginBottom: 6 }}>
         <h1 className="pageTitle">기록 홈</h1>

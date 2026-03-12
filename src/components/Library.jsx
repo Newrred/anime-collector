@@ -425,16 +425,19 @@ function Chip({ active, onClick, children, title }) {
 function StatBars({ rows, maxCount, emptyText = "데이터 없음" }) {
   if (!rows.length) return <div className="small">{emptyText}</div>;
   return (
-    <div style={{ display: "grid", gap: 6 }}>
+    <div className="library-stat-bars">
       {rows.map((row) => {
         const w = maxCount > 0 ? Math.max(6, Math.round((row.count / maxCount) * 100)) : 0;
         return (
-          <div key={row.key} style={{ display: "grid", gridTemplateColumns: "74px 1fr 36px", gap: 8, alignItems: "center" }}>
-            <div className="small" style={{ opacity: 0.9, textAlign: "right" }}>{row.label}</div>
-            <div style={{ height: 8, background: "rgba(255,255,255,0.07)", borderRadius: 999 }}>
-              <div style={{ width: `${w}%`, height: "100%", borderRadius: 999, background: "rgba(120,220,255,.85)" }} />
+          <div key={row.key} className="library-stat-bar-row">
+            <div className="small library-stat-bar-label">{row.label}</div>
+            <div className="library-stat-bar-track">
+              <div
+                className="library-stat-bar-fill"
+                style={{ width: `${w}%` }}
+              />
             </div>
-            <div className="small" style={{ opacity: 0.95 }}>{row.count}</div>
+            <div className="small library-stat-bar-count">{row.count}</div>
           </div>
         );
       })}
@@ -450,6 +453,53 @@ function SegTabButton({ active, onClick, children }) {
       className={`library-seg-btn${active ? " is-active" : ""}`}
     >
       {children}
+    </button>
+  );
+}
+
+function CollapsiblePanelHeader({
+  title,
+  summary = null,
+  open,
+  onToggle,
+  controlsId,
+  openLabel,
+  closedLabel,
+}) {
+  return (
+    <button
+      type="button"
+      className={`library-panel-header-btn${open ? "" : " is-collapsed"}`}
+      onClick={onToggle}
+      aria-expanded={open}
+      aria-controls={controlsId}
+      aria-label={open ? openLabel : closedLabel}
+    >
+      <div className="library-panel-header-main">
+        <h3 className="library-panel-header-title">{title}</h3>
+        {summary ? <div className="small library-panel-header-summary">{summary}</div> : null}
+      </div>
+      <span className="library-panel-header-toggle" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          width="16"
+          height="16"
+          style={{
+            display: "block",
+            transition: "transform 160ms ease",
+            transform: open ? "rotate(0deg)" : "rotate(-90deg)",
+          }}
+        >
+          <path
+            d="M5.5 7.5L10 12l4.5-4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
     </button>
   );
 }
@@ -485,15 +535,7 @@ function GenresRow({ genres, max = 3, compact = false, onPickGenre }) {
       ))}
       {rest > 0 && (
         <span
-          className="small"
-          style={{
-            padding: "2px 8px",
-            borderRadius: 999,
-            background: "rgba(0,0,0,0.06)",
-            opacity: 0.85,
-            lineHeight: 1.6,
-            whiteSpace: "nowrap",
-          }}
+          className="small library-genre-rest"
           title={arr.map(genreKo).join(", ")}
         >
           +{rest}
@@ -536,6 +578,8 @@ export default function Library() {
   const [backupReminder, setBackupReminder] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [addPanelOpen, setAddPanelOpen] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [addTab, setAddTab] = useState("search"); // search | recommend
   const [cardView, setCardView] = useState("meta"); // meta | poster
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
@@ -1972,60 +2016,44 @@ export default function Library() {
       </section>
 
       <section className="library-panel">
-        <div className="library-seg-wrap">
-          <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>애니 검색</SegTabButton>
-          <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>AI 추천</SegTabButton>
-        </div>
-        {addTab === "search" ? (
-          <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} />
-        ) : (
-          <div className="library-recommend-placeholder">
-            <div className="small">
-              추후 구현 예정: 시청기록 기반 추천
+        <CollapsiblePanelHeader
+          title="추가할 애니 검색"
+          summary={addTab === "search" ? "검색으로 직접 추가" : "AI 추천 준비 중"}
+          open={addPanelOpen}
+          onToggle={() => setAddPanelOpen((v) => !v)}
+          controlsId="add-anime-panel-content"
+          openLabel="추가할 애니 검색 접기"
+          closedLabel="추가할 애니 검색 펼치기"
+        />
+        {addPanelOpen && (
+          <>
+            <div id="add-anime-panel-content" className="library-seg-wrap">
+              <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>애니 검색</SegTabButton>
+              <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>AI 추천</SegTabButton>
             </div>
-          </div>
+            {addTab === "search" ? (
+              <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} />
+            ) : (
+              <div className="library-recommend-placeholder">
+                <div className="small">
+                  추후 구현 예정: 시청기록 기반 추천
+                </div>
+              </div>
+            )}
+          </>
         )}
       </section>
 
       <section className="library-panel library-panel--stats">
-        <div className={`library-stats-header${statsOpen ? "" : " is-collapsed"}`}>
-          <h3 className="library-stats-title">통계 대시보드</h3>
-          <div className="library-stats-tools">
-            <div className="small library-stats-summary">
-              총 {dashboard.total}개 · 평균 점수 {dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${SCORE_MAX}`} ({dashboard.scored}개 채점)
-            </div>
-            <button
-              type="button"
-              className="btn library-stats-toggle"
-              onClick={() => setStatsOpen((v) => !v)}
-              aria-expanded={statsOpen}
-              aria-controls="stats-board-content"
-              aria-label={statsOpen ? "통계 대시보드 접기" : "통계 대시보드 펼치기"}
-              title={statsOpen ? "접기" : "펼치기"}
-            >
-              <svg
-                viewBox="0 0 20 20"
-                width="16"
-                height="16"
-                aria-hidden="true"
-                style={{
-                  display: "block",
-                  transition: "transform 160ms ease",
-                  transform: statsOpen ? "rotate(0deg)" : "rotate(-90deg)",
-                }}
-              >
-                <path
-                  d="M5.5 7.5L10 12l4.5-4.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+        <CollapsiblePanelHeader
+          title="통계 대시보드"
+          summary={`총 ${dashboard.total}개 · 평균 점수 ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${SCORE_MAX}`} (${dashboard.scored}개 채점)`}
+          open={statsOpen}
+          onToggle={() => setStatsOpen((v) => !v)}
+          controlsId="stats-board-content"
+          openLabel="통계 대시보드 접기"
+          closedLabel="통계 대시보드 펼치기"
+        />
 
         {statsOpen && (
           <div id="stats-board-content" className="library-stats-grid">
@@ -2069,103 +2097,117 @@ export default function Library() {
       </section>
 
       <section className="library-panel">
-        <div className="library-filter-row">
-          <select
-            className="select library-filter-select library-filter-select--sort"
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value)}
-          >
-            <option value="addedAt">추가순</option>
-            <option value="title">제목순</option>
-            <option value="score">점수순</option>
-            <option value="year">연도순</option>
-            <option value="genre">장르순</option>
-          </select>
-          <select
-            className="select library-filter-select library-filter-select--status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option>전체</option>
-            <option>완료</option>
-            <option>보는중</option>
-            <option>보류</option>
-            <option>하차</option>
-            <option>미분류</option>
-          </select>
-          <div className="library-filter-actions">
-            <label className="library-filter-actions-label">
-              <input type="checkbox" checked={groupByStatus} onChange={(e) => setGroupByStatus(e.target.checked)} />
-              <span className="small">상태별 정렬</span>
-            </label>
-            <button className="btn" onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}>
-              {sortDir === "asc" ? "오름차순" : "내림차순"}
-            </button>
-          </div>
-        </div>
+        <CollapsiblePanelHeader
+          title="라이브러리 검색/정렬"
+          summary={`현재 ${filtered.length}개 표시`}
+          open={filterPanelOpen}
+          onToggle={() => setFilterPanelOpen((v) => !v)}
+          controlsId="library-filter-panel-content"
+          openLabel="라이브러리 검색/정렬 접기"
+          closedLabel="라이브러리 검색/정렬 펼치기"
+        />
 
-        <div className="library-search-row">
-          <input
-            className="input library-search-input"
-            placeholder="보관함 검색 (제목/장르)"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <div className="library-seg-wrap library-view-mode">
-            <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>정보 함께</SegTabButton>
-            <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터만</SegTabButton>
-          </div>
-        </div>
-
-        <div className="library-chip-row">
-          <div className="small library-chip-label">장르:</div>
-          <div className="library-chip-scroll">
-            <Chip active={genreSet.size === 0} onClick={clearGenres} title="장르 전체">전체</Chip>
-            {genreOptions.map((g) => (
-              <Chip key={g} active={genreSet.has(g)} onClick={() => toggleGenre(g)} title={g}>
-                {genreKo(g)}
-              </Chip>
-            ))}
-          </div>
-          {genreSet.size > 0 && (
-            <button type="button" className="btn library-chip-reset" onClick={clearGenres}>
-              선택 해제({genreSet.size})
-            </button>
-          )}
-        </div>
-
-        <div className="library-chip-row">
-          <div className="small library-chip-label">상태:</div>
-          <div className="library-chip-scroll">
-            {["전체", "완료", "보는중", "보류", "하차", "미분류"].map((s) => (
-              <Chip
-                key={s}
-                active={status === s}
-                onClick={() => setStatus(s)}
-                title={`상태 ${s}`}
+        {filterPanelOpen && (
+          <div id="library-filter-panel-content">
+            <div className="library-filter-row">
+              <select
+                className="select library-filter-select library-filter-select--sort"
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value)}
               >
-                {s}
-              </Chip>
-            ))}
-          </div>
-        </div>
+                <option value="addedAt">추가순</option>
+                <option value="title">제목순</option>
+                <option value="score">점수순</option>
+                <option value="year">연도순</option>
+                <option value="genre">장르순</option>
+              </select>
+              <select
+                className="select library-filter-select library-filter-select--status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option>전체</option>
+                <option>완료</option>
+                <option>보는중</option>
+                <option>보류</option>
+                <option>하차</option>
+                <option>미분류</option>
+              </select>
+              <div className="library-filter-actions">
+                <label className="library-filter-actions-label">
+                  <input type="checkbox" checked={groupByStatus} onChange={(e) => setGroupByStatus(e.target.checked)} />
+                  <span className="small">상태별 정렬</span>
+                </label>
+                <button className="btn" onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}>
+                  {sortDir === "asc" ? "오름차순" : "내림차순"}
+                </button>
+              </div>
+            </div>
 
-        <div className="library-card-size-row">
-          <div className="small library-card-size-label">카드 크기</div>
-          <input
-            type="range"
-            min={2}
-            max={10}
-            step={1}
-            value={Number(cardsPerRowBase) || 5}
-            onChange={(e) => setCardsPerRowBase(Number(e.target.value))}
-            className="library-card-size-slider"
-            title="그리드 가로 수 조절"
-          />
-          <div className="small library-card-size-value">
-            기준 {Number(cardsPerRowBase) || 5} · 현재 {effectiveCols}열
+            <div className="library-search-row">
+              <input
+                className="input library-search-input"
+                placeholder="보관함 검색 (제목/장르)"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+              <div className="library-seg-wrap library-view-mode">
+                <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>정보 함께</SegTabButton>
+                <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터만</SegTabButton>
+              </div>
+            </div>
+
+            <div className="library-chip-row">
+              <div className="small library-chip-label">장르:</div>
+              <div className="library-chip-scroll">
+                <Chip active={genreSet.size === 0} onClick={clearGenres} title="장르 전체">전체</Chip>
+                {genreOptions.map((g) => (
+                  <Chip key={g} active={genreSet.has(g)} onClick={() => toggleGenre(g)} title={g}>
+                    {genreKo(g)}
+                  </Chip>
+                ))}
+              </div>
+              {genreSet.size > 0 && (
+                <button type="button" className="btn library-chip-reset" onClick={clearGenres}>
+                  선택 해제({genreSet.size})
+                </button>
+              )}
+            </div>
+
+            <div className="library-chip-row">
+              <div className="small library-chip-label">상태:</div>
+              <div className="library-chip-scroll">
+                {["전체", "완료", "보는중", "보류", "하차", "미분류"].map((s) => (
+                  <Chip
+                    key={s}
+                    active={status === s}
+                    onClick={() => setStatus(s)}
+                    title={`상태 ${s}`}
+                  >
+                    {s}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="library-card-size-row">
+              <div className="small library-card-size-label">카드 크기</div>
+              <input
+                type="range"
+                min={2}
+                max={10}
+                step={1}
+                value={Number(cardsPerRowBase) || 5}
+                onChange={(e) => setCardsPerRowBase(Number(e.target.value))}
+                className="library-card-size-slider"
+                title="그리드 가로 수 조절"
+              />
+              <div className="small library-card-size-value">
+                기준 {Number(cardsPerRowBase) || 5} · 현재 {effectiveCols}열
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       <div

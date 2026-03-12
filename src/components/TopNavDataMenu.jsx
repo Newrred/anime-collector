@@ -91,24 +91,26 @@ function SegTabButton({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      style={{
-        border: "none",
-        borderRadius: 10,
-        padding: "8px 12px",
-        cursor: "pointer",
-        color: active ? "#0b0c10" : "rgba(255,255,255,0.92)",
-        background: active ? "rgba(255,255,255,.88)" : "transparent",
-        fontWeight: active ? 700 : 500,
-      }}
+      className={`data-menu-seg-btn${active ? " is-active" : ""}`}
     >
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{children}</span>
+      <span className="data-menu-seg-label">{children}</span>
     </button>
+  );
+}
+
+function IconHelp() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.8 9.4a2.6 2.6 0 0 1 5.2 0c0 1.4-.8 2.1-1.8 2.7-.8.5-1.2.9-1.2 1.7" />
+      <circle cx="12" cy="17.2" r="0.8" fill="currentColor" stroke="none" />
+    </Icon>
   );
 }
 
 function ActionLabel({ icon, children }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
+    <span className="data-menu-action-label">
       {icon}
       <span>{children}</span>
     </span>
@@ -129,20 +131,32 @@ export default function TopNavDataMenu({
   const dataMenuRef = useRef(null);
   const [dataTab, setDataTab] = useState("export");
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [importMode, setImportMode] = useState("merge");
   const [importText, setImportText] = useState("");
 
   useEffect(() => {
     function onDocDown(e) {
       if (!dataMenuRef.current) return;
-      if (!dataMenuRef.current.contains(e.target)) setDataMenuOpen(false);
+      if (!dataMenuRef.current.contains(e.target)) {
+        setDataMenuOpen(false);
+        setHelpOpen(false);
+      }
     }
     document.addEventListener("mousedown", onDocDown);
     return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
+  function openLibraryManageFallback() {
+    if (typeof window === "undefined") return;
+    window.location.href = `${base}library/`;
+  }
+
   async function handleImportText() {
-    if (typeof onImportJsonText !== "function") return;
+    if (typeof onImportJsonText !== "function") {
+      openLibraryManageFallback();
+      return;
+    }
     try {
       await onImportJsonText(importText, importMode);
       setImportText("");
@@ -152,7 +166,12 @@ export default function TopNavDataMenu({
 
   async function handlePickImport(e) {
     const file = e.target.files?.[0];
-    if (!file || typeof onImportJsonFile !== "function") {
+    if (!file) {
+      e.target.value = "";
+      return;
+    }
+    if (typeof onImportJsonFile !== "function") {
+      openLibraryManageFallback();
       e.target.value = "";
       return;
     }
@@ -163,6 +182,18 @@ export default function TopNavDataMenu({
       // Parent handles error messaging.
     } finally {
       e.target.value = "";
+    }
+  }
+
+  async function handleInstallPwaClick() {
+    if (typeof onInstallPwa === "function") {
+      await onInstallPwa();
+      return;
+    }
+    if (typeof window !== "undefined" && typeof window.__promptPwaInstall === "function") {
+      try {
+        await window.__promptPwaInstall();
+      } catch {}
     }
   }
 
@@ -183,55 +214,66 @@ export default function TopNavDataMenu({
         </div>
 
         <div ref={dataMenuRef} style={{ position: "relative", marginLeft: "auto" }}>
+          <div className="data-menu-actions">
+            <button
+              type="button"
+              onClick={() => {
+                setHelpOpen((v) => !v);
+                setDataMenuOpen(false);
+              }}
+              aria-expanded={helpOpen}
+              aria-label="도움말"
+              className="data-menu-trigger"
+            >
+              <span className="data-menu-trigger-label">
+                <IconHelp />
+              </span>
+            </button>
           <button
             type="button"
-            onClick={() => setDataMenuOpen((v) => !v)}
+            onClick={() => {
+              setDataMenuOpen((v) => !v);
+              setHelpOpen(false);
+            }}
             aria-expanded={dataMenuOpen}
             aria-controls={panelId}
             aria-label="관리 메뉴"
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "inherit",
-              cursor: "pointer",
-              padding: "8px 10px",
-              borderRadius: 10,
-              fontSize: 14,
-            }}
+            className="data-menu-trigger"
           >
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span className="data-menu-trigger-label">
               <IconGear />
-              <span>관리</span>
             </span>
           </button>
+          </div>
+
+          {helpOpen && (
+            <div className="data-menu-panel data-help-panel" role="dialog" aria-label="서비스 도움말">
+              <div className="data-help-title">도움말</div>
+              <div className="small data-help-block">
+                홈에서는 최근 감상/회상 카드와 연간 요약을 확인합니다.
+              </div>
+              <div className="small data-help-block">
+                보관함에서 작품 검색 추가, 상태/점수/메모/재시청 기록을 관리합니다.
+              </div>
+              <div className="small data-help-block">
+                티어에서는 작품 카드를 드래그해서 순위를 정리합니다.
+              </div>
+              <div className="small data-help-block">
+                관리에서 JSON 내보내기/불러오기를 사용합니다.
+                이어붙이기는 합치기, 덮어쓰기는 현재 데이터를 교체합니다.
+              </div>
+              <div className="small data-help-block">
+                모바일에서는 모바일로 보내기/복사 또는 붙여넣기 불러오기를 사용하세요.
+              </div>
+            </div>
+          )}
 
           {dataMenuOpen && (
             <div
               id={panelId}
-              style={{
-                position: "absolute",
-                top: "calc(100% + 6px)",
-                right: 0,
-                width: 360,
-                maxWidth: "min(94vw, 360px)",
-                zIndex: 70,
-                border: "1px solid rgba(255,255,255,.12)",
-                background: "rgba(15,17,23,.98)",
-                borderRadius: 12,
-                padding: 10,
-                boxShadow: "0 10px 30px rgba(0,0,0,.35)",
-              }}
+              className="data-menu-panel"
             >
-              <div
-                style={{
-                  display: "flex",
-                  gap: 6,
-                  padding: 4,
-                  border: "1px solid rgba(255,255,255,.12)",
-                  borderRadius: 12,
-                  background: "rgba(0,0,0,.18)",
-                }}
-              >
+              <div className="data-menu-tabs">
                 <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>
                   <IconDownload />
                   내보내기
@@ -243,11 +285,12 @@ export default function TopNavDataMenu({
               </div>
 
               {dataTab === "export" ? (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                <div className="data-menu-body">
                   <button
                     className="btn"
                     onClick={async () => {
                       if (typeof onExportFile === "function") await onExportFile();
+                      else openLibraryManageFallback();
                       setDataMenuOpen(false);
                     }}
                   >
@@ -257,6 +300,7 @@ export default function TopNavDataMenu({
                     className="btn"
                     onClick={async () => {
                       if (typeof onExportMobile === "function") await onExportMobile();
+                      else openLibraryManageFallback();
                       setDataMenuOpen(false);
                     }}
                   >
@@ -266,7 +310,7 @@ export default function TopNavDataMenu({
                     <button
                       className="btn"
                       onClick={async () => {
-                        if (typeof onInstallPwa === "function") await onInstallPwa();
+                        await handleInstallPwaClick();
                         setDataMenuOpen(false);
                       }}
                     >
@@ -283,17 +327,8 @@ export default function TopNavDataMenu({
                   </a>
                 </div>
               ) : (
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 6,
-                      padding: 4,
-                      border: "1px solid rgba(255,255,255,.10)",
-                      borderRadius: 12,
-                      background: "rgba(0,0,0,.18)",
-                    }}
-                  >
+                <div className="data-menu-body">
+                  <div className="data-menu-import-mode">
                     <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>
                       이어서 불러오기
                     </SegTabButton>
@@ -304,8 +339,12 @@ export default function TopNavDataMenu({
                   <button
                     className="btn"
                     onClick={() => {
-                      fileRef.current?.click();
-                      setDataMenuOpen(false);
+                      if (typeof onImportJsonFile === "function") {
+                        fileRef.current?.click();
+                        setDataMenuOpen(false);
+                      } else {
+                        openLibraryManageFallback();
+                      }
                     }}
                   >
                     <ActionLabel icon={<IconFile />}>백업 파일 선택</ActionLabel>

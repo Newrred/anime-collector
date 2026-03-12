@@ -25,14 +25,6 @@ const isLibraryPage = normalize(Astro.url.pathname) === normalize(toBasePath("li
   <body>
     <ClientRouter />
     <div class="app-shell">
-      {!isIndexPage && !isTierPage && !isLibraryPage && (
-        <nav class="nav">
-          <a href={base}>홈</a>
-          <a href={toBasePath("library/")}>보관함</a>
-          <a href={toBasePath("tier/")}>티어</a>
-          <a href={toBasePath("data/")}>데이터 관리</a>
-        </nav>
-      )}
       <main class="container page-wrap">
         <slot />
       </main>

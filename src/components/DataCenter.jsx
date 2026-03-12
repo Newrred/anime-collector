@@ -6,6 +6,7 @@ import { readTierStatePreferred } from "../repositories/tierRepo";
 import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
 import { readLastExportAtMs } from "../repositories/backupRepo";
+import TopNavDataMenu from "./TopNavDataMenu.jsx";
 
 function formatBytes(value) {
   const n = Number(value);
@@ -32,6 +33,7 @@ export default function DataCenter() {
   const [persisted, setPersisted] = useState(null);
   const [message, setMessage] = useState("");
   const [lastBackupMs, setLastBackupMs] = useState(null);
+  const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [counts, setCounts] = useState({
     library: 0,
     tierPlaced: 0,
@@ -92,6 +94,26 @@ export default function DataCenter() {
     };
   }, []);
 
+  useEffect(() => {
+    function syncInstallState() {
+      setCanInstallPwa(typeof window !== "undefined" && typeof window.__promptPwaInstall === "function");
+    }
+    function onInstallReady() {
+      setCanInstallPwa(true);
+    }
+    function onInstalled() {
+      setCanInstallPwa(false);
+    }
+
+    syncInstallState();
+    window.addEventListener("pwa-install-ready", onInstallReady);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("pwa-install-ready", onInstallReady);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
   async function requestPersist() {
     if (typeof navigator === "undefined" || !navigator.storage) {
       setMessage("현재 브라우저에서는 저장 보호 API를 지원하지 않습니다.");
@@ -116,8 +138,25 @@ export default function DataCenter() {
     return Math.min(100, Math.max(0, (usage / quota) * 100));
   }, [usage, quota]);
 
+  const rawBase = String(import.meta.env.BASE_URL || "/");
+  const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+
+  async function onClickInstallPwa() {
+    if (typeof window === "undefined") return;
+    if (typeof window.__promptPwaInstall !== "function") return;
+    try {
+      await window.__promptPwaInstall();
+    } catch {}
+  }
+
   return (
     <div className="data-grid">
+      <TopNavDataMenu
+        base={base}
+        panelId="data-center-menu-panel"
+        canInstallPwa={canInstallPwa}
+        onInstallPwa={onClickInstallPwa}
+      />
       <section className="status-panel">
         <div className="pageHeader" style={{ marginBottom: 0 }}>
           <h1 className="pageTitle">데이터 관리</h1>
