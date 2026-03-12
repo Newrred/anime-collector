@@ -1,60 +1,94 @@
-﻿# anime-collector
+# anime-collector
 
-서버 없이 브라우저 저장소만으로 동작하는 개인 애니 기록 앱입니다.  
-기능 축은 `홈 / 보관함 / 티어 / 데이터 관리`이며, 검색-기록-회고 루프를 중심으로 설계되어 있습니다.
+브라우저만으로 동작하는 개인 애니 기록 서비스입니다.  
+핵심 목표는 `검색 → 보관 → 감상 기록 → 회고/정리`를 하나의 흐름으로 묶는 것입니다.
 
-## 핵심 화면
+## 서비스 요약
 
-- `/` : 기록 홈
-- `/library/` : 보관함(검색/추가/상세/기록/통계)
-- `/tier/` : 티어 보드
-- `/data/` : 데이터 관리(저장 상태/용량/보호)
+- 서버 없이 작동하는 `offline-first` 구조
+- 페이지 축: `홈 / 보관함 / 티어 / 데이터`
+- 상단 공통 UI: `홈 | 보관함 | 티어` + 우측 `도움말 아이콘` + `관리(톱니) 아이콘`
+- 관리 메뉴에서 JSON 백업/복원 및 모바일 공유를 처리
 
-상단 내비게이션은 `홈 | 보관함 | 티어` + 우측 `관리` 메뉴 구조입니다.
+## 핵심 사용자 흐름
+
+1. 보관함에서 작품 검색/추가
+2. 상세 모달에서 상태, 별점, 메모, 재시청 정보 기록
+3. 감상 로그와 캐릭터 로그가 자동 축적
+4. 홈에서 회고 카드/연간 리캡 확인
+5. 티어에서 작품을 드래그로 재정렬
+6. 관리 메뉴로 데이터 내보내기/불러오기
 
 ## 주요 기능
 
-### 1) 보관함/검색
-- 한글 강화 검색: `aliases + AniList + Wikidata` 조합
-- 검색 단계 표시 및 로딩 점(.) 애니메이션
-- 보관함 필터: 텍스트/장르/상태
+### 1) 보관함 (`/library/`)
+
+- 한글 강화 검색: `aliases + AniList + Wikidata`
+- 검색 단계 표시 + 로딩 점 애니메이션
+- 라이브러리 필터: 텍스트/장르/상태
 - 정렬 + 카드 밀도 슬라이더 + 포스터/메타 뷰 전환
+- 상단 섹션(추가/통계/검색·정렬) 공통 접기/펼치기
 
-### 2) 상세/기록(WatchLog)
-- 작품 상세 모달에서 상태/메모/점수/재주행 관리
+### 2) 상세 기록(작품 모달)
+
+- 상태 변경(완료/보는중/보류/하차/미분류)
 - 별점: 5점 만점, 0.5 단위
-- 빠른 기록: `day/month/season/year/unknown` 정밀도 지원
-- 캐릭터 로그: 최대 3명 + 대표캐 1명 + affinity/reasonTags/note
-- 상태 변경(시작/완료/하차) 및 재주행 +1 시 로그 생성
+- 메모, 재시청 횟수, 마지막 재시청일
+- 감상 기록(WatchLog) 추가/편집/삭제
+- 캐릭터 기반 로그(대표 캐릭터, affinity, reason tag, 노트)
+- 관련 시리즈 조회 및(애니 포맷일 때) 보관함 바로 추가
 
-### 3) 홈
-- 최근 감상 기록
-- 아직 기록 안 남긴 작품
-- 최근 감상 대표캐
-- 자꾸 생각난 캐릭터
-- 이맘때 봤던 작품
-- 최애로 고정한 캐릭터
-- 연말 리캡(연도별): Top 작품/Top 캐릭터/시즌 분포
-- 공유 기능: 리캡 텍스트 복사, Web Share, PNG 카드 저장
+### 3) 홈 (`/`)
 
-### 4) 티어
+- 최근 감상/재노출 카드
+- 캐릭터 기반 인사이트
+- 연도별 리캡(Top 작품/Top 캐릭터/시즌 분포)
+- 리캡 공유(텍스트/공유 API/이미지 카드)
+
+### 4) 티어 (`/tier/`)
+
 - Drag & Drop 티어 편집
-- 감상 기록 필터(연도/시즌/재시청/대표캐 있는 작품/포인트 태그/고정 캐릭터 포함 작품)
+- 감상 기록 기반 필터(연도/시즌/재시청/캐릭터/포인트 태그)
+- 필터 관점으로 티어를 재해석 가능
 
-### 5) 데이터/백업
-- 백업 파일 내보내기/불러오기(이어서 불러오기/지금 데이터 대신 불러오기)
-- 모바일 공유/클립보드 불러오기 대응
-- 저장 엔진/사용량/persist 상태 표시
-- PWA 설치(가능 환경에서 버튼 노출)
+### 5) 데이터/백업 (`/data/`)
 
-## 데이터 모델 요약
+- 저장 엔진/용량/저장 보호(persisted) 상태 확인
+- 백업 파일 내보내기/불러오기
+- 불러오기 모드: `이어붙이기(merge)` / `덮어쓰기(overwrite)`
+- 모바일 공유/클립보드 백업 시나리오 지원
 
-- `LibraryItem`: 현재 상태(snapshot)
-- `WatchLog`: 시점 이벤트 로그(eventType, watchedAtPrecision/value/start/end/sort, cue, note, characterRefs...)
-- `CharacterPin`: 전역 캐릭터 핀
-- `TierState`: 글로벌 현재 티어 배치
+## 구현 포인트
 
-백업 포맷은 현재 `version: 3` 입니다.
+### 검색 파이프라인
+
+- `aliases`로 빠른 선매칭
+- AniList GraphQL 기본 검색
+- 한글 검색 보강용 Wikidata/WDQS 확장
+- 최종 결과를 중복 제거/정렬 후 UI에 단계적으로 반영
+
+### 데이터 구조
+
+- `LibraryItem`: 현재 상태 스냅샷
+- `WatchLog`: 시점 이벤트 로그
+- `CharacterPin`: 캐릭터 고정 데이터
+- `TierState`: 티어 배치 상태
+
+### 저장 아키텍처
+
+- 우선 저장소: IndexedDB
+- 보조 미러: localStorage
+- 레거시 localStorage 데이터 자동 마이그레이션
+- 백업 포맷 버전 관리(`version: 3`)
+
+### UI 아키텍처
+
+- Astro + React(`client:only`) 혼합
+- 상단 공통 메뉴 컴포넌트: `TopNavDataMenu`
+- 테마 토큰(`src/styles/global.css`) 기반 색상 시스템
+- 커스텀 스크롤바(세로/가로 칩 스크롤) 적용
+
+## 백업 JSON 형식
 
 ```json
 {
@@ -72,41 +106,26 @@
 }
 ```
 
-- `v1`(배열 또는 `{list,tier}`) import 호환
-- 캐시 데이터(media/search)는 export 대상 아님
+- `v1`(배열 또는 `{ list, tier }`) 입력도 호환
+- 검색/미디어 캐시는 export 대상에서 제외
 
-## 저장소 구조
+## 프로젝트 구조
 
-### localStorage keys
-- `anime:list:v1`
-- `anime:tier:v1`
-- `anime:watchLogs:v1`
-- `anime:characterPins:v1`
-- `anime:searchCache:v1`
-- `anime:lastBackupAt:v1`
-- `anime:autoBackup:v1`
-- `anime:autoBackup:meta:v1`
-- `anime:grid:perRowBase:v1`
-
-### IndexedDB stores
-- `library_items`
-- `watch_logs`
-- `character_pins`
-- `tier_state`
-- `media_cache`
-- `search_cache`
-- `meta`
-
-앱 시작 시 legacy localStorage 데이터는 마이그레이션 로직으로 IDB에 이행됩니다.
+- `src/pages`: Astro 라우트 엔트리
+- `src/components`: 주요 화면 컴포넌트
+- `src/components/home`: 홈 세부 컴포넌트
+- `src/domain`: 도메인 정규화/셀렉터
+- `src/repositories`: 데이터 접근 계층
+- `src/storage`: IDB/localStorage 계층 + 마이그레이션
+- `src/lib`: 외부 API(AniList, Wikidata) 연동
 
 ## 기술 스택
 
 - Astro 5
-- React 19 (`client:only`)
+- React 19
 - AniList GraphQL API
 - Wikidata / WDQS
-- Playwright(E2E)
-- PWA(manifest + service worker)
+- PWA (manifest + service worker)
 
 ## 로컬 실행
 
@@ -128,7 +147,7 @@ npm run preview
 npm run test:e2e
 ```
 
-- 라이브 외부 API 품질 측정(선택):
+외부 API 실시간 품질 점검:
 
 ```bash
 npm run test:e2e:live
@@ -136,31 +155,11 @@ npm run test:e2e:live
 
 ## 배포
 
-GitHub Pages Actions 워크플로 사용:
+GitHub Pages Actions 기반 자동 배포
 
-- 파일: `.github/workflows/astro.yml`
-- 기본 브랜치 push 시 빌드/배포
+- 워크플로 파일: `.github/workflows/astro.yml`
+- 기본 브랜치 push 시 자동 빌드/배포
 
-## 데이터 수집/별칭 스크립트
+## 참고 문서
 
-```bash
-npm run collect:anilife:first-season
-npm run collect:anilife:2010-2027
-npm run build:aliases:auto
-npm run build:aliases:auto:sample
-```
-
-## 디렉터리 가이드
-
-- `src/components` : 페이지/뷰 컴포넌트
-- `src/components/home` : 홈 세부 컴포넌트
-- `src/domain` : 도메인 셀렉터/정규화
-- `src/services` : 공유/관리 서비스 로직
-- `src/repositories` : 데이터 접근 계층
-- `src/storage` : IDB + legacy/localStorage 계층
-- `src/pages` : Astro 라우트 엔트리
-
-## UI 수정 가이드
-
-- 디자인/레이아웃을 직접 수정할 때는 아래 문서를 먼저 참고하세요.
-- `docs/UI_EDIT_GUIDE.md`
+- UI 수정 가이드: `docs/UI_EDIT_GUIDE.md`

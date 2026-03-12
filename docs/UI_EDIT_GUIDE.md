@@ -33,11 +33,6 @@
 2. `global.css` class
 3. 브라우저 기본 스타일
 
-주의:
-
-- 같은 요소에서 class와 inline이 충돌하면 inline이 이깁니다.
-- "클래스를 바꿨는데 안 바뀐다"는 대부분 inline style 때문입니다.
-
 ## 3. 디자인 토큰 (전역)
 
 파일:
@@ -137,11 +132,6 @@
 7. 상세 모달
 8. 빠른 기록 시트
 
-특징:
-
-- inline style 비중이 가장 큼
-- 카드/모달/기록 시트는 UX 영향이 커서 수정 후 E2E 필수
-
 1차 클래스화 완료 영역(`global.css`의 `library-*`):
 
 - 패널/섹션: `library-panel`, `library-panel--stats`
@@ -160,10 +150,6 @@
 - 감상 기록 필터 패널
 - 티어 레인 + 미분류 레인
 
-특징:
-
-- DnD 영역의 카드 폭/간격이 전부 inline style 중심
-
 ### 5-4) 데이터 관리 (`src/components/DataCenter.jsx`)
 
 주요 블록:
@@ -171,10 +157,6 @@
 - `status-panel` 카드
 - 저장 엔진/보호 상태/용량 막대
 - 작품/티어/로그/캐릭터 카운트 카드
-
-특징:
-
-- 전역 클래스 + inline 혼합
 
 ## 6. 홈 서브컴포넌트 수정 지도
 
@@ -239,7 +221,7 @@
 5. 모달/시트 내부는 `overflow-x: hidden` 유지
 6. sticky/nav 변경 시 `scrollbar-gutter`와 같이 확인
 
-## 10. “자주 하는 수정” 빠른 레시피
+## 10. 자주 하는 수정
 
 ### 10-1) 전체 테마 색 변경
 
@@ -277,44 +259,7 @@
 - `src/styles/global.css` `.modal`, `.modalBody`, `.modalBack`
 - `Library.jsx` 상세 영역 inline style (행 배치)
 
-## 11. inline style -> class 전환 권장 순서
-
-inline 비중이 높은 컴포넌트:
-
-1. `Library.jsx`
-2. `TierBoard.jsx`
-3. `TopNavDataMenu.jsx`
-4. `YearRecapPanel.jsx`
-5. `CharacterInsightSheet.jsx`
-
-전환 절차:
-
-1. 반복되는 style object를 class로 추출
-2. `global.css`에 유틸/컴포넌트 클래스 추가
-3. JSX에서 className으로 교체
-4. 모바일/태블릿 테스트로 overflow 회귀 확인
-
-## 12. 수정 후 검증 체크리스트
-
-필수:
-
-1. `npm run build`
-2. `npm run test:e2e`
-
-권장 수동 확인:
-
-1. `/library/` 카드 필터/정렬/모달/빠른기록
-2. `/tier/` DnD + 필터
-3. `/` 홈 카드 + 캐릭터 시트
-4. `/data/` 저장 상태 카드
-
-모바일/태블릿:
-
-1. 가로 스크롤 발생 여부
-2. 모달/시트 내부 가로 스크롤 여부
-3. 상단 nav 흔들림/폭 점프 여부
-
-## 13. 파일별 역할 요약 (디자인 관점)
+## 11. 파일별 역할 요약 (디자인 관점)
 
 - `src/layouts/BaseLayout.astro`: 공통 shell/viewport/nav 틀
 - `src/styles/global.css`: 디자인 시스템 + 공통 컴포넌트 스타일
@@ -325,12 +270,3 @@ inline 비중이 높은 컴포넌트:
 - `src/components/TopNavDataMenu.jsx`: 상단 관리 메뉴
 - `src/components/DataCenter.jsx`: 데이터 관리 패널
 - `src/components/home/*.jsx`: 홈 하위 카드/시트 UI
-
-## 14. 다음 정리 단계 제안
-
-UI를 더 편하게 수정하려면 아래를 다음 단계로 권장합니다.
-
-1. `Library.jsx` inline 스타일을 우선 class화
-2. `TierBoard.jsx` 카드/필터 패널 class화
-3. `home/*.jsx` 카드 공통 스타일 통합
-4. `global.css`를 `tokens.css + components.css + pages.css`로 분리
