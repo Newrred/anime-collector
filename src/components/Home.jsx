@@ -129,6 +129,29 @@ export default function Home() {
     return map;
   }, [items, mediaMap]);
 
+  const homeHeroImage = useMemo(() => {
+    const recentId = Number(resurfacing?.recentLogs?.[0]?.anilistId);
+    if (Number.isFinite(recentId)) {
+      const media = mediaMap.get(recentId);
+      const banner = String(media?.bannerImage || "").trim();
+      if (banner) return banner;
+      const cover =
+        media?.coverImage?.extraLarge ||
+        media?.coverImage?.large ||
+        media?.coverImage?.medium ||
+        "";
+      if (cover) return String(cover);
+    }
+
+    for (const it of items) {
+      const media = mediaMap.get(Number(it?.anilistId));
+      const banner = String(media?.bannerImage || "").trim();
+      if (banner) return banner;
+    }
+
+    return "";
+  }, [items, mediaMap, resurfacing]);
+
   const characterInsight = useMemo(() => {
     const id = Number(selectedCharacter?.characterId);
     if (!Number.isFinite(id)) return null;
@@ -189,7 +212,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
+    <div className="home-page">
       <section
         className="nav"
         style={{
@@ -265,33 +288,36 @@ export default function Home() {
       </section>
 
       <section
-        style={{
-          border: "1px solid rgba(255,255,255,.12)",
-          borderRadius: 10,
-          padding: 12,
-          background: "linear-gradient(135deg, rgba(55,128,255,.18), rgba(255,255,255,.02))",
-          display: "grid",
-          gap: 10,
-        }}
+        className="surface-card home-quick-panel"
+        style={
+          homeHeroImage
+            ? {
+                backgroundImage: `linear-gradient(135deg, rgba(7,12,28,.82), rgba(13,22,45,.76)), linear-gradient(135deg, rgba(91,124,255,.24), rgba(255,255,255,.02)), url("${homeHeroImage}")`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : { background: "linear-gradient(135deg, rgba(91,124,255,.18), rgba(255,255,255,.02))" }
+        }
       >
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+        <div className="status-badge-row">
+          <div className="small status-badge">
             작품 {items.length}개
           </div>
-          <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+          <div className="small status-badge">
             감상 기록 {logs.length}개
           </div>
-          <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+          <div className="small status-badge">
             {formatBackupAgo(lastBackupMs)}
           </div>
-          <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+          <div className="small status-badge">
             저장 보호 {persisted == null ? "확인 중" : persisted ? "활성" : "비활성"}
           </div>
         </div>
-        <div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <a href={`${base}library/`} className="btn" style={{ textDecoration: "none" }}>
-            최근 기록하기
+            바로 기록하기
           </a>
+          <span className="small" style={{ opacity: 0.86 }}>오늘 떠오른 장면을 짧게 남겨두면 회상 카드가 더 정확해집니다.</span>
         </div>
       </section>
 

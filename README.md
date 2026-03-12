@@ -159,3 +159,8 @@ npm run build:aliases:auto:sample
 - `src/repositories` : 데이터 접근 계층
 - `src/storage` : IDB + legacy/localStorage 계층
 - `src/pages` : Astro 라우트 엔트리
+
+## UI 수정 가이드
+
+- 디자인/레이아웃을 직접 수정할 때는 아래 문서를 먼저 참고하세요.
+- `docs/UI_EDIT_GUIDE.md`

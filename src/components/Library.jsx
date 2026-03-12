@@ -371,7 +371,7 @@ function getRelatedSeriesRows(media, currentId, limit = 12) {
       relationLabel: relationTypeKo(edge?.relationType),
       title: pickMediaTitle(node),
       siteUrl: String(node?.siteUrl || ""),
-      cover: node?.coverImage?.large || "",
+      cover: node?.coverImage?.extraLarge || node?.coverImage?.large || node?.coverImage?.medium || "",
       seasonYear: Number.isFinite(seasonYear) ? seasonYear : null,
       format: String(node?.format || ""),
       episodes: Number.isFinite(episodes) && episodes > 0 ? episodes : null,
@@ -415,18 +415,7 @@ function Chip({ active, onClick, children, title }) {
       type="button"
       onClick={onClick}
       title={title}
-      className="small"
-      style={{
-        border: "solid 0.1px rgba(255,255,255,0.3)",
-        color: "white",
-        cursor: "pointer",
-        padding: "4px 10px",
-        borderRadius: 999,
-        lineHeight: 1.6,
-        background: active ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.08)",
-        fontWeight: active ? 700 : 500,
-        whiteSpace: "nowrap",
-      }}
+      className={`small library-chip${active ? " is-active" : ""}`}
     >
       {children}
     </button>
@@ -458,15 +447,7 @@ function SegTabButton({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      style={{
-        border: "none",
-        borderRadius: 5,
-        padding: "8px 12px",
-        cursor: "pointer",
-        color: active ? "#0b0c10" : "rgba(255,255,255,0.92)",
-        background: active ? "rgba(255,255,255,.88)" : "transparent",
-        fontWeight: active ? 700 : 500,
-      }}
+      className={`library-seg-btn${active ? " is-active" : ""}`}
     >
       {children}
     </button>
@@ -485,39 +466,19 @@ function GenresRow({ genres, max = 3, compact = false, onPickGenre }) {
   const show = arr.slice(0, max);
   const rest = arr.length - show.length;
 
-  const wrapStyle = compact
-    ? {
-        display: "flex",
-        flexWrap: "nowrap",
-        gap: 6,
-        marginTop: 6,
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-      }
-    : { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 };
-
   return (
-    <div style={wrapStyle}>
+    <div className={`library-genres-row${compact ? " library-genres-row--compact" : ""}`}>
       {show.map((g) => (
         <button
           key={g}
           type="button"
-          className="small"
+          className="small library-genre-chip"
           title={g}
           onClick={(e) => {
             e.stopPropagation(); // 카드 클릭(모달 열기) 방지
             onPickGenre?.(g, e);
           }}
-          style={{
-            border: "none",
-            cursor: onPickGenre ? "pointer" : "default",
-            padding: "2px 8px",
-            borderRadius: 999,
-            color: "white",
-            background: "rgba(255,255,255,0.08)",
-            lineHeight: 1.6,
-            whiteSpace: "nowrap",
-          }}
+          style={!onPickGenre ? { cursor: "default" } : undefined}
         >
           {genreKo(g)}
         </button>
@@ -2002,54 +1963,45 @@ export default function Library() {
       <section className="pageHeader">
         <h1 className="pageTitle">애니 보관함</h1>
         <p className="pageLead">지금까지 본 작품을 모아 두고 다시 꺼내보는 개인 보관함</p>
-        <div style={{ marginTop: 6 }}>
-          <span className="small" style={{ opacity: 0.9 }}>
+        <div className="library-top-note">
+          <span className="small">
             {backupReminder || "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다."}
           </span>
         </div>
-        {backupMsg && <div className="small" style={{ opacity: 0.9, marginTop: 4 }}>{backupMsg}</div>}
+        {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
       </section>
 
-      <section style={{ border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.03)", borderRadius: 5, padding: 12, marginBottom: 5 }}>
-        <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.12)", borderRadius: 5, background: "rgba(0,0,0,.18)", width: "fit-content", marginBottom: 5 }}>
+      <section className="library-panel">
+        <div className="library-seg-wrap">
           <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>애니 검색</SegTabButton>
           <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>AI 추천</SegTabButton>
         </div>
         {addTab === "search" ? (
           <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} />
         ) : (
-          <div style={{ border: "1px dashed rgba(255,255,255,.2)", borderRadius: 5, padding: 12, margin: "14px 0px 10px", background: "rgba(255,255,255,.02)" }}>
-            <div className="small" style={{ opacity: 0.9}}>
+          <div className="library-recommend-placeholder">
+            <div className="small">
               추후 구현 예정: 시청기록 기반 추천
             </div>
           </div>
         )}
       </section>
 
-      <section
-        style={{
-          border: "1px solid rgba(255,255,255,.1)",
-          background: "rgba(255,255,255,.03)",
-          borderRadius: 5,
-          padding: 14,
-          margin: "10px 0 5px",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: statsOpen ? 10 : 0, flexWrap: "wrap" }}>
-          <h3 style={{ margin: 0, fontSize: 16 }}>통계 대시보드</h3>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <div className="small">
+      <section className="library-panel library-panel--stats">
+        <div className={`library-stats-header${statsOpen ? "" : " is-collapsed"}`}>
+          <h3 className="library-stats-title">통계 대시보드</h3>
+          <div className="library-stats-tools">
+            <div className="small library-stats-summary">
               총 {dashboard.total}개 · 평균 점수 {dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${SCORE_MAX}`} ({dashboard.scored}개 채점)
             </div>
             <button
               type="button"
-              className="btn"
+              className="btn library-stats-toggle"
               onClick={() => setStatsOpen((v) => !v)}
               aria-expanded={statsOpen}
               aria-controls="stats-board-content"
               aria-label={statsOpen ? "통계 대시보드 접기" : "통계 대시보드 펼치기"}
               title={statsOpen ? "접기" : "펼치기"}
-              style={{ width: 34, height: 34, padding: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
             >
               <svg
                 viewBox="0 0 20 20"
@@ -2076,42 +2028,35 @@ export default function Library() {
         </div>
 
         {statsOpen && (
-          <div id="stats-board-content" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-            <div style={{ border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: 10, background: "rgba(255,255,255,.02)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>상태별 분류</div>
+          <div id="stats-board-content" className="library-stats-grid">
+            <div className="library-stats-card">
+              <div className="library-stats-card-title">상태별 분류</div>
               <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} />
             </div>
-            <div style={{ border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: 10, background: "rgba(255,255,255,.02)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>시청 장르 상위 5</div>
+            <div className="library-stats-card">
+              <div className="library-stats-card-title">시청 장르 상위 5</div>
               <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} />
             </div>
-            <div style={{ border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: 10, background: "rgba(255,255,255,.02)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>재주행 TOP 5</div>
+            <div className="library-stats-card">
+              <div className="library-stats-card-title">재주행 TOP 5</div>
               {dashboard.rewatchRows.length === 0 ? (
                 <div className="small">재주행 기록이 없습니다.</div>
               ) : (
-                <div style={{ display: "grid", gap: 6 }}>
+                <div className="library-rewatch-list">
                   {dashboard.rewatchRows.map((row) => {
                     return (
                       <button
                         key={row.key}
                         type="button"
                         onClick={() => setSelectedId(row.id)}
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          color: "inherit",
-                          textAlign: "left",
-                          padding: 0,
-                          cursor: "pointer",
-                        }}
+                        className="library-rewatch-item"
                         title={`${row.title} · ${row.count}회`}
                       >
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 40px", gap: 8, alignItems: "center" }}>
-                          <div className="small" style={{ opacity: 0.92, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <div className="library-rewatch-item-grid">
+                          <div className="small library-rewatch-item-title">
                             {row.title}
                           </div>
-                          <div className="small" style={{ opacity: 0.95, textAlign: "right" }}>{row.count}회</div>
+                          <div className="small library-rewatch-item-count">{row.count}회</div>
                         </div>
                       </button>
                     );
@@ -2123,13 +2068,12 @@ export default function Library() {
         )}
       </section>
 
-      <section style={{ border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.03)", borderRadius: 5, padding: 12, marginBottom: 5 }}>
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+      <section className="library-panel">
+        <div className="library-filter-row">
           <select
-            className="select"
+            className="select library-filter-select library-filter-select--sort"
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value)}
-            style={{ width: "auto", minWidth: 160, flex: "1 1 200px" }}
           >
             <option value="addedAt">추가순</option>
             <option value="title">제목순</option>
@@ -2138,10 +2082,9 @@ export default function Library() {
             <option value="genre">장르순</option>
           </select>
           <select
-            className="select"
+            className="select library-filter-select library-filter-select--status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            style={{ width: "auto", minWidth: 130, flex: "1 1 160px" }}
           >
             <option>전체</option>
             <option>완료</option>
@@ -2150,8 +2093,8 @@ export default function Library() {
             <option>하차</option>
             <option>미분류</option>
           </select>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap", marginLeft: "auto" }}>
-            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <div className="library-filter-actions">
+            <label className="library-filter-actions-label">
               <input type="checkbox" checked={groupByStatus} onChange={(e) => setGroupByStatus(e.target.checked)} />
               <span className="small">상태별 정렬</span>
             </label>
@@ -2161,23 +2104,22 @@ export default function Library() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "stretch", flexWrap: "wrap" }}>
+        <div className="library-search-row">
           <input
-            className="input"
+            className="input library-search-input"
             placeholder="보관함 검색 (제목/장르)"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            style={{ minWidth: 220, flex: "1 1 320px" }}
           />
-          <div style={{ display: "flex", gap: 6, padding: 4, border: "1px solid rgba(255,255,255,.10)", borderRadius: 5, background: "rgba(0,0,0,.18)", marginLeft: "auto", flex: "0 0 auto" }}>
+          <div className="library-seg-wrap library-view-mode">
             <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>정보 함께</SegTabButton>
             <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터만</SegTabButton>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <div className="small" style={{ whiteSpace: "nowrap", opacity: 0.85 }}>장르:</div>
-          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, flex: 1 }}>
+        <div className="library-chip-row">
+          <div className="small library-chip-label">장르:</div>
+          <div className="library-chip-scroll">
             <Chip active={genreSet.size === 0} onClick={clearGenres} title="장르 전체">전체</Chip>
             {genreOptions.map((g) => (
               <Chip key={g} active={genreSet.has(g)} onClick={() => toggleGenre(g)} title={g}>
@@ -2186,15 +2128,15 @@ export default function Library() {
             ))}
           </div>
           {genreSet.size > 0 && (
-            <button type="button" className="btn" onClick={clearGenres} style={{ whiteSpace: "nowrap" }}>
+            <button type="button" className="btn library-chip-reset" onClick={clearGenres}>
               선택 해제({genreSet.size})
             </button>
           )}
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
-          <div className="small" style={{ whiteSpace: "nowrap", opacity: 0.85 }}>상태:</div>
-          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, flex: 1 }}>
+        <div className="library-chip-row">
+          <div className="small library-chip-label">상태:</div>
+          <div className="library-chip-scroll">
             {["전체", "완료", "보는중", "보류", "하차", "미분류"].map((s) => (
               <Chip
                 key={s}
@@ -2208,8 +2150,8 @@ export default function Library() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-          <div className="small" style={{ whiteSpace: "nowrap", opacity: 0.9, border: 0 }}>카드 크기</div>
+        <div className="library-card-size-row">
+          <div className="small library-card-size-label">카드 크기</div>
           <input
             type="range"
             min={2}
@@ -2217,10 +2159,10 @@ export default function Library() {
             step={1}
             value={Number(cardsPerRowBase) || 5}
             onChange={(e) => setCardsPerRowBase(Number(e.target.value))}
-            style={{ width: 180 }}
+            className="library-card-size-slider"
             title="그리드 가로 수 조절"
           />
-          <div className="small" style={{ opacity: 0.92 }}>
+          <div className="small library-card-size-value">
             기준 {Number(cardsPerRowBase) || 5} · 현재 {effectiveCols}열
           </div>
         </div>
@@ -2252,7 +2194,7 @@ export default function Library() {
               aria-label={`${cardTitle} 상세 열기`}
             >
               <img
-                src={m?.coverImage?.large ?? undefined}
+                src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
                 alt={cardTitle}
                 loading="lazy"
                 style={{
@@ -2264,58 +2206,24 @@ export default function Library() {
               />
 
               {cardView === "meta" && (
-                <div className="meta" style={{ padding: "8px 10px" }}>
-                  <div
-                    style={{
-                      fontWeight: 600,
-                      lineHeight: 1.25,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      minHeight: "2.5em",
-                    }}
-                  >
+                <div className="meta library-card-meta">
+                  <div className="library-card-title">
                     {cardTitle}
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 4,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 6,
-                      fontSize: 12,
-                      opacity: 0.82,
-                    }}
-                  >
+                  <div className="library-card-meta-row">
                     <span style={getStatusBadgeStyle(cardStatus)}>{cardStatus}</span>
                     <span
                       aria-label={cardScore == null ? "미평가" : `별점 ${cardScore} / ${SCORE_MAX}`}
-                      style={{
-                        marginLeft: "auto",
-                        textAlign: "right",
-                        position: "relative",
-                        width: 62,
-                        height: 14,
-                        fontSize: 13,
-                        letterSpacing: 1,
-                        lineHeight: 1,
-                        display: "inline-block",
-                      }}
+                      className="library-card-stars"
                     >
-                      <span aria-hidden style={{ color: "rgba(255,255,255,.22)" }}>★★★★★</span>
+                      <span aria-hidden className="library-card-stars-base">★★★★★</span>
                       <span
                         aria-hidden
                         style={{
-                          position: "absolute",
-                          inset: 0,
                           width: cardStarsFill,
-                          overflow: "hidden",
-                          color: "#ffd76b",
-                          whiteSpace: "nowrap",
                         }}
+                        className="library-card-stars-fill"
                       >
                         ★★★★★
                       </span>
@@ -2357,7 +2265,7 @@ export default function Library() {
             </button>
             <div className="modalBody">
               <div className="modalCover">
-                <img src={selectedMedia?.coverImage?.large || ""} alt={selectedTitle} />
+                <img src={selectedMedia?.coverImage?.extraLarge || selectedMedia?.coverImage?.large || selectedMedia?.coverImage?.medium || ""} alt={selectedTitle} />
                 <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {selectedMedia?.siteUrl && (
                     <a className="btn" href={selectedMedia.siteUrl} target="_blank" rel="noreferrer">
@@ -2827,19 +2735,9 @@ export default function Library() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(780px, calc(100vw - 16px))",
-              margin: "0 auto",
-              border: "1px solid rgba(255,255,255,.14)",
-              borderRadius: "16px 16px 0 0",
-              background: "rgba(15,17,23,.98)",
-              padding: 14,
-              maxHeight: "78vh",
-              overflowY: "auto",
-              boxSizing: "border-box",
-            }}
+            className="log-sheet"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginBottom: 8 }}>
+            <div className="log-sheet__header" style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
               <div>
                 <div style={{ fontWeight: 700 }}>빠른 기록</div>
                 <div className="small" style={{ opacity: 0.85 }}>
@@ -2851,7 +2749,7 @@ export default function Library() {
               </button>
             </div>
 
-            <div style={{ display: "grid", gap: 10 }}>
+            <div className="log-sheet__body">
               {quickLogContext?.isAuto && (
                 <div
                   className="small"
@@ -3193,7 +3091,7 @@ export default function Library() {
               )}
             </div>
 
-            <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <div className="log-sheet__footer">
               <button type="button" className="btn" onClick={closeQuickLogSheet}>
                 {"\uAE30\uBCF8\uAC12 \uC720\uC9C0"}
               </button>

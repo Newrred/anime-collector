@@ -5,6 +5,7 @@ import { readLibraryListPreferred } from "../repositories/libraryRepo";
 import { readTierStatePreferred } from "../repositories/tierRepo";
 import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
+import { readLastExportAtMs } from "../repositories/backupRepo";
 
 function formatBytes(value) {
   const n = Number(value);
@@ -15,6 +16,14 @@ function formatBytes(value) {
   return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
+function formatBackupAgo(ms) {
+  if (!Number.isFinite(ms)) return "백업 기록 없음";
+  const diff = Date.now() - ms;
+  if (diff < 60 * 60 * 1000) return "1시간 이내 백업";
+  if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}시간 전 백업`;
+  return `${Math.floor(diff / (24 * 60 * 60 * 1000))}일 전 백업`;
+}
+
 export default function DataCenter() {
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState("확인 중");
@@ -22,6 +31,7 @@ export default function DataCenter() {
   const [quota, setQuota] = useState(null);
   const [persisted, setPersisted] = useState(null);
   const [message, setMessage] = useState("");
+  const [lastBackupMs, setLastBackupMs] = useState(null);
   const [counts, setCounts] = useState({
     library: 0,
     tierPlaced: 0,
@@ -70,6 +80,7 @@ export default function DataCenter() {
         watchLogs: Array.isArray(logs) ? logs.length : 0,
         characterPins: Array.isArray(pins) ? pins.length : 0,
       });
+      setLastBackupMs(readLastExportAtMs());
 
       await refreshStorageHealth();
       if (!alive) return;
@@ -106,29 +117,25 @@ export default function DataCenter() {
   }, [usage, quota]);
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <section
-        style={{
-          border: "1px solid rgba(255,255,255,.12)",
-          background: "rgba(255,255,255,.03)",
-          borderRadius: 8,
-          padding: 14,
-          display: "grid",
-          gap: 12,
-        }}
-      >
+    <div className="data-grid">
+      <section className="status-panel">
         <div className="pageHeader" style={{ marginBottom: 0 }}>
           <h1 className="pageTitle">데이터 관리</h1>
           <p className="pageLead">
-            저장 상태와 용량을 점검하고, 장치 저장 보호 상태를 확인합니다.
+            이 앱의 기록은 이 기기에 저장돼요. 필요할 때 백업 파일로 꺼낼 수 있어요.
           </p>
+        </div>
+
+        <div className="status-badge-row">
+          <span className="small status-badge">저장 상태: 이 기기에 저장됨</span>
+          <span className="small status-badge">{formatBackupAgo(lastBackupMs)}</span>
+          <span className="small status-badge">
+            저장 보호: {persisted == null ? "확인 중" : persisted ? "활성" : "비활성"}
+          </span>
         </div>
 
         <div style={{ display: "grid", gap: 8 }}>
           <div className="small">저장 엔진: {engine}</div>
-          <div className="small">
-            저장 보호: {persisted == null ? "확인 중" : persisted ? "활성" : "비활성"}
-          </div>
           <button type="button" className="btn" onClick={requestPersist} style={{ width: "fit-content" }}>
             이 기기 저장 보호 요청
           </button>

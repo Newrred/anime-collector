@@ -88,7 +88,8 @@ const CARD_FIELDS = `
   title { romaji english native }
   synonyms
   genres
-  coverImage { large }
+  coverImage { extraLarge large medium }
+  bannerImage
   seasonYear
   format
   episodes
@@ -129,7 +130,8 @@ async function fetchAnimeByIdsInternal(
             siteUrl
             title { romaji english native }
             synonyms
-            coverImage { large }
+            coverImage { extraLarge large medium }
+            bannerImage
             seasonYear
             format
             episodes
@@ -176,7 +178,8 @@ export async function searchAnimeByTitle(search, perPage = 10) {
           title { romaji english native }
           synonyms
           genres
-          coverImage { large }
+          coverImage { extraLarge large medium }
+          bannerImage
           seasonYear
           format
           episodes

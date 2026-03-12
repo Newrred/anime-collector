@@ -53,3 +53,16 @@ src/data/anilife-2010-2027-title-pairs.paged.json
 src/data/anilife-2021-recheck.json
 tmp-deploy-debug.png
 tmp-deploy-home.png
+
+# docs extraction artifacts (generated from .docx)
+docs/*_extract/
+docs/*.zip
+docs/*.extracted.txt
+docs/*.extracted.clean.txt
+docs/tmp_extract*/
+docs/feature_audit_extract*/
+docs/ui_css_guide_extract/
+
+# windows junk
+Thumbs.db
+Desktop.ini

@@ -7,7 +7,7 @@ function buildLibraryDetailHref(base, anilistId) {
 function renderAnimeRow({ base, anilistId, metaTop, metaBottom = "", mediaMap, titleById }) {
   const media = mediaMap.get(Number(anilistId));
   const title = titleById.get(Number(anilistId)) || `#${anilistId}`;
-  const poster = media?.coverImage?.large || "";
+  const poster = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
   return (
     <a
       href={buildLibraryDetailHref(base, anilistId)}
@@ -61,10 +61,14 @@ export default function ResurfacingCards({
   resurfacing,
   onOpenCharacter,
 }) {
+  const hasRepeated = resurfacing.repeatedCharacters.length > 0;
+  const hasThisTime = resurfacing.thisTime.length > 0;
+
   return (
     <>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
-        <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+      <div className="home-grid">
+        <div className="home-row-2">
+        <div className="surface-card">
           <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 기록</div>
           {resurfacing.recentLogs.length === 0 ? (
             <div className="small">아직 기록이 없습니다.</div>
@@ -86,7 +90,7 @@ export default function ResurfacingCards({
           )}
         </div>
 
-        <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+        <div className="surface-card">
           <div style={{ fontWeight: 700, marginBottom: 8 }}>아직 기록 안 남긴 작품</div>
           {resurfacing.missingMemory.length === 0 ? (
             <div className="small">모든 작품에 최소 1개 이상의 기록이 있습니다.</div>
@@ -107,8 +111,10 @@ export default function ResurfacingCards({
             </div>
           )}
         </div>
+        </div>
 
-        <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+        <div className="home-row-2">
+        <div className="surface-card">
           <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 대표캐</div>
           {resurfacing.recentPrimaryCharacters.length === 0 ? (
             <div className="small">대표캐를 남긴 기록이 아직 없어요.</div>
@@ -148,9 +154,8 @@ export default function ResurfacingCards({
             </div>
           )}
         </div>
-
-        {resurfacing.repeatedCharacters.length > 0 && (
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+        {hasRepeated ? (
+          <div className="surface-card">
             <div style={{ fontWeight: 700, marginBottom: 8 }}>자꾸 생각난 캐릭터</div>
             <div style={{ display: "grid", gap: 8 }}>
               {resurfacing.repeatedCharacters.map((row) => (
@@ -187,10 +192,8 @@ export default function ResurfacingCards({
               ))}
             </div>
           </div>
-        )}
-
-        {resurfacing.thisTime.length > 0 && (
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+        ) : hasThisTime ? (
+          <div className="surface-card">
             <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 봤던 작품</div>
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.thisTime.map((row) => (
@@ -206,11 +209,39 @@ export default function ResurfacingCards({
               ))}
             </div>
           </div>
+        ) : null}
+        </div>
+
+        {hasRepeated && hasThisTime && (
+          <div className="home-row-2">
+          <div className="surface-card">
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 봤던 작품</div>
+            <div style={{ display: "grid", gap: 6 }}>
+              {resurfacing.thisTime.map((row) => (
+                <div key={row.id}>
+                  {renderAnimeRow({
+                    base,
+                    anilistId: row.anilistId,
+                    metaTop: `${row.label} · ${row.eventType}`,
+                    mediaMap,
+                    titleById,
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="surface-card" style={{ display: "grid", placeItems: "center" }}>
+            <div className="small" style={{ opacity: 0.84 }}>
+              오래된 기억 카드와 최근 캐릭터 카드를 번갈아 확인해 보세요.
+            </div>
+          </div>
+          </div>
         )}
+
       </div>
 
       {resurfacing.pinnedHighlights.length > 0 && (
-        <section style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
+        <section className="surface-card">
           <div style={{ fontWeight: 700, marginBottom: 8 }}>최애로 고정한 캐릭터</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
             {resurfacing.pinnedHighlights.map((p) => (

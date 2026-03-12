@@ -624,7 +624,12 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
                 aria-disabled={already}
                 tabIndex={already ? -1 : 0}
               >
-                <img className="suggestThumb" src={r.media?.coverImage?.large || ""} alt={title} loading="lazy" />
+                <img
+                  className="suggestThumb"
+                  src={r.media?.coverImage?.extraLarge || r.media?.coverImage?.large || r.media?.coverImage?.medium || ""}
+                  alt={title}
+                  loading="lazy"
+                />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <div style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

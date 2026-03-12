@@ -875,7 +875,7 @@ export default function TierBoard() {
                   }}
                 >
                   <img
-                    src={m?.coverImage?.large ?? undefined}
+                    src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
                     alt={title}
                     style={{
                       width: "100%",
@@ -935,7 +935,7 @@ export default function TierBoard() {
                 }}
               >
                 <img
-                  src={m?.coverImage?.large ?? undefined}
+                  src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
                   alt={title}
                   style={{
                     width: "100%",
