@@ -182,21 +182,6 @@ npm run test:e2e:live
 - `tests/tier.spec.ts`: 티어 페이지 메뉴, 드래그, 초기화, 레이아웃
 - `tests/live-search.spec.ts`: 외부 API 기반 실검색 확인
 
-## 데이터 수집 / 별칭 스크립트
-
-```bash
-npm run collect:anilife:first-season
-npm run collect:anilife:2010-2027
-npm run build:aliases:auto
-npm run build:aliases:auto:sample
-```
-
-용도:
-
-- 계절별 작품 수집
-- 별칭 데이터 재생성
-- 검색 품질 보강용 데이터 업데이트
-
 ## 배포
 
 GitHub Pages 배포를 사용합니다.
