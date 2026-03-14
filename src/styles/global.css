@@ -1,4 +1,9 @@
+@import "./fonts-noto-sans.css";
+@import "./fonts-noto-sans-kr.css";
+
 :root {
+  --font-family-ko: "Noto Sans KR", "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-en: "Noto Sans", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg-app: #010326;
   --bg-surface: rgba(140, 133, 28, 0.12);
   --bg-surface-2: #262626;
@@ -89,7 +94,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Pretendard", "SUIT", "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-family-ko);
   background:
     radial-gradient(1200px 580px at 90% -20%, rgba(140, 133, 28, 0.28), transparent 58%),
     radial-gradient(900px 460px at -10% -20%, rgba(38, 38, 38, 0.44), transparent 55%),
@@ -97,6 +102,10 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   font-size: var(--fs-body);
+}
+
+html:lang(en) body {
+  font-family: var(--font-family-en);
 }
 
 html[data-theme="light"] body {
