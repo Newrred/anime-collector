@@ -13,30 +13,34 @@ import YearRecapPanel from "./home/YearRecapPanel";
 import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
-
-function pickTitle(item, media) {
-  if (item?.koTitle) return item.koTitle;
-  const synKo = Array.isArray(media?.synonyms)
-    ? media.synonyms.find((s) => /[가-힣]/.test(String(s || "")))
-    : null;
-  return (
-    synKo ||
-    media?.title?.english ||
-    media?.title?.romaji ||
-    media?.title?.native ||
-    (item?.anilistId ? `#${item.anilistId}` : "Unknown")
-  );
-}
-
-function formatBackupAgo(ms) {
-  if (!Number.isFinite(ms)) return "백업 기록 없음";
-  const diff = Date.now() - ms;
-  if (diff < 60 * 60 * 1000) return "1시간 이내 백업";
-  if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}시간 전 백업`;
-  return `${Math.floor(diff / (24 * 60 * 60 * 1000))}일 전 백업`;
-}
+import { useUiPreferences } from "../hooks/useUiPreferences";
+import { formatBackupAgo, formatStatusToggleLabel, pickByLocale } from "../domain/uiText";
+import { pickDisplayTitle } from "../domain/animeTitles";
 
 export default function Home() {
+  const { locale, setLocale } = useUiPreferences();
+  const copy = pickByLocale(locale, {
+    ko: {
+      title: "기록 홈",
+      lead: "검색하고 기록한 작품을 나중에 다시 꺼내보는 개인 홈",
+      animeCount: "작품",
+      logCount: "감상 기록",
+      storageProtect: "저장 보호",
+      quickRecord: "바로 기록하기",
+      heroHint: "오늘 떠오른 장면을 짧게 남겨두면 회상 카드가 더 정확해집니다.",
+      unit: "개",
+    },
+    en: {
+      title: "Home",
+      lead: "A personal home for revisiting anime you searched and logged",
+      animeCount: "Anime",
+      logCount: "Logs",
+      storageProtect: "Storage protect",
+      quickRecord: "Log now",
+      heroHint: "Leave a short note about what stood out today to improve resurfacing cards.",
+      unit: "",
+    },
+  });
   const [items, setItems] = useState([]);
   const [mediaMap, setMediaMap] = useState(new Map());
   const [logs, setLogs] = useState([]);
@@ -114,10 +118,10 @@ export default function Home() {
   const titleById = useMemo(() => {
     const map = new Map();
     for (const it of items) {
-      map.set(Number(it.anilistId), pickTitle(it, mediaMap.get(Number(it.anilistId))));
+      map.set(Number(it.anilistId), pickDisplayTitle(it, mediaMap.get(Number(it.anilistId)), locale));
     }
     return map;
-  }, [items, mediaMap]);
+  }, [items, mediaMap, locale]);
 
   const homeHeroImage = useMemo(() => {
     const recentId = Number(resurfacing?.recentLogs?.[0]?.anilistId);
@@ -206,14 +210,14 @@ export default function Home() {
         base={base}
         panelId="home-data-menu-panel"
         canInstallPwa={canInstallPwa}
+        locale={locale}
+        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
         onInstallPwa={onClickInstallPwa}
       />
 
       <section className="pageHeader" style={{ marginBottom: 6 }}>
-        <h1 className="pageTitle">기록 홈</h1>
-        <p className="pageLead">
-          검색하고 기록한 작품을 나중에 다시 꺼내보는 개인 홈
-        </p>
+        <h1 className="pageTitle">{copy.title}</h1>
+        <p className="pageLead">{copy.lead}</p>
       </section>
 
       <section
@@ -230,27 +234,28 @@ export default function Home() {
       >
         <div className="status-badge-row">
           <div className="small status-badge">
-            작품 {items.length}개
+            {locale === "en" ? `${copy.animeCount} ${items.length}` : `${copy.animeCount} ${items.length}${copy.unit}`}
           </div>
           <div className="small status-badge">
-            감상 기록 {logs.length}개
+            {locale === "en" ? `${copy.logCount} ${logs.length}` : `${copy.logCount} ${logs.length}${copy.unit}`}
           </div>
           <div className="small status-badge">
-            {formatBackupAgo(lastBackupMs)}
+            {formatBackupAgo(lastBackupMs, locale)}
           </div>
           <div className="small status-badge">
-            저장 보호 {persisted == null ? "확인 중" : persisted ? "활성" : "비활성"}
+            {copy.storageProtect} {formatStatusToggleLabel(persisted, locale)}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <a href={`${base}library/`} className="btn" style={{ textDecoration: "none" }}>
-            바로 기록하기
+            {copy.quickRecord}
           </a>
-          <span className="small" style={{ opacity: 0.86 }}>오늘 떠오른 장면을 짧게 남겨두면 회상 카드가 더 정확해집니다.</span>
+          <span className="small" style={{ opacity: 0.86 }}>{copy.heroHint}</span>
         </div>
       </section>
 
       <YearRecapPanel
+        locale={locale}
         recapYear={recapYear}
         setRecapYear={setRecapYear}
         recapYears={recapYears}
@@ -260,6 +265,7 @@ export default function Home() {
       />
 
       <ResurfacingCards
+        locale={locale}
         base={base}
         mediaMap={mediaMap}
         titleById={titleById}
@@ -268,6 +274,7 @@ export default function Home() {
       />
 
       <CharacterInsightSheet
+        locale={locale}
         base={base}
         selectedCharacter={selectedCharacter}
         characterInsight={characterInsight}

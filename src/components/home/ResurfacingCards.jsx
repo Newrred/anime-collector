@@ -1,3 +1,6 @@
+import { pickByLocale } from "../../domain/uiText";
+import { formatEventLabel, formatReasonTagLabel } from "../library/libraryCopy.js";
+
 function buildLibraryDetailHref(base, anilistId) {
   const id = Number(anilistId);
   if (!Number.isFinite(id)) return `${base}library/`;
@@ -55,12 +58,55 @@ function renderAnimeRow({ base, anilistId, metaTop, metaBottom = "", mediaMap, t
 }
 
 export default function ResurfacingCards({
+  locale = "ko",
   base,
   mediaMap,
   titleById,
   resurfacing,
   onOpenCharacter,
 }) {
+  const copy = pickByLocale(locale, {
+    ko: {
+      recentLogs: "최근 감상 기록",
+      noLogs: "아직 기록이 없습니다.",
+      noMemory: "아직 기록 안 남긴 작품",
+      allLogged: "모든 작품에 최소 1개 이상의 기록이 있습니다.",
+      noLogMeta: "기록 없음",
+      promptLog: "바로 기록해 보세요",
+      recentPrimary: "최근 감상 대표캐",
+      noPrimary: "대표캐를 남긴 기록이 아직 없어요.",
+      recurring: "자꾸 생각난 캐릭터",
+      thisTime: "이맘때 봤던 작품",
+      revisitHint: "오래된 기억 카드와 최근 캐릭터 카드를 번갈아 확인해 보세요.",
+      pinned: "최애로 고정한 캐릭터",
+      recent60: "최근 60일",
+      total: "전체",
+      relatedAnime: "관련 작품",
+      featuredAnime: "대표 작품",
+      countUnit: "회",
+      countItem: "개",
+    },
+    en: {
+      recentLogs: "Recent logs",
+      noLogs: "No logs yet.",
+      noMemory: "Anime without logs yet",
+      allLogged: "Every anime already has at least one log.",
+      noLogMeta: "No log",
+      promptLog: "Add a quick log",
+      recentPrimary: "Recent primary characters",
+      noPrimary: "No logs with a primary character yet.",
+      recurring: "Characters that keep returning",
+      thisTime: "Watched around this time",
+      revisitHint: "Alternate between older memory cards and recent character cards.",
+      pinned: "Pinned favorite characters",
+      recent60: "Last 60d",
+      total: "Total",
+      relatedAnime: "Related anime",
+      featuredAnime: "Featured anime",
+      countUnit: "x",
+      countItem: "",
+    },
+  });
   const hasRepeated = resurfacing.repeatedCharacters.length > 0;
   const hasThisTime = resurfacing.thisTime.length > 0;
 
@@ -69,9 +115,9 @@ export default function ResurfacingCards({
       <div className="home-grid">
         <div className="home-row-2">
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 기록</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recentLogs}</div>
           {resurfacing.recentLogs.length === 0 ? (
-            <div className="small">아직 기록이 없습니다.</div>
+            <div className="small">{copy.noLogs}</div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.recentLogs.map((row) => (
@@ -79,7 +125,7 @@ export default function ResurfacingCards({
                   {renderAnimeRow({
                     base,
                     anilistId: row.anilistId,
-                    metaTop: `${row.label} · ${row.eventType}`,
+                    metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
                     metaBottom: row.cue || "",
                     mediaMap,
                     titleById,
@@ -91,9 +137,9 @@ export default function ResurfacingCards({
         </div>
 
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>아직 기록 안 남긴 작품</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.noMemory}</div>
           {resurfacing.missingMemory.length === 0 ? (
-            <div className="small">모든 작품에 최소 1개 이상의 기록이 있습니다.</div>
+            <div className="small">{copy.allLogged}</div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.missingMemory.map((row) => (
@@ -101,8 +147,8 @@ export default function ResurfacingCards({
                   {renderAnimeRow({
                     base,
                     anilistId: row.anilistId,
-                    metaTop: "기록 없음",
-                    metaBottom: "바로 기록해 보세요",
+                    metaTop: copy.noLogMeta,
+                    metaBottom: copy.promptLog,
                     mediaMap,
                     titleById,
                   })}
@@ -115,9 +161,9 @@ export default function ResurfacingCards({
 
         <div className="home-row-2">
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>최근 감상 대표캐</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recentPrimary}</div>
           {resurfacing.recentPrimaryCharacters.length === 0 ? (
-            <div className="small">대표캐를 남긴 기록이 아직 없어요.</div>
+            <div className="small">{copy.noPrimary}</div>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {resurfacing.recentPrimaryCharacters.map((row) => (
@@ -144,7 +190,7 @@ export default function ResurfacingCards({
                       </div>
                       <div className="small" style={{ opacity: 0.82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {row.label}
-                        {row.reasonTag ? ` · ${row.reasonTag}` : ""}
+                        {row.reasonTag ? ` · ${formatReasonTagLabel(row.reasonTag, locale)}` : ""}
                         {row.cue ? ` · ${row.cue}` : ""}
                       </div>
                     </div>
@@ -156,7 +202,7 @@ export default function ResurfacingCards({
         </div>
         {hasRepeated ? (
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>자꾸 생각난 캐릭터</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recurring}</div>
             <div style={{ display: "grid", gap: 8 }}>
               {resurfacing.repeatedCharacters.map((row) => (
                 <button
@@ -181,9 +227,11 @@ export default function ResurfacingCards({
                         {row.name}
                       </div>
                       <div className="small" style={{ opacity: 0.82 }}>
-                        최근 60일 {row.countRecent60}회 · 전체 {row.countTotal}회 · 관련 작품 {row.relatedAnimeCount}개
+                        {locale === "en"
+                          ? `${copy.recent60} ${row.countRecent60}${copy.countUnit} · ${copy.total} ${row.countTotal}${copy.countUnit} · ${copy.relatedAnime} ${row.relatedAnimeCount}`
+                          : `${copy.recent60} ${row.countRecent60}${copy.countUnit} · ${copy.total} ${row.countTotal}${copy.countUnit} · ${copy.relatedAnime} ${row.relatedAnimeCount}${copy.countItem}`}
                         {Number.isFinite(Number(row.topAnimeId))
-                          ? ` · 대표 작품 ${titleById.get(Number(row.topAnimeId)) || `#${row.topAnimeId}`}`
+                          ? ` · ${copy.featuredAnime} ${titleById.get(Number(row.topAnimeId)) || `#${row.topAnimeId}`}`
                           : ""}
                       </div>
                     </div>
@@ -194,14 +242,14 @@ export default function ResurfacingCards({
           </div>
         ) : hasThisTime ? (
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 봤던 작품</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.thisTime}</div>
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.thisTime.map((row) => (
                 <div key={row.id}>
                   {renderAnimeRow({
                     base,
                     anilistId: row.anilistId,
-                    metaTop: `${row.label} · ${row.eventType}`,
+                    metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
                     mediaMap,
                     titleById,
                   })}
@@ -215,7 +263,7 @@ export default function ResurfacingCards({
         {hasRepeated && hasThisTime && (
           <div className="home-row-2">
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>이맘때 봤던 작품</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.thisTime}</div>
             <div style={{ display: "grid", gap: 6 }}>
               {resurfacing.thisTime.map((row) => (
                 <div key={row.id}>
@@ -232,7 +280,7 @@ export default function ResurfacingCards({
           </div>
           <div className="surface-card" style={{ display: "grid", placeItems: "center" }}>
             <div className="small" style={{ opacity: 0.84 }}>
-              오래된 기억 카드와 최근 캐릭터 카드를 번갈아 확인해 보세요.
+              {copy.revisitHint}
             </div>
           </div>
           </div>
@@ -242,7 +290,7 @@ export default function ResurfacingCards({
 
       {resurfacing.pinnedHighlights.length > 0 && (
         <section className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>최애로 고정한 캐릭터</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.pinned}</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
             {resurfacing.pinnedHighlights.map((p) => (
               <button
@@ -268,7 +316,7 @@ export default function ResurfacingCards({
                     </div>
                     <div className="small" style={{ opacity: 0.82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {titleById.get(Number(p.mediaId)) || `#${p.mediaId}`}
-                      {p.pinReason ? ` · ${p.pinReason}` : ""}
+                      {p.pinReason ? ` · ${formatReasonTagLabel(p.pinReason, locale)}` : ""}
                     </div>
                   </div>
                 </div>

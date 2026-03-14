@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { pickByLocale } from "../domain/uiText";
 
 function Icon({ children, size = 14 }) {
   return (
@@ -121,12 +122,75 @@ export default function TopNavDataMenu({
   base = "/",
   panelId = "data-menu-panel",
   canInstallPwa = false,
+  locale = "ko",
+  preferenceControls = null,
+  onToggleLocale,
   onExportFile,
   onExportMobile,
   onInstallPwa,
   onImportJsonFile,
   onImportJsonText,
 }) {
+  const copy = pickByLocale(locale, {
+    ko: {
+      home: "홈",
+      library: "보관함",
+      tier: "티어",
+      switchToEnglish: "영어로 전환",
+      switchToKorean: "한국어로 전환",
+      help: "도움말",
+      manage: "관리 메뉴",
+      helpDialog: "서비스 도움말",
+      helpTitle: "도움말",
+      helpBlocks: [
+        "홈에서는 최근 감상/회상 카드와 연간 요약을 확인합니다.",
+        "보관함에서 작품 검색 추가, 상태/점수/메모/재시청 기록을 관리합니다.",
+        "티어에서는 작품 카드를 드래그해서 순위를 정리합니다.",
+        "관리에서 JSON 내보내기/불러오기를 사용합니다. 이어붙이기는 합치기, 덮어쓰기는 현재 데이터를 교체합니다.",
+        "모바일에서는 모바일로 보내기/복사 또는 붙여넣기 불러오기를 사용하세요.",
+      ],
+      export: "내보내기",
+      import: "불러오기",
+      saveBackupFile: "백업 파일 저장",
+      mobileShare: "모바일로 보내기/복사",
+      installApp: "앱 설치",
+      storageStatus: "저장 상태",
+      mergeImport: "이어서 불러오기",
+      overwriteImport: "지금 데이터 대신 불러오기",
+      pickBackupFile: "백업 파일 선택",
+      importPlaceholder: "모바일에서는 백업 내용을 복사해 여기에 붙여넣고 불러오세요.",
+      importFromPaste: "붙여넣은 내용 불러오기",
+    },
+    en: {
+      home: "Home",
+      library: "Library",
+      tier: "Tier",
+      switchToEnglish: "Switch to English",
+      switchToKorean: "Switch to Korean",
+      help: "Help",
+      manage: "Manage",
+      helpDialog: "Service help",
+      helpTitle: "Help",
+      helpBlocks: [
+        "On Home, review recent logs, resurfacing cards, and yearly recap.",
+        "In Library, add anime and manage status, score, memo, and rewatch logs.",
+        "In Tier, drag anime cards to reorganize rankings.",
+        "Use Manage for JSON export and import. Merge appends data, overwrite replaces current data.",
+        "On mobile, use share/copy export or paste import.",
+      ],
+      export: "Export",
+      import: "Import",
+      saveBackupFile: "Save backup file",
+      mobileShare: "Send to mobile / copy",
+      installApp: "Install app",
+      storageStatus: "Storage status",
+      mergeImport: "Merge import",
+      overwriteImport: "Overwrite current data",
+      pickBackupFile: "Choose backup file",
+      importPlaceholder: "On mobile, paste copied backup JSON here and import it.",
+      importFromPaste: "Import pasted content",
+    },
+  });
   const fileRef = useRef(null);
   const dataMenuRef = useRef(null);
   const [dataTab, setDataTab] = useState("export");
@@ -197,6 +261,12 @@ export default function TopNavDataMenu({
     }
   }
 
+  function handleToggleLocale() {
+    setHelpOpen(false);
+    setDataMenuOpen(false);
+    if (typeof onToggleLocale === "function") onToggleLocale();
+  }
+
   return (
     <>
       <section
@@ -208,13 +278,26 @@ export default function TopNavDataMenu({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <a href={`${base}`}>홈</a>
-          <a href={`${base}library/`}>보관함</a>
-          <a href={`${base}tier/`}>티어</a>
+          <a href={`${base}`}>{copy.home}</a>
+          <a href={`${base}library/`}>{copy.library}</a>
+          <a href={`${base}tier/`}>{copy.tier}</a>
         </div>
 
         <div ref={dataMenuRef} style={{ position: "relative", marginLeft: "auto" }}>
           <div className="data-menu-actions">
+            <button
+              type="button"
+              onClick={handleToggleLocale}
+              aria-label={locale === "ko" ? copy.switchToEnglish : copy.switchToKorean}
+              title={locale === "ko" ? copy.switchToEnglish : copy.switchToKorean}
+              className="data-menu-trigger data-menu-locale-trigger"
+            >
+              <span className="data-menu-locale-label" aria-hidden>
+                <span className={`data-menu-locale-token${locale === "ko" ? " is-active" : ""}`}>KO</span>
+                <span className="data-menu-locale-divider">/</span>
+                <span className={`data-menu-locale-token${locale === "en" ? " is-active" : ""}`}>EN</span>
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -222,49 +305,38 @@ export default function TopNavDataMenu({
                 setDataMenuOpen(false);
               }}
               aria-expanded={helpOpen}
-              aria-label="도움말"
+              aria-label={copy.help}
               className="data-menu-trigger"
             >
               <span className="data-menu-trigger-label">
                 <IconHelp />
               </span>
             </button>
-          <button
-            type="button"
-            onClick={() => {
-              setDataMenuOpen((v) => !v);
-              setHelpOpen(false);
-            }}
-            aria-expanded={dataMenuOpen}
-            aria-controls={panelId}
-            aria-label="관리 메뉴"
-            className="data-menu-trigger"
-          >
-            <span className="data-menu-trigger-label">
-              <IconGear />
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDataMenuOpen((v) => !v);
+                setHelpOpen(false);
+              }}
+              aria-expanded={dataMenuOpen}
+              aria-controls={panelId}
+              aria-label={copy.manage}
+              className="data-menu-trigger"
+            >
+              <span className="data-menu-trigger-label">
+                <IconGear />
+              </span>
+            </button>
           </div>
 
           {helpOpen && (
-            <div className="data-menu-panel data-help-panel" role="dialog" aria-label="서비스 도움말">
-              <div className="data-help-title">도움말</div>
-              <div className="small data-help-block">
-                홈에서는 최근 감상/회상 카드와 연간 요약을 확인합니다.
-              </div>
-              <div className="small data-help-block">
-                보관함에서 작품 검색 추가, 상태/점수/메모/재시청 기록을 관리합니다.
-              </div>
-              <div className="small data-help-block">
-                티어에서는 작품 카드를 드래그해서 순위를 정리합니다.
-              </div>
-              <div className="small data-help-block">
-                관리에서 JSON 내보내기/불러오기를 사용합니다.
-                이어붙이기는 합치기, 덮어쓰기는 현재 데이터를 교체합니다.
-              </div>
-              <div className="small data-help-block">
-                모바일에서는 모바일로 보내기/복사 또는 붙여넣기 불러오기를 사용하세요.
-              </div>
+            <div className="data-menu-panel data-help-panel" role="dialog" aria-label={copy.helpDialog}>
+              <div className="data-help-title">{copy.helpTitle}</div>
+              {copy.helpBlocks.map((block) => (
+                <div key={block} className="small data-help-block">
+                  {block}
+                </div>
+              ))}
             </div>
           )}
 
@@ -273,14 +345,19 @@ export default function TopNavDataMenu({
               id={panelId}
               className="data-menu-panel"
             >
+              {preferenceControls ? (
+                <div className="data-menu-preferences">
+                  {preferenceControls}
+                </div>
+              ) : null}
               <div className="data-menu-tabs">
                 <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>
                   <IconDownload />
-                  내보내기
+                  {copy.export}
                 </SegTabButton>
                 <SegTabButton active={dataTab === "import"} onClick={() => setDataTab("import")}>
                   <IconUpload />
-                  불러오기
+                  {copy.import}
                 </SegTabButton>
               </div>
 
@@ -294,7 +371,7 @@ export default function TopNavDataMenu({
                       setDataMenuOpen(false);
                     }}
                   >
-                    <ActionLabel icon={<IconFile />}>백업 파일 저장</ActionLabel>
+                    <ActionLabel icon={<IconFile />}>{copy.saveBackupFile}</ActionLabel>
                   </button>
                   <button
                     className="btn"
@@ -304,7 +381,7 @@ export default function TopNavDataMenu({
                       setDataMenuOpen(false);
                     }}
                   >
-                    <ActionLabel icon={<IconMobile />}>모바일로 보내기/복사</ActionLabel>
+                    <ActionLabel icon={<IconMobile />}>{copy.mobileShare}</ActionLabel>
                   </button>
                   {canInstallPwa && (
                     <button
@@ -314,7 +391,7 @@ export default function TopNavDataMenu({
                         setDataMenuOpen(false);
                       }}
                     >
-                      앱 설치
+                      {copy.installApp}
                     </button>
                   )}
                   <a
@@ -323,17 +400,17 @@ export default function TopNavDataMenu({
                     style={{ textAlign: "center", textDecoration: "none" }}
                     onClick={() => setDataMenuOpen(false)}
                   >
-                    <ActionLabel icon={<IconDatabase />}>저장 상태</ActionLabel>
+                    <ActionLabel icon={<IconDatabase />}>{copy.storageStatus}</ActionLabel>
                   </a>
                 </div>
               ) : (
                 <div className="data-menu-body">
                   <div className="data-menu-import-mode">
                     <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>
-                      이어서 불러오기
+                      {copy.mergeImport}
                     </SegTabButton>
                     <SegTabButton active={importMode === "overwrite"} onClick={() => setImportMode("overwrite")}>
-                      지금 데이터 대신 불러오기
+                      {copy.overwriteImport}
                     </SegTabButton>
                   </div>
                   <button
@@ -347,17 +424,17 @@ export default function TopNavDataMenu({
                       }
                     }}
                   >
-                    <ActionLabel icon={<IconFile />}>백업 파일 선택</ActionLabel>
+                    <ActionLabel icon={<IconFile />}>{copy.pickBackupFile}</ActionLabel>
                   </button>
                   <textarea
                     className="textarea"
                     value={importText}
                     onChange={(e) => setImportText(e.target.value)}
-                    placeholder="모바일에서는 백업 내용을 복사해 여기에 붙여넣고 불러오세요."
+                    placeholder={copy.importPlaceholder}
                     style={{ minHeight: 100 }}
                   />
                   <button className="btn" onClick={handleImportText}>
-                    <ActionLabel icon={<IconClipboard />}>붙여넣은 내용 불러오기</ActionLabel>
+                    <ActionLabel icon={<IconClipboard />}>{copy.importFromPaste}</ActionLabel>
                   </button>
                 </div>
               )}

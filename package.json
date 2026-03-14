@@ -7,6 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test:unit": "node tests/unit/run-tests.mjs",
     "test:e2e": "playwright test",
     "test:e2e:live": "playwright test tests/live-search.spec.ts --project=desktop-chromium --workers=1 --output=test-results-live",
     "collect:anilife:first-season": "node scripts/collect-anilife-first-season.mjs",

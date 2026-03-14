@@ -20,6 +20,10 @@ import { mergeWatchLogs, readAllWatchLogsSnapshot, replaceWatchLogs } from "../r
 import { listCharacterPinsPreferred, mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
+import { useUiPreferences } from "../hooks/useUiPreferences";
+import { formatSeasonTermLabel, formatReasonTagLabel } from "./library/libraryCopy.js";
+import { pickByLocale } from "../domain/uiText";
+import { pickDisplayTitle } from "../domain/animeTitles";
 
 const SEASON_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
 
@@ -56,13 +60,100 @@ function extractSeasonFromLog(log) {
   return null;
 }
 
-function firstHangulSynonym(media) {
-  const arr = media?.synonyms;
-  if (!Array.isArray(arr)) return null;
-  return arr.find((s) => /[가-힣]/.test(String(s || ""))) || null;
-}
-
 export default function TierBoard() {
+  const { locale, setLocale } = useUiPreferences();
+  const copy = pickByLocale(locale, {
+    ko: {
+      installReady: "앱이 설치되었습니다. 홈 화면에서 바로 열 수 있어요.",
+      installUnsupported: "현재 브라우저에서는 설치 프롬프트를 아직 사용할 수 없습니다.",
+      installCancelled: "설치를 취소했어요. 필요할 때 다시 시도할 수 있습니다.",
+      installFailed: "설치 요청 중 오류가 발생했습니다.",
+      backupDownloaded: "백업 파일을 다운로드했어요.",
+      shareFileTitle: "애니 보관함 백업",
+      sharedFile: "백업 JSON 파일을 공유했어요.",
+      shareCancelled: "공유를 취소했어요.",
+      shareTextTitle: "애니 보관함 백업(JSON)",
+      sharedText: "백업 JSON 텍스트를 공유했어요.",
+      copiedJson: "백업 JSON을 클립보드에 복사했어요.",
+      shareFailed: "공유/복사에 실패했어요. JSON 파일 내보내기를 사용해 주세요.",
+      missingList: "가져오기 파일에 list 배열이 없어요.",
+      overwriteConfirm: "지금 보관함 데이터를 모두 바꾸고 불러올까요?",
+      importDoneOverwrite: "불러오기 완료! 지금 보관함 데이터로 교체했어요.",
+      importDoneMerge: "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요.",
+      emptyPaste: "붙여넣은 JSON 텍스트가 비어 있어요.",
+      pasteImportFailed: "붙여넣기 가져오기 실패",
+      importFailed: "가져오기 실패",
+      unknownError: "알 수 없는 오류",
+      title: "티어 보드",
+      lead: "감상 기록을 기준으로 다시 정리해 보는 티어 보드입니다.",
+      reset: "초기화",
+      filterTitle: "감상 기록 필터",
+      visible: "표시",
+      total: "전체",
+      filterWarning: "필터를 쓰는 동안에는 보기만 할 수 있어요. 드래그 편집은 `전체`에서 해주세요.",
+      unranked: "미분류",
+      all: "전체",
+      year: "올해/연도",
+      season: "시즌",
+      rewatch: "재시청 기록",
+      primary: "대표캐 있는 작품",
+      favorite: "최애캐가 있는 작품",
+      pinned: "고정한 캐릭터가 있는 작품",
+      reasonTag: "포인트 태그",
+      character: "캐릭터 선택",
+      logYearFilter: "로그 연도 필터",
+      logSeasonFilter: "로그 시즌 필터",
+      reasonTagFilter: "포인트 태그 필터",
+      reasonTagSelect: "포인트 태그 선택",
+      characterFilter: "캐릭터 선택 필터",
+      characterSelect: "캐릭터 선택",
+    },
+    en: {
+      installReady: "App installed. You can launch it from your home screen.",
+      installUnsupported: "This browser does not support the install prompt yet.",
+      installCancelled: "Install cancelled. You can try again later.",
+      installFailed: "Failed while requesting install.",
+      backupDownloaded: "Downloaded backup file.",
+      shareFileTitle: "Anime Library Backup",
+      sharedFile: "Shared backup JSON file.",
+      shareCancelled: "Share cancelled.",
+      shareTextTitle: "Anime Library Backup (JSON)",
+      sharedText: "Shared backup JSON text.",
+      copiedJson: "Copied backup JSON to clipboard.",
+      shareFailed: "Share/copy failed. Use JSON file export instead.",
+      missingList: "Imported file does not contain a list array.",
+      overwriteConfirm: "Replace the current library data with this import?",
+      importDoneOverwrite: "Import complete. Replaced current library data.",
+      importDoneMerge: "Import complete. Merged into the existing library.",
+      emptyPaste: "Pasted JSON text is empty.",
+      pasteImportFailed: "Paste import failed",
+      importFailed: "Import failed",
+      unknownError: "Unknown error",
+      title: "Tier Board",
+      lead: "Reorganize your rankings based on watch history.",
+      reset: "Reset",
+      filterTitle: "Log filter",
+      visible: "Showing",
+      total: "Total",
+      filterWarning: "While a filter is active, the board is view-only. Use `All` to drag and edit.",
+      unranked: "Unranked",
+      all: "All",
+      year: "This year / year",
+      season: "Season",
+      rewatch: "Rewatch logs",
+      primary: "Has primary character",
+      favorite: "Has favorite character",
+      pinned: "Has pinned character",
+      reasonTag: "Reason tag",
+      character: "Character",
+      logYearFilter: "Log year filter",
+      logSeasonFilter: "Log season filter",
+      reasonTagFilter: "Reason tag filter",
+      reasonTagSelect: "Choose reason tag",
+      characterFilter: "Character filter",
+      characterSelect: "Choose character",
+    },
+  });
   // ✅ 라이브러리(localStorage) 읽어서 ids를 만든다 (새로 추가된 애니 자동 반영)
   const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, myListSeed);
 
@@ -103,20 +194,8 @@ export default function TierBoard() {
     return m;
   }, [library]);
 
-  // ✅ Tier에서 보여줄 제목 결정(koTitle -> synonyms 한글 -> 영어/로마자/네이티브)
   function titleFor(id, media) {
-    const ko = koById.get(id);
-    if (ko) return ko;
-
-    const synKo = firstHangulSynonym(media);
-    if (synKo) return synKo;
-
-    return (
-      media?.title?.english ||
-      media?.title?.romaji ||
-      media?.title?.native ||
-      (id ? `#${id}` : "Loading...")
-    );
+    return pickDisplayTitle({ anilistId: id, koTitle: koById.get(id) || null }, media, locale) || (id ? `#${id}` : "Loading...");
   }
 
   const [mediaMap, setMediaMap] = useState(new Map());
@@ -273,7 +352,7 @@ export default function TierBoard() {
     }
     function onInstalled() {
       setCanInstallPwa(false);
-      setBackupMsg("앱이 설치되었습니다. 홈 화면에서 바로 열 수 있어요.");
+      setBackupMsg(copy.installReady);
     }
 
     syncInstallState();
@@ -283,7 +362,7 @@ export default function TierBoard() {
       window.removeEventListener("pwa-install-ready", onInstallReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, []);
+  }, [copy.installReady]);
 
   // ---- Drag & Drop (순서 재정렬 지원) ----
   function allowDrop(e) {
@@ -369,14 +448,14 @@ export default function TierBoard() {
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
     if (typeof window.__promptPwaInstall !== "function") {
-      setBackupMsg("현재 브라우저에서는 설치 프롬프트를 아직 사용할 수 없습니다.");
+      setBackupMsg(copy.installUnsupported);
       return;
     }
     try {
       const ok = await window.__promptPwaInstall();
-      if (!ok) setBackupMsg("설치를 취소했어요. 필요할 때 다시 시도할 수 있습니다.");
+      if (!ok) setBackupMsg(copy.installCancelled);
     } catch {
-      setBackupMsg("설치 요청 중 오류가 발생했습니다.");
+      setBackupMsg(copy.installFailed);
     }
   }
 
@@ -411,7 +490,7 @@ export default function TierBoard() {
     a.remove();
     URL.revokeObjectURL(url);
 
-    markBackupExported("백업 파일을 다운로드했어요.");
+    markBackupExported(copy.backupDownloaded);
   }
 
   async function exportBackupMobile() {
@@ -424,15 +503,15 @@ export default function TierBoard() {
       const file = new File([text], filename, { type: "application/json" });
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: "애니 보관함 백업",
+          title: copy.shareFileTitle,
           files: [file],
         });
-        markBackupExported("백업 JSON 파일을 공유했어요.");
+        markBackupExported(copy.sharedFile);
         return;
       }
     } catch (err) {
       if (err?.name === "AbortError") {
-        setBackupMsg("공유를 취소했어요.");
+        setBackupMsg(copy.shareCancelled);
         return;
       }
     }
@@ -440,24 +519,24 @@ export default function TierBoard() {
     try {
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
         await navigator.share({
-          title: "애니 보관함 백업(JSON)",
+          title: copy.shareTextTitle,
           text,
         });
-        markBackupExported("백업 JSON 텍스트를 공유했어요.");
+        markBackupExported(copy.sharedText);
         return;
       }
     } catch (err) {
       if (err?.name === "AbortError") {
-        setBackupMsg("공유를 취소했어요.");
+        setBackupMsg(copy.shareCancelled);
         return;
       }
     }
 
     try {
       await navigator.clipboard.writeText(text);
-      markBackupExported("백업 JSON을 클립보드에 복사했어요.");
+      markBackupExported(copy.copiedJson);
     } catch {
-      setBackupMsg("공유/복사에 실패했어요. JSON 파일 내보내기를 사용해 주세요.");
+      setBackupMsg(copy.shareFailed);
     }
   }
 
@@ -465,14 +544,14 @@ export default function TierBoard() {
 
     const incomingList = Array.isArray(json) ? json : json?.list;
     if (!Array.isArray(incomingList)) {
-      throw new Error("가져오기 파일에 list 배열이 없어요.");
+      throw new Error(copy.missingList);
     }
 
     const incomingNormalized = normalizeImportList(incomingList);
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
-      const ok = window.confirm("지금 보관함 데이터를 모두 바꾸고 불러올까요?");
+      const ok = window.confirm(copy.overwriteConfirm);
       if (!ok) return;
       setLibrary(incomingNormalized);
     } else {
@@ -515,8 +594,8 @@ export default function TierBoard() {
 
     setBackupMsg(
       isOverwrite
-        ? "불러오기 완료! 지금 보관함 데이터로 교체했어요."
-        : "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요."
+        ? copy.importDoneOverwrite
+        : copy.importDoneMerge
     );
   }
 
@@ -529,7 +608,7 @@ export default function TierBoard() {
   async function importBackupText(rawText, mode = "merge") {
     const raw = String(rawText || "").trim();
     if (!raw) {
-      setBackupMsg("붙여넣은 JSON 텍스트가 비어 있어요.");
+      setBackupMsg(copy.emptyPaste);
       return;
     }
 
@@ -538,7 +617,7 @@ export default function TierBoard() {
       await importBackupFromJson(json, mode);
     } catch (err) {
       console.error(err);
-      setBackupMsg(`붙여넣기 가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      setBackupMsg(`${copy.pasteImportFailed}: ${err?.message || copy.unknownError}`);
       throw err;
     }
   }
@@ -548,7 +627,7 @@ export default function TierBoard() {
       await importBackup(file, mode);
     } catch (err) {
       console.error(err);
-      setBackupMsg(`가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      setBackupMsg(`${copy.importFailed}: ${err?.message || copy.unknownError}`);
       throw err;
     }
   }
@@ -691,6 +770,8 @@ export default function TierBoard() {
         base={base}
         panelId="tier-data-menu-panel"
         canInstallPwa={canInstallPwa}
+        locale={locale}
+        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
         onExportFile={exportBackup}
         onExportMobile={exportBackupMobile}
         onInstallPwa={onClickInstallPwa}
@@ -700,12 +781,12 @@ export default function TierBoard() {
       {backupMsg && <div className="small" style={{ opacity: 0.9 }}>{backupMsg}</div>}
 
       <section className="pageHeader" style={{ marginBottom: 4 }}>
-        <h1 className="pageTitle">티어 보드</h1>
-        <p className="pageLead">감상 기록을 기준으로 다시 정리해 보는 티어 보드입니다.</p>
+        <h1 className="pageTitle">{copy.title}</h1>
+        <p className="pageLead">{copy.lead}</p>
       </section>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <button className="btn" onClick={reset}>초기화</button>
+        <button className="btn" onClick={reset}>{copy.reset}</button>
         <span className="small">Drag & Drop</span>
       </div>
 
@@ -720,23 +801,23 @@ export default function TierBoard() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700 }}>감상 기록 필터</div>
+          <div style={{ fontWeight: 700 }}>{copy.filterTitle}</div>
           <div className="small" style={{ opacity: 0.86 }}>
-            표시 {visiblePlacedCount} / 전체 {totalPlacedCount}
+            {copy.visible} {visiblePlacedCount} / {copy.total} {totalPlacedCount}
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {[
-            { key: "all", label: "전체" },
-            { key: "year", label: "올해/연도" },
-            { key: "season", label: "시즌" },
-            { key: "rewatch", label: "재시청 기록" },
-            { key: "primary", label: "대표캐 있는 작품" },
-            { key: "favorite", label: "최애캐가 있는 작품" },
-            { key: "pinned", label: "고정한 캐릭터가 있는 작품" },
-            { key: "reasonTag", label: "포인트 태그" },
-            { key: "character", label: "캐릭터 선택" },
+            { key: "all", label: copy.all },
+            { key: "year", label: copy.year },
+            { key: "season", label: copy.season },
+            { key: "rewatch", label: copy.rewatch },
+            { key: "primary", label: copy.primary },
+            { key: "favorite", label: copy.favorite },
+            { key: "pinned", label: copy.pinned },
+            { key: "reasonTag", label: copy.reasonTag },
+            { key: "character", label: copy.character },
           ].map((opt) => (
             <button
               key={opt.key}
@@ -764,7 +845,7 @@ export default function TierBoard() {
               max={2099}
               value={logYear}
               onChange={(e) => setLogYear(String(e.target.value || "").replace(/[^\d]/g, "").slice(0, 4))}
-              aria-label="로그 연도 필터"
+              aria-label={copy.logYearFilter}
               style={{ width: 100 }}
             />
             {logFilter === "season" && (
@@ -772,12 +853,12 @@ export default function TierBoard() {
                 className="select"
                 value={logSeason}
                 onChange={(e) => setLogSeason(SEASON_OPTIONS.includes(e.target.value) ? e.target.value : "Spring")}
-                aria-label="로그 시즌 필터"
+                aria-label={copy.logSeasonFilter}
                 style={{ width: 140 }}
               >
                 {SEASON_OPTIONS.map((term) => (
                   <option key={term} value={term}>
-                    {term}
+                    {formatSeasonTermLabel(term, locale)}
                   </option>
                 ))}
               </select>
@@ -791,13 +872,13 @@ export default function TierBoard() {
               className="select"
               value={reasonTagFilter}
               onChange={(e) => setReasonTagFilter(String(e.target.value || ""))}
-              aria-label="포인트 태그 필터"
+              aria-label={copy.reasonTagFilter}
               style={{ width: 200 }}
             >
-              <option value="">포인트 태그 선택</option>
+              <option value="">{copy.reasonTagSelect}</option>
               {reasonTagOptions.map((row) => (
                 <option key={row.tag} value={row.tag}>
-                  {row.tag} ({row.count})
+                  {formatReasonTagLabel(row.tag, locale)} ({row.count})
                 </option>
               ))}
             </select>
@@ -810,10 +891,10 @@ export default function TierBoard() {
               className="select"
               value={characterFilterId}
               onChange={(e) => setCharacterFilterId(String(e.target.value || ""))}
-              aria-label="캐릭터 선택 필터"
+              aria-label={copy.characterFilter}
               style={{ width: 260 }}
             >
-              <option value="">캐릭터 선택</option>
+              <option value="">{copy.characterSelect}</option>
               {characterFilterOptions.map((row) => (
                 <option key={row.id} value={String(row.id)}>
                   {row.name} ({row.count})
@@ -825,7 +906,7 @@ export default function TierBoard() {
 
         {!canEditTierBoard && (
           <div className="small" style={{ opacity: 0.85 }}>
-            필터를 쓰는 동안에는 보기만 할 수 있어요. 드래그 편집은 `전체`에서 해주세요.
+            {copy.filterWarning}
           </div>
         )}
       </section>
@@ -908,7 +989,7 @@ export default function TierBoard() {
           minHeight: 140,
         }}
       >
-        <div style={{ fontWeight: 700, marginBottom: 10 }}>미분류</div>
+        <div style={{ fontWeight: 700, marginBottom: 10 }}>{copy.unranked}</div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {filterIdsByLog(tierState.unranked || []).map((id, idx) => {

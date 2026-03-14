@@ -1,10 +1,44 @@
+import { pickByLocale } from "../../domain/uiText";
+import { formatEventLabel, formatReasonTagLabel } from "../library/libraryCopy.js";
+
 export default function CharacterInsightSheet({
+  locale = "ko",
   base,
   selectedCharacter,
   characterInsight,
   titleById,
   onClose,
 }) {
+  const copy = pickByLocale(locale, {
+    ko: {
+      totalLogs: "이 캐릭터로 남긴 감상 기록",
+      close: "닫기",
+      recent60: "최근 60일",
+      relatedAnime: "관련 작품",
+      commonTags: "자주 붙는 포인트 태그",
+      relatedSection: "관련 작품",
+      emptyRelated: "아직 관련 로그가 없습니다.",
+      timeline: "최근 기록 타임라인",
+      emptyTimeline: "표시할 로그가 없습니다.",
+      openLibrary: "보관함에서 상세 보기",
+      countUnit: "개",
+      times: "회",
+    },
+    en: {
+      totalLogs: "Logs left for this character",
+      close: "Close",
+      recent60: "Last 60d",
+      relatedAnime: "Related anime",
+      commonTags: "Common reason tags",
+      relatedSection: "Related anime",
+      emptyRelated: "No related logs yet.",
+      timeline: "Recent timeline",
+      emptyTimeline: "No logs to show.",
+      openLibrary: "Open in Library",
+      countUnit: "",
+      times: "x",
+    },
+  });
   if (!selectedCharacter) return null;
   function buildLibraryDetailHref(anilistId) {
     const id = Number(anilistId);
@@ -59,27 +93,31 @@ export default function CharacterInsightSheet({
                 {characterInsight?.name || selectedCharacter?.name || `#${selectedCharacter.characterId}`}
               </div>
               <div className="small" style={{ opacity: 0.82 }}>
-                이 캐릭터로 남긴 감상 기록 {characterInsight?.total || 0}개
+                {locale === "en"
+                  ? `${copy.totalLogs} ${characterInsight?.total || 0}`
+                  : `${copy.totalLogs} ${characterInsight?.total || 0}${copy.countUnit}`}
               </div>
             </div>
           </div>
           <button type="button" className="btn" onClick={onClose}>
-            닫기
+            {copy.close}
           </button>
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
           <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.1)" }}>
-            최근 60일 {characterInsight?.recent60 || 0}회
+            {copy.recent60} {characterInsight?.recent60 || 0}{copy.times}
           </div>
           <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.1)" }}>
-            관련 작품 {characterInsight?.relatedAnime?.length || 0}개
+            {locale === "en"
+              ? `${copy.relatedAnime} ${characterInsight?.relatedAnime?.length || 0}`
+              : `${copy.relatedAnime} ${characterInsight?.relatedAnime?.length || 0}${copy.countUnit}`}
           </div>
         </div>
 
         {characterInsight?.reasonTags?.length > 0 && (
           <section style={{ marginBottom: 12 }}>
-            <div className="small" style={{ marginBottom: 6 }}>자주 붙는 포인트 태그</div>
+            <div className="small" style={{ marginBottom: 6 }}>{copy.commonTags}</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {characterInsight.reasonTags.map((row) => (
                 <span
@@ -96,7 +134,7 @@ export default function CharacterInsightSheet({
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ marginBottom: 8 }}>관련 작품</div>
+            <div className="small" style={{ marginBottom: 8 }}>{copy.relatedSection}</div>
             {characterInsight?.relatedAnime?.length ? (
               <div style={{ display: "grid", gap: 6 }}>
                 {characterInsight.relatedAnime.map((row) => (
@@ -108,24 +146,24 @@ export default function CharacterInsightSheet({
                     >
                       {row.title}
                     </a>
-                    <div className="small" style={{ opacity: 0.9 }}>{row.count}회</div>
+                    <div className="small" style={{ opacity: 0.9 }}>{row.count}{copy.times}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="small" style={{ opacity: 0.82 }}>아직 관련 로그가 없습니다.</div>
+              <div className="small" style={{ opacity: 0.82 }}>{copy.emptyRelated}</div>
             )}
           </div>
 
           <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ marginBottom: 8 }}>최근 기록 타임라인</div>
+            <div className="small" style={{ marginBottom: 8 }}>{copy.timeline}</div>
             {characterInsight?.recentLogs?.length ? (
               <div style={{ display: "grid", gap: 8 }}>
                 {characterInsight.recentLogs.map((row) => (
                   <div key={row.id} style={{ display: "grid", gap: 2 }}>
                     <div className="small" style={{ opacity: 0.86 }}>
-                      {row.label} · {row.eventType}
-                      {row.reasonTag ? ` · ${row.reasonTag}` : ""}
+                      {row.label} · {formatEventLabel(row.eventType, locale)}
+                      {row.reasonTag ? ` · ${formatReasonTagLabel(row.reasonTag, locale)}` : ""}
                     </div>
                     <div className="small" style={{ opacity: 0.94 }}>
                       <a
@@ -144,14 +182,14 @@ export default function CharacterInsightSheet({
                 ))}
               </div>
             ) : (
-              <div className="small" style={{ opacity: 0.82 }}>표시할 로그가 없습니다.</div>
+              <div className="small" style={{ opacity: 0.82 }}>{copy.emptyTimeline}</div>
             )}
           </div>
         </section>
 
         <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
           <a href={insightCtaHref} className="btn" style={{ textDecoration: "none" }}>
-            보관함에서 상세 보기
+            {copy.openLibrary}
           </a>
         </div>
       </div>

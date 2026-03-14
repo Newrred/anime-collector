@@ -47,96 +47,32 @@ import {
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import { wikidataGetKoTitlesByAniListIds } from "../lib/wikidata";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
-
-function firstHangulSynonym(media) {
-  const arr = media?.synonyms;
-  if (!Array.isArray(arr)) return null;
-  return arr.find((s) => /[\uAC00-\uD7A3]/.test(String(s || ""))) || null;
-}
-
-function deriveKoTitleFromMedia(media) {
-  const synKo = firstHangulSynonym(media);
-  if (synKo) return synKo;
-  const nativeTitle = String(media?.title?.native || "").trim();
-  if (isHangulText(nativeTitle)) return nativeTitle;
-  return null;
-}
-
-function pickCardTitle(item, media) {
-  if (item?.koTitle) return item.koTitle;
-
-  const derivedKo = deriveKoTitleFromMedia(media);
-  if (derivedKo) return derivedKo;
-
-  return (
-    media?.title?.native ||
-    media?.title?.english ||
-    media?.title?.romaji ||
-    (item?.anilistId ? `#${item.anilistId}` : "Unknown")
-  );
-}
-
-/** AniList 장르(영문) -> 한글 매핑 */
-const GENRE_KO = {
-  Action: "액션",
-  Adventure: "어드벤처",
-  Comedy: "코미디",
-  Drama: "드라마",
-  Ecchi: "에치",
-  Fantasy: "판타지",
-  Horror: "호러",
-  "Mahou Shoujo": "마법소녀",
-  Mecha: "메카",
-  Music: "음악",
-  Mystery: "미스터리",
-  Psychological: "심리",
-  Romance: "로맨스",
-  "Sci-Fi": "SF",
-  SciFi: "SF",
-  "Slice of Life": "일상",
-  Sports: "스포츠",
-  Supernatural: "초자연",
-  Thriller: "스릴러",
-  Hentai: "헨타이",
-};
-
-function genreKo(g) {
-  const s = String(g || "").trim();
-  return GENRE_KO[s] || s;
-}
+import { Chip, CollapsiblePanelHeader, GenresRow, SegTabButton } from "./library/LibraryUi.jsx";
+import LibraryStatsPanel from "./library/LibraryStatsPanel.jsx";
+import LibraryFiltersPanel from "./library/LibraryFiltersPanel.jsx";
+import LibraryDetailModal from "./library/LibraryDetailModal.jsx";
+import LibraryQuickLogSheet from "./library/LibraryQuickLogSheet.jsx";
+import {
+  AFFINITY_OPTIONS,
+  BACKUP_REMIND_DAYS,
+  LIBRARY_EVENT,
+  LIBRARY_STATUS,
+  REASON_TAG_OPTIONS,
+  SEASON_TERM_OPTIONS,
+  formatAffinityLabel,
+  formatGenreLabel,
+  formatRelationTypeLabel,
+  formatReasonTagLabel,
+  formatStatusLabel,
+} from "./library/libraryCopy.js";
+import { useUiPreferences } from "../hooks/useUiPreferences";
+import { formatRelativeAgo, pickByLocale } from "../domain/uiText";
+import { deriveKoTitleFromMedia, firstHangulSynonym, pickDisplayMediaTitle, pickDisplayTitle } from "../domain/animeTitles";
 
 function safeGenres(media) {
   const arr = media?.genres;
   return Array.isArray(arr) ? arr.filter(Boolean) : [];
 }
-
-const BACKUP_REMIND_DAYS = 7;
-const AFFINITY_OPTIONS = ["최애", "기억남음", "불호지만강렬"];
-const REASON_TAG_OPTIONS = ["성장", "관계성", "대사", "연출", "디자인", "성우", "기타"];
-const AFFINITY_LABELS = {
-  최애: "최애",
-  기억남음: "인상 깊었음",
-  불호지만강렬: "불호인데 강렬함",
-};
-const REASON_TAG_LABELS = {
-  성장: "서사",
-  관계성: "관계성",
-  대사: "대사",
-  연출: "연출",
-  디자인: "비주얼",
-  성우: "성우연기",
-  기타: "기타",
-};
-const SEASON_TERM_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
-const STATUS_UNCLASSIFIED = "\uBBF8\uBD84\uB958";
-const STATUS_WATCHING = "\uBCF4\uB294\uC911";
-const STATUS_HOLD = "\uBCF4\uB958";
-const STATUS_COMPLETED = "\uC644\uB8CC";
-const STATUS_DROPPED = "\uD558\uCC28";
-const EVENT_START = "\uC2DC\uC791";
-const EVENT_COMPLETE = "\uC644\uB8CC";
-const EVENT_REWATCH = "\uC7AC\uC2DC\uCCAD";
-const EVENT_DROP = "\uD558\uCC28";
 
 function formatLocalDate(date = new Date()) {
   const y = String(date.getFullYear());
@@ -147,44 +83,26 @@ function formatLocalDate(date = new Date()) {
 
 function normalizeStatusValue(rawStatus) {
   const value = String(rawStatus || "").trim();
-  if (value === STATUS_WATCHING) return STATUS_WATCHING;
-  if (value === STATUS_HOLD) return STATUS_HOLD;
-  if (value === STATUS_COMPLETED) return STATUS_COMPLETED;
-  if (value === STATUS_DROPPED) return STATUS_DROPPED;
-  return STATUS_UNCLASSIFIED;
+  if (value === LIBRARY_STATUS.watching) return LIBRARY_STATUS.watching;
+  if (value === LIBRARY_STATUS.hold) return LIBRARY_STATUS.hold;
+  if (value === LIBRARY_STATUS.completed) return LIBRARY_STATUS.completed;
+  if (value === LIBRARY_STATUS.dropped) return LIBRARY_STATUS.dropped;
+  return LIBRARY_STATUS.unclassified;
 }
 
 function eventTypeFromStatus(status) {
-  if (status === STATUS_WATCHING) return EVENT_START;
-  if (status === STATUS_COMPLETED) return EVENT_COMPLETE;
-  if (status === STATUS_DROPPED) return EVENT_DROP;
+  if (status === LIBRARY_STATUS.watching) return LIBRARY_EVENT.start;
+  if (status === LIBRARY_STATUS.completed) return LIBRARY_EVENT.complete;
+  if (status === LIBRARY_STATUS.dropped) return LIBRARY_EVENT.drop;
   return null;
 }
 
-function formatAgo(ms) {
-  if (!Number.isFinite(ms)) return "기록 없음";
-  const diff = Date.now() - ms;
-  if (diff < 60 * 60 * 1000) return "1시간 이내";
-  const hours = Math.floor(diff / (60 * 60 * 1000));
-  if (hours < 24) return `${hours}시간 전`;
-  const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-  return `${days}일 전`;
-}
-
-function formatWatchLogDate(log) {
+function formatWatchLogDate(log, locale = "ko") {
   const value = String(log?.watchedAtValue || "").trim();
   if (value) return value;
   const createdAt = Number(log?.createdAt);
-  if (!Number.isFinite(createdAt)) return "날짜 잘 모름";
+  if (!Number.isFinite(createdAt)) return locale === "en" ? "Date unknown" : "날짜 잘 모름";
   return new Date(createdAt).toISOString().slice(0, 10);
-}
-
-function affinityLabel(value) {
-  return AFFINITY_LABELS[String(value || "").trim()] || String(value || "").trim() || "인상 깊었음";
-}
-
-function reasonTagLabel(value) {
-  return REASON_TAG_LABELS[String(value || "").trim()] || String(value || "").trim();
 }
 
 function parseSeasonValue(value) {
@@ -301,22 +219,6 @@ function getCharacterRows(media, limit = 8) {
   return out;
 }
 
-const RELATION_TYPE_KO = {
-  ADAPTATION: "원작 연계",
-  PREQUEL: "전편",
-  SEQUEL: "속편",
-  PARENT: "본편",
-  SIDE_STORY: "외전",
-  CHARACTER: "캐릭터",
-  SUMMARY: "총집편",
-  ALTERNATIVE: "대체 설정",
-  SPIN_OFF: "스핀오프",
-  OTHER: "기타",
-  SOURCE: "원작",
-  COMPILATION: "편집본",
-  CONTAINS: "포함",
-};
-
 const ANIME_MEDIA_FORMATS = new Set([
   "TV",
   "TV_SHORT",
@@ -327,28 +229,16 @@ const ANIME_MEDIA_FORMATS = new Set([
   "MUSIC",
 ]);
 
-function relationTypeKo(type) {
-  const key = String(type || "").trim();
-  if (!key) return "연관";
-  return RELATION_TYPE_KO[key] || key.replace(/_/g, " ").toLowerCase();
-}
-
 function isAnimeMediaFormat(format) {
   const key = String(format || "").trim().toUpperCase();
   return ANIME_MEDIA_FORMATS.has(key);
 }
 
 function pickMediaTitle(media) {
-  const synKo = firstHangulSynonym(media);
-  if (synKo) return synKo;
-  const nativeTitle = String(media?.title?.native || "").trim();
-  const englishTitle = String(media?.title?.english || "").trim();
-  const romajiTitle = String(media?.title?.romaji || "").trim();
-  if (isHangulText(nativeTitle)) return nativeTitle;
-  return nativeTitle || englishTitle || romajiTitle || (Number.isFinite(Number(media?.id)) ? `#${media.id}` : "Unknown");
+  return pickDisplayMediaTitle(media, "ko");
 }
 
-function getRelatedSeriesRows(media, currentId, limit = 12) {
+function getRelatedSeriesRows(media, currentId, limit = 12, locale = "ko") {
   const edges = media?.relations?.edges;
   if (!Array.isArray(edges)) return [];
 
@@ -368,7 +258,7 @@ function getRelatedSeriesRows(media, currentId, limit = 12) {
     out.push({
       id,
       relationType: String(edge?.relationType || ""),
-      relationLabel: relationTypeKo(edge?.relationType),
+      relationLabel: formatRelationTypeLabel(edge?.relationType, locale),
       title: pickMediaTitle(node),
       siteUrl: String(node?.siteUrl || ""),
       cover: node?.coverImage?.extraLarge || node?.coverImage?.large || node?.coverImage?.medium || "",
@@ -409,143 +299,100 @@ function buildAliasKoTitleMap(seed) {
 
 const ALIAS_KO_TITLE_MAP = buildAliasKoTitleMap(aliasSeed);
 
-function Chip({ active, onClick, children, title }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`small library-chip${active ? " is-active" : ""}`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function StatBars({ rows, maxCount, emptyText = "데이터 없음" }) {
-  if (!rows.length) return <div className="small">{emptyText}</div>;
-  return (
-    <div className="library-stat-bars">
-      {rows.map((row) => {
-        const w = maxCount > 0 ? Math.max(6, Math.round((row.count / maxCount) * 100)) : 0;
-        return (
-          <div key={row.key} className="library-stat-bar-row">
-            <div className="small library-stat-bar-label">{row.label}</div>
-            <div className="library-stat-bar-track">
-              <div
-                className="library-stat-bar-fill"
-                style={{ width: `${w}%` }}
-              />
-            </div>
-            <div className="small library-stat-bar-count">{row.count}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function SegTabButton({ active, onClick, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`library-seg-btn${active ? " is-active" : ""}`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function CollapsiblePanelHeader({
-  title,
-  summary = null,
-  open,
-  onToggle,
-  controlsId,
-  openLabel,
-  closedLabel,
-}) {
-  return (
-    <button
-      type="button"
-      className={`library-panel-header-btn${open ? "" : " is-collapsed"}`}
-      onClick={onToggle}
-      aria-expanded={open}
-      aria-controls={controlsId}
-      aria-label={open ? openLabel : closedLabel}
-    >
-      <div className="library-panel-header-main">
-        <h3 className="library-panel-header-title">{title}</h3>
-        {summary ? <div className="small library-panel-header-summary">{summary}</div> : null}
-      </div>
-      <span className="library-panel-header-toggle" aria-hidden="true">
-        <svg
-          viewBox="0 0 20 20"
-          width="16"
-          height="16"
-          style={{
-            display: "block",
-            transition: "transform 160ms ease",
-            transform: open ? "rotate(0deg)" : "rotate(-90deg)",
-          }}
-        >
-          <path
-            d="M5.5 7.5L10 12l4.5-4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-    </button>
-  );
-}
-
-/**
- * 장르 태그(카드/모달 공용)
- * - compact=true: 줄바꿈 없이 1줄로 잘라서 meta 높이 줄임
- * - onPickGenre: 태그 클릭 시 필터
- */
-function GenresRow({ genres, max = 3, compact = false, onPickGenre }) {
-  const arr = Array.isArray(genres) ? genres : [];
-  if (arr.length === 0) return null;
-
-  const show = arr.slice(0, max);
-  const rest = arr.length - show.length;
-
-  return (
-    <div className={`library-genres-row${compact ? " library-genres-row--compact" : ""}`}>
-      {show.map((g) => (
-        <button
-          key={g}
-          type="button"
-          className="small library-genre-chip"
-          title={g}
-          onClick={(e) => {
-            e.stopPropagation(); // 카드 클릭(모달 열기) 방지
-            onPickGenre?.(g, e);
-          }}
-          style={!onPickGenre ? { cursor: "default" } : undefined}
-        >
-          {genreKo(g)}
-        </button>
-      ))}
-      {rest > 0 && (
-        <span
-          className="small library-genre-rest"
-          title={arr.map(genreKo).join(", ")}
-        >
-          +{rest}
-        </span>
-      )}
-    </div>
-  );
-}
-
 export default function Library() {
+  const { locale, setLocale } = useUiPreferences();
+  const copy = pickByLocale(locale, {
+    ko: {
+      fallbackBackup: "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다.",
+      title: "애니 보관함",
+      lead: "지금까지 본 작품을 모아 두고 다시 꺼내보는 개인 보관함",
+      addPanel: "추가할 애니 검색",
+      addPanelSummarySearch: "검색으로 직접 추가",
+      addPanelSummaryRecommend: "AI 추천 준비 중",
+      addPanelOpen: "추가할 애니 검색 접기",
+      addPanelClosed: "추가할 애니 검색 펼치기",
+      searchTab: "애니 검색",
+      recommendTab: "AI 추천",
+      recommendPlaceholder: "추후 구현 예정: 시청기록 기반 추천",
+      openDetail: "상세 열기",
+      unrated: "미평가",
+      starLabel: "별점",
+      backupNone: "수동 백업 기록이 없습니다. 내보내기(JSON)로 백업해 두세요.",
+      backupWas: "마지막 수동 백업이",
+      backupRefresh: "입니다. 백업 갱신을 권장합니다.",
+      backupLast: "마지막 수동 백업:",
+      backupAuto: "(자동 로컬 스냅샷은 계속 저장)",
+      installed: "앱이 설치됐습니다. 홈 화면에서 바로 실행할 수 있어요.",
+      backupDownloaded: "백업 파일을 다운로드했어요.",
+      sharedFile: "백업 JSON 파일을 공유했어요.",
+      shareCancelled: "공유를 취소했어요.",
+      sharedText: "백업 JSON 텍스트를 공유했어요.",
+      copiedJson: "백업 JSON을 클립보드에 복사했어요.",
+      shareFailed: "공유/복사에 실패했어요. JSON 파일 내보내기를 사용해 주세요.",
+      missingList: "가져오기 파일에 list 배열이 없어요.",
+      overwriteConfirm: "지금 보관함 데이터를 모두 바꾸고 불러올까요?",
+      importDoneOverwrite: "불러오기 완료! 지금 보관함 데이터로 교체했어요.",
+      importDoneMerge: "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요.",
+      emptyPaste: "붙여넣은 JSON 텍스트가 비어 있어요.",
+      pasteImportFailed: "붙여넣기 가져오기 실패",
+      importFailed: "가져오기 실패",
+      unknownError: "알 수 없는 오류",
+      nonAnimeType: "애니 형식이 아닌 항목은 보관함에 추가하지 않습니다.",
+      addedRelated: "관련 시리즈를 보관함에 추가하고 상세를 열었습니다.",
+      deleteAnimeConfirm: "이 작품을 보관함에서 삭제할까요?\n(점수/메모 포함된 모든 데이터가 사라집니다)",
+      deleteLogConfirm: "이 감상 기록을 삭제할까요?",
+      deletedLog: "감상 기록을 삭제했습니다.",
+      deleteLogFailed: "감상 기록 삭제 중 오류가 발생했습니다.",
+      installUnsupported: "현재 브라우저에서는 설치 프롬프트를 직접 사용할 수 없습니다.",
+      installCancelled: "설치를 취소했어요. 필요하면 다시 시도해 주세요.",
+      installFailed: "설치 요청 중 오류가 발생했습니다.",
+    },
+    en: {
+      fallbackBackup: "Automatic local backup is on. Export JSON regularly for a manual backup.",
+      title: "Anime Library",
+      lead: "A personal library for revisiting anime you have watched",
+      addPanel: "Search anime to add",
+      addPanelSummarySearch: "Add directly from search",
+      addPanelSummaryRecommend: "AI recommendations coming soon",
+      addPanelOpen: "Collapse add anime search",
+      addPanelClosed: "Expand add anime search",
+      searchTab: "Search",
+      recommendTab: "AI picks",
+      recommendPlaceholder: "Planned next: recommendations from watch history",
+      openDetail: "Open detail",
+      unrated: "Unrated",
+      starLabel: "Rating",
+      backupNone: "No manual backup yet. Export JSON to keep a backup file.",
+      backupWas: "Last manual backup was",
+      backupRefresh: ". Refreshing your backup is recommended.",
+      backupLast: "Last manual backup:",
+      backupAuto: "(automatic local snapshots continue in the background)",
+      installed: "The app was installed. You can launch it from your home screen.",
+      backupDownloaded: "Downloaded backup file.",
+      sharedFile: "Shared backup JSON file.",
+      shareCancelled: "Share cancelled.",
+      sharedText: "Shared backup JSON text.",
+      copiedJson: "Copied backup JSON to clipboard.",
+      shareFailed: "Share/copy failed. Use JSON file export instead.",
+      missingList: "Imported file does not contain a list array.",
+      overwriteConfirm: "Replace the current library data with this import?",
+      importDoneOverwrite: "Import complete. Replaced current library data.",
+      importDoneMerge: "Import complete. Merged into the existing library.",
+      emptyPaste: "Pasted JSON text is empty.",
+      pasteImportFailed: "Paste import failed",
+      importFailed: "Import failed",
+      unknownError: "Unknown error",
+      nonAnimeType: "Non-anime entries are not added to the library.",
+      addedRelated: "Added the related series to the library and opened its detail view.",
+      deleteAnimeConfirm: "Remove this anime from the library?\n(All score and memo data will be deleted.)",
+      deleteLogConfirm: "Delete this watch log?",
+      deletedLog: "Deleted the watch log.",
+      deleteLogFailed: "Failed while deleting the watch log.",
+      installUnsupported: "This browser cannot open the install prompt directly.",
+      installCancelled: "Install cancelled. You can try again later.",
+      installFailed: "Failed while requesting install.",
+    },
+  });
   const [sortKey, setSortKey] = useState("addedAt"); // addedAt | title | score | year | genre
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
@@ -578,14 +425,17 @@ export default function Library() {
   const [backupReminder, setBackupReminder] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
-  const [addPanelOpen, setAddPanelOpen] = useState(false);
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [addPanelOpen, setAddPanelOpen] = useState(true);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(true);
   const [addTab, setAddTab] = useState("search"); // search | recommend
   const [cardView, setCardView] = useState("meta"); // meta | poster
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
   const deepLinkHandledRef = useRef(false);
+  const genreKo = (value) => formatGenreLabel(value, locale);
+  const affinityLabel = (value) => formatAffinityLabel(value, locale);
+  const reasonTagLabel = (value) => formatReasonTagLabel(value, locale);
 
   useEffect(() => {
     let alive = true;
@@ -685,7 +535,7 @@ export default function Library() {
     a.remove();
     URL.revokeObjectURL(url);
 
-    markBackupExported("백업 파일을 다운로드했어요.");
+    markBackupExported(copy.backupDownloaded);
   }
 
   async function exportBackupMobile() {
@@ -698,15 +548,15 @@ export default function Library() {
       const file = new File([text], filename, { type: "application/json" });
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
-          title: "애니 보관함 백업",
+          title: locale === "en" ? "Anime Library Backup" : "애니 보관함 백업",
           files: [file],
         });
-        markBackupExported("백업 JSON 파일을 공유했어요.");
+        markBackupExported(copy.sharedFile);
         return;
       }
     } catch (err) {
       if (err?.name === "AbortError") {
-        setBackupMsg("공유를 취소했어요.");
+        setBackupMsg(copy.shareCancelled);
         return;
       }
     }
@@ -714,38 +564,38 @@ export default function Library() {
     try {
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
         await navigator.share({
-          title: "애니 보관함 백업(JSON)",
+          title: locale === "en" ? "Anime Library Backup (JSON)" : "애니 보관함 백업(JSON)",
           text,
         });
-        markBackupExported("백업 JSON 텍스트를 공유했어요.");
+        markBackupExported(copy.sharedText);
         return;
       }
     } catch (err) {
       if (err?.name === "AbortError") {
-        setBackupMsg("공유를 취소했어요.");
+        setBackupMsg(copy.shareCancelled);
         return;
       }
     }
 
     try {
       await navigator.clipboard.writeText(text);
-      markBackupExported("백업 JSON을 클립보드에 복사했어요.");
+      markBackupExported(copy.copiedJson);
     } catch {
-      setBackupMsg("공유/복사에 실패했어요. JSON 파일 내보내기를 사용해 주세요.");
+      setBackupMsg(copy.shareFailed);
     }
   }
 
   async function importBackupFromJson(json, mode = "merge") {
     const incomingList = Array.isArray(json) ? json : json?.list;
     if (!Array.isArray(incomingList)) {
-      throw new Error("가져오기 파일에 list 배열이 없어요.");
+      throw new Error(copy.missingList);
     }
 
     const incomingNormalized = normalizeImportList(incomingList);
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
-      const ok = window.confirm("지금 보관함 데이터를 모두 바꾸고 불러올까요?");
+      const ok = window.confirm(copy.overwriteConfirm);
       if (!ok) return;
       setItems(incomingNormalized);
     } else {
@@ -803,8 +653,8 @@ export default function Library() {
 
     setBackupMsg(
       isOverwrite
-        ? "불러오기 완료! 지금 보관함 데이터로 교체했어요."
-        : "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요."
+        ? copy.importDoneOverwrite
+        : copy.importDoneMerge
     );
     setSelectedId(null);
   }
@@ -818,7 +668,7 @@ export default function Library() {
   async function importBackupText(rawText, mode = "merge") {
     const raw = String(rawText || "").trim();
     if (!raw) {
-      setBackupMsg("붙여넣은 JSON 텍스트가 비어 있어요.");
+      setBackupMsg(copy.emptyPaste);
       return;
     }
 
@@ -827,7 +677,7 @@ export default function Library() {
       await importBackupFromJson(json, mode);
     } catch (err) {
       console.error(err);
-      setBackupMsg(`붙여넣기 가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      setBackupMsg(`${copy.pasteImportFailed}: ${err?.message || copy.unknownError}`);
       throw err;
     }
   }
@@ -837,7 +687,7 @@ export default function Library() {
       await importBackup(file, mode);
     } catch (err) {
       console.error(err);
-      setBackupMsg(`가져오기 실패: ${err?.message || "알 수 없는 오류"}`);
+      setBackupMsg(`${copy.importFailed}: ${err?.message || copy.unknownError}`);
       throw err;
     }
   }
@@ -932,17 +782,17 @@ export default function Library() {
     }
 
     if (!last) {
-      setBackupReminder("수동 백업 기록이 없습니다. 내보내기(JSON)로 백업해 두세요.");
+      setBackupReminder(copy.backupNone);
       return;
     }
 
     const threshold = BACKUP_REMIND_DAYS * 24 * 60 * 60 * 1000;
     if (Date.now() - last >= threshold) {
-      setBackupReminder(`마지막 수동 백업이 ${formatAgo(last)}입니다. 백업 갱신을 권장합니다.`);
+      setBackupReminder(`${copy.backupWas} ${formatRelativeAgo(last, locale, { ko: "기록 없음", en: "No record" })}${copy.backupRefresh}`);
     } else {
-      setBackupReminder(`마지막 수동 백업: ${formatAgo(last)} (자동 로컬 스냅샷은 계속 저장)`);
+      setBackupReminder(`${copy.backupLast} ${formatRelativeAgo(last, locale, { ko: "기록 없음", en: "No record" })} ${copy.backupAuto}`);
     }
-  }, [items, backupMsg]);
+  }, [items, backupMsg, copy.backupNone, copy.backupWas, copy.backupRefresh, copy.backupLast, copy.backupAuto, locale]);
 
   useEffect(() => {
     function syncInstallState() {
@@ -953,7 +803,7 @@ export default function Library() {
     }
     function onInstalled() {
       setCanInstallPwa(false);
-      setBackupMsg("앱이 설치됐습니다. 홈 화면에서 바로 실행할 수 있어요.");
+      setBackupMsg(copy.installed);
     }
 
     syncInstallState();
@@ -963,7 +813,7 @@ export default function Library() {
       window.removeEventListener("pwa-install-ready", onInstallReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, []);
+  }, [copy.installed]);
 
   useEffect(() => {
     if (!gridRef.current || typeof ResizeObserver === "undefined") return undefined;
@@ -1008,6 +858,10 @@ export default function Library() {
     const m = mediaMap.get(it.anilistId);
     return pickCardTitle(it, m);
   }
+
+  function pickCardTitle(item, media) {
+    return pickDisplayTitle(item, media, locale);
+  }
   function getYear(it) {
     const m = mediaMap.get(it.anilistId);
     return m?.seasonYear ?? -1;
@@ -1024,7 +878,7 @@ export default function Library() {
   }
 
   function removeAnime(id) {
-    const ok = window.confirm("이 작품을 보관함에서 삭제할까요?\n(점수/메모 포함된 모든 데이터가 사라집니다)");
+    const ok = window.confirm(copy.deleteAnimeConfirm);
     if (!ok) return;
 
     setItems((prev) => prev.filter((x) => x.anilistId !== id));
@@ -1146,7 +1000,7 @@ export default function Library() {
       if (sortKey === "title") {
         const ta = getTitle(a) || "";
         const tb = getTitle(b) || "";
-        return dir * ta.localeCompare(tb, "ko") || (a.anilistId - b.anilistId);
+        return dir * ta.localeCompare(tb, locale === "en" ? "en" : "ko") || (a.anilistId - b.anilistId);
       }
 
       if (sortKey === "score") { va = getScore(a); vb = getScore(b); }
@@ -1180,7 +1034,7 @@ export default function Library() {
   const dashboard = useMemo(() => {
     const statusRows = ["완료", "보는중", "보류", "하차", "미분류"].map((s) => ({
       key: s,
-      label: s,
+      label: formatStatusLabel(s, locale),
       count: items.filter((it) => (it.status || "미분류") === s).length,
     }));
 
@@ -1215,7 +1069,7 @@ export default function Library() {
         count: normalizeRewatchCount(it?.rewatchCount),
       }))
       .filter((row) => row.count > 0)
-      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title, "ko"))
+      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title, locale === "en" ? "en" : "ko"))
       .slice(0, 5)
       .map((row) => ({ ...row }));
 
@@ -1233,7 +1087,7 @@ export default function Library() {
       maxStatus,
       maxGenre,
     };
-  }, [items, mediaMap]);
+  }, [items, mediaMap, locale]);
 
   const selected = selectedId ? items.find((x) => x.anilistId === selectedId) : null;
   const selectedMedia = selectedId ? mediaMap.get(selectedId) : null;
@@ -1247,15 +1101,15 @@ export default function Library() {
   const selectedScoreLabel = hoverScore != null
     ? `${hoverScore} / ${SCORE_MAX}`
     : selectedScoreRaw == null
-      ? "미평가"
+      ? copy.unrated
       : `${selectedScore} / ${SCORE_MAX}`;
   const selectedCharacters = useMemo(
     () => getCharacterRows(selectedMedia, 8),
     [selectedMedia]
   );
   const selectedRelatedSeries = useMemo(
-    () => getRelatedSeriesRows(selectedMedia, selectedId, 12),
-    [selectedMedia, selectedId]
+    () => getRelatedSeriesRows(selectedMedia, selectedId, 12, locale),
+    [selectedMedia, selectedId, locale]
   );
   const itemKoTitleMap = useMemo(() => {
     const m = new Map();
@@ -1609,9 +1463,9 @@ export default function Library() {
 
     const today = formatLocalDate(new Date());
     const cueByStatus = {
-      [STATUS_WATCHING]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uBCF4\uB294\uC911 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
-      [STATUS_COMPLETED]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uC644\uB8CC \uC0C1\uD0DC\uB85C \uCD94\uAC00",
-      [STATUS_DROPPED]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uD558\uCC28 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+      [LIBRARY_STATUS.watching]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uBCF4\uB294\uC911 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+      [LIBRARY_STATUS.completed]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uC644\uB8CC \uC0C1\uD0DC\uB85C \uCD94\uAC00",
+      [LIBRARY_STATUS.dropped]: "\uB77C\uC774\uBE0C\uB7EC\uB9AC\uC5D0 \uD558\uCC28 \uC0C1\uD0DC\uB85C \uCD94\uAC00",
     };
     const log = createWatchLog({
       anilistId: id,
@@ -1627,16 +1481,16 @@ export default function Library() {
     });
     const quickContext = {
       source:
-        initialStatus === STATUS_COMPLETED
+        initialStatus === LIBRARY_STATUS.completed
           ? "add-completed"
-          : initialStatus === STATUS_DROPPED
+          : initialStatus === LIBRARY_STATUS.dropped
             ? "add-dropped"
             : "add-watching",
       isAuto: true,
       status: initialStatus,
     };
     const shouldOpenQuickSheet =
-      initialStatus === STATUS_COMPLETED || initialStatus === STATUS_DROPPED;
+      initialStatus === LIBRARY_STATUS.completed || initialStatus === LIBRARY_STATUS.dropped;
 
     appendWatchLog(log)
       .then((saved) => {
@@ -1646,7 +1500,7 @@ export default function Library() {
         }
       })
       .catch(() => {
-        setBackupMsg("\uCD08\uAE30 \uC0C1\uD0DC \uB85C\uADF8 \uC0DD\uC131\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.");
+        setBackupMsg(locale === "en" ? "Failed to create the initial status log." : "초기 상태 로그 생성에 실패했습니다.");
       });
   }
 
@@ -1670,7 +1524,7 @@ export default function Library() {
     const id = Number(row?.id);
     if (!Number.isFinite(id)) return;
     if (!isAnimeMediaFormat(row?.format)) {
-      setBackupMsg("애니 형식이 아닌 항목은 보관함에 추가하지 않습니다.");
+      setBackupMsg(copy.nonAnimeType);
       return;
     }
     if (libraryIdSet.has(id)) {
@@ -1686,7 +1540,7 @@ export default function Library() {
     const nextItem = normalizeItem({
       anilistId: id,
       koTitle: derivedKoTitle,
-      status: STATUS_UNCLASSIFIED,
+      status: LIBRARY_STATUS.unclassified,
       score: null,
       memo: "",
       rewatchCount: 0,
@@ -1703,7 +1557,7 @@ export default function Library() {
       });
     }
     setSelectedId(id);
-    setBackupMsg("관련 시리즈를 보관함에 추가하고 상세를 열었습니다.");
+    setBackupMsg(copy.addedRelated);
   }
 
   function toggleQuickLogCharacter(characterId) {
@@ -1812,7 +1666,7 @@ export default function Library() {
   async function deleteSelectedWatchLog(logId) {
     const key = String(logId || "").trim();
     if (!key) return;
-    const ok = window.confirm("이 감상 기록을 삭제할까요?");
+    const ok = window.confirm(copy.deleteLogConfirm);
     if (!ok) return;
 
     try {
@@ -1822,9 +1676,9 @@ export default function Library() {
       const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
       setSelectedLogs(Array.isArray(rows) ? rows : []);
       if (quickLogDraft?.logId && String(quickLogDraft.logId) === key) closeQuickLogSheet();
-      setBackupMsg("감상 기록을 삭제했습니다.");
+      setBackupMsg(copy.deletedLog);
     } catch {
-      setBackupMsg("감상 기록 삭제 중 오류가 발생했습니다.");
+      setBackupMsg(copy.deleteLogFailed);
     }
   }
 
@@ -1881,7 +1735,9 @@ export default function Library() {
           String(primaryRef.note || "").trim() ||
           String(quickLogDraft.cue || "").trim();
         const shouldPin = window.confirm(
-          `이 캐릭터("${primaryRef.nameSnapshot}")를 최애로 고정할까요?`
+          locale === "en"
+            ? `Pin "${primaryRef.nameSnapshot}" as a favorite character?`
+            : `이 캐릭터("${primaryRef.nameSnapshot}")를 최애로 고정할까요?`
         );
         if (shouldPin) {
           await upsertCharacterPin({
@@ -1976,15 +1832,15 @@ export default function Library() {
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
     if (typeof window.__promptPwaInstall !== "function") {
-      setBackupMsg("현재 브라우저에서는 설치 프롬프트를 직접 사용할 수 없습니다.");
+      setBackupMsg(copy.installUnsupported);
       return;
     }
 
     try {
       const ok = await window.__promptPwaInstall();
-      if (!ok) setBackupMsg("설치를 취소했어요. 필요하면 다시 시도해 주세요.");
+      if (!ok) setBackupMsg(copy.installCancelled);
     } catch {
-      setBackupMsg("설치 요청 중 오류가 발생했습니다.");
+      setBackupMsg(copy.installFailed);
     }
   }
 
@@ -1997,6 +1853,8 @@ export default function Library() {
         base={base}
         panelId="data-menu-panel"
         canInstallPwa={canInstallPwa}
+        locale={locale}
+        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
         onExportFile={exportBackup}
         onExportMobile={exportBackupMobile}
         onInstallPwa={onClickInstallPwa}
@@ -2005,11 +1863,11 @@ export default function Library() {
       />
 
       <section className="pageHeader">
-        <h1 className="pageTitle">애니 보관함</h1>
-        <p className="pageLead">지금까지 본 작품을 모아 두고 다시 꺼내보는 개인 보관함</p>
+        <h1 className="pageTitle">{copy.title}</h1>
+        <p className="pageLead">{copy.lead}</p>
         <div className="library-top-note">
           <span className="small">
-            {backupReminder || "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다."}
+            {backupReminder || copy.fallbackBackup}
           </span>
         </div>
         {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
@@ -2017,26 +1875,26 @@ export default function Library() {
 
       <section className="library-panel">
         <CollapsiblePanelHeader
-          title="추가할 애니 검색"
-          summary={addTab === "search" ? "검색으로 직접 추가" : "AI 추천 준비 중"}
+          title={copy.addPanel}
+          summary={addTab === "search" ? copy.addPanelSummarySearch : copy.addPanelSummaryRecommend}
           open={addPanelOpen}
           onToggle={() => setAddPanelOpen((v) => !v)}
           controlsId="add-anime-panel-content"
-          openLabel="추가할 애니 검색 접기"
-          closedLabel="추가할 애니 검색 펼치기"
+          openLabel={copy.addPanelOpen}
+          closedLabel={copy.addPanelClosed}
         />
         {addPanelOpen && (
           <>
             <div id="add-anime-panel-content" className="library-seg-wrap">
-              <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>애니 검색</SegTabButton>
-              <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>AI 추천</SegTabButton>
+              <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>{copy.searchTab}</SegTabButton>
+              <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>{copy.recommendTab}</SegTabButton>
             </div>
             {addTab === "search" ? (
-              <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} />
+              <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} locale={locale} />
             ) : (
               <div className="library-recommend-placeholder">
                 <div className="small">
-                  추후 구현 예정: 시청기록 기반 추천
+                  {copy.recommendPlaceholder}
                 </div>
               </div>
             )}
@@ -2044,171 +1902,41 @@ export default function Library() {
         )}
       </section>
 
-      <section className="library-panel library-panel--stats">
-        <CollapsiblePanelHeader
-          title="통계 대시보드"
-          summary={`총 ${dashboard.total}개 · 평균 점수 ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${SCORE_MAX}`} (${dashboard.scored}개 채점)`}
-          open={statsOpen}
-          onToggle={() => setStatsOpen((v) => !v)}
-          controlsId="stats-board-content"
-          openLabel="통계 대시보드 접기"
-          closedLabel="통계 대시보드 펼치기"
-        />
+      <LibraryStatsPanel
+        locale={locale}
+        dashboard={dashboard}
+        open={statsOpen}
+        onToggle={() => setStatsOpen((value) => !value)}
+        onOpenAnime={setSelectedId}
+        scoreMax={SCORE_MAX}
+      />
 
-        {statsOpen && (
-          <div id="stats-board-content" className="library-stats-grid">
-            <div className="library-stats-card">
-              <div className="library-stats-card-title">상태별 분류</div>
-              <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} />
-            </div>
-            <div className="library-stats-card">
-              <div className="library-stats-card-title">시청 장르 상위 5</div>
-              <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} />
-            </div>
-            <div className="library-stats-card">
-              <div className="library-stats-card-title">재주행 TOP 5</div>
-              {dashboard.rewatchRows.length === 0 ? (
-                <div className="small">재주행 기록이 없습니다.</div>
-              ) : (
-                <div className="library-rewatch-list">
-                  {dashboard.rewatchRows.map((row) => {
-                    return (
-                      <button
-                        key={row.key}
-                        type="button"
-                        onClick={() => setSelectedId(row.id)}
-                        className="library-rewatch-item"
-                        title={`${row.title} · ${row.count}회`}
-                      >
-                        <div className="library-rewatch-item-grid">
-                          <div className="small library-rewatch-item-title">
-                            {row.title}
-                          </div>
-                          <div className="small library-rewatch-item-count">{row.count}회</div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="library-panel">
-        <CollapsiblePanelHeader
-          title="라이브러리 검색/정렬"
-          summary={`현재 ${filtered.length}개 표시`}
-          open={filterPanelOpen}
-          onToggle={() => setFilterPanelOpen((v) => !v)}
-          controlsId="library-filter-panel-content"
-          openLabel="라이브러리 검색/정렬 접기"
-          closedLabel="라이브러리 검색/정렬 펼치기"
-        />
-
-        {filterPanelOpen && (
-          <div id="library-filter-panel-content">
-            <div className="library-filter-row">
-              <select
-                className="select library-filter-select library-filter-select--sort"
-                value={sortKey}
-                onChange={(e) => setSortKey(e.target.value)}
-              >
-                <option value="addedAt">추가순</option>
-                <option value="title">제목순</option>
-                <option value="score">점수순</option>
-                <option value="year">연도순</option>
-                <option value="genre">장르순</option>
-              </select>
-              <select
-                className="select library-filter-select library-filter-select--status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option>전체</option>
-                <option>완료</option>
-                <option>보는중</option>
-                <option>보류</option>
-                <option>하차</option>
-                <option>미분류</option>
-              </select>
-              <div className="library-filter-actions">
-                <label className="library-filter-actions-label">
-                  <input type="checkbox" checked={groupByStatus} onChange={(e) => setGroupByStatus(e.target.checked)} />
-                  <span className="small">상태별 정렬</span>
-                </label>
-                <button className="btn" onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}>
-                  {sortDir === "asc" ? "오름차순" : "내림차순"}
-                </button>
-              </div>
-            </div>
-
-            <div className="library-search-row">
-              <input
-                className="input library-search-input"
-                placeholder="보관함 검색 (제목/장르)"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
-              <div className="library-seg-wrap library-view-mode">
-                <SegTabButton active={cardView === "meta"} onClick={() => setCardView("meta")}>정보 함께</SegTabButton>
-                <SegTabButton active={cardView === "poster"} onClick={() => setCardView("poster")}>포스터만</SegTabButton>
-              </div>
-            </div>
-
-            <div className="library-chip-row">
-              <div className="small library-chip-label">장르:</div>
-              <div className="library-chip-scroll">
-                <Chip active={genreSet.size === 0} onClick={clearGenres} title="장르 전체">전체</Chip>
-                {genreOptions.map((g) => (
-                  <Chip key={g} active={genreSet.has(g)} onClick={() => toggleGenre(g)} title={g}>
-                    {genreKo(g)}
-                  </Chip>
-                ))}
-              </div>
-              {genreSet.size > 0 && (
-                <button type="button" className="btn library-chip-reset" onClick={clearGenres}>
-                  선택 해제({genreSet.size})
-                </button>
-              )}
-            </div>
-
-            <div className="library-chip-row">
-              <div className="small library-chip-label">상태:</div>
-              <div className="library-chip-scroll">
-                {["전체", "완료", "보는중", "보류", "하차", "미분류"].map((s) => (
-                  <Chip
-                    key={s}
-                    active={status === s}
-                    onClick={() => setStatus(s)}
-                    title={`상태 ${s}`}
-                  >
-                    {s}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-
-            <div className="library-card-size-row">
-              <div className="small library-card-size-label">카드 크기</div>
-              <input
-                type="range"
-                min={2}
-                max={10}
-                step={1}
-                value={Number(cardsPerRowBase) || 5}
-                onChange={(e) => setCardsPerRowBase(Number(e.target.value))}
-                className="library-card-size-slider"
-                title="그리드 가로 수 조절"
-              />
-              <div className="small library-card-size-value">
-                기준 {Number(cardsPerRowBase) || 5} · 현재 {effectiveCols}열
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
+      <LibraryFiltersPanel
+        locale={locale}
+        filteredCount={filtered.length}
+        open={filterPanelOpen}
+        onToggle={() => setFilterPanelOpen((value) => !value)}
+        sortKey={sortKey}
+        onSortKeyChange={setSortKey}
+        status={status}
+        onStatusChange={setStatus}
+        groupByStatus={groupByStatus}
+        onGroupByStatusChange={setGroupByStatus}
+        sortDir={sortDir}
+        onToggleSortDir={() => setSortDir((direction) => (direction === "asc" ? "desc" : "asc"))}
+        query={q}
+        onQueryChange={setQ}
+        cardView={cardView}
+        onCardViewChange={setCardView}
+        genreSet={genreSet}
+        genreOptions={genreOptions}
+        onClearGenres={clearGenres}
+        onToggleGenre={toggleGenre}
+        cardsPerRowBase={cardsPerRowBase}
+        onCardsPerRowBaseChange={setCardsPerRowBase}
+        effectiveCols={effectiveCols}
+        formatGenreLabel={genreKo}
+      />
 
       <div
         ref={gridRef}
@@ -2221,6 +1949,7 @@ export default function Library() {
           const m = mediaMap.get(it.anilistId);
           const cardTitle = getTitle(it);
           const cardStatus = it.status || "미분류";
+          const cardStatusLabel = formatStatusLabel(cardStatus, locale);
           const cardScore = normalizeScoreValue(it.score);
           const cardStarsFill = `${((cardScore ?? 0) / SCORE_MAX) * 100}%`;
           const gs = safeGenres(m);
@@ -2233,7 +1962,7 @@ export default function Library() {
               onKeyDown={(e) => onCardKeyDown(e, it.anilistId)}
               role="button"
               tabIndex={0}
-              aria-label={`${cardTitle} 상세 열기`}
+              aria-label={`${cardTitle} ${copy.openDetail}`}
             >
               <img
                 src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
@@ -2254,9 +1983,9 @@ export default function Library() {
                   </div>
 
                   <div className="library-card-meta-row">
-                    <span style={getStatusBadgeStyle(cardStatus)}>{cardStatus}</span>
+                    <span style={getStatusBadgeStyle(cardStatus)}>{cardStatusLabel}</span>
                     <span
-                      aria-label={cardScore == null ? "미평가" : `별점 ${cardScore} / ${SCORE_MAX}`}
+                      aria-label={cardScore == null ? copy.unrated : `${copy.starLabel} ${cardScore} / ${SCORE_MAX}`}
                       className="library-card-stars"
                     >
                       <span aria-hidden className="library-card-stars-base">★★★★★</span>
@@ -2276,6 +2005,7 @@ export default function Library() {
                     genres={gs}
                     max={3}
                     compact={true}
+                    formatGenreLabel={genreKo}
                     onPickGenre={onPickGenreFromTag}
                   />
                 </div>
@@ -2285,865 +2015,94 @@ export default function Library() {
         })}
       </div>
 
-      {selected && (
-        <div
-          className="modalBack"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) closeSelectedModal();
-          }}
-        >
-          <div
-            className="modal"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="modalCloseBtn"
-              onClick={closeSelectedModal}
-              aria-label="닫기"
-            >
-              ×
-            </button>
-            <div className="modalBody">
-              <div className="modalCover">
-                <img src={selectedMedia?.coverImage?.extraLarge || selectedMedia?.coverImage?.large || selectedMedia?.coverImage?.medium || ""} alt={selectedTitle} />
-                <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {selectedMedia?.siteUrl && (
-                    <a className="btn" href={selectedMedia.siteUrl} target="_blank" rel="noreferrer">
-                      AniList 열기
-                    </a>
-                  )}
-                  <button className="removeBtn" onClick={() => removeAnime(selectedId)}>삭제</button>
-                </div>
-              </div>
+      <LibraryDetailModal
+        locale={locale}
+        open={Boolean(selected)}
+        selectedId={selectedId}
+        selected={selected}
+        selectedMedia={selectedMedia}
+        selectedTitle={selectedTitle}
+        selectedRelatedSeries={selectedRelatedSeries}
+        libraryIdSet={libraryIdSet}
+        items={items}
+        mediaMap={mediaMap}
+        itemKoTitleMap={itemKoTitleMap}
+        relatedKoTitleById={relatedKoTitleById}
+        aliasKoTitleMap={ALIAS_KO_TITLE_MAP}
+        selectedScore={selectedScore}
+        selectedScoreLabel={selectedScoreLabel}
+        selectedStarsFill={selectedStarsFill}
+        selectedLogs={selectedLogs}
+        logsLoading={logsLoading}
+        selectedCharacters={selectedCharacters}
+        memoDraft={memoDraft}
+        rewatchCountDraft={rewatchCountDraft}
+        lastRewatchAtDraft={lastRewatchAtDraft}
+        pinnedCharacterKeySet={pinnedCharacterKeySet}
+        onClose={closeSelectedModal}
+        onRemoveAnime={removeAnime}
+        onOpenAnime={setSelectedId}
+        onAddRelatedSeries={addRelatedSeriesToLibrary}
+        onStatusChange={onSelectedStatusChange}
+        onUpdateSelected={updateSelected}
+        onHoverScoreChange={setHoverScore}
+        getHoverScoreFromPointer={getHoverScoreFromPointer}
+        setMemoDraft={setMemoDraft}
+        setRewatchCountDraft={setRewatchCountDraft}
+        setLastRewatchAtDraft={setLastRewatchAtDraft}
+        onCommitModalDraft={commitModalDraft}
+        onAppendSelectedWatchLog={appendSelectedWatchLog}
+        onOpenQuickLogSheet={openQuickLogSheet}
+        onDeleteSelectedWatchLog={deleteSelectedWatchLog}
+        onToggleCharacterPin={toggleCharacterPin}
+        safeGenres={safeGenres}
+        formatGenreLabel={genreKo}
+        isAnimeMediaFormat={isAnimeMediaFormat}
+        pickCardTitle={pickCardTitle}
+        formatLocalDate={formatLocalDate}
+        formatWatchLogDate={(log) => formatWatchLogDate(log, locale)}
+        normalizeRewatchCount={normalizeRewatchCount}
+        onPickGenreFromTag={onPickGenreFromTag}
+        scoreMax={SCORE_MAX}
+        scoreStep={SCORE_STEP}
+        eventRewatch={LIBRARY_EVENT.rewatch}
+        statusCompleted={LIBRARY_STATUS.completed}
+      />
 
-              <div className="modalMain">
-                <h2 className="modalTitle">{selectedTitle}</h2>
-                <div className="small modalMeta">
-                  {selectedMedia?.seasonYear ? `${selectedMedia.seasonYear} · ` : ""}
-                  {selectedMedia?.format || ""}
-                  {selectedMedia?.episodes ? ` · ${selectedMedia.episodes}화` : ""}
-                </div>
-
-                {/* 모달 장르 태그(전체, 클릭하면 필터) */}
-                <GenresRow
-                  genres={safeGenres(selectedMedia)}
-                  max={999}
-                  compact={false}
-                  onPickGenre={onPickGenreFromTag}
-                />
-
-                <div className="row">
-                  <div className="small">관련 시리즈</div>
-                  <div style={{ display: "grid", gap: 8 }}>
-                    {selectedRelatedSeries.length === 0 ? (
-                      <div className="small" style={{ opacity: 0.85 }}>
-                        관련 시리즈 정보가 없거나 불러오는 중입니다.
-                      </div>
-                    ) : (
-                      selectedRelatedSeries.map((row) => {
-                        const inLibrary = libraryIdSet.has(row.id);
-                        const canAddToLibrary = isAnimeMediaFormat(row.format);
-                        const libraryItem = inLibrary
-                          ? items.find((x) => Number(x?.anilistId) === row.id) || null
-                          : null;
-                        const cachedMedia = mediaMap.get(row.id) || null;
-                        const mappedKoTitle = String(
-                          itemKoTitleMap.get(row.id) || ALIAS_KO_TITLE_MAP.get(row.id) || relatedKoTitleById[row.id] || ""
-                        ).trim();
-                        const displayTitle = mappedKoTitle || pickCardTitle(libraryItem, cachedMedia || row.media || null);
-                        return (
-                          <div
-                            key={`${row.id}:${row.relationType}`}
-                            style={{
-                              border: "1px solid rgba(255,255,255,.1)",
-                              borderRadius: 10,
-                              background: "rgba(255,255,255,.03)",
-                              padding: 8,
-                            }}
-                          >
-                            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                              {row.cover ? (
-                                <img
-                                  src={row.cover}
-                                  alt={displayTitle}
-                                  style={{ width: 40, height: 56, borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
-                                />
-                              ) : (
-                                <div
-                                  aria-hidden
-                                  style={{
-                                    width: 40,
-                                    height: 56,
-                                    borderRadius: 6,
-                                    background: "rgba(255,255,255,.08)",
-                                    flexShrink: 0,
-                                  }}
-                                />
-                              )}
-                              <div style={{ minWidth: 0, flex: "1 1 180px" }}>
-                                <div
-                                  style={{
-                                    fontSize: 13,
-                                    fontWeight: 700,
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                  }}
-                                >
-                                  {displayTitle}
-                                </div>
-                                <div className="small" style={{ opacity: 0.86 }}>
-                                  {row.relationLabel}
-                                  {row.seasonYear ? ` · ${row.seasonYear}` : ""}
-                                  {row.format ? ` · ${row.format}` : ""}
-                                  {row.episodes ? ` · ${row.episodes}화` : ""}
-                                </div>
-                              </div>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  gap: 6,
-                                  flexWrap: "wrap",
-                                  justifyContent: "flex-end",
-                                  marginLeft: "auto",
-                                  flex: "0 0 auto",
-                                }}
-                              >
-                                {inLibrary ? (
-                                  <button type="button" className="btn" onClick={() => setSelectedId(row.id)}>
-                                    상세 열기
-                                  </button>
-                                ) : canAddToLibrary ? (
-                                  <button
-                                    type="button"
-                                    className="btn"
-                                    onClick={() => addRelatedSeriesToLibrary(row)}
-                                    aria-label={`${displayTitle} 추가 후 상세 열기`}
-                                    title="추가 후 열기"
-                                    style={{
-                                      width: 34,
-                                      minWidth: 34,
-                                      padding: 0,
-                                      fontSize: 22,
-                                      lineHeight: 1,
-                                      fontWeight: 700,
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                    }}
-                                  >
-                                    +
-                                  </button>
-                                ) : null}
-                                {row.siteUrl && (
-                                  <a className="btn" href={row.siteUrl} target="_blank" rel="noreferrer">
-                                    AniList
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="small">상태</div>
-                  <select
-                    className="select"
-                    value={selected.status || "미분류"}
-                    onChange={(e) => onSelectedStatusChange(e.target.value)}
-                  >
-                    <option>완료</option>
-                    <option>보는중</option>
-                    <option>보류</option>
-                    <option>하차</option>
-                    <option>미분류</option>
-                  </select>
-                </div>
-
-                <div className="row">
-                  <div className="small">점수</div>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-                      <div
-                        style={{
-                          position: "relative",
-                          width: 132,
-                          height: 24,
-                          fontSize: 24,
-                          letterSpacing: 2,
-                          lineHeight: 1,
-                          userSelect: "none",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div aria-hidden style={{ color: "rgba(255,255,255,.22)" }}>★★★★★</div>
-                        <div
-                          aria-hidden
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            width: selectedStarsFill,
-                            overflow: "hidden",
-                            color: "#ffd76b",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          ★★★★★
-                        </div>
-
-                        <input
-                          type="range"
-                          min={0}
-                          max={SCORE_MAX}
-                          step={SCORE_STEP}
-                          value={selectedScore}
-                          onChange={(e) => updateSelected({ score: Number(e.target.value) })}
-                          onMouseMove={(e) => setHoverScore(getHoverScoreFromPointer(e))}
-                          onMouseLeave={() => setHoverScore(null)}
-                          aria-label="별점"
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            margin: 0,
-                            cursor: "pointer",
-                          }}
-                        />
-                      </div>
-                      <div className="small" style={{ opacity: 0.95, minWidth: 44 }}>
-                        {selectedScoreLabel}
-                      </div>
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() => {
-                          setHoverScore(null);
-                          updateSelected({ score: null });
-                        }}
-                        style={{ marginLeft: "auto", padding: "6px 10px" }}
-                      >
-                        초기화
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="small">재주행</div>
-                  <div style={{ display: "grid", gap: 8 }}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() => {
-                          const nextCount = normalizeRewatchCount(rewatchCountDraft + 1);
-                          const today = formatLocalDate(new Date());
-                          setRewatchCountDraft(nextCount);
-                          setLastRewatchAtDraft(today);
-                          updateSelected({ rewatchCount: nextCount, lastRewatchAt: today });
-                          appendSelectedWatchLog(EVENT_REWATCH, {
-                            cue: `\uC7AC\uC8FC\uD589 \uC644\uB8CC (${nextCount}\uD68C\uCC28)`,
-                          }, {
-                            openQuickSheet: true,
-                            quickContext: { source: "rewatch-plus", isAuto: true, status: STATUS_COMPLETED },
-                          });
-                        }}
-                      >
-                        재주행 +1
-                      </button>
-                      <input
-                        className="input"
-                        type="number"
-                        min={0}
-                        step={1}
-                        value={rewatchCountDraft}
-                        onChange={(e) => setRewatchCountDraft(normalizeRewatchCount(e.target.value))}
-                        onBlur={commitModalDraft}
-                        style={{ width: 72, maxWidth: "100%", textAlign: "center", flex: "0 0 72px" }}
-                        aria-label="재주행 횟수"
-                      />
-
-                      <input
-                        className="input"
-                        type="date"
-                        value={lastRewatchAtDraft}
-                        onChange={(e) => setLastRewatchAtDraft(e.target.value)}
-                        onBlur={commitModalDraft}
-                        style={{ width: "min(220px, 100%)", maxWidth: "100%", flex: "1 1 180px" }}
-                        aria-label="마지막 재주행"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="row">
-                    <div className="small">자세한 메모</div>
-                    <textarea
-                      className="textarea"
-                      value={memoDraft}
-                      onChange={(e) => setMemoDraft(e.target.value)}
-                      onBlur={commitModalDraft}
-                      placeholder="보고 난 뒤 한줄 메모"
-                    />
-                </div>
-
-                <div className="row">
-                  <div className="small">감상 기록</div>
-                  <div style={{ display: "grid", gap: 6 }}>
-                    {logsLoading ? (
-                      <div className="small" style={{ opacity: 0.85 }}>불러오는 중...</div>
-                    ) : selectedLogs.length === 0 ? (
-                      <div className="small" style={{ opacity: 0.85 }}>
-                        {"\uC544\uC9C1 \uB85C\uADF8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4. \uCD94\uAC00 \uC2DC \uC120\uD0DD\uD55C \uCD08\uAE30 \uC0C1\uD0DC\uC640 \uC0C1\uD0DC \uBCC0\uACBD/\uC815\uC8FC\uD589 \uC644\uB8CC \uC2DC \uC790\uB3D9 \uAE30\uB85D\uB429\uB2C8\uB2E4."}
-                      </div>
-                    ) : (
-                      <div style={{ display: "grid", gap: 6, maxHeight: 220, overflowY: "auto", paddingRight: 4 }}>
-                        {selectedLogs.slice(0, 20).map((log) => (
-                          <div
-                            key={log.id}
-                            style={{
-                              border: "1px solid rgba(255,255,255,.1)",
-                              borderRadius: 10,
-                              padding: "8px 10px",
-                              background: "rgba(255,255,255,.03)",
-                            }}
-                          >
-                            <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
-                              <div className="small" style={{ opacity: 0.9 }}>
-                                {formatWatchLogDate(log)} · {log.eventType || "기록"}
-                              </div>
-                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
-                                <button
-                                  type="button"
-                                  className="btn"
-                                  onClick={() => openQuickLogSheet(log, selectedMedia || null, { source: "manual-edit", isAuto: false })}
-                                  style={{ padding: "4px 8px" }}
-                                >
-                                  기록 편집
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn"
-                                  onClick={() => deleteSelectedWatchLog(log.id)}
-                                  style={{ padding: "4px 8px" }}
-                                >
-                                  기록 삭제
-                                </button>
-                              </div>
-                            </div>
-                            <div style={{ fontSize: 13, marginTop: 2, wordBreak: "break-word" }}>
-                              {log.cue || "한줄 감상 없음"}
-                            </div>
-                            {String(log.note || "").trim() && (
-                              <div className="small" style={{ opacity: 0.82, marginTop: 2, wordBreak: "break-word" }}>
-                                {log.note}
-                              </div>
-                            )}
-                            <div className="small" style={{ opacity: 0.7, marginTop: 2 }}>
-                              시점: {formatWatchLogDate(log)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 14 }}>
-                  <div className="small" style={{ marginBottom: 8 }}>캐릭터</div>
-                  {selectedCharacters.length === 0 ? (
-                    <div className="small" style={{ opacity: 0.85 }}>
-                      캐릭터 정보를 아직 가져오지 못했습니다.
-                    </div>
-                  ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
-                      {selectedCharacters.map((c) => (
-                        <div
-                          key={c.id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                            border: "1px solid rgba(255,255,255,.1)",
-                            borderRadius: 40,
-                            background: "rgba(255,255,255,.03)",
-                            padding: 7,
-                            minWidth: 0,
-                          }}
-                        >
-                          {c.image ? (
-                            <img
-                              src={c.image}
-                              alt={c.name}
-                              loading="lazy"
-                              style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                objectFit: "cover",
-                                flexShrink: 0,
-                              }}
-                            />
-                          ) : (
-                            <div
-                              aria-hidden
-                              style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                background: "rgba(255,255,255,.1)",
-                                flexShrink: 0,
-                              }}
-                            />
-                          )}
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div
-                              style={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                              title={c.name}
-                            >
-                              {c.name}
-                            </div>
-                            {c.subName && (
-                              <div
-                                className="small"
-                                style={{
-                                  opacity: 0.8,
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                                title={c.subName}
-                              >
-                                {c.subName}
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            className="btn"
-                            onClick={() => toggleCharacterPin(c)}
-                            title={pinnedCharacterKeySet.has(`${c.id}:${selectedId}`) ? "핀 해제" : "핀"}
-                            style={{
-                              width: 34,
-                              height: 34,
-                              padding: 0,
-                              borderRadius: "50%",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              borderColor: "rgba(255,255,255,.22)",
-                              background: pinnedCharacterKeySet.has(`${c.id}:${selectedId}`)
-                                ? "rgba(255,215,107,.22)"
-                                : "transparent",
-                            }}
-                          >
-                            {pinnedCharacterKeySet.has(`${c.id}:${selectedId}`) ? "★" : "☆"}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {quickLogOpen && quickLogDraft && (
-        <div
-          onClick={closeQuickLogSheet}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,.45)",
-            display: "grid",
-            alignItems: "end",
-            zIndex: 1300,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="log-sheet"
-          >
-            <div className="log-sheet__header" style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
-              <div>
-                <div style={{ fontWeight: 700 }}>빠른 기록</div>
-                <div className="small" style={{ opacity: 0.85 }}>
-                  {quickLogTitle || `#${quickLogDraft.anilistId}`} · {quickLogDraft.eventType}
-                </div>
-              </div>
-              <button type="button" className="btn" onClick={closeQuickLogSheet}>
-                닫기
-              </button>
-            </div>
-
-            <div className="log-sheet__body">
-              {quickLogContext?.isAuto && (
-                <div
-                  className="small"
-                  style={{
-                    border: "1px solid rgba(255,255,255,.14)",
-                    borderRadius: 8,
-                    padding: "8px 10px",
-                    background: "rgba(255,255,255,.05)",
-                    opacity: 0.9,
-                  }}
-                >
-                  {"\uC790\uB3D9 \uC0DD\uC131\uB41C \uAE30\uB85D\uC785\uB2C8\uB2E4. \uC9C0\uAE08 \uB0B4\uC6A9\uC744 \uBCF4\uC644\uD558\uC9C0 \uC54A\uC544\uB3C4 \uAE30\uBCF8\uAC12\uC73C\uB85C \uC800\uC7A5\uB429\uB2C8\uB2E4."}
-                </div>
-              )}
-              {quickLogContext?.source === "add-completed" && (
-                <div className="small" style={{ opacity: 0.88 }}>
-                  {"\uC644\uB8CC \uC0C1\uD0DC\uB85C \uCD94\uAC00\uD55C \uAE30\uB85D\uC774\uB77C \uC2DC\uCCAD \uC2DC\uC810/\uD55C \uC904 \uAE30\uC5B5\uC744 \uAC00\uB2A5\uD55C \uBC94\uC704\uC5D0\uC11C \uD568\uAED8 \uB0A8\uAE30\uB294 \uAC83\uC744 \uAD8C\uC7A5\uD569\uB2C8\uB2E4."}
-                </div>
-              )}
-              {quickLogContext?.source === "add-dropped" && (
-                <div className="small" style={{ opacity: 0.88 }}>
-                  {"\uD558\uCC28 \uC0C1\uD0DC \uAE30\uB85D\uC740 \uC774\uC720 \uD0DC\uADF8/\uBA54\uBAA8\uB97C \uD568\uAED8 \uB0A8\uAE30\uBA74 \uB098\uC911\uC5D0 \uBCF5\uAE30 \uD310\uB2E8\uC5D0 \uB3C4\uC6C0\uC774 \uB429\uB2C8\uB2E4."}
-                </div>
-              )}
-              <div className="row">
-                <div className="small">언제 봤는지</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {[
-                    { key: "day", label: "날짜" },
-                    { key: "month", label: "월" },
-                    { key: "season", label: "시즌" },
-                    { key: "year", label: "연도" },
-                    { key: "unknown", label: "잘 모름" },
-                  ].map((opt) => (
-                    <Chip
-                      key={opt.key}
-                      active={quickLogDraft.watchedAtPrecision === opt.key}
-                      onClick={() => setQuickLogPrecision(opt.key)}
-                    >
-                      {opt.label}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="small">
-                  {quickLogDraft.watchedAtPrecision === "day"
-                    ? "본 날짜"
-                    : quickLogDraft.watchedAtPrecision === "month"
-                      ? "본 달"
-                      : quickLogDraft.watchedAtPrecision === "season"
-                        ? "본 시즌"
-                        : quickLogDraft.watchedAtPrecision === "year"
-                          ? "본 연도"
-                          : "언제 봤는지"}
-                </div>
-                {quickLogDraft.watchedAtPrecision === "day" && (
-                  <input
-                    className="input"
-                    type="date"
-                    value={coerceQuickLogValue("day", quickLogDraft.watchedAtValue)}
-                    onChange={(e) =>
-                      setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
-                    }
-                    aria-label="빠른 기록 날짜"
-                  />
-                )}
-                {quickLogDraft.watchedAtPrecision === "month" && (
-                  <input
-                    className="input"
-                    type="month"
-                    value={coerceQuickLogValue("month", quickLogDraft.watchedAtValue)}
-                    onChange={(e) =>
-                      setQuickLogDraft((prev) => ({ ...prev, watchedAtValue: e.target.value }))
-                    }
-                    aria-label="빠른 기록 월"
-                  />
-                )}
-                {quickLogDraft.watchedAtPrecision === "season" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    <input
-                      className="input"
-                      type="number"
-                      min={1950}
-                      max={2099}
-                      value={(parseSeasonValue(quickLogDraft.watchedAtValue)?.year || "").slice(0, 4)}
-                      onChange={(e) => {
-                        const year = String(e.target.value || "").replace(/[^\d]/g, "").slice(0, 4);
-                        const term = parseSeasonValue(quickLogDraft.watchedAtValue)?.term || "Spring";
-                        setQuickLogDraft((prev) => ({
-                          ...prev,
-                          watchedAtValue: year ? `${year}-${term}` : "",
-                        }));
-                      }}
-                      placeholder="YYYY"
-                      aria-label="빠른 기록 시즌 연도"
-                    />
-                    <select
-                      className="select"
-                      value={parseSeasonValue(quickLogDraft.watchedAtValue)?.term || "Spring"}
-                      onChange={(e) => {
-                        const term = SEASON_TERM_OPTIONS.includes(e.target.value)
-                          ? e.target.value
-                          : "Spring";
-                        const year =
-                          parseSeasonValue(quickLogDraft.watchedAtValue)?.year || defaultQuickLogValue("year");
-                        setQuickLogDraft((prev) => ({
-                          ...prev,
-                          watchedAtValue: `${year}-${term}`,
-                        }));
-                      }}
-                      aria-label="빠른 기록 시즌"
-                    >
-                      {SEASON_TERM_OPTIONS.map((term) => (
-                        <option key={term} value={term}>
-                          {term}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {quickLogDraft.watchedAtPrecision === "year" && (
-                  <input
-                    className="input"
-                    type="number"
-                    min={1950}
-                    max={2099}
-                    value={coerceQuickLogValue("year", quickLogDraft.watchedAtValue)}
-                    onChange={(e) =>
-                      setQuickLogDraft((prev) => ({
-                        ...prev,
-                        watchedAtValue: String(e.target.value || "")
-                          .replace(/[^\d]/g, "")
-                          .slice(0, 4),
-                      }))
-                    }
-                    placeholder="YYYY"
-                    aria-label="빠른 기록 연도"
-                  />
-                )}
-                {quickLogDraft.watchedAtPrecision === "unknown" && (
-                  <div className="small" style={{ opacity: 0.85 }}>
-                    정확한 날짜가 기억나지 않으면 이 항목을 선택하세요. 정렬은 기록한 시점을 기준으로 맞춰집니다.
-                  </div>
-                )}
-              </div>
-
-              <div className="row">
-                <div className="small">한줄 감상</div>
-                <input
-                  className="input"
-                  value={quickLogDraft.cue}
-                  maxLength={120}
-                  onChange={(e) =>
-                    setQuickLogDraft((prev) => ({ ...prev, cue: e.target.value }))
-                  }
-                  placeholder="예: 캐릭터 연출이 인상적이었음"
-                  aria-label="한줄 감상"
-                />
-              </div>
-
-              <div className="row">
-                <div className="small">자세한 메모</div>
-                <textarea
-                  className="textarea"
-                  value={quickLogDraft.note}
-                  onChange={(e) =>
-                    setQuickLogDraft((prev) => ({ ...prev, note: e.target.value }))
-                  }
-                  placeholder="선택 입력"
-                />
-              </div>
-
-              <div className="row">
-                <div className="small">기억에 남은 캐릭터 (최대 3)</div>
-                {quickLogCandidates.length === 0 ? (
-                  <div className="small" style={{ opacity: 0.8 }}>
-                    캐릭터 후보를 아직 불러오지 못했습니다.
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {quickLogCandidates.map((c) => {
-                      const active = quickLogCharacterIds.includes(c.id);
-                      const isPrimary = Number(c.id) === Number(quickLogPrimaryCharacterIdSafe);
-                      return (
-                        <div key={c.id} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-                          <button
-                            type="button"
-                            onClick={() => toggleQuickLogCharacter(c.id)}
-                            style={{
-                              border: `1px solid ${active ? "rgba(120,220,255,.9)" : "rgba(255,255,255,.16)"}`,
-                              borderRadius: 999,
-                              background: active ? "rgba(120,220,255,.2)" : "rgba(255,255,255,.06)",
-                              color: "inherit",
-                              padding: "6px 10px",
-                              cursor: "pointer",
-                              maxWidth: 220,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                            title={c.name}
-                          >
-                            {isPrimary ? "★ " : ""}{c.name}
-                          </button>
-                          {active && (
-                            <button
-                              type="button"
-                              className="btn"
-                              onClick={() => setQuickLogPrimaryCharacter(c.id)}
-                              style={{
-                                padding: "4px 8px",
-                                borderColor: isPrimary ? "rgba(255,215,107,.9)" : "rgba(255,255,255,.2)",
-                                background: isPrimary ? "rgba(255,215,107,.2)" : "transparent",
-                              }}
-                              title="대표캐 지정"
-                            >
-                              {isPrimary ? "대표캐" : "대표캐로"}
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <div className="small" style={{ opacity: 0.8 }}>
-                  대표캐는 한 명만 고를 수 있어요.
-                </div>
-              </div>
-
-              {quickLogSelectedCharacters.length > 0 && (
-                <div className="row">
-                  <div className="small">캐릭터별 기록</div>
-                  <div style={{ display: "grid", gap: 10 }}>
-                    {quickLogSelectedCharacters.map((c) => {
-                      const meta = quickLogCharacterMeta?.[c.id] || {
-                        affinity: "기억남음",
-                        reasonTags: [],
-                        note: "",
-                      };
-                      return (
-                        <div
-                          key={c.id}
-                          style={{
-                            border: "1px solid rgba(255,255,255,.12)",
-                            borderRadius: 12,
-                            padding: 10,
-                            display: "grid",
-                            gap: 8,
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            {c.image ? (
-                              <img
-                                src={c.image}
-                                alt={c.name}
-                                loading="lazy"
-                                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
-                              />
-                            ) : (
-                              <div
-                                aria-hidden
-                                style={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: "50%",
-                                  background: "rgba(255,255,255,.1)",
-                                }}
-                              />
-                            )}
-                            <div style={{ fontWeight: 600, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {c.name}
-                            </div>
-                            <button
-                              type="button"
-                              className="btn"
-                              onClick={() => setQuickLogPrimaryCharacter(c.id)}
-                              style={{
-                                marginLeft: "auto",
-                                padding: "4px 8px",
-                                borderColor:
-                                  Number(c.id) === Number(quickLogPrimaryCharacterIdSafe)
-                                    ? "rgba(255,215,107,.9)"
-                                    : "rgba(255,255,255,.2)",
-                                background:
-                                  Number(c.id) === Number(quickLogPrimaryCharacterIdSafe)
-                                    ? "rgba(255,215,107,.2)"
-                                    : "transparent",
-                              }}
-                            >
-                              {Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ? "대표캐" : "대표캐로"}
-                            </button>
-                          </div>
-
-                          <div style={{ display: "grid", gap: 6 }}>
-                            <div className="small">감정 태그</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                              {AFFINITY_OPTIONS.map((aff) => (
-                                <Chip
-                                  key={aff}
-                                  active={meta.affinity === aff}
-                                  onClick={() => setQuickLogCharacterAffinity(c.id, aff)}
-                                >
-                                  {affinityLabel(aff)}
-                                </Chip>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div style={{ display: "grid", gap: 6 }}>
-                            <div className="small">꽂힌 포인트 (최대 3)</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                              {REASON_TAG_OPTIONS.map((tag) => (
-                                <Chip
-                                  key={`${c.id}-${tag}`}
-                                  active={Array.isArray(meta.reasonTags) && meta.reasonTags.includes(tag)}
-                                  onClick={() => toggleQuickLogReasonTag(c.id, tag)}
-                                >
-                                  {reasonTagLabel(tag)}
-                                </Chip>
-                              ))}
-                            </div>
-                          </div>
-
-                          <input
-                            className="input"
-                            value={String(meta.note || "")}
-                            maxLength={200}
-                            onChange={(e) => setQuickLogCharacterNote(c.id, e.target.value)}
-                            placeholder="캐릭터 한줄 (선택)"
-                            aria-label={`${c.name} 메모`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="log-sheet__footer">
-              <button type="button" className="btn" onClick={closeQuickLogSheet}>
-                {"\uAE30\uBCF8\uAC12 \uC720\uC9C0"}
-              </button>
-              <button type="button" className="btn" onClick={saveQuickLogDraft}>
-                저장
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LibraryQuickLogSheet
+        locale={locale}
+        open={quickLogOpen}
+        draft={quickLogDraft}
+        title={quickLogTitle}
+        context={quickLogContext}
+        candidates={quickLogCandidates}
+        characterIds={quickLogCharacterIds}
+        primaryCharacterId={quickLogPrimaryCharacterIdSafe}
+        selectedCharacters={quickLogSelectedCharacters}
+        characterMeta={quickLogCharacterMeta}
+        onClose={closeQuickLogSheet}
+        onSave={saveQuickLogDraft}
+        onDraftChange={setQuickLogDraft}
+        onPrecisionChange={setQuickLogPrecision}
+        onToggleCharacter={toggleQuickLogCharacter}
+        onSetPrimaryCharacter={setQuickLogPrimaryCharacter}
+        onSetAffinity={setQuickLogCharacterAffinity}
+        onToggleReasonTag={toggleQuickLogReasonTag}
+        onSetCharacterNote={setQuickLogCharacterNote}
+        helpers={{
+          coerceQuickLogValue,
+          parseSeasonValue,
+          defaultQuickLogValue,
+          affinityLabel,
+          reasonTagLabel,
+        }}
+        constants={{
+          seasonTermOptions: SEASON_TERM_OPTIONS,
+          affinityOptions: AFFINITY_OPTIONS,
+          reasonTagOptions: REASON_TAG_OPTIONS,
+        }}
+      />
     </>
   );
 }
+

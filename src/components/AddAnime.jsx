@@ -11,28 +11,16 @@ import {
   persistSearchCacheMap,
   setSearchCacheEntry,
 } from "../repositories/searchCacheRepo";
+import { formatStatusLabel } from "./library/libraryCopy.js";
+import { deriveKoTitleFromMedia, pickDisplayTitle } from "../domain/animeTitles";
+import { pickByLocale } from "../domain/uiText";
 
 function isHangulQuery(q) {
   return /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(q);
 }
 
-function firstHangulSynonym(media) {
-  const arr = media?.synonyms;
-  if (!Array.isArray(arr)) return null;
-  const hit = arr.find((s) => /[가-힣]/.test(String(s || "")));
-  return hit || null;
-}
-
-function isHangulText(value) {
-  return /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(String(value || ""));
-}
-
 function inferKoTitleFromMedia(media) {
-  const synKo = firstHangulSynonym(media);
-  if (synKo) return synKo;
-  const nativeTitle = String(media?.title?.native || "").trim();
-  if (isHangulText(nativeTitle)) return nativeTitle;
-  return null;
+  return deriveKoTitleFromMedia(media);
 }
 
 function normalizeSearchText(s) {
@@ -82,18 +70,6 @@ function findAliasMatches(query, aliasEntries, limit = 20) {
   return hits.slice(0, Math.max(1, limit));
 }
 
-function pickTitle(media, koTitle) {
-  if (koTitle) return koTitle;
-  const synKo = firstHangulSynonym(media);
-  if (synKo) return synKo;
-  return (
-    media?.title?.english ||
-    media?.title?.romaji ||
-    media?.title?.native ||
-    (media?.id ? `#${media.id}` : "Loading...")
-  );
-}
-
 function formatRank(fmt) {
   const map = { TV: 0, TV_SHORT: 1, ONA: 2, OVA: 3, SPECIAL: 4, MOVIE: 5, MUSIC: 6 };
   return map[fmt] ?? 9;
@@ -119,7 +95,53 @@ function normalizeInitialStatus(raw) {
   return INITIAL_STATUS_OPTIONS.includes(value) ? value : STATUS_UNCLASSIFIED;
 }
 
-export default function AddAnime({ items, setItems, onAnimeAdded }) {
+export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" }) {
+  const copy = pickByLocale(locale, {
+    ko: {
+      stage: {
+        recent: "최근 찾은 결과",
+        searching: "찾는 중",
+        alias: "다른 제목 확인 중",
+        koTitle: "한글 제목 찾는 중",
+        preparing: "작품 정보 정리 중",
+        organizing: "결과 정리 중",
+        error: "오류",
+      },
+      searchPlaceholder: "작품 검색",
+      searchAria: "작품 검색",
+      addStatus: "보관할 때 상태",
+      addStatusHint: "미분류/보류로 넣으면 자동 기록이 생기지 않고, 보는중/완료/하차로 넣으면 첫 기록이 같이 남아요.",
+      results: "검색 결과",
+      noResult: "결과 없음.",
+      alreadyInLibrary: "이미 보관함에 있음",
+      clickToAdd: "눌러서 보관함에 추가",
+      added: "추가됨",
+      add: "추가",
+      preparingFallback: "작품 정보 정리 중",
+    },
+    en: {
+      stage: {
+        recent: "Recent results",
+        searching: "Searching",
+        alias: "Checking alternate titles",
+        koTitle: "Finding Korean titles",
+        preparing: "Preparing anime info",
+        organizing: "Organizing results",
+        error: "Error",
+      },
+      searchPlaceholder: "Search anime",
+      searchAria: "Search anime",
+      addStatus: "Initial status when adding",
+      addStatusHint: "If you add as Unsorted or On Hold, no auto-log is created. Watching, Completed, and Dropped create the first log automatically.",
+      results: "Search results",
+      noResult: "No results.",
+      alreadyInLibrary: "Already in library",
+      clickToAdd: "Click to add to library",
+      added: "Added",
+      add: "Add",
+      preparingFallback: "Preparing anime info",
+    },
+  });
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -167,14 +189,14 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
 
     const key = `${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
     const cached = cacheRef.current.get(key);
-    if (cached) {
+      if (cached) {
       const isFresh = isFreshSearchCacheEntry(cached, Date.now());
       if (isFresh) {
         const cachedResults = Array.isArray(cached.results) ? cached.results : [];
         if (cachedResults.length > 0) {
           setResults(cachedResults);
           setLoading(false);
-          setLoadingStage("최근 찾은 결과");
+          setLoadingStage("recent");
           return;
         }
       }
@@ -185,7 +207,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
     let alive = true;
     let fallbackRows = [];
     setLoading(true);
-    setLoadingStage("찾는 중");
+    setLoadingStage("searching");
 
     (async () => {
       const setStage = (v) => {
@@ -225,7 +247,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
 
       // 1) 한글 검색: Wikidata 확장으로 ID 후보를 더 잘 뽑고 → AniList로 카드 데이터
       if (isHangulQuery(query)) {
-        setStage("다른 제목 확인 중");
+        setStage("alias");
         const aliasHits = findAliasMatches(query, aliasEntries, ALIAS_LIMIT);
         const aliasIds = aliasHits
           .map((x) => Number(x?.id))
@@ -256,7 +278,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
               sourceRank: 2,
               score: 0,
             })),
-            "찾는 중"
+            "searching"
           );
         }).catch(() => {});
 
@@ -283,7 +305,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
               .filter((x) => x.media)
               .slice(0, 10);
 
-            renderQuick(quickAliasRows, "찾는 중");
+            renderQuick(quickAliasRows, "searching");
           }).catch(() => {});
         }
 
@@ -294,7 +316,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
         if (!quickMode) {
           const wdDepth = qn.length >= 4 ? 2 : 0;
           const wdLimit = wdDepth === 2 ? WD_DEPTH2_LIMIT : WD_DEPTH1_LIMIT;
-          setStage("한글 제목 찾는 중");
+          setStage("koTitle");
           wd = await wikidataSearchKoToAniListExpanded(query, wdLimit, wdDepth).catch(() => []);
         }
 
@@ -350,7 +372,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
           })
           .slice(0, MAX_CANDIDATE_FETCH)
           .map(([id]) => id);
-        setStage("작품 정보 정리 중");
+        setStage("preparing");
 
         const aliasMediaMap = await aliasMediaPromise;
         const mediaMap = new Map(aliasMediaMap);
@@ -374,7 +396,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
         if (fastMerged.length > 0) {
           rememberRows(fastMerged);
           setResults(fastMerged);
-          setStage(tailIds.length ? "작품 정보 정리 중" : "결과 정리 중");
+          setStage(tailIds.length ? "preparing" : "organizing");
           setLoading(false);
         }
 
@@ -384,7 +406,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
           for (const [id, media] of tailMap.entries()) mediaMap.set(id, media);
         }
 
-        setStage("결과 정리 중");
+        setStage("organizing");
         const merged = buildMergedResults(ids, candidateMap, mediaMap);
 
         if (!alive) return;
@@ -409,7 +431,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
       }
 
       // 2) 한글이 아닌 검색(영어/일본어 등): AniList로 검색 → Wikidata로 한글 타이틀 보강
-      setStage("찾는 중");
+      setStage("searching");
       const mediaList = await searchAnimeByTitle(query, 8);
       const ids = mediaList.map((m) => m.id);
       if (alive) {
@@ -426,13 +448,13 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
 
       let koMap = new Map();
       try {
-        setStage("한글 제목 다듬는 중");
+        setStage("koTitle");
         koMap = await wikidataGetKoTitlesByAniListIds(ids); // P8729 기반 보강 :contentReference[oaicite:1]{index=1}
       } catch (e) {
         // WDQS 실패해도 검색 자체는 계속
       }
 
-      setStage("결과 정리 중");
+      setStage("organizing");
       const merged = mediaList.map((m) => ({
         id: m.id,
         ko: koMap.get(m.id) || null,
@@ -461,7 +483,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
       }
       setResults([]);
       setLoading(false);
-      setLoadingStage("오류");
+      setLoadingStage("error");
     });
 
     return () => {
@@ -541,8 +563,8 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
         <input
           className="input"
           value={q}
-          placeholder="작품 검색"
-          aria-label="작품 검색"
+          placeholder={copy.searchPlaceholder}
+          aria-label={copy.searchAria}
           aria-autocomplete="list"
           aria-controls="anime-suggest-list"
           aria-expanded={open && dq.length >= 2}
@@ -562,7 +584,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
           }}
         >
           <label className="small" htmlFor="add-status-select" style={{ opacity: 0.9 }}>
-            {"\uBCF4\uAD00\uD560 \uB54C \uC0C1\uD0DC"}
+            {copy.addStatus}
           </label>
           <select
             id="add-status-select"
@@ -570,40 +592,46 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
             value={addStatus}
             onChange={(e) => setAddStatus(normalizeInitialStatus(e.target.value))}
             style={{ width: "100%" }}
-            aria-label="\uBCF4\uAD00\uD560 \uB54C \uC0C1\uD0DC"
+            aria-label={copy.addStatus}
           >
             {INITIAL_STATUS_OPTIONS.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {formatStatusLabel(value, locale)}
               </option>
             ))}
           </select>
           <div className="small" style={{ gridColumn: "1 / -1", opacity: 0.78 }}>
-            {"\uBBF8\uBD84\uB958/\uBCF4\uB958\uB85C \uB123\uC73C\uBA74 \uC790\uB3D9 \uAE30\uB85D\uC774 \uC0DD\uAE30\uC9C0 \uC54A\uACE0, \uBCF4\uB294\uC911/\uC644\uB8CC/\uD558\uCC28\uB85C \uB123\uC73C\uBA74 \uCCAB \uAE30\uB85D\uC774 \uAC19\uC774 \uB0A8\uC544\uC694."}
+            {copy.addStatusHint}
           </div>
         </div>
       </div>
 
       {open && dq.length >= 2 && (
-        <div className="suggestList" id="anime-suggest-list" role="listbox" aria-label="검색 결과">
-          {(loading || loadingStage === "최근 찾은 결과") && (
+        <div className="suggestList" id="anime-suggest-list" role="listbox" aria-label={copy.results}>
+          {(loading || loadingStage === "recent") && (
             <div className="small" style={{ padding: 12, borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-              {loading ? `찾는 중${loadingDots} · ${loadingStage || "작품 정보 정리 중"}` : "최근 찾은 결과"}
+              {loading
+                ? `${copy.stage.searching}${loadingDots} · ${copy.stage[loadingStage] || copy.preparingFallback}`
+                : copy.stage.recent}
             </div>
           )}
           {results.length === 0 && !loading && (
             <div style={{ padding: 12 }} className="small">
-              결과 없음.
+              {copy.noResult}
             </div>
           )}
 
           {results.map((r) => {
             const already = hasId(r.id);
-            const title = pickTitle(r.media, r.ko);
+            const title = pickDisplayTitle(
+              { anilistId: r.id, koTitle: r.ko || null },
+              r.media,
+              locale
+            );
             const sub =
-              r.media?.title?.english && r.media?.title?.english !== title
-                ? r.media.title.english
-                : r.media?.title?.romaji || r.media?.title?.native || "";
+              locale === "en"
+                ? r.media?.title?.romaji || r.media?.title?.native || r.ko || ""
+                : r.media?.title?.english || r.media?.title?.romaji || "";
 
             return (
               <div
@@ -618,7 +646,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
                   }
                 }}
                 style={{ opacity: already ? 0.55 : 1 }}
-                title={already ? "이미 보관함에 있음" : "눌러서 보관함에 추가"}
+                title={already ? copy.alreadyInLibrary : copy.clickToAdd}
                 role="option"
                 aria-selected={already}
                 aria-disabled={already}
@@ -635,7 +663,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
                     <div style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {title}
                     </div>
-                    {already && <span className="badge">추가됨</span>}
+                    {already && <span className="badge">{copy.added}</span>}
                   </div>
                   <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {sub}
@@ -652,7 +680,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded }) {
                     if (!already) addAnime(r);              // ✅ 객체로
                   }}
                 >
-                  추가
+                  {copy.add}
                 </button>
               </div>
             );
