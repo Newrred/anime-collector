@@ -217,7 +217,7 @@ export default function Home() {
         onInstallPwa={onClickInstallPwa}
       />
 
-      <section className="pageHeader" style={{ marginBottom: 6 }}>
+      <section className="pageHeader">
         <h1 className="pageTitle">{copy.title}</h1>
         <p className="pageLead">{copy.lead}</p>
       </section>
@@ -248,11 +248,11 @@ export default function Home() {
             {copy.storageProtect} {formatStatusToggleLabel(persisted, locale)}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <a href={`${base}library/`} className="btn" style={{ textDecoration: "none" }}>
+        <div className="action-row">
+          <a href={`${base}library/`} className="btn btn--subtle" style={{ textDecoration: "none" }}>
             {copy.quickRecord}
           </a>
-          <span className="small" style={{ opacity: 0.86 }}>{copy.heroHint}</span>
+          <span className="small page-feedback">{copy.heroHint}</span>
         </div>
       </section>
 

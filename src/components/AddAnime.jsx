@@ -14,6 +14,7 @@ import {
 import { formatStatusLabel } from "./library/libraryCopy.js";
 import { deriveKoTitleFromMedia, pickDisplayTitle } from "../domain/animeTitles";
 import { pickByLocale } from "../domain/uiText";
+import { IconPlus } from "./ui/AppIcons.jsx";
 
 function isHangulQuery(q) {
   return /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(q);
@@ -558,8 +559,8 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
   }
 
   return (
-    <div ref={boxRef} className="suggestWrap" style={{ margin: "14px 0 10px" }}>
-      <div style={{ display: "grid", gap: 10, alignItems: "center" }}>
+    <div ref={boxRef} className="suggestWrap library-add-search">
+      <div className="library-add-search__controls">
         <input
           className="input"
           value={q}
@@ -575,23 +576,15 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
         />
-        <div
-          style={{
-            display: "grid",
-            gap: 6,
-            gridTemplateColumns: "auto minmax(140px, 220px)",
-            alignItems: "center",
-          }}
-        >
-          <label className="small" htmlFor="add-status-select" style={{ opacity: 0.9 }}>
+        <div className="library-add-status-row">
+          <label className="small library-add-status-label" htmlFor="add-status-select">
             {copy.addStatus}
           </label>
           <select
             id="add-status-select"
-            className="select"
+            className="select library-add-status-select"
             value={addStatus}
             onChange={(e) => setAddStatus(normalizeInitialStatus(e.target.value))}
-            style={{ width: "100%" }}
             aria-label={copy.addStatus}
           >
             {INITIAL_STATUS_OPTIONS.map((value) => (
@@ -600,7 +593,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
               </option>
             ))}
           </select>
-          <div className="small" style={{ gridColumn: "1 / -1", opacity: 0.78 }}>
+          <div className="small library-add-status-hint">
             {copy.addStatusHint}
           </div>
         </div>
@@ -609,14 +602,14 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
       {open && dq.length >= 2 && (
         <div className="suggestList" id="anime-suggest-list" role="listbox" aria-label={copy.results}>
           {(loading || loadingStage === "recent") && (
-            <div className="small" style={{ padding: 12, borderBottom: "1px solid rgba(255,255,255,.08)" }}>
+            <div className="small library-add-results-state library-add-results-state--framed">
               {loading
                 ? `${copy.stage.searching}${loadingDots} · ${copy.stage[loadingStage] || copy.preparingFallback}`
                 : copy.stage.recent}
             </div>
           )}
           {results.length === 0 && !loading && (
-            <div style={{ padding: 12 }} className="small">
+            <div className="small library-add-results-state">
               {copy.noResult}
             </div>
           )}
@@ -636,7 +629,6 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
             return (
               <div
                 key={r.id}
-                className="suggestItem"
                 onClick={() => !already && addAnime(r)}      // ✅ 객체로
                 onKeyDown={(e) => {
                   if (already) return;
@@ -645,7 +637,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
                     addAnime(r);
                   }
                 }}
-                style={{ opacity: already ? 0.55 : 1 }}
+                className={`suggestItem${already ? " suggestItem--disabled" : ""}`}
                 title={already ? copy.alreadyInLibrary : copy.clickToAdd}
                 role="option"
                 aria-selected={already}
@@ -658,14 +650,14 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
                   alt={title}
                   loading="lazy"
                 />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <div style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="suggestItem__body">
+                  <div className="suggestItem__titleRow">
+                    <div className="suggestItem__title">
                       {title}
                     </div>
                     {already && <span className="badge">{copy.added}</span>}
                   </div>
-                  <div className="small" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div className="small suggestItem__meta">
                     {sub}
                     {r.media?.seasonYear ? ` · ${r.media.seasonYear}` : ""}
                     {r.media?.format ? ` · ${r.media.format}` : ""}
@@ -673,14 +665,16 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
                 </div>
 
                 <button
-                  className="btn"
+                  className="btn btn--icon"
                   disabled={already}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!already) addAnime(r);              // ✅ 객체로
                   }}
+                  aria-label={copy.add}
+                  title={`${title} ${copy.add}`}
                 >
-                  {copy.add}
+                  <IconPlus size={16} />
                 </button>
               </div>
             );

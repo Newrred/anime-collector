@@ -1,6 +1,7 @@
 import { Chip, CollapsiblePanelHeader, SegTabButton } from "./LibraryUi.jsx";
 import { formatStatusLabel } from "./libraryCopy.js";
 import { pickByLocale } from "../../domain/uiText";
+import { IconSortAsc, IconSortDesc } from "../ui/AppIcons.jsx";
 
 const STATUS_OPTIONS = ["전체", "완료", "보는중", "보류", "하차", "미분류"];
 
@@ -41,6 +42,7 @@ export default function LibraryFiltersPanel({
       groupByStatus: "상태별 정렬",
       asc: "오름차순",
       desc: "내림차순",
+      sortDirection: "정렬 방향 전환",
       searchPlaceholder: "보관함 검색 (제목/장르)",
       meta: "정보 함께",
       poster: "포스터만",
@@ -66,6 +68,7 @@ export default function LibraryFiltersPanel({
       groupByStatus: "Group by status",
       asc: "Ascending",
       desc: "Descending",
+      sortDirection: "Toggle sort direction",
       searchPlaceholder: "Search library (title/genre)",
       meta: "With meta",
       poster: "Poster only",
@@ -126,8 +129,14 @@ export default function LibraryFiltersPanel({
                 />
                 <span className="small">{copy.groupByStatus}</span>
               </label>
-              <button className="btn" onClick={onToggleSortDir}>
-                {sortDir === "asc" ? copy.asc : copy.desc}
+              <button
+                type="button"
+                className="btn btn--icon"
+                onClick={onToggleSortDir}
+                aria-label={`${copy.sortDirection}: ${sortDir === "asc" ? copy.asc : copy.desc}`}
+                title={sortDir === "asc" ? copy.asc : copy.desc}
+              >
+                {sortDir === "asc" ? <IconSortAsc /> : <IconSortDesc />}
               </button>
             </div>
           </div>

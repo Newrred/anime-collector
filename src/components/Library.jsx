@@ -17,9 +17,10 @@ import {
   SCORE_MAX,
   SCORE_STEP,
 } from "../domain/animeState";
+import { mergeTierTopicBundles, normalizeTierTopicBundle } from "../domain/tierTopics";
 import { useStoredState } from "../hooks/useStoredState";
 import { STORAGE_KEYS } from "../storage/keys";
-import { readTierState, writeTierState, pruneTierByAnimeId } from "../repositories/tierRepo";
+import { readTierBoardBundle, readTierState, writeTierBoardBundle, writeTierState, pruneTierByAnimeId } from "../repositories/tierRepo";
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
 import {
   markManualBackupExported,
@@ -602,13 +603,22 @@ export default function Library() {
       setItems((prev) => dedupeByAnilistId([...prev, ...incomingNormalized]));
     }
 
+    const incomingTierBundle = !Array.isArray(json) ? json?.tierTopics : null;
     const incomingTier = !Array.isArray(json) ? json?.tier : null;
-    if (incomingTier) {
-      const currentTier = readTierState(null);
-      const nextTier = isOverwrite
-        ? normalizeTierState(incomingTier)
-        : mergeTierState(currentTier, incomingTier);
-      writeTierState(nextTier);
+    if (incomingTierBundle || incomingTier) {
+      if (incomingTierBundle) {
+        const currentBundle = readTierBoardBundle(null);
+        const nextBundle = isOverwrite
+          ? normalizeTierTopicBundle(incomingTierBundle, null)
+          : mergeTierTopicBundles(currentBundle, incomingTierBundle);
+        writeTierBoardBundle(nextBundle);
+      } else if (incomingTier) {
+        const currentTier = readTierState(null);
+        const nextTier = isOverwrite
+          ? normalizeTierState(incomingTier)
+          : mergeTierState(currentTier, incomingTier);
+        writeTierState(nextTier);
+      }
     }
 
     const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
@@ -1970,12 +1980,6 @@ export default function Library() {
                 src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
                 alt={cardTitle}
                 loading="lazy"
-                style={{
-                  width: "100%",
-                  aspectRatio: "2 / 3",
-                  objectFit: "cover",
-                  display: "block",
-                }}
               />
 
               {cardView === "meta" && (

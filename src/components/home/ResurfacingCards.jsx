@@ -14,43 +14,23 @@ function renderAnimeRow({ base, anilistId, metaTop, metaBottom = "", mediaMap, t
   return (
     <a
       href={buildLibraryDetailHref(base, anilistId)}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "42px 1fr",
-        gap: 8,
-        alignItems: "center",
-        textDecoration: "none",
-        color: "inherit",
-        border: "1px solid rgba(255,255,255,.08)",
-        borderRadius: 8,
-        padding: 6,
-        background: "rgba(255,255,255,.02)",
-      }}
+      className="list-card"
     >
       {poster ? (
         <img
           src={poster}
           alt={title}
           loading="lazy"
-          style={{ width: 42, height: 58, borderRadius: 6, objectFit: "cover" }}
+          className="list-card__thumb"
         />
       ) : (
-        <div
-          aria-hidden
-          style={{ width: 42, height: 58, borderRadius: 6, background: "rgba(255,255,255,.14)" }}
-        />
+        <div aria-hidden className="list-card__thumb" />
       )}
-      <div style={{ minWidth: 0 }}>
-        <div className="small" style={{ opacity: 0.82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {metaTop}
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {title}
-        </div>
+      <div className="list-card__body">
+        <div className="list-card__eyebrow">{metaTop}</div>
+        <div className="list-card__title">{title}</div>
         {metaBottom && (
-          <div className="small" style={{ opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {metaBottom}
-          </div>
+          <div className="list-card__meta">{metaBottom}</div>
         )}
       </div>
     </a>
@@ -115,11 +95,11 @@ export default function ResurfacingCards({
       <div className="home-grid">
         <div className="home-row-2">
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recentLogs}</div>
+          <h2 className="sectionTitle">{copy.recentLogs}</h2>
           {resurfacing.recentLogs.length === 0 ? (
             <div className="small">{copy.noLogs}</div>
           ) : (
-            <div style={{ display: "grid", gap: 6 }}>
+            <div className="list-stack">
               {resurfacing.recentLogs.map((row) => (
                 <div key={row.id}>
                   {renderAnimeRow({
@@ -137,11 +117,11 @@ export default function ResurfacingCards({
         </div>
 
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.noMemory}</div>
+          <h2 className="sectionTitle">{copy.noMemory}</h2>
           {resurfacing.missingMemory.length === 0 ? (
             <div className="small">{copy.allLogged}</div>
           ) : (
-            <div style={{ display: "grid", gap: 6 }}>
+            <div className="list-stack">
               {resurfacing.missingMemory.map((row) => (
                 <div key={row.anilistId}>
                   {renderAnimeRow({
@@ -161,40 +141,40 @@ export default function ResurfacingCards({
 
         <div className="home-row-2">
         <div className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recentPrimary}</div>
+          <h2 className="sectionTitle">{copy.recentPrimary}</h2>
           {resurfacing.recentPrimaryCharacters.length === 0 ? (
             <div className="small">{copy.noPrimary}</div>
           ) : (
-            <div style={{ display: "grid", gap: 8 }}>
+            <div className="list-stack">
               {resurfacing.recentPrimaryCharacters.map((row) => (
                 <button
                   key={row.id}
                   type="button"
                   onClick={() => onOpenCharacter(row.characterId, row.name, row.image)}
-                  style={{ border: "none", background: "transparent", color: "inherit", padding: 0, textAlign: "left", cursor: "pointer" }}
+                  className="list-card list-card--button"
                 >
-                  <div style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 8, alignItems: "center" }}>
+                  <>
                     {row.image ? (
                       <img
                         src={row.image}
                         alt={row.name}
                         loading="lazy"
-                        style={{ width: 30, height: 30, borderRadius: "50%", objectFit: "cover" }}
+                        className="list-card__thumb list-card__thumb--circle"
                       />
                     ) : (
-                      <div aria-hidden style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(255,255,255,.14)" }} />
+                      <div aria-hidden className="list-card__thumb list-card__thumb--circle" />
                     )}
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div className="list-card__body">
+                      <div className="list-card__title">
                         {row.name} · {titleById.get(Number(row.anilistId)) || `#${row.anilistId}`}
                       </div>
-                      <div className="small" style={{ opacity: 0.82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div className="list-card__meta">
                         {row.label}
                         {row.reasonTag ? ` · ${formatReasonTagLabel(row.reasonTag, locale)}` : ""}
                         {row.cue ? ` · ${row.cue}` : ""}
                       </div>
                     </div>
-                  </div>
+                  </>
                 </button>
               ))}
             </div>
@@ -202,31 +182,29 @@ export default function ResurfacingCards({
         </div>
         {hasRepeated ? (
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.recurring}</div>
-            <div style={{ display: "grid", gap: 8 }}>
+            <h2 className="sectionTitle">{copy.recurring}</h2>
+            <div className="list-stack">
               {resurfacing.repeatedCharacters.map((row) => (
                 <button
                   key={row.characterId}
                   type="button"
                   onClick={() => onOpenCharacter(row.characterId, row.name, row.image)}
-                  style={{ border: "none", background: "transparent", color: "inherit", padding: 0, textAlign: "left", cursor: "pointer" }}
+                  className="list-card list-card--button"
                 >
-                  <div style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 8, alignItems: "center" }}>
+                  <>
                     {row.image ? (
                       <img
                         src={row.image}
                         alt={row.name}
                         loading="lazy"
-                        style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+                        className="list-card__thumb list-card__thumb--circle list-card__thumb--sm"
                       />
                     ) : (
-                      <div aria-hidden style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,.14)" }} />
+                      <div aria-hidden className="list-card__thumb list-card__thumb--circle list-card__thumb--sm" />
                     )}
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {row.name}
-                      </div>
-                      <div className="small" style={{ opacity: 0.82 }}>
+                    <div className="list-card__body">
+                      <div className="list-card__title">{row.name}</div>
+                      <div className="list-card__meta">
                         {locale === "en"
                           ? `${copy.recent60} ${row.countRecent60}${copy.countUnit} · ${copy.total} ${row.countTotal}${copy.countUnit} · ${copy.relatedAnime} ${row.relatedAnimeCount}`
                           : `${copy.recent60} ${row.countRecent60}${copy.countUnit} · ${copy.total} ${row.countTotal}${copy.countUnit} · ${copy.relatedAnime} ${row.relatedAnimeCount}${copy.countItem}`}
@@ -235,15 +213,15 @@ export default function ResurfacingCards({
                           : ""}
                       </div>
                     </div>
-                  </div>
+                  </>
                 </button>
               ))}
             </div>
           </div>
         ) : hasThisTime ? (
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.thisTime}</div>
-            <div style={{ display: "grid", gap: 6 }}>
+            <h2 className="sectionTitle">{copy.thisTime}</h2>
+            <div className="list-stack">
               {resurfacing.thisTime.map((row) => (
                 <div key={row.id}>
                   {renderAnimeRow({
@@ -263,8 +241,8 @@ export default function ResurfacingCards({
         {hasRepeated && hasThisTime && (
           <div className="home-row-2">
           <div className="surface-card">
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.thisTime}</div>
-            <div style={{ display: "grid", gap: 6 }}>
+            <h2 className="sectionTitle">{copy.thisTime}</h2>
+            <div className="list-stack">
               {resurfacing.thisTime.map((row) => (
                 <div key={row.id}>
                   {renderAnimeRow({
@@ -278,8 +256,8 @@ export default function ResurfacingCards({
               ))}
             </div>
           </div>
-          <div className="surface-card" style={{ display: "grid", placeItems: "center" }}>
-            <div className="small" style={{ opacity: 0.84 }}>
+          <div className="surface-card home-note-card">
+            <div className="small page-feedback">
               {copy.revisitHint}
             </div>
           </div>
@@ -290,36 +268,34 @@ export default function ResurfacingCards({
 
       {resurfacing.pinnedHighlights.length > 0 && (
         <section className="surface-card">
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.pinned}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
+          <h2 className="sectionTitle">{copy.pinned}</h2>
+          <div className="metric-grid">
             {resurfacing.pinnedHighlights.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => onOpenCharacter(p.characterId, p.nameSnapshot, p.imageSnapshot)}
-                style={{ border: "none", background: "transparent", color: "inherit", padding: 0, textAlign: "left", cursor: "pointer" }}
+                className="list-card list-card--button"
               >
-                <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", gap: 8, alignItems: "center" }}>
+                <>
                   {p.imageSnapshot ? (
                     <img
                       src={p.imageSnapshot}
                       alt={p.nameSnapshot}
                       loading="lazy"
-                      style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+                      className="list-card__thumb list-card__thumb--circle list-card__thumb--sm"
                     />
                   ) : (
-                    <div aria-hidden style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,.14)" }} />
+                    <div aria-hidden className="list-card__thumb list-card__thumb--circle list-card__thumb--sm" />
                   )}
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {p.nameSnapshot}
-                    </div>
-                    <div className="small" style={{ opacity: 0.82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div className="list-card__body">
+                    <div className="list-card__title">{p.nameSnapshot}</div>
+                    <div className="list-card__meta">
                       {titleById.get(Number(p.mediaId)) || `#${p.mediaId}`}
                       {p.pinReason ? ` · ${formatReasonTagLabel(p.pinReason, locale)}` : ""}
                     </div>
                   </div>
-                </div>
+                </>
               </button>
             ))}
           </div>

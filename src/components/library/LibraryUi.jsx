@@ -1,3 +1,5 @@
+import { IconChevronDown } from "../ui/AppIcons.jsx";
+
 function Chip({ active, onClick, children, title }) {
   return (
     <button
@@ -66,25 +68,9 @@ function CollapsiblePanelHeader({
         {summary ? <div className="small library-panel-header-summary">{summary}</div> : null}
       </div>
       <span className="library-panel-header-toggle" aria-hidden="true">
-        <svg
-          viewBox="0 0 20 20"
-          width="16"
-          height="16"
-          style={{
-            display: "block",
-            transition: "transform 160ms ease",
-            transform: open ? "rotate(0deg)" : "rotate(-90deg)",
-          }}
-        >
-          <path
-            d="M5.5 7.5L10 12l4.5-4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <span className={`library-panel-header-chevron${open ? " is-open" : ""}`}>
+          <IconChevronDown size={16} />
+        </span>
       </span>
     </button>
   );

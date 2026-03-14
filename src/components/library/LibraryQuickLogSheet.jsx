@@ -1,6 +1,7 @@
 import { Chip } from "./LibraryUi.jsx";
 import { formatEventLabel, formatSeasonTermLabel } from "./libraryCopy.js";
 import { pickByLocale } from "../../domain/uiText";
+import { IconX } from "../ui/AppIcons.jsx";
 
 export default function LibraryQuickLogSheet({
   locale = "ko",
@@ -125,8 +126,8 @@ export default function LibraryQuickLogSheet({
                 {title || `#${draft.anilistId}`} · {formatEventLabel(draft.eventType, locale)}
               </div>
             </div>
-            <button type="button" className="btn" onClick={onClose}>
-              {copy.close}
+            <button type="button" className="btn btn--icon btn--ghost" onClick={onClose} aria-label={copy.close} title={copy.close}>
+              <IconX size={14} />
             </button>
           </div>
         </div>

@@ -9,6 +9,7 @@ import { readLastExportAtMs } from "../repositories/backupRepo";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { formatBackupAgo, formatStatusToggleLabel, pickByLocale } from "../domain/uiText";
+import { IconShield } from "./ui/AppIcons.jsx";
 
 function formatBytes(value) {
   const n = Number(value);
@@ -202,8 +203,8 @@ export default function DataCenter() {
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
-      <section className="status-panel">
-        <div className="pageHeader" style={{ marginBottom: 0 }}>
+      <section className="status-panel surface-card">
+        <div className="pageHeader">
           <h1 className="pageTitle">{copy.title}</h1>
           <p className="pageLead">{copy.lead}</p>
         </div>
@@ -216,50 +217,48 @@ export default function DataCenter() {
           </span>
         </div>
 
-        <div style={{ display: "grid", gap: 8 }}>
+        <div className="list-stack">
           <div className="small">{copy.engine} {engine}</div>
-          <button type="button" className="btn" onClick={requestPersist} style={{ width: "fit-content" }}>
-            {copy.requestProtect}
+          <button type="button" className="btn btn--subtle" onClick={requestPersist} style={{ width: "fit-content" }}>
+            <span className="btn__icon"><IconShield /></span>
+            <span className="btn__label">{copy.requestProtect}</span>
           </button>
         </div>
 
-        <div style={{ display: "grid", gap: 6 }}>
+        <div className="list-stack">
           <div className="small">
             {copy.usage} {formatBytes(usage)} / {formatBytes(quota)}
             {usageRatio == null ? "" : ` (${usageRatio.toFixed(1)}%)`}
           </div>
-          <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,.12)", overflow: "hidden" }}>
+          <div className="progress-meter">
             <div
-              style={{
-                width: `${usageRatio == null ? 0 : usageRatio}%`,
-                height: "100%",
-                background: "rgba(120,220,255,.85)",
-              }}
+              className="progress-meter__fill"
+              style={{ width: `${usageRatio == null ? 0 : usageRatio}%` }}
             />
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 8 }}>
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>{copy.libraryCount}</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.library}</div>
+        <div className="metric-grid">
+          <div className="metric-card">
+            <div className="metric-card__label">{copy.libraryCount}</div>
+            <div className="metric-card__value">{counts.library}</div>
           </div>
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>{copy.tierCount}</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.tierPlaced}</div>
+          <div className="metric-card">
+            <div className="metric-card__label">{copy.tierCount}</div>
+            <div className="metric-card__value">{counts.tierPlaced}</div>
           </div>
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>{copy.logCount}</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.watchLogs}</div>
+          <div className="metric-card">
+            <div className="metric-card__label">{copy.logCount}</div>
+            <div className="metric-card__value">{counts.watchLogs}</div>
           </div>
-          <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10 }}>
-            <div className="small" style={{ opacity: 0.8 }}>{copy.pinCount}</div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{counts.characterPins}</div>
+          <div className="metric-card">
+            <div className="metric-card__label">{copy.pinCount}</div>
+            <div className="metric-card__value">{counts.characterPins}</div>
           </div>
         </div>
 
-        {message && <div className="small" style={{ opacity: 0.9 }}>{message}</div>}
-        {loading && <div className="small" style={{ opacity: 0.8 }}>{copy.loading}</div>}
+        {message && <div className="small page-feedback">{message}</div>}
+        {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
     </div>
   );

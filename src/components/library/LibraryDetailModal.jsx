@@ -1,6 +1,7 @@
 import { GenresRow } from "./LibraryUi.jsx";
 import { formatStatusLabel, formatEventLabel } from "./libraryCopy.js";
 import { pickByLocale } from "../../domain/uiText";
+import { IconPlus, IconX } from "../ui/AppIcons.jsx";
 
 export default function LibraryDetailModal({
   locale = "ko",
@@ -135,8 +136,8 @@ export default function LibraryDetailModal({
         onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
-        <button type="button" className="modalCloseBtn" onClick={onClose} aria-label={copy.close}>
-          ×
+        <button type="button" className="modalCloseBtn" onClick={onClose} aria-label={copy.close} title={copy.close}>
+          <IconX size={14} />
         </button>
         <div className="modalBody">
           <div className="modalCover">
@@ -224,7 +225,7 @@ export default function LibraryDetailModal({
                                 aria-label={`${displayTitle} ${copy.addAndOpen}`}
                                 title={copy.addAndOpen}
                               >
-                                +
+                                <IconPlus size={16} />
                               </button>
                             ) : null}
                             {row.siteUrl && (

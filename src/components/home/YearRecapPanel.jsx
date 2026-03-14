@@ -6,6 +6,7 @@ import {
 } from "../../services/recapShare";
 import { pickByLocale } from "../../domain/uiText";
 import { formatReasonTagLabel } from "../library/libraryCopy.js";
+import { IconCopy, IconImage, IconShare } from "../ui/AppIcons.jsx";
 
 export default function YearRecapPanel({
   locale = "ko",
@@ -111,24 +112,13 @@ export default function YearRecapPanel({
   }
 
   return (
-    <section
-      style={{
-        border: "1px solid rgba(255,255,255,.12)",
-        borderRadius: 10,
-        padding: 12,
-        background: "linear-gradient(135deg, rgba(64,180,130,.16), rgba(255,255,255,.02))",
-        display: "grid",
-        gap: 10,
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontWeight: 700 }}>{copy.title}</div>
-          <div className="small" style={{ opacity: 0.82 }}>
-            {copy.lead}
-          </div>
+    <section className="surface-card year-recap-panel">
+      <div className="year-recap-panel__head">
+        <div className="pageHeader year-recap-panel__copy">
+          <h2 className="sectionTitle">{copy.title}</h2>
+          <p className="sectionLead">{copy.lead}</p>
         </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div className="pill-row">
           {displayYears.map((y) => {
             const active = Number(recapYear) === Number(y);
             return (
@@ -136,16 +126,7 @@ export default function YearRecapPanel({
                 key={y}
                 type="button"
                 onClick={() => setRecapYear(Number(y))}
-                className="small"
-                style={{
-                  border: "1px solid rgba(255,255,255,.2)",
-                  borderRadius: 999,
-                  padding: "4px 10px",
-                  background: active ? "rgba(255,255,255,.86)" : "rgba(255,255,255,.08)",
-                  color: active ? "#121217" : "inherit",
-                  cursor: "pointer",
-                  fontWeight: active ? 700 : 500,
-                }}
+                className={`pill-btn${active ? " is-active" : ""}`}
               >
                 {y}
               </button>
@@ -156,29 +137,29 @@ export default function YearRecapPanel({
 
       {yearRecap && yearRecap.totalLogs > 0 ? (
         <>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+          <div className="status-badge-row">
+            <div className="small status-badge">
               {locale === "en" ? `${copy.logs} ${yearRecap.totalLogs}` : `${copy.logs} ${yearRecap.totalLogs}${copy.countUnit}`}
             </div>
-            <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+            <div className="small status-badge">
               {locale === "en" ? `${copy.anime} ${yearRecap.uniqueAnimeCount}` : `${copy.anime} ${yearRecap.uniqueAnimeCount}${copy.countUnit}`}
             </div>
-            <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+            <div className="small status-badge">
               {locale === "en" ? `${copy.characters} ${yearRecap.uniqueCharacterCount}` : `${copy.characters} ${yearRecap.uniqueCharacterCount}${copy.peopleUnit}`}
             </div>
-            <div className="small" style={{ padding: "4px 10px", borderRadius: 999, background: "rgba(255,255,255,.12)" }}>
+            <div className="small status-badge">
               {copy.rewatches} {yearRecap.eventCounts.rewatch}{copy.times}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
-            <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.topAnime}</div>
-              <div style={{ display: "grid", gap: 6 }}>
+          <div className="metric-grid">
+            <div className="metric-card year-recap-panel__metric">
+              <div className="sectionTitle year-recap-panel__metric-title">{copy.topAnime}</div>
+              <div className="list-stack">
                 {yearRecap.topAnime.slice(0, 5).map((row, idx) => (
-                  <div key={row.anilistId} className="small" style={{ display: "grid", gridTemplateColumns: "20px 1fr auto", gap: 8 }}>
+                  <div key={row.anilistId} className="small year-recap-panel__rank-row">
                     <span>{idx + 1}</span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="year-recap-panel__rank-text">
                       {titleById.get(Number(row.anilistId)) || `#${row.anilistId}`}
                     </span>
                     <span>{row.count}{copy.times}</span>
@@ -187,29 +168,18 @@ export default function YearRecapPanel({
               </div>
             </div>
 
-            <div style={{ border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: 10, background: "rgba(255,255,255,.03)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>{copy.topCharacters}</div>
-              <div style={{ display: "grid", gap: 6 }}>
+            <div className="metric-card year-recap-panel__metric">
+              <div className="sectionTitle year-recap-panel__metric-title">{copy.topCharacters}</div>
+              <div className="list-stack">
                 {yearRecap.topCharacters.slice(0, 5).map((row, idx) => (
                   <button
                     key={row.characterId}
                     type="button"
                     onClick={() => onOpenCharacter(row.characterId, row.name, row.image)}
-                    className="small"
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      color: "inherit",
-                      cursor: "pointer",
-                      display: "grid",
-                      gridTemplateColumns: "20px 1fr auto",
-                      gap: 8,
-                      textAlign: "left",
-                      padding: 0,
-                    }}
+                    className="small year-recap-panel__rank-btn"
                   >
                     <span>{idx + 1}</span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="year-recap-panel__rank-text">
                       {row.name}
                       {row.bestTag ? ` · ${formatReasonTagLabel(row.bestTag, locale)}` : ""}
                     </span>
@@ -220,12 +190,11 @@ export default function YearRecapPanel({
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <div className="pill-row">
             {yearRecap.seasons.map((row) => (
               <span
                 key={row.key}
-                className="small"
-                style={{ border: "1px solid rgba(255,255,255,.16)", borderRadius: 999, padding: "3px 10px" }}
+                className="small status-badge"
               >
                 {seasonLabel(row.key, locale)} {row.count}
               </span>
@@ -233,26 +202,29 @@ export default function YearRecapPanel({
           </div>
         </>
       ) : (
-        <div className="small" style={{ opacity: 0.85 }}>
+        <div className="small page-feedback">
           {locale === "en"
             ? `${Number.isFinite(Number(recapYear)) ? recapYear : copy.selectedYear} ${copy.noLogsForYear}`
             : `${Number.isFinite(Number(recapYear)) ? `${recapYear}년` : copy.selectedYear}에 ${copy.noLogsForYear}`}
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <button type="button" className="btn" onClick={onCopyRecapText}>
-          {copy.copyText}
+      <div className="action-row">
+        <button type="button" className="btn btn--subtle" onClick={onCopyRecapText}>
+          <span className="btn__icon"><IconCopy /></span>
+          <span className="btn__label">{copy.copyText}</span>
         </button>
-        <button type="button" className="btn" onClick={onShareRecapText}>
-          {copy.share}
+        <button type="button" className="btn btn--subtle" onClick={onShareRecapText}>
+          <span className="btn__icon"><IconShare /></span>
+          <span className="btn__label">{copy.share}</span>
         </button>
-        <button type="button" className="btn" onClick={onDownloadRecapImage}>
-          {copy.saveImage}
+        <button type="button" className="btn btn--subtle" onClick={onDownloadRecapImage}>
+          <span className="btn__icon"><IconImage /></span>
+          <span className="btn__label">{copy.saveImage}</span>
         </button>
       </div>
       {message && (
-        <div className="small" style={{ opacity: 0.88 }}>
+        <div className="small page-feedback">
           {message}
         </div>
       )}

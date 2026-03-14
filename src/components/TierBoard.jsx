@@ -5,65 +5,176 @@ import {
   DEFAULT_TIERS,
   dedupeByAnilistId,
   makeEmptyTierState,
-  mergeTierState,
   normalizeImportList,
   normalizeItem,
-  normalizeTierState,
   sameItem,
 } from "../domain/animeState";
+import {
+  createCustomTierTopic,
+  createGenreTierTopic,
+  DEFAULT_TIER_TOPIC_ID,
+  getActiveTierTopic,
+  mergeTierTopicBundles,
+  normalizeTierTopicBundle,
+  removeTierTopic,
+  replaceActiveTierState,
+  setActiveTierTopicId,
+  syncTierStateWithEligibleIds,
+  upsertTierTopic,
+} from "../domain/tierTopics";
 import { useStoredState } from "../hooks/useStoredState";
 import { STORAGE_KEYS } from "../storage/keys";
 import { markManualBackupExported } from "../repositories/backupRepo";
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
-import { readTierStatePreferred, writeTierState } from "../repositories/tierRepo";
+import { readTierBoardBundlePreferred, writeTierBoardBundle } from "../repositories/tierRepo";
 import { mergeWatchLogs, readAllWatchLogsSnapshot, replaceWatchLogs } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred, mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatSeasonTermLabel, formatReasonTagLabel } from "./library/libraryCopy.js";
+import { formatGenreLabel } from "./library/libraryCopy.js";
 import { pickByLocale } from "../domain/uiText";
 import { pickDisplayTitle } from "../domain/animeTitles";
 
-const SEASON_OPTIONS = ["Spring", "Summer", "Fall", "Winter"];
-
-function extractYearFromLog(log) {
-  const start = String(log?.watchedAtStart || "");
-  const mStart = start.match(/^(\d{4})-\d{2}-\d{2}$/);
-  if (mStart) return Number(mStart[1]);
-
-  const value = String(log?.watchedAtValue || "");
-  const mValue = value.match(/^(\d{4})/);
-  if (mValue) return Number(mValue[1]);
-
-  return null;
+function normalizeSearchText(value) {
+  return String(value || "").trim().toLowerCase().normalize("NFKC");
 }
 
-function seasonByMonth(month) {
-  const m = Number(month);
-  if (m >= 3 && m <= 5) return "Spring";
-  if (m >= 6 && m <= 8) return "Summer";
-  if (m >= 9 && m <= 11) return "Fall";
-  return "Winter";
+function safeGenres(media) {
+  return Array.isArray(media?.genres) ? media.genres.filter(Boolean) : [];
 }
 
-function extractSeasonFromLog(log) {
-  const value = String(log?.watchedAtValue || "");
-  const direct = value.match(/^\d{4}-(Spring|Summer|Fall|Winter)$/i);
-  if (direct) {
-    return `${direct[1][0].toUpperCase()}${direct[1].slice(1).toLowerCase()}`;
-  }
+function matchesTopicSearch(item, media, query, locale) {
+  const q = normalizeSearchText(query);
+  if (!q) return true;
 
-  const start = String(log?.watchedAtStart || "");
-  const m = start.match(/^\d{4}-(\d{2})-\d{2}$/);
-  if (m) return seasonByMonth(Number(m[1]));
-  return null;
+  const hay = [
+    pickDisplayTitle(item, media, locale),
+    item?.koTitle,
+    media?.title?.english,
+    media?.title?.romaji,
+    media?.title?.native,
+    ...(Array.isArray(media?.synonyms) ? media.synonyms : []),
+    ...safeGenres(media),
+    ...safeGenres(media).map((genre) => formatGenreLabel(genre, locale)),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return hay.includes(q);
+}
+
+function sameJson(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function TopicMetric({ label, value }) {
+  return (
+    <div className="tier-topic-metric">
+      <span className="tier-topic-metric__label">{label}</span>
+      <strong className="tier-topic-metric__value">{value}</strong>
+    </div>
+  );
+}
+
+function TopicChip({ label, meta, isActive, onClick, badge }) {
+  return (
+    <button
+      type="button"
+      className={`tier-topic-chip${isActive ? " is-active" : ""}`}
+      onClick={onClick}
+    >
+      <span className="tier-topic-chip__text">
+        <span className="tier-topic-chip__label">{label}</span>
+        <span className="tier-topic-chip__meta">{meta}</span>
+      </span>
+      {badge ? <span className="tier-topic-chip__badge">{badge}</span> : null}
+    </button>
+  );
+}
+
+function TierPoster({ id, index, listName, title, image, onDragStart, onDragOver, onDrop }) {
+  return (
+    <div
+      draggable
+      onDragStart={(event) => onDragStart(event, id, listName, index)}
+      onDragOver={onDragOver}
+      onDrop={(event) => onDrop(event, listName, index)}
+      title={title}
+      className="tier-poster"
+    >
+      {image ? (
+        <img
+          src={image}
+          alt={title}
+          className="tier-poster__image"
+          loading="lazy"
+        />
+      ) : (
+        <div className="tier-poster__fallback">{title}</div>
+      )}
+    </div>
+  );
 }
 
 export default function TierBoard() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = pickByLocale(locale, {
     ko: {
+      title: "티어 보드",
+      lead: "장르별 랭킹과 커스텀 주제를 저장해 두고 드래그로 정리하는 보드입니다.",
+      currentBoard: "현재 보드",
+      currentBoardLead: "지금 선택된 주제를 기준으로 포스터를 드래그해 순위를 매깁니다.",
+      reset: "현재 주제 초기화",
+      deleteTopic: "현재 주제 삭제",
+      dragDrop: "Drag & Drop",
+      topicLibrary: "저장된 주제",
+      topicLibraryLead: "주제를 바꿔가며 서로 다른 랭킹을 저장할 수 있습니다.",
+      createTopic: "새 주제 만들기",
+      createTopicLead: "장르 보드를 빠르게 만들거나, 원하는 작품만 골라 커스텀 보드를 저장할 수 있습니다.",
+      allAnime: "전체 작품",
+      genreTopic: "장르 주제",
+      customTopic: "커스텀 주제",
+      topicType: "주제 종류",
+      topicTypeAll: "전체 작품 보드",
+      topicTypeGenre: "장르 보드",
+      topicTypeCustom: "커스텀 보드",
+      activeTopicBadge: "사용 중",
+      createGenreTopic: "장르 주제 저장",
+      createCustomTopic: "커스텀 주제 저장",
+      updateCustomTopic: "현재 커스텀 주제 저장",
+      genreSelect: "장르 선택",
+      genreTopicLead: "하나의 장르를 골라 별도 랭킹 보드로 저장합니다.",
+      customName: "주제 이름",
+      customNamePlaceholder: "예: 눈물나는 작품, 올타임 액션 탑",
+      customSearch: "작품 찾기",
+      customSearchPlaceholder: "제목이나 장르로 작품 찾기",
+      customTopicLead: "직접 작품을 골라 나만의 랭킹 주제를 만듭니다.",
+      selectedAnime: "선택된 작품",
+      selectedCount: "선택",
+      candidateAnime: "후보 작품",
+      selectedAnimeLead: "보드에 포함할 작품입니다. 다시 누르면 빠집니다.",
+      candidateAnimeLead: "검색 결과에서 작품을 눌러 보드에 추가합니다.",
+      topicCount: "대상 작품",
+      total: "전체",
+      tiers: "티어",
+      unranked: "미분류",
+      rankingBoard: "랭킹 보드",
+      rankingLead: "포스터를 끌어서 각 티어로 옮기거나 순서를 바꿉니다.",
+      unrankedLead: "아직 순위를 정하지 않은 작품입니다. 여기서 시작해 위 티어로 옮기면 됩니다.",
+      emptyTier: "여기에 작품을 드래그해 넣으세요.",
+      noGenre: "장르 정보가 아직 없습니다.",
+      noCandidates: "조건에 맞는 작품이 없습니다.",
+      noSelected: "아직 선택한 작품이 없습니다.",
+      needGenre: "장르를 먼저 골라 주세요.",
+      needCustomName: "커스텀 주제 이름을 입력해 주세요.",
+      needCustomAnime: "커스텀 주제에 넣을 작품을 하나 이상 선택해 주세요.",
+      duplicateGenre: "이미 저장된 장르 주제가 있어 해당 주제로 이동했어요.",
+      customSaved: "커스텀 주제를 저장했어요.",
+      genreSaved: "장르 주제를 저장했어요.",
+      topicDeleted: "주제를 삭제했어요.",
+      topicSummary: "현재 주제",
       installReady: "앱이 설치되었습니다. 홈 화면에서 바로 열 수 있어요.",
       installUnsupported: "현재 브라우저에서는 설치 프롬프트를 아직 사용할 수 없습니다.",
       installCancelled: "설치를 취소했어요. 필요할 때 다시 시도할 수 있습니다.",
@@ -84,31 +195,61 @@ export default function TierBoard() {
       pasteImportFailed: "붙여넣기 가져오기 실패",
       importFailed: "가져오기 실패",
       unknownError: "알 수 없는 오류",
-      title: "티어 보드",
-      lead: "감상 기록을 기준으로 다시 정리해 보는 티어 보드입니다.",
-      reset: "초기화",
-      filterTitle: "감상 기록 필터",
-      visible: "표시",
-      total: "전체",
-      filterWarning: "필터를 쓰는 동안에는 보기만 할 수 있어요. 드래그 편집은 `전체`에서 해주세요.",
-      unranked: "미분류",
-      all: "전체",
-      year: "올해/연도",
-      season: "시즌",
-      rewatch: "재시청 기록",
-      primary: "대표캐 있는 작품",
-      favorite: "최애캐가 있는 작품",
-      pinned: "고정한 캐릭터가 있는 작품",
-      reasonTag: "포인트 태그",
-      character: "캐릭터 선택",
-      logYearFilter: "로그 연도 필터",
-      logSeasonFilter: "로그 시즌 필터",
-      reasonTagFilter: "포인트 태그 필터",
-      reasonTagSelect: "포인트 태그 선택",
-      characterFilter: "캐릭터 선택 필터",
-      characterSelect: "캐릭터 선택",
     },
     en: {
+      title: "Tier Board",
+      lead: "Save genre-specific boards and custom ranking topics, then reorder them by drag and drop.",
+      currentBoard: "Current board",
+      currentBoardLead: "Rank posters by drag and drop for the topic that is currently selected.",
+      reset: "Reset current topic",
+      deleteTopic: "Delete current topic",
+      dragDrop: "Drag & Drop",
+      topicLibrary: "Saved topics",
+      topicLibraryLead: "Switch between topics and keep separate rankings.",
+      createTopic: "Create a topic",
+      createTopicLead: "Quickly save a genre board or build a custom board from hand-picked anime.",
+      allAnime: "All anime",
+      genreTopic: "Genre topic",
+      customTopic: "Custom topic",
+      topicType: "Topic type",
+      topicTypeAll: "All-anime board",
+      topicTypeGenre: "Genre board",
+      topicTypeCustom: "Custom board",
+      activeTopicBadge: "Active",
+      createGenreTopic: "Save genre topic",
+      createCustomTopic: "Save custom topic",
+      updateCustomTopic: "Save current custom topic",
+      genreSelect: "Choose genre",
+      genreTopicLead: "Pick one genre and save it as its own ranking board.",
+      customName: "Topic name",
+      customNamePlaceholder: "Example: tearjerkers, all-time action top",
+      customSearch: "Find anime",
+      customSearchPlaceholder: "Search by title or genre",
+      customTopicLead: "Hand-pick anime and save them as your own ranking topic.",
+      selectedAnime: "Selected anime",
+      selectedCount: "Selected",
+      candidateAnime: "Candidates",
+      selectedAnimeLead: "Anime currently included in this board. Click again to remove.",
+      candidateAnimeLead: "Click a search result to add it to the board.",
+      topicCount: "Eligible anime",
+      total: "Total",
+      tiers: "Tiers",
+      unranked: "Unranked",
+      rankingBoard: "Ranking board",
+      rankingLead: "Drag posters into tiers or reorder them within the same tier.",
+      unrankedLead: "Anime without a rank yet. Start here and move them upward.",
+      emptyTier: "Drag anime here to place them.",
+      noGenre: "No genre data yet.",
+      noCandidates: "No matching anime.",
+      noSelected: "No anime selected yet.",
+      needGenre: "Choose a genre first.",
+      needCustomName: "Enter a name for the custom topic.",
+      needCustomAnime: "Select at least one anime for the custom topic.",
+      duplicateGenre: "A topic for that genre already exists, so the board switched to it.",
+      customSaved: "Saved the custom topic.",
+      genreSaved: "Saved the genre topic.",
+      topicDeleted: "Deleted the topic.",
+      topicSummary: "Current topic",
       installReady: "App installed. You can launch it from your home screen.",
       installUnsupported: "This browser does not support the install prompt yet.",
       installCancelled: "Install cancelled. You can try again later.",
@@ -129,33 +270,21 @@ export default function TierBoard() {
       pasteImportFailed: "Paste import failed",
       importFailed: "Import failed",
       unknownError: "Unknown error",
-      title: "Tier Board",
-      lead: "Reorganize your rankings based on watch history.",
-      reset: "Reset",
-      filterTitle: "Log filter",
-      visible: "Showing",
-      total: "Total",
-      filterWarning: "While a filter is active, the board is view-only. Use `All` to drag and edit.",
-      unranked: "Unranked",
-      all: "All",
-      year: "This year / year",
-      season: "Season",
-      rewatch: "Rewatch logs",
-      primary: "Has primary character",
-      favorite: "Has favorite character",
-      pinned: "Has pinned character",
-      reasonTag: "Reason tag",
-      character: "Character",
-      logYearFilter: "Log year filter",
-      logSeasonFilter: "Log season filter",
-      reasonTagFilter: "Reason tag filter",
-      reasonTagSelect: "Choose reason tag",
-      characterFilter: "Character filter",
-      characterSelect: "Choose character",
     },
   });
-  // ✅ 라이브러리(localStorage) 읽어서 ids를 만든다 (새로 추가된 애니 자동 반영)
+
   const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, myListSeed);
+  const [tierBundleRaw, setTierBundleRaw] = useStoredState(STORAGE_KEYS.tier, null);
+  const [backupMsg, setBackupMsg] = useState("");
+  const [canInstallPwa, setCanInstallPwa] = useState(false);
+  const [watchLogsSnapshot, setWatchLogsSnapshot] = useState([]);
+  const [characterPinsSnapshot, setCharacterPinsSnapshot] = useState([]);
+  const [mediaMap, setMediaMap] = useState(new Map());
+  const [topicKindDraft, setTopicKindDraft] = useState("genre");
+  const [genreDraft, setGenreDraft] = useState("");
+  const [customTopicName, setCustomTopicName] = useState("");
+  const [customSearch, setCustomSearch] = useState("");
+  const [customSelectedIds, setCustomSelectedIds] = useState([]);
 
   useEffect(() => {
     setLibrary((prev) => {
@@ -169,9 +298,7 @@ export default function TierBoard() {
         )
       );
 
-      if (!Array.isArray(prev)) {
-        return normalized;
-      }
+      if (!Array.isArray(prev)) return normalized;
       if (
         normalized.length === source.length &&
         normalized.every((it, idx) => sameItem(it, source[idx]))
@@ -182,38 +309,91 @@ export default function TierBoard() {
     });
   }, [setLibrary]);
 
-  const ids = useMemo(() => library.map((x) => x.anilistId), [library]);
+  const ids = useMemo(() => library.map((row) => row.anilistId), [library]);
+  const idsKey = useMemo(() => ids.join(","), [ids]);
 
-  // ✅ id -> koTitle 맵 (라이브러리에 저장된 한글 제목 우선)
   const koById = useMemo(() => {
-    const m = new Map();
-    for (const it of library) {
-      if (it?.anilistId == null) continue;
-      if (it?.koTitle) m.set(it.anilistId, it.koTitle);
+    const map = new Map();
+    for (const item of library) {
+      if (item?.anilistId == null) continue;
+      if (item?.koTitle) map.set(item.anilistId, item.koTitle);
     }
-    return m;
+    return map;
   }, [library]);
 
   function titleFor(id, media) {
     return pickDisplayTitle({ anilistId: id, koTitle: koById.get(id) || null }, media, locale) || (id ? `#${id}` : "Loading...");
   }
 
-  const [mediaMap, setMediaMap] = useState(new Map());
-
-  // ✅ tierState는 localStorage에 저장
-  const [tierState, setTierState] = useStoredState(
-    STORAGE_KEYS.tier,
-    makeEmptyTierState(ids)
+  const tierBundle = useMemo(
+    () => normalizeTierTopicBundle(tierBundleRaw, makeEmptyTierState(ids)),
+    [tierBundleRaw, idsKey]
   );
-  const [backupMsg, setBackupMsg] = useState("");
-  const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [watchLogsSnapshot, setWatchLogsSnapshot] = useState([]);
-  const [logFilter, setLogFilter] = useState("all"); // all | year | season | rewatch | primary | favorite | pinned | reasonTag | character
-  const [logYear, setLogYear] = useState(String(new Date().getUTCFullYear()));
-  const [logSeason, setLogSeason] = useState("Spring");
-  const [characterPinsSnapshot, setCharacterPinsSnapshot] = useState([]);
-  const [reasonTagFilter, setReasonTagFilter] = useState("");
-  const [characterFilterId, setCharacterFilterId] = useState("");
+  const activeTopic = useMemo(() => getActiveTierTopic(tierBundle), [tierBundle]);
+  const activeTierState = activeTopic?.tier || makeEmptyTierState([]);
+
+  function getEligibleIdsForTopic(topic, sourceIds = ids, sourceMediaMap = mediaMap) {
+    if (!topic || topic.kind === "all") return [...sourceIds];
+    if (topic.kind === "genre") {
+      const genreKey = String(topic.genreKey || "").trim();
+      if (!genreKey) return [];
+      return sourceIds.filter((id) => safeGenres(sourceMediaMap.get(id)).includes(genreKey));
+    }
+    if (topic.kind === "custom") {
+      const set = new Set(sourceIds);
+      return (Array.isArray(topic.includedIds) ? topic.includedIds : []).filter((id) => set.has(id));
+    }
+    return [...sourceIds];
+  }
+
+  const activeEligibleIds = useMemo(
+    () => getEligibleIdsForTopic(activeTopic),
+    [activeTopic, idsKey, mediaMap]
+  );
+
+  const genreOptions = useMemo(() => {
+    const counts = new Map();
+    for (const id of ids) {
+      for (const genre of safeGenres(mediaMap.get(id))) {
+        counts.set(genre, (counts.get(genre) || 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || formatGenreLabel(a[0], locale).localeCompare(formatGenreLabel(b[0], locale), locale === "en" ? "en" : "ko"))
+      .map(([genre, count]) => ({ genre, count }));
+  }, [idsKey, mediaMap, locale]);
+
+  const customCandidates = useMemo(() => {
+    const selectedSet = new Set(customSelectedIds);
+    return library
+      .filter((item) => !selectedSet.has(item.anilistId))
+      .filter((item) => matchesTopicSearch(item, mediaMap.get(item.anilistId), customSearch, locale))
+      .sort((a, b) => {
+        const ta = titleFor(a.anilistId, mediaMap.get(a.anilistId));
+        const tb = titleFor(b.anilistId, mediaMap.get(b.anilistId));
+        return ta.localeCompare(tb, locale === "en" ? "en" : "ko");
+      })
+      .slice(0, 16);
+  }, [customSearch, customSelectedIds, library, mediaMap, locale]);
+
+  const activeTopicLabel = useMemo(() => {
+    if (!activeTopic) return copy.allAnime;
+    if (activeTopic.kind === "genre" && activeTopic.genreKey) return formatGenreLabel(activeTopic.genreKey, locale);
+    if (activeTopic.id === DEFAULT_TIER_TOPIC_ID) return copy.allAnime;
+    return activeTopic.name || copy.customTopic;
+  }, [activeTopic, copy.allAnime, copy.customTopic, locale]);
+
+  const activeTopicTypeLabel = useMemo(() => {
+    if (!activeTopic || activeTopic.id === DEFAULT_TIER_TOPIC_ID || activeTopic.kind === "all") {
+      return copy.topicTypeAll;
+    }
+    if (activeTopic.kind === "genre") return copy.topicTypeGenre;
+    return copy.topicTypeCustom;
+  }, [activeTopic, copy.topicTypeAll, copy.topicTypeCustom, copy.topicTypeGenre]);
+
+  const totalPlacedCount =
+    (Array.isArray(activeTierState?.unranked) ? activeTierState.unranked.length : 0) +
+    DEFAULT_TIERS.reduce((acc, tier) => acc + (Array.isArray(activeTierState?.tiers?.[tier]) ? activeTierState.tiers[tier].length : 0), 0);
 
   function refreshWatchLogsSnapshot() {
     const rows = readAllWatchLogsSnapshot();
@@ -229,9 +409,7 @@ export default function TierBoard() {
     refreshWatchLogsSnapshot();
     refreshCharacterPinsSnapshot();
     listCharacterPinsPreferred()
-      .then((rows) => {
-        setCharacterPinsSnapshot(Array.isArray(rows) ? rows : []);
-      })
+      .then((rows) => setCharacterPinsSnapshot(Array.isArray(rows) ? rows : []))
       .catch(() => {});
   }, []);
 
@@ -239,9 +417,9 @@ export default function TierBoard() {
     let alive = true;
     (async () => {
       await ensureLegacyStorageMigrated().catch(() => {});
-      const [preferredLibrary, preferredTier] = await Promise.all([
+      const [preferredLibrary, preferredBundle] = await Promise.all([
         readLibraryListPreferred(myListSeed).catch(() => null),
-        readTierStatePreferred(null).catch(() => null),
+        readTierBoardBundlePreferred(null).catch(() => null),
       ]);
       if (!alive) return;
 
@@ -266,30 +444,27 @@ export default function TierBoard() {
         });
       }
 
-      if (preferredTier && typeof preferredTier === "object") {
-        setTierState((prev) => {
-          const next = normalizeTierState(preferredTier);
-          const same =
-            JSON.stringify(prev?.unranked || []) === JSON.stringify(next?.unranked || []) &&
-            JSON.stringify(prev?.tiers || {}) === JSON.stringify(next?.tiers || {});
-          return same ? prev : next;
+      if (preferredBundle && typeof preferredBundle === "object") {
+        setTierBundleRaw((prev) => {
+          const current = normalizeTierTopicBundle(prev, null);
+          const next = normalizeTierTopicBundle(preferredBundle, null);
+          return sameJson(current, next) ? prev : next;
         });
       }
     })();
     return () => {
       alive = false;
     };
-  }, [setLibrary, setTierState]);
+  }, [setLibrary, setTierBundleRaw]);
 
   useEffect(() => {
     writeLibraryList(library, { mirrorOnly: true });
   }, [library]);
 
   useEffect(() => {
-    writeTierState(tierState, { mirrorOnly: true });
-  }, [tierState]);
+    writeTierBoardBundle(tierBundle, { mirrorOnly: true });
+  }, [tierBundle]);
 
-  // AniList 메타 로드(캐시 우선)
   useEffect(() => {
     setMediaMap(getCachedAnimeMap(ids));
 
@@ -302,46 +477,33 @@ export default function TierBoard() {
     return () => {
       alive = false;
     };
-  }, [ids]);
+  }, [idsKey]);
 
-  // ✅ 라이브러리 ↔ 티어 자동 동기화
-  const idsKey = useMemo(() => ids.join(","), [ids]);
   useEffect(() => {
-    setTierState((prev) => {
-      const next = structuredClone(prev);
-
-      const allNow = new Set();
-      for (const id of next.unranked || []) allNow.add(id);
-      for (const k of Object.keys(next.tiers || {})) {
-        for (const id of next.tiers[k] || []) allNow.add(id);
-      }
-
-      const desired = new Set(ids);
-
-      const missing = ids.filter((id) => !allNow.has(id));
-      const removed = [...allNow].filter((id) => !desired.has(id));
-
-      if (missing.length === 0 && removed.length === 0) return prev;
-
-      if (removed.length) {
-        next.unranked = (next.unranked || []).filter((id) => !removed.includes(id));
-        for (const k of Object.keys(next.tiers || {})) {
-          next.tiers[k] = (next.tiers[k] || []).filter((id) => !removed.includes(id));
-        }
-      }
-
-      if (missing.length) {
-        next.unranked = [...missing, ...(next.unranked || [])];
-        // 중복 제거
-        const seen = new Set();
-        next.unranked = next.unranked.filter((id) =>
-          seen.has(id) ? false : (seen.add(id), true)
-        );
-      }
-
-      return next;
+    setTierBundleRaw((prevRaw) => {
+      const current = normalizeTierTopicBundle(prevRaw, makeEmptyTierState(ids));
+      const next = {
+        ...current,
+        topics: current.topics.map((topic) => {
+          const eligibleIds = getEligibleIdsForTopic(topic, ids, mediaMap);
+          return {
+            ...topic,
+            includedIds: topic.kind === "custom" ? eligibleIds : topic.includedIds,
+            tier: syncTierStateWithEligibleIds(topic.tier, eligibleIds),
+          };
+        }),
+      };
+      return sameJson(current, next) ? prevRaw : next;
     });
-  }, [idsKey, setTierState]);
+  }, [idsKey, mediaMap, setTierBundleRaw]);
+
+  useEffect(() => {
+    if (activeTopic?.kind !== "custom") return;
+    setTopicKindDraft("custom");
+    setCustomTopicName(activeTopic.name || "");
+    setCustomSelectedIds(Array.isArray(activeTopic.includedIds) ? activeTopic.includedIds : []);
+    setCustomSearch("");
+  }, [activeTopic?.id, activeTopic?.kind]);
 
   useEffect(() => {
     function syncInstallState() {
@@ -364,20 +526,18 @@ export default function TierBoard() {
     };
   }, [copy.installReady]);
 
-  // ---- Drag & Drop (순서 재정렬 지원) ----
-  function allowDrop(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+  function allowDrop(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
   }
 
-  function onDragStart(e, id, from, fromIndex) {
-    // Drag&Drop 데이터는 문자열로 넣고(getData로 꺼냄)
-    e.dataTransfer.setData("text/plain", JSON.stringify({ id, from, fromIndex }));
-    e.dataTransfer.effectAllowed = "move";
+  function onDragStart(event, id, from, fromIndex) {
+    event.dataTransfer.setData("text/plain", JSON.stringify({ id, from, fromIndex }));
+    event.dataTransfer.effectAllowed = "move";
   }
 
-  function parsePayload(e) {
-    const raw = e.dataTransfer.getData("text/plain");
+  function parsePayload(event) {
+    const raw = event.dataTransfer.getData("text/plain");
     if (!raw) return null;
     try {
       return JSON.parse(raw);
@@ -391,58 +551,136 @@ export default function TierBoard() {
   }
 
   function removeEverywhere(state, id) {
-    state.unranked = (state.unranked || []).filter((x) => x !== id);
-    for (const k of Object.keys(state.tiers || {})) {
-      state.tiers[k] = (state.tiers[k] || []).filter((x) => x !== id);
+    state.unranked = (state.unranked || []).filter((value) => value !== id);
+    for (const key of Object.keys(state.tiers || {})) {
+      state.tiers[key] = (state.tiers[key] || []).filter((value) => value !== id);
     }
   }
 
   function insertAt(arr, index, value) {
-    const i = Math.max(0, Math.min(index, arr.length));
-    arr.splice(i, 0, value);
+    const nextIndex = Math.max(0, Math.min(index, arr.length));
+    arr.splice(nextIndex, 0, value);
   }
 
   function moveItem(prev, { id, from, fromIndex }, to, toIndex) {
     const next = structuredClone(prev);
     const sameList = from === to;
-
     removeEverywhere(next, id);
 
     const target = getListRef(next, to) || [];
-    if (to !== "unranked") next.tiers[to] = target;
-    else next.unranked = target;
+    if (to === "unranked") next.unranked = target;
+    else next.tiers[to] = target;
 
-    let idx = typeof toIndex === "number" ? toIndex : target.length;
-    if (sameList && typeof fromIndex === "number" && fromIndex < idx) idx = idx - 1;
-
-    insertAt(target, idx, id);
+    let nextIndex = typeof toIndex === "number" ? toIndex : target.length;
+    if (sameList && typeof fromIndex === "number" && fromIndex < nextIndex) nextIndex -= 1;
+    insertAt(target, nextIndex, id);
     return next;
   }
 
-  function onDropToEnd(e, to) {
-    if (logFilter !== "all") return;
-    e.preventDefault();
-    const payload = parsePayload(e);
-    if (!payload) return;
-
-    setTierState((prev) => {
-      const arr = getListRef(prev, to) || [];
-      return moveItem(prev, payload, to, arr.length);
+  function updateActiveTier(updater) {
+    setTierBundleRaw((prevRaw) => {
+      const current = normalizeTierTopicBundle(prevRaw, makeEmptyTierState(ids));
+      const nextTier =
+        typeof updater === "function"
+          ? updater(getActiveTierTopic(current)?.tier || makeEmptyTierState(activeEligibleIds))
+          : updater;
+      return replaceActiveTierState(current, nextTier);
     });
   }
 
-  function onDropToItem(e, to, toIndex) {
-    if (logFilter !== "all") return;
-    e.preventDefault();
-    e.stopPropagation();
-    const payload = parsePayload(e);
+  function onDropToEnd(event, to) {
+    event.preventDefault();
+    const payload = parsePayload(event);
     if (!payload) return;
+    updateActiveTier((prevTier) => {
+      const arr = getListRef(prevTier, to) || [];
+      return moveItem(prevTier, payload, to, arr.length);
+    });
+  }
 
-    setTierState((prev) => moveItem(prev, payload, to, toIndex));
+  function onDropToItem(event, to, toIndex) {
+    event.preventDefault();
+    event.stopPropagation();
+    const payload = parsePayload(event);
+    if (!payload) return;
+    updateActiveTier((prevTier) => moveItem(prevTier, payload, to, toIndex));
   }
 
   function reset() {
-    setTierState(makeEmptyTierState(ids));
+    updateActiveTier(makeEmptyTierState(activeEligibleIds));
+  }
+
+  function selectTopic(topicId) {
+    setTierBundleRaw((prevRaw) => setActiveTierTopicId(prevRaw, topicId));
+  }
+
+  function deleteCurrentTopic() {
+    if (!activeTopic || activeTopic.id === DEFAULT_TIER_TOPIC_ID) return;
+    setTierBundleRaw((prevRaw) => removeTierTopic(prevRaw, activeTopic.id));
+    setBackupMsg(copy.topicDeleted);
+  }
+
+  function createGenreTopic() {
+    const genreKey = String(genreDraft || "").trim();
+    if (!genreKey) {
+      setBackupMsg(copy.needGenre);
+      return;
+    }
+
+    const existing = tierBundle.topics.find((topic) => topic.kind === "genre" && topic.genreKey === genreKey);
+    if (existing) {
+      setTierBundleRaw((prevRaw) => setActiveTierTopicId(prevRaw, existing.id));
+      setBackupMsg(copy.duplicateGenre);
+      return;
+    }
+
+    const eligibleIds = getEligibleIdsForTopic({ kind: "genre", genreKey });
+    const nextTopic = createGenreTierTopic({
+      name: genreKey,
+      genreKey,
+      tier: makeEmptyTierState(eligibleIds),
+    });
+    setTierBundleRaw((prevRaw) => upsertTierTopic(prevRaw, nextTopic, true));
+    setBackupMsg(copy.genreSaved);
+  }
+
+  function persistCustomTopic() {
+    const name = String(customTopicName || "").trim();
+    if (!name) {
+      setBackupMsg(copy.needCustomName);
+      return;
+    }
+    if (!customSelectedIds.length) {
+      setBackupMsg(copy.needCustomAnime);
+      return;
+    }
+
+    const nextTopic = activeTopic?.kind === "custom"
+      ? {
+          ...activeTopic,
+          name,
+          includedIds: customSelectedIds,
+          tier: syncTierStateWithEligibleIds(activeTopic.tier, customSelectedIds),
+        }
+      : createCustomTierTopic({
+          name,
+          includedIds: customSelectedIds,
+          tier: makeEmptyTierState(customSelectedIds),
+        });
+
+    setTierBundleRaw((prevRaw) => upsertTierTopic(prevRaw, nextTopic, true));
+    setBackupMsg(copy.customSaved);
+  }
+
+  function addCustomAnime(id) {
+    const numericId = Number(id);
+    if (!Number.isFinite(numericId)) return;
+    setCustomSelectedIds((prev) => (prev.includes(numericId) ? prev : [...prev, numericId]));
+  }
+
+  function removeCustomAnime(id) {
+    const numericId = Number(id);
+    setCustomSelectedIds((prev) => prev.filter((row) => row !== numericId));
   }
 
   async function onClickInstallPwa() {
@@ -462,10 +700,11 @@ export default function TierBoard() {
   function buildBackupPayload() {
     return {
       app: "ani-site",
-      version: 3,
+      version: 4,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(library),
-      tier: tierState,
+      tier: activeTierState,
+      tierTopics: tierBundle,
       watchLogs: readAllWatchLogsSnapshot(),
       characterPins: readCharacterPinsSnapshot(),
     };
@@ -478,18 +717,16 @@ export default function TierBoard() {
 
   function exportBackup() {
     const payload = buildBackupPayload();
-
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const anchor = document.createElement("a");
     const date = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = `ani-site-backup-${date}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    anchor.href = url;
+    anchor.download = `ani-site-backup-${date}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
     URL.revokeObjectURL(url);
-
     markBackupExported(copy.backupDownloaded);
   }
 
@@ -502,15 +739,12 @@ export default function TierBoard() {
     try {
       const file = new File([text], filename, { type: "application/json" });
       if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: copy.shareFileTitle,
-          files: [file],
-        });
+        await navigator.share({ title: copy.shareFileTitle, files: [file] });
         markBackupExported(copy.sharedFile);
         return;
       }
-    } catch (err) {
-      if (err?.name === "AbortError") {
+    } catch (error) {
+      if (error?.name === "AbortError") {
         setBackupMsg(copy.shareCancelled);
         return;
       }
@@ -518,15 +752,12 @@ export default function TierBoard() {
 
     try {
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-        await navigator.share({
-          title: copy.shareTextTitle,
-          text,
-        });
+        await navigator.share({ title: copy.shareTextTitle, text });
         markBackupExported(copy.sharedText);
         return;
       }
-    } catch (err) {
-      if (err?.name === "AbortError") {
+    } catch (error) {
+      if (error?.name === "AbortError") {
         setBackupMsg(copy.shareCancelled);
         return;
       }
@@ -541,11 +772,8 @@ export default function TierBoard() {
   }
 
   async function importBackupFromJson(json, mode = "merge") {
-
     const incomingList = Array.isArray(json) ? json : json?.list;
-    if (!Array.isArray(incomingList)) {
-      throw new Error(copy.missingList);
-    }
+    if (!Array.isArray(incomingList)) throw new Error(copy.missingList);
 
     const incomingNormalized = normalizeImportList(incomingList);
     const isOverwrite = mode === "overwrite";
@@ -558,21 +786,19 @@ export default function TierBoard() {
       setLibrary((prev) => dedupeByAnilistId([...prev, ...incomingNormalized]));
     }
 
+    const incomingBundle = !Array.isArray(json) ? json?.tierTopics : null;
     const incomingTier = !Array.isArray(json) ? json?.tier : null;
-    if (incomingTier) {
-      const nextTier = isOverwrite
-        ? normalizeTierState(incomingTier)
-        : mergeTierState(tierState, incomingTier);
-      setTierState(nextTier);
+    if (incomingBundle || incomingTier) {
+      const nextBundle = incomingBundle || incomingTier;
+      setTierBundleRaw((prevRaw) =>
+        isOverwrite ? normalizeTierTopicBundle(nextBundle, null) : mergeTierTopicBundles(prevRaw, nextBundle)
+      );
     }
 
     const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
     if (Array.isArray(incomingLogs)) {
-      if (isOverwrite) {
-        await replaceWatchLogs(incomingLogs);
-      } else {
-        await mergeWatchLogs(incomingLogs);
-      }
+      if (isOverwrite) await replaceWatchLogs(incomingLogs);
+      else await mergeWatchLogs(incomingLogs);
       refreshWatchLogsSnapshot();
     } else if (isOverwrite) {
       await replaceWatchLogs([]);
@@ -581,22 +807,15 @@ export default function TierBoard() {
 
     const incomingPins = !Array.isArray(json) ? json?.characterPins : null;
     if (Array.isArray(incomingPins)) {
-      if (isOverwrite) {
-        await replaceCharacterPins(incomingPins);
-      } else {
-        await mergeCharacterPins(incomingPins);
-      }
+      if (isOverwrite) await replaceCharacterPins(incomingPins);
+      else await mergeCharacterPins(incomingPins);
       refreshCharacterPinsSnapshot();
     } else if (isOverwrite) {
       await replaceCharacterPins([]);
       refreshCharacterPinsSnapshot();
     }
 
-    setBackupMsg(
-      isOverwrite
-        ? copy.importDoneOverwrite
-        : copy.importDoneMerge
-    );
+    setBackupMsg(isOverwrite ? copy.importDoneOverwrite : copy.importDoneMerge);
   }
 
   async function importBackup(file, mode = "merge") {
@@ -615,164 +834,35 @@ export default function TierBoard() {
     try {
       const json = JSON.parse(raw);
       await importBackupFromJson(json, mode);
-    } catch (err) {
-      console.error(err);
-      setBackupMsg(`${copy.pasteImportFailed}: ${err?.message || copy.unknownError}`);
-      throw err;
+    } catch (error) {
+      console.error(error);
+      setBackupMsg(`${copy.pasteImportFailed}: ${error?.message || copy.unknownError}`);
+      throw error;
     }
   }
 
   async function importBackupFile(file, mode = "merge") {
     try {
       await importBackup(file, mode);
-    } catch (err) {
-      console.error(err);
-      setBackupMsg(`${copy.importFailed}: ${err?.message || copy.unknownError}`);
-      throw err;
+    } catch (error) {
+      console.error(error);
+      setBackupMsg(`${copy.importFailed}: ${error?.message || copy.unknownError}`);
+      throw error;
     }
   }
 
-  // ---- Render ----
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
-  const canEditTierBoard = logFilter === "all";
-  const eligibleIdSet = useMemo(() => {
-    if (logFilter === "all") return null;
-    const logs = Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : [];
-    const out = new Set();
-
-    for (const log of logs) {
-      const id = Number(log?.anilistId);
-      if (!Number.isFinite(id)) continue;
-
-      if (logFilter === "year") {
-        const y = extractYearFromLog(log);
-        if (Number.isFinite(y) && String(y) === String(logYear)) out.add(id);
-        continue;
-      }
-
-      if (logFilter === "season") {
-        const y = extractYearFromLog(log);
-        const season = extractSeasonFromLog(log);
-        if (
-          Number.isFinite(y) &&
-          String(y) === String(logYear) &&
-          season === logSeason
-        ) {
-          out.add(id);
-        }
-        continue;
-      }
-
-      if (logFilter === "rewatch") {
-        if (String(log?.eventType || "") === "재시청") out.add(id);
-        continue;
-      }
-
-      if (logFilter === "primary") {
-        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-        const hasPrimary = refs.some((ref) => ref?.isPrimary === true);
-        if (hasPrimary || refs.length === 1) out.add(id);
-        continue;
-      }
-
-      if (logFilter === "favorite") {
-        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-        const hasFavorite = refs.some((ref) => String(ref?.affinity || "") === "최애");
-        if (hasFavorite) out.add(id);
-        continue;
-      }
-
-      if (logFilter === "reasonTag") {
-        const selectedTag = String(reasonTagFilter || "").trim();
-        if (!selectedTag) continue;
-        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-        const hasTag = refs.some((ref) =>
-          Array.isArray(ref?.reasonTags) && ref.reasonTags.includes(selectedTag)
-        );
-        if (hasTag) out.add(id);
-        continue;
-      }
-
-      if (logFilter === "character") {
-        const selectedId = Number(characterFilterId);
-        if (!Number.isFinite(selectedId)) continue;
-        const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-        const hasCharacter = refs.some((ref) => Number(ref?.characterId) === selectedId);
-        if (hasCharacter) out.add(id);
-      }
-    }
-
-    if (logFilter === "pinned") {
-      for (const pin of Array.isArray(characterPinsSnapshot) ? characterPinsSnapshot : []) {
-        const mediaId = Number(pin?.mediaId);
-        if (Number.isFinite(mediaId)) out.add(mediaId);
-      }
-    }
-    return out;
-  }, [characterFilterId, characterPinsSnapshot, logFilter, logSeason, logYear, reasonTagFilter, watchLogsSnapshot]);
-
-  const reasonTagOptions = useMemo(() => {
-    const map = new Map();
-    for (const log of Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : []) {
-      const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-      for (const ref of refs) {
-        const tags = Array.isArray(ref?.reasonTags) ? ref.reasonTags : [];
-        for (const tagRaw of tags) {
-          const tag = String(tagRaw || "").trim();
-          if (!tag) continue;
-          map.set(tag, (map.get(tag) || 0) + 1);
-        }
-      }
-    }
-    return [...map.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"))
-      .map(([tag, count]) => ({ tag, count }));
-  }, [watchLogsSnapshot]);
-
-  const characterFilterOptions = useMemo(() => {
-    const map = new Map();
-    for (const log of Array.isArray(watchLogsSnapshot) ? watchLogsSnapshot : []) {
-      const refs = Array.isArray(log?.characterRefs) ? log.characterRefs : [];
-      for (const ref of refs) {
-        const id = Number(ref?.characterId);
-        if (!Number.isFinite(id)) continue;
-        const cur = map.get(id) || {
-          id,
-          name: String(ref?.nameSnapshot || `#${id}`).trim() || `#${id}`,
-          count: 0,
-        };
-        cur.count += 1;
-        if (!cur.name && ref?.nameSnapshot) cur.name = String(ref.nameSnapshot).trim();
-        map.set(id, cur);
-      }
-    }
-    return [...map.values()]
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ko"))
-      .slice(0, 100);
-  }, [watchLogsSnapshot]);
-
-  function filterIdsByLog(idsList) {
-    if (!eligibleIdSet) return Array.isArray(idsList) ? idsList : [];
-    return (Array.isArray(idsList) ? idsList : []).filter((id) => eligibleIdSet.has(id));
-  }
-
-  const totalPlacedCount =
-    (Array.isArray(tierState?.unranked) ? tierState.unranked.length : 0) +
-    DEFAULT_TIERS.reduce((acc, t) => acc + (Array.isArray(tierState?.tiers?.[t]) ? tierState.tiers[t].length : 0), 0);
-  const visiblePlacedCount =
-    filterIdsByLog(tierState?.unranked).length +
-    DEFAULT_TIERS.reduce((acc, t) => acc + filterIdsByLog(tierState?.tiers?.[t]).length, 0);
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div className="tier-board">
       <TopNavDataMenu
         base={base}
         panelId="tier-data-menu-panel"
         canInstallPwa={canInstallPwa}
         locale={locale}
         theme={theme}
-        onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
+        onToggleLocale={(nextLocale) => setLocale(nextLocale || (locale === "ko" ? "en" : "ko"))}
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onExportFile={exportBackup}
         onExportMobile={exportBackupMobile}
@@ -780,259 +870,274 @@ export default function TierBoard() {
         onImportJsonFile={importBackupFile}
         onImportJsonText={importBackupText}
       />
-      {backupMsg && <div className="small" style={{ opacity: 0.9 }}>{backupMsg}</div>}
 
-      <section className="pageHeader" style={{ marginBottom: 4 }}>
+      {backupMsg && <div className="tier-board__feedback small">{backupMsg}</div>}
+
+      <section className="pageHeader tier-board__header">
         <h1 className="pageTitle">{copy.title}</h1>
         <p className="pageLead">{copy.lead}</p>
       </section>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <button className="btn" onClick={reset}>{copy.reset}</button>
-        <span className="small">Drag & Drop</span>
-      </div>
-
-      <section
-        style={{
-          border: "1px solid rgba(255,255,255,.1)",
-          background: "rgba(255,255,255,.03)",
-          borderRadius: 5,
-          padding: 10,
-          display: "grid",
-          gap: 8,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700 }}>{copy.filterTitle}</div>
-          <div className="small" style={{ opacity: 0.86 }}>
-            {copy.visible} {visiblePlacedCount} / {copy.total} {totalPlacedCount}
+      <section className="surface-card tier-summary-card">
+        <div className="tier-summary-card__top">
+          <div className="pageHeader tier-summary-card__copy">
+            <div className="pageTitle tier-summary-card__title">{copy.currentBoard}</div>
+            <p className="pageLead">{copy.currentBoardLead}</p>
+          </div>
+          <div className="tier-summary-card__actions">
+            <button className="btn" onClick={reset}>{copy.reset}</button>
+            {activeTopic.id !== DEFAULT_TIER_TOPIC_ID && (
+              <button className="btn" onClick={deleteCurrentTopic}>{copy.deleteTopic}</button>
+            )}
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {[
-            { key: "all", label: copy.all },
-            { key: "year", label: copy.year },
-            { key: "season", label: copy.season },
-            { key: "rewatch", label: copy.rewatch },
-            { key: "primary", label: copy.primary },
-            { key: "favorite", label: copy.favorite },
-            { key: "pinned", label: copy.pinned },
-            { key: "reasonTag", label: copy.reasonTag },
-            { key: "character", label: copy.character },
-          ].map((opt) => (
-            <button
-              key={opt.key}
-              type="button"
-              className="btn"
-              onClick={() => setLogFilter(opt.key)}
-              style={{
-                border: "1px solid rgba(255,255,255,.2)",
-                background: logFilter === opt.key ? "rgba(255,255,255,.82)" : "transparent",
-                color: logFilter === opt.key ? "#0b0c10" : "inherit",
-                fontWeight: logFilter === opt.key ? 700 : 500,
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="tier-summary-card__meta">
+          <div className="tier-summary-card__topic">
+            <div className="tier-summary-card__eyebrow">{copy.topicSummary}</div>
+            <div className="tier-summary-card__topic-row">
+              <strong className="tier-summary-card__topic-name">{activeTopicLabel}</strong>
+              <span className="tier-summary-card__topic-kind">{activeTopicTypeLabel}</span>
+            </div>
+          </div>
+          <div className="tier-summary-card__metrics">
+            <TopicMetric label={copy.topicCount} value={activeEligibleIds.length} />
+            <TopicMetric label={copy.total} value={totalPlacedCount} />
+            <TopicMetric label={copy.tiers} value={DEFAULT_TIERS.length} />
+          </div>
+        </div>
+      </section>
+
+      <section className="surface-card tier-topic-section">
+        <div className="pageHeader tier-topic-section__header">
+          <div className="pageTitle tier-topic-section__title">{copy.topicLibrary}</div>
+          <p className="pageLead">{copy.topicLibraryLead}</p>
         </div>
 
-        {(logFilter === "year" || logFilter === "season") && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <input
-              className="input"
-              type="number"
-              min={1950}
-              max={2099}
-              value={logYear}
-              onChange={(e) => setLogYear(String(e.target.value || "").replace(/[^\d]/g, "").slice(0, 4))}
-              aria-label={copy.logYearFilter}
-              style={{ width: 100 }}
-            />
-            {logFilter === "season" && (
+        <div className="tier-topic-chip-row">
+          {tierBundle.topics.map((topic) => {
+            const label =
+              topic.id === DEFAULT_TIER_TOPIC_ID
+                ? copy.allAnime
+                : topic.kind === "genre" && topic.genreKey
+                  ? formatGenreLabel(topic.genreKey, locale)
+                  : topic.name;
+            const eligibleCount = getEligibleIdsForTopic(topic).length;
+
+            return (
+              <TopicChip
+                key={topic.id}
+                label={label}
+                meta={`${copy.topicCount} ${eligibleCount}`}
+                isActive={topic.id === activeTopic.id}
+                badge={topic.id === activeTopic.id ? copy.activeTopicBadge : null}
+                onClick={() => selectTopic(topic.id)}
+              />
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="surface-card tier-topic-section">
+        <div className="pageHeader tier-topic-section__header">
+          <div className="pageTitle tier-topic-section__title">{copy.createTopic}</div>
+          <p className="pageLead">{copy.createTopicLead}</p>
+        </div>
+
+        <div className="tier-topic-mode-row" aria-label={copy.topicType}>
+          <button
+            type="button"
+            className={`tier-topic-mode-btn${topicKindDraft === "genre" ? " is-active" : ""}`}
+            onClick={() => setTopicKindDraft("genre")}
+          >
+            {copy.genreTopic}
+          </button>
+          <button
+            type="button"
+            className={`tier-topic-mode-btn${topicKindDraft === "custom" ? " is-active" : ""}`}
+            onClick={() => setTopicKindDraft("custom")}
+          >
+            {copy.customTopic}
+          </button>
+        </div>
+
+        {topicKindDraft === "genre" ? (
+          <div className="tier-topic-builder">
+            <div className="tier-topic-builder__main">
+              <div className="tier-topic-builder__eyebrow">{copy.genreTopic}</div>
+              <p className="tier-topic-builder__lead">{copy.genreTopicLead}</p>
               <select
-                className="select"
-                value={logSeason}
-                onChange={(e) => setLogSeason(SEASON_OPTIONS.includes(e.target.value) ? e.target.value : "Spring")}
-                aria-label={copy.logSeasonFilter}
-                style={{ width: 140 }}
+                className="select tier-topic-builder__control"
+                value={genreDraft}
+                onChange={(event) => setGenreDraft(String(event.target.value || ""))}
+                aria-label={copy.genreSelect}
               >
-                {SEASON_OPTIONS.map((term) => (
-                  <option key={term} value={term}>
-                    {formatSeasonTermLabel(term, locale)}
+                <option value="">{copy.genreSelect}</option>
+                {genreOptions.map((row) => (
+                  <option key={row.genre} value={row.genre}>
+                    {formatGenreLabel(row.genre, locale)} ({row.count})
                   </option>
                 ))}
               </select>
-            )}
-          </div>
-        )}
+              {genreOptions.length === 0 && <div className="small">{copy.noGenre}</div>}
+            </div>
 
-        {logFilter === "reasonTag" && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <select
-              className="select"
-              value={reasonTagFilter}
-              onChange={(e) => setReasonTagFilter(String(e.target.value || ""))}
-              aria-label={copy.reasonTagFilter}
-              style={{ width: 200 }}
-            >
-              <option value="">{copy.reasonTagSelect}</option>
-              {reasonTagOptions.map((row) => (
-                <option key={row.tag} value={row.tag}>
-                  {formatReasonTagLabel(row.tag, locale)} ({row.count})
-                </option>
-              ))}
-            </select>
+            <div className="tier-topic-builder__side">
+              <button className="btn" onClick={createGenreTopic}>{copy.createGenreTopic}</button>
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            <div className="tier-topic-builder tier-topic-builder--custom">
+              <div className="tier-topic-builder__main">
+                <div className="tier-topic-builder__eyebrow">{copy.customTopic}</div>
+                <p className="tier-topic-builder__lead">{copy.customTopicLead}</p>
+                <input
+                  className="input tier-topic-builder__control"
+                  value={customTopicName}
+                  onChange={(event) => setCustomTopicName(event.target.value)}
+                  placeholder={copy.customNamePlaceholder}
+                  aria-label={copy.customName}
+                />
+                <input
+                  className="input tier-topic-builder__control"
+                  value={customSearch}
+                  onChange={(event) => setCustomSearch(event.target.value)}
+                  placeholder={copy.customSearchPlaceholder}
+                  aria-label={copy.customSearch}
+                />
+              </div>
 
-        {logFilter === "character" && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <select
-              className="select"
-              value={characterFilterId}
-              onChange={(e) => setCharacterFilterId(String(e.target.value || ""))}
-              aria-label={copy.characterFilter}
-              style={{ width: 260 }}
-            >
-              <option value="">{copy.characterSelect}</option>
-              {characterFilterOptions.map((row) => (
-                <option key={row.id} value={String(row.id)}>
-                  {row.name} ({row.count})
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+              <div className="tier-topic-builder__side">
+                <button className="btn" onClick={persistCustomTopic}>
+                  {activeTopic.kind === "custom" ? copy.updateCustomTopic : copy.createCustomTopic}
+                </button>
+              </div>
+            </div>
 
-        {!canEditTierBoard && (
-          <div className="small" style={{ opacity: 0.85 }}>
-            {copy.filterWarning}
-          </div>
+            <div className="tier-topic-picker-grid">
+              <section className="tier-topic-picker-card">
+                <div className="tier-topic-picker-card__head">
+                  <strong>{copy.selectedAnime}</strong>
+                  <span className="small">{copy.selectedCount} {customSelectedIds.length}</span>
+                </div>
+                <p className="pageLead tier-topic-picker-card__lead">{copy.selectedAnimeLead}</p>
+                <div className="tier-topic-picker-card__body">
+                  <div className="tier-token-wrap">
+                    {customSelectedIds.map((id) => {
+                      const media = mediaMap.get(id);
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          className="tier-token-btn"
+                          onClick={() => removeCustomAnime(id)}
+                        >
+                          {titleFor(id, media)} <span aria-hidden="true">×</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {customSelectedIds.length === 0 && <div className="small">{copy.noSelected}</div>}
+                </div>
+              </section>
+
+              <section className="tier-topic-picker-card">
+                <div className="tier-topic-picker-card__head">
+                  <strong>{copy.candidateAnime}</strong>
+                </div>
+                <p className="pageLead tier-topic-picker-card__lead">{copy.candidateAnimeLead}</p>
+                <div className="tier-topic-picker-card__body">
+                  <div className="tier-token-wrap">
+                    {customCandidates.map((item) => {
+                      const media = mediaMap.get(item.anilistId);
+                      return (
+                        <button
+                          key={item.anilistId}
+                          type="button"
+                          className="tier-token-btn"
+                          onClick={() => addCustomAnime(item.anilistId)}
+                        >
+                          {titleFor(item.anilistId, media)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {customCandidates.length === 0 && <div className="small">{copy.noCandidates}</div>}
+                </div>
+              </section>
+            </div>
+          </>
         )}
       </section>
 
-      {DEFAULT_TIERS.map((t) => (
-        <div
-          key={t}
-          onDragOver={allowDrop}
-          onDrop={(e) => onDropToEnd(e, t)}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "60px 1fr",
-            gap: 12,
-            alignItems: "start",
-            border: "1px rgba(255,255,255,.12)",
-            borderStyle: "solid none",
-            borderRadius: 0,
-            padding: 12,
-            background: "rgba(255,255,255,.03)",
-            minHeight: 110,
-          }}
-        >
-          <div style={{ fontWeight: 800, fontSize: 48 }}>{t}</div>
+      <section className="pageHeader tier-rank-header">
+        <div className="pageTitle tier-topic-section__title">{copy.rankingBoard}</div>
+        <p className="pageLead">{copy.rankingLead}</p>
+      </section>
 
-          <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
-            {filterIdsByLog(tierState.tiers?.[t] || []).map((id, idx) => {
-              const m = mediaMap.get(id);
-              const title = titleFor(id, m);
+      {DEFAULT_TIERS.map((tierName) => (
+        <div
+          key={tierName}
+          onDragOver={allowDrop}
+          onDrop={(event) => onDropToEnd(event, tierName)}
+          className="tier-rank-row"
+        >
+          <div className="tier-rank-row__label">{tierName}</div>
+          <div className="tier-rank-row__dropzone">
+            {(activeTierState.tiers?.[tierName] || []).map((id, idx) => {
+              const media = mediaMap.get(id);
+              const title = titleFor(id, media);
               return (
-                <div
+                <TierPoster
                   key={id}
-                  draggable={canEditTierBoard}
-                  onDragStart={(e) => {
-                    if (!canEditTierBoard) return;
-                    onDragStart(e, id, t, idx);
-                  }}
-                  onDragOver={allowDrop}
-                  onDrop={(e) => onDropToItem(e, t, idx)}
+                  id={id}
+                  index={idx}
+                  listName={tierName}
                   title={title}
-                  style={{
-                    width: 78,
-                    borderRadius: 0,
-                    overflow: "hidden",
-                    border: "1px solid rgba(255,255,255,.10)",
-                    background: "rgba(255,255,255,.04)",
-                    cursor: canEditTierBoard ? "grab" : "default",
-                  }}
-                >
-                  <img
-                    src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
-                    alt={title}
-                    style={{
-                      width: "100%",
-                      aspectRatio: "2/3",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                    loading="lazy"
-                  />
-                </div>
+                  image={media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || undefined}
+                  onDragStart={onDragStart}
+                  onDragOver={allowDrop}
+                  onDrop={onDropToItem}
+                />
               );
             })}
-
-            {filterIdsByLog(tierState.tiers?.[t] || []).length === 0 && (
-              <div className="small" style={{ opacity: 0.7, padding: "6px 0" }} />
+            {(activeTierState.tiers?.[tierName] || []).length === 0 && (
+              <div className="tier-rank-row__empty small">{copy.emptyTier}</div>
             )}
           </div>
         </div>
       ))}
 
-      {/* Unranked */}
-      <div
+      <section
         onDragOver={allowDrop}
-        onDrop={(e) => onDropToEnd(e, "unranked")}
-        style={{
-          border: "1px dashed rgba(255,255,255,.18)",
-          borderRadius: 0,
-          padding: 12,
-          background: "rgba(255,255,255,.02)",
-          minHeight: 140,
-        }}
+        onDrop={(event) => onDropToEnd(event, "unranked")}
+        className="tier-unranked"
       >
-        <div style={{ fontWeight: 700, marginBottom: 10 }}>{copy.unranked}</div>
-
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {filterIdsByLog(tierState.unranked || []).map((id, idx) => {
-            const m = mediaMap.get(id);
-            const title = titleFor(id, m);
+        <div className="tier-unranked__head">
+          <strong>{copy.unranked}</strong>
+          <p className="pageLead tier-unranked__lead">{copy.unrankedLead}</p>
+        </div>
+        <div className="tier-unranked__grid">
+          {(activeTierState.unranked || []).map((id, idx) => {
+            const media = mediaMap.get(id);
+            const title = titleFor(id, media);
             return (
-              <div
+              <TierPoster
                 key={id}
-                draggable={canEditTierBoard}
-                onDragStart={(e) => {
-                  if (!canEditTierBoard) return;
-                  onDragStart(e, id, "unranked", idx);
-                }}
-                onDragOver={allowDrop}
-                onDrop={(e) => onDropToItem(e, "unranked", idx)}
+                id={id}
+                index={idx}
+                listName="unranked"
                 title={title}
-                style={{
-                  width: 78,
-                  borderRadius: 0,
-                  overflow: "hidden",
-                  border: "1px solid rgba(255,255,255,.10)",
-                  background: "rgba(255,255,255,.04)",
-                  cursor: canEditTierBoard ? "grab" : "default",
-                }}
-              >
-                <img
-                  src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
-                  alt={title}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "2/3",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                  loading="lazy"
-                />
-              </div>
+                image={media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || undefined}
+                onDragStart={onDragStart}
+                onDragOver={allowDrop}
+                onDrop={onDropToItem}
+              />
             );
           })}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
