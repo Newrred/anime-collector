@@ -300,7 +300,7 @@ function buildAliasKoTitleMap(seed) {
 const ALIAS_KO_TITLE_MAP = buildAliasKoTitleMap(aliasSeed);
 
 export default function Library() {
-  const { locale, setLocale } = useUiPreferences();
+  const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = pickByLocale(locale, {
     ko: {
       fallbackBackup: "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다.",
@@ -1854,7 +1854,9 @@ export default function Library() {
         panelId="data-menu-panel"
         canInstallPwa={canInstallPwa}
         locale={locale}
-        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
+        theme={theme}
+        onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
+        onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onExportFile={exportBackup}
         onExportMobile={exportBackupMobile}
         onInstallPwa={onClickInstallPwa}

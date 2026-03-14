@@ -109,6 +109,41 @@ function IconHelp() {
   );
 }
 
+function IconSun() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2.5" />
+      <path d="M12 19v2.5" />
+      <path d="m4.9 4.9 1.8 1.8" />
+      <path d="m17.3 17.3 1.8 1.8" />
+      <path d="M2.5 12H5" />
+      <path d="M19 12h2.5" />
+      <path d="m4.9 19.1 1.8-1.8" />
+      <path d="m17.3 6.7 1.8-1.8" />
+    </Icon>
+  );
+}
+
+function IconMoon() {
+  return (
+    <Icon>
+      <path d="M20 14.2A7.8 7.8 0 1 1 9.8 4 6.4 6.4 0 0 0 20 14.2Z" />
+    </Icon>
+  );
+}
+
+function IconGlobe() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a13.5 13.5 0 0 1 0 18" />
+      <path d="M12 3a13.5 13.5 0 0 0 0 18" />
+    </Icon>
+  );
+}
+
 function ActionLabel({ icon, children }) {
   return (
     <span className="data-menu-action-label">
@@ -123,8 +158,10 @@ export default function TopNavDataMenu({
   panelId = "data-menu-panel",
   canInstallPwa = false,
   locale = "ko",
+  theme = "dark",
   preferenceControls = null,
   onToggleLocale,
+  onToggleTheme,
   onExportFile,
   onExportMobile,
   onInstallPwa,
@@ -136,10 +173,17 @@ export default function TopNavDataMenu({
       home: "홈",
       library: "보관함",
       tier: "티어",
+      localeMenu: "언어 선택",
+      localeKorean: "한국어",
+      localeEnglish: "영어",
       switchToEnglish: "영어로 전환",
       switchToKorean: "한국어로 전환",
+      switchToLight: "라이트 모드로 전환",
+      switchToDark: "다크 모드로 전환",
       help: "도움말",
       manage: "관리 메뉴",
+      themeLight: "라이트",
+      themeDark: "다크",
       helpDialog: "서비스 도움말",
       helpTitle: "도움말",
       helpBlocks: [
@@ -165,10 +209,17 @@ export default function TopNavDataMenu({
       home: "Home",
       library: "Library",
       tier: "Tier",
+      localeMenu: "Choose language",
+      localeKorean: "Korean",
+      localeEnglish: "English",
       switchToEnglish: "Switch to English",
       switchToKorean: "Switch to Korean",
+      switchToLight: "Switch to light mode",
+      switchToDark: "Switch to dark mode",
       help: "Help",
       manage: "Manage",
+      themeLight: "Light",
+      themeDark: "Dark",
       helpDialog: "Service help",
       helpTitle: "Help",
       helpBlocks: [
@@ -196,6 +247,7 @@ export default function TopNavDataMenu({
   const [dataTab, setDataTab] = useState("export");
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [importMode, setImportMode] = useState("merge");
   const [importText, setImportText] = useState("");
 
@@ -205,6 +257,7 @@ export default function TopNavDataMenu({
       if (!dataMenuRef.current.contains(e.target)) {
         setDataMenuOpen(false);
         setHelpOpen(false);
+        setLocaleMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", onDocDown);
@@ -261,10 +314,18 @@ export default function TopNavDataMenu({
     }
   }
 
-  function handleToggleLocale() {
+  function handleSelectLocale(nextLocale) {
     setHelpOpen(false);
     setDataMenuOpen(false);
-    if (typeof onToggleLocale === "function") onToggleLocale();
+    setLocaleMenuOpen(false);
+    if (typeof onToggleLocale === "function") onToggleLocale(nextLocale);
+  }
+
+  function handleToggleTheme() {
+    setHelpOpen(false);
+    setDataMenuOpen(false);
+    setLocaleMenuOpen(false);
+    if (typeof onToggleTheme === "function") onToggleTheme();
   }
 
   return (
@@ -287,15 +348,30 @@ export default function TopNavDataMenu({
           <div className="data-menu-actions">
             <button
               type="button"
-              onClick={handleToggleLocale}
-              aria-label={locale === "ko" ? copy.switchToEnglish : copy.switchToKorean}
-              title={locale === "ko" ? copy.switchToEnglish : copy.switchToKorean}
-              className="data-menu-trigger data-menu-locale-trigger"
+              onClick={handleToggleTheme}
+              aria-label={theme === "dark" ? copy.switchToLight : copy.switchToDark}
+              title={theme === "dark" ? copy.switchToLight : copy.switchToDark}
+              className="data-menu-trigger data-menu-theme-trigger"
             >
-              <span className="data-menu-locale-label" aria-hidden>
-                <span className={`data-menu-locale-token${locale === "ko" ? " is-active" : ""}`}>KO</span>
-                <span className="data-menu-locale-divider">/</span>
-                <span className={`data-menu-locale-token${locale === "en" ? " is-active" : ""}`}>EN</span>
+              <span className="data-menu-trigger-label data-menu-theme-icon" aria-hidden>
+                {theme === "dark" ? <IconMoon /> : <IconSun />}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLocaleMenuOpen((v) => !v);
+                setHelpOpen(false);
+                setDataMenuOpen(false);
+              }}
+              aria-expanded={localeMenuOpen}
+              aria-controls="locale-menu-panel"
+              aria-label={copy.localeMenu}
+              title={copy.localeMenu}
+              className="data-menu-trigger"
+            >
+              <span className="data-menu-trigger-label data-menu-locale-icon" aria-hidden>
+                <IconGlobe />
               </span>
             </button>
             <button
@@ -303,6 +379,7 @@ export default function TopNavDataMenu({
               onClick={() => {
                 setHelpOpen((v) => !v);
                 setDataMenuOpen(false);
+                setLocaleMenuOpen(false);
               }}
               aria-expanded={helpOpen}
               aria-label={copy.help}
@@ -317,6 +394,7 @@ export default function TopNavDataMenu({
               onClick={() => {
                 setDataMenuOpen((v) => !v);
                 setHelpOpen(false);
+                setLocaleMenuOpen(false);
               }}
               aria-expanded={dataMenuOpen}
               aria-controls={panelId}
@@ -337,6 +415,32 @@ export default function TopNavDataMenu({
                   {block}
                 </div>
               ))}
+            </div>
+          )}
+
+          {localeMenuOpen && (
+            <div
+              id="locale-menu-panel"
+              className="data-menu-panel data-menu-locale-panel"
+              role="dialog"
+              aria-label={copy.localeMenu}
+            >
+              <button
+                type="button"
+                className={`data-menu-locale-option${locale === "ko" ? " is-active" : ""}`}
+                onClick={() => handleSelectLocale("ko")}
+              >
+                <span className="data-menu-locale-option-code">KO</span>
+                <span className="data-menu-locale-option-text">{copy.localeKorean}</span>
+              </button>
+              <button
+                type="button"
+                className={`data-menu-locale-option${locale === "en" ? " is-active" : ""}`}
+                onClick={() => handleSelectLocale("en")}
+              >
+                <span className="data-menu-locale-option-code">EN</span>
+                <span className="data-menu-locale-option-text">{copy.localeEnglish}</span>
+              </button>
             </div>
           )}
 

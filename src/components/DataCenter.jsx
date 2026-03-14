@@ -20,7 +20,7 @@ function formatBytes(value) {
 }
 
 export default function DataCenter() {
-  const { locale, setLocale } = useUiPreferences();
+  const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = pickByLocale(locale, {
     ko: {
       checking: "확인 중",
@@ -197,7 +197,9 @@ export default function DataCenter() {
         panelId="data-center-menu-panel"
         canInstallPwa={canInstallPwa}
         locale={locale}
-        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
+        theme={theme}
+        onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
+        onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
       <section className="status-panel">

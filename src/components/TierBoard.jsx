@@ -61,7 +61,7 @@ function extractSeasonFromLog(log) {
 }
 
 export default function TierBoard() {
-  const { locale, setLocale } = useUiPreferences();
+  const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = pickByLocale(locale, {
     ko: {
       installReady: "앱이 설치되었습니다. 홈 화면에서 바로 열 수 있어요.",
@@ -771,7 +771,9 @@ export default function TierBoard() {
         panelId="tier-data-menu-panel"
         canInstallPwa={canInstallPwa}
         locale={locale}
-        onToggleLocale={() => setLocale((current) => (current === "ko" ? "en" : "ko"))}
+        theme={theme}
+        onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
+        onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onExportFile={exportBackup}
         onExportMobile={exportBackupMobile}
         onInstallPwa={onClickInstallPwa}
