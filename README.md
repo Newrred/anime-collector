@@ -189,24 +189,6 @@ npm run test:e2e:live
 - `tests/tier.spec.ts`: 티어보드 주제 전환, 드래그, 레이아웃
 - `tests/live-search.spec.ts`: 외부 API 기반 실검색 확인
 
-## 데이터 수집 스크립트
-
-프로젝트에는 AniLife 타이틀 데이터를 다시 수집하는 스크립트가 포함되어 있습니다.
-
-첫 시즌 데이터:
-
-```bash
-npm run collect:anilife:first-season
-```
-
-2010-2027 시즌 데이터:
-
-```bash
-npm run collect:anilife:2010-2027
-```
-
-출력 파일은 `src/data/` 아래에 생성됩니다.
-
 ## 배포
 
 GitHub Pages 배포를 사용합니다.
