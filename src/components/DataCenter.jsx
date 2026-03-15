@@ -8,7 +8,8 @@ import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
 import { readLastExportAtMs } from "../repositories/backupRepo";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatBackupAgo, formatStatusToggleLabel, pickByLocale } from "../domain/uiText";
+import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
+import { getMessageGroup } from "../domain/messages.js";
 import { IconShield } from "./ui/AppIcons.jsx";
 
 function formatBytes(value) {
@@ -22,52 +23,7 @@ function formatBytes(value) {
 
 export default function DataCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
-  const copy = pickByLocale(locale, {
-    ko: {
-      checking: "확인 중",
-      storageEngineIndexed: "IndexedDB + local mirror",
-      storageEngineLegacy: "legacy localStorage 제한 모드",
-      persistUnsupported: "현재 브라우저에서는 저장 보호 API를 지원하지 않습니다.",
-      persistMethodUnsupported: "persist 요청을 지원하지 않는 브라우저입니다.",
-      persistEnabled: "이 기기에서 저장 보호가 활성화되었습니다.",
-      persistRejected: "저장 보호 요청이 허용되지 않았습니다.",
-      persistFailed: "저장 보호 요청 중 오류가 발생했습니다.",
-      title: "데이터 관리",
-      lead: "이 앱의 기록은 이 기기에 저장돼요. 필요할 때 백업 파일로 꺼낼 수 있어요.",
-      storedHere: "저장 상태: 이 기기에 저장됨",
-      storageProtect: "저장 보호:",
-      engine: "저장 엔진:",
-      requestProtect: "이 기기 저장 보호 요청",
-      usage: "사용량:",
-      libraryCount: "보관 작품 수",
-      tierCount: "티어에 올린 작품 수",
-      logCount: "감상 기록 수",
-      pinCount: "고정한 캐릭터 수",
-      loading: "저장 상태를 확인하는 중...",
-    },
-    en: {
-      checking: "Checking",
-      storageEngineIndexed: "IndexedDB + local mirror",
-      storageEngineLegacy: "Legacy localStorage fallback",
-      persistUnsupported: "This browser does not support the storage persistence API.",
-      persistMethodUnsupported: "This browser cannot request persistence.",
-      persistEnabled: "Storage protection is enabled on this device.",
-      persistRejected: "The storage protection request was not granted.",
-      persistFailed: "Failed while requesting storage protection.",
-      title: "Data Center",
-      lead: "This app keeps your records on this device. You can export them as backup files when needed.",
-      storedHere: "Storage: saved on this device",
-      storageProtect: "Storage protect:",
-      engine: "Engine:",
-      requestProtect: "Request storage protection",
-      usage: "Usage:",
-      libraryCount: "Anime in library",
-      tierCount: "Anime placed in tier",
-      logCount: "Watch logs",
-      pinCount: "Pinned characters",
-      loading: "Checking storage status...",
-    },
-  });
+  const copy = getMessageGroup(locale, "dataCenter");
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState(copy.checking);
   const [usage, setUsage] = useState(null);
@@ -197,6 +153,7 @@ export default function DataCenter() {
         base={base}
         panelId="data-center-menu-panel"
         canInstallPwa={canInstallPwa}
+        currentRoute="data"
         locale={locale}
         theme={theme}
         onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}

@@ -213,7 +213,29 @@ function IconSortDesc(props) {
   );
 }
 
+function IconArrowRight(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </IconBase>
+  );
+}
+
+function IconTrash(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 7h16" />
+      <path d="M9 4h6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+    </IconBase>
+  );
+}
+
 export {
+  IconArrowRight,
   IconBase,
   IconChevronDown,
   IconClipboard,
@@ -233,6 +255,7 @@ export {
   IconSortAsc,
   IconSortDesc,
   IconSun,
+  IconTrash,
   IconUpload,
   IconX,
 };

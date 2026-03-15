@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import { buildUiPreferenceBootScript } from "../domain/uiPreferences";
+import { THEME_META_COLORS } from "../domain/colorSystem.js";
 const rawBase = String(import.meta.env.BASE_URL || "/");
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 const isProd = import.meta.env.PROD;
@@ -17,7 +18,7 @@ const uiPreferenceBootScript = buildUiPreferenceBootScript();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0c10" />
+    <meta name="theme-color" content={THEME_META_COLORS.dark} />
     <script is:inline set:html={uiPreferenceBootScript}></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

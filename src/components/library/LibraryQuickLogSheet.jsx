@@ -1,6 +1,6 @@
 import { Chip } from "./LibraryUi.jsx";
 import { formatEventLabel, formatSeasonTermLabel } from "./libraryCopy.js";
-import { pickByLocale } from "../../domain/uiText";
+import { getMessageGroup } from "../../domain/messages.js";
 import { IconX } from "../ui/AppIcons.jsx";
 
 export default function LibraryQuickLogSheet({
@@ -26,84 +26,7 @@ export default function LibraryQuickLogSheet({
   helpers,
   constants,
 }) {
-  const copy = pickByLocale(locale, {
-    ko: {
-      title: "빠른 기록",
-      close: "닫기",
-      autoHint: "자동 생성된 기록입니다. 지금 내용을 보완하지 않아도 기본값으로 저장됩니다.",
-      completedHint: "완료 상태로 추가한 기록이라 시청 시점과 한 줄 기억을 가능한 범위에서 함께 남기는 것을 권장합니다.",
-      droppedHint: "하차 상태 기록은 이유 태그와 메모를 같이 남기면 나중에 복기할 때 도움이 됩니다.",
-      watchedWhen: "언제 봤는지",
-      precision: { day: "날짜", month: "월", season: "시즌", year: "연도", unknown: "잘 모름" },
-      day: "본 날짜",
-      month: "본 달",
-      season: "본 시즌",
-      year: "본 연도",
-      unknown: "언제 봤는지",
-      unknownHint: "정확한 날짜가 기억나지 않으면 이 항목을 선택하세요. 정렬은 기록한 시점을 기준으로 맞춰집니다.",
-      cue: "한줄 감상",
-      cuePlaceholder: "예: 캐릭터 연출이 인상적이었음",
-      note: "자세한 메모",
-      notePlaceholder: "선택 입력",
-      characters: "기억에 남은 캐릭터 (최대 3)",
-      noCharacters: "캐릭터 후보를 아직 불러오지 못했습니다.",
-      primaryTitle: "대표캐 지정",
-      primary: "대표캐",
-      makePrimary: "대표캐로",
-      onlyOnePrimary: "대표캐는 한 명만 고를 수 있어요.",
-      perCharacter: "캐릭터별 기록",
-      affinity: "감정 태그",
-      reasonTags: "꽂힌 포인트 (최대 3)",
-      characterMemo: "캐릭터 한줄 (선택)",
-      keepDefaults: "기본값 유지",
-      save: "저장",
-      seasonYear: "빠른 기록 시즌 연도",
-      seasonAria: "빠른 기록 시즌",
-      dateAria: "빠른 기록 날짜",
-      monthAria: "빠른 기록 월",
-      yearAria: "빠른 기록 연도",
-      cueAria: "한줄 감상",
-      characterMemoSuffix: "메모",
-    },
-    en: {
-      title: "Quick log",
-      close: "Close",
-      autoHint: "This log was auto-created. You can save it as-is without filling everything in.",
-      completedHint: "Since this was added as completed, it helps to leave when you watched it and a short memory if you can.",
-      droppedHint: "For dropped logs, leaving a reason tag and note helps when you revisit it later.",
-      watchedWhen: "When did you watch it?",
-      precision: { day: "Date", month: "Month", season: "Season", year: "Year", unknown: "Not sure" },
-      day: "Watch date",
-      month: "Watch month",
-      season: "Watch season",
-      year: "Watch year",
-      unknown: "When watched",
-      unknownHint: "Choose this if you do not remember the exact date. Sorting will use the recorded log time.",
-      cue: "One-line note",
-      cuePlaceholder: "e.g. Character direction stood out",
-      note: "Detailed note",
-      notePlaceholder: "Optional",
-      characters: "Memorable characters (up to 3)",
-      noCharacters: "Character candidates are not loaded yet.",
-      primaryTitle: "Set primary character",
-      primary: "Primary",
-      makePrimary: "Make primary",
-      onlyOnePrimary: "Only one primary character can be selected.",
-      perCharacter: "Per-character notes",
-      affinity: "Affinity",
-      reasonTags: "Hook points (up to 3)",
-      characterMemo: "Character note (optional)",
-      keepDefaults: "Keep defaults",
-      save: "Save",
-      seasonYear: "Quick log season year",
-      seasonAria: "Quick log season",
-      dateAria: "Quick log date",
-      monthAria: "Quick log month",
-      yearAria: "Quick log year",
-      cueAria: "One-line note",
-      characterMemoSuffix: "memo",
-    },
-  });
+  const copy = getMessageGroup(locale, "libraryQuickLogSheet");
   if (!open || !draft) return null;
 
   const {
@@ -329,7 +252,9 @@ export default function LibraryQuickLogSheet({
                 })}
               </div>
             )}
-            <div className="small log-sheet__helper-text">{copy.onlyOnePrimary}</div>
+            {copy.onlyOnePrimary ? (
+              <div className="small log-sheet__helper-text">{copy.onlyOnePrimary}</div>
+            ) : null}
           </div>
 
           {selectedCharacters.length > 0 && (

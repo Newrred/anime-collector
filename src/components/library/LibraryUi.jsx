@@ -33,12 +33,14 @@ function StatBars({ rows, maxCount, emptyText = "데이터 없음" }) {
   );
 }
 
-function SegTabButton({ active, onClick, children }) {
+function SegTabButton({ active, onClick, children, className = "", ...props }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`library-seg-btn${active ? " is-active" : ""}`}
+      className={`library-seg-btn${active ? " is-active" : ""}${className ? ` ${className}` : ""}`}
+      aria-pressed={active}
+      {...props}
     >
       {children}
     </button>

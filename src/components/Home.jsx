@@ -12,35 +12,25 @@ import { buildYearRecap, listRecapYears } from "../domain/recapSelectors";
 import YearRecapPanel from "./home/YearRecapPanel";
 import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
+import HomeTierEntryCard from "./home/HomeTierEntryCard.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatBackupAgo, formatStatusToggleLabel, pickByLocale } from "../domain/uiText";
+import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
+import { getMessageGroup } from "../domain/messages.js";
 import { pickDisplayTitle } from "../domain/animeTitles";
+
+function buildLibraryHref(base, anilistId, focus = "") {
+  const params = new URLSearchParams();
+  const id = Number(anilistId);
+  if (Number.isFinite(id)) params.set("animeId", String(id));
+  if (focus) params.set("focus", focus);
+  if (!params.toString()) return `${base}library/?tab=add`;
+  return `${base}library/?${params.toString()}`;
+}
 
 export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
-  const copy = pickByLocale(locale, {
-    ko: {
-      title: "기록 홈",
-      lead: "검색하고 기록한 작품을 나중에 다시 꺼내보는 개인 홈",
-      animeCount: "작품",
-      logCount: "감상 기록",
-      storageProtect: "저장 보호",
-      quickRecord: "바로 기록하기",
-      heroHint: "오늘 떠오른 장면을 짧게 남겨두면 회상 카드가 더 정확해집니다.",
-      unit: "개",
-    },
-    en: {
-      title: "Home",
-      lead: "A personal home for revisiting anime you searched and logged",
-      animeCount: "Anime",
-      logCount: "Logs",
-      storageProtect: "Storage protect",
-      quickRecord: "Log now",
-      heroHint: "Leave a short note about what stood out today to improve resurfacing cards.",
-      unit: "",
-    },
-  });
+  const copy = getMessageGroup(locale, "home");
   const [items, setItems] = useState([]);
   const [mediaMap, setMediaMap] = useState(new Map());
   const [logs, setLogs] = useState([]);
@@ -124,9 +114,13 @@ export default function Home() {
   }, [items, mediaMap, locale]);
 
   const homeHeroImage = useMemo(() => {
-    const recentId = Number(resurfacing?.recentLogs?.[0]?.anilistId);
-    if (Number.isFinite(recentId)) {
-      const media = mediaMap.get(recentId);
+    const heroId = Number(
+      resurfacing?.recentLogs?.[0]?.anilistId ??
+      resurfacing?.missingMemory?.[0]?.anilistId ??
+      items?.[0]?.anilistId
+    );
+    if (Number.isFinite(heroId)) {
+      const media = mediaMap.get(heroId);
       const banner = String(media?.bannerImage || "").trim();
       if (banner) return banner;
       const cover =
@@ -145,6 +139,44 @@ export default function Home() {
 
     return "";
   }, [items, mediaMap, resurfacing]);
+
+  const heroEntry = useMemo(
+    () => resurfacing?.recentLogs?.[0] ?? resurfacing?.missingMemory?.[0] ?? items?.[0] ?? null,
+    [items, resurfacing]
+  );
+
+  const heroAnimeId = Number(heroEntry?.anilistId);
+  const heroMedia = Number.isFinite(heroAnimeId) ? mediaMap.get(heroAnimeId) : null;
+  const heroTitle = Number.isFinite(heroAnimeId)
+    ? (titleById.get(heroAnimeId) || pickDisplayTitle(heroEntry, heroMedia, locale) || `#${heroAnimeId}`)
+    : copy.heroFallback;
+  const heroSourceLabel = heroEntry?.id
+    ? copy.heroMetaRecent
+    : heroEntry?.anilistId && resurfacing?.missingMemory?.some((row) => Number(row?.anilistId) === heroAnimeId)
+      ? copy.heroMetaMissing
+      : copy.heroMetaLibrary;
+  const heroPrimaryHref = Number.isFinite(heroAnimeId)
+    ? buildLibraryHref(base, heroAnimeId, "quick-log")
+    : `${base}library/?tab=add`;
+  const heroSecondaryHref = Number.isFinite(heroAnimeId)
+    ? buildLibraryHref(base, heroAnimeId)
+    : `${base}library/?tab=collection`;
+  const heroCue = String(heroEntry?.cue || "").trim();
+  const heroMeta = [
+    heroSourceLabel,
+    Number.isFinite(heroAnimeId) ? heroTitle : "",
+    heroEntry?.label || "",
+  ].filter(Boolean).slice(0, 3);
+
+  const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
+  const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
+  const characterTargets = useMemo(() => {
+    const repeated = resurfacing?.repeatedCharacters?.slice(0, 4) || [];
+    if (repeated.length > 0) return repeated;
+    return resurfacing?.recentPrimaryCharacters?.slice(0, 4) || [];
+  }, [resurfacing]);
+  const thisTimeTargets = useMemo(() => resurfacing?.thisTime?.slice(0, 4) || [], [resurfacing]);
+  const tierCtaDisabled = recentLogTargets.length === 0;
 
   const characterInsight = useMemo(() => {
     const id = Number(selectedCharacter?.characterId);
@@ -210,6 +242,7 @@ export default function Home() {
         base={base}
         panelId="home-data-menu-panel"
         canInstallPwa={canInstallPwa}
+        currentRoute="home"
         locale={locale}
         theme={theme}
         onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
@@ -223,18 +256,34 @@ export default function Home() {
       </section>
 
       <section
-        className="surface-card home-quick-panel"
+        className="surface-card home-memory-hero"
         style={
           homeHeroImage
             ? {
-                backgroundImage: `linear-gradient(135deg, rgba(7,12,28,.82), rgba(13,22,45,.76)), linear-gradient(135deg, rgba(91,124,255,.24), rgba(255,255,255,.02)), url("${homeHeroImage}")`,
+                backgroundImage: `linear-gradient(135deg, var(--color-hero-overlay-start), var(--color-hero-overlay-end)), linear-gradient(135deg, var(--color-hero-accent-start), var(--color-hero-accent-end)), url("${homeHeroImage}")`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }
-            : { background: "linear-gradient(135deg, rgba(91,124,255,.18), rgba(255,255,255,.02))" }
+            : { background: "linear-gradient(135deg, var(--color-hero-fallback-start), var(--color-hero-fallback-end))" }
         }
       >
-        <div className="status-badge-row">
+        <div className="home-memory-hero__copy">
+          <div className="small home-memory-hero__eyebrow">{copy.heroTitle}</div>
+          <h2 className="sectionTitle home-memory-hero__title">{heroTitle}</h2>
+          <p className="sectionLead home-memory-hero__lead">
+            {heroCue || copy.heroLead}
+          </p>
+          <div className="status-badge-row">
+            {heroMeta.map((entry) => (
+              <div key={entry} className="small status-badge">{entry}</div>
+            ))}
+          </div>
+          <div className="action-row">
+            <a href={heroPrimaryHref} className="btn home-memory-hero__cta">{copy.quickRecord}</a>
+            <a href={heroSecondaryHref} className="btn btn--subtle home-memory-hero__cta-link">{copy.heroOpen}</a>
+          </div>
+        </div>
+        <div className="home-memory-hero__meta">
           <div className="small status-badge">
             {locale === "en" ? `${copy.animeCount} ${items.length}` : `${copy.animeCount} ${items.length}${copy.unit}`}
           </div>
@@ -247,14 +296,23 @@ export default function Home() {
           <div className="small status-badge">
             {copy.storageProtect} {formatStatusToggleLabel(persisted, locale)}
           </div>
-        </div>
-        <div className="action-row">
-          <a href={`${base}library/`} className="btn btn--subtle" style={{ textDecoration: "none" }}>
-            {copy.quickRecord}
-          </a>
-          <span className="small page-feedback">{copy.heroHint}</span>
+          <div className="small page-feedback">{copy.heroHint}</div>
         </div>
       </section>
+
+      <ResurfacingCards
+        locale={locale}
+        base={base}
+        mediaMap={mediaMap}
+        titleById={titleById}
+        recentLogs={recentLogTargets}
+        missingMemory={continueTargets}
+        characterRows={characterTargets}
+        characterMode={resurfacing?.repeatedCharacters?.length > 0 ? "repeated" : "recent"}
+        thisTimeRows={thisTimeTargets}
+        pinnedHighlights={resurfacing?.pinnedHighlights || []}
+        onOpenCharacter={openCharacterSheet}
+      />
 
       <YearRecapPanel
         locale={locale}
@@ -266,13 +324,11 @@ export default function Home() {
         onOpenCharacter={openCharacterSheet}
       />
 
-      <ResurfacingCards
+      <HomeTierEntryCard
         locale={locale}
         base={base}
-        mediaMap={mediaMap}
-        titleById={titleById}
-        resurfacing={resurfacing}
-        onOpenCharacter={openCharacterSheet}
+        year={new Date().getUTCFullYear()}
+        disabled={tierCtaDisabled}
       />
 
       <CharacterInsightSheet

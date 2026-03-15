@@ -67,7 +67,8 @@ import {
   formatStatusLabel,
 } from "./library/libraryCopy.js";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatRelativeAgo, pickByLocale } from "../domain/uiText";
+import { formatRelativeAgo } from "../domain/uiText";
+import { getMessageGroup } from "../domain/messages.js";
 import { deriveKoTitleFromMedia, firstHangulSynonym, pickDisplayMediaTitle, pickDisplayTitle } from "../domain/animeTitles";
 
 function safeGenres(media) {
@@ -302,98 +303,7 @@ const ALIAS_KO_TITLE_MAP = buildAliasKoTitleMap(aliasSeed);
 
 export default function Library() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
-  const copy = pickByLocale(locale, {
-    ko: {
-      fallbackBackup: "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다.",
-      title: "애니 보관함",
-      lead: "지금까지 본 작품을 모아 두고 다시 꺼내보는 개인 보관함",
-      addPanel: "추가할 애니 검색",
-      addPanelSummarySearch: "검색으로 직접 추가",
-      addPanelSummaryRecommend: "AI 추천 준비 중",
-      addPanelOpen: "추가할 애니 검색 접기",
-      addPanelClosed: "추가할 애니 검색 펼치기",
-      searchTab: "애니 검색",
-      recommendTab: "AI 추천",
-      recommendPlaceholder: "추후 구현 예정: 시청기록 기반 추천",
-      openDetail: "상세 열기",
-      unrated: "미평가",
-      starLabel: "별점",
-      backupNone: "수동 백업 기록이 없습니다. 내보내기(JSON)로 백업해 두세요.",
-      backupWas: "마지막 수동 백업이",
-      backupRefresh: "입니다. 백업 갱신을 권장합니다.",
-      backupLast: "마지막 수동 백업:",
-      backupAuto: "(자동 로컬 스냅샷은 계속 저장)",
-      installed: "앱이 설치됐습니다. 홈 화면에서 바로 실행할 수 있어요.",
-      backupDownloaded: "백업 파일을 다운로드했어요.",
-      sharedFile: "백업 JSON 파일을 공유했어요.",
-      shareCancelled: "공유를 취소했어요.",
-      sharedText: "백업 JSON 텍스트를 공유했어요.",
-      copiedJson: "백업 JSON을 클립보드에 복사했어요.",
-      shareFailed: "공유/복사에 실패했어요. JSON 파일 내보내기를 사용해 주세요.",
-      missingList: "가져오기 파일에 list 배열이 없어요.",
-      overwriteConfirm: "지금 보관함 데이터를 모두 바꾸고 불러올까요?",
-      importDoneOverwrite: "불러오기 완료! 지금 보관함 데이터로 교체했어요.",
-      importDoneMerge: "불러오기 완료! 기존 보관함 뒤에 이어서 합쳤어요.",
-      emptyPaste: "붙여넣은 JSON 텍스트가 비어 있어요.",
-      pasteImportFailed: "붙여넣기 가져오기 실패",
-      importFailed: "가져오기 실패",
-      unknownError: "알 수 없는 오류",
-      nonAnimeType: "애니 형식이 아닌 항목은 보관함에 추가하지 않습니다.",
-      addedRelated: "관련 시리즈를 보관함에 추가하고 상세를 열었습니다.",
-      deleteAnimeConfirm: "이 작품을 보관함에서 삭제할까요?\n(점수/메모 포함된 모든 데이터가 사라집니다)",
-      deleteLogConfirm: "이 감상 기록을 삭제할까요?",
-      deletedLog: "감상 기록을 삭제했습니다.",
-      deleteLogFailed: "감상 기록 삭제 중 오류가 발생했습니다.",
-      installUnsupported: "현재 브라우저에서는 설치 프롬프트를 직접 사용할 수 없습니다.",
-      installCancelled: "설치를 취소했어요. 필요하면 다시 시도해 주세요.",
-      installFailed: "설치 요청 중 오류가 발생했습니다.",
-    },
-    en: {
-      fallbackBackup: "Automatic local backup is on. Export JSON regularly for a manual backup.",
-      title: "Anime Library",
-      lead: "A personal library for revisiting anime you have watched",
-      addPanel: "Search anime to add",
-      addPanelSummarySearch: "Add directly from search",
-      addPanelSummaryRecommend: "AI recommendations coming soon",
-      addPanelOpen: "Collapse add anime search",
-      addPanelClosed: "Expand add anime search",
-      searchTab: "Search",
-      recommendTab: "AI picks",
-      recommendPlaceholder: "Planned next: recommendations from watch history",
-      openDetail: "Open detail",
-      unrated: "Unrated",
-      starLabel: "Rating",
-      backupNone: "No manual backup yet. Export JSON to keep a backup file.",
-      backupWas: "Last manual backup was",
-      backupRefresh: ". Refreshing your backup is recommended.",
-      backupLast: "Last manual backup:",
-      backupAuto: "(automatic local snapshots continue in the background)",
-      installed: "The app was installed. You can launch it from your home screen.",
-      backupDownloaded: "Downloaded backup file.",
-      sharedFile: "Shared backup JSON file.",
-      shareCancelled: "Share cancelled.",
-      sharedText: "Shared backup JSON text.",
-      copiedJson: "Copied backup JSON to clipboard.",
-      shareFailed: "Share/copy failed. Use JSON file export instead.",
-      missingList: "Imported file does not contain a list array.",
-      overwriteConfirm: "Replace the current library data with this import?",
-      importDoneOverwrite: "Import complete. Replaced current library data.",
-      importDoneMerge: "Import complete. Merged into the existing library.",
-      emptyPaste: "Pasted JSON text is empty.",
-      pasteImportFailed: "Paste import failed",
-      importFailed: "Import failed",
-      unknownError: "Unknown error",
-      nonAnimeType: "Non-anime entries are not added to the library.",
-      addedRelated: "Added the related series to the library and opened its detail view.",
-      deleteAnimeConfirm: "Remove this anime from the library?\n(All score and memo data will be deleted.)",
-      deleteLogConfirm: "Delete this watch log?",
-      deletedLog: "Deleted the watch log.",
-      deleteLogFailed: "Failed while deleting the watch log.",
-      installUnsupported: "This browser cannot open the install prompt directly.",
-      installCancelled: "Install cancelled. You can try again later.",
-      installFailed: "Failed while requesting install.",
-    },
-  });
+  const copy = getMessageGroup(locale, "library");
   const [sortKey, setSortKey] = useState("addedAt"); // addedAt | title | score | year | genre
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
@@ -426,6 +336,7 @@ export default function Library() {
   const [backupReminder, setBackupReminder] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [pageTab, setPageTab] = useState("collection");
   const [addPanelOpen, setAddPanelOpen] = useState(true);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
   const [addTab, setAddTab] = useState("search"); // search | recommend
@@ -434,6 +345,7 @@ export default function Library() {
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
   const deepLinkHandledRef = useRef(false);
+  const pendingQuickLogFocusRef = useRef(false);
   const genreKo = (value) => formatGenreLabel(value, locale);
   const affinityLabel = (value) => formatAffinityLabel(value, locale);
   const reasonTagLabel = (value) => formatReasonTagLabel(value, locale);
@@ -714,7 +626,11 @@ export default function Library() {
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams(window.location.search);
+    const tab = String(params.get("tab") || "").trim().toLowerCase();
+    if (tab === "add") setPageTab("add");
+    else setPageTab("collection");
     const fromQuery = Number(params.get("animeId"));
+    const focus = String(params.get("focus") || "").trim().toLowerCase();
     if (!Number.isFinite(fromQuery)) {
       deepLinkHandledRef.current = true;
       return;
@@ -723,9 +639,30 @@ export default function Library() {
     const exists = items.some((x) => Number(x?.anilistId) === fromQuery);
     if (!exists) return;
 
+    setPageTab("collection");
     setSelectedId(fromQuery);
+    pendingQuickLogFocusRef.current = focus === "quick-log";
     deepLinkHandledRef.current = true;
   }, [items]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!pendingQuickLogFocusRef.current) return;
+    const target = items.find((item) => Number(item?.anilistId) === Number(selectedId));
+    const targetMedia = mediaMap.get(Number(selectedId));
+    if (!target || !targetMedia) return;
+    const draft = createWatchLog({
+      anilistId: target.anilistId,
+      eventType: eventTypeFromStatus(target.status) || LIBRARY_EVENT.start,
+      watchedAtPrecision: "day",
+      watchedAtValue: formatLocalDate(new Date()),
+      cue: "",
+      note: "",
+      characterRefs: [],
+    });
+    pendingQuickLogFocusRef.current = false;
+    openQuickLogSheet(draft, targetMedia, { source: "deep-link", isAuto: false });
+  }, [selectedId, items, mediaMap]);
 
   useEffect(() => {
     setMediaMap(getCachedAnimeMap(ids));
@@ -837,31 +774,15 @@ export default function Library() {
   }, []);
 
   const statusOrder = { 보는중: 0, 완료: 1, 보류: 2, 하차: 3, 미분류: 4 };
-  const statusBadgeTheme = {
-    완료: { text: "#8fd3ff", border: "rgba(143,211,255,.72)", bg: "rgba(143,211,255,.14)" },
-    보는중: { text: "#8ff3ba", border: "rgba(143,243,186,.72)", bg: "rgba(143,243,186,.14)" },
-    보류: { text: "#ffd083", border: "rgba(255,208,131,.72)", bg: "rgba(255,208,131,.14)" },
-    하차: { text: "#ff9a9a", border: "rgba(255,154,154,.72)", bg: "rgba(255,154,154,.14)" },
-    미분류: { text: "#d7d9df", border: "rgba(215,217,223,.52)", bg: "rgba(215,217,223,.10)" },
-  };
 
-  function getStatusBadgeStyle(statusRaw) {
-    const status = statusRaw || "미분류";
-    const theme = statusBadgeTheme[status] || statusBadgeTheme.미분류;
-    return {
-      display: "inline-flex",
-      alignItems:"center",
-      justifyContent: "center",
-      padding: "1px 6px",
-      borderRadius: 999,
-      border: `1px solid ${theme.border}`,
-      background: theme.bg,
-      color: theme.text,
-      fontSize: 11,
-      fontWeight: 700,
-      lineHeight: 1.3,
-      whiteSpace: "nowrap",
-    };
+  function getStatusBadgeClassName(statusRaw) {
+    const normalized = String(statusRaw || "").trim().toLowerCase();
+    let tone = "uncategorized";
+    if (normalized === "완료" || normalized === "completed") tone = "completed";
+    else if (normalized === "보는중" || normalized === "watching") tone = "watching";
+    else if (normalized === "보류" || normalized === "paused") tone = "paused";
+    else if (normalized === "하차" || normalized === "dropped") tone = "dropped";
+    return `status-badge library-status-badge library-status-badge--${tone}`;
   }
 
   function getTitle(it) {
@@ -1098,6 +1019,23 @@ export default function Library() {
       maxGenre,
     };
   }, [items, mediaMap, locale]);
+
+  const logCountByAnimeId = useMemo(() => {
+    const map = new Map();
+    for (const log of readAllWatchLogsSnapshot()) {
+      const id = Number(log?.anilistId);
+      if (!Number.isFinite(id)) continue;
+      map.set(id, (map.get(id) || 0) + 1);
+    }
+    return map;
+  }, [selectedLogs, quickLogOpen, items.length]);
+
+  function getMemoryStateLabel(anilistId) {
+    const count = logCountByAnimeId.get(Number(anilistId)) || 0;
+    if (count <= 0) return copy.memoryEmpty;
+    if (count === 1) return copy.memoryOne;
+    return copy.memoryMany(count);
+  }
 
   const selected = selectedId ? items.find((x) => x.anilistId === selectedId) : null;
   const selectedMedia = selectedId ? mediaMap.get(selectedId) : null;
@@ -1461,6 +1399,18 @@ export default function Library() {
         setBackupMsg("\uB85C\uADF8 \uC800\uC7A5 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.");
         return null;
       });
+  }
+
+  function createQuickLogFromDetail() {
+    const fallbackEvent = eventTypeFromStatus(selected?.status) || LIBRARY_EVENT.start;
+    return appendSelectedWatchLog(
+      fallbackEvent,
+      {},
+      {
+        openQuickSheet: true,
+        quickContext: { source: "manual-add", isAuto: false, status: selected?.status || LIBRARY_STATUS.unclassified },
+      }
+    );
   }
 
   function onAddAnimeFromSearch(addedItem, addedMedia, options = {}) {
@@ -1863,6 +1813,7 @@ export default function Library() {
         base={base}
         panelId="data-menu-panel"
         canInstallPwa={canInstallPwa}
+        currentRoute="library"
         locale={locale}
         theme={theme}
         onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
@@ -1885,141 +1836,178 @@ export default function Library() {
         {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
       </section>
 
-      <section className="library-panel">
-        <CollapsiblePanelHeader
-          title={copy.addPanel}
-          summary={addTab === "search" ? copy.addPanelSummarySearch : copy.addPanelSummaryRecommend}
-          open={addPanelOpen}
-          onToggle={() => setAddPanelOpen((v) => !v)}
-          controlsId="add-anime-panel-content"
-          openLabel={copy.addPanelOpen}
-          closedLabel={copy.addPanelClosed}
-        />
-        {addPanelOpen && (
-          <>
-            <div id="add-anime-panel-content" className="library-seg-wrap">
-              <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>{copy.searchTab}</SegTabButton>
-              <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>{copy.recommendTab}</SegTabButton>
-            </div>
-            {addTab === "search" ? (
-              <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} locale={locale} />
-            ) : (
-              <div className="library-recommend-placeholder">
-                <div className="small">
-                  {copy.recommendPlaceholder}
-                </div>
-              </div>
-            )}
-          </>
-        )}
+      <section className="library-page-tabs">
+        <div
+          className="library-seg-wrap library-seg-wrap--page-toggle seg-toggle-2"
+          role="tablist"
+          aria-label={copy.title}
+          data-active-index={pageTab === "collection" ? "0" : "1"}
+        >
+          <SegTabButton
+            active={pageTab === "collection"}
+            onClick={() => setPageTab("collection")}
+            className="library-seg-btn--page-toggle"
+            role="tab"
+            aria-selected={pageTab === "collection"}
+          >
+            {copy.collectionTab}
+          </SegTabButton>
+          <SegTabButton
+            active={pageTab === "add"}
+            onClick={() => setPageTab("add")}
+            className="library-seg-btn--page-toggle"
+            role="tab"
+            aria-selected={pageTab === "add"}
+          >
+            {copy.addPageTab}
+          </SegTabButton>
+        </div>
       </section>
 
-      <LibraryStatsPanel
-        locale={locale}
-        dashboard={dashboard}
-        open={statsOpen}
-        onToggle={() => setStatsOpen((value) => !value)}
-        onOpenAnime={setSelectedId}
-        scoreMax={SCORE_MAX}
-      />
-
-      <LibraryFiltersPanel
-        locale={locale}
-        filteredCount={filtered.length}
-        open={filterPanelOpen}
-        onToggle={() => setFilterPanelOpen((value) => !value)}
-        sortKey={sortKey}
-        onSortKeyChange={setSortKey}
-        status={status}
-        onStatusChange={setStatus}
-        groupByStatus={groupByStatus}
-        onGroupByStatusChange={setGroupByStatus}
-        sortDir={sortDir}
-        onToggleSortDir={() => setSortDir((direction) => (direction === "asc" ? "desc" : "asc"))}
-        query={q}
-        onQueryChange={setQ}
-        cardView={cardView}
-        onCardViewChange={setCardView}
-        genreSet={genreSet}
-        genreOptions={genreOptions}
-        onClearGenres={clearGenres}
-        onToggleGenre={toggleGenre}
-        cardsPerRowBase={cardsPerRowBase}
-        onCardsPerRowBaseChange={setCardsPerRowBase}
-        effectiveCols={effectiveCols}
-        formatGenreLabel={genreKo}
-      />
-
-      <div
-        ref={gridRef}
-        className="grid"
-        style={{
-          gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
-        }}
-      >
-        {filtered.map((it) => {
-          const m = mediaMap.get(it.anilistId);
-          const cardTitle = getTitle(it);
-          const cardStatus = it.status || "미분류";
-          const cardStatusLabel = formatStatusLabel(cardStatus, locale);
-          const cardScore = normalizeScoreValue(it.score);
-          const cardStarsFill = `${((cardScore ?? 0) / SCORE_MAX) * 100}%`;
-          const gs = safeGenres(m);
-
-          return (
-            <div
-              key={it.anilistId}
-              className="card"
-              onClick={() => setSelectedId(it.anilistId)}
-              onKeyDown={(e) => onCardKeyDown(e, it.anilistId)}
-              role="button"
-              tabIndex={0}
-              aria-label={`${cardTitle} ${copy.openDetail}`}
-            >
-              <img
-                src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
-                alt={cardTitle}
-                loading="lazy"
-              />
-
-              {cardView === "meta" && (
-                <div className="meta library-card-meta">
-                  <div className="library-card-title">
-                    {cardTitle}
+      {pageTab === "add" ? (
+        <section className="library-panel">
+          <CollapsiblePanelHeader
+            title={copy.addPanel}
+            summary={addTab === "search" ? copy.addPanelSummarySearch : copy.addPanelSummaryRecommend}
+            open={addPanelOpen}
+            onToggle={() => setAddPanelOpen((v) => !v)}
+            controlsId="add-anime-panel-content"
+            openLabel={copy.addPanelOpen}
+            closedLabel={copy.addPanelClosed}
+          />
+          {addPanelOpen && (
+            <>
+              <div
+                id="add-anime-panel-content"
+                className="library-seg-wrap seg-toggle-2"
+                data-active-index={addTab === "search" ? "0" : "1"}
+              >
+                <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>{copy.searchTab}</SegTabButton>
+                <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>{copy.recommendTab}</SegTabButton>
+              </div>
+              {addTab === "search" ? (
+                <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} locale={locale} />
+              ) : (
+                <div className="library-recommend-placeholder">
+                  <div className="small">
+                    {copy.recommendPlaceholder}
                   </div>
-
-                  <div className="library-card-meta-row">
-                    <span style={getStatusBadgeStyle(cardStatus)}>{cardStatusLabel}</span>
-                    <span
-                      aria-label={cardScore == null ? copy.unrated : `${copy.starLabel} ${cardScore} / ${SCORE_MAX}`}
-                      className="library-card-stars"
-                    >
-                      <span aria-hidden className="library-card-stars-base">★★★★★</span>
-                      <span
-                        aria-hidden
-                        style={{
-                          width: cardStarsFill,
-                        }}
-                        className="library-card-stars-fill"
-                      >
-                        ★★★★★
-                      </span>
-                    </span>
-                  </div>
-
-                  <GenresRow
-                    genres={gs}
-                    max={3}
-                    compact={true}
-                    formatGenreLabel={genreKo}
-                    onPickGenre={onPickGenreFromTag}
-                  />
                 </div>
               )}
-            </div>
-          );
-        })}
-      </div>
+            </>
+          )}
+        </section>
+      ) : (
+        <>
+          <LibraryFiltersPanel
+            locale={locale}
+            filteredCount={filtered.length}
+            open={filterPanelOpen}
+            onToggle={() => setFilterPanelOpen((value) => !value)}
+            sortKey={sortKey}
+            onSortKeyChange={setSortKey}
+            status={status}
+            onStatusChange={setStatus}
+            groupByStatus={groupByStatus}
+            onGroupByStatusChange={setGroupByStatus}
+            sortDir={sortDir}
+            onToggleSortDir={() => setSortDir((direction) => (direction === "asc" ? "desc" : "asc"))}
+            query={q}
+            onQueryChange={setQ}
+            cardView={cardView}
+            onCardViewChange={setCardView}
+            genreSet={genreSet}
+            genreOptions={genreOptions}
+            onClearGenres={clearGenres}
+            onToggleGenre={toggleGenre}
+            cardsPerRowBase={cardsPerRowBase}
+            onCardsPerRowBaseChange={setCardsPerRowBase}
+            effectiveCols={effectiveCols}
+            formatGenreLabel={genreKo}
+          />
+
+          <LibraryStatsPanel
+            locale={locale}
+            dashboard={dashboard}
+            open={statsOpen}
+            onToggle={() => setStatsOpen((value) => !value)}
+            onOpenAnime={setSelectedId}
+            scoreMax={SCORE_MAX}
+          />
+
+          <div
+            ref={gridRef}
+            className={`grid library-grid${cardView === "poster" ? " library-grid--poster" : ""}`}
+            style={{
+              gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
+            }}
+          >
+            {filtered.map((it) => {
+              const m = mediaMap.get(it.anilistId);
+              const cardTitle = getTitle(it);
+              const cardStatus = it.status || "미분류";
+              const cardStatusLabel = formatStatusLabel(cardStatus, locale);
+              const cardScore = normalizeScoreValue(it.score);
+              const cardStarsFill = `${((cardScore ?? 0) / SCORE_MAX) * 100}%`;
+              const gs = safeGenres(m);
+
+              return (
+                <div
+                  key={it.anilistId}
+                  className={`card library-card${cardView === "poster" ? " library-card--poster" : ""}`}
+                  onClick={() => setSelectedId(it.anilistId)}
+                  onKeyDown={(e) => onCardKeyDown(e, it.anilistId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${cardTitle} ${copy.openDetail}`}
+                >
+                  <img
+                    src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
+                    alt={cardTitle}
+                    loading="lazy"
+                  />
+
+                  {cardView === "meta" && (
+                    <div className="meta library-card-meta">
+                      <div className="library-card-title">
+                        {cardTitle}
+                      </div>
+
+                      <div className="library-card-meta-row">
+                        <span className={getStatusBadgeClassName(cardStatus)}>{cardStatusLabel}</span>
+                        <span
+                          aria-label={cardScore == null ? copy.unrated : `${copy.starLabel} ${cardScore} / ${SCORE_MAX}`}
+                          className="library-card-stars"
+                        >
+                          <span aria-hidden className="library-card-stars-base">★★★★★</span>
+                          <span
+                            aria-hidden
+                            style={{
+                              width: cardStarsFill,
+                            }}
+                            className="library-card-stars-fill"
+                          >
+                            ★★★★★
+                          </span>
+                        </span>
+                        <span className="status-badge library-memory-chip">{getMemoryStateLabel(it.anilistId)}</span>
+                      </div>
+
+                      <GenresRow
+                        genres={gs}
+                        max={3}
+                        compact={true}
+                        formatGenreLabel={genreKo}
+                        onPickGenre={onPickGenreFromTag}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <LibraryDetailModal
         locale={locale}
@@ -2058,6 +2046,7 @@ export default function Library() {
         setLastRewatchAtDraft={setLastRewatchAtDraft}
         onCommitModalDraft={commitModalDraft}
         onAppendSelectedWatchLog={appendSelectedWatchLog}
+        onCreateQuickLog={createQuickLogFromDetail}
         onOpenQuickLogSheet={openQuickLogSheet}
         onDeleteSelectedWatchLog={deleteSelectedWatchLog}
         onToggleCharacterPin={toggleCharacterPin}

@@ -1,3 +1,5 @@
+import { THEME_META_COLORS } from "./colorSystem.js";
+
 export const UI_THEME = {
   dark: "dark",
   light: "light",
@@ -19,8 +21,8 @@ export const DEFAULT_UI_PREFERENCES = {
 };
 
 const THEME_META = {
-  [UI_THEME.dark]: { themeColor: "#0b0c10" },
-  [UI_THEME.light]: { themeColor: "#f4f1df" },
+  [UI_THEME.dark]: { themeColor: THEME_META_COLORS.dark },
+  [UI_THEME.light]: { themeColor: THEME_META_COLORS.light },
 };
 
 export function normalizeUiTheme(value) {
@@ -52,6 +54,8 @@ export function buildUiPreferenceBootScript() {
   const localeKey = JSON.stringify(UI_PREFERENCE_KEYS.locale);
   const defaultTheme = JSON.stringify(DEFAULT_UI_PREFERENCES.theme);
   const defaultLocale = JSON.stringify(DEFAULT_UI_PREFERENCES.locale);
+  const darkThemeColor = JSON.stringify(THEME_META_COLORS.dark);
+  const lightThemeColor = JSON.stringify(THEME_META_COLORS.light);
 
   return `
     (() => {
@@ -64,7 +68,7 @@ export function buildUiPreferenceBootScript() {
         root.dataset.theme = theme;
         root.lang = locale;
         const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute("content", theme === "light" ? "#f4f1df" : "#0b0c10");
+        if (meta) meta.setAttribute("content", theme === "light" ? ${lightThemeColor} : ${darkThemeColor});
       } catch {}
     })();
   `.trim();

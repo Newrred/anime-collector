@@ -1,6 +1,6 @@
 import { Chip, CollapsiblePanelHeader, SegTabButton } from "./LibraryUi.jsx";
 import { formatStatusLabel } from "./libraryCopy.js";
-import { pickByLocale } from "../../domain/uiText";
+import { getMessageGroup } from "../../domain/messages.js";
 import { IconSortAsc, IconSortDesc } from "../ui/AppIcons.jsx";
 
 const STATUS_OPTIONS = ["전체", "완료", "보는중", "보류", "하차", "미분류"];
@@ -31,62 +31,49 @@ export default function LibraryFiltersPanel({
   effectiveCols,
   formatGenreLabel,
 }) {
-  const copy = pickByLocale(locale, {
-    ko: {
-      title: "라이브러리 검색/정렬",
-      showing: "현재",
-      visible: "개 표시",
-      open: "라이브러리 검색/정렬 접기",
-      closed: "라이브러리 검색/정렬 펼치기",
-      sort: { addedAt: "추가순", title: "제목순", score: "점수순", year: "연도순", genre: "장르순" },
-      groupByStatus: "상태별 정렬",
-      asc: "오름차순",
-      desc: "내림차순",
-      sortDirection: "정렬 방향 전환",
-      searchPlaceholder: "보관함 검색 (제목/장르)",
-      meta: "정보 함께",
-      poster: "포스터만",
-      genre: "장르:",
-      allGenre: "장르 전체",
-      all: "전체",
-      clearSelected: "선택 해제",
-      status: "상태:",
-      statusTitle: "상태",
-      cardSize: "카드 크기",
-      sliderTitle: "그리드 가로 수 조절",
-      base: "기준",
-      current: "현재",
-      cols: "열",
-    },
-    en: {
-      title: "Library filters",
-      showing: "Showing",
-      visible: "",
-      open: "Collapse library filters",
-      closed: "Expand library filters",
-      sort: { addedAt: "Recently added", title: "Title", score: "Score", year: "Year", genre: "Genre" },
-      groupByStatus: "Group by status",
-      asc: "Ascending",
-      desc: "Descending",
-      sortDirection: "Toggle sort direction",
-      searchPlaceholder: "Search library (title/genre)",
-      meta: "With meta",
-      poster: "Poster only",
-      genre: "Genre:",
-      allGenre: "All genres",
-      all: "All",
-      clearSelected: "Clear",
-      status: "Status:",
-      statusTitle: "Status",
-      cardSize: "Card size",
-      sliderTitle: "Adjust grid density",
-      base: "Base",
-      current: "Current",
-      cols: "cols",
-    },
-  });
+  const copy = getMessageGroup(locale, "libraryFiltersPanel");
   return (
     <section className="library-panel">
+      <div className="library-search-row">
+        <input
+          className="input library-search-input"
+          placeholder={copy.searchPlaceholder}
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+        <select
+          className="select library-filter-select library-filter-select--sort"
+          value={sortKey}
+          onChange={(event) => onSortKeyChange(event.target.value)}
+        >
+          <option value="addedAt">{copy.sort.addedAt}</option>
+          <option value="title">{copy.sort.title}</option>
+          <option value="score">{copy.sort.score}</option>
+          <option value="year">{copy.sort.year}</option>
+          <option value="genre">{copy.sort.genre}</option>
+        </select>
+        <div
+          className="library-seg-wrap library-view-mode seg-toggle-2"
+          data-active-index={cardView === "meta" ? "0" : "1"}
+        >
+          <SegTabButton active={cardView === "meta"} onClick={() => onCardViewChange("meta")}>
+            {copy.meta}
+          </SegTabButton>
+          <SegTabButton active={cardView === "poster"} onClick={() => onCardViewChange("poster")}>
+            {copy.poster}
+          </SegTabButton>
+        </div>
+        <button
+          type="button"
+          className="btn btn--icon"
+          onClick={onToggleSortDir}
+          aria-label={`${copy.sortDirection}: ${sortDir === "asc" ? copy.asc : copy.desc}`}
+          title={sortDir === "asc" ? copy.asc : copy.desc}
+        >
+          {sortDir === "asc" ? <IconSortAsc /> : <IconSortDesc />}
+        </button>
+      </div>
+
       <CollapsiblePanelHeader
         title={copy.title}
         summary={locale === "en" ? `${copy.showing} ${filteredCount}` : `${copy.showing} ${filteredCount}${copy.visible}`}
@@ -100,17 +87,6 @@ export default function LibraryFiltersPanel({
       {open && (
         <div id="library-filter-panel-content">
           <div className="library-filter-row">
-            <select
-              className="select library-filter-select library-filter-select--sort"
-              value={sortKey}
-              onChange={(event) => onSortKeyChange(event.target.value)}
-            >
-              <option value="addedAt">{copy.sort.addedAt}</option>
-              <option value="title">{copy.sort.title}</option>
-              <option value="score">{copy.sort.score}</option>
-              <option value="year">{copy.sort.year}</option>
-              <option value="genre">{copy.sort.genre}</option>
-            </select>
             <select
               className="select library-filter-select library-filter-select--status"
               value={status}
@@ -129,32 +105,6 @@ export default function LibraryFiltersPanel({
                 />
                 <span className="small">{copy.groupByStatus}</span>
               </label>
-              <button
-                type="button"
-                className="btn btn--icon"
-                onClick={onToggleSortDir}
-                aria-label={`${copy.sortDirection}: ${sortDir === "asc" ? copy.asc : copy.desc}`}
-                title={sortDir === "asc" ? copy.asc : copy.desc}
-              >
-                {sortDir === "asc" ? <IconSortAsc /> : <IconSortDesc />}
-              </button>
-            </div>
-          </div>
-
-          <div className="library-search-row">
-            <input
-              className="input library-search-input"
-              placeholder={copy.searchPlaceholder}
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-            />
-            <div className="library-seg-wrap library-view-mode">
-              <SegTabButton active={cardView === "meta"} onClick={() => onCardViewChange("meta")}>
-                {copy.meta}
-              </SegTabButton>
-              <SegTabButton active={cardView === "poster"} onClick={() => onCardViewChange("poster")}>
-                {copy.poster}
-              </SegTabButton>
             </div>
           </div>
 

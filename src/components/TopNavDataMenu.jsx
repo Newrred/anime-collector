@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { pickByLocale } from "../domain/uiText";
+import { getMessageGroup } from "../domain/messages.js";
 import {
   IconClipboard,
   IconDatabase,
@@ -14,12 +14,14 @@ import {
   IconUpload,
 } from "./ui/AppIcons.jsx";
 
-function SegTabButton({ active, onClick, children }) {
+function SegTabButton({ active, onClick, children, className = "", ...props }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`data-menu-seg-btn${active ? " is-active" : ""}`}
+      className={`data-menu-seg-btn${active ? " is-active" : ""}${className ? ` ${className}` : ""}`}
+      aria-pressed={active}
+      {...props}
     >
       <span className="data-menu-seg-label">{children}</span>
     </button>
@@ -39,6 +41,7 @@ export default function TopNavDataMenu({
   base = "/",
   panelId = "data-menu-panel",
   canInstallPwa = false,
+  currentRoute = "",
   locale = "ko",
   theme = "dark",
   preferenceControls = null,
@@ -50,80 +53,7 @@ export default function TopNavDataMenu({
   onImportJsonFile,
   onImportJsonText,
 }) {
-  const copy = pickByLocale(locale, {
-    ko: {
-      home: "홈",
-      library: "보관함",
-      tier: "티어",
-      localeMenu: "언어 선택",
-      localeKorean: "한국어",
-      localeEnglish: "영어",
-      switchToEnglish: "영어로 전환",
-      switchToKorean: "한국어로 전환",
-      switchToLight: "라이트 모드로 전환",
-      switchToDark: "다크 모드로 전환",
-      help: "도움말",
-      manage: "관리 메뉴",
-      themeLight: "라이트",
-      themeDark: "다크",
-      helpDialog: "서비스 도움말",
-      helpTitle: "도움말",
-      helpBlocks: [
-        "홈에서는 최근 감상/회상 카드와 연간 요약을 확인합니다.",
-        "보관함에서 작품 검색 추가, 상태/점수/메모/재시청 기록을 관리합니다.",
-        "티어에서는 작품 카드를 드래그해서 순위를 정리합니다.",
-        "관리에서 JSON 내보내기/불러오기를 사용합니다. 이어붙이기는 합치기, 덮어쓰기는 현재 데이터를 교체합니다.",
-        "모바일에서는 모바일로 보내기/복사 또는 붙여넣기 불러오기를 사용하세요.",
-      ],
-      export: "내보내기",
-      import: "불러오기",
-      saveBackupFile: "백업 파일 저장",
-      mobileShare: "모바일로 보내기/복사",
-      installApp: "앱 설치",
-      storageStatus: "저장 상태",
-      mergeImport: "이어서 불러오기",
-      overwriteImport: "지금 데이터 대신 불러오기",
-      pickBackupFile: "백업 파일 선택",
-      importPlaceholder: "모바일에서는 백업 내용을 복사해 여기에 붙여넣고 불러오세요.",
-      importFromPaste: "붙여넣은 내용 불러오기",
-    },
-    en: {
-      home: "Home",
-      library: "Library",
-      tier: "Tier",
-      localeMenu: "Choose language",
-      localeKorean: "Korean",
-      localeEnglish: "English",
-      switchToEnglish: "Switch to English",
-      switchToKorean: "Switch to Korean",
-      switchToLight: "Switch to light mode",
-      switchToDark: "Switch to dark mode",
-      help: "Help",
-      manage: "Manage",
-      themeLight: "Light",
-      themeDark: "Dark",
-      helpDialog: "Service help",
-      helpTitle: "Help",
-      helpBlocks: [
-        "On Home, review recent logs, resurfacing cards, and yearly recap.",
-        "In Library, add anime and manage status, score, memo, and rewatch logs.",
-        "In Tier, drag anime cards to reorganize rankings.",
-        "Use Manage for JSON export and import. Merge appends data, overwrite replaces current data.",
-        "On mobile, use share/copy export or paste import.",
-      ],
-      export: "Export",
-      import: "Import",
-      saveBackupFile: "Save backup file",
-      mobileShare: "Send to mobile / copy",
-      installApp: "Install app",
-      storageStatus: "Storage status",
-      mergeImport: "Merge import",
-      overwriteImport: "Overwrite current data",
-      pickBackupFile: "Choose backup file",
-      importPlaceholder: "On mobile, paste copied backup JSON here and import it.",
-      importFromPaste: "Import pasted content",
-    },
-  });
+  const copy = getMessageGroup(locale, "topNavDataMenu");
   const fileRef = useRef(null);
   const dataMenuRef = useRef(null);
   const [dataTab, setDataTab] = useState("export");
@@ -216,12 +146,30 @@ export default function TopNavDataMenu({
         className="nav top-nav"
       >
         <div className="top-nav__links">
-          <a href={`${base}`}>{copy.home}</a>
-          <a href={`${base}library/`}>{copy.library}</a>
-          <a href={`${base}tier/`}>{copy.tier}</a>
+          <a
+            href={`${base}`}
+            className={`top-nav__link top-nav__link--primary${currentRoute === "home" ? " is-active" : ""}`}
+            aria-current={currentRoute === "home" ? "page" : undefined}
+          >
+            {copy.home}
+          </a>
+          <a
+            href={`${base}library/`}
+            className={`top-nav__link top-nav__link--primary${currentRoute === "library" ? " is-active" : ""}`}
+            aria-current={currentRoute === "library" ? "page" : undefined}
+          >
+            {copy.library}
+          </a>
+          <a
+            href={`${base}tier/`}
+            className={`top-nav__link top-nav__link--secondary${currentRoute === "tier" ? " is-active" : ""}`}
+            aria-current={currentRoute === "tier" ? "page" : undefined}
+          >
+            {copy.tier}
+          </a>
         </div>
 
-        <div ref={dataMenuRef} style={{ position: "relative", marginLeft: "auto" }}>
+        <div ref={dataMenuRef} className="top-nav__menu">
           <div className="data-menu-actions">
             <button
               type="button"
@@ -331,7 +279,7 @@ export default function TopNavDataMenu({
                   {preferenceControls}
                 </div>
               ) : null}
-              <div className="data-menu-tabs">
+              <div className="data-menu-tabs seg-toggle-2" data-active-index={dataTab === "export" ? "0" : "1"}>
                 <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>
                   <IconDownload />
                   {copy.export}
@@ -377,8 +325,7 @@ export default function TopNavDataMenu({
                   )}
                   <a
                     href={`${base}data/`}
-                    className="btn"
-                    style={{ textAlign: "center", textDecoration: "none" }}
+                    className="btn data-menu-link"
                     onClick={() => setDataMenuOpen(false)}
                   >
                     <ActionLabel icon={<IconDatabase />}>{copy.storageStatus}</ActionLabel>
@@ -386,7 +333,10 @@ export default function TopNavDataMenu({
                 </div>
               ) : (
                 <div className="data-menu-body">
-                  <div className="data-menu-import-mode">
+                  <div
+                    className="data-menu-import-mode seg-toggle-2"
+                    data-active-index={importMode === "merge" ? "0" : "1"}
+                  >
                     <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>
                       {copy.mergeImport}
                     </SegTabButton>
@@ -408,11 +358,10 @@ export default function TopNavDataMenu({
                     <ActionLabel icon={<IconFile />}>{copy.pickBackupFile}</ActionLabel>
                   </button>
                   <textarea
-                    className="textarea"
+                    className="textarea data-menu-import-text"
                     value={importText}
                     onChange={(e) => setImportText(e.target.value)}
                     placeholder={copy.importPlaceholder}
-                    style={{ minHeight: 100 }}
                   />
                   <button className="btn" onClick={handleImportText}>
                     <ActionLabel icon={<IconClipboard />}>{copy.importFromPaste}</ActionLabel>
@@ -428,7 +377,7 @@ export default function TopNavDataMenu({
         ref={fileRef}
         type="file"
         accept="application/json,.json"
-        style={{ display: "none" }}
+        className="data-menu-file-input"
         onChange={handlePickImport}
       />
     </>

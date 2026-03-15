@@ -1,5 +1,5 @@
 import { CollapsiblePanelHeader, StatBars } from "./LibraryUi.jsx";
-import { pickByLocale } from "../../domain/uiText";
+import { getMessageGroup } from "../../domain/messages.js";
 
 export default function LibraryStatsPanel({
   locale = "ko",
@@ -9,34 +9,7 @@ export default function LibraryStatsPanel({
   onOpenAnime,
   scoreMax,
 }) {
-  const copy = pickByLocale(locale, {
-    ko: {
-      title: "통계 대시보드",
-      summary: "총",
-      average: "평균 점수",
-      scored: "개 채점",
-      open: "통계 대시보드 접기",
-      closed: "통계 대시보드 펼치기",
-      status: "상태별 분류",
-      genre: "시청 장르 상위 5",
-      rewatch: "재주행 TOP 5",
-      empty: "재주행 기록이 없습니다.",
-      times: "회",
-    },
-    en: {
-      title: "Stats dashboard",
-      summary: "Total",
-      average: "Average score",
-      scored: "scored",
-      open: "Collapse stats dashboard",
-      closed: "Expand stats dashboard",
-      status: "Status breakdown",
-      genre: "Top 5 genres",
-      rewatch: "Top 5 rewatches",
-      empty: "No rewatch data yet.",
-      times: "x",
-    },
-  });
+  const copy = getMessageGroup(locale, "libraryStatsPanel");
   return (
     <section className="library-panel library-panel--stats">
       <CollapsiblePanelHeader
@@ -53,18 +26,18 @@ export default function LibraryStatsPanel({
 
       {open && (
         <div id="stats-board-content" className="library-stats-grid">
-          <div className="library-stats-card">
+          <div className="library-stats-card ui-panel-stack">
             <div className="library-stats-card-title">{copy.status}</div>
-            <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} emptyText={locale === "en" ? "No data" : "데이터 없음"} />
+            <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} emptyText={copy.noData} />
           </div>
-          <div className="library-stats-card">
+          <div className="library-stats-card ui-panel-stack">
             <div className="library-stats-card-title">{copy.genre}</div>
-            <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} emptyText={locale === "en" ? "No data" : "데이터 없음"} />
+            <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} emptyText={copy.noData} />
           </div>
-          <div className="library-stats-card">
+          <div className="library-stats-card ui-panel-stack">
             <div className="library-stats-card-title">{copy.rewatch}</div>
             {dashboard.rewatchRows.length === 0 ? (
-              <div className="small">{copy.empty}</div>
+              <div className="small ui-empty-state ui-empty-state--compact">{copy.empty}</div>
             ) : (
               <div className="library-rewatch-list">
                 {dashboard.rewatchRows.map((row) => (

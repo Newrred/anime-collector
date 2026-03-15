@@ -13,7 +13,7 @@ import {
 } from "../repositories/searchCacheRepo";
 import { formatStatusLabel } from "./library/libraryCopy.js";
 import { deriveKoTitleFromMedia, pickDisplayTitle } from "../domain/animeTitles";
-import { pickByLocale } from "../domain/uiText";
+import { getMessageGroup } from "../domain/messages.js";
 import { IconPlus } from "./ui/AppIcons.jsx";
 
 function isHangulQuery(q) {
@@ -97,52 +97,7 @@ function normalizeInitialStatus(raw) {
 }
 
 export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" }) {
-  const copy = pickByLocale(locale, {
-    ko: {
-      stage: {
-        recent: "최근 찾은 결과",
-        searching: "찾는 중",
-        alias: "다른 제목 확인 중",
-        koTitle: "한글 제목 찾는 중",
-        preparing: "작품 정보 정리 중",
-        organizing: "결과 정리 중",
-        error: "오류",
-      },
-      searchPlaceholder: "작품 검색",
-      searchAria: "작품 검색",
-      addStatus: "보관할 때 상태",
-      addStatusHint: "미분류/보류로 넣으면 자동 기록이 생기지 않고, 보는중/완료/하차로 넣으면 첫 기록이 같이 남아요.",
-      results: "검색 결과",
-      noResult: "결과 없음.",
-      alreadyInLibrary: "이미 보관함에 있음",
-      clickToAdd: "눌러서 보관함에 추가",
-      added: "추가됨",
-      add: "추가",
-      preparingFallback: "작품 정보 정리 중",
-    },
-    en: {
-      stage: {
-        recent: "Recent results",
-        searching: "Searching",
-        alias: "Checking alternate titles",
-        koTitle: "Finding Korean titles",
-        preparing: "Preparing anime info",
-        organizing: "Organizing results",
-        error: "Error",
-      },
-      searchPlaceholder: "Search anime",
-      searchAria: "Search anime",
-      addStatus: "Initial status when adding",
-      addStatusHint: "If you add as Unsorted or On Hold, no auto-log is created. Watching, Completed, and Dropped create the first log automatically.",
-      results: "Search results",
-      noResult: "No results.",
-      alreadyInLibrary: "Already in library",
-      clickToAdd: "Click to add to library",
-      added: "Added",
-      add: "Add",
-      preparingFallback: "Preparing anime info",
-    },
-  });
+  const copy = getMessageGroup(locale, "addAnime");
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
