@@ -1,0 +1,7 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PublicProfilePage from "../components/PublicProfilePage.jsx";
+---
+<BaseLayout>
+  <PublicProfilePage client:only="react" />
+</BaseLayout>

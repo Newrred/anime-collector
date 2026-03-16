@@ -1,11 +1,12 @@
-import { STORAGE_KEYS } from "../storage/keys";
-import { readJson, writeJson } from "../storage/localJsonStore";
+import { STORAGE_KEYS } from "../storage/keys.js";
+import { readJson, writeJson } from "../storage/localJsonStore.js";
 import {
   deleteCharacterPinIdb,
   getAllCharacterPinsIdb,
   putCharacterPinIdb,
   replaceCharacterPinsIdb,
-} from "../storage/idb";
+} from "../storage/idb.js";
+import { markLocalDirty } from "./syncRepo.js";
 
 function normalizePin(raw) {
   const characterId = Number(raw?.characterId);
@@ -61,12 +62,13 @@ export async function listCharacterPinsPreferred() {
   return readPinsLocal();
 }
 
-export async function replaceCharacterPins(pins) {
+export async function replaceCharacterPins(pins, options = {}) {
   const rows = (Array.isArray(pins) ? pins : [])
     .map(normalizePin)
     .filter(Boolean)
     .sort((a, b) => Number(b?.pinnedAt || 0) - Number(a?.pinnedAt || 0));
   writePinsLocal(rows);
+  if (!options?.skipSyncMark) markLocalDirty();
   replaceCharacterPinsIdb(rows).catch(() => {});
   return rows.length;
 }
@@ -85,22 +87,24 @@ export async function mergeCharacterPins(incomingPins) {
   return merged.length;
 }
 
-export async function upsertCharacterPin(pinInput) {
+export async function upsertCharacterPin(pinInput, options = {}) {
   const pin = normalizePin(pinInput);
   if (!pin) return null;
   const map = new Map(readPinsLocal().map((x) => [x.id, x]));
   map.set(pin.id, pin);
   const next = [...map.values()].sort((a, b) => Number(b?.pinnedAt || 0) - Number(a?.pinnedAt || 0));
   writePinsLocal(next);
+  if (!options?.skipSyncMark) markLocalDirty();
   putCharacterPinIdb(pin).catch(() => {});
   return pin;
 }
 
-export async function removeCharacterPin(pinId) {
+export async function removeCharacterPin(pinId, options = {}) {
   const id = String(pinId || "").trim();
   if (!id) return false;
   const next = readPinsLocal().filter((x) => String(x.id) !== id);
   writePinsLocal(next);
+  if (!options?.skipSyncMark) markLocalDirty();
   deleteCharacterPinIdb(id).catch(() => {});
   return true;
 }

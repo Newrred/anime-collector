@@ -1,12 +1,13 @@
-import { STORAGE_KEYS } from "../storage/keys";
-import { readJson, writeJson } from "../storage/localJsonStore";
-import { getTierStateIdb, putTierStateIdb } from "../storage/idb";
+import { STORAGE_KEYS } from "../storage/keys.js";
+import { readJson, writeJson } from "../storage/localJsonStore.js";
+import { getTierStateIdb, putTierStateIdb } from "../storage/idb.js";
 import {
   getActiveTierTopic,
   normalizeTierTopicBundle,
   removeTierTopic,
   replaceActiveTierState,
-} from "../domain/tierTopics";
+} from "../domain/tierTopics.js";
+import { markLocalDirty } from "./syncRepo.js";
 
 export function readTierState(fallback = null) {
   const raw = readJson(STORAGE_KEYS.tier, null);
@@ -54,6 +55,7 @@ export function writeTierState(nextTier, options = {}) {
 
   if (!options?.mirrorOnly) {
     writeJson(STORAGE_KEYS.tier, bundle);
+    if (!options?.skipSyncMark) markLocalDirty();
   }
   putTierStateIdb(nextTier, "default").catch(() => {});
 }
@@ -62,6 +64,7 @@ export function writeTierBoardBundle(nextBundle, options = {}) {
   const bundle = normalizeTierTopicBundle(nextBundle);
   if (!options?.mirrorOnly) {
     writeJson(STORAGE_KEYS.tier, bundle);
+    if (!options?.skipSyncMark) markLocalDirty();
   }
   putTierStateIdb(getActiveTierTopic(bundle)?.tier || { unranked: [], tiers: {} }, "default").catch(() => {});
 }
@@ -93,5 +96,6 @@ export function pruneTierByAnimeId(removedId) {
   if (!sanitized || typeof sanitized !== "object") return;
 
   writeJson(STORAGE_KEYS.tier, sanitized);
+  markLocalDirty();
   putTierStateIdb(getActiveTierTopic(sanitized)?.tier || { unranked: [], tiers: {} }, "default").catch(() => {});
 }

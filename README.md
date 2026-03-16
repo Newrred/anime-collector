@@ -1,18 +1,19 @@
 # anime-collector
 
 브라우저만으로 동작하는 개인 애니 기록 서비스입니다.  
-핵심 흐름은 `검색 -> 보관 -> 감상 기록 -> 회고 -> 티어 정리 -> 백업`입니다.
+핵심 흐름은 `검색 -> 보관 -> 감상 기록 -> 회고 -> 티어 정리 -> 백업 -> 기기간 동기화`입니다.
 
 ## 개요
 
 - `offline-first` 개인 기록 앱
-- 주요 화면: `홈 / 보관함 / 티어 / 데이터`
+- 주요 화면: `홈 / 보관함 / 티어 / 데이터 / 프로필`
 - 저장 구조: `IndexedDB 우선 + localStorage 미러 + 레거시 마이그레이션`
-- 상단 공통 메뉴에서 `라이트/다크`, `한/영`, `도움말`, `백업/복원` 제공
+- 상단 공통 메뉴에서 `라이트/다크`, `한/영`, `도움말`, `데이터 관리`, `계정/동기화`, `내 프로필` 제공
 - self-host 폰트 사용
   - 한국어: `Noto Sans KR`
   - 영어: `Noto Sans`
 - PWA 설치와 JSON 백업/복원 지원
+- Google 로그인 + 클라우드 snapshot sync 구조 포함
 
 ## 주요 기능
 
@@ -49,6 +50,38 @@
 - 저장 엔진 상태와 사용량 확인
 - quota / persistence 상태 확인 및 요청
 - 백업 이력 요약
+- Google 계정 연결 상태
+- 클라우드 sync 상태 카드
+- 충돌 시 로컬 유지 / 클라우드 가져오기 / JSON 백업 경로 제공
+- 수동 백업 및 복원 섹션에서 JSON export/import 제공
+
+### 프로필 (`/profile/`, `/u/?handle=...`)
+
+- 로그인 시 자동 생성되는 기본 공개 프로필
+- 닉네임 / handle / 한줄 소개 / 공개 여부 편집
+- 공개 프로필 링크 복사 / 공유
+- 팔로우 / 언팔로우
+- 팔로워 / 팔로잉 목록을 통해 다른 프로필 이동
+
+## 동기화 구조
+
+현재 프로젝트는 `record-level sync`가 아니라 `snapshot sync`를 사용합니다.
+
+- 로컬 데이터가 기본 원본
+- 변경 시 `sync.pending` 메타가 올라감
+- 로그인 후 현재 스냅샷 전체를 업로드/다운로드
+- 마지막 동기화 이후 로컬과 클라우드가 모두 바뀌면 자동 덮어쓰기 대신 충돌 선택 UI 표시
+- 검색/미디어 캐시는 sync 대상에서 제외
+
+sync 관련 로컬 메타 키:
+
+- `sync.deviceId`
+- `sync.lastSyncedAt`
+- `sync.lastSyncedHash`
+- `sync.lastRemoteUpdatedAt`
+- `sync.pending`
+- `sync.lastError`
+- `sync.lastLocalMutationAt`
 
 ## UI 시스템
 
@@ -58,16 +91,31 @@
 - 아이콘 버튼, segmented toggle, 카드, 패널 스타일 통일
 - 전체 locale 전환 시 UI 문구와 애니 제목 표시 우선순위가 함께 전환됨
 
-자세한 규칙은 [docs/UI_EDIT_GUIDE.md](docs/UI_EDIT_GUIDE.md)에서 확인할 수 있습니다.
+자세한 규칙은 `docs/UI_EDIT_GUIDE.md`에서 확인할 수 있습니다.
 
 ## 기술 스택
 
 - Astro 5
 - React 19
+- Supabase JS
 - Playwright
 - AniList GraphQL
 - Wikidata / WDQS
 - IndexedDB + localStorage
+
+## 환경변수
+
+로컬/preview/production에서 아래 값을 사용합니다.
+
+```bash
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+PUBLIC_SITE_URL=https://app.example.com
+```
+
+- 템플릿 파일: `.env.example`
+- `PUBLIC_SITE_URL`은 Astro `site` 값에 사용됩니다.
+- Google OAuth와 Supabase Redirect URLs는 실제 preview / production origin과 함께 별도로 등록해야 합니다.
 
 ## 데이터 구조
 
@@ -80,35 +128,34 @@
 - `tierTopics`: 주제형 티어보드 번들
 - `mediaCache`: AniList 응답 캐시
 
-백업 JSON은 현재 `version: 4`를 사용합니다.
+백업 JSON과 클라우드 snapshot은 현재 compact wire format인 `version: 5`를 사용합니다.
+사용자가 직접 읽기 쉬운 형식보다는 전송 크기와 중복 제거를 우선하며, import 시에는 예전 `version: 4` 백업도 계속 읽을 수 있습니다.
 
 ```json
 {
-  "app": "ani-site",
-  "version": 4,
-  "exportedAt": "2026-03-15T00:00:00.000Z",
-  "list": [],
-  "tier": {},
-  "tierTopics": {
-    "version": 1,
-    "activeTopicId": "default-all",
-    "topics": []
-  },
-  "watchLogs": [],
-  "characterPins": []
+  "v": 5,
+  "e": "2026-03-15T00:00:00.000Z",
+  "s": [],
+  "l": [],
+  "tt": [null, []],
+  "w": [],
+  "p": [],
+  "pr": []
 }
 ```
 
 호환성 메모:
 
 - 예전 `tier` 단일 상태도 읽을 수 있습니다.
-- 검색/미디어 캐시는 백업 대상이 아닙니다.
+- 검색/미디어 캐시는 백업과 sync 대상이 아닙니다.
 
 ## 프로젝트 구조
 
 ```text
 src/
   components/
+    auth/
+    data/
     home/
     library/
     ui/
@@ -119,10 +166,13 @@ src/
   lib/
   messages/
   pages/
+    auth/
   repositories/
   services/
   storage/
   styles/
+docs/
+  deploy/
 tests/
   unit/
   library.spec.ts
@@ -130,17 +180,6 @@ tests/
   tier.spec.ts
   live-search.spec.ts
 ```
-
-구조 설명:
-
-- `src/pages`: Astro 라우트 엔트리
-- `src/components`: 페이지와 UI 컴포넌트
-- `src/messages`: locale별 중앙 번역 파일
-- `src/domain`: 정규화, 셀렉터, UI preference, 타이틀/티어/리캡 로직
-- `src/repositories`: 저장소 접근 계층
-- `src/storage`: storage key, IDB, 마이그레이션
-- `src/lib`: 외부 API 연동
-- `src/services`: 공유 이미지, 리캡 보조 서비스
 
 ## 로컬 실행
 
@@ -182,7 +221,7 @@ npm run test:e2e
 npm run test:e2e:live
 ```
 
-테스트 스펙:
+주요 스펙:
 
 - `tests/library.spec.ts`: 보관함 레이아웃, 필터, 상세 팝업, 로그, 데이터 메뉴
 - `tests/home-data.spec.ts`: 홈 / 데이터 렌더와 공통 UI 안정성
@@ -191,12 +230,31 @@ npm run test:e2e:live
 
 ## 배포
 
-GitHub Pages 배포를 사용합니다.
+지금 단계의 권장 흐름은 `Vercel + Supabase`로 먼저 사설 테스트를 돌리고,
+기능이 안정되면 그 뒤에 custom domain까지 붙이는 방식입니다.
+GitHub 저장소는 유지하고, 실제 서비스 호스팅만 GitHub Pages에서 옮기는 구조를 전제로 합니다.
 
-- 워크플로: `.github/workflows/astro.yml`
-- 브랜치 푸시 시 정적 빌드 후 Pages에 배포
-- `astro build`에 Pages용 `site/base` 설정이 주입됩니다
+현재 저장소에서 이미 준비된 것:
+
+- `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_SITE_URL` 환경변수 구조
+- `/auth/callback/` 경로
+- `docs/deploy/supabase-user-snapshots.sql`
+- `docs/deploy/supabase-social.sql`
+- `docs/deploy/OWNER_DEPLOY_GUIDE.md`
+
+운영자가 직접 해야 하는 것:
+
+- Supabase 프로젝트 생성
+- Google OAuth 앱 생성
+- Vercel 프로젝트 연결
+- preview / production 환경변수 등록
+- preview / production origin / redirect URL 등록
+- custom domain 연결
+- GitHub Pages workflow 비활성화 또는 삭제 여부 결정
 
 ## 참고 문서
 
 - UI 수정 가이드: `docs/UI_EDIT_GUIDE.md`
+- 운영 전환 가이드: `docs/deploy/OWNER_DEPLOY_GUIDE.md`
+- Vercel 테스트 가이드: `docs/deploy/VERCEL_SETUP.md`
+- Supabase SQL: `docs/deploy/supabase-user-snapshots.sql`

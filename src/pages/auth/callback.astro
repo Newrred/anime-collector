@@ -1,0 +1,23 @@
+---
+import "../../styles/global.css";
+import AuthCallbackClient from "../../components/auth/AuthCallbackClient.jsx";
+const rawBase = String(import.meta.env.BASE_URL || "/");
+const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+---
+<html lang="ko" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Auth Callback</title>
+  </head>
+  <body>
+    <main class="container page-wrap">
+      <section class="surface-card sync-callback-card">
+        <div class="pageHeader">
+          <h1 class="pageTitle">Google Sign-In</h1>
+          <AuthCallbackClient client:load base={base} />
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

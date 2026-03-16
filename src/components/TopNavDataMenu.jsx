@@ -1,32 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
+import { useAuthSession } from "../hooks/useAuthSession.js";
+import { useSyncStatus } from "../hooks/useSyncStatus.js";
 import {
-  IconClipboard,
   IconDatabase,
-  IconDownload,
-  IconFile,
   IconGear,
   IconGlobe,
   IconHelp,
-  IconMobile,
   IconMoon,
   IconSun,
-  IconUpload,
 } from "./ui/AppIcons.jsx";
-
-function SegTabButton({ active, onClick, children, className = "", ...props }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`data-menu-seg-btn${active ? " is-active" : ""}${className ? ` ${className}` : ""}`}
-      aria-pressed={active}
-      {...props}
-    >
-      <span className="data-menu-seg-label">{children}</span>
-    </button>
-  );
-}
+import AuthSheet from "./auth/AuthSheet.jsx";
 
 function ActionLabel({ icon, children }) {
   return (
@@ -35,6 +19,14 @@ function ActionLabel({ icon, children }) {
       <span>{children}</span>
     </span>
   );
+}
+
+function syncToneClass(status) {
+  if (status === "conflict") return "is-conflict";
+  if (status === "error") return "is-error";
+  if (status === "pending") return "is-pending";
+  if (status === "synced") return "is-synced";
+  return "is-idle";
 }
 
 export default function TopNavDataMenu({
@@ -47,28 +39,20 @@ export default function TopNavDataMenu({
   preferenceControls = null,
   onToggleLocale,
   onToggleTheme,
-  onExportFile,
-  onExportMobile,
   onInstallPwa,
-  onImportJsonFile,
-  onImportJsonText,
 }) {
   const copy = getMessageGroup(locale, "topNavDataMenu");
-  const fileRef = useRef(null);
   const dataMenuRef = useRef(null);
-  const [dataTab, setDataTab] = useState("export");
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
-  const [importMode, setImportMode] = useState("merge");
-  const [importText, setImportText] = useState("");
+  const auth = useAuthSession(`${base}data/`);
+  const sync = useSyncStatus({ session: auth.session, autoSync: false });
 
   useEffect(() => {
     function onDocDown(e) {
       if (!dataMenuRef.current) return;
       if (!dataMenuRef.current.contains(e.target)) {
         setDataMenuOpen(false);
-        setHelpOpen(false);
         setLocaleMenuOpen(false);
       }
     }
@@ -76,42 +60,14 @@ export default function TopNavDataMenu({
     return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
-  function openLibraryManageFallback() {
+  function openDataPage() {
     if (typeof window === "undefined") return;
-    window.location.href = `${base}library/`;
+    window.location.href = `${base}data/`;
   }
 
-  async function handleImportText() {
-    if (typeof onImportJsonText !== "function") {
-      openLibraryManageFallback();
-      return;
-    }
-    try {
-      await onImportJsonText(importText, importMode);
-      setImportText("");
-      setDataMenuOpen(false);
-    } catch {}
-  }
-
-  async function handlePickImport(e) {
-    const file = e.target.files?.[0];
-    if (!file) {
-      e.target.value = "";
-      return;
-    }
-    if (typeof onImportJsonFile !== "function") {
-      openLibraryManageFallback();
-      e.target.value = "";
-      return;
-    }
-    try {
-      await onImportJsonFile(file, importMode);
-      setDataMenuOpen(false);
-    } catch {
-      // Parent handles error messaging.
-    } finally {
-      e.target.value = "";
-    }
+  function openProfilePage() {
+    if (typeof window === "undefined") return;
+    window.location.href = `${base}profile/`;
   }
 
   async function handleInstallPwaClick() {
@@ -127,14 +83,12 @@ export default function TopNavDataMenu({
   }
 
   function handleSelectLocale(nextLocale) {
-    setHelpOpen(false);
     setDataMenuOpen(false);
     setLocaleMenuOpen(false);
     if (typeof onToggleLocale === "function") onToggleLocale(nextLocale);
   }
 
   function handleToggleTheme() {
-    setHelpOpen(false);
     setDataMenuOpen(false);
     setLocaleMenuOpen(false);
     if (typeof onToggleTheme === "function") onToggleTheme();
@@ -146,6 +100,19 @@ export default function TopNavDataMenu({
         className="nav top-nav"
       >
         <div className="top-nav__links">
+          <a
+            href={`${base}`}
+            className="top-nav__brand"
+            aria-label="MOEMOA home"
+          >
+            <img
+              src={`${base}MOEMOA.svg`}
+              alt="MOEMOA"
+              className="top-nav__brand-mark"
+              width="155"
+              height="41"
+            />
+          </a>
           <a
             href={`${base}`}
             className={`top-nav__link top-nav__link--primary${currentRoute === "home" ? " is-active" : ""}`}
@@ -186,7 +153,6 @@ export default function TopNavDataMenu({
               type="button"
               onClick={() => {
                 setLocaleMenuOpen((v) => !v);
-                setHelpOpen(false);
                 setDataMenuOpen(false);
               }}
               aria-expanded={localeMenuOpen}
@@ -202,46 +168,21 @@ export default function TopNavDataMenu({
             <button
               type="button"
               onClick={() => {
-                setHelpOpen((v) => !v);
-                setDataMenuOpen(false);
-                setLocaleMenuOpen(false);
-              }}
-              aria-expanded={helpOpen}
-              aria-label={copy.help}
-              className="data-menu-trigger"
-            >
-              <span className="data-menu-trigger-label">
-                <IconHelp />
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
                 setDataMenuOpen((v) => !v);
-                setHelpOpen(false);
                 setLocaleMenuOpen(false);
               }}
               aria-expanded={dataMenuOpen}
               aria-controls={panelId}
               aria-label={copy.manage}
-              className="data-menu-trigger"
+              title={copy.manage}
+              className={`data-menu-trigger auth-trigger ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
             >
-              <span className="data-menu-trigger-label">
+              <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 <IconGear />
               </span>
+              <span className={`sync-dot ${syncToneClass(sync.status)}`} aria-hidden />
             </button>
           </div>
-
-          {helpOpen && (
-            <div className="data-menu-panel data-help-panel" role="dialog" aria-label={copy.helpDialog}>
-              <div className="data-help-title">{copy.helpTitle}</div>
-              {copy.helpBlocks.map((block) => (
-                <div key={block} className="small data-help-block">
-                  {block}
-                </div>
-              ))}
-            </div>
-          )}
 
           {localeMenuOpen && (
             <div
@@ -272,114 +213,100 @@ export default function TopNavDataMenu({
           {dataMenuOpen && (
             <div
               id={panelId}
-              className="data-menu-panel"
+              className="data-menu-panel data-menu-panel--manage"
+              role="dialog"
+              aria-label={copy.manage}
             >
-              {preferenceControls ? (
-                <div className="data-menu-preferences">
-                  {preferenceControls}
-                </div>
-              ) : null}
-              <div className="data-menu-tabs seg-toggle-2" data-active-index={dataTab === "export" ? "0" : "1"}>
-                <SegTabButton active={dataTab === "export"} onClick={() => setDataTab("export")}>
-                  <IconDownload />
-                  {copy.export}
-                </SegTabButton>
-                <SegTabButton active={dataTab === "import"} onClick={() => setDataTab("import")}>
-                  <IconUpload />
-                  {copy.import}
-                </SegTabButton>
-              </div>
+              <div className="data-menu-stack">
+                <section className="data-menu-section">
+                  <AuthSheet
+                    embedded
+                    copy={getMessageGroup(locale, "authSheet")}
+                    session={auth.session}
+                    configured={auth.configured}
+                    loading={auth.loading}
+                    syncStatus={getMessageGroup(locale, "syncStatus").statusLabels?.[sync.status] || sync.status}
+                    syncing={sync.syncing}
+                    onSignIn={async () => {
+                      await auth.signIn(`${base}data/`);
+                    }}
+                    onSignOut={async () => {
+                      await auth.signOut();
+                    }}
+                    onSyncNow={async () => {
+                      await sync.syncNow().catch(() => {});
+                    }}
+                    onOpenData={() => {
+                      setDataMenuOpen(false);
+                      openDataPage();
+                    }}
+                    onOpenProfile={() => {
+                      setDataMenuOpen(false);
+                      openProfilePage();
+                    }}
+                  />
+                </section>
 
-              {dataTab === "export" ? (
-                <div className="data-menu-body">
-                  <button
-                    className="btn"
-                    onClick={async () => {
-                      if (typeof onExportFile === "function") await onExportFile();
-                      else openLibraryManageFallback();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    <ActionLabel icon={<IconFile />}>{copy.saveBackupFile}</ActionLabel>
-                  </button>
-                  <button
-                    className="btn"
-                    onClick={async () => {
-                      if (typeof onExportMobile === "function") await onExportMobile();
-                      else openLibraryManageFallback();
-                      setDataMenuOpen(false);
-                    }}
-                  >
-                    <ActionLabel icon={<IconMobile />}>{copy.mobileShare}</ActionLabel>
-                  </button>
-                  {canInstallPwa && (
-                    <button
-                      className="btn"
-                      onClick={async () => {
-                        await handleInstallPwaClick();
-                        setDataMenuOpen(false);
-                      }}
+                {preferenceControls ? (
+                  <section className="data-menu-section">
+                    <div className="data-menu-preferences">
+                      {preferenceControls}
+                    </div>
+                  </section>
+                ) : null}
+
+                <section className="data-menu-section">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconDatabase />
+                    </span>
+                    <div className="data-menu-section-title">{copy.dataToolsTitle}</div>
+                  </div>
+                  <p className="small data-menu-section-summary">{copy.dataToolsSummary}</p>
+                  <div className="data-menu-body">
+                    <a
+                      href={`${base}data/#manual-tools`}
+                      className="btn btn--subtle data-menu-link"
+                      onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.installApp}
-                    </button>
-                  )}
+                      <ActionLabel icon={<IconDatabase />}>{copy.openManualTools}</ActionLabel>
+                    </a>
+                    {canInstallPwa && (
+                      <button
+                        className="btn"
+                        onClick={async () => {
+                          await handleInstallPwaClick();
+                          setDataMenuOpen(false);
+                        }}
+                      >
+                        {copy.installApp}
+                      </button>
+                    )}
+                  </div>
+                </section>
+
+                <section className="data-menu-section">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconHelp />
+                    </span>
+                    <div className="data-menu-section-title">{copy.helpTitle}</div>
+                  </div>
+                  <p className="small data-menu-section-summary">{copy.helpSummary}</p>
                   <a
-                    href={`${base}data/`}
-                    className="btn data-menu-link"
+                    href={`${base}help/`}
+                    className="btn btn--subtle data-menu-link"
                     onClick={() => setDataMenuOpen(false)}
                   >
-                    <ActionLabel icon={<IconDatabase />}>{copy.storageStatus}</ActionLabel>
+                    <ActionLabel icon={<IconHelp />}>{copy.openHelpPage}</ActionLabel>
                   </a>
-                </div>
-              ) : (
-                <div className="data-menu-body">
-                  <div
-                    className="data-menu-import-mode seg-toggle-2"
-                    data-active-index={importMode === "merge" ? "0" : "1"}
-                  >
-                    <SegTabButton active={importMode === "merge"} onClick={() => setImportMode("merge")}>
-                      {copy.mergeImport}
-                    </SegTabButton>
-                    <SegTabButton active={importMode === "overwrite"} onClick={() => setImportMode("overwrite")}>
-                      {copy.overwriteImport}
-                    </SegTabButton>
-                  </div>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      if (typeof onImportJsonFile === "function") {
-                        fileRef.current?.click();
-                        setDataMenuOpen(false);
-                      } else {
-                        openLibraryManageFallback();
-                      }
-                    }}
-                  >
-                    <ActionLabel icon={<IconFile />}>{copy.pickBackupFile}</ActionLabel>
-                  </button>
-                  <textarea
-                    className="textarea data-menu-import-text"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder={copy.importPlaceholder}
-                  />
-                  <button className="btn" onClick={handleImportText}>
-                    <ActionLabel icon={<IconClipboard />}>{copy.importFromPaste}</ActionLabel>
-                  </button>
-                </div>
-              )}
+                </section>
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      <input
-        ref={fileRef}
-        type="file"
-        accept="application/json,.json"
-        className="data-menu-file-input"
-        onChange={handlePickImport}
-      />
     </>
   );
 }

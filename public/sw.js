@@ -12,6 +12,16 @@ function toScopeUrl(path) {
   return new URL(path, self.registration.scope).toString();
 }
 
+function shouldBypassCache(url) {
+  if (url.pathname.includes("/auth/callback")) return true;
+  if (url.search) return true;
+  if (url.searchParams.has("code")) return true;
+  if (url.searchParams.has("access_token")) return true;
+  if (url.searchParams.has("refresh_token")) return true;
+  if (url.searchParams.has("error_description")) return true;
+  return false;
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_PATHS.map(toScopeUrl)))
@@ -34,6 +44,11 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  if (shouldBypassCache(url)) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(

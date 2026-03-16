@@ -17,7 +17,7 @@ import {
   SCORE_MAX,
   SCORE_STEP,
 } from "../domain/animeState";
-import { mergeTierTopicBundles, normalizeTierTopicBundle } from "../domain/tierTopics";
+import { getActiveTierTopic, mergeTierTopicBundles, normalizeTierTopicBundle } from "../domain/tierTopics";
 import { useStoredState } from "../hooks/useStoredState";
 import { STORAGE_KEYS } from "../storage/keys";
 import { readTierBoardBundle, readTierState, writeTierBoardBundle, writeTierState, pruneTierByAnimeId } from "../repositories/tierRepo";
@@ -70,6 +70,12 @@ import { useUiPreferences } from "../hooks/useUiPreferences";
 import { formatRelativeAgo } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { deriveKoTitleFromMedia, firstHangulSynonym, pickDisplayMediaTitle, pickDisplayTitle } from "../domain/animeTitles";
+import {
+  SYNC_SNAPSHOT_VERSION,
+  downloadSnapshotJson,
+  encodeSyncSnapshot,
+  normalizeSyncSnapshot,
+} from "../domain/snapshotCodec.js";
 
 function safeGenres(media) {
   const arr = media?.genres;
@@ -340,7 +346,7 @@ export default function Library() {
   const [addPanelOpen, setAddPanelOpen] = useState(true);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
   const [addTab, setAddTab] = useState("search"); // search | recommend
-  const [cardView, setCardView] = useState("meta"); // meta | poster
+  const [cardView, setCardView] = useStoredState(STORAGE_KEYS.cardView, "meta"); // meta | poster
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
@@ -412,14 +418,16 @@ export default function Library() {
   }, [setItems]);
 
   function buildBackupPayload() {
-    const tier = readTierState(null);
+    const tierTopics = readTierBoardBundle(null);
+    const tier = getActiveTierTopic(tierTopics)?.tier || readTierState(null);
 
     return {
       app: "ani-site",
-      version: 3,
+      version: SYNC_SNAPSHOT_VERSION,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(items),
       tier,
+      tierTopics,
       watchLogs: readAllWatchLogsSnapshot(),
       characterPins: readCharacterPinsSnapshot(),
       preferences: {
@@ -436,24 +444,15 @@ export default function Library() {
 
   function exportBackup() {
     const payload = buildBackupPayload();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
     const date = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = `ani-site-backup-${date}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    downloadSnapshotJson(payload, `ani-site-backup-${date}.json`);
 
     markBackupExported(copy.backupDownloaded);
   }
 
   async function exportBackupMobile() {
     const payload = buildBackupPayload();
-    const text = JSON.stringify(payload, null, 2);
+    const text = JSON.stringify(encodeSyncSnapshot(payload));
     const date = new Date().toISOString().slice(0, 10);
     const filename = `ani-site-backup-${date}.json`;
 
@@ -499,24 +498,26 @@ export default function Library() {
   }
 
   async function importBackupFromJson(json, mode = "merge") {
-    const incomingList = Array.isArray(json) ? json : json?.list;
+    const snapshot = Array.isArray(json)
+      ? { list: normalizeImportList(json) }
+      : normalizeSyncSnapshot(json);
+    const incomingList = snapshot?.list;
     if (!Array.isArray(incomingList)) {
       throw new Error(copy.missingList);
     }
 
-    const incomingNormalized = normalizeImportList(incomingList);
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
       const ok = window.confirm(copy.overwriteConfirm);
       if (!ok) return;
-      setItems(incomingNormalized);
+      setItems(incomingList);
     } else {
-      setItems((prev) => dedupeByAnilistId([...prev, ...incomingNormalized]));
+      setItems((prev) => dedupeByAnilistId([...prev, ...incomingList]));
     }
 
-    const incomingTierBundle = !Array.isArray(json) ? json?.tierTopics : null;
-    const incomingTier = !Array.isArray(json) ? json?.tier : null;
+    const incomingTierBundle = Array.isArray(json) ? null : snapshot?.tierTopics;
+    const incomingTier = Array.isArray(json) ? null : snapshot?.tier;
     if (incomingTierBundle || incomingTier) {
       if (incomingTierBundle) {
         const currentBundle = readTierBoardBundle(null);
@@ -533,7 +534,7 @@ export default function Library() {
       }
     }
 
-    const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
+    const incomingLogs = Array.isArray(json) ? null : snapshot?.watchLogs;
     if (Array.isArray(incomingLogs)) {
       if (isOverwrite) {
         await replaceWatchLogs(incomingLogs);
@@ -549,7 +550,7 @@ export default function Library() {
       setSelectedLogs([]);
     }
 
-    const incomingPins = !Array.isArray(json) ? json?.characterPins : null;
+    const incomingPins = Array.isArray(json) ? null : snapshot?.characterPins;
     if (Array.isArray(incomingPins)) {
       if (isOverwrite) {
         await replaceCharacterPins(incomingPins);
@@ -562,7 +563,7 @@ export default function Library() {
       refreshCharacterPins();
     }
 
-    const incomingPrefs = !Array.isArray(json) ? json?.preferences : null;
+    const incomingPrefs = Array.isArray(json) ? null : snapshot?.preferences;
     if (incomingPrefs && typeof incomingPrefs === "object") {
       if (Object.prototype.hasOwnProperty.call(incomingPrefs, "cardsPerRowBase")) {
         setCardsPerRowBase(incomingPrefs.cardsPerRowBase);

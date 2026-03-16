@@ -189,6 +189,42 @@ function IconShield(props) {
   );
 }
 
+function IconCloud(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M7.5 18.5h9a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 6.3 8a3.8 3.8 0 0 0 1.2 10.5Z" />
+    </IconBase>
+  );
+}
+
+function IconUser(props) {
+  return (
+    <IconBase {...props}>
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5.5 19a6.5 6.5 0 0 1 13 0" />
+    </IconBase>
+  );
+}
+
+function IconRefreshCw(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M20 11a8 8 0 1 0 1.2 4.2" />
+      <path d="M20 4v5h-5" />
+    </IconBase>
+  );
+}
+
+function IconLogOut(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </IconBase>
+  );
+}
+
 function IconSortAsc(props) {
   return (
     <IconBase {...props}>
@@ -239,6 +275,7 @@ export {
   IconBase,
   IconChevronDown,
   IconClipboard,
+  IconCloud,
   IconCopy,
   IconDatabase,
   IconDownload,
@@ -247,9 +284,11 @@ export {
   IconGlobe,
   IconHelp,
   IconImage,
+  IconLogOut,
   IconMobile,
   IconMoon,
   IconPlus,
+  IconRefreshCw,
   IconShare,
   IconShield,
   IconSortAsc,
@@ -257,5 +296,6 @@ export {
   IconSun,
   IconTrash,
   IconUpload,
+  IconUser,
   IconX,
 };

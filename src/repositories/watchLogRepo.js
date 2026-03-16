@@ -1,11 +1,12 @@
-import { STORAGE_KEYS } from "../storage/keys";
-import { readJson, writeJson } from "../storage/localJsonStore";
+import { STORAGE_KEYS } from "../storage/keys.js";
+import { readJson, writeJson } from "../storage/localJsonStore.js";
 import {
   getRecentWatchLogsIdb,
   getWatchLogsByAnimeIdIdb,
   putWatchLogIdb,
   replaceWatchLogsIdb,
-} from "../storage/idb";
+} from "../storage/idb.js";
+import { markLocalDirty } from "./syncRepo.js";
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
@@ -193,13 +194,14 @@ export function createWatchLog(input) {
   });
 }
 
-export async function appendWatchLog(logInput) {
+export async function appendWatchLog(logInput, options = {}) {
   const row = normalizeWatchLog(logInput);
   if (!Number.isFinite(row.anilistId)) return null;
 
   const rows = readWatchLogsLocal();
   rows.push(row);
   writeWatchLogsLocal(rows);
+  if (!options?.skipSyncMark) markLocalDirty();
   putWatchLogIdb(row).catch(() => {});
   return row;
 }
@@ -231,14 +233,15 @@ export async function listRecentWatchLogs(limit = 30) {
     .slice(0, Math.max(1, Number(limit) || 30));
 }
 
-export async function replaceWatchLogs(logs) {
+export async function replaceWatchLogs(logs, options = {}) {
   const rows = toArray(logs).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
   writeWatchLogsLocal(rows);
+  if (!options?.skipSyncMark) markLocalDirty();
   replaceWatchLogsIdb(rows).catch(() => {});
   return rows.length;
 }
 
-export async function updateWatchLog(logId, patch = {}) {
+export async function updateWatchLog(logId, patch = {}, options = {}) {
   const key = String(logId || "").trim();
   if (!key) return null;
 
@@ -257,6 +260,7 @@ export async function updateWatchLog(logId, patch = {}) {
 
   rows[idx] = next;
   writeWatchLogsLocal(rows);
+  if (!options?.skipSyncMark) markLocalDirty();
   putWatchLogIdb(next).catch(() => {});
   return next;
 }

@@ -8,9 +8,14 @@ import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
 import { readLastExportAtMs } from "../repositories/backupRepo";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
+import { useAuthSession } from "../hooks/useAuthSession.js";
+import { useSyncStatus } from "../hooks/useSyncStatus.js";
 import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { IconShield } from "./ui/AppIcons.jsx";
+import SyncStatusCard from "./data/SyncStatusCard.jsx";
+import ConflictResolveModal from "./data/ConflictResolveModal.jsx";
+import ManualDataTools from "./data/ManualDataTools.jsx";
 
 function formatBytes(value) {
   const n = Number(value);
@@ -24,6 +29,10 @@ function formatBytes(value) {
 export default function DataCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "dataCenter");
+  const syncCopy = getMessageGroup(locale, "syncStatus");
+  const conflictCopy = getMessageGroup(locale, "syncConflict");
+  const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}data/`);
+  const sync = useSyncStatus({ session: auth.session, autoSync: true });
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState(copy.checking);
   const [usage, setUsage] = useState(null);
@@ -38,6 +47,47 @@ export default function DataCenter() {
     watchLogs: 0,
     characterPins: 0,
   });
+
+  async function readLocalOverview() {
+    const [list, tier, pins] = await Promise.all([
+      readLibraryListPreferred(myListSeed).catch(() => myListSeed),
+      readTierStatePreferred(null).catch(() => null),
+      listCharacterPinsPreferred().catch(() => []),
+    ]);
+    const logs = readAllWatchLogsSnapshot();
+    const tierPlaced =
+      (Array.isArray(tier?.unranked) ? tier.unranked.length : 0) +
+      Object.values(tier?.tiers || {}).reduce(
+        (acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0),
+        0
+      );
+
+    return {
+      counts: {
+        library: Array.isArray(list) ? list.length : 0,
+        tierPlaced,
+        watchLogs: Array.isArray(logs) ? logs.length : 0,
+        characterPins: Array.isArray(pins) ? pins.length : 0,
+      },
+      lastBackupMs: readLastExportAtMs(),
+    };
+  }
+
+  function applyLocalOverview(overview) {
+    setCounts(overview?.counts || {
+      library: 0,
+      tierPlaced: 0,
+      watchLogs: 0,
+      characterPins: 0,
+    });
+    setLastBackupMs(overview?.lastBackupMs ?? null);
+  }
+
+  async function refreshLocalOverview() {
+    const overview = await readLocalOverview();
+    applyLocalOverview(overview);
+    await refreshStorageHealth();
+  }
 
   async function refreshStorageHealth() {
     try {
@@ -60,28 +110,9 @@ export default function DataCenter() {
       setLoading(true);
       setEngine(isIdbSupported() ? copy.storageEngineIndexed : copy.storageEngineLegacy);
 
-      const [list, tier, pins] = await Promise.all([
-        readLibraryListPreferred(myListSeed).catch(() => myListSeed),
-        readTierStatePreferred(null).catch(() => null),
-        listCharacterPinsPreferred().catch(() => []),
-      ]);
-      const logs = readAllWatchLogsSnapshot();
-
+      const overview = await readLocalOverview();
       if (!alive) return;
-      const tierPlaced =
-        (Array.isArray(tier?.unranked) ? tier.unranked.length : 0) +
-        Object.values(tier?.tiers || {}).reduce(
-          (acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0),
-          0
-        );
-      setCounts({
-        library: Array.isArray(list) ? list.length : 0,
-        tierPlaced,
-        watchLogs: Array.isArray(logs) ? logs.length : 0,
-        characterPins: Array.isArray(pins) ? pins.length : 0,
-      });
-      setLastBackupMs(readLastExportAtMs());
-
+      applyLocalOverview(overview);
       await refreshStorageHealth();
       if (!alive) return;
       setLoading(false);
@@ -160,6 +191,14 @@ export default function DataCenter() {
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
+      <SyncStatusCard
+        locale={locale}
+        copy={syncCopy}
+        auth={auth}
+        sync={sync}
+        onSignIn={() => auth.signIn(`${base}data/`)}
+        onSignOut={() => auth.signOut()}
+      />
       <section className="status-panel surface-card">
         <div className="pageHeader">
           <h1 className="pageTitle">{copy.title}</h1>
@@ -217,6 +256,18 @@ export default function DataCenter() {
         {message && <div className="small page-feedback">{message}</div>}
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
+      <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
+      <ConflictResolveModal
+        open={Boolean(sync.conflict)}
+        locale={locale}
+        copy={conflictCopy}
+        conflict={sync.conflict}
+        syncing={sync.syncing}
+        onClose={() => sync.dismissConflict()}
+        onKeepLocal={() => sync.keepLocalVersion()}
+        onUseCloud={() => sync.useCloudVersion()}
+        onExportBackup={() => sync.exportConflictBackup()}
+      />
     </div>
   );
 }

@@ -35,6 +35,12 @@ import { useUiPreferences } from "../hooks/useUiPreferences";
 import { formatGenreLabel } from "./library/libraryCopy.js";
 import { getMessageGroup } from "../domain/messages.js";
 import { pickDisplayTitle } from "../domain/animeTitles";
+import {
+  SYNC_SNAPSHOT_VERSION,
+  downloadSnapshotJson,
+  encodeSyncSnapshot,
+  normalizeSyncSnapshot,
+} from "../domain/snapshotCodec.js";
 
 function normalizeSearchText(value) {
   return String(value || "").trim().toLowerCase().normalize("NFKC");
@@ -519,7 +525,7 @@ export default function TierBoard() {
   function buildBackupPayload() {
     return {
       app: "ani-site",
-      version: 4,
+      version: SYNC_SNAPSHOT_VERSION,
       exportedAt: new Date().toISOString(),
       list: normalizeImportList(library),
       tier: activeTierState,
@@ -536,22 +542,14 @@ export default function TierBoard() {
 
   function exportBackup() {
     const payload = buildBackupPayload();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
     const date = new Date().toISOString().slice(0, 10);
-    anchor.href = url;
-    anchor.download = `ani-site-backup-${date}.json`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
+    downloadSnapshotJson(payload, `ani-site-backup-${date}.json`);
     markBackupExported(copy.backupDownloaded);
   }
 
   async function exportBackupMobile() {
     const payload = buildBackupPayload();
-    const text = JSON.stringify(payload, null, 2);
+    const text = JSON.stringify(encodeSyncSnapshot(payload));
     const date = new Date().toISOString().slice(0, 10);
     const filename = `ani-site-backup-${date}.json`;
 
@@ -591,22 +589,24 @@ export default function TierBoard() {
   }
 
   async function importBackupFromJson(json, mode = "merge") {
-    const incomingList = Array.isArray(json) ? json : json?.list;
+    const snapshot = Array.isArray(json)
+      ? { list: normalizeImportList(json) }
+      : normalizeSyncSnapshot(json);
+    const incomingList = snapshot?.list;
     if (!Array.isArray(incomingList)) throw new Error(copy.missingList);
 
-    const incomingNormalized = normalizeImportList(incomingList);
     const isOverwrite = mode === "overwrite";
 
     if (isOverwrite) {
       const ok = window.confirm(copy.overwriteConfirm);
       if (!ok) return;
-      setLibrary(incomingNormalized);
+      setLibrary(incomingList);
     } else {
-      setLibrary((prev) => dedupeByAnilistId([...prev, ...incomingNormalized]));
+      setLibrary((prev) => dedupeByAnilistId([...prev, ...incomingList]));
     }
 
-    const incomingBundle = !Array.isArray(json) ? json?.tierTopics : null;
-    const incomingTier = !Array.isArray(json) ? json?.tier : null;
+    const incomingBundle = Array.isArray(json) ? null : snapshot?.tierTopics;
+    const incomingTier = Array.isArray(json) ? null : snapshot?.tier;
     if (incomingBundle || incomingTier) {
       const nextBundle = incomingBundle || incomingTier;
       setTierBundleRaw((prevRaw) =>
@@ -614,7 +614,7 @@ export default function TierBoard() {
       );
     }
 
-    const incomingLogs = !Array.isArray(json) ? json?.watchLogs : null;
+    const incomingLogs = Array.isArray(json) ? null : snapshot?.watchLogs;
     if (Array.isArray(incomingLogs)) {
       if (isOverwrite) await replaceWatchLogs(incomingLogs);
       else await mergeWatchLogs(incomingLogs);
@@ -624,7 +624,7 @@ export default function TierBoard() {
       refreshWatchLogsSnapshot();
     }
 
-    const incomingPins = !Array.isArray(json) ? json?.characterPins : null;
+    const incomingPins = Array.isArray(json) ? null : snapshot?.characterPins;
     if (Array.isArray(incomingPins)) {
       if (isOverwrite) await replaceCharacterPins(incomingPins);
       else await mergeCharacterPins(incomingPins);
