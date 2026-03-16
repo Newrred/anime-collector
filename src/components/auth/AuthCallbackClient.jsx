@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { exchangeCodeForSession, setAuthSession } from "../../repositories/authRepo.js";
+import {
+  consumePendingAuthNext,
+  exchangeCodeForSession,
+  setAuthSession,
+} from "../../repositories/authRepo.js";
 
 function explainAuthError(error, fallbackDescription = "") {
   const raw = String(error?.message || fallbackDescription || error || "").trim();
@@ -18,7 +22,7 @@ function explainAuthError(error, fallbackDescription = "") {
 
 function resolveSafeNext(rawNext, base = "/") {
   const fallback = new URL(`${base}data/`, window.location.origin);
-  const next = String(rawNext || "").trim();
+  const next = String(rawNext || consumePendingAuthNext() || "").trim();
   if (!next) return `${fallback.pathname}${fallback.search}${fallback.hash}`;
 
   try {

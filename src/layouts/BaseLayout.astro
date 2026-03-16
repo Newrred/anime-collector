@@ -14,12 +14,36 @@ const isIndexPage = normalize(Astro.url.pathname) === normalize(base);
 const isTierPage = normalize(Astro.url.pathname) === normalize(toBasePath("tier/"));
 const isLibraryPage = normalize(Astro.url.pathname) === normalize(toBasePath("library/"));
 const uiPreferenceBootScript = buildUiPreferenceBootScript();
+const authReturnGuardScript = `
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const hasAuthPayload =
+    params.has("code") ||
+    params.has("error_description") ||
+    hashParams.has("access_token") ||
+    hashParams.has("error_description");
+  if (!hasAuthPayload) return;
+
+  const callback = new URL(${JSON.stringify(`${base}auth/callback/`)}, window.location.origin);
+  const pathname = window.location.pathname.endsWith("/")
+    ? window.location.pathname
+    : \`\${window.location.pathname}/\`;
+
+  if (pathname === callback.pathname) return;
+
+  callback.search = window.location.search;
+  callback.hash = window.location.hash;
+  window.location.replace(callback.toString());
+})();
+`;
 ---
 <html lang="ko" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content={THEME_META_COLORS.dark} />
+    <script is:inline set:html={authReturnGuardScript}></script>
     <script is:inline set:html={uiPreferenceBootScript}></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
