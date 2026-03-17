@@ -24,7 +24,6 @@ import { readTierBoardBundle, readTierState, writeTierBoardBundle, writeTierStat
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
 import {
   markManualBackupExported,
-  readLastExportAtMs,
   writeAutoBackupSnapshot,
 } from "../repositories/backupRepo";
 import {
@@ -55,7 +54,6 @@ import LibraryDetailModal from "./library/LibraryDetailModal.jsx";
 import LibraryQuickLogSheet from "./library/LibraryQuickLogSheet.jsx";
 import {
   AFFINITY_OPTIONS,
-  BACKUP_REMIND_DAYS,
   LIBRARY_EVENT,
   LIBRARY_STATUS,
   REASON_TAG_OPTIONS,
@@ -67,7 +65,6 @@ import {
   formatStatusLabel,
 } from "./library/libraryCopy.js";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatRelativeAgo } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { deriveKoTitleFromMedia, firstHangulSynonym, pickDisplayMediaTitle, pickDisplayTitle } from "../domain/animeTitles";
 import {
@@ -339,7 +336,6 @@ export default function Library() {
   const [relatedKoTitleById, setRelatedKoTitleById] = useState({});
 
   const [backupMsg, setBackupMsg] = useState("");
-  const [backupReminder, setBackupReminder] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [pageTab, setPageTab] = useState("collection");
@@ -721,26 +717,6 @@ export default function Library() {
     };
     writeAutoBackupSnapshot(snapshot);
   }, [items]);
-
-  useEffect(() => {
-    const last = readLastExportAtMs();
-    if (!items.length) {
-      setBackupReminder("");
-      return;
-    }
-
-    if (!last) {
-      setBackupReminder(copy.backupNone);
-      return;
-    }
-
-    const threshold = BACKUP_REMIND_DAYS * 24 * 60 * 60 * 1000;
-    if (Date.now() - last >= threshold) {
-      setBackupReminder(`${copy.backupWas} ${formatRelativeAgo(last, locale, { ko: "기록 없음", en: "No record" })}${copy.backupRefresh}`);
-    } else {
-      setBackupReminder(`${copy.backupLast} ${formatRelativeAgo(last, locale, { ko: "기록 없음", en: "No record" })} ${copy.backupAuto}`);
-    }
-  }, [items, backupMsg, copy.backupNone, copy.backupWas, copy.backupRefresh, copy.backupLast, copy.backupAuto, locale]);
 
   useEffect(() => {
     function syncInstallState() {
@@ -1829,11 +1805,6 @@ export default function Library() {
       <section className="pageHeader">
         <h1 className="pageTitle">{copy.title}</h1>
         <p className="pageLead">{copy.lead}</p>
-        <div className="library-top-note">
-          <span className="small">
-            {backupReminder || copy.fallbackBackup}
-          </span>
-        </div>
         {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
       </section>
 

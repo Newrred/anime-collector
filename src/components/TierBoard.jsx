@@ -99,7 +99,43 @@ function TopicChip({ label, meta, isActive, onClick }) {
   );
 }
 
-function TierPoster({ id, index, listName, title, image, onDragStart, onDragOver, onDrop }) {
+function TierPoster({
+  id,
+  index,
+  listName,
+  title,
+  image,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  draggableEnabled = true,
+  onSelect = null,
+  selected = false,
+}) {
+  const className = `tier-poster${!draggableEnabled ? " tier-poster--button" : ""}${selected ? " is-selected" : ""}`;
+
+  if (!draggableEnabled) {
+    return (
+      <button
+        type="button"
+        title={title}
+        className={className}
+        onClick={() => onSelect?.({ id, listName, index })}
+      >
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className="tier-poster__image"
+            loading="lazy"
+          />
+        ) : (
+          <div className="tier-poster__fallback">{title}</div>
+        )}
+      </button>
+    );
+  }
+
   return (
     <div
       draggable
@@ -107,7 +143,7 @@ function TierPoster({ id, index, listName, title, image, onDragStart, onDragOver
       onDragOver={onDragOver}
       onDrop={(event) => onDrop(event, listName, index)}
       title={title}
-      className="tier-poster"
+      className={className}
     >
       {image ? (
         <img
@@ -137,6 +173,8 @@ export default function TierBoard() {
   const [customTopicName, setCustomTopicName] = useState("");
   const [unrankedQuery, setUnrankedQuery] = useState("");
   const [unrankedGenre, setUnrankedGenre] = useState("");
+  const [isMobileTierMode, setIsMobileTierMode] = useState(false);
+  const [selectedPoster, setSelectedPoster] = useState(null);
 
   useEffect(() => {
     setLibrary((prev) => {
@@ -369,6 +407,33 @@ export default function TierBoard() {
   }, [activeTopic?.id]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const query = window.matchMedia("(max-width: 820px)");
+    const syncViewport = () => setIsMobileTierMode(query.matches);
+    syncViewport();
+
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", syncViewport);
+      return () => query.removeEventListener("change", syncViewport);
+    }
+
+    query.addListener(syncViewport);
+    return () => query.removeListener(syncViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedPoster?.id) return;
+
+    const existsInBoard =
+      (activeTierState.unranked || []).includes(selectedPoster.id) ||
+      DEFAULT_TIERS.some((tierName) => (activeTierState.tiers?.[tierName] || []).includes(selectedPoster.id));
+
+    if (!existsInBoard) {
+      setSelectedPoster(null);
+    }
+  }, [activeTierState, selectedPoster]);
+
+  useEffect(() => {
     function syncInstallState() {
       setCanInstallPwa(typeof window !== "undefined" && typeof window.__promptPwaInstall === "function");
     }
@@ -450,6 +515,35 @@ export default function TierBoard() {
       return replaceActiveTierState(current, nextTier);
     });
   }
+
+  function findPosterListName(state, id) {
+    if ((state?.unranked || []).includes(id)) return "unranked";
+    for (const tierName of DEFAULT_TIERS) {
+      if ((state?.tiers?.[tierName] || []).includes(id)) return tierName;
+    }
+    return null;
+  }
+
+  function movePosterToList(id, to) {
+    updateActiveTier((prevTier) => {
+      const from = findPosterListName(prevTier, id);
+      if (!from) return prevTier;
+      return moveItem(prevTier, { id, from }, to, 0);
+    });
+    setSelectedPoster({ id, listName: to });
+    setBackupMsg(copy.posterMoved);
+  }
+
+  const selectedPosterMeta = useMemo(() => {
+    if (!selectedPoster?.id) return null;
+    const media = mediaMap.get(selectedPoster.id);
+    return {
+      id: selectedPoster.id,
+      listName: selectedPoster.listName || findPosterListName(activeTierState, selectedPoster.id) || "unranked",
+      title: titleFor(selectedPoster.id, media),
+      image: media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || null,
+    };
+  }, [selectedPoster, mediaMap, activeTierState, locale, koById]);
 
   function onDropToEnd(event, to) {
     event.preventDefault();
@@ -726,14 +820,12 @@ export default function TierBoard() {
           <div className="tier-summary-card__metrics">
             <TopicMetric label={copy.topicCount} value={activeEligibleIds.length} />
             <TopicMetric label={copy.total} value={totalPlacedCount} />
-            <TopicMetric label={copy.tiers} value={DEFAULT_TIERS.length} />
           </div>
         </div>
 
         <div className="tier-summary-card__topic-tools">
           <div className="tier-summary-card__topic-creator">
             <div className="tier-summary-card__eyebrow">{copy.createCustomTopic}</div>
-            <p className="pageLead tier-summary-card__topic-helper">{copy.customTopicLead}</p>
             <div className="tier-summary-card__topic-input-row">
               <input
                 className="input tier-summary-card__topic-input"
@@ -777,8 +869,67 @@ export default function TierBoard() {
 
       <section className="pageHeader tier-rank-header">
         <div className="pageTitle tier-topic-section__title">{copy.rankingBoard}</div>
-        <p className="pageLead">{copy.rankingLead}</p>
+        <p className="pageLead">{isMobileTierMode ? copy.rankingLeadMobile : copy.rankingLead}</p>
       </section>
+
+      {isMobileTierMode && (
+        <section className={`surface-card tier-mobile-assign${selectedPosterMeta ? " is-active" : ""}`}>
+          <div className="tier-mobile-assign__head">
+            <div>
+              <div className="tier-summary-card__eyebrow">{copy.mobileAssign}</div>
+              <div className="pageLead tier-mobile-assign__lead">
+                {selectedPosterMeta ? copy.mobileAssignSelected : copy.mobileAssignEmpty}
+              </div>
+            </div>
+            {selectedPosterMeta && (
+              <button className="btn btn--subtle" type="button" onClick={() => setSelectedPoster(null)}>
+                {copy.clearSelection}
+              </button>
+            )}
+          </div>
+
+          {selectedPosterMeta && (
+            <div className="tier-mobile-assign__body">
+              <div className="tier-mobile-assign__poster">
+                {selectedPosterMeta.image ? (
+                  <img
+                    src={selectedPosterMeta.image}
+                    alt={selectedPosterMeta.title}
+                    className="tier-mobile-assign__poster-image"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="tier-mobile-assign__poster-fallback">{selectedPosterMeta.title}</div>
+                )}
+                <div className="tier-mobile-assign__poster-copy">
+                  <strong>{selectedPosterMeta.title}</strong>
+                  <span className="small">{copy.currentSlot} {selectedPosterMeta.listName === "unranked" ? copy.unranked : selectedPosterMeta.listName}</span>
+                </div>
+              </div>
+
+              <div className="tier-mobile-assign__actions">
+                {DEFAULT_TIERS.map((tierName) => (
+                  <button
+                    key={tierName}
+                    type="button"
+                    className={`btn btn--subtle tier-mobile-assign__tier-btn${selectedPosterMeta.listName === tierName ? " is-active" : ""}`}
+                    onClick={() => movePosterToList(selectedPosterMeta.id, tierName)}
+                  >
+                    {tierName}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className={`btn btn--subtle tier-mobile-assign__tier-btn${selectedPosterMeta.listName === "unranked" ? " is-active" : ""}`}
+                  onClick={() => movePosterToList(selectedPosterMeta.id, "unranked")}
+                >
+                  {copy.unranked}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {DEFAULT_TIERS.map((tierName) => (
         <div
@@ -803,6 +954,9 @@ export default function TierBoard() {
                   onDragStart={onDragStart}
                   onDragOver={allowDrop}
                   onDrop={onDropToItem}
+                  draggableEnabled={!isMobileTierMode}
+                  onSelect={setSelectedPoster}
+                  selected={selectedPosterMeta?.id === id}
                 />
               );
             })}
@@ -859,6 +1013,9 @@ export default function TierBoard() {
                 onDragStart={onDragStart}
                 onDragOver={allowDrop}
                 onDrop={onDropToItem}
+                draggableEnabled={!isMobileTierMode}
+                onSelect={setSelectedPoster}
+                selected={selectedPosterMeta?.id === id}
               />
             );
           })}

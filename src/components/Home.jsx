@@ -4,7 +4,6 @@ import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
 import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
-import { readLastExportAtMs } from "../repositories/backupRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import { buildHomeResurfacing } from "../domain/homeSelectors";
 import { buildCharacterInsight } from "../domain/characterInsights";
@@ -15,7 +14,6 @@ import CharacterInsightSheet from "./home/CharacterInsightSheet";
 import HomeTierEntryCard from "./home/HomeTierEntryCard.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
-import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { pickDisplayTitle } from "../domain/animeTitles";
 
@@ -35,8 +33,6 @@ export default function Home() {
   const [mediaMap, setMediaMap] = useState(new Map());
   const [logs, setLogs] = useState([]);
   const [pins, setPins] = useState([]);
-  const [lastBackupMs, setLastBackupMs] = useState(null);
-  const [persisted, setPersisted] = useState(null);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [recapYear, setRecapYear] = useState(null);
@@ -50,20 +46,10 @@ export default function Home() {
       if (!alive) return;
       setItems(safeList);
       setLogs(readAllWatchLogsSnapshot());
-      setLastBackupMs(readLastExportAtMs());
 
       const pinRows = await listCharacterPinsPreferred().catch(() => []);
       if (!alive) return;
       setPins(Array.isArray(pinRows) ? pinRows : []);
-
-      if (typeof navigator !== "undefined" && navigator.storage?.persisted) {
-        try {
-          const ok = await navigator.storage.persisted();
-          if (alive) setPersisted(Boolean(ok));
-        } catch {
-          if (alive) setPersisted(null);
-        }
-      }
 
       const ids = safeList.map((x) => Number(x?.anilistId)).filter(Number.isFinite);
       setMediaMap(getCachedAnimeMap(ids));
@@ -289,12 +275,6 @@ export default function Home() {
           </div>
           <div className="small status-badge">
             {locale === "en" ? `${copy.logCount} ${logs.length}` : `${copy.logCount} ${logs.length}${copy.unit}`}
-          </div>
-          <div className="small status-badge">
-            {formatBackupAgo(lastBackupMs, locale)}
-          </div>
-          <div className="small status-badge">
-            {copy.storageProtect} {formatStatusToggleLabel(persisted, locale)}
           </div>
           <div className="small page-feedback">{copy.heroHint}</div>
         </div>
