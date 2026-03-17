@@ -454,7 +454,7 @@ const enMessages = {
       countUnit: "",
     },
     characterGravity: {
-      title: "Character gravity map",
+      title: "Character orbit map",
       lead: "How recurring characters cluster around your memory patterns",
       empty: "The gravity map appears as more character records accumulate.",
     },

@@ -276,9 +276,6 @@ export default function ProfileCenter() {
             </div>
 
             <div className="action-row">
-              <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
-                {copy.editProfile}
-              </button>
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
                 {copy.copyLink}
               </button>
@@ -371,9 +368,18 @@ export default function ProfileCenter() {
           </section>
 
           <section className="surface-card minihome-settings">
-            <div className="pageHeader">
-              <h2 className="sectionTitle">{copy.settingsTitle}</h2>
-              <p className="sectionLead">{copy.settingsLead}</p>
+            <div className="minihome-settings__head">
+              <div className="pageHeader">
+                <h2 className="sectionTitle">{copy.settingsTitle}</h2>
+                <p className="sectionLead">{copy.settingsLead}</p>
+              </div>
+              {!editing ? (
+                <div className="action-row minihome-settings__actions">
+                  <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
+                    {copy.editProfile}
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             {editing ? (

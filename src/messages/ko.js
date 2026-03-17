@@ -454,9 +454,9 @@ const koMessages = {
       countUnit: "개",
     },
     characterGravity: {
-      title: "캐릭터 중력장",
+      title: "캐릭터 오비트",
       lead: "자꾸 끌려가게 되는 캐릭터들이 어떻게 모여 있는지",
-      empty: "캐릭터 기억이 더 쌓이면 중력장이 나타납니다.",
+      empty: "캐릭터 기억이 더 쌓이면 오비트가 나타납니다.",
     },
     posterPalette: {
       title: "포스터 팔레트",

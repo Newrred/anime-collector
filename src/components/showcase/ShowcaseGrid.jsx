@@ -1,3 +1,4 @@
+import { useEffect, useId, useState } from "react";
 import { getMessageGroup } from "../../domain/messages.js";
 
 function WidgetShell({ title, lead, children, className = "" }) {
@@ -91,28 +92,38 @@ function GenreWordHeatmapCard({ data, locale }) {
       ) : (
         <div className="showcase-heatmap">
           <div className="showcase-heatmap__header">
-            <div className="small showcase-meta-label">{copy.axisGenre}</div>
-            <div className="showcase-heatmap__terms">
-              {data.terms.map((term) => (
-                <div key={term} className="showcase-heatmap__term">
-                  {term}
-                </div>
-              ))}
+            <div className="small showcase-heatmap__axis-head">
+              <span className="showcase-heatmap__axis-key">{copy.axisGenre}</span>
+            </div>
+            <div className="showcase-heatmap__terms-wrap">
+              <div className="small showcase-heatmap__axis-head showcase-heatmap__axis-head--word">
+                <span className="showcase-heatmap__axis-key">{copy.axisWord}</span>
+              </div>
+              <div className="showcase-heatmap__terms">
+                {data.terms.map((term) => (
+                  <div key={term} className="showcase-heatmap__term" title={term}>
+                    {term}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className="showcase-heatmap__body">
             {data.cells.map((row) => (
               <div key={row.genre} className="showcase-heatmap__row">
-                <div className="showcase-heatmap__genre">{row.genre}</div>
+                <div className="showcase-heatmap__genre-wrap">
+                  <div className="showcase-heatmap__genre">{row.genre}</div>
+                </div>
                 <div className="showcase-heatmap__cells">
                   {row.values.map((cell) => (
                     <div
                       key={`${row.genre}-${cell.term}`}
-                      className="showcase-heatmap__cell"
+                      className={`showcase-heatmap__cell${cell.count > 0 ? " is-hot" : " is-empty"}`}
                       style={{ "--heat": `${Math.max(10, Math.round(cell.intensity * 100))}%` }}
                       title={`${row.genre} · ${cell.term} · ${cell.count}회`}
                     >
-                      <span>{cell.count > 0 ? cell.count : ""}</span>
+                      <span className="showcase-heatmap__cell-glow" aria-hidden />
+                      <span className="showcase-heatmap__cell-value">{cell.count > 0 ? cell.count : ""}</span>
                     </div>
                   ))}
                 </div>
@@ -280,8 +291,31 @@ function CharacterGravityCard({ data, locale }) {
   const copy = getMessageGroup(locale, "showcaseWidgets").characterGravity || {};
   const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
   const links = Array.isArray(data?.links) ? data.links : [];
-  const linkGradientId = "showcase-gravity-link-gradient";
-  const glowId = "showcase-gravity-glow";
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const idPrefix = useId().replace(/:/g, "");
+  const linkGradientId = `${idPrefix}-showcase-gravity-link-gradient`;
+  const glowId = `${idPrefix}-showcase-gravity-glow`;
+  const activeNodeId = hoveredNodeId ?? selectedNodeId;
+
+  useEffect(() => {
+    if (!nodes.length) {
+      setSelectedNodeId(null);
+      setHoveredNodeId(null);
+      return;
+    }
+
+    if (selectedNodeId != null && !nodes.some((row) => row.characterId === selectedNodeId)) {
+      setSelectedNodeId(null);
+    }
+    if (hoveredNodeId != null && !nodes.some((row) => row.characterId === hoveredNodeId)) {
+      setHoveredNodeId(null);
+    }
+  }, [nodes, selectedNodeId, hoveredNodeId]);
+
+  function toggleNodeInfo(nodeId) {
+    setSelectedNodeId((prev) => (prev === nodeId ? null : nodeId));
+  }
 
   return (
     <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide showcase-card--gravity">
@@ -303,6 +337,11 @@ function CharacterGravityCard({ data, locale }) {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              {nodes.map((node) => (
+                <clipPath key={`clip-${node.characterId}`} id={`${idPrefix}-clip-${node.characterId}`}>
+                  <circle cx="0" cy="0" r={Math.max(2, node.r - 1.2)} />
+                </clipPath>
+              ))}
             </defs>
             {links.map((link) => (
               <line
@@ -320,15 +359,40 @@ function CharacterGravityCard({ data, locale }) {
               <g
                 key={node.characterId}
                 transform={`translate(${node.x}, ${node.y})`}
-                className="showcase-gravity__node"
+                className={`showcase-gravity__node${activeNodeId === node.characterId ? " is-active" : ""}`}
                 style={{ "--node-index": index }}
+                role="button"
+                tabIndex={0}
+                onMouseEnter={() => setHoveredNodeId(node.characterId)}
+                onMouseLeave={() => setHoveredNodeId(null)}
+                onClick={() => toggleNodeInfo(node.characterId)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  toggleNodeInfo(node.characterId);
+                }}
               >
+                <title>{`${node.name} · ${node.topTag || node.featuredAnimeTitle || ""}`}</title>
                 <circle
                   className="showcase-gravity__node-halo"
                   r={node.r + 6}
                   filter={`url(#${glowId})`}
                 />
-                <circle className="showcase-gravity__node-core" r={node.r} />
+                {node.image ? (
+                  <image
+                    href={node.image}
+                    x={-node.r}
+                    y={-node.r}
+                    width={node.r * 2}
+                    height={node.r * 2}
+                    preserveAspectRatio="xMidYMid slice"
+                    className="showcase-gravity__node-image"
+                    clipPath={`url(#${idPrefix}-clip-${node.characterId})`}
+                  />
+                ) : (
+                  <circle className="showcase-gravity__node-core" r={node.r} />
+                )}
+                <circle className="showcase-gravity__node-ring" r={Math.max(3, node.r - 1)} />
                 <text y="-2" textAnchor="middle" className="showcase-gravity__name">
                   {node.name}
                 </text>
