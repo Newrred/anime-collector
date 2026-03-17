@@ -184,26 +184,31 @@ function LogDensityCalendarCard({ data, locale }) {
   const months = Array.isArray(data?.months) ? data.months : [];
 
   return (
-    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide">
+    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide showcase-card--density">
       {!months.length ? (
         <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
       ) : (
         <>
           <div className="showcase-density-grid">
-            {months.map((row) => (
-              <div key={row.key} className="showcase-density-grid__item">
+            {months.map((row, index) => (
+              <div
+                key={row.key}
+                className="showcase-density-grid__item"
+                style={{ "--density-index": index }}
+              >
                 <div
                   className="showcase-density-grid__heat"
                   style={{ "--heat": `${Math.max(8, Math.round((row.intensity || 0) * 100))}%` }}
                   title={`${row.label} · ${row.count}`}
                 >
-                  <span>{row.count > 0 ? row.count : ""}</span>
+                  <span className="showcase-density-grid__heat-glow" aria-hidden />
+                  <span className="showcase-density-grid__heat-value">{row.count > 0 ? row.count : ""}</span>
                 </div>
                 <div className="small showcase-density-grid__label">{row.label}</div>
               </div>
             ))}
           </div>
-          <div className="small page-feedback">
+          <div className="small page-feedback showcase-density-grid__peak">
             {copy.peak} · {data?.peakLabel || "-"} · {data?.peakCount || 0}
             {copy.countUnit}
           </div>
@@ -217,33 +222,55 @@ function CharacterGravityCard({ data, locale }) {
   const copy = getMessageGroup(locale, "showcaseWidgets").characterGravity || {};
   const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
   const links = Array.isArray(data?.links) ? data.links : [];
+  const linkGradientId = "showcase-gravity-link-gradient";
+  const glowId = "showcase-gravity-glow";
 
   return (
-    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide">
+    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide showcase-card--gravity">
       {!nodes.length ? (
         <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
       ) : (
         <div className="showcase-gravity-wrap">
           <svg viewBox="0 0 640 360" className="showcase-gravity" role="img" aria-label={copy.title}>
+            <defs>
+              <linearGradient id={linkGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="rgba(244, 247, 251, 0.08)" />
+                <stop offset="52%" stopColor="rgba(197, 210, 232, 0.36)" />
+                <stop offset="100%" stopColor="rgba(244, 247, 251, 0.1)" />
+              </linearGradient>
+              <filter id={glowId} x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
             {links.map((link) => (
               <line
                 key={`${link.sourceId}-${link.targetId}`}
+                className="showcase-gravity__link"
                 x1={link.source.x}
                 y1={link.source.y}
                 x2={link.target.x}
                 y2={link.target.y}
-                stroke="rgba(255,255,255,0.16)"
+                stroke={`url(#${linkGradientId})`}
                 strokeWidth={1 + Math.min(4, link.weight)}
               />
             ))}
-            {nodes.map((node) => (
-              <g key={node.characterId} transform={`translate(${node.x}, ${node.y})`}>
+            {nodes.map((node, index) => (
+              <g
+                key={node.characterId}
+                transform={`translate(${node.x}, ${node.y})`}
+                className="showcase-gravity__node"
+                style={{ "--node-index": index }}
+              >
                 <circle
-                  r={node.r}
-                  fill="rgba(255, 206, 84, 0.16)"
-                  stroke="rgba(255, 214, 124, 0.72)"
-                  strokeWidth="1.5"
+                  className="showcase-gravity__node-halo"
+                  r={node.r + 6}
+                  filter={`url(#${glowId})`}
                 />
+                <circle className="showcase-gravity__node-core" r={node.r} />
                 <text y="-2" textAnchor="middle" className="showcase-gravity__name">
                   {node.name}
                 </text>
@@ -299,7 +326,7 @@ export default function ShowcaseGrid({ model, layout, locale = "ko", compact = f
 
   return (
     <div className={`showcase-grid${compact ? " is-compact" : ""}`}>
-      {widgets.map((widget) => {
+      {widgets.map((widget, index) => {
         const Comp = REGISTRY[widget.id];
         if (!Comp) return null;
         const data = model?.[widget.id];
@@ -307,6 +334,7 @@ export default function ShowcaseGrid({ model, layout, locale = "ko", compact = f
           <div
             key={widget.id}
             className={`showcase-grid__item ${widget.size === "wide" ? "is-wide" : "is-half"}`}
+            style={{ "--showcase-index": index }}
           >
             <Comp data={data} rows={data} locale={locale} />
           </div>
