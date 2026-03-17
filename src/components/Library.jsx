@@ -1785,7 +1785,7 @@ export default function Library() {
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
   return (
-    <>
+    <div className="library-page">
       <TopNavDataMenu
         base={base}
         panelId="data-menu-panel"
@@ -2069,7 +2069,7 @@ export default function Library() {
           reasonTagOptions: REASON_TAG_OPTIONS,
         }}
       />
-    </>
+    </div>
   );
 }
 
