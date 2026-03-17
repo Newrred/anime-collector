@@ -99,20 +99,20 @@ export default function TopNavDataMenu({
       <section
         className="nav top-nav"
       >
-        <div className="top-nav__links">
-          <a
-            href={`${base}`}
-            className="top-nav__brand"
-            aria-label="MOEMOA home"
-          >
-            <img
-              src={`${base}MOEMOA.svg`}
-              alt="MOEMOA"
-              className="top-nav__brand-mark"
-              width="155"
-              height="41"
-            />
-          </a>
+        <a
+          href={`${base}`}
+          className="top-nav__brand"
+          aria-label="MOEMOA home"
+        >
+          <img
+            src={`${base}MOEMOA.svg`}
+            alt="MOEMOA"
+            className="top-nav__brand-mark"
+            width="155"
+            height="41"
+          />
+        </a>
+        <div className="top-nav__links top-nav__links--routes">
           <a
             href={`${base}`}
             className={`top-nav__link top-nav__link--primary${currentRoute === "home" ? " is-active" : ""}`}

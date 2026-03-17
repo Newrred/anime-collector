@@ -435,13 +435,20 @@ h3 {
 .top-nav {
   margin: calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) var(--space-3);
   padding: var(--space-3) var(--page-pad);
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
 }
 
 .top-nav__links {
   display: flex;
   align-items: center;
   gap: 2px;
+  min-width: 0;
+}
+
+.top-nav__links--routes {
   min-width: 0;
 }
 
@@ -474,6 +481,10 @@ h3 {
 
 .top-nav__link {
   position: relative;
+  flex: 0 0 auto;
+  min-width: fit-content;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .top-nav__link--secondary {
@@ -614,7 +625,8 @@ h3 {
 
 .top-nav__menu {
   position: relative;
-  margin-left: auto;
+  margin-left: 0;
+  justify-self: end;
 }
 
 .data-menu-trigger-label {
@@ -4025,6 +4037,38 @@ h3 {
 
   .nav a {
     padding: 6px 8px;
+  }
+
+  .top-nav {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    row-gap: 10px;
+  }
+
+  .top-nav__brand {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .top-nav__menu {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .top-nav__links--routes {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .top-nav__links--routes::-webkit-scrollbar {
+    display: none;
   }
 
   .top-nav__brand {
