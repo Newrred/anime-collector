@@ -182,33 +182,91 @@ function MemoryLineShelfCard({ rows = [], locale }) {
 function LogDensityCalendarCard({ data, locale }) {
   const copy = getMessageGroup(locale, "showcaseWidgets").logDensityCalendar || {};
   const months = Array.isArray(data?.months) ? data.months : [];
+  const rows = months.map((row) => ({
+    key: String(row?.key || ""),
+    label: String(row?.label || ""),
+    count: Number(row?.count || 0),
+  }));
+  const chartMax = Math.max(1, ...rows.map((row) => row.count));
+  const chartWidth = 720;
+  const chartHeight = 250;
+  const chartPadding = { top: 18, right: 16, bottom: 34, left: 24 };
+  const plotWidth = chartWidth - chartPadding.left - chartPadding.right;
+  const plotHeight = chartHeight - chartPadding.top - chartPadding.bottom;
+  const bottomY = chartPadding.top + plotHeight;
+  const xDivisor = Math.max(1, rows.length - 1);
+
+  const points = rows.map((row, index) => {
+    const x = chartPadding.left + (index / xDivisor) * plotWidth;
+    const ratio = row.count / chartMax;
+    const y = chartPadding.top + (1 - ratio) * plotHeight;
+    return { ...row, x, y };
+  });
+
+  const linePath = points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+    .join(" ");
+  const areaPath = points.length
+    ? `${linePath} L ${points[points.length - 1].x.toFixed(2)} ${bottomY.toFixed(2)} L ${points[0].x.toFixed(2)} ${bottomY.toFixed(2)} Z`
+    : "";
+  const yTicks = 4;
+  const tickValues = Array.from({ length: yTicks + 1 }, (_, index) => {
+    const value = Math.round((chartMax * (yTicks - index)) / yTicks);
+    const y = chartPadding.top + (index / yTicks) * plotHeight;
+    return { value, y };
+  });
 
   return (
     <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide showcase-card--density">
-      {!months.length ? (
+      {!rows.length ? (
         <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
       ) : (
         <>
-          <div className="showcase-density-grid">
-            {months.map((row, index) => (
-              <div
-                key={row.key}
-                className="showcase-density-grid__item"
-                style={{ "--density-index": index }}
-              >
-                <div
-                  className="showcase-density-grid__heat"
-                  style={{ "--heat": `${Math.max(8, Math.round((row.intensity || 0) * 100))}%` }}
-                  title={`${row.label} · ${row.count}`}
-                >
-                  <span className="showcase-density-grid__heat-glow" aria-hidden />
-                  <span className="showcase-density-grid__heat-value">{row.count > 0 ? row.count : ""}</span>
+          <div className="showcase-density-chart">
+            <svg
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              className="showcase-density-chart__svg"
+              role="img"
+              aria-label={copy.lead || copy.title}
+            >
+              {tickValues.map((tick) => (
+                <line
+                  key={`tick-${tick.y}`}
+                  x1={chartPadding.left}
+                  y1={tick.y}
+                  x2={chartPadding.left + plotWidth}
+                  y2={tick.y}
+                  className="showcase-density-chart__gridline"
+                />
+              ))}
+              {areaPath ? <path d={areaPath} className="showcase-density-chart__area" /> : null}
+              {linePath ? <path d={linePath} className="showcase-density-chart__line" /> : null}
+              {points.map((point) => (
+                <g key={`point-${point.key}`} transform={`translate(${point.x}, ${point.y})`}>
+                  <circle className="showcase-density-chart__point" r="4.4" />
+                  {point.count > 0 ? (
+                    <text className="showcase-density-chart__point-value" y="-9" textAnchor="middle">
+                      {point.count}
+                    </text>
+                  ) : null}
+                </g>
+              ))}
+            </svg>
+            <div className="showcase-density-chart__xlabels">
+              {rows.map((row) => (
+                <div key={`label-${row.key}`} className="small showcase-density-chart__xlabel">
+                  {row.label}
                 </div>
-                <div className="small showcase-density-grid__label">{row.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="showcase-density-chart__legend small">
+              {tickValues
+                .map((tick) => tick.value)
+                .filter((value, index, array) => array.indexOf(value) === index)
+                .join(" · ")}
+            </div>
           </div>
-          <div className="small page-feedback showcase-density-grid__peak">
+          <div className="small page-feedback showcase-density-chart__peak">
             {copy.peak} · {data?.peakLabel || "-"} · {data?.peakCount || 0}
             {copy.countUnit}
           </div>
