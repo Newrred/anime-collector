@@ -1,21 +1,16 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import myListSeed from "../data/myAnime.json";
-import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
-import { readLibraryListPreferred } from "../repositories/libraryRepo";
-import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
-import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
-import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
+import { useEffect, useMemo, useState } from "react";
 import { buildHomeResurfacing } from "../domain/homeSelectors";
 import { buildCharacterInsight } from "../domain/characterInsights";
 import { buildYearRecap, listRecapYears } from "../domain/recapSelectors";
+import { buildShowcaseModel } from "../domain/showcase/showcaseSelectors.js";
+import { useShowcaseSource } from "../hooks/useShowcaseSource.js";
 import YearRecapPanel from "./home/YearRecapPanel";
 import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
-import HomeTierEntryCard from "./home/HomeTierEntryCard.jsx";
+import HomeShowcasePreview from "./home/HomeShowcasePreview.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { getMessageGroup } from "../domain/messages.js";
-import { pickDisplayTitle } from "../domain/animeTitles";
 
 function buildLibraryHref(base, anilistId, focus = "") {
   const params = new URLSearchParams();
@@ -29,39 +24,10 @@ function buildLibraryHref(base, anilistId, focus = "") {
 export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "home");
-  const [items, setItems] = useState([]);
-  const [mediaMap, setMediaMap] = useState(new Map());
-  const [logs, setLogs] = useState([]);
-  const [pins, setPins] = useState([]);
+  const { items, logs, pins, mediaMap, titleById } = useShowcaseSource(locale);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [recapYear, setRecapYear] = useState(null);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      await ensureLegacyStorageMigrated().catch(() => {});
-      const list = await readLibraryListPreferred(myListSeed).catch(() => myListSeed);
-      const safeList = Array.isArray(list) ? list : [];
-      if (!alive) return;
-      setItems(safeList);
-      setLogs(readAllWatchLogsSnapshot());
-
-      const pinRows = await listCharacterPinsPreferred().catch(() => []);
-      if (!alive) return;
-      setPins(Array.isArray(pinRows) ? pinRows : []);
-
-      const ids = safeList.map((x) => Number(x?.anilistId)).filter(Number.isFinite);
-      setMediaMap(getCachedAnimeMap(ids));
-      const map = await fetchAnimeByIdsCached(ids, { includeCharacters: false }).catch(() => new Map());
-      if (!alive) return;
-      setMediaMap(map);
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, []);
 
   useEffect(() => {
     function syncInstallState() {
@@ -83,37 +49,25 @@ export default function Home() {
     };
   }, []);
 
-  const resurfacing = useMemo(
-    () => buildHomeResurfacing({ items, logs, pins }),
-    [items, logs, pins]
+  const resurfacing = useMemo(() => buildHomeResurfacing({ items, logs, pins }), [items, logs, pins]);
+
+  const showcaseModel = useMemo(
+    () => buildShowcaseModel({ items, logs, mediaMap, titleById, locale }),
+    [items, logs, mediaMap, titleById, locale]
   );
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
-  const titleById = useMemo(() => {
-    const map = new Map();
-    for (const it of items) {
-      map.set(Number(it.anilistId), pickDisplayTitle(it, mediaMap.get(Number(it.anilistId)), locale));
-    }
-    return map;
-  }, [items, mediaMap, locale]);
-
   const homeHeroImage = useMemo(() => {
     const heroId = Number(
-      resurfacing?.recentLogs?.[0]?.anilistId ??
-      resurfacing?.missingMemory?.[0]?.anilistId ??
-      items?.[0]?.anilistId
+      resurfacing?.recentLogs?.[0]?.anilistId ?? resurfacing?.missingMemory?.[0]?.anilistId ?? items?.[0]?.anilistId
     );
     if (Number.isFinite(heroId)) {
       const media = mediaMap.get(heroId);
       const banner = String(media?.bannerImage || "").trim();
       if (banner) return banner;
-      const cover =
-        media?.coverImage?.extraLarge ||
-        media?.coverImage?.large ||
-        media?.coverImage?.medium ||
-        "";
+      const cover = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
       if (cover) return String(cover);
     }
 
@@ -133,26 +87,18 @@ export default function Home() {
 
   const heroAnimeId = Number(heroEntry?.anilistId);
   const heroMedia = Number.isFinite(heroAnimeId) ? mediaMap.get(heroAnimeId) : null;
-  const heroTitle = Number.isFinite(heroAnimeId)
-    ? (titleById.get(heroAnimeId) || pickDisplayTitle(heroEntry, heroMedia, locale) || `#${heroAnimeId}`)
-    : copy.heroFallback;
+  const heroTitle = Number.isFinite(heroAnimeId) ? titleById.get(heroAnimeId) || heroMedia?.title?.romaji || `#${heroAnimeId}` : copy.heroFallback;
   const heroSourceLabel = heroEntry?.id
     ? copy.heroMetaRecent
     : heroEntry?.anilistId && resurfacing?.missingMemory?.some((row) => Number(row?.anilistId) === heroAnimeId)
       ? copy.heroMetaMissing
       : copy.heroMetaLibrary;
-  const heroPrimaryHref = Number.isFinite(heroAnimeId)
-    ? buildLibraryHref(base, heroAnimeId, "quick-log")
-    : `${base}library/?tab=add`;
-  const heroSecondaryHref = Number.isFinite(heroAnimeId)
-    ? buildLibraryHref(base, heroAnimeId)
-    : `${base}library/?tab=collection`;
+  const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : `${base}library/?tab=add`;
+  const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/?tab=collection`;
   const heroCue = String(heroEntry?.cue || "").trim();
-  const heroMeta = [
-    heroSourceLabel,
-    Number.isFinite(heroAnimeId) ? heroTitle : "",
-    heroEntry?.label || "",
-  ].filter(Boolean).slice(0, 3);
+  const heroMeta = [heroSourceLabel, Number.isFinite(heroAnimeId) ? heroTitle : "", heroEntry?.label || ""]
+    .filter(Boolean)
+    .slice(0, 3);
 
   const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
   const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
@@ -162,7 +108,6 @@ export default function Home() {
     return resurfacing?.recentPrimaryCharacters?.slice(0, 4) || [];
   }, [resurfacing]);
   const thisTimeTargets = useMemo(() => resurfacing?.thisTime?.slice(0, 4) || [], [resurfacing]);
-  const tierCtaDisabled = recentLogTargets.length === 0;
 
   const characterInsight = useMemo(() => {
     const id = Number(selectedCharacter?.characterId);
@@ -199,10 +144,7 @@ export default function Home() {
     }
   }, [recapYear, recapYears]);
 
-  const yearRecap = useMemo(
-    () => buildYearRecap({ logs, year: recapYear }),
-    [logs, recapYear]
-  );
+  const yearRecap = useMemo(() => buildYearRecap({ logs, year: recapYear }), [logs, recapYear]);
 
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
@@ -231,7 +173,7 @@ export default function Home() {
         currentRoute="home"
         locale={locale}
         theme={theme}
-        onToggleLocale={(nextLocale) => setLocale(nextLocale || ((locale === "ko") ? "en" : "ko"))}
+        onToggleLocale={(nextLocale) => setLocale(nextLocale || (locale === "ko" ? "en" : "ko"))}
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
@@ -256,17 +198,21 @@ export default function Home() {
         <div className="home-memory-hero__copy">
           <div className="small home-memory-hero__eyebrow">{copy.heroTitle}</div>
           <h2 className="sectionTitle home-memory-hero__title">{heroTitle}</h2>
-          <p className="sectionLead home-memory-hero__lead">
-            {heroCue || copy.heroLead}
-          </p>
+          <p className="sectionLead home-memory-hero__lead">{heroCue || copy.heroLead}</p>
           <div className="status-badge-row">
             {heroMeta.map((entry) => (
-              <div key={entry} className="small status-badge">{entry}</div>
+              <div key={entry} className="small status-badge">
+                {entry}
+              </div>
             ))}
           </div>
           <div className="action-row">
-            <a href={heroPrimaryHref} className="btn home-memory-hero__cta">{copy.quickRecord}</a>
-            <a href={heroSecondaryHref} className="btn btn--subtle home-memory-hero__cta-link">{copy.heroOpen}</a>
+            <a href={heroPrimaryHref} className="btn home-memory-hero__cta">
+              {copy.quickRecord}
+            </a>
+            <a href={heroSecondaryHref} className="btn btn--subtle home-memory-hero__cta-link">
+              {copy.heroOpen}
+            </a>
           </div>
         </div>
         <div className="home-memory-hero__meta">
@@ -294,6 +240,8 @@ export default function Home() {
         onOpenCharacter={openCharacterSheet}
       />
 
+      <HomeShowcasePreview locale={locale} base={base} model={showcaseModel} />
+
       <YearRecapPanel
         locale={locale}
         recapYear={recapYear}
@@ -302,13 +250,6 @@ export default function Home() {
         yearRecap={yearRecap}
         titleById={titleById}
         onOpenCharacter={openCharacterSheet}
-      />
-
-      <HomeTierEntryCard
-        locale={locale}
-        base={base}
-        year={new Date().getUTCFullYear()}
-        disabled={tierCtaDisabled}
       />
 
       <CharacterInsightSheet

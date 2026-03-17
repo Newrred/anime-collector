@@ -11,9 +11,18 @@ import {
   listFollowing,
   saveMyProfile,
 } from "../repositories/profileRepo.js";
+import { useShowcaseSource } from "../hooks/useShowcaseSource.js";
+import { buildShowcaseModel, buildPublicShowcaseSnapshot } from "../domain/showcase/showcaseSelectors.js";
+import {
+  DEFAULT_SHOWCASE_LAYOUT,
+  publishShowcaseSnapshot,
+  readShowcaseLayout,
+  saveShowcaseLayout,
+} from "../repositories/showcaseRepo.js";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { IconArrowRight, IconCopy, IconShare } from "./ui/AppIcons.jsx";
 import { ProfileAvatar, ProfileMetric, ProfilePeopleList } from "./profile/ProfileUi.jsx";
+import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
 
 function buildProfileFormState(profile) {
   return {
@@ -24,10 +33,40 @@ function buildProfileFormState(profile) {
   };
 }
 
+function moveWidget(layout, fromIndex, toIndex) {
+  if (!Array.isArray(layout?.widgets)) return layout;
+  if (fromIndex === toIndex) return layout;
+  if (fromIndex < 0 || toIndex < 0) return layout;
+  if (fromIndex >= layout.widgets.length || toIndex >= layout.widgets.length) return layout;
+  const next = [...layout.widgets];
+  const [row] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, row);
+  return { ...layout, widgets: next };
+}
+
+function resolveWidgetLabel(widgetId, locale = "ko") {
+  const widgetCopy = getMessageGroup(locale, "showcaseWidgets");
+  const titles = {
+    tasteFingerprint: widgetCopy?.tasteFingerprint?.title || "tasteFingerprint",
+    thisTimeCapsule: widgetCopy?.thisTimeCapsule?.title || "thisTimeCapsule",
+    genreWordHeatmap: widgetCopy?.genreWordHeatmap?.title || "genreWordHeatmap",
+    resonanceShelf: widgetCopy?.resonanceShelf?.title || "resonanceShelf",
+    posterPalette: widgetCopy?.posterPalette?.title || "posterPalette",
+  };
+  return titles[widgetId] || widgetId;
+}
+
 export default function ProfileCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}profile/`);
   const copy = getMessageGroup(locale, "profilePage");
+  const editorCopy = getMessageGroup(locale, "showcaseEditor");
+  const { items, logs, mediaMap, titleById } = useShowcaseSource(locale);
+  const showcaseModel = useMemo(
+    () => buildShowcaseModel({ items, logs, mediaMap, titleById, locale }),
+    [items, logs, mediaMap, titleById, locale]
+  );
+
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState(buildProfileFormState(null));
   const [followers, setFollowers] = useState([]);
@@ -37,6 +76,8 @@ export default function ProfileCenter() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
+  const [showcaseLayout, setShowcaseLayout] = useState(DEFAULT_SHOWCASE_LAYOUT);
+  const [publishing, setPublishing] = useState(false);
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
@@ -51,6 +92,7 @@ export default function ProfileCenter() {
       setFollowing([]);
       setCounts({ followers: 0, following: 0 });
       setEditing(false);
+      setShowcaseLayout(DEFAULT_SHOWCASE_LAYOUT);
       return;
     }
 
@@ -64,12 +106,22 @@ export default function ProfileCenter() {
           listFollowers(ensured?.userId),
           listFollowing(ensured?.userId),
         ]);
+
+        let layout = DEFAULT_SHOWCASE_LAYOUT;
+        try {
+          layout = await readShowcaseLayout(auth.user.id);
+        } catch (layoutError) {
+          console.error(layoutError);
+          if (alive) setMessage(`Showcase layout load failed: ${layoutError?.message || copy.unknownError}`);
+        }
+
         if (!alive) return;
         setProfile(ensured);
         setForm(buildProfileFormState(ensured));
         setCounts(nextCounts);
         setFollowers(nextFollowers);
         setFollowing(nextFollowing);
+        setShowcaseLayout(layout);
       } catch (error) {
         if (!alive) return;
         console.error(error);
@@ -166,6 +218,37 @@ export default function ProfileCenter() {
     }
   }
 
+  async function handleSaveShowcaseLayout() {
+    if (!auth.user?.id) return;
+    try {
+      const saved = await saveShowcaseLayout(auth.user.id, showcaseLayout);
+      setShowcaseLayout(saved);
+      setMessage(editorCopy.layoutSaved);
+    } catch (error) {
+      console.error(error);
+      setMessage(`Showcase layout save failed: ${error?.message || copy.unknownError}`);
+    }
+  }
+
+  async function handlePublishShowcase() {
+    if (!auth.user?.id || !profile) return;
+    setPublishing(true);
+    try {
+      const snapshot = buildPublicShowcaseSnapshot({
+        profile,
+        layout: showcaseLayout,
+        model: showcaseModel,
+      });
+      await publishShowcaseSnapshot(auth.user.id, snapshot);
+      setMessage(editorCopy.published);
+    } catch (error) {
+      console.error(error);
+      setMessage(`Public showcase publish failed: ${error?.message || copy.unknownError}`);
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   function handleEditStart() {
     setForm(buildProfileFormState(profile));
     setEditing(true);
@@ -183,7 +266,7 @@ export default function ProfileCenter() {
       <TopNavDataMenu
         base={base}
         panelId="profile-menu-panel"
-        currentRoute=""
+        currentRoute="profile"
         locale={locale}
         theme={theme}
         onToggleLocale={(nextLocale) => setLocale(nextLocale || (locale === "ko" ? "en" : "ko"))}
@@ -219,9 +302,7 @@ export default function ProfileCenter() {
                 <p className="pageLead">@{savedHandle || form.handle || copy.handlePlaceholder}</p>
                 <p className="sectionLead">{savedBio || copy.bioEmpty}</p>
                 <div className="profile-visibility-row">
-                  <span
-                    className={`profile-visibility-badge${profile?.profilePublic ? " is-public" : " is-private"}`}
-                  >
+                  <span className={`profile-visibility-badge${profile?.profilePublic ? " is-public" : " is-private"}`}>
                     {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate}
                   </span>
                   <span className="small profile-visibility-note">
@@ -246,20 +327,100 @@ export default function ProfileCenter() {
                 {copy.editProfile}
               </button>
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
-                <span className="btn__icon"><IconCopy size={14} /></span>
+                <span className="btn__icon">
+                  <IconCopy size={14} />
+                </span>
                 <span className="btn__label">{copy.copyLink}</span>
               </button>
               <button type="button" className="btn btn--subtle" onClick={shareProfileLink}>
-                <span className="btn__icon"><IconShare size={14} /></span>
+                <span className="btn__icon">
+                  <IconShare size={14} />
+                </span>
                 <span className="btn__label">{copy.shareLink}</span>
               </button>
               <a href={publicPath} className="btn btn--subtle">
-                <span className="btn__icon"><IconArrowRight size={14} /></span>
+                <span className="btn__icon">
+                  <IconArrowRight size={14} />
+                </span>
                 <span className="btn__label">{copy.openPublicProfile}</span>
               </a>
             </div>
             {message ? <div className="small page-feedback">{message}</div> : null}
             {loading ? <div className="small page-feedback">{copy.loading}</div> : null}
+          </section>
+
+          <section className="profile-showcase-layout">
+            <div className="profile-showcase-layout__preview">
+              <ShowcaseGrid locale={locale} model={showcaseModel} layout={showcaseLayout} />
+            </div>
+
+            <aside className="surface-card profile-showcase-layout__editor">
+              <div className="pageHeader">
+                <h2 className="sectionTitle">{editorCopy.title}</h2>
+                <p className="sectionLead">{editorCopy.lead}</p>
+              </div>
+
+              <div className="showcase-editor-list">
+                {(showcaseLayout.widgets || []).map((widget, index) => (
+                  <div key={widget.id} className="showcase-editor-row">
+                    <div className="showcase-editor-row__main">
+                      <div className="showcase-editor-row__title">{resolveWidgetLabel(widget.id, locale)}</div>
+                      <div className="small showcase-editor-row__meta">
+                        {widget.size === "wide" ? editorCopy.wideCard : editorCopy.baseCard}
+                      </div>
+                    </div>
+
+                    <div className="showcase-editor-row__actions">
+                      <button
+                        type="button"
+                        className="btn btn--subtle"
+                        onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index - 1))}
+                        disabled={index === 0}
+                      >
+                        {editorCopy.moveUp}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn btn--subtle"
+                        onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index + 1))}
+                        disabled={index === showcaseLayout.widgets.length - 1}
+                      >
+                        {editorCopy.moveDown}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn btn--subtle"
+                        onClick={() => {
+                          setShowcaseLayout((prev) => ({
+                            ...prev,
+                            widgets: prev.widgets.map((row) =>
+                              row.id === widget.id ? { ...row, enabled: !row.enabled } : row
+                            ),
+                          }));
+                        }}
+                      >
+                        {widget.enabled ? editorCopy.hide : editorCopy.show}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="action-row">
+                <button type="button" className="btn btn--subtle" onClick={handleSaveShowcaseLayout}>
+                  {editorCopy.saveLayout}
+                </button>
+                <button type="button" className="btn" onClick={handlePublishShowcase} disabled={publishing || !profile}>
+                  {publishing ? editorCopy.publishing : editorCopy.publish}
+                </button>
+              </div>
+
+              <div className="small page-feedback">
+                {profile?.profilePublic ? editorCopy.publishHint : editorCopy.privateHint}
+              </div>
+            </aside>
           </section>
 
           {editing ? (
@@ -328,18 +489,8 @@ export default function ProfileCenter() {
           ) : null}
 
           <div className="profile-page__lists">
-            <ProfilePeopleList
-              title={copy.followersTitle}
-              emptyText={copy.followersEmpty}
-              people={followers}
-              base={base}
-            />
-            <ProfilePeopleList
-              title={copy.followingTitle}
-              emptyText={copy.followingEmpty}
-              people={following}
-              base={base}
-            />
+            <ProfilePeopleList title={copy.followersTitle} emptyText={copy.followersEmpty} people={followers} base={base} />
+            <ProfilePeopleList title={copy.followingTitle} emptyText={copy.followingEmpty} people={following} base={base} />
           </div>
         </div>
       )}

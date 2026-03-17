@@ -13,16 +13,21 @@ import {
   listFollowing,
   unfollowProfile,
 } from "../repositories/profileRepo.js";
+import { DEFAULT_SHOWCASE_LAYOUT, readPublicShowcaseSnapshot } from "../repositories/showcaseRepo.js";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { IconArrowRight, IconCopy, IconShare } from "./ui/AppIcons.jsx";
 import { ProfileAvatar, ProfileMetric, ProfilePeopleList } from "./profile/ProfileUi.jsx";
+import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
 
 export default function PublicProfilePage() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "profilePage");
-  const auth = useAuthSession(typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "/u/");
+  const auth = useAuthSession(
+    typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "/u/"
+  );
   const [handle, setHandle] = useState("");
   const [profile, setProfile] = useState(null);
+  const [publicShowcase, setPublicShowcase] = useState(null);
   const [counts, setCounts] = useState({ followers: 0, following: 0 });
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -43,6 +48,7 @@ export default function PublicProfilePage() {
   async function refreshProfileState(nextHandle, viewerId = auth.user?.id || null) {
     if (!nextHandle || !isValidProfileHandle(nextHandle)) {
       setProfile(null);
+      setPublicShowcase(null);
       setCounts({ followers: 0, following: 0 });
       setFollowers([]);
       setFollowing([]);
@@ -56,6 +62,7 @@ export default function PublicProfilePage() {
       const nextProfile = await getPublicProfileByHandle(nextHandle);
       if (!nextProfile) {
         setProfile(null);
+        setPublicShowcase(null);
         setCounts({ followers: 0, following: 0 });
         setFollowers([]);
         setFollowing([]);
@@ -63,16 +70,18 @@ export default function PublicProfilePage() {
         return;
       }
 
-      const [nextCounts, nextFollowers, nextFollowing, nextIsFollowing] = await Promise.all([
+      const [nextCounts, nextFollowers, nextFollowing, nextIsFollowing, nextShowcase] = await Promise.all([
         getFollowCounts(nextProfile.userId),
         listFollowers(nextProfile.userId),
         listFollowing(nextProfile.userId),
         viewerId && viewerId !== nextProfile.userId
           ? isFollowingProfile(viewerId, nextProfile.userId)
           : Promise.resolve(false),
+        readPublicShowcaseSnapshot(nextProfile.userId),
       ]);
 
       setProfile(nextProfile);
+      setPublicShowcase(nextShowcase);
       setCounts(nextCounts);
       setFollowers(nextFollowers);
       setFollowing(nextFollowing);
@@ -89,10 +98,7 @@ export default function PublicProfilePage() {
     refreshProfileState(handle, auth.user?.id || null);
   }, [handle, auth.user?.id]);
 
-  const shareUrl = useMemo(
-    () => (profile?.handle ? buildPublicProfileUrl(profile.handle) : ""),
-    [profile?.handle]
-  );
+  const shareUrl = useMemo(() => (profile?.handle ? buildPublicProfileUrl(profile.handle) : ""), [profile?.handle]);
 
   async function copyProfileLink() {
     if (!shareUrl) return;
@@ -157,7 +163,7 @@ export default function PublicProfilePage() {
       <TopNavDataMenu
         base={base}
         panelId="public-profile-menu-panel"
-        currentRoute=""
+        currentRoute="profile"
         locale={locale}
         theme={theme}
         onToggleLocale={(nextLocale) => setLocale(nextLocale || (locale === "ko" ? "en" : "ko"))}
@@ -198,16 +204,22 @@ export default function PublicProfilePage() {
 
             <div className="action-row">
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
-                <span className="btn__icon"><IconCopy size={14} /></span>
+                <span className="btn__icon">
+                  <IconCopy size={14} />
+                </span>
                 <span className="btn__label">{copy.copyLink}</span>
               </button>
               <button type="button" className="btn btn--subtle" onClick={shareProfileLink}>
-                <span className="btn__icon"><IconShare size={14} /></span>
+                <span className="btn__icon">
+                  <IconShare size={14} />
+                </span>
                 <span className="btn__label">{copy.shareLink}</span>
               </button>
               {isOwnProfile ? (
                 <a href={`${base}profile/`} className="btn">
-                  <span className="btn__icon"><IconArrowRight size={14} /></span>
+                  <span className="btn__icon">
+                    <IconArrowRight size={14} />
+                  </span>
                   <span className="btn__label">{copy.openOwnProfile}</span>
                 </a>
               ) : (
@@ -220,19 +232,22 @@ export default function PublicProfilePage() {
             {loading ? <div className="small page-feedback">{copy.loading}</div> : null}
           </section>
 
+          {publicShowcase?.widgets ? (
+            <ShowcaseGrid
+              locale={locale}
+              model={publicShowcase.widgets}
+              layout={publicShowcase.layout || DEFAULT_SHOWCASE_LAYOUT}
+            />
+          ) : (
+            <section className="surface-card ui-panel-stack">
+              <h2 className="sectionTitle">{copy.noShowcaseTitle}</h2>
+              <p className="sectionLead">{copy.noShowcaseLead}</p>
+            </section>
+          )}
+
           <div className="profile-page__lists">
-            <ProfilePeopleList
-              title={copy.followersTitle}
-              emptyText={copy.followersEmpty}
-              people={followers}
-              base={base}
-            />
-            <ProfilePeopleList
-              title={copy.followingTitle}
-              emptyText={copy.followingEmpty}
-              people={following}
-              base={base}
-            />
+            <ProfilePeopleList title={copy.followersTitle} emptyText={copy.followersEmpty} people={followers} base={base} />
+            <ProfilePeopleList title={copy.followingTitle} emptyText={copy.followingEmpty} people={following} base={base} />
           </div>
         </div>
       )}
