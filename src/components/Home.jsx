@@ -102,11 +102,6 @@ export default function Home() {
 
   const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
   const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
-  const characterTargets = useMemo(() => {
-    const repeated = resurfacing?.repeatedCharacters?.slice(0, 4) || [];
-    if (repeated.length > 0) return repeated;
-    return resurfacing?.recentPrimaryCharacters?.slice(0, 4) || [];
-  }, [resurfacing]);
   const thisTimeTargets = useMemo(() => resurfacing?.thisTime?.slice(0, 4) || [], [resurfacing]);
 
   const characterInsight = useMemo(() => {
@@ -233,11 +228,7 @@ export default function Home() {
         titleById={titleById}
         recentLogs={recentLogTargets}
         missingMemory={continueTargets}
-        characterRows={characterTargets}
-        characterMode={resurfacing?.repeatedCharacters?.length > 0 ? "repeated" : "recent"}
         thisTimeRows={thisTimeTargets}
-        pinnedHighlights={resurfacing?.pinnedHighlights || []}
-        onOpenCharacter={openCharacterSheet}
       />
 
       <HomeShowcasePreview locale={locale} base={base} model={showcaseModel} />

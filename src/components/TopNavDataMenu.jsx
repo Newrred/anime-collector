@@ -65,11 +65,6 @@ export default function TopNavDataMenu({
     window.location.href = `${base}data/`;
   }
 
-  function openProfilePage() {
-    if (typeof window === "undefined") return;
-    window.location.href = `${base}profile/`;
-  }
-
   async function handleInstallPwaClick() {
     if (typeof onInstallPwa === "function") {
       await onInstallPwa();
@@ -239,10 +234,6 @@ export default function TopNavDataMenu({
                     onOpenData={() => {
                       setDataMenuOpen(false);
                       openDataPage();
-                    }}
-                    onOpenProfile={() => {
-                      setDataMenuOpen(false);
-                      openProfilePage();
                     }}
                   />
                 </section>

@@ -4417,3 +4417,123 @@ h3 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.home-resurfacing-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.home-resurfacing-card--wide {
+  grid-column: 1 / -1;
+}
+
+.minihome-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.minihome-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.minihome-canvas,
+.minihome-controls,
+.minihome-settings {
+  padding: 24px;
+}
+
+.profile-link-box-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.showcase-lineshelf {
+  display: grid;
+  gap: 12px;
+}
+
+.showcase-lineshelf__item {
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--surface-strong) 22%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
+}
+
+.showcase-lineshelf__quote {
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+.showcase-lineshelf__meta {
+  margin-top: 8px;
+  color: var(--text-secondary);
+}
+
+.showcase-density-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.showcase-density-grid__item {
+  display: grid;
+  gap: 6px;
+}
+
+.showcase-density-grid__heat {
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--surface-strong) 22%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent) var(--heat), transparent);
+}
+
+.showcase-density-grid__label {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.showcase-gravity-wrap {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--surface-strong) 22%, transparent);
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--surface-strong) 32%, transparent), color-mix(in srgb, var(--surface-soft) 70%, transparent));
+}
+
+.showcase-gravity {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.showcase-gravity__name {
+  fill: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.showcase-gravity__meta {
+  fill: var(--text-secondary);
+  font-size: 10px;
+}
+
+@media (max-width: 960px) {
+  .home-resurfacing-grid,
+  .minihome-workbench,
+  .showcase-density-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .minihome-page__header {
+    flex-direction: column;
+  }
+}

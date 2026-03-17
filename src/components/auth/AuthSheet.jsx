@@ -20,7 +20,6 @@ export default function AuthSheet({
   onSignOut,
   onSyncNow,
   onOpenData,
-  onOpenProfile,
   embedded = false,
 }) {
   const user = session?.user || null;
@@ -61,10 +60,6 @@ export default function AuthSheet({
           <button type="button" className="btn btn--subtle" onClick={onOpenData}>
             <span className="btn__icon"><IconArrowRight size={14} /></span>
             <span className="btn__label">{copy.openData}</span>
-          </button>
-          <button type="button" className="btn btn--subtle" onClick={onOpenProfile}>
-            <span className="btn__icon"><IconUser size={14} /></span>
-            <span className="btn__label">{copy.openProfile}</span>
           </button>
           <button type="button" className="btn btn--ghost" onClick={onSignOut}>
             <span className="btn__icon"><IconLogOut size={14} /></span>

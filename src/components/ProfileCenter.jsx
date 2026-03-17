@@ -6,7 +6,6 @@ import { useAuthSession } from "../hooks/useAuthSession.js";
 import {
   buildPublicProfileUrl,
   ensureMyProfile,
-  getFollowCounts,
   listFollowers,
   listFollowing,
   saveMyProfile,
@@ -20,8 +19,7 @@ import {
   saveShowcaseLayout,
 } from "../repositories/showcaseRepo.js";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
-import { IconArrowRight, IconCopy, IconShare } from "./ui/AppIcons.jsx";
-import { ProfileAvatar, ProfileMetric, ProfilePeopleList } from "./profile/ProfileUi.jsx";
+import { ProfilePeopleList } from "./profile/ProfileUi.jsx";
 import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
 
 function buildProfileFormState(profile) {
@@ -47,10 +45,13 @@ function moveWidget(layout, fromIndex, toIndex) {
 function resolveWidgetLabel(widgetId, locale = "ko") {
   const widgetCopy = getMessageGroup(locale, "showcaseWidgets");
   const titles = {
-    tasteFingerprint: widgetCopy?.tasteFingerprint?.title || "tasteFingerprint",
-    thisTimeCapsule: widgetCopy?.thisTimeCapsule?.title || "thisTimeCapsule",
-    genreWordHeatmap: widgetCopy?.genreWordHeatmap?.title || "genreWordHeatmap",
     resonanceShelf: widgetCopy?.resonanceShelf?.title || "resonanceShelf",
+    memoryLineShelf: widgetCopy?.memoryLineShelf?.title || "memoryLineShelf",
+    thisTimeCapsule: widgetCopy?.thisTimeCapsule?.title || "thisTimeCapsule",
+    tasteFingerprint: widgetCopy?.tasteFingerprint?.title || "tasteFingerprint",
+    logDensityCalendar: widgetCopy?.logDensityCalendar?.title || "logDensityCalendar",
+    characterGravity: widgetCopy?.characterGravity?.title || "characterGravity",
+    genreWordHeatmap: widgetCopy?.genreWordHeatmap?.title || "genreWordHeatmap",
     posterPalette: widgetCopy?.posterPalette?.title || "posterPalette",
   };
   return titles[widgetId] || widgetId;
@@ -71,7 +72,6 @@ export default function ProfileCenter() {
   const [form, setForm] = useState(buildProfileFormState(null));
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [counts, setCounts] = useState({ followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -90,7 +90,6 @@ export default function ProfileCenter() {
       setForm(buildProfileFormState(null));
       setFollowers([]);
       setFollowing([]);
-      setCounts({ followers: 0, following: 0 });
       setEditing(false);
       setShowcaseLayout(DEFAULT_SHOWCASE_LAYOUT);
       return;
@@ -101,8 +100,7 @@ export default function ProfileCenter() {
     (async () => {
       try {
         const ensured = await ensureMyProfile(auth.user);
-        const [nextCounts, nextFollowers, nextFollowing] = await Promise.all([
-          getFollowCounts(ensured?.userId),
+        const [nextFollowers, nextFollowing] = await Promise.all([
           listFollowers(ensured?.userId),
           listFollowing(ensured?.userId),
         ]);
@@ -118,7 +116,6 @@ export default function ProfileCenter() {
         if (!alive) return;
         setProfile(ensured);
         setForm(buildProfileFormState(ensured));
-        setCounts(nextCounts);
         setFollowers(nextFollowers);
         setFollowing(nextFollowing);
         setShowcaseLayout(layout);
@@ -143,10 +140,9 @@ export default function ProfileCenter() {
     () => (savedHandle ? buildPublicProfilePath(savedHandle, base) : `${base}u/`),
     [base, savedHandle]
   );
-  const canSharePublicProfile = isValidProfileHandle(savedHandle);
 
   async function copyProfileLink() {
-    if (!canSharePublicProfile) {
+    if (!isValidProfileHandle(savedHandle)) {
       setMessage(copy.handleInvalid);
       return;
     }
@@ -156,31 +152,6 @@ export default function ProfileCenter() {
     } catch {
       setMessage(copy.copyFailed);
     }
-  }
-
-  async function shareProfileLink() {
-    if (!canSharePublicProfile) {
-      setMessage(copy.handleInvalid);
-      return;
-    }
-    const url = buildPublicProfileUrl(savedHandle);
-    try {
-      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-        await navigator.share({
-          title: copy.shareTitle,
-          text: copy.shareBody,
-          url,
-        });
-        setMessage(copy.shareSucceeded);
-        return;
-      }
-    } catch (error) {
-      if (error?.name === "AbortError") {
-        setMessage(copy.shareCancelled);
-        return;
-      }
-    }
-    await copyProfileLink();
   }
 
   async function handleSave() {
@@ -198,14 +169,12 @@ export default function ProfileCenter() {
         },
         profile
       );
-      const [nextCounts, nextFollowers, nextFollowing] = await Promise.all([
-        getFollowCounts(saved?.userId),
+      const [nextFollowers, nextFollowing] = await Promise.all([
         listFollowers(saved?.userId),
         listFollowing(saved?.userId),
       ]);
       setProfile(saved);
       setForm(buildProfileFormState(saved));
-      setCounts(nextCounts);
       setFollowers(nextFollowers);
       setFollowing(nextFollowing);
       setEditing(false);
@@ -262,7 +231,7 @@ export default function ProfileCenter() {
   }
 
   return (
-    <div className="profile-page">
+    <div className="profile-page minihome-page">
       <TopNavDataMenu
         base={base}
         panelId="profile-menu-panel"
@@ -292,69 +261,49 @@ export default function ProfileCenter() {
           </div>
         </section>
       ) : (
-        <div className="profile-page__stack">
-          <section className="surface-card profile-hero-card">
-            <div className="profile-hero-card__header">
-              <ProfileAvatar profile={profile} size={72} />
-              <div className="pageHeader profile-hero-card__copy">
-                <div className="small profile-kicker">{copy.title}</div>
-                <h1 className="pageTitle">{savedDisplayName}</h1>
-                <p className="pageLead">@{savedHandle || form.handle || copy.handlePlaceholder}</p>
-                <p className="sectionLead">{savedBio || copy.bioEmpty}</p>
-                <div className="profile-visibility-row">
-                  <span className={`profile-visibility-badge${profile?.profilePublic ? " is-public" : " is-private"}`}>
-                    {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate}
-                  </span>
-                  <span className="small profile-visibility-note">
-                    {profile?.profilePublic ? copy.publicToggleOn : copy.publicToggleOff}
-                  </span>
-                </div>
+        <div className="profile-page__stack minihome-page__stack">
+          <section className="pageHeader minihome-page__header">
+            <div>
+              <div className="small profile-kicker">{copy.title}</div>
+              <h1 className="pageTitle">{copy.title}</h1>
+              <p className="pageLead">{copy.lead}</p>
+              <div className="status-badge-row">
+                <span className={`status-badge ${profile?.profilePublic ? "is-public" : ""}`}>
+                  {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate}
+                </span>
+                <span className="status-badge">@{savedHandle || form.handle || copy.handlePlaceholder}</span>
               </div>
             </div>
 
-            <div className="metric-grid profile-metric-grid">
-              <ProfileMetric label={copy.followersLabel} value={counts.followers} />
-              <ProfileMetric label={copy.followingLabel} value={counts.following} />
-            </div>
-
-            <div className="profile-link-box">
-              <div className="small profile-link-box__label">{copy.publicLink}</div>
-              <div className="profile-link-box__value">{publicPath}</div>
-            </div>
-
             <div className="action-row">
-              <button type="button" className="btn" onClick={handleEditStart}>
+              <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
                 {copy.editProfile}
               </button>
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
-                <span className="btn__icon">
-                  <IconCopy size={14} />
-                </span>
-                <span className="btn__label">{copy.copyLink}</span>
-              </button>
-              <button type="button" className="btn btn--subtle" onClick={shareProfileLink}>
-                <span className="btn__icon">
-                  <IconShare size={14} />
-                </span>
-                <span className="btn__label">{copy.shareLink}</span>
+                {copy.copyLink}
               </button>
               <a href={publicPath} className="btn btn--subtle">
-                <span className="btn__icon">
-                  <IconArrowRight size={14} />
-                </span>
-                <span className="btn__label">{copy.openPublicProfile}</span>
+                {copy.openPublicProfile}
               </a>
+              <button type="button" className="btn" onClick={handlePublishShowcase} disabled={publishing || !profile}>
+                {publishing ? editorCopy.publishing : editorCopy.publish}
+              </button>
             </div>
-            {message ? <div className="small page-feedback">{message}</div> : null}
-            {loading ? <div className="small page-feedback">{copy.loading}</div> : null}
           </section>
 
-          <section className="profile-showcase-layout">
-            <div className="profile-showcase-layout__preview">
+          {message ? <div className="small page-feedback">{message}</div> : null}
+          {loading ? <div className="small page-feedback">{copy.loading}</div> : null}
+
+          <section className="minihome-workbench">
+            <div className="surface-card minihome-canvas">
+              <div className="pageHeader">
+                <h2 className="sectionTitle">{copy.canvasTitle}</h2>
+                <p className="sectionLead">{copy.canvasLead}</p>
+              </div>
               <ShowcaseGrid locale={locale} model={showcaseModel} layout={showcaseLayout} />
             </div>
 
-            <aside className="surface-card profile-showcase-layout__editor">
+            <aside className="surface-card minihome-controls">
               <div className="pageHeader">
                 <h2 className="sectionTitle">{editorCopy.title}</h2>
                 <p className="sectionLead">{editorCopy.lead}</p>
@@ -379,7 +328,6 @@ export default function ProfileCenter() {
                       >
                         {editorCopy.moveUp}
                       </button>
-
                       <button
                         type="button"
                         className="btn btn--subtle"
@@ -388,7 +336,6 @@ export default function ProfileCenter() {
                       >
                         {editorCopy.moveDown}
                       </button>
-
                       <button
                         type="button"
                         className="btn btn--subtle"
@@ -423,13 +370,13 @@ export default function ProfileCenter() {
             </aside>
           </section>
 
-          {editing ? (
-            <section className="surface-card profile-form-card">
-              <div className="pageHeader">
-                <h2 className="sectionTitle">{copy.editTitle}</h2>
-                <p className="sectionLead">{copy.editLead}</p>
-              </div>
+          <section className="surface-card minihome-settings">
+            <div className="pageHeader">
+              <h2 className="sectionTitle">{copy.settingsTitle}</h2>
+              <p className="sectionLead">{copy.settingsLead}</p>
+            </div>
 
+            {editing ? (
               <div className="profile-form">
                 <label className="profile-field">
                   <span className="small profile-field__label">{copy.displayNameLabel}</span>
@@ -475,18 +422,33 @@ export default function ProfileCenter() {
                     </span>
                   </span>
                 </label>
-              </div>
 
-              <div className="action-row">
-                <button type="button" className="btn" onClick={handleSave} disabled={saving || loading}>
-                  {saving ? copy.saving : copy.save}
-                </button>
-                <button type="button" className="btn btn--subtle" onClick={handleEditCancel} disabled={saving}>
-                  {copy.cancelEdit}
-                </button>
+                <div className="action-row">
+                  <button type="button" className="btn" onClick={handleSave} disabled={saving || loading}>
+                    {saving ? copy.saving : copy.save}
+                  </button>
+                  <button type="button" className="btn btn--subtle" onClick={handleEditCancel} disabled={saving}>
+                    {copy.cancelEdit}
+                  </button>
+                </div>
               </div>
-            </section>
-          ) : null}
+            ) : (
+              <div className="profile-link-box-stack">
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.displayNameLabel}</div>
+                  <div className="profile-link-box__value">{savedDisplayName}</div>
+                </div>
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.publicLink}</div>
+                  <div className="profile-link-box__value">{publicPath}</div>
+                </div>
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.bioLabel}</div>
+                  <div className="profile-link-box__value">{savedBio || copy.bioEmpty}</div>
+                </div>
+              </div>
+            )}
+          </section>
 
           <div className="profile-page__lists">
             <ProfilePeopleList title={copy.followersTitle} emptyText={copy.followersEmpty} people={followers} base={base} />

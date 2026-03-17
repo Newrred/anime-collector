@@ -110,7 +110,7 @@ function GenreWordHeatmapCard({ data, locale }) {
                       key={`${row.genre}-${cell.term}`}
                       className="showcase-heatmap__cell"
                       style={{ "--heat": `${Math.max(10, Math.round(cell.intensity * 100))}%` }}
-                      title={`${row.genre} · ${cell.term} · ${cell.count}`}
+                      title={`${row.genre} · ${cell.term} · ${cell.count}회`}
                     >
                       <span>{cell.count > 0 ? cell.count : ""}</span>
                     </div>
@@ -144,12 +144,115 @@ function ResonanceShelfCard({ rows = [], locale }) {
               <div className="list-card__body">
                 <div className="list-card__title">{row.title}</div>
                 <div className="list-card__meta">
-                  {copy.logs} {row.count} · score {row.resonanceScore.toFixed(1)}
+                  {copy.logs} {row.count} · {copy.score} {row.resonanceScore.toFixed(1)}
                 </div>
                 <div className="list-card__meta">{row.lastCue || ""}</div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+    </WidgetShell>
+  );
+}
+
+function MemoryLineShelfCard({ rows = [], locale }) {
+  const copy = getMessageGroup(locale, "showcaseWidgets").memoryLineShelf || {};
+
+  return (
+    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide">
+      {!rows.length ? (
+        <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
+      ) : (
+        <div className="showcase-lineshelf">
+          {rows.map((row) => (
+            <article key={row.id} className="showcase-lineshelf__item">
+              <div className="showcase-lineshelf__quote">"{row.cue}"</div>
+              <div className="small showcase-lineshelf__meta">
+                {row.title} · {row.monthKey || row.eventType}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </WidgetShell>
+  );
+}
+
+function LogDensityCalendarCard({ data, locale }) {
+  const copy = getMessageGroup(locale, "showcaseWidgets").logDensityCalendar || {};
+  const months = Array.isArray(data?.months) ? data.months : [];
+
+  return (
+    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide">
+      {!months.length ? (
+        <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
+      ) : (
+        <>
+          <div className="showcase-density-grid">
+            {months.map((row) => (
+              <div key={row.key} className="showcase-density-grid__item">
+                <div
+                  className="showcase-density-grid__heat"
+                  style={{ "--heat": `${Math.max(8, Math.round((row.intensity || 0) * 100))}%` }}
+                  title={`${row.label} · ${row.count}`}
+                >
+                  <span>{row.count > 0 ? row.count : ""}</span>
+                </div>
+                <div className="small showcase-density-grid__label">{row.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="small page-feedback">
+            {copy.peak} · {data?.peakLabel || "-"} · {data?.peakCount || 0}
+            {copy.countUnit}
+          </div>
+        </>
+      )}
+    </WidgetShell>
+  );
+}
+
+function CharacterGravityCard({ data, locale }) {
+  const copy = getMessageGroup(locale, "showcaseWidgets").characterGravity || {};
+  const nodes = Array.isArray(data?.nodes) ? data.nodes : [];
+  const links = Array.isArray(data?.links) ? data.links : [];
+
+  return (
+    <WidgetShell title={copy.title} lead={copy.lead} className="showcase-card--wide">
+      {!nodes.length ? (
+        <div className="small ui-empty-state ui-empty-state--card">{copy.empty}</div>
+      ) : (
+        <div className="showcase-gravity-wrap">
+          <svg viewBox="0 0 640 360" className="showcase-gravity" role="img" aria-label={copy.title}>
+            {links.map((link) => (
+              <line
+                key={`${link.sourceId}-${link.targetId}`}
+                x1={link.source.x}
+                y1={link.source.y}
+                x2={link.target.x}
+                y2={link.target.y}
+                stroke="rgba(255,255,255,0.16)"
+                strokeWidth={1 + Math.min(4, link.weight)}
+              />
+            ))}
+            {nodes.map((node) => (
+              <g key={node.characterId} transform={`translate(${node.x}, ${node.y})`}>
+                <circle
+                  r={node.r}
+                  fill="rgba(255, 206, 84, 0.16)"
+                  stroke="rgba(255, 214, 124, 0.72)"
+                  strokeWidth="1.5"
+                />
+                <text y="-2" textAnchor="middle" className="showcase-gravity__name">
+                  {node.name}
+                </text>
+                <text y="15" textAnchor="middle" className="showcase-gravity__meta">
+                  {node.topTag || node.featuredAnimeTitle || ""}
+                </text>
+              </g>
+            ))}
+          </svg>
         </div>
       )}
     </WidgetShell>
@@ -185,6 +288,9 @@ const REGISTRY = {
   thisTimeCapsule: ThisTimeCapsuleCard,
   genreWordHeatmap: GenreWordHeatmapCard,
   resonanceShelf: ResonanceShelfCard,
+  memoryLineShelf: MemoryLineShelfCard,
+  logDensityCalendar: LogDensityCalendarCard,
+  characterGravity: CharacterGravityCard,
   posterPalette: PosterPaletteCard,
 };
 
@@ -198,7 +304,10 @@ export default function ShowcaseGrid({ model, layout, locale = "ko", compact = f
         if (!Comp) return null;
         const data = model?.[widget.id];
         return (
-          <div key={widget.id} className={`showcase-grid__item ${widget.size === "wide" ? "is-wide" : "is-half"}`}>
+          <div
+            key={widget.id}
+            className={`showcase-grid__item ${widget.size === "wide" ? "is-wide" : "is-half"}`}
+          >
             <Comp data={data} rows={data} locale={locale} />
           </div>
         );

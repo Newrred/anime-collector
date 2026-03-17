@@ -99,14 +99,12 @@ function getReasonTags(log) {
 function segmentWords(text, locale = "ko") {
   const raw = String(text || "").toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, " ");
   if (!raw.trim()) return [];
-
   if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {
     const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
     return [...segmenter.segment(raw)]
       .map((part) => String(part.segment || "").trim())
       .filter(Boolean);
   }
-
   return raw.split(/\s+/).filter(Boolean);
 }
 
@@ -161,6 +159,14 @@ function hueFamily(hue, locale = "ko") {
   return ko ? "분홍색" : "Pink";
 }
 
+function getLogSort(log) {
+  return Number(log?.watchedAtSort || log?.createdAt || 0);
+}
+
+function topEntryLabel(map, locale = "ko") {
+  return topEntries(map, 1, locale)[0]?.label || "";
+}
+
 export function buildThisTimeCapsule({ logs, mediaMap, titleById, limit = 4 }) {
   const now = new Date();
   const currentYear = now.getUTCFullYear();
@@ -189,7 +195,9 @@ export function buildThisTimeCapsule({ logs, mediaMap, titleById, limit = 4 }) {
     });
   }
 
-  return rows.sort((a, b) => b.year - a.year || b.watchedAtSort - a.watchedAtSort).slice(0, limit);
+  return rows
+    .sort((a, b) => b.year - a.year || b.watchedAtSort - a.watchedAtSort)
+    .slice(0, limit);
 }
 
 export function buildGenreWordHeatmap({ logs, mediaMap, locale = "ko", maxGenres = 6, maxTerms = 8 }) {
@@ -247,7 +255,8 @@ export function buildGenreWordHeatmap({ logs, mediaMap, locale = "ko", maxGenres
       values: terms.map((term) => {
         const pair = pairCounts.get(`${genre}::${term}`) || 0;
         const global = termCounts.get(term) || 1;
-        const lift = pair > 0 ? (pair / genreTotal) / (global / Math.max(1, totalGenreAssignments)) : 0;
+        const lift =
+          pair > 0 ? (pair / genreTotal) / (global / Math.max(1, totalGenreAssignments)) : 0;
         return {
           term,
           count: pair,
@@ -318,7 +327,8 @@ export function buildResonanceShelf({ logs, mediaMap, titleById, limit = 6 }) {
     }
     const row = byAnime.get(id);
     row.count += 1;
-    row.totalText += String(log?.cue || "").trim().length + String(log?.note || "").trim().length;
+    row.totalText +=
+      String(log?.cue || "").trim().length + String(log?.note || "").trim().length;
     const date = parseLogDate(log);
     if (date?.monthKey) row.monthKeys.add(date.monthKey);
     if (String(log?.eventType || "") === "재시청") row.rewatchCount += 1;
@@ -339,6 +349,195 @@ export function buildResonanceShelf({ logs, mediaMap, titleById, limit = 6 }) {
     }))
     .sort((a, b) => b.resonanceScore - a.resonanceScore || b.latestSort - a.latestSort)
     .slice(0, limit);
+}
+
+export function buildMemoryLineShelf({ logs, mediaMap, titleById, locale = "ko", limit = 6 }) {
+  const seenCue = new Set();
+
+  return safeArray(logs)
+    .map((log) => {
+      const cue = String(log?.cue || "").trim();
+      if (cue.length < 8) return null;
+      if (cue.length > 68) return null;
+      const key = cue.toLowerCase();
+      if (seenCue.has(key)) return null;
+      seenCue.add(key);
+
+      const tokenCount = tokenizeLog(log, locale).length;
+      const date = parseLogDate(log);
+      const primary = safeArray(log?.characterRefs).some((ref) => ref?.isPrimary === true);
+      const score =
+        (cue.length >= 12 && cue.length <= 36 ? 2.2 : 1.1) +
+        Math.min(2, tokenCount / 3) +
+        (primary ? 1.2 : 0) +
+        (String(log?.note || "").trim() ? 0.4 : 0) +
+        Math.min(1.2, getLogSort(log) / 10 ** 13);
+
+      return {
+        id: String(log?.id || ""),
+        anilistId: Number(log?.anilistId),
+        title: getTitle(log?.anilistId, titleById),
+        poster: getPoster(log?.anilistId, mediaMap),
+        cue,
+        eventType: String(log?.eventType || "기록"),
+        monthKey: date?.monthKey || "",
+        score,
+        watchedAtSort: getLogSort(log),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || b.watchedAtSort - a.watchedAtSort)
+    .slice(0, limit);
+}
+
+export function buildLogDensityCalendar({ logs, months = 12, now = new Date() }) {
+  const slots = [];
+  for (let i = months - 1; i >= 0; i -= 1) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    slots.push({
+      key: `${year}-${month}`,
+      label: String(d.getUTCMonth() + 1),
+      count: 0,
+      preciseCount: 0,
+      fuzzyCount: 0,
+    });
+  }
+
+  const byKey = new Map(slots.map((row) => [row.key, row]));
+
+  for (const log of safeArray(logs)) {
+    const date = parseLogDate(log);
+    if (!date?.monthKey || !byKey.has(date.monthKey)) continue;
+    const row = byKey.get(date.monthKey);
+    row.count += 1;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(log?.watchedAtStart || "").trim())) row.preciseCount += 1;
+    else row.fuzzyCount += 1;
+  }
+
+  const maxCount = Math.max(0, ...slots.map((row) => row.count));
+  const peak = [...slots].sort((a, b) => b.count - a.count)[0] || null;
+
+  return {
+    months: slots.map((row) => ({
+      ...row,
+      intensity: maxCount > 0 ? row.count / maxCount : 0,
+    })),
+    peakLabel: peak?.label || "-",
+    peakCount: peak?.count || 0,
+  };
+}
+
+export function buildCharacterGravity({ logs, titleById, locale = "ko", limit = 8 }) {
+  const nowMs = Date.now();
+  const cutoff60 = nowMs - 60 * 24 * 60 * 60 * 1000;
+  const nodeMap = new Map();
+  const linkMap = new Map();
+
+  for (const log of safeArray(logs)) {
+    const sort = getLogSort(log);
+    const refs = safeArray(log?.characterRefs)
+      .map((ref) => ({
+        characterId: Number(ref?.characterId),
+        name: String(ref?.nameSnapshot || "").trim(),
+        image: String(ref?.imageSnapshot || "").trim(),
+        isPrimary: ref?.isPrimary === true,
+        reasonTags: safeArray(ref?.reasonTags).map((tag) => String(tag || "").trim()).filter(Boolean),
+      }))
+      .filter((ref) => Number.isFinite(ref.characterId));
+
+    const uniq = [];
+    const seen = new Set();
+    for (const ref of refs) {
+      if (seen.has(ref.characterId)) continue;
+      seen.add(ref.characterId);
+      uniq.push(ref);
+    }
+    if (!uniq.length) continue;
+
+    for (const ref of uniq) {
+      if (!nodeMap.has(ref.characterId)) {
+        nodeMap.set(ref.characterId, {
+          characterId: ref.characterId,
+          name: ref.name || `#${ref.characterId}`,
+          image: ref.image || "",
+          total: 0,
+          recent60: 0,
+          primaryCount: 0,
+          animeIds: new Set(),
+          tagMap: new Map(),
+          featuredAnimeId: Number(log?.anilistId),
+        });
+      }
+
+      const row = nodeMap.get(ref.characterId);
+      row.total += 1;
+      if (sort >= cutoff60) row.recent60 += 1;
+      if (ref.isPrimary) row.primaryCount += 1;
+      if (Number.isFinite(Number(log?.anilistId))) row.animeIds.add(Number(log.anilistId));
+      if (Number.isFinite(Number(log?.anilistId))) row.featuredAnimeId = Number(log.anilistId);
+      for (const tag of ref.reasonTags) {
+        row.tagMap.set(tag, (row.tagMap.get(tag) || 0) + 1);
+      }
+    }
+
+    for (let i = 0; i < uniq.length; i += 1) {
+      for (let j = i + 1; j < uniq.length; j += 1) {
+        const a = uniq[i].characterId;
+        const b = uniq[j].characterId;
+        const key = a < b ? `${a}::${b}` : `${b}::${a}`;
+        linkMap.set(key, (linkMap.get(key) || 0) + 1);
+      }
+    }
+  }
+
+  const ranked = [...nodeMap.values()]
+    .map((row) => ({
+      ...row,
+      topTag: topEntryLabel(row.tagMap, locale),
+      animeCount: row.animeIds.size,
+      featuredAnimeTitle: Number.isFinite(row.featuredAnimeId) ? getTitle(row.featuredAnimeId, titleById) : "",
+      weight: row.total * 3 + row.recent60 * 2 + row.primaryCount * 1.5 + row.animeIds.size,
+    }))
+    .filter((row) => row.total >= 2)
+    .sort((a, b) => b.weight - a.weight || b.total - a.total)
+    .slice(0, limit);
+
+  if (!ranked.length) return { nodes: [], links: [] };
+
+  const allowed = new Set(ranked.map((row) => row.characterId));
+  const maxWeight = Math.max(...ranked.map((row) => row.weight));
+
+  const positioned = ranked.map((row, index) => {
+    if (index === 0) {
+      return { ...row, x: 320, y: 180, r: 52 };
+    }
+    const ring = Math.floor((index - 1) / 4) + 1;
+    const posInRing = (index - 1) % 4;
+    const angle = -Math.PI / 2 + (Math.PI * 2 * posInRing) / 4;
+    const radius = ring === 1 ? 116 : 190;
+    return {
+      ...row,
+      x: 320 + Math.cos(angle) * radius,
+      y: 180 + Math.sin(angle) * radius,
+      r: 26 + Math.round((row.weight / Math.max(1, maxWeight)) * 18),
+    };
+  });
+
+  const links = [...linkMap.entries()]
+    .map(([key, weight]) => {
+      const [sourceId, targetId] = key.split("::").map(Number);
+      if (!allowed.has(sourceId) || !allowed.has(targetId)) return null;
+      if (weight < 2) return null;
+      const source = positioned.find((row) => row.characterId === sourceId);
+      const target = positioned.find((row) => row.characterId === targetId);
+      if (!source || !target) return null;
+      return { sourceId, targetId, weight, source, target };
+    })
+    .filter(Boolean);
+
+  return { nodes: positioned, links };
 }
 
 export function buildPosterPalette({ items, mediaMap, titleById, locale = "ko" }) {
@@ -381,13 +580,16 @@ export function buildShowcaseModel({ items, logs, mediaMap, titleById, locale = 
     thisTimeCapsule: buildThisTimeCapsule({ logs, mediaMap, titleById }),
     genreWordHeatmap: buildGenreWordHeatmap({ logs, mediaMap, locale }),
     resonanceShelf: buildResonanceShelf({ logs, mediaMap, titleById }),
+    memoryLineShelf: buildMemoryLineShelf({ logs, mediaMap, titleById, locale }),
+    logDensityCalendar: buildLogDensityCalendar({ logs }),
+    characterGravity: buildCharacterGravity({ logs, titleById, locale }),
     posterPalette: buildPosterPalette({ items, mediaMap, titleById, locale }),
   };
 }
 
 export function buildPublicShowcaseSnapshot({ profile, layout, model }) {
   return {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     profile: {
       displayName: String(profile?.displayName || "").trim(),
@@ -400,6 +602,9 @@ export function buildPublicShowcaseSnapshot({ profile, layout, model }) {
       thisTimeCapsule: model?.thisTimeCapsule || [],
       genreWordHeatmap: model?.genreWordHeatmap || { genres: [], terms: [], cells: [] },
       resonanceShelf: model?.resonanceShelf || [],
+      memoryLineShelf: model?.memoryLineShelf || [],
+      logDensityCalendar: model?.logDensityCalendar || { months: [], peakLabel: "-", peakCount: 0 },
+      characterGravity: model?.characterGravity || { nodes: [], links: [] },
       posterPalette: model?.posterPalette || [],
     },
   };

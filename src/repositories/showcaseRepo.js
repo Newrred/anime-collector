@@ -1,17 +1,20 @@
 import { supabase } from "../lib/supabaseClient.js";
 import { readJson, writeJson } from "../storage/localJsonStore.js";
 
-const LOCAL_LAYOUT_KEY = "moemoa.showcase.layout.v1";
+const LOCAL_LAYOUT_KEY = "moemoa.showcase.layout.v2";
 const LAYOUT_TABLE = "user_showcase_layouts";
 const PUBLIC_TABLE = "user_showcase_public";
 
 export const DEFAULT_SHOWCASE_LAYOUT = {
-  version: 1,
+  version: 2,
   widgets: [
-    { id: "tasteFingerprint", enabled: true, size: "half" },
-    { id: "thisTimeCapsule", enabled: true, size: "half" },
-    { id: "genreWordHeatmap", enabled: true, size: "wide" },
     { id: "resonanceShelf", enabled: true, size: "wide" },
+    { id: "memoryLineShelf", enabled: true, size: "wide" },
+    { id: "thisTimeCapsule", enabled: true, size: "half" },
+    { id: "tasteFingerprint", enabled: true, size: "half" },
+    { id: "logDensityCalendar", enabled: true, size: "wide" },
+    { id: "characterGravity", enabled: true, size: "wide" },
+    { id: "genreWordHeatmap", enabled: true, size: "wide" },
     { id: "posterPalette", enabled: true, size: "half" },
   ],
 };
@@ -40,7 +43,7 @@ export function normalizeShowcaseLayout(raw) {
   }
 
   return {
-    version: 1,
+    version: 2,
     widgets: deduped,
   };
 }
@@ -63,7 +66,6 @@ export async function readShowcaseLayout(userId = null) {
 export async function saveShowcaseLayout(userId = null, layout) {
   const normalized = normalizeShowcaseLayout(layout);
   writeJson(LOCAL_LAYOUT_KEY, normalized);
-
   if (!supabase || !userId) return normalized;
 
   const { error } = await supabase.from(LAYOUT_TABLE).upsert(
