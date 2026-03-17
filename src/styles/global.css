@@ -428,17 +428,18 @@ h3 {
   min-height: var(--topbar-h);
   background: color-mix(in srgb, var(--bg-app) 78%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--surface-strong) 30%, transparent);
   padding: var(--space-3) max(20px, calc((100dvw - var(--page-max)) / 2 + 16px));
 }
 
 .top-nav {
-  margin: calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) var(--space-3);
+  margin: calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) var(--space-4);
   padding: var(--space-3) var(--page-pad);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 8px 24px color-mix(in srgb, black 18%, transparent);
 }
 
 .top-nav__links {
@@ -450,15 +451,21 @@ h3 {
 
 .top-nav__links--routes {
   min-width: 0;
+  justify-content: flex-start;
+}
+
+.top-nav__links--routes .top-nav__link {
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .top-nav__brand {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex: 0 0 auto;
-  padding: 0 8px 0 0;
-  margin-right: 6px;
+  padding: 0 4px 0 0;
+  margin-right: 4px;
   border-radius: 0;
   overflow: visible;
   background: transparent;
