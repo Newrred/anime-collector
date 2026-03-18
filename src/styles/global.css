@@ -4702,14 +4702,10 @@ h3 {
 }
 
 .home-page .home-section-block > .pageHeader {
-  margin-bottom: var(--layout-gap-sm);
-}
-
-.home-page .home-section-block--hero > .pageHeader {
   margin-bottom: 0;
 }
 
-.home-page .home-section-block--hero .pageHeader {
+.home-page .home-section-block .pageHeader {
   gap: var(--layout-gap-tight);
 }
 

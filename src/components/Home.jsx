@@ -304,7 +304,7 @@ export default function Home() {
         {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
       </section>
 
-      <section className="home-section-block home-section-block--hero">
+      <section className="home-section-block">
         <div className="pageHeader">
           <p className="sectionLead">{copy.heroLead}</p>
           <h2 className="sectionTitle home-section-title">{copy.heroTitle}</h2>
