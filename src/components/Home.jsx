@@ -82,6 +82,11 @@ export default function Home() {
     const cover = heroMedia?.coverImage?.extraLarge || heroMedia?.coverImage?.large || heroMedia?.coverImage?.medium || "";
     return String(cover || "").trim();
   }, [heroAnimeId, heroMedia]);
+  const heroLayoutStyle = heroVisual
+    ? {
+        backgroundImage: `linear-gradient(130deg, var(--color-hero-overlay-start), var(--color-hero-overlay-end)), url("${heroVisual}")`,
+      }
+    : {};
 
   const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
   const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
@@ -161,8 +166,9 @@ export default function Home() {
         <p className="pageLead">{copy.lead}</p>
       </section>
 
-      <section className="surface-card home-focus-card">
-        <div className="home-focus-card__layout">
+      <section className={`surface-card home-focus-card${heroVisual ? " home-focus-card--hero-bg" : ""}`}>
+        <div className="home-focus-card__layout" style={heroLayoutStyle}>
+          {heroVisual ? <div className="home-focus-card__overlay" aria-hidden="true" /> : null}
           <div className="home-focus-card__body">
             <div className="pageHeader home-focus-card__head">
               <h2 className="sectionTitle">{copy.heroTitle}</h2>
@@ -191,11 +197,6 @@ export default function Home() {
             </div>
             <div className="small page-feedback">{copy.heroHint}</div>
           </div>
-          {heroVisual ? (
-            <div className="home-focus-card__visual">
-              <img src={heroVisual} alt={heroTitle} loading="lazy" />
-            </div>
-          ) : null}
         </div>
       </section>
 

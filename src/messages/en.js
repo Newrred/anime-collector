@@ -108,12 +108,20 @@ const enMessages = {
         body: "Manage backup/restore/sync in the Data page, and use Organizer Board as a secondary tier tool from the manage menu.",
       },
     ],
-    tipsTitle: "About this project",
-    tips: [
-      "MOEMOA is a personal project built by one creator focused on lightweight personal record workflows.",
-      "If you find bugs or have feature ideas, share them in feedback. It helps me set the next priorities.",
-      "Planned updates focus on practical improvements from real users and smoother daily use on mobile-first workflows.",
-    ],
+    tipsTitle: "About",
+    aboutSubtitle: "MOEMOA is an anime journaling experience built around continuity.",
+    aboutIntro: "It is designed so your records don't disappear and can keep gaining meaning over time.",
+    aboutCreatorTitle: "Creator note",
+    aboutCreatorText:
+      "MOEMOA started as a way to combine stable local notes with convenient cloud sync. It is still evolving based on how people actually use it.",
+    aboutVisionTitle: "Design direction",
+    aboutVisionText: "The key goal is keeping the flow smooth across Journal, analysis (tier/widgets), and public showcase.",
+    aboutCopyButton: "Copy feedback template",
+    feedbackCopyTemplate:
+      "MOEMOA feedback\n- Page/feature:\n- Expected behavior:\n- Actual behavior:\n- Suggested improvement:\n- Browser/device:",
+    feedbackCopyOk: "Copied feedback template.",
+    feedbackCopyFail: "Copy failed. Please check browser permissions.",
+    tips: ["Bug reports, feature ideas, and usage notes are reflected in the next release."],
   },
   library: {
     fallbackBackup: "Automatic local backup is on. Export JSON regularly for a manual backup.",

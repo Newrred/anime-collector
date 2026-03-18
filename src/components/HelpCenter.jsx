@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { getMessageGroup } from "../domain/messages.js";
@@ -13,6 +13,8 @@ export default function HelpCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "helpCenter");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
+  const copyMessageTimeoutRef = useRef(null);
 
   useEffect(() => {
     function syncInstallState() {
@@ -39,12 +41,29 @@ export default function HelpCenter() {
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
+  useEffect(() => () => {
+    if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
+  }, []);
+
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
     if (typeof window.__promptPwaInstall !== "function") return;
     try {
       await window.__promptPwaInstall();
     } catch {}
+  }
+
+  async function onCopyFeedbackMessage() {
+    if (typeof window === "undefined" || typeof copy.feedbackCopyTemplate !== "string") return;
+    try {
+      await navigator.clipboard.writeText(copy.feedbackCopyTemplate);
+      setCopyMessage(copy.feedbackCopyOk || "복사했어요.");
+    } catch (err) {
+      setCopyMessage(copy.feedbackCopyFail || "복사에 실패했어요.");
+    } finally {
+      if (copyMessageTimeoutRef.current) clearTimeout(copyMessageTimeoutRef.current);
+      copyMessageTimeoutRef.current = setTimeout(() => setCopyMessage(""), 2500);
+    }
   }
 
   return (
@@ -104,12 +123,25 @@ export default function HelpCenter() {
           <div className="pageHeader">
             <h2 className="sectionTitle">{copy.tipsTitle}</h2>
           </div>
-          <div className="help-center__tips">
-            {copy.tips.map((tip) => (
-              <div key={tip} className="small help-center__tip">
-                {tip}
-              </div>
-            ))}
+          <div className="help-center__about">
+            <p className="small help-center__about-subtitle">{copy.aboutSubtitle}</p>
+            <p className="small help-center__about-intro">{copy.aboutIntro}</p>
+            <div className="help-center__grid help-center__about-grid">
+              <article className="help-center__about-card">
+                <h3 className="sectionTitle help-center__about-title">{copy.aboutCreatorTitle}</h3>
+                <p className="small help-center__about-text">{copy.aboutCreatorText}</p>
+              </article>
+              <article className="help-center__about-card">
+                <h3 className="sectionTitle help-center__about-title">{copy.aboutVisionTitle}</h3>
+                <p className="small help-center__about-text">{copy.aboutVisionText}</p>
+              </article>
+            </div>
+            <div className="help-center__about-actions">
+              <button type="button" className="btn btn--subtle" onClick={onCopyFeedbackMessage}>
+                <span className="btn__label">{copy.aboutCopyButton}</span>
+              </button>
+            </div>
+            {copyMessage ? <p className="small help-center__about-copy-message">{copyMessage}</p> : null}
           </div>
         </section>
       </div>
