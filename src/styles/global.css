@@ -4707,7 +4707,7 @@ h3 {
 
 .home-section-block {
   display: grid;
-  gap: calc(var(--layout-gap-md) * 2);
+  gap: calc(var(--layout-gap-md) * 1.4);
 }
 
 .home-section-block .pageHeader {
