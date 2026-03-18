@@ -18,6 +18,7 @@ import {
   readShowcaseLayout,
   saveShowcaseLayout,
 } from "../repositories/showcaseRepo.js";
+import { IconEye, IconEyeOff, IconSortAsc, IconSortDesc } from "./ui/AppIcons.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { ProfilePeopleList } from "./profile/ProfileUi.jsx";
 import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
@@ -409,23 +410,27 @@ export default function ProfileCenter() {
                     <div className="showcase-editor-row__actions">
                       <button
                         type="button"
-                        className="btn btn--subtle"
+                        className="btn btn--subtle btn--icon"
                         onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index - 1))}
                         disabled={index === 0}
+                        aria-label={editorCopy.moveUp}
+                        title={editorCopy.moveUp}
                       >
-                        {editorCopy.moveUp}
+                        <span className="btn__icon"><IconSortAsc size={16} /></span>
                       </button>
                       <button
                         type="button"
-                        className="btn btn--subtle"
+                        className="btn btn--subtle btn--icon"
                         onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index + 1))}
                         disabled={index === showcaseLayout.widgets.length - 1}
+                        aria-label={editorCopy.moveDown}
+                        title={editorCopy.moveDown}
                       >
-                        {editorCopy.moveDown}
+                        <span className="btn__icon"><IconSortDesc size={16} /></span>
                       </button>
                       <button
                         type="button"
-                        className="btn btn--subtle"
+                        className="btn btn--subtle btn--icon"
                         onClick={() => {
                           setShowcaseLayout((prev) => ({
                             ...prev,
@@ -434,8 +439,12 @@ export default function ProfileCenter() {
                             ),
                           }));
                         }}
+                        aria-label={widget.enabled ? editorCopy.hide : editorCopy.show}
+                        title={widget.enabled ? editorCopy.hide : editorCopy.show}
                       >
-                        {widget.enabled ? editorCopy.hide : editorCopy.show}
+                        <span className="btn__icon">
+                          {widget.enabled ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                        </span>
                       </button>
                     </div>
                   </div>

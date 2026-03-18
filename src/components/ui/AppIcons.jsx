@@ -206,6 +206,26 @@ function IconUser(props) {
   );
 }
 
+function IconEye(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M2.5 12s3.6-6 9.5-6 9.5 6 9.5 6-3.6 6-9.5 6-9.5-6-9.5-6Z" />
+      <circle cx="12" cy="12" r="2.7" />
+    </IconBase>
+  );
+}
+
+function IconEyeOff(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M2.5 12s3.6-6 9.5-6a10.4 10.4 0 0 1 4.2.9" />
+      <path d="M21.5 12s-3.6 6-9.5 6a10.4 10.4 0 0 1-4.2-.9" />
+      <circle cx="12" cy="12" r="2.7" />
+      <path d="M4 4 20 20" />
+    </IconBase>
+  );
+}
+
 function IconRefreshCw(props) {
   return (
     <IconBase {...props}>
@@ -279,6 +299,8 @@ export {
   IconCopy,
   IconDatabase,
   IconDownload,
+  IconEye,
+  IconEyeOff,
   IconFile,
   IconGear,
   IconGlobe,

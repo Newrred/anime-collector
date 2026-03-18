@@ -4771,6 +4771,11 @@ h3 {
   justify-content: flex-end;
 }
 
+.minihome-canvas > .pageHeader,
+.minihome-controls > .pageHeader {
+  margin-bottom: var(--layout-gap-sm);
+}
+
 .profile-link-box-stack {
   display: grid;
   gap: 12px;
