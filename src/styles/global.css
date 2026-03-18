@@ -5326,6 +5326,15 @@ html[data-theme="light"] body {
 
 .home-showcase-preview .showcase-grid {
   gap: var(--layout-gap-sm);
+  align-items: start;
+}
+
+.home-showcase-preview .showcase-grid__item {
+  align-self: start;
+}
+
+.home-showcase-preview .showcase-card {
+  min-height: 0;
 }
 
 .minihome-page__header {
