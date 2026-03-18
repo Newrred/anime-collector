@@ -63,7 +63,7 @@ const koMessages = {
   },
   helpCenter: {
     title: "도움말",
-    lead: "홈, 기록장, 쇼케이스 중심 흐름을 빠르게 이해할 수 있도록 핵심만 정리했습니다.",
+    lead: "",
     noticesTitle: "공지사항",
     noticeKinds: {
       important: "중요",

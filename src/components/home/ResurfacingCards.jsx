@@ -45,7 +45,7 @@ export default function ResurfacingCards({
     <section className="home-resurfacing-grid">
       <div className="home-section-block">
         <div className="pageHeader">
-          <h2 className="sectionTitle">{copy.noMemory}</h2>
+          <h2 className="sectionTitle home-section-title">{copy.noMemory}</h2>
         </div>
         <section className="surface-card home-resurfacing-card">
           {missingMemory.length === 0 ? (
@@ -70,7 +70,7 @@ export default function ResurfacingCards({
 
       <div className="home-section-block">
         <div className="pageHeader">
-          <h2 className="sectionTitle">{copy.recentLogs}</h2>
+          <h2 className="sectionTitle home-section-title">{copy.recentLogs}</h2>
         </div>
         <section className="surface-card home-resurfacing-card">
           {recentLogs.length === 0 ? (
@@ -96,7 +96,7 @@ export default function ResurfacingCards({
       {hasThisTime ? (
         <div className="home-section-block home-resurfacing-card--wide">
           <div className="pageHeader">
-            <h2 className="sectionTitle">{copy.thisTime}</h2>
+            <h2 className="sectionTitle home-section-title">{copy.thisTime}</h2>
             <p className="sectionLead">{copy.revisitHint}</p>
           </div>
           <section className="surface-card home-resurfacing-card">

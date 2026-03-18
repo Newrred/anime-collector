@@ -63,7 +63,7 @@ const enMessages = {
   },
   helpCenter: {
     title: "Help",
-    lead: "This page gives you the shortest path to understanding the Home, Journal, and Showcase flow.",
+    lead: "",
     noticesTitle: "Announcements",
     noticeKinds: {
       important: "Important",

@@ -84,7 +84,7 @@ export default function HelpCenter() {
         <section className="surface-card status-panel">
           <div className="pageHeader">
             <h1 className="pageTitle">{copy.title}</h1>
-            <p className="pageLead">{copy.lead}</p>
+            {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
           </div>
         </section>
 

@@ -4697,6 +4697,18 @@ h3 {
   gap: var(--layout-gap-sm);
 }
 
+.home-section-title {
+  font-size: var(--type-title-lg-size);
+  font-weight: var(--type-title-weight);
+  line-height: 1.25;
+}
+
+.home-resurfacing-subtitle {
+  font-size: var(--type-title-lg-size);
+  font-weight: var(--type-title-weight);
+  line-height: 1.25;
+}
+
 .home-resurfacing-card--wide {
   grid-column: 1 / -1;
 }
