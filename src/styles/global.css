@@ -4694,19 +4694,16 @@ h3 {
 
 .home-section-block {
   display: grid;
-  gap: calc(var(--layout-gap-sm) * 4);
+  gap: var(--layout-gap-sm);
 }
 
 .home-section-block .pageHeader {
-  gap: calc(var(--layout-gap-tight) * 4);
+  gap: var(--layout-gap-tight);
 }
 
 .home-page .home-section-block > .pageHeader {
+  margin-top: calc(var(--layout-gap-sm) * 3);
   margin-bottom: 0;
-}
-
-.home-page .home-section-block .pageHeader {
-  gap: var(--layout-gap-tight);
 }
 
 .home-section-title {
