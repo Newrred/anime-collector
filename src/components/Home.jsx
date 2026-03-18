@@ -24,7 +24,7 @@ function buildLibraryHref(base, anilistId, focus = "") {
 export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "home");
-  const { items, logs, pins, mediaMap, titleById } = useShowcaseSource(locale);
+  const { items, logs, mediaMap, titleById } = useShowcaseSource(locale);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [recapYear, setRecapYear] = useState(null);
@@ -49,7 +49,7 @@ export default function Home() {
     };
   }, []);
 
-  const resurfacing = useMemo(() => buildHomeResurfacing({ items, logs, pins }), [items, logs, pins]);
+  const resurfacing = useMemo(() => buildHomeResurfacing({ items, logs }), [items, logs]);
 
   const showcaseModel = useMemo(
     () => buildShowcaseModel({ items, logs, mediaMap, titleById, locale }),
@@ -58,27 +58,6 @@ export default function Home() {
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
-
-  const homeHeroImage = useMemo(() => {
-    const heroId = Number(
-      resurfacing?.recentLogs?.[0]?.anilistId ?? resurfacing?.missingMemory?.[0]?.anilistId ?? items?.[0]?.anilistId
-    );
-    if (Number.isFinite(heroId)) {
-      const media = mediaMap.get(heroId);
-      const banner = String(media?.bannerImage || "").trim();
-      if (banner) return banner;
-      const cover = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
-      if (cover) return String(cover);
-    }
-
-    for (const it of items) {
-      const media = mediaMap.get(Number(it?.anilistId));
-      const banner = String(media?.bannerImage || "").trim();
-      if (banner) return banner;
-    }
-
-    return "";
-  }, [items, mediaMap, resurfacing]);
 
   const heroEntry = useMemo(
     () => resurfacing?.recentLogs?.[0] ?? resurfacing?.missingMemory?.[0] ?? items?.[0] ?? null,
@@ -96,9 +75,6 @@ export default function Home() {
   const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : `${base}library/?tab=add`;
   const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/?tab=collection`;
   const heroCue = String(heroEntry?.cue || "").trim();
-  const heroMeta = [heroSourceLabel, Number.isFinite(heroAnimeId) ? heroTitle : "", heroEntry?.label || ""]
-    .filter(Boolean)
-    .slice(0, 3);
 
   const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
   const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
@@ -178,47 +154,33 @@ export default function Home() {
         <p className="pageLead">{copy.lead}</p>
       </section>
 
-      <section
-        className="surface-card home-memory-hero"
-        style={
-          homeHeroImage
-            ? {
-                backgroundImage: `linear-gradient(135deg, var(--color-hero-overlay-start), var(--color-hero-overlay-end)), linear-gradient(135deg, var(--color-hero-accent-start), var(--color-hero-accent-end)), url("${homeHeroImage}")`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : { background: "linear-gradient(135deg, var(--color-hero-fallback-start), var(--color-hero-fallback-end))" }
-        }
-      >
-        <div className="home-memory-hero__copy">
-          <div className="small home-memory-hero__eyebrow">{copy.heroTitle}</div>
-          <h2 className="sectionTitle home-memory-hero__title">{heroTitle}</h2>
-          <p className="sectionLead home-memory-hero__lead">{heroCue || copy.heroLead}</p>
-          <div className="status-badge-row">
-            {heroMeta.map((entry) => (
-              <div key={entry} className="small status-badge">
-                {entry}
-              </div>
-            ))}
+      <section className="surface-card home-focus-card">
+        <div className="pageHeader home-focus-card__head">
+          <h2 className="sectionTitle">{copy.heroTitle}</h2>
+          <p className="sectionLead">{copy.heroLead}</p>
+          <div className="small home-focus-card__source">{heroSourceLabel}</div>
+        </div>
+        <h3 className="home-focus-card__title">{heroTitle}</h3>
+        <p className="home-focus-card__cue">{heroCue || copy.heroLead}</p>
+        <div className="home-focus-card__stats">
+          <div className="home-focus-card__stat">
+            <span className="small">{copy.animeCount}</span>
+            <strong>{locale === "en" ? items.length : `${items.length}${copy.unit}`}</strong>
           </div>
-          <div className="action-row">
-            <a href={heroPrimaryHref} className="btn home-memory-hero__cta">
-              {copy.quickRecord}
-            </a>
-            <a href={heroSecondaryHref} className="btn btn--subtle home-memory-hero__cta-link">
-              {copy.heroOpen}
-            </a>
+          <div className="home-focus-card__stat">
+            <span className="small">{copy.logCount}</span>
+            <strong>{locale === "en" ? logs.length : `${logs.length}${copy.unit}`}</strong>
           </div>
         </div>
-        <div className="home-memory-hero__meta">
-          <div className="small status-badge">
-            {locale === "en" ? `${copy.animeCount} ${items.length}` : `${copy.animeCount} ${items.length}${copy.unit}`}
-          </div>
-          <div className="small status-badge">
-            {locale === "en" ? `${copy.logCount} ${logs.length}` : `${copy.logCount} ${logs.length}${copy.unit}`}
-          </div>
-          <div className="small page-feedback">{copy.heroHint}</div>
+        <div className="action-row">
+          <a href={heroPrimaryHref} className="btn">
+            {copy.quickRecord}
+          </a>
+          <a href={heroSecondaryHref} className="btn btn--subtle">
+            {copy.heroOpen}
+          </a>
         </div>
+        <div className="small page-feedback">{copy.heroHint}</div>
       </section>
 
       <ResurfacingCards

@@ -5,7 +5,6 @@ const PREVIEW_LAYOUT = {
   version: 2,
   widgets: [
     { id: "characterGravity", enabled: true, size: "wide" },
-    { id: "resonanceShelf", enabled: true, size: "wide" },
     { id: "memoryLineShelf", enabled: true, size: "wide" },
     { id: "logDensityCalendar", enabled: true, size: "wide" },
   ],

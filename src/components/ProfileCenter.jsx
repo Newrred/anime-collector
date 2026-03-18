@@ -78,6 +78,7 @@ export default function ProfileCenter() {
   const [message, setMessage] = useState("");
   const [showcaseLayout, setShowcaseLayout] = useState(DEFAULT_SHOWCASE_LAYOUT);
   const [publishing, setPublishing] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
@@ -91,6 +92,7 @@ export default function ProfileCenter() {
       setFollowers([]);
       setFollowing([]);
       setEditing(false);
+      setSettingsExpanded(false);
       setShowcaseLayout(DEFAULT_SHOWCASE_LAYOUT);
       return;
     }
@@ -220,6 +222,7 @@ export default function ProfileCenter() {
 
   function handleEditStart() {
     setForm(buildProfileFormState(profile));
+    setSettingsExpanded(true);
     setEditing(true);
     setMessage("");
   }
@@ -264,18 +267,20 @@ export default function ProfileCenter() {
         <div className="profile-page__stack minihome-page__stack">
           <section className="pageHeader minihome-page__header">
             <div>
-              <div className="small profile-kicker">{copy.title}</div>
               <h1 className="pageTitle">{copy.title}</h1>
               <p className="pageLead">{copy.lead}</p>
-              <div className="status-badge-row">
-                <span className={`status-badge ${profile?.profilePublic ? "is-public" : ""}`}>
-                  {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate}
-                </span>
-                <span className="status-badge">@{savedHandle || form.handle || copy.handlePlaceholder}</span>
-              </div>
+              <p className="small minihome-page__meta">
+                {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate} · @
+                {savedHandle || form.handle || copy.handlePlaceholder}
+              </p>
             </div>
 
             <div className="action-row">
+              {!editing ? (
+                <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
+                  {copy.editProfile}
+                </button>
+              ) : null}
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
                 {copy.copyLink}
               </button>
@@ -373,17 +378,25 @@ export default function ProfileCenter() {
                 <h2 className="sectionTitle">{copy.settingsTitle}</h2>
                 <p className="sectionLead">{copy.settingsLead}</p>
               </div>
-              {!editing ? (
-                <div className="action-row minihome-settings__actions">
+              <div className="action-row minihome-settings__actions">
+                <button
+                  type="button"
+                  className="btn btn--subtle"
+                  onClick={() => setSettingsExpanded((current) => !current)}
+                >
+                  {settingsExpanded ? copy.closeSettings : copy.openSettings}
+                </button>
+                {!editing ? (
                   <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
                     {copy.editProfile}
                   </button>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
             </div>
 
-            {editing ? (
-              <div className="profile-form">
+            {settingsExpanded ? (
+              editing ? (
+                <div className="profile-form">
                 <label className="profile-field">
                   <span className="small profile-field__label">{copy.displayNameLabel}</span>
                   <input
@@ -437,22 +450,25 @@ export default function ProfileCenter() {
                     {copy.cancelEdit}
                   </button>
                 </div>
-              </div>
+                </div>
+              ) : (
+                <div className="profile-link-box-stack">
+                  <div className="profile-link-box">
+                    <div className="small profile-link-box__label">{copy.displayNameLabel}</div>
+                    <div className="profile-link-box__value">{savedDisplayName}</div>
+                  </div>
+                  <div className="profile-link-box">
+                    <div className="small profile-link-box__label">{copy.publicLink}</div>
+                    <div className="profile-link-box__value">{publicPath}</div>
+                  </div>
+                  <div className="profile-link-box">
+                    <div className="small profile-link-box__label">{copy.bioLabel}</div>
+                    <div className="profile-link-box__value">{savedBio || copy.bioEmpty}</div>
+                  </div>
+                </div>
+              )
             ) : (
-              <div className="profile-link-box-stack">
-                <div className="profile-link-box">
-                  <div className="small profile-link-box__label">{copy.displayNameLabel}</div>
-                  <div className="profile-link-box__value">{savedDisplayName}</div>
-                </div>
-                <div className="profile-link-box">
-                  <div className="small profile-link-box__label">{copy.publicLink}</div>
-                  <div className="profile-link-box__value">{publicPath}</div>
-                </div>
-                <div className="profile-link-box">
-                  <div className="small profile-link-box__label">{copy.bioLabel}</div>
-                  <div className="profile-link-box__value">{savedBio || copy.bioEmpty}</div>
-                </div>
-              </div>
+              <div className="small page-feedback">{copy.settingsCollapsedHint}</div>
             )}
           </section>
 
