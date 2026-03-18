@@ -18,7 +18,7 @@ function renderAnimeRow({ base, anilistId, href, metaTop, metaBottom = "", media
   const title = titleById.get(Number(anilistId)) || `#${anilistId}`;
   const poster = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
   return (
-    <a href={href || buildLibraryDetailHref(base, anilistId)} className="list-card">
+    <a href={href || buildLibraryDetailHref(base, anilistId)} className="list-card home-resurfacing-list-card">
       {poster ? <img src={poster} alt={title} loading="lazy" className="list-card__thumb" /> : <div className="list-card__thumb" aria-hidden />}
       <div className="list-card__body">
         <div className="list-card__eyebrow">{metaTop}</div>

@@ -1433,6 +1433,16 @@ h3 {
   color: inherit;
 }
 
+.home-resurfacing-list-card {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-resurfacing-list-card .list-card__thumb {
+  background: transparent;
+}
+
 .list-card--button {
   width: 100%;
   text-align: left;
