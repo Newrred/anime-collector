@@ -4364,7 +4364,7 @@ h3 {
 
 .showcase-card {
   display: grid;
-  gap: var(--layout-gap-sm);
+  gap: calc(var(--layout-gap-sm) * 2);
   min-height: 100%;
   position: relative;
   overflow: hidden;
@@ -4395,7 +4395,7 @@ h3 {
 }
 
 .showcase-card__head {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .showcase-card--density {

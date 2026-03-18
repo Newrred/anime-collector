@@ -48,7 +48,6 @@ import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import { wikidataGetKoTitlesByAniListIds } from "../lib/wikidata";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { Chip, CollapsiblePanelHeader, GenresRow, SegTabButton } from "./library/LibraryUi.jsx";
-import LibraryStatsPanel from "./library/LibraryStatsPanel.jsx";
 import LibraryFiltersPanel from "./library/LibraryFiltersPanel.jsx";
 import LibraryDetailModal from "./library/LibraryDetailModal.jsx";
 import LibraryQuickLogSheet from "./library/LibraryQuickLogSheet.jsx";
@@ -337,7 +336,6 @@ export default function Library() {
 
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
   const [pageTab, setPageTab] = useState("collection");
   const [addPanelOpen, setAddPanelOpen] = useState(true);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
@@ -938,64 +936,6 @@ export default function Library() {
     const maxColsByWidth = Math.max(minCols, Math.floor(gridWidth / minCardWidth));
     return clamp(scaled, minCols, Math.max(minCols, maxColsByWidth));
   }, [cardsPerRowBase, gridWidth, cardView]);
-
-  const dashboard = useMemo(() => {
-    const statusRows = ["완료", "보는중", "보류", "하차", "미분류"].map((s) => ({
-      key: s,
-      label: formatStatusLabel(s, locale),
-      count: items.filter((it) => (it.status || "미분류") === s).length,
-    }));
-
-    const genreCount = new Map();
-    let scoreSum = 0;
-    let scoreCount = 0;
-
-    for (const it of items) {
-      const m = mediaMap.get(it.anilistId);
-      const gs = safeGenres(m);
-      for (const g of gs) {
-        genreCount.set(g, (genreCount.get(g) || 0) + 1);
-      }
-
-      const score = normalizeScoreValue(it?.score);
-      if (score != null) {
-        scoreSum += score;
-        scoreCount += 1;
-      }
-    }
-
-    const genreRows = [...genreCount.entries()]
-      .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), "ko"))
-      .slice(0, 5)
-      .map(([g, count]) => ({ key: g, label: genreKo(g), count }));
-
-    const rewatchRows = items
-      .map((it) => ({
-        key: String(it.anilistId),
-        id: it.anilistId,
-        title: getTitle(it),
-        count: normalizeRewatchCount(it?.rewatchCount),
-      }))
-      .filter((row) => row.count > 0)
-      .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title, locale === "en" ? "en" : "ko"))
-      .slice(0, 5)
-      .map((row) => ({ ...row }));
-
-    const maxStatus = Math.max(...statusRows.map((x) => x.count), 1);
-    const maxGenre = Math.max(...genreRows.map((x) => x.count), 1);
-    const averageScore = scoreCount > 0 ? scoreSum / scoreCount : null;
-
-    return {
-      total: items.length,
-      scored: scoreCount,
-      averageScore,
-      statusRows,
-      genreRows,
-      rewatchRows,
-      maxStatus,
-      maxGenre,
-    };
-  }, [items, mediaMap, locale]);
 
   const logCountByAnimeId = useMemo(() => {
     const map = new Map();
@@ -1802,11 +1742,7 @@ export default function Library() {
         onImportJsonText={importBackupText}
       />
 
-      <section className="pageHeader">
-        <h1 className="pageTitle">{copy.title}</h1>
-        {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
-        {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
-      </section>
+      {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
 
       <section className="library-page-tabs">
         <div
@@ -1896,15 +1832,6 @@ export default function Library() {
             onCardsPerRowBaseChange={setCardsPerRowBase}
             effectiveCols={effectiveCols}
             formatGenreLabel={genreKo}
-          />
-
-          <LibraryStatsPanel
-            locale={locale}
-            dashboard={dashboard}
-            open={statsOpen}
-            onToggle={() => setStatsOpen((value) => !value)}
-            onOpenAnime={setSelectedId}
-            scoreMax={SCORE_MAX}
           />
 
           <div
