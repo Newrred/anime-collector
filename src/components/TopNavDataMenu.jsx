@@ -255,13 +255,6 @@ export default function TopNavDataMenu({
                   </div>
                   <p className="small data-menu-section-summary">{copy.dataToolsSummary}</p>
                   <div className="data-menu-body">
-                    <a
-                      href={`${base}data/#manual-tools`}
-                      className="btn btn--subtle data-menu-link"
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconDatabase />}>{copy.openManualTools}</ActionLabel>
-                    </a>
                     {canInstallPwa && (
                       <button
                         className="btn"

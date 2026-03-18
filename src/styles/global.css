@@ -384,6 +384,7 @@ img {
 .tier-board,
 .data-grid,
 .help-center,
+.help-page,
 .profile-page {
   display: grid;
   gap: var(--page-section-gap);
@@ -4161,6 +4162,7 @@ h3 {
   .tier-board,
   .data-grid,
   .help-center,
+  .help-page,
   .profile-page,
   .profile-page__stack,
   .profile-page__lists {
@@ -5089,6 +5091,18 @@ html[data-theme="light"] body {
   gap: var(--layout-gap-sm);
 }
 
+.home-focus-card__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: var(--layout-gap-md);
+  align-items: start;
+}
+
+.home-focus-card__body {
+  display: grid;
+  gap: var(--layout-gap-sm);
+}
+
 .home-focus-card__head {
   gap: 6px;
 }
@@ -5128,6 +5142,20 @@ html[data-theme="light"] body {
 .home-focus-card__stat strong {
   font-size: 18px;
   line-height: 1.2;
+}
+
+.home-focus-card__visual {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+}
+
+.home-focus-card__visual img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
 }
 
 .home-showcase-preview .showcase-grid {
@@ -5261,6 +5289,14 @@ html[data-theme="light"] body {
 }
 
 @media (max-width: 720px) {
+  .home-focus-card__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-focus-card__visual {
+    order: -1;
+  }
+
   .home-focus-card__stats {
     grid-template-columns: 1fr;
   }

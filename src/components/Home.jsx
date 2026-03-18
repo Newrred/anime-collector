@@ -75,6 +75,13 @@ export default function Home() {
   const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : `${base}library/?tab=add`;
   const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/?tab=collection`;
   const heroCue = String(heroEntry?.cue || "").trim();
+  const heroVisual = useMemo(() => {
+    if (!Number.isFinite(heroAnimeId)) return "";
+    const banner = String(heroMedia?.bannerImage || "").trim();
+    if (banner) return banner;
+    const cover = heroMedia?.coverImage?.extraLarge || heroMedia?.coverImage?.large || heroMedia?.coverImage?.medium || "";
+    return String(cover || "").trim();
+  }, [heroAnimeId, heroMedia]);
 
   const continueTargets = useMemo(() => resurfacing?.missingMemory?.slice(0, 4) || [], [resurfacing]);
   const recentLogTargets = useMemo(() => resurfacing?.recentLogs?.slice(0, 4) || [], [resurfacing]);
@@ -155,32 +162,41 @@ export default function Home() {
       </section>
 
       <section className="surface-card home-focus-card">
-        <div className="pageHeader home-focus-card__head">
-          <h2 className="sectionTitle">{copy.heroTitle}</h2>
-          <p className="sectionLead">{copy.heroLead}</p>
-          <div className="small home-focus-card__source">{heroSourceLabel}</div>
-        </div>
-        <h3 className="home-focus-card__title">{heroTitle}</h3>
-        <p className="home-focus-card__cue">{heroCue || copy.heroLead}</p>
-        <div className="home-focus-card__stats">
-          <div className="home-focus-card__stat">
-            <span className="small">{copy.animeCount}</span>
-            <strong>{locale === "en" ? items.length : `${items.length}${copy.unit}`}</strong>
+        <div className="home-focus-card__layout">
+          <div className="home-focus-card__body">
+            <div className="pageHeader home-focus-card__head">
+              <h2 className="sectionTitle">{copy.heroTitle}</h2>
+              <p className="sectionLead">{copy.heroLead}</p>
+              <div className="small home-focus-card__source">{heroSourceLabel}</div>
+            </div>
+            <h3 className="home-focus-card__title">{heroTitle}</h3>
+            <p className="home-focus-card__cue">{heroCue || copy.heroLead}</p>
+            <div className="home-focus-card__stats">
+              <div className="home-focus-card__stat">
+                <span className="small">{copy.animeCount}</span>
+                <strong>{locale === "en" ? items.length : `${items.length}${copy.unit}`}</strong>
+              </div>
+              <div className="home-focus-card__stat">
+                <span className="small">{copy.logCount}</span>
+                <strong>{locale === "en" ? logs.length : `${logs.length}${copy.unit}`}</strong>
+              </div>
+            </div>
+            <div className="action-row">
+              <a href={heroPrimaryHref} className="btn">
+                {copy.quickRecord}
+              </a>
+              <a href={heroSecondaryHref} className="btn btn--subtle">
+                {copy.heroOpen}
+              </a>
+            </div>
+            <div className="small page-feedback">{copy.heroHint}</div>
           </div>
-          <div className="home-focus-card__stat">
-            <span className="small">{copy.logCount}</span>
-            <strong>{locale === "en" ? logs.length : `${logs.length}${copy.unit}`}</strong>
-          </div>
+          {heroVisual ? (
+            <div className="home-focus-card__visual">
+              <img src={heroVisual} alt={heroTitle} loading="lazy" />
+            </div>
+          ) : null}
         </div>
-        <div className="action-row">
-          <a href={heroPrimaryHref} className="btn">
-            {copy.quickRecord}
-          </a>
-          <a href={heroSecondaryHref} className="btn btn--subtle">
-            {copy.heroOpen}
-          </a>
-        </div>
-        <div className="small page-feedback">{copy.heroHint}</div>
       </section>
 
       <ResurfacingCards

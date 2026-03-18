@@ -48,7 +48,7 @@ export default function HelpCenter() {
   }
 
   return (
-    <div className="data-grid help-center">
+    <div className="data-grid help-page">
       <TopNavDataMenu
         base={base}
         panelId="help-data-menu-panel"
@@ -61,56 +61,58 @@ export default function HelpCenter() {
         onInstallPwa={onClickInstallPwa}
       />
 
-      <section className="surface-card status-panel">
-        <div className="pageHeader">
-          <h1 className="pageTitle">{copy.title}</h1>
-          <p className="pageLead">{copy.lead}</p>
-        </div>
-      </section>
+      <div className="help-center">
+        <section className="surface-card status-panel">
+          <div className="pageHeader">
+            <h1 className="pageTitle">{copy.title}</h1>
+            <p className="pageLead">{copy.lead}</p>
+          </div>
+        </section>
 
-      <section className="surface-card help-center__section">
-        <div className="pageHeader">
-          <h2 className="sectionTitle">{copy.noticesTitle}</h2>
-        </div>
-        <div className="help-center__notice-list">
-          {copy.notices.map((notice) => (
-            <article key={`${notice.kind}-${notice.date}-${notice.title}`} className="help-center__notice">
-              <div className="help-center__notice-meta">
-                <span className={`help-center__notice-badge ${noticeToneClass(notice.kind)}`}>
-                  {copy.noticeKinds?.[notice.kind] || notice.kind}
-                </span>
-                <span className="small help-center__notice-date">{notice.date}</span>
+        <section className="surface-card help-center__section">
+          <div className="pageHeader">
+            <h2 className="sectionTitle">{copy.noticesTitle}</h2>
+          </div>
+          <div className="help-center__notice-list">
+            {copy.notices.map((notice) => (
+              <article key={`${notice.kind}-${notice.date}-${notice.title}`} className="help-center__notice">
+                <div className="help-center__notice-meta">
+                  <span className={`help-center__notice-badge ${noticeToneClass(notice.kind)}`}>
+                    {copy.noticeKinds?.[notice.kind] || notice.kind}
+                  </span>
+                  <span className="small help-center__notice-date">{notice.date}</span>
+                </div>
+                <h3 className="help-center__notice-title">{notice.title}</h3>
+                <p className="small help-center__notice-body">{notice.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="surface-card help-center__section">
+          <div className="help-center__grid">
+            {copy.cards.map((card) => (
+              <article key={card.title} className="help-center__card">
+                <h2 className="sectionTitle help-center__card-title">{card.title}</h2>
+                <p className="small help-center__card-body">{card.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="surface-card help-center__section">
+          <div className="pageHeader">
+            <h2 className="sectionTitle">{copy.tipsTitle}</h2>
+          </div>
+          <div className="help-center__tips">
+            {copy.tips.map((tip) => (
+              <div key={tip} className="small help-center__tip">
+                {tip}
               </div>
-              <h3 className="help-center__notice-title">{notice.title}</h3>
-              <p className="small help-center__notice-body">{notice.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="surface-card help-center__section">
-        <div className="help-center__grid">
-          {copy.cards.map((card) => (
-            <article key={card.title} className="help-center__card">
-              <h2 className="sectionTitle help-center__card-title">{card.title}</h2>
-              <p className="small help-center__card-body">{card.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="surface-card help-center__section">
-        <div className="pageHeader">
-          <h2 className="sectionTitle">{copy.tipsTitle}</h2>
-        </div>
-        <div className="help-center__tips">
-          {copy.tips.map((tip) => (
-            <div key={tip} className="small help-center__tip">
-              {tip}
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
