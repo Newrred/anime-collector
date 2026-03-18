@@ -43,72 +43,78 @@ export default function ResurfacingCards({
 
   return (
     <section className="home-resurfacing-grid">
-      <section className="surface-card home-resurfacing-card">
+      <div className="home-section-block">
         <div className="pageHeader">
           <h2 className="sectionTitle">{copy.noMemory}</h2>
         </div>
-        {missingMemory.length === 0 ? (
-          <div className="small ui-empty-state ui-empty-state--card">{copy.allLogged}</div>
-        ) : (
-          <div className="list-stack">
-            {missingMemory.map((row) =>
-              renderAnimeRow({
-                base,
-                anilistId: row.anilistId,
-                href: buildQuickLogHref(base, row.anilistId),
-                metaTop: copy.noLogMeta,
-                metaBottom: copy.promptLog,
-                mediaMap,
-                titleById,
-              })
-            )}
-          </div>
-        )}
-      </section>
+        <section className="surface-card home-resurfacing-card">
+          {missingMemory.length === 0 ? (
+            <div className="small ui-empty-state ui-empty-state--card">{copy.allLogged}</div>
+          ) : (
+            <div className="list-stack">
+              {missingMemory.map((row) =>
+                renderAnimeRow({
+                  base,
+                  anilistId: row.anilistId,
+                  href: buildQuickLogHref(base, row.anilistId),
+                  metaTop: copy.noLogMeta,
+                  metaBottom: copy.promptLog,
+                  mediaMap,
+                  titleById,
+                })
+              )}
+            </div>
+          )}
+        </section>
+      </div>
 
-      <section className="surface-card home-resurfacing-card">
+      <div className="home-section-block">
         <div className="pageHeader">
           <h2 className="sectionTitle">{copy.recentLogs}</h2>
         </div>
-        {recentLogs.length === 0 ? (
-          <div className="small ui-empty-state ui-empty-state--card">{copy.noLogs}</div>
-        ) : (
-          <div className="list-stack">
-            {recentLogs.map((row) =>
-              renderAnimeRow({
-                base,
-                anilistId: row.anilistId,
-                href: buildLibraryDetailHref(base, row.anilistId),
-                metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
-                metaBottom: row.cue || "",
-                mediaMap,
-                titleById,
-              })
-            )}
-          </div>
-        )}
-      </section>
+        <section className="surface-card home-resurfacing-card">
+          {recentLogs.length === 0 ? (
+            <div className="small ui-empty-state ui-empty-state--card">{copy.noLogs}</div>
+          ) : (
+            <div className="list-stack">
+              {recentLogs.map((row) =>
+                renderAnimeRow({
+                  base,
+                  anilistId: row.anilistId,
+                  href: buildLibraryDetailHref(base, row.anilistId),
+                  metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
+                  metaBottom: row.cue || "",
+                  mediaMap,
+                  titleById,
+                })
+              )}
+            </div>
+          )}
+        </section>
+      </div>
 
       {hasThisTime ? (
-        <section className="surface-card home-resurfacing-card home-resurfacing-card--wide">
+        <div className="home-section-block home-resurfacing-card--wide">
           <div className="pageHeader">
             <h2 className="sectionTitle">{copy.thisTime}</h2>
             <p className="sectionLead">{copy.revisitHint}</p>
           </div>
-          <div className="list-stack">
-            {thisTimeRows.map((row) =>
-              renderAnimeRow({
-                base,
-                anilistId: row.anilistId,
-                href: buildLibraryDetailHref(base, row.anilistId),
-                metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
-                metaBottom: row.cue || "",
-                mediaMap,
-                titleById,
-              })
-            )}
-          </div>
-        </section>
+          <section className="surface-card home-resurfacing-card">
+            <div className="list-stack">
+              {thisTimeRows.map((row) =>
+                renderAnimeRow({
+                  base,
+                  anilistId: row.anilistId,
+                  href: buildLibraryDetailHref(base, row.anilistId),
+                  metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
+                  metaBottom: row.cue || "",
+                  mediaMap,
+                  titleById,
+                })
+              )}
+            </div>
+          </section>
+        </div>
       ) : null}
     </section>
   );

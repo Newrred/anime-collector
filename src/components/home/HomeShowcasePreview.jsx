@@ -14,17 +14,19 @@ export default function HomeShowcasePreview({ locale = "ko", base = "/", model }
   const copy = getMessageGroup(locale, "homeShowcasePreview");
 
   return (
-    <section className="home-showcase-preview surface-card ui-panel-stack">
+    <section className="home-section-block">
       <div className="pageHeader">
         <h2 className="sectionTitle">{copy.title}</h2>
         <p className="sectionLead">{copy.lead}</p>
       </div>
-      <ShowcaseGrid locale={locale} model={model} layout={PREVIEW_LAYOUT} compact />
-      <div className="action-row">
-        <a href={`${base}profile/`} className="btn btn--subtle">
-          {copy.cta}
-        </a>
-      </div>
+      <section className="home-showcase-preview surface-card ui-panel-stack">
+        <ShowcaseGrid locale={locale} model={model} layout={PREVIEW_LAYOUT} compact />
+        <div className="action-row">
+          <a href={`${base}profile/`} className="btn btn--subtle">
+            {copy.cta}
+          </a>
+        </div>
+      </section>
     </section>
   );
 }

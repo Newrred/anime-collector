@@ -92,7 +92,7 @@ function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }
   const scoreMax = SCORE_MAX;
 
   return (
-    <section className={`surface-card home-taste-card${compact ? " surface-card--compact" : ""}`}>
+    <section className="home-section-block">
       <div className="pageHeader">
         <h2 className="sectionTitle">{copy.title}</h2>
         <p className="sectionLead">
@@ -102,43 +102,45 @@ function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }
         </p>
       </div>
 
-      <div className="library-stats-grid">
-        <div className="library-stats-card ui-panel-stack">
-          <div className="library-stats-card-title">{copy.status}</div>
-          <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} emptyText={noData} />
+      <section className={`surface-card home-taste-card${compact ? " surface-card--compact" : ""}`}>
+        <div className="library-stats-grid">
+          <div className="library-stats-card ui-panel-stack">
+            <div className="library-stats-card-title">{copy.status}</div>
+            <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} emptyText={noData} />
+          </div>
+          <div className="library-stats-card ui-panel-stack">
+            <div className="library-stats-card-title">{copy.genre}</div>
+            <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} emptyText={noData} />
+          </div>
+          <div className="library-stats-card ui-panel-stack">
+            <div className="library-stats-card-title">{copy.rewatch}</div>
+            {dashboard.rewatchRows.length === 0 ? (
+              <div className="small ui-empty-state ui-empty-state--compact">{copy.empty}</div>
+            ) : (
+              <div className="library-rewatch-list">
+                {dashboard.rewatchRows.map((row) => (
+                  <a
+                    key={row.key}
+                    href={`./library/?animeId=${encodeURIComponent(row.id)}`}
+                    className="library-rewatch-item"
+                    title={`${row.title} · ${row.count}${times}`}
+                    onClick={(event) => {
+                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                      event.preventDefault();
+                      onOpenAnime(row.id);
+                    }}
+                  >
+                    <div className="library-rewatch-list-item">
+                      <div className="small library-rewatch-item-title">{row.title}</div>
+                      <div className="small">{row.count}{times}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="library-stats-card ui-panel-stack">
-          <div className="library-stats-card-title">{copy.genre}</div>
-          <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} emptyText={noData} />
-        </div>
-        <div className="library-stats-card ui-panel-stack">
-          <div className="library-stats-card-title">{copy.rewatch}</div>
-          {dashboard.rewatchRows.length === 0 ? (
-            <div className="small ui-empty-state ui-empty-state--compact">{copy.empty}</div>
-          ) : (
-            <div className="library-rewatch-list">
-              {dashboard.rewatchRows.map((row) => (
-                <a
-                  key={row.key}
-                  href={`./library/?animeId=${encodeURIComponent(row.id)}`}
-                  className="library-rewatch-item"
-                  title={`${row.title} · ${row.count}${times}`}
-                  onClick={(event) => {
-                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-                    event.preventDefault();
-                    onOpenAnime(row.id);
-                  }}
-                >
-                  <div className="library-rewatch-list-item">
-                    <div className="small library-rewatch-item-title">{row.title}</div>
-                    <div className="small">{row.count}{times}</div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      </section>
     </section>
   );
 }
@@ -304,38 +306,41 @@ export default function Home() {
         <p className="pageLead">{copy.lead}</p>
       </section>
 
-      <section className={`surface-card home-focus-card${heroVisual ? " home-focus-card--hero-bg" : ""}`}>
-        <div className="home-focus-card__layout" style={heroLayoutStyle}>
-          {heroVisual ? <div className="home-focus-card__overlay" aria-hidden="true" /> : null}
-          <div className="home-focus-card__body">
-            <div className="pageHeader home-focus-card__head">
-              <h2 className="sectionTitle">{copy.heroTitle}</h2>
-              <p className="sectionLead">{copy.heroLead}</p>
-              <div className="small home-focus-card__source">{heroSourceLabel}</div>
-            </div>
-            <h3 className="home-focus-card__title">{heroTitle}</h3>
-            <p className="home-focus-card__cue">{heroCue || copy.heroLead}</p>
-            <div className="home-focus-card__stats">
-              <div className="home-focus-card__stat">
-                <span className="small">{copy.animeCount}</span>
-                <strong>{locale === "en" ? items.length : `${items.length}${copy.unit}`}</strong>
-              </div>
-              <div className="home-focus-card__stat">
-                <span className="small">{copy.logCount}</span>
-                <strong>{locale === "en" ? logs.length : `${logs.length}${copy.unit}`}</strong>
-              </div>
-            </div>
-            <div className="action-row">
-              <a href={heroPrimaryHref} className="btn">
-                {copy.quickRecord}
-              </a>
-              <a href={heroSecondaryHref} className="btn btn--subtle">
-                {copy.heroOpen}
-              </a>
-            </div>
-            <div className="small page-feedback">{copy.heroHint}</div>
-          </div>
+      <section className="home-section-block">
+        <div className="pageHeader">
+          <h2 className="sectionTitle">{copy.heroTitle}</h2>
+          <p className="sectionLead">{copy.heroLead}</p>
         </div>
+
+        <section className={`surface-card home-focus-card${heroVisual ? " home-focus-card--hero-bg" : ""}`}>
+          <div className="home-focus-card__layout" style={heroLayoutStyle}>
+            {heroVisual ? <div className="home-focus-card__overlay" aria-hidden="true" /> : null}
+            <div className="home-focus-card__body">
+              <div className="small home-focus-card__source">{heroSourceLabel}</div>
+              <h3 className="home-focus-card__title">{heroTitle}</h3>
+              <p className="home-focus-card__cue">{heroCue || copy.heroLead}</p>
+              <div className="home-focus-card__stats">
+                <div className="home-focus-card__stat">
+                  <span className="small">{copy.animeCount}</span>
+                  <strong>{locale === "en" ? items.length : `${items.length}${copy.unit}`}</strong>
+                </div>
+                <div className="home-focus-card__stat">
+                  <span className="small">{copy.logCount}</span>
+                  <strong>{locale === "en" ? logs.length : `${logs.length}${copy.unit}`}</strong>
+                </div>
+              </div>
+              <div className="action-row">
+                <a href={heroPrimaryHref} className="btn">
+                  {copy.quickRecord}
+                </a>
+                <a href={heroSecondaryHref} className="btn btn--subtle">
+                  {copy.heroOpen}
+                </a>
+              </div>
+              <div className="small page-feedback">{copy.heroHint}</div>
+            </div>
+          </div>
+        </section>
       </section>
 
       <ResurfacingCards
