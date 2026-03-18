@@ -528,6 +528,7 @@ const koMessages = {
   libraryStatsPanel: {
     title: "내 취향 분석",
     summary: "총",
+    summaryUnit: "개",
     average: "평균",
     scored: "개 평가",
     open: "통계 대시보드 접기",

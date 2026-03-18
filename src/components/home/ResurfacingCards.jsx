@@ -96,8 +96,8 @@ export default function ResurfacingCards({
       {hasThisTime ? (
         <div className="home-section-block home-resurfacing-card--wide">
           <div className="pageHeader">
-            <h2 className="sectionTitle home-section-title">{copy.thisTime}</h2>
             <p className="sectionLead">{copy.revisitHint}</p>
+            <h2 className="sectionTitle home-section-title">{copy.thisTime}</h2>
           </div>
           <section className="surface-card home-resurfacing-card">
             <div className="list-stack">

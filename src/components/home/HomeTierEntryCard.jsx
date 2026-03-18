@@ -16,8 +16,8 @@ export default function HomeTierEntryCard({
   return (
     <section className="surface-card home-tier-entry-card">
       <div className="home-tier-entry-card__copy">
-        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
         <p className="sectionLead">{copy.lead}</p>
+        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
         <div className="small page-feedback">
           {disabled ? copy.empty : `${year}`}
         </div>

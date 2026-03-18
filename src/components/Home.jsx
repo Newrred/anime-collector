@@ -94,12 +94,10 @@ function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }
   return (
     <section className="home-section-block">
       <div className="pageHeader">
-        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
         <p className="sectionLead">
-          {locale === "en"
-            ? `${copy.summary} ${dashboard.total} · ${copy.average} ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${scoreMax}`} (${dashboard.scored}${copy.scored})`
-            : `${copy.summary} ${dashboard.total}개 · ${copy.average} ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${scoreMax}`} (${dashboard.scored}${copy.scored})`}
+          {`${copy.summary} ${dashboard.total}${copy.summaryUnit || ""}`}
         </p>
+        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
       </div>
 
       <section className={`surface-card home-taste-card${compact ? " surface-card--compact" : ""}`}>
@@ -308,8 +306,8 @@ export default function Home() {
 
       <section className="home-section-block">
         <div className="pageHeader">
-          <h2 className="sectionTitle home-section-title">{copy.heroTitle}</h2>
           <p className="sectionLead">{copy.heroLead}</p>
+          <h2 className="sectionTitle home-section-title">{copy.heroTitle}</h2>
         </div>
 
         <section className={`surface-card home-focus-card${heroVisual ? " home-focus-card--hero-bg" : ""}`}>

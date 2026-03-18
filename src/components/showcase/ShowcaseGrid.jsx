@@ -5,8 +5,8 @@ function WidgetShell({ title, lead, children, className = "" }) {
   return (
     <section className={`surface-card showcase-card ${className}`.trim()}>
       <div className="pageHeader showcase-card__head">
-        <h2 className="sectionTitle">{title}</h2>
         <p className="sectionLead">{lead}</p>
+        <h2 className="sectionTitle">{title}</h2>
       </div>
       {children}
     </section>

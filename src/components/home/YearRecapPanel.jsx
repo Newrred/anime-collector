@@ -61,8 +61,8 @@ export default function YearRecapPanel({
   return (
     <section className="home-section-block">
       <div className="pageHeader">
-        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
         <p className="sectionLead">{copy.lead}</p>
+        <h2 className="sectionTitle home-section-title">{copy.title}</h2>
       </div>
 
       <section className="surface-card year-recap-panel">

@@ -526,6 +526,7 @@ const enMessages = {
   libraryStatsPanel: {
     title: "Taste breakdown",
     summary: "Total",
+    summaryUnit: " items",
     average: "Average",
     scored: "rated",
     open: "Collapse stats dashboard",
