@@ -128,7 +128,7 @@ const koMessages = {
   library: {
     fallbackBackup: "자동 로컬 백업이 켜져 있어요. 주기적으로 JSON 내보내기를 권장합니다.",
     title: "기록장",
-    lead: "본 작품을 모으고, 한 줄 기록과 캐릭터 기억을 남겨 보세요.",
+    lead: "",
     collectionTab: "내 기록",
     addPageTab: "애니 추가",
     addPanel: "추가할 애니 검색",
@@ -360,7 +360,7 @@ const koMessages = {
   },
   home: {
     title: "홈",
-    lead: "오늘의 발견을 꺼내 보고, 내 기록이 어떤 사람처럼 쌓이고 있는지 확인해 보세요.",
+    lead: "",
     animeCount: "작품",
     logCount: "기록",
     storageProtect: "저장 보호",

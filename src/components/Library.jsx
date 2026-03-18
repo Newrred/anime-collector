@@ -1804,7 +1804,7 @@ export default function Library() {
 
       <section className="pageHeader">
         <h1 className="pageTitle">{copy.title}</h1>
-        <p className="pageLead">{copy.lead}</p>
+        {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
         {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
       </section>
 

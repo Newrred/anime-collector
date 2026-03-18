@@ -126,7 +126,7 @@ const enMessages = {
   library: {
     fallbackBackup: "Automatic local backup is on. Export JSON regularly for a manual backup.",
     title: "Journal",
-    lead: "Collect watched titles and keep short memory logs and character notes.",
+    lead: "",
     collectionTab: "My logs",
     addPageTab: "Add anime",
     addPanel: "Search anime to add",
@@ -358,7 +358,7 @@ const enMessages = {
   },
   home: {
     title: "Home",
-    lead: "Pull out today's discoveries and see what kind of person your records describe.",
+    lead: "",
     animeCount: "Titles",
     logCount: "Logs",
     storageProtect: "Storage protect",
