@@ -4705,6 +4705,14 @@ h3 {
   margin-bottom: var(--layout-gap-sm);
 }
 
+.home-page .home-section-block--hero > .pageHeader {
+  margin-bottom: 0;
+}
+
+.home-page .home-section-block--hero .pageHeader {
+  gap: var(--layout-gap-tight);
+}
+
 .home-section-title {
   font-size: var(--type-title-xl-size);
   font-weight: var(--type-title-weight);
