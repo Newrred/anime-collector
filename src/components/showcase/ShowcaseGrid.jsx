@@ -270,12 +270,6 @@ function LogDensityCalendarCard({ data, locale }) {
                 </div>
               ))}
             </div>
-            <div className="showcase-density-chart__legend small">
-              {tickValues
-                .map((tick) => tick.value)
-                .filter((value, index, array) => array.indexOf(value) === index)
-                .join(" · ")}
-            </div>
           </div>
           <div className="small page-feedback showcase-density-chart__peak">
             {copy.peak} · {data?.peakLabel || "-"} · {data?.peakCount || 0}

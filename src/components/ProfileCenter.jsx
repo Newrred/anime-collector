@@ -267,8 +267,8 @@ export default function ProfileCenter() {
         <div className="profile-page__stack minihome-page__stack">
           <section className="pageHeader minihome-page__header">
             <div>
-              <h1 className="pageTitle">{copy.title}</h1>
               <p className="pageLead">{copy.lead}</p>
+              <h1 className="pageTitle">{copy.title}</h1>
               <p className="small minihome-page__meta">
                 {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate} · @
                 {savedHandle || form.handle || copy.handlePlaceholder}
@@ -276,11 +276,6 @@ export default function ProfileCenter() {
             </div>
 
             <div className="action-row">
-              {!editing ? (
-                <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
-                  {copy.editProfile}
-                </button>
-              ) : null}
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
                 {copy.copyLink}
               </button>
@@ -299,8 +294,8 @@ export default function ProfileCenter() {
           <section className="surface-card minihome-settings">
             <div className="minihome-settings__head">
               <div className="pageHeader">
-                <h2 className="sectionTitle">{copy.settingsTitle}</h2>
                 <p className="sectionLead">{copy.settingsLead}</p>
+                <h2 className="sectionTitle">{copy.settingsTitle}</h2>
               </div>
               <div className="action-row minihome-settings__actions">
                 <button
@@ -404,16 +399,16 @@ export default function ProfileCenter() {
           <section className="minihome-workbench">
             <div className="surface-card minihome-canvas">
               <div className="pageHeader">
-                <h2 className="sectionTitle">{copy.canvasTitle}</h2>
                 <p className="sectionLead">{copy.canvasLead}</p>
+                <h2 className="sectionTitle">{copy.canvasTitle}</h2>
               </div>
               <ShowcaseGrid locale={locale} model={showcaseModel} layout={showcaseLayout} />
             </div>
 
             <aside className="surface-card minihome-controls">
               <div className="pageHeader">
-                <h2 className="sectionTitle">{editorCopy.title}</h2>
                 <p className="sectionLead">{editorCopy.lead}</p>
+                <h2 className="sectionTitle">{editorCopy.title}</h2>
               </div>
 
               <div className="showcase-editor-list">
