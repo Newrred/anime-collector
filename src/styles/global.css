@@ -4698,9 +4698,9 @@ h3 {
 }
 
 .home-section-title {
-  font-size: var(--type-title-lg-size);
+  font-size: var(--type-title-xl-size);
   font-weight: var(--type-title-weight);
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .home-resurfacing-subtitle {
