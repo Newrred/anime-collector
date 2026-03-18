@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getMessageGroup } from "../../domain/messages.js";
 
 function WidgetShell({ title, lead, children, className = "" }) {
@@ -439,9 +439,56 @@ const REGISTRY = {
 
 export default function ShowcaseGrid({ model, layout, locale = "ko", compact = false }) {
   const widgets = Array.isArray(layout?.widgets) ? layout.widgets.filter((row) => row.enabled !== false) : [];
+  const gridRef = useRef(null);
+  const previousGridRectsRef = useRef(new Map());
+  const widgetOrderKey = useMemo(
+    () => widgets.map((widget) => widget.id).join("|"),
+    [widgets]
+  );
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+
+    const items = Array.from(grid.querySelectorAll(".showcase-grid__item[data-widget-id]"));
+    const nextRects = new Map(
+      items.map((item) => [
+        item.getAttribute("data-widget-id"),
+        item.getBoundingClientRect(),
+      ])
+    );
+    const previousRects = previousGridRectsRef.current;
+
+    if (previousRects.size > 0) {
+      items.forEach((item) => {
+        const widgetId = item.getAttribute("data-widget-id");
+        const previous = previousRects.get(widgetId);
+        const next = nextRects.get(widgetId);
+        if (!previous || !next) return;
+        const deltaX = previous.left - next.left;
+        const deltaY = previous.top - next.top;
+        if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
+
+        item.animate(
+          [
+            { transform: `translate(${deltaX}px, ${deltaY}px)` },
+            { transform: "translate(0, 0)" },
+          ],
+          {
+            duration: 300,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          }
+        );
+      });
+    }
+
+    previousGridRectsRef.current = nextRects;
+  }, [widgetOrderKey]);
 
   return (
-    <div className={`showcase-grid${compact ? " is-compact" : ""}`}>
+    <div className={`showcase-grid${compact ? " is-compact" : ""}`} ref={gridRef}>
       {widgets.map((widget, index) => {
         const Comp = REGISTRY[widget.id];
         if (!Comp) return null;
@@ -451,6 +498,7 @@ export default function ShowcaseGrid({ model, layout, locale = "ko", compact = f
             key={widget.id}
             className={`showcase-grid__item ${widget.size === "wide" ? "is-wide" : "is-half"}`}
             style={{ "--showcase-index": index }}
+            data-widget-id={widget.id}
           >
             <Comp data={data} rows={data} locale={locale} />
           </div>

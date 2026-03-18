@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
 import { buildPublicProfilePath, isValidProfileHandle } from "../domain/profileUtils.js";
 import { useUiPreferences } from "../hooks/useUiPreferences.js";
@@ -79,6 +79,8 @@ export default function ProfileCenter() {
   const [message, setMessage] = useState("");
   const [showcaseLayout, setShowcaseLayout] = useState(DEFAULT_SHOWCASE_LAYOUT);
   const [publishing, setPublishing] = useState(false);
+  const editorListRef = useRef(null);
+  const previousEditorRectsRef = useRef(new Map());
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
@@ -141,6 +143,51 @@ export default function ProfileCenter() {
     () => (savedHandle ? buildPublicProfilePath(savedHandle, base) : `${base}u/`),
     [base, savedHandle]
   );
+  const editorOrderKey = useMemo(
+    () => (Array.isArray(showcaseLayout?.widgets) ? showcaseLayout.widgets.map((row) => row.id).join("|") : ""),
+    [showcaseLayout]
+  );
+
+  useLayoutEffect(() => {
+    const list = editorListRef.current;
+    if (!list) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+
+    const rows = Array.from(list.querySelectorAll("[data-widget-id]"));
+    const nextRects = new Map(
+      rows.map((row) => [
+        row.getAttribute("data-widget-id"),
+        row.getBoundingClientRect(),
+      ])
+    );
+    const previousRects = previousEditorRectsRef.current;
+
+    if (previousRects.size > 0) {
+      rows.forEach((row) => {
+        const widgetId = row.getAttribute("data-widget-id");
+        const previous = previousRects.get(widgetId);
+        const next = nextRects.get(widgetId);
+        if (!previous || !next) return;
+        const deltaX = previous.left - next.left;
+        const deltaY = previous.top - next.top;
+        if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
+
+        row.animate(
+          [
+            { transform: `translate(${deltaX}px, ${deltaY}px)` },
+            { transform: "translate(0, 0)" },
+          ],
+          {
+            duration: 280,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          }
+        );
+      });
+    }
+
+    previousEditorRectsRef.current = nextRects;
+  }, [editorOrderKey]);
 
   async function copyProfileLink() {
     if (!isValidProfileHandle(savedHandle)) {
@@ -397,9 +444,9 @@ export default function ProfileCenter() {
                 <h2 className="sectionTitle">{editorCopy.title}</h2>
               </div>
 
-              <div className="showcase-editor-list">
+              <div className="showcase-editor-list" ref={editorListRef}>
                 {(showcaseLayout.widgets || []).map((widget, index) => (
-                  <div key={widget.id} className="showcase-editor-row">
+                  <div key={widget.id} className="showcase-editor-row" data-widget-id={widget.id}>
                     <div className="showcase-editor-row__main">
                       <div className="showcase-editor-row__title">{resolveWidgetLabel(widget.id, locale)}</div>
                       <div className="small showcase-editor-row__meta">
