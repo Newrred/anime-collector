@@ -357,7 +357,7 @@ const enMessages = {
     unknownError: "Unknown error",
   },
   home: {
-    title: "Home",
+    title: "",
     lead: "",
     animeCount: "Titles",
     logCount: "Logs",

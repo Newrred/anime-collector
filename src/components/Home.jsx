@@ -302,7 +302,7 @@ export default function Home() {
       />
 
       <section className="pageHeader">
-        <h1 className="pageTitle">{copy.title}</h1>
+        {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
         {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
       </section>
 

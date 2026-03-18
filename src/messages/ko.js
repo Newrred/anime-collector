@@ -359,7 +359,7 @@ const koMessages = {
     unknownError: "알 수 없는 오류",
   },
   home: {
-    title: "홈",
+    title: "",
     lead: "",
     animeCount: "작품",
     logCount: "기록",
