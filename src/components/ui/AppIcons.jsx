@@ -20,6 +20,14 @@ function IconChevronDown(props) {
   );
 }
 
+function IconChevronUp(props) {
+  return (
+    <IconBase {...props}>
+      <path d="m6 14.5 6-5.5 6 5.5" strokeLinecap="round" strokeLinejoin="round" />
+    </IconBase>
+  );
+}
+
 function IconGear(props) {
   return (
     <IconBase {...props}>
@@ -293,6 +301,7 @@ function IconTrash(props) {
 export {
   IconArrowRight,
   IconBase,
+  IconChevronUp,
   IconChevronDown,
   IconClipboard,
   IconCloud,
