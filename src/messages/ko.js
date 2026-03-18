@@ -399,6 +399,8 @@ const koMessages = {
     title: "오늘의 발견",
     lead: "내 기록에서 지금 특히 나다운 카드만 뽑았습니다.",
     cta: "미니홈 편집",
+    tasteTitle: "내 취향 분석",
+    tasteLead: "기록장에 쌓인 기록으로 취향 패턴을 정리해 보여드려요.",
   },
   showcaseEditor: {
     title: "미니홈 편집",

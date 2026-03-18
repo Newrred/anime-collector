@@ -397,6 +397,8 @@ const enMessages = {
     title: "Today's discoveries",
     lead: "Picked only the cards that feel especially like you right now.",
     cta: "Edit minihome",
+    tasteTitle: "Taste analysis",
+    tasteLead: "Summarize taste patterns from your recorded logs.",
   },
   showcaseEditor: {
     title: "Edit minihome",

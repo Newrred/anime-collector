@@ -5275,6 +5275,14 @@ html[data-theme="light"] body {
   gap: var(--layout-gap-sm);
 }
 
+.home-showcase-preview__taste-analysis {
+  margin-top: var(--space-4);
+}
+
+.home-showcase-preview__taste-analysis .showcase-grid {
+  margin-top: var(--space-2);
+}
+
 .minihome-page__header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
