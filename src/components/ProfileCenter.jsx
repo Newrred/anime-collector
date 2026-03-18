@@ -78,7 +78,6 @@ export default function ProfileCenter() {
   const [message, setMessage] = useState("");
   const [showcaseLayout, setShowcaseLayout] = useState(DEFAULT_SHOWCASE_LAYOUT);
   const [publishing, setPublishing] = useState(false);
-  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
@@ -92,7 +91,6 @@ export default function ProfileCenter() {
       setFollowers([]);
       setFollowing([]);
       setEditing(false);
-      setSettingsExpanded(false);
       setShowcaseLayout(DEFAULT_SHOWCASE_LAYOUT);
       return;
     }
@@ -222,7 +220,6 @@ export default function ProfileCenter() {
 
   function handleEditStart() {
     setForm(buildProfileFormState(profile));
-    setSettingsExpanded(true);
     setEditing(true);
     setMessage("");
   }
@@ -294,17 +291,9 @@ export default function ProfileCenter() {
           <section className="surface-card minihome-settings">
             <div className="minihome-settings__head">
               <div className="pageHeader">
-                <p className="sectionLead">{copy.settingsLead}</p>
                 <h2 className="sectionTitle">{copy.settingsTitle}</h2>
               </div>
               <div className="action-row minihome-settings__actions">
-                <button
-                  type="button"
-                  className="btn btn--subtle"
-                  onClick={() => setSettingsExpanded((current) => !current)}
-                >
-                  {settingsExpanded ? copy.closeSettings : copy.openSettings}
-                </button>
                 {!editing ? (
                   <button type="button" className="btn btn--subtle" onClick={handleEditStart}>
                     {copy.editProfile}
@@ -313,81 +302,77 @@ export default function ProfileCenter() {
               </div>
             </div>
 
-            {settingsExpanded ? (
-              editing ? (
-                <div className="profile-form">
-                  <label className="profile-field">
-                    <span className="small profile-field__label">{copy.displayNameLabel}</span>
-                    <input
-                      className="input"
-                      value={form.displayName}
-                      onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
-                      placeholder={copy.displayNamePlaceholder}
-                    />
-                  </label>
+            {editing ? (
+              <div className="profile-form">
+                <label className="profile-field">
+                  <span className="small profile-field__label">{copy.displayNameLabel}</span>
+                  <input
+                    className="input"
+                    value={form.displayName}
+                    onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
+                    placeholder={copy.displayNamePlaceholder}
+                  />
+                </label>
 
-                  <label className="profile-field">
-                    <span className="small profile-field__label">{copy.handleLabel}</span>
-                    <input
-                      className="input"
-                      value={form.handle}
-                      onChange={(event) => setForm((prev) => ({ ...prev, handle: event.target.value.toLowerCase() }))}
-                      placeholder={copy.handlePlaceholder}
-                    />
-                    <span className="small profile-field__hint">{copy.handleHint}</span>
-                  </label>
+                <label className="profile-field">
+                  <span className="small profile-field__label">{copy.handleLabel}</span>
+                  <input
+                    className="input"
+                    value={form.handle}
+                    onChange={(event) => setForm((prev) => ({ ...prev, handle: event.target.value.toLowerCase() }))}
+                    placeholder={copy.handlePlaceholder}
+                  />
+                  <span className="small profile-field__hint">{copy.handleHint}</span>
+                </label>
 
-                  <label className="profile-field">
-                    <span className="small profile-field__label">{copy.bioLabel}</span>
-                    <textarea
-                      className="textarea profile-field__textarea"
-                      value={form.bio}
-                      onChange={(event) => setForm((prev) => ({ ...prev, bio: event.target.value }))}
-                      placeholder={copy.bioPlaceholder}
-                    />
-                  </label>
+                <label className="profile-field">
+                  <span className="small profile-field__label">{copy.bioLabel}</span>
+                  <textarea
+                    className="textarea profile-field__textarea"
+                    value={form.bio}
+                    onChange={(event) => setForm((prev) => ({ ...prev, bio: event.target.value }))}
+                    placeholder={copy.bioPlaceholder}
+                  />
+                </label>
 
-                  <label className="profile-toggle">
-                    <input
-                      type="checkbox"
-                      checked={form.profilePublic}
-                      onChange={(event) => setForm((prev) => ({ ...prev, profilePublic: event.target.checked }))}
-                    />
-                    <span className="profile-toggle__copy">
-                      <span className="profile-toggle__title">{copy.publicToggleLabel}</span>
-                      <span className="small profile-toggle__hint">
-                        {form.profilePublic ? copy.publicToggleOn : copy.publicToggleOff}
-                      </span>
+                <label className="profile-toggle">
+                  <input
+                    type="checkbox"
+                    checked={form.profilePublic}
+                    onChange={(event) => setForm((prev) => ({ ...prev, profilePublic: event.target.checked }))}
+                  />
+                  <span className="profile-toggle__copy">
+                    <span className="profile-toggle__title">{copy.publicToggleLabel}</span>
+                    <span className="small profile-toggle__hint">
+                      {form.profilePublic ? copy.publicToggleOn : copy.publicToggleOff}
                     </span>
-                  </label>
+                  </span>
+                </label>
 
-                  <div className="action-row">
-                    <button type="button" className="btn" onClick={handleSave} disabled={saving || loading}>
-                      {saving ? copy.saving : copy.save}
-                    </button>
-                    <button type="button" className="btn btn--subtle" onClick={handleEditCancel} disabled={saving}>
-                      {copy.cancelEdit}
-                    </button>
-                  </div>
+                <div className="action-row">
+                  <button type="button" className="btn" onClick={handleSave} disabled={saving || loading}>
+                    {saving ? copy.saving : copy.save}
+                  </button>
+                  <button type="button" className="btn btn--subtle" onClick={handleEditCancel} disabled={saving}>
+                    {copy.cancelEdit}
+                  </button>
                 </div>
-              ) : (
-                <div className="profile-link-box-stack">
-                  <div className="profile-link-box">
-                    <div className="small profile-link-box__label">{copy.displayNameLabel}</div>
-                    <div className="profile-link-box__value">{savedDisplayName}</div>
-                  </div>
-                  <div className="profile-link-box">
-                    <div className="small profile-link-box__label">{copy.publicLink}</div>
-                    <div className="profile-link-box__value">{publicPath}</div>
-                  </div>
-                  <div className="profile-link-box">
-                    <div className="small profile-link-box__label">{copy.bioLabel}</div>
-                    <div className="profile-link-box__value">{savedBio || copy.bioEmpty}</div>
-                  </div>
-                </div>
-              )
+              </div>
             ) : (
-              <div className="small page-feedback">{copy.settingsCollapsedHint}</div>
+              <div className="profile-link-box-stack">
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.displayNameLabel}</div>
+                  <div className="profile-link-box__value">{savedDisplayName}</div>
+                </div>
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.publicLink}</div>
+                  <div className="profile-link-box__value">{publicPath}</div>
+                </div>
+                <div className="profile-link-box">
+                  <div className="small profile-link-box__label">{copy.bioLabel}</div>
+                  <div className="profile-link-box__value">{savedBio || copy.bioEmpty}</div>
+                </div>
+              </div>
             )}
           </section>
 
