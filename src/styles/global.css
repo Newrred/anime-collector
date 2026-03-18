@@ -4694,7 +4694,15 @@ h3 {
 
 .home-section-block {
   display: grid;
-  gap: var(--layout-gap-sm);
+  gap: calc(var(--layout-gap-sm) * 4);
+}
+
+.home-section-block .pageHeader {
+  gap: calc(var(--layout-gap-tight) * 4);
+}
+
+.home-page .home-section-block > .pageHeader {
+  margin-bottom: var(--layout-gap-sm);
 }
 
 .home-section-title {
