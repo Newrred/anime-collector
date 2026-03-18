@@ -10,11 +10,6 @@ const PREVIEW_LAYOUT = {
   ],
 };
 
-const TASTE_ANALYSIS_LAYOUT = {
-  version: 2,
-  widgets: [{ id: "tasteFingerprint", enabled: true, size: "wide" }],
-};
-
 export default function HomeShowcasePreview({ locale = "ko", base = "/", model }) {
   const copy = getMessageGroup(locale, "homeShowcasePreview");
 
@@ -30,13 +25,6 @@ export default function HomeShowcasePreview({ locale = "ko", base = "/", model }
           {copy.cta}
         </a>
       </div>
-      <section className="home-showcase-preview__taste-analysis">
-        <div className="pageHeader">
-          <h3 className="sectionTitle">{copy.tasteTitle || "내 취향 분석"}</h3>
-          <p className="sectionLead">{copy.tasteLead || "기록에서 취향 패턴을 뽑아 한눈에 확인하세요."}</p>
-        </div>
-        <ShowcaseGrid locale={locale} model={model} layout={TASTE_ANALYSIS_LAYOUT} compact />
-      </section>
     </section>
   );
 }

@@ -10,7 +10,10 @@ import CharacterInsightSheet from "./home/CharacterInsightSheet";
 import HomeShowcasePreview from "./home/HomeShowcasePreview.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
+import { StatBars } from "./library/LibraryUi.jsx";
+import { formatGenreLabel, formatStatusLabel } from "./library/libraryCopy.js";
 import { getMessageGroup } from "../domain/messages.js";
+import { SCORE_MAX, normalizeRewatchCount, normalizeScoreValue } from "../domain/animeState";
 
 function buildLibraryHref(base, anilistId, focus = "") {
   const params = new URLSearchParams();
@@ -21,9 +24,136 @@ function buildLibraryHref(base, anilistId, focus = "") {
   return `${base}library/?${params.toString()}`;
 }
 
+function safeGenres(media) {
+  const arr = media?.genres;
+  return Array.isArray(arr) ? arr.filter(Boolean) : [];
+}
+
+function buildLibraryStatsFromItems({ items, mediaMap, locale, titleById }) {
+  const statusRows = ["완료", "보는중", "보류", "하차", "미분류"].map((s) => ({
+    key: s,
+    label: formatStatusLabel(s, locale),
+    count: items.filter((it) => (it.status || "미분류") === s).length,
+  }));
+
+  const genreCount = new Map();
+  let scoreSum = 0;
+  let scoreCount = 0;
+
+  for (const it of items) {
+    const m = mediaMap.get(it.anilistId);
+    for (const g of safeGenres(m)) {
+      genreCount.set(g, (genreCount.get(g) || 0) + 1);
+    }
+
+    const score = normalizeScoreValue(it?.score);
+    if (score != null) {
+      scoreSum += score;
+      scoreCount += 1;
+    }
+  }
+
+  const genreRows = [...genreCount.entries()]
+    .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), locale === "en" ? "en" : "ko"))
+    .slice(0, 5)
+    .map(([g, count]) => ({ key: g, label: formatGenreLabel(g, locale), count }));
+
+  const rewatchRows = items
+    .map((it) => ({
+      key: String(it.anilistId),
+      id: it.anilistId,
+      title: titleById.get(Number(it?.anilistId)) || `#${it?.anilistId}`,
+      count: normalizeRewatchCount(it?.rewatchCount),
+    }))
+    .filter((row) => row.count > 0)
+    .sort((a, b) => b.count - a.count || a.title.localeCompare(b.title, locale === "en" ? "en" : "ko"))
+    .slice(0, 5)
+    .map((row) => ({ ...row }));
+
+  const maxStatus = Math.max(...statusRows.map((x) => x.count), 1);
+  const maxGenre = Math.max(...genreRows.map((x) => x.count), 1);
+  const averageScore = scoreCount > 0 ? scoreSum / scoreCount : null;
+
+  return {
+    total: items.length,
+    scored: scoreCount,
+    averageScore,
+    statusRows,
+    genreRows,
+    rewatchRows,
+    maxStatus,
+    maxGenre,
+  };
+}
+
+function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }) {
+  const noData = copy.noData || "No data";
+  const times = copy.times || "";
+  const scoreMax = SCORE_MAX;
+
+  return (
+    <section className={`surface-card home-taste-card${compact ? " surface-card--compact" : ""}`}>
+      <div className="pageHeader">
+        <h2 className="sectionTitle">{copy.title}</h2>
+        <p className="sectionLead">
+          {locale === "en"
+            ? `${copy.summary} ${dashboard.total} · ${copy.average} ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${scoreMax}`} (${dashboard.scored}${copy.scored})`
+            : `${copy.summary} ${dashboard.total}개 · ${copy.average} ${dashboard.averageScore == null ? "-" : `${dashboard.averageScore.toFixed(2)} / ${scoreMax}`} (${dashboard.scored}${copy.scored})`}
+        </p>
+      </div>
+
+      <div className="library-stats-grid">
+        <div className="library-stats-card ui-panel-stack">
+          <div className="library-stats-card-title">{copy.status}</div>
+          <StatBars rows={dashboard.statusRows} maxCount={dashboard.maxStatus} emptyText={noData} />
+        </div>
+        <div className="library-stats-card ui-panel-stack">
+          <div className="library-stats-card-title">{copy.genre}</div>
+          <StatBars rows={dashboard.genreRows} maxCount={dashboard.maxGenre} emptyText={noData} />
+        </div>
+        <div className="library-stats-card ui-panel-stack">
+          <div className="library-stats-card-title">{copy.rewatch}</div>
+          {dashboard.rewatchRows.length === 0 ? (
+            <div className="small ui-empty-state ui-empty-state--compact">{copy.empty}</div>
+          ) : (
+            <div className="library-rewatch-list">
+              {dashboard.rewatchRows.map((row) => (
+                <a
+                  key={row.key}
+                  href={`./library/?animeId=${encodeURIComponent(row.id)}`}
+                  className="library-rewatch-item"
+                  title={`${row.title} · ${row.count}${times}`}
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                    event.preventDefault();
+                    onOpenAnime(row.id);
+                  }}
+                >
+                  <div className="library-rewatch-list-item">
+                    <div className="small library-rewatch-item-title">{row.title}</div>
+                    <div className="small">{row.count}{times}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function useLibraryStatsPanelProps({ items, mediaMap, locale, titleById }) {
+  return useMemo(
+    () => buildLibraryStatsFromItems({ items, mediaMap, locale, titleById }),
+    [items, mediaMap, locale, titleById]
+  );
+}
+
 export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "home");
+  const tasteCopy = getMessageGroup(locale, "libraryStatsPanel");
   const { items, logs, mediaMap, titleById } = useShowcaseSource(locale);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
@@ -50,6 +180,7 @@ export default function Home() {
   }, []);
 
   const resurfacing = useMemo(() => buildHomeResurfacing({ items, logs }), [items, logs]);
+  const tasteDashboard = useLibraryStatsPanelProps({ items, mediaMap, locale, titleById });
 
   const showcaseModel = useMemo(
     () => buildShowcaseModel({ items, logs, mediaMap, titleById, locale }),
@@ -128,6 +259,13 @@ export default function Home() {
   }, [recapYear, recapYears]);
 
   const yearRecap = useMemo(() => buildYearRecap({ logs, year: recapYear }), [logs, recapYear]);
+
+  function openLibraryAnimeById(anilistId) {
+    const id = Number(anilistId);
+    if (!Number.isFinite(id)) return;
+    if (typeof window === "undefined") return;
+    window.location.href = `${base}library/?animeId=${encodeURIComponent(id)}`;
+  }
 
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
@@ -211,6 +349,13 @@ export default function Home() {
       />
 
       <HomeShowcasePreview locale={locale} base={base} model={showcaseModel} />
+
+      <HomeTasteCard
+        dashboard={tasteDashboard}
+        locale={locale}
+        onOpenAnime={openLibraryAnimeById}
+        copy={tasteCopy}
+      />
 
       <YearRecapPanel
         locale={locale}
