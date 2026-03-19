@@ -7,11 +7,17 @@ const rawBase = String(import.meta.env.BASE_URL || "/");
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 const isProd = import.meta.env.PROD;
 let Analytics = null;
+let SpeedInsights = null;
 if (isProd) {
   try {
     Analytics = (await import("@vercel/analytics/astro")).default;
   } catch (error) {
     console.warn("[analytics] optional import failed in this environment", error);
+  }
+  try {
+    SpeedInsights = (await import("@vercel/speed-insights/astro")).default;
+  } catch (error) {
+    console.warn("[speed-insights] optional import failed in this environment", error);
   }
 }
 const normalize = (p: string | null | undefined) =>
@@ -66,6 +72,7 @@ const authReturnGuardScript = `
       </main>
     </div>
     {isProd && Analytics ? <Analytics /> : null}
+    {isProd && SpeedInsights ? <SpeedInsights /> : null}
     {isProd && <script is:inline type="module" src={toBasePath("register-sw.js")}></script>}
   </body>
 </html>
