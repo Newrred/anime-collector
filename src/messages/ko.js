@@ -111,11 +111,11 @@ const koMessages = {
     aboutCreatorText:
       "애니를 좋아하는 한 사람으로서, 애니 감상 기록이 단순한 로그를 넘어 나만의 취향과 기억을 발견하는 여정이 되길 바라는 마음으로 이 서비스를 만들게 되었습니다. 함께 애니 기록의 새로운 즐거움을 만들어가요!",
     aboutVisionTitle: "CONTACT",
-    aboutVisionText: "기록(홈·보관함) - 분석(티어/위젯) - 공유(미니홈) 흐름이 자연스럽게 이어지는 게 핵심입니다.",
-    aboutCopyButton: "피드백 템플릿 복사",
+    aboutVisionText: "minecrafthong@gmail.com",
+    aboutCopyButton: "인스타그램 계정",
     feedbackCopyTemplate:
-      "MOEMOA 피드백\n- 페이지/기능:\n- 기대한 동작:\n- 실제 동작:\n- 개선 제안:\n- 브라우저/디바이스:",
-    feedbackCopyOk: "피드백 템플릿을 복사했어요.",
+      "https://www.instagram.com/bottlegodburgundy/",
+    feedbackCopyOk: "인스타그램 계정 링크를 복사했어요.",
     feedbackCopyFail: "복사에 실패했어요. 브라우저 권한을 확인해 주세요.",
     tips: [
       "소중한 버그 제보, 기능 제안, 사용 소감을 남겨주시면 참고해서 더욱 좋은 서비스를 만들어가기 위해 노력하겠습니다.",

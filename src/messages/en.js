@@ -110,12 +110,12 @@ const enMessages = {
     aboutCreatorTitle: "Creator note",
     aboutCreatorText:
       "Hi, I'm Shin Hong, the creator of MOEMOA. As someone who loves anime, I wanted watch logs to become more than a simple archive. I hoped they could turn into a journey where you discover your own taste and the memories that stay with you. That's why I started this service. I'll keep listening to your feedback and polishing the experience so it feels better over time. Let's build a new kind of fun around anime journaling together.",
-    aboutVisionTitle: "Design direction",
-    aboutVisionText: "The core is a natural flow from record-keeping (Home, Library) to analysis (tiers, widgets) to sharing (Minihome).",
-    aboutCopyButton: "Copy feedback template",
+    aboutVisionTitle: "CONTACT",
+    aboutVisionText: "minecrafthong@gmail.com",
+    aboutCopyButton: "Instagram account",
     feedbackCopyTemplate:
-      "MOEMOA feedback\n- Page/feature:\n- What you expected:\n- What happened:\n- Suggested improvement:\n- Browser/device:",
-    feedbackCopyOk: "Copied the feedback template.",
+      "https://www.instagram.com/bottlegodburgundy/",
+    feedbackCopyOk: "Copied the Instagram account link.",
     feedbackCopyFail: "Couldn't copy it. Please check your browser permissions.",
     tips: [
       "If you leave bug reports, feature ideas, or even quick impressions, we'll use them to make MOEMOA better.",
