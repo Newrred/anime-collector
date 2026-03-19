@@ -40,11 +40,25 @@ alter table public.user_profiles enable row level security;
 alter table public.user_follows enable row level security;
 
 drop policy if exists "read public or own profiles" on public.user_profiles;
-create policy "read public or own profiles"
+drop policy if exists "read public, own, or connected profiles" on public.user_profiles;
+create policy "read public, own, or connected profiles"
 on public.user_profiles
 for select
 to anon, authenticated
-using (profile_public = true or auth.uid() = user_id);
+using (
+  profile_public = true
+  or auth.uid() = user_id
+  or exists (
+    select 1
+    from public.user_follows f
+    where auth.uid() is not null
+      and (
+        (f.followed_user_id = auth.uid() and f.follower_user_id = user_id)
+        or
+        (f.follower_user_id = auth.uid() and f.followed_user_id = user_id)
+      )
+  )
+);
 
 drop policy if exists "insert own profile" on public.user_profiles;
 create policy "insert own profile"
