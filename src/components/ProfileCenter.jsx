@@ -596,7 +596,7 @@ export default function ProfileCenter() {
                 {(showcaseLayout.widgets || []).map((widget, index) => (
                   <div
                     key={widget.id}
-                    className={`showcase-editor-row${draggedWidgetId === widget.id ? " is-dragging" : ""}${dragOverWidgetId === widget.id && draggedWidgetId !== widget.id ? " is-drop-target" : ""}`}
+                    className={`showcase-editor-row showcase-editor-row--${widget.size === "wide" ? "wide" : "half"}${draggedWidgetId === widget.id ? " is-dragging" : ""}${dragOverWidgetId === widget.id && draggedWidgetId !== widget.id ? " is-drop-target" : ""}`}
                     data-widget-id={widget.id}
                     draggable
                     onDragStart={(event) => handleWidgetDragStart(event, widget.id)}

@@ -7,8 +7,10 @@ import {
   IconGear,
   IconGlobe,
   IconHelp,
+  IconMenu,
   IconMoon,
   IconSun,
+  IconX,
 } from "./ui/AppIcons.jsx";
 import AuthSheet from "./auth/AuthSheet.jsx";
 import TopNavGlobalSearch from "./search/TopNavGlobalSearch.jsx";
@@ -143,7 +145,7 @@ export default function TopNavDataMenu({
               onClick={handleToggleTheme}
               aria-label={theme === "dark" ? copy.switchToLight : copy.switchToDark}
               title={theme === "dark" ? copy.switchToLight : copy.switchToDark}
-              className="data-menu-trigger data-menu-theme-trigger"
+              className="data-menu-trigger data-menu-theme-trigger top-nav__desktop-action"
             >
               <span className="data-menu-trigger-label data-menu-theme-icon" aria-hidden>
                 {theme === "dark" ? <IconMoon /> : <IconSun />}
@@ -159,7 +161,7 @@ export default function TopNavDataMenu({
               aria-controls="locale-menu-panel"
               aria-label={copy.localeMenu}
               title={copy.localeMenu}
-              className="data-menu-trigger"
+              className="data-menu-trigger top-nav__desktop-action"
             >
               <span className="data-menu-trigger-label data-menu-locale-icon" aria-hidden>
                 <IconGlobe />
@@ -175,10 +177,27 @@ export default function TopNavDataMenu({
               aria-controls={panelId}
               aria-label={copy.manage}
               title={copy.manage}
-              className={`data-menu-trigger auth-trigger ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
+              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
             >
               <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 <IconGear />
+              </span>
+              <span className={`sync-dot ${syncToneClass(sync.status)}`} aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDataMenuOpen((v) => !v);
+                setLocaleMenuOpen(false);
+              }}
+              aria-expanded={dataMenuOpen}
+              aria-controls={panelId}
+              aria-label={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
+              title={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
+              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
+            >
+              <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
+                {dataMenuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
               </span>
               <span className={`sync-dot ${syncToneClass(sync.status)}`} aria-hidden />
             </button>
@@ -218,6 +237,68 @@ export default function TopNavDataMenu({
               aria-label={copy.manage}
             >
               <div className="data-menu-stack">
+                <section className="data-menu-section top-nav-mobile-only">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconMenu />
+                    </span>
+                    <div className="data-menu-section-title">{copy.navigationTitle}</div>
+                  </div>
+                  <div className="top-nav-mobile-links">
+                    <a
+                      href={`${base}`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "home" ? " is-active" : ""}`}
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      {copy.home}
+                    </a>
+                    <a
+                      href={`${base}library/`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "library" ? " is-active" : ""}`}
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      {copy.library}
+                    </a>
+                    <a
+                      href={`${base}profile/`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      {copy.showcase}
+                    </a>
+                  </div>
+                </section>
+
+                <section className="data-menu-section top-nav-mobile-only">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconGlobe />
+                    </span>
+                    <div className="data-menu-section-title">{copy.appearanceTitle}</div>
+                  </div>
+                  <div className="top-nav-mobile-preferences">
+                    <button type="button" className="btn btn--subtle" onClick={handleToggleTheme}>
+                      {theme === "dark" ? copy.switchToLight : copy.switchToDark}
+                    </button>
+                    <div className="top-nav-mobile-locale-row">
+                      <button
+                        type="button"
+                        className={`btn btn--subtle${locale === "ko" ? " is-active" : ""}`}
+                        onClick={() => handleSelectLocale("ko")}
+                      >
+                        KO
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn--subtle${locale === "en" ? " is-active" : ""}`}
+                        onClick={() => handleSelectLocale("en")}
+                      >
+                        EN
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
                 <section className="data-menu-section">
                   <AuthSheet
                     embedded

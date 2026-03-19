@@ -266,7 +266,10 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
           aria-label={copy.openSearchSheet}
           title={copy.openSearchSheet}
         >
-          <IconSearch size={18} />
+          <span className="quick-action__mobile-trigger-icon" aria-hidden>
+            <IconSearch size={18} />
+          </span>
+          <span className="quick-action__mobile-trigger-text">{copy.inputPlaceholder}</span>
         </button>
       </div>
 

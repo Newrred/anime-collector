@@ -320,6 +320,16 @@ function IconGrip(props) {
   );
 }
 
+function IconMenu(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 7h16" strokeLinecap="round" />
+      <path d="M4 12h16" strokeLinecap="round" />
+      <path d="M4 17h16" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
 export {
   IconArrowRight,
   IconBase,
@@ -339,6 +349,7 @@ export {
   IconHelp,
   IconImage,
   IconLogOut,
+  IconMenu,
   IconMobile,
   IconMoon,
   IconPlus,
