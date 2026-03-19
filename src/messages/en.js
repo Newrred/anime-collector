@@ -103,10 +103,6 @@ const enMessages = {
         title: "Minihome",
         body: "Minihome lets you turn your records into cards and publish them as a public Minihome. Set it up your way and share it.",
       },
-      {
-        title: "Data & Tier Maker",
-        body: "In account settings, you can manage backup, restore, and sync. Tier Maker is there as a helper when you want to sort things out.",
-      },
     ],
     tipsTitle: "About",
     aboutSubtitle: "MOEMOA is a project for building your own anime journaling habit.",
