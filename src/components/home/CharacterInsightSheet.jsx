@@ -37,17 +37,17 @@ export default function CharacterInsightSheet({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "min(860px, 100vw)",
+          width: "min(860px, calc(100vw - 16px))",
           margin: "0 auto",
           border: "1px solid var(--color-insight-panel-border)",
-          borderRadius: "16px 16px 0 0",
+          borderRadius: "12px 12px 0 0",
           background: "var(--color-insight-panel-bg)",
-          padding: 14,
-          maxHeight: "80vh",
+          padding: 12,
+          maxHeight: "min(82svh, 82vh)",
           overflowY: "auto",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", marginBottom: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 8 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center", minWidth: 0 }}>
             {characterInsight?.image ? (
               <img
@@ -70,7 +70,7 @@ export default function CharacterInsightSheet({
               </div>
             </div>
           </div>
-          <button type="button" className="btn" onClick={onClose}>
+          <button type="button" className="btn" onClick={onClose} style={{ marginLeft: "auto" }}>
             {copy.close}
           </button>
         </div>

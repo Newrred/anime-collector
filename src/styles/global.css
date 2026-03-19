@@ -1546,32 +1546,30 @@ h3 {
   overflow: hidden;
   background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
   cursor: pointer;
-  transform: translate3d(0, 0, 0);
-  will-change: transform, box-shadow;
+  will-change: auto;
   transition:
-    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 200ms ease;
+    border-color 140ms ease,
+    background 140ms ease;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surface-strong) 18%, transparent);
 }
 
 .card:hover {
-  transform: translate3d(0, -7px, 0) scale(1.012);
-  background: color-mix(in srgb, var(--surface-hover) 94%, transparent);
-  box-shadow: var(--shadow-md);
+  background: color-mix(in srgb, var(--surface-hover) 90%, transparent);
+  box-shadow: none;
+  border-color: var(--border-strong);
 }
 
 .card img {
   width: 100%;
   aspect-ratio: 2 / 3;
   object-fit: cover;
-  transform: scale(1);
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease;
+  transform: none;
+  transition: filter 140ms ease;
 }
 
 .card:hover img {
-  transform: scale(1.022);
-  filter: saturate(1.03);
+  transform: none;
+  filter: none;
 }
 
 .card .meta {
@@ -3012,10 +3010,10 @@ h3 {
 }
 
 .library-modal-related-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 .library-modal-related-thumb {
@@ -3032,7 +3030,7 @@ h3 {
 
 .library-modal-related-main {
   min-width: 0;
-  flex: 1 1 180px;
+  align-self: stretch;
 }
 
 .library-modal-related-title {
@@ -3052,8 +3050,8 @@ h3 {
   gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-end;
-  margin-left: auto;
-  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
 }
 
 .library-modal-icon-btn {
@@ -5495,5 +5493,175 @@ html[data-theme="light"] body {
 
   .home-focus-card__stats {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-section-gap: 18px;
+    --inset-panel: 20px;
+    --size-control-md: 38px;
+    --type-title-xl-size: clamp(26px, 2.1vw, 32px);
+    --type-title-lg-size: clamp(20px, 1.6vw, 22px);
+  }
+
+  .top-nav {
+    margin-bottom: var(--space-3);
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .pageHeader {
+    gap: 6px;
+  }
+
+  .pageLead,
+  .sectionLead {
+    line-height: 1.5;
+  }
+
+  .surface-card {
+    padding: var(--inset-panel);
+  }
+
+  .btn {
+    padding: 8px 12px;
+  }
+
+  .action-row {
+    gap: 6px;
+  }
+
+  .grid {
+    gap: 14px;
+  }
+
+  .library-panel + .library-panel {
+    margin-top: 6px;
+  }
+}
+
+/* Mobile layout stability fixes */
+@media (max-width: 720px) {
+  .top-nav {
+    inline-size: auto;
+    width: auto;
+    overflow: visible;
+  }
+
+  .top-nav__links--routes {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding-bottom: 0;
+  }
+
+  .top-nav__links--routes .top-nav__link {
+    flex: 0 0 auto;
+  }
+
+  .action-row > .btn,
+  .action-row > a.btn {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .library-filter-select--sort,
+  .library-filter-select--status,
+  .library-view-mode {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .library-card-size-slider {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .profile-link-box__value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --page-pad: 12px;
+  }
+
+  .data-menu-panel,
+  .data-menu-panel--manage {
+    width: min(calc(100vw - 12px), 408px);
+    max-width: calc(100vw - 12px);
+  }
+
+  .library-chip-row {
+    align-items: flex-start;
+  }
+
+  .library-chip-scroll {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .library-chip-scroll > * {
+    min-width: 0;
+  }
+
+  .library-chip {
+    max-width: 100%;
+  }
+
+  .library-chip-label {
+    width: 100%;
+  }
+
+  .library-chip-reset {
+    margin-left: 0;
+  }
+
+  .library-stat-bar-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label count"
+      "track track";
+    row-gap: 4px;
+  }
+
+  .library-stat-bar-label {
+    grid-area: label;
+    text-align: left;
+  }
+
+  .library-stat-bar-track {
+    grid-area: track;
+  }
+
+  .library-stat-bar-count {
+    grid-area: count;
+    text-align: right;
+  }
+
+  .library-modal-related-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .library-modal-related-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 2px;
+  }
+
+  .library-modal-related-title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .minihome-page__header .action-row {
+    width: 100%;
   }
 }
