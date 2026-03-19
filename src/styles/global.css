@@ -4713,6 +4713,7 @@ h3 {
 }
 
 .home-resurfacing-grid {
+  align-items: start;
   display: grid;
   gap: var(--layout-gap-lg);
   grid-template-columns: repeat(2, minmax(0, 1fr));
