@@ -307,6 +307,19 @@ function IconSearch(props) {
   );
 }
 
+function IconGrip(props) {
+  return (
+    <IconBase {...props}>
+      <circle cx="8" cy="7" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="17" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="7" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="17" r="1.2" fill="currentColor" stroke="none" />
+    </IconBase>
+  );
+}
+
 export {
   IconArrowRight,
   IconBase,
@@ -322,6 +335,7 @@ export {
   IconFile,
   IconGear,
   IconGlobe,
+  IconGrip,
   IconHelp,
   IconImage,
   IconLogOut,

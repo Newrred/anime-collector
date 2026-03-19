@@ -435,6 +435,7 @@ const koMessages = {
     privateHint: "공개가 꺼져 있으면 다른 사람은 이 미니홈을 볼 수 없습니다.",
     moveUp: "위로",
     moveDown: "아래로",
+    dragReorder: "길게 눌러 이동",
     show: "보이기",
     hide: "숨기기",
     wideCard: "2 X 1",

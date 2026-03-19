@@ -1713,11 +1713,6 @@ export default function Library() {
     }
   }
 
-  function openGlobalQuickAction() {
-    if (typeof window === "undefined") return;
-    window.dispatchEvent(new CustomEvent("moemoa:quick-action-open"));
-  }
-
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
@@ -1740,34 +1735,6 @@ export default function Library() {
       />
 
       {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
-
-      <section className="pageHeader">
-        {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
-        {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
-      </section>
-
-      <section className="surface-card library-global-add-banner">
-        <div className="pageHeader">
-          <p className="sectionLead">
-            {locale === "en" ? "Global quick action" : "전역 퀵 액션"}
-          </p>
-          <h2 className="sectionTitle">
-            {locale === "en"
-              ? "Add a title or reopen a saved record from the top search."
-              : "작품 추가는 상단 검색에서 바로 할 수 있어요."}
-          </h2>
-        </div>
-        <p className="sectionLead">
-          {locale === "en"
-            ? "Use the top search to add something new, or jump straight into a record you already have."
-            : "검색창에서 새 작품을 추가하거나, 이미 있는 기록을 바로 열 수 있습니다."}
-        </p>
-        <div className="action-row">
-          <button type="button" className="btn btn--subtle" onClick={openGlobalQuickAction}>
-            {locale === "en" ? "Add title or search my records" : "작품 추가 또는 내 기록 검색"}
-          </button>
-        </div>
-      </section>
 
       <LibraryFiltersPanel
         locale={locale}

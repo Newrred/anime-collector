@@ -179,7 +179,7 @@ export default function DataCenter() {
   }
 
   return (
-    <div className="data-grid">
+    <div className="data-grid page-shell page-shell--narrow">
       <TopNavDataMenu
         base={base}
         panelId="data-center-menu-panel"

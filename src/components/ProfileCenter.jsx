@@ -18,7 +18,7 @@ import {
   readShowcaseLayout,
   saveShowcaseLayout,
 } from "../repositories/showcaseRepo.js";
-import { IconChevronDown, IconChevronUp, IconEye, IconEyeOff } from "./ui/AppIcons.jsx";
+import { IconChevronDown, IconChevronUp, IconEye, IconEyeOff, IconGrip } from "./ui/AppIcons.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { ProfilePeopleList } from "./profile/ProfileUi.jsx";
 import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
@@ -41,6 +41,25 @@ function moveWidget(layout, fromIndex, toIndex) {
   const [row] = next.splice(fromIndex, 1);
   next.splice(toIndex, 0, row);
   return { ...layout, widgets: next };
+}
+
+function findWidgetIndex(layout, widgetId) {
+  if (!Array.isArray(layout?.widgets)) return -1;
+  return layout.widgets.findIndex((row) => row.id === widgetId);
+}
+
+function moveWidgetByOffset(layout, widgetId, offset) {
+  const fromIndex = findWidgetIndex(layout, widgetId);
+  if (fromIndex < 0) return layout;
+  const toIndex = Math.max(0, Math.min(layout.widgets.length - 1, fromIndex + offset));
+  return moveWidget(layout, fromIndex, toIndex);
+}
+
+function moveWidgetBeforeTarget(layout, draggedWidgetId, targetWidgetId) {
+  const fromIndex = findWidgetIndex(layout, draggedWidgetId);
+  const targetIndex = findWidgetIndex(layout, targetWidgetId);
+  if (fromIndex < 0 || targetIndex < 0 || fromIndex === targetIndex) return layout;
+  return moveWidget(layout, fromIndex, targetIndex);
 }
 
 function resolveWidgetLabel(widgetId, locale = "ko") {
@@ -79,8 +98,13 @@ export default function ProfileCenter() {
   const [message, setMessage] = useState("");
   const [showcaseLayout, setShowcaseLayout] = useState(DEFAULT_SHOWCASE_LAYOUT);
   const [publishing, setPublishing] = useState(false);
+  const [draggedWidgetId, setDraggedWidgetId] = useState(null);
+  const [dragOverWidgetId, setDragOverWidgetId] = useState(null);
+  const [touchDragState, setTouchDragState] = useState(null);
   const editorListRef = useRef(null);
   const previousEditorRectsRef = useRef(new Map());
+  const touchHoldTimerRef = useRef(null);
+  const touchDragRef = useRef({ active: false, widgetId: null, overWidgetId: null, pointerId: null });
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
@@ -189,6 +213,67 @@ export default function ProfileCenter() {
     previousEditorRectsRef.current = nextRects;
   }, [editorOrderKey]);
 
+  useEffect(() => {
+    touchDragRef.current = {
+      active: Boolean(touchDragState?.active),
+      widgetId: touchDragState?.widgetId || null,
+      overWidgetId: dragOverWidgetId || touchDragState?.widgetId || null,
+      pointerId: touchDragState?.pointerId ?? null,
+    };
+  }, [touchDragState, dragOverWidgetId]);
+
+  useEffect(() => () => {
+    if (touchHoldTimerRef.current) {
+      clearTimeout(touchHoldTimerRef.current);
+      touchHoldTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!touchDragState?.active) return undefined;
+
+    function onPointerMove(event) {
+      if (event.pointerId !== touchDragRef.current.pointerId) return;
+      if (event.cancelable) event.preventDefault();
+      const hit = document.elementFromPoint(event.clientX, event.clientY);
+      const row = hit?.closest?.("[data-widget-id]");
+      const widgetId = row?.getAttribute?.("data-widget-id") || touchDragRef.current.widgetId;
+      if (widgetId && widgetId !== dragOverWidgetId) {
+        setDragOverWidgetId(widgetId);
+      }
+    }
+
+    function finish(pointerId) {
+      if (pointerId !== touchDragRef.current.pointerId) return;
+      const activeWidgetId = touchDragRef.current.widgetId;
+      const overWidgetId = touchDragRef.current.overWidgetId;
+      if (activeWidgetId && overWidgetId && activeWidgetId !== overWidgetId) {
+        setShowcaseLayout((prev) => moveWidgetBeforeTarget(prev, activeWidgetId, overWidgetId));
+      }
+      setTouchDragState(null);
+      setDraggedWidgetId(null);
+      setDragOverWidgetId(null);
+    }
+
+    function onPointerUp(event) {
+      finish(event.pointerId);
+    }
+
+    function onPointerCancel(event) {
+      finish(event.pointerId);
+    }
+
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerCancel);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerCancel);
+    };
+  }, [touchDragState, dragOverWidgetId]);
+
   async function copyProfileLink() {
     if (!isValidProfileHandle(savedHandle)) {
       setMessage(copy.handleInvalid);
@@ -278,8 +363,69 @@ export default function ProfileCenter() {
     setMessage("");
   }
 
+  function handleMoveWidget(widgetId, offset, control) {
+    control?.blur?.();
+    setShowcaseLayout((prev) => moveWidgetByOffset(prev, widgetId, offset));
+  }
+
+  function handleWidgetDragStart(event, widgetId) {
+    setDraggedWidgetId(widgetId);
+    setDragOverWidgetId(widgetId);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", widgetId);
+  }
+
+  function handleWidgetDragOver(event, widgetId) {
+    if (!draggedWidgetId || draggedWidgetId === widgetId) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    if (dragOverWidgetId !== widgetId) setDragOverWidgetId(widgetId);
+  }
+
+  function handleWidgetDrop(event, widgetId) {
+    event.preventDefault();
+    const droppedWidgetId = draggedWidgetId || event.dataTransfer.getData("text/plain");
+    if (!droppedWidgetId || droppedWidgetId === widgetId) {
+      setDraggedWidgetId(null);
+      setDragOverWidgetId(null);
+      return;
+    }
+    setShowcaseLayout((prev) => moveWidgetBeforeTarget(prev, droppedWidgetId, widgetId));
+    setDraggedWidgetId(null);
+    setDragOverWidgetId(null);
+  }
+
+  function handleWidgetDragEnd() {
+    setDraggedWidgetId(null);
+    setDragOverWidgetId(null);
+  }
+
+  function clearTouchHoldTimer() {
+    if (!touchHoldTimerRef.current) return;
+    clearTimeout(touchHoldTimerRef.current);
+    touchHoldTimerRef.current = null;
+  }
+
+  function handleTouchHandlePointerDown(event, widgetId) {
+    if (event.pointerType === "mouse") return;
+    clearTouchHoldTimer();
+    touchHoldTimerRef.current = setTimeout(() => {
+      setDraggedWidgetId(widgetId);
+      setDragOverWidgetId(widgetId);
+      setTouchDragState({
+        active: true,
+        widgetId,
+        pointerId: event.pointerId,
+      });
+    }, 180);
+  }
+
+  function handleTouchHandlePointerEnd() {
+    clearTouchHoldTimer();
+  }
+
   return (
-    <div className="profile-page minihome-page">
+    <div className="profile-page minihome-page page-shell page-shell--wide">
       <TopNavDataMenu
         base={base}
         panelId="profile-menu-panel"
@@ -448,7 +594,16 @@ export default function ProfileCenter() {
 
               <div className="showcase-editor-list" ref={editorListRef}>
                 {(showcaseLayout.widgets || []).map((widget, index) => (
-                  <div key={widget.id} className="showcase-editor-row" data-widget-id={widget.id}>
+                  <div
+                    key={widget.id}
+                    className={`showcase-editor-row${draggedWidgetId === widget.id ? " is-dragging" : ""}${dragOverWidgetId === widget.id && draggedWidgetId !== widget.id ? " is-drop-target" : ""}`}
+                    data-widget-id={widget.id}
+                    draggable
+                    onDragStart={(event) => handleWidgetDragStart(event, widget.id)}
+                    onDragOver={(event) => handleWidgetDragOver(event, widget.id)}
+                    onDrop={(event) => handleWidgetDrop(event, widget.id)}
+                    onDragEnd={handleWidgetDragEnd}
+                  >
                     <div className="showcase-editor-row__main">
                       <div className="showcase-editor-row__title">{resolveWidgetLabel(widget.id, locale)}</div>
                       <div className="small showcase-editor-row__meta">
@@ -459,8 +614,20 @@ export default function ProfileCenter() {
                     <div className="showcase-editor-row__actions">
                       <button
                         type="button"
+                        className="btn btn--ghost btn--icon showcase-editor-row__drag-handle"
+                        aria-label={editorCopy.dragReorder}
+                        title={editorCopy.dragReorder}
+                        onPointerDown={(event) => handleTouchHandlePointerDown(event, widget.id)}
+                        onPointerUp={handleTouchHandlePointerEnd}
+                        onPointerCancel={handleTouchHandlePointerEnd}
+                        onPointerLeave={handleTouchHandlePointerEnd}
+                      >
+                        <span className="btn__icon"><IconGrip size={18} /></span>
+                      </button>
+                      <button
+                        type="button"
                         className="btn btn--ghost btn--icon showcase-editor-row__icon-btn"
-                        onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index - 1))}
+                        onClick={(event) => handleMoveWidget(widget.id, -1, event.currentTarget)}
                         disabled={index === 0}
                         aria-label={editorCopy.moveUp}
                         title={editorCopy.moveUp}
@@ -470,7 +637,7 @@ export default function ProfileCenter() {
                       <button
                         type="button"
                         className="btn btn--ghost btn--icon showcase-editor-row__icon-btn"
-                        onClick={() => setShowcaseLayout((prev) => moveWidget(prev, index, index + 1))}
+                        onClick={(event) => handleMoveWidget(widget.id, 1, event.currentTarget)}
                         disabled={index === showcaseLayout.widgets.length - 1}
                         aria-label={editorCopy.moveDown}
                         title={editorCopy.moveDown}

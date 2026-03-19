@@ -80,7 +80,7 @@ export default function HelpCenter() {
         onInstallPwa={onClickInstallPwa}
       />
 
-      <div className="help-center">
+      <div className="help-center page-shell page-shell--narrow">
         <section className="surface-card status-panel">
           <div className="pageHeader">
             <h1 className="pageTitle">{copy.title}</h1>

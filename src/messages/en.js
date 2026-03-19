@@ -435,6 +435,7 @@ const enMessages = {
     privateHint: "If public is off, no one else can see this Minihome.",
     moveUp: "Move up",
     moveDown: "Move down",
+    dragReorder: "Press and hold to move",
     show: "Show",
     hide: "Hide",
     wideCard: "2 x 1",
