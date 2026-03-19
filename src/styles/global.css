@@ -618,6 +618,10 @@ h3 {
   display: none;
 }
 
+.data-menu-panel .top-nav-mobile-only {
+  display: none;
+}
+
 .auth-trigger {
   position: relative;
 }
@@ -5569,6 +5573,10 @@ h3 {
     width: 100%;
   }
 
+  .data-menu-panel .top-nav-mobile-only {
+    display: grid;
+  }
+
   .quick-action__mobile-trigger-text {
     color: var(--text-tertiary);
     min-width: 0;
@@ -5645,6 +5653,21 @@ html[data-theme="light"] body {
   background: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
   border-color: var(--border-strong);
   transform: none;
+}
+
+@media (min-width: 901px) {
+  .top-nav .top-nav__desktop-action {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .top-nav .top-nav__desktop-action:hover,
+  .top-nav .top-nav__desktop-action:focus-visible {
+    background: color-mix(in srgb, var(--surface-hover) 38%, transparent);
+    border-color: transparent;
+    box-shadow: none;
+  }
 }
 
 .data-menu-panel {
