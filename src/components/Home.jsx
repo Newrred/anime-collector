@@ -20,13 +20,20 @@ function buildLibraryHref(base, anilistId, focus = "") {
   const id = Number(anilistId);
   if (Number.isFinite(id)) params.set("animeId", String(id));
   if (focus) params.set("focus", focus);
-  if (!params.toString()) return `${base}library/?tab=add`;
+  if (!params.toString()) return `${base}library/`;
   return `${base}library/?${params.toString()}`;
 }
 
 function safeGenres(media) {
   const arr = media?.genres;
   return Array.isArray(arr) ? arr.filter(Boolean) : [];
+}
+
+function hasValidRecapYear(value) {
+  if (value == null) return false;
+  if (typeof value === "string" && !value.trim()) return false;
+  const numeric = Number(value);
+  return Number.isInteger(numeric) && numeric > 0;
 }
 
 function buildLibraryStatsFromItems({ items, mediaMap, locale, titleById }) {
@@ -203,8 +210,8 @@ export default function Home() {
     : heroEntry?.anilistId && resurfacing?.missingMemory?.some((row) => Number(row?.anilistId) === heroAnimeId)
       ? copy.heroMetaMissing
       : copy.heroMetaLibrary;
-  const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : `${base}library/?tab=add`;
-  const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/?tab=collection`;
+  const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : "";
+  const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/`;
   const heroCue = String(heroEntry?.cue || "").trim();
   const heroVisual = useMemo(() => {
     if (!Number.isFinite(heroAnimeId)) return "";
@@ -250,10 +257,10 @@ export default function Home() {
   useEffect(() => {
     const fallbackYear = new Date().getUTCFullYear();
     if (!recapYears.length) {
-      if (!Number.isFinite(Number(recapYear))) setRecapYear(fallbackYear);
+      if (!hasValidRecapYear(recapYear)) setRecapYear(fallbackYear);
       return;
     }
-    if (!Number.isFinite(Number(recapYear)) || !recapYears.includes(Number(recapYear))) {
+    if (!hasValidRecapYear(recapYear) || !recapYears.includes(Number(recapYear))) {
       setRecapYear(recapYears[0]);
     }
   }, [recapYear, recapYears]);
@@ -273,6 +280,11 @@ export default function Home() {
     try {
       await window.__promptPwaInstall();
     } catch {}
+  }
+
+  function openGlobalQuickAction() {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("moemoa:quick-action-open"));
   }
 
   function openCharacterSheet(characterId, name = "", image = "") {
@@ -328,12 +340,25 @@ export default function Home() {
                 </div>
               </div>
               <div className="action-row">
-                <a href={heroPrimaryHref} className="btn">
-                  {copy.quickRecord}
-                </a>
-                <a href={heroSecondaryHref} className="btn btn--subtle">
-                  {copy.heroOpen}
-                </a>
+                {Number.isFinite(heroAnimeId) ? (
+                  <>
+                    <a href={heroPrimaryHref} className="btn">
+                      {copy.quickRecord}
+                    </a>
+                    <a href={heroSecondaryHref} className="btn btn--subtle">
+                      {copy.heroOpen}
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn" onClick={openGlobalQuickAction}>
+                      {locale === "en" ? "Add a title" : "작품 추가"}
+                    </button>
+                    <a href={heroSecondaryHref} className="btn btn--subtle">
+                      {copy.heroOpen}
+                    </a>
+                  </>
+                )}
               </div>
               <div className="small page-feedback">{copy.heroHint}</div>
             </div>

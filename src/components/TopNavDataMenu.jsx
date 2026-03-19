@@ -11,6 +11,7 @@ import {
   IconSun,
 } from "./ui/AppIcons.jsx";
 import AuthSheet from "./auth/AuthSheet.jsx";
+import TopNavGlobalSearch from "./search/TopNavGlobalSearch.jsx";
 
 function ActionLabel({ icon, children }) {
   return (
@@ -129,6 +130,10 @@ export default function TopNavDataMenu({
           >
             {copy.showcase}
           </a>
+        </div>
+
+        <div className="top-nav__search-slot">
+          <TopNavGlobalSearch base={base} locale={locale} />
         </div>
 
         <div ref={dataMenuRef} className="top-nav__menu">

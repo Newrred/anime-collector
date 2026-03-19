@@ -298,6 +298,15 @@ function IconTrash(props) {
   );
 }
 
+function IconSearch(props) {
+  return (
+    <IconBase {...props}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4 4" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
 export {
   IconArrowRight,
   IconBase,
@@ -320,6 +329,7 @@ export {
   IconMoon,
   IconPlus,
   IconRefreshCw,
+  IconSearch,
   IconShare,
   IconShield,
   IconSortAsc,

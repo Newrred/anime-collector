@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import myListSeed from "../data/myAnime.json";
 import aliasSeed from "../data/aliases.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
-import AddAnime from "./AddAnime.jsx";
 import {
   clamp,
   dedupeByAnilistId,
@@ -47,7 +46,7 @@ import {
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import { wikidataGetKoTitlesByAniListIds } from "../lib/wikidata";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
-import { Chip, CollapsiblePanelHeader, GenresRow, SegTabButton } from "./library/LibraryUi.jsx";
+import { GenresRow } from "./library/LibraryUi.jsx";
 import LibraryFiltersPanel from "./library/LibraryFiltersPanel.jsx";
 import LibraryDetailModal from "./library/LibraryDetailModal.jsx";
 import LibraryQuickLogSheet from "./library/LibraryQuickLogSheet.jsx";
@@ -336,10 +335,7 @@ export default function Library() {
 
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
-  const [pageTab, setPageTab] = useState("collection");
-  const [addPanelOpen, setAddPanelOpen] = useState(true);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
-  const [addTab, setAddTab] = useState("search"); // search | recommend
   const [cardView, setCardView] = useStoredState(STORAGE_KEYS.cardView, "meta"); // meta | poster
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
   const gridRef = useRef(null);
@@ -621,9 +617,6 @@ export default function Library() {
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams(window.location.search);
-    const tab = String(params.get("tab") || "").trim().toLowerCase();
-    if (tab === "add") setPageTab("add");
-    else setPageTab("collection");
     const fromQuery = Number(params.get("animeId"));
     const focus = String(params.get("focus") || "").trim().toLowerCase();
     if (!Number.isFinite(fromQuery)) {
@@ -634,7 +627,6 @@ export default function Library() {
     const exists = items.some((x) => Number(x?.anilistId) === fromQuery);
     if (!exists) return;
 
-    setPageTab("collection");
     setSelectedId(fromQuery);
     pendingQuickLogFocusRef.current = focus === "quick-log";
     deepLinkHandledRef.current = true;
@@ -1721,6 +1713,11 @@ export default function Library() {
     }
   }
 
+  function openGlobalQuickAction() {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("moemoa:quick-action-open"));
+  }
+
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
@@ -1744,169 +1741,132 @@ export default function Library() {
 
       {backupMsg && <div className="small library-msg-line">{backupMsg}</div>}
 
-      <section className="library-page-tabs">
-        <div
-          className="library-seg-wrap library-seg-wrap--page-toggle seg-toggle-2"
-          role="tablist"
-          aria-label={copy.title}
-          data-active-index={pageTab === "collection" ? "0" : "1"}
-        >
-          <SegTabButton
-            active={pageTab === "collection"}
-            onClick={() => setPageTab("collection")}
-            className="library-seg-btn--page-toggle"
-            role="tab"
-            aria-selected={pageTab === "collection"}
-          >
-            {copy.collectionTab}
-          </SegTabButton>
-          <SegTabButton
-            active={pageTab === "add"}
-            onClick={() => setPageTab("add")}
-            className="library-seg-btn--page-toggle"
-            role="tab"
-            aria-selected={pageTab === "add"}
-          >
-            {copy.addPageTab}
-          </SegTabButton>
+      <section className="pageHeader">
+        {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
+        {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
+      </section>
+
+      <section className="surface-card library-global-add-banner">
+        <div className="pageHeader">
+          <p className="sectionLead">
+            {locale === "en" ? "Global quick action" : "전역 퀵 액션"}
+          </p>
+          <h2 className="sectionTitle">
+            {locale === "en"
+              ? "Add a title or reopen a saved record from the top search."
+              : "작품 추가는 상단 검색에서 바로 할 수 있어요."}
+          </h2>
+        </div>
+        <p className="sectionLead">
+          {locale === "en"
+            ? "Use the top search to add something new, or jump straight into a record you already have."
+            : "검색창에서 새 작품을 추가하거나, 이미 있는 기록을 바로 열 수 있습니다."}
+        </p>
+        <div className="action-row">
+          <button type="button" className="btn btn--subtle" onClick={openGlobalQuickAction}>
+            {locale === "en" ? "Add title or search my records" : "작품 추가 또는 내 기록 검색"}
+          </button>
         </div>
       </section>
 
-      {pageTab === "add" ? (
-        <section className="library-panel">
-          <CollapsiblePanelHeader
-            title={copy.addPanel}
-            summary={addTab === "search" ? copy.addPanelSummarySearch : copy.addPanelSummaryRecommend}
-            open={addPanelOpen}
-            onToggle={() => setAddPanelOpen((v) => !v)}
-            controlsId="add-anime-panel-content"
-            openLabel={copy.addPanelOpen}
-            closedLabel={copy.addPanelClosed}
-          />
-          {addPanelOpen && (
-            <>
-              <div
-                id="add-anime-panel-content"
-                className="library-seg-wrap seg-toggle-2"
-                data-active-index={addTab === "search" ? "0" : "1"}
-              >
-                <SegTabButton active={addTab === "search"} onClick={() => setAddTab("search")}>{copy.searchTab}</SegTabButton>
-                <SegTabButton active={addTab === "recommend"} onClick={() => setAddTab("recommend")}>{copy.recommendTab}</SegTabButton>
-              </div>
-              {addTab === "search" ? (
-                <AddAnime items={items} setItems={setItems} onAnimeAdded={onAddAnimeFromSearch} locale={locale} />
-              ) : (
-                <div className="library-recommend-placeholder">
-                  <div className="small">
-                    {copy.recommendPlaceholder}
+      <LibraryFiltersPanel
+        locale={locale}
+        filteredCount={filtered.length}
+        open={filterPanelOpen}
+        onToggle={() => setFilterPanelOpen((value) => !value)}
+        sortKey={sortKey}
+        onSortKeyChange={setSortKey}
+        status={status}
+        onStatusChange={setStatus}
+        groupByStatus={groupByStatus}
+        onGroupByStatusChange={setGroupByStatus}
+        sortDir={sortDir}
+        onToggleSortDir={() => setSortDir((direction) => (direction === "asc" ? "desc" : "asc"))}
+        query={q}
+        onQueryChange={setQ}
+        cardView={cardView}
+        onCardViewChange={setCardView}
+        genreSet={genreSet}
+        genreOptions={genreOptions}
+        onClearGenres={clearGenres}
+        onToggleGenre={toggleGenre}
+        cardsPerRowBase={cardsPerRowBase}
+        onCardsPerRowBaseChange={setCardsPerRowBase}
+        effectiveCols={effectiveCols}
+        formatGenreLabel={genreKo}
+      />
+
+      <div
+        ref={gridRef}
+        className={`grid library-grid${cardView === "poster" ? " library-grid--poster" : ""}`}
+        style={{
+          gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
+        }}
+      >
+        {filtered.map((it) => {
+          const m = mediaMap.get(it.anilistId);
+          const cardTitle = getTitle(it);
+          const cardStatus = it.status || "미분류";
+          const cardStatusLabel = formatStatusLabel(cardStatus, locale);
+          const cardScore = normalizeScoreValue(it.score);
+          const cardStarsFill = `${((cardScore ?? 0) / SCORE_MAX) * 100}%`;
+          const gs = safeGenres(m);
+
+          return (
+            <div
+              key={it.anilistId}
+              className={`card library-card${cardView === "poster" ? " library-card--poster" : ""}`}
+              onClick={() => setSelectedId(it.anilistId)}
+              onKeyDown={(e) => onCardKeyDown(e, it.anilistId)}
+              role="button"
+              tabIndex={0}
+              aria-label={`${cardTitle} ${copy.openDetail}`}
+            >
+              <img
+                src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
+                alt={cardTitle}
+                loading="lazy"
+              />
+
+              {cardView === "meta" && (
+                <div className="meta library-card-meta">
+                  <div className="library-card-title">
+                    {cardTitle}
                   </div>
+
+                  <div className="library-card-meta-row">
+                    <span className={getStatusBadgeClassName(cardStatus)}>{cardStatusLabel}</span>
+                    <span
+                      aria-label={cardScore == null ? copy.unrated : `${copy.starLabel} ${cardScore} / ${SCORE_MAX}`}
+                      className="library-card-stars"
+                    >
+                      <span aria-hidden className="library-card-stars-base">★★★★★</span>
+                      <span
+                        aria-hidden
+                        style={{
+                          width: cardStarsFill,
+                        }}
+                        className="library-card-stars-fill"
+                      >
+                        ★★★★★
+                      </span>
+                    </span>
+                    <span className="status-badge library-memory-chip">{getMemoryStateLabel(it.anilistId)}</span>
+                  </div>
+
+                  <GenresRow
+                    genres={gs}
+                    max={3}
+                    compact={true}
+                    formatGenreLabel={genreKo}
+                    onPickGenre={onPickGenreFromTag}
+                  />
                 </div>
               )}
-            </>
-          )}
-        </section>
-      ) : (
-        <>
-          <LibraryFiltersPanel
-            locale={locale}
-            filteredCount={filtered.length}
-            open={filterPanelOpen}
-            onToggle={() => setFilterPanelOpen((value) => !value)}
-            sortKey={sortKey}
-            onSortKeyChange={setSortKey}
-            status={status}
-            onStatusChange={setStatus}
-            groupByStatus={groupByStatus}
-            onGroupByStatusChange={setGroupByStatus}
-            sortDir={sortDir}
-            onToggleSortDir={() => setSortDir((direction) => (direction === "asc" ? "desc" : "asc"))}
-            query={q}
-            onQueryChange={setQ}
-            cardView={cardView}
-            onCardViewChange={setCardView}
-            genreSet={genreSet}
-            genreOptions={genreOptions}
-            onClearGenres={clearGenres}
-            onToggleGenre={toggleGenre}
-            cardsPerRowBase={cardsPerRowBase}
-            onCardsPerRowBaseChange={setCardsPerRowBase}
-            effectiveCols={effectiveCols}
-            formatGenreLabel={genreKo}
-          />
-
-          <div
-            ref={gridRef}
-            className={`grid library-grid${cardView === "poster" ? " library-grid--poster" : ""}`}
-            style={{
-              gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
-            }}
-          >
-            {filtered.map((it) => {
-              const m = mediaMap.get(it.anilistId);
-              const cardTitle = getTitle(it);
-              const cardStatus = it.status || "미분류";
-              const cardStatusLabel = formatStatusLabel(cardStatus, locale);
-              const cardScore = normalizeScoreValue(it.score);
-              const cardStarsFill = `${((cardScore ?? 0) / SCORE_MAX) * 100}%`;
-              const gs = safeGenres(m);
-
-              return (
-                <div
-                  key={it.anilistId}
-                  className={`card library-card${cardView === "poster" ? " library-card--poster" : ""}`}
-                  onClick={() => setSelectedId(it.anilistId)}
-                  onKeyDown={(e) => onCardKeyDown(e, it.anilistId)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${cardTitle} ${copy.openDetail}`}
-                >
-                  <img
-                    src={m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium || undefined}
-                    alt={cardTitle}
-                    loading="lazy"
-                  />
-
-                  {cardView === "meta" && (
-                    <div className="meta library-card-meta">
-                      <div className="library-card-title">
-                        {cardTitle}
-                      </div>
-
-                      <div className="library-card-meta-row">
-                        <span className={getStatusBadgeClassName(cardStatus)}>{cardStatusLabel}</span>
-                        <span
-                          aria-label={cardScore == null ? copy.unrated : `${copy.starLabel} ${cardScore} / ${SCORE_MAX}`}
-                          className="library-card-stars"
-                        >
-                          <span aria-hidden className="library-card-stars-base">★★★★★</span>
-                          <span
-                            aria-hidden
-                            style={{
-                              width: cardStarsFill,
-                            }}
-                            className="library-card-stars-fill"
-                          >
-                            ★★★★★
-                          </span>
-                        </span>
-                        <span className="status-badge library-memory-chip">{getMemoryStateLabel(it.anilistId)}</span>
-                      </div>
-
-                      <GenresRow
-                        genres={gs}
-                        max={3}
-                        compact={true}
-                        formatGenreLabel={genreKo}
-                        onPickGenre={onPickGenreFromTag}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+            </div>
+          );
+        })}
+      </div>
 
       <LibraryDetailModal
         locale={locale}

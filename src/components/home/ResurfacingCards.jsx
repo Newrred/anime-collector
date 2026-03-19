@@ -9,16 +9,16 @@ function buildLibraryDetailHref(base, anilistId) {
 
 function buildQuickLogHref(base, anilistId) {
   const id = Number(anilistId);
-  if (!Number.isFinite(id)) return `${base}library/?tab=add`;
+  if (!Number.isFinite(id)) return `${base}library/`;
   return `${base}library/?animeId=${encodeURIComponent(String(id))}&focus=quick-log`;
 }
 
-function renderAnimeRow({ base, anilistId, href, metaTop, metaBottom = "", mediaMap, titleById }) {
+function renderAnimeRow({ rowKey, base, anilistId, href, metaTop, metaBottom = "", mediaMap, titleById }) {
   const media = mediaMap.get(Number(anilistId));
   const title = titleById.get(Number(anilistId)) || `#${anilistId}`;
   const poster = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
   return (
-    <a href={href || buildLibraryDetailHref(base, anilistId)} className="list-card home-resurfacing-list-card">
+    <a href={href || buildLibraryDetailHref(base, anilistId)} className="list-card home-resurfacing-list-card" key={rowKey}>
       {poster ? <img src={poster} alt={title} loading="lazy" className="list-card__thumb" /> : <div className="list-card__thumb" aria-hidden />}
       <div className="list-card__body">
         <div className="list-card__eyebrow">{metaTop}</div>
@@ -54,6 +54,7 @@ export default function ResurfacingCards({
             <div className="list-stack">
               {missingMemory.map((row) =>
                 renderAnimeRow({
+                  rowKey: `missing-${row.anilistId}`,
                   base,
                   anilistId: row.anilistId,
                   href: buildQuickLogHref(base, row.anilistId),
@@ -79,6 +80,7 @@ export default function ResurfacingCards({
             <div className="list-stack">
               {recentLogs.map((row) =>
                 renderAnimeRow({
+                  rowKey: row.id || `recent-${row.anilistId}-${row.label || ""}`,
                   base,
                   anilistId: row.anilistId,
                   href: buildLibraryDetailHref(base, row.anilistId),
@@ -103,6 +105,7 @@ export default function ResurfacingCards({
             <div className="list-stack">
               {thisTimeRows.map((row) =>
                 renderAnimeRow({
+                  rowKey: row.id || `thistime-${row.anilistId}-${row.label || ""}`,
                   base,
                   anilistId: row.anilistId,
                   href: buildLibraryDetailHref(base, row.anilistId),

@@ -29,6 +29,19 @@ export default function LibraryQuickLogSheet({
   const copy = getMessageGroup(locale, "libraryQuickLogSheet");
   if (!open || !draft) return null;
 
+  function resolveContextHint() {
+    const source = String(context?.source || "").trim();
+    if (["manual-add", "manual-edit", "status-change", "rewatch-plus", "deep-link"].includes(source)) {
+      return copy.contextFromDetail;
+    }
+    if (source.startsWith("add-")) {
+      return copy.contextFromAdd;
+    }
+    return copy.contextDefault;
+  }
+
+  const contextHint = resolveContextHint();
+
   const {
     coerceQuickLogValue,
     parseSeasonValue,
@@ -40,7 +53,13 @@ export default function LibraryQuickLogSheet({
 
   return (
     <div onClick={onClose} className="log-sheet-backdrop">
-      <div onClick={(event) => event.stopPropagation()} className="log-sheet">
+      <div
+        onClick={(event) => event.stopPropagation()}
+        className="log-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.title}
+      >
         <div className="log-sheet__header">
           <div className="log-sheet__header-row">
             <div>
@@ -56,6 +75,11 @@ export default function LibraryQuickLogSheet({
         </div>
 
         <div className="log-sheet__body">
+          <div className="log-sheet__context-card">
+            <div className="small log-sheet__context-title">{copy.contextTitle}</div>
+            <div className="small log-sheet__context-text">{contextHint}</div>
+          </div>
+
           {context?.isAuto && (
             <div className="small log-sheet__hint">
               {copy.autoHint}

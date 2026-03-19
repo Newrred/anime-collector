@@ -76,3 +76,6 @@ docs/deploy/OWNER_DEPLOY_GUIDE.md
 docs/deploy/VERCEL_SETUP.md
 .codex-dev.log
 .codex-preview.log
+.codex-dev-4322.log
+.tmp-astro-dev.err.log
+.tmp-astro-dev.log

@@ -8,6 +8,13 @@ import { getMessageGroup } from "../../domain/messages.js";
 import { formatReasonTagLabel } from "../library/libraryCopy.js";
 import { IconCopy, IconImage, IconShare } from "../ui/AppIcons.jsx";
 
+function hasValidRecapYear(value) {
+  if (value == null) return false;
+  if (typeof value === "string" && !value.trim()) return false;
+  const numeric = Number(value);
+  return Number.isInteger(numeric) && numeric > 0;
+}
+
 export default function YearRecapPanel({
   locale = "ko",
   recapYear,
@@ -20,6 +27,14 @@ export default function YearRecapPanel({
   const copy = getMessageGroup(locale, "yearRecapPanel");
   const [message, setMessage] = useState("");
   const displayYears = recapYears.length ? recapYears : [new Date().getUTCFullYear()];
+  const hasValidYear = hasValidRecapYear(recapYear);
+  const safeRecapYear = hasValidYear ? Number(recapYear) : new Date().getUTCFullYear();
+  const emptyRecapText =
+    locale === "en"
+      ? hasValidYear
+        ? `${safeRecapYear} ${copy.noLogsForYear}`
+        : "No logs saved for the selected year."
+      : `${hasValidYear ? `${safeRecapYear}년` : copy.selectedYear}에 ${copy.noLogsForYear}`;
 
   async function onCopyRecapText() {
     if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
@@ -43,7 +58,7 @@ export default function YearRecapPanel({
     const text = buildRecapShareText({ yearRecap, titleById, recapYear, locale });
     try {
       await navigator.share({
-        title: `${Number(recapYear) || new Date().getUTCFullYear()} ${copy.shareTitle}`,
+        title: `${safeRecapYear} ${copy.shareTitle}`,
         text,
       });
       setMessage(copy.shared);
@@ -152,9 +167,7 @@ export default function YearRecapPanel({
           </>
         ) : (
           <div className="small page-feedback">
-            {locale === "en"
-              ? `${Number.isFinite(Number(recapYear)) ? recapYear : copy.selectedYear} ${copy.noLogsForYear}`
-              : `${Number.isFinite(Number(recapYear)) ? `${recapYear}년` : copy.selectedYear}에 ${copy.noLogsForYear}`}
+            {emptyRecapText}
           </div>
         )}
 
