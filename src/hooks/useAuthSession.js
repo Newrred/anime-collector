@@ -4,15 +4,10 @@ import { isSupabaseConfigured } from "../lib/supabaseClient.js";
 
 export function useAuthSession(nextPath = "/data/") {
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      setLoading(false);
-      return () => {};
-    }
-
     let alive = true;
     getAuthSession()
       .then((currentSession) => {

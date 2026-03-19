@@ -1,9 +1,25 @@
 import { supabase } from "../lib/supabaseClient.js";
 import { readJson, writeJson } from "../storage/localJsonStore.js";
+import {
+  readMockAuthSession,
+  readMockPublicShowcaseSnapshot,
+  readMockShowcaseLayout,
+  writeMockPublicShowcaseSnapshot,
+  writeMockShowcaseLayout,
+} from "./mockAuthStorage.js";
 
 const LOCAL_LAYOUT_KEY = "moemoa.showcase.layout.v2";
 const LAYOUT_TABLE = "user_showcase_layouts";
 const PUBLIC_TABLE = "user_showcase_public";
+
+function shouldUseMockShowcaseStore(userId = null) {
+  if (supabase) return false;
+  const mockSession = readMockAuthSession();
+  const sessionUserId = String(mockSession?.user?.id || "").trim();
+  if (!sessionUserId) return false;
+  if (userId == null) return true;
+  return sessionUserId === String(userId || "").trim();
+}
 
 export const DEFAULT_SHOWCASE_LAYOUT = {
   version: 2,
@@ -50,6 +66,10 @@ export function normalizeShowcaseLayout(raw) {
 
 export async function readShowcaseLayout(userId = null) {
   const local = normalizeShowcaseLayout(readJson(LOCAL_LAYOUT_KEY, DEFAULT_SHOWCASE_LAYOUT));
+  if (shouldUseMockShowcaseStore(userId)) {
+    const scoped = readMockShowcaseLayout(userId);
+    return scoped ? normalizeShowcaseLayout(scoped) : local;
+  }
   if (!supabase || !userId) return local;
 
   const { data, error } = await supabase
@@ -66,6 +86,10 @@ export async function readShowcaseLayout(userId = null) {
 export async function saveShowcaseLayout(userId = null, layout) {
   const normalized = normalizeShowcaseLayout(layout);
   writeJson(LOCAL_LAYOUT_KEY, normalized);
+  if (shouldUseMockShowcaseStore(userId)) {
+    writeMockShowcaseLayout(userId, normalized);
+    return normalized;
+  }
   if (!supabase || !userId) return normalized;
 
   const { error } = await supabase.from(LAYOUT_TABLE).upsert(
@@ -82,6 +106,9 @@ export async function saveShowcaseLayout(userId = null, layout) {
 }
 
 export async function readPublicShowcaseSnapshot(userId) {
+  if (shouldUseMockShowcaseStore(userId)) {
+    return readMockPublicShowcaseSnapshot(userId);
+  }
   if (!supabase || !userId) return null;
   const { data, error } = await supabase
     .from(PUBLIC_TABLE)
@@ -94,6 +121,10 @@ export async function readPublicShowcaseSnapshot(userId) {
 }
 
 export async function publishShowcaseSnapshot(userId, snapshot) {
+  if (shouldUseMockShowcaseStore(userId)) {
+    writeMockPublicShowcaseSnapshot(userId, snapshot);
+    return snapshot;
+  }
   if (!supabase || !userId) {
     throw new Error("Public showcase publish requires a signed-in user and Supabase config.");
   }

@@ -1,4 +1,9 @@
 import { supabase } from "../lib/supabaseClient.js";
+import {
+  MOCK_AUTH_EVENT,
+  clearMockAuthSession,
+  readMockAuthSession,
+} from "./mockAuthStorage.js";
 
 const AUTH_NEXT_STORAGE_KEY = "auth.redirect.next";
 
@@ -48,12 +53,18 @@ export async function signInWithGoogle(next = "/data/") {
 }
 
 export async function signOutFromCloud() {
+  if (readMockAuthSession()) {
+    clearMockAuthSession();
+    return;
+  }
   if (!supabase) return;
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
 
 export async function getAuthSession() {
+  const mockSession = readMockAuthSession();
+  if (mockSession) return mockSession;
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
@@ -61,11 +72,28 @@ export async function getAuthSession() {
 }
 
 export function onAuthSessionChange(callback) {
-  if (!supabase) return () => {};
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-    callback(session || null);
-  });
-  return () => data.subscription.unsubscribe();
+  function onMockAuthChange() {
+    callback(readMockAuthSession());
+  }
+
+  if (typeof window !== "undefined") {
+    window.addEventListener(MOCK_AUTH_EVENT, onMockAuthChange);
+  }
+
+  let unsubscribeSupabase = () => {};
+  if (supabase) {
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      callback(session || null);
+    });
+    unsubscribeSupabase = () => data.subscription.unsubscribe();
+  }
+
+  return () => {
+    if (typeof window !== "undefined") {
+      window.removeEventListener(MOCK_AUTH_EVENT, onMockAuthChange);
+    }
+    unsubscribeSupabase();
+  };
 }
 
 export async function exchangeCodeForSession(code) {

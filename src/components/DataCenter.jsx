@@ -191,14 +191,6 @@ export default function DataCenter() {
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
-      <SyncStatusCard
-        locale={locale}
-        copy={syncCopy}
-        auth={auth}
-        sync={sync}
-        onSignIn={() => auth.signIn(`${base}data/`)}
-        onSignOut={() => auth.signOut()}
-      />
       <section className="status-panel surface-card">
         <div className="pageHeader">
           <h1 className="pageTitle">{copy.title}</h1>
@@ -256,6 +248,14 @@ export default function DataCenter() {
         {message && <div className="small page-feedback">{message}</div>}
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
+      <SyncStatusCard
+        locale={locale}
+        copy={syncCopy}
+        auth={auth}
+        sync={sync}
+        onSignIn={() => auth.signIn(`${base}data/`)}
+        onSignOut={() => auth.signOut()}
+      />
       <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
       <ConflictResolveModal
         open={Boolean(sync.conflict)}

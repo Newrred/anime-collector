@@ -1,5 +1,11 @@
 import { supabase } from "../lib/supabaseClient.js";
 import {
+  listMockFollowers,
+  readMockAuthSession,
+  readMockProfileRow,
+  writeMockProfileRow,
+} from "./mockAuthStorage.js";
+import {
   buildDefaultProfileDraft,
   buildPublicProfilePath,
   isValidProfileHandle,
@@ -12,6 +18,42 @@ import {
 const PROFILE_TABLE = "user_profiles";
 const FOLLOW_TABLE = "user_follows";
 const PROFILE_FIELDS = "user_id,handle,display_name,bio,profile_public,created_at,updated_at";
+
+function shouldUseMockProfileStore(userId = null) {
+  if (supabase) return false;
+  const mockSession = readMockAuthSession();
+  const sessionUserId = String(mockSession?.user?.id || "").trim();
+  if (!sessionUserId) return false;
+  if (userId == null) return true;
+  return sessionUserId === String(userId || "").trim();
+}
+
+function normalizeMockProfileRow(row) {
+  if (!row || typeof row !== "object") return null;
+  return {
+    userId: String(row.userId || row.user_id || "").trim(),
+    handle: String(row.handle || "").trim().toLowerCase(),
+    displayName: String(row.displayName || row.display_name || "").trim(),
+    bio: String(row.bio || ""),
+    profilePublic: row.profilePublic === true || row.profile_public === true,
+    createdAt: String(row.createdAt || row.created_at || "").trim() || null,
+    updatedAt: String(row.updatedAt || row.updated_at || "").trim() || null,
+  };
+}
+
+function toMockProfileRow(profile) {
+  const normalized = normalizeMockProfileRow(profile);
+  if (!normalized) return null;
+  return {
+    userId: normalized.userId,
+    handle: normalized.handle,
+    displayName: normalized.displayName,
+    bio: normalized.bio,
+    profilePublic: normalized.profilePublic,
+    createdAt: normalized.createdAt,
+    updatedAt: normalized.updatedAt,
+  };
+}
 
 function basePath() {
   const rawBase = String(import.meta.env.BASE_URL || "/");
@@ -76,6 +118,9 @@ export function buildPublicProfileUrl(handle) {
 }
 
 export async function getMyProfile(userId) {
+  if (shouldUseMockProfileStore(userId)) {
+    return normalizeMockProfileRow(readMockProfileRow(userId));
+  }
   if (!supabase || !userId) return null;
   const { data, error } = await supabase
     .from(PROFILE_TABLE)
@@ -87,6 +132,23 @@ export async function getMyProfile(userId) {
 }
 
 export async function ensureMyProfile(user) {
+  if (shouldUseMockProfileStore(user?.id)) {
+    const existing = normalizeMockProfileRow(readMockProfileRow(user.id));
+    if (existing) return existing;
+
+    const draft = buildDefaultProfileDraft(user);
+    const next = {
+      userId: String(user.id),
+      handle: normalizeProfileHandle(draft.handle, `user-${String(user.id).slice(0, 8).toLowerCase()}`),
+      displayName: normalizeProfileDisplayName(draft.displayName, draft.handle),
+      bio: normalizeProfileBio(draft.bio),
+      profilePublic: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    writeMockProfileRow(user.id, next);
+    return next;
+  }
   if (!supabase || !user?.id) return null;
 
   const existing = await getMyProfile(user.id);
@@ -122,6 +184,24 @@ export async function ensureMyProfile(user) {
 }
 
 export async function saveMyProfile(userId, patch, currentProfile = null) {
+  if (shouldUseMockProfileStore(userId)) {
+    const fallback = currentProfile || normalizeMockProfileRow(readMockProfileRow(userId)) || {};
+    const handle = normalizeProfileHandle(patch?.handle, fallback?.handle || suggestProfileHandle({ id: userId }));
+    if (!isValidProfileHandle(handle)) {
+      throw new Error("Handle must use 3-24 lowercase letters, numbers, or hyphens.");
+    }
+    const saved = {
+      userId: String(userId),
+      handle,
+      displayName: normalizeProfileDisplayName(patch?.displayName, fallback?.displayName || ""),
+      bio: normalizeProfileBio(patch?.bio),
+      profilePublic: patch?.profilePublic === true,
+      createdAt: fallback?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    writeMockProfileRow(userId, saved);
+    return saved;
+  }
   if (!supabase || !userId) throw new Error("Profile save requires a signed-in user.");
   const fallback = currentProfile || {};
   const row = toPublicProfilePayload(userId, patch, fallback);
@@ -140,6 +220,13 @@ export async function saveMyProfile(userId, patch, currentProfile = null) {
 }
 
 export async function getPublicProfileByHandle(handle) {
+  if (shouldUseMockProfileStore()) {
+    const normalizedHandle = normalizeProfileHandle(handle);
+    const mockSession = readMockAuthSession();
+    const ownProfile = normalizeMockProfileRow(readMockProfileRow(mockSession?.user?.id));
+    if (ownProfile?.handle === normalizedHandle) return ownProfile;
+    return null;
+  }
   if (!supabase) return null;
   const normalizedHandle = normalizeProfileHandle(handle);
   if (!isValidProfileHandle(normalizedHandle)) return null;
@@ -153,6 +240,9 @@ export async function getPublicProfileByHandle(handle) {
 }
 
 export async function getFollowCounts(userId) {
+  if (shouldUseMockProfileStore(userId)) {
+    return { followers: listMockFollowers(userId).length, following: 0 };
+  }
   if (!supabase || !userId) return { followers: 0, following: 0 };
   const [{ count: followers, error: followerError }, { count: following, error: followingError }] = await Promise.all([
     supabase.from(FOLLOW_TABLE).select("*", { count: "exact", head: true }).eq("followed_user_id", userId),
@@ -167,6 +257,12 @@ export async function getFollowCounts(userId) {
 }
 
 export async function listFollowers(userId, limit = 24) {
+  if (shouldUseMockProfileStore(userId)) {
+    return listMockFollowers(userId)
+      .slice(0, limit)
+      .map(toMockProfileRow)
+      .filter(Boolean);
+  }
   if (!supabase || !userId) return [];
   const { data, error } = await supabase
     .from(FOLLOW_TABLE)
@@ -180,6 +276,12 @@ export async function listFollowers(userId, limit = 24) {
 }
 
 export async function listFollowing(userId, limit = 24) {
+  if (shouldUseMockProfileStore(userId)) {
+    return listMockFollowers(`following:${userId}`)
+      .slice(0, limit)
+      .map(toMockProfileRow)
+      .filter(Boolean);
+  }
   if (!supabase || !userId) return [];
   const { data, error } = await supabase
     .from(FOLLOW_TABLE)
@@ -193,6 +295,11 @@ export async function listFollowing(userId, limit = 24) {
 }
 
 export async function isFollowingProfile(followerUserId, followedUserId) {
+  if (shouldUseMockProfileStore(followerUserId)) {
+    return listMockFollowers(`following:${followerUserId}`).some(
+      (row) => String(row?.userId || "") === String(followedUserId || "")
+    );
+  }
   if (!supabase || !followerUserId || !followedUserId) return false;
   const { data, error } = await supabase
     .from(FOLLOW_TABLE)
@@ -205,6 +312,9 @@ export async function isFollowingProfile(followerUserId, followedUserId) {
 }
 
 export async function followProfile(followerUserId, followedUserId) {
+  if (shouldUseMockProfileStore(followerUserId)) {
+    return true;
+  }
   if (!supabase || !followerUserId || !followedUserId) throw new Error("Follow requires a signed-in user.");
   if (String(followerUserId) === String(followedUserId)) throw new Error("You cannot follow yourself.");
   const { error } = await supabase.from(FOLLOW_TABLE).insert({
@@ -216,6 +326,9 @@ export async function followProfile(followerUserId, followedUserId) {
 }
 
 export async function unfollowProfile(followerUserId, followedUserId) {
+  if (shouldUseMockProfileStore(followerUserId)) {
+    return true;
+  }
   if (!supabase || !followerUserId || !followedUserId) throw new Error("Unfollow requires a signed-in user.");
   const { error } = await supabase
     .from(FOLLOW_TABLE)

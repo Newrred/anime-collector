@@ -310,15 +310,16 @@ export default function ProfileCenter() {
         </section>
       ) : (
         <div className="profile-page__stack minihome-page__stack">
-          <section className="pageHeader minihome-page__header">
-            <div>
+          <section className="surface-card minihome-hero-card">
+            <div className="minihome-page__header">
+              <div className="pageHeader">
               <p className="pageLead">{copy.lead}</p>
               <h1 className="pageTitle">{copy.title}</h1>
               <p className="small minihome-page__meta">
                 {profile?.profilePublic ? copy.visibilityPublic : copy.visibilityPrivate} · @
                 {savedHandle || form.handle || copy.handlePlaceholder}
               </p>
-            </div>
+              </div>
 
             <div className="action-row">
               <button type="button" className="btn btn--subtle" onClick={copyProfileLink}>
@@ -330,6 +331,7 @@ export default function ProfileCenter() {
               <button type="button" className="btn" onClick={handlePublishShowcase} disabled={publishing || !profile}>
                 {publishing ? editorCopy.publishing : editorCopy.publish}
               </button>
+            </div>
             </div>
           </section>
 
