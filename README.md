@@ -15,6 +15,13 @@
 - PWA 설치와 JSON 백업/복원 지원
 - Google 로그인 + 클라우드 snapshot sync 구조 포함
 
+## 베타 제품 기본값
+
+- 새 사용자는 샘플 작품이나 감상 로그 없이 빈 보관함에서 시작합니다. 빈 상태에는 다음 작품을 추가하기 위한 primary CTA를 하나만 둡니다.
+- 최초 언어는 영어이며, 사용자가 선택해 저장한 언어 설정은 다음 방문에도 유지됩니다.
+- 감상 로그는 작성 화면을 열거나 닫는 것만으로 저장되지 않습니다. `Save`를 눌러야 로컬 기록에 반영됩니다.
+- 클라우드 상태는 실제 설정·연결·확인 결과만 표시합니다. Supabase가 설정되지 않은 환경에서는 로컬 전용 상태를 명확히 안내합니다.
+
 ## 주요 기능
 
 ### 홈 (`/`)
@@ -212,13 +219,21 @@ npm run test:unit
 Playwright E2E:
 
 ```bash
-npm run test:e2e
+npm run test:e2e -- --project=chromium
 ```
 
-실시간 외부 검색 확인:
+제품 기본 회귀는 AniList와 Wikidata 응답을 고정 fixture로 제어하므로 네트워크 상태와 무관하게 완료됩니다. 실제 외부 검색 확인은 별도 live 게이트에서만 실행합니다.
 
 ```bash
 npm run test:e2e:live
+```
+
+배포 전에는 다음 세 명령을 모두 실행합니다.
+
+```bash
+npm run test:unit
+npm run test:e2e -- --project=chromium
+npm run build
 ```
 
 주요 스펙:

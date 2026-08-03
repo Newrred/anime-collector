@@ -97,75 +97,107 @@ const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 900 },
 ];
 
-async function ensureAddSearchReady(page: Page) {
-  const pageTabs = page.locator(".library-page-tabs .library-seg-btn--page-toggle");
-  await expect(pageTabs).toHaveCount(2);
-  await pageTabs.nth(1).click();
-  await expect(page.locator(".library-panel")).toBeVisible();
+const LIVE_E2E = process.env.MOEMOA_E2E_LIVE === "1";
 
-  const addPanelToggle = page.locator(".library-panel .library-panel-header-btn");
-  if (await addPanelToggle.count()) {
-    const expanded = await addPanelToggle.getAttribute("aria-expanded");
-    if (expanded === "false") await addPanelToggle.click();
-  }
+const SEARCH_FIXTURE_BY_QUERY: Record<string, { id: number; title: string }> = {
+  "약사의 혼잣말": { id: 101, title: "The Apothecary Diaries" },
+  "단다단": { id: 102, title: "DAN DA DAN" },
+  "주술회전": { id: 103, title: "Jujutsu Kaisen" },
+  "Frieren": { id: 104, title: "Frieren: Beyond Journey's End" },
+  "Kaiju No. 8": { id: 105, title: "Kaiju No. 8" },
+  "Blue Lock": { id: 106, title: "Blue Lock" },
+};
 
-  const modeTabs = page.locator("#add-anime-panel-content .library-seg-btn");
-  if (await modeTabs.count()) await modeTabs.first().click();
+function fixtureMedia(id: number, title: string) {
+  return {
+    id,
+    siteUrl: `https://anilist.co/anime/${id}`,
+    title: { romaji: title, english: title, native: title },
+    synonyms: [],
+    genres: ["Adventure"],
+    coverImage: { extraLarge: "", large: "", medium: "" },
+    bannerImage: "",
+    seasonYear: 2024,
+    format: "TV",
+    episodes: 12,
+    characters: { edges: [] },
+    relations: { edges: [] },
+  };
+}
 
-  const searchInput = page.locator(".library-add-search input.input");
+const SEARCH_FIXTURE_MEDIA = new Map(
+  Object.values(SEARCH_FIXTURE_BY_QUERY).map(({ id, title }) => [id, fixtureMedia(id, title)]),
+);
+
+async function installSearchFixtures(page: Page) {
+  await page.route(/^https:\/\/graphql\.anilist\.co\/?$/, async (route) => {
+    const variables = route.request().postDataJSON()?.variables || {};
+    const search = String(variables.search || "");
+    const ids = Array.isArray(variables.ids) ? variables.ids.map(Number) : [];
+    const media = search
+      ? (() => {
+          const row = SEARCH_FIXTURE_BY_QUERY[search];
+          return row ? [fixtureMedia(row.id, row.title)] : [];
+        })()
+      : ids.map((id) => SEARCH_FIXTURE_MEDIA.get(id)).filter(Boolean);
+
+    await route.fulfill({ json: { data: { Page: { media } } } });
+  });
+
+  await page.route(/^https:\/\/(?:www\.)?wikidata\.org\//, (route) =>
+    route.fulfill({ json: { search: [], entities: {}, query: { search: [] } } }),
+  );
+  await page.route(/^https:\/\/query\.wikidata\.org\//, (route) =>
+    route.fulfill({ json: { head: { vars: [] }, results: { bindings: [] } } }),
+  );
+}
+
+async function openGlobalSearch(page: Page) {
+  const mobileTrigger = page.locator(".quick-action__mobile-trigger:visible");
+  if (await mobileTrigger.count()) await mobileTrigger.click();
+
+  const searchInput = page.locator(".quick-action__input:visible");
   await expect(searchInput).toBeVisible();
+  return searchInput;
 }
 
 async function switchLocale(page: Page, code: "KO" | "EN") {
-  const localeTrigger = page.locator('button[aria-controls="locale-menu-panel"]');
-  await localeTrigger.click();
-  const panel = page.locator("#locale-menu-panel");
-  await expect(panel).toBeVisible();
-  await panel.locator(".data-menu-locale-option").filter({ hasText: code }).first().click();
-  await expect(panel).toBeHidden();
+  const localeTrigger = page.locator('button[aria-controls="locale-menu-panel"]:visible');
+  if (await localeTrigger.count()) {
+    await localeTrigger.click();
+    const panel = page.locator("#locale-menu-panel");
+    await expect(panel).toBeVisible();
+    await panel.locator(".data-menu-locale-option").filter({ hasText: code }).first().click();
+    await expect(panel).toBeHidden();
+    return;
+  }
+
+  await page.locator(".top-nav__mobile-menu-trigger:visible").click();
+  const mobileMenu = page.locator("#data-menu-panel");
+  await expect(mobileMenu).toBeVisible();
+  await mobileMenu.locator(".top-nav-mobile-locale-row .btn").filter({ hasText: code }).click();
+  await expect(mobileMenu).toBeHidden();
 }
 
 async function addByQuery(page: Page, locale: "KO" | "EN", query: string): Promise<AddAttempt> {
   try {
-    await ensureAddSearchReady(page);
-    const input = page.locator(".library-add-search input.input");
-    await input.click();
-    await input.fill("");
+    const input = await openGlobalSearch(page);
     await input.fill(query);
 
-    const suggestList = page.locator(".library-add-search .suggestList");
-    await expect(suggestList).toBeVisible({ timeout: 20000 });
-    await page.waitForTimeout(1200);
+    const remoteRow = page.locator(".quick-action-section").filter({
+      has: page.locator(".quick-action-row__actions .btn"),
+    }).last();
+    const addButton = remoteRow.locator(".quick-action-row__actions .btn").first();
+    await expect(addButton).toBeVisible({ timeout: 20000 });
+    const title = (await remoteRow.locator(".quick-action-row__title").first().innerText()).trim();
 
-    const candidate = suggestList.locator(".suggestItem:not(.suggestItem--disabled)").first();
-    const candidateCount = await candidate.count();
-    if (!candidateCount) {
-      return { locale, query, added: false, reason: "no-selectable-result" };
-    }
-
-    const title = (await candidate.locator(".suggestItem__title").first().innerText()).trim();
-    const iconButton = candidate.locator("button.btn--icon:not([disabled])").first();
-    if (await iconButton.count()) await iconButton.click();
-    else await candidate.click();
-
-    let likelyAdded = false;
-    try {
-      await expect(suggestList).toBeHidden({ timeout: 5000 });
-      likelyAdded = true;
-    } catch {
-      // Keep checking below.
-    }
-
-    if (!likelyAdded) {
-      const disabledAfterClick = await candidate.evaluate((node) => node.classList.contains("suggestItem--disabled")).catch(() => false);
-      const disabledButton = await candidate.locator("button.btn--icon[disabled]").count();
-      const addedBadge = await candidate.locator(".badge").count();
-      likelyAdded = disabledAfterClick || disabledButton > 0 || addedBadge > 0;
-    }
-
-    if (!likelyAdded) {
-      return { locale, query, added: false, reason: "post-click-state-uncertain" };
-    }
+    await Promise.all([
+      page.waitForURL(/\/library\/\?animeId=\d+/, { timeout: 10000 }),
+      addButton.click(),
+    ]);
+    await expect(page.locator(".modal")).toBeVisible();
+    await page.locator(".modalCloseBtn").click();
+    await expect(page.locator(".modal")).toBeHidden();
 
     return { locale, query, added: true, title };
   } catch (error) {
@@ -178,15 +210,9 @@ async function addByQuery(page: Page, locale: "KO" | "EN", query: string): Promi
   }
 }
 
-async function openCollectionTab(page: Page) {
-  const pageTabs = page.locator(".library-page-tabs .library-seg-btn--page-toggle");
-  await pageTabs.nth(0).click();
-  await expect(page.locator(".library-grid")).toBeVisible();
-}
-
 async function createQuickLogs(page: Page, count: number): Promise<number> {
-  await openCollectionTab(page);
   const cards = page.locator(".library-grid .library-card");
+  await expect(cards.first()).toBeVisible();
   const totalCards = await cards.count();
   const target = Math.min(count, totalCards);
   let created = 0;
@@ -260,15 +286,22 @@ async function screenshot(page: Page, testInfo: TestInfo, name: string) {
   await page.screenshot({ path: testInfo.outputPath(name), fullPage: true });
 }
 
-async function runFlow(browser: Browser, testInfo: TestInfo, width: number, height: number) {
+async function runFlow(
+  browser: Browser,
+  testInfo: TestInfo,
+  width: number,
+  height: number,
+  mode: "fixture" | "live",
+) {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
   const addAttempts: AddAttempt[] = [];
 
+  if (mode === "fixture") await installSearchFixtures(page);
+
   await page.goto("/library/", { waitUntil: "networkidle" });
   await expect(page.locator(".library-page")).toBeVisible();
 
-  await openCollectionTab(page);
   const cardsBefore = await page.locator(".library-grid .library-card").count();
 
   await switchLocale(page, "KO");
@@ -283,7 +316,6 @@ async function runFlow(browser: Browser, testInfo: TestInfo, width: number, heig
   }
   await screenshot(page, testInfo, "library-after-en-add.png");
 
-  await openCollectionTab(page);
   const cardsAfter = await page.locator(".library-grid .library-card").count();
   const logsCreated = await createQuickLogs(page, 3);
 
@@ -314,27 +346,40 @@ async function runFlow(browser: Browser, testInfo: TestInfo, width: number, heig
   return report;
 }
 
-test.describe("Library UX Live Flow", () => {
+async function expectFlowContract(browser: Browser, testInfo: TestInfo, viewport: (typeof VIEWPORTS)[number], mode: "fixture" | "live") {
+  const report = await runFlow(browser, testInfo, viewport.width, viewport.height, mode);
+
+  expect(report.cardsAfter, `${viewport.name} card count should not decrease`).toBeGreaterThanOrEqual(report.cardsBefore);
+  expect(report.logsCreated, `${viewport.name} should create at least two quick logs`).toBeGreaterThanOrEqual(2);
+
+  expect(report.discovery.sectionCount, `${viewport.name} discovery section blocks`).toBeGreaterThanOrEqual(2);
+  expect(report.discovery.recentRows, `${viewport.name} recent discovery rows`).toBeGreaterThanOrEqual(1);
+  expect(report.discovery.maxCardOverflow, `${viewport.name} discovery card overflow`).toBeLessThanOrEqual(0.5);
+  expect(report.discovery.minCardGap, `${viewport.name} discovery card vertical gap`).toBeGreaterThanOrEqual(4);
+  expect(report.addAttempts.length, `${viewport.name} query attempt count`).toBe(KO_QUERIES.length + EN_QUERIES.length);
+  expect(report.addedCount, `${viewport.name} searches should add every fixture title`).toBe(KO_QUERIES.length + EN_QUERIES.length);
+}
+
+test.describe("Library UX fixture flow", () => {
+  test.skip(LIVE_E2E, "The explicit live command runs the external-network variant instead.");
+  test.setTimeout(120000);
+
+  for (const viewport of VIEWPORTS) {
+    test(`search/add/log/discovery flow works (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
+      test.skip(browserName !== "chromium", "flow test is validated on chromium");
+      await expectFlowContract(browser, testInfo, viewport, "fixture");
+    });
+  }
+});
+
+test.describe("Library UX live flow", () => {
+  test.skip(!LIVE_E2E, "Set MOEMOA_E2E_LIVE=1 through the live-only command to call AniList and Wikidata.");
   test.setTimeout(240000);
 
   for (const viewport of VIEWPORTS) {
     test(`search/add/log/discovery flow works (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
       test.skip(browserName !== "chromium", "flow test is validated on chromium");
-
-      const report = await runFlow(browser, testInfo, viewport.width, viewport.height);
-
-      expect(report.cardsAfter, `${viewport.name} card count should not decrease`).toBeGreaterThanOrEqual(report.cardsBefore);
-      expect(report.logsCreated, `${viewport.name} should create at least two quick logs`).toBeGreaterThanOrEqual(2);
-
-      expect(report.discovery.sectionCount, `${viewport.name} discovery section blocks`).toBeGreaterThanOrEqual(2);
-      expect(report.discovery.recentRows, `${viewport.name} recent discovery rows`).toBeGreaterThanOrEqual(1);
-      expect(report.discovery.maxCardOverflow, `${viewport.name} discovery card overflow`).toBeLessThanOrEqual(0.5);
-      expect(report.discovery.minCardGap, `${viewport.name} discovery card vertical gap`).toBeGreaterThanOrEqual(4);
-      expect(report.addAttempts.length, `${viewport.name} query attempt count`).toBe(KO_QUERIES.length + EN_QUERIES.length);
-      expect(
-        report.addAttempts.some((attempt) => attempt.added || attempt.reason === "no-selectable-result"),
-        `${viewport.name} add flow should complete query attempts without hard failures`
-      ).toBeTruthy();
+      await expectFlowContract(browser, testInfo, viewport, "live");
     });
   }
 });

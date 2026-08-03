@@ -3,6 +3,9 @@ import { spawn } from "node:child_process";
 const host = "127.0.0.1";
 const port = 4321;
 const baseUrl = `http://${host}:${port}/`;
+const args = process.argv.slice(2);
+const liveOnly = args[0] === "--live";
+if (liveOnly) args.shift();
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -47,10 +50,14 @@ try {
 
   const playwright = spawn(
     process.execPath,
-    ["node_modules/playwright/cli.js", "test", ...process.argv.slice(2)],
+    ["node_modules/playwright/cli.js", "test", ...args],
     {
       stdio: "inherit",
-      env: { ...process.env, PLAYWRIGHT_EXTERNAL_SERVER: "1" },
+      env: {
+        ...process.env,
+        PLAYWRIGHT_EXTERNAL_SERVER: "1",
+        ...(liveOnly ? { MOEMOA_E2E_LIVE: "1" } : {}),
+      },
     },
   );
   const exitCode = await new Promise((resolve) => playwright.once("exit", (code) => resolve(code ?? 1)));
