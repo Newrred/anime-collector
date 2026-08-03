@@ -1,5 +1,42 @@
 import { expect, test, type Browser, type Page, type TestInfo } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
+import { installAppState } from "./helpers/appState";
+
+const quickLogFixture = {
+  locale: "en" as const,
+  list: [{ anilistId: 1, status: "completed", score: 9, memo: "fixture", addedAt: 1 }],
+  watchLogs: [],
+  mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
+};
+
+test("opening and cancelling quick log does not persist a row", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1&focus=quick-log");
+  const sheet = page.locator(".log-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByLabel("Close", { exact: true }).click();
+  const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(0);
+});
+
+test("saving then editing a quick log keeps one row", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1&focus=quick-log");
+  const sheet = page.locator(".log-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeHidden();
+  let logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(1);
+
+  await page.locator(".modal .library-modal-tab").nth(1).click();
+  await page.locator(".library-modal-log-actions .btn").first().click();
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeHidden();
+  logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(1);
+});
 
 type AddAttempt = {
   locale: "KO" | "EN";

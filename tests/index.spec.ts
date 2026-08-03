@@ -19,6 +19,22 @@ test("visitor with one logged title is asked to add more titles", async ({ page 
   await expect(page.getByRole("button", { name: "Add two more titles" })).toHaveCount(1);
 });
 
+test("home first-memory CTA creates one log only after save", async ({ page }) => {
+  await installAppState(page, {
+    locale: "en",
+    list: [{ anilistId: 1, status: "completed", addedAt: 1 }],
+    watchLogs: [],
+    mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
+  });
+  await page.goto("/");
+  await page.getByRole("link", { name: "Write your first memory" }).click();
+  const sheet = page.locator(".log-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Save" }).click();
+  const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(1);
+});
+
 test("seeded returning visitor sees the home shell", async ({ page }) => {
   await installAppState(page, {
     locale: "ko",

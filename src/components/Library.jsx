@@ -15,6 +15,7 @@ import {
   SCORE_MAX,
   SCORE_STEP,
 } from "../domain/animeState";
+import { createEditQuickLogDraft, createNewQuickLogDraft, isNewQuickLogDraft } from "../domain/quickLogDraft.js";
 import { getActiveTierTopic, mergeTierTopicBundles, normalizeTierTopicBundle } from "../domain/tierTopics";
 import { useStoredState } from "../hooks/useStoredState";
 import { STORAGE_KEYS } from "../storage/keys";
@@ -637,7 +638,7 @@ export default function Library() {
     const target = items.find((item) => Number(item?.anilistId) === Number(selectedId));
     const targetMedia = mediaMap.get(Number(selectedId));
     if (!target || !targetMedia) return;
-    const draft = createWatchLog({
+    const draft = createNewQuickLogDraft({
       anilistId: target.anilistId,
       eventType: eventTypeFromStatus(target.status) || LIBRARY_EVENT.start,
       watchedAtPrecision: "day",
@@ -1184,8 +1185,9 @@ export default function Library() {
 
   function openQuickLogSheet(log, fallbackMedia = null, context = null) {
     if (!log) return;
-    const precision = normalizeQuickLogPrecision(log.watchedAtPrecision || "day");
-    const value = coerceQuickLogValue(precision, log.watchedAtValue);
+    const draft = isNewQuickLogDraft(log) ? log : createEditQuickLogDraft(log);
+    const precision = normalizeQuickLogPrecision(draft.watchedAtPrecision || "day");
+    const value = coerceQuickLogValue(precision, draft.watchedAtValue);
 
     const existingRefs = Array.isArray(log.characterRefs) ? log.characterRefs : [];
     const existingIds = Array.isArray(log.characterIds)
@@ -1215,15 +1217,7 @@ export default function Library() {
       };
     }
 
-    setQuickLogDraft({
-      logId: log.id,
-      anilistId: log.anilistId,
-      eventType: log.eventType,
-      watchedAtPrecision: precision,
-      watchedAtValue: value,
-      cue: String(log.cue || "").slice(0, 120),
-      note: String(log.note || ""),
-    });
+    setQuickLogDraft({ ...draft, watchedAtPrecision: precision, watchedAtValue: value });
     setQuickLogCharacterIds(compactIds);
     setQuickLogPrimaryCharacterId(resolvedPrimaryId);
     setQuickLogCharacterMeta(nextMeta);
@@ -1311,14 +1305,19 @@ export default function Library() {
 
   function createQuickLogFromDetail() {
     const fallbackEvent = eventTypeFromStatus(selected?.status) || LIBRARY_EVENT.start;
-    return appendSelectedWatchLog(
-      fallbackEvent,
-      {},
-      {
-        openQuickSheet: true,
-        quickContext: { source: "manual-add", isAuto: false, status: selected?.status || LIBRARY_STATUS.unclassified },
-      }
-    );
+    const draft = createNewQuickLogDraft({
+      anilistId: selectedId,
+      eventType: fallbackEvent,
+      watchedAtPrecision: "day",
+      watchedAtValue: formatLocalDate(new Date()),
+      cue: "",
+      note: "",
+    });
+    openQuickLogSheet(draft, selectedMedia || null, {
+      source: "manual-add",
+      isAuto: false,
+      status: selected?.status || LIBRARY_STATUS.unclassified,
+    });
   }
 
   function onAddAnimeFromSearch(addedItem, addedMedia, options = {}) {
@@ -1551,7 +1550,7 @@ export default function Library() {
   }
 
   async function saveQuickLogDraft() {
-    if (!quickLogDraft?.logId || !Number.isFinite(Number(quickLogDraft?.anilistId))) {
+    if (!quickLogDraft || !Number.isFinite(Number(quickLogDraft.anilistId))) {
       closeQuickLogSheet();
       return;
     }
@@ -1581,7 +1580,9 @@ export default function Library() {
           Number(c.id) === Number(quickLogPrimaryCharacterIdSafe) ||
           (!Number.isFinite(Number(quickLogPrimaryCharacterIdSafe)) && idx === 0),
       }));
-    const saved = await updateWatchLog(quickLogDraft.logId, {
+    const payload = {
+      anilistId: Number(quickLogDraft.anilistId),
+      eventType: quickLogDraft.eventType,
       watchedAtPrecision: watchedInput.precision,
       watchedAtValue: watchedInput.value,
       watchedAtStart: watchedMeta.watchedAtStart,
@@ -1591,7 +1592,10 @@ export default function Library() {
       note: String(quickLogDraft.note || ""),
       characterIds: selectedRefs.map((x) => x.characterId),
       characterRefs: selectedRefs,
-    });
+    };
+    const saved = isNewQuickLogDraft(quickLogDraft)
+      ? await appendWatchLog(createWatchLog(payload))
+      : await updateWatchLog(quickLogDraft.logId, payload);
 
     const primaryRef = selectedRefs.find((x) => x.isPrimary);
     if (saved && primaryRef) {
