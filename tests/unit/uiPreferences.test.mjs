@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildUiPreferenceBootScript, UI_PREFERENCE_KEYS } from "../../src/domain/uiPreferences.js";
+import {
+  buildUiPreferenceBootScript,
+  normalizeUiLocale,
+  UI_PREFERENCE_KEYS,
+} from "../../src/domain/uiPreferences.js";
 
 function runBootScript(values = {}) {
   const root = { dataset: {}, lang: "en" };
@@ -57,4 +61,21 @@ test("boot script falls back to fresh English and dark preferences for malformed
   assert.equal(root.lang, "en");
   assert.equal(root.dataset.theme, "dark");
   assert.notEqual(meta.content, "");
+});
+
+test("invalid stored locale values normalize to the declared English default", () => {
+  assert.equal(normalizeUiLocale(null), "en");
+  assert.equal(normalizeUiLocale("fr"), "en");
+  assert.equal(normalizeUiLocale("ko"), "ko");
+});
+
+test("boot script treats JSON null and unsupported JSON strings as fresh English", () => {
+  assert.equal(
+    runBootScript({ [UI_PREFERENCE_KEYS.locale]: JSON.stringify(null) }).root.lang,
+    "en",
+  );
+  assert.equal(
+    runBootScript({ [UI_PREFERENCE_KEYS.locale]: JSON.stringify("vi") }).root.lang,
+    "en",
+  );
 });

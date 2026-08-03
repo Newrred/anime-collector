@@ -30,6 +30,12 @@ const LIBRARY_TABLE = "user_library_items";
 const WATCH_LOG_TABLE = "user_watch_logs";
 const CHARACTER_PIN_TABLE = "user_character_pins";
 const PREFERENCE_TABLE = "user_preferences";
+const ACCOUNT_SYNC_META_FIELDS = [
+  "lastSyncedAt",
+  "lastSyncedHash",
+  "lastRemoteUpdatedAt",
+  "lastError",
+];
 
 function emitSyncMetaChanged() {
   if (typeof window === "undefined") return;
@@ -41,6 +47,35 @@ function normalizeIso(value) {
   if (!raw) return null;
   const ms = Date.parse(raw);
   return Number.isFinite(ms) ? new Date(ms).toISOString() : null;
+}
+
+function normalizeAccountId(value) {
+  const userId = String(value || "").trim();
+  return userId || null;
+}
+
+function readAccountSyncMeta(userId) {
+  const accountId = normalizeAccountId(userId);
+  if (!accountId) return null;
+  const all = readJson(STORAGE_KEYS.syncAccountMeta, {});
+  if (!all || typeof all !== "object" || Array.isArray(all)) return {};
+  const row = all[accountId];
+  return row && typeof row === "object" && !Array.isArray(row) ? row : {};
+}
+
+function writeAccountSyncMetaPatch(userId, patch) {
+  const accountId = normalizeAccountId(userId);
+  if (!accountId) return;
+  const stored = readJson(STORAGE_KEYS.syncAccountMeta, {});
+  const all = stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+  const current = all[accountId] && typeof all[accountId] === "object" ? all[accountId] : {};
+  const next = { ...current };
+  for (const field of ACCOUNT_SYNC_META_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(patch, field)) {
+      next[field] = patch[field] || "";
+    }
+  }
+  writeJson(STORAGE_KEYS.syncAccountMeta, { ...all, [accountId]: next });
 }
 
 function readPendingFlag() {
@@ -298,6 +333,7 @@ async function pushLocalState(userId, snapshot, remoteState, options = {}) {
 
   const contentHash = options.hash || (await hashSnapshot(localSnapshot));
   markSyncCompleted({
+    userId,
     hash: contentHash,
     remoteUpdatedAt: updatedAt,
     syncedAt: updatedAt,
@@ -309,21 +345,30 @@ async function pushLocalState(userId, snapshot, remoteState, options = {}) {
   };
 }
 
-export function readSyncMeta() {
+export function readSyncMeta(userId = null) {
+  const account = readAccountSyncMeta(userId);
   return {
     deviceId: readString(STORAGE_KEYS.syncDeviceId, "").trim() || null,
-    lastSyncedAt: normalizeIso(readString(STORAGE_KEYS.syncLastSyncedAt, "")),
-    lastSyncedHash: readString(STORAGE_KEYS.syncLastSyncedHash, "").trim() || null,
-    lastRemoteUpdatedAt: normalizeIso(readString(STORAGE_KEYS.syncLastRemoteUpdatedAt, "")),
+    lastSyncedAt: normalizeIso(
+      account ? account.lastSyncedAt : readString(STORAGE_KEYS.syncLastSyncedAt, "")
+    ),
+    lastSyncedHash: String(
+      account ? account.lastSyncedHash || "" : readString(STORAGE_KEYS.syncLastSyncedHash, "")
+    ).trim() || null,
+    lastRemoteUpdatedAt: normalizeIso(
+      account ? account.lastRemoteUpdatedAt : readString(STORAGE_KEYS.syncLastRemoteUpdatedAt, "")
+    ),
     pending: readPendingFlag(),
-    lastError: readString(STORAGE_KEYS.syncLastError, "").trim() || null,
+    lastError: String(
+      account ? account.lastError || "" : readString(STORAGE_KEYS.syncLastError, "")
+    ).trim() || null,
     lastLocalMutationAt: normalizeIso(readString(STORAGE_KEYS.syncLastLocalMutationAt, "")),
   };
 }
 
-export function subscribeSyncMeta(listener) {
+export function subscribeSyncMeta(listener, userId = null) {
   if (typeof window === "undefined") return () => {};
-  const handler = () => listener(readSyncMeta());
+  const handler = () => listener(readSyncMeta(userId));
   window.addEventListener(SYNC_EVENT, handler);
   return () => window.removeEventListener(SYNC_EVENT, handler);
 }
@@ -340,24 +385,29 @@ export function ensureSyncDeviceId() {
   return deviceId;
 }
 
-function writeSyncMetaPatch(patch = {}) {
+function writeSyncMetaPatch(patch = {}, userId = null) {
   if (Object.prototype.hasOwnProperty.call(patch, "deviceId")) {
     writeString(STORAGE_KEYS.syncDeviceId, patch.deviceId || "");
   }
-  if (Object.prototype.hasOwnProperty.call(patch, "lastSyncedAt")) {
-    writeString(STORAGE_KEYS.syncLastSyncedAt, patch.lastSyncedAt || "");
-  }
-  if (Object.prototype.hasOwnProperty.call(patch, "lastSyncedHash")) {
-    writeString(STORAGE_KEYS.syncLastSyncedHash, patch.lastSyncedHash || "");
-  }
-  if (Object.prototype.hasOwnProperty.call(patch, "lastRemoteUpdatedAt")) {
-    writeString(STORAGE_KEYS.syncLastRemoteUpdatedAt, patch.lastRemoteUpdatedAt || "");
+  const accountId = normalizeAccountId(userId);
+  if (accountId) {
+    writeAccountSyncMetaPatch(accountId, patch);
+  } else {
+    if (Object.prototype.hasOwnProperty.call(patch, "lastSyncedAt")) {
+      writeString(STORAGE_KEYS.syncLastSyncedAt, patch.lastSyncedAt || "");
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, "lastSyncedHash")) {
+      writeString(STORAGE_KEYS.syncLastSyncedHash, patch.lastSyncedHash || "");
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, "lastRemoteUpdatedAt")) {
+      writeString(STORAGE_KEYS.syncLastRemoteUpdatedAt, patch.lastRemoteUpdatedAt || "");
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, "lastError")) {
+      writeString(STORAGE_KEYS.syncLastError, patch.lastError || "");
+    }
   }
   if (Object.prototype.hasOwnProperty.call(patch, "pending")) {
     writeJson(STORAGE_KEYS.syncPending, patch.pending === true);
-  }
-  if (Object.prototype.hasOwnProperty.call(patch, "lastError")) {
-    writeString(STORAGE_KEYS.syncLastError, patch.lastError || "");
   }
   if (Object.prototype.hasOwnProperty.call(patch, "lastLocalMutationAt")) {
     writeString(STORAGE_KEYS.syncLastLocalMutationAt, patch.lastLocalMutationAt || "");
@@ -374,17 +424,17 @@ export function markLocalDirty(atIso = new Date().toISOString()) {
   });
 }
 
-export function clearSyncError() {
-  writeSyncMetaPatch({ lastError: "" });
+export function clearSyncError(userId = null) {
+  writeSyncMetaPatch({ lastError: "" }, userId);
 }
 
-export function setSyncError(error) {
+export function setSyncError(error, userId = null) {
   writeSyncMetaPatch({
     lastError: String(error?.message || error || "").trim() || "Unknown sync error",
-  });
+  }, userId);
 }
 
-export function markSyncCompleted({ hash, remoteUpdatedAt, syncedAt = new Date().toISOString() }) {
+export function markSyncCompleted({ userId = null, hash, remoteUpdatedAt, syncedAt = new Date().toISOString() }) {
   writeSyncMetaPatch({
     deviceId: ensureSyncDeviceId(),
     pending: false,
@@ -392,13 +442,13 @@ export function markSyncCompleted({ hash, remoteUpdatedAt, syncedAt = new Date()
     lastSyncedHash: hash || "",
     lastRemoteUpdatedAt: remoteUpdatedAt || syncedAt,
     lastError: "",
-  });
+  }, userId);
 }
 
-export async function buildLocalSyncState() {
+export async function buildLocalSyncState(userId = null) {
   const snapshot = await exportSyncSnapshot();
   const hash = await hashSnapshot(snapshot);
-  return { snapshot, hash, meta: readSyncMeta() };
+  return { snapshot, hash, meta: readSyncMeta(userId) };
 }
 
 export async function readRemoteSnapshot(userId) {
@@ -448,15 +498,19 @@ export async function uploadSnapshotToCloud(userId, snapshot, options = {}) {
   if (!supabase) throw new Error("Supabase env missing");
   if (!userId) throw new Error("Missing user id");
 
-  const remoteState = options.remoteState || (await readRemoteSnapshot(userId));
+  const remoteState = Object.prototype.hasOwnProperty.call(options, "remoteState")
+    ? options.remoteState
+    : await readRemoteSnapshot(userId);
+  if (typeof options.canMutate === "function" && !options.canMutate()) return null;
   return pushLocalState(userId, snapshot, remoteState, options);
 }
 
-export async function applyRemoteSnapshot(remoteRow) {
+export async function applyRemoteSnapshot(remoteRow, options = {}) {
   const snapshot = normalizeSyncSnapshot(remoteRow?.snapshot);
   await applySyncSnapshot(snapshot);
   const hash = remoteRow?.contentHash || (await hashSnapshot(snapshot));
   markSyncCompleted({
+    userId: options.userId || remoteRow?.userId || null,
     hash,
     remoteUpdatedAt: normalizeIso(remoteRow?.updatedAt) || new Date().toISOString(),
   });

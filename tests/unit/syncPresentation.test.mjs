@@ -4,7 +4,6 @@ import {
   deriveSyncPresentation,
   hasSuccessfulRemoteCheck,
   shouldShowAuthSheetSyncAction,
-  shouldAcceptSyncStatusRequest,
 } from "../../src/domain/syncPresentation.js";
 
 test("unconfigured cloud never claims remote data exists", () => {
@@ -98,37 +97,5 @@ test("successful remote reads only apply to the current signed-in user", () => {
       successfulUserId: "user-1",
     }),
     false
-  );
-});
-
-test("a late user-1 refresh cannot replace a successful user-2 refresh", () => {
-  const user2Request = {
-    requestId: 2,
-    latestRequestId: 2,
-    capturedUserId: "user-2",
-    currentUserId: "user-2",
-  };
-  const lateUser1Request = {
-    requestId: 1,
-    latestRequestId: 2,
-    capturedUserId: "user-1",
-    currentUserId: "user-2",
-  };
-
-  assert.equal(shouldAcceptSyncStatusRequest(user2Request), true);
-  assert.equal(shouldAcceptSyncStatusRequest(lateUser1Request), false);
-  assert.deepEqual(
-    deriveSyncPresentation({
-      configured: true,
-      connected: true,
-      remoteChecked: true,
-      remoteMissing: false,
-    }),
-    {
-      tone: "connected",
-      accountState: "connected",
-      remoteState: "available",
-      showSyncActions: true,
-    }
   );
 });

@@ -61,6 +61,92 @@ test("failed quick log save keeps the draft available for retry", async ({ page 
   await expect(sheet.getByLabel("One-line impression")).toHaveValue("Retry me");
   const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
   expect(logs).toHaveLength(0);
+
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeHidden();
+  const retriedLogs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(retriedLogs).toHaveLength(1);
+  expect(retriedLogs[0]).toMatchObject({ cue: "Retry me" });
+});
+
+test("rapid repeated save clicks create exactly one quick log", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1&focus=quick-log");
+  const sheet = page.locator(".log-sheet");
+  const save = sheet.getByRole("button", { name: "Save" });
+  await expect(save).toBeVisible();
+  await save.evaluate((button: HTMLButtonElement) => {
+    (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving = false;
+    const observer = new MutationObserver(() => {
+      if (button.disabled && button.textContent?.includes("Saving")) {
+        (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving = true;
+        observer.disconnect();
+      }
+    });
+    observer.observe(button, { attributes: true, childList: true, subtree: true });
+  });
+  await save.evaluate((button: HTMLButtonElement) => {
+    button.click();
+    button.click();
+  });
+  await expect(sheet).toBeHidden();
+  const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(1);
+  expect(await page.evaluate(() =>
+    (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving,
+  )).toBe(true);
+});
+
+test("a failed IndexedDB mirror cannot hide a successful local quick log after reload", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1&focus=quick-log");
+  const sheet = page.locator(".log-sheet");
+  await expect(sheet).toBeVisible();
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("anime-collector-db", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const tx = db.transaction("watch_logs", "readwrite");
+    tx.objectStore("watch_logs").put({
+      id: "stale-idb-row",
+      anilistId: 1,
+      eventType: "completed",
+      watchedAtPrecision: "day",
+      watchedAtValue: "2026-07-01",
+      watchedAtSort: 1,
+      cue: "Stale IDB value",
+      note: "",
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    db.close();
+
+    const originalPut = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function failWatchLogMirror(value, key) {
+      if (this.name === "watch_logs") throw new Error("simulated IndexedDB mirror failure");
+      return originalPut.call(this, value, key);
+    };
+  });
+  await sheet.getByLabel("One-line impression").fill("Local source survives");
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeHidden();
+
+  const reloadedPage = await page.context().newPage();
+  await reloadedPage.goto("/library/?animeId=1");
+  await expect(reloadedPage.locator(".modal")).toBeVisible();
+  await reloadedPage.locator(".modal .library-modal-tab").nth(1).click();
+  const rows = reloadedPage.locator(".library-modal-log-card");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Local source survives");
+  await expect(rows.first()).not.toContainText("Stale IDB value");
+  await reloadedPage.close();
 });
 
 type AddAttempt = {
@@ -428,6 +514,9 @@ async function expectFlowContract(browser: Browser, testInfo: TestInfo, viewport
   expect(report.discovery.minCardGap, `${viewport.name} discovery card vertical gap`).toBeGreaterThanOrEqual(4);
   expect(report.addAttempts.length, `${viewport.name} query attempt count`).toBe(KO_QUERIES.length + EN_QUERIES.length);
   expect(report.addedCount, `${viewport.name} searches should add every fixture title`).toBe(KO_QUERIES.length + EN_QUERIES.length);
+  if (mode === "fixture") {
+    expect(report.addedByCardDelta, `${viewport.name} should add exactly six fixture cards`).toBe(6);
+  }
 }
 
 test.describe("Library UX fixture flow", () => {

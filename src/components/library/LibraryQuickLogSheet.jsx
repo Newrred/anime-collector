@@ -8,6 +8,7 @@ export default function LibraryQuickLogSheet({
   open,
   draft,
   saveError,
+  saving = false,
   title,
   context,
   candidates,
@@ -60,6 +61,7 @@ export default function LibraryQuickLogSheet({
         role="dialog"
         aria-modal="true"
         aria-label={copy.title}
+        aria-busy={saving ? "true" : undefined}
       >
         <div className="log-sheet__header">
           <div className="log-sheet__header-row">
@@ -364,11 +366,11 @@ export default function LibraryQuickLogSheet({
         </div>
 
         <div className="log-sheet__footer">
-          <button type="button" className="btn" onClick={onClose}>
+          <button type="button" className="btn" onClick={onClose} disabled={saving}>
             {copy.keepDefaults}
           </button>
-          <button type="button" className="btn" onClick={onSave}>
-            {copy.save}
+          <button type="button" className="btn" onClick={onSave} disabled={saving}>
+            {saving ? copy.saving : copy.save}
           </button>
         </div>
       </div>

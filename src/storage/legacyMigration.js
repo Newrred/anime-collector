@@ -2,6 +2,9 @@ import { STORAGE_KEYS } from "./keys";
 import { readJson } from "./localJsonStore";
 import {
   getMetaValue,
+  getAllLibraryItemsIdb,
+  getRecentWatchLogsIdb,
+  getTierStateIdb,
   isIdbSupported,
   putMetaValue,
   putTierStateIdb,
@@ -44,11 +47,21 @@ export function ensureLegacyStorageMigrated() {
     const rawWatchLogs = readJson(STORAGE_KEYS.watchLogs, []);
     const legacyWatchLogs = Array.isArray(rawWatchLogs) ? rawWatchLogs : [];
 
-    await replaceLibraryItemsIdb(legacyList);
-    if (legacyTier && typeof legacyTier === "object") {
+    const [existingList, existingTier, existingWatchLogs] = await Promise.all([
+      getAllLibraryItemsIdb().catch(() => []),
+      getTierStateIdb("default").catch(() => null),
+      getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER).catch(() => []),
+    ]);
+
+    // Migration is a one-way fallback. Valid IndexedDB-only state can exist
+    // before the marker is written, so legacy local data must never erase it.
+    if ((!Array.isArray(existingList) || existingList.length === 0) && legacyList.length > 0) {
+      await replaceLibraryItemsIdb(legacyList);
+    }
+    if (!existingTier && legacyTier && typeof legacyTier === "object") {
       await putTierStateIdb(legacyTier, "default");
     }
-    if (legacyWatchLogs.length) {
+    if ((!Array.isArray(existingWatchLogs) || existingWatchLogs.length === 0) && legacyWatchLogs.length) {
       await replaceWatchLogsIdb(legacyWatchLogs);
     }
 

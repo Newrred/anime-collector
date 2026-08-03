@@ -1,11 +1,11 @@
 import { STORAGE_KEYS } from "../storage/keys.js";
-import { readJson, writeJson } from "../storage/localJsonStore.js";
+import { hasStoredValue, readJson, writeJson } from "../storage/localJsonStore.js";
 import {
   getRecentWatchLogsIdb,
-  getWatchLogsByAnimeIdIdb,
   putWatchLogIdb,
   replaceWatchLogsIdb,
 } from "../storage/idb.js";
+import { loadAuthoritativeWatchLogSnapshot } from "../services/watchLogSource.js";
 import { markLocalDirty } from "./syncRepo.js";
 
 function toArray(value) {
@@ -170,6 +170,24 @@ function writeWatchLogsLocal(rows) {
   }
 }
 
+function hasLocalWatchLogSnapshot() {
+  return hasStoredValue(STORAGE_KEYS.watchLogs);
+}
+
+async function readAuthoritativeWatchLogs() {
+  return loadAuthoritativeWatchLogSnapshot({
+    hasLocalSnapshot: hasLocalWatchLogSnapshot,
+    readLocalSnapshot: readWatchLogsLocal,
+    readAllIdbSnapshot: async () => {
+      const rows = await getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER);
+      return toArray(rows)
+        .map(normalizeWatchLog)
+        .filter((row) => Number.isFinite(row.anilistId));
+    },
+    writeLocalSnapshot: writeWatchLogsLocal,
+  });
+}
+
 export function createWatchLog(input) {
   const now = Date.now();
   const precision = String(input?.watchedAtPrecision || "unknown").toLowerCase();
@@ -211,26 +229,18 @@ export async function appendWatchLog(logInput, options = {}) {
 export async function listWatchLogsByAnimeId(anilistId) {
   const id = Number(anilistId);
   if (!Number.isFinite(id)) return [];
-  try {
-    const rows = await getWatchLogsByAnimeIdIdb(id);
-    if (Array.isArray(rows) && rows.length > 0) {
-      return rows
-        .map(normalizeWatchLog)
-        .sort((a, b) => Number(b.watchedAtSort || 0) - Number(a.watchedAtSort || 0));
-    }
-  } catch {}
-
-  return readWatchLogsLocal()
+  // localStorage is the authoritative watch-log snapshot. IndexedDB is a
+  // rebuildable query mirror and is consulted only to promote a complete
+  // legacy IDB-only snapshot before applying this scoped query.
+  const rows = await readAuthoritativeWatchLogs();
+  return rows
     .filter((x) => x.anilistId === id)
     .sort((a, b) => Number(b.watchedAtSort || 0) - Number(a.watchedAtSort || 0));
 }
 
 export async function listRecentWatchLogs(limit = 30) {
-  try {
-    const rows = await getRecentWatchLogsIdb(limit);
-    if (Array.isArray(rows) && rows.length > 0) return rows.map(normalizeWatchLog);
-  } catch {}
-  return readWatchLogsLocal()
+  const rows = await readAuthoritativeWatchLogs();
+  return rows
     .sort((a, b) => Number(b.watchedAtSort || 0) - Number(a.watchedAtSort || 0))
     .slice(0, Math.max(1, Number(limit) || 30));
 }

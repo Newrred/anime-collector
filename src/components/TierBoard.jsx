@@ -164,6 +164,7 @@ export default function TierBoard() {
 
   const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, []);
   const [tierBundleRaw, setTierBundleRaw] = useStoredState(STORAGE_KEYS.tier, null);
+  const [storageHydrated, setStorageHydrated] = useState(false);
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [watchLogsSnapshot, setWatchLogsSnapshot] = useState([]);
@@ -346,6 +347,7 @@ export default function TierBoard() {
           return sameJson(current, next) ? prev : next;
         });
       }
+      if (alive) setStorageHydrated(true);
     })();
     return () => {
       alive = false;
@@ -353,12 +355,14 @@ export default function TierBoard() {
   }, [setLibrary, setTierBundleRaw]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     writeLibraryList(library, { mirrorOnly: true });
-  }, [library]);
+  }, [library, storageHydrated]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     writeTierBoardBundle(tierBundle, { mirrorOnly: true });
-  }, [tierBundle]);
+  }, [tierBundle, storageHydrated]);
 
   useEffect(() => {
     setMediaMap(getCachedAnimeMap(ids));
@@ -375,6 +379,7 @@ export default function TierBoard() {
   }, [idsKey]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     setTierBundleRaw((prevRaw) => {
       const current = normalizeTierTopicBundle(prevRaw, makeEmptyTierState(ids));
       const next = {
@@ -390,7 +395,7 @@ export default function TierBoard() {
       };
       return sameJson(current, next) ? prevRaw : next;
     });
-  }, [idsKey, mediaMap, setTierBundleRaw]);
+  }, [idsKey, mediaMap, setTierBundleRaw, storageHydrated]);
 
   useEffect(() => {
     if (activeTopic?.kind === "custom") {

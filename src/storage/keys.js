@@ -18,4 +18,5 @@ export const STORAGE_KEYS = {
   syncPending: "sync.pending",
   syncLastError: "sync.lastError",
   syncLastLocalMutationAt: "sync.lastLocalMutationAt",
+  syncAccountMeta: "sync.accounts:v1",
 };

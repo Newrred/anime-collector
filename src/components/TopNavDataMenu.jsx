@@ -99,8 +99,9 @@ export default function TopNavDataMenu({
 
   return (
     <>
-      <section
+      <nav
         className="nav top-nav"
+        aria-label="Primary"
       >
         <a
           href={`${base}`}
@@ -253,6 +254,7 @@ export default function TopNavDataMenu({
                     <a
                       href={`${base}`}
                       className={`btn btn--subtle data-menu-link${currentRoute === "home" ? " is-active" : ""}`}
+                      aria-current={currentRoute === "home" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
                       {copy.home}
@@ -260,6 +262,7 @@ export default function TopNavDataMenu({
                     <a
                       href={`${base}library/`}
                       className={`btn btn--subtle data-menu-link${currentRoute === "library" ? " is-active" : ""}`}
+                      aria-current={currentRoute === "library" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
                       {copy.library}
@@ -267,6 +270,7 @@ export default function TopNavDataMenu({
                     <a
                       href={`${base}tier/`}
                       className={`btn btn--subtle data-menu-link${currentRoute === "tier" ? " is-active" : ""}`}
+                      aria-current={currentRoute === "tier" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
                       {copy.tier}
@@ -398,7 +402,7 @@ export default function TopNavDataMenu({
             </div>
           )}
         </div>
-      </section>
+      </nav>
 
     </>
   );

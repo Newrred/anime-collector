@@ -651,6 +651,7 @@ const koMessages = {
     characterMemo: "캐릭터 한줄 (선택)",
     keepDefaults: "지금은 닫기",
     save: "저장",
+    saving: "저장 중...",
     saveFailed: "기록을 저장하지 못했습니다. 다시 시도해 주세요.",
     seasonYear: "빠른 기록 시즌 연도",
     seasonAria: "빠른 기록 시즌",

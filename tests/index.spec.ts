@@ -10,6 +10,16 @@ test("fresh browser uses English shell and primary navigation", async ({ page })
   await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+});
+
+test("mobile menu identifies the current route accessibly", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await clearAppState(page);
+  await page.goto("/library/");
+  await page.locator(".top-nav__mobile-menu-trigger:visible").click();
+  const current = page.locator(".top-nav-mobile-links").getByRole("link", { name: "Library" });
+  await expect(current).toHaveAttribute("aria-current", "page");
 });
 
 test("new visitor sees one primary add-title action", async ({ page }) => {

@@ -22,6 +22,15 @@ export function writeJson(key, value) {
   }
 }
 
+export function hasStoredValue(key) {
+  if (!canUseStorage()) return false;
+  try {
+    return localStorage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function readString(key, fallbackValue = "") {
   if (!canUseStorage()) return fallbackValue;
   try {

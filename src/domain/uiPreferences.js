@@ -30,7 +30,7 @@ export function normalizeUiTheme(value) {
 }
 
 export function normalizeUiLocale(value) {
-  return value === UI_LOCALE.en ? UI_LOCALE.en : UI_LOCALE.ko;
+  return value === UI_LOCALE.ko ? UI_LOCALE.ko : DEFAULT_UI_PREFERENCES.locale;
 }
 
 export function applyUiPreferencesToDocument({ theme, locale }) {

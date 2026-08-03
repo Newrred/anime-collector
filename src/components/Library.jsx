@@ -310,6 +310,7 @@ export default function Library() {
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
   const [items, setItems] = useStoredState(STORAGE_KEYS.list, []);
+  const [storageHydrated, setStorageHydrated] = useState(false);
   const [mediaMap, setMediaMap] = useState(new Map());
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("전체");
@@ -328,6 +329,7 @@ export default function Library() {
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [quickLogDraft, setQuickLogDraft] = useState(null);
   const [quickLogSaveError, setQuickLogSaveError] = useState("");
+  const [quickLogSaving, setQuickLogSaving] = useState(false);
   const [quickLogCandidates, setQuickLogCandidates] = useState([]);
   const [quickLogCharacterIds, setQuickLogCharacterIds] = useState([]);
   const [quickLogPrimaryCharacterId, setQuickLogPrimaryCharacterId] = useState(null);
@@ -344,6 +346,7 @@ export default function Library() {
   const [gridWidth, setGridWidth] = useState(0);
   const deepLinkHandledRef = useRef(false);
   const pendingQuickLogFocusRef = useRef(false);
+  const quickLogSaveInFlightRef = useRef(false);
   const genreKo = (value) => formatGenreLabel(value, locale);
   const affinityLabel = (value) => formatAffinityLabel(value, locale);
   const reasonTagLabel = (value) => formatReasonTagLabel(value, locale);
@@ -374,6 +377,7 @@ export default function Library() {
         }
         return next;
       });
+      if (alive) setStorageHydrated(true);
     })();
     return () => {
       alive = false;
@@ -381,8 +385,9 @@ export default function Library() {
   }, [setItems]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     writeLibraryList(items, { mirrorOnly: true });
-  }, [items]);
+  }, [items, storageHydrated]);
 
   useEffect(() => {
     setItems((prev) => {
@@ -1230,6 +1235,11 @@ export default function Library() {
   }
 
   function closeQuickLogSheet() {
+    if (quickLogSaveInFlightRef.current) return;
+    clearQuickLogSheet();
+  }
+
+  function clearQuickLogSheet() {
     setQuickLogOpen(false);
     setQuickLogDraft(null);
     setQuickLogSaveError("");
@@ -1554,10 +1564,14 @@ export default function Library() {
   }
 
   async function saveQuickLogDraft() {
+    if (quickLogSaveInFlightRef.current) return;
     if (!quickLogDraft || !Number.isFinite(Number(quickLogDraft.anilistId))) {
       closeQuickLogSheet();
       return;
     }
+
+    quickLogSaveInFlightRef.current = true;
+    setQuickLogSaving(true);
 
     const watchedInput = buildQuickLogInputByPrecision(quickLogDraft);
     const watchedMeta = buildWatchedRange(
@@ -1597,57 +1611,62 @@ export default function Library() {
       characterIds: selectedRefs.map((x) => x.characterId),
       characterRefs: selectedRefs,
     };
-    let saved;
     try {
-      saved = isNewQuickLogDraft(quickLogDraft)
-        ? await appendWatchLog(createWatchLog(payload))
-        : await updateWatchLog(quickLogDraft.logId, payload);
-      if (!saved) throw new Error("Quick log was not saved");
-    } catch {
-      setQuickLogSaveError(quickLogCopy.saveFailed);
-      setBackupMsg(quickLogCopy.saveFailed);
-      return;
-    }
-
-    const primaryRef = selectedRefs.find((x) => x.isPrimary);
-    if (primaryRef) {
+      let saved;
       try {
-      const pinId = buildCharacterPinId(primaryRef.characterId, quickLogDraft.anilistId);
-      const alreadyPinned = pinnedCharacterKeySet.has(pinId);
-      if (!alreadyPinned) {
-        const reasonSeed =
-          (Array.isArray(primaryRef.reasonTags) ? primaryRef.reasonTags[0] : "") ||
-          String(primaryRef.note || "").trim() ||
-          String(quickLogDraft.cue || "").trim();
-        const shouldPin = window.confirm(
-          locale === "en"
-            ? `Pin "${primaryRef.nameSnapshot}" as a favorite character?`
-            : `이 캐릭터("${primaryRef.nameSnapshot}")를 최애로 고정할까요?`
-        );
-        if (shouldPin) {
-          await upsertCharacterPin({
-            id: pinId,
-            characterId: primaryRef.characterId,
-            mediaId: Number(quickLogDraft.anilistId),
-            nameSnapshot: primaryRef.nameSnapshot,
-            imageSnapshot: primaryRef.imageSnapshot || null,
-            note: String(primaryRef.note || ""),
-            sourceLogId: saved.id,
-            pinnedFromLogId: saved.id,
-            pinReason: String(reasonSeed || ""),
-            pinnedAt: Date.now(),
-          }).catch(() => {});
-          refreshCharacterPins();
-        }
+        saved = isNewQuickLogDraft(quickLogDraft)
+          ? await appendWatchLog(createWatchLog(payload))
+          : await updateWatchLog(quickLogDraft.logId, payload);
+        if (!saved) throw new Error("Quick log was not saved");
+      } catch {
+        setQuickLogSaveError(quickLogCopy.saveFailed);
+        setBackupMsg(quickLogCopy.saveFailed);
+        return;
       }
-      } catch {}
-    }
 
-    if (selectedId && Number(selectedId) === Number(quickLogDraft.anilistId)) {
-      const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
-      setSelectedLogs(Array.isArray(rows) ? rows : []);
+      const primaryRef = selectedRefs.find((x) => x.isPrimary);
+      if (primaryRef) {
+        try {
+          const pinId = buildCharacterPinId(primaryRef.characterId, quickLogDraft.anilistId);
+          const alreadyPinned = pinnedCharacterKeySet.has(pinId);
+          if (!alreadyPinned) {
+            const reasonSeed =
+              (Array.isArray(primaryRef.reasonTags) ? primaryRef.reasonTags[0] : "") ||
+              String(primaryRef.note || "").trim() ||
+              String(quickLogDraft.cue || "").trim();
+            const shouldPin = window.confirm(
+              locale === "en"
+                ? `Pin "${primaryRef.nameSnapshot}" as a favorite character?`
+                : `이 캐릭터("${primaryRef.nameSnapshot}")를 최애로 고정할까요?`
+            );
+            if (shouldPin) {
+              await upsertCharacterPin({
+                id: pinId,
+                characterId: primaryRef.characterId,
+                mediaId: Number(quickLogDraft.anilistId),
+                nameSnapshot: primaryRef.nameSnapshot,
+                imageSnapshot: primaryRef.imageSnapshot || null,
+                note: String(primaryRef.note || ""),
+                sourceLogId: saved.id,
+                pinnedFromLogId: saved.id,
+                pinReason: String(reasonSeed || ""),
+                pinnedAt: Date.now(),
+              }).catch(() => {});
+              refreshCharacterPins();
+            }
+          }
+        } catch {}
+      }
+
+      if (selectedId && Number(selectedId) === Number(quickLogDraft.anilistId)) {
+        const rows = await listWatchLogsByAnimeId(selectedId).catch(() => []);
+        setSelectedLogs(Array.isArray(rows) ? rows : []);
+      }
+      clearQuickLogSheet();
+    } finally {
+      quickLogSaveInFlightRef.current = false;
+      setQuickLogSaving(false);
     }
-    closeQuickLogSheet();
   }
 
   function buildCharacterPinId(characterId, mediaId) {
@@ -1912,6 +1931,7 @@ export default function Library() {
         open={quickLogOpen}
         draft={quickLogDraft}
         saveError={quickLogSaveError}
+        saving={quickLogSaving}
         title={quickLogTitle}
         context={quickLogContext}
         candidates={quickLogCandidates}

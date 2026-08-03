@@ -7,7 +7,7 @@
 
 - `offline-first` 개인 기록 앱
 - 주요 화면: `홈 / 보관함 / 티어 / 데이터 / 프로필`
-- 저장 구조: `IndexedDB 우선 + localStorage 미러 + 레거시 마이그레이션`
+- 저장 구조: 데이터별 원본이 명시된 `IndexedDB + localStorage + 레거시 마이그레이션`
 - 상단 공통 메뉴에서 `라이트/다크`, `한/영`, `도움말`, `데이터 관리`, `계정/동기화`, `내 프로필` 제공
 - self-host 폰트 사용
   - 한국어: `Noto Sans KR`
@@ -89,6 +89,9 @@ sync 관련 로컬 메타 키:
 - `sync.pending`
 - `sync.lastError`
 - `sync.lastLocalMutationAt`
+- `sync.accounts:v1` (계정별 마지막 동기화 hash·시각·오류)
+
+감상 로그는 `localStorage`의 전체 스냅샷을 원본으로 사용하고 IndexedDB를 재구축 가능한 조회 미러로 사용합니다. 따라서 IndexedDB 미러 갱신이 실패해도 성공한 로컬 저장을 이전 IndexedDB 행이 가리지 않습니다. 보관함과 티어는 초기 IndexedDB 복구가 끝난 뒤에만 미러 쓰기를 시작합니다.
 
 ## UI 시스템
 
@@ -182,10 +185,20 @@ docs/
   deploy/
 tests/
   unit/
-  library.spec.ts
-  home-data.spec.ts
-  tier.spec.ts
-  live-search.spec.ts
+    onboardingState.test.mjs
+    quickLogDraft.test.mjs
+    syncAccountMeta.test.mjs
+    syncOperationCoordinator.test.mjs
+    syncPresentation.test.mjs
+    uiPreferences.test.mjs
+    watchLogSource.test.mjs
+  authenticated-minihome.spec.ts
+  index.spec.ts
+  layout-desktop.spec.ts
+  layout-mobile.spec.ts
+  library-userflow.spec.ts
+  page-design-system.spec.ts
+  storage-hydration.spec.ts
 ```
 
 ## 로컬 실행
@@ -238,10 +251,13 @@ npm run build
 
 주요 스펙:
 
-- `tests/library.spec.ts`: 보관함 레이아웃, 필터, 상세 팝업, 로그, 데이터 메뉴
-- `tests/home-data.spec.ts`: 홈 / 데이터 렌더와 공통 UI 안정성
-- `tests/tier.spec.ts`: 티어보드 주제 전환, 드래그, 레이아웃
-- `tests/live-search.spec.ts`: 외부 API 기반 실검색 확인
+- `tests/index.spec.ts`: 영어 기본 셸, 신규 사용자 온보딩, 동기화 표시 계약
+- `tests/library-userflow.spec.ts`: 검색·6개 작품 추가·퀵로그·홈 회고의 fixture 및 live 흐름
+- `tests/storage-hydration.spec.ts`: IndexedDB-only 보관함·티어·감상 로그 시작 복구
+- `tests/layout-desktop.spec.ts`, `tests/layout-mobile.spec.ts`: 주요 경로 반응형 회귀
+- `tests/page-design-system.spec.ts`: 공통 카드·간격·타이포 시스템 회귀
+- `tests/authenticated-minihome.spec.ts`: 로그인 사용자 미니홈 흐름
+- `tests/unit/*.test.mjs`: 온보딩, 퀵로그 초안, UI 설정, 동기화 표시·계정 안전성, 감상 로그 저장소 승격
 
 ## 배포
 
