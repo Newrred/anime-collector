@@ -1,4 +1,5 @@
 import { IconArrowRight, IconCloud, IconLogOut, IconRefreshCw, IconShield, IconUser } from "../ui/AppIcons.jsx";
+import { shouldShowAuthSheetSyncAction } from "../../domain/syncPresentation.js";
 
 function SummaryRow({ label, value }) {
   return (
@@ -16,6 +17,7 @@ export default function AuthSheet({
   loading,
   syncStatus,
   syncing,
+  showSyncActions = false,
   onSignIn,
   onSignOut,
   onSyncNow,
@@ -25,6 +27,11 @@ export default function AuthSheet({
   const user = session?.user || null;
   const email = String(user?.email || "").trim();
   const name = String(user?.user_metadata?.name || "").trim() || email || copy.localOnlyTitle;
+  const showSyncNow = shouldShowAuthSheetSyncAction({
+    configured,
+    connected: Boolean(user),
+    showSyncActions,
+  });
 
   return (
     <div
@@ -53,10 +60,12 @@ export default function AuthSheet({
             <SummaryRow label={copy.syncLabel} value={syncStatus} />
             <SummaryRow label={copy.storageModeLabel} value={copy.localFirstValue} />
           </div>
-          <button type="button" className="btn" onClick={onSyncNow} disabled={syncing || loading}>
-            <span className="btn__icon"><IconRefreshCw size={14} /></span>
-            <span className="btn__label">{copy.syncNow}</span>
-          </button>
+          {showSyncNow ? (
+            <button type="button" className="btn" onClick={onSyncNow} disabled={syncing || loading}>
+              <span className="btn__icon"><IconRefreshCw size={14} /></span>
+              <span className="btn__label">{copy.syncNow}</span>
+            </button>
+          ) : null}
           <button type="button" className="btn btn--subtle" onClick={onOpenData}>
             <span className="btn__icon"><IconArrowRight size={14} /></span>
             <span className="btn__label">{copy.openData}</span>

@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deriveSyncPresentation } from "../../src/domain/syncPresentation.js";
+import {
+  deriveSyncPresentation,
+  hasSuccessfulRemoteCheck,
+  shouldShowAuthSheetSyncAction,
+} from "../../src/domain/syncPresentation.js";
 
 test("unconfigured cloud never claims remote data exists", () => {
   assert.deepEqual(deriveSyncPresentation({ configured: false }), {
@@ -41,5 +45,57 @@ test("checked remote data is available and enables sync actions", () => {
       remoteState: "available",
       showSyncActions: true,
     }
+  );
+});
+
+test("failed remote check remains not checked and does not enable sync actions", () => {
+  assert.deepEqual(
+    deriveSyncPresentation({ configured: true, connected: true, status: "error" }),
+    {
+      tone: "error",
+      accountState: "connected",
+      remoteState: "not-checked",
+      showSyncActions: false,
+    }
+  );
+});
+
+test("auth sheet sync action stays hidden until the presentation allows it", () => {
+  assert.equal(
+    shouldShowAuthSheetSyncAction({
+      configured: true,
+      connected: true,
+      showSyncActions: false,
+    }),
+    false
+  );
+  assert.equal(
+    shouldShowAuthSheetSyncAction({
+      configured: true,
+      connected: true,
+      showSyncActions: true,
+    }),
+    true
+  );
+});
+
+test("successful remote reads only apply to the current signed-in user", () => {
+  assert.equal(
+    hasSuccessfulRemoteCheck({
+      configured: true,
+      connected: true,
+      currentUserId: "user-1",
+      successfulUserId: "user-1",
+    }),
+    true
+  );
+  assert.equal(
+    hasSuccessfulRemoteCheck({
+      configured: true,
+      connected: true,
+      currentUserId: "user-2",
+      successfulUserId: "user-1",
+    }),
+    false
   );
 });

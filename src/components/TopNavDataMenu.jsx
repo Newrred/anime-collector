@@ -330,6 +330,7 @@ export default function TopNavDataMenu({
                     loading={auth.loading}
                     syncStatus={getMessageGroup(locale, "syncStatus").statusLabels?.[syncPresentation.tone] || syncPresentation.tone}
                     syncing={sync.syncing}
+                    showSyncActions={syncPresentation.showSyncActions}
                     onSignIn={async () => {
                       await auth.signIn(`${base}data/`);
                     }}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { downloadSnapshotJson, isSnapshotEffectivelyEmpty } from "../domain/snapshotCodec.js";
+import { hasSuccessfulRemoteCheck } from "../domain/syncPresentation.js";
 import {
   applyRemoteSnapshot,
   buildLocalSyncState,
@@ -36,6 +37,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   const [meta, setMeta] = useState(readSyncMeta());
   const [remote, setRemote] = useState(null);
   const [loading, setLoading] = useState(Boolean(session?.user));
+  const [successfulRemoteUserId, setSuccessfulRemoteUserId] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [conflict, setConflict] = useState(null);
   const [remoteMissing, setRemoteMissing] = useState(false);
@@ -76,6 +78,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
 
     if (!session?.user || !isSupabaseConfigured) {
       setRemote(null);
+      setSuccessfulRemoteUserId(null);
       setRemoteMissing(false);
       setNeedsInitialUpload(false);
       setCanDownloadRemote(false);
@@ -84,6 +87,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     }
 
     setLoading(true);
+    setSuccessfulRemoteUserId(null);
     try {
       const [localState, remoteRow] = await Promise.all([
         buildLocalSyncState(),
@@ -92,6 +96,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
 
       setRemote(remoteRow);
       setRemoteMissing(!remoteRow);
+      setSuccessfulRemoteUserId(session.user.id);
 
       if (!remoteRow) {
         setCanDownloadRemote(false);
@@ -191,6 +196,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     if (!isOnline()) return null;
 
     setSyncing(true);
+    setSuccessfulRemoteUserId(null);
     clearSyncError();
     setMeta(readSyncMeta());
 
@@ -201,6 +207,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       ]);
       setRemote(remoteRow);
       setRemoteMissing(!remoteRow);
+      setSuccessfulRemoteUserId(session.user.id);
 
       if (!remoteRow) {
         if (isSnapshotEffectivelyEmpty(localState.snapshot)) {
@@ -391,6 +398,12 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     () => deriveStatus(meta, session, conflict),
     [meta, session?.user?.id, conflict]
   );
+  const remoteChecked = hasSuccessfulRemoteCheck({
+    configured: isSupabaseConfigured,
+    connected: Boolean(session?.user),
+    currentUserId: session?.user?.id,
+    successfulUserId: successfulRemoteUserId,
+  });
 
   return {
     configured: isSupabaseConfigured,
@@ -398,7 +411,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     meta,
     remote,
     loading,
-    remoteChecked: !loading && Boolean(session?.user) && isSupabaseConfigured,
+    remoteChecked,
     syncing,
     conflict,
     remoteMissing,
