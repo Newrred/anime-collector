@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import myListSeed from "../data/myAnime.json";
 import { isIdbSupported } from "../storage/idb";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
 import { readTierStatePreferred } from "../repositories/tierRepo";
@@ -50,7 +49,7 @@ export default function DataCenter() {
 
   async function readLocalOverview() {
     const [list, tier, pins] = await Promise.all([
-      readLibraryListPreferred(myListSeed).catch(() => myListSeed),
+      readLibraryListPreferred([]).catch(() => []),
       readTierStatePreferred(null).catch(() => null),
       listCharacterPinsPreferred().catch(() => []),
     ]);

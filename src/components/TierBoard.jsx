@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import {
   DEFAULT_TIERS,
@@ -163,7 +162,7 @@ export default function TierBoard() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "tierBoard");
 
-  const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, myListSeed);
+  const [library, setLibrary] = useStoredState(STORAGE_KEYS.list, []);
   const [tierBundleRaw, setTierBundleRaw] = useStoredState(STORAGE_KEYS.tier, null);
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
@@ -314,7 +313,7 @@ export default function TierBoard() {
     (async () => {
       await ensureLegacyStorageMigrated().catch(() => {});
       const [preferredLibrary, preferredBundle] = await Promise.all([
-        readLibraryListPreferred(myListSeed).catch(() => null),
+        readLibraryListPreferred([]).catch(() => []),
         readTierBoardBundlePreferred(null).catch(() => null),
       ]);
       if (!alive) return;

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
 import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
@@ -21,7 +20,7 @@ export function useShowcaseSource(locale = "ko") {
       setLoading(true);
       await ensureLegacyStorageMigrated().catch(() => {});
 
-      const list = await readLibraryListPreferred(myListSeed).catch(() => myListSeed);
+      const list = await readLibraryListPreferred([]).catch(() => []);
       const safeList = Array.isArray(list) ? list : [];
       const ids = safeList.map((x) => Number(x?.anilistId)).filter(Number.isFinite);
 

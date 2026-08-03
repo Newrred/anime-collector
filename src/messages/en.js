@@ -400,6 +400,18 @@ const enMessages = {
     heroMetaLibrary: "Saved",
     unit: "",
   },
+  homeOnboarding: {
+    eyebrow: "Your private anime journal",
+    firstTitle: "Start with one anime you remember",
+    firstTitleLead: "Add a title now. You can write as much or as little as you want later.",
+    addFirstTitle: "Add your first title",
+    moreTitles: "Build your home with three titles",
+    moreTitlesLead: "Add two more titles to unlock your full home.",
+    addMoreTitles: "Add two more titles",
+    firstLog: "Add the memory you want to keep",
+    firstLogLead: "A date and one short line are enough.",
+    writeFirstLog: "Write your first memory",
+  },
   homeResurfacing: {
     recentLogs: "Recent memories",
     noLogs: "No records yet.",

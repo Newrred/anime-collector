@@ -3,11 +3,13 @@ import { buildHomeResurfacing } from "../domain/homeSelectors";
 import { buildCharacterInsight } from "../domain/characterInsights";
 import { buildYearRecap, listRecapYears } from "../domain/recapSelectors";
 import { buildShowcaseModel } from "../domain/showcase/showcaseSelectors.js";
+import { deriveOnboardingState } from "../domain/onboardingState.js";
 import { useShowcaseSource } from "../hooks/useShowcaseSource.js";
 import YearRecapPanel from "./home/YearRecapPanel";
 import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
 import HomeShowcasePreview from "./home/HomeShowcasePreview.jsx";
+import HomeEmptyState from "./home/HomeEmptyState.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { StatBars } from "./library/LibraryUi.jsx";
@@ -160,6 +162,7 @@ function useLibraryStatsPanelProps({ items, mediaMap, locale, titleById }) {
 export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "home");
+  const onboardingCopy = getMessageGroup(locale, "homeOnboarding");
   const tasteCopy = getMessageGroup(locale, "libraryStatsPanel");
   const { items, logs, mediaMap, titleById } = useShowcaseSource(locale);
   const [canInstallPwa, setCanInstallPwa] = useState(false);
@@ -196,6 +199,11 @@ export default function Home() {
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+  const onboardingState = deriveOnboardingState({ itemCount: items.length, logCount: logs.length });
+  const firstItemId = Number(items?.[0]?.anilistId);
+  const onboardingLibraryHref = Number.isFinite(firstItemId)
+    ? buildLibraryHref(base, firstItemId, "quick-log")
+    : `${base}library/`;
 
   const heroEntry = useMemo(
     () => resurfacing?.recentLogs?.[0] ?? resurfacing?.missingMemory?.[0] ?? items?.[0] ?? null,
@@ -311,6 +319,8 @@ export default function Home() {
         onInstallPwa={onClickInstallPwa}
       />
 
+      {onboardingState.stage === "active" ? (
+        <>
       <section className="pageHeader">
         {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
         {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
@@ -403,6 +413,15 @@ export default function Home() {
         titleById={titleById}
         onClose={() => setSelectedCharacter(null)}
       />
+        </>
+      ) : (
+        <HomeEmptyState
+          copy={onboardingCopy}
+          stage={onboardingState.stage}
+          onAddTitle={openGlobalQuickAction}
+          libraryHref={onboardingLibraryHref}
+        />
+      )}
     </div>
   );
 }

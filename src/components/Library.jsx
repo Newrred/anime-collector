@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import myListSeed from "../data/myAnime.json";
 import aliasSeed from "../data/aliases.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import {
@@ -308,7 +307,7 @@ export default function Library() {
   const [sortKey, setSortKey] = useState("addedAt"); // addedAt | title | score | year | genre
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
-  const [items, setItems] = useStoredState(STORAGE_KEYS.list, myListSeed);
+  const [items, setItems] = useStoredState(STORAGE_KEYS.list, []);
   const [mediaMap, setMediaMap] = useState(new Map());
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("전체");
@@ -350,7 +349,7 @@ export default function Library() {
     let alive = true;
     (async () => {
       await ensureLegacyStorageMigrated().catch(() => {});
-      const preferred = await readLibraryListPreferred(myListSeed).catch(() => null);
+      const preferred = await readLibraryListPreferred([]).catch(() => []);
       if (!alive || !Array.isArray(preferred)) return;
 
       setItems((prev) => {

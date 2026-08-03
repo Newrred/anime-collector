@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import myListSeed from "../data/myAnime.json";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist.js";
 import { readLibraryListPreferred } from "../repositories/libraryRepo.js";
 import { listRecentWatchLogs } from "../repositories/watchLogRepo.js";
@@ -26,7 +25,7 @@ export function useGlobalQuickActionSource() {
     async function loadSnapshot() {
       await ensureLegacyStorageMigrated().catch(() => {});
       const [preferred, logs] = await Promise.all([
-        readLibraryListPreferred(myListSeed).catch(() => []),
+        readLibraryListPreferred([]).catch(() => []),
         listRecentWatchLogs(20).catch(() => []),
       ]);
       if (!alive) return;

@@ -400,6 +400,18 @@ const koMessages = {
     heroMetaLibrary: "보관 중",
     unit: "개",
   },
+  homeOnboarding: {
+    eyebrow: "나만의 애니 감상 기록",
+    firstTitle: "기억나는 애니 한 편부터 시작해 보세요",
+    firstTitleLead: "지금 작품을 추가하세요. 기록은 나중에 길게 써도, 짧게 써도 됩니다.",
+    addFirstTitle: "첫 작품 추가하기",
+    moreTitles: "세 작품으로 나만의 홈을 완성해 보세요",
+    moreTitlesLead: "두 작품만 더 추가하면 홈을 모두 볼 수 있어요.",
+    addMoreTitles: "두 작품 더 추가하기",
+    firstLog: "남기고 싶은 기억을 기록해 보세요",
+    firstLogLead: "날짜와 한 줄이면 충분합니다.",
+    writeFirstLog: "첫 감상 기록 남기기",
+  },
   homeResurfacing: {
     recentLogs: "최근 남긴 기억",
     noLogs: "아직 기록이 없습니다.",
