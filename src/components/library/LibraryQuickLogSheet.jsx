@@ -7,6 +7,7 @@ export default function LibraryQuickLogSheet({
   locale = "ko",
   open,
   draft,
+  saveError,
   title,
   context,
   candidates,
@@ -79,6 +80,7 @@ export default function LibraryQuickLogSheet({
             <div className="small log-sheet__context-title">{copy.contextTitle}</div>
             <div className="small log-sheet__context-text">{contextHint}</div>
           </div>
+          {saveError ? <div role="alert" className="small log-sheet__hint">{saveError}</div> : null}
 
           {context?.isAuto && (
             <div className="small log-sheet__hint">

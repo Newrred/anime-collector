@@ -165,7 +165,9 @@ function readWatchLogsLocal() {
 }
 
 function writeWatchLogsLocal(rows) {
-  writeJson(STORAGE_KEYS.watchLogs, toArray(rows));
+  if (!writeJson(STORAGE_KEYS.watchLogs, toArray(rows))) {
+    throw new Error("Failed to write watch logs");
+  }
 }
 
 export function createWatchLog(input) {

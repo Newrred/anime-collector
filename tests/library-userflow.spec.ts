@@ -38,6 +38,31 @@ test("saving then editing a quick log keeps one row", async ({ page }) => {
   expect(logs).toHaveLength(1);
 });
 
+test("failed quick log save keeps the draft available for retry", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1&focus=quick-log");
+  const sheet = page.locator(".log-sheet");
+  await expect(sheet).toBeVisible();
+  await sheet.getByLabel("One-line impression").fill("Retry me");
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    let failOnce = true;
+    Storage.prototype.setItem = function scopedWatchLogFailure(key, value) {
+      if (key === "anime:watchLogs:v1" && failOnce) {
+        failOnce = false;
+        throw new Error("simulated watch-log write failure");
+      }
+      return original.call(this, key, value);
+    };
+  });
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole("alert")).toHaveText("Couldn't save this log. Try again.");
+  await expect(sheet.getByLabel("One-line impression")).toHaveValue("Retry me");
+  const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
+  expect(logs).toHaveLength(0);
+});
+
 type AddAttempt = {
   locale: "KO" | "EN";
   query: string;

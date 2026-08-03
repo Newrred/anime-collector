@@ -18,3 +18,26 @@ test("edit draft preserves the stored id", () => {
   assert.equal(draft.mode, "edit");
   assert.equal(draft.logId, "log-1");
 });
+
+test("draft normalizes editable fields", () => {
+  const draft = createNewQuickLogDraft({
+    anilistId: "1",
+    eventType: "시작",
+    watchedAtPrecision: "month",
+    watchedAtValue: "2026-08",
+    cue: "x".repeat(130),
+    note: "Saved for later",
+  });
+  assert.equal(draft.anilistId, 1);
+  assert.equal(draft.watchedAtPrecision, "month");
+  assert.equal(draft.watchedAtValue, "2026-08");
+  assert.equal(draft.cue.length, 120);
+  assert.equal(draft.note, "Saved for later");
+});
+
+test("malformed edit id is not mistaken for a new draft", () => {
+  const draft = createEditQuickLogDraft({ anilistId: 1 });
+  assert.equal(draft.mode, "edit");
+  assert.equal(draft.logId, "");
+  assert.equal(isNewQuickLogDraft(draft), false);
+});

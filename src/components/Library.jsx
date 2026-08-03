@@ -305,6 +305,7 @@ const ALIAS_KO_TITLE_MAP = buildAliasKoTitleMap(aliasSeed);
 export default function Library() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "library");
+  const quickLogCopy = getMessageGroup(locale, "libraryQuickLogSheet");
   const [sortKey, setSortKey] = useState("addedAt"); // addedAt | title | score | year | genre
   const [sortDir, setSortDir] = useState("desc"); // asc | desc
   const [groupByStatus, setGroupByStatus] = useState(true);
@@ -326,6 +327,7 @@ export default function Library() {
   const [logsLoading, setLogsLoading] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [quickLogDraft, setQuickLogDraft] = useState(null);
+  const [quickLogSaveError, setQuickLogSaveError] = useState("");
   const [quickLogCandidates, setQuickLogCandidates] = useState([]);
   const [quickLogCharacterIds, setQuickLogCharacterIds] = useState([]);
   const [quickLogPrimaryCharacterId, setQuickLogPrimaryCharacterId] = useState(null);
@@ -1218,6 +1220,7 @@ export default function Library() {
     }
 
     setQuickLogDraft({ ...draft, watchedAtPrecision: precision, watchedAtValue: value });
+    setQuickLogSaveError("");
     setQuickLogCharacterIds(compactIds);
     setQuickLogPrimaryCharacterId(resolvedPrimaryId);
     setQuickLogCharacterMeta(nextMeta);
@@ -1229,6 +1232,7 @@ export default function Library() {
   function closeQuickLogSheet() {
     setQuickLogOpen(false);
     setQuickLogDraft(null);
+    setQuickLogSaveError("");
     setQuickLogCandidates([]);
     setQuickLogCharacterIds([]);
     setQuickLogPrimaryCharacterId(null);
@@ -1593,12 +1597,14 @@ export default function Library() {
       characterIds: selectedRefs.map((x) => x.characterId),
       characterRefs: selectedRefs,
     };
+    try {
     const saved = isNewQuickLogDraft(quickLogDraft)
       ? await appendWatchLog(createWatchLog(payload))
       : await updateWatchLog(quickLogDraft.logId, payload);
+    if (!saved) throw new Error("Quick log was not saved");
 
     const primaryRef = selectedRefs.find((x) => x.isPrimary);
-    if (saved && primaryRef) {
+    if (primaryRef) {
       const pinId = buildCharacterPinId(primaryRef.characterId, quickLogDraft.anilistId);
       const alreadyPinned = pinnedCharacterKeySet.has(pinId);
       if (!alreadyPinned) {
@@ -1634,6 +1640,10 @@ export default function Library() {
       setSelectedLogs(Array.isArray(rows) ? rows : []);
     }
     closeQuickLogSheet();
+    } catch {
+      setQuickLogSaveError(quickLogCopy.saveFailed);
+      setBackupMsg(quickLogCopy.saveFailed);
+    }
   }
 
   function buildCharacterPinId(characterId, mediaId) {
@@ -1897,6 +1907,7 @@ export default function Library() {
         locale={locale}
         open={quickLogOpen}
         draft={quickLogDraft}
+        saveError={quickLogSaveError}
         title={quickLogTitle}
         context={quickLogContext}
         candidates={quickLogCandidates}

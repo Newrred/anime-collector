@@ -13,10 +13,13 @@ export function readJson(key, fallbackValue) {
 }
 
 export function writeJson(key, value) {
-  if (!canUseStorage()) return;
+  if (!canUseStorage()) return false;
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function readString(key, fallbackValue = "") {

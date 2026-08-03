@@ -638,6 +638,7 @@ const enMessages = {
     characterMemo: "One-liner for character (optional)",
     keepDefaults: "Close for now",
     save: "Save",
+    saveFailed: "Couldn't save this log. Try again.",
     seasonYear: "Quick log season year",
     seasonAria: "Quick log season",
     dateAria: "Quick log date",
