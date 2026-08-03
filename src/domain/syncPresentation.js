@@ -55,3 +55,10 @@ export function hasSuccessfulRemoteCheck(input = {}) {
 export function shouldShowAuthSheetSyncAction(input = {}) {
   return Boolean(input.configured && input.connected && input.showSyncActions);
 }
+
+export function shouldAcceptSyncStatusRequest(input = {}) {
+  return Boolean(
+    input.requestId === input.latestRequestId &&
+    input.capturedUserId === input.currentUserId
+  );
+}

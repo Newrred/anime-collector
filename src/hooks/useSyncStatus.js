@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { downloadSnapshotJson, isSnapshotEffectivelyEmpty } from "../domain/snapshotCodec.js";
-import { hasSuccessfulRemoteCheck } from "../domain/syncPresentation.js";
+import { hasSuccessfulRemoteCheck, shouldAcceptSyncStatusRequest } from "../domain/syncPresentation.js";
 import {
   applyRemoteSnapshot,
   buildLocalSyncState,
@@ -50,6 +50,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   const conflictRef = useRef(conflict);
   const sessionRef = useRef(session);
   const autoSyncRef = useRef(autoSync);
+  const syncStatusRequestGenerationRef = useRef(0);
+  const currentUserIdRef = useRef(session?.user?.id || null);
+  const currentUserId = session?.user?.id || null;
+
+  currentUserIdRef.current = currentUserId;
 
   useEffect(() => {
     metaRef.current = meta;
@@ -72,11 +77,21 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   }, [autoSync]);
 
   async function refreshStatus() {
+    const requestId = syncStatusRequestGenerationRef.current + 1;
+    const capturedUserId = session?.user?.id || null;
+    syncStatusRequestGenerationRef.current = requestId;
+    const isCurrentRequest = () => shouldAcceptSyncStatusRequest({
+      requestId,
+      latestRequestId: syncStatusRequestGenerationRef.current,
+      capturedUserId,
+      currentUserId: currentUserIdRef.current,
+    });
     const nextMeta = readSyncMeta();
-    setMeta(nextMeta);
-    setConflict(null);
 
-    if (!session?.user || !isSupabaseConfigured) {
+    if (!capturedUserId || !isSupabaseConfigured) {
+      if (!isCurrentRequest()) return;
+      setMeta(nextMeta);
+      setConflict(null);
       setRemote(null);
       setSuccessfulRemoteUserId(null);
       setRemoteMissing(false);
@@ -86,17 +101,21 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       return;
     }
 
+    if (!isCurrentRequest()) return;
+    setMeta(nextMeta);
+    setConflict(null);
     setLoading(true);
     setSuccessfulRemoteUserId(null);
     try {
       const [localState, remoteRow] = await Promise.all([
         buildLocalSyncState(),
-        readRemoteSnapshot(session.user.id),
+        readRemoteSnapshot(capturedUserId),
       ]);
 
+      if (!isCurrentRequest()) return;
       setRemote(remoteRow);
       setRemoteMissing(!remoteRow);
-      setSuccessfulRemoteUserId(session.user.id);
+      setSuccessfulRemoteUserId(capturedUserId);
 
       if (!remoteRow) {
         setCanDownloadRemote(false);
@@ -116,6 +135,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       if (!lastSyncedHash) {
         if (localEmpty && autoSync) {
           await applyRemoteSnapshot(remoteRow);
+          if (!isCurrentRequest()) return;
           setMeta(readSyncMeta());
           setConflict(null);
           setCanDownloadRemote(false);
@@ -136,6 +156,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
 
       if (!localChanged && remoteChanged && autoSync) {
         await applyRemoteSnapshot(remoteRow);
+        if (!isCurrentRequest()) return;
         setMeta(readSyncMeta());
         setConflict(null);
         setCanDownloadRemote(false);
@@ -152,10 +173,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
         });
       }
     } catch (error) {
+      if (!isCurrentRequest()) return;
       setSyncError(error);
       setMeta(readSyncMeta());
     } finally {
-      setLoading(false);
+      if (isCurrentRequest()) setLoading(false);
     }
   }
 
@@ -163,6 +185,17 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     const unsubscribe = subscribeSyncMeta((nextMeta) => setMeta(nextMeta));
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    syncStatusRequestGenerationRef.current += 1;
+    setSuccessfulRemoteUserId(null);
+    setRemote(null);
+    setRemoteMissing(false);
+    setNeedsInitialUpload(false);
+    setCanDownloadRemote(false);
+    setConflict(null);
+    setLoading(Boolean(session?.user) && isSupabaseConfigured);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     refreshStatus().catch(() => {});
