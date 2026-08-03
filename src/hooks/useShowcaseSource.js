@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
-import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
+import { readAllWatchLogsPreferred } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import { pickDisplayTitle } from "../domain/animeTitles";
@@ -20,13 +20,16 @@ export function useShowcaseSource(locale = "ko") {
       setLoading(true);
       await ensureLegacyStorageMigrated().catch(() => {});
 
-      const list = await readLibraryListPreferred([]).catch(() => []);
+      const [list, preferredLogs] = await Promise.all([
+        readLibraryListPreferred([]).catch(() => []),
+        readAllWatchLogsPreferred().catch(() => []),
+      ]);
       const safeList = Array.isArray(list) ? list : [];
       const ids = safeList.map((x) => Number(x?.anilistId)).filter(Number.isFinite);
 
       if (!alive) return;
       setItems(safeList);
-      setLogs(readAllWatchLogsSnapshot());
+      setLogs(Array.isArray(preferredLogs) ? preferredLogs : []);
 
       const pinRows = await listCharacterPinsPreferred().catch(() => []);
       if (!alive) return;

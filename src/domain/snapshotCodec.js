@@ -3,8 +3,9 @@ import { STORAGE_KEYS } from "../storage/keys.js";
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo.js";
 import { readTierBoardBundlePreferred, writeTierBoardBundle } from "../repositories/tierRepo.js";
 import { DEFAULT_TIER_TOPIC_ID, getActiveTierTopic, isLegacyTierState } from "./tierTopics.js";
-import { readAllWatchLogsSnapshot, replaceWatchLogs } from "../repositories/watchLogRepo.js";
+import { readAllWatchLogsPreferred, replaceWatchLogs } from "../repositories/watchLogRepo.js";
 import { listCharacterPinsPreferred, replaceCharacterPins } from "../repositories/characterPinRepo.js";
+import { runGuardedMutationSteps } from "../services/guardedMutationSteps.js";
 import {
   DEFAULT_TIERS,
   normalizeRewatchCount,
@@ -633,9 +634,10 @@ export function normalizeSyncSnapshot(snapshot) {
   return normalizeExpandedSnapshot(isCompactSnapshot(snapshot) ? decodeCompactSnapshot(snapshot) : snapshot);
 }
 export async function exportSyncSnapshot() {
-  const [list, tierTopics, characterPins] = await Promise.all([
+  const [list, tierTopics, watchLogs, characterPins] = await Promise.all([
     readLibraryListPreferred([]).catch(() => []),
     readTierBoardBundlePreferred(null).catch(() => null),
+    readAllWatchLogsPreferred().catch(() => []),
     listCharacterPinsPreferred().catch(() => []),
   ]);
   const activeTier = getActiveTierTopic(tierTopics)?.tier || { unranked: [], tiers: {} };
@@ -648,7 +650,7 @@ export async function exportSyncSnapshot() {
     list,
     tier: activeTier,
     tierTopics,
-    watchLogs: readAllWatchLogsSnapshot(),
+    watchLogs,
     characterPins,
     preferences:
       Number.isFinite(Number(cardsPerRowBase)) || cardView === "meta" || cardView === "poster"
@@ -669,17 +671,28 @@ export function isSnapshotEffectivelyEmpty(snapshot) {
     safe.tier.unranked.length === 0 &&
     Object.values(safe.tier.tiers || {}).every((rows) => !Array.isArray(rows) || rows.length === 0);
 }
-export async function applySyncSnapshot(snapshot) {
+export async function applySyncSnapshot(snapshot, options = {}) {
   const safe = normalizeSyncSnapshot(snapshot);
-  writeLibraryList(safe.list, { skipSyncMark: true });
-  writeTierBoardBundle(safe.tierTopics || safe.tier, { skipSyncMark: true });
-  await replaceWatchLogs(safe.watchLogs, { skipSyncMark: true });
-  await replaceCharacterPins(safe.characterPins, { skipSyncMark: true });
   const cardsPerRowBase = Number(safe.preferences?.cardsPerRowBase);
-  if (Number.isFinite(cardsPerRowBase)) writeJson(STORAGE_KEYS.cardsPerRowBase, cardsPerRowBase);
   const cardView = String(safe.preferences?.cardView || "").trim();
-  if (cardView === "meta" || cardView === "poster") writeJson(STORAGE_KEYS.cardView, cardView);
-  return safe;
+  const steps = [
+    () => writeLibraryList(safe.list, { skipSyncMark: true }),
+    () => writeTierBoardBundle(safe.tierTopics || safe.tier, { skipSyncMark: true }),
+    () => replaceWatchLogs(safe.watchLogs, { skipSyncMark: true }),
+    () => replaceCharacterPins(safe.characterPins, { skipSyncMark: true }),
+  ];
+  if (Number.isFinite(cardsPerRowBase)) {
+    steps.push(() => writeJson(STORAGE_KEYS.cardsPerRowBase, cardsPerRowBase));
+  }
+  if (cardView === "meta" || cardView === "poster") {
+    steps.push(() => writeJson(STORAGE_KEYS.cardView, cardView));
+  }
+
+  const result = await runGuardedMutationSteps({
+    canMutate: options.canMutate,
+    steps,
+  });
+  return result.completed ? safe : null;
 }
 export function downloadSnapshotJson(snapshot, filename = "") {
   if (typeof document === "undefined" || typeof URL === "undefined") return false;

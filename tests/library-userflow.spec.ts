@@ -75,15 +75,33 @@ test("rapid repeated save clicks create exactly one quick log", async ({ page })
   const sheet = page.locator(".log-sheet");
   const save = sheet.getByRole("button", { name: "Save" });
   await expect(save).toBeVisible();
-  await save.evaluate((button: HTMLButtonElement) => {
-    (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving = false;
+  await sheet.evaluate((sheetElement: HTMLElement) => {
+    const state = window as typeof window & {
+      __sawQuickLogSaving?: boolean;
+      __sawQuickLogCloseDisabled?: boolean;
+      __sawQuickLogCloseDisabledStyle?: boolean;
+    };
+    state.__sawQuickLogSaving = false;
+    state.__sawQuickLogCloseDisabled = false;
+    state.__sawQuickLogCloseDisabledStyle = false;
+    const saveButton = [...sheetElement.querySelectorAll("button")]
+      .find((button) => button.textContent?.trim() === "Save") as HTMLButtonElement | undefined;
+    const closeButton = sheetElement.querySelector('button[aria-label="Close"]') as HTMLButtonElement | null;
     const observer = new MutationObserver(() => {
-      if (button.disabled && button.textContent?.includes("Saving")) {
-        (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving = true;
+      if (saveButton?.disabled && saveButton.textContent?.includes("Saving")) {
+        state.__sawQuickLogSaving = true;
+      }
+      if (closeButton?.disabled) {
+        state.__sawQuickLogCloseDisabled = true;
+        const style = getComputedStyle(closeButton);
+        state.__sawQuickLogCloseDisabledStyle =
+          Number.parseFloat(style.opacity || "1") < 1 && style.cursor === "not-allowed";
+      }
+      if (state.__sawQuickLogSaving && state.__sawQuickLogCloseDisabledStyle) {
         observer.disconnect();
       }
     });
-    observer.observe(button, { attributes: true, childList: true, subtree: true });
+    observer.observe(sheetElement, { attributes: true, childList: true, subtree: true });
   });
   await save.evaluate((button: HTMLButtonElement) => {
     button.click();
@@ -94,6 +112,12 @@ test("rapid repeated save clicks create exactly one quick log", async ({ page })
   expect(logs).toHaveLength(1);
   expect(await page.evaluate(() =>
     (window as typeof window & { __sawQuickLogSaving?: boolean }).__sawQuickLogSaving,
+  )).toBe(true);
+  expect(await page.evaluate(() =>
+    (window as typeof window & { __sawQuickLogCloseDisabled?: boolean }).__sawQuickLogCloseDisabled,
+  )).toBe(true);
+  expect(await page.evaluate(() =>
+    (window as typeof window & { __sawQuickLogCloseDisabledStyle?: boolean }).__sawQuickLogCloseDisabledStyle,
   )).toBe(true);
 });
 

@@ -31,6 +31,7 @@ import {
   createWatchLog,
   listWatchLogsByAnimeId,
   mergeWatchLogs,
+  readAllWatchLogsPreferred,
   readAllWatchLogsSnapshot,
   replaceWatchLogs,
   updateWatchLog,
@@ -414,9 +415,10 @@ export default function Library() {
     });
   }, [setItems]);
 
-  function buildBackupPayload() {
+  async function buildBackupPayload() {
     const tierTopics = readTierBoardBundle(null);
     const tier = getActiveTierTopic(tierTopics)?.tier || readTierState(null);
+    const watchLogs = await readAllWatchLogsPreferred().catch(() => []);
 
     return {
       app: "ani-site",
@@ -425,7 +427,7 @@ export default function Library() {
       list: normalizeImportList(items),
       tier,
       tierTopics,
-      watchLogs: readAllWatchLogsSnapshot(),
+      watchLogs,
       characterPins: readCharacterPinsSnapshot(),
       preferences: {
         cardsPerRowBase,
@@ -439,8 +441,8 @@ export default function Library() {
     setBackupMsg(message);
   }
 
-  function exportBackup() {
-    const payload = buildBackupPayload();
+  async function exportBackup() {
+    const payload = await buildBackupPayload();
     const date = new Date().toISOString().slice(0, 10);
     downloadSnapshotJson(payload, `ani-site-backup-${date}.json`);
 
@@ -448,7 +450,7 @@ export default function Library() {
   }
 
   async function exportBackupMobile() {
-    const payload = buildBackupPayload();
+    const payload = await buildBackupPayload();
     const text = JSON.stringify(encodeSyncSnapshot(payload));
     const date = new Date().toISOString().slice(0, 10);
     const filename = `ani-site-backup-${date}.json`;

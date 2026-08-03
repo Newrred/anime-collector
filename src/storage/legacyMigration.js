@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from "./keys";
-import { readJson } from "./localJsonStore";
+import { readJson, writeJson } from "./localJsonStore";
 import {
   getMetaValue,
   getAllLibraryItemsIdb,
@@ -11,6 +11,16 @@ import {
   replaceLibraryItemsIdb,
   replaceWatchLogsIdb,
 } from "./idb";
+import {
+  mergeLegacyLibraryRows,
+  mergeLegacyWatchLogs,
+  mergeTierStatePreferExisting,
+} from "../services/legacyMigrationMerge.js";
+import {
+  getActiveTierTopic,
+  normalizeTierTopicBundle,
+  replaceActiveTierState,
+} from "../domain/tierTopics.js";
 
 const MIGRATION_META_KEY = "migratedFromLocalV1";
 
@@ -25,6 +35,12 @@ function sanitizeList(list) {
     out.push({ ...it, anilistId: id });
   }
   return out;
+}
+
+function writeMergedLocalSnapshot(key, value) {
+  if (!writeJson(key, value)) {
+    throw new Error(`Failed to mirror migrated storage: ${key}`);
+  }
 }
 
 let migrationPromise = null;
@@ -53,27 +69,45 @@ export function ensureLegacyStorageMigrated() {
       getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER).catch(() => []),
     ]);
 
-    // Migration is a one-way fallback. Valid IndexedDB-only state can exist
-    // before the marker is written, so legacy local data must never erase it.
-    if ((!Array.isArray(existingList) || existingList.length === 0) && legacyList.length > 0) {
-      await replaceLibraryItemsIdb(legacyList);
+    // The marker is committed last. If a prior attempt stopped halfway, IDB
+    // can be nonempty but incomplete, so union both sources instead of
+    // treating any nonempty store as authoritative.
+    const mergedList = mergeLegacyLibraryRows(existingList, legacyList);
+    if (mergedList.length > 0) {
+      await replaceLibraryItemsIdb(mergedList);
+      writeMergedLocalSnapshot(STORAGE_KEYS.list, mergedList);
     }
-    if (!existingTier && legacyTier && typeof legacyTier === "object") {
-      await putTierStateIdb(legacyTier, "default");
+
+    const hasLegacyTier = legacyTier && typeof legacyTier === "object";
+    const legacyTierState = hasLegacyTier
+      ? getActiveTierTopic(normalizeTierTopicBundle(legacyTier))?.tier
+      : null;
+    const hasTierSource = Boolean(existingTier || legacyTierState);
+    const mergedTier = mergeTierStatePreferExisting(existingTier, legacyTierState);
+    if (hasTierSource) {
+      await putTierStateIdb(mergedTier, "default");
+      const baseBundle = normalizeTierTopicBundle(hasLegacyTier ? legacyTier : existingTier, mergedTier);
+      writeMergedLocalSnapshot(
+        STORAGE_KEYS.tier,
+        replaceActiveTierState(baseBundle, mergedTier),
+      );
     }
-    if ((!Array.isArray(existingWatchLogs) || existingWatchLogs.length === 0) && legacyWatchLogs.length) {
-      await replaceWatchLogsIdb(legacyWatchLogs);
+
+    const mergedWatchLogs = mergeLegacyWatchLogs(existingWatchLogs, legacyWatchLogs);
+    if (mergedWatchLogs.length > 0) {
+      await replaceWatchLogsIdb(mergedWatchLogs);
+      writeMergedLocalSnapshot(STORAGE_KEYS.watchLogs, mergedWatchLogs);
     }
 
     await putMetaValue(MIGRATION_META_KEY, {
       done: true,
       migratedAt: new Date().toISOString(),
-      listCount: legacyList.length,
-      hasTier: !!legacyTier,
-      watchLogCount: legacyWatchLogs.length,
+      listCount: mergedList.length,
+      hasTier: hasTierSource,
+      watchLogCount: mergedWatchLogs.length,
     });
 
-    return { mode: "idb", migrated: true, listCount: legacyList.length };
+    return { mode: "idb", migrated: true, listCount: mergedList.length };
   })().catch((error) => {
     console.error("[storage] legacy migration failed", error);
     return { mode: "legacy", migrated: false, reason: "error" };

@@ -245,6 +245,15 @@ export async function listRecentWatchLogs(limit = 30) {
     .slice(0, Math.max(1, Number(limit) || 30));
 }
 
+export async function readAllWatchLogsPreferred() {
+  const rows = await readAuthoritativeWatchLogs();
+  return rows.sort(
+    (a, b) =>
+      Number(b?.watchedAtSort || 0) - Number(a?.watchedAtSort || 0) ||
+      Number(b?.createdAt || 0) - Number(a?.createdAt || 0)
+  );
+}
+
 export async function replaceWatchLogs(logs, options = {}) {
   const rows = toArray(logs).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
   writeWatchLogsLocal(rows);

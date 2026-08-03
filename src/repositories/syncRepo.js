@@ -11,6 +11,7 @@ import {
   normalizeSyncSnapshot,
 } from "../domain/snapshotCodec.js";
 import { hashSnapshot } from "../domain/syncHash.js";
+import { runGuardedMutationSteps } from "../services/guardedMutationSteps.js";
 import {
   buildCharacterPinCloudRows,
   buildLibraryCloudRows,
@@ -80,6 +81,11 @@ function writeAccountSyncMetaPatch(userId, patch) {
 
 function readPendingFlag() {
   return readJson(STORAGE_KEYS.syncPending, false) === true;
+}
+
+function readLocalRevision() {
+  const revision = Number(readJson(STORAGE_KEYS.syncLocalRevision, 0));
+  return Number.isSafeInteger(revision) && revision >= 0 ? revision : 0;
 }
 
 function hasTierData(snapshot) {
@@ -214,51 +220,73 @@ async function upsertRows(table, rows, onConflict) {
   if (error) throw error;
 }
 
-async function deleteRowsByKeys(table, userId, keyColumn, keys) {
-  if (!keys.length) return;
+async function deleteRowsByKeys(table, userId, keyColumn, keys, canMutate) {
+  if (!keys.length) return { completed: true, stale: false, value: null };
   const chunkSize = 200;
   for (let index = 0; index < keys.length; index += chunkSize) {
     const slice = keys.slice(index, index + chunkSize);
-    const { error } = await supabase
-      .from(table)
-      .delete()
-      .eq("user_id", userId)
-      .in(keyColumn, slice);
-    if (error) throw error;
+    const result = await runGuardedMutationSteps({
+      canMutate,
+      steps: [async () => {
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq("user_id", userId)
+          .in(keyColumn, slice);
+        if (error) throw error;
+      }],
+    });
+    if (!result.completed) return result;
   }
+  return { completed: true, stale: false, value: null };
 }
 
-async function replaceLibraryRows(userId, localSnapshot, remoteState, updatedAt) {
+async function replaceLibraryRows(userId, localSnapshot, remoteState, updatedAt, canMutate) {
   const localRows = buildLibraryCloudRows(userId, localSnapshot.list, updatedAt);
   const remoteRows = buildLibraryCloudRows(userId, remoteState.snapshot.list, remoteState.updatedAt || updatedAt);
   const { upsertRows: rowsToUpsert, deleteKeys } = diffCloudRows(localRows, remoteRows, "anilist_id", {
     forceAll: remoteState.legacySources.list,
   });
-  await upsertRows(LIBRARY_TABLE, rowsToUpsert, "user_id,anilist_id");
-  await deleteRowsByKeys(LIBRARY_TABLE, userId, "anilist_id", deleteKeys);
+  return runGuardedMutationSteps({
+    canMutate,
+    steps: [
+      () => upsertRows(LIBRARY_TABLE, rowsToUpsert, "user_id,anilist_id"),
+      () => deleteRowsByKeys(LIBRARY_TABLE, userId, "anilist_id", deleteKeys, canMutate),
+    ],
+  });
 }
 
-async function replaceWatchLogRows(userId, localSnapshot, remoteState, updatedAt) {
+async function replaceWatchLogRows(userId, localSnapshot, remoteState, updatedAt, canMutate) {
   const localRows = buildWatchLogCloudRows(userId, localSnapshot.watchLogs, updatedAt);
   const remoteRows = buildWatchLogCloudRows(userId, remoteState.snapshot.watchLogs, remoteState.updatedAt || updatedAt);
   const { upsertRows: rowsToUpsert, deleteKeys } = diffCloudRows(localRows, remoteRows, "log_id", {
     forceAll: remoteState.legacySources.watchLogs,
   });
-  await upsertRows(WATCH_LOG_TABLE, rowsToUpsert, "user_id,log_id");
-  await deleteRowsByKeys(WATCH_LOG_TABLE, userId, "log_id", deleteKeys);
+  return runGuardedMutationSteps({
+    canMutate,
+    steps: [
+      () => upsertRows(WATCH_LOG_TABLE, rowsToUpsert, "user_id,log_id"),
+      () => deleteRowsByKeys(WATCH_LOG_TABLE, userId, "log_id", deleteKeys, canMutate),
+    ],
+  });
 }
 
-async function replaceCharacterPinRows(userId, localSnapshot, remoteState, updatedAt) {
+async function replaceCharacterPinRows(userId, localSnapshot, remoteState, updatedAt, canMutate) {
   const localRows = buildCharacterPinCloudRows(userId, localSnapshot.characterPins, updatedAt);
   const remoteRows = buildCharacterPinCloudRows(userId, remoteState.snapshot.characterPins, remoteState.updatedAt || updatedAt);
   const { upsertRows: rowsToUpsert, deleteKeys } = diffCloudRows(localRows, remoteRows, "pin_id", {
     forceAll: remoteState.legacySources.characterPins,
   });
-  await upsertRows(CHARACTER_PIN_TABLE, rowsToUpsert, "user_id,pin_id");
-  await deleteRowsByKeys(CHARACTER_PIN_TABLE, userId, "pin_id", deleteKeys);
+  return runGuardedMutationSteps({
+    canMutate,
+    steps: [
+      () => upsertRows(CHARACTER_PIN_TABLE, rowsToUpsert, "user_id,pin_id"),
+      () => deleteRowsByKeys(CHARACTER_PIN_TABLE, userId, "pin_id", deleteKeys, canMutate),
+    ],
+  });
 }
 
-async function replacePreferenceRow(userId, localSnapshot, remoteState, updatedAt) {
+async function replacePreferenceRow(userId, localSnapshot, remoteState, updatedAt, canMutate) {
   const localRow = buildPreferenceCloudRow(userId, localSnapshot.preferences, updatedAt);
   const remoteRow = buildPreferenceCloudRow(userId, remoteState.snapshot.preferences, remoteState.updatedAt || updatedAt);
   if (localRow) {
@@ -267,50 +295,69 @@ async function replacePreferenceRow(userId, localSnapshot, remoteState, updatedA
       JSON.stringify({ ...localRow, user_id: undefined, updated_at: undefined }) ===
         JSON.stringify({ ...remoteRow, user_id: undefined, updated_at: undefined });
     if (!same || remoteState.legacySources.preferences) {
-      await upsertRows(PREFERENCE_TABLE, [localRow], "user_id");
+      return runGuardedMutationSteps({
+        canMutate,
+        steps: [() => upsertRows(PREFERENCE_TABLE, [localRow], "user_id")],
+      });
     }
-    return;
+    return { completed: true, stale: false, value: null };
   }
   if (remoteRow) {
-    const { error } = await supabase.from(PREFERENCE_TABLE).delete().eq("user_id", userId);
-    if (error) throw error;
+    return runGuardedMutationSteps({
+      canMutate,
+      steps: [async () => {
+        const { error } = await supabase.from(PREFERENCE_TABLE).delete().eq("user_id", userId);
+        if (error) throw error;
+      }],
+    });
   }
+  return { completed: true, stale: false, value: null };
 }
 
-async function replaceTierSnapshot(userId, localSnapshot, updatedAt) {
+async function replaceTierSnapshot(userId, localSnapshot, updatedAt, canMutate) {
   const tierSnapshot = buildTierOnlySnapshot(localSnapshot);
   if (!hasTierData(tierSnapshot)) {
-    const { error } = await supabase.from(TIER_SNAPSHOT_TABLE).delete().eq("user_id", userId);
-    if (error) throw error;
-    return null;
+    return runGuardedMutationSteps({
+      canMutate,
+      steps: [async () => {
+        const { error } = await supabase.from(TIER_SNAPSHOT_TABLE).delete().eq("user_id", userId);
+        if (error) throw error;
+      }],
+    });
   }
 
   const wireSnapshot = encodeSyncSnapshot(tierSnapshot);
   const tierHash = await hashSnapshot(tierSnapshot);
-  const deviceId = ensureSyncDeviceId();
-  const { data, error } = await supabase
-    .from(TIER_SNAPSHOT_TABLE)
-    .upsert(
-      {
-        user_id: userId,
-        snapshot: wireSnapshot,
-        schema_version: Number(wireSnapshot?.v) || SYNC_SNAPSHOT_VERSION,
-        content_hash: tierHash,
-        updated_at: updatedAt,
-        device_id: deviceId,
-        app_version: "web",
-      },
-      { onConflict: "user_id" }
-    )
-    .select("updated_at")
-    .maybeSingle();
-  if (error) throw error;
-  return normalizeIso(data?.updated_at) || updatedAt;
+  return runGuardedMutationSteps({
+    canMutate,
+    steps: [async () => {
+      const deviceId = ensureSyncDeviceId();
+      const { error } = await supabase
+        .from(TIER_SNAPSHOT_TABLE)
+        .upsert(
+          {
+            user_id: userId,
+            snapshot: wireSnapshot,
+            schema_version: Number(wireSnapshot?.v) || SYNC_SNAPSHOT_VERSION,
+            content_hash: tierHash,
+            updated_at: updatedAt,
+            device_id: deviceId,
+            app_version: "web",
+          },
+          { onConflict: "user_id" }
+        )
+        .select("updated_at")
+        .maybeSingle();
+      if (error) throw error;
+    }],
+  });
 }
 
 async function pushLocalState(userId, snapshot, remoteState, options = {}) {
   const localSnapshot = normalizeSyncSnapshot(snapshot);
   const updatedAt = new Date().toISOString();
+  const canMutate = options.canMutate;
+  const contentHash = options.hash || (await hashSnapshot(localSnapshot));
   const effectiveRemote = remoteState || {
     snapshot: normalizeSyncSnapshot(null),
     updatedAt: updatedAt,
@@ -323,26 +370,27 @@ async function pushLocalState(userId, snapshot, remoteState, options = {}) {
     },
   };
 
-  await Promise.all([
-    replaceLibraryRows(userId, localSnapshot, effectiveRemote, updatedAt),
-    replaceWatchLogRows(userId, localSnapshot, effectiveRemote, updatedAt),
-    replaceCharacterPinRows(userId, localSnapshot, effectiveRemote, updatedAt),
-    replacePreferenceRow(userId, localSnapshot, effectiveRemote, updatedAt),
-    replaceTierSnapshot(userId, localSnapshot, updatedAt),
-  ]);
-
-  const contentHash = options.hash || (await hashSnapshot(localSnapshot));
-  markSyncCompleted({
-    userId,
-    hash: contentHash,
-    remoteUpdatedAt: updatedAt,
-    syncedAt: updatedAt,
+  const result = await runGuardedMutationSteps({
+    canMutate,
+    steps: [
+      () => replaceLibraryRows(userId, localSnapshot, effectiveRemote, updatedAt, canMutate),
+      () => replaceWatchLogRows(userId, localSnapshot, effectiveRemote, updatedAt, canMutate),
+      () => replaceCharacterPinRows(userId, localSnapshot, effectiveRemote, updatedAt, canMutate),
+      () => replacePreferenceRow(userId, localSnapshot, effectiveRemote, updatedAt, canMutate),
+      () => replaceTierSnapshot(userId, localSnapshot, updatedAt, canMutate),
+    ],
+    onComplete: () => {
+      markSyncCompleted({
+        userId,
+        hash: contentHash,
+        remoteUpdatedAt: updatedAt,
+        syncedAt: updatedAt,
+        expectedLocalRevision: options.expectedLocalRevision,
+      });
+      return { contentHash, updatedAt };
+    },
   });
-
-  return {
-    contentHash,
-    updatedAt,
-  };
+  return result.completed ? result.value : null;
 }
 
 export function readSyncMeta(userId = null) {
@@ -363,6 +411,7 @@ export function readSyncMeta(userId = null) {
       account ? account.lastError || "" : readString(STORAGE_KEYS.syncLastError, "")
     ).trim() || null,
     lastLocalMutationAt: normalizeIso(readString(STORAGE_KEYS.syncLastLocalMutationAt, "")),
+    localRevision: readLocalRevision(),
   };
 }
 
@@ -412,6 +461,9 @@ function writeSyncMetaPatch(patch = {}, userId = null) {
   if (Object.prototype.hasOwnProperty.call(patch, "lastLocalMutationAt")) {
     writeString(STORAGE_KEYS.syncLastLocalMutationAt, patch.lastLocalMutationAt || "");
   }
+  if (Object.prototype.hasOwnProperty.call(patch, "localRevision")) {
+    writeJson(STORAGE_KEYS.syncLocalRevision, Number(patch.localRevision) || 0);
+  }
   emitSyncMetaChanged();
 }
 
@@ -420,6 +472,7 @@ export function markLocalDirty(atIso = new Date().toISOString()) {
     deviceId: ensureSyncDeviceId(),
     pending: true,
     lastLocalMutationAt: atIso,
+    localRevision: readLocalRevision() + 1,
     lastError: "",
   });
 }
@@ -434,10 +487,19 @@ export function setSyncError(error, userId = null) {
   }, userId);
 }
 
-export function markSyncCompleted({ userId = null, hash, remoteUpdatedAt, syncedAt = new Date().toISOString() }) {
+export function markSyncCompleted({
+  userId = null,
+  hash,
+  remoteUpdatedAt,
+  syncedAt = new Date().toISOString(),
+  expectedLocalRevision = null,
+}) {
+  const currentRevision = readLocalRevision();
+  const revisionMatches = expectedLocalRevision == null ||
+    Number(expectedLocalRevision) === currentRevision;
   writeSyncMetaPatch({
     deviceId: ensureSyncDeviceId(),
-    pending: false,
+    pending: revisionMatches ? false : readPendingFlag(),
     lastSyncedAt: syncedAt,
     lastSyncedHash: hash || "",
     lastRemoteUpdatedAt: remoteUpdatedAt || syncedAt,
@@ -446,9 +508,13 @@ export function markSyncCompleted({ userId = null, hash, remoteUpdatedAt, synced
 }
 
 export async function buildLocalSyncState(userId = null) {
-  const snapshot = await exportSyncSnapshot();
-  const hash = await hashSnapshot(snapshot);
-  return { snapshot, hash, meta: readSyncMeta(userId) };
+  while (true) {
+    const revision = readLocalRevision();
+    const snapshot = await exportSyncSnapshot();
+    const hash = await hashSnapshot(snapshot);
+    const meta = readSyncMeta(userId);
+    if (meta.localRevision === revision) return { snapshot, hash, meta };
+  }
 }
 
 export async function readRemoteSnapshot(userId) {
@@ -507,14 +573,20 @@ export async function uploadSnapshotToCloud(userId, snapshot, options = {}) {
 
 export async function applyRemoteSnapshot(remoteRow, options = {}) {
   const snapshot = normalizeSyncSnapshot(remoteRow?.snapshot);
-  await applySyncSnapshot(snapshot);
   const hash = remoteRow?.contentHash || (await hashSnapshot(snapshot));
-  markSyncCompleted({
-    userId: options.userId || remoteRow?.userId || null,
-    hash,
-    remoteUpdatedAt: normalizeIso(remoteRow?.updatedAt) || new Date().toISOString(),
+  const userId = options.userId || remoteRow?.userId || null;
+  const expectedLocalRevision = options.expectedLocalRevision ?? readLocalRevision();
+  const result = await runGuardedMutationSteps({
+    canMutate: options.canMutate,
+    steps: [() => applySyncSnapshot(snapshot, { canMutate: options.canMutate })],
+    onComplete: () => markSyncCompleted({
+      userId,
+      hash,
+      remoteUpdatedAt: normalizeIso(remoteRow?.updatedAt) || new Date().toISOString(),
+      expectedLocalRevision,
+    }),
   });
-  return snapshot;
+  return result.completed ? snapshot : null;
 }
 
 export async function exportConflictBackup() {

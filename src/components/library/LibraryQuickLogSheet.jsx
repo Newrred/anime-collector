@@ -71,7 +71,14 @@ export default function LibraryQuickLogSheet({
                 {title || `#${draft.anilistId}`} · {formatEventLabel(draft.eventType, locale)}
               </div>
             </div>
-            <button type="button" className="btn btn--icon btn--ghost" onClick={onClose} aria-label={copy.close} title={copy.close}>
+            <button
+              type="button"
+              className="btn btn--icon btn--ghost"
+              onClick={onClose}
+              aria-label={copy.close}
+              title={copy.close}
+              disabled={saving}
+            >
               <IconX size={14} />
             </button>
           </div>

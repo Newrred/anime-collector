@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { isIdbSupported } from "../storage/idb";
 import { readLibraryListPreferred } from "../repositories/libraryRepo";
 import { readTierStatePreferred } from "../repositories/tierRepo";
-import { readAllWatchLogsSnapshot } from "../repositories/watchLogRepo";
+import { readAllWatchLogsPreferred } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
 import { readLastExportAtMs } from "../repositories/backupRepo";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
@@ -48,12 +48,12 @@ export default function DataCenter() {
   });
 
   async function readLocalOverview() {
-    const [list, tier, pins] = await Promise.all([
+    const [list, tier, logs, pins] = await Promise.all([
       readLibraryListPreferred([]).catch(() => []),
       readTierStatePreferred(null).catch(() => null),
+      readAllWatchLogsPreferred().catch(() => []),
       listCharacterPinsPreferred().catch(() => []),
     ]);
-    const logs = readAllWatchLogsSnapshot();
     const tierPlaced =
       (Array.isArray(tier?.unranked) ? tier.unranked.length : 0) +
       Object.values(tier?.tiers || {}).reduce(

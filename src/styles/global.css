@@ -3632,6 +3632,12 @@ h3 {
   align-items: center;
 }
 
+.log-sheet .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .log-sheet__title {
   font-weight: var(--fw-bold);
 }

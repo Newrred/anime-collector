@@ -138,7 +138,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
         if (localEmpty && autoSync) {
           const applied = await operationCoordinatorRef.current.runMutation(
             operationToken,
-            () => applyRemoteSnapshot(remoteRow, { userId: capturedUserId }),
+            () => applyRemoteSnapshot(remoteRow, {
+              userId: capturedUserId,
+              canMutate: isCurrentRequest,
+              expectedLocalRevision: localState.meta.localRevision,
+            }),
           );
           if (!applied.executed) return;
           if (!isCurrentRequest()) return;
@@ -163,7 +167,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       if (!localChanged && remoteChanged && autoSync) {
         const applied = await operationCoordinatorRef.current.runMutation(
           operationToken,
-          () => applyRemoteSnapshot(remoteRow, { userId: capturedUserId }),
+          () => applyRemoteSnapshot(remoteRow, {
+            userId: capturedUserId,
+            canMutate: isCurrentRequest,
+            expectedLocalRevision: localState.meta.localRevision,
+          }),
         );
         if (!applied.executed) return;
         if (!isCurrentRequest()) return;
@@ -271,6 +279,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
             hash: localState.hash,
             remoteState: remoteRow,
             canMutate: isCurrentOperation,
+            expectedLocalRevision: localState.meta.localRevision,
           }),
         );
         if (!result.executed || !isCurrentOperation()) return null;
@@ -287,7 +296,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
         if (localEmpty) {
           const result = await operationCoordinatorRef.current.runMutation(
             operationToken,
-            () => applyRemoteSnapshot(remoteRow, { userId: capturedUserId }),
+            () => applyRemoteSnapshot(remoteRow, {
+              userId: capturedUserId,
+              canMutate: isCurrentOperation,
+              expectedLocalRevision: localState.meta.localRevision,
+            }),
           );
           if (!result.executed || !isCurrentOperation()) return null;
           setMeta(readSyncMeta(capturedUserId));
@@ -303,6 +316,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
                 hash: localState.hash,
                 remoteState: remoteRow,
                 canMutate: isCurrentOperation,
+                expectedLocalRevision: localState.meta.localRevision,
               }),
             );
             if (!result.executed || !isCurrentOperation()) return null;
@@ -312,7 +326,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
           }
           const result = await operationCoordinatorRef.current.runMutation(
             operationToken,
-            () => applyRemoteSnapshot(remoteRow, { userId: capturedUserId }),
+            () => applyRemoteSnapshot(remoteRow, {
+              userId: capturedUserId,
+              canMutate: isCurrentOperation,
+              expectedLocalRevision: localState.meta.localRevision,
+            }),
           );
           if (!result.executed || !isCurrentOperation()) return null;
           setMeta(readSyncMeta(capturedUserId));
@@ -349,6 +367,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
             hash: localState.hash,
             remoteState: remoteRow,
             canMutate: isCurrentOperation,
+            expectedLocalRevision: localState.meta.localRevision,
           }),
         );
         if (!result.executed || !isCurrentOperation()) return null;
@@ -360,7 +379,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       if (remoteChanged) {
         const result = await operationCoordinatorRef.current.runMutation(
           operationToken,
-          () => applyRemoteSnapshot(remoteRow, { userId: capturedUserId }),
+          () => applyRemoteSnapshot(remoteRow, {
+            userId: capturedUserId,
+            canMutate: isCurrentOperation,
+            expectedLocalRevision: localState.meta.localRevision,
+          }),
         );
         if (!result.executed || !isCurrentOperation()) return null;
         setMeta(readSyncMeta(capturedUserId));
@@ -375,6 +398,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
             hash: localState.hash,
             remoteState: remoteRow,
             canMutate: isCurrentOperation,
+            expectedLocalRevision: localState.meta.localRevision,
           }),
         );
         if (!result.executed || !isCurrentOperation()) return null;
@@ -466,6 +490,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
           hash: localState.hash,
           remoteState,
           canMutate: isCurrentOperation,
+          expectedLocalRevision: localState.meta.localRevision,
         }),
       );
       if (!result.executed || !isCurrentOperation()) return null;
@@ -483,12 +508,17 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     if (!capturedUserId || !remote || remote?.userId !== capturedUserId) return null;
     const operationToken = operationCoordinatorRef.current.begin(capturedUserId, "useCloudVersion");
     const isCurrentOperation = () => operationCoordinatorRef.current.isCurrent(operationToken);
+    const expectedLocalRevision = readSyncMeta(capturedUserId).localRevision;
     if (!isCurrentOperation()) return null;
     setSyncing(true);
     try {
       const result = await operationCoordinatorRef.current.runMutation(
         operationToken,
-        () => applyRemoteSnapshot(remote, { userId: capturedUserId }),
+        () => applyRemoteSnapshot(remote, {
+          userId: capturedUserId,
+          canMutate: isCurrentOperation,
+          expectedLocalRevision,
+        }),
       );
       if (!result.executed || !isCurrentOperation()) return null;
       setConflict(null);

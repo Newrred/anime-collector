@@ -26,7 +26,12 @@ import { STORAGE_KEYS } from "../storage/keys";
 import { markManualBackupExported } from "../repositories/backupRepo";
 import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo";
 import { readTierBoardBundlePreferred, writeTierBoardBundle } from "../repositories/tierRepo";
-import { mergeWatchLogs, readAllWatchLogsSnapshot, replaceWatchLogs } from "../repositories/watchLogRepo";
+import {
+  mergeWatchLogs,
+  readAllWatchLogsPreferred,
+  readAllWatchLogsSnapshot,
+  replaceWatchLogs,
+} from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred, mergeCharacterPins, readCharacterPinsSnapshot, replaceCharacterPins } from "../repositories/characterPinRepo";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
@@ -291,8 +296,8 @@ export default function TierBoard() {
     [activeTierState.unranked, activeEligibleIdSet, library, mediaMap, unrankedGenre, unrankedQuery, locale]
   );
 
-  function refreshWatchLogsSnapshot() {
-    const rows = readAllWatchLogsSnapshot();
+  async function refreshWatchLogsSnapshot() {
+    const rows = await readAllWatchLogsPreferred().catch(() => []);
     setWatchLogsSnapshot(Array.isArray(rows) ? rows : []);
   }
 
@@ -302,7 +307,7 @@ export default function TierBoard() {
   }
 
   useEffect(() => {
-    refreshWatchLogsSnapshot();
+    refreshWatchLogsSnapshot().catch(() => {});
     refreshCharacterPinsSnapshot();
     listCharacterPinsPreferred()
       .then((rows) => setCharacterPinsSnapshot(Array.isArray(rows) ? rows : []))
@@ -620,7 +625,8 @@ export default function TierBoard() {
     }
   }
 
-  function buildBackupPayload() {
+  async function buildBackupPayload() {
+    const watchLogs = await readAllWatchLogsPreferred().catch(() => []);
     return {
       app: "ani-site",
       version: SYNC_SNAPSHOT_VERSION,
@@ -628,7 +634,7 @@ export default function TierBoard() {
       list: normalizeImportList(library),
       tier: activeTierState,
       tierTopics: tierBundle,
-      watchLogs: readAllWatchLogsSnapshot(),
+      watchLogs,
       characterPins: readCharacterPinsSnapshot(),
     };
   }
@@ -638,15 +644,15 @@ export default function TierBoard() {
     setBackupMsg(message);
   }
 
-  function exportBackup() {
-    const payload = buildBackupPayload();
+  async function exportBackup() {
+    const payload = await buildBackupPayload();
     const date = new Date().toISOString().slice(0, 10);
     downloadSnapshotJson(payload, `ani-site-backup-${date}.json`);
     markBackupExported(copy.backupDownloaded);
   }
 
   async function exportBackupMobile() {
-    const payload = buildBackupPayload();
+    const payload = await buildBackupPayload();
     const text = JSON.stringify(encodeSyncSnapshot(payload));
     const date = new Date().toISOString().slice(0, 10);
     const filename = `ani-site-backup-${date}.json`;
@@ -716,10 +722,10 @@ export default function TierBoard() {
     if (Array.isArray(incomingLogs)) {
       if (isOverwrite) await replaceWatchLogs(incomingLogs);
       else await mergeWatchLogs(incomingLogs);
-      refreshWatchLogsSnapshot();
+      await refreshWatchLogsSnapshot();
     } else if (isOverwrite) {
       await replaceWatchLogs([]);
-      refreshWatchLogsSnapshot();
+      await refreshWatchLogsSnapshot();
     }
 
     const incomingPins = Array.isArray(json) ? null : snapshot?.characterPins;
