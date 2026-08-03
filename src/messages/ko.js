@@ -274,6 +274,18 @@ const koMessages = {
     loading: "저장 상태를 확인하는 중...",
   },
   syncStatus: {
+    accountStates: {
+      "local-only": "로컬 전용",
+      "signed-out": "로그아웃",
+      connected: "연결됨",
+    },
+    remoteStates: {
+      unavailable: "사용할 수 없음",
+      "not-checked": "확인하지 않음",
+      checking: "확인 중",
+      empty: "클라우드 백업이 아직 없음",
+      available: "클라우드 백업 확인됨",
+    },
     title: "클라우드 동기화",
     lead: "Google 계정으로 현재 기기의 기록과 티어 보드를 올리거나 다른 기기에서 이어받을 수 있습니다.",
     envMissing: "Supabase 환경변수가 없어 동기화를 활성화할 수 없습니다.",
@@ -294,6 +306,7 @@ const koMessages = {
     disconnect: "로그아웃",
     signIn: "Google로 로그인",
     statusLabels: {
+      idle: "대기 중",
       disabled: "설정 필요",
       "offline-local": "로컬 전용",
       connected: "연결됨",

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
+import { deriveSyncPresentation } from "../domain/syncPresentation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useSyncStatus } from "../hooks/useSyncStatus.js";
 import {
@@ -24,12 +25,8 @@ function ActionLabel({ icon, children }) {
   );
 }
 
-function syncToneClass(status) {
-  if (status === "conflict") return "is-conflict";
-  if (status === "error") return "is-error";
-  if (status === "pending") return "is-pending";
-  if (status === "synced") return "is-synced";
-  return "is-idle";
+function syncToneClass(tone) {
+  return `is-${tone || "idle"}`;
 }
 
 export default function TopNavDataMenu({
@@ -50,6 +47,14 @@ export default function TopNavDataMenu({
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const auth = useAuthSession(`${base}data/`);
   const sync = useSyncStatus({ session: auth.session, autoSync: false });
+  const syncPresentation = deriveSyncPresentation({
+    configured: sync.configured,
+    connected: Boolean(auth.session?.user),
+    loading: sync.loading,
+    remoteChecked: sync.remoteChecked,
+    remoteMissing: sync.remoteMissing,
+    status: sync.status,
+  });
 
   useEffect(() => {
     function onDocDown(e) {
@@ -177,12 +182,12 @@ export default function TopNavDataMenu({
               aria-controls={panelId}
               aria-label={copy.manage}
               title={copy.manage}
-              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
+              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(syncPresentation.tone)}${sync.syncing ? " is-syncing" : ""}`}
             >
               <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 <IconGear />
               </span>
-              <span className={`sync-dot ${syncToneClass(sync.status)}`} aria-hidden />
+              <span className={`sync-dot ${syncToneClass(syncPresentation.tone)}`} aria-hidden />
             </button>
             <button
               type="button"
@@ -194,12 +199,12 @@ export default function TopNavDataMenu({
               aria-controls={panelId}
               aria-label={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
               title={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
-              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(sync.status)}${sync.syncing ? " is-syncing" : ""}`}
+              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(syncPresentation.tone)}${sync.syncing ? " is-syncing" : ""}`}
             >
               <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 {dataMenuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
               </span>
-              <span className={`sync-dot ${syncToneClass(sync.status)}`} aria-hidden />
+              <span className={`sync-dot ${syncToneClass(syncPresentation.tone)}`} aria-hidden />
             </button>
           </div>
 
@@ -323,7 +328,7 @@ export default function TopNavDataMenu({
                     session={auth.session}
                     configured={auth.configured}
                     loading={auth.loading}
-                    syncStatus={getMessageGroup(locale, "syncStatus").statusLabels?.[sync.status] || sync.status}
+                    syncStatus={getMessageGroup(locale, "syncStatus").statusLabels?.[syncPresentation.tone] || syncPresentation.tone}
                     syncing={sync.syncing}
                     onSignIn={async () => {
                       await auth.signIn(`${base}data/`);

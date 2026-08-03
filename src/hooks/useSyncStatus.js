@@ -398,6 +398,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     meta,
     remote,
     loading,
+    remoteChecked: !loading && Boolean(session?.user) && isSupabaseConfigured,
     syncing,
     conflict,
     remoteMissing,

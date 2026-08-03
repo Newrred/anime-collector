@@ -20,6 +20,15 @@ test("new visitor sees one primary add-title action", async ({ page }) => {
   await expect(page.locator(".library-card")).toHaveCount(0);
 });
 
+test("unconfigured cloud stays local-only and never claims a cloud backup", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/data/");
+  const syncCard = page.locator(".sync-card");
+  await expect(syncCard).toContainText("Local only");
+  await expect(syncCard).toContainText("Unavailable");
+  await expect(syncCard).not.toContainText("Cloud backup found");
+});
+
 test("visitor with one logged title is asked to add more titles", async ({ page }) => {
   await installAppState(page, {
     locale: "en",

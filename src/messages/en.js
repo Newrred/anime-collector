@@ -274,6 +274,18 @@ const enMessages = {
     loading: "Checking storage status...",
   },
   syncStatus: {
+    accountStates: {
+      "local-only": "Local only",
+      "signed-out": "Signed out",
+      connected: "Connected",
+    },
+    remoteStates: {
+      unavailable: "Unavailable",
+      "not-checked": "Not checked",
+      checking: "Checking",
+      empty: "No cloud backup yet",
+      available: "Cloud backup found",
+    },
     title: "Cloud Sync",
     lead: "With Google, you can upload the records and tier board on this device or pull them down on another one.",
     envMissing: "Supabase environment variables are missing, so sync can't be turned on right now.",
@@ -294,6 +306,7 @@ const enMessages = {
     disconnect: "Sign out",
     signIn: "Continue with Google",
     statusLabels: {
+      idle: "Idle",
       disabled: "Setup needed",
       "offline-local": "Local only",
       connected: "Connected",
