@@ -1597,14 +1597,21 @@ export default function Library() {
       characterIds: selectedRefs.map((x) => x.characterId),
       characterRefs: selectedRefs,
     };
+    let saved;
     try {
-    const saved = isNewQuickLogDraft(quickLogDraft)
-      ? await appendWatchLog(createWatchLog(payload))
-      : await updateWatchLog(quickLogDraft.logId, payload);
-    if (!saved) throw new Error("Quick log was not saved");
+      saved = isNewQuickLogDraft(quickLogDraft)
+        ? await appendWatchLog(createWatchLog(payload))
+        : await updateWatchLog(quickLogDraft.logId, payload);
+      if (!saved) throw new Error("Quick log was not saved");
+    } catch {
+      setQuickLogSaveError(quickLogCopy.saveFailed);
+      setBackupMsg(quickLogCopy.saveFailed);
+      return;
+    }
 
     const primaryRef = selectedRefs.find((x) => x.isPrimary);
     if (primaryRef) {
+      try {
       const pinId = buildCharacterPinId(primaryRef.characterId, quickLogDraft.anilistId);
       const alreadyPinned = pinnedCharacterKeySet.has(pinId);
       if (!alreadyPinned) {
@@ -1633,6 +1640,7 @@ export default function Library() {
           refreshCharacterPins();
         }
       }
+      } catch {}
     }
 
     if (selectedId && Number(selectedId) === Number(quickLogDraft.anilistId)) {
@@ -1640,10 +1648,6 @@ export default function Library() {
       setSelectedLogs(Array.isArray(rows) ? rows : []);
     }
     closeQuickLogSheet();
-    } catch {
-      setQuickLogSaveError(quickLogCopy.saveFailed);
-      setBackupMsg(quickLogCopy.saveFailed);
-    }
   }
 
   function buildCharacterPinId(characterId, mediaId) {
