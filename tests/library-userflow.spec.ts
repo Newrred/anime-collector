@@ -152,6 +152,16 @@ async function installSearchFixtures(page: Page) {
   );
 }
 
+async function installFreshState(page: Page) {
+  await page.addInitScript(() => {
+    const initializedKey = "moemoa.e2e.fresh-state.initialized";
+    if (sessionStorage.getItem(initializedKey)) return;
+    sessionStorage.setItem(initializedKey, "1");
+    localStorage.clear();
+    indexedDB.deleteDatabase("anime-collector-db");
+  });
+}
+
 async function openGlobalSearch(page: Page) {
   const mobileTrigger = page.locator(".quick-action__mobile-trigger:visible");
   if (await mobileTrigger.count()) await mobileTrigger.click();
@@ -179,7 +189,12 @@ async function switchLocale(page: Page, code: "KO" | "EN") {
   await expect(mobileMenu).toBeHidden();
 }
 
-async function addByQuery(page: Page, locale: "KO" | "EN", query: string): Promise<AddAttempt> {
+async function addByQuery(
+  page: Page,
+  locale: "KO" | "EN",
+  query: string,
+  expectedTitle?: string,
+): Promise<AddAttempt> {
   try {
     const input = await openGlobalSearch(page);
     await input.fill(query);
@@ -190,6 +205,7 @@ async function addByQuery(page: Page, locale: "KO" | "EN", query: string): Promi
     const addButton = remoteRow.locator(".quick-action-row__actions .btn").first();
     await expect(addButton).toBeVisible({ timeout: 20000 });
     const title = (await remoteRow.locator(".quick-action-row__title").first().innerText()).trim();
+    if (expectedTitle) expect(title, `${query} fixture result title`).toBe(expectedTitle);
 
     await Promise.all([
       page.waitForURL(/\/library\/\?animeId=\d+/, { timeout: 10000 }),
@@ -208,6 +224,10 @@ async function addByQuery(page: Page, locale: "KO" | "EN", query: string): Promi
       reason: error instanceof Error ? error.message : "unknown-error",
     };
   }
+}
+
+async function readWatchLogCount(page: Page) {
+  return page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]").length);
 }
 
 async function createQuickLogs(page: Page, count: number): Promise<number> {
@@ -231,16 +251,50 @@ async function createQuickLogs(page: Page, count: number): Promise<number> {
 
     const sheet = page.locator(".log-sheet");
     await expect(sheet).toBeVisible();
+    const logsBeforeSave = await readWatchLogCount(page);
     await sheet.locator("textarea.textarea").fill(`Playwright UX flow log ${i + 1}`);
+    expect(await readWatchLogCount(page), `log ${i + 1} should not persist before Save`).toBe(logsBeforeSave);
     await sheet.locator(".log-sheet__footer .btn").last().click();
     await expect(sheet).toBeHidden();
+    await expect.poll(() => readWatchLogCount(page)).toBe(logsBeforeSave + 1);
 
     await page.locator(".modalCloseBtn").click();
     await expect(page.locator(".modal")).toBeHidden();
     created += 1;
   }
 
+  expect(await readWatchLogCount(page), "quick-log helper should persist exactly its created rows").toBe(target);
   return created;
+}
+
+async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPORTS)[number]) {
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+  if (viewport.width > 900) {
+    const primary = page.locator(".top-nav__links--routes");
+    await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+    return;
+  }
+
+  await page.locator(".top-nav__mobile-menu-trigger:visible").click();
+  const mobileMenu = page.locator("#data-menu-panel");
+  const primary = mobileMenu.locator(".top-nav-mobile-links");
+  await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+  await page.locator(".top-nav__mobile-menu-trigger:visible").click();
+  await expect(mobileMenu).toBeHidden();
+}
+
+async function assertUnconfiguredCloudInEnglish(page: Page) {
+  await page.goto("/data/", { waitUntil: "networkidle" });
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const syncCard = page.locator(".sync-card");
+  await expect(syncCard).toContainText("Local only");
+  await expect(syncCard).toContainText("Unavailable");
+  await expect(syncCard).not.toContainText("Cloud backup found");
 }
 
 async function evaluateHomeDiscovery(page: Page): Promise<FlowMetrics> {
@@ -297,27 +351,41 @@ async function runFlow(
   const page = await context.newPage();
   const addAttempts: AddAttempt[] = [];
 
+  await installFreshState(page);
   if (mode === "fixture") await installSearchFixtures(page);
 
   await page.goto("/library/", { waitUntil: "networkidle" });
   await expect(page.locator(".library-page")).toBeVisible();
 
+  const viewport = { name: width <= 900 ? "mobile" : "desktop", width, height } as const;
+  if (mode === "fixture") {
+    await assertFreshEnglishNavigation(page, viewport);
+  }
+
   const cardsBefore = await page.locator(".library-grid .library-card").count();
+  if (mode === "fixture") {
+    expect(cardsBefore, "fresh fixture flow starts with an empty library").toBe(0);
+    await assertUnconfiguredCloudInEnglish(page);
+    await page.goto("/library/", { waitUntil: "networkidle" });
+    await expect(page.locator(".library-page")).toBeVisible();
+  }
 
   await switchLocale(page, "KO");
   for (const query of KO_QUERIES) {
-    addAttempts.push(await addByQuery(page, "KO", query));
+    addAttempts.push(await addByQuery(page, "KO", query, mode === "fixture" ? SEARCH_FIXTURE_BY_QUERY[query]?.title : undefined));
   }
   await screenshot(page, testInfo, "library-after-ko-add.png");
 
   await switchLocale(page, "EN");
   for (const query of EN_QUERIES) {
-    addAttempts.push(await addByQuery(page, "EN", query));
+    addAttempts.push(await addByQuery(page, "EN", query, mode === "fixture" ? SEARCH_FIXTURE_BY_QUERY[query]?.title : undefined));
   }
   await screenshot(page, testInfo, "library-after-en-add.png");
 
   const cardsAfter = await page.locator(".library-grid .library-card").count();
+  expect(await readWatchLogCount(page), "adding unsorted titles should not create watch logs").toBe(0);
   const logsCreated = await createQuickLogs(page, 3);
+  const persistedWatchLogs = await readWatchLogCount(page);
 
   await page.goto("/", { waitUntil: "networkidle" });
   const discovery = await evaluateHomeDiscovery(page);
@@ -328,6 +396,7 @@ async function runFlow(
     cardsBefore,
     cardsAfter,
     logsCreated,
+    persistedWatchLogs,
     addedCount: addAttempts.filter((row) => row.added).length,
     addedByCardDelta: Math.max(cardsAfter - cardsBefore, 0),
     addAttempts,
@@ -350,7 +419,8 @@ async function expectFlowContract(browser: Browser, testInfo: TestInfo, viewport
   const report = await runFlow(browser, testInfo, viewport.width, viewport.height, mode);
 
   expect(report.cardsAfter, `${viewport.name} card count should not decrease`).toBeGreaterThanOrEqual(report.cardsBefore);
-  expect(report.logsCreated, `${viewport.name} should create at least two quick logs`).toBeGreaterThanOrEqual(2);
+  expect(report.logsCreated, `${viewport.name} should create the three requested quick logs`).toBe(3);
+  expect(report.persistedWatchLogs, `${viewport.name} should persist exactly the three saved quick logs`).toBe(3);
 
   expect(report.discovery.sectionCount, `${viewport.name} discovery section blocks`).toBeGreaterThanOrEqual(2);
   expect(report.discovery.recentRows, `${viewport.name} recent discovery rows`).toBeGreaterThanOrEqual(1);
