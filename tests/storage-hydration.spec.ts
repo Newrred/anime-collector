@@ -214,6 +214,74 @@ test("interrupted migration merges partial IDB with complete local Library and T
   })).toMatchObject(completeTier);
 });
 
+test("legacy migration rejects an IDB read failure and retries safely in the same SPA", async ({ page }) => {
+  await seedIdbOnlyState(page, {
+    list: [
+      { anilistId: 901, status: "completed", memo: "IDB one", addedAt: 1 },
+      { anilistId: 902, status: "completed", memo: "IDB two", addedAt: 2 },
+    ],
+    localList: [
+      { anilistId: 901, status: "completed", memo: "older local", addedAt: 0 },
+    ],
+  });
+
+  const result = await page.evaluate(async () => {
+    const migration = await import("/src/storage/legacyMigration.js");
+    const idb = await import("/src/storage/idb.js");
+    let failNextLibraryRead = true;
+    let replaceCalls = 0;
+    const storage = {
+      ...idb,
+      async getAllLibraryItemsIdb() {
+        if (failNextLibraryRead) {
+          failNextLibraryRead = false;
+          throw new Error("Injected migration Library read failure");
+        }
+        return idb.getAllLibraryItemsIdb();
+      },
+      async replaceLibraryItemsIdb(rows: Array<Record<string, unknown>>) {
+        replaceCalls += 1;
+        return idb.replaceLibraryItemsIdb(rows);
+      },
+    };
+
+    let firstError = "";
+    try {
+      await migration.ensureLegacyStorageMigrated({ storage });
+    } catch (error) {
+      firstError = String((error as Error)?.message || error);
+    }
+    const afterFailure = {
+      library: await idb.getAllLibraryItemsIdb(),
+      marker: await idb.getMetaValue("migratedFromLocalV1"),
+      replaceCalls,
+    };
+
+    const retry = await migration.ensureLegacyStorageMigrated({ storage });
+    return {
+      firstError,
+      afterFailure,
+      retry,
+      afterRetry: {
+        library: await idb.getAllLibraryItemsIdb(),
+        marker: await idb.getMetaValue("migratedFromLocalV1"),
+        local: JSON.parse(localStorage.getItem("anime:list:v1") || "[]"),
+        replaceCalls,
+      },
+    };
+  });
+
+  expect(result.firstError).toContain("Injected migration Library read failure");
+  expect(result.afterFailure.library.map((row) => row.anilistId).sort()).toEqual([901, 902]);
+  expect(result.afterFailure.marker).toBeNull();
+  expect(result.afterFailure.replaceCalls).toBe(0);
+  expect(result.retry).toMatchObject({ mode: "idb", migrated: true, listCount: 2 });
+  expect(result.afterRetry.library.map((row) => row.anilistId).sort()).toEqual([901, 902]);
+  expect(result.afterRetry.local.map((row) => row.anilistId).sort()).toEqual([901, 902]);
+  expect(result.afterRetry.marker).toMatchObject({ done: true, listCount: 2 });
+  expect(result.afterRetry.replaceCalls).toBe(1);
+});
+
 test("migration marker stays unset when the merged local mirror cannot be written", async ({ page }) => {
   await seedIdbOnlyState(page, {
     list: [{ anilistId: 777, status: "completed", memo: "IDB row", addedAt: 1 }],
@@ -258,7 +326,7 @@ test("an IndexedDB-only watch-log migration restores the complete local source",
   ).toHaveLength(2);
 });
 
-test("IDB-only watch logs reach snapshot export and Home before any Library scoped read", async ({ page }) => {
+test("IDB-only watch logs reach snapshot export before any Library scoped read", async ({ page }) => {
   await seedIdbOnlyState(page, {
     list: [
       { anilistId: 777, status: "completed", addedAt: 1 },
@@ -287,7 +355,28 @@ test("IDB-only watch logs reach snapshot export and Home before any Library scop
     id: "home-export-log",
     cue: "IDB memory reaches Home and export",
   });
+});
+
+test("Home initial entry hydrates an IDB-only watch log without export or Library", async ({ page }) => {
+  await seedIdbOnlyState(page, {
+    list: [
+      { anilistId: 777, status: "completed", addedAt: 1 },
+      { anilistId: 778, status: "completed", addedAt: 2 },
+      { anilistId: 779, status: "completed", addedAt: 3 },
+    ],
+    watchLogs: [{
+      id: "home-first-entry-log",
+      anilistId: 777,
+      eventType: "completed",
+      watchedAtPrecision: "day",
+      watchedAtValue: "2026-08-02",
+      watchedAtSort: Date.UTC(2026, 7, 2),
+      cue: "Home hydrates this memory directly",
+      createdAt: Date.UTC(2026, 7, 2),
+      updatedAt: Date.UTC(2026, 7, 2),
+    }],
+  });
 
   await page.goto("/");
-  await expect(page.locator(".home-focus-card__cue")).toHaveText("IDB memory reaches Home and export");
+  await expect(page.locator(".home-focus-card__cue")).toHaveText("Home hydrates this memory directly");
 });

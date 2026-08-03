@@ -92,9 +92,11 @@ sync 관련 로컬 메타 키:
 - `sync.localRevision` (기기 로컬 스냅샷 변경마다 증가하는 단조 카운터)
 - `sync.accounts:v1` (계정별 마지막 동기화 hash·시각·오류)
 
-감상 로그는 `localStorage`의 전체 스냅샷을 원본으로 사용하고 IndexedDB를 재구축 가능한 조회 미러로 사용합니다. 따라서 IndexedDB 미러 갱신이 실패해도 성공한 로컬 저장을 이전 IndexedDB 행이 가리지 않습니다. 홈, JSON 백업, 클라우드 스냅샷은 모두 전체 로그를 먼저 승격하는 preferred 조회를 사용합니다.
+감상 로그는 `localStorage`의 전체 스냅샷을 원본으로 사용하고 IndexedDB를 재구축 가능한 조회 미러로 사용합니다. 따라서 IndexedDB 미러 갱신이 실패해도 성공한 로컬 저장을 이전 IndexedDB 행이 가리지 않습니다. 홈, JSON 백업, 클라우드 스냅샷은 모두 전체 로그를 먼저 승격하는 preferred 조회를 사용합니다. IDB-only 승격을 기다리는 동안 새 로컬 로그가 생기면 ID 기준으로 합치고 로컬 충돌 값을 우선하며, IDB 읽기 실패 시 백업·동기화는 빈 로그를 만들지 않고 실패를 상위로 전달합니다.
 
-보관함과 티어는 초기 IndexedDB 복구가 끝난 뒤에만 미러 쓰기를 시작합니다. 레거시 이전이 중단되어 IndexedDB에 일부 데이터만 남은 경우에는 기존 IndexedDB 값을 우선하면서 localStorage의 고유 항목을 합쳐 양쪽 저장소를 복구한 다음 완료 마커를 기록합니다. 동기화 중에는 각 원격 변경 단계 직전에 현재 계정을 다시 확인하고, 업로드 시작 뒤 새 로컬 수정이 생기면 이전 업로드가 `sync.pending`을 해제하지 않습니다.
+보관함과 티어는 초기 IndexedDB 복구가 끝난 뒤에만 미러 쓰기를 시작합니다. 레거시 이전이 중단되어 IndexedDB에 일부 데이터만 남은 경우에는 기존 IndexedDB 값을 우선하면서 localStorage의 고유 항목을 합쳐 양쪽 저장소를 복구한 다음 완료 마커를 기록합니다. 이전용 IDB 읽기 하나라도 실패하면 쓰기와 마커 기록을 시작하지 않으며, 같은 SPA의 다음 호출에서 다시 시도합니다.
+
+동기화 중에는 각 원격 변경 단계 직전에 현재 계정을 다시 확인하고, 업로드 시작 뒤 새 로컬 수정이 생기면 이전 업로드가 `sync.pending`을 해제하지 않습니다. 클라우드 가져오기는 보관함·티어·감상 로그·캐릭터 고정의 localStorage 저장과 IndexedDB 트랜잭션을 순서대로 모두 기다린 뒤에만 완료 메타를 기록합니다. 대기 중 계정이 바뀌거나 어느 저장 단계라도 실패하면 이후 저장과 완료 메타를 중단합니다.
 
 ## UI 시스템
 
@@ -258,11 +260,11 @@ npm run build
 
 - `tests/index.spec.ts`: 영어 기본 셸, 신규 사용자 온보딩, 동기화 표시 계약
 - `tests/library-userflow.spec.ts`: 검색·6개 작품 추가·퀵로그·홈 회고의 fixture 및 live 흐름
-- `tests/storage-hydration.spec.ts`: IndexedDB-only 보관함·티어·감상 로그 복구, 중단된 이전 병합, 홈·백업 전체 로그 승격
+- `tests/storage-hydration.spec.ts`: IndexedDB-only 보관함·티어·감상 로그 복구, 중단된 이전 병합·실패 재시도, 독립 Home 진입, 백업 전체 로그 승격
 - `tests/layout-desktop.spec.ts`, `tests/layout-mobile.spec.ts`: 주요 경로 반응형 회귀
 - `tests/page-design-system.spec.ts`: 공통 카드·간격·타이포 시스템 회귀
 - `tests/authenticated-minihome.spec.ts`: 로그인 사용자 미니홈 흐름
-- `tests/unit/*.test.mjs`: 온보딩, 퀵로그 초안, UI 설정, 중단 이전 병합, 동기화 표시·계정·mutation 안전성, 감상 로그 저장소 승격
+- `tests/unit/*.test.mjs`: 온보딩, 퀵로그 초안, UI 설정, 중단 이전 병합, 실제 업로드·다운로드 동기화 내구성, 감상 로그 동시 승격·오류 전파
 
 ## 배포
 

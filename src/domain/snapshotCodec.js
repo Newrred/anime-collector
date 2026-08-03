@@ -1,10 +1,10 @@
 import { readJson, writeJson } from "../storage/localJsonStore.js";
 import { STORAGE_KEYS } from "../storage/keys.js";
-import { readLibraryListPreferred, writeLibraryList } from "../repositories/libraryRepo.js";
-import { readTierBoardBundlePreferred, writeTierBoardBundle } from "../repositories/tierRepo.js";
+import { readLibraryListPreferred, writeLibraryListDurable } from "../repositories/libraryRepo.js";
+import { readTierBoardBundlePreferred, writeTierBoardBundleDurable } from "../repositories/tierRepo.js";
 import { DEFAULT_TIER_TOPIC_ID, getActiveTierTopic, isLegacyTierState } from "./tierTopics.js";
-import { readAllWatchLogsPreferred, replaceWatchLogs } from "../repositories/watchLogRepo.js";
-import { listCharacterPinsPreferred, replaceCharacterPins } from "../repositories/characterPinRepo.js";
+import { readAllWatchLogsPreferred, replaceWatchLogsDurable } from "../repositories/watchLogRepo.js";
+import { listCharacterPinsPreferred, replaceCharacterPinsDurable } from "../repositories/characterPinRepo.js";
 import { runGuardedMutationSteps } from "../services/guardedMutationSteps.js";
 import {
   DEFAULT_TIERS,
@@ -633,11 +633,11 @@ export function encodeSyncSnapshot(snapshot) {
 export function normalizeSyncSnapshot(snapshot) {
   return normalizeExpandedSnapshot(isCompactSnapshot(snapshot) ? decodeCompactSnapshot(snapshot) : snapshot);
 }
-export async function exportSyncSnapshot() {
+export async function exportSyncSnapshot(options = {}) {
   const [list, tierTopics, watchLogs, characterPins] = await Promise.all([
     readLibraryListPreferred([]).catch(() => []),
     readTierBoardBundlePreferred(null).catch(() => null),
-    readAllWatchLogsPreferred().catch(() => []),
+    readAllWatchLogsPreferred(options.watchLogStorage),
     listCharacterPinsPreferred().catch(() => []),
   ]);
   const activeTier = getActiveTierTopic(tierTopics)?.tier || { unranked: [], tiers: {} };
@@ -676,16 +676,24 @@ export async function applySyncSnapshot(snapshot, options = {}) {
   const cardsPerRowBase = Number(safe.preferences?.cardsPerRowBase);
   const cardView = String(safe.preferences?.cardView || "").trim();
   const steps = [
-    () => writeLibraryList(safe.list, { skipSyncMark: true }),
-    () => writeTierBoardBundle(safe.tierTopics || safe.tier, { skipSyncMark: true }),
-    () => replaceWatchLogs(safe.watchLogs, { skipSyncMark: true }),
-    () => replaceCharacterPins(safe.characterPins, { skipSyncMark: true }),
+    () => writeLibraryListDurable(safe.list, { skipSyncMark: true, storage: options.storage }),
+    () => writeTierBoardBundleDurable(safe.tierTopics || safe.tier, { skipSyncMark: true, storage: options.storage }),
+    () => replaceWatchLogsDurable(safe.watchLogs, { skipSyncMark: true, storage: options.storage }),
+    () => replaceCharacterPinsDurable(safe.characterPins, { skipSyncMark: true, storage: options.storage }),
   ];
   if (Number.isFinite(cardsPerRowBase)) {
-    steps.push(() => writeJson(STORAGE_KEYS.cardsPerRowBase, cardsPerRowBase));
+    steps.push(() => {
+      if (!writeJson(STORAGE_KEYS.cardsPerRowBase, cardsPerRowBase)) {
+        throw new Error("Failed to persist cards-per-row preference to localStorage");
+      }
+    });
   }
   if (cardView === "meta" || cardView === "poster") {
-    steps.push(() => writeJson(STORAGE_KEYS.cardView, cardView));
+    steps.push(() => {
+      if (!writeJson(STORAGE_KEYS.cardView, cardView)) {
+        throw new Error("Failed to persist card-view preference to localStorage");
+      }
+    });
   }
 
   const result = await runGuardedMutationSteps({

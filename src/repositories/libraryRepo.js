@@ -22,3 +22,13 @@ export function writeLibraryList(list, options = {}) {
   }
   replaceLibraryItemsIdb(list).catch(() => {});
 }
+
+export async function writeLibraryListDurable(list, options = {}) {
+  if (!writeJson(STORAGE_KEYS.list, list)) {
+    throw new Error("Failed to persist Library snapshot to localStorage");
+  }
+  if (!options?.skipSyncMark) markLocalDirty();
+  const replaceIdb = options?.storage?.replaceLibraryItemsIdb || replaceLibraryItemsIdb;
+  await replaceIdb(list);
+  return list;
+}

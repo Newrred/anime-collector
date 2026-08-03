@@ -418,7 +418,7 @@ export default function Library() {
   async function buildBackupPayload() {
     const tierTopics = readTierBoardBundle(null);
     const tier = getActiveTierTopic(tierTopics)?.tier || readTierState(null);
-    const watchLogs = await readAllWatchLogsPreferred().catch(() => []);
+    const watchLogs = await readAllWatchLogsPreferred();
 
     return {
       app: "ani-site",

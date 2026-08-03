@@ -626,7 +626,7 @@ export default function TierBoard() {
   }
 
   async function buildBackupPayload() {
-    const watchLogs = await readAllWatchLogsPreferred().catch(() => []);
+    const watchLogs = await readAllWatchLogsPreferred();
     return {
       app: "ani-site",
       version: SYNC_SNAPSHOT_VERSION,

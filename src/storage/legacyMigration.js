@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from "./keys";
-import { readJson, writeJson } from "./localJsonStore";
+import { STORAGE_KEYS } from "./keys.js";
+import { readJson, writeJson } from "./localJsonStore.js";
 import {
   getMetaValue,
   getAllLibraryItemsIdb,
@@ -10,7 +10,7 @@ import {
   putTierStateIdb,
   replaceLibraryItemsIdb,
   replaceWatchLogsIdb,
-} from "./idb";
+} from "./idb.js";
 import {
   mergeLegacyLibraryRows,
   mergeLegacyWatchLogs,
@@ -45,15 +45,32 @@ function writeMergedLocalSnapshot(key, value) {
 
 let migrationPromise = null;
 
-export function ensureLegacyStorageMigrated() {
+const defaultMigrationStorage = {
+  getMetaValue,
+  getAllLibraryItemsIdb,
+  getRecentWatchLogsIdb,
+  getTierStateIdb,
+  isIdbSupported,
+  putMetaValue,
+  putTierStateIdb,
+  replaceLibraryItemsIdb,
+  replaceWatchLogsIdb,
+};
+
+export function ensureLegacyStorageMigrated(options = {}) {
   if (migrationPromise) return migrationPromise;
 
-  migrationPromise = (async () => {
-    if (!isIdbSupported()) {
+  const storage = {
+    ...defaultMigrationStorage,
+    ...(options.storage || {}),
+  };
+
+  const attempt = (async () => {
+    if (!storage.isIdbSupported()) {
       return { mode: "legacy", migrated: false, reason: "idb-not-supported" };
     }
 
-    const already = await getMetaValue(MIGRATION_META_KEY);
+    const already = await storage.getMetaValue(MIGRATION_META_KEY);
     if (already?.done) {
       return { mode: "idb", migrated: false, reason: "already-migrated" };
     }
@@ -64,9 +81,9 @@ export function ensureLegacyStorageMigrated() {
     const legacyWatchLogs = Array.isArray(rawWatchLogs) ? rawWatchLogs : [];
 
     const [existingList, existingTier, existingWatchLogs] = await Promise.all([
-      getAllLibraryItemsIdb().catch(() => []),
-      getTierStateIdb("default").catch(() => null),
-      getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER).catch(() => []),
+      storage.getAllLibraryItemsIdb(),
+      storage.getTierStateIdb("default"),
+      storage.getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER),
     ]);
 
     // The marker is committed last. If a prior attempt stopped halfway, IDB
@@ -74,7 +91,7 @@ export function ensureLegacyStorageMigrated() {
     // treating any nonempty store as authoritative.
     const mergedList = mergeLegacyLibraryRows(existingList, legacyList);
     if (mergedList.length > 0) {
-      await replaceLibraryItemsIdb(mergedList);
+      await storage.replaceLibraryItemsIdb(mergedList);
       writeMergedLocalSnapshot(STORAGE_KEYS.list, mergedList);
     }
 
@@ -85,7 +102,7 @@ export function ensureLegacyStorageMigrated() {
     const hasTierSource = Boolean(existingTier || legacyTierState);
     const mergedTier = mergeTierStatePreferExisting(existingTier, legacyTierState);
     if (hasTierSource) {
-      await putTierStateIdb(mergedTier, "default");
+      await storage.putTierStateIdb(mergedTier, "default");
       const baseBundle = normalizeTierTopicBundle(hasLegacyTier ? legacyTier : existingTier, mergedTier);
       writeMergedLocalSnapshot(
         STORAGE_KEYS.tier,
@@ -95,11 +112,11 @@ export function ensureLegacyStorageMigrated() {
 
     const mergedWatchLogs = mergeLegacyWatchLogs(existingWatchLogs, legacyWatchLogs);
     if (mergedWatchLogs.length > 0) {
-      await replaceWatchLogsIdb(mergedWatchLogs);
+      await storage.replaceWatchLogsIdb(mergedWatchLogs);
       writeMergedLocalSnapshot(STORAGE_KEYS.watchLogs, mergedWatchLogs);
     }
 
-    await putMetaValue(MIGRATION_META_KEY, {
+    await storage.putMetaValue(MIGRATION_META_KEY, {
       done: true,
       migratedAt: new Date().toISOString(),
       listCount: mergedList.length,
@@ -108,9 +125,11 @@ export function ensureLegacyStorageMigrated() {
     });
 
     return { mode: "idb", migrated: true, listCount: mergedList.length };
-  })().catch((error) => {
-    console.error("[storage] legacy migration failed", error);
-    return { mode: "legacy", migrated: false, reason: "error" };
+  })();
+
+  migrationPromise = attempt;
+  attempt.catch(() => {
+    if (migrationPromise === attempt) migrationPromise = null;
   });
 
   return migrationPromise;

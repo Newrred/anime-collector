@@ -42,7 +42,7 @@ function readPinsLocal() {
 }
 
 function writePinsLocal(rows) {
-  writeJson(STORAGE_KEYS.characterPins, Array.isArray(rows) ? rows : []);
+  return writeJson(STORAGE_KEYS.characterPins, Array.isArray(rows) ? rows : []);
 }
 
 export function readCharacterPinsSnapshot() {
@@ -70,6 +70,20 @@ export async function replaceCharacterPins(pins, options = {}) {
   writePinsLocal(rows);
   if (!options?.skipSyncMark) markLocalDirty();
   replaceCharacterPinsIdb(rows).catch(() => {});
+  return rows.length;
+}
+
+export async function replaceCharacterPinsDurable(pins, options = {}) {
+  const rows = (Array.isArray(pins) ? pins : [])
+    .map(normalizePin)
+    .filter(Boolean)
+    .sort((a, b) => Number(b?.pinnedAt || 0) - Number(a?.pinnedAt || 0));
+  if (!writePinsLocal(rows)) {
+    throw new Error("Failed to persist CharacterPin snapshot to localStorage");
+  }
+  if (!options?.skipSyncMark) markLocalDirty();
+  const replaceIdb = options?.storage?.replaceCharacterPinsIdb || replaceCharacterPinsIdb;
+  await replaceIdb(rows);
   return rows.length;
 }
 

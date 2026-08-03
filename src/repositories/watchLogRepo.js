@@ -174,16 +174,17 @@ function hasLocalWatchLogSnapshot() {
   return hasStoredValue(STORAGE_KEYS.watchLogs);
 }
 
-async function readAuthoritativeWatchLogs() {
+async function readAuthoritativeWatchLogs(options = {}) {
+  const readAllIdbSnapshot = options.readAllIdbSnapshot || (async () => {
+    const rows = await getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER);
+    return toArray(rows)
+      .map(normalizeWatchLog)
+      .filter((row) => Number.isFinite(row.anilistId));
+  });
   return loadAuthoritativeWatchLogSnapshot({
     hasLocalSnapshot: hasLocalWatchLogSnapshot,
     readLocalSnapshot: readWatchLogsLocal,
-    readAllIdbSnapshot: async () => {
-      const rows = await getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER);
-      return toArray(rows)
-        .map(normalizeWatchLog)
-        .filter((row) => Number.isFinite(row.anilistId));
-    },
+    readAllIdbSnapshot,
     writeLocalSnapshot: writeWatchLogsLocal,
   });
 }
@@ -245,8 +246,8 @@ export async function listRecentWatchLogs(limit = 30) {
     .slice(0, Math.max(1, Number(limit) || 30));
 }
 
-export async function readAllWatchLogsPreferred() {
-  const rows = await readAuthoritativeWatchLogs();
+export async function readAllWatchLogsPreferred(options = {}) {
+  const rows = await readAuthoritativeWatchLogs(options);
   return rows.sort(
     (a, b) =>
       Number(b?.watchedAtSort || 0) - Number(a?.watchedAtSort || 0) ||
@@ -259,6 +260,15 @@ export async function replaceWatchLogs(logs, options = {}) {
   writeWatchLogsLocal(rows);
   if (!options?.skipSyncMark) markLocalDirty();
   replaceWatchLogsIdb(rows).catch(() => {});
+  return rows.length;
+}
+
+export async function replaceWatchLogsDurable(logs, options = {}) {
+  const rows = toArray(logs).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
+  writeWatchLogsLocal(rows);
+  if (!options?.skipSyncMark) markLocalDirty();
+  const replaceIdb = options?.storage?.replaceWatchLogsIdb || replaceWatchLogsIdb;
+  await replaceIdb(rows);
   return rows.length;
 }
 

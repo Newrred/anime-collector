@@ -69,6 +69,20 @@ export function writeTierBoardBundle(nextBundle, options = {}) {
   putTierStateIdb(getActiveTierTopic(bundle)?.tier || { unranked: [], tiers: {} }, "default").catch(() => {});
 }
 
+export async function writeTierBoardBundleDurable(nextBundle, options = {}) {
+  const bundle = normalizeTierTopicBundle(nextBundle);
+  if (!writeJson(STORAGE_KEYS.tier, bundle)) {
+    throw new Error("Failed to persist Tier snapshot to localStorage");
+  }
+  if (!options?.skipSyncMark) markLocalDirty();
+  const putIdb = options?.storage?.putTierStateIdb || putTierStateIdb;
+  await putIdb(
+    getActiveTierTopic(bundle)?.tier || { unranked: [], tiers: {} },
+    "default",
+  );
+  return bundle;
+}
+
 export function pruneTierByAnimeId(removedId) {
   const bundle = readTierBoardBundle(null);
   if (!bundle || typeof bundle !== "object") return;
