@@ -4,8 +4,8 @@ const MOCK_SESSION_KEY = "moemoa.e2e.mockSession.v1";
 const MOCK_PROFILE_STORE_KEY = "moemoa.e2e.profileStore.v1";
 
 const ROUTES = [
-  { route: "/", root: ".home-page", leadSelector: ".home-section-block--hero", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
-  { route: "/library/", root: ".library-page", leadSelector: ".library-page-tabs", cardSelector: ".library-panel, .library-card, .card", minPadding: 0, maxPadding: 24.5 },
+  { route: "/", root: ".home-page", leadSelector: ".home-empty-state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/library/", root: ".library-page", leadSelector: ".library-panel", cardSelector: ".library-panel, .library-card, .card", minPadding: 0, maxPadding: 24.5 },
   { route: "/tier/", root: ".tier-board", leadSelector: ".tier-board__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/profile/", root: ".profile-page", leadSelector: ".minihome-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/data/", root: ".data-grid", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
@@ -110,6 +110,7 @@ test.describe("Page Design System Consistency", () => {
         }
 
         await page.goto(routeConfig.route, { waitUntil: "networkidle" });
+        await expect(page.locator("html")).toHaveAttribute("lang", "en");
         await expect(page.locator(".top-nav")).toBeVisible();
         await expect(page.locator(routeConfig.root)).toBeVisible();
 

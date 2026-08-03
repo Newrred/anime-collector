@@ -2,9 +2,8 @@ const koMessages = {
   topNavDataMenu: {
     home: "홈",
     library: "기록장",
-    showcase: "미니홈",
-    tier: "티어 메이커",
-    labs: "티어 메이커 (실험실)",
+    showcase: "프로필 & 미니홈",
+    tier: "티어",
     account: "계정 및 동기화",
     localeMenu: "언어 선택",
     navigationTitle: "탐색",
@@ -26,8 +25,9 @@ const koMessages = {
     dataToolsTitle: "앱 설치",
     dataToolsSummary: "브라우저의 홈 화면에 앱처럼 설치하면 더 빠르게 이용할 수 있어요.",
     openManualTools: "계정 설정 열기",
-    labsSummary: "티어 메이커로 좋아하는 애니의 순위를 정리해보세요.",
-    openLabsPage: "티어 메이커 열기",
+    profileMinihomeTitle: "프로필 & 미니홈",
+    profileMinihomeSummary: "프로필과 공개 미니홈을 한 곳에서 관리하세요.",
+    openProfileMinihome: "프로필 & 미니홈 열기",
     helpSummary: "MOEMOA 서비스의 사용법을 도움말에서 한 번에 확인할 수 있어요.",
     openHelpPage: "도움말 페이지 열기",
     helpBlocks: [

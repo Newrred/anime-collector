@@ -126,11 +126,11 @@ export default function TopNavDataMenu({
             {copy.library}
           </a>
           <a
-            href={`${base}profile/`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "profile" ? " is-active" : ""}`}
-            aria-current={currentRoute === "profile" ? "page" : undefined}
+            href={`${base}tier/`}
+            className={`top-nav__link top-nav__link--primary${currentRoute === "tier" ? " is-active" : ""}`}
+            aria-current={currentRoute === "tier" ? "page" : undefined}
           >
-            {copy.showcase}
+            {copy.tier}
           </a>
         </div>
 
@@ -260,11 +260,11 @@ export default function TopNavDataMenu({
                       {copy.library}
                     </a>
                     <a
-                      href={`${base}profile/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
+                      href={`${base}tier/`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "tier" ? " is-active" : ""}`}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.showcase}
+                      {copy.tier}
                     </a>
                   </div>
                 </section>
@@ -297,6 +297,23 @@ export default function TopNavDataMenu({
                       </button>
                     </div>
                   </div>
+                </section>
+
+                <section className="data-menu-section">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconGear />
+                    </span>
+                    <div className="data-menu-section-title">{copy.profileMinihomeTitle}</div>
+                  </div>
+                  <p className="small data-menu-section-summary">{copy.profileMinihomeSummary}</p>
+                  <a
+                    href={`${base}profile/`}
+                    className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
+                    onClick={() => setDataMenuOpen(false)}
+                  >
+                    <ActionLabel icon={<IconGear />}>{copy.openProfileMinihome}</ActionLabel>
+                  </a>
                 </section>
 
                 <section className="data-menu-section">
@@ -353,23 +370,6 @@ export default function TopNavDataMenu({
                       </button>
                     )}
                   </div>
-                </section>
-
-                <section className="data-menu-section">
-                  <div className="data-menu-section-head">
-                    <span className="data-menu-section-icon" aria-hidden>
-                      <IconDatabase />
-                    </span>
-                    <div className="data-menu-section-title">{copy.labs}</div>
-                  </div>
-                  <p className="small data-menu-section-summary">{copy.labsSummary}</p>
-                  <a
-                    href={`${base}tier/`}
-                    className="btn btn--subtle data-menu-link"
-                    onClick={() => setDataMenuOpen(false)}
-                  >
-                    <ActionLabel icon={<IconDatabase />}>{copy.openLabsPage}</ActionLabel>
-                  </a>
                 </section>
 
                 <section className="data-menu-section">

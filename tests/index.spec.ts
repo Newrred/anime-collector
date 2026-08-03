@@ -1,6 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { clearAppState, installAppState } from "./helpers/appState";
 
+test("fresh browser uses English shell and primary navigation", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const primary = page.locator(".top-nav__links--routes");
+  await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
+});
+
 test("new visitor sees one primary add-title action", async ({ page }) => {
   await clearAppState(page);
   await installAppState(page, { locale: "en" });

@@ -44,7 +44,7 @@ test.describe("Desktop Layout Regression", () => {
       const page = await context.newPage();
 
       const rhythmCases = [
-        { route: "/", leadSelector: ".pageHeader" },
+        { route: "/", leadSelector: ".home-empty-state" },
         { route: "/library/", leadSelector: ".library-panel" },
         { route: "/data/", leadSelector: ".surface-card" },
       ];

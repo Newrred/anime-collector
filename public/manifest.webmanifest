@@ -1,13 +1,13 @@
 {
-  "name": "애니 라이브러리",
-  "short_name": "애니목록",
-  "description": "애니 목록 관리와 티어 정리를 위한 웹 앱",
+  "name": "MOEMOA — Anime Journal",
+  "short_name": "MOEMOA",
+  "description": "A personal anime journal for records, memories, and tiers.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0c10",
   "theme_color": "#0b0c10",
-  "lang": "ko",
+  "lang": "en",
   "icons": [
     {
       "src": "./favicon.svg",

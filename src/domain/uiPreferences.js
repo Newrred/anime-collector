@@ -17,7 +17,7 @@ export const UI_PREFERENCE_KEYS = {
 
 export const DEFAULT_UI_PREFERENCES = {
   theme: UI_THEME.dark,
-  locale: UI_LOCALE.ko,
+  locale: UI_LOCALE.en,
 };
 
 const THEME_META = {

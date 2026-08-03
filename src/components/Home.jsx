@@ -386,15 +386,6 @@ export default function Home() {
         thisTimeRows={thisTimeTargets}
       />
 
-      <HomeShowcasePreview locale={locale} base={base} model={showcaseModel} />
-
-      <HomeTasteCard
-        dashboard={tasteDashboard}
-        locale={locale}
-        onOpenAnime={openLibraryAnimeById}
-        copy={tasteCopy}
-      />
-
       <YearRecapPanel
         locale={locale}
         recapYear={recapYear}
@@ -404,6 +395,15 @@ export default function Home() {
         titleById={titleById}
         onOpenCharacter={openCharacterSheet}
       />
+
+      <HomeTasteCard
+        dashboard={tasteDashboard}
+        locale={locale}
+        onOpenAnime={openLibraryAnimeById}
+        copy={tasteCopy}
+      />
+
+      <HomeShowcasePreview locale={locale} base={base} model={showcaseModel} />
 
       <CharacterInsightSheet
         locale={locale}
