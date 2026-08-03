@@ -63,8 +63,17 @@ export function buildUiPreferenceBootScript() {
         const root = document.documentElement;
         const themeRaw = localStorage.getItem(${themeKey});
         const localeRaw = localStorage.getItem(${localeKey});
-        const theme = themeRaw === "light" ? "light" : ${defaultTheme};
-        const locale = localeRaw === "en" ? "en" : ${defaultLocale};
+        const parsePreference = (raw) => {
+          try {
+            return JSON.parse(raw);
+          } catch {
+            return null;
+          }
+        };
+        const themeValue = parsePreference(themeRaw);
+        const localeValue = parsePreference(localeRaw);
+        const theme = themeValue === "light" || themeValue === "dark" ? themeValue : ${defaultTheme};
+        const locale = localeValue === "en" || localeValue === "ko" ? localeValue : ${defaultLocale};
         root.dataset.theme = theme;
         root.lang = locale;
         const meta = document.querySelector('meta[name="theme-color"]');
