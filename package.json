@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:unit": "node tests/unit/run-tests.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:auth-profile": "playwright test tests/authenticated-minihome.spec.ts --project=chromium --workers=1",
     "test:e2e:desktop-layout": "playwright test tests/layout-desktop.spec.ts --project=chromium --workers=1",
     "test:e2e:design-system": "playwright test tests/page-design-system.spec.ts --project=chromium --workers=1",

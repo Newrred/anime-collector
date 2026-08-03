@@ -1,5 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER
+  ? undefined
+  : {
+      command: 'node node_modules/astro/astro.js dev --host 127.0.0.1 --port 4321',
+      url: 'http://localhost:4321',
+      reuseExistingServer: !process.env.CI,
+      timeout: 30000,
+    };
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -75,10 +84,5 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
-  },
+  webServer,
 });
