@@ -31,9 +31,7 @@ pnpm-debug.log*
 # editor settings
 .vscode/
 
-# e2e tests and reports (local only)
-tests/
-playwright.config.ts
+# e2e reports (local only)
 playwright-report/
 test-results/
 test-results-*/
