@@ -12,7 +12,7 @@ import {
   uploadSnapshotToCloud,
 } from "../repositories/syncRepo.js";
 import { isSupabaseConfigured } from "../lib/supabaseClient.js";
-import { createSyncOperationCoordinator } from "../services/syncOperationCoordinator.js";
+import { useCommittedSyncOperationCoordinator } from "./useSyncOperationCoordinator.js";
 
 function isOnline() {
   return typeof navigator === "undefined" ? true : navigator.onLine !== false;
@@ -53,12 +53,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   const sessionRef = useRef(session);
   const autoSyncRef = useRef(autoSync);
   const syncStatusRequestGenerationRef = useRef(0);
-  const operationCoordinatorRef = useRef(null);
-
-  if (!operationCoordinatorRef.current) {
-    operationCoordinatorRef.current = createSyncOperationCoordinator(currentUserId);
-  }
-  operationCoordinatorRef.current.updateUserId(currentUserId);
+  const operationCoordinator = useCommittedSyncOperationCoordinator(currentUserId);
 
   useEffect(() => {
     metaRef.current = meta;
@@ -83,11 +78,11 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   async function refreshStatus() {
     const requestId = syncStatusRequestGenerationRef.current + 1;
     const capturedUserId = session?.user?.id || null;
-    const operationToken = operationCoordinatorRef.current.begin(capturedUserId, "refreshStatus");
+    const operationToken = operationCoordinator.begin(capturedUserId, "refreshStatus");
     syncStatusRequestGenerationRef.current = requestId;
     const isCurrentRequest = () =>
       requestId === syncStatusRequestGenerationRef.current &&
-      operationCoordinatorRef.current.isCurrent(operationToken);
+      operationCoordinator.isCurrent(operationToken);
     const nextMeta = readSyncMeta(capturedUserId);
 
     if (!capturedUserId || !isSupabaseConfigured) {
@@ -136,7 +131,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
 
       if (!lastSyncedHash) {
         if (localEmpty && autoSync) {
-          const applied = await operationCoordinatorRef.current.runMutation(
+          const applied = await operationCoordinator.runMutation(
             operationToken,
             () => applyRemoteSnapshot(remoteRow, {
               userId: capturedUserId,
@@ -165,7 +160,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       }
 
       if (!localChanged && remoteChanged && autoSync) {
-        const applied = await operationCoordinatorRef.current.runMutation(
+        const applied = await operationCoordinator.runMutation(
           operationToken,
           () => applyRemoteSnapshot(remoteRow, {
             userId: capturedUserId,
@@ -248,8 +243,8 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
     const capturedUserId = session?.user?.id || null;
     if (!capturedUserId || !isSupabaseConfigured) return null;
     if (!isOnline()) return null;
-    const operationToken = operationCoordinatorRef.current.begin(capturedUserId, "syncNow");
-    const isCurrentOperation = () => operationCoordinatorRef.current.isCurrent(operationToken);
+    const operationToken = operationCoordinator.begin(capturedUserId, "syncNow");
+    const isCurrentOperation = () => operationCoordinator.isCurrent(operationToken);
     if (!isCurrentOperation()) return null;
 
     setSyncing(true);
@@ -273,7 +268,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
           return null;
         }
         setConflict(null);
-        const result = await operationCoordinatorRef.current.runMutation(
+        const result = await operationCoordinator.runMutation(
           operationToken,
           () => uploadSnapshotToCloud(capturedUserId, localState.snapshot, {
             hash: localState.hash,
@@ -294,7 +289,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
 
       if (!lastSyncedHash) {
         if (localEmpty) {
-          const result = await operationCoordinatorRef.current.runMutation(
+          const result = await operationCoordinator.runMutation(
             operationToken,
             () => applyRemoteSnapshot(remoteRow, {
               userId: capturedUserId,
@@ -310,7 +305,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
         }
         if (remoteRow.contentHash === localState.hash) {
           if (hasLegacySources(remoteRow)) {
-            const result = await operationCoordinatorRef.current.runMutation(
+            const result = await operationCoordinator.runMutation(
               operationToken,
               () => uploadSnapshotToCloud(capturedUserId, localState.snapshot, {
                 hash: localState.hash,
@@ -324,7 +319,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
             setConflict(null);
             return result.value;
           }
-          const result = await operationCoordinatorRef.current.runMutation(
+          const result = await operationCoordinator.runMutation(
             operationToken,
             () => applyRemoteSnapshot(remoteRow, {
               userId: capturedUserId,
@@ -361,7 +356,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       }
 
       if (localChanged) {
-        const result = await operationCoordinatorRef.current.runMutation(
+        const result = await operationCoordinator.runMutation(
           operationToken,
           () => uploadSnapshotToCloud(capturedUserId, localState.snapshot, {
             hash: localState.hash,
@@ -377,7 +372,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       }
 
       if (remoteChanged) {
-        const result = await operationCoordinatorRef.current.runMutation(
+        const result = await operationCoordinator.runMutation(
           operationToken,
           () => applyRemoteSnapshot(remoteRow, {
             userId: capturedUserId,
@@ -392,7 +387,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
       }
 
       if (hasLegacySources(remoteRow)) {
-        const result = await operationCoordinatorRef.current.runMutation(
+        const result = await operationCoordinator.runMutation(
           operationToken,
           () => uploadSnapshotToCloud(capturedUserId, localState.snapshot, {
             hash: localState.hash,
@@ -474,8 +469,8 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   async function keepLocalVersion() {
     const capturedUserId = session?.user?.id || null;
     if (!capturedUserId) return null;
-    const operationToken = operationCoordinatorRef.current.begin(capturedUserId, "keepLocalVersion");
-    const isCurrentOperation = () => operationCoordinatorRef.current.isCurrent(operationToken);
+    const operationToken = operationCoordinator.begin(capturedUserId, "keepLocalVersion");
+    const isCurrentOperation = () => operationCoordinator.isCurrent(operationToken);
     if (!isCurrentOperation()) return null;
     setSyncing(true);
     try {
@@ -484,7 +479,7 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
         readRemoteSnapshot(capturedUserId),
       ]);
       if (!isCurrentOperation()) return null;
-      const result = await operationCoordinatorRef.current.runMutation(
+      const result = await operationCoordinator.runMutation(
         operationToken,
         () => uploadSnapshotToCloud(capturedUserId, localState.snapshot, {
           hash: localState.hash,
@@ -506,13 +501,13 @@ export function useSyncStatus({ session, autoSync = false } = {}) {
   async function useCloudVersion() {
     const capturedUserId = session?.user?.id || null;
     if (!capturedUserId || !remote || remote?.userId !== capturedUserId) return null;
-    const operationToken = operationCoordinatorRef.current.begin(capturedUserId, "useCloudVersion");
-    const isCurrentOperation = () => operationCoordinatorRef.current.isCurrent(operationToken);
+    const operationToken = operationCoordinator.begin(capturedUserId, "useCloudVersion");
+    const isCurrentOperation = () => operationCoordinator.isCurrent(operationToken);
     const expectedLocalRevision = readSyncMeta(capturedUserId).localRevision;
     if (!isCurrentOperation()) return null;
     setSyncing(true);
     try {
-      const result = await operationCoordinatorRef.current.runMutation(
+      const result = await operationCoordinator.runMutation(
         operationToken,
         () => applyRemoteSnapshot(remote, {
           userId: capturedUserId,
