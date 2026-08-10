@@ -292,6 +292,7 @@ GitHub 저장소는 유지하고, 실제 서비스 호스팅만 GitHub Pages에�
 
 ## 참고 문서
 
+- 제품 방향성 결정 초안: `docs/product/2026-08-06-product-direction-decision-draft.md`
 - UI 수정 가이드: `docs/UI_EDIT_GUIDE.md`
 - 운영 전환 가이드: `docs/deploy/OWNER_DEPLOY_GUIDE.md`
 - Vercel 테스트 가이드: `docs/deploy/VERCEL_SETUP.md`
