@@ -97,9 +97,74 @@ public class ImageIntakePlugin extends Plugin {
         });
     }
 
+    @PluginMethod
+    public void promoteIntake(PluginCall call) {
+        String ticketId = call.getString("ticketId");
+        String assetId = call.getString("assetId");
+        String operationId = call.getString("operationId");
+        if (ticketId == null || ticketId.isEmpty() || assetId == null || assetId.isEmpty()) {
+            call.reject("Ticket and asset ids are required", "INVALID_MEDIA_PROMOTION");
+            return;
+        }
+        if (operationId == null || operationId.isEmpty()) {
+            call.reject("An operation id is required", "INVALID_MEDIA_PROMOTION");
+            return;
+        }
+
+        runtime.execute(() -> {
+            try {
+                JSObject result = toJsObject(runtime.promote(ticketId, assetId).toMap());
+                resolveOnMain(call, result);
+            } catch (ImageIntakeException exception) {
+                rejectOnMain(call, exception);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void getAssetPreview(PluginCall call) {
+        String localRef = call.getString("localRef");
+        if (localRef == null || localRef.isEmpty()) {
+            call.reject("A private media reference is required", "INVALID_LOCAL_REF");
+            return;
+        }
+        runtime.execute(() -> {
+            try {
+                JSObject result = new JSObject();
+                result.put("previewDataUrl", runtime.readAssetPreviewDataUrl(localRef));
+                result.put("localOnly", true);
+                resolveOnMain(call, result);
+            } catch (ImageIntakeException exception) {
+                rejectOnMain(call, exception);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void deleteAsset(PluginCall call) {
+        String localRef = call.getString("localRef");
+        if (localRef == null || localRef.isEmpty()) {
+            call.reject("A private media reference is required", "INVALID_LOCAL_REF");
+            return;
+        }
+        runtime.execute(() -> {
+            try {
+                JSObject result = new JSObject();
+                result.put("deleted", runtime.deleteAsset(localRef));
+                resolveOnMain(call, result);
+            } catch (ImageIntakeException exception) {
+                rejectOnMain(call, exception);
+            }
+        });
+    }
+
     private static JSObject toJsObject(PublicIntakeTicket ticket) {
+        return toJsObject(ticket.toMap());
+    }
+
+    private static JSObject toJsObject(Map<String, Object> value) {
         JSObject result = new JSObject();
-        for (Map.Entry<String, Object> entry : ticket.toMap().entrySet()) {
+        for (Map.Entry<String, Object> entry : value.entrySet()) {
             result.put(entry.getKey(), entry.getValue());
         }
         return result;

@@ -6,6 +6,13 @@ const unavailableAdapter = Object.freeze({
   claim: async () => ({ ticket: null, processing: false, errorCode: null }),
   pick: async () => ({ ticket: null, cancelled: true }),
   discard: async () => false,
+  promoteTicket: async () => {
+    throw Object.assign(new Error("Private media is only available in the Android app"), {
+      code: "NATIVE_MEDIA_UNAVAILABLE",
+    });
+  },
+  getPreview: async () => null,
+  deleteAsset: async () => false,
 });
 
 export function createPlatformImageIntake() {

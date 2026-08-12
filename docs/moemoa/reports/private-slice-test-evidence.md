@@ -70,12 +70,12 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 | 명령 | 결과 | 비고 |
 | --- | --- | --- |
 | `gradlew testDebugUnitTest assembleDebug` | PASS | generated example 포함 Android unit 25개, debug APK build |
-| `npm run test:unit` | PASS | 43/43 |
-| `npm run test:e2e -- tests/memory-card-composer.spec.ts --project=chromium --workers=1` | PASS | browser route에서 file input 0개, Android-only 안내와 save gate 확인 |
-| `npm run build` | PASS | Astro static 9 pages, Memory composer 15.24 kB, baseline large chunk warning 유지 |
+| `npm run test:unit` | PASS | 68/68; domain, create/delete/recovery, isolated DB schema, 기존 unit 포함 |
+| `npm run test:e2e -- --project=chromium --workers=1` | PASS | 40 passed, live 2 skipped; 신규 card/archive/IndexedDB와 legacy 전체 회귀 포함 |
+| `npm run build` | PASS | Astro static 11 pages; `/memory/new`, `/archive`, `/memory/card` 포함, baseline large chunk warning 유지 |
 | `cap sync android` | PASS | 최신 `dist`를 Android assets로 반영 |
-| sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | 최신 static asset과 custom plugin 포함 APK |
-| `react-doctor --scope files --include-untracked` | PASS | 이번 변경 7개 React/JS 파일, 100/100, 신규 진단 없음 |
+| sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,793,876 bytes |
+| `react-doctor --scope files --include-untracked --blocking error` | PASS | blocking error 0; 초기 warning 6건 중 안전한 3건 수정, 순차 recovery/useState 관련 3건은 의도 또는 낮은 위험으로 유지 |
 
 ## 6. API 36 emulator runtime evidence
 
@@ -90,6 +90,10 @@ Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.
 | 공개 bridge payload | PASS | DOM에는 1080×2400/94KB와 preview만 표시; source URI/path/checksum은 public ticket contract에서 제외 |
 | Web cancel/discard | PASS | image remove 후 preview가 사라지고 대응 original/preview/ticket 3개가 함께 삭제됨 |
 | system Photo Picker | PASS | Web button으로 system picker가 열림; Back 취소 후 복귀하고, PNG 실제 선택 시 새 private ticket 세트·bounded JPEG preview 생성과 composer 표시 확인 |
+| permanent promotion | PASS | 저장 확정 시 staging ticket을 `files/moemoa-media`의 original/preview/metadata set으로 승격; bridge/DB에는 opaque `asset:<uuid>`만 저장 |
+| Card create/restart/read | PASS | 실제 Photo Picker PNG로 PrivateTitle Card 저장, Archive 표시, 앱 강제 종료·재실행 뒤 WebView IndexedDB와 native preview를 다시 열어 제목 확인 |
+| Card delete | PASS | 상세 화면 확인 대화상자 후 Archive row 제거, tombstone의 note/path/hash scrub, `files/moemoa-media`가 빈 디렉터리임을 확인 |
+| system design fallback | PASS | 이미지와 권리 확인 없이 deterministic private VisualAsset을 저장하고 Archive에서 표시 |
 
 첫 ADB synthetic share는 `EXTRA_STREAM`만 넣어 URI grant 대상이 없어서 media provider가 접근을 거부했다. 일반 공유 앱이 구성하는 것처럼 같은 URI를 Intent data에도 두고 read grant를 적용한 재실행은 성공했다. 이는 앱의 typed `IMAGE_READ_FAILED` 경로와 테스트 인텐트 차이를 함께 확인한 결과다.
 
@@ -100,6 +104,21 @@ Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.
 - EXIF orientation 사진 표시 확인.
 - source grant 만료, storage full, 강제 종료·process death 뒤 pending ticket 재claim.
 - API 24~32 `ACTION_OPEN_DOCUMENT` fallback.
+
+Browser persistence evidence:
+
+- `moemoa-memory-v1` schema 1을 닫고 다시 연 뒤 같은 Guest Owner와 Complete Card를 조회했다.
+- 서로 다른 두 Guest Owner fixture의 Archive 조회가 섞이지 않았다.
+- 중단된 IMPORT/DELETE journal을 startup reconciliation이 재시도하고 안전한 완료 상태로 수렴시켰다.
+- 테스트용 legacy DB marker가 전후 동일해 신규 Memory DB가 `anime-collector-db`를 변경하지 않았음을 확인했다.
+- Playwright에서 image Card create→중복 저장 방지→Archive→reload→detail note edit→reload→delete→Archive reload와 system design create를 통과했다.
+
+현재 한계:
+
+- 물리 실기기와 실제 외부 앱 Share Target은 아직 검증하지 않았다.
+- orphan final file, DB-only missing file의 전체 filesystem reconciliation과 사용자 복구 UI는 아직 없다.
+- image replacement, ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.
+- title resolver와 AnimeRef 연결 전이므로 현재 composer는 PrivateTitle 직접 입력만 사용한다.
 
 ## 7. Dependency audit finding
 

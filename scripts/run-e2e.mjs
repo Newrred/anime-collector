@@ -43,6 +43,11 @@ const server = existingServer
   ? null
   : spawn(process.execPath, ["node_modules/astro/astro.js", "dev", "--host", host, "--port", String(port)], {
       stdio: "inherit",
+      env: {
+        ...process.env,
+        CI: process.env.CI ?? "1",
+        ASTRO_TELEMETRY_DISABLED: process.env.ASTRO_TELEMETRY_DISABLED ?? "1",
+      },
     });
 
 try {

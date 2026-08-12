@@ -428,7 +428,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 2 — Memory domain과 port contract
 
-상태: `[ ] NOT STARTED`
+상태: `[~] IN PROGRESS`
 
 - Owner, AnimeRef, PrivateTitle, MemoryCard, VisualAsset, MediaOperation model을 구현한다.
 - title XOR, READY VisualAsset, owner isolation invariant를 순수 함수로 고정한다.
@@ -444,7 +444,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 3 — owner-scoped DB와 보상 transaction
 
-상태: `[ ] NOT STARTED`
+상태: `[~] IN PROGRESS`
 
 - `moemoa-memory-v1` schema와 `IndexedDbMemoryRepository`를 구현한다.
 - 최초 Guest Owner를 멱등 생성한다.
@@ -461,7 +461,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4 — 공통 Card composer와 Archive UI
 
-상태: `[ ] NOT STARTED`
+상태: `[~] IN PROGRESS`
 
 - `/memory/new/`, `/archive/`, card detail route를 flag 뒤에 추가한다.
 - image preview, 취소, 교체, 시스템 디자인 전환을 제공한다.
@@ -482,7 +482,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 5 — Android end-to-end 통합
 
-상태: `[ ] NOT STARTED`
+상태: `[~] IN PROGRESS`
 
 - native ticket을 실제 composer에 전달한다.
 - 사용자가 저장을 확정할 때만 import saga를 시작한다.
@@ -499,7 +499,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 6 — 수정·교체·삭제·export·복구 UX
 
-상태: `[ ] NOT STARTED`
+상태: `[~] IN PROGRESS`
 
 - metadata 수정과 안전한 image replacement를 구현한다.
 - Card delete와 local file delete를 멱등 구현한다.
@@ -724,6 +724,14 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 [2026-08-12] emulator: API 36에서 cold launch, synthetic MediaStore share, original/preview/ticket 생성, Web preview, discard 3-file cleanup, system Photo Picker launch/cancel을 terminal-only로 확인.
 [2026-08-12] 발견/수정: Capacitor local server에서 `/memory/new/`가 root document fallback을 반환해 exact static path `/memory/new/index.html`로 변경.
 [2026-08-12] 남은 gate: 물리 실기기 실제 share/picker 선택, EXIF orientation, storage full/source grant 만료, process-death 재claim, API 24~32 fallback. Card/VisualAsset 영구 저장은 Milestone 2 범위.
+[2026-08-12] 완료: Guest Owner, PrivateTitle, MemoryCard, VisualAsset, MediaOperation domain/port와 system design deterministic spec을 구현하고 owner/title/READY asset invariant를 unit test로 고정.
+[2026-08-12] 완료: 격리 DB `moemoa-memory-v1` schema 1, owner-scoped repository, IMPORT/DELETE journal과 startup reconciliation을 구현. 기존 `anime-collector-db`와 localStorage는 읽거나 변경하지 않음.
+[2026-08-12] 완료: native staging ticket을 `files/moemoa-media` 영구 파일로 승격하고 opaque `asset:<uuid>`만 Web에 전달하는 promote/preview/delete bridge를 구현. 실패 보상과 멱등 동작을 Android unit test로 고정.
+[2026-08-12] 완료: composer 저장, Archive 목록·재열기, 상세 note 수정·확인 삭제, 이미지 없는 deterministic system design fallback을 연결. Web E2E는 DEV 전용 fake native adapter를 사용하며 production에는 노출되지 않음.
+[2026-08-12] emulator: API 36 system Photo Picker 실제 PNG 선택→PrivateTitle Card 저장→Archive 표시→앱 강제 종료/재실행 후 재열기→상세 삭제→native 영구 파일 제거를 terminal-only로 통과.
+[2026-08-12] 검증: Web unit 68/68, Chromium 전체 40 pass/2 live skip, Astro static 11 pages, Android unit 30/30와 debug APK 11,793,876 bytes 통과. 상세 수치는 test evidence에 기록.
+[2026-08-12] 발견/수정: 비대화형 Windows 실행에서 Astro dev server가 telemetry 입력을 기다릴 수 있어 E2E runner가 `CI=1`, `ASTRO_TELEMETRY_DISABLED=1` 기본값을 자식 서버에 전달하도록 고정.
+[2026-08-12] 남은 구현: AnimeRef/local alias/AniList title resolver, 선택 metadata 전체, image replacement, missing/orphan file reconciliation UI, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -736,6 +744,9 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 - 현재 저장소에는 Android project와 Capacitor dependency가 전혀 없다. 따라서 native intake는 구현 milestone이 아니라 먼저 실패 가능한 spike로 검증해야 한다.
 - 기존 runbook의 catalog-first 번호와 Gap 분석의 local-first 권장 순서가 달랐다. 이 계획은 첫 사용자 가치와 미정 backend/auth/sync 회피를 근거로 local-first를 제안한다.
 - Capacitor 공식 지원 정책상 v8은 Node 22+와 Android Studio 2025.2.1+가 필요하다. v7은 2026-12-08 extended support가 끝나므로 신규 기반으로 낮추지 않는다.
+- staging ticket은 저장 확정 전까지만 유지하고, 확정 시 app-private `files/moemoa-media`의 original/preview/metadata commit set으로 승격한다. Web/DB에는 절대 경로나 source URI 대신 opaque `asset:<uuid>`만 보관한다. 이는 ADR-0001/0002 경계를 구체화하며 schema version 변경은 없다.
+- 첫 composer 구현은 provider에 의존하지 않는 PrivateTitle 직접 입력부터 연결했다. local alias/AniList resolver와 AnimeRef 생성은 범위에서 제거한 것이 아니라 Milestone 2·4의 남은 항목이다.
+- Playwright의 native image 성공 경로는 DEV 빌드에만 존재하는 deterministic fake adapter를 사용한다. production Android는 Capacitor bridge만 사용하고 일반 Web에서는 local image input을 제공하지 않는다.
 
 ### 변경 기록 규칙
 

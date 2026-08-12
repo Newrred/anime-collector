@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { createPlatformImageIntake } from "../adapters/platform/nativeImageIntake.js";
+import { useEffect, useRef, useState } from "react";
+import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
+import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import "./memory-card-composer.css";
 
 const ERROR_MESSAGES = {
@@ -9,6 +10,10 @@ const ERROR_MESSAGES = {
   IMAGE_TOO_COMPLEX: "이미지가 너무 커서 미리보기를 만들 수 없어요.",
   UNSUPPORTED_SOURCE_URI: "이 앱에서 안전하게 읽을 수 있는 이미지가 아니에요.",
   PREVIEW_UNAVAILABLE: "이미지 미리보기를 불러오지 못했어요.",
+  LOCAL_USE_CONFIRMATION_REQUIRED: "개인 기록 용도 확인이 필요해요.",
+  MEDIA_STORAGE_FULL: "기기 저장 공간이 부족해요.",
+  MEDIA_PROMOTION_FAILED: "이미지를 기기에 보관하지 못했어요. 다시 시도해 주세요.",
+  OPERATION_IN_PROGRESS: "카드를 저장하고 있어요. 잠시만 기다려 주세요.",
 };
 
 const errorMessage = (code) =>
@@ -22,22 +27,23 @@ const formatBytes = (value) => {
 };
 
 export default function MemoryCardComposer() {
-  const intake = useMemo(() => createPlatformImageIntake(), []);
+  const saveInFlight = useRef(false);
+  const [runtime, setRuntime] = useState(null);
   const [ticket, setTicket] = useState(null);
-  const [status, setStatus] = useState(intake.available ? "checking" : "browser");
+  const [designSpec, setDesignSpec] = useState(null);
+  const [status, setStatus] = useState("checking");
   const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
 
   useEffect(() => {
-    if (!intake.available) return undefined;
     let active = true;
     let timer = null;
 
-    const claim = async () => {
+    const claim = async (activeRuntime) => {
       try {
-        const result = await intake.claim();
+        const result = await activeRuntime.imageIntake.claim();
         if (!active) return;
         if (result.ticket) {
           setTicket(result.ticket);
@@ -47,7 +53,7 @@ export default function MemoryCardComposer() {
         }
         if (result.processing) {
           setStatus("processing");
-          timer = window.setTimeout(claim, 250);
+          timer = window.setTimeout(() => claim(activeRuntime), 250);
           return;
         }
         setStatus(result.errorCode ? "error" : "empty");
@@ -59,26 +65,64 @@ export default function MemoryCardComposer() {
       }
     };
 
-    claim();
+    getPlatformMemoryRuntime().then(async (activeRuntime) => {
+      if (!active) return;
+      await activeRuntime.initialize();
+      if (!active) return;
+      setRuntime(activeRuntime);
+      if (!activeRuntime.imageIntake.available) {
+        setStatus("browser");
+        return;
+      }
+      claim(activeRuntime);
+    }).catch((error) => {
+      if (!active) return;
+      setStatus("error");
+      setMessage(errorMessage(error?.code));
+    });
     return () => {
       active = false;
       if (timer != null) window.clearTimeout(timer);
     };
-  }, [intake]);
+  }, []);
 
   const chooseImage = async () => {
     setStatus("picking");
     setMessage("");
     try {
-      const result = await intake.pick();
+      const result = await runtime.imageIntake.pick();
       if (result.cancelled || !result.ticket) {
         setStatus(ticket ? "ready" : "empty");
         return;
       }
       if (ticket && ticket.ticketId !== result.ticket.ticketId) {
-        await intake.discard(ticket.ticketId);
+        await runtime.imageIntake.discard(ticket.ticketId);
       }
       setTicket(result.ticket);
+      setDesignSpec(null);
+      setStatus("ready");
+    } catch (error) {
+      setStatus("error");
+      setMessage(errorMessage(error?.code));
+    }
+  };
+
+  const useSystemDesign = async () => {
+    if (!runtime || busy) return;
+    setStatus("processing");
+    setMessage("");
+    try {
+      if (ticket) await runtime.imageIntake.discard(ticket.ticketId);
+      setTicket(null);
+      setRightsConfirmed(false);
+      setDesignSpec({
+        version: 1,
+        templateId: "memory-gradient",
+        paletteId: "violet-dawn",
+        patternSeed: globalThis.crypto.randomUUID(),
+        titleLayout: "BOTTOM_LEFT",
+        genreTokens: [],
+      });
       setStatus("ready");
     } catch (error) {
       setStatus("error");
@@ -90,7 +134,7 @@ export default function MemoryCardComposer() {
     if (!ticket) return;
     setStatus("removing");
     try {
-      await intake.discard(ticket.ticketId);
+      await runtime.imageIntake.discard(ticket.ticketId);
       setTicket(null);
       setStatus("empty");
       setMessage("");
@@ -100,7 +144,41 @@ export default function MemoryCardComposer() {
     }
   };
 
-  const busy = ["checking", "processing", "picking", "removing"].includes(status);
+  const saveCard = async (event) => {
+    event.preventDefault();
+    if (
+      !runtime ||
+      (!ticket && !designSpec) ||
+      !title.trim() ||
+      (ticket && !rightsConfirmed) ||
+      saveInFlight.current
+    ) return;
+    saveInFlight.current = true;
+    setStatus("saving");
+    setMessage("");
+    try {
+      await runtime.createCard({
+        titleChoice: { kind: "PRIVATE_TITLE", displayTitle: title },
+        ...(ticket ? { intakeTicketId: ticket.ticketId } : { systemDesignSpec: designSpec }),
+        note,
+        rightsConfirmed,
+      });
+      window.location.assign("/archive/index.html");
+    } catch (error) {
+      saveInFlight.current = false;
+      setStatus("ready");
+      setMessage(errorMessage(error?.code));
+    }
+  };
+
+  const busy = ["checking", "processing", "picking", "removing", "saving"].includes(status);
+  const canSave = Boolean(
+    runtime &&
+    (ticket || designSpec) &&
+    title.trim() &&
+    (designSpec || rightsConfirmed) &&
+    !busy,
+  );
 
   return (
     <div className="memory-composer page-shell page-shell--narrow">
@@ -118,12 +196,12 @@ export default function MemoryCardComposer() {
           </p>
         </div>
         <div className="memory-composer__privacy">
-          <strong>현재 단계에서는 내 기기에만 임시 보관</strong>
-          <span>원본 이미지의 주소와 저장 경로는 웹 화면에 전달되지 않아요.</span>
+          <strong>내 기기에만 비공개로 저장</strong>
+          <span>서버 업로드 없이 앱 전용 공간에 보관하며 원본 경로는 웹 화면에 전달되지 않아요.</span>
         </div>
       </section>
 
-      <form className="surface-card memory-composer__form" onSubmit={(event) => event.preventDefault()}>
+      <form className="surface-card memory-composer__form" onSubmit={saveCard}>
         <section className="memory-composer__image-section" aria-labelledby="memory-image-heading">
           <div className="memory-composer__section-head">
             <div>
@@ -137,7 +215,13 @@ export default function MemoryCardComposer() {
             )}
           </div>
 
-          {ticket ? (
+          {designSpec ? (
+            <SystemDesignPreview
+              className="memory-composer__preview memory-composer__system-preview"
+              spec={designSpec}
+              title={title}
+            />
+          ) : ticket ? (
             <div className="memory-composer__preview-wrap">
               <img
                 className="memory-composer__preview"
@@ -165,7 +249,7 @@ export default function MemoryCardComposer() {
               type="button"
               className="btn"
               onClick={chooseImage}
-              disabled={!intake.available || busy}
+              disabled={!runtime?.imageIntake.available || busy}
             >
               {ticket ? "다른 이미지 선택" : "이미지 선택"}
             </button>
@@ -174,6 +258,14 @@ export default function MemoryCardComposer() {
                 이미지 제거
               </button>
             )}
+            <button
+              type="button"
+              className="btn btn--subtle"
+              onClick={useSystemDesign}
+              disabled={!runtime || busy}
+            >
+              시스템 디자인 사용
+            </button>
           </div>
         </section>
 
@@ -202,21 +294,27 @@ export default function MemoryCardComposer() {
             <small>{note.length}/500</small>
           </label>
 
-          <label className="memory-composer__rights">
-            <input
-              type="checkbox"
-              checked={rightsConfirmed}
-              onChange={(event) => setRightsConfirmed(event.target.checked)}
-            />
-            <span>이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.</span>
-          </label>
+          {ticket ? (
+            <label className="memory-composer__rights">
+              <input
+                type="checkbox"
+                checked={rightsConfirmed}
+                onChange={(event) => setRightsConfirmed(event.target.checked)}
+              />
+              <span>이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.</span>
+            </label>
+          ) : designSpec ? (
+            <p className="memory-composer__rights">
+              시스템 디자인은 이미지 파일 대신 재현 가능한 디자인 정보만 저장합니다.
+            </p>
+          ) : null}
         </div>
 
         <div className="memory-composer__save-gate">
-          <button type="button" className="btn" disabled>
-            카드 저장은 다음 단계에서 연결
+          <button type="submit" className="btn" disabled={!canSave}>
+            {status === "saving" ? "카드 저장 중…" : "카드 저장"}
           </button>
-          <p>이번 슬라이스는 이미지 인입과 작성 화면 연결까지만 검증합니다.</p>
+          <p>저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.</p>
         </div>
       </form>
     </div>

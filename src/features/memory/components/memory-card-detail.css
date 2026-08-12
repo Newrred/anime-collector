@@ -1,0 +1,66 @@
+.memory-detail {
+  padding-block: 28px 64px;
+}
+
+.memory-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.memory-detail__header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.memory-detail__card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.memory-detail__card > img,
+.memory-detail__missing-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.memory-detail__missing-image {
+  display: grid;
+  place-items: center;
+  background: rgba(127, 100, 168, 0.12);
+  color: var(--text-muted, #a79ebd);
+}
+
+.memory-detail__body {
+  padding: 24px;
+}
+
+.memory-detail__field {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.memory-detail__field small {
+  color: var(--text-muted, #a79ebd);
+  text-align: right;
+}
+
+.memory-detail__message {
+  color: var(--accent, #b997ff);
+}
+
+.memory-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.memory-detail__state {
+  padding: 32px;
+  text-align: center;
+}

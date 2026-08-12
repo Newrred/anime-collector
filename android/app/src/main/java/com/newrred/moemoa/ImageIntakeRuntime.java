@@ -27,6 +27,7 @@ final class ImageIntakeRuntime {
 
     private final ContentResolver contentResolver;
     private final File root;
+    private final LocalMediaStore localMediaStore;
     private final PendingIntakeStore store;
     private final ImageIntakeCoordinator coordinator;
     private final ExecutorService executor;
@@ -38,6 +39,11 @@ final class ImageIntakeRuntime {
         contentResolver = applicationContext.getContentResolver();
         root = new File(applicationContext.getFilesDir(), "moemoa-intake");
         store = new PendingIntakeStore(root);
+        localMediaStore = new LocalMediaStore(
+            root,
+            new File(applicationContext.getFilesDir(), "moemoa-media"),
+            store
+        );
         coordinator = new ImageIntakeCoordinator(
             root,
             store,
@@ -129,6 +135,18 @@ final class ImageIntakeRuntime {
         }
     }
 
+    LocalMediaAsset promote(String ticketId, String assetId) throws ImageIntakeException {
+        return localMediaStore.promote(ticketId, assetId);
+    }
+
+    String readAssetPreviewDataUrl(String localRef) throws ImageIntakeException {
+        return readPreviewDataUrl(localMediaStore.previewFileFor(localRef));
+    }
+
+    boolean deleteAsset(String localRef) throws ImageIntakeException {
+        return localMediaStore.delete(localRef);
+    }
+
     boolean isProcessing() {
         return processingCount.get() > 0;
     }
@@ -146,7 +164,10 @@ final class ImageIntakeRuntime {
     }
 
     private String readPreviewDataUrl(PendingIntakeTicket ticket) throws ImageIntakeException {
-        File preview = new File(root, ticket.getPreviewFileName());
+        return readPreviewDataUrl(new File(root, ticket.getPreviewFileName()));
+    }
+
+    private String readPreviewDataUrl(File preview) throws ImageIntakeException {
         long length = preview.length();
         if (length <= 0L || length > MAX_PREVIEW_BYTES) {
             throw new ImageIntakeException("PREVIEW_UNAVAILABLE", "Pending image preview is unavailable");

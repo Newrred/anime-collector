@@ -1,0 +1,101 @@
+const GUEST_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export class MemoryDomainError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = "MemoryDomainError";
+    this.code = code;
+  }
+}
+
+const fail = (code, message) => {
+  throw new MemoryDomainError(code, message);
+};
+
+const requireGuestOwnerId = (ownerId) => {
+  const value = String(ownerId || "");
+  if (!value.startsWith("guest:") || !GUEST_UUID.test(value.slice(6))) {
+    fail("INVALID_OWNER_ID", "A valid guest owner id is required");
+  }
+  return value;
+};
+
+const requireId = (value, field) => {
+  const id = String(value || "").trim();
+  if (!id) fail("INVALID_ID", `${field} is required`);
+  return id;
+};
+
+export const normalizeDisplayTitle = (value) => {
+  const title = String(value || "").normalize("NFKC").trim().replace(/\s+/gu, " ");
+  if (!title) fail("TITLE_REQUIRED", "A title is required");
+  if (title.length > 120) fail("TITLE_TOO_LONG", "Title must be 120 characters or fewer");
+  return title;
+};
+
+export function createGuestOwner({ uuid, now }) {
+  if (!GUEST_UUID.test(String(uuid || ""))) {
+    fail("INVALID_OWNER_ID", "A version 4 UUID is required for a guest owner");
+  }
+  return Object.freeze({
+    id: `guest:${String(uuid).toLowerCase()}`,
+    kind: "GUEST",
+    createdAt: String(now),
+  });
+}
+
+export function createPrivateTitle({ id, ownerId, displayTitle, optionalGenres = [], now }) {
+  const title = normalizeDisplayTitle(displayTitle);
+  return Object.freeze({
+    id: requireId(id, "PrivateTitle id"),
+    ownerId: requireGuestOwnerId(ownerId),
+    displayTitle: title,
+    normalizedTitle: title.toLocaleLowerCase("en-US"),
+    optionalGenres: Object.freeze(optionalGenres.flatMap((genre) => {
+      const normalizedGenre = String(genre).trim();
+      return normalizedGenre ? [normalizedGenre] : [];
+    })),
+    createdAt: String(now),
+    updatedAt: String(now),
+  });
+}
+
+export function assertCompletePrivateCard({ card, title, animeRef, asset }) {
+  if (!card || card.status !== "COMPLETE_PRIVATE") {
+    fail("CARD_NOT_COMPLETE_PRIVATE", "Card must be COMPLETE_PRIVATE");
+  }
+
+  const ownerId = requireGuestOwnerId(card.ownerId);
+  const hasPrivateTitle = Boolean(card.privateTitleId);
+  const hasAnimeRef = Boolean(card.animeRefId);
+  if (!hasPrivateTitle && !hasAnimeRef) {
+    fail("TITLE_REFERENCE_REQUIRED", "Complete Card requires a title reference");
+  }
+  if (hasPrivateTitle && hasAnimeRef) {
+    fail("TITLE_REFERENCE_CONFLICT", "Complete Card must reference exactly one title");
+  }
+
+  const referencedTitle = hasPrivateTitle ? title : animeRef;
+  const expectedTitleId = hasPrivateTitle ? card.privateTitleId : card.animeRefId;
+  if (!referencedTitle || referencedTitle.id !== expectedTitleId) {
+    fail("TITLE_REFERENCE_MISSING", "Referenced title does not exist");
+  }
+  if (hasPrivateTitle && referencedTitle.ownerId !== ownerId) {
+    fail("CROSS_OWNER_REFERENCE", "Private title belongs to another owner");
+  }
+
+  if (!card.visualAssetId || !asset || asset.id !== card.visualAssetId) {
+    fail("VISUAL_ASSET_REQUIRED", "Complete Card requires a VisualAsset");
+  }
+  if (asset.ownerId !== ownerId) {
+    fail("CROSS_OWNER_REFERENCE", "VisualAsset belongs to another owner");
+  }
+  if (asset.state !== "READY") {
+    fail("VISUAL_ASSET_NOT_READY", "VisualAsset must be READY");
+  }
+  if (asset.storageScope !== "LOCAL_ONLY" || asset.visibility !== "PRIVATE") {
+    fail("PRIVATE_STORAGE_REQUIRED", "First-slice assets must remain local and private");
+  }
+
+  return true;
+}

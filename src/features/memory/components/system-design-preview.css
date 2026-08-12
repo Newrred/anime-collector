@@ -1,0 +1,46 @@
+.system-design-preview {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 20%, hsl(var(--design-hue) 82% 78% / 0.72), transparent 34%),
+    linear-gradient(var(--design-angle), hsl(calc(var(--design-hue) + 28) 58% 32%), hsl(var(--design-hue) 52% 13%));
+  color: #fff;
+  isolation: isolate;
+}
+.system-design-preview::before {
+  position: absolute;
+  z-index: -1;
+  width: 180px;
+  height: 180px;
+  border: 1px solid rgb(255 255 255 / 0.26);
+  border-radius: 42% 58% 64% 36%;
+  content: "";
+  inset: 14% 10% auto auto;
+  transform: rotate(var(--design-angle));
+}
+
+.system-design-preview {
+  position: relative;
+}
+
+.system-design-preview__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.system-design-preview strong {
+  max-width: 90%;
+  font-size: clamp(1.35rem, 5vw, 2.25rem);
+  line-height: 1.05;
+}
+
+.system-design-preview small {
+  opacity: 0.72;
+}
