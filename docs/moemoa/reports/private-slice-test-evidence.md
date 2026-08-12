@@ -62,20 +62,26 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 | Capacitor static asset exact route | `/memory/new/`가 native local server에서 root fallback을 반환하는 emulator 실패 | 1 test PASS, `/memory/new/index.html`로 수정 |
 | Web ticket sanitization과 bridge response normalization | adapter module 부재로 unit import 실패 | 3 tests PASS |
 | 일반 Web에서 LOCAL_ONLY file input 차단 | `/memory/new/` 404로 Playwright 실패 | Chromium E2E PASS |
+| 교체 전 기존 Card/image 보존과 commit 뒤 이전 file 삭제 | replace command module 부재, 이후 old-file 선삭제·native 오류 노출 변이에서 unit 실패 | replacement unit 8 tests PASS |
+| commit 뒤 old-file cleanup 실패의 재시작 복구 | REPLACE journal이 recoverable operation에서 제외되고 native delete `false`를 성공으로 오인해 unit/실제 IndexedDB reopen test 실패 | startup reconciliation unit + IndexedDB reopen E2E PASS |
+| 상세 교체 preview·권리 확인·누락 이미지 복구·ticket ownership | 교체 control 부재, picker 연타 2회 호출, late/pre-reservation ticket 유실로 E2E 실패 | Card detail Chromium E2E 4 tests PASS |
+| runtime 교체 결과와 최종 화면 refresh 경계 | refresh bundle/preview 누락 및 post-commit read failure 전파로 unit 실패 | committed success 보존 포함 runtime unit 2 tests PASS |
+| 교체 중 metadata/concurrent replacement | stale Card snapshot이 동시 note를 덮어쓰고 같은 Card의 두 REPLACE reservation을 허용해 실제 IndexedDB test 실패 | latest Card merge + active REPLACE transaction guard E2E PASS |
+| discard 미확인 ticket의 durable cleanup | late/unmount discard `false` 뒤 opaque ticket ownership을 잃는 E2E·unit 실패 | bounded local cleanup queue + 다음 runtime startup retry PASS |
 
-현재 구현은 `MainActivity`, `ImageIntakeRuntime`, custom `ImageIntakePlugin`, React composer까지 연결됐다. Card/VisualAsset IndexedDB 영구 저장은 의도적으로 다음 milestone에 남겼다.
+현재 구현은 `MainActivity`, `ImageIntakeRuntime`, custom `ImageIntakePlugin`, React composer, owner-scoped Card/VisualAsset 영구 저장, create/replace/delete journal과 Archive/detail까지 연결됐다.
 
 ## 5. Checkpoint regression
 
 | 명령 | 결과 | 비고 |
 | --- | --- | --- |
 | `gradlew testDebugUnitTest assembleDebug` | PASS | generated example 포함 Android unit 25개, debug APK build |
-| `npm run test:unit` | PASS | 77/77; TitleResolver, AnimeRef, create/recovery, isolated DB schema와 기존 unit 포함 |
-| `npm run test:e2e -- --project=chromium --workers=1` | PASS | 43 passed, live 2 skipped; catalog candidate, PrivateTitle fallback, stale search 응답과 legacy 전체 회귀 포함 |
-| `npm run build` | PASS | Astro static 11 pages; Composer 11.62 kB, resolver 3.78 kB, lazy alias chunk 662.82 kB |
+| `npm run test:unit` | PASS | 91/91; replacement fault matrix/recovery/runtime/deferred cleanup, TitleResolver, AnimeRef, isolated DB schema와 기존 unit 포함 |
+| `npm run test:e2e -- --project=chromium --workers=1` | PASS | 49 passed, live 2 skipped; image replacement·missing image recovery·picker races와 legacy 전체 회귀 포함 |
+| `npm run build` | PASS | Astro static 11 pages; Detail 8.25 kB, Composer 11.62 kB, resolver 3.78 kB, lazy alias chunk 662.82 kB |
 | `cap sync android` | PASS | 최신 `dist`를 Android assets로 반영 |
 | sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,730,977 bytes |
-| `react-doctor --verbose --scope changed --base HEAD` | PASS | 89/100; 변경분 진단 issue 0건, Composer view/title selector/state hook 분리 후 재검증 |
+| `react-doctor --verbose --scope changed --base HEAD` | PASS | 100/100; 변경분 진단 issue 0건, detail reducer와 runtime 최종-view 경계 정리 후 재검증 |
 
 ## 6. API 36 emulator runtime evidence
 
@@ -110,8 +116,16 @@ Browser persistence evidence:
 - `moemoa-memory-v1` schema 1을 닫고 다시 연 뒤 같은 Guest Owner와 Complete Card를 조회했다.
 - 서로 다른 두 Guest Owner fixture의 Archive 조회가 섞이지 않았다.
 - 중단된 IMPORT/DELETE journal을 startup reconciliation이 재시도하고 안전한 완료 상태로 수렴시켰다.
+- REPLACE는 신규 asset과 Card pointer가 commit되기 전 기존 asset을 유지하고, commit 뒤 이전 asset만 `DELETE_PENDING`으로 전환한다.
+- 이전 file 삭제 실패 뒤 DB를 닫고 다시 연 실제 IndexedDB test에서 새 Card를 유지한 채 old-file cleanup만 재개했으며 ticket promotion은 반복하지 않았다.
+- native delete의 `false` 반환은 성공으로 처리하지 않으며, post-switch DB cleanup과 failure 기록이 함께 실패해도 Card 교체 성공을 유지하고 journal을 다음 startup 복구 대상으로 남긴다.
+- 교체 media promotion 중 다른 탭이 수정한 note를 실제 IndexedDB pointer commit이 보존하고, 같은 Card의 두 번째 active REPLACE reservation은 transaction 안에서 `OPERATION_IN_PROGRESS`로 거부한다.
+- 교체 완료 뒤 도착한 stale metadata 저장도 Card 전체 snapshot을 쓰지 않고 note만 최신 row에 병합하므로 새 asset pointer를 되돌리지 않는다.
 - 테스트용 legacy DB marker가 전후 동일해 신규 Memory DB가 `anime-collector-db`를 변경하지 않았음을 확인했다.
 - Playwright에서 image Card create→중복 저장 방지→Archive→reload→detail note edit→reload→delete→Archive reload와 system design create를 통과했다.
+- Playwright 상세 화면에서 기존 image 유지→새 bounded preview→권리 확인 전 적용 차단→교체→이전 asset scrub을 검증했고, preview 누락 Card에는 `이미지 복구`와 `카드 삭제`를 함께 표시했다.
+- picker 연타는 synchronous mutex로 한 번만 실행하고, detail 이탈 뒤 늦게 도착한 ticket은 discard한다. command가 journal을 만들기 전 거절한 ticket은 UI가 유지하며 native discard가 `true`로 확인될 때만 제거한다.
+- late/unmount discard가 `false` 또는 throw이면 안전한 opaque ticket ID만 최대 32개 cleanup queue에 남기고 다음 runtime startup에서 재시도한다. source URI, path, hash, preview는 queue에 기록하지 않는다.
 
 TitleResolver/AnimeRef evidence:
 
@@ -126,8 +140,9 @@ TitleResolver/AnimeRef evidence:
 현재 한계:
 
 - 물리 실기기와 실제 외부 앱 Share Target은 아직 검증하지 않았다.
-- orphan final file, DB-only missing file의 전체 filesystem reconciliation과 사용자 복구 UI는 아직 없다.
-- image replacement, ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.
+- orphan final file, DB-only missing file의 전체 filesystem reconciliation과 `MISSING` 자동 분류는 아직 없다. 상세 화면의 수동 교체·삭제 복구 진입점만 구현됐다.
+- ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.
+- image replacement는 Web fake-native·실제 IndexedDB까지 검증했지만 물리 Android 실기기에서 기존 native file 교체와 재시작 cleanup은 아직 검증하지 않았다.
 - 2.5초 제한은 UI 응답을 해제하지만 이미 시작한 AniList 요청 자체를 취소하지는 않는다.
 - schema v1의 `anime_refs.source_key` index는 비고유이므로 여러 탭이 동시에 같은 후보를 최초 저장하면 중복 AnimeRef가 생길 여지가 있다.
 - alias 데이터는 검색 시에만 lazy-load되지만 662.82 kB chunk 경고가 남아 있어 후속 인덱싱·분할 최적화가 필요하다.

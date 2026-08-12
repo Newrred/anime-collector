@@ -4,6 +4,10 @@
  * @property {(ownerId: string) => Promise<number>} countCompleteCards
  * @property {(reservation: Object) => Promise<void>} reserveCreate
  * @property {(completion: Object) => Promise<void>} completeCreate
+ * @property {(reservation: Object) => Promise<void>} reserveReplace
+ * @property {(completion: Object) => Promise<void>} commitReplace
+ * @property {(completion: Object) => Promise<void>} completeReplace
+ * @property {(input: {ownerId: string, cardId: string, changes: Object, now: string}) => Promise<Object>} updateCardMetadata
  * @property {(failure: Object) => Promise<void>} failOperation
  * @property {(sourceKey: string) => Promise<Object|null>} findAnimeRefBySourceKey
  */

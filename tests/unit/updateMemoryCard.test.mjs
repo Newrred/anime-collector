@@ -24,7 +24,11 @@ test("metadata update is owner-scoped and normalizes the private note", async ()
   const command = createUpdateMemoryCardCommand({
     repository: {
       getCardBundle: async () => structuredClone(stored),
-      updateCardMetadata: async ({ card }) => { stored = { ...stored, card: structuredClone(card) }; },
+      updateCardMetadata: async ({ cardId, changes, now }) => {
+        const card = { ...stored.card, ...changes, id: cardId, updatedAt: now };
+        stored = { ...stored, card: structuredClone(card) };
+        return card;
+      },
     },
     telemetry: { track: (name, properties) => events.push({ name, properties }) },
     clock: { now: () => "2026-08-12T01:00:00.000Z" },

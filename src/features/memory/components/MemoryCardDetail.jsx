@@ -1,39 +1,51 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
+import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import "./memory-card-detail.css";
 
+const INITIAL_STATE = Object.freeze({
+  runtime: null,
+  bundle: null,
+  previewDataUrl: null,
+  note: "",
+  status: "loading",
+  message: "",
+});
+
+const mergeState = (state, patch) => ({ ...state, ...patch });
+
 export default function MemoryCardDetail() {
-  const [runtime, setRuntime] = useState(null);
-  const [bundle, setBundle] = useState(null);
-  const [previewDataUrl, setPreviewDataUrl] = useState(null);
-  const [note, setNote] = useState("");
-  const [status, setStatus] = useState("loading");
-  const [message, setMessage] = useState("");
+  const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
+  const { runtime, bundle, previewDataUrl, note, status, message } = state;
 
   useEffect(() => {
     let active = true;
     const cardId = new URLSearchParams(window.location.search).get("id");
     if (!cardId) {
-      setStatus("not-found");
+      updateState({ status: "not-found" });
       return () => { active = false; };
     }
     getPlatformMemoryRuntime().then(async (activeRuntime) => {
       await activeRuntime.initialize();
       const cardBundle = await activeRuntime.getCard(cardId);
       if (!cardBundle) {
-        if (active) setStatus("not-found");
+        if (active) updateState({ status: "not-found" });
         return;
       }
-      const preview = await activeRuntime.getPreview(cardBundle.asset.localRef).catch(() => null);
+      const preview = cardBundle.asset.localRef
+        ? await activeRuntime.getPreview(cardBundle.asset.localRef).catch(() => null)
+        : null;
       if (!active) return;
-      setRuntime(activeRuntime);
-      setBundle(cardBundle);
-      setPreviewDataUrl(preview);
-      setNote(cardBundle.card.note || "");
-      setStatus("ready");
+      updateState({
+        runtime: activeRuntime,
+        bundle: cardBundle,
+        previewDataUrl: preview,
+        note: cardBundle.card.note || "",
+        status: "ready",
+      });
     }).catch(() => {
-      if (active) setStatus("error");
+      if (active) updateState({ status: "error" });
     });
     return () => { active = false; };
   }, []);
@@ -41,17 +53,20 @@ export default function MemoryCardDetail() {
   const save = async (event) => {
     event.preventDefault();
     if (!runtime || !bundle || status === "saving") return;
-    setStatus("saving");
-    setMessage("");
+    updateState({ status: "saving", message: "" });
     try {
       const card = await runtime.updateCard(bundle.card.id, { note });
-      setBundle({ ...bundle, card });
-      setNote(card.note || "");
-      setMessage("변경 내용을 이 기기에 저장했어요.");
-      setStatus("ready");
+      updateState({
+        bundle: { ...bundle, card },
+        note: card.note || "",
+        message: "변경 내용을 이 기기에 저장했어요.",
+        status: "ready",
+      });
     } catch {
-      setMessage("변경 내용을 저장하지 못했어요. 다시 시도해 주세요.");
-      setStatus("ready");
+      updateState({
+        message: "변경 내용을 저장하지 못했어요. 다시 시도해 주세요.",
+        status: "ready",
+      });
     }
   };
 
@@ -61,15 +76,32 @@ export default function MemoryCardDetail() {
       "이 카드를 기기에서 삭제할까요? 이미지와 감상도 함께 삭제되며 되돌릴 수 없어요.",
     );
     if (!confirmed) return;
-    setStatus("deleting");
-    setMessage("");
+    updateState({ status: "deleting", message: "" });
     try {
       await runtime.deleteCard(bundle.card.id);
       window.location.assign("/archive/index.html");
     } catch {
-      setMessage("카드를 완전히 삭제하지 못했어요. 앱을 다시 열어 복구를 시도해 주세요.");
-      setStatus("ready");
+      updateState({
+        message: "카드를 완전히 삭제하지 못했어요. 앱을 다시 열어 복구를 시도해 주세요.",
+        status: "ready",
+      });
     }
+  };
+
+  const replaceImage = async (ticket) => {
+    const result = await runtime.replaceCardImage(bundle.card.id, {
+      intakeTicketId: ticket.ticketId,
+      rightsConfirmed: true,
+    });
+    updateState(result.bundle ? {
+      bundle: result.bundle,
+      previewDataUrl: result.previewDataUrl || ticket.previewDataUrl,
+      message: result.cleanupPending
+        ? "새 이미지를 이 기기에 저장했어요. 이전 이미지 정리는 앱을 다시 열 때 마무리합니다."
+        : "새 이미지를 이 기기에 저장했어요.",
+    } : {
+      message: "새 이미지는 저장됐어요. 화면을 다시 열면 변경된 카드를 확인할 수 있어요.",
+    });
   };
 
   if (status === "loading") {
@@ -102,6 +134,14 @@ export default function MemoryCardDetail() {
         )}
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
+          <MemoryImageReplacement
+            runtime={runtime}
+            imageMissing={!bundle.asset.designSpec && !previewDataUrl}
+            disabled={status !== "ready"}
+            onReplace={replaceImage}
+            onBusyChange={(isBusy) => updateState({ status: isBusy ? "replacing" : "ready" })}
+            onMessage={(nextMessage) => updateState({ message: nextMessage })}
+          />
           <form onSubmit={save}>
             <label className="memory-detail__field">
               <span>짧은 감상</span>
@@ -110,7 +150,7 @@ export default function MemoryCardDetail() {
                 value={note}
                 maxLength={500}
                 rows={6}
-                onChange={(event) => setNote(event.target.value)}
+                onChange={(event) => updateState({ note: event.target.value })}
               />
               <small>{note.length}/500</small>
             </label>

@@ -39,6 +39,62 @@
   padding: 24px;
 }
 
+.memory-detail__replacement {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid rgba(185, 151, 255, 0.24);
+  border-radius: 16px;
+  background: rgba(127, 100, 168, 0.08);
+}
+
+.memory-detail__replacement-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.memory-detail__replacement-head p,
+.memory-detail__replacement-review p,
+.memory-detail__replacement-note {
+  margin: 6px 0 0;
+  color: var(--text-muted, #a79ebd);
+}
+
+.memory-detail__replacement-review {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.memory-detail__replacement-review > img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.memory-detail__rights {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+}
+
+.memory-detail__rights input {
+  margin-top: 3px;
+}
+
+.memory-detail__replacement-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
 .memory-detail__field {
   display: grid;
   gap: 8px;
@@ -63,4 +119,16 @@
 .memory-detail__state {
   padding: 32px;
   text-align: center;
+}
+
+@media (max-width: 620px) {
+  .memory-detail__replacement-head,
+  .memory-detail__replacement-review {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .memory-detail__replacement-head {
+    flex-direction: column;
+  }
 }

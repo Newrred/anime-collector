@@ -501,12 +501,12 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 상태: `[~] IN PROGRESS`
 
-- metadata 수정과 안전한 image replacement를 구현한다.
-- Card delete와 local file delete를 멱등 구현한다.
-- missing/broken asset 복구 UI를 제공한다.
-- versioned ZIP export와 Android 공유를 구현한다.
-- export manifest count/checksum 검증을 추가한다.
-- staging/export temp TTL cleanup을 구현한다.
+- `[x]` note metadata 수정과 안전한 image replacement를 구현한다.
+- `[x]` Card delete와 local file delete를 멱등 구현한다.
+- `[~]` 상세 화면에서 missing/broken image의 교체·삭제 복구 진입점을 제공한다. 전체 filesystem orphan scan과 `MISSING` 자동 분류는 남아 있다.
+- `[ ]` versioned ZIP export와 Android 공유를 구현한다.
+- `[ ]` export manifest count/checksum 검증을 추가한다.
+- `[ ]` staging/export temp TTL cleanup을 구현한다.
 
 완료 증거:
 
@@ -738,6 +738,12 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 [2026-08-12] 완료: composer 작품 검색·후보 provenance 표시·선택 해제·PrivateTitle fallback을 연결하고, 제목 변경 뒤 늦게 도착한 과거 응답을 generation guard로 폐기. resolver/aliases는 최초 검색 시에만 dynamic import.
 [2026-08-12] 남은 구현 갱신: 선택 metadata 전체, image replacement, missing/orphan file reconciliation UI, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix. TitleResolver/AnimeRef 항목은 완료.
 [2026-08-12] 검증: Web unit 77/77, Chromium 전체 43 pass/2 live skip, Astro static 11 pages, Android unit 30/30와 debug APK 11,730,977 bytes, React Doctor 89/100 통과. exact evidence와 잔여 위험은 test evidence 문서에 기록.
+[2026-08-12] 완료: REPLACE operation journal을 추가해 신규 asset READY와 Card pointer commit 전에는 기존 asset을 보존하고, commit 뒤에만 이전 asset을 DELETE_PENDING→DELETED로 정리한다. 이전 파일 삭제 실패는 새 Card 성공을 되돌리지 않고 startup reconciliation이 재시작 뒤 이어서 완료한다.
+[2026-08-12] 완료: Card 상세에서 Android image picker 기반 이미지 교체, bounded preview, 명시적 개인 사용 권리 확인, 취소 시 staging ticket 정리, 누락 이미지의 `이미지 복구`·`카드 삭제` 진입점을 연결했다. 교체 확정 전에는 기존 이미지가 계속 표시된다.
+[2026-08-12] 리뷰/보강: native delete `false`, post-switch DB cleanup failure, fail-state 기록의 2차 실패도 신규 Card 성공을 되돌리지 않고 복구 journal을 유지한다. 같은 Card의 동시 REPLACE는 transaction에서 차단하고, 교체 중 저장된 최신 note를 pointer commit이 덮어쓰지 않는다. picker 연타·화면 이탈의 late ticket과 pre-reservation 거절 ticket ownership도 검증했다.
+[2026-08-12] 추가 보강: metadata update는 Card 전체 snapshot 대신 허용된 note만 같은 readwrite transaction의 최신 Card에 병합한다. promotion 오류 기록이 2차 실패해도 journal의 ticket ownership을 유지하며, discard 미확인 ticket ID는 path/hash 없이 bounded local cleanup queue에 보존해 다음 runtime 시작에서 재시도한다.
+[2026-08-12] 검증: Web unit 91/91, Chromium 전체 49 pass/2 live skip, Astro static 11 pages, Android sync와 unit 30/30·debug APK 11,730,977 bytes, React Doctor 변경분 100/100 통과.
+[2026-08-12] 남은 구현 갱신: 선택 metadata 전체, 전체 filesystem orphan scan과 `MISSING` 자동 분류, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix. Image replacement와 상세 복구 진입점은 완료.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -755,6 +761,7 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 - Playwright의 native image 성공 경로는 DEV 빌드에만 존재하는 deterministic fake adapter를 사용한다. production Android는 Capacitor bridge만 사용하고 일반 Web에서는 local image input을 제공하지 않는다.
 - 검색 adapter는 full catalog ingestion이나 legacy 승격이 아니다. `aliases.json` row는 계속 `LEGACY_UNVERIFIED`이며, AniList 응답도 `PROVIDER_CANDIDATE`일 뿐 MOEMOA verified catalog가 아니다. 두 후보는 numeric AniList binding이 동일할 때만 화면 검색 결과에서 병합한다.
 - title resolver와 3,998-row alias payload는 Archive/detail runtime에서 정적으로 import하지 않고 첫 검색 시 lazy load한다. 이는 catalog 경계를 바꾸지 않는 번들 분리이며 신규 dependency나 schema 변경이 없다.
+- image replacement는 신규 schema 없이 기존 `MediaOperation.kind=REPLACE`, `previousAssetId`, VisualAsset lifecycle을 사용한다. 교체 command 결과와 telemetry에는 opaque ID·enum·boolean만 포함하고 ticket, source URI, native path, checksum은 포함하지 않는다.
 
 ### 변경 기록 규칙
 

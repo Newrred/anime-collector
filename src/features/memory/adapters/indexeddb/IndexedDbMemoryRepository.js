@@ -200,13 +200,193 @@ export class IndexedDbMemoryRepository {
     return clone({ card, title, asset });
   }
 
-  async updateCardMetadata({ ownerId, card }) {
-    const existing = await this.getCardBundle(ownerId, card.id);
-    if (!existing || card.ownerId !== ownerId || card.status !== "COMPLETE_PRIVATE") {
+  async updateCardMetadata({ ownerId, cardId, changes, now }) {
+    const transaction = this.database.transaction("memory_cards", "readwrite");
+    const cards = transaction.objectStore("memory_cards");
+    const current = await requestResult(cards.get(cardId));
+    if (!current || current.ownerId !== ownerId || current.status !== "COMPLETE_PRIVATE") {
+      transaction.abort();
       throw Object.assign(new Error("Private Card was not found"), { code: "CARD_NOT_FOUND" });
     }
-    const transaction = this.database.transaction("memory_cards", "readwrite");
-    transaction.objectStore("memory_cards").put(card);
+    const card = {
+      ...current,
+      ...(Object.hasOwn(changes || {}, "note") ? { note: changes.note } : {}),
+      updatedAt: String(now),
+    };
+    cards.put(card);
+    await transactionDone(transaction);
+    return clone(card);
+  }
+
+  async reserveReplace({ card, previousAsset, replacementAsset, operation }) {
+    await requireOwner(this.database, operation.ownerId);
+    if (
+      card.ownerId !== operation.ownerId ||
+      previousAsset.ownerId !== operation.ownerId ||
+      replacementAsset.ownerId !== operation.ownerId ||
+      replacementAsset.id !== operation.assetId ||
+      previousAsset.id !== operation.previousAssetId
+    ) {
+      throw Object.assign(new Error("Cross-owner replacement rejected"), {
+        code: "CROSS_OWNER_REFERENCE",
+      });
+    }
+
+    const transaction = this.database.transaction(
+      ["memory_cards", "visual_assets", "media_operations"],
+      "readwrite",
+    );
+    const cards = transaction.objectStore("memory_cards");
+    const assets = transaction.objectStore("visual_assets");
+    const operations = transaction.objectStore("media_operations");
+    const [storedCard, storedPreviousAsset, storedOperation, existingOperations] = await Promise.all([
+      requestResult(cards.get(card.id)),
+      requestResult(assets.get(previousAsset.id)),
+      requestResult(operations.get(operation.id)),
+      requestResult(operations.getAll()),
+    ]);
+    const activeReplacement = existingOperations.some((candidate) => (
+      candidate.ownerId === operation.ownerId &&
+      candidate.cardId === card.id &&
+      candidate.kind === "REPLACE" &&
+      ["PLANNED", "FILE_READY", "FAILED"].includes(candidate.state)
+    ));
+    if (activeReplacement) {
+      transaction.abort();
+      throw Object.assign(new Error("Another image replacement is in progress"), {
+        code: "OPERATION_IN_PROGRESS",
+      });
+    }
+    if (
+      storedOperation ||
+      !storedCard ||
+      storedCard.ownerId !== operation.ownerId ||
+      storedCard.status !== "COMPLETE_PRIVATE" ||
+      storedCard.visualAssetId !== previousAsset.id ||
+      !storedPreviousAsset ||
+      storedPreviousAsset.ownerId !== operation.ownerId ||
+      storedPreviousAsset.state !== "READY" ||
+      replacementAsset.state !== "IMPORTING"
+    ) {
+      transaction.abort();
+      throw Object.assign(new Error("Replacement reservation is stale"), {
+        code: "OPERATION_RESERVATION_MISMATCH",
+      });
+    }
+    assets.add(replacementAsset);
+    operations.add(operation);
+    await transactionDone(transaction);
+  }
+
+  async commitReplace({ card, replacementAsset, previousAsset, operation }) {
+    if (
+      card.ownerId !== operation.ownerId ||
+      replacementAsset.ownerId !== operation.ownerId ||
+      previousAsset.ownerId !== operation.ownerId ||
+      card.visualAssetId !== replacementAsset.id ||
+      replacementAsset.id !== operation.assetId ||
+      previousAsset.id !== operation.previousAssetId ||
+      replacementAsset.state !== "READY" ||
+      previousAsset.state !== "DELETE_PENDING"
+    ) {
+      throw Object.assign(new Error("Replacement commit is invalid"), {
+        code: "OPERATION_RESERVATION_MISMATCH",
+      });
+    }
+
+    const transaction = this.database.transaction(
+      ["memory_cards", "visual_assets", "media_operations"],
+      "readwrite",
+    );
+    const cards = transaction.objectStore("memory_cards");
+    const assets = transaction.objectStore("visual_assets");
+    const operations = transaction.objectStore("media_operations");
+    const [storedCard, storedReplacementAsset, storedPreviousAsset, storedOperation] = await Promise.all([
+      requestResult(cards.get(card.id)),
+      requestResult(assets.get(replacementAsset.id)),
+      requestResult(assets.get(previousAsset.id)),
+      requestResult(operations.get(operation.id)),
+    ]);
+    if (
+      !storedCard ||
+      storedCard.ownerId !== operation.ownerId ||
+      storedCard.visualAssetId !== previousAsset.id ||
+      !storedReplacementAsset ||
+      storedReplacementAsset.ownerId !== operation.ownerId ||
+      storedReplacementAsset.state !== "IMPORTING" ||
+      !storedPreviousAsset ||
+      storedPreviousAsset.ownerId !== operation.ownerId ||
+      storedPreviousAsset.state !== "READY" ||
+      !storedOperation ||
+      storedOperation.ownerId !== operation.ownerId ||
+      storedOperation.kind !== "REPLACE" ||
+      storedOperation.assetId !== replacementAsset.id ||
+      storedOperation.previousAssetId !== previousAsset.id
+    ) {
+      transaction.abort();
+      throw Object.assign(new Error("Replacement reservation does not match commit"), {
+        code: "OPERATION_RESERVATION_MISMATCH",
+      });
+    }
+    const committedCard = {
+      ...storedCard,
+      visualAssetId: replacementAsset.id,
+      updatedAt: card.updatedAt,
+    };
+    cards.put(committedCard);
+    assets.put(replacementAsset);
+    assets.put(previousAsset);
+    operations.put(operation);
+    await transactionDone(transaction);
+    return clone(committedCard);
+  }
+
+  async completeReplace({ replacementAsset, previousAsset, operation }) {
+    if (
+      replacementAsset.ownerId !== operation.ownerId ||
+      previousAsset.ownerId !== operation.ownerId ||
+      replacementAsset.id !== operation.assetId ||
+      previousAsset.id !== operation.previousAssetId ||
+      replacementAsset.state !== "READY" ||
+      previousAsset.state !== "DELETED" ||
+      operation.state !== "COMPLETED"
+    ) {
+      throw Object.assign(new Error("Replacement cleanup is invalid"), {
+        code: "OPERATION_RESERVATION_MISMATCH",
+      });
+    }
+    const transaction = this.database.transaction(
+      ["visual_assets", "media_operations"],
+      "readwrite",
+    );
+    const assets = transaction.objectStore("visual_assets");
+    const operations = transaction.objectStore("media_operations");
+    const [storedReplacementAsset, storedPreviousAsset, storedOperation] = await Promise.all([
+      requestResult(assets.get(replacementAsset.id)),
+      requestResult(assets.get(previousAsset.id)),
+      requestResult(operations.get(operation.id)),
+    ]);
+    if (
+      !storedReplacementAsset ||
+      storedReplacementAsset.ownerId !== operation.ownerId ||
+      storedReplacementAsset.state !== "READY" ||
+      !storedPreviousAsset ||
+      storedPreviousAsset.ownerId !== operation.ownerId ||
+      storedPreviousAsset.state !== "DELETE_PENDING" ||
+      !storedOperation ||
+      storedOperation.ownerId !== operation.ownerId ||
+      storedOperation.kind !== "REPLACE" ||
+      storedOperation.assetId !== replacementAsset.id ||
+      storedOperation.previousAssetId !== previousAsset.id ||
+      !["FILE_READY", "FAILED"].includes(storedOperation.state)
+    ) {
+      transaction.abort();
+      throw Object.assign(new Error("Replacement cleanup reservation was lost"), {
+        code: "OPERATION_RESERVATION_MISMATCH",
+      });
+    }
+    assets.put(previousAsset);
+    operations.put(operation);
     await transactionDone(transaction);
   }
 
@@ -248,7 +428,7 @@ export class IndexedDbMemoryRepository {
       .filter((operation) => (
         operation.ownerId === ownerId &&
         ["PLANNED", "FILE_READY", "FAILED"].includes(operation.state) &&
-        ["IMPORT", "DELETE"].includes(operation.kind)
+        ["IMPORT", "REPLACE", "DELETE"].includes(operation.kind)
       ))
       .sort((left, right) => left.createdAt.localeCompare(right.createdAt)));
   }
@@ -273,9 +453,15 @@ export class IndexedDbMemoryRepository {
     const animeRef = card?.animeRefId
       ? await requestResult(transaction.objectStore("anime_refs").get(card.animeRefId))
       : null;
+    const previousAsset = operation.previousAssetId
+      ? await requestResult(transaction.objectStore("visual_assets").get(operation.previousAssetId))
+      : null;
     await transactionDone(transaction);
     if (!card || !asset || card.ownerId !== ownerId || asset.ownerId !== ownerId) return null;
-    return clone({ operation, card, asset, title, animeRef });
+    if (operation.kind === "REPLACE" && (
+      !previousAsset || previousAsset.ownerId !== ownerId
+    )) return null;
+    return clone({ operation, card, asset, previousAsset, title, animeRef });
   }
 
   async beginOperationAttempt(operation, now) {
@@ -284,7 +470,6 @@ export class IndexedDbMemoryRepository {
     const transaction = this.database.transaction("media_operations", "readwrite");
     transaction.objectStore("media_operations").put({
       ...current,
-      state: "PLANNED",
       attemptCount: Number(current.attemptCount || 0) + 1,
       lastErrorCode: null,
       updatedAt: String(now),

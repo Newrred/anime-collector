@@ -67,6 +67,55 @@ const deleteBundle = () => ({
   },
 });
 
+const replaceCleanupBundle = () => ({
+  operation: {
+    id: "replace-op",
+    ownerId: OWNER_ID,
+    cardId: "card-3",
+    assetId: "asset-new",
+    previousAssetId: "asset-old",
+    kind: "REPLACE",
+    state: "FAILED",
+    attemptCount: 1,
+    intakeTicketId: null,
+    result: {
+      operationId: "replace-op",
+      cardId: "card-3",
+      visualAssetId: "asset-new",
+      previousAssetId: "asset-old",
+      cleanupPending: true,
+    },
+    createdAt: "2026-08-12T00:00:00.000Z",
+  },
+  card: {
+    id: "card-3",
+    ownerId: OWNER_ID,
+    privateTitleId: "title-3",
+    animeRefId: null,
+    visualAssetId: "asset-new",
+    status: "COMPLETE_PRIVATE",
+    note: "keep note",
+  },
+  title: { id: "title-3", ownerId: OWNER_ID, displayTitle: "Violet" },
+  asset: {
+    id: "asset-new",
+    ownerId: OWNER_ID,
+    state: "READY",
+    localRef: "asset:new",
+    storageScope: "LOCAL_ONLY",
+    visibility: "PRIVATE",
+  },
+  previousAsset: {
+    id: "asset-old",
+    ownerId: OWNER_ID,
+    state: "DELETE_PENDING",
+    localRef: "asset:old",
+    checksumSha256: "c".repeat(64),
+    storageScope: "LOCAL_ONLY",
+    visibility: "PRIVATE",
+  },
+});
+
 test("startup reconciliation completes interrupted import and delete journals", async () => {
   const imports = importBundle();
   const deletion = deleteBundle();
@@ -183,4 +232,121 @@ test("reconciliation preserves an AnimeRef title when an import resumes", async 
   assert.equal(completion.card.animeRefId, "anime-ref-1");
   assert.equal(completion.operation.result.animeRefId, "anime-ref-1");
   assert.equal("privateTitleId" in completion.operation.result, false);
+});
+
+test("reconciliation finishes old-file cleanup without promoting an already-switched replacement", async () => {
+  const replacement = replaceCleanupBundle();
+  const attempts = [];
+  let completion;
+  const mediaCalls = [];
+  const reconciler = createMemoryOperationReconciler({
+    repository: {
+      listRecoverableOperations: async () => [replacement.operation],
+      getOperationBundle: async () => structuredClone(replacement),
+      beginOperationAttempt: async (operation) => attempts.push(operation.id),
+      completeReplace: async (value) => { completion = value; },
+      failOperation: async () => { throw new Error("not expected"); },
+    },
+    localMedia: {
+      promoteTicket: async () => assert.fail("committed replacement must not promote again"),
+      deleteAsset: async (value) => { mediaCalls.push(value); return true; },
+    },
+    clock: { now: () => "2026-08-12T06:00:00.000Z" },
+  });
+
+  assert.deepEqual(await reconciler.execute(OWNER_ID), { recovered: 1, failed: 0 });
+  assert.deepEqual(attempts, ["replace-op"]);
+  assert.deepEqual(mediaCalls, [{ localRef: "asset:old" }]);
+  assert.equal(completion.card.visualAssetId, "asset-new");
+  assert.equal(completion.replacementAsset.id, "asset-new");
+  assert.equal(completion.previousAsset.state, "DELETED");
+  assert.equal(completion.previousAsset.localRef, null);
+  assert.equal(completion.previousAsset.checksumSha256, null);
+  assert.equal(completion.operation.state, "COMPLETED");
+  assert.equal(completion.operation.result.cleanupPending, false);
+});
+
+test("reconciliation does not scrub a previous asset when native deletion is unconfirmed", async () => {
+  const replacement = replaceCleanupBundle();
+  const failures = [];
+  let completion;
+  const reconciler = createMemoryOperationReconciler({
+    repository: {
+      listRecoverableOperations: async () => [replacement.operation],
+      getOperationBundle: async () => structuredClone(replacement),
+      beginOperationAttempt: async () => {},
+      completeReplace: async (value) => { completion = value; },
+      failOperation: async (failure) => failures.push(failure),
+    },
+    localMedia: {
+      promoteTicket: async () => assert.fail("committed replacement must not promote again"),
+      deleteAsset: async () => false,
+    },
+    clock: { now: () => "2026-08-12T06:30:00.000Z" },
+  });
+
+  assert.deepEqual(await reconciler.execute(OWNER_ID), { recovered: 0, failed: 1 });
+  assert.equal(completion, undefined);
+  assert.equal(replacement.previousAsset.localRef, "asset:old");
+  assert.equal(failures[0].errorCode, "MEDIA_DELETE_FAILED");
+});
+
+test("reconciliation resumes a replacement that stopped before the new file was committed", async () => {
+  const replacement = replaceCleanupBundle();
+  replacement.operation.state = "FAILED";
+  replacement.operation.intakeTicketId = "ticket-new";
+  replacement.operation.result = null;
+  replacement.card.visualAssetId = "asset-old";
+  replacement.asset.state = "IMPORTING";
+  replacement.asset.localRef = null;
+  replacement.previousAsset.state = "READY";
+  replacement.previousAsset.deletedAt = null;
+  const sequence = [];
+  let committed;
+  let completed;
+  const reconciler = createMemoryOperationReconciler({
+    repository: {
+      listRecoverableOperations: async () => [replacement.operation],
+      getOperationBundle: async () => structuredClone(replacement),
+      beginOperationAttempt: async () => sequence.push("attempt"),
+      commitReplace: async (value) => { sequence.push("commit"); committed = value; },
+      completeReplace: async (value) => { sequence.push("complete"); completed = value; },
+      failOperation: async () => { throw new Error("not expected"); },
+    },
+    localMedia: {
+      promoteTicket: async (value) => {
+        sequence.push("promote");
+        assert.deepEqual(value, {
+          ticketId: "ticket-new",
+          assetId: "asset-new",
+          operationId: "replace-op",
+        });
+        return {
+          localRef: "asset:new",
+          checksumSha256: "d".repeat(64),
+          mimeType: "image/webp",
+          byteSize: 4096,
+          width: 1920,
+          height: 1080,
+        };
+      },
+      deleteAsset: async ({ localRef }) => {
+        sequence.push("delete-old");
+        assert.equal(localRef, "asset:old");
+        return true;
+      },
+    },
+    clock: { now: () => "2026-08-12T07:00:00.000Z" },
+  });
+
+  assert.deepEqual(await reconciler.execute(OWNER_ID), { recovered: 1, failed: 0 });
+  assert.deepEqual(sequence, ["attempt", "promote", "commit", "delete-old", "complete"]);
+  assert.equal(committed.card.visualAssetId, "asset-new");
+  assert.equal(committed.replacementAsset.state, "READY");
+  assert.equal(committed.previousAsset.state, "DELETE_PENDING");
+  assert.equal(committed.operation.state, "FILE_READY");
+  assert.equal(committed.operation.intakeTicketId, null);
+  assert.equal(completed.previousAsset.state, "DELETED");
+  assert.equal(completed.operation.state, "COMPLETED");
+  assert.equal(completed.operation.result.cleanupPending, false);
 });

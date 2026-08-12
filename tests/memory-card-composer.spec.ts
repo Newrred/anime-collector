@@ -79,6 +79,305 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await expect(page.getByRole("heading", { name: "Frieren" })).toHaveCount(0);
 });
 
+test("card detail replaces a local image only after explicit rights confirmation", async ({ page }) => {
+  await page.addInitScript(() => {
+    const oldPreview = "data:image/jpeg;base64,b2xkLXByZXZpZXc=";
+    const newPreview = "data:image/jpeg;base64,bmV3LXByZXZpZXc=";
+    const ticket = (ticketId: string, previewDataUrl: string) => ({
+      ticketId,
+      mimeType: "image/jpeg",
+      byteSize: 42,
+      width: 1280,
+      height: 720,
+      createdAtEpochMs: 123,
+      previewDataUrl,
+      localOnly: true,
+    });
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => ({
+        ticket: ticket("ticket-old", oldPreview),
+        processing: false,
+        errorCode: null,
+      }),
+      pick: async () => ({ ticket: ticket("ticket-new", newPreview), cancelled: false }),
+      discard: async () => true,
+      promoteTicket: async ({ ticketId, assetId }) => {
+        const localRef = `asset:${assetId}`;
+        sessionStorage.setItem(
+          `moemoa-test-preview:${localRef}`,
+          ticketId === "ticket-new" ? newPreview : oldPreview,
+        );
+        return {
+          localRef,
+          checksumSha256: ticketId === "ticket-new" ? "b".repeat(64) : "a".repeat(64),
+          mimeType: "image/jpeg",
+          byteSize: 42,
+          width: 1280,
+          height: 720,
+        };
+      },
+      getPreview: async (localRef: string) => (
+        sessionStorage.getItem(`moemoa-test-preview:${localRef}`)
+      ),
+      deleteAsset: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
+  await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await page.getByRole("link", { name: "Frieren" }).click();
+
+  const currentImage = page.getByAltText("Frieren 메모리 카드");
+  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,b2xkLXByZXZpZXc=");
+  await page.getByRole("button", { name: "이미지 교체" }).click();
+  await expect(page.getByAltText("새 이미지 미리보기")).toHaveAttribute(
+    "src",
+    "data:image/jpeg;base64,bmV3LXByZXZpZXc=",
+  );
+  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,b2xkLXByZXZpZXc=");
+
+  const applyReplacement = page.getByRole("button", { name: "이 이미지로 교체" });
+  await expect(applyReplacement).toBeDisabled();
+  await page.getByLabel("이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.").check();
+  await expect(applyReplacement).toBeEnabled();
+  await applyReplacement.click();
+
+  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,bmV3LXByZXZpZXc=");
+  await expect(page.getByText("새 이미지를 이 기기에 저장했어요.")).toBeVisible();
+
+  const stored = await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction(
+      ["memory_cards", "visual_assets", "media_operations"],
+      "readonly",
+    );
+    const requestValue = <T,>(value: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
+      value.onsuccess = () => resolve(value.result);
+      value.onerror = () => reject(value.error);
+    });
+    const [cards, assets, operations] = await Promise.all([
+      requestValue(transaction.objectStore("memory_cards").getAll()),
+      requestValue(transaction.objectStore("visual_assets").getAll()),
+      requestValue(transaction.objectStore("media_operations").getAll()),
+    ]);
+    database.close();
+    return { cards, assets, operations };
+  });
+  const replacement = stored.operations.find(({ kind }) => kind === "REPLACE");
+  expect(replacement.state).toBe("COMPLETED");
+  expect(stored.cards[0].visualAssetId).toBe(replacement.assetId);
+  expect(stored.assets.find(({ id }) => id === replacement.assetId).state).toBe("READY");
+  const oldAsset = stored.assets.find(({ id }) => id === replacement.previousAssetId);
+  expect(oldAsset.state).toBe("DELETED");
+  expect(oldAsset.localRef).toBeNull();
+});
+
+test("missing local image exposes recovery and delete actions", async ({ page }) => {
+  await page.addInitScript(() => {
+    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => ({
+        ticket: {
+          ticketId: "ticket-old",
+          mimeType: "image/jpeg",
+          byteSize: 42,
+          width: 1280,
+          height: 720,
+          createdAtEpochMs: 123,
+          previewDataUrl,
+          localOnly: true,
+        },
+        processing: false,
+        errorCode: null,
+      }),
+      pick: async () => ({ ticket: null, cancelled: true }),
+      discard: async () => true,
+      promoteTicket: async ({ assetId }) => ({
+        localRef: `asset:${assetId}`,
+        checksumSha256: "a".repeat(64),
+        mimeType: "image/jpeg",
+        byteSize: 42,
+        width: 1280,
+        height: 720,
+      }),
+      getPreview: async () => null,
+      deleteAsset: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
+  await page.getByLabel("작품 또는 카드 제목").fill("Missing Image Card");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await page.getByRole("link", { name: "Missing Image Card" }).click();
+
+  await expect(page.getByText("이미지를 불러올 수 없어요.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "이미지 복구" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "카드 삭제" })).toBeVisible();
+});
+
+test("late picker result is discarded after leaving detail and rapid clicks open only one picker", async ({ page }) => {
+  await page.addInitScript(() => {
+    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+    const ticket = (ticketId: string) => ({
+      ticketId,
+      mimeType: "image/jpeg",
+      byteSize: 42,
+      width: 1280,
+      height: 720,
+      createdAtEpochMs: 123,
+      previewDataUrl,
+      localOnly: true,
+    });
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => ({ ticket: ticket("ticket-old"), processing: false, errorCode: null }),
+      pick: async () => {
+        const count = Number(sessionStorage.getItem("picker-call-count") || "0") + 1;
+        sessionStorage.setItem("picker-call-count", String(count));
+        await new Promise((resolve) => setTimeout(resolve, 120));
+        return { ticket: ticket("ticket-late"), cancelled: false };
+      },
+      discard: async (ticketId: string) => {
+        sessionStorage.setItem("discarded-late-ticket", ticketId);
+        return sessionStorage.getItem("allow-late-ticket-cleanup") === "true";
+      },
+      promoteTicket: async ({ assetId }) => ({
+        localRef: `asset:${assetId}`,
+        checksumSha256: "a".repeat(64),
+        mimeType: "image/jpeg",
+        byteSize: 42,
+        width: 1280,
+        height: 720,
+      }),
+      getPreview: async () => previewDataUrl,
+      deleteAsset: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
+  await page.getByLabel("작품 또는 카드 제목").fill("Picker Ownership");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await page.getByRole("link", { name: "Picker Ownership" }).click();
+
+  await page.getByRole("button", { name: "이미지 교체" }).evaluate((button: HTMLButtonElement) => {
+    button.click();
+    button.click();
+  });
+  await page.getByRole("link", { name: "← Memory Archive" }).click();
+  await page.waitForTimeout(200);
+
+  expect(await page.evaluate(() => sessionStorage.getItem("picker-call-count"))).toBe("1");
+  expect(await page.evaluate(() => sessionStorage.getItem("discarded-late-ticket"))).toBe("ticket-late");
+  expect(await page.evaluate(() => JSON.parse(
+    localStorage.getItem("moemoa:pending-ticket-cleanup:v1") || "[]",
+  ))).toEqual(["ticket-late"]);
+
+  await page.evaluate(() => sessionStorage.setItem("allow-late-ticket-cleanup", "true"));
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => (
+    localStorage.getItem("moemoa:pending-ticket-cleanup:v1")
+  ))).toBeNull();
+});
+
+test("pre-reservation replacement rejection keeps the ticket until discard is confirmed", async ({ page }) => {
+  await page.addInitScript(() => {
+    const oldPreview = "data:image/jpeg;base64,b2xkLXByZXZpZXc=";
+    const newPreview = "data:image/jpeg;base64,bmV3LXByZXZpZXc=";
+    const ticket = (ticketId: string, previewDataUrl: string) => ({
+      ticketId,
+      mimeType: "image/jpeg",
+      byteSize: 42,
+      width: 1280,
+      height: 720,
+      createdAtEpochMs: 123,
+      previewDataUrl,
+      localOnly: true,
+    });
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => ({
+        ticket: ticket("ticket-old", oldPreview),
+        processing: false,
+        errorCode: null,
+      }),
+      pick: async () => ({ ticket: ticket("ticket-rejected", newPreview), cancelled: false }),
+      discard: async (ticketId: string) => {
+        const count = Number(sessionStorage.getItem("rejected-discard-count") || "0") + 1;
+        sessionStorage.setItem("rejected-discard-count", String(count));
+        sessionStorage.setItem("rejected-discard-ticket", ticketId);
+        return count > 1;
+      },
+      promoteTicket: async ({ assetId }) => ({
+        localRef: `asset:${assetId}`,
+        checksumSha256: "a".repeat(64),
+        mimeType: "image/jpeg",
+        byteSize: 42,
+        width: 1280,
+        height: 720,
+      }),
+      getPreview: async () => oldPreview,
+      deleteAsset: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
+  await page.getByLabel("작품 또는 카드 제목").fill("Rejected Replacement");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await page.getByRole("link", { name: "Rejected Replacement" }).click();
+  await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction("visual_assets", "readwrite");
+    const assets = transaction.objectStore("visual_assets");
+    const all: any[] = await new Promise((resolve, reject) => {
+      const get = assets.getAll();
+      get.onsuccess = () => resolve(get.result);
+      get.onerror = () => reject(get.error);
+    });
+    assets.put({ ...all[0], state: "DELETE_PENDING" });
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    database.close();
+  });
+
+  await page.getByRole("button", { name: "이미지 교체" }).click();
+  await page.getByLabel("이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.").check();
+  await page.getByRole("button", { name: "이 이미지로 교체" }).click();
+  await expect(page.getByAltText("새 이미지 미리보기")).toBeVisible();
+
+  await page.getByRole("button", { name: "취소" }).click();
+  await expect(page.getByAltText("새 이미지 미리보기")).toBeVisible();
+  await expect(page.getByText("선택한 임시 이미지를 정리하지 못했어요. 다시 시도해 주세요.")).toBeVisible();
+  await page.getByRole("button", { name: "취소" }).click();
+  await expect(page.getByAltText("새 이미지 미리보기")).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem("rejected-discard-ticket"))).toBe(
+    "ticket-rejected",
+  );
+  expect(await page.evaluate(() => localStorage.getItem(
+    "moemoa:pending-ticket-cleanup:v1",
+  ))).toBeNull();
+});
+
 test("browser can create a deterministic system design card without an image upload", async ({ page }) => {
   await page.goto("/memory/new/");
   await page.getByLabel("작품 또는 카드 제목").fill("A Place Further Than the Universe");
