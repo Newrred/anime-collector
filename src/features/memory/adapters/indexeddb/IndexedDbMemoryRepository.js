@@ -73,40 +73,72 @@ export class IndexedDbMemoryRepository {
     return Number(count || 0);
   }
 
-  async reserveCreate({ title, card, asset, operation }) {
+  async findAnimeRefBySourceKey(sourceKey) {
+    const transaction = this.database.transaction("anime_refs", "readonly");
+    const animeRef = await requestResult(
+      transaction.objectStore("anime_refs").index("source_key").get(String(sourceKey || "")),
+    );
+    await transactionDone(transaction);
+    return clone(animeRef);
+  }
+
+  async reserveCreate({ title = null, animeRef = null, card, asset, operation }) {
     await requireOwner(this.database, operation.ownerId);
     const existing = await this.getOperation(operation.ownerId, operation.id);
     if (existing) {
       throw Object.assign(new Error("Operation already exists"), { code: "OPERATION_EXISTS" });
     }
 
+    if (Boolean(title) === Boolean(animeRef)) {
+      throw Object.assign(new Error("Create requires exactly one title record"), {
+        code: "TITLE_REFERENCE_CONFLICT",
+      });
+    }
+    if ([title?.ownerId, card.ownerId, asset.ownerId]
+      .filter(Boolean)
+      .some((ownerId) => ownerId !== operation.ownerId)) {
+      throw Object.assign(new Error("Cross-owner reservation rejected"), {
+        code: "CROSS_OWNER_REFERENCE",
+      });
+    }
+
+    const titleStore = title ? "private_titles" : "anime_refs";
     const transaction = this.database.transaction(
-      ["private_titles", "memory_cards", "visual_assets", "media_operations"],
+      [titleStore, "memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    transaction.objectStore("private_titles").add(title);
+    if (title) transaction.objectStore(titleStore).add(title);
+    else transaction.objectStore(titleStore).put(animeRef);
     transaction.objectStore("memory_cards").add(card);
     transaction.objectStore("visual_assets").add(asset);
     transaction.objectStore("media_operations").add(operation);
     await transactionDone(transaction);
   }
 
-  async completeCreate({ title, card, asset, operation }) {
+  async completeCreate({ title = null, animeRef = null, card, asset, operation }) {
     const existing = await this.getOperation(operation.ownerId, operation.id);
     if (!existing || existing.cardId !== card.id || existing.assetId !== asset.id) {
       throw Object.assign(new Error("Create reservation does not match completion"), {
         code: "OPERATION_RESERVATION_MISMATCH",
       });
     }
-    if ([title.ownerId, card.ownerId, asset.ownerId].some((ownerId) => ownerId !== operation.ownerId)) {
+    if (Boolean(title) === Boolean(animeRef)) {
+      throw Object.assign(new Error("Completion requires exactly one title record"), {
+        code: "TITLE_REFERENCE_CONFLICT",
+      });
+    }
+    if ([title?.ownerId, card.ownerId, asset.ownerId]
+      .filter(Boolean)
+      .some((ownerId) => ownerId !== operation.ownerId)) {
       throw Object.assign(new Error("Cross-owner completion rejected"), { code: "CROSS_OWNER_REFERENCE" });
     }
 
+    const titleStore = title ? "private_titles" : "anime_refs";
     const transaction = this.database.transaction(
-      ["private_titles", "memory_cards", "visual_assets", "media_operations"],
+      [titleStore, "memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    transaction.objectStore("private_titles").put(title);
+    transaction.objectStore(titleStore).put(title || animeRef);
     transaction.objectStore("memory_cards").put(card);
     transaction.objectStore("visual_assets").put(asset);
     transaction.objectStore("media_operations").put(operation);

@@ -10,6 +10,7 @@ class FakeRepository {
   constructor() {
     this.operations = new Map();
     this.titles = new Map();
+    this.animeRefs = new Map();
     this.cards = new Map();
     this.assets = new Map();
   }
@@ -25,15 +26,21 @@ class FakeRepository {
     ).length;
   }
 
-  async reserveCreate({ title, card, asset, operation }) {
-    this.titles.set(title.id, structuredClone(title));
+  async findAnimeRefBySourceKey(sourceKey) {
+    return [...this.animeRefs.values()].find((animeRef) => animeRef.sourceKey === sourceKey) || null;
+  }
+
+  async reserveCreate({ title, animeRef, card, asset, operation }) {
+    if (title) this.titles.set(title.id, structuredClone(title));
+    if (animeRef) this.animeRefs.set(animeRef.id, structuredClone(animeRef));
     this.cards.set(card.id, structuredClone(card));
     this.assets.set(asset.id, structuredClone(asset));
     this.operations.set(operation.id, structuredClone(operation));
   }
 
-  async completeCreate({ title, card, asset, operation }) {
-    this.titles.set(title.id, structuredClone(title));
+  async completeCreate({ title, animeRef, card, asset, operation }) {
+    if (title) this.titles.set(title.id, structuredClone(title));
+    if (animeRef) this.animeRefs.set(animeRef.id, structuredClone(animeRef));
     this.cards.set(card.id, structuredClone(card));
     this.assets.set(asset.id, structuredClone(asset));
     this.operations.set(operation.id, structuredClone(operation));
@@ -79,7 +86,12 @@ const createHarness = ({ promoteError } = {}) => {
       },
     },
     clock: { now: () => NOW },
-    ids: { next: (kind) => ({ card: "card-1", asset: "asset-1", privateTitle: "title-1" })[kind] },
+    ids: { next: (kind) => ({
+      card: "card-1",
+      asset: "asset-1",
+      privateTitle: "title-1",
+      animeRef: "anime-ref-1",
+    })[kind] },
   });
   return { command, repository, calls };
 };
@@ -179,4 +191,54 @@ test("system design completes without native media or local-use confirmation", a
   assert.equal(asset.localRef, null);
   assert.deepEqual(asset.designSpec, designInput.systemDesignSpec);
   assert.equal(repository.cards.get("card-1").status, "COMPLETE_PRIVATE");
+});
+
+test("selected catalog candidate creates an AnimeRef card without retaining provider artwork", async () => {
+  const { command, repository, calls } = createHarness();
+  const animeInput = {
+    operationId: "operation-1",
+    ownerId: OWNER_ID,
+    titleChoice: {
+      kind: "ANIME_REF",
+      displayTitle: "Frieren: Beyond Journey's End",
+      aliases: ["Sousou no Frieren", "葬送のフリーレン"],
+      genres: ["Adventure", "Fantasy"],
+      sourceBinding: { provider: "ANILIST", externalId: "154587" },
+      verificationState: "PROVIDER_CANDIDATE",
+      coverImage: "https://cdn.example/private-provider-art.jpg",
+    },
+    systemDesignSpec: {
+      version: 1,
+      templateId: "memory-gradient",
+      paletteId: "violet-dawn",
+      patternSeed: "seed-1",
+      titleLayout: "BOTTOM_LEFT",
+      genreTokens: ["Adventure", "Fantasy"],
+    },
+  };
+
+  const result = await command.execute(animeInput);
+
+  assert.deepEqual(result, {
+    operationId: "operation-1",
+    cardId: "card-1",
+    visualAssetId: "asset-1",
+    animeRefId: "anime-ref-1",
+  });
+  assert.equal(repository.cards.get("card-1").animeRefId, "anime-ref-1");
+  assert.equal(repository.cards.get("card-1").privateTitleId, null);
+  assert.equal(repository.titles.size, 0);
+  assert.deepEqual(repository.animeRefs.get("anime-ref-1").sourceBinding, {
+    provider: "ANILIST",
+    externalId: "154587",
+  });
+  assert.equal("coverImage" in repository.animeRefs.get("anime-ref-1"), false);
+  assert.deepEqual(calls.events, [
+    { name: "system_design_selected", properties: { templateId: "memory-gradient" } },
+    {
+      name: "first_memory_card_saved",
+      properties: { storageScope: "LOCAL_ONLY", titleKind: "ANIME_REF" },
+    },
+  ]);
+  assert.doesNotMatch(JSON.stringify(calls.events), /Frieren|154587|https?/i);
 });

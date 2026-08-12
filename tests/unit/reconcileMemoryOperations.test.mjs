@@ -143,3 +143,44 @@ test("reconciliation records a safe failure and continues with other operations"
     now: "2026-08-12T04:00:00.000Z",
   }]);
 });
+
+test("reconciliation preserves an AnimeRef title when an import resumes", async () => {
+  const imports = importBundle();
+  imports.card.privateTitleId = null;
+  imports.card.animeRefId = "anime-ref-1";
+  imports.title = null;
+  imports.animeRef = {
+    id: "anime-ref-1",
+    displayTitle: "Frieren: Beyond Journey's End",
+    sourceKey: "ANILIST:154587",
+    verificationState: "PROVIDER_CANDIDATE",
+  };
+  let completion;
+  const reconciler = createMemoryOperationReconciler({
+    repository: {
+      listRecoverableOperations: async () => [imports.operation],
+      getOperationBundle: async () => structuredClone(imports),
+      beginOperationAttempt: async () => {},
+      completeCreate: async (value) => { completion = value; },
+      failOperation: async () => { throw new Error("not expected"); },
+    },
+    localMedia: {
+      promoteTicket: async () => ({
+        localRef: "asset:asset-1",
+        checksumSha256: "a".repeat(64),
+        mimeType: "image/png",
+        byteSize: 42,
+        width: 1920,
+        height: 1080,
+      }),
+    },
+    clock: { now: () => "2026-08-12T04:00:00.000Z" },
+  });
+
+  assert.deepEqual(await reconciler.execute(OWNER_ID), { recovered: 1, failed: 0 });
+  assert.equal(completion.title, null);
+  assert.equal(completion.animeRef.id, "anime-ref-1");
+  assert.equal(completion.card.animeRefId, "anime-ref-1");
+  assert.equal(completion.operation.result.animeRefId, "anime-ref-1");
+  assert.equal("privateTitleId" in completion.operation.result, false);
+});

@@ -47,3 +47,28 @@ test("runtime initializes one guest owner and scopes create/archive commands to 
   assert.equal(calls.find(([name]) => name === "create")[1].operationId, "operation-1");
   assert.equal(calls.find(([name]) => name === "archive")[1], OWNER_ID);
 });
+
+test("runtime exposes title search without initializing an owner or logging the query", async () => {
+  const calls = [];
+  const runtime = createMemoryRuntime({
+    repository: {
+      ensureGuestOwner: async () => { throw new Error("search must not initialize owner"); },
+    },
+    imageIntake: { available: false },
+    createCommand: { execute: async () => ({}) },
+    titleResolver: {
+      search: async (query) => {
+        calls.push(query);
+        return { results: [{ displayTitle: "Frieren" }], remoteStatus: "READY" };
+      },
+    },
+    uuid: () => "11111111-1111-4111-8111-111111111111",
+    clock: { now: () => "2026-08-12T00:00:00.000Z" },
+  });
+
+  assert.deepEqual(await runtime.searchTitles("프리렌"), {
+    results: [{ displayTitle: "Frieren" }],
+    remoteStatus: "READY",
+  });
+  assert.deepEqual(calls, ["프리렌"]);
+});

@@ -82,6 +82,37 @@ test("memory database survives reopen and does not mutate the legacy database", 
       note: "private note",
       rightsConfirmed: true,
     });
+    const catalogCommand = commandModule.createMemoryCardCommand({
+      repository,
+      localMedia: { promoteTicket: async () => { throw new Error("system design must not import media"); } },
+      telemetry: { track: () => {} },
+      clock: { now: () => "2026-08-12T01:15:00.000Z" },
+      ids: { next: (kind: string) => ({
+        card: "card-catalog",
+        asset: "asset-catalog",
+        animeRef: "anime-ref-catalog",
+      })[kind] },
+    });
+    await catalogCommand.execute({
+      operationId: "operation-catalog",
+      ownerId: owner.id,
+      titleChoice: {
+        kind: "ANIME_REF",
+        displayTitle: "Frieren: Beyond Journey's End",
+        aliases: ["Sousou no Frieren"],
+        genres: ["Adventure", "Fantasy"],
+        sourceBinding: { provider: "ANILIST", externalId: "154587" },
+        verificationState: "PROVIDER_CANDIDATE",
+      },
+      systemDesignSpec: {
+        version: 1,
+        templateId: "memory-gradient",
+        paletteId: "violet-dawn",
+        patternSeed: "catalog-seed",
+        titleLayout: "BOTTOM_LEFT",
+        genreTokens: ["Adventure", "Fantasy"],
+      },
+    });
     await repository.reserveCreate({
       title: {
         id: "title-2",
@@ -153,6 +184,7 @@ test("memory database survives reopen and does not mutate the legacy database", 
     const stores = [...reopened.database.objectStoreNames];
     reopened.close();
 
+    const animeRefBundle = archive.find(({ card }) => card.id === "card-catalog");
     return {
       ownerId: owner.id,
       sameOwnerId: sameOwner.id,
@@ -160,18 +192,25 @@ test("memory database survives reopen and does not mutate the legacy database", 
       otherArchive,
       stores,
       recovery,
+      animeRefBundle,
       legacyMarker: await readLegacyMarker(),
     };
   });
 
   expect(result.ownerId).toBe("guest:11111111-1111-4111-8111-111111111111");
   expect(result.sameOwnerId).toBe(result.ownerId);
-  expect(result.archive).toHaveLength(2);
+  expect(result.archive).toHaveLength(3);
   expect(result.archive.every(({ card }) => card.status === "COMPLETE_PRIVATE")).toBe(true);
   expect(result.archive.map(({ title }) => title.displayTitle).sort()).toEqual([
     "Frieren",
+    "Frieren: Beyond Journey's End",
     "Violet Evergarden",
   ]);
+  expect(result.animeRefBundle.card.privateTitleId).toBeNull();
+  expect(result.animeRefBundle.card.animeRefId).toBe("anime-ref-catalog");
+  expect(result.animeRefBundle.title.verificationState).toBe("PROVIDER_CANDIDATE");
+  expect(result.animeRefBundle.title.sourceKey).toBe("ANILIST:154587");
+  expect(result.animeRefBundle.title.coverImage).toBeUndefined();
   expect(result.archive.every(({ asset }) => asset.state === "READY")).toBe(true);
   expect(result.recovery).toEqual({ recovered: 1, failed: 0 });
   expect(result.otherArchive).toEqual([]);

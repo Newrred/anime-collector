@@ -1,4 +1,5 @@
 const GUEST_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ANIME_VERIFICATION_STATES = new Set(["LEGACY_UNVERIFIED", "PROVIDER_CANDIDATE"]);
 
 export class MemoryDomainError extends Error {
   constructor(code, message) {
@@ -33,6 +34,17 @@ export const normalizeDisplayTitle = (value) => {
   return title;
 };
 
+const normalizeUniqueText = (values, { maxItems, maxLength }) => {
+  const seen = new Set();
+  return Object.freeze((Array.isArray(values) ? values : []).flatMap((value) => {
+    const normalized = String(value || "").normalize("NFKC").trim().replace(/\s+/gu, " ");
+    const key = normalized.toLocaleLowerCase("en-US");
+    if (!normalized || normalized.length > maxLength || seen.has(key) || seen.size >= maxItems) return [];
+    seen.add(key);
+    return [normalized];
+  }));
+};
+
 export function createGuestOwner({ uuid, now }) {
   if (!GUEST_UUID.test(String(uuid || ""))) {
     fail("INVALID_OWNER_ID", "A version 4 UUID is required for a guest owner");
@@ -55,6 +67,39 @@ export function createPrivateTitle({ id, ownerId, displayTitle, optionalGenres =
       const normalizedGenre = String(genre).trim();
       return normalizedGenre ? [normalizedGenre] : [];
     })),
+    createdAt: String(now),
+    updatedAt: String(now),
+  });
+}
+
+export function createAnimeRef({
+  id,
+  displayTitle,
+  aliases = [],
+  genres = [],
+  sourceBinding,
+  verificationState,
+  now,
+}) {
+  const provider = String(sourceBinding?.provider || "").trim().toUpperCase();
+  const externalId = String(sourceBinding?.externalId ?? "").trim();
+  if (provider !== "ANILIST" || !/^[1-9]\d{0,11}$/.test(externalId)) {
+    fail("INVALID_ANIME_SOURCE", "A numeric AniList source binding is required");
+  }
+  if (!ANIME_VERIFICATION_STATES.has(verificationState)) {
+    fail("INVALID_VERIFICATION_STATE", "Anime reference provenance must remain explicit");
+  }
+
+  const title = normalizeDisplayTitle(displayTitle);
+  return Object.freeze({
+    id: requireId(id, "AnimeRef id"),
+    displayTitle: title,
+    normalizedTitle: title.toLocaleLowerCase("en-US"),
+    aliases: normalizeUniqueText(aliases, { maxItems: 24, maxLength: 120 }),
+    genres: normalizeUniqueText(genres, { maxItems: 16, maxLength: 48 }),
+    sourceKey: `${provider}:${externalId}`,
+    sourceBinding: Object.freeze({ provider, externalId }),
+    verificationState,
     createdAt: String(now),
     updatedAt: String(now),
   });

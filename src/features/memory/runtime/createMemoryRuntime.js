@@ -11,6 +11,7 @@ export function createMemoryRuntime({
   clock,
   telemetry = { track: () => {} },
   reconciler,
+  titleResolver = { search: async () => ({ results: [], remoteStatus: "UNAVAILABLE" }) },
 }) {
   if (!repository || !imageIntake || !uuid || !clock) {
     throw new TypeError("Memory runtime dependencies are required");
@@ -55,6 +56,10 @@ export function createMemoryRuntime({
   return Object.freeze({
     imageIntake,
     initialize,
+
+    searchTitles(query) {
+      return titleResolver.search(query);
+    },
 
     async createCard(input) {
       const owner = await initialize();

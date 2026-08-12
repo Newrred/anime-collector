@@ -1,7 +1,7 @@
 # CODEX START HERE — MOEMOA
 
 > **현재 저장소 상태 — 2026-08-11**
-> MOEMOA 인수인계 패키지 설치와 최초 저장소 감사가 완료됐고, `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`과 첫 Private Vertical Slice가 사용자 승인으로 확정됐다. 현재는 **Milestone 0 environment gate 진행 중**이다. 아래 Phase 0~1 설명은 새 저장소에 다시 설치하거나 코드가 크게 바뀌어 재감사할 때 사용한다.
+> MOEMOA 인수인계 패키지 설치와 최초 저장소 감사가 완료됐고, `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`과 첫 Private Vertical Slice가 사용자 승인으로 확정됐다. 현재는 **Private Vertical Slice Milestone 2 완료, Milestone 1·3~6 진행 중**이다. Android local image intake, Private Card/Archive 영구 저장과 TitleResolver/AnimeRef 연결까지 구현됐다. 아래 Phase 0~1 설명은 새 저장소에 다시 설치하거나 코드가 크게 바뀌어 재감사할 때 사용한다.
 
 ## 1. 목적
 
@@ -204,4 +204,4 @@ Android Share Target 또는 Photo Picker
 prompts/moemoa/01_BOOTSTRAP_REPOSITORY_AUDIT.md
 ```
 
-이 저장소에서는 최초 감사, 기반 세 결정, prompt 02 architecture proposal과 first slice ExecPlan 승인까지 완료됐다. 다음 행동은 `docs/moemoa/adr/0003-android-image-intake-spike-toolchain.md`의 Node/Android Studio/application ID gate를 해결하고 Milestone 1 native spike를 시작하는 것이다.
+이 저장소에서는 최초 감사, 기반 세 결정, architecture proposal과 first slice ExecPlan 승인, local-only Card/Archive 기반, Android 영구 media boundary, local alias/AniList TitleResolver와 AnimeRef 저장까지 완료됐다. 현재 구현 상태와 다음 항목은 `docs/moemoa/plans/first-private-vertical-slice.md`의 진행 기록과 `docs/moemoa/reports/private-slice-test-evidence.md`를 기준으로 확인한다.

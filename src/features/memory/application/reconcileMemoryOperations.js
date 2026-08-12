@@ -42,7 +42,9 @@ export function createMemoryOperationReconciler({ repository, localMedia, clock 
               operationId: bundle.operation.id,
               cardId: card.id,
               visualAssetId: asset.id,
-              privateTitleId: card.privateTitleId || null,
+              ...(card.privateTitleId
+                ? { privateTitleId: card.privateTitleId }
+                : { animeRefId: card.animeRefId }),
             };
             const completedOperation = {
               ...retriedOperation,
@@ -53,6 +55,7 @@ export function createMemoryOperationReconciler({ repository, localMedia, clock 
             assertCompletePrivateCard({ card, title: bundle.title, animeRef: bundle.animeRef, asset });
             await repository.completeCreate({
               title: bundle.title,
+              animeRef: bundle.animeRef,
               card,
               asset,
               operation: completedOperation,

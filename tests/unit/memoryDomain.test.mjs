@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   assertCompletePrivateCard,
+  createAnimeRef,
   createGuestOwner,
   createPrivateTitle,
 } from "../../src/features/memory/domain/memoryDomain.js";
@@ -58,6 +59,54 @@ test("private title normalization is deterministic without provider data", () =>
   assert.equal(title.displayTitle, "葬送の フリーレン");
   assert.equal(title.normalizedTitle, "葬送の フリーレン");
   assert.equal(title.ownerId, OWNER_A);
+});
+
+test("anime reference keeps only normalized title facts and explicit AniList provenance", () => {
+  const animeRef = createAnimeRef({
+    id: "anime-ref-1",
+    displayTitle: "  Frieren:  Beyond Journey's End ",
+    aliases: ["Sousou no Frieren", "  葬送のフリーレン  ", "Sousou no Frieren"],
+    genres: ["Adventure", " Fantasy ", "Adventure"],
+    sourceBinding: { provider: "ANILIST", externalId: 154587 },
+    verificationState: "PROVIDER_CANDIDATE",
+    now: "2026-08-12T00:00:00.000Z",
+  });
+
+  assert.deepEqual(animeRef, {
+    id: "anime-ref-1",
+    displayTitle: "Frieren: Beyond Journey's End",
+    normalizedTitle: "frieren: beyond journey's end",
+    aliases: ["Sousou no Frieren", "葬送のフリーレン"],
+    genres: ["Adventure", "Fantasy"],
+    sourceKey: "ANILIST:154587",
+    sourceBinding: { provider: "ANILIST", externalId: "154587" },
+    verificationState: "PROVIDER_CANDIDATE",
+    createdAt: "2026-08-12T00:00:00.000Z",
+    updatedAt: "2026-08-12T00:00:00.000Z",
+  });
+  assert.equal("coverImage" in animeRef, false);
+  assert.equal("siteUrl" in animeRef, false);
+});
+
+test("anime reference rejects unknown providers and unclassified provenance", () => {
+  const base = {
+    id: "anime-ref-1",
+    displayTitle: "Frieren",
+    aliases: [],
+    genres: [],
+    sourceBinding: { provider: "ANILIST", externalId: "154587" },
+    verificationState: "PROVIDER_CANDIDATE",
+    now: "2026-08-12T00:00:00.000Z",
+  };
+
+  assert.throws(
+    () => createAnimeRef({ ...base, sourceBinding: { provider: "UNKNOWN", externalId: "1" } }),
+    { code: "INVALID_ANIME_SOURCE" },
+  );
+  assert.throws(
+    () => createAnimeRef({ ...base, verificationState: "VERIFIED" }),
+    { code: "INVALID_VERIFICATION_STATE" },
+  );
 });
 
 test("complete private card accepts exactly one same-owner title and a READY local asset", () => {

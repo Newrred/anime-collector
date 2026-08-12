@@ -92,3 +92,105 @@ test("browser can create a deterministic system design card without an image upl
   ).toBeVisible();
   await expect(page.getByText("System design preview")).toBeVisible();
 });
+
+test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
+      search: async () => ({
+        remoteStatus: "READY",
+        results: [{
+          kind: "ANIME_REF",
+          displayTitle: "Frieren: Beyond Journey's End",
+          aliases: ["Sousou no Frieren", "葬送のフリーレン"],
+          genres: ["Adventure", "Fantasy"],
+          sourceBinding: { provider: "ANILIST", externalId: "154587" },
+          verificationState: "PROVIDER_CANDIDATE",
+        }],
+      }),
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
+  await page.getByRole("button", { name: "작품 검색" }).click();
+  await expect(page.getByText("AniList candidate")).toBeVisible();
+  await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await expect(page.getByRole("heading", { name: "Frieren: Beyond Journey's End" })).toBeVisible();
+
+  const stored = await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction(["memory_cards", "anime_refs", "private_titles"], "readonly");
+    const requestValue = <T,>(value: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
+      value.onsuccess = () => resolve(value.result);
+      value.onerror = () => reject(value.error);
+    });
+    const [cards, animeRefs, privateTitles] = await Promise.all([
+      requestValue(transaction.objectStore("memory_cards").getAll()),
+      requestValue(transaction.objectStore("anime_refs").getAll()),
+      requestValue(transaction.objectStore("private_titles").getAll()),
+    ]);
+    database.close();
+    return { cards, animeRefs, privateTitles };
+  });
+
+  expect(stored.cards).toHaveLength(1);
+  expect(stored.cards[0].animeRefId).toBe(stored.animeRefs[0].id);
+  expect(stored.cards[0].privateTitleId).toBeNull();
+  expect(stored.animeRefs[0].sourceKey).toBe("ANILIST:154587");
+  expect(stored.privateTitles).toEqual([]);
+});
+
+test("provider unavailability keeps the typed PrivateTitle save path available", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
+      search: async () => ({ results: [], remoteStatus: "UNAVAILABLE" }),
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("작품 또는 카드 제목").fill("My Offline Anime");
+  await page.getByRole("button", { name: "작품 검색" }).click();
+  await expect(page.getByText(/온라인 검색을 사용할 수 없어요/)).toBeVisible();
+  await expect(page.getByText(/개인 제목으로 저장/)).toBeVisible();
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await expect(page.getByRole("button", { name: "카드 저장" })).toBeEnabled();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await expect(page.getByRole("heading", { name: "My Offline Anime" })).toBeVisible();
+});
+
+test("a late title response cannot replace results after the query changes", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
+      search: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        return {
+          remoteStatus: "READY",
+          results: [{
+            kind: "ANIME_REF",
+            displayTitle: "Frieren: Beyond Journey's End",
+            aliases: [],
+            genres: ["Fantasy"],
+            sourceBinding: { provider: "ANILIST", externalId: "154587" },
+            verificationState: "PROVIDER_CANDIDATE",
+          }],
+        };
+      },
+    };
+  });
+
+  await page.goto("/memory/new/");
+  const title = page.getByLabel("작품 또는 카드 제목");
+  await title.fill("Frieren");
+  await page.getByRole("button", { name: "작품 검색" }).click();
+  await title.fill("Violet Evergarden");
+  await page.waitForTimeout(250);
+
+  await expect(page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" })).toHaveCount(0);
+  await expect(page.getByText(/“Violet Evergarden”을 개인 제목으로 저장/)).toBeVisible();
+});

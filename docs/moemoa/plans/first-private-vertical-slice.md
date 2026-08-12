@@ -428,7 +428,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 2 — Memory domain과 port contract
 
-상태: `[~] IN PROGRESS`
+상태: `[x] COMPLETED`
 
 - Owner, AnimeRef, PrivateTitle, MemoryCard, VisualAsset, MediaOperation model을 구현한다.
 - title XOR, READY VisualAsset, owner isolation invariant를 순수 함수로 고정한다.
@@ -732,6 +732,12 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 [2026-08-12] 검증: Web unit 68/68, Chromium 전체 40 pass/2 live skip, Astro static 11 pages, Android unit 30/30와 debug APK 11,793,876 bytes 통과. 상세 수치는 test evidence에 기록.
 [2026-08-12] 발견/수정: 비대화형 Windows 실행에서 Astro dev server가 telemetry 입력을 기다릴 수 있어 E2E runner가 `CI=1`, `ASTRO_TELEMETRY_DISABLED=1` 기본값을 자식 서버에 전달하도록 고정.
 [2026-08-12] 남은 구현: AnimeRef/local alias/AniList title resolver, 선택 metadata 전체, image replacement, missing/orphan file reconciliation UI, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix.
+[2026-08-12] 완료: `aliases.json` local resolver는 기존 3,998개 row를 `LEGACY_UNVERIFIED` read-only 후보로만 반환하고, AniList resolver는 제목·별칭·장르·numeric provider ID만 `PROVIDER_CANDIDATE`로 투영하도록 RED→GREEN 계약을 고정. cover/banner/site URL은 결과와 VisualAsset에 포함되지 않음.
+[2026-08-12] 완료: combined TitleResolver는 동일 AniList ID의 local/remote 후보만 병합하며 원격 실패·2.5초 timeout에도 local 결과와 PrivateTitle 경로를 반환. 사용자 자유 검색어는 telemetry와 ordinary log에 전달하지 않음.
+[2026-08-12] 완료: CreateMemoryCard command와 IndexedDB repository가 PrivateTitle/AnimeRef XOR를 저장·복구하며, 선택하지 않은 입력은 PrivateTitle, 선택한 후보는 AnimeRef로 Complete Card를 생성. `moemoa-memory-v1` schema version은 1 유지.
+[2026-08-12] 완료: composer 작품 검색·후보 provenance 표시·선택 해제·PrivateTitle fallback을 연결하고, 제목 변경 뒤 늦게 도착한 과거 응답을 generation guard로 폐기. resolver/aliases는 최초 검색 시에만 dynamic import.
+[2026-08-12] 남은 구현 갱신: 선택 metadata 전체, image replacement, missing/orphan file reconciliation UI, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix. TitleResolver/AnimeRef 항목은 완료.
+[2026-08-12] 검증: Web unit 77/77, Chromium 전체 43 pass/2 live skip, Astro static 11 pages, Android unit 30/30와 debug APK 11,730,977 bytes, React Doctor 89/100 통과. exact evidence와 잔여 위험은 test evidence 문서에 기록.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -745,8 +751,10 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 - 기존 runbook의 catalog-first 번호와 Gap 분석의 local-first 권장 순서가 달랐다. 이 계획은 첫 사용자 가치와 미정 backend/auth/sync 회피를 근거로 local-first를 제안한다.
 - Capacitor 공식 지원 정책상 v8은 Node 22+와 Android Studio 2025.2.1+가 필요하다. v7은 2026-12-08 extended support가 끝나므로 신규 기반으로 낮추지 않는다.
 - staging ticket은 저장 확정 전까지만 유지하고, 확정 시 app-private `files/moemoa-media`의 original/preview/metadata commit set으로 승격한다. Web/DB에는 절대 경로나 source URI 대신 opaque `asset:<uuid>`만 보관한다. 이는 ADR-0001/0002 경계를 구체화하며 schema version 변경은 없다.
-- 첫 composer 구현은 provider에 의존하지 않는 PrivateTitle 직접 입력부터 연결했다. local alias/AniList resolver와 AnimeRef 생성은 범위에서 제거한 것이 아니라 Milestone 2·4의 남은 항목이다.
+- 첫 composer 구현은 provider에 의존하지 않는 PrivateTitle 직접 입력부터 시작했고, 이후 local alias/AniList resolver와 AnimeRef 선택 저장을 같은 slice에 연결했다.
 - Playwright의 native image 성공 경로는 DEV 빌드에만 존재하는 deterministic fake adapter를 사용한다. production Android는 Capacitor bridge만 사용하고 일반 Web에서는 local image input을 제공하지 않는다.
+- 검색 adapter는 full catalog ingestion이나 legacy 승격이 아니다. `aliases.json` row는 계속 `LEGACY_UNVERIFIED`이며, AniList 응답도 `PROVIDER_CANDIDATE`일 뿐 MOEMOA verified catalog가 아니다. 두 후보는 numeric AniList binding이 동일할 때만 화면 검색 결과에서 병합한다.
+- title resolver와 3,998-row alias payload는 Archive/detail runtime에서 정적으로 import하지 않고 첫 검색 시 lazy load한다. 이는 catalog 경계를 바꾸지 않는 번들 분리이며 신규 dependency나 schema 변경이 없다.
 
 ### 변경 기록 규칙
 

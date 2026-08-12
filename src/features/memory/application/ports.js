@@ -5,6 +5,12 @@
  * @property {(reservation: Object) => Promise<void>} reserveCreate
  * @property {(completion: Object) => Promise<void>} completeCreate
  * @property {(failure: Object) => Promise<void>} failOperation
+ * @property {(sourceKey: string) => Promise<Object|null>} findAnimeRefBySourceKey
+ */
+
+/**
+ * @typedef {Object} TitleResolverPort
+ * @property {(query: string) => Promise<{results: Object[], remoteStatus: string}>} search
  */
 
 /**

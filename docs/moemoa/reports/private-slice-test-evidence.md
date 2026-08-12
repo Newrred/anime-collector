@@ -70,12 +70,12 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 | 명령 | 결과 | 비고 |
 | --- | --- | --- |
 | `gradlew testDebugUnitTest assembleDebug` | PASS | generated example 포함 Android unit 25개, debug APK build |
-| `npm run test:unit` | PASS | 68/68; domain, create/delete/recovery, isolated DB schema, 기존 unit 포함 |
-| `npm run test:e2e -- --project=chromium --workers=1` | PASS | 40 passed, live 2 skipped; 신규 card/archive/IndexedDB와 legacy 전체 회귀 포함 |
-| `npm run build` | PASS | Astro static 11 pages; `/memory/new`, `/archive`, `/memory/card` 포함, baseline large chunk warning 유지 |
+| `npm run test:unit` | PASS | 77/77; TitleResolver, AnimeRef, create/recovery, isolated DB schema와 기존 unit 포함 |
+| `npm run test:e2e -- --project=chromium --workers=1` | PASS | 43 passed, live 2 skipped; catalog candidate, PrivateTitle fallback, stale search 응답과 legacy 전체 회귀 포함 |
+| `npm run build` | PASS | Astro static 11 pages; Composer 11.62 kB, resolver 3.78 kB, lazy alias chunk 662.82 kB |
 | `cap sync android` | PASS | 최신 `dist`를 Android assets로 반영 |
-| sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,793,876 bytes |
-| `react-doctor --scope files --include-untracked --blocking error` | PASS | blocking error 0; 초기 warning 6건 중 안전한 3건 수정, 순차 recovery/useState 관련 3건은 의도 또는 낮은 위험으로 유지 |
+| sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,730,977 bytes |
+| `react-doctor --verbose --scope changed --base HEAD` | PASS | 89/100; 변경분 진단 issue 0건, Composer view/title selector/state hook 분리 후 재검증 |
 
 ## 6. API 36 emulator runtime evidence
 
@@ -113,12 +113,24 @@ Browser persistence evidence:
 - 테스트용 legacy DB marker가 전후 동일해 신규 Memory DB가 `anime-collector-db`를 변경하지 않았음을 확인했다.
 - Playwright에서 image Card create→중복 저장 방지→Archive→reload→detail note edit→reload→delete→Archive reload와 system design create를 통과했다.
 
+TitleResolver/AnimeRef evidence:
+
+- local alias unit fixture에서 한글 검색이 네트워크 없이 `LEGACY_UNVERIFIED` 후보를 반환했다.
+- AniList adapter fixture에 cover/banner/site URL을 포함해도 결과에는 제목·별칭·장르·`ANILIST:<id>` binding만 남았다.
+- remote error와 bounded timeout에서 자유 오류 문자열 대신 `UNAVAILABLE`/`TIMED_OUT` 상태를 반환하고 local result·PrivateTitle 진행을 유지했다.
+- 동일 provider ID의 remote 후보는 local 한국어 제목을 alias로 보존하되 verification은 `PROVIDER_CANDIDATE`로 명시했다.
+- selected catalog candidate를 저장한 뒤 IndexedDB에는 AnimeRef와 `card.animeRefId`만 있고 PrivateTitle row는 없었으며, 재개된 IMPORT journal도 같은 AnimeRef를 보존했다.
+- Composer E2E에서 candidate 선택 저장, provider unavailable PrivateTitle 저장, 검색 중 query 변경 뒤 stale response 폐기를 검증했다.
+- alias/AniList resolver는 dynamic import로 분리돼 검색 전 Archive/detail 초기 bundle에는 포함되지 않는다.
+
 현재 한계:
 
 - 물리 실기기와 실제 외부 앱 Share Target은 아직 검증하지 않았다.
 - orphan final file, DB-only missing file의 전체 filesystem reconciliation과 사용자 복구 UI는 아직 없다.
 - image replacement, ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.
-- title resolver와 AnimeRef 연결 전이므로 현재 composer는 PrivateTitle 직접 입력만 사용한다.
+- 2.5초 제한은 UI 응답을 해제하지만 이미 시작한 AniList 요청 자체를 취소하지는 않는다.
+- schema v1의 `anime_refs.source_key` index는 비고유이므로 여러 탭이 동시에 같은 후보를 최초 저장하면 중복 AnimeRef가 생길 여지가 있다.
+- alias 데이터는 검색 시에만 lazy-load되지만 662.82 kB chunk 경고가 남아 있어 후속 인덱싱·분할 최적화가 필요하다.
 
 ## 7. Dependency audit finding
 

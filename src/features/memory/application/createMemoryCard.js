@@ -1,6 +1,7 @@
 import {
   MemoryDomainError,
   assertCompletePrivateCard,
+  createAnimeRef,
   createPrivateTitle,
 } from "../domain/memoryDomain.js";
 import { normalizeSystemDesignSpec } from "../domain/systemDesign.js";
@@ -103,8 +104,9 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
           "Local image use confirmation is required",
         );
       }
-      if (input.titleChoice?.kind !== "PRIVATE_TITLE") {
-        applicationError("UNSUPPORTED_TITLE_CHOICE", "This milestone requires a PrivateTitle");
+      const titleKind = input.titleChoice?.kind;
+      if (!new Set(["PRIVATE_TITLE", "ANIME_REF"]).has(titleKind)) {
+        applicationError("UNSUPPORTED_TITLE_CHOICE", "Choose a catalog result or a PrivateTitle");
       }
 
       const existing = await repository.getOperation(ownerId, operationId);
@@ -121,19 +123,44 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const now = String(clock.now());
       const cardId = requiredId(ids.next("card"), "card id");
       const assetId = requiredId(ids.next("asset"), "asset id");
-      const privateTitleId = requiredId(ids.next("privateTitle"), "private title id");
-      const title = createPrivateTitle({
-        id: privateTitleId,
-        ownerId,
-        displayTitle: input.titleChoice.displayTitle,
-        now,
-      });
+      let title = null;
+      let animeRef = null;
+      if (titleKind === "PRIVATE_TITLE") {
+        title = createPrivateTitle({
+          id: requiredId(ids.next("privateTitle"), "private title id"),
+          ownerId,
+          displayTitle: input.titleChoice.displayTitle,
+          now,
+        });
+      } else {
+        const proposed = createAnimeRef({
+          id: requiredId(ids.next("animeRef"), "anime reference id"),
+          displayTitle: input.titleChoice.displayTitle,
+          aliases: input.titleChoice.aliases,
+          genres: input.titleChoice.genres,
+          sourceBinding: input.titleChoice.sourceBinding,
+          verificationState: input.titleChoice.verificationState,
+          now,
+        });
+        const existingAnimeRef = typeof repository.findAnimeRefBySourceKey === "function"
+          ? await repository.findAnimeRefBySourceKey(proposed.sourceKey)
+          : null;
+        const shouldUpgrade = existingAnimeRef?.verificationState === "LEGACY_UNVERIFIED"
+          && proposed.verificationState === "PROVIDER_CANDIDATE";
+        animeRef = existingAnimeRef
+          ? (shouldUpgrade
+            ? { ...proposed, id: existingAnimeRef.id, createdAt: existingAnimeRef.createdAt }
+            : existingAnimeRef)
+          : proposed;
+      }
+      const privateTitleId = title?.id || null;
+      const animeRefId = animeRef?.id || null;
       const completeCountBeforeSave = await repository.countCompleteCards(ownerId);
 
       const card = {
         id: cardId,
         ownerId,
-        animeRefId: null,
+        animeRefId,
         privateTitleId,
         visualAssetId: assetId,
         status: "DRAFT",
@@ -189,7 +216,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         updatedAt: now,
       };
 
-      await repository.reserveCreate({ title, card, asset, operation });
+      await repository.reserveCreate({ title, animeRef, card, asset, operation });
 
       let media = {};
       if (hasNativeTicket) {
@@ -214,7 +241,12 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const completedAt = String(clock.now());
       const completeAsset = { ...asset, ...media, state: "READY", updatedAt: completedAt };
       const completeCard = { ...card, status: "COMPLETE_PRIVATE", updatedAt: completedAt };
-      const result = { operationId, cardId, visualAssetId: assetId, privateTitleId };
+      const result = {
+        operationId,
+        cardId,
+        visualAssetId: assetId,
+        ...(title ? { privateTitleId } : { animeRefId }),
+      };
       const completeOperation = {
         ...operation,
         state: "COMPLETED",
@@ -223,9 +255,10 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         updatedAt: completedAt,
       };
 
-      assertCompletePrivateCard({ card: completeCard, title, asset: completeAsset });
+      assertCompletePrivateCard({ card: completeCard, title, animeRef, asset: completeAsset });
       await repository.completeCreate({
         title,
+        animeRef,
         card: completeCard,
         asset: completeAsset,
         operation: completeOperation,
@@ -236,7 +269,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       }
       telemetry.track(milestoneEvent(completeCountBeforeSave), {
         storageScope: "LOCAL_ONLY",
-        titleKind: "PRIVATE_TITLE",
+        titleKind,
       });
       return structuredClone(result);
     },

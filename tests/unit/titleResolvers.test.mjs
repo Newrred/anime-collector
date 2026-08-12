@@ -1,0 +1,116 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import { createLegacyAliasTitleResolver } from "../../src/features/memory/adapters/catalog/legacyAliasTitleResolver.js";
+import { createAniListTitleResolver } from "../../src/features/memory/adapters/catalog/anilistTitleResolver.js";
+import { createCombinedTitleResolver } from "../../src/features/memory/application/titleResolver.js";
+
+const legacyRows = [
+  {
+    anilistId: 154587,
+    ko: "장송의 프리렌",
+    aliases: ["Frieren: Beyond Journey's End", "Sousou no Frieren", "葬送のフリーレン"],
+  },
+  {
+    anilistId: 19,
+    ko: "몬스터",
+    aliases: ["Monster", "MONSTER"],
+  },
+];
+
+test("legacy alias resolver returns local facts as explicitly unverified candidates", async () => {
+  const resolver = createLegacyAliasTitleResolver({ rows: legacyRows, limit: 5 });
+
+  const results = await resolver.search("  프리렌 ");
+
+  assert.deepEqual(results, [{
+    kind: "ANIME_REF",
+    displayTitle: "장송의 프리렌",
+    aliases: ["Frieren: Beyond Journey's End", "Sousou no Frieren", "葬送のフリーレン"],
+    genres: [],
+    sourceBinding: { provider: "ANILIST", externalId: "154587" },
+    verificationState: "LEGACY_UNVERIFIED",
+  }]);
+});
+
+test("AniList resolver projects only title facts and excludes provider artwork and URLs", async () => {
+  const resolver = createAniListTitleResolver({
+    searchAnime: async (query, limit) => {
+      assert.equal(query, "Frieren");
+      assert.equal(limit, 6);
+      return [{
+        id: 154587,
+        title: {
+          english: "Frieren: Beyond Journey's End",
+          romaji: "Sousou no Frieren",
+          native: "葬送のフリーレン",
+        },
+        synonyms: ["Frieren at the Funeral"],
+        genres: ["Adventure", "Fantasy"],
+        coverImage: { large: "https://cdn.example/cover.jpg" },
+        bannerImage: "https://cdn.example/banner.jpg",
+        siteUrl: "https://anilist.co/anime/154587",
+      }];
+    },
+    limit: 6,
+  });
+
+  const [candidate] = await resolver.search(" Frieren ");
+
+  assert.deepEqual(candidate, {
+    kind: "ANIME_REF",
+    displayTitle: "Frieren: Beyond Journey's End",
+    aliases: ["Sousou no Frieren", "葬送のフリーレン", "Frieren at the Funeral"],
+    genres: ["Adventure", "Fantasy"],
+    sourceBinding: { provider: "ANILIST", externalId: "154587" },
+    verificationState: "PROVIDER_CANDIDATE",
+  });
+  assert.doesNotMatch(JSON.stringify(candidate), /https?:|cover|banner/i);
+});
+
+test("combined resolver prefers provider facts for the same id and retains the local Korean alias", async () => {
+  const localResolver = createLegacyAliasTitleResolver({ rows: legacyRows });
+  const remoteResolver = createAniListTitleResolver({
+    searchAnime: async () => [{
+      id: 154587,
+      title: { english: "Frieren: Beyond Journey's End", romaji: "Sousou no Frieren" },
+      synonyms: [],
+      genres: ["Adventure", "Fantasy"],
+    }],
+  });
+  const resolver = createCombinedTitleResolver({ localResolver, remoteResolver, remoteTimeoutMs: 50 });
+
+  const response = await resolver.search("프리렌");
+
+  assert.equal(response.remoteStatus, "READY");
+  assert.equal(response.results.length, 1);
+  assert.equal(response.results[0].verificationState, "PROVIDER_CANDIDATE");
+  assert.equal(response.results[0].displayTitle, "Frieren: Beyond Journey's End");
+  assert.deepEqual(response.results[0].aliases, [
+    "Sousou no Frieren",
+    "장송의 프리렌",
+    "葬送のフリーレン",
+  ]);
+});
+
+test("combined resolver returns local results when the provider fails or times out", async () => {
+  const localResolver = createLegacyAliasTitleResolver({ rows: legacyRows });
+  const failed = createCombinedTitleResolver({
+    localResolver,
+    remoteResolver: { search: async () => { throw new Error("private network detail"); } },
+    remoteTimeoutMs: 20,
+  });
+  const timedOut = createCombinedTitleResolver({
+    localResolver,
+    remoteResolver: { search: () => new Promise(() => {}) },
+    remoteTimeoutMs: 5,
+  });
+
+  const failedResponse = await failed.search("프리렌");
+  const timeoutResponse = await timedOut.search("프리렌");
+
+  assert.equal(failedResponse.remoteStatus, "UNAVAILABLE");
+  assert.equal(timeoutResponse.remoteStatus, "TIMED_OUT");
+  assert.equal(failedResponse.results[0].verificationState, "LEGACY_UNVERIFIED");
+  assert.equal(timeoutResponse.results[0].displayTitle, "장송의 프리렌");
+});
