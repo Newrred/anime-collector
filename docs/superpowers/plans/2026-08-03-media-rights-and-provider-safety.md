@@ -1,5 +1,8 @@
 # MOEMOA Media Rights and Provider Safety Implementation Plan
 
+> **문서 상태: `SUPERSEDED` — 현재 계획으로 실행 금지**
+> 공급자 차단 가능성의 문제의식은 유효하지만 `anilistId` 호환 키 중심 구조와 당시 rollout은 최신 catalog/image 규칙이 대체했다. 현재 기준은 [`04_CATALOG_DATA_AND_INGESTION_SPEC.md`](../../moemoa/04_CATALOG_DATA_AND_INGESTION_SPEC.md)와 [`05_IMAGE_UGC_POLICY_MODERATION_SPEC.md`](../../moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md)를 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** AniList 답변이 허용·부분 허용·불허 중 어느 경우여도 작품 데이터와 이미지를 안전하게 끄거나 교체할 수 있는 출시 구조를 만든다.

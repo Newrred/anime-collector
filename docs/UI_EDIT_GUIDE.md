@@ -1,5 +1,8 @@
 # UI/CSS 편집 가이드 (실무용)
 
+> **문서 상태: `CURRENT_RUNTIME_ONLY`**
+> 이 가이드는 현재 legacy Astro/React UI를 수정할 때만 적용한다. 아래 Home/Library/Tier 규칙을 신규 MOEMOA Memory Card/Archive/Board의 제품 불변조건으로 사용하지 않는다. 미래 제품 기준은 [`docs/moemoa/README.md`](moemoa/README.md)와 [`02_PRODUCT_SCOPE_AND_USER_FLOWS.md`](moemoa/02_PRODUCT_SCOPE_AND_USER_FLOWS.md)를 따른다.
+
 이 문서는 현재 프로젝트에서 디자인/레이아웃을 직접 수정할 때, 어디를 어떻게 바꿔야 하는지 빠르게 찾기 위한 가이드입니다.
 
 ## 제품 준비 불변조건

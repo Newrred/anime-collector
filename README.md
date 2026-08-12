@@ -1,5 +1,8 @@
 # anime-collector
 
+> **문서 상태: `CURRENT_RUNTIME`**
+> 이 README는 현재 저장소에서 실행되는 legacy Astro/React 애니 기록 Web/PWA를 설명한다. 앞으로 구현할 MOEMOA의 제품 결정·Android·Memory Card·Archive·Board 기준은 [MOEMOA 문서 인덱스](docs/moemoa/README.md)와 [확정 결정](docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md)을 따른다. 현재 코드에 존재하는 Tier/Public Profile/Showcase를 새 Board/Public Memory Card의 승인된 구현으로 간주하지 않는다.
+
 브라우저만으로 동작하는 개인 애니 기록 서비스입니다.  
 핵심 흐름은 `검색 -> 보관 -> 감상 기록 -> 회고 -> 티어 정리 -> 백업 -> 기기간 동기화`입니다.
 
@@ -70,15 +73,19 @@
 - 팔로우 / 언팔로우
 - 팔로워 / 팔로잉 목록을 통해 다른 프로필 이동
 
+감사 주의: 위 공개 프로필·showcase·follow는 legacy 구현 경로다. 신고·차단·moderation·unpublish/delete·kill switch가 완성되지 않았으므로 신규 MOEMOA Public 기능의 기반으로 바로 활성화하지 않는다. 상세 근거는 `docs/moemoa/reports/repository-audit.md`를 따른다.
+
 ## 동기화 구조
 
-현재 프로젝트는 `record-level sync`가 아니라 `snapshot sync`를 사용합니다.
+현재 프로젝트는 완전한 record-level sync가 아니라 **split record table과 snapshot fallback이 섞인 legacy sync**를 사용합니다. Library/WatchLog/CharacterPin/Preferences 일부는 split table, Tier/Topic은 snapshot 경로를 사용합니다.
 
 - 로컬 데이터가 기본 원본
 - 변경 시 `sync.pending` 메타가 올라감
 - 로그인 후 현재 스냅샷 전체를 업로드/다운로드
 - 마지막 동기화 이후 로컬과 클라우드가 모두 바뀌면 자동 덮어쓰기 대신 충돌 선택 UI 표시
 - 검색/미디어 캐시는 sync 대상에서 제외
+
+감사 주의: Library/Tier의 일반 UI 쓰기 일부는 `sync.pending`을 표시하지 않는 경로가 있어 수동 sync 전까지 자동 업로드가 누락될 수 있다. 계정별 sync metadata와 달리 실제 local product data key도 account namespace로 분리되어 있지 않다. 신규 account/sync 작업은 `docs/moemoa/reports/implementation-gap-analysis.md`에서 위험과 선택지를 확인하되, 실제 모델과 순서는 승인된 ADR/ExecPlan으로 확정한다.
 
 sync 관련 로컬 메타 키:
 
@@ -128,7 +135,7 @@ PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 PUBLIC_SITE_URL=https://app.example.com
 ```
 
-- 템플릿 파일: `.env.example`
+- `.env.example`은 현재 checkout에 없다. 위 key 목록을 참고하되 실제 값이나 secret을 문서·Git에 기록하지 않는다.
 - `PUBLIC_SITE_URL`은 Astro `site` 값에 사용됩니다.
 - Google OAuth와 Supabase Redirect URLs는 실제 preview / production origin과 함께 별도로 등록해야 합니다.
 
@@ -239,8 +246,10 @@ npm run test:unit
 Playwright E2E:
 
 ```bash
-npm run test:e2e -- --project=chromium
+npm run test:e2e -- --project=chromium --workers=1
 ```
+
+2026-08-11 감사에서는 Chromium 단일 worker가 36 통과·live-only 2 스킵이었다. 기본 병렬 실행은 cold-start/timeout으로 6건 실패했으므로 병렬 안정성이 해결되기 전에는 단일 worker를 기준으로 사용한다.
 
 제품 기본 회귀는 AniList와 Wikidata 응답을 고정 fixture로 제어하므로 네트워크 상태와 무관하게 완료됩니다. 실제 외부 검색 확인은 별도 live 게이트에서만 실행합니다.
 
@@ -252,7 +261,7 @@ npm run test:e2e:live
 
 ```bash
 npm run test:unit
-npm run test:e2e -- --project=chromium
+npm run test:e2e -- --project=chromium --workers=1
 npm run build
 ```
 
@@ -268,9 +277,11 @@ npm run build
 
 ## 배포
 
-지금 단계의 권장 흐름은 `Vercel + Supabase`로 먼저 사설 테스트를 돌리고,
-기능이 안정되면 그 뒤에 custom domain까지 붙이는 방식입니다.
-GitHub 저장소는 유지하고, 실제 서비스 호스팅만 GitHub Pages에서 옮기는 구조를 전제로 합니다.
+> **상태: `DEPLOY-01` 미정**
+
+현재 저장소에는 `vercel.json`과 `master` push 시 GitHub Pages 배포를 시도하는 `.github/workflows/astro.yml`이 함께 있다. 사용자는 Vercel이 `master`에 연결된 것으로 보고했지만, repository evidence만으로 실제 canonical production origin과 GitHub Pages 활성 상태를 확정할 수 없다.
+
+따라서 Vercel 이전, custom domain, OAuth redirect, PWA scope, canonical URL, GitHub Pages workflow 변경을 현재 권장안이나 완료 작업으로 간주하지 않는다. 먼저 `DEPLOY-01`에서 canonical origin과 preview/production 구분을 확인·승인한다.
 
 현재 저장소에서 이미 준비된 것:
 
@@ -278,22 +289,27 @@ GitHub 저장소는 유지하고, 실제 서비스 호스팅만 GitHub Pages에�
 - `/auth/callback/` 경로
 - `docs/deploy/supabase-user-snapshots.sql`
 - `docs/deploy/supabase-social.sql`
-- `docs/deploy/OWNER_DEPLOY_GUIDE.md`
 
-운영자가 직접 해야 하는 것:
+현재 확인이 필요한 외부 상태와 후속 작업 후보:
 
-- Supabase 프로젝트 생성
-- Google OAuth 앱 생성
-- Vercel 프로젝트 연결
-- preview / production 환경변수 등록
-- preview / production origin / redirect URL 등록
-- custom domain 연결
-- GitHub Pages workflow 비활성화 또는 삭제 여부 결정
+- 실제 Supabase project/table/RLS/region/backup 상태
+- Google OAuth app과 현재 허용 redirect URL
+- Vercel project의 실제 production/preview 연결 상태
+- GitHub Pages의 실제 활성·사용 상태
+- 선택한 canonical host의 환경변수와 origin/redirect 등록
+- custom domain 필요 여부
+- GitHub Pages workflow 유지·비활성화 여부
+
+마지막 네 항목은 `DEPLOY-01` 승인 뒤에만 변경한다.
 
 ## 참고 문서
 
-- 제품 방향성 결정 초안: `docs/product/2026-08-06-product-direction-decision-draft.md`
+- 현행 MOEMOA 문서 지도: `docs/moemoa/README.md`
+- 확정 결정과 열린 gate: `docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`
+- 현재 저장소 감사: `docs/moemoa/reports/repository-audit.md`
+- 구현 Gap과 권장 migration 단계(미승인 분석안): `docs/moemoa/reports/implementation-gap-analysis.md`
+- 과거 제품 방향 초안: `docs/product/2026-08-06-product-direction-decision-draft.md` (`SUPERSEDED`)
 - UI 수정 가이드: `docs/UI_EDIT_GUIDE.md`
-- 운영 전환 가이드: `docs/deploy/OWNER_DEPLOY_GUIDE.md`
-- Vercel 테스트 가이드: `docs/deploy/VERCEL_SETUP.md`
 - Supabase SQL: `docs/deploy/supabase-user-snapshots.sql`
+- Supabase split sync SQL: `docs/deploy/supabase-split-sync.sql`
+- Supabase social/showcase SQL: `docs/deploy/supabase-social.sql`, `docs/deploy/supabase-showcase.sql`

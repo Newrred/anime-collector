@@ -1,5 +1,8 @@
 # MOEMOA Southeast Asia Beta Launch Implementation Plan
 
+> **문서 상태: `SUPERSEDED` — 현재 계획으로 집행 금지**
+> 4주·600,000원, 필리핀/싱가포르, 작품·감상 로그 activation을 전제로 한 legacy 출시안이다. 현재 예산·국가·광고 이벤트는 `GROWTH-01~03`과 `BETA-01`에서 미정이며 [`open-decision-questions.md`](../../moemoa/reports/open-decision-questions.md)를 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 필리핀을 주 시장, 싱가포르를 교차 검증 시장으로 삼아 4주·600,000원 한도에서 활성화와 재방문을 측정할 수 있는 영어 베타를 출시한다.

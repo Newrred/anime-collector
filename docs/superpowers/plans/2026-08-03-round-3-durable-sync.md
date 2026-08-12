@@ -1,5 +1,8 @@
 # Round 3 Durable Sync Implementation Plan
 
+> **문서 상태: `COMPLETED_LEGACY_PLAN` — 재실행 금지**
+> legacy snapshot sync 내구성 구현 이력이다. 신규 Card/Board sync 설계로 간주하지 않는다. 현재 기준은 [`docs/moemoa/README.md`](../../moemoa/README.md)를 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Close the remaining durability, promotion-race, and migration-retry data-loss paths using real `applyRemoteSnapshot`, `uploadSnapshotToCloud`, snapshot export, migration, and Home entry flows.

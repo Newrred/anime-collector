@@ -1,5 +1,8 @@
 # Round 2 Data Safety Implementation Plan
 
+> **문서 상태: `COMPLETED_LEGACY_PLAN` — 재실행 금지**
+> legacy 저장·동기화 회귀 계약의 구현 이력이다. 현재 sync Gap과 신규 owner 모델은 [`implementation-gap-analysis.md`](../../moemoa/reports/implementation-gap-analysis.md)를 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Close the four merge-blocking data-loss races found in the `b622f8f..4f078d7` review while preserving account-scoped sync metadata and device-local pending state.

@@ -1,5 +1,8 @@
 # MOEMOA 동남아 출시·수익화 설계
 
+> **문서 상태: `SUPERSEDED` — 역사적 출시 가설**
+> 아래 “방향 승인”, 국가, 60만원 예산과 KPI는 현재 승인이 아니다. 신규 제품 방향과 열린 성장 결정은 [`docs/moemoa/README.md`](../../moemoa/README.md)와 [`open-decision-questions.md`](../../moemoa/reports/open-decision-questions.md)를 따른다.
+
 - 작성일: 2026-08-03
 - 상태: 방향 승인, 구현 전 설계
 - 1차 시장: 필리핀

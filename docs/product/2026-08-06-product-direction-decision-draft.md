@@ -1,5 +1,8 @@
 # MOEMOA 제품 방향성 결정 초안
 
+> **문서 상태: `SUPERSEDED_DUPLICATE` — 편집 금지**
+> 이 경로는 과거 호환을 위해 남긴 중복본이다. 역사 reference는 [`docs/moemoa/references/2026-08-06-product-direction-decision-draft.md`](../moemoa/references/2026-08-06-product-direction-decision-draft.md), 현재 문서 지도는 [`docs/moemoa/README.md`](../moemoa/README.md), 확정 결정은 [`01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`](../moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md)를 사용한다. 아래 선택지·완료 조건·출시안이 최신 문서와 충돌하면 사용하지 않는다.
+
 - 최초 작성일: 2026-08-06
 - 최근 업데이트: 2026-08-10 — 이미지 기반 `Memory Card → Archive → Board → Share` 방향 반영
 - 문서 성격: 검토·선택용 초안

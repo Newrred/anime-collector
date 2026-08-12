@@ -1,5 +1,8 @@
 # MOEMOA Product Readiness Implementation Plan
 
+> **문서 상태: `COMPLETED_LEGACY_PLAN` — 재실행 금지**
+> Library/WatchLog 중심 기존 Web/PWA를 만든 구현 이력이다. 신규 Card/Archive/Board 계획은 [`docs/moemoa/README.md`](../../moemoa/README.md)를 따른다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 신규 영어 사용자가 데모 데이터나 빈 로그 없이 첫 작품 3개와 첫 감상 기록을 남길 수 있는 안정적인 베타 제품을 만든다.
