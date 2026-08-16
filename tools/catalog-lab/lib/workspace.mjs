@@ -63,6 +63,7 @@ export async function openCatalogWorkspace({ repoRoot, workspaceRoot = process.e
   const requestedRoot = resolve(workspaceRoot);
   if (isWithin(repo, requestedRoot)) throw insideRepositoryError();
   const canonicalRepo = await realpath(repo);
+  if (isWithin(canonicalRepo, resolveExistingAncestor(requestedRoot))) throw insideRepositoryError();
   if (create) await mkdir(requestedRoot, { recursive: true });
   let root;
   try {

@@ -13,18 +13,26 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
   legacy_aliases: Object.freeze({
     sourceRole: 'crosscheck_only', executionScope: 'TARGET_ROSTER_ONLY',
     allowedMethod: 'local_file', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 0,
+    allowedPaths: Object.freeze(['src/data/aliases.json']),
+    allowedFields: Object.freeze(['anilistId', 'ko', 'aliases']),
   }),
   anilist: Object.freeze({
     sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_MAX_100',
     allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 800,
+    allowedPaths: Object.freeze(['/']),
+    allowedFields: Object.freeze(['media', 'relations', 'characters', 'staff', 'coverImage']),
   }),
   wikidata: Object.freeze({
     sourceRole: 'direct_import', executionScope: 'LOCAL_SAMPLE_MAX_100',
     allowedMethod: 'api', catalogPromotion: 'FIELD_REVIEW_REQUIRED', redistributionStatus: 'CC0', minIntervalMs: 1000,
+    allowedPaths: Object.freeze(['/w/api.php']),
+    allowedFields: Object.freeze(['P8729', 'labels', 'aliases', 'claims', 'sitelinks']),
   }),
   anilife_public: Object.freeze({
     sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_MAX_100',
     allowedMethod: 'public_sitemap_and_html', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 1500,
+    allowedPaths: Object.freeze(['/sitemap.xml', '/content/{numericId}']),
+    allowedFields: Object.freeze(['title', 'description', 'year', 'episodeCount', 'coverMetadata']),
   }),
 });
 const ANILIFE_BLOCKED_PATHS = Object.freeze([
@@ -40,6 +48,11 @@ function registryInvalidError() {
   const error = new Error('Catalog source registry is invalid');
   error.code = 'SOURCE_REGISTRY_INVALID';
   return error;
+}
+
+function matchesStringList(actual, expected) {
+  return Array.isArray(actual) && actual.length === expected.length
+    && actual.every((value, index) => value === expected[index]);
 }
 
 function validateRegistry(registry) {
@@ -60,7 +73,9 @@ function validateRegistry(registry) {
     }
     const policy = APPROVED_SOURCE_POLICIES[entry.sourceId];
     if (!policy || !SOURCE_EXECUTION_SCOPES.includes(entry.executionScope)
-      || Object.entries(policy).some(([field, value]) => entry[field] !== value)) {
+      || Object.entries(policy).some(([field, value]) => !Array.isArray(value) && entry[field] !== value)
+      || !matchesStringList(entry.allowedPaths, policy.allowedPaths)
+      || !matchesStringList(entry.allowedFields, policy.allowedFields)) {
       throw registryInvalidError();
     }
     if (entry.sourceId === 'anilife_public' && (!Array.isArray(entry.blockedPaths)

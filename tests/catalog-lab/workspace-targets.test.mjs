@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, symlink, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -24,6 +24,10 @@ const uuid = (() => {
   return () => `11111111-1111-4111-8111-${String(++index).padStart(12, '0')}`;
 })();
 
+async function pathExists(path) {
+  return stat(path).then(() => true, () => false);
+}
+
 test('workspace rejects a path inside the git worktree', async () => {
   await assert.rejects(
     openCatalogWorkspace({ repoRoot, workspaceRoot: join(repoRoot, '.cache', 'catalog') }),
@@ -46,6 +50,27 @@ test('workspace rejects case-variant and junction paths into the git worktree', 
       { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
     );
   } finally {
+    await unlink(junctionRoot).catch(() => {});
+    await rm(outsideRoot, { recursive: true, force: true });
+  }
+});
+
+test('workspace rejects a new child through a junction before creating repository files', async () => {
+  const outsideRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-junction-'));
+  const junctionRoot = join(outsideRoot, 'into-repository');
+  const childName = `catalog-lab-write-guard-${process.pid}`;
+  const repositoryChild = join(repoRoot, childName);
+  try {
+    await rm(repositoryChild, { recursive: true, force: true });
+    await symlink(repoRoot, junctionRoot, 'junction');
+    await assert.rejects(
+      openCatalogWorkspace({ repoRoot, workspaceRoot: join(junctionRoot, childName), create: true }),
+      { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
+    );
+    assert.equal(await pathExists(repositoryChild), false);
+    assert.equal(await pathExists(join(repositoryChild, 'TEST_ONLY.json')), false);
+  } finally {
+    await rm(repositoryChild, { recursive: true, force: true });
     await unlink(junctionRoot).catch(() => {});
     await rm(outsideRoot, { recursive: true, force: true });
   }
@@ -149,6 +174,29 @@ test('registry rejects source-specific blocked-path policy drift', async () => {
     });
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('registry rejects allowed path and field policy drift for every source', async () => {
+  const sourceIds = ['legacy_aliases', 'anilist', 'wikidata', 'anilife_public'];
+  for (const sourceId of sourceIds) {
+    for (const field of ['allowedPaths', 'allowedFields']) {
+      const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-registry-'));
+      const registryFile = join(fixtureRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json');
+      try {
+        const registry = JSON.parse(await readFile(
+          join(repoRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json'), 'utf8',
+        ));
+        registry.find((entry) => entry.sourceId === sourceId)[field].push(`unexpected-${field}`);
+        await mkdir(dirname(registryFile), { recursive: true });
+        await writeFile(registryFile, JSON.stringify(registry));
+        await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+          code: 'SOURCE_REGISTRY_INVALID',
+        });
+      } finally {
+        await rm(fixtureRoot, { recursive: true, force: true });
+      }
+    }
   }
 });
 
