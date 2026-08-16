@@ -4,7 +4,7 @@
 > 승인일: 2026-08-17
 > 승인자: 사용자
 > 적용 범위: 기존 3,998개 작품 목록을 출발점으로 하는 로컬 전용 카탈로그 수집·검증 파이프라인
-> 후속 산출물: 별도 ExecPlan과 Source Registry 실물 항목
+> 실행 계획: `../../moemoa/plans/2026-08-17-three-source-local-catalog-lab.md`
 > 전체 수집 상태: `FULL-CATALOG-INGESTION-GATE-01` 미통과
 
 ## 1. 결정 요약

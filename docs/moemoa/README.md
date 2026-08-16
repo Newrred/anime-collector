@@ -1,11 +1,11 @@
 # MOEMOA 문서 인덱스와 Source of Truth
 
 - 기준일: 2026-08-17
-- 현재 단계: **로컬 카탈로그 랩 10→100 표본 설계 승인 → 구현 ExecPlan 작성 전 사용자 문서 검토**. Web-first Shared UI 설계는 승인 상태로 대기한다.
+- 현재 단계: **로컬 카탈로그 랩 10→100 표본 ExecPlan 작성 완료 → 사용자 계획 검토와 실행 방식 선택 대기**. Web-first Shared UI 설계는 승인 상태로 대기한다.
 
 이 파일은 문서를 찾기 위한 인덱스다. 제품 결정을 새로 만들지 않으며, 내용이 충돌할 때는 아래 source hierarchy를 따른다.
 
-빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [ADR-0002](adr/0002-memory-local-domain-and-owner-boundary.md) · [ADR-0003](adr/0003-android-image-intake-spike-toolchain.md) · [테스트 증거](reports/private-slice-test-evidence.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
+빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [로컬 카탈로그 랩 ExecPlan](plans/2026-08-17-three-source-local-catalog-lab.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [ADR-0002](adr/0002-memory-local-domain-and-owner-boundary.md) · [ADR-0003](adr/0003-android-image-intake-spike-toolchain.md) · [테스트 증거](reports/private-slice-test-evidence.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
 
 ## 1. 먼저 읽을 것
 
@@ -78,6 +78,7 @@ reports/open-decision-questions.md
 | `08_CODEX_PHASE_RUNBOOK.md` | `CURRENT_GATED` | 승인된 local-first 실행 순서와 단계별 gate. 첫 slice 내부 Web-first UI 순서 포함 |
 | `09_CHANGE_CONTROL_AND_REPORTING.md` | `CURRENT` | Decision Log, ADR, 변경·테스트 보고 규칙 |
 | `../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 3,998개 target roster 기반 세 출처 로컬 10→100 표본 수집 설계. 전체 수집과 production 발행은 별도 gate |
+| `plans/2026-08-17-three-source-local-catalog-lab.md` | `DRAFT_EXECPLAN_FOR_REVIEW` | 위 설계를 Task 1~10의 TDD 구현·검증·롤백 단위로 변환. 사용자 실행 방식 선택 전 코드 작업 금지 |
 
 ## 5. 저장소 감사 산출물
 
