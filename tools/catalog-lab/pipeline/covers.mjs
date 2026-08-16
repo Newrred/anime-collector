@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
-import { mkdir, open, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { link, lstat, mkdir, open, readFile, rm, stat } from 'node:fs/promises';
 
 import { toPathKey } from '../lib/path-key.mjs';
+import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
 
 export const COVER_MIME = Object.freeze({
   JPEG: 'image/jpeg',
@@ -17,9 +17,20 @@ const MIME_DETAILS = Object.freeze({
 });
 const PNG_SIGNATURE = Object.freeze([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const MAX_COVER_BYTES = 8 * 1024 * 1024;
-const MAX_COVER_PIXELS = 40_000_000;
+const MAX_COVER_AXIS = 4096;
+const MAX_COVER_PIXELS = 12_000_000;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 const SOF_MARKERS = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
+const COVER_RECORDS = new WeakSet();
+const COVER_BYTES = new WeakMap();
+const COVER_POLICIES = new WeakSet();
+const COVER_TRANSPORTS = new WeakSet();
+const POLICIES = Object.freeze({
+  anilist: Object.freeze({ sourceId: 'anilist', origins: Object.freeze(['https://s4.anilist.co']) }),
+  anilife_public: Object.freeze({ sourceId: 'anilife_public', origins: Object.freeze([]) }),
+  wikidata: Object.freeze({ sourceId: 'wikidata', origins: Object.freeze([]) }),
+});
+Object.values(POLICIES).forEach((policy) => COVER_POLICIES.add(policy));
 
 function typedError(code, message) {
   const error = new Error(message);
@@ -68,7 +79,7 @@ function imageTooShort() {
 }
 
 function validateDimensions(width, height) {
-  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width < 1 || height < 1
+  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width < 1 || height < 1 || width > MAX_COVER_AXIS || height > MAX_COVER_AXIS
     || !Number.isSafeInteger(width * height) || width * height > MAX_COVER_PIXELS) {
     throw typedError('IMAGE_DIMENSIONS_INVALID', 'Image dimensions exceed safe cover limits');
   }
@@ -181,6 +192,40 @@ function normalizedMime(value) {
   return MIME_DETAILS[mime] ? mime : null;
 }
 
+export function getApprovedCoverSourcePolicy(sourceId) {
+  const policy = POLICIES[sourceId];
+  if (!policy) throw typedError('COVER_SOURCE_POLICY_INVALID', 'Cover source has no approved cover-origin policy');
+  return policy;
+}
+
+function ipv4Global(address) {
+  const values = address.split('.').map(Number);
+  if (values.length !== 4 || values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) return false;
+  const [a, b] = values;
+  return !(a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127)
+    || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
+    || (a === 192 && (b === 0 || b === 168)) || (a === 198 && (b === 18 || b === 19)));
+}
+
+function globalAddress(address) {
+  if (typeof address !== 'string') return false;
+  const value = address.toLowerCase();
+  if (/^\d+\.\d+\.\d+\.\d+$/u.test(value)) return ipv4Global(value);
+  const mapped = value.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/u);
+  if (mapped) return ipv4Global(mapped[1]);
+  if (!value.includes(':')) return false;
+  return !(value === '::' || value === '::1' || value.startsWith('fc') || value.startsWith('fd')
+    || value.startsWith('fe8') || value.startsWith('fe9') || value.startsWith('fea') || value.startsWith('feb'));
+}
+
+/** Creates the only accepted cover transport: resolution is supplied once and the chosen address is pinned into the request. */
+export function createPinnedCoverTransport({ resolve, request }) {
+  if (typeof resolve !== 'function' || typeof request !== 'function') throw typedError('IMAGE_TRANSPORT_INVALID', 'Pinned cover transport requires resolver and request functions');
+  const transport = Object.freeze({ resolve, request });
+  COVER_TRANSPORTS.add(transport);
+  return transport;
+}
+
 /** Inspects only JPEG, PNG, and WebP container structure; decoding is a separate Chromium gate. */
 export function inspectImageBytes({ declaredMime, bytes }) {
   const image = asBytes(bytes);
@@ -227,6 +272,7 @@ async function readBoundedBody(response, maxBytes) {
   const reader = response.body.getReader();
   const chunks = [];
   let size = 0;
+  let completed = false;
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -239,7 +285,9 @@ async function readBoundedBody(response, maxBytes) {
       }
       chunks.push(chunk);
     }
+    completed = true;
   } finally {
+    if (!completed) await reader.cancel().catch(() => {});
     reader.releaseLock?.();
   }
   const bytes = new Uint8Array(size);
@@ -251,7 +299,7 @@ async function readBoundedBody(response, maxBytes) {
   return bytes;
 }
 
-function candidateMetadata(candidate) {
+function candidateMetadata(candidate, policy) {
   if (!candidate || typeof candidate !== 'object' || !['anilist', 'anilife_public', 'wikidata'].includes(candidate.sourceId)
     || typeof candidate.sourceRecordId !== 'string' || !/^[a-f0-9]{64}$/u.test(candidate.sourceRecordId)
     || typeof candidate.retrievedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(candidate.retrievedAt)) {
@@ -263,87 +311,95 @@ function candidateMetadata(candidate) {
     throw typedError('COVER_IDENTITY_NOT_EXACT', 'Only exact identity matches may download covers');
   }
   const sourceUrl = exactHttpUrl(candidate.sourceUrl);
-  return Object.freeze({ sourceId: candidate.sourceId, sourceUrl, sourceRecordId: candidate.sourceRecordId, retrievedAt: candidate.retrievedAt });
+  if (!COVER_POLICIES.has(policy) || policy.sourceId !== candidate.sourceId || !policy.origins.includes(new URL(sourceUrl).origin)) {
+    throw typedError('COVER_ORIGIN_FORBIDDEN', 'Cover URL is not an approved HTTPS source origin');
+  }
+  if (!sourceUrl.startsWith('https://')) throw typedError('COVER_ORIGIN_FORBIDDEN', 'Cover downloads require HTTPS');
+  return Object.freeze({ identity: Object.freeze({ ...candidate.identity }), sourceId: candidate.sourceId, sourceUrl, sourceRecordId: candidate.sourceRecordId, retrievedAt: candidate.retrievedAt });
 }
 
 /** Downloads one already exact-matched candidate with redirect and byte limits enforced before storage. */
-export async function downloadCoverCandidate({ candidate, http, maxBytes = MAX_COVER_BYTES }) {
-  if (!http || typeof http.request !== 'function' || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_COVER_BYTES) {
-    throw typedError('IMAGE_DOWNLOAD_INPUT_INVALID', 'Cover download requires a bounded HTTP client');
+export async function downloadCoverCandidate({ candidate, policy, transport, maxBytes = MAX_COVER_BYTES }) {
+  if (!COVER_TRANSPORTS.has(transport) || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_COVER_BYTES) throw typedError('IMAGE_DOWNLOAD_INPUT_INVALID', 'Cover download requires a pinned bounded transport');
+  const metadata = candidateMetadata(candidate, policy);
+  const hostname = new URL(metadata.sourceUrl).hostname;
+  const addresses = await transport.resolve(hostname);
+  if (!Array.isArray(addresses) || addresses.length === 0 || addresses.some((entry) => !globalAddress(entry?.address))) throw typedError('IMAGE_ADDRESS_FORBIDDEN', 'Cover hostname resolves to a non-global address');
+  const address = addresses[0].address;
+  let response;
+  let consumed = false;
+  try {
+    response = await transport.request({ url: metadata.sourceUrl, address, hostname, kind: 'IMAGE', init: { redirect: 'error' } });
+    if (!response || response.redirected || response.url !== metadata.sourceUrl || response.connectedAddress !== address) throw typedError('IMAGE_REDIRECT_FORBIDDEN', 'Cover redirect or final destination is forbidden');
+    boundedContentLength(response, maxBytes);
+    const declaredMime = response.headers?.get?.('content-type');
+    const bytes = await readBoundedBody(response, maxBytes);
+    consumed = true;
+    const inspection = inspectImageBytes({ declaredMime, bytes });
+    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
+    COVER_RECORDS.add(record);
+    COVER_BYTES.set(record, bytes);
+    return record;
+  } finally {
+    if (!consumed) await response?.body?.cancel?.().catch(() => {});
   }
-  const metadata = candidateMetadata(candidate);
-  const response = await http.request({ url: metadata.sourceUrl, kind: 'IMAGE', init: { redirect: 'error' } });
-  if (response?.redirected) throw typedError('IMAGE_REDIRECT_FORBIDDEN', 'Cover redirects are forbidden');
-  boundedContentLength(response, maxBytes);
-  const declaredMime = response?.headers?.get?.('content-type');
-  const bytes = await readBoundedBody(response, maxBytes);
-  const inspection = inspectImageBytes({ declaredMime, bytes });
-  return Object.freeze({ ...metadata, bytes, inspection, validationStatus: 'STRUCTURE_VALID', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
 }
 
 function checksum(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-function storeMetadata(candidate, inspection, bytes, localRef, created) {
-  const source = candidate ? candidateMetadata(candidate) : {
-    sourceId: 'test_fixture', sourceUrl: null, sourceRecordId: null, retrievedAt: null,
-  };
-  return Object.freeze({
-    ...source,
-    localRef,
-    mimeType: inspection.mimeType,
-    extension: inspection.extension,
-    byteSize: inspection.byteSize,
-    width: inspection.width,
-    height: inspection.height,
-    sha256: checksum(bytes),
-    validationStatus: 'STRUCTURE_VALID',
-    rightsStatus: 'TEST_ONLY_UNKNOWN',
-    distributionStatus: 'PROHIBITED',
-    created,
-  });
-}
-
 /** Stores a validated image under a safe internal id and never overwrites an existing checksum path. */
-export async function storeValidatedCover({ bytes, workspace, animeId, candidate, declaredMime }) {
-  if (!workspace || typeof workspace.resolve !== 'function' || typeof workspace.root !== 'string') {
-    throw typedError('COVER_WORKSPACE_INVALID', 'Validated covers require a catalog workspace');
-  }
+export async function storeValidatedCover({ record, workspace, animeId }) {
+  if (!COVER_RECORDS.has(record) || record.validationStatus !== 'DECODED' || !COVER_BYTES.has(record)) throw typedError('COVER_RECORD_UNTRUSTED', 'Only decoded authenticated CoverRecords may be stored');
   if (typeof animeId !== 'string' || !ANIME_ID.test(animeId)) {
     throw typedError('COVER_ANIME_ID_INVALID', 'Cover anime ID is not safe for external storage');
   }
-  const image = asBytes(bytes);
-  const inspection = inspectImageBytes({ declaredMime, bytes: image });
-  const digest = checksum(image);
+  const image = COVER_BYTES.get(record);
+  const digest = record.checksum;
   const directoryParts = ['images', 'covers', toPathKey(animeId)];
-  const filename = `${digest}.${inspection.extension}`;
+  const filename = `${digest}.${record.extension}`;
+  await assertCatalogWorkspaceMutation(workspace, directoryParts);
+  const directory = workspace.resolve(...directoryParts);
+  await mkdir(directory, { recursive: true });
+  await assertCatalogWorkspaceMutation(workspace, directoryParts);
   const destination = workspace.resolve(...directoryParts, filename);
-  await mkdir(workspace.resolve(...directoryParts), { recursive: true });
+  const temporary = workspace.resolve(...directoryParts, `.${digest}.${process.pid}.${Date.now()}.tmp`);
   let created = false;
   try {
-    const handle = await open(destination, 'wx');
+    const handle = await open(temporary, 'wx');
     try {
       await handle.writeFile(image);
+      await handle.sync();
       created = true;
     } finally {
       await handle.close();
     }
+    try { await link(temporary, destination); } catch (error) {
+      if (error?.code !== 'EEXIST') throw error;
+      created = false;
+    }
   } catch (error) {
-    if (error?.code !== 'EEXIST') throw error;
-    const existing = await readFile(destination);
-    if (checksum(existing) !== digest) throw typedError('COVER_STORE_COLLISION', 'Existing cover path has different immutable bytes');
+    throw error;
+  } finally {
+    await rm(temporary, { force: true }).catch(() => {});
   }
+  const existingInfo = await lstat(destination);
+  if (!existingInfo.isFile() || existingInfo.isSymbolicLink() || existingInfo.size > MAX_COVER_BYTES) throw typedError('COVER_STORE_COLLISION', 'Existing cover path is not a bounded regular file');
+  const existing = await readFile(destination);
+  if (checksum(existing) !== digest) throw typedError('COVER_STORE_COLLISION', 'Existing cover path has different immutable bytes');
   const localRef = [...directoryParts, filename].join('/');
-  return storeMetadata(candidate, inspection, image, localRef, created);
+  const stored = Object.freeze({ ...record, localRef, created });
+  COVER_RECORDS.add(stored);
+  COVER_BYTES.set(stored, image);
+  return stored;
 }
 
 /** Runs browser-native image decoding after structural validation without introducing an image package. */
-export async function decodeCoverWithChromium({ bytes, inspection, browser } = {}) {
-  const image = asBytes(bytes);
-  if (!inspection || !MIME_DETAILS[inspection.mimeType] || inspection.byteSize !== image.byteLength) {
-    throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires inspected image bytes');
-  }
+export async function decodeCoverWithChromium({ record, browser, timeoutMs = 5_000 } = {}) {
+  if (!COVER_RECORDS.has(record) || record.validationStatus !== 'SNIFFED' || !COVER_BYTES.has(record)
+    || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
+  const image = COVER_BYTES.get(record);
   let ownedBrowser = false;
   let activeBrowser = browser;
   if (!activeBrowser) {
@@ -353,8 +409,9 @@ export async function decodeCoverWithChromium({ bytes, inspection, browser } = {
   }
   try {
     const page = await activeBrowser.newPage();
+    let timer;
     try {
-      const result = await page.evaluate(async ({ base64, mimeType }) => {
+      const evaluation = page.evaluate(async ({ base64, mimeType }) => {
         const binary = atob(base64);
         const pixels = Uint8Array.from(binary, (character) => character.charCodeAt(0));
         try {
@@ -365,13 +422,19 @@ export async function decodeCoverWithChromium({ bytes, inspection, browser } = {
         } catch (error) {
           return { ok: false, message: String(error?.message ?? error) };
         }
-      }, { base64: Buffer.from(image).toString('base64'), mimeType: inspection.mimeType });
-      if (!result.ok || result.dimensions.width !== inspection.width || result.dimensions.height !== inspection.height) {
+      }, { base64: Buffer.from(image).toString('base64'), mimeType: record.mimeType });
+      const timeout = new Promise((_, reject) => { timer = setTimeout(() => { page.close().catch(() => {}); reject(typedError('IMAGE_DECODE_TIMEOUT', 'Chromium cover decode exceeded its deadline')); }, timeoutMs); });
+      const result = await Promise.race([evaluation, timeout]);
+      if (!result.ok || result.dimensions.width !== record.width || result.dimensions.height !== record.height) {
         throw typedError('IMAGE_DECODE_FAILED', 'Chromium could not decode the structurally valid cover');
       }
-      return Object.freeze({ ...inspection, validationStatus: 'DECODED' });
+      const decoded = Object.freeze({ ...record, validationStatus: 'DECODED' });
+      COVER_RECORDS.add(decoded);
+      COVER_BYTES.set(decoded, image);
+      return decoded;
     } finally {
-      await page.close();
+      clearTimeout(timer);
+      await page.close().catch(() => {});
     }
   } finally {
     if (ownedBrowser) await activeBrowser.close();
@@ -401,10 +464,9 @@ function compareCover(left, right) {
 /** Selects a single test-only canonical cover without changing any text catalog record. */
 export function selectCanonicalCover(candidates) {
   if (!Array.isArray(candidates)) throw typedError('COVER_SELECTION_INPUT_INVALID', 'Cover candidates must be an array');
-  const eligible = candidates.filter((row) => exactIdentityRank(row) < 2
-    && ['STRUCTURE_VALID', 'DECODED'].includes(row?.validationStatus)
-    && Number.isSafeInteger(row?.width) && Number.isSafeInteger(row?.height));
+  const eligible = candidates.filter((row) => COVER_RECORDS.has(row) && exactIdentityRank(row) < 2
+    && row.validationStatus === 'DECODED' && typeof row.localRef === 'string'
+    && Number.isSafeInteger(row.width) && Number.isSafeInteger(row.height));
   if (eligible.length === 0) return null;
-  const winner = [...eligible].sort(compareCover)[0];
-  return Object.freeze({ ...winner, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
+  return [...eligible].sort(compareCover)[0];
 }

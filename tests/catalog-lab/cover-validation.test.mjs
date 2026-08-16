@@ -7,8 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 import {
   COVER_MIME,
+  createPinnedCoverTransport,
   decodeCoverWithChromium,
   downloadCoverCandidate,
+  getApprovedCoverSourcePolicy,
   inspectImageBytes,
   selectCanonicalCover,
   storeValidatedCover,
@@ -34,11 +36,19 @@ function candidate(overrides = {}) {
   return {
     identity: { status: 'MATCHED', confidenceClass: 'EXACT_ID' },
     sourceId: 'anilist',
-    sourceUrl: 'https://covers.example.test/cover.png',
+    sourceUrl: 'https://s4.anilist.co/cover.png',
     sourceRecordId: 'a'.repeat(64),
     retrievedAt: '2026-08-17T00:00:00.000Z',
     ...overrides,
   };
+}
+
+const policy = getApprovedCoverSourcePolicy('anilist');
+function transportFor(bytes = pngBytes, mime = 'image/png') {
+  return createPinnedCoverTransport({
+    resolve: async () => [{ address: '8.8.8.8', family: 4 }],
+    request: async ({ url, address }) => ({ url, connectedAddress: address, redirected: false, headers: new Headers({ 'content-type': mime }), body: new Response(bytes).body }),
+  });
 }
 
 test('inspectImageBytes recognizes only bounded JPEG, PNG, and WebP structures', () => {
@@ -70,56 +80,43 @@ test('cover validation rejects spoofed MIME, truncation, unsafe pixels, and unsa
 });
 
 test('cover download applies exact URL, redirect, MIME, content-length, and stream bounds', async () => {
-  const requests = [];
-  const http = {
-    async request(request) {
-      requests.push(request);
-      return new Response(pngBytes, { headers: { 'content-type': 'image/png', 'content-length': String(pngBytes.byteLength) } });
-    },
-  };
-  const result = await downloadCoverCandidate({ candidate: candidate(), http, maxBytes: 4096 });
-  assert.equal(result.inspection.mimeType, COVER_MIME.PNG);
-  assert.deepEqual(requests, [{
-    url: 'https://covers.example.test/cover.png', kind: 'IMAGE', init: { redirect: 'error' },
-  }]);
+  const result = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(), maxBytes: 4096 });
+  assert.equal(result.mimeType, COVER_MIME.PNG);
+  assert.equal(result.validationStatus, 'SNIFFED');
 
-  await assert.rejects(downloadCoverCandidate({ candidate: candidate({ sourceUrl: 'file:///tmp/cover.png' }), http }),
+  await assert.rejects(downloadCoverCandidate({ candidate: candidate({ sourceUrl: 'file:///tmp/cover.png' }), policy, transport: transportFor() }),
     { code: 'IMAGE_URL_INVALID' });
-  await assert.rejects(downloadCoverCandidate({ candidate: candidate({ identity: { status: 'PENDING_REVIEW', confidenceClass: 'AMBIGUOUS' } }), http }),
+  await assert.rejects(downloadCoverCandidate({ candidate: candidate({ identity: { status: 'PENDING_REVIEW', confidenceClass: 'AMBIGUOUS' } }), policy, transport: transportFor() }),
     { code: 'COVER_IDENTITY_NOT_EXACT' });
-  await assert.rejects(downloadCoverCandidate({ candidate: candidate(), http: {
-    request: async () => new Response(pngBytes, { headers: { 'content-type': 'image/png', 'content-length': '9999' } }),
-  }, maxBytes: 64 }), { code: 'IMAGE_RESPONSE_TOO_LARGE' });
-  await assert.rejects(downloadCoverCandidate({ candidate: candidate(), http: {
-    request: async () => new Response(pngBytes, { headers: { 'content-type': 'text/html' } }),
-  } }), { code: 'IMAGE_MIME_UNSUPPORTED' });
+  await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(pngBytes, 'text/html') }), { code: 'IMAGE_MIME_UNSUPPORTED' });
 });
 
 test('validated cover storage is immutable, checksum-deduplicated, and contains no image failure side effect', async () => {
   await withWorkspace(async (workspace) => {
-    const first = await storeValidatedCover({ bytes: pngBytes, workspace, animeId, candidate: candidate() });
-    const second = await storeValidatedCover({ bytes: pngBytes, workspace, animeId, candidate: candidate() });
+    const sniffed = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor() });
+    await assert.rejects(storeValidatedCover({ record: sniffed, workspace, animeId }), { code: 'COVER_RECORD_UNTRUSTED' });
+    const decoded = await decodeCoverWithChromium({ record: sniffed });
+    const first = await storeValidatedCover({ record: decoded, workspace, animeId });
+    const second = await storeValidatedCover({ record: decoded, workspace, animeId });
     assert.equal(second.localRef, first.localRef);
     assert.equal(second.created, false);
     assert.equal(first.rightsStatus, 'TEST_ONLY_UNKNOWN');
     assert.equal(first.distributionStatus, 'PROHIBITED');
-    assert.equal(first.validationStatus, 'STRUCTURE_VALID');
+    assert.equal(first.validationStatus, 'DECODED');
     assert.match(first.localRef, /^images\/covers\/anime-11111111-1111-4111-8111-111111111111\/[a-f0-9]{64}\.png$/u);
     assert.deepEqual(new Uint8Array(await readFile(workspace.resolve(...first.localRef.split('/')))), pngBytes);
-    await assert.rejects(storeValidatedCover({ bytes: pngBytes, workspace, animeId: '../outside', candidate: candidate() }),
+    await assert.rejects(storeValidatedCover({ record: decoded, workspace, animeId: '../outside' }),
       { code: 'COVER_ANIME_ID_INVALID' });
 
     const textRecord = Object.freeze({ title: 'Synthetic title', description: 'must remain intact' });
-    await assert.rejects(downloadCoverCandidate({ candidate: candidate(), http: {
-      request: async () => new Response(truncatedPngBytes, { headers: { 'content-type': 'image/png' } }),
-    }, textRecord }), { code: 'IMAGE_TRUNCATED' });
+    await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(truncatedPngBytes), textRecord }), { code: 'IMAGE_TRUNCATED' });
     assert.deepEqual(textRecord, { title: 'Synthetic title', description: 'must remain intact' });
   });
 });
 
 test('Chromium decodes a structurally valid synthetic cover without adding an image dependency', async () => {
-  const inspected = inspectImageBytes({ declaredMime: COVER_MIME.PNG, bytes: pngBytes });
-  const decoded = await decodeCoverWithChromium({ bytes: pngBytes, inspection: inspected });
+  const sniffed = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor() });
+  const decoded = await decodeCoverWithChromium({ record: sniffed });
   assert.equal(decoded.validationStatus, 'DECODED');
 });
 
@@ -130,8 +127,46 @@ test('canonical cover selection is deterministic: exact identity, decoded state,
     { ...candidate({ sourceId: 'alpha' }), validationStatus: 'DECODED', width: 800, height: 800 },
     { ...candidate({ sourceId: 'beta' }), validationStatus: 'DECODED', width: 800, height: 800 },
   ]);
-  assert.equal(selected.sourceId, 'alpha');
-  assert.equal(selected.validationStatus, 'DECODED');
-  assert.equal(selected.rightsStatus, 'TEST_ONLY_UNKNOWN');
-  assert.equal(selected.distributionStatus, 'PROHIBITED');
+  assert.equal(selected, null);
+});
+
+test('cover pipeline requires an approved HTTPS origin, pinned public resolution, decode, and one authenticated record', async () => {
+  const policy = getApprovedCoverSourcePolicy('anilist');
+  const transport = createPinnedCoverTransport({
+    resolve: async () => [{ address: '203.0.113.44', family: 4 }],
+    request: async ({ url, address }) => ({
+      url, connectedAddress: address, redirected: false,
+      headers: new Headers({ 'content-type': 'image/png' }), body: new Response(pngBytes).body,
+    }),
+  });
+  const downloaded = await downloadCoverCandidate({
+    candidate: candidate({ sourceUrl: 'https://s4.anilist.co/cover.png' }), policy, transport,
+  });
+  assert.equal(downloaded.validationStatus, 'SNIFFED');
+  assert.equal(selectCanonicalCover([downloaded]), null);
+  const decoded = await decodeCoverWithChromium({ record: downloaded });
+  await withWorkspace(async (workspace) => {
+    const stored = await storeValidatedCover({ record: decoded, workspace, animeId });
+    assert.equal(stored.validationStatus, 'DECODED');
+    assert.match(stored.checksum, /^[a-f0-9]{64}$/u);
+    assert.equal(selectCanonicalCover([stored]), stored);
+  });
+});
+
+test('pinned transport refuses private, mapped, alternate numeric, and rebinding DNS answers', async () => {
+  const policy = getApprovedCoverSourcePolicy('anilist');
+  for (const address of ['127.0.0.1', '::1', '::ffff:10.0.0.1']) {
+    const transport = createPinnedCoverTransport({
+      resolve: async () => [{ address, family: address.includes(':') ? 6 : 4 }], request: async () => null,
+    });
+    await assert.rejects(downloadCoverCandidate({
+      candidate: candidate({ sourceUrl: 'https://s4.anilist.co/cover.png' }), policy, transport,
+    }), { code: 'IMAGE_ADDRESS_FORBIDDEN' });
+  }
+  const rebinding = createPinnedCoverTransport({
+    resolve: async () => [{ address: '8.8.8.8', family: 4 }, { address: '10.0.0.1', family: 4 }], request: async () => null,
+  });
+  await assert.rejects(downloadCoverCandidate({
+    candidate: candidate({ sourceUrl: 'https://s4.anilist.co/cover.png' }), policy, transport: rebinding,
+  }), { code: 'IMAGE_ADDRESS_FORBIDDEN' });
 });

@@ -1,8 +1,9 @@
-import { mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
 import { realpathSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve, sep } from 'node:path';
 
 const SENTINEL = Object.freeze({ kind: 'MOEMOA_CATALOG_LAB', schemaVersion: 1 });
+const WORKSPACE_HANDLES = new WeakMap();
 
 function normalizeForComparison(path) {
   return process.platform === 'win32' ? path.toLowerCase() : path;
@@ -92,5 +93,39 @@ export async function openCatalogWorkspace({ repoRoot, workspaceRoot = process.e
     error.code = 'CATALOG_WORKSPACE_SENTINEL_INVALID';
     throw error;
   }
-  return Object.freeze({ root, resolve: createContainedResolver(root) });
+  const handle = Object.freeze({ root, resolve: createContainedResolver(root) });
+  WORKSPACE_HANDLES.set(handle, Object.freeze({ root, canonicalRepo }));
+  return handle;
+}
+
+/** Rechecks the branded TEST_ONLY workspace immediately before an external mutation. */
+export async function assertCatalogWorkspaceMutation(workspace, parts) {
+  const trusted = WORKSPACE_HANDLES.get(workspace);
+  if (!trusted || !Array.isArray(parts) || parts.some((part) => typeof part !== 'string' || !part || isAbsolute(part))) {
+    const error = new Error('Catalog workspace handle is not authenticated');
+    error.code = 'CATALOG_WORKSPACE_UNTRUSTED';
+    throw error;
+  }
+  const canonicalRoot = await realpath(trusted.root).catch(() => null);
+  if (!canonicalRoot || canonicalRoot !== trusted.root || isWithin(trusted.canonicalRepo, canonicalRoot)) {
+    throw insideRepositoryError();
+  }
+  let sentinel;
+  try { sentinel = JSON.parse(await readFile(join(canonicalRoot, 'TEST_ONLY.json'), 'utf8')); } catch { sentinel = null; }
+  if (!sentinel || sentinel.kind !== SENTINEL.kind || sentinel.schemaVersion !== SENTINEL.schemaVersion) {
+    const error = new Error('Catalog workspace sentinel is invalid');
+    error.code = 'CATALOG_WORKSPACE_SENTINEL_INVALID';
+    throw error;
+  }
+  let current = canonicalRoot;
+  for (const part of parts) {
+    current = join(current, part);
+    const entry = await lstat(current).catch((error) => error.code === 'ENOENT' ? null : Promise.reject(error));
+    if (entry?.isSymbolicLink()) {
+      const error = new Error('Catalog workspace mutation path contains a symbolic link');
+      error.code = 'CATALOG_WORKSPACE_SYMLINK_FORBIDDEN';
+      throw error;
+    }
+  }
+  return workspace.resolve(...parts);
 }
