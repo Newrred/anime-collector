@@ -1,5 +1,5 @@
 import { sha256, stableStringify } from '../lib/hash.mjs';
-import { CANONICAL_FIELD_PATHS, COLLECTION_FIELD_PATHS, isPlainRecord } from './normalize.mjs';
+import { CANONICAL_FIELD_PATHS, COLLECTION_FIELD_PATHS, deepFrozenSnapshot } from './normalize.mjs';
 import { validateFieldClaim } from './claims.mjs';
 
 function typedError(code, message) {
@@ -114,51 +114,18 @@ function provenanceFor(fieldPath, claims) {
   };
 }
 
-function jsonSafe(value, seen = new Set()) {
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
-  if (typeof value === 'number') return Number.isFinite(value);
-  if (typeof value !== 'object' || seen.has(value)) return false;
-  seen.add(value);
-  let valid;
-  if (Array.isArray(value)) {
-    let descriptors;
-    try {
-      descriptors = Object.getOwnPropertyDescriptors(value);
-    } catch {
-      seen.delete(value);
-      return false;
-    }
-    valid = Reflect.ownKeys(value).every((key) => typeof key === 'string')
-      && Object.keys(value).length === value.length
-      && Object.entries(descriptors).every(([key, descriptor]) => key === 'length'
-        || ('value' in descriptor && /^\d+$/u.test(key)))
-      && Object.keys(value).every((key) => jsonSafe(descriptors[key].value, seen));
-  } else {
-    valid = isPlainRecord(value) && Object.values(Object.getOwnPropertyDescriptors(value))
-      .every((descriptor) => jsonSafe(descriptor.value, seen));
-  }
-  seen.delete(value);
-  return valid;
-}
-
-function deepFreeze(value, seen = new Set()) {
-  if (value === null || typeof value !== 'object' || seen.has(value)) return value;
-  seen.add(value);
-  for (const child of Object.values(value)) deepFreeze(child, seen);
-  return Object.freeze(value);
-}
-
 function frozenSnapshot(value) {
-  if (!jsonSafe(value)) throw typedError('FIELD_CLAIM_INVALID', 'Claims must be immutable JSON data');
-  return deepFreeze(structuredClone(value));
+  return deepFrozenSnapshot(value, {
+    code: 'FIELD_CLAIM_INVALID', message: 'Claims must be immutable JSON data',
+  });
 }
 
 /** Rebuilds a complete deterministic CanonicalAnime revision without overwriting conflicts. */
 export function buildCanonicalRevision(inputClaims) {
-  if (!Array.isArray(inputClaims) || inputClaims.length === 0) {
+  const claims = frozenSnapshot(inputClaims);
+  if (!Array.isArray(claims) || claims.length === 0) {
     throw typedError('CANONICAL_CLAIMS_REQUIRED', 'Canonical revision requires at least one FieldClaim');
   }
-  const claims = frozenSnapshot(inputClaims);
   const claimsById = new Map();
   for (const claim of claims) {
     const existing = claimsById.get(claim.claimId);

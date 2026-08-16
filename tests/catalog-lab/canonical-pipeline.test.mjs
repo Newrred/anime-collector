@@ -4,12 +4,13 @@ import test from 'node:test';
 import { sha256, stableStringify } from '../../tools/catalog-lab/lib/hash.mjs';
 import { toPathKey } from '../../tools/catalog-lab/lib/path-key.mjs';
 import genreConfig from '../../tools/catalog-lab/config/core-genre-map.json' with { type: 'json' };
-import sourceRegistry from '../../tools/catalog-lab/config/source-registry.json' with { type: 'json' };
+import { SOURCE_PROMOTION_POLICY } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
 import {
   CORE_GENRES,
   FIELD_STATES,
   FORMAT_VALUES,
   RELATION_VALUES,
+  STUDIO_ROLE_VALUES,
   STATUS_VALUES,
   normalizeSourceRecord,
 } from '../../tools/catalog-lab/pipeline/normalize.mjs';
@@ -61,6 +62,28 @@ function sourceRecord(sourceId, inputPayload, overrides = {}) {
       claims: { ...defaults.claims, ...structuredClone(inputPayload.claims ?? {}) },
     } : {}),
   };
+  if (sourceId === 'wikidata' && !isAbsence) {
+    const datavalueTypes = {
+      P8729: 'string', P856: 'string', P577: 'time',
+      P136: 'wikibase-entityid', P272: 'wikibase-entityid',
+    };
+    payload.claims = Object.fromEntries(Object.entries(payload.claims).map(([property, rows]) => [
+      property,
+      rows.map((row) => ({
+        ...row,
+        mainsnak: {
+          ...row.mainsnak,
+          snaktype: row.mainsnak.snaktype ?? 'value',
+          ...(row.mainsnak.datavalue ? {
+            datavalue: {
+              ...row.mainsnak.datavalue,
+              type: row.mainsnak.datavalue.type ?? datavalueTypes[property],
+            },
+          } : {}),
+        },
+      })),
+    ]));
+  }
   const sourceEntityId = overrides.sourceEntityId
     ?? (sourceId === 'anilist' ? '1' : sourceId === 'wikidata' ? 'Q1' : '101');
   const responseStatus = overrides.responseStatus ?? 200;
@@ -115,6 +138,10 @@ test('normalization exports the explicit finite vocabularies', () => {
   assert.deepEqual(RELATION_VALUES, [
     'SEQUEL', 'PREQUEL', 'SIDE_STORY', 'SPIN_OFF', 'ADAPTATION', 'REMAKE', 'RECAP',
     'ALTERNATIVE_VERSION', 'SHARED_UNIVERSE', 'CHARACTER_CROSSOVER', 'OTHER',
+  ]);
+  assert.deepEqual(STUDIO_ROLE_VALUES, [
+    'ANIMATION_PRODUCTION', 'CO_PRODUCTION', 'PRODUCTION_ASSISTANCE', 'PLANNING',
+    'PRODUCTION_COMMITTEE', 'DISTRIBUTOR', 'BROADCASTER', 'OTHER',
   ]);
   assert.deepEqual(CORE_GENRES, [
     'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery',
@@ -334,7 +361,9 @@ test('AniLife title ambiguity and near matches are review-only', () => {
     contentId: '101', title: 'Cowboy Bebop', datePublished: '1998-04-03', numberOfEpisodes: 26,
   }));
   assert.deepEqual(resolveIdentity({
-    target, candidate: { ...candidate, exactTitleCandidateCount: 2 }, sourceId: 'anilife_public',
+    target, candidate: { ...candidate, identityEvidence: {
+      ...candidate.identityEvidence, exactTitleCandidateCount: 2,
+    } }, sourceId: 'anilife_public',
   }), {
     status: 'PENDING_REVIEW', confidenceClass: 'AMBIGUOUS', ruleId: 'ANILIFE_MULTIPLE_CANDIDATES_V1',
   });
@@ -357,16 +386,38 @@ test('AniLife episode rule requires explicit single-candidate evidence', () => {
     contentId: '101', title: 'Cowboy Bebop', datePublished: null, numberOfEpisodes: 26,
   }));
   assert.deepEqual(resolveIdentity({
-    target: targetWithoutYear, candidate, sourceId: 'anilife_public',
+    target: targetWithoutYear, candidate: { ...candidate, identityEvidence: null },
+    sourceId: 'anilife_public',
   }), {
     status: 'PENDING_REVIEW', confidenceClass: 'AMBIGUOUS', ruleId: 'ANILIFE_UNIQUENESS_REQUIRED_V1',
   });
   assert.deepEqual(resolveIdentity({
-    target: targetWithoutYear, candidate: { ...candidate, exactTitleCandidateCount: 1 },
+    target: targetWithoutYear, candidate,
     sourceId: 'anilife_public',
   }), {
     status: 'MATCHED', confidenceClass: 'EXACT_RULE', ruleId: 'ANILIFE_TITLE_EPISODE_V1',
   });
+});
+
+test('AniLife episode-only identity evidence survives normalize clone and claim creation', () => {
+  const targetWithoutYear = { ...target, releaseYear: null };
+  const normalized = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: null, numberOfEpisodes: 26,
+  }));
+  assert.deepEqual(normalized.identityEvidence, {
+    version: 'IDENTITY_EVIDENCE_V1',
+    evidenceSource: 'REVIEWED_LOCAL_BINDING',
+    exactTitleCandidateCount: 1,
+  });
+  const persisted = structuredClone(normalized);
+  const claims = buildFieldClaims({ target: targetWithoutYear, normalizedRecords: [persisted] });
+  assert.equal(claims.some((claim) => claim.fieldPath === 'episodeCount'
+    && claim.ruleId === 'ANILIFE_TITLE_EPISODE_V1'), true);
+
+  persisted.identityEvidence.exactTitleCandidateCount = 0;
+  assert.throws(() => buildFieldClaims({
+    target: targetWithoutYear, normalizedRecords: [persisted],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
 });
 
 test('identity rejects a candidate collected for a different target key', () => {
@@ -582,13 +633,12 @@ test('source claims stay immutable when a later source introduces a scalar confl
 });
 
 test('canonical rights derive from authoritative claim policy and reject policy spoofing', () => {
-  const policyBySource = Object.fromEntries(sourceRegistry.map((row) => [row.sourceId, row.catalogPromotion]));
   const anilist = normalizeSourceRecord(sourceRecord('anilist', {
     id: 1, title: { romaji: 'Cowboy Bebop' },
   }));
   const anilistClaims = buildFieldClaims({ target, normalizedRecords: [anilist] });
   assert.equal(anilistClaims.every((claim) => (
-    claim.catalogPromotion === policyBySource.anilist
+    claim.catalogPromotion === SOURCE_PROMOTION_POLICY.anilist
   )), true);
   assert.equal(buildCanonicalRevision(anilistClaims).distributionStatus, 'PROHIBITED');
 
@@ -602,6 +652,37 @@ test('canonical rights derive from authoritative claim policy and reject policy 
   assert.throws(() => buildCanonicalRevision([
     { ...wikidataClaim, sourceId: 'future_source', catalogPromotion: 'PROHIBITED' },
   ]), { code: 'FIELD_CLAIM_SOURCE_POLICY_INVALID' });
+});
+
+test('FieldClaim full-content integrity rejects coherent relabel and lone provenance tamper', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' },
+  }));
+  const [claim] = buildFieldClaims({ target, normalizedRecords: [normalized] });
+  assert.deepEqual(Object.keys(claim.contentIntegrity).sort(), ['algorithm', 'contentHash', 'version']);
+  assert.deepEqual(claim.contentIntegrity, {
+    version: 'FIELD_CLAIM_CONTENT_V1',
+    algorithm: 'SHA-256',
+    contentHash: claim.contentIntegrity.contentHash,
+  });
+  assert.match(claim.contentIntegrity.contentHash, /^[a-f0-9]{64}$/u);
+
+  const tamperedClaims = [
+    {
+      ...claim,
+      sourceId: 'wikidata',
+      catalogPromotion: 'FIELD_REVIEW_REQUIRED',
+    },
+    { ...claim, rawValue: { relabeled: 'raw evidence' } },
+    { ...claim, ruleId: 'WIKIDATA_P8729_V1' },
+    { ...claim, confidenceClass: claim.confidenceClass === 'EXACT_ID' ? 'EXACT_RULE' : 'EXACT_ID' },
+    { ...claim, retrievedAt: '2026-08-17T01:02:04.000Z' },
+  ];
+  for (const tampered of tamperedClaims) {
+    assert.throws(() => buildCanonicalRevision([tampered]), {
+      code: 'FIELD_CLAIM_INTEGRITY_INVALID',
+    });
+  }
 });
 
 test('collection natural-key collisions are conflicted and totally ordered', () => {
@@ -664,6 +745,44 @@ test('Wikidata preserves every valid scalar candidate before canonical conflict 
   const canonical = buildCanonicalRevision(buildFieldClaims({ target, normalizedRecords: [normalized] }));
   assert.equal(canonical.startDate.state, 'CONFLICTED');
   assert.equal(canonical.officialSiteUrl.state, 'CONFLICTED');
+});
+
+test('Wikidata missing-value snaks preserve evidence without poisoning valid sibling fields', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('wikidata', {
+    externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+    claims: {
+      P577: [
+        { mainsnak: { snaktype: 'novalue' } },
+        { mainsnak: { datavalue: {
+          value: { time: '+1998-04-03T00:00:00Z', precision: 11 }, type: 'time',
+        } } },
+      ],
+      P856: [{ mainsnak: { snaktype: 'somevalue' } }],
+      P136: [{ mainsnak: { snaktype: 'novalue' } }],
+      P272: [{ mainsnak: { snaktype: 'somevalue' } }],
+    },
+  }));
+  assert.equal(normalized.titles.some((title) => title.value === 'Cowboy Bebop'), true);
+  assert.equal(normalized.startDate, '1998-04-03');
+  const missingSite = normalized.fieldValues.find((row) => row.fieldPath === 'officialSiteUrl');
+  assert.equal(missingSite.status, 'NOT_FETCHED');
+  assert.deepEqual(missingSite.rawValue, { snaktype: 'somevalue' });
+  const missingGenre = normalized.fieldValues.find((row) => row.fieldPath === 'sourceGenres');
+  assert.equal(missingGenre.status, 'SOURCE_NOT_AVAILABLE');
+  assert.deepEqual(missingGenre.rawValue, { snaktype: 'novalue' });
+  const claims = buildFieldClaims({ target, normalizedRecords: [structuredClone(normalized)] });
+  assert.equal(claims.some((claim) => claim.fieldPath === 'officialSiteUrl'
+    && claim.status === 'NOT_FETCHED' && claim.rawValue.snaktype === 'somevalue'), true);
+
+  for (const mainsnak of [
+    { snaktype: 'novalue', datavalue: { value: 'https://example.test', type: 'string' } },
+    { snaktype: 'value' },
+  ]) {
+    assert.throws(() => normalizeSourceRecord(sourceRecord('wikidata', {
+      externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+      claims: { P856: [{ mainsnak }] },
+    })), { code: 'SOURCE_SCHEMA_DRIFT' });
+  }
 });
 
 test('partial-year evidence supports exact AniLife matching without inventing a full date', () => {
@@ -756,6 +875,20 @@ test('SourceRecord validation rejects integrity, state and per-source payload dr
       }),
       code: 'SOURCE_SCHEMA_DRIFT',
     },
+    {
+      name: 'timestamp without exact milliseconds',
+      record: sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } }, {
+        fetchedAt: '2026-08-17T01:02:03Z',
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'invalid exact-shaped timestamp',
+      record: sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } }, {
+        fetchedAt: '2026-99-17T01:02:03.000Z',
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
   ];
   for (const { name, record, code } of cases) {
     assert.throws(() => normalizeSourceRecord(record), { code }, name);
@@ -821,7 +954,7 @@ test('normalized and FieldClaim persistence inputs are strictly validated', () =
   });
   assert.throws(() => buildFieldClaims({
     target, normalizedRecords: [accessorNormalized],
-  }), { code: 'NORMALIZED_RECORD_INVALID' });
+  }), { code: 'FIELD_CLAIM_INPUT_INVALID' });
   assert.equal(fieldGetterInvoked, false);
 
   const [claim] = buildFieldClaims({ target, normalizedRecords: [normalized] });
@@ -831,12 +964,80 @@ test('normalized and FieldClaim persistence inputs are strictly validated', () =
     { ...claim, status: 'PUBLISHED' },
     { ...claim, confidenceClass: 'SCORE_0_9' },
     { ...claim, catalogPromotion: 'ALLOWED' },
+    { ...claim, retrievedAt: '2026-99-17T01:02:03.000Z' },
   ];
   for (const invalid of invalidClaims) {
     assert.throws(() => buildCanonicalRevision([invalid]), { code: 'FIELD_CLAIM_INVALID' });
   }
   assert.throws(() => buildCanonicalRevision([{ ...claim, normalizedValue: 'tampered' }]), {
     code: 'FIELD_CLAIM_ID_INVALID',
+  });
+});
+
+test('persisted entity values enforce studio roles, qualified IDs and normalized names', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, idMal: 2, title: { romaji: 'Cowboy Bebop' },
+    studios: { nodes: [{ id: 14, name: 'Sunrise', isAnimationStudio: true }] },
+    relations: { edges: [{
+      relationType: 'SEQUEL', node: {
+        id: 3, type: 'ANIME', title: { romaji: 'Movie' }, format: 'MOVIE',
+      },
+    }] },
+    characters: [{
+      role: 'MAIN', node: { id: 10, name: { full: 'Spike', native: null, alternative: [] } },
+      voiceActors: [{
+        id: 20, name: { full: 'Actor', native: null, alternative: [] }, language: 'JAPANESE',
+      }],
+    }],
+  }));
+  const mutations = [
+    ['studios', (value) => { value.role = 'OWNER'; }],
+    ['studios', (value) => { value.id = '14'; }],
+    ['studios', (value) => { value.name = ''; }],
+    ['relations', (value) => { value.targetId = '3'; }],
+    ['characters', (value) => { value.id = '10'; }],
+    ['castings', (value) => { value.personId = '20'; }],
+    ['externalIds', (value) => { value.value = 'not-an-id'; }, 1],
+  ];
+  for (const [fieldPath, mutate, index = 0] of mutations) {
+    const malformed = structuredClone(normalized);
+    mutate(malformed[fieldPath][index]);
+    mutate(malformed.fieldValues.filter((row) => row.fieldPath === fieldPath)[index].normalizedValue);
+    assert.throws(() => buildFieldClaims({ target, normalizedRecords: [malformed] }), {
+      code: 'NORMALIZED_RECORD_INVALID',
+    }, fieldPath);
+  }
+});
+
+test('claim and canonical snapshot boundaries type throwing and revoked Proxy failures', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' },
+  }));
+  const claims = buildFieldClaims({ target, normalizedRecords: [normalized] });
+
+  const revokedClaimInput = Proxy.revocable({ target, normalizedRecords: [normalized] }, {});
+  revokedClaimInput.revoke();
+  assert.throws(() => buildFieldClaims(revokedClaimInput.proxy), {
+    code: 'FIELD_CLAIM_INPUT_INVALID',
+  });
+
+  const revokedRecords = Proxy.revocable([], {});
+  revokedRecords.revoke();
+  assert.throws(() => buildFieldClaims({ target, normalizedRecords: revokedRecords.proxy }), {
+    code: 'FIELD_CLAIM_INPUT_INVALID',
+  });
+
+  const revokedClaims = Proxy.revocable([], {});
+  revokedClaims.revoke();
+  assert.throws(() => buildCanonicalRevision(revokedClaims.proxy), {
+    code: 'FIELD_CLAIM_INVALID',
+  });
+
+  const throwingClaim = new Proxy(structuredClone(claims[0]), {
+    ownKeys() { throw new Error('SYNTHETIC_TRAP'); },
+  });
+  assert.throws(() => buildCanonicalRevision([throwingClaim]), {
+    code: 'FIELD_CLAIM_INVALID',
   });
 });
 

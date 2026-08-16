@@ -59,6 +59,14 @@ function absenceOnly(candidate, status) {
     && candidate.fieldValues.every((field) => field?.status === status);
 }
 
+function exactTitleCandidateCount(candidate) {
+  const evidence = candidate?.identityEvidence;
+  return evidence?.version === 'IDENTITY_EVIDENCE_V1'
+    && evidence.evidenceSource === 'REVIEWED_LOCAL_BINDING'
+    && Number.isSafeInteger(evidence.exactTitleCandidateCount)
+    ? evidence.exactTitleCandidateCount : null;
+}
+
 /** Applies only approved exact identity rules. Every non-exact outcome is sent to review. */
 export function resolveIdentity({ target, candidate, sourceId, referenceRecords = [] }) {
   if (!target || !candidate || candidate.sourceId !== sourceId) {
@@ -93,7 +101,8 @@ export function resolveIdentity({ target, candidate, sourceId, referenceRecords 
       : decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_INSUFFICIENT_EVIDENCE_V1');
   }
 
-  if (candidate.exactTitleCandidateCount > 1) {
+  const candidateCount = exactTitleCandidateCount(candidate);
+  if (candidateCount > 1) {
     return decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_MULTIPLE_CANDIDATES_V1');
   }
   const targetTitles = new Set((Array.isArray(target.seedTitles) ? target.seedTitles : [])
@@ -133,7 +142,7 @@ export function resolveIdentity({ target, candidate, sourceId, referenceRecords 
     if (targetEpisodes !== candidateEpisodes) {
       return decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_EPISODE_MISMATCH_V1');
     }
-    return candidate.exactTitleCandidateCount === 1
+    return candidateCount === 1
       ? decision('MATCHED', 'EXACT_RULE', 'ANILIFE_TITLE_EPISODE_V1')
       : decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_UNIQUENESS_REQUIRED_V1');
   }

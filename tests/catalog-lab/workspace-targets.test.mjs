@@ -6,7 +6,12 @@ import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { assertSourceEndpoint, loadSourceRegistry, assertSourceExecution } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
+import {
+  SOURCE_PROMOTION_POLICY,
+  assertSourceEndpoint,
+  loadSourceRegistry,
+  assertSourceExecution,
+} from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
 import { toPathKey } from '../../tools/catalog-lab/lib/path-key.mjs';
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
 import { buildTargetManifest } from '../../tools/catalog-lab/pipeline/targets.mjs';
@@ -167,6 +172,17 @@ test('registry exposes four approved sources and blocks over-scope execution', a
   assert.throws(() => assertSourceExecution({
     sourceId: 'unregistered', status: 'approved', executionScope: 'LOCAL_TEST_MAX_100',
   }, 1), { code: 'SOURCE_NOT_REGISTERED' });
+});
+
+test('registry contract exposes one immutable authoritative promotion projection', () => {
+  assert.deepEqual(SOURCE_PROMOTION_POLICY, {
+    legacy_aliases: 'PROHIBITED',
+    anilist: 'PROHIBITED',
+    wikidata: 'FIELD_REVIEW_REQUIRED',
+    anilife_public: 'PROHIBITED',
+  });
+  assert.equal(Object.isFrozen(SOURCE_PROMOTION_POLICY), true);
+  assert.throws(() => { SOURCE_PROMOTION_POLICY.wikidata = 'PROHIBITED'; }, TypeError);
 });
 
 test('registry rejects entries missing required policy fields', async () => {

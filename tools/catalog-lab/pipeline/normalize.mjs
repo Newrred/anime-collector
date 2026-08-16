@@ -20,6 +20,10 @@ export const RELATION_VALUES = Object.freeze([
   'SEQUEL', 'PREQUEL', 'SIDE_STORY', 'SPIN_OFF', 'ADAPTATION', 'REMAKE', 'RECAP',
   'ALTERNATIVE_VERSION', 'SHARED_UNIVERSE', 'CHARACTER_CROSSOVER', 'OTHER',
 ]);
+export const STUDIO_ROLE_VALUES = Object.freeze([
+  'ANIMATION_PRODUCTION', 'CO_PRODUCTION', 'PRODUCTION_ASSISTANCE', 'PLANNING',
+  'PRODUCTION_COMMITTEE', 'DISTRIBUTOR', 'BROADCASTER', 'OTHER',
+]);
 export const CANONICAL_FIELD_PATHS = Object.freeze([
   'externalIds', 'titles', 'format', 'status', 'season', 'startDate', 'endDate',
   'episodeCount', 'sourceMaterialType', 'officialSiteUrl', 'studios', 'relations',
@@ -99,18 +103,16 @@ function schemaError() {
 }
 
 export function isPlainRecord(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  let prototype;
-  let descriptors;
   try {
-    prototype = Object.getPrototypeOf(value);
-    descriptors = Object.getOwnPropertyDescriptors(value);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const prototype = Object.getPrototypeOf(value);
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    return Reflect.ownKeys(value).every((key) => typeof key === 'string')
+      && (prototype === Object.prototype || prototype === null)
+      && Object.values(descriptors).every((descriptor) => 'value' in descriptor);
   } catch {
     return false;
   }
-  return Reflect.ownKeys(value).every((key) => typeof key === 'string')
-    && (prototype === Object.prototype || prototype === null)
-    && Object.values(descriptors).every((descriptor) => 'value' in descriptor);
 }
 
 function hasExactKeys(value, keys) {
@@ -129,15 +131,17 @@ function deepFreeze(value, seen = new Set()) {
   return Object.freeze(value);
 }
 
-export function deepFrozenSnapshot(value) {
+export function deepFrozenSnapshot(value, {
+  code = 'SOURCE_SCHEMA_DRIFT', message = 'SourceRecord does not match its approved source schema',
+} = {}) {
   let snapshot;
   try {
     if (!jsonSafe(value)) throw new TypeError('Value must be plain JSON data');
     snapshot = structuredClone(value);
+    return deepFreeze(snapshot);
   } catch {
-    throw schemaError();
+    throw typedError(code, message);
   }
-  return deepFreeze(snapshot);
 }
 
 function jsonSafe(value, ancestors = new Set()) {
@@ -170,6 +174,16 @@ export function normalizeText(value) {
   if (typeof value !== 'string') return null;
   const normalized = value.normalize('NFKC').trim();
   return normalized || null;
+}
+
+export function isExactIsoTimestamp(value) {
+  if (typeof value !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)) return false;
+  try {
+    return new Date(value).toISOString() === value;
+  } catch {
+    return false;
+  }
 }
 
 function compareText(left, right) {
@@ -241,13 +255,18 @@ function uniqueEntries(entries, fieldPath) {
   for (const entry of entries) {
     const key = stableStringify(entry.normalizedValue);
     const existing = groups.get(key);
-    if (!existing) groups.set(key, { ...entry, rawValues: [entry.rawValue] });
-    else existing.rawValues.push(entry.rawValue);
+    if (!existing) groups.set(key, { ...entry, rawValues: [entry.rawValue], statuses: [entry.status] });
+    else {
+      existing.rawValues.push(entry.rawValue);
+      existing.statuses.push(entry.status);
+    }
   }
-  return [...groups.values()].map(({ rawValues, ...entry }) => {
+  return [...groups.values()].map(({ rawValues, statuses, ...entry }) => {
     const uniqueRaw = [...new Map(rawValues.map((raw) => [stableStringify(raw), raw])).values()]
       .sort((left, right) => compareText(stableStringify(left), stableStringify(right)));
-    return { ...entry, rawValue: uniqueRaw.length === 1 ? uniqueRaw[0] : uniqueRaw };
+    const status = statuses.includes('SOURCE_NOT_AVAILABLE') ? 'SOURCE_NOT_AVAILABLE'
+      : statuses.includes('NOT_FETCHED') ? 'NOT_FETCHED' : 'VALUE';
+    return { ...entry, status, rawValue: uniqueRaw.length === 1 ? uniqueRaw[0] : uniqueRaw };
   }).sort((left, right) => {
     if (fieldPath === 'titles') {
       const localeOrder = ['ja-Latn', 'ja', 'en', 'und'];
@@ -329,11 +348,24 @@ function validateAniListPayload(record) {
       && safeInteger(payload.episodes) === null)) throw schemaError();
 }
 
-function wikidataValues(payload, property) {
+function wikidataSnaks(payload, property) {
   const rows = payload.claims[property] ?? [];
-  requireArray(rows, (claim) => isPlainRecord(claim) && isPlainRecord(claim.mainsnak)
-    && isPlainRecord(claim.mainsnak.datavalue) && Object.hasOwn(claim.mainsnak.datavalue, 'value'));
-  return rows.map((claim) => claim.mainsnak.datavalue.value);
+  const typeByProperty = {
+    P8729: 'string', P856: 'string', P577: 'time',
+    P136: 'wikibase-entityid', P272: 'wikibase-entityid',
+  };
+  requireArray(rows, (claim) => {
+    if (!isPlainRecord(claim) || !isPlainRecord(claim.mainsnak)
+      || !['value', 'novalue', 'somevalue'].includes(claim.mainsnak.snaktype)) return false;
+    if (claim.mainsnak.snaktype !== 'value') return !Object.hasOwn(claim.mainsnak, 'datavalue');
+    return hasExactKeys(claim.mainsnak.datavalue, ['type', 'value'])
+      && claim.mainsnak.datavalue.type === typeByProperty[property];
+  });
+  return rows.map((claim) => ({
+    snaktype: claim.mainsnak.snaktype,
+    mainsnak: claim.mainsnak,
+    ...(claim.mainsnak.snaktype === 'value' ? { value: claim.mainsnak.datavalue.value } : {}),
+  }));
 }
 
 function validateWikidataPayload(record) {
@@ -349,7 +381,8 @@ function validateWikidataPayload(record) {
   const anilistId = payload.externalIds.anilist;
   if (typeof anilistId !== 'string' || !/^[1-9]\d*$/.test(anilistId)
     || anilistId !== targetAniListId(record.targetKey)) throw schemaError();
-  const p8729 = wikidataValues(payload, 'P8729');
+  const p8729 = wikidataSnaks(payload, 'P8729')
+    .filter((snak) => snak.snaktype === 'value').map((snak) => snak.value);
   if (p8729.length === 0 || p8729.some((value) => value !== anilistId)) throw schemaError();
   const valueShapeByProperty = {
     P8729: (value) => typeof value === 'string' && /^[1-9]\d*$/u.test(value),
@@ -364,7 +397,8 @@ function validateWikidataPayload(record) {
   for (const value of Object.values(payload.labels)) if (typeof value !== 'string') throw schemaError();
   for (const value of Object.values(payload.aliases)) requireArray(value, (entry) => typeof entry === 'string');
   for (const property of Object.keys(payload.claims)) {
-    if (!wikidataValues(payload, property).every(valueShapeByProperty[property])) throw schemaError();
+    if (!wikidataSnaks(payload, property).filter((snak) => snak.snaktype === 'value')
+      .every((snak) => valueShapeByProperty[property](snak.value))) throw schemaError();
   }
 }
 
@@ -402,7 +436,7 @@ function validateSourceRecord(record) {
   if (!hasExactKeys(record, SOURCE_RECORD_KEYS) || !/^[a-f0-9]{64}$/.test(record.sourceRecordId)
     || !/^[a-f0-9]{64}$/.test(record.payloadHash) || typeof record.targetKey !== 'string'
     || typeof record.sourceId !== 'string' || typeof record.sourceEntityId !== 'string'
-    || typeof record.fetchedAt !== 'string' || Number.isNaN(Date.parse(record.fetchedAt))
+    || !isExactIsoTimestamp(record.fetchedAt)
     || typeof record.requestFingerprint !== 'string' || !record.requestFingerprint
     || typeof record.parserVersion !== 'string' || !record.parserVersion
     || typeof record.rawPayloadRef !== 'string' || !record.rawPayloadRef
@@ -545,26 +579,38 @@ function wikidataFields(record) {
       if (entry) titles.push(entry);
     }
   }
-  const dateEntries = wikidataValues(payload, 'P577').map((rawValue) => ({
-    rawValue,
-    normalizedValue: normalizedDate(isPlainRecord(rawValue) ? rawValue.time : rawValue),
-  })).filter(({ normalizedValue }) => normalizedValue !== null);
-  const officialSites = wikidataValues(payload, 'P856').map((rawValue) => ({
-    rawValue, normalizedValue: normalizedHttpUrl(rawValue),
-  })).filter(({ normalizedValue }) => normalizedValue !== null);
-  const studios = wikidataValues(payload, 'P272').filter((value) => isPlainRecord(value)
-    && typeof value.id === 'string' && /^Q[1-9]\d*$/.test(value.id)).map((rawValue) => ({
-    rawValue, normalizedValue: { id: `wikidata:${rawValue.id}`, name: null, role: 'OTHER' },
-  }));
-  const sourceGenres = wikidataValues(payload, 'P136').filter((value) => isPlainRecord(value)
-    && typeof value.id === 'string' && /^Q[1-9]\d*$/.test(value.id)).map((rawValue) => ({
-    rawValue, normalizedValue: `wikidata:${rawValue.id}`,
-  }));
+  const missingEntry = (snak) => ({
+    rawValue: snak.mainsnak,
+    normalizedValue: null,
+    status: snak.snaktype === 'novalue' ? 'SOURCE_NOT_AVAILABLE' : 'NOT_FETCHED',
+  });
+  const dateEntries = wikidataSnaks(payload, 'P577').map((snak) => {
+    if (snak.snaktype !== 'value') return missingEntry(snak);
+    const normalizedValue = normalizedDate(snak.value.time);
+    return normalizedValue === null ? null : { rawValue: snak.value, normalizedValue };
+  }).filter(Boolean);
+  const officialSites = wikidataSnaks(payload, 'P856').map((snak) => {
+    if (snak.snaktype !== 'value') return missingEntry(snak);
+    const normalizedValue = normalizedHttpUrl(snak.value);
+    return normalizedValue === null ? null : { rawValue: snak.value, normalizedValue };
+  }).filter(Boolean);
+  const studios = wikidataSnaks(payload, 'P272').map((snak) => (
+    snak.snaktype !== 'value' ? missingEntry(snak) : {
+      rawValue: snak.value,
+      normalizedValue: { id: `wikidata:${snak.value.id}`, name: null, role: 'OTHER' },
+    }
+  ));
+  const sourceGenres = wikidataSnaks(payload, 'P136').map((snak) => (
+    snak.snaktype !== 'value' ? missingEntry(snak) : {
+      rawValue: snak.value, normalizedValue: `wikidata:${snak.value.id}`,
+    }
+  ));
   return {
     entries: {
       externalIds, titles, startDate: dateEntries, officialSiteUrl: officialSites, studios, sourceGenres,
     },
-    releaseYearEvidence: dateEntries.map(({ normalizedValue }) => Number(normalizedValue.slice(0, 4))),
+    releaseYearEvidence: dateEntries.filter((entry) => entry.normalizedValue !== null)
+      .map(({ normalizedValue }) => Number(normalizedValue.slice(0, 4))),
   };
 }
 
@@ -589,14 +635,31 @@ function anilifeFields(record) {
       } }] : [],
     },
     releaseYearEvidence: [rawYearEvidence(payload.datePublished)].filter(Boolean),
+    identityEvidence: {
+      version: 'IDENTITY_EVIDENCE_V1',
+      evidenceSource: 'REVIEWED_LOCAL_BINDING',
+      exactTitleCandidateCount: 1,
+    },
   };
 }
 
+function sourceQualifiedId(value, sources) {
+  if (typeof value !== 'string') return false;
+  return sources.some((source) => source === 'wikidata'
+    ? /^wikidata:Q[1-9]\d*$/u.test(value)
+    : new RegExp(`^${source}:[1-9]\\d*$`, 'u').test(value));
+}
+
+function normalizedName(value) {
+  return typeof value === 'string' && normalizeText(value) === value;
+}
+
 export function isNormalizedFieldValue(fieldPath, value) {
-  if (fieldPath === 'externalIds') return hasExactKeys(value, ['sourceId', 'value']) && typeof value.sourceId === 'string'
-    && typeof value.value === 'string' && value.sourceId && value.value;
+  if (fieldPath === 'externalIds') return hasExactKeys(value, ['sourceId', 'value'])
+    && ((['anilist', 'mal', 'anilife_public'].includes(value.sourceId) && /^[1-9]\d*$/u.test(value.value))
+      || (value.sourceId === 'wikidata' && /^Q[1-9]\d*$/u.test(value.value)));
   if (fieldPath === 'titles') return hasExactKeys(value, ['locale', 'value']) && typeof value.locale === 'string'
-    && typeof value.value === 'string' && value.locale && value.value;
+    && value.locale.length > 0 && normalizedName(value.value);
   if (fieldPath === 'format') return FORMAT_VALUES.includes(value);
   if (fieldPath === 'status') return STATUS_VALUES.includes(value);
   if (fieldPath === 'season') return SEASON_VALUES.includes(value);
@@ -604,22 +667,23 @@ export function isNormalizedFieldValue(fieldPath, value) {
   if (fieldPath === 'episodeCount') return safeInteger(value) !== null;
   if (fieldPath === 'sourceMaterialType') return SOURCE_MATERIAL_VALUES.includes(value);
   if (fieldPath === 'officialSiteUrl') return normalizedHttpUrl(value) === value;
-  if (fieldPath === 'studios') return hasExactKeys(value, ['id', 'name', 'role']) && typeof value.id === 'string'
-    && (typeof value.name === 'string' || value.name === null) && typeof value.role === 'string';
+  if (fieldPath === 'studios') return hasExactKeys(value, ['id', 'name', 'role'])
+    && sourceQualifiedId(value.id, ['anilist', 'wikidata'])
+    && (value.name === null || normalizedName(value.name)) && STUDIO_ROLE_VALUES.includes(value.role);
   if (fieldPath === 'relations') return hasExactKeys(value, ['format', 'targetId', 'title', 'type'])
-    && typeof value.targetId === 'string'
-    && RELATION_VALUES.includes(value.type) && (typeof value.title === 'string' || value.title === null)
+    && sourceQualifiedId(value.targetId, ['anilist', 'wikidata'])
+    && RELATION_VALUES.includes(value.type) && (value.title === null || normalizedName(value.title))
     && FORMAT_VALUES.includes(value.format);
   if (fieldPath === 'sourceGenres') return typeof value === 'string' && value.length > 0;
   if (fieldPath === 'coreGenres') return CORE_GENRES.includes(value);
   if (fieldPath === 'characters') return hasExactKeys(value, ['canonicalName', 'id', 'localizedNames', 'role'])
-    && typeof value.id === 'string'
-    && ['MAIN', 'SUPPORTING'].includes(value.role) && typeof value.canonicalName === 'string'
+    && sourceQualifiedId(value.id, ['anilist', 'wikidata'])
+    && ['MAIN', 'SUPPORTING'].includes(value.role) && normalizedName(value.canonicalName)
     && Array.isArray(value.localizedNames) && value.localizedNames.every((name) => isNormalizedFieldValue('titles', name));
   if (fieldPath === 'castings') return hasExactKeys(value, ['characterId', 'creditedName', 'language', 'personId', 'roleType'])
-    && typeof value.characterId === 'string'
-    && typeof value.personId === 'string' && value.language === 'ja'
-    && ['MAIN', 'SUPPORTING'].includes(value.roleType) && typeof value.creditedName === 'string';
+    && sourceQualifiedId(value.characterId, ['anilist', 'wikidata'])
+    && sourceQualifiedId(value.personId, ['anilist', 'wikidata']) && value.language === 'ja'
+    && ['MAIN', 'SUPPORTING'].includes(value.roleType) && normalizedName(value.creditedName);
   if (fieldPath === 'cover') return hasExactKeys(value, ['distributionStatus', 'rightsStatus', 'sourceUrl'])
     && normalizedHttpUrl(value.sourceUrl) === value.sourceUrl
     && value.rightsStatus === 'TEST_ONLY_UNKNOWN' && value.distributionStatus === 'PROHIBITED';
@@ -635,14 +699,18 @@ function finalize(record, normalized, overallState) {
     const isCollection = COLLECTION_FIELD_PATHS.includes(fieldPath);
     const entries = overallState ? [] : uniqueEntries(entriesByField[fieldPath] ?? [], fieldPath);
     if (entries.length > 0) {
-      const scalarConflict = !isCollection && entries.length > 1;
-      fieldStates[fieldPath] = scalarConflict ? 'CONFLICTED' : 'VALUE';
+      const valueEntries = entries.filter((entry) => (entry.status ?? 'VALUE') === 'VALUE');
+      const scalarConflict = !isCollection && valueEntries.length > 1;
+      const missingState = entries.some((entry) => entry.status === 'SOURCE_NOT_AVAILABLE')
+        ? 'SOURCE_NOT_AVAILABLE' : 'NOT_FETCHED';
+      const state = valueEntries.length > 0 ? (scalarConflict ? 'CONFLICTED' : 'VALUE') : missingState;
+      fieldStates[fieldPath] = state;
       summaries[fieldPath] = isCollection
-        ? entries.map(({ normalizedValue }) => structuredClone(normalizedValue))
-        : entries.length === 1 ? structuredClone(entries[0].normalizedValue) : null;
+        ? valueEntries.map(({ normalizedValue }) => structuredClone(normalizedValue))
+        : valueEntries.length === 1 ? structuredClone(valueEntries[0].normalizedValue) : null;
       for (const entry of entries) fieldValues.push({
         fieldPath, rawValue: structuredClone(entry.rawValue),
-        normalizedValue: structuredClone(entry.normalizedValue), status: 'VALUE',
+        normalizedValue: structuredClone(entry.normalizedValue), status: entry.status ?? 'VALUE',
       });
     } else {
       const state = overallState ?? 'SOURCE_NOT_AVAILABLE';
@@ -664,6 +732,7 @@ function finalize(record, normalized, overallState) {
     retrievedAt: record.fetchedAt,
     releaseYear: releaseYearEvidence.length === 1 ? releaseYearEvidence[0] : null,
     releaseYearEvidence,
+    identityEvidence: normalized.identityEvidence ?? null,
     ...summaries,
     fieldStates,
     fieldValues,

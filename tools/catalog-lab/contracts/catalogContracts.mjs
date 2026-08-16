@@ -39,6 +39,12 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
     allowedFields: Object.freeze(['title', 'description', 'year', 'episodeCount', 'coverMetadata']),
   }),
 });
+/** Portable promotion-only projection of the authoritative, fully validated source policy. */
+export const SOURCE_PROMOTION_POLICY = Object.freeze(Object.fromEntries(
+  Object.entries(APPROVED_SOURCE_POLICIES).map(([sourceId, policy]) => [
+    sourceId, policy.catalogPromotion,
+  ]),
+));
 const ANILIFE_BLOCKED_PATHS = Object.freeze([
   '/api/', '/archive', '/history', '/settings', '/login', '/notifications',
 ]);
