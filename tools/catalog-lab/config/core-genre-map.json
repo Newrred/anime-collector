@@ -1,0 +1,33 @@
+{
+  "status": "TEST_ONLY",
+  "genres": [
+    "Action",
+    "Adventure",
+    "Comedy",
+    "Drama",
+    "Fantasy",
+    "Horror",
+    "Mystery",
+    "Romance",
+    "Sci-Fi",
+    "Slice of Life",
+    "Sports",
+    "Supernatural",
+    "Thriller"
+  ],
+  "mappings": {
+    "Action": "Action",
+    "Adventure": "Adventure",
+    "Comedy": "Comedy",
+    "Drama": "Drama",
+    "Fantasy": "Fantasy",
+    "Horror": "Horror",
+    "Mystery": "Mystery",
+    "Romance": "Romance",
+    "Sci-Fi": "Sci-Fi",
+    "Slice of Life": "Slice of Life",
+    "Sports": "Sports",
+    "Supernatural": "Supernatural",
+    "Thriller": "Thriller"
+  }
+}
