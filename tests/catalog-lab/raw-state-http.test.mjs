@@ -87,6 +87,46 @@ test('a corrupt content-addressed raw record is quarantined before a complete im
   });
 });
 
+test('a stale raw repair lock terminates with a recoverable typed error', { timeout: 1000 }, async () => {
+  await withWorkspace(async (workspace) => {
+    const envelope = createEnvelope();
+    const { fetchedAt, ...identity } = envelope;
+    const sourceRecordId = sha256(identity);
+    const directory = workspace.resolve('raw', 'anilist', 'anilist-1');
+    const path = workspace.resolve('raw', 'anilist', 'anilist-1', `${sourceRecordId}.json`);
+    await mkdir(directory, { recursive: true });
+    await writeFile(path, '{"sourceRecordId":"partial"', 'utf8');
+    await writeFile(`${path}.repair.lock`, 'stale', 'utf8');
+
+    await assert.rejects(storeSourceEnvelope({ workspace, envelope }), {
+      code: 'RAW_REPAIR_LOCK_TIMEOUT', recoverable: true,
+    });
+    assert.equal(await readFile(path, 'utf8'), '{"sourceRecordId":"partial"');
+  });
+});
+
+test('a parseable raw record missing payload is quarantined and republished', async () => {
+  await withWorkspace(async (workspace) => {
+    const envelope = createEnvelope();
+    const { fetchedAt, ...identity } = envelope;
+    const sourceRecordId = sha256(identity);
+    const directory = workspace.resolve('raw', 'anilist', 'anilist-1');
+    const path = workspace.resolve('raw', 'anilist', 'anilist-1', `${sourceRecordId}.json`);
+    await mkdir(directory, { recursive: true });
+    await writeFile(path, JSON.stringify({
+      sourceRecordId,
+      payloadHash: sha256(envelope.payload),
+    }), 'utf8');
+
+    const result = await storeSourceEnvelope({ workspace, envelope });
+    const record = JSON.parse(await readFile(path, 'utf8'));
+
+    assert.equal(result.created, true);
+    assert.deepEqual(record.payload, envelope.payload);
+    assert.equal((await readdir(directory)).some((name) => name.includes('.corrupt.')), true);
+  });
+});
+
 test('competing corrupt-record repair never quarantines a valid publication', { timeout: 1000 }, async () => {
   await withWorkspace(async (workspace) => {
     const firstEnvelope = createEnvelope();

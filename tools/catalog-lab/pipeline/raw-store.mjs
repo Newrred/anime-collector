@@ -5,6 +5,8 @@ import { basename, join, relative } from 'node:path';
 import { sha256 } from '../lib/hash.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
 
+const REPAIR_LOCK_POLICY = Object.freeze({ maxWaitAttempts: 20, waitMs: 5 });
+
 function sourceRecordIdentity(envelope) {
   const { fetchedAt, ...identity } = envelope;
   return identity;
@@ -23,16 +25,14 @@ async function writeDurableTemporaryRecord(directory, path, record) {
 }
 
 async function isValidExistingRecord(path, sourceRecordId, payloadHash) {
-  let record;
   try {
-    record = JSON.parse(await readFile(path, 'utf8'));
-  } catch (error) {
-    if (error.code === 'ENOENT') return false;
+    const record = JSON.parse(await readFile(path, 'utf8'));
+    return record?.sourceRecordId === sourceRecordId
+      && record.payloadHash === payloadHash
+      && sha256(record.payload) === payloadHash;
+  } catch {
     return false;
   }
-  return record?.sourceRecordId === sourceRecordId
-    && record.payloadHash === payloadHash
-    && sha256(record.payload) === payloadHash;
 }
 
 async function quarantineCorruptRecord(path) {
@@ -44,12 +44,21 @@ async function quarantineCorruptRecord(path) {
 }
 
 function waitForRepairLock() {
-  return new Promise((resolve) => setTimeout(resolve, 5));
+  return new Promise((resolve) => setTimeout(resolve, REPAIR_LOCK_POLICY.waitMs));
+}
+
+function repairLockTimeoutError(path) {
+  const error = new Error('Raw record repair lock did not become available');
+  error.code = 'RAW_REPAIR_LOCK_TIMEOUT';
+  error.recoverable = true;
+  error.path = path;
+  return error;
 }
 
 async function acquireRepairLock(path, { onRepairLocked, onRepairWaiting } = {}) {
   const lockPath = `${path}.repair.lock`;
   let waiting = false;
+  let attempts = 0;
   while (true) {
     try {
       const file = await open(lockPath, 'wx');
@@ -66,6 +75,8 @@ async function acquireRepairLock(path, { onRepairLocked, onRepairWaiting } = {})
       };
     } catch (error) {
       if (error.code !== 'EEXIST') throw error;
+      attempts += 1;
+      if (attempts >= REPAIR_LOCK_POLICY.maxWaitAttempts) throw repairLockTimeoutError(path);
       if (!waiting) {
         waiting = true;
         await onRepairWaiting?.();
