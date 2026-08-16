@@ -1,6 +1,6 @@
 # MOEMOA Codex Handoff — 문서 패키지 목록
 
-> **문서 상태: `CURRENT_INVENTORY` — 2026-08-11**
+> **문서 상태: `CURRENT_INVENTORY` — 2026-08-16**
 > 이 목록은 MOEMOA 작업 문서와 배포 artifact의 역할을 정리한다. 저장소 전체 파일 manifest가 아니며, 최신 상태·우선순위는 `docs/moemoa/README.md`가 설명한다.
 
 ## 1. 현행 진입점과 작업 규칙
@@ -36,12 +36,14 @@
 - `docs/moemoa/reports/private-slice-test-evidence.md` — first slice baseline/toolchain/TDD evidence
 - `docs/moemoa/plans/2026-08-11-document-consolidation.md` — 이번 문서 정리 ExecPlan
 - `docs/moemoa/plans/2026-08-11-foundation-decision-recording.md` — 기반 세 결정 기록 작업
-- `docs/moemoa/plans/first-private-vertical-slice.md` — 승인된 첫 Private Vertical Slice 구현 계획; Milestone 0 진행 중
+- `docs/moemoa/plans/first-private-vertical-slice.md` — 승인된 첫 Private Vertical Slice 구현 계획; 현재 Web-first Shared UI Readiness 선행 gate
 - `docs/moemoa/decisions/2026-08-11-foundation-decisions.md` — TECH/STORAGE/LEGACY 사용자 승인 기록
 - `docs/moemoa/decisions/2026-08-12-first-private-slice-approval.md` — architecture/ExecPlan 사용자 승인 기록
+- `docs/moemoa/decisions/2026-08-16-web-first-shared-ui-readiness.md` — 첫 slice 내부 Web→Android UI 검증 순서 승인 기록
 - `docs/moemoa/adr/0001-capacitor-client-and-local-media-boundary.md` — accepted client/local media 기술 경계
 - `docs/moemoa/adr/0002-memory-local-domain-and-owner-boundary.md` — accepted Memory/Guest Owner/local DB 경계
-- `docs/moemoa/adr/0003-android-image-intake-spike-toolchain.md` — environment gate가 남은 Android toolchain proposal
+- `docs/moemoa/adr/0003-android-image-intake-spike-toolchain.md` — accepted-for-spike Android toolchain과 terminal gate 결과
+- `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md` — 현재 승인된 공용 Memory UI 설계·품질 gate
 
 승인된 후속 산출물 위치:
 
@@ -62,7 +64,7 @@ References는 제품·시장·정책 배경이며 현재 코드 사실이나 확
 
 - `prompts/moemoa/README.md` — prompt 상태와 실행 gate 인덱스
 - `prompts/moemoa/01_BOOTSTRAP_REPOSITORY_AUDIT.md` — 최초 감사 완료, 재감사용 reference
-- `prompts/moemoa/02_ARCHITECTURE_AND_EXECPLAN.md` — architecture proposal/ExecPlan 작성 완료, 사용자 승인 대기
+- `prompts/moemoa/02_ARCHITECTURE_AND_EXECPLAN.md` — architecture proposal/ExecPlan 작성·승인 완료 이력
 - `prompts/moemoa/03_CATALOG_PIPELINE.md` — Source/ExecPlan gate 이후
 - `prompts/moemoa/04_PRIVATE_VERTICAL_SLICE.md` — 기술·저장·legacy gate 이후
 - `prompts/moemoa/05_UGC_IMPLEMENTATION.md` — cloud/UGC gate 이후
@@ -87,8 +89,9 @@ References는 제품·시장·정책 배경이며 현재 코드 사실이나 확
 - `docs/UI_EDIT_GUIDE.md` — 현재 legacy UI 편집 가이드
 - `docs/product/MOEMOA_PRODUCT_BASELINE.md` — `SUPERSEDED`
 - `docs/product/2026-08-06-product-direction-decision-draft.md` — `SUPERSEDED_DUPLICATE`
-- `docs/superpowers/README.md` — legacy plan 상태표
-- `docs/superpowers/plans/*`, `docs/superpowers/specs/*` — 완료 이력 또는 superseded 출시안
+- `docs/superpowers/README.md` — 현행 설계와 legacy plan을 구분하는 상태표
+- `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md` — 현행 승인 설계
+- 그 외 `docs/superpowers/plans/*`, `docs/superpowers/specs/*` — 완료 이력 또는 superseded 출시안
 - `docs/design_spec_v1.extracted.clean.txt` — legacy design reference
 - `docs/design_spec_v1.extracted.txt` — raw duplicate, 실행 기준에서 제외
 

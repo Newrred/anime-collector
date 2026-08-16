@@ -22,7 +22,7 @@
 
 ## 구현 순서 해석
 
-승인은 `Web을 완성한 뒤 Android로 전환`한다는 의미가 아니다.
+승인은 `Web 제품 전체를 완성한 뒤 Android를 새로 시작`한다는 의미가 아니다.
 
 ```text
 최소 Android 실기기 spike
@@ -32,6 +32,17 @@
 ```
 
 이 순서를 사용해 Web 구현이 browser-only API에 고정되는 것을 막는다.
+
+2026-08-16 사용자 승인으로, 위 native/local 기반이 실제로 구축된 다음 단계의 UI 실행 순서를 아래처럼 보완했다.
+
+```text
+구축된 Android native/local 기반 유지·기능 확장 동결
+→ Web 내부 테스트 surface에서 공용 Memory UI readiness 검증
+→ Android 전용 적응·실기기 검증
+→ 첫 slice 잔여 기능과 안전 gate 마감
+```
+
+이는 기존 승인과 충돌하지 않는다. Web production의 실제 LOCAL_ONLY 이미지 저장, Board/Web production read path, sync/cloud/Public은 계속 후속 범위다. 상세 결정은 `2026-08-16-web-first-shared-ui-readiness.md`, UI 기준은 `../../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
 
 ## 승인하지 않은 내용
 

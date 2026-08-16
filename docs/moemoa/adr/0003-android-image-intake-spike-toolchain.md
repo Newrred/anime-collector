@@ -25,7 +25,7 @@ Capacitor client 방향은 확정됐지만 exact version, Android 지원 범위,
 - https://developer.android.com/training/data-storage/shared/photo-picker
 - https://developer.android.com/training/sharing/receive
 
-## Proposed decision
+## Decision
 
 1. 신규 project는 지원 종료가 가까운 Capacitor 7로 낮추지 않고 Capacitor 8.5.0을 사용한다.
 2. application ID는 사용자가 확인한 `com.newrred.moemoa`를 사용한다.
@@ -49,7 +49,7 @@ deleteLocal(localRef, operationId)
 
 native queue는 source URI를 JS/localStorage/analytics에 영구 노출하지 않는다. JS에는 ticket ID와 검증된 display metadata만 전달한다.
 
-## Gate before implementation
+## Toolchain gate result
 
 다음 gate는 2026-08-12 terminal 기반 검증으로 통과했다.
 

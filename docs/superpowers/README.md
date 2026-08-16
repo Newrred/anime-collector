@@ -1,12 +1,13 @@
-# Legacy superpowers 문서 상태표
+# Superpowers 설계·계획 문서 상태표
 
-> **문서 상태: `LEGACY_INDEX` — 2026-08-11**
-> 이 폴더는 현재 실행 중인 legacy Web/PWA의 구현 이력과 과거 출시안을 보존한다. 신규 MOEMOA 제품 결정·구현 순서는 [`docs/moemoa/README.md`](../moemoa/README.md)와 [`01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`](../moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md)를 따른다.
+> **문서 상태: `MIXED CURRENT + LEGACY INDEX` — 2026-08-16**
+> 이 폴더에는 현행 설계서와 legacy Web/PWA 구현 이력이 함께 있다. 신규 MOEMOA 제품 결정·실행 순서는 [`docs/moemoa/README.md`](../moemoa/README.md)와 [`01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`](../moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md)를 따르며, 아래 표에서 현행으로 명시한 문서만 현재 구현 기준으로 사용한다.
 
 ## 분류
 
 | 문서 | 상태 | 사용 범위 |
 | --- | --- | --- |
+| `specs/2026-08-16-web-first-shared-ui-readiness-design.md` | `CURRENT_APPROVED_DESIGN` | 첫 Private Slice 안에서 Web 공용 UI를 먼저 검증하고 Android에 적용하는 UI 범위·품질 gate. 구현 계획 작성 전 사용자 검토 기준 |
 | `plans/2026-08-03-product-readiness.md` | `COMPLETED_LEGACY_PLAN` | 현재 Library/WatchLog 기반 onboarding 구현 이력. 새 Card P0 계획으로 재실행 금지 |
 | `plans/2026-08-03-round-2-data-safety.md` | `COMPLETED_LEGACY_PLAN` | legacy 저장·동기화 데이터 안전 계약과 회귀 참고 |
 | `plans/2026-08-03-round-3-durable-sync.md` | `COMPLETED_LEGACY_PLAN` | legacy snapshot sync 내구성 구현 이력 |
@@ -16,6 +17,7 @@
 
 ## 사용 규칙
 
+- `CURRENT_APPROVED_DESIGN`은 대응 Decision/ExecPlan과 함께 현재 범위의 설계 기준으로 사용한다.
 - 완료된 legacy 계획은 당시 구현 의도와 회귀 원인을 찾을 때만 사용한다.
 - `COMPLETED_LEGACY_PLAN`은 미완료 task list가 보여도 다시 실행하지 않는다.
 - 현재 제품 모델에서 `Library = Archive`, `WatchLog = Complete MemoryCard`, `Tier = Board`로 자동 대응시키지 않는다.

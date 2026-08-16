@@ -8,6 +8,8 @@
 
 이 문서는 `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`을 변경하지 않는다. local-only first slice 경계는 승인됐고 exact Capacitor/Android toolchain은 ADR-0003 environment gate를 따른다.
 
+> **2026-08-16 실행 순서 보완:** Android native/local 기반은 유지하고, 공용 Memory UI를 Web 내부 테스트 surface에서 먼저 안정화한 뒤 Android에 적용한다. 이는 아래 Android local-only 경계나 후속 Board/Web production 범위를 변경하지 않는다. 상세 기준은 `../decisions/2026-08-16-web-first-shared-ui-readiness.md`와 `../../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
+
 ## 1. 결론 요약
 
 첫 구현 단위는 **Android에서 이미지 또는 시스템 디자인을 사용해 로그인 없이 Private Memory Card를 만들고, 재시작 후 Archive에서 다시 확인·수정·삭제·내보내기 할 수 있는 local-only 흐름**으로 제한한다.
@@ -24,6 +26,15 @@
 ```
 
 기존 runbook의 catalog-first 번호를 그대로 구현 순서로 사용하지 않는다. 첫 카드 저장에는 전체 카탈로그가 필요하지 않으므로, 기존 alias 데이터와 AniList 검색을 **교체 가능한 최소 TitleResolver adapter**로 감싸고 검색 실패 시 `PrivateTitle`로 진행한다. alias 데이터는 `legacy_unverified` 상태를 유지하며, AniList 표지 이미지는 새 Memory Card의 VisualAsset으로 저장하거나 재배포하지 않는다.
+
+첫 단계의 현재 세부 순서는 다음과 같다.
+
+```text
+구축된 Android native/local 기반 유지
+→ Web 공용 Memory UI readiness
+→ Android 적응·실기기 검증
+→ export·복구·rollback 등 local-only slice 마감
+```
 
 이 순서의 이유는 다음과 같다.
 

@@ -71,6 +71,24 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 
 현재 구현은 `MainActivity`, `ImageIntakeRuntime`, custom `ImageIntakePlugin`, React composer, owner-scoped Card/VisualAsset 영구 저장, create/replace/delete journal과 Archive/detail까지 연결됐다.
 
+### UI Readiness finding — 2026-08-16
+
+실제 APK 검토에서 정보 위계와 가독성이 약하고 작은 화면에서 문구·조작부가 잘리거나 밀리는 문제가 확인됐다. 기능·데이터 안전 테스트가 통과했더라도 현 UI는 실사용 제품 가설을 평가할 준비가 되지 않은 것으로 판정한다.
+
+자동 검증 공백:
+
+- 기존 mobile/layout/design-system 검사가 `/memory/new/`, `/archive/`, `/memory/card/`를 충분히 포함하지 않는다.
+- 현재 검사는 주로 기하·overflow 중심이며 승인된 screenshot visual baseline이 없다.
+- 기존 button 검사 기준 32px는 새 Memory UI의 44×44px touch target 기준에 미달한다.
+- React 정적 진단 통과는 정보 위계, 읽기 쉬움, 카피 이해도를 증명하지 않는다.
+- Web 검증만으로 Android safe-area, keyboard, back, 실제 native media 표시를 증명할 수 없다.
+
+판정과 조치:
+
+- 기능 기반을 폐기하지 않고 Web-first Shared UI Readiness를 첫 slice의 선행 gate로 추가한다.
+- Web 모바일·데스크톱에서 공용 UI gate를 통과한 뒤 Android 전용 적응과 실기기 검증으로 복귀한다.
+- 이 판정으로 코드, IndexedDB schema, native media directory, APK는 변경하지 않았다.
+
 ## 5. Checkpoint regression
 
 | 명령 | 결과 | 비고 |
@@ -139,6 +157,7 @@ TitleResolver/AnimeRef evidence:
 
 현재 한계:
 
+- 현재 Memory UI는 기능 검증용이며 가독성·잘림·시각 회귀 gate를 통과하기 전에는 dogfood-ready로 간주하지 않는다.
 - 물리 실기기와 실제 외부 앱 Share Target은 아직 검증하지 않았다.
 - orphan final file, DB-only missing file의 전체 filesystem reconciliation과 `MISSING` 자동 분류는 아직 없다. 상세 화면의 수동 교체·삭제 복구 진입점만 구현됐다.
 - ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.

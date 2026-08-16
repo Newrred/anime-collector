@@ -33,6 +33,9 @@
 - dependency 설치와 scaffold 전에 공유→복사→process death→복구 spike를 계획한다.
 - 상세 결정 기록: `decisions/2026-08-11-foundation-decisions.md`
 - 기술 경계: `adr/0001-capacitor-client-and-local-media-boundary.md`
+- 2026-08-16 실행 순서 보완: 이미 구축한 Android native/local 기반은 유지하되, 공용 Memory UI는 Web 모바일·데스크톱에서 먼저 사용성 gate를 통과한 뒤 Android에 적용한다. 이는 Web production의 LOCAL_ONLY 이미지 저장이나 Web 전체 선출시를 승인하지 않는다.
+- UI 순서 결정: `decisions/2026-08-16-web-first-shared-ui-readiness.md`
+- UI 설계 기준: `../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`
 
 ### CARD-01 — 이미지 우선 Memory Card
 

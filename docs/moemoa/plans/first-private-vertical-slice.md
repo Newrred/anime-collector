@@ -6,8 +6,10 @@
 > 계획 기준: `PLANS.md`, `docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`, `docs/moemoa/reports/architecture-decision-proposal.md`
 > 승인일: 2026-08-12
 > 승인 기록: `../decisions/2026-08-12-first-private-slice-approval.md`
+> 실행 순서 보완: `../decisions/2026-08-16-web-first-shared-ui-readiness.md`
+> 공용 UI 설계: `../../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`
 
-이 문서의 구현 경계는 승인됐다. dependency 설치와 Android scaffold는 ADR-0003 environment gate 통과 뒤 실행한다.
+이 문서의 구현 경계는 승인됐고 Android dependency/scaffold/native-local 기반도 이미 구축됐다. 현재는 기능 확장을 잠시 멈추고 공용 Memory UI를 Web 모바일·데스크톱에서 먼저 검증한 뒤 Android에 적용하는 readiness 단계를 선행한다. 이 순서 보완은 Web production 이미지 저장이나 Web 전체 선출시를 추가하지 않는다.
 
 ## 1. 목적과 사용자 결과
 
@@ -461,7 +463,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4 — 공통 Card composer와 Archive UI
 
-상태: `[~] IN PROGRESS`
+상태: `[~] FUNCTIONAL FLOW IMPLEMENTED / UI READINESS OPEN`
 
 - `/memory/new/`, `/archive/`, card detail route를 flag 뒤에 추가한다.
 - image preview, 취소, 교체, 시스템 디자인 전환을 제공한다.
@@ -480,9 +482,36 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 - offline 상태에서 legacy alias read-only 검색 또는 PrivateTitle로 진행 가능하며 alias row가 canonical catalog로 변하지 않음.
 - narrow mobile viewport에서 composer 핵심 CTA가 접근 가능.
 
+### Milestone 4A — Web-first Shared UI Readiness
+
+상태: `[ ] DESIGN APPROVED / IMPLEMENTATION PLAN PENDING REVIEW`
+
+이 단계는 Milestone 4의 기능 흐름을 실제 사용 가능한 공용 UI로 끌어올리는 선행 gate다. 신규 제품 기능이나 Web production media 기능을 추가하지 않는다.
+
+- `/memory/new/`, `/archive/`, `/memory/card/`와 최소 navigation entry만 대상으로 한다.
+- Memory 범위의 typography, spacing, surface, button, input, feedback, image frame을 일관된 규칙으로 정리한다.
+- 카드 작성, Archive, 상세의 loading/empty/error/offline/provider failure/missing image/cleanup pending 상태를 독립적으로 표현한다.
+- 모바일 320/360/390/412px, 태블릿 768px, 데스크톱 1280/1440px에서 잘림과 가로 overflow를 검증한다.
+- 사용자에게 보이는 text button과 주요 조작의 touch target은 최소 44×44px로 한다.
+- 긴 작품 제목, 30% 길어진 copy, English-first/Korean 개발 locale fixture를 검증한다.
+- keyboard-only focus, visible focus, reduced motion, screenshot visual baseline을 추가한다.
+- 기존 domain/application/repository/native bridge 계약과 IndexedDB schema 1은 변경하지 않는다.
+- 각 큰 UI checkpoint에서 `astro build`→`cap sync android`→debug APK→cold launch smoke를 유지한다.
+
+완료 증거:
+
+- 세 Memory route의 기능·layout·accessibility·visual regression이 승인된 viewport와 상태 fixture에서 통과.
+- 320px에서도 핵심 흐름과 primary action이 가려지거나 잘리지 않음.
+- 설명 없는 내부 검토자가 첫 Card 저장→Archive 발견→상세 재열람을 완료.
+- Private/LOCAL_ONLY가 Public 또는 cloud backup처럼 보이지 않음.
+- Web fake native adapter가 production build에 노출되지 않음.
+- Android 적용 전 승인된 기준 screenshot과 알려진 한계가 test evidence에 기록됨.
+
 ### Milestone 5 — Android end-to-end 통합
 
 상태: `[~] IN PROGRESS`
+
+Milestone 4A Web UI Readiness Gate 통과 뒤 공용 UI의 Android 적응 작업을 재개한다. 그 전에도 큰 UI checkpoint마다 build/sync/cold-launch smoke는 유지한다.
 
 - native ticket을 실제 composer에 전달한다.
 - 사용자가 저장을 확정할 때만 import saga를 시작한다.
@@ -692,16 +721,23 @@ export_failed
 | export만 있고 restore 없음 | 완전한 백업 기대 불일치 | UI에 export 범위 명시, restore를 다음 별도 plan으로 추적 |
 | app uninstall | LOCAL_ONLY 완전 손실 | 첫 카드 이후 export 안내, 후속 opt-in cloud backup gate |
 
-## 14. 필요한 사용자 결정
+## 14. 승인된 사용자 결정과 재검토 조건
 
-구현 시작 전 다음을 승인해야 한다.
+2026-08-12 사용자가 다음을 승인했다.
 
 1. 이 첫 slice를 **Android local-only Card/Archive**로 제한하는 것.
 2. `moemoa-memory-v1` 신규 IndexedDB와 Guest Owner 방식을 사용하는 것.
 3. Board, Web production read path, 로그인/sync, cloud backup, catalog ingestion을 후속 slice로 미루는 것.
 4. 첫 slice는 export를 포함하되 restore/import는 후속 계획으로 미루는 것.
 
-Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유지보수성에 중대한 trade-off가 발견되면 실행을 멈추고 다시 결정받는다.
+2026-08-16 사용자가 다음 실행 순서 보완을 승인했다.
+
+5. Android native/local 기반은 유지하고 신규 기능 확장을 잠시 동결하는 것.
+6. 공용 Memory UI를 Web 내부 테스트 surface에서 먼저 완성·검증하는 것.
+7. Web UI Readiness Gate 뒤 Android 전용 적응과 실기기 검증으로 복귀하는 것.
+8. Web production image persistence, Board, sync, cloud, Public의 기존 후속 gate를 유지하는 것.
+
+DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI 폐기와 별도 Android UI 구축처럼 승인 범위를 바꾸는 중대한 trade-off가 발견되면 실행을 멈추고 다시 결정받는다.
 
 ## 15. 진행 기록
 
@@ -744,6 +780,9 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 [2026-08-12] 추가 보강: metadata update는 Card 전체 snapshot 대신 허용된 note만 같은 readwrite transaction의 최신 Card에 병합한다. promotion 오류 기록이 2차 실패해도 journal의 ticket ownership을 유지하며, discard 미확인 ticket ID는 path/hash 없이 bounded local cleanup queue에 보존해 다음 runtime 시작에서 재시도한다.
 [2026-08-12] 검증: Web unit 91/91, Chromium 전체 49 pass/2 live skip, Astro static 11 pages, Android sync와 unit 30/30·debug APK 11,730,977 bytes, React Doctor 변경분 100/100 통과.
 [2026-08-12] 남은 구현 갱신: 선택 metadata 전체, 전체 filesystem orphan scan과 `MISSING` 자동 분류, export package·Android 공유, temp TTL cleanup, feature flag rollback, 물리 실기기/API 24~32 matrix. Image replacement와 상세 복구 진입점은 완료.
+[2026-08-16] 사용자 피드백: 현재 APK는 정보 위계·가독성이 약하고 작은 화면의 잘림이 많아 실사용 테스트 전에 공용 UI 안정화가 필요함.
+[2026-08-16] 결정: Android native/local 기반은 유지하고, 기능 확장을 동결한 채 Web-first Shared UI Readiness를 Milestone 4A로 선행함. Web 제품 전체 선출시나 production image persistence는 범위에 없음.
+[2026-08-16] 문서: UI 순서 Decision과 디자인 명세를 추가하고 current index·architecture·runbook·ExecPlan·test evidence의 상태를 일치시킴. 코드·DB·APK 변경 없음.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -762,6 +801,7 @@ Milestone 0~1에서 exact dependency, Android 지원 범위, native bridge 유�
 - 검색 adapter는 full catalog ingestion이나 legacy 승격이 아니다. `aliases.json` row는 계속 `LEGACY_UNVERIFIED`이며, AniList 응답도 `PROVIDER_CANDIDATE`일 뿐 MOEMOA verified catalog가 아니다. 두 후보는 numeric AniList binding이 동일할 때만 화면 검색 결과에서 병합한다.
 - title resolver와 3,998-row alias payload는 Archive/detail runtime에서 정적으로 import하지 않고 첫 검색 시 lazy load한다. 이는 catalog 경계를 바꾸지 않는 번들 분리이며 신규 dependency나 schema 변경이 없다.
 - image replacement는 신규 schema 없이 기존 `MediaOperation.kind=REPLACE`, `previousAssetId`, VisualAsset lifecycle을 사용한다. 교체 command 결과와 telemetry에는 opaque ID·enum·boolean만 포함하고 ticket, source URI, native path, checksum은 포함하지 않는다.
+- API 36 emulator 기능 검증은 통과했지만 실제 APK의 가독성·잘림 문제로 제품 가설을 평가하기에는 UI readiness가 부족했다. 기능 수용 테스트 통과와 실사용 준비 완료를 분리하고 Milestone 4A를 추가했다.
 
 ### 변경 기록 규칙
 

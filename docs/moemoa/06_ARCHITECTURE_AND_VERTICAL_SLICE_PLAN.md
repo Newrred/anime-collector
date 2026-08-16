@@ -1,7 +1,7 @@
 # 06. 아키텍처와 첫 Vertical Slice 계획
 
 > **문서 상태: `CURRENT CONSTRAINTS / GATED DESIGN`**
-> 공통 도메인/local-first 제약과 Astro/React + Capacitor client 방향은 확정됐다. 첫 실행 단위의 상세안은 `reports/architecture-decision-proposal.md`와 `plans/first-private-vertical-slice.md`에 작성됐으며 사용자 승인 전이다. backend 형태, account linking/promotion schema, sync 규칙은 `BACKEND-01`, `AUTH-01`, `SYNC-01` 승인 전에는 확정하지 않는다. Guest Owner ID와 owner-scoped local namespace는 `ACCOUNT-01`에서 파생되는 필수 불변조건이다.
+> 공통 도메인/local-first 제약, Astro/React + Capacitor client 방향, 첫 Private Vertical Slice는 승인되어 구현 중이다. 2026-08-16에는 첫 slice 내부 실행 순서를 `Web 공용 UI readiness → Android 적용·실기기 검증`으로 보완했다. backend 형태, account linking/promotion schema, sync 규칙은 `BACKEND-01`, `AUTH-01`, `SYNC-01` 승인 전에는 확정하지 않는다. Guest Owner ID와 owner-scoped local namespace는 `ACCOUNT-01`에서 파생되는 필수 불변조건이다.
 
 확정 근거: `decisions/2026-08-11-foundation-decisions.md`, `adr/0001-capacitor-client-and-local-media-boundary.md`.
 
@@ -182,7 +182,7 @@ CONFLICT
 
 ## 9. Web/Android 코드 공유
 
-`TECH-01`에 따라 Astro/React + Capacitor Android shell을 사용한다. Phase 2에서는 이 방향 안에서 다음 경계를 구체화한다.
+`TECH-01`에 따라 Astro/React + Capacitor Android shell을 사용한다. 다음 경계를 유지한다.
 
 - 재사용할 responsive React surface와 Android 전용 화면 경계
 - shared JS/TS domain contract와 platform adapter 경계
@@ -199,7 +199,17 @@ CONFLICT
 - build/release complexity
 - tests
 
-Capacitor/plugin 버전과 native bridge 구현 세부는 spike 증거와 ADR/ExecPlan 승인 없이 고정하지 않는다.
+Capacitor/plugin 버전과 native bridge 구현 세부는 승인된 ADR/ExecPlan과 spike 증거를 따른다.
+
+2026-08-16 실행 순서 보완:
+
+- Android native image intake와 app-private storage 기반은 폐기하거나 다시 만들지 않는다.
+- `/memory/new/`, `/archive/`, `/memory/card/`의 공용 React UI를 Web 내부 검증면에서 먼저 완성한다.
+- Web gate에서는 모바일·데스크톱 반응형, 잘림·가독성, 상태 표현, 키보드·터치 접근성을 검증한다.
+- gate 통과 뒤 같은 공용 surface를 Android shell에 적용하고 safe-area, keyboard, back, native media 표시를 실기기에서 검증한다.
+- 이 단계에서 Web production 이미지 업로드·영구 LOCAL_ONLY 저장, 인증·동기화·cloud·Public을 활성화하지 않는다.
+
+상세 결정과 UI 기준은 `decisions/2026-08-16-web-first-shared-ui-readiness.md`와 `../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
 
 ## 10. Catalog provider 격리
 
@@ -271,7 +281,7 @@ Web은 LOCAL_ONLY 원본을 가정하면 안 된다.
 
 ## 15. P0 chain 구성 요소
 
-아래 목록은 필요한 구성 요소의 legacy outline이며 승인된 실행 순서가 아니다. 현재 제안 순서는 `local-only Card/Archive → Board/Web → account sync → private cloud → 제한 catalog`이고, 상세 milestone은 `plans/first-private-vertical-slice.md`를 따른다.
+아래 목록은 필요한 구성 요소의 legacy outline이며 승인된 실행 순서가 아니다. 승인된 큰 순서는 `local-only Card/Archive → Board/Web → account sync → private cloud → 제한 catalog`다. 첫 단계 내부의 현재 순서는 `구축된 Android 기반 유지 → Web 공용 UI readiness → Android 적용·dogfood → 잔여 local-only 기능 마감`이며, 상세 milestone은 `plans/first-private-vertical-slice.md`를 따른다.
 
 ```text
 observability/feature flags

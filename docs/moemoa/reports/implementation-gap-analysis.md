@@ -3,6 +3,8 @@
 > **문서 상태: `ANALYSIS / PROPOSED SEQUENCE`**
 > Gap 분류는 감사 증거를 바탕으로 하지만 단계 순서는 승인된 ADR/ExecPlan이 아니다. 사용자 승인 전 이 순서를 구현 명령으로 사용하지 않는다.
 
+> **현재 순서 안내 — 2026-08-16:** 이 문서는 2026-08-11 snapshot 기반의 역사적 Gap 분석이다. 실제 실행 순서는 승인된 `plans/first-private-vertical-slice.md`와 `decisions/2026-08-16-web-first-shared-ui-readiness.md`를 따른다. 현재는 Android 기반 위에서 Web 공용 UI readiness를 먼저 통과한 뒤 Android 적응·실기기 검증으로 복귀한다.
+
 작성일: 2026-08-11  
 기준 결정: `docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`  
 상세 현황: `docs/moemoa/reports/repository-audit.md`

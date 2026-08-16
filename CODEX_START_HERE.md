@@ -1,7 +1,7 @@
 # CODEX START HERE — MOEMOA
 
-> **현재 저장소 상태 — 2026-08-12**
-> MOEMOA 인수인계 패키지 설치와 최초 저장소 감사가 완료됐고, `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`과 첫 Private Vertical Slice가 사용자 승인으로 확정됐다. 현재는 **Private Vertical Slice Milestone 2 완료, Milestone 1·3~6 진행 중**이다. Android local image intake, Private Card/Archive 영구 저장, TitleResolver/AnimeRef, 안전한 이미지 교체 saga와 상세 화면의 누락 이미지 복구 진입점까지 구현됐다. 아래 Phase 0~1 설명은 새 저장소에 다시 설치하거나 코드가 크게 바뀌어 재감사할 때 사용한다.
+> **현재 저장소 상태 — 2026-08-16**
+> MOEMOA 인수인계 패키지 설치와 최초 저장소 감사가 완료됐고, `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`과 첫 Private Vertical Slice가 사용자 승인으로 확정됐다. Android local image intake, Private Card/Archive 영구 저장, TitleResolver/AnimeRef, 안전한 이미지 교체 기반까지 구현됐다. APK 사용성 검토 결과에 따라 현재 최우선 순서는 **공용 Memory UI를 Web 모바일·데스크톱에서 먼저 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness 단계**다. 이는 Web 제품 전체를 먼저 출시한다는 뜻이 아니며, Android local-only 첫 slice 안의 실행 순서 조정이다. 아래 Phase 0~1 설명은 새 저장소에 다시 설치하거나 코드가 크게 바뀌어 재감사할 때 사용한다.
 
 ## 1. 목적
 
@@ -33,7 +33,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 | 1 | `01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md` | 현재 확정 결정과 미정 게이트 |
 | 2 | 실제 저장소 코드·설정·테스트·마이그레이션 | 현재 구현 상태의 유일한 기술적 사실 |
 | 3 | `reports/repository-audit.md` | 2026-08-11 시점의 증거 기반 구현 snapshot. 코드 변경 시 재검증 |
-| 4 | 승인된 Decision Log/ADR/ExecPlan | 해당 범위의 결정·기술 경계·실행 계획. `01`을 변경할 수 없음 |
+| 4 | 승인된 Decision Log/ADR/ExecPlan/설계 명세 | 해당 범위의 결정·기술 경계·실행 계획. `01`을 변경할 수 없음 |
 | 5 | `02`~`09` 실행 명세 | `CURRENT/GATED`가 섞인 구현·검수·운영 기준. 개별 문서 banner와 index 확인 |
 | 6 | `reports/implementation-gap-analysis.md` | 확정 결정과 현재 코드 사이의 Gap·권장 이전 순서. 승인된 ExecPlan은 아님 |
 | 7 | `reports/architecture-options.md`, `reports/open-decision-questions.md` | TECH/STORAGE/LEGACY 확정 이력과 나머지 승인 전 선택지 |
@@ -91,7 +91,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 
 ### Phase 2 — 기술 방향과 ExecPlan
 
-현재 상태: **제안서와 ExecPlan 승인 완료, Milestone 0 진행 중.**
+현재 상태: **제안서와 ExecPlan 승인 완료, 첫 slice 진행 중. 2026-08-16 Web-first Shared UI Readiness 순서가 추가 승인됨.**
 
 읽기:
 
@@ -105,6 +105,8 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 - `reports/open-decision-questions.md`
 - `reports/architecture-decision-proposal.md`
 - `plans/first-private-vertical-slice.md`
+- `decisions/2026-08-16-web-first-shared-ui-readiness.md`
+- `../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`
 
 행동:
 
@@ -113,9 +115,9 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 - 확정된 Astro/React + Capacitor, app-private filesystem + DB metadata, 보수적 legacy 이전을 입력 조건으로 사용한다.
 - 첫 Vertical Slice와 단계별 마이그레이션 ExecPlan을 작성한다.
 - 최소 catalog adapter와 본격 catalog ingestion을 분리하고 Phase 3 이후 실제 실행 순서를 제안한다.
-- 승인 전 대규모 구현을 시작하지 않는다.
+- 승인되지 않은 범위의 대규모 구현을 시작하지 않는다.
 
-> **Phase 3 이후 순서 주의:** 아래 번호는 audit 이전 runbook의 작업 묶음이지 승인된 실행 순서가 아니다. 새 architecture proposal과 ExecPlan은 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog`를 제안한다. 사용자 승인 전에는 이 순서를 확정으로 간주하거나 Phase 3·4 구현을 시작하지 않는다.
+> **Phase 3 이후 순서 주의:** 아래 번호는 audit 이전 runbook의 작업 묶음이지 승인된 실행 순서가 아니다. 승인된 큰 순서는 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog`다. 현재 첫 단계 내부에서는 `Android native/local 기반 유지 → Web에서 공용 Memory UI readiness 검증 → Android 적용·실기기 검증 → 첫 slice 마감` 순서를 따른다.
 
 ### Phase 3 — 카탈로그 기반
 
@@ -204,4 +206,4 @@ Android Share Target 또는 Photo Picker
 prompts/moemoa/01_BOOTSTRAP_REPOSITORY_AUDIT.md
 ```
 
-이 저장소에서는 최초 감사, 기반 세 결정, architecture proposal과 first slice ExecPlan 승인, local-only Card/Archive 기반, Android 영구 media boundary, local alias/AniList TitleResolver와 AnimeRef 저장, 안전한 image replacement와 재시작 cleanup 복구까지 완료됐다. 현재 구현 상태와 다음 항목은 `docs/moemoa/plans/first-private-vertical-slice.md`의 진행 기록과 `docs/moemoa/reports/private-slice-test-evidence.md`를 기준으로 확인한다.
+이 저장소에서는 최초 감사, 기반 세 결정, architecture proposal과 first slice ExecPlan 승인, local-only Card/Archive 기반, Android 영구 media boundary, local alias/AniList TitleResolver와 AnimeRef 저장, 안전한 image replacement와 재시작 cleanup 복구까지 완료됐다. 현재는 2026-08-16 승인된 Web-first Shared UI Readiness 설계를 구현 계획으로 전환하기 전 사용자 문서 검토 단계다. 현재 구현 상태는 `docs/moemoa/plans/first-private-vertical-slice.md`와 `docs/moemoa/reports/private-slice-test-evidence.md`, UI 실행 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.

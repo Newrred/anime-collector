@@ -1,7 +1,7 @@
 # 08. Codex 단계별 행동 지침
 
-> **문서 상태: `GATED / PROPOSED LOCAL-FIRST ORDER`**
-> Phase 0~2의 감사와 제안 작성은 완료됐고, `reports/architecture-decision-proposal.md`와 `plans/first-private-vertical-slice.md`는 사용자 승인 전이다. Phase 3 이후 기존 번호는 audit 이전 작업 묶음이다. 아래 local-first 순서가 제안됐지만 승인 전에는 실행 순서로 확정하지 않는다.
+> **문서 상태: `CURRENT RUNBOOK / APPROVED LOCAL-FIRST ORDER`**
+> Phase 0~2의 감사·제안·승인은 완료됐고 첫 Private Vertical Slice를 구현 중이다. Phase 3 이후 기존 번호는 audit 이전 작업 묶음이며 승인된 local-first 순서가 우선한다. 2026-08-16 첫 slice 내부에 Web-first Shared UI Readiness 단계를 추가 승인했다.
 
 ## Phase 0 — 문서 설치와 지침 충돌 확인
 
@@ -71,7 +71,7 @@
 
 ## Phase 2 — Architecture Decision and ExecPlan
 
-현재 상태: **산출물 작성 완료 / 사용자 승인 대기.**
+현재 상태: **산출물 작성·사용자 승인 완료 / 첫 slice 구현 중.**
 
 ### 참고 문서
 
@@ -107,9 +107,9 @@
 
 ---
 
-## Phase 3 이후 제안 실행 순서
+## Phase 3 이후 승인된 실행 순서
 
-상태: `PROPOSAL — AWAITING USER APPROVAL`
+상태: `APPROVED — 2026-08-12`, 첫 단계 UI 순서 보완 `CONFIRMED — 2026-08-16`
 
 ```text
 1. Android local-only Card + Archive
@@ -120,7 +120,16 @@
 6. Public 준비 상태 재평가
 ```
 
-첫 단계의 실행 source는 `plans/first-private-vertical-slice.md`다. 아래 기존 Phase 3~10 절은 전체 작업 범위를 보존하기 위한 목록이며, 위 제안과 충돌할 때 승인된 ExecPlan을 우선한다. 사용자 승인 전에는 어느 쪽도 구현 명령으로 사용하지 않는다.
+첫 단계의 실행 source는 `plans/first-private-vertical-slice.md`다. 현재 첫 단계 내부에서는 아래 순서를 사용한다.
+
+```text
+구축된 Android native/local 기반 유지
+→ Web 모바일·데스크톱에서 공용 Memory UI readiness gate
+→ Android shell 적용과 실기기 적응 검증
+→ export·복구·rollback·device matrix 등 첫 slice 잔여 항목 마감
+```
+
+UI 상세 기준은 `decisions/2026-08-16-web-first-shared-ui-readiness.md`와 `../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다. 아래 기존 Phase 3~10 절은 전체 작업 범위를 보존하기 위한 목록이며, 충돌할 때 승인된 Decision/ExecPlan을 우선한다.
 
 ---
 
