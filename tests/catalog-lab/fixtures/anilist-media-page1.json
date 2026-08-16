@@ -1,0 +1,54 @@
+{
+  "data": {
+    "Media": {
+      "id": 1,
+      "idMal": 101,
+      "title": { "romaji": "Sample One", "english": "Sample One", "native": "サンプルワン" },
+      "synonyms": ["Sample I"],
+      "format": "TV",
+      "status": "FINISHED",
+      "startDate": { "year": 2000, "month": 1, "day": 1 },
+      "endDate": { "year": 2000, "month": 6, "day": 1 },
+      "season": "WINTER",
+      "seasonYear": 2000,
+      "episodes": 12,
+      "source": "ORIGINAL",
+      "genres": ["Action"],
+      "coverImage": { "extraLarge": "https://example.test/cover-xl.jpg", "large": "https://example.test/cover-l.jpg", "medium": "https://example.test/cover-m.jpg" },
+      "bannerImage": "https://example.test/forbidden-banner.jpg",
+      "studios": { "nodes": [{ "id": 11, "name": "Sample Studio", "isAnimationStudio": true }] },
+      "relations": { "edges": [{ "relationType": "SEQUEL", "node": { "id": 2, "type": "ANIME", "title": { "romaji": "Sample Two", "english": "Sample Two", "native": "サンプルツー" }, "format": "TV", "coverImage": { "large": "https://example.test/forbidden-relation.jpg" } } }] },
+      "externalLinks": [{ "id": 22, "site": "Official Site", "url": "https://example.test/official", "type": "STREAMING", "icon": "https://example.test/forbidden-icon.png" }],
+      "characters": {
+        "pageInfo": { "currentPage": 1, "hasNextPage": true },
+        "edges": [
+          { "role": "MAIN", "node": { "id": 1001, "name": { "full": "Character 1", "native": "キャラクター1", "alternative": ["C1"] }, "image": { "large": "https://example.test/forbidden-character-1.jpg" } }, "voiceActors": [{ "id": 2001, "name": { "full": "Actor 1", "native": "声優1", "alternative": ["A1"] }, "language": "JAPANESE", "image": { "large": "https://example.test/forbidden-actor-1.jpg" } }, { "id": 3001, "name": { "full": "Actor EN", "native": null, "alternative": [] }, "language": "ENGLISH", "image": { "large": "https://example.test/forbidden-actor-en.jpg" } }] },
+          { "role": "SUPPORTING", "node": { "id": 1002, "name": { "full": "Character 2", "native": "キャラクター2", "alternative": [] } }, "voiceActors": [{ "id": 2002, "name": { "full": "Actor 2", "native": "声優2", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1003, "name": { "full": "Character 3", "native": "キャラクター3", "alternative": [] } }, "voiceActors": [{ "id": 2003, "name": { "full": "Actor 3", "native": "声優3", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1004, "name": { "full": "Character 4", "native": "キャラクター4", "alternative": [] } }, "voiceActors": [{ "id": 2004, "name": { "full": "Actor 4", "native": "声優4", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1005, "name": { "full": "Character 5", "native": "キャラクター5", "alternative": [] } }, "voiceActors": [{ "id": 2005, "name": { "full": "Actor 5", "native": "声優5", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1006, "name": { "full": "Character 6", "native": "キャラクター6", "alternative": [] } }, "voiceActors": [{ "id": 2006, "name": { "full": "Actor 6", "native": "声優6", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1007, "name": { "full": "Character 7", "native": "キャラクター7", "alternative": [] } }, "voiceActors": [{ "id": 2007, "name": { "full": "Actor 7", "native": "声優7", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1008, "name": { "full": "Character 8", "native": "キャラクター8", "alternative": [] } }, "voiceActors": [{ "id": 2008, "name": { "full": "Actor 8", "native": "声優8", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1009, "name": { "full": "Character 9", "native": "キャラクター9", "alternative": [] } }, "voiceActors": [{ "id": 2009, "name": { "full": "Actor 9", "native": "声優9", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1010, "name": { "full": "Character 10", "native": "キャラクター10", "alternative": [] } }, "voiceActors": [{ "id": 2010, "name": { "full": "Actor 10", "native": "声優10", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1011, "name": { "full": "Character 11", "native": "キャラクター11", "alternative": [] } }, "voiceActors": [{ "id": 2011, "name": { "full": "Actor 11", "native": "声優11", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1012, "name": { "full": "Character 12", "native": "キャラクター12", "alternative": [] } }, "voiceActors": [{ "id": 2012, "name": { "full": "Actor 12", "native": "声優12", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1013, "name": { "full": "Character 13", "native": "キャラクター13", "alternative": [] } }, "voiceActors": [{ "id": 2013, "name": { "full": "Actor 13", "native": "声優13", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1014, "name": { "full": "Character 14", "native": "キャラクター14", "alternative": [] } }, "voiceActors": [{ "id": 2014, "name": { "full": "Actor 14", "native": "声優14", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1015, "name": { "full": "Character 15", "native": "キャラクター15", "alternative": [] } }, "voiceActors": [{ "id": 2015, "name": { "full": "Actor 15", "native": "声優15", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1016, "name": { "full": "Character 16", "native": "キャラクター16", "alternative": [] } }, "voiceActors": [{ "id": 2016, "name": { "full": "Actor 16", "native": "声優16", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1017, "name": { "full": "Character 17", "native": "キャラクター17", "alternative": [] } }, "voiceActors": [{ "id": 2017, "name": { "full": "Actor 17", "native": "声優17", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1018, "name": { "full": "Character 18", "native": "キャラクター18", "alternative": [] } }, "voiceActors": [{ "id": 2018, "name": { "full": "Actor 18", "native": "声優18", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1019, "name": { "full": "Character 19", "native": "キャラクター19", "alternative": [] } }, "voiceActors": [{ "id": 2019, "name": { "full": "Actor 19", "native": "声優19", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1020, "name": { "full": "Character 20", "native": "キャラクター20", "alternative": [] } }, "voiceActors": [{ "id": 2020, "name": { "full": "Actor 20", "native": "声優20", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1021, "name": { "full": "Character 21", "native": "キャラクター21", "alternative": [] } }, "voiceActors": [{ "id": 2021, "name": { "full": "Actor 21", "native": "声優21", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1022, "name": { "full": "Character 22", "native": "キャラクター22", "alternative": [] } }, "voiceActors": [{ "id": 2022, "name": { "full": "Actor 22", "native": "声優22", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1023, "name": { "full": "Character 23", "native": "キャラクター23", "alternative": [] } }, "voiceActors": [{ "id": 2023, "name": { "full": "Actor 23", "native": "声優23", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "SUPPORTING", "node": { "id": 1024, "name": { "full": "Character 24", "native": "キャラクター24", "alternative": [] } }, "voiceActors": [{ "id": 2024, "name": { "full": "Actor 24", "native": "声優24", "alternative": [] }, "language": "JAPANESE" }] },
+          { "role": "MAIN", "node": { "id": 1025, "name": { "full": "Character 25", "native": "キャラクター25", "alternative": [] } }, "voiceActors": [{ "id": 2025, "name": { "full": "Actor 25", "native": "声優25", "alternative": [] }, "language": "JAPANESE" }] }
+        ]
+      }
+    }
+  }
+}

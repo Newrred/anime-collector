@@ -1,0 +1,13 @@
+{
+  "data": {
+    "Media": {
+      "id": 1,
+      "characters": {
+        "pageInfo": { "currentPage": 2, "hasNextPage": false },
+        "edges": [
+          { "role": "SUPPORTING", "node": { "id": 1026, "name": { "full": "Character 26", "native": "キャラクター26", "alternative": [] }, "image": { "large": "https://example.test/forbidden-character-26.jpg" } }, "voiceActors": [{ "id": 2026, "name": { "full": "Actor 26", "native": "声優26", "alternative": [] }, "language": "JAPANESE", "image": { "large": "https://example.test/forbidden-actor-26.jpg" } }] }
+        ]
+      }
+    }
+  }
+}
