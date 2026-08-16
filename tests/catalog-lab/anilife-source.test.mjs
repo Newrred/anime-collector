@@ -139,6 +139,37 @@ test('AniLife rejects forwarding and trap-throwing binding proxies before reques
   }
 });
 
+test('AniLife rejects map and entry getters without invoking them or requesting pages', async () => {
+  const reviewedBinding = { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' };
+  let mapGetterCalls = 0;
+  const mapGetterBindings = {};
+  Object.defineProperty(mapGetterBindings, 'ANILIST:1', {
+    enumerable: true,
+    get() { mapGetterCalls += 1; return reviewedBinding; },
+  });
+  let entryGetterCalls = 0;
+  const entryGetter = {};
+  Object.defineProperty(entryGetter, 'contentId', {
+    enumerable: true,
+    get() { entryGetterCalls += 1; return '1'; },
+  });
+  Object.defineProperty(entryGetter, 'evidence', {
+    enumerable: true,
+    get() { entryGetterCalls += 1; return 'MANUAL_PUBLIC_PAGE_REVIEW'; },
+  });
+
+  for (const bindings of [mapGetterBindings, { 'ANILIST:1': entryGetter }]) {
+    const requests = [];
+    const http = { async request({ url }) { requests.push(url); throw new Error('Must not request'); } };
+    await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+      targets: [target], http, workspace: {}, clock, bindings,
+    }), { code: 'SOURCE_SCHEMA_DRIFT' });
+    assert.deepEqual(requests, []);
+  }
+  assert.equal(mapGetterCalls, 0);
+  assert.equal(entryGetterCalls, 0);
+});
+
 test('AniLife verifies sitemap membership before fetching a bound content page', async () => {
   const [sitemap, content] = await Promise.all([
     fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
@@ -261,6 +292,30 @@ test('AniLife default HTTP classifies redirect-error failures once without retry
       ? ['https://anilife1.tv/sitemap.xml']
       : ['https://anilife1.tv/sitemap.xml', 'https://anilife1.tv/content/1']);
   }
+});
+
+test('AniLife stops reading an oversized sitemap stream before body text buffering', async () => {
+  const requests = [];
+  let textCalled = false;
+  const oversizedStream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array((5 * 1024 * 1024) + 1));
+      controller.close();
+    },
+  });
+  const http = {
+    async request({ url }) {
+      requests.push(url);
+      return { body: oversizedStream, async text() { textCalled = true; return ''; } };
+    },
+  };
+
+  await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+    targets: [target], http, workspace: {}, clock,
+    bindings: { 'ANILIST:1': { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' } },
+  }), { code: 'SOURCE_SCHEMA_DRIFT' });
+  assert.deepEqual(requests, ['https://anilife1.tv/sitemap.xml']);
+  assert.equal(textCalled, false);
 });
 
 test('AniLife falls back to OpenGraph title and image while classifying malformed JSON-LD', async () => {

@@ -22,12 +22,10 @@ function sourceError(code, { status, cause } = {}) {
   return error;
 }
 
-function isRedirectFailure(error, seen = new Set()) {
-  if (!error || typeof error !== 'object' || seen.has(error)) return false;
-  seen.add(error);
-  return error.code === 'SOURCE_REDIRECT_FORBIDDEN'
-    || /redirect/i.test(String(error.message ?? ''))
-    || isRedirectFailure(error.cause, seen);
+function isRedirectFailure(error) {
+  return error?.code === 'SOURCE_REDIRECT_FORBIDDEN'
+    || (error?.name === 'TypeError' && error.message === 'fetch failed'
+      && error.cause?.name === 'Error' && error.cause.message === 'unexpected redirect');
 }
 
 function retryAfterMilliseconds(response, now) {

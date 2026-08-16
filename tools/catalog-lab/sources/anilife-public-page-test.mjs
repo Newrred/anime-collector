@@ -5,6 +5,7 @@ const SITEMAP_URL = `${ANILIFE_ORIGIN}/sitemap.xml`;
 const PARSER_VERSION = 'anilife-public-page-test-v1';
 const MANUAL_REVIEW_EVIDENCE = 'MANUAL_PUBLIC_PAGE_REVIEW';
 const ALLOWED_JSON_LD_TYPES = new Set(['TVSeries', 'Movie', 'VideoObject']);
+const MAX_SITEMAP_BYTES = 5 * 1024 * 1024;
 
 function typedError(code, message = code) {
   const error = new Error(message);
@@ -44,6 +45,7 @@ function isPlainRecord(value) {
 
 function snapshotJsonRecord(value) {
   try {
+    assertSafeJsonData(value);
     if (!isPlainRecord(value)) throw new TypeError('Binding is not a record');
     const cloned = structuredClone(value);
     const serialized = JSON.stringify(cloned);
@@ -54,6 +56,27 @@ function snapshotJsonRecord(value) {
   } catch {
     throw sourceSchemaDrift();
   }
+}
+
+function assertSafeJsonData(value, seen = new Set()) {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return;
+  if (typeof value === 'number') {
+    if (Number.isFinite(value)) return;
+    throw new TypeError('Binding contains a non-JSON number');
+  }
+  if (typeof value !== 'object' || seen.has(value)) throw new TypeError('Binding contains unsupported data');
+  const prototype = Object.getPrototypeOf(value);
+  if (!(Array.isArray(value) ? prototype === Array.prototype : isPlainRecord(value))) {
+    throw new TypeError('Binding contains an unsupported prototype');
+  }
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key === 'symbol') throw new TypeError('Binding contains a symbol key');
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) throw new TypeError('Binding contains an accessor');
+    assertSafeJsonData(descriptor.value, seen);
+  }
+  seen.delete(value);
 }
 
 function ownDataValue(record, key) {
@@ -190,7 +213,7 @@ function sitemapHasContentUrl(xml, publicPageUrl) {
 
 function extractSitemapLocators(xml) {
   const value = String(xml);
-  if (value.length > 5_000_000) return null;
+  if (value.length > MAX_SITEMAP_BYTES) return null;
   const tokens = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[[\s\S]*?\]\]>|<[^>]*>/g;
   const stack = [];
   const locators = [];
@@ -256,10 +279,35 @@ async function requestApprovedPublicPage(http, url) {
 }
 
 function isRedirectFailure(error) {
-  if (!error || typeof error !== 'object') return false;
-  return error.code === 'SOURCE_REDIRECT_FORBIDDEN'
-    || /redirect/i.test(String(error.message ?? ''))
-    || isRedirectFailure(error.cause);
+  return error?.code === 'SOURCE_REDIRECT_FORBIDDEN' || error?.cause?.code === 'SOURCE_REDIRECT_FORBIDDEN';
+}
+
+async function readSitemapBody(response) {
+  const reader = response?.body?.getReader?.();
+  if (!reader) throw sourceSchemaDrift();
+  const decoder = new TextDecoder();
+  let totalBytes = 0;
+  let content = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!(value instanceof Uint8Array)) throw sourceSchemaDrift();
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_SITEMAP_BYTES) throw sourceSchemaDrift();
+      content += decoder.decode(value, { stream: true });
+    }
+    return content + decoder.decode();
+  } catch {
+    try {
+      await reader.cancel();
+    } catch {
+      // A failed cancellation must not replace the bounded schema error.
+    }
+    throw sourceSchemaDrift();
+  } finally {
+    reader.releaseLock?.();
+  }
 }
 
 /**
@@ -327,12 +375,7 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
         const { contentId } = validateAniLifeBinding(foundBinding.binding);
         const publicPageUrl = contentPageUrl(contentId);
         const sitemapResponse = await requestApprovedPublicPage(http, assertApprovedPublicUrl(SITEMAP_URL).href);
-        let sitemap;
-        try {
-          sitemap = await sitemapResponse.text();
-        } catch {
-          throw sourceSchemaDrift();
-        }
+        const sitemap = await readSitemapBody(sitemapResponse);
         if (!sitemapHasContentUrl(sitemap, publicPageUrl)) throw sourceSchemaDrift();
         const contentResponse = await requestApprovedPublicPage(http, publicPageUrl);
         let html;

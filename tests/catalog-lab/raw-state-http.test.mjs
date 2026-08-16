@@ -209,6 +209,18 @@ test('redirect-error fetch failure is typed and never retried', async (t) => {
   assert.equal(fetchImpl.mock.callCount(), 1);
 });
 
+test('unrelated redirect-named failures retain normal retry behavior', async (t) => {
+  const sleeps = [];
+  const fetchImpl = t.mock.fn(async () => { throw new Error('redirect cache timeout'); });
+  const http = createHttpClient({ fetchImpl, sleep: async (milliseconds) => sleeps.push(milliseconds), random: () => 0 });
+
+  await assert.rejects(http.request({
+    url: 'https://example.test/data', kind: 'DATA', init: { redirect: 'error' },
+  }), { code: 'SOURCE_RETRY_EXHAUSTED' });
+  assert.equal(fetchImpl.mock.callCount(), 5);
+  assert.deepEqual(sleeps, [500, 1000, 2000, 4000]);
+});
+
 test('429 honors Retry-After and stops after five retries', async (t) => {
   const sleeps = [];
   const fetchImpl = t.mock.fn(async () => new Response('', {
