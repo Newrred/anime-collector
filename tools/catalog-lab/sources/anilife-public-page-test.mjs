@@ -36,13 +36,28 @@ function contentPageUrl(contentId) {
   return assertApprovedPublicUrl(`${ANILIFE_ORIGIN}/content/${contentId}`).href;
 }
 
+function isPlainRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function ownDataValue(record, key) {
+  const descriptor = Object.getOwnPropertyDescriptor(record, key);
+  if (!descriptor || !Object.hasOwn(descriptor, 'value')) return undefined;
+  return descriptor.value;
+}
+
 function textValue(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 function episodeCount(value) {
-  if (Number.isInteger(value) && value > 0) return value;
-  if (typeof value === 'string' && /^[1-9]\d*$/.test(value)) return Number(value);
+  if (Number.isSafeInteger(value) && value > 0) return value;
+  if (typeof value === 'string' && /^[1-9]\d*$/.test(value)) {
+    const parsed = Number(value);
+    return Number.isSafeInteger(parsed) ? parsed : null;
+  }
   return null;
 }
 
@@ -86,10 +101,22 @@ function parseAttributes(markup) {
   return values;
 }
 
+const NAMED_HTML_ENTITIES = Object.freeze({ amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' });
+
+function decodeHtmlEntities(value) {
+  return String(value).replace(/&(?:(#x[0-9a-f]+)|(#\d+)|([a-z]+));/gi, (match, hex, decimal, named) => {
+    if (named) return NAMED_HTML_ENTITIES[named.toLowerCase()] ?? match;
+    const codePoint = Number.parseInt((hex ?? decimal).slice(hex ? 2 : 1), hex ? 16 : 10);
+    if (!Number.isSafeInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff
+      || (codePoint >= 0xd800 && codePoint <= 0xdfff)) return match;
+    return String.fromCodePoint(codePoint);
+  });
+}
+
 function openGraphValue(html, property) {
   for (const match of html.matchAll(/<meta\b[^>]*>/gi)) {
     const attributes = parseAttributes(match[0]);
-    if (attributes.property?.toLowerCase() === property) return textValue(attributes.content);
+    if (attributes.property?.toLowerCase() === property) return textValue(decodeHtmlEntities(attributes.content));
   }
   return null;
 }
@@ -122,7 +149,15 @@ function parseAllowedPayload(html, { contentId, publicPageUrl }) {
 }
 
 function sitemapHasContentUrl(xml, publicPageUrl) {
-  for (const match of xml.matchAll(/<loc\b[^>]*>([\s\S]*?)<\/loc\s*>/gi)) {
+  const cleaned = String(xml)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<\?[\s\S]*?\?>/g, '')
+    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, '');
+  const urlset = /<urlset\b[^>]*>([\s\S]*?)<\/urlset\s*>/i.exec(cleaned);
+  if (!urlset) return false;
+  for (const url of urlset[1].matchAll(/<url\b[^>]*>([\s\S]*?)<\/url\s*>/gi)) {
+    const match = /<loc\b[^>]*>([^<]*)<\/loc\s*>/i.exec(url[1]);
+    if (!match) continue;
     try {
       if (assertApprovedPublicUrl(match[1].trim()).href === publicPageUrl) return true;
     } catch {
@@ -134,7 +169,21 @@ function sitemapHasContentUrl(xml, publicPageUrl) {
 
 async function requestApprovedPublicPage(http, url) {
   assertApprovedPublicUrl(url);
-  return http.request({ url, kind: 'DATA' });
+  try {
+    return await http.request({ url, kind: 'DATA', init: { redirect: 'error' } });
+  } catch (error) {
+    if (isRedirectFailure(error)) {
+      throw typedError('SOURCE_REDIRECT_FORBIDDEN', 'AniLife redirect is not an approved public endpoint');
+    }
+    throw error;
+  }
+}
+
+function isRedirectFailure(error) {
+  if (!error || typeof error !== 'object') return false;
+  return error.code === 'SOURCE_REDIRECT_FORBIDDEN'
+    || /redirect/i.test(String(error.message ?? ''))
+    || isRedirectFailure(error.cause);
 }
 
 /**
@@ -142,14 +191,28 @@ async function requestApprovedPublicPage(http, url) {
  * deliberately unsupported: this adapter accepts only a numeric, reviewed content id.
  */
 export function validateAniLifeBinding(binding) {
-  if (!binding || typeof binding !== 'object' || binding.evidence !== MANUAL_REVIEW_EVIDENCE) {
+  if (!isPlainRecord(binding)) {
     throw sourceSchemaDrift();
   }
-  if (typeof binding.contentId !== 'string' || !/^[1-9]\d*$/.test(binding.contentId)) {
+  const evidence = ownDataValue(binding, 'evidence');
+  const contentId = ownDataValue(binding, 'contentId');
+  if (evidence !== MANUAL_REVIEW_EVIDENCE) throw sourceSchemaDrift();
+  if (typeof contentId !== 'string' || !/^[1-9]\d*$/.test(contentId)) {
     throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife content binding must be a numeric public content id');
   }
-  contentPageUrl(binding.contentId);
-  return Object.freeze({ contentId: binding.contentId });
+  contentPageUrl(contentId);
+  return Object.freeze({ contentId });
+}
+
+function bindingForTarget(bindings, targetKey) {
+  if (!isPlainRecord(bindings) || typeof targetKey !== 'string' || !targetKey) throw sourceSchemaDrift();
+  if (!Object.hasOwn(bindings, targetKey)) {
+    if (targetKey in bindings) throw sourceSchemaDrift();
+    return { found: false };
+  }
+  const binding = ownDataValue(bindings, targetKey);
+  if (binding === undefined) throw sourceSchemaDrift();
+  return { found: true, binding };
 }
 
 function unboundEnvelope({ target, clock }) {
@@ -177,16 +240,16 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
   return Object.freeze({
     async *collect({ targets, http = defaultHttp, clock, bindings }) {
       if (!Array.isArray(targets) || !http || typeof http.request !== 'function' || !clock
-        || typeof clock.now !== 'function' || !bindings || typeof bindings !== 'object') {
+        || typeof clock.now !== 'function' || !isPlainRecord(bindings)) {
         throw sourceSchemaDrift();
       }
       for (const target of targets) {
-        const binding = bindings[target?.targetKey];
-        if (!binding) {
+        const foundBinding = bindingForTarget(bindings, target?.targetKey);
+        if (!foundBinding.found) {
           yield unboundEnvelope({ target, clock });
           continue;
         }
-        const { contentId } = validateAniLifeBinding(binding);
+        const { contentId } = validateAniLifeBinding(foundBinding.binding);
         const publicPageUrl = contentPageUrl(contentId);
         const sitemapResponse = await requestApprovedPublicPage(http, assertApprovedPublicUrl(SITEMAP_URL).href);
         let sitemap;
