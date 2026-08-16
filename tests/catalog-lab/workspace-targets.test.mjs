@@ -56,23 +56,26 @@ test('workspace rejects case-variant and junction paths into the git worktree', 
 });
 
 test('workspace rejects a new child through a junction before creating repository files', async () => {
+  const syntheticRepoRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-synthetic-repo-'));
   const outsideRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-junction-'));
   const junctionRoot = join(outsideRoot, 'into-repository');
-  const childName = `catalog-lab-write-guard-${process.pid}`;
-  const repositoryChild = join(repoRoot, childName);
+  const repositoryChild = join(syntheticRepoRoot, 'catalog-lab-write-guard');
   try {
-    await rm(repositoryChild, { recursive: true, force: true });
-    await symlink(repoRoot, junctionRoot, 'junction');
+    await symlink(syntheticRepoRoot, junctionRoot, 'junction');
     await assert.rejects(
-      openCatalogWorkspace({ repoRoot, workspaceRoot: join(junctionRoot, childName), create: true }),
+      openCatalogWorkspace({
+        repoRoot: syntheticRepoRoot,
+        workspaceRoot: join(junctionRoot, 'catalog-lab-write-guard'),
+        create: true,
+      }),
       { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
     );
     assert.equal(await pathExists(repositoryChild), false);
     assert.equal(await pathExists(join(repositoryChild, 'TEST_ONLY.json')), false);
   } finally {
-    await rm(repositoryChild, { recursive: true, force: true });
     await unlink(junctionRoot).catch(() => {});
     await rm(outsideRoot, { recursive: true, force: true });
+    await rm(syntheticRepoRoot, { recursive: true, force: true });
   }
 });
 
