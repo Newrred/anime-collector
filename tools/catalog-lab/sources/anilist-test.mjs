@@ -3,6 +3,8 @@ import { createHttpClient } from '../lib/http.mjs';
 const ANILIST_GRAPHQL_URL = 'https://graphql.anilist.co';
 const PARSER_VERSION = 'anilist-test-v1';
 const CHARACTER_PAGE_SIZE = 25;
+const MAX_CHARACTER_PAGES = 100;
+const MAX_CHARACTER_RESULTS = MAX_CHARACTER_PAGES * CHARACTER_PAGE_SIZE;
 
 const CATALOG_MEDIA_QUERY = `
 query CatalogMedia($id: Int!, $page: Int!) {
@@ -25,6 +27,12 @@ query CatalogMedia($id: Int!, $page: Int!) {
 function sourceSchemaDrift() {
   const error = new Error('AniList response does not match the requested target schema');
   error.code = 'SOURCE_SCHEMA_DRIFT';
+  return error;
+}
+
+function sourcePaginationLimit() {
+  const error = new Error('AniList character pagination exceeded the local-test limit');
+  error.code = 'SOURCE_PAGINATION_LIMIT_EXCEEDED';
   return error;
 }
 
@@ -123,6 +131,9 @@ async function fetchMediaPage({ http, id, page }) {
   } catch {
     throw sourceSchemaDrift();
   }
+  if (Array.isArray(responseBody?.errors) && responseBody.errors.length > 0) {
+    throw sourceSchemaDrift();
+  }
   const media = responseBody?.data?.Media;
   if (!media || typeof media !== 'object' || media.id !== id || !media.characters?.pageInfo) {
     throw sourceSchemaDrift();
@@ -151,13 +162,15 @@ export function createAniListTestAdapter({ fetchImpl = globalThis.fetch } = {}) 
         let page = 1;
         let firstMedia;
         const characters = [];
-        while (true) {
+        while (page <= MAX_CHARACTER_PAGES) {
           const media = await fetchMediaPage({ http, id, page });
           if (!firstMedia) firstMedia = media;
           characters.push(...projectCharacters(media.characters.edges));
+          if (characters.length > MAX_CHARACTER_RESULTS) throw sourcePaginationLimit();
           if (!media.characters.pageInfo.hasNextPage) break;
           page += 1;
         }
+        if (page > MAX_CHARACTER_PAGES) throw sourcePaginationLimit();
         yield Object.freeze({
           sourceId: 'anilist',
           targetKey: target.targetKey,
@@ -173,4 +186,4 @@ export function createAniListTestAdapter({ fetchImpl = globalThis.fetch } = {}) 
   });
 }
 
-export { CATALOG_MEDIA_QUERY, CHARACTER_PAGE_SIZE };
+export { CATALOG_MEDIA_QUERY, CHARACTER_PAGE_SIZE, MAX_CHARACTER_PAGES, MAX_CHARACTER_RESULTS };

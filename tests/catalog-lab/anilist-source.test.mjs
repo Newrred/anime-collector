@@ -74,3 +74,41 @@ test('AniList adapter rejects a media response with a non-target id as schema dr
     code: 'SOURCE_SCHEMA_DRIFT',
   });
 });
+
+test('AniList adapter rejects GraphQL partial data with errors before it yields an envelope', async () => {
+  const page = await fixture('anilist-media-page1.json');
+  page.errors = [{ message: 'Synthetic partial-data failure' }];
+  let requests = 0;
+  const adapter = createAniListTestAdapter({
+    fetchImpl: async () => {
+      requests += 1;
+      return new Response(JSON.stringify(page), { status: 200 });
+    },
+  });
+
+  await assert.rejects(collect(adapter, { targets: [target], clock: { now: () => '2026-08-17T00:00:00.000Z' } }), {
+    code: 'SOURCE_SCHEMA_DRIFT',
+  });
+  assert.equal(requests, 1);
+});
+
+test('AniList adapter rejects an endless character pagination sequence at its bounded page limit', async () => {
+  const page = await fixture('anilist-media-page1.json');
+  let requests = 0;
+  const adapter = createAniListTestAdapter({
+    fetchImpl: async (_url, init) => {
+      requests += 1;
+      const responsePage = structuredClone(page);
+      responsePage.data.Media.characters.pageInfo = {
+        currentPage: JSON.parse(init.body).variables.page,
+        hasNextPage: true,
+      };
+      return new Response(JSON.stringify(responsePage), { status: 200 });
+    },
+  });
+
+  await assert.rejects(collect(adapter, { targets: [target], clock: { now: () => '2026-08-17T00:00:00.000Z' } }), {
+    code: 'SOURCE_PAGINATION_LIMIT_EXCEEDED',
+  });
+  assert.equal(requests, 100);
+});
