@@ -4,6 +4,7 @@ import { lookup } from 'node:dns/promises';
 import { request as httpsRequest } from 'node:https';
 import { isIP } from 'node:net';
 
+import { classifyHttpFailure, RETRY_POLICY } from '../lib/http.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
 
@@ -22,12 +23,15 @@ const PNG_SIGNATURE = Object.freeze([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0
 const MAX_COVER_BYTES = 8 * 1024 * 1024;
 const MAX_COVER_AXIS = 4096;
 const MAX_COVER_PIXELS = 12_000_000;
+const IMAGE_ATTEMPT_TIMEOUT_MS = 10_000;
+const IMAGE_OVERALL_TIMEOUT_MS = 45_000;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 const SOF_MARKERS = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 const COVER_RECORDS = new WeakSet();
 const COVER_BYTES = new WeakMap();
+const COVER_RECORD_TRANSPORT = new WeakMap();
 const COVER_POLICIES = new WeakSet();
-const COVER_TRANSPORTS = new WeakSet();
+const COVER_TRANSPORTS = new WeakMap();
 const POLICIES = Object.freeze({
   anilist: Object.freeze({ sourceId: 'anilist', origins: Object.freeze(['https://s4.anilist.co']) }),
   anilife_public: Object.freeze({ sourceId: 'anilife_public', origins: Object.freeze(['https://anilife1.tv']) }),
@@ -35,9 +39,10 @@ const POLICIES = Object.freeze({
 });
 Object.values(POLICIES).forEach((policy) => COVER_POLICIES.add(policy));
 
-function typedError(code, message) {
+function typedError(code, message, details = {}) {
   const error = new Error(message);
   error.code = code;
+  Object.assign(error, details);
   return error;
 }
 
@@ -201,65 +206,362 @@ export function getApprovedCoverSourcePolicy(sourceId) {
   return policy;
 }
 
-function ipv4Global(address) {
+const IPV4_SPECIAL_REACHABILITY = Object.freeze([
+  ['192.0.0.9', 32, true],
+  ['192.0.0.10', 32, true],
+  ['192.0.0.8', 32, false],
+  ['192.0.0.170', 32, false],
+  ['192.0.0.171', 32, false],
+  ['192.88.99.2', 32, false],
+  ['192.0.0.0', 29, false],
+  ['192.0.0.0', 24, false],
+  ['192.0.2.0', 24, false],
+  ['192.31.196.0', 24, true],
+  ['192.52.193.0', 24, true],
+  ['192.88.99.0', 24, false],
+  ['192.175.48.0', 24, true],
+  ['198.51.100.0', 24, false],
+  ['203.0.113.0', 24, false],
+  ['169.254.0.0', 16, false],
+  ['192.168.0.0', 16, false],
+  ['198.18.0.0', 15, false],
+  ['172.16.0.0', 12, false],
+  ['100.64.0.0', 10, false],
+  ['0.0.0.0', 8, false],
+  ['10.0.0.0', 8, false],
+  ['127.0.0.0', 8, false],
+  ['224.0.0.0', 4, false],
+  ['240.0.0.0', 4, false],
+]);
+
+function ipv4Number(address) {
   const values = address.split('.').map(Number);
-  if (values.length !== 4 || values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) return false;
-  const [a, b] = values;
-  return !(a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127)
-    || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
-    || (a === 192 && (b === 0 || b === 2 || b === 88 || b === 168))
-    || (a === 198 && (b === 18 || b === 19 || b === 51)) || (a === 203 && b === 0));
+  if (values.length !== 4 || values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) return null;
+  return (((values[0] * 0x1000000) + (values[1] << 16) + (values[2] << 8) + values[3]) >>> 0);
+}
+
+function ipv4PrefixMatches(value, prefix, length) {
+  const mask = length === 0 ? 0 : (0xffffffff << (32 - length)) >>> 0;
+  return (value & mask) === (prefix & mask);
+}
+
+function ipv4Global(address) {
+  const value = ipv4Number(address);
+  if (value === null) return false;
+  for (const [prefix, length, globallyReachable] of IPV4_SPECIAL_REACHABILITY) {
+    if (ipv4PrefixMatches(value, ipv4Number(prefix), length)) return globallyReachable;
+  }
+  return true;
 }
 
 function ipv6Words(address) {
   const lower = address.toLowerCase().replace(/%.*$/u, '');
-  const halves = lower.split('::');
+  const dottedIndex = lower.lastIndexOf(':');
+  let normalized = lower;
+  if (lower.includes('.')) {
+    if (dottedIndex < 0) return null;
+    const embedded = ipv4Number(lower.slice(dottedIndex + 1));
+    if (embedded === null) return null;
+    normalized = `${lower.slice(0, dottedIndex)}:${(embedded >>> 16).toString(16)}:${(embedded & 0xffff).toString(16)}`;
+  }
+  const halves = normalized.split('::');
   if (halves.length > 2) return null;
   const left = halves[0] ? halves[0].split(':') : [];
   const right = halves.length === 2 && halves[1] ? halves[1].split(':') : [];
   if (left.some((part) => !/^[0-9a-f]{1,4}$/u.test(part)) || right.some((part) => !/^[0-9a-f]{1,4}$/u.test(part))) return null;
+  if ((halves.length === 1 && left.length !== 8) || (halves.length === 2 && left.length + right.length >= 8)) return null;
   const words = [...left.map((part) => Number.parseInt(part, 16)), ...Array(Math.max(0, 8 - left.length - right.length)).fill(0), ...right.map((part) => Number.parseInt(part, 16))];
   return words.length === 8 ? words : null;
 }
 
+// Snapshot of the IANA IPv6 Special-Purpose registry (updated 2025-10-09).
+// More-specific globally reachable exceptions precede the fail-closed
+// 2001::/23 parent allocation, as required by the registry footnote.
+const IPV6_SPECIAL_REACHABILITY = Object.freeze([
+  ['::', 128, false],
+  ['::1', 128, false],
+  ['2001:1::1', 128, true],
+  ['2001:1::2', 128, true],
+  ['2001:1::3', 128, true],
+  ['::ffff:0:0', 96, false],
+  ['64:ff9b::', 96, true],
+  ['64:ff9b:1::', 48, false],
+  ['2001:2::', 48, false],
+  ['2001:4:112::', 48, true],
+  ['2620:4f:8000::', 48, true],
+  ['2001::', 32, false],
+  ['2001:3::', 32, true],
+  ['2001:db8::', 32, false],
+  ['2001:10::', 28, false],
+  ['2001:20::', 28, true],
+  ['2001:30::', 28, true],
+  ['2001::', 23, false],
+  ['3fff::', 20, false],
+  ['2002::', 16, false],
+  ['5f00::', 16, false],
+  ['100::', 64, false],
+  ['100:0:0:1::', 64, false],
+  ['fe80::', 10, false],
+  ['fc00::', 7, false],
+]);
+
+function ipv6PrefixMatches(words, prefixAddress, length) {
+  const prefix = ipv6Words(prefixAddress);
+  if (!prefix) return false;
+  const completeWords = Math.floor(length / 16);
+  for (let index = 0; index < completeWords; index += 1) {
+    if (words[index] !== prefix[index]) return false;
+  }
+  const remaining = length % 16;
+  if (remaining === 0) return true;
+  const mask = (0xffff << (16 - remaining)) & 0xffff;
+  return (words[completeWords] & mask) === (prefix[completeWords] & mask);
+}
+
+function embeddedIpv4(words) {
+  return `${words[6] >>> 8}.${words[6] & 255}.${words[7] >>> 8}.${words[7] & 255}`;
+}
+
 function globalAddress(address) {
   if (typeof address !== 'string' || !isIP(address.replace(/%.*$/u, ''))) return false;
-  const value = address.toLowerCase();
-  if (/^\d+\.\d+\.\d+\.\d+$/u.test(value)) return ipv4Global(value);
+  const value = address.toLowerCase().replace(/%.*$/u, '');
+  if (isIP(value) === 4) return ipv4Global(value);
   const words = ipv6Words(value);
   if (!words) return false;
   const mapped = words.slice(0, 6).every((word, index) => word === (index === 5 ? 0xffff : 0));
-  if (mapped) return ipv4Global(`${words[6] >> 8}.${words[6] & 255}.${words[7] >> 8}.${words[7] & 255}`);
-  const allZero = words.every((word) => word === 0);
-  const loopback = words.slice(0, 7).every((word) => word === 0) && words[7] === 1;
-  const documentation = words[0] === 0x2001 && words[1] === 0x0db8;
-  const protocol = words[0] === 0x2001 && words[1] === 0;
-  const nat64Local = words[0] === 0x0064 && words[1] === 0xff9b && words[2] === 0x0001;
-  const discard = words[0] === 0x0100 && words.slice(1).every((word) => word === 0) || words[0] === 0x0100 && words[1] === 0;
-  const benchmarking = words[0] === 0x2001 && words[1] === 0x0002 && words[2] === 0;
-  const orchid = words[0] === 0x2001 && (words[1] & 0xfff0) === 0x0010;
-  const sixToFourDocumentation = words[0] === 0x3fff && (words[1] & 0xfff0) === 0;
-  const siteLocal = (words[0] & 0xffc0) === 0xfec0;
-  const linkLocal = (words[0] & 0xffc0) === 0xfe80;
-  return !(allZero || loopback || documentation || protocol || nat64Local || discard || benchmarking || orchid || sixToFourDocumentation || siteLocal || linkLocal || (words[0] & 0xfe00) === 0xfc00 || (words[0] & 0xff00) === 0xff00);
+  if (mapped) return ipv4Global(embeddedIpv4(words));
+  if (ipv6PrefixMatches(words, '64:ff9b::', 96)) return ipv4Global(embeddedIpv4(words));
+  if (ipv6PrefixMatches(words, '2002::', 16)) {
+    const sixToFourIpv4 = `${words[1] >>> 8}.${words[1] & 255}.${words[2] >>> 8}.${words[2] & 255}`;
+    if (!ipv4Global(sixToFourIpv4)) return false;
+    return false; // IANA marks 6to4 global reachability N/A, including global embedded IPv4.
+  }
+  if ((words[0] & 0xe000) !== 0x2000) return false;
+  for (const [prefix, length, globallyReachable] of IPV6_SPECIAL_REACHABILITY) {
+    if (ipv6PrefixMatches(words, prefix, length)) return globallyReachable;
+  }
+  return true;
 }
 
-/** Creates the only accepted cover transport: resolution is supplied once and the chosen address is pinned into the request. */
-export function createPinnedCoverTransport({ resolve = (host) => lookup(host, { all: true, verbatim: true }), request } = {}) {
-  const concreteRequest = request ?? (({ url, address, hostname }) => new Promise((resolve, reject) => {
+function retryAfterMilliseconds(headers, now) {
+  const raw = headers?.get?.('retry-after');
+  if (!raw) return null;
+  const value = raw.trim();
+  if (/^\d+$/u.test(value)) {
+    const seconds = Number(value);
+    return Number.isSafeInteger(seconds) ? seconds * 1000 : null;
+  }
+  if (!/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u.test(value)) return null;
+  const timestamp = Date.parse(value);
+  const current = now();
+  return Number.isFinite(timestamp) && new Date(timestamp).toUTCString() === value && timestamp > current ? timestamp - current : null;
+}
+
+function retryDelay(attempt, random) {
+  const exponential = Math.min(RETRY_POLICY.maxDelayMs, RETRY_POLICY.baseDelayMs * (2 ** attempt));
+  return Math.min(RETRY_POLICY.maxDelayMs, exponential + Math.floor(random() * RETRY_POLICY.baseDelayMs));
+}
+
+function sameAddress(left, right) {
+  const leftVersion = isIP(left?.replace?.(/%.*$/u, '') ?? '');
+  const rightVersion = isIP(right?.replace?.(/%.*$/u, '') ?? '');
+  if (leftVersion === 4 && rightVersion === 4) return ipv4Number(left) === ipv4Number(right);
+  const leftWords = ipv6Words(left ?? '');
+  const rightWords = ipv6Words(right ?? '');
+  return Boolean(leftWords && rightWords && leftWords.every((word, index) => word === rightWords[index]));
+}
+
+function abortable(promise, signal) {
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener('abort', abort, { once: true });
+    Promise.resolve(promise).then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
+  });
+}
+
+async function readNodeBody(response, headers, maxBytes, signal) {
+  boundedContentLength({ headers }, maxBytes);
+  const chunks = [];
+  let size = 0;
+  try {
+    for await (const value of response) {
+      if (signal.aborted) throw signal.reason;
+      const chunk = asBytes(value);
+      size += chunk.byteLength;
+      if (!Number.isSafeInteger(size) || size > maxBytes) {
+        throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit', { retryable: false });
+      }
+      chunks.push(chunk);
+    }
+  } catch (error) {
+    response.destroy?.();
+    throw error;
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+function requestConcreteAttempt({ url, address, hostname, maxBytes, httpsRequestImpl, signal, now }) {
+  return new Promise((resolve, reject) => {
     const parsed = new URL(url);
-    const req = httpsRequest({ hostname: address, port: 443, path: `${parsed.pathname}${parsed.search}`, method: 'GET', servername: hostname, headers: { host: hostname }, lookup: (_name, _options, callback) => callback(null, address, isIP(address)), timeout: 10_000 }, (response) => {
-      const remoteAddress = response.socket.remoteAddress;
-      if (remoteAddress !== address || response.statusCode < 200 || response.statusCode >= 300) { response.resume(); reject(typedError('IMAGE_HTTP_STATUS_INVALID', 'Pinned cover response is not a successful direct HTTPS response')); return; }
-      resolve({ url, connectedAddress: remoteAddress, redirected: false, headers: new Headers(response.headers), body: new Response(response).body });
+    let response;
+    let settled = false;
+    const finish = (handler, value) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener('abort', abort);
+      handler(value);
+    };
+    const abort = () => {
+      response?.destroy?.();
+      request.destroy?.(signal.reason);
+      finish(reject, signal.reason);
+    };
+    const options = {
+      hostname: address,
+      port: 443,
+      path: `${parsed.pathname}${parsed.search}`,
+      method: 'GET',
+      servername: hostname,
+      headers: { host: hostname },
+      lookup: (_name, _options, callback) => callback(null, address, isIP(address)),
+      signal,
+    };
+    const request = httpsRequestImpl(options, (incoming) => {
+      response = incoming;
+      const remoteAddress = incoming.socket?.remoteAddress;
+      if (!sameAddress(remoteAddress, address)) {
+        incoming.destroy?.();
+        finish(reject, typedError('IMAGE_ADDRESS_MISMATCH', 'Pinned cover socket connected to a different address', { retryable: false }));
+        return;
+      }
+      const status = incoming.statusCode;
+      const headers = new Headers(incoming.headers);
+      if (!Number.isInteger(status) || status < 200 || status >= 300) {
+        const failure = Number.isInteger(status) ? classifyHttpFailure(status) : 'FAILED_PERMANENT';
+        const retryable = failure === 'RATE_LIMITED' || failure === 'FAILED_RETRYABLE';
+        const retryAfterMs = status === 429 ? retryAfterMilliseconds(headers, now) : null;
+        incoming.destroy?.();
+        finish(reject, typedError('IMAGE_HTTP_STATUS_INVALID', 'Pinned cover response is not successful', {
+          status, retryable, retryAfterMs,
+        }));
+        return;
+      }
+      readNodeBody(incoming, headers, maxBytes, signal).then(
+        (bytes) => finish(resolve, { url, connectedAddress: remoteAddress, redirected: false, status, headers, bytes }),
+        (error) => finish(reject, error),
+      );
     });
-    req.once('timeout', () => req.destroy(typedError('IMAGE_TIMEOUT', 'Pinned cover request timed out')));
-    req.once('error', reject); req.end();
-  }));
-  if (typeof resolve !== 'function' || typeof concreteRequest !== 'function') throw typedError('IMAGE_TRANSPORT_INVALID', 'Pinned cover transport requires resolver and request functions');
-  const transport = Object.freeze({ resolve, request: concreteRequest, testSeam: Boolean(request) });
-  COVER_TRANSPORTS.add(transport);
+    request.once('error', (error) => finish(reject, error));
+    signal.addEventListener('abort', abort, { once: true });
+    if (signal.aborted) abort();
+    else request.end();
+  });
+}
+
+async function waitForRetry(milliseconds, { sleep, signal }) {
+  if (milliseconds <= 0) return;
+  await abortable(sleep(milliseconds), signal);
+}
+
+function createConcreteDownloader({
+  resolve, httpsRequestImpl, sleep, random, now, attemptTimeoutMs, overallTimeoutMs,
+}) {
+  return async ({ url, hostname, maxBytes }) => {
+    const operation = new AbortController();
+    const overallTimer = setTimeout(() => operation.abort(typedError('IMAGE_TIMEOUT', 'Pinned cover download exceeded its overall deadline')),
+      overallTimeoutMs);
+    try {
+      for (let attempt = 0; attempt <= RETRY_POLICY.imageRetries; attempt += 1) {
+        if (operation.signal.aborted) throw operation.signal.reason;
+        const attemptController = new AbortController();
+        const forwardOverall = () => attemptController.abort(operation.signal.reason);
+        operation.signal.addEventListener('abort', forwardOverall, { once: true });
+        const attemptTimer = setTimeout(() => attemptController.abort(typedError('IMAGE_ATTEMPT_TIMEOUT', 'Pinned cover attempt timed out', { retryable: true })), attemptTimeoutMs);
+        let failure;
+        try {
+          const addresses = await abortable(resolve(hostname, { signal: attemptController.signal }), attemptController.signal);
+          if (!Array.isArray(addresses) || addresses.length === 0 || addresses.some((entry) => !globalAddress(entry?.address))) {
+            throw typedError('IMAGE_ADDRESS_FORBIDDEN', 'Cover hostname resolves to a non-global address', { retryable: false });
+          }
+          return await requestConcreteAttempt({
+            url, address: addresses[0].address, hostname, maxBytes, httpsRequestImpl, signal: attemptController.signal, now,
+          });
+        } catch (error) {
+          failure = operation.signal.aborted ? operation.signal.reason : attemptController.signal.aborted ? attemptController.signal.reason : error;
+        } finally {
+          clearTimeout(attemptTimer);
+          operation.signal.removeEventListener('abort', forwardOverall);
+        }
+        if (operation.signal.aborted) throw operation.signal.reason;
+        if (failure?.retryable === false) throw failure;
+        if (attempt >= RETRY_POLICY.imageRetries) {
+          throw typedError('IMAGE_RETRY_EXHAUSTED', 'Pinned cover retries were exhausted', {
+            status: failure?.status, cause: failure,
+          });
+        }
+        const delay = failure?.retryAfterMs ?? retryDelay(attempt, random);
+        await waitForRetry(delay, { sleep, signal: operation.signal });
+      }
+      throw typedError('IMAGE_RETRY_EXHAUSTED', 'Pinned cover retries were exhausted');
+    } finally {
+      clearTimeout(overallTimer);
+    }
+  };
+}
+
+function registerTransport(metadata) {
+  const transport = Object.freeze({});
+  COVER_TRANSPORTS.set(transport, Object.freeze(metadata));
   return transport;
+}
+
+/** Creates the production transport, or a branded synthetic fixture transport when callbacks are supplied. */
+export function createPinnedCoverTransport({ resolve, request } = {}) {
+  if (request !== undefined || resolve !== undefined) {
+    if (typeof resolve !== 'function' || typeof request !== 'function') throw typedError('IMAGE_TRANSPORT_INVALID', 'Synthetic cover transport requires resolver and request functions');
+    return registerTransport({ kind: 'SYNTHETIC_TEST', production: false, concrete: false, resolve, request });
+  }
+  return registerTransport({
+    kind: 'CONCRETE', production: true, concrete: true,
+    download: createConcreteDownloader({
+      resolve: (host) => lookup(host, { all: true, verbatim: true }),
+      httpsRequestImpl: httpsRequest,
+      sleep: (milliseconds) => new Promise((resolveSleep) => setTimeout(resolveSleep, milliseconds)),
+      random: Math.random,
+      now: Date.now,
+      attemptTimeoutMs: IMAGE_ATTEMPT_TIMEOUT_MS,
+      overallTimeoutMs: IMAGE_OVERALL_TIMEOUT_MS,
+    }),
+  });
+}
+
+/** Exercises the concrete production algorithm with low-level fakes, but brands every resulting record TEST-only. */
+export function createConcreteCoverTransportTestHarness({
+  resolve,
+  httpsRequest: httpsRequestImpl,
+  sleep = (milliseconds) => new Promise((resolveSleep) => setTimeout(resolveSleep, milliseconds)),
+  random = Math.random,
+  now = Date.now,
+  attemptTimeoutMs = IMAGE_ATTEMPT_TIMEOUT_MS,
+  overallTimeoutMs = IMAGE_OVERALL_TIMEOUT_MS,
+} = {}) {
+  if (typeof resolve !== 'function' || typeof httpsRequestImpl !== 'function' || typeof sleep !== 'function'
+    || typeof random !== 'function' || typeof now !== 'function'
+    || !Number.isSafeInteger(attemptTimeoutMs) || attemptTimeoutMs < 1
+    || !Number.isSafeInteger(overallTimeoutMs) || overallTimeoutMs < 1) {
+    throw typedError('IMAGE_TRANSPORT_INVALID', 'Concrete cover test harness dependencies are invalid');
+  }
+  return registerTransport({
+    kind: 'CONCRETE_TEST', production: false, concrete: true,
+    download: createConcreteDownloader({ resolve, httpsRequestImpl, sleep, random, now, attemptTimeoutMs, overallTimeoutMs }),
+  });
 }
 
 /** Inspects only JPEG, PNG, and WebP container structure; decoding is a separate Chromium gate. */
@@ -297,10 +599,10 @@ function exactHttpUrl(value) {
 function boundedContentLength(response, maxBytes) {
   const raw = response?.headers?.get?.('content-length');
   if (raw === null || raw === undefined) return;
-  if (!/^\d+$/u.test(raw.trim())) throw typedError('IMAGE_CONTENT_LENGTH_INVALID', 'Cover Content-Length must be a safe integer');
+  if (!/^\d+$/u.test(raw.trim())) throw typedError('IMAGE_CONTENT_LENGTH_INVALID', 'Cover Content-Length must be a safe integer', { retryable: false });
   const length = Number(raw);
-  if (!Number.isSafeInteger(length)) throw typedError('IMAGE_CONTENT_LENGTH_INVALID', 'Cover Content-Length must be a safe integer');
-  if (length > maxBytes) throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit');
+  if (!Number.isSafeInteger(length)) throw typedError('IMAGE_CONTENT_LENGTH_INVALID', 'Cover Content-Length must be a safe integer', { retryable: false });
+  if (length > maxBytes) throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit', { retryable: false });
 }
 
 async function readBoundedBody(response, maxBytes) {
@@ -357,29 +659,41 @@ function candidateMetadata(candidate, policy) {
 
 /** Downloads one already exact-matched candidate with redirect and byte limits enforced before storage. */
 export async function downloadCoverCandidate({ candidate, policy, transport, maxBytes = MAX_COVER_BYTES }) {
-  if (!COVER_TRANSPORTS.has(transport) || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_COVER_BYTES) throw typedError('IMAGE_DOWNLOAD_INPUT_INVALID', 'Cover download requires a pinned bounded transport');
+  const transportMetadata = COVER_TRANSPORTS.get(transport);
+  if (!transportMetadata || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > MAX_COVER_BYTES) throw typedError('IMAGE_DOWNLOAD_INPUT_INVALID', 'Cover download requires a pinned bounded transport');
   const metadata = candidateMetadata(candidate, policy);
   const hostname = new URL(metadata.sourceUrl).hostname;
-  const addresses = await transport.resolve(hostname);
-  if (!Array.isArray(addresses) || addresses.length === 0 || addresses.some((entry) => !globalAddress(entry?.address))) throw typedError('IMAGE_ADDRESS_FORBIDDEN', 'Cover hostname resolves to a non-global address');
-  const address = addresses[0].address;
   let response;
   let consumed = false;
   try {
-    response = await transport.request({ url: metadata.sourceUrl, address, hostname, kind: 'IMAGE', init: { redirect: 'error' } });
-    if (!response || response.redirected || response.url !== metadata.sourceUrl || response.connectedAddress !== address) throw typedError('IMAGE_REDIRECT_FORBIDDEN', 'Cover redirect or final destination is forbidden');
+    let address;
+    if (transportMetadata.concrete) {
+      response = await transportMetadata.download({ url: metadata.sourceUrl, hostname, maxBytes });
+      address = response?.connectedAddress;
+    } else {
+      const addresses = await transportMetadata.resolve(hostname);
+      if (!Array.isArray(addresses) || addresses.length === 0 || addresses.some((entry) => !globalAddress(entry?.address))) throw typedError('IMAGE_ADDRESS_FORBIDDEN', 'Cover hostname resolves to a non-global address');
+      address = addresses[0].address;
+      response = await transportMetadata.request({ url: metadata.sourceUrl, address, hostname, kind: 'IMAGE', init: { redirect: 'error' } });
+    }
+    if (!response || response.redirected || response.url !== metadata.sourceUrl || !sameAddress(response.connectedAddress, address)) throw typedError('IMAGE_REDIRECT_FORBIDDEN', 'Cover redirect or final destination is forbidden');
     if (response.status !== undefined && (!Number.isInteger(response.status) || response.status < 200 || response.status >= 300)) throw typedError('IMAGE_HTTP_STATUS_INVALID', 'Cover response is not successful');
     boundedContentLength(response, maxBytes);
     const declaredMime = response.headers?.get?.('content-type');
-    const bytes = await readBoundedBody(response, maxBytes);
+    const bytes = response.bytes === undefined ? await readBoundedBody(response, maxBytes) : asBytes(response.bytes);
+    if (bytes.byteLength > maxBytes) throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit');
     consumed = true;
     const inspection = inspectImageBytes({ declaredMime, bytes });
-    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', testOnlyTransport: transport.testSeam, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
+    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
     COVER_RECORDS.add(record);
     COVER_BYTES.set(record, bytes);
+    COVER_RECORD_TRANSPORT.set(record, Object.freeze({ production: transportMetadata.production, concrete: transportMetadata.concrete }));
     return record;
   } finally {
-    if (!consumed) await response?.body?.cancel?.().catch(() => {});
+    if (!consumed) {
+      response?.destroy?.();
+      await response?.body?.cancel?.().catch(() => {});
+    }
   }
 }
 
@@ -393,7 +707,8 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
   if (typeof animeId !== 'string' || !ANIME_ID.test(animeId)) {
     throw typedError('COVER_ANIME_ID_INVALID', 'Cover anime ID is not safe for external storage');
   }
-  if (process.platform === 'win32' && !record.testOnlyTransport) {
+  const transportMetadata = COVER_RECORD_TRANSPORT.get(record);
+  if (process.platform === 'win32' && transportMetadata?.concrete) {
     throw typedError('COVER_STORAGE_PLATFORM_UNSAFE', 'Concrete network covers cannot be stored on Windows without handle-relative no-follow storage');
   }
   const image = COVER_BYTES.get(record);
@@ -433,49 +748,145 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
   const stored = Object.freeze({ ...record, localRef, created });
   COVER_RECORDS.add(stored);
   COVER_BYTES.set(stored, image);
+  COVER_RECORD_TRANSPORT.set(stored, transportMetadata);
   return stored;
 }
 
-/** Runs browser-native image decoding after structural validation without introducing an image package. */
-export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, browser } = {}) {
-  if (!COVER_RECORDS.has(record) || record.validationStatus !== 'SNIFFED' || !COVER_BYTES.has(record)
-    || browser !== undefined || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
-  const image = COVER_BYTES.get(record);
-  let deadlineTimer;
-  const deadline = new Promise((_, reject) => { deadlineTimer = setTimeout(() => reject(typedError('IMAGE_DECODE_TIMEOUT', 'Chromium cover decode exceeded its deadline')), timeoutMs); });
-  const { chromium } = await import('@playwright/test');
-  let activeBrowser;
+const loadProductionChromium = () => import('@playwright/test');
+
+function decodeTimeoutError() {
+  return typedError('IMAGE_DECODE_TIMEOUT', 'Chromium cover decode exceeded its operation deadline');
+}
+
+function remainingMilliseconds(deadlineAt) {
+  return Math.max(0, Math.ceil(deadlineAt - Date.now()));
+}
+
+async function beforeDeadline(promise, deadlineAt) {
+  const remaining = remainingMilliseconds(deadlineAt);
+  if (remaining < 1) throw decodeTimeoutError();
+  let timer;
   try {
-    activeBrowser = await Promise.race([chromium.launch(), deadline]);
-    const page = await Promise.race([activeBrowser.newPage(), deadline]);
-    try {
-      const evaluation = page.evaluate(async ({ base64, mimeType }) => {
-        const binary = atob(base64);
-        const pixels = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-        try {
-          const bitmap = await createImageBitmap(new Blob([pixels], { type: mimeType }));
-          const dimensions = { width: bitmap.width, height: bitmap.height };
-          bitmap.close();
-          return { ok: true, dimensions };
-        } catch (error) {
-          return { ok: false, message: String(error?.message ?? error) };
-        }
-      }, { base64: Buffer.from(image).toString('base64'), mimeType: record.mimeType });
-      const result = await Promise.race([evaluation, deadline]);
-      if (!result.ok || result.dimensions.width !== record.width || result.dimensions.height !== record.height) {
-        throw typedError('IMAGE_DECODE_FAILED', 'Chromium could not decode the structurally valid cover');
-      }
-      const decoded = Object.freeze({ ...record, validationStatus: 'DECODED' });
-      COVER_RECORDS.add(decoded);
-      COVER_BYTES.set(decoded, image);
-      return decoded;
-    } finally {
-      await page.close().catch(() => {});
-    }
+    return await Promise.race([
+      Promise.resolve(promise),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(decodeTimeoutError()), remaining); }),
+    ]);
   } finally {
-    clearTimeout(deadlineTimer);
-    await activeBrowser?.close().catch(() => {});
+    clearTimeout(timer);
   }
+}
+
+async function boundedCleanup(close, timeoutMs) {
+  let timer;
+  const operation = Promise.resolve().then(close).catch(() => {});
+  try {
+    await Promise.race([
+      operation,
+      new Promise((resolve) => { timer = setTimeout(resolve, timeoutMs); }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function acquireBeforeDeadline(acquisition, deadlineAt, closeLate) {
+  let abandoned = false;
+  const promise = Promise.resolve(acquisition);
+  promise.then((resource) => {
+    if (abandoned) void closeLate(resource);
+  }, () => {});
+  try {
+    return await beforeDeadline(promise, deadlineAt);
+  } catch (error) {
+    abandoned = true;
+    throw error;
+  }
+}
+
+function normalizeDecodeFailure(error, deadlineAt) {
+  if (error?.code === 'IMAGE_DECODE_TIMEOUT' || error?.code === 'IMAGE_DECODE_FAILED') return error;
+  if (remainingMilliseconds(deadlineAt) < 1 || error?.name === 'TimeoutError') return decodeTimeoutError();
+  return typedError('IMAGE_DECODE_FAILED', 'Chromium could not decode the structurally valid cover', { cause: error });
+}
+
+async function runChromiumLifecycle({ record, loadChromium, timeoutMs, cleanupTimeoutMs }) {
+  if (!COVER_RECORDS.has(record) || record.validationStatus !== 'SNIFFED' || !COVER_BYTES.has(record)) {
+    throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
+  }
+  const image = COVER_BYTES.get(record);
+  const deadlineAt = Date.now() + timeoutMs;
+  let browser;
+  let page;
+  let context;
+  const closePage = (resource) => boundedCleanup(() => resource?.close?.({ runBeforeUnload: false }), cleanupTimeoutMs);
+  const closeContext = (resource) => boundedCleanup(() => resource?.close?.({ reason: 'MOEMOA cover decode complete' }), cleanupTimeoutMs);
+  const closeBrowser = (resource) => boundedCleanup(() => resource?.close?.({ reason: 'MOEMOA cover decode complete' }), cleanupTimeoutMs);
+  const closeLatePage = async (resource) => {
+    await closePage(resource);
+    const lateContext = typeof resource?.context === 'function' ? resource.context() : undefined;
+    if (lateContext) await closeContext(lateContext);
+  };
+  try {
+    const module = await beforeDeadline(Promise.resolve().then(loadChromium), deadlineAt);
+    if (!module?.chromium || typeof module.chromium.launch !== 'function') {
+      throw typedError('IMAGE_DECODE_FAILED', 'Chromium module is unavailable');
+    }
+    const launchTimeout = remainingMilliseconds(deadlineAt);
+    if (launchTimeout < 1) throw decodeTimeoutError();
+    browser = await acquireBeforeDeadline(module.chromium.launch({ timeout: launchTimeout }), deadlineAt, closeBrowser);
+    page = await acquireBeforeDeadline(browser.newPage(), deadlineAt, closeLatePage);
+    context = typeof page.context === 'function' ? page.context() : undefined;
+    const result = await beforeDeadline(page.evaluate(async ({ base64, mimeType }) => {
+      const binary = atob(base64);
+      const pixels = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      try {
+        const bitmap = await createImageBitmap(new Blob([pixels], { type: mimeType }));
+        const dimensions = { width: bitmap.width, height: bitmap.height };
+        bitmap.close();
+        return { ok: true, dimensions };
+      } catch (error) {
+        return { ok: false, message: String(error?.message ?? error) };
+      }
+    }, { base64: Buffer.from(image).toString('base64'), mimeType: record.mimeType }), deadlineAt);
+    if (!result?.ok || result.dimensions?.width !== record.width || result.dimensions?.height !== record.height) {
+      throw typedError('IMAGE_DECODE_FAILED', 'Chromium could not decode the structurally valid cover');
+    }
+    return Object.freeze({ ok: true, dimensions: Object.freeze({ ...result.dimensions }) });
+  } catch (error) {
+    throw normalizeDecodeFailure(error, deadlineAt);
+  } finally {
+    if (page) await closePage(page);
+    if (context) await closeContext(context);
+    if (browser) await closeBrowser(browser);
+  }
+}
+
+/** Runs browser-native image decoding with module-owned Playwright Chromium only. */
+export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, browser } = {}) {
+  if (browser !== undefined || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) {
+    throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
+  }
+  await runChromiumLifecycle({ record, loadChromium: loadProductionChromium, timeoutMs, cleanupTimeoutMs: 250 });
+  const image = COVER_BYTES.get(record);
+  const decoded = Object.freeze({ ...record, validationStatus: 'DECODED' });
+  COVER_RECORDS.add(decoded);
+  COVER_BYTES.set(decoded, image);
+  COVER_RECORD_TRANSPORT.set(decoded, COVER_RECORD_TRANSPORT.get(record));
+  return decoded;
+}
+
+/** Lifecycle-only seam: injected Chromium can be observed but can never mint a DECODED CoverRecord. */
+export function createChromiumLifecycleTestHarness({ loadChromium } = {}) {
+  if (typeof loadChromium !== 'function') throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium lifecycle test loader is invalid');
+  return Object.freeze({
+    async run({ record, timeoutMs = 100, cleanupTimeoutMs = 10 } = {}) {
+      if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000
+        || !Number.isSafeInteger(cleanupTimeoutMs) || cleanupTimeoutMs < 1 || cleanupTimeoutMs > 1_000) {
+        throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium lifecycle test deadline is invalid');
+      }
+      return runChromiumLifecycle({ record, loadChromium, timeoutMs, cleanupTimeoutMs });
+    },
+  });
 }
 
 function exactIdentityRank(row) {
