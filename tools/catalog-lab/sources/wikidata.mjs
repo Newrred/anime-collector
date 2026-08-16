@@ -12,11 +12,21 @@ const DATAVALUE_TYPES = Object.freeze({
   P8729: 'string', P856: 'string', P577: 'time',
   P136: 'wikibase-entityid', P272: 'wikibase-entityid',
 });
+const WIKIDATA_DATATYPES = Object.freeze({
+  P8729: 'external-id', P856: 'url', P577: 'time',
+  P136: 'wikibase-item', P272: 'wikibase-item',
+});
 
 function sourceSchemaDrift() {
   const error = new Error('Wikidata response does not match the requested target schema');
   error.code = 'SOURCE_SCHEMA_DRIFT';
   return error;
+}
+
+function isPlainJsonRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 function targetAniListId(target) {
@@ -86,10 +96,14 @@ async function fetchEntities({ http, userAgent, qids }) {
     const body = await jsonResponse(await http.request({
       url: url.toString(), kind: 'DATA', init: { headers: requestHeaders(userAgent) },
     }));
-    if (!body?.entities || typeof body.entities !== 'object') throw sourceSchemaDrift();
+    if (!isPlainJsonRecord(body?.entities)) throw sourceSchemaDrift();
     for (const qid of ids) {
+      if (!Object.hasOwn(body.entities, qid)) throw sourceSchemaDrift();
       const entity = body.entities[qid];
-      if (entity && typeof entity === 'object' && entity.id === qid) entities.set(qid, entity);
+      if (!isPlainJsonRecord(entity) || entity.id !== qid || !isPlainJsonRecord(entity.claims)) {
+        throw sourceSchemaDrift();
+      }
+      entities.set(qid, entity);
     }
   }
   return entities;
@@ -115,28 +129,31 @@ function projectLanguageValues(values, isAliases = false) {
 }
 
 function projectClaims(claims) {
-  if (!claims || typeof claims !== 'object') return {};
+  if (!isPlainJsonRecord(claims)) throw sourceSchemaDrift();
   const projected = {};
   for (const property of CLAIM_PROPERTIES) {
     if (!(property in claims)) continue;
     if (!Array.isArray(claims[property])) throw sourceSchemaDrift();
     projected[property] = claims[property].map((claim) => {
       const snak = claim?.mainsnak;
-      if (!claim || typeof claim !== 'object' || !snak || typeof snak !== 'object'
-        || !['value', 'novalue', 'somevalue'].includes(snak.snaktype)) throw sourceSchemaDrift();
+      if (!isPlainJsonRecord(claim) || !isPlainJsonRecord(snak)
+        || !['value', 'novalue', 'somevalue'].includes(snak.snaktype)
+        || snak.property !== property || snak.datatype !== WIKIDATA_DATATYPES[property]) {
+        throw sourceSchemaDrift();
+      }
       if (snak.snaktype !== 'value') {
         if (Object.hasOwn(snak, 'datavalue')) throw sourceSchemaDrift();
         return structuredClone(claim);
       }
-      if (!snak.datavalue || typeof snak.datavalue !== 'object'
+      if (!isPlainJsonRecord(snak.datavalue)
         || snak.datavalue.type !== DATAVALUE_TYPES[property]
         || !Object.hasOwn(snak.datavalue, 'value')) throw sourceSchemaDrift();
       const value = snak.datavalue.value;
       const validValue = property === 'P8729' ? typeof value === 'string' && /^[1-9]\d*$/u.test(value)
         : property === 'P856' ? typeof value === 'string'
-          : property === 'P577' ? value && typeof value === 'object'
+          : property === 'P577' ? isPlainJsonRecord(value)
             && typeof value.time === 'string' && Number.isInteger(value.precision)
-            : value && typeof value === 'object' && typeof value.id === 'string'
+            : isPlainJsonRecord(value) && typeof value.id === 'string'
               && /^Q[1-9]\d*$/u.test(value.id);
       if (!validValue) throw sourceSchemaDrift();
       return structuredClone(claim);

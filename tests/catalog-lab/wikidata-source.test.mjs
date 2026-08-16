@@ -28,6 +28,19 @@ function requestValues(query) {
   return [...query.matchAll(/"(\d+)"/g)].map((match) => match[1]);
 }
 
+async function collectWithEntityBody(mapping, body) {
+  const http = {
+    async request({ url }) {
+      return new Response(JSON.stringify(url.startsWith('https://query.wikidata.org/')
+        ? { ...mapping, results: { bindings: [mapping.results.bindings[0]] } }
+        : body), { status: 200 });
+    },
+  };
+  return collectEnvelopes(createWikidataAdapter({ userAgent }), {
+    targets: [target(1)], http, workspace: {}, clock,
+  });
+}
+
 async function withWorkspace(run) {
   const workspaceRoot = await mkdtemp(join(tmpdir(), 'moemoa-wikidata-integration-'));
   try {
@@ -62,8 +75,12 @@ test('Wikidata maps exact P8729 values and projects only approved CC0 fields', a
   assert.equal(envelopes[0].payload.externalIds.anilist, '1');
   assert.equal(envelopes[0].payload.labels.ko, '카우보이 비밥');
   assert.deepEqual(Object.keys(envelopes[0].payload.claims), ['P8729', 'P856', 'P577', 'P136', 'P272']);
-  assert.deepEqual(envelopes[0].payload.claims.P856[1].mainsnak, { snaktype: 'somevalue' });
-  assert.deepEqual(envelopes[0].payload.claims.P136[1].mainsnak, { snaktype: 'novalue' });
+  assert.deepEqual(envelopes[0].payload.claims.P856[1].mainsnak, {
+    snaktype: 'somevalue', property: 'P856', datatype: 'url',
+  });
+  assert.deepEqual(envelopes[0].payload.claims.P136[1].mainsnak, {
+    snaktype: 'novalue', property: 'P136', datatype: 'wikibase-item',
+  });
   assert.deepEqual(Object.keys(envelopes[0].payload.labels).sort(), ['en', 'ja', 'ko']);
   assert.deepEqual(Object.keys(envelopes[0].payload.aliases).sort(), ['en', 'ko']);
   assert.deepEqual(envelopes[0].payload.sitelinks, entities.entities.Q101244908.sitelinks);
@@ -123,6 +140,52 @@ test('Wikidata adapter rejects value claims without an explicit snaktype', async
   }), { code: 'SOURCE_SCHEMA_DRIFT' });
 });
 
+test('Wikidata rejects malformed entity and claims record containers instead of source absence', async () => {
+  const [mapping, fixtureBody] = await Promise.all([
+    fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+  ]);
+  const entity = fixtureBody.entities.Q101244908;
+  const missingClaims = structuredClone(entity);
+  delete missingClaims.claims;
+  const cases = [
+    ['entities array', { entities: [] }],
+    ['entities null', { entities: null }],
+    ['entities string', { entities: 'not-a-record' }],
+    ['selected entity missing', { entities: {} }],
+    ['selected entity array', { entities: { Q101244908: [] } }],
+    ['selected entity null', { entities: { Q101244908: null } }],
+    ['selected entity string', { entities: { Q101244908: 'not-a-record' } }],
+    ['claims missing', { entities: { Q101244908: missingClaims } }],
+    ['claims array', { entities: { Q101244908: { ...entity, claims: [] } } }],
+    ['claims null', { entities: { Q101244908: { ...entity, claims: null } } }],
+    ['claims string', { entities: { Q101244908: { ...entity, claims: 'not-a-record' } } }],
+  ];
+  for (const [name, body] of cases) {
+    await assert.rejects(collectWithEntityBody(mapping, body), {
+      code: 'SOURCE_SCHEMA_DRIFT',
+    }, name);
+  }
+});
+
+test('Wikidata rejects property and datatype contradictions for value and missing snaks', async () => {
+  const [mapping, fixtureBody] = await Promise.all([
+    fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+  ]);
+  const mutations = [
+    ['value property', 'P856', 0, 'property', 'P8729'],
+    ['value datatype', 'P577', 0, 'datatype', 'url'],
+    ['somevalue property', 'P856', 1, 'property', 'P8729'],
+    ['novalue datatype', 'P136', 1, 'datatype', 'wikibase-property'],
+  ];
+  for (const [name, property, index, key, value] of mutations) {
+    const malformed = structuredClone(fixtureBody);
+    malformed.entities.Q101244908.claims[property][index].mainsnak[key] = value;
+    await assert.rejects(collectWithEntityBody(mapping, malformed), {
+      code: 'SOURCE_SCHEMA_DRIFT',
+    }, name);
+  }
+});
+
 test('Wikidata keeps WDQS at 25 IDs and wbgetentities at 50 QIDs', async () => {
   const [baseMapping, baseEntities] = await Promise.all([
     fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
@@ -149,7 +212,10 @@ test('Wikidata keeps WDQS at 25 IDs and wbgetentities at 50 QIDs', async () => {
         const entities = Object.fromEntries(ids.map((qid) => [qid, {
           ...structuredClone(baseEntities.entities.Q101244908),
           id: qid,
-          claims: { P8729: [{ mainsnak: { snaktype: 'value', datavalue: { value: String(Number(qid.slice(1)) - 100000000), type: 'string' } } }] },
+          claims: { P8729: [{ mainsnak: {
+            snaktype: 'value', property: 'P8729', datatype: 'external-id',
+            datavalue: { value: String(Number(qid.slice(1)) - 100000000), type: 'string' },
+          } }] },
         }]));
         return new Response(JSON.stringify({ entities }), { status: 200 });
       }
@@ -210,7 +276,10 @@ test('Wikidata never records a rejected WDQS QID when the entity P8729 is missin
             ...entities.entities.Q101244908,
             claims: {
               ...entities.entities.Q101244908.claims,
-              P8729: [{ mainsnak: { snaktype: 'value', datavalue: { value: '121', type: 'string' } } }],
+              P8729: [{ mainsnak: {
+                snaktype: 'value', property: 'P8729', datatype: 'external-id',
+                datavalue: { value: '121', type: 'string' },
+              } }],
             },
           },
         },

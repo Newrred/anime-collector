@@ -1084,6 +1084,27 @@ test('source-specific absence binding rejects wrong-target and unsupported recor
   assert.throws(() => normalizeSourceRecord(unsupported), { code: 'SOURCE_SCHEMA_DRIFT' });
 });
 
+test('standalone normalization rejects malformed-target and non-exact source absences', () => {
+  const cases = [
+    sourceRecord('wikidata', {
+      errorCode: 'SOURCE_NOT_AVAILABLE', externalIds: { anilist: null },
+    }, {
+      targetKey: 'MALFORMED', sourceEntityId: 'P8729:null', responseStatus: 404,
+      fetchStatus: 'FAILED_PERMANENT',
+    }),
+    sourceRecord('wikidata', {
+      errorCode: 'SOURCE_NOT_AVAILABLE', externalIds: { anilist: '1', wikidata: 'Q1' },
+    }, { sourceEntityId: 'P8729:1', responseStatus: 404, fetchStatus: 'FAILED_PERMANENT' }),
+    sourceRecord('anilife_public', { fieldState: 'NOT_FETCHED' }, {
+      targetKey: 'MALFORMED', sourceEntityId: 'UNBOUND', responseStatus: 0,
+      fetchStatus: 'FAILED_PERMANENT',
+    }),
+  ];
+  for (const record of cases) {
+    assert.throws(() => normalizeSourceRecord(record), { code: 'SOURCE_SCHEMA_DRIFT' });
+  }
+});
+
 test('normalized and FieldClaim persistence inputs are strictly validated', () => {
   const normalized = normalizeSourceRecord(sourceRecord('anilist', {
     id: 1, title: { romaji: 'Cowboy Bebop' },

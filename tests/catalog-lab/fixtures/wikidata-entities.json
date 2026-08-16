@@ -14,17 +14,17 @@
         "fr": [{ "language": "fr", "value": "Cowboy Bebop" }]
       },
       "claims": {
-        "P8729": [{ "mainsnak": { "snaktype": "value", "datavalue": { "value": "1", "type": "string" } } }],
+        "P8729": [{ "mainsnak": { "snaktype": "value", "property": "P8729", "datatype": "external-id", "datavalue": { "value": "1", "type": "string" } } }],
         "P856": [
-          { "mainsnak": { "snaktype": "value", "datavalue": { "value": "https://example.test/cowboy-bebop", "type": "string" } } },
-          { "mainsnak": { "snaktype": "somevalue" } }
+          { "mainsnak": { "snaktype": "value", "property": "P856", "datatype": "url", "datavalue": { "value": "https://example.test/cowboy-bebop", "type": "string" } } },
+          { "mainsnak": { "snaktype": "somevalue", "property": "P856", "datatype": "url" } }
         ],
-        "P577": [{ "mainsnak": { "snaktype": "value", "datavalue": { "value": { "time": "+1998-04-03T00:00:00Z", "precision": 11 }, "type": "time" } } }],
+        "P577": [{ "mainsnak": { "snaktype": "value", "property": "P577", "datatype": "time", "datavalue": { "value": { "time": "+1998-04-03T00:00:00Z", "precision": 11 }, "type": "time" } } }],
         "P136": [
-          { "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q201658" }, "type": "wikibase-entityid" } } },
-          { "mainsnak": { "snaktype": "novalue" } }
+          { "mainsnak": { "snaktype": "value", "property": "P136", "datatype": "wikibase-item", "datavalue": { "value": { "id": "Q201658" }, "type": "wikibase-entityid" } } },
+          { "mainsnak": { "snaktype": "novalue", "property": "P136", "datatype": "wikibase-item" } }
         ],
-        "P272": [{ "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q312103" }, "type": "wikibase-entityid" } } }],
+        "P272": [{ "mainsnak": { "snaktype": "value", "property": "P272", "datatype": "wikibase-item", "datavalue": { "value": { "id": "Q312103" }, "type": "wikibase-entityid" } } }],
         "P31": [{ "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q1107" }, "type": "wikibase-entityid" } } }]
       },
       "sitelinks": {
@@ -41,7 +41,7 @@
       },
       "aliases": { "en": [{ "language": "en", "value": "Knockin' on Heaven's Door" }] },
       "claims": {
-        "P8729": [{ "mainsnak": { "snaktype": "value", "datavalue": { "value": "121", "type": "string" } } }],
+        "P8729": [{ "mainsnak": { "snaktype": "value", "property": "P8729", "datatype": "external-id", "datavalue": { "value": "121", "type": "string" } } }],
         "P856": [],
         "P577": [],
         "P136": [],

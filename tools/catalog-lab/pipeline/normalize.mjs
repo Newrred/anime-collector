@@ -442,11 +442,12 @@ function targetAniListId(targetKey) {
 
 function sourceAbsenceState(record) {
   const targetId = targetAniListId(record.targetKey);
+  if (targetId === null) return null;
   if (record.sourceId === 'wikidata' && record.responseStatus === 404
     && record.fetchStatus === 'FAILED_PERMANENT' && record.sourceEntityId === `P8729:${targetId}`
     && hasExactKeys(record.payload, ['errorCode', 'externalIds'])
     && record.payload.errorCode === 'SOURCE_NOT_AVAILABLE'
-    && isPlainRecord(record.payload.externalIds)
+    && hasExactKeys(record.payload.externalIds, ['anilist'])
     && record.payload.externalIds.anilist === targetId) return 'SOURCE_NOT_AVAILABLE';
   if (record.sourceId === 'anilife_public' && record.responseStatus === 0
     && record.fetchStatus === 'FAILED_PERMANENT' && record.sourceEntityId === 'UNBOUND'
