@@ -1,0 +1,15 @@
+{
+  "head": { "vars": ["item", "anilistId"] },
+  "results": {
+    "bindings": [
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q101244908" },
+        "anilistId": { "type": "literal", "value": "1" }
+      },
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q101243909" },
+        "anilistId": { "type": "literal", "value": "121" }
+      }
+    ]
+  }
+}

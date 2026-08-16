@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "Q101244908": {
+      "id": "Q101244908",
+      "labels": {
+        "ko": { "language": "ko", "value": "카우보이 비밥" },
+        "ja": { "language": "ja", "value": "カウボーイビバップ" },
+        "en": { "language": "en", "value": "Cowboy Bebop" },
+        "fr": { "language": "fr", "value": "Cowboy Bebop" }
+      },
+      "aliases": {
+        "ko": [{ "language": "ko", "value": "카우보이 비밥 TV" }],
+        "en": [{ "language": "en", "value": "Cowboy Bebop TV" }],
+        "fr": [{ "language": "fr", "value": "Cowboy Bebop" }]
+      },
+      "claims": {
+        "P8729": [{ "mainsnak": { "datavalue": { "value": "1", "type": "string" } } }],
+        "P856": [{ "mainsnak": { "datavalue": { "value": "https://example.test/cowboy-bebop", "type": "string" } } }],
+        "P577": [{ "mainsnak": { "datavalue": { "value": { "time": "+1998-04-03T00:00:00Z", "precision": 11 }, "type": "time" } } }],
+        "P136": [{ "mainsnak": { "datavalue": { "value": { "id": "Q201658" }, "type": "wikibase-entityid" } } }],
+        "P272": [{ "mainsnak": { "datavalue": { "value": { "id": "Q312103" }, "type": "wikibase-entityid" } } }],
+        "P31": [{ "mainsnak": { "datavalue": { "value": { "id": "Q1107" }, "type": "wikibase-entityid" } } }]
+      },
+      "sitelinks": {
+        "enwiki": { "site": "enwiki", "title": "Cowboy Bebop" },
+        "kowiki": { "site": "kowiki", "title": "카우보이 비밥" }
+      }
+    },
+    "Q101243909": {
+      "id": "Q101243909",
+      "labels": {
+        "ko": { "language": "ko", "value": "카우보이 비밥: 천국의 문" },
+        "ja": { "language": "ja", "value": "カウボーイビバップ 天国の扉" },
+        "en": { "language": "en", "value": "Cowboy Bebop: The Movie" }
+      },
+      "aliases": { "en": [{ "language": "en", "value": "Knockin' on Heaven's Door" }] },
+      "claims": {
+        "P8729": [{ "mainsnak": { "datavalue": { "value": "121", "type": "string" } } }],
+        "P856": [],
+        "P577": [],
+        "P136": [],
+        "P272": [],
+        "P999": [{ "mainsnak": { "datavalue": { "value": "not allowed", "type": "string" } } }]
+      },
+      "sitelinks": { "enwiki": { "site": "enwiki", "title": "Cowboy Bebop: The Movie" } }
+    }
+  }
+}
