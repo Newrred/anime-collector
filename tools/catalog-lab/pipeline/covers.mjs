@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
-import { link, lstat, mkdir, open, readFile, rm, stat } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { link, lstat, mkdir, open, readFile, rm } from 'node:fs/promises';
+import { lookup } from 'node:dns/promises';
+import { request as httpsRequest } from 'node:https';
+import { isIP } from 'node:net';
 
 import { toPathKey } from '../lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
@@ -27,7 +31,7 @@ const COVER_POLICIES = new WeakSet();
 const COVER_TRANSPORTS = new WeakSet();
 const POLICIES = Object.freeze({
   anilist: Object.freeze({ sourceId: 'anilist', origins: Object.freeze(['https://s4.anilist.co']) }),
-  anilife_public: Object.freeze({ sourceId: 'anilife_public', origins: Object.freeze([]) }),
+  anilife_public: Object.freeze({ sourceId: 'anilife_public', origins: Object.freeze(['https://anilife1.tv']) }),
   wikidata: Object.freeze({ sourceId: 'wikidata', origins: Object.freeze([]) }),
 });
 Object.values(POLICIES).forEach((policy) => COVER_POLICIES.add(policy));
@@ -204,24 +208,51 @@ function ipv4Global(address) {
   const [a, b] = values;
   return !(a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127)
     || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31)
-    || (a === 192 && (b === 0 || b === 168)) || (a === 198 && (b === 18 || b === 19)));
+    || (a === 192 && (b === 0 || b === 2 || b === 88 || b === 168))
+    || (a === 198 && (b === 18 || b === 19 || b === 51)) || (a === 203 && b === 0));
+}
+
+function ipv6Words(address) {
+  const lower = address.toLowerCase().replace(/%.*$/u, '');
+  const halves = lower.split('::');
+  if (halves.length > 2) return null;
+  const left = halves[0] ? halves[0].split(':') : [];
+  const right = halves.length === 2 && halves[1] ? halves[1].split(':') : [];
+  if (left.some((part) => !/^[0-9a-f]{1,4}$/u.test(part)) || right.some((part) => !/^[0-9a-f]{1,4}$/u.test(part))) return null;
+  const words = [...left.map((part) => Number.parseInt(part, 16)), ...Array(Math.max(0, 8 - left.length - right.length)).fill(0), ...right.map((part) => Number.parseInt(part, 16))];
+  return words.length === 8 ? words : null;
 }
 
 function globalAddress(address) {
-  if (typeof address !== 'string') return false;
+  if (typeof address !== 'string' || !isIP(address.replace(/%.*$/u, ''))) return false;
   const value = address.toLowerCase();
   if (/^\d+\.\d+\.\d+\.\d+$/u.test(value)) return ipv4Global(value);
-  const mapped = value.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/u);
-  if (mapped) return ipv4Global(mapped[1]);
-  if (!value.includes(':')) return false;
-  return !(value === '::' || value === '::1' || value.startsWith('fc') || value.startsWith('fd')
-    || value.startsWith('fe8') || value.startsWith('fe9') || value.startsWith('fea') || value.startsWith('feb'));
+  const words = ipv6Words(value);
+  if (!words) return false;
+  const mapped = words.slice(0, 6).every((word, index) => word === (index === 5 ? 0xffff : 0));
+  if (mapped) return ipv4Global(`${words[6] >> 8}.${words[6] & 255}.${words[7] >> 8}.${words[7] & 255}`);
+  const allZero = words.every((word) => word === 0);
+  const loopback = words.slice(0, 7).every((word) => word === 0) && words[7] === 1;
+  const documentation = words[0] === 0x2001 && words[1] === 0x0db8;
+  const protocol = words[0] === 0x2001 && words[1] === 0;
+  const linkLocal = (words[0] & 0xffc0) === 0xfe80;
+  return !(allZero || loopback || documentation || protocol || linkLocal || (words[0] & 0xfe00) === 0xfc00 || (words[0] & 0xff00) === 0xff00);
 }
 
 /** Creates the only accepted cover transport: resolution is supplied once and the chosen address is pinned into the request. */
-export function createPinnedCoverTransport({ resolve, request }) {
-  if (typeof resolve !== 'function' || typeof request !== 'function') throw typedError('IMAGE_TRANSPORT_INVALID', 'Pinned cover transport requires resolver and request functions');
-  const transport = Object.freeze({ resolve, request });
+export function createPinnedCoverTransport({ resolve = (host) => lookup(host, { all: true, verbatim: true }), request } = {}) {
+  const concreteRequest = request ?? (({ url, address, hostname }) => new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const req = httpsRequest({ hostname: address, port: 443, path: `${parsed.pathname}${parsed.search}`, method: 'GET', servername: hostname, headers: { host: hostname }, lookup: (_name, _options, callback) => callback(null, address, isIP(address)), timeout: 10_000 }, (response) => {
+      const remoteAddress = response.socket.remoteAddress;
+      if (remoteAddress !== address || response.statusCode < 200 || response.statusCode >= 300) { response.resume(); reject(typedError('IMAGE_HTTP_STATUS_INVALID', 'Pinned cover response is not a successful direct HTTPS response')); return; }
+      resolve({ url, connectedAddress: remoteAddress, redirected: false, headers: new Headers(response.headers), body: new Response(response).body });
+    });
+    req.once('timeout', () => req.destroy(typedError('IMAGE_TIMEOUT', 'Pinned cover request timed out')));
+    req.once('error', reject); req.end();
+  }));
+  if (typeof resolve !== 'function' || typeof concreteRequest !== 'function') throw typedError('IMAGE_TRANSPORT_INVALID', 'Pinned cover transport requires resolver and request functions');
+  const transport = Object.freeze({ resolve, request: concreteRequest, testSeam: Boolean(request) });
   COVER_TRANSPORTS.add(transport);
   return transport;
 }
@@ -280,8 +311,9 @@ async function readBoundedBody(response, maxBytes) {
       const chunk = asBytes(value);
       size += chunk.byteLength;
       if (!Number.isSafeInteger(size) || size > maxBytes) {
-        await reader.cancel();
-        throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit');
+        const error = typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit');
+        await reader.cancel().catch(() => {});
+        throw error;
       }
       chunks.push(chunk);
     }
@@ -331,6 +363,7 @@ export async function downloadCoverCandidate({ candidate, policy, transport, max
   try {
     response = await transport.request({ url: metadata.sourceUrl, address, hostname, kind: 'IMAGE', init: { redirect: 'error' } });
     if (!response || response.redirected || response.url !== metadata.sourceUrl || response.connectedAddress !== address) throw typedError('IMAGE_REDIRECT_FORBIDDEN', 'Cover redirect or final destination is forbidden');
+    if (response.status !== undefined && (!Number.isInteger(response.status) || response.status < 200 || response.status >= 300)) throw typedError('IMAGE_HTTP_STATUS_INVALID', 'Cover response is not successful');
     boundedContentLength(response, maxBytes);
     const declaredMime = response.headers?.get?.('content-type');
     const bytes = await readBoundedBody(response, maxBytes);
@@ -364,7 +397,7 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
   await mkdir(directory, { recursive: true });
   await assertCatalogWorkspaceMutation(workspace, directoryParts);
   const destination = workspace.resolve(...directoryParts, filename);
-  const temporary = workspace.resolve(...directoryParts, `.${digest}.${process.pid}.${Date.now()}.tmp`);
+  const temporary = workspace.resolve(...directoryParts, `.${digest}.${randomUUID()}.tmp`);
   let created = false;
   try {
     const handle = await open(temporary, 'wx');
@@ -396,19 +429,17 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
 }
 
 /** Runs browser-native image decoding after structural validation without introducing an image package. */
-export async function decodeCoverWithChromium({ record, browser, timeoutMs = 5_000 } = {}) {
+export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, browser } = {}) {
   if (!COVER_RECORDS.has(record) || record.validationStatus !== 'SNIFFED' || !COVER_BYTES.has(record)
-    || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
+    || browser !== undefined || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
   const image = COVER_BYTES.get(record);
-  let ownedBrowser = false;
-  let activeBrowser = browser;
-  if (!activeBrowser) {
-    const { chromium } = await import('@playwright/test');
-    activeBrowser = await chromium.launch();
-    ownedBrowser = true;
-  }
+  let deadlineTimer;
+  const deadline = new Promise((_, reject) => { deadlineTimer = setTimeout(() => reject(typedError('IMAGE_DECODE_TIMEOUT', 'Chromium cover decode exceeded its deadline')), timeoutMs); });
+  const { chromium } = await import('@playwright/test');
+  let activeBrowser;
   try {
-    const page = await activeBrowser.newPage();
+    activeBrowser = await Promise.race([chromium.launch(), deadline]);
+    const page = await Promise.race([activeBrowser.newPage(), deadline]);
     let timer;
     try {
       const evaluation = page.evaluate(async ({ base64, mimeType }) => {
@@ -423,8 +454,7 @@ export async function decodeCoverWithChromium({ record, browser, timeoutMs = 5_0
           return { ok: false, message: String(error?.message ?? error) };
         }
       }, { base64: Buffer.from(image).toString('base64'), mimeType: record.mimeType });
-      const timeout = new Promise((_, reject) => { timer = setTimeout(() => { page.close().catch(() => {}); reject(typedError('IMAGE_DECODE_TIMEOUT', 'Chromium cover decode exceeded its deadline')); }, timeoutMs); });
-      const result = await Promise.race([evaluation, timeout]);
+      const result = await Promise.race([evaluation, deadline]);
       if (!result.ok || result.dimensions.width !== record.width || result.dimensions.height !== record.height) {
         throw typedError('IMAGE_DECODE_FAILED', 'Chromium could not decode the structurally valid cover');
       }
@@ -437,7 +467,8 @@ export async function decodeCoverWithChromium({ record, browser, timeoutMs = 5_0
       await page.close().catch(() => {});
     }
   } finally {
-    if (ownedBrowser) await activeBrowser.close();
+    clearTimeout(deadlineTimer);
+    await activeBrowser?.close().catch(() => {});
   }
 }
 

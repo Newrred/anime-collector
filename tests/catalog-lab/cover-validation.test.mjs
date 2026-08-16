@@ -133,7 +133,7 @@ test('canonical cover selection is deterministic: exact identity, decoded state,
 test('cover pipeline requires an approved HTTPS origin, pinned public resolution, decode, and one authenticated record', async () => {
   const policy = getApprovedCoverSourcePolicy('anilist');
   const transport = createPinnedCoverTransport({
-    resolve: async () => [{ address: '203.0.113.44', family: 4 }],
+    resolve: async () => [{ address: '8.8.8.8', family: 4 }],
     request: async ({ url, address }) => ({
       url, connectedAddress: address, redirected: false,
       headers: new Headers({ 'content-type': 'image/png' }), body: new Response(pngBytes).body,
@@ -169,4 +169,16 @@ test('pinned transport refuses private, mapped, alternate numeric, and rebinding
   await assert.rejects(downloadCoverCandidate({
     candidate: candidate({ sourceUrl: 'https://s4.anilist.co/cover.png' }), policy, transport: rebinding,
   }), { code: 'IMAGE_ADDRESS_FORBIDDEN' });
+});
+
+test('cover download rejects every non-global address encoding and non-success response', async () => {
+  for (const address of ['::ffff:7f00:1', '0:0:0:0:0:0:0:1', 'ff02::1', '2001:db8::1', '198.51.100.7', '203.0.113.44']) {
+    const transport = createPinnedCoverTransport({ resolve: async () => [{ address, family: 6 }], request: async () => null });
+    await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport }), { code: 'IMAGE_ADDRESS_FORBIDDEN' });
+  }
+  const statusTransport = createPinnedCoverTransport({
+    resolve: async () => [{ address: '8.8.8.8', family: 4 }],
+    request: async ({ url, address }) => ({ status: 404, url, connectedAddress: address, redirected: false, headers: new Headers({ 'content-type': 'image/png' }), body: new Response(pngBytes).body }),
+  });
+  await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport: statusTransport }), { code: 'IMAGE_HTTP_STATUS_INVALID' });
 });
