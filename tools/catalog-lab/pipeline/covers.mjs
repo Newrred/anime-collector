@@ -1,5 +1,4 @@
-import { createHash } from 'node:crypto';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { link, lstat, mkdir, open, readFile, rm } from 'node:fs/promises';
 import { lookup } from 'node:dns/promises';
 import { request as httpsRequest } from 'node:https';
@@ -235,8 +234,14 @@ function globalAddress(address) {
   const loopback = words.slice(0, 7).every((word) => word === 0) && words[7] === 1;
   const documentation = words[0] === 0x2001 && words[1] === 0x0db8;
   const protocol = words[0] === 0x2001 && words[1] === 0;
+  const nat64Local = words[0] === 0x0064 && words[1] === 0xff9b && words[2] === 0x0001;
+  const discard = words[0] === 0x0100 && words.slice(1).every((word) => word === 0) || words[0] === 0x0100 && words[1] === 0;
+  const benchmarking = words[0] === 0x2001 && words[1] === 0x0002 && words[2] === 0;
+  const orchid = words[0] === 0x2001 && (words[1] & 0xfff0) === 0x0010;
+  const sixToFourDocumentation = words[0] === 0x3fff && (words[1] & 0xfff0) === 0;
+  const siteLocal = (words[0] & 0xffc0) === 0xfec0;
   const linkLocal = (words[0] & 0xffc0) === 0xfe80;
-  return !(allZero || loopback || documentation || protocol || linkLocal || (words[0] & 0xfe00) === 0xfc00 || (words[0] & 0xff00) === 0xff00);
+  return !(allZero || loopback || documentation || protocol || nat64Local || discard || benchmarking || orchid || sixToFourDocumentation || siteLocal || linkLocal || (words[0] & 0xfe00) === 0xfc00 || (words[0] & 0xff00) === 0xff00);
 }
 
 /** Creates the only accepted cover transport: resolution is supplied once and the chosen address is pinned into the request. */
@@ -369,7 +374,7 @@ export async function downloadCoverCandidate({ candidate, policy, transport, max
     const bytes = await readBoundedBody(response, maxBytes);
     consumed = true;
     const inspection = inspectImageBytes({ declaredMime, bytes });
-    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
+    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', testOnlyTransport: transport.testSeam, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
     COVER_RECORDS.add(record);
     COVER_BYTES.set(record, bytes);
     return record;
@@ -387,6 +392,9 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
   if (!COVER_RECORDS.has(record) || record.validationStatus !== 'DECODED' || !COVER_BYTES.has(record)) throw typedError('COVER_RECORD_UNTRUSTED', 'Only decoded authenticated CoverRecords may be stored');
   if (typeof animeId !== 'string' || !ANIME_ID.test(animeId)) {
     throw typedError('COVER_ANIME_ID_INVALID', 'Cover anime ID is not safe for external storage');
+  }
+  if (process.platform === 'win32' && !record.testOnlyTransport) {
+    throw typedError('COVER_STORAGE_PLATFORM_UNSAFE', 'Concrete network covers cannot be stored on Windows without handle-relative no-follow storage');
   }
   const image = COVER_BYTES.get(record);
   const digest = record.checksum;
@@ -440,7 +448,6 @@ export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, brows
   try {
     activeBrowser = await Promise.race([chromium.launch(), deadline]);
     const page = await Promise.race([activeBrowser.newPage(), deadline]);
-    let timer;
     try {
       const evaluation = page.evaluate(async ({ base64, mimeType }) => {
         const binary = atob(base64);
@@ -463,7 +470,6 @@ export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, brows
       COVER_BYTES.set(decoded, image);
       return decoded;
     } finally {
-      clearTimeout(timer);
       await page.close().catch(() => {});
     }
   } finally {
