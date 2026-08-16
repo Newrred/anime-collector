@@ -25,11 +25,12 @@ const MAX_COVER_AXIS = 4096;
 const MAX_COVER_PIXELS = 12_000_000;
 const IMAGE_ATTEMPT_TIMEOUT_MS = 10_000;
 const IMAGE_OVERALL_TIMEOUT_MS = 45_000;
+const MAX_NODE_TIMER_DELAY_MS = 2_147_483_647;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 const SOF_MARKERS = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 const COVER_RECORDS = new WeakSet();
+const PRODUCTION_COVER_RECORDS = new WeakSet();
 const COVER_BYTES = new WeakMap();
-const COVER_RECORD_TRANSPORT = new WeakMap();
 const COVER_POLICIES = new WeakSet();
 const COVER_TRANSPORTS = new WeakMap();
 const POLICIES = Object.freeze({
@@ -349,12 +350,16 @@ function retryAfterMilliseconds(headers, now) {
   const value = raw.trim();
   if (/^\d+$/u.test(value)) {
     const seconds = Number(value);
-    return Number.isSafeInteger(seconds) ? seconds * 1000 : null;
+    if (!Number.isSafeInteger(seconds)) return null;
+    const milliseconds = seconds * 1000;
+    return Number.isSafeInteger(milliseconds) && milliseconds <= MAX_NODE_TIMER_DELAY_MS ? milliseconds : null;
   }
   if (!/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u.test(value)) return null;
   const timestamp = Date.parse(value);
   const current = now();
-  return Number.isFinite(timestamp) && new Date(timestamp).toUTCString() === value && timestamp > current ? timestamp - current : null;
+  const milliseconds = timestamp - current;
+  return Number.isFinite(timestamp) && new Date(timestamp).toUTCString() === value && timestamp > current
+    && Number.isSafeInteger(milliseconds) && milliseconds <= MAX_NODE_TIMER_DELAY_MS ? milliseconds : null;
 }
 
 function retryDelay(attempt, random) {
@@ -465,18 +470,47 @@ function requestConcreteAttempt({ url, address, hostname, maxBytes, httpsRequest
   });
 }
 
-async function waitForRetry(milliseconds, { sleep, signal }) {
+function overallTimeoutError() {
+  return typedError('IMAGE_TIMEOUT', 'Pinned cover download exceeded its overall deadline');
+}
+
+function waitForRetry(milliseconds, { signal, retryTimers }) {
   if (milliseconds <= 0) return;
-  await abortable(sleep(milliseconds), signal);
+  if (!Number.isSafeInteger(milliseconds) || milliseconds > MAX_NODE_TIMER_DELAY_MS) throw overallTimeoutError();
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise((resolve, reject) => {
+    let handle;
+    let settled = false;
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      if (handle !== undefined) retryTimers.clearTimeout(handle);
+      signal.removeEventListener('abort', abort);
+      callback(value);
+    };
+    const abort = () => finish(reject, signal.reason);
+    signal.addEventListener('abort', abort, { once: true });
+    try {
+      handle = retryTimers.setTimeout(() => finish(resolve), milliseconds);
+    } catch (error) {
+      finish(reject, error);
+      return;
+    }
+    if (settled) retryTimers.clearTimeout(handle);
+    else if (signal.aborted) abort();
+  });
 }
 
 function createConcreteDownloader({
-  resolve, httpsRequestImpl, sleep, random, now, attemptTimeoutMs, overallTimeoutMs,
+  resolve, httpsRequestImpl, retryTimers, operationSignal, random, now, attemptTimeoutMs, overallTimeoutMs,
 }) {
   return async ({ url, hostname, maxBytes }) => {
     const operation = new AbortController();
-    const overallTimer = setTimeout(() => operation.abort(typedError('IMAGE_TIMEOUT', 'Pinned cover download exceeded its overall deadline')),
-      overallTimeoutMs);
+    const deadlineAt = now() + overallTimeoutMs;
+    const forwardExternal = () => operation.abort(operationSignal.reason);
+    operationSignal?.addEventListener('abort', forwardExternal, { once: true });
+    if (operationSignal?.aborted) forwardExternal();
+    const overallTimer = setTimeout(() => operation.abort(overallTimeoutError()), overallTimeoutMs);
     try {
       for (let attempt = 0; attempt <= RETRY_POLICY.imageRetries; attempt += 1) {
         if (operation.signal.aborted) throw operation.signal.reason;
@@ -507,11 +541,15 @@ function createConcreteDownloader({
           });
         }
         const delay = failure?.retryAfterMs ?? retryDelay(attempt, random);
-        await waitForRetry(delay, { sleep, signal: operation.signal });
+        const remaining = Math.ceil(deadlineAt - now());
+        if (operation.signal.aborted) throw operation.signal.reason;
+        if (remaining < 1 || delay >= remaining) throw overallTimeoutError();
+        await waitForRetry(delay, { signal: operation.signal, retryTimers });
       }
       throw typedError('IMAGE_RETRY_EXHAUSTED', 'Pinned cover retries were exhausted');
     } finally {
       clearTimeout(overallTimer);
+      operationSignal?.removeEventListener('abort', forwardExternal);
     }
   };
 }
@@ -533,7 +571,10 @@ export function createPinnedCoverTransport({ resolve, request } = {}) {
     download: createConcreteDownloader({
       resolve: (host) => lookup(host, { all: true, verbatim: true }),
       httpsRequestImpl: httpsRequest,
-      sleep: (milliseconds) => new Promise((resolveSleep) => setTimeout(resolveSleep, milliseconds)),
+      retryTimers: Object.freeze({
+        setTimeout: (callback, milliseconds) => setTimeout(callback, milliseconds),
+        clearTimeout: (handle) => clearTimeout(handle),
+      }),
       random: Math.random,
       now: Date.now,
       attemptTimeoutMs: IMAGE_ATTEMPT_TIMEOUT_MS,
@@ -546,13 +587,19 @@ export function createPinnedCoverTransport({ resolve, request } = {}) {
 export function createConcreteCoverTransportTestHarness({
   resolve,
   httpsRequest: httpsRequestImpl,
-  sleep = (milliseconds) => new Promise((resolveSleep) => setTimeout(resolveSleep, milliseconds)),
+  retryTimers = Object.freeze({
+    setTimeout: (callback, milliseconds) => setTimeout(callback, milliseconds),
+    clearTimeout: (handle) => clearTimeout(handle),
+  }),
+  operationSignal,
   random = Math.random,
   now = Date.now,
   attemptTimeoutMs = IMAGE_ATTEMPT_TIMEOUT_MS,
   overallTimeoutMs = IMAGE_OVERALL_TIMEOUT_MS,
 } = {}) {
-  if (typeof resolve !== 'function' || typeof httpsRequestImpl !== 'function' || typeof sleep !== 'function'
+  if (typeof resolve !== 'function' || typeof httpsRequestImpl !== 'function'
+    || typeof retryTimers?.setTimeout !== 'function' || typeof retryTimers?.clearTimeout !== 'function'
+    || (operationSignal !== undefined && !(operationSignal instanceof AbortSignal))
     || typeof random !== 'function' || typeof now !== 'function'
     || !Number.isSafeInteger(attemptTimeoutMs) || attemptTimeoutMs < 1
     || !Number.isSafeInteger(overallTimeoutMs) || overallTimeoutMs < 1) {
@@ -560,7 +607,7 @@ export function createConcreteCoverTransportTestHarness({
   }
   return registerTransport({
     kind: 'CONCRETE_TEST', production: false, concrete: true,
-    download: createConcreteDownloader({ resolve, httpsRequestImpl, sleep, random, now, attemptTimeoutMs, overallTimeoutMs }),
+    download: createConcreteDownloader({ resolve, httpsRequestImpl, retryTimers, operationSignal, random, now, attemptTimeoutMs, overallTimeoutMs }),
   });
 }
 
@@ -687,7 +734,7 @@ export async function downloadCoverCandidate({ candidate, policy, transport, max
     const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
     COVER_RECORDS.add(record);
     COVER_BYTES.set(record, bytes);
-    COVER_RECORD_TRANSPORT.set(record, Object.freeze({ production: transportMetadata.production, concrete: transportMetadata.concrete }));
+    if (transportMetadata.production) PRODUCTION_COVER_RECORDS.add(record);
     return record;
   } finally {
     if (!consumed) {
@@ -701,20 +748,18 @@ function checksum(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-/** Stores a validated image under a safe internal id and never overwrites an existing checksum path. */
-export async function storeValidatedCover({ record, workspace, animeId }) {
-  if (!COVER_RECORDS.has(record) || record.validationStatus !== 'DECODED' || !COVER_BYTES.has(record)) throw typedError('COVER_RECORD_UNTRUSTED', 'Only decoded authenticated CoverRecords may be stored');
+function assertProductionStoragePlatformSafe() {
+  if (process.platform === 'win32') {
+    throw typedError('COVER_STORAGE_PLATFORM_UNSAFE', 'Concrete network covers cannot be stored on Windows without handle-relative no-follow storage');
+  }
+}
+
+async function persistCoverBytes({ image, digest, extension, workspace, animeId }) {
   if (typeof animeId !== 'string' || !ANIME_ID.test(animeId)) {
     throw typedError('COVER_ANIME_ID_INVALID', 'Cover anime ID is not safe for external storage');
   }
-  const transportMetadata = COVER_RECORD_TRANSPORT.get(record);
-  if (process.platform === 'win32' && transportMetadata?.concrete) {
-    throw typedError('COVER_STORAGE_PLATFORM_UNSAFE', 'Concrete network covers cannot be stored on Windows without handle-relative no-follow storage');
-  }
-  const image = COVER_BYTES.get(record);
-  const digest = record.checksum;
   const directoryParts = ['images', 'covers', toPathKey(animeId)];
-  const filename = `${digest}.${record.extension}`;
+  const filename = `${digest}.${extension}`;
   await assertCatalogWorkspaceMutation(workspace, directoryParts);
   const directory = workspace.resolve(...directoryParts);
   await mkdir(directory, { recursive: true });
@@ -745,11 +790,50 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
   const existing = await readFile(destination);
   if (checksum(existing) !== digest) throw typedError('COVER_STORE_COLLISION', 'Existing cover path has different immutable bytes');
   const localRef = [...directoryParts, filename].join('/');
+  return Object.freeze({ localRef, created });
+}
+
+/** Stores a validated image under a safe internal id and never overwrites an existing checksum path. */
+export async function storeValidatedCover({ record, workspace, animeId }) {
+  if (!COVER_RECORDS.has(record) || !PRODUCTION_COVER_RECORDS.has(record)
+    || record.validationStatus !== 'DECODED' || !COVER_BYTES.has(record)) {
+    throw typedError('COVER_RECORD_UNTRUSTED', 'Only decoded production-acquired CoverRecords may be stored');
+  }
+  assertProductionStoragePlatformSafe();
+  const image = COVER_BYTES.get(record);
+  const persisted = await persistCoverBytes({
+    image, digest: record.checksum, extension: record.extension, workspace, animeId,
+  });
+  const { localRef, created } = persisted;
   const stored = Object.freeze({ ...record, localRef, created });
   COVER_RECORDS.add(stored);
+  PRODUCTION_COVER_RECORDS.add(stored);
   COVER_BYTES.set(stored, image);
-  COVER_RECORD_TRANSPORT.set(stored, transportMetadata);
   return stored;
+}
+
+/** Test-only persistence observation. It never creates, brands, decodes, or selects a CoverRecord. */
+export function createCoverStorageTestHarness() {
+  return Object.freeze({
+    observeProductionPlatformGate() {
+      assertProductionStoragePlatformSafe();
+      return Object.freeze({ allowed: true, platform: process.platform });
+    },
+    async storeFixture({ bytes, declaredMime, workspace, animeId } = {}) {
+      const image = asBytes(bytes);
+      const inspection = inspectImageBytes({ declaredMime, bytes: image });
+      const digest = checksum(image);
+      const persisted = await persistCoverBytes({
+        image, digest, extension: inspection.extension, workspace, animeId,
+      });
+      return Object.freeze({
+        checksum: digest,
+        byteSize: inspection.byteSize,
+        localRef: persisted.localRef,
+        created: persisted.created,
+      });
+    },
+  });
 }
 
 const loadProductionChromium = () => import('@playwright/test');
@@ -866,12 +950,15 @@ export async function decodeCoverWithChromium({ record, timeoutMs = 5_000, brows
   if (browser !== undefined || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) {
     throw typedError('IMAGE_DECODE_INPUT_INVALID', 'Chromium decode requires an authenticated sniffed CoverRecord');
   }
+  if (!PRODUCTION_COVER_RECORDS.has(record)) {
+    throw typedError('COVER_RECORD_UNTRUSTED', 'Production Chromium decode requires a module-acquired CoverRecord');
+  }
   await runChromiumLifecycle({ record, loadChromium: loadProductionChromium, timeoutMs, cleanupTimeoutMs: 250 });
   const image = COVER_BYTES.get(record);
   const decoded = Object.freeze({ ...record, validationStatus: 'DECODED' });
   COVER_RECORDS.add(decoded);
+  PRODUCTION_COVER_RECORDS.add(decoded);
   COVER_BYTES.set(decoded, image);
-  COVER_RECORD_TRANSPORT.set(decoded, COVER_RECORD_TRANSPORT.get(record));
   return decoded;
 }
 
@@ -913,6 +1000,7 @@ function compareCover(left, right) {
 export function selectCanonicalCover(candidates) {
   if (!Array.isArray(candidates)) throw typedError('COVER_SELECTION_INPUT_INVALID', 'Cover candidates must be an array');
   const eligible = candidates.filter((row) => COVER_RECORDS.has(row) && exactIdentityRank(row) < 2
+    && PRODUCTION_COVER_RECORDS.has(row)
     && row.validationStatus === 'DECODED' && typeof row.localRef === 'string'
     && Number.isSafeInteger(row.width) && Number.isSafeInteger(row.height));
   if (eligible.length === 0) return null;
