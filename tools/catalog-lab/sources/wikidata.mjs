@@ -1,4 +1,5 @@
 import { createHttpClient } from '../lib/http.mjs';
+import { assertSourceEndpoint } from '../contracts/catalogContracts.mjs';
 
 const WDQS_URL = 'https://query.wikidata.org/sparql';
 const WIKIDATA_API_URL = 'https://www.wikidata.org/w/api.php';
@@ -49,6 +50,7 @@ async function fetchMappings({ http, userAgent, anilistIds }) {
     const url = new URL(WDQS_URL);
     url.searchParams.set('query', buildP8729Query(ids));
     url.searchParams.set('format', 'json');
+    assertSourceEndpoint('wikidata', url.toString());
     const body = await jsonResponse(await http.request({
       url: url.toString(), kind: 'DATA', init: { headers: requestHeaders(userAgent) },
     }));
@@ -76,6 +78,7 @@ async function fetchEntities({ http, userAgent, qids }) {
     url.searchParams.set('props', 'labels|aliases|claims|sitelinks');
     url.searchParams.set('languages', LANGUAGES.join('|'));
     url.searchParams.set('format', 'json');
+    assertSourceEndpoint('wikidata', url.toString());
     const body = await jsonResponse(await http.request({
       url: url.toString(), kind: 'DATA', init: { headers: requestHeaders(userAgent) },
     }));
@@ -127,11 +130,11 @@ function hasExactP8729(entity, anilistId) {
   ));
 }
 
-function sourceNotAvailableEnvelope({ target, anilistId, clock, qid }) {
+function sourceNotAvailableEnvelope({ target, anilistId, clock }) {
   return Object.freeze({
     sourceId: 'wikidata',
     targetKey: target.targetKey,
-    sourceEntityId: qid ?? `P8729:${anilistId}`,
+    sourceEntityId: `P8729:${anilistId}`,
     responseStatus: 404,
     fetchedAt: clock.now(),
     requestFingerprint: `p8729:${anilistId}`,
@@ -182,7 +185,7 @@ export function createWikidataAdapter({ userAgent, fetchImpl = globalThis.fetch 
         const qid = mappings.get(anilistId);
         const entity = qid ? entities.get(qid) : undefined;
         if (!qid || !entity || !hasExactP8729(entity, anilistId)) {
-          yield sourceNotAvailableEnvelope({ target, anilistId, clock, qid });
+          yield sourceNotAvailableEnvelope({ target, anilistId, clock });
           continue;
         }
         yield sourceEnvelope({ target, anilistId, qid, entity, clock });

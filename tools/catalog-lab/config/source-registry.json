@@ -58,6 +58,10 @@
     "executionScope": "LOCAL_SAMPLE_MAX_100",
     "allowedMethod": "api",
     "allowedPaths": ["/w/api.php"],
+    "allowedEndpoints": [
+      {"origin": "https://query.wikidata.org", "path": "/sparql", "minIntervalMs": 1000},
+      {"origin": "https://www.wikidata.org", "path": "/w/api.php", "minIntervalMs": 1000}
+    ],
     "allowedFields": ["P8729", "labels", "aliases", "claims", "sitelinks"],
     "catalogPromotion": "FIELD_REVIEW_REQUIRED",
     "commercialUseStatus": "CC0",

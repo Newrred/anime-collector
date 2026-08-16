@@ -129,3 +129,37 @@ test('Wikidata emits SOURCE_NOT_AVAILABLE when exact P8729 mapping is absent', a
   assert.equal(envelope.payload.externalIds.anilist, '999');
   assert.equal(entityRequests, 0);
 });
+
+test('Wikidata never records a rejected WDQS QID when the entity P8729 is missing or mismatched', async () => {
+  const [mapping, entities] = await Promise.all([
+    fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+  ]);
+  const adapter = createWikidataAdapter({ userAgent });
+  const http = {
+    async request({ url }) {
+      if (url.startsWith('https://query.wikidata.org/sparql?')) {
+        return new Response(JSON.stringify({
+          ...mapping,
+          results: { bindings: [mapping.results.bindings[0]] },
+        }), { status: 200 });
+      }
+      return new Response(JSON.stringify({
+        entities: {
+          Q101244908: {
+            ...entities.entities.Q101244908,
+            claims: {
+              ...entities.entities.Q101244908.claims,
+              P8729: [{ mainsnak: { datavalue: { value: '121', type: 'string' } } }],
+            },
+          },
+        },
+      }), { status: 200 });
+    },
+  };
+
+  const [envelope] = await collectEnvelopes(adapter, { targets: [target(1)], http, workspace: {}, clock });
+
+  assert.equal(envelope.responseStatus, 404);
+  assert.equal(envelope.sourceEntityId, 'P8729:1');
+  assert.equal(envelope.payload.errorCode, 'SOURCE_NOT_AVAILABLE');
+});

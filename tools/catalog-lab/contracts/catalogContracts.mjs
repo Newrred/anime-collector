@@ -26,6 +26,10 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
     sourceRole: 'direct_import', executionScope: 'LOCAL_SAMPLE_MAX_100',
     allowedMethod: 'api', catalogPromotion: 'FIELD_REVIEW_REQUIRED', redistributionStatus: 'CC0', minIntervalMs: 1000,
     allowedPaths: Object.freeze(['/w/api.php']),
+    allowedEndpoints: Object.freeze([
+      Object.freeze({ origin: 'https://query.wikidata.org', path: '/sparql', minIntervalMs: 1000 }),
+      Object.freeze({ origin: 'https://www.wikidata.org', path: '/w/api.php', minIntervalMs: 1000 }),
+    ]),
     allowedFields: Object.freeze(['P8729', 'labels', 'aliases', 'claims', 'sitelinks']),
   }),
   anilife_public: Object.freeze({
@@ -55,6 +59,15 @@ function matchesStringList(actual, expected) {
     && actual.every((value, index) => value === expected[index]);
 }
 
+function matchesEndpointList(actual, expected) {
+  return Array.isArray(actual) && actual.length === expected.length
+    && actual.every((endpoint, index) => endpoint && typeof endpoint === 'object'
+      && Object.keys(endpoint).length === 3
+      && endpoint.origin === expected[index].origin
+      && endpoint.path === expected[index].path
+      && endpoint.minIntervalMs === expected[index].minIntervalMs);
+}
+
 function validateRegistry(registry) {
   if (!Array.isArray(registry) || registry.length !== Object.keys(APPROVED_SOURCE_POLICIES).length) {
     throw registryInvalidError();
@@ -75,7 +88,10 @@ function validateRegistry(registry) {
     if (!policy || !SOURCE_EXECUTION_SCOPES.includes(entry.executionScope)
       || Object.entries(policy).some(([field, value]) => !Array.isArray(value) && entry[field] !== value)
       || !matchesStringList(entry.allowedPaths, policy.allowedPaths)
-      || !matchesStringList(entry.allowedFields, policy.allowedFields)) {
+      || !matchesStringList(entry.allowedFields, policy.allowedFields)
+      || (policy.allowedEndpoints
+        ? !matchesEndpointList(entry.allowedEndpoints, policy.allowedEndpoints)
+        : 'allowedEndpoints' in entry)) {
       throw registryInvalidError();
     }
     if (entry.sourceId === 'anilife_public' && (!Array.isArray(entry.blockedPaths)
@@ -107,6 +123,9 @@ export async function loadSourceRegistry({ repoRoot }) {
     allowedPaths: Object.freeze([...entry.allowedPaths]),
     allowedFields: Object.freeze([...entry.allowedFields]),
     evidenceUrls: Object.freeze([...entry.evidenceUrls]),
+    ...(entry.allowedEndpoints ? {
+      allowedEndpoints: Object.freeze(entry.allowedEndpoints.map((endpoint) => Object.freeze({ ...endpoint }))),
+    } : {}),
     ...(entry.blockedPaths ? { blockedPaths: Object.freeze([...entry.blockedPaths]) } : {}),
   }));
   validated.forEach((entry) => VALIDATED_REGISTRY_ENTRIES.add(entry));
@@ -139,6 +158,28 @@ export function assertSourceExecution(registryEntry, targetCount) {
     || registryEntry.executionScope === 'LOCAL_SAMPLE_MAX_100') && targetCount > 100) {
     const error = new Error('Catalog source execution scope exceeds 100 targets');
     error.code = 'SOURCE_SCOPE_EXCEEDED';
+    throw error;
+  }
+}
+
+/**
+ * Rejects a network destination unless it is an exact endpoint approved by the source policy.
+ * This guard is independent of query parameters, which are validated by each source adapter.
+ */
+export function assertSourceEndpoint(sourceId, url) {
+  const policy = APPROVED_SOURCE_POLICIES[sourceId];
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    parsed = null;
+  }
+  if (!policy?.allowedEndpoints || !parsed || parsed.username || parsed.password
+    || !policy.allowedEndpoints.some((endpoint) => (
+      endpoint.origin === parsed.origin && endpoint.path === parsed.pathname
+    ))) {
+    const error = new Error('Catalog source endpoint is not approved');
+    error.code = 'SOURCE_ENDPOINT_FORBIDDEN';
     throw error;
   }
 }

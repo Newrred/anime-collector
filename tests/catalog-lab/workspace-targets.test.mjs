@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { loadSourceRegistry, assertSourceExecution } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
+import { assertSourceEndpoint, loadSourceRegistry, assertSourceExecution } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
 import { toPathKey } from '../../tools/catalog-lab/lib/path-key.mjs';
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
 import { buildTargetManifest } from '../../tools/catalog-lab/pipeline/targets.mjs';
@@ -26,6 +27,20 @@ const uuid = (() => {
 
 async function pathExists(path) {
   return stat(path).then(() => true, () => false);
+}
+
+function runCatalogTestRunner(directory) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [fileURLToPath(new URL('./run-tests.mjs', import.meta.url))], {
+      env: { ...process.env, MOEMOA_CATALOG_TEST_DIR: directory },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let output = '';
+    child.stdout.on('data', (chunk) => { output += chunk; });
+    child.stderr.on('data', (chunk) => { output += chunk; });
+    child.on('error', reject);
+    child.on('close', (code) => resolve({ code, output }));
+  });
 }
 
 test('workspace rejects a path inside the git worktree', async () => {
@@ -133,6 +148,16 @@ test('registry exposes four approved sources and blocks over-scope execution', a
   ]);
   assert.deepEqual(registry.find((entry) => entry.sourceId === 'anilife_public').blockedPaths,
     ['/api/', '/archive', '/history', '/settings', '/login', '/notifications']);
+  const wikidata = registry.find((entry) => entry.sourceId === 'wikidata');
+  assert.deepEqual(wikidata.allowedEndpoints, [
+    { origin: 'https://query.wikidata.org', path: '/sparql', minIntervalMs: 1000 },
+    { origin: 'https://www.wikidata.org', path: '/w/api.php', minIntervalMs: 1000 },
+  ]);
+  assert.doesNotThrow(() => assertSourceEndpoint('wikidata', 'https://query.wikidata.org/sparql?format=json'));
+  assert.doesNotThrow(() => assertSourceEndpoint('wikidata', 'https://www.wikidata.org/w/api.php?action=wbgetentities'));
+  assert.throws(() => assertSourceEndpoint('wikidata', 'https://www.wikidata.org/w/api.php/extra'), {
+    code: 'SOURCE_ENDPOINT_FORBIDDEN',
+  });
   assert.doesNotThrow(() => assertSourceExecution(
     registry.find((entry) => entry.sourceId === 'anilist'), 100,
   ));
@@ -200,6 +225,47 @@ test('registry rejects allowed path and field policy drift for every source', as
         await rm(fixtureRoot, { recursive: true, force: true });
       }
     }
+  }
+});
+
+test('registry rejects Wikidata endpoint policy drift', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-registry-'));
+  const registryFile = join(fixtureRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json');
+  try {
+    const registry = JSON.parse(await readFile(
+      join(repoRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json'), 'utf8',
+    ));
+    registry.find((entry) => entry.sourceId === 'wikidata').allowedEndpoints[0].origin = 'https://example.test';
+    await mkdir(dirname(registryFile), { recursive: true });
+    await writeFile(registryFile, JSON.stringify(registry));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('catalog test runner fails for a module-load error and a registered test failure', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-runner-'));
+  try {
+    await writeFile(join(fixtureRoot, 'module-load.test.mjs'), "throw new Error('SYNTHETIC_MODULE_LOAD_FAILURE');\n");
+    const moduleLoad = await runCatalogTestRunner(fixtureRoot);
+    assert.notEqual(moduleLoad.code, 0, moduleLoad.output);
+    assert.match(moduleLoad.output, /SYNTHETIC_MODULE_LOAD_FAILURE/);
+
+    await rm(join(fixtureRoot, 'module-load.test.mjs'));
+    await writeFile(join(fixtureRoot, 'registered-failure.test.mjs'), [
+      "import assert from 'node:assert/strict';",
+      "import test from 'node:test';",
+      "test('synthetic registered failure', () => assert.fail('SYNTHETIC_REGISTERED_TEST_FAILURE'));",
+      '',
+    ].join('\n'));
+    const registeredFailure = await runCatalogTestRunner(fixtureRoot);
+    assert.notEqual(registeredFailure.code, 0, registeredFailure.output);
+    assert.match(registeredFailure.output, /SYNTHETIC_REGISTERED_TEST_FAILURE/);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
   }
 });
 
