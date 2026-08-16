@@ -1,4 +1,6 @@
-import { stableStringify } from '../lib/hash.mjs';
+import { sha256, stableStringify } from '../lib/hash.mjs';
+import { toPathKey } from '../lib/path-key.mjs';
+import genreConfig from '../config/core-genre-map.json' with { type: 'json' };
 
 export const FIELD_STATES = Object.freeze([
   'VALUE', 'SOURCE_NOT_AVAILABLE', 'NOT_FETCHED', 'CONFLICTED',
@@ -18,10 +20,6 @@ export const RELATION_VALUES = Object.freeze([
   'SEQUEL', 'PREQUEL', 'SIDE_STORY', 'SPIN_OFF', 'ADAPTATION', 'REMAKE', 'RECAP',
   'ALTERNATIVE_VERSION', 'SHARED_UNIVERSE', 'CHARACTER_CROSSOVER', 'OTHER',
 ]);
-export const CORE_GENRES = Object.freeze([
-  'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery',
-  'Romance', 'Sci-Fi', 'Slice of Life', 'Sports', 'Supernatural', 'Thriller',
-]);
 export const CANONICAL_FIELD_PATHS = Object.freeze([
   'externalIds', 'titles', 'format', 'status', 'season', 'startDate', 'endDate',
   'episodeCount', 'sourceMaterialType', 'officialSiteUrl', 'studios', 'relations',
@@ -31,6 +29,26 @@ export const COLLECTION_FIELD_PATHS = Object.freeze([
   'externalIds', 'titles', 'studios', 'relations', 'sourceGenres', 'coreGenres',
   'characters', 'castings',
 ]);
+
+function configError() {
+  const error = new Error('Catalog normalization configuration is invalid');
+  error.code = 'CATALOG_CONFIG_INVALID';
+  return error;
+}
+
+function validateGenreConfig(config) {
+  if (!isPlainRecord(config) || config.status !== 'TEST_ONLY' || !Array.isArray(config.genres)
+    || config.genres.length !== 13 || new Set(config.genres).size !== config.genres.length
+    || !config.genres.every((genre) => typeof genre === 'string' && genre)
+    || !isPlainRecord(config.mappings)
+    || Object.entries(config.mappings).some(([raw, mapped]) => !raw || !config.genres.includes(mapped))) {
+    throw configError();
+  }
+}
+
+validateGenreConfig(genreConfig);
+export const CORE_GENRES = Object.freeze([...genreConfig.genres]);
+const CORE_GENRE_MAP = Object.freeze({ ...genreConfig.mappings });
 
 const FORMAT_MAP = Object.freeze({
   TV: 'TV', TV_SHORT: 'WEB_SHORT', MOVIE: 'MOVIE', OVA: 'OVA', ONA: 'ONA',
@@ -54,11 +72,98 @@ const RELATION_MAP = Object.freeze({
   SHARED_CHARACTER: 'CHARACTER_CROSSOVER', CHARACTER_CROSSOVER: 'CHARACTER_CROSSOVER',
   OTHER: 'OTHER',
 });
+const SOURCE_RECORD_KEYS = Object.freeze([
+  'fetchStatus', 'fetchedAt', 'parserVersion', 'payload', 'payloadHash', 'rawPayloadRef',
+  'requestFingerprint', 'responseStatus', 'sourceEntityId', 'sourceId', 'sourceRecordId', 'targetKey',
+]);
+const ANILIST_KEYS = Object.freeze([
+  'characters', 'coverImage', 'endDate', 'episodes', 'externalLinks', 'format', 'genres', 'id',
+  'idMal', 'relations', 'season', 'seasonYear', 'source', 'startDate', 'status', 'studios',
+  'synonyms', 'title',
+]);
+const WIKIDATA_KEYS = Object.freeze(['aliases', 'claims', 'externalIds', 'labels', 'sitelinks']);
+const ANILIFE_KEYS = Object.freeze([
+  'alternateName', 'contentId', 'datePublished', 'imageUrl', 'numberOfEpisodes', 'publicPageUrl',
+  'title',
+]);
+const WIKIDATA_PROPERTIES = new Set(['P8729', 'P856', 'P577', 'P136', 'P272']);
+
+function typedError(code, message) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
 
 function schemaError() {
-  const error = new Error('SourceRecord cannot be normalized by the catalog contract');
-  error.code = 'SOURCE_SCHEMA_DRIFT';
-  return error;
+  return typedError('SOURCE_SCHEMA_DRIFT', 'SourceRecord does not match its approved source schema');
+}
+
+export function isPlainRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  let prototype;
+  let descriptors;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    descriptors = Object.getOwnPropertyDescriptors(value);
+  } catch {
+    return false;
+  }
+  return Reflect.ownKeys(value).every((key) => typeof key === 'string')
+    && (prototype === Object.prototype || prototype === null)
+    && Object.values(descriptors).every((descriptor) => 'value' in descriptor);
+}
+
+function hasExactKeys(value, keys) {
+  return isPlainRecord(value)
+    && stableStringify(Object.keys(value).sort()) === stableStringify([...keys].sort());
+}
+
+function hasOnlyKeys(value, keys) {
+  return isPlainRecord(value) && Object.keys(value).every((key) => keys.includes(key));
+}
+
+function deepFreeze(value, seen = new Set()) {
+  if (value === null || typeof value !== 'object' || seen.has(value)) return value;
+  seen.add(value);
+  for (const child of Object.values(value)) deepFreeze(child, seen);
+  return Object.freeze(value);
+}
+
+export function deepFrozenSnapshot(value) {
+  let snapshot;
+  try {
+    if (!jsonSafe(value)) throw new TypeError('Value must be plain JSON data');
+    snapshot = structuredClone(value);
+  } catch {
+    throw schemaError();
+  }
+  return deepFreeze(snapshot);
+}
+
+function jsonSafe(value, ancestors = new Set()) {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value !== 'object' || ancestors.has(value)) return false;
+  ancestors.add(value);
+  let valid;
+  if (Array.isArray(value)) {
+    let descriptors;
+    try {
+      descriptors = Object.getOwnPropertyDescriptors(value);
+    } catch {
+      ancestors.delete(value);
+      return false;
+    }
+    valid = Reflect.ownKeys(value).every((key) => typeof key === 'string')
+      && Object.keys(value).length === value.length
+      && Object.entries(descriptors).every(([key, descriptor]) => key === 'length' || ('value' in descriptor && /^\d+$/u.test(key)))
+      && Object.keys(value).every((key) => jsonSafe(descriptors[key].value, ancestors));
+  } else {
+    valid = isPlainRecord(value) && Object.values(Object.getOwnPropertyDescriptors(value))
+      .every((descriptor) => jsonSafe(descriptor.value, ancestors));
+  }
+  ancestors.delete(value);
+  return valid;
 }
 
 export function normalizeText(value) {
@@ -67,14 +172,24 @@ export function normalizeText(value) {
   return normalized || null;
 }
 
+function compareText(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function safeInteger(value) {
   return Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+
+function safeYear(value) {
+  const year = typeof value === 'string' && /^\d{4}$/.test(value) ? Number(value) : value;
+  return Number.isInteger(year) && year >= 1000 && year <= 9999 ? year : null;
 }
 
 function stringId(value) {
   if ((typeof value !== 'string' && typeof value !== 'number') || value === '') return null;
   const result = String(value);
-  return /^(?:[1-9]\d*|Q[1-9]\d*)$/.test(result) ? result : null;
+  return /^(?:[1-9]\d*|Q[1-9]\d*)$/.test(result) && Number.isSafeInteger(Number(result.replace(/^Q/, '')))
+    ? result : null;
 }
 
 function enumValue(value, map, fallback = 'UNKNOWN') {
@@ -82,27 +197,68 @@ function enumValue(value, map, fallback = 'UNKNOWN') {
 }
 
 function normalizedDate(value) {
+  let year;
+  let month;
+  let day;
   if (typeof value === 'string') {
-    const match = value.match(/^\+?(\d{4})-(\d{2})-(\d{2})/);
+    const plain = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const wikidata = value.match(/^\+(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}Z$/);
+    const match = plain ?? wikidata;
     if (!match) return null;
-    const [, year, month, day] = match;
-    const date = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
-    return Number.isNaN(date.valueOf()) || date.toISOString().slice(0, 10) !== `${year}-${month}-${day}`
-      ? null : `${year}-${month}-${day}`;
-  }
-  if (!value || typeof value !== 'object') return null;
-  const { year, month, day } = value;
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
-  return normalizedDate(`${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+    [, year, month, day] = match;
+  } else if (isPlainRecord(value)) {
+    ({ year, month, day } = value);
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
+    year = String(year).padStart(4, '0');
+    month = String(month).padStart(2, '0');
+    day = String(day).padStart(2, '0');
+  } else return null;
+  const iso = `${year}-${month}-${day}`;
+  const date = new Date(`${iso}T00:00:00.000Z`);
+  return Number.isNaN(date.valueOf()) || date.toISOString().slice(0, 10) !== iso ? null : iso;
 }
 
-function uniqueEntries(entries) {
-  const seen = new Set();
-  return entries.filter(({ normalizedValue }) => {
-    const key = stableStringify(normalizedValue);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+function normalizedHttpUrl(value) {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
+    url.hash = '';
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
+function rawYearEvidence(value) {
+  if (typeof value !== 'string') return null;
+  const match = value.match(/^(\d{4})(?:-\d{2}-\d{2})?$/);
+  return match ? safeYear(match[1]) : null;
+}
+
+function uniqueEntries(entries, fieldPath) {
+  const groups = new Map();
+  for (const entry of entries) {
+    const key = stableStringify(entry.normalizedValue);
+    const existing = groups.get(key);
+    if (!existing) groups.set(key, { ...entry, rawValues: [entry.rawValue] });
+    else existing.rawValues.push(entry.rawValue);
+  }
+  return [...groups.values()].map(({ rawValues, ...entry }) => {
+    const uniqueRaw = [...new Map(rawValues.map((raw) => [stableStringify(raw), raw])).values()]
+      .sort((left, right) => compareText(stableStringify(left), stableStringify(right)));
+    return { ...entry, rawValue: uniqueRaw.length === 1 ? uniqueRaw[0] : uniqueRaw };
+  }).sort((left, right) => {
+    if (fieldPath === 'titles') {
+      const localeOrder = ['ja-Latn', 'ja', 'en', 'und'];
+      const leftRank = localeOrder.indexOf(left.normalizedValue.locale);
+      const rightRank = localeOrder.indexOf(right.normalizedValue.locale);
+      const ranked = compareText(leftRank < 0 ? Number.MAX_SAFE_INTEGER : leftRank,
+        rightRank < 0 ? Number.MAX_SAFE_INTEGER : rightRank);
+      if (ranked) return ranked;
+    }
+    return compareText(stableStringify(left.normalizedValue), stableStringify(right.normalizedValue))
+      || compareText(stableStringify(left.rawValue), stableStringify(right.rawValue));
   });
 }
 
@@ -116,74 +272,228 @@ function textEntry(rawValue) {
   return normalizedValue === null ? null : { rawValue, normalizedValue };
 }
 
-function sourceOverallState(record) {
-  if (record.payload?.fieldState === 'NOT_FETCHED') return 'NOT_FETCHED';
-  if (record.payload?.fieldState === 'SOURCE_NOT_AVAILABLE'
-    || record.payload?.errorCode === 'SOURCE_NOT_AVAILABLE') return 'SOURCE_NOT_AVAILABLE';
+function requireArray(value, validator = () => true) {
+  if (!Array.isArray(value) || !value.every(validator)) throw schemaError();
+}
+
+function optionalString(value) {
+  return value === null || value === undefined || typeof value === 'string';
+}
+
+function validateName(value) {
+  return hasOnlyKeys(value, ['full', 'native', 'alternative'])
+    && optionalString(value.full) && optionalString(value.native)
+    && (value.alternative === undefined || (Array.isArray(value.alternative)
+      && value.alternative.every((entry) => typeof entry === 'string')));
+}
+
+function validateAniListPayload(record) {
+  const payload = record.payload;
+  if (!hasExactKeys(payload, ANILIST_KEYS) || !Number.isSafeInteger(payload.id) || payload.id < 1
+    || String(payload.id) !== record.sourceEntityId
+    || !hasOnlyKeys(payload.title, ['romaji', 'english', 'native'])
+    || !['romaji', 'english', 'native'].every((key) => optionalString(payload.title[key]))) throw schemaError();
+  requireArray(payload.synonyms, (value) => typeof value === 'string');
+  requireArray(payload.genres, (value) => typeof value === 'string');
+  requireArray(payload.externalLinks, (link) => hasOnlyKeys(link, ['id', 'site', 'url', 'type'])
+    && (link.id === undefined || (Number.isSafeInteger(link.id) && link.id > 0)) && optionalString(link.site)
+    && optionalString(link.url) && optionalString(link.type));
+  if (!hasOnlyKeys(payload.coverImage, ['extraLarge', 'large', 'medium']) || !['extraLarge', 'large', 'medium']
+    .every((key) => optionalString(payload.coverImage[key]))) throw schemaError();
+  if (!hasExactKeys(payload.studios, ['nodes'])) throw schemaError();
+  requireArray(payload.studios.nodes, (studio) => hasExactKeys(studio, ['id', 'isAnimationStudio', 'name'])
+    && Number.isSafeInteger(studio.id) && studio.id > 0 && typeof studio.name === 'string'
+    && typeof studio.isAnimationStudio === 'boolean');
+  if (!hasExactKeys(payload.relations, ['edges'])) throw schemaError();
+  requireArray(payload.relations.edges, (edge) => hasExactKeys(edge, ['node', 'relationType'])
+    && typeof edge.relationType === 'string'
+    && hasExactKeys(edge.node, ['format', 'id', 'title', 'type'])
+    && Number.isSafeInteger(edge.node.id) && edge.node.id > 0 && optionalString(edge.node.type)
+    && optionalString(edge.node.format) && hasOnlyKeys(edge.node.title, ['romaji', 'english', 'native'])
+    && ['romaji', 'english', 'native'].every((key) => optionalString(edge.node.title[key])));
+  requireArray(payload.characters, (edge) => hasExactKeys(edge, ['node', 'role', 'voiceActors'])
+    && typeof edge.role === 'string' && hasExactKeys(edge.node, ['id', 'name'])
+    && Number.isSafeInteger(edge.node.id) && edge.node.id > 0
+    && validateName(edge.node.name) && Array.isArray(edge.voiceActors)
+    && edge.voiceActors.every((actor) => hasExactKeys(actor, ['id', 'language', 'name'])
+      && Number.isSafeInteger(actor.id)
+      && actor.id > 0 && typeof actor.language === 'string' && validateName(actor.name)));
+  for (const date of [payload.startDate, payload.endDate]) {
+    if (!hasOnlyKeys(date, ['year', 'month', 'day']) || !['year', 'month', 'day'].every((key) => (
+      date[key] === null || date[key] === undefined || Number.isInteger(date[key])
+    ))) throw schemaError();
+  }
+  if (!optionalString(payload.format) || !optionalString(payload.status) || !optionalString(payload.season)
+    || !optionalString(payload.source) || (payload.seasonYear !== null && payload.seasonYear !== undefined
+      && safeYear(payload.seasonYear) === null) || (payload.episodes !== null && payload.episodes !== undefined
+      && safeInteger(payload.episodes) === null)) throw schemaError();
+}
+
+function wikidataValues(payload, property) {
+  const rows = payload.claims[property] ?? [];
+  requireArray(rows, (claim) => isPlainRecord(claim) && isPlainRecord(claim.mainsnak)
+    && isPlainRecord(claim.mainsnak.datavalue) && Object.hasOwn(claim.mainsnak.datavalue, 'value'));
+  return rows.map((claim) => claim.mainsnak.datavalue.value);
+}
+
+function validateWikidataPayload(record) {
+  const payload = record.payload;
+  if (!hasExactKeys(payload, WIKIDATA_KEYS) || !/^Q[1-9]\d*$/.test(record.sourceEntityId)
+    || !hasExactKeys(payload.externalIds, ['anilist']) || !isPlainRecord(payload.labels)
+    || !isPlainRecord(payload.aliases) || !isPlainRecord(payload.claims) || !isPlainRecord(payload.sitelinks)
+    || Object.keys(payload.labels).some((locale) => !['ko', 'ja', 'en'].includes(locale))
+    || Object.keys(payload.aliases).some((locale) => !['ko', 'ja', 'en'].includes(locale))
+    || Object.values(payload.sitelinks).some((value) => !hasExactKeys(value, ['site', 'title'])
+      || typeof value.site !== 'string' || typeof value.title !== 'string')
+    || Object.keys(payload.claims).some((property) => !WIKIDATA_PROPERTIES.has(property))) throw schemaError();
+  const anilistId = payload.externalIds.anilist;
+  if (typeof anilistId !== 'string' || !/^[1-9]\d*$/.test(anilistId)
+    || anilistId !== targetAniListId(record.targetKey)) throw schemaError();
+  const p8729 = wikidataValues(payload, 'P8729');
+  if (p8729.length === 0 || p8729.some((value) => value !== anilistId)) throw schemaError();
+  const valueShapeByProperty = {
+    P8729: (value) => typeof value === 'string' && /^[1-9]\d*$/u.test(value),
+    P856: (value) => typeof value === 'string',
+    P577: (value) => isPlainRecord(value) && typeof value.time === 'string'
+      && Number.isInteger(value.precision),
+    P136: (value) => isPlainRecord(value) && typeof value.id === 'string'
+      && /^Q[1-9]\d*$/u.test(value.id),
+    P272: (value) => isPlainRecord(value) && typeof value.id === 'string'
+      && /^Q[1-9]\d*$/u.test(value.id),
+  };
+  for (const value of Object.values(payload.labels)) if (typeof value !== 'string') throw schemaError();
+  for (const value of Object.values(payload.aliases)) requireArray(value, (entry) => typeof entry === 'string');
+  for (const property of Object.keys(payload.claims)) {
+    if (!wikidataValues(payload, property).every(valueShapeByProperty[property])) throw schemaError();
+  }
+}
+
+function validateAniLifePayload(record) {
+  const payload = record.payload;
+  if (!hasExactKeys(payload, ANILIFE_KEYS) || typeof payload.contentId !== 'string'
+    || !/^[1-9]\d*$/.test(payload.contentId) || payload.contentId !== record.sourceEntityId
+    || !optionalString(payload.title) || !optionalString(payload.alternateName)
+    || !optionalString(payload.datePublished) || !optionalString(payload.imageUrl)
+    || !optionalString(payload.publicPageUrl) || (payload.numberOfEpisodes !== null
+      && payload.numberOfEpisodes !== undefined && safeInteger(payload.numberOfEpisodes) === null)) throw schemaError();
+}
+
+function targetAniListId(targetKey) {
+  return typeof targetKey === 'string' ? targetKey.match(/^ANILIST:([1-9]\d*)$/)?.[1] ?? null : null;
+}
+
+function sourceAbsenceState(record) {
+  const targetId = targetAniListId(record.targetKey);
+  if (record.sourceId === 'wikidata' && record.responseStatus === 404
+    && record.fetchStatus === 'FAILED_PERMANENT' && record.sourceEntityId === `P8729:${targetId}`
+    && hasExactKeys(record.payload, ['errorCode', 'externalIds'])
+    && record.payload.errorCode === 'SOURCE_NOT_AVAILABLE'
+    && isPlainRecord(record.payload.externalIds)
+    && record.payload.externalIds.anilist === targetId) return 'SOURCE_NOT_AVAILABLE';
+  if (record.sourceId === 'anilife_public' && record.responseStatus === 0
+    && record.fetchStatus === 'FAILED_PERMANENT' && record.sourceEntityId === 'UNBOUND'
+    && hasExactKeys(record.payload, ['fieldState']) && record.payload.fieldState === 'NOT_FETCHED') {
+    return 'NOT_FETCHED';
+  }
+  return null;
+}
+
+function validateSourceRecord(record) {
+  if (!hasExactKeys(record, SOURCE_RECORD_KEYS) || !/^[a-f0-9]{64}$/.test(record.sourceRecordId)
+    || !/^[a-f0-9]{64}$/.test(record.payloadHash) || typeof record.targetKey !== 'string'
+    || typeof record.sourceId !== 'string' || typeof record.sourceEntityId !== 'string'
+    || typeof record.fetchedAt !== 'string' || Number.isNaN(Date.parse(record.fetchedAt))
+    || typeof record.requestFingerprint !== 'string' || !record.requestFingerprint
+    || typeof record.parserVersion !== 'string' || !record.parserVersion
+    || typeof record.rawPayloadRef !== 'string' || !record.rawPayloadRef
+    || !Number.isInteger(record.responseStatus) || !isPlainRecord(record.payload)) throw schemaError();
+  if (sha256(record.payload) !== record.payloadHash) {
+    throw typedError('SOURCE_RECORD_INTEGRITY_INVALID', 'SourceRecord payload hash is invalid');
+  }
+  const expectedId = sha256({
+    sourceId: record.sourceId,
+    targetKey: record.targetKey,
+    sourceEntityId: record.sourceEntityId,
+    responseStatus: record.responseStatus,
+    requestFingerprint: record.requestFingerprint,
+    parserVersion: record.parserVersion,
+    payload: record.payload,
+  });
+  const expectedRawRef = `raw/${toPathKey(record.sourceId)}/${toPathKey(record.targetKey)}/${record.sourceRecordId}.json`;
+  if (record.sourceRecordId !== expectedId
+    || record.rawPayloadRef.replaceAll('\\', '/') !== expectedRawRef) {
+    throw typedError('SOURCE_RECORD_INTEGRITY_INVALID', 'SourceRecord immutable identity is invalid');
+  }
+  const absenceState = sourceAbsenceState(record);
+  if (absenceState) return absenceState;
+  if (!['anilist', 'wikidata', 'anilife_public'].includes(record.sourceId)
+    || Object.hasOwn(record.payload, 'errorCode') || Object.hasOwn(record.payload, 'fieldState')) {
+    throw schemaError();
+  }
+  if (record.fetchStatus !== 'FETCHED' || record.responseStatus < 200 || record.responseStatus >= 300) {
+    throw typedError('SOURCE_RECORD_STATE_INVALID', 'SourceRecord is not a successful or approved absence record');
+  }
+  if (record.sourceId === 'anilist') validateAniListPayload(record);
+  else if (record.sourceId === 'wikidata') validateWikidataPayload(record);
+  else if (record.sourceId === 'anilife_public') validateAniLifePayload(record);
+  else throw schemaError();
   return null;
 }
 
 function anilistFields(record) {
   const payload = record.payload;
-  if (stringId(payload.id) && String(payload.id) !== record.sourceEntityId) throw schemaError();
   const titleEntries = uniqueEntries([
-    titleEntry('ja-Latn', payload.title?.romaji),
-    titleEntry('en', payload.title?.english),
-    titleEntry('ja', payload.title?.native),
-    ...(Array.isArray(payload.synonyms) ? payload.synonyms.map((value) => titleEntry('und', value)) : []),
+    titleEntry('ja-Latn', payload.title.romaji), titleEntry('en', payload.title.english),
+    titleEntry('ja', payload.title.native), ...payload.synonyms.map((value) => titleEntry('und', value)),
   ].filter(Boolean));
   const externalEntries = [
-    stringId(payload.id) ? { rawValue: { sourceId: 'anilist', value: payload.id }, normalizedValue: { sourceId: 'anilist', value: String(payload.id) } } : null,
+    { rawValue: { sourceId: 'anilist', value: payload.id }, normalizedValue: { sourceId: 'anilist', value: String(payload.id) } },
     stringId(payload.idMal) ? { rawValue: { sourceId: 'mal', value: payload.idMal }, normalizedValue: { sourceId: 'mal', value: String(payload.idMal) } } : null,
   ].filter(Boolean);
-  const genreEntries = uniqueEntries((Array.isArray(payload.genres) ? payload.genres : [])
-    .map(textEntry).filter(Boolean));
-  const coreEntries = genreEntries.filter(({ normalizedValue }) => CORE_GENRES.includes(normalizedValue));
-  const studioEntries = (Array.isArray(payload.studios?.nodes) ? payload.studios.nodes : [])
-    .filter((studio) => stringId(studio?.id) && normalizeText(studio?.name))
-    .map((studio) => ({
-      rawValue: studio,
-      normalizedValue: {
-        id: `anilist:${studio.id}`, name: normalizeText(studio.name),
-        role: studio.isAnimationStudio ? 'ANIMATION_PRODUCTION' : 'OTHER',
-      },
-    }));
-  const relationEntries = (Array.isArray(payload.relations?.edges) ? payload.relations.edges : [])
-    .filter((edge) => stringId(edge?.node?.id))
-    .map((edge) => ({
-      rawValue: edge,
-      normalizedValue: {
-        targetId: `anilist:${edge.node.id}`,
-        type: RELATION_MAP[edge.relationType] ?? 'OTHER',
-        title: normalizeText(edge.node.title?.romaji) ?? normalizeText(edge.node.title?.english)
-          ?? normalizeText(edge.node.title?.native),
-        format: enumValue(edge.node.format, FORMAT_MAP),
-      },
-    }));
-  const characterEntries = [];
-  const castingEntries = [];
-  for (const edge of Array.isArray(payload.characters) ? payload.characters : []) {
-    if (!['MAIN', 'SUPPORTING'].includes(edge?.role) || !stringId(edge?.node?.id)) continue;
-    const canonicalName = normalizeText(edge.node.name?.full) ?? normalizeText(edge.node.name?.native);
+  const genreEntries = uniqueEntries(payload.genres.map(textEntry).filter(Boolean));
+  const coreEntries = genreEntries.map(({ rawValue, normalizedValue }) => ({
+    rawValue, normalizedValue: CORE_GENRE_MAP[normalizedValue],
+  })).filter(({ normalizedValue }) => normalizedValue !== undefined);
+  const studios = payload.studios.nodes.map((studio) => ({
+    rawValue: studio,
+    normalizedValue: {
+      id: `anilist:${studio.id}`, name: normalizeText(studio.name),
+      role: studio.isAnimationStudio ? 'ANIMATION_PRODUCTION' : 'OTHER',
+    },
+  }));
+  const relations = payload.relations.edges.map((edge) => ({
+    rawValue: edge,
+    normalizedValue: {
+      targetId: `anilist:${edge.node.id}`, type: RELATION_MAP[edge.relationType] ?? 'OTHER',
+      title: normalizeText(edge.node.title.romaji) ?? normalizeText(edge.node.title.english)
+        ?? normalizeText(edge.node.title.native),
+      format: enumValue(edge.node.format, FORMAT_MAP),
+    },
+  }));
+  const characters = [];
+  const castings = [];
+  for (const edge of payload.characters) {
+    if (!['MAIN', 'SUPPORTING'].includes(edge.role)) continue;
+    const canonicalName = normalizeText(edge.node.name.full) ?? normalizeText(edge.node.name.native);
     if (!canonicalName) continue;
     const characterId = `anilist:${edge.node.id}`;
-    characterEntries.push({
-      rawValue: edge.node,
+    const characterContext = { role: edge.role, node: edge.node };
+    characters.push({
+      rawValue: characterContext,
       normalizedValue: {
         id: characterId, role: edge.role, canonicalName,
         localizedNames: uniqueEntries([
-          titleEntry('ja', edge.node.name?.native),
-          ...(Array.isArray(edge.node.name?.alternative)
-            ? edge.node.name.alternative.map((value) => titleEntry('und', value)) : []),
+          titleEntry('ja', edge.node.name.native),
+          ...(edge.node.name.alternative ?? []).map((value) => titleEntry('und', value)),
         ].filter(Boolean)).map(({ normalizedValue }) => normalizedValue),
       },
     });
-    for (const actor of Array.isArray(edge.voiceActors) ? edge.voiceActors : []) {
-      if (actor?.language !== 'JAPANESE' || !stringId(actor.id)) continue;
-      const creditedName = normalizeText(actor.name?.native) ?? normalizeText(actor.name?.full);
+    for (const actor of edge.voiceActors) {
+      if (actor.language !== 'JAPANESE') continue;
+      const creditedName = normalizeText(actor.name.native) ?? normalizeText(actor.name.full);
       if (!creditedName) continue;
-      castingEntries.push({
-        rawValue: actor,
+      castings.push({
+        rawValue: { character: characterContext, voiceActor: actor },
         normalizedValue: {
           characterId, personId: `anilist:${actor.id}`, language: 'ja', roleType: edge.role,
           creditedName,
@@ -191,161 +501,183 @@ function anilistFields(record) {
       });
     }
   }
-  const officialLink = (Array.isArray(payload.externalLinks) ? payload.externalLinks : [])
-    .find((link) => /official/i.test(link?.site ?? '') && normalizeText(link?.url));
-  const coverUrl = normalizeText(payload.coverImage?.extraLarge)
-    ?? normalizeText(payload.coverImage?.large) ?? normalizeText(payload.coverImage?.medium);
+  const officialLinks = payload.externalLinks.filter((link) => /official/i.test(link.site ?? ''))
+    .map((link) => ({ rawValue: link, normalizedValue: normalizedHttpUrl(link.url) }))
+    .filter(({ normalizedValue }) => normalizedValue !== null);
+  const coverRaw = payload.coverImage.extraLarge ?? payload.coverImage.large ?? payload.coverImage.medium;
+  const coverUrl = normalizedHttpUrl(coverRaw);
+  const startDate = normalizedDate(payload.startDate);
+  const endDate = normalizedDate(payload.endDate);
+  const releaseYearEvidence = [safeYear(payload.startDate.year), safeYear(payload.seasonYear)].filter(Boolean);
   return {
-    externalIds: externalEntries,
-    titles: titleEntries,
-    format: typeof payload.format === 'string'
-      ? [{ rawValue: payload.format, normalizedValue: enumValue(payload.format, FORMAT_MAP) }] : [],
-    status: typeof payload.status === 'string'
-      ? [{ rawValue: payload.status, normalizedValue: enumValue(payload.status, STATUS_MAP) }] : [],
-    season: SEASON_VALUES.includes(payload.season)
-      ? [{ rawValue: payload.season, normalizedValue: payload.season }] : [],
-    startDate: normalizedDate(payload.startDate)
-      ? [{ rawValue: payload.startDate, normalizedValue: normalizedDate(payload.startDate) }] : [],
-    endDate: normalizedDate(payload.endDate)
-      ? [{ rawValue: payload.endDate, normalizedValue: normalizedDate(payload.endDate) }] : [],
-    episodeCount: safeInteger(payload.episodes) !== null
-      ? [{ rawValue: payload.episodes, normalizedValue: payload.episodes }] : [],
-    sourceMaterialType: typeof payload.source === 'string' ? [{
-      rawValue: payload.source,
-      normalizedValue: enumValue(payload.source, SOURCE_MATERIAL_MAP),
-    }] : [],
-    officialSiteUrl: officialLink
-      ? [{ rawValue: officialLink.url, normalizedValue: normalizeText(officialLink.url) }] : [],
-    studios: studioEntries,
-    relations: relationEntries,
-    sourceGenres: genreEntries,
-    coreGenres: coreEntries,
-    characters: characterEntries,
-    castings: castingEntries,
-    cover: coverUrl ? [{
-      rawValue: payload.coverImage,
-      normalizedValue: {
+    entries: {
+      externalIds: externalEntries, titles: titleEntries,
+      format: typeof payload.format === 'string' ? [{ rawValue: payload.format, normalizedValue: enumValue(payload.format, FORMAT_MAP) }] : [],
+      status: typeof payload.status === 'string' ? [{ rawValue: payload.status, normalizedValue: enumValue(payload.status, STATUS_MAP) }] : [],
+      season: SEASON_VALUES.includes(payload.season) ? [{ rawValue: payload.season, normalizedValue: payload.season }] : [],
+      startDate: startDate ? [{ rawValue: payload.startDate, normalizedValue: startDate }] : [],
+      endDate: endDate ? [{ rawValue: payload.endDate, normalizedValue: endDate }] : [],
+      episodeCount: safeInteger(payload.episodes) !== null ? [{ rawValue: payload.episodes, normalizedValue: payload.episodes }] : [],
+      sourceMaterialType: typeof payload.source === 'string' ? [{ rawValue: payload.source, normalizedValue: enumValue(payload.source, SOURCE_MATERIAL_MAP) }] : [],
+      officialSiteUrl: officialLinks, studios, relations, sourceGenres: genreEntries,
+      coreGenres: coreEntries, characters, castings,
+      cover: coverUrl ? [{ rawValue: payload.coverImage, normalizedValue: {
         sourceUrl: coverUrl, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED',
-      },
-    }] : [],
+      } }] : [],
+    },
+    releaseYearEvidence,
   };
-}
-
-function wikidataClaimValues(payload, property) {
-  return Array.isArray(payload.claims?.[property]) ? payload.claims[property]
-    .map((claim) => claim?.mainsnak?.datavalue?.value).filter((value) => value !== undefined) : [];
 }
 
 function wikidataFields(record) {
   const payload = record.payload;
-  const externalEntries = [];
-  if (/^Q[1-9]\d*$/.test(record.sourceEntityId)) externalEntries.push({
-    rawValue: { sourceId: 'wikidata', value: record.sourceEntityId },
-    normalizedValue: { sourceId: 'wikidata', value: record.sourceEntityId },
-  });
-  for (const [sourceId, rawValue] of Object.entries(payload.externalIds ?? {})) {
-    const value = stringId(rawValue);
-    if (value) externalEntries.push({ rawValue: { sourceId, value: rawValue }, normalizedValue: { sourceId, value } });
-  }
-  const titleEntries = [];
+  const anilistId = payload.externalIds.anilist;
+  const externalIds = [
+    { rawValue: { sourceId: 'wikidata', value: record.sourceEntityId }, normalizedValue: { sourceId: 'wikidata', value: record.sourceEntityId } },
+    { rawValue: { sourceId: 'anilist', value: anilistId }, normalizedValue: { sourceId: 'anilist', value: anilistId } },
+  ];
+  const titles = [];
   for (const locale of ['ko', 'ja', 'en']) {
-    const label = titleEntry(locale, payload.labels?.[locale]);
-    if (label) titleEntries.push(label);
-    for (const alias of Array.isArray(payload.aliases?.[locale]) ? payload.aliases[locale] : []) {
+    const label = titleEntry(locale, payload.labels[locale]);
+    if (label) titles.push(label);
+    for (const alias of payload.aliases[locale] ?? []) {
       const entry = titleEntry(locale, alias);
-      if (entry) titleEntries.push(entry);
+      if (entry) titles.push(entry);
     }
   }
-  const dateEntries = wikidataClaimValues(payload, 'P577').map((value) => {
-    const rawValue = typeof value === 'object' ? value.time : value;
-    return { rawValue, normalizedValue: normalizedDate(rawValue) };
-  }).filter(({ normalizedValue }) => normalizedValue !== null);
-  const officialSite = wikidataClaimValues(payload, 'P856').map((value) => normalizeText(value)).find(Boolean);
-  const studios = wikidataClaimValues(payload, 'P272').map((value) => value?.id ?? value)
-    .filter((value) => typeof value === 'string' && /^Q[1-9]\d*$/.test(value))
-    .map((value) => ({ rawValue: value, normalizedValue: { id: `wikidata:${value}`, name: null, role: 'OTHER' } }));
-  const sourceGenres = wikidataClaimValues(payload, 'P136').map((value) => value?.id ?? value)
-    .filter((value) => typeof value === 'string' && /^Q[1-9]\d*$/.test(value))
-    .map((value) => ({ rawValue: value, normalizedValue: `wikidata:${value}` }));
+  const dateEntries = wikidataValues(payload, 'P577').map((rawValue) => ({
+    rawValue,
+    normalizedValue: normalizedDate(isPlainRecord(rawValue) ? rawValue.time : rawValue),
+  })).filter(({ normalizedValue }) => normalizedValue !== null);
+  const officialSites = wikidataValues(payload, 'P856').map((rawValue) => ({
+    rawValue, normalizedValue: normalizedHttpUrl(rawValue),
+  })).filter(({ normalizedValue }) => normalizedValue !== null);
+  const studios = wikidataValues(payload, 'P272').filter((value) => isPlainRecord(value)
+    && typeof value.id === 'string' && /^Q[1-9]\d*$/.test(value.id)).map((rawValue) => ({
+    rawValue, normalizedValue: { id: `wikidata:${rawValue.id}`, name: null, role: 'OTHER' },
+  }));
+  const sourceGenres = wikidataValues(payload, 'P136').filter((value) => isPlainRecord(value)
+    && typeof value.id === 'string' && /^Q[1-9]\d*$/.test(value.id)).map((rawValue) => ({
+    rawValue, normalizedValue: `wikidata:${rawValue.id}`,
+  }));
   return {
-    externalIds: uniqueEntries(externalEntries), titles: uniqueEntries(titleEntries),
-    startDate: dateEntries.slice(0, 1),
-    officialSiteUrl: officialSite ? [{ rawValue: officialSite, normalizedValue: officialSite }] : [],
-    studios, sourceGenres,
+    entries: {
+      externalIds, titles, startDate: dateEntries, officialSiteUrl: officialSites, studios, sourceGenres,
+    },
+    releaseYearEvidence: dateEntries.map(({ normalizedValue }) => Number(normalizedValue.slice(0, 4))),
   };
 }
 
 function anilifeFields(record) {
   const payload = record.payload;
-  if (payload.contentId !== undefined && String(payload.contentId) !== record.sourceEntityId) throw schemaError();
-  const contentId = stringId(payload.contentId ?? record.sourceEntityId);
-  const externalIds = contentId && contentId !== 'UNBOUND' ? [{
-    rawValue: { sourceId: 'anilife_public', value: payload.contentId ?? record.sourceEntityId },
-    normalizedValue: { sourceId: 'anilife_public', value: contentId },
-  }] : [];
-  const titles = uniqueEntries([
-    titleEntry('und', payload.title), titleEntry('ko', payload.alternateName),
-  ].filter(Boolean));
   const startDate = normalizedDate(payload.datePublished);
-  const coverUrl = normalizeText(payload.imageUrl);
+  const coverUrl = normalizedHttpUrl(payload.imageUrl);
   return {
-    externalIds, titles,
-    startDate: startDate ? [{ rawValue: payload.datePublished, normalizedValue: startDate }] : [],
-    episodeCount: safeInteger(payload.numberOfEpisodes) !== null
-      ? [{ rawValue: payload.numberOfEpisodes, normalizedValue: payload.numberOfEpisodes }] : [],
-    cover: coverUrl ? [{
-      rawValue: payload.imageUrl,
-      normalizedValue: {
+    entries: {
+      externalIds: [{
+        rawValue: { sourceId: 'anilife_public', value: payload.contentId },
+        normalizedValue: { sourceId: 'anilife_public', value: payload.contentId },
+      }],
+      titles: uniqueEntries([
+        titleEntry('und', payload.title), titleEntry('ko', payload.alternateName),
+      ].filter(Boolean)),
+      startDate: startDate ? [{ rawValue: payload.datePublished, normalizedValue: startDate }] : [],
+      episodeCount: safeInteger(payload.numberOfEpisodes) !== null
+        ? [{ rawValue: payload.numberOfEpisodes, normalizedValue: payload.numberOfEpisodes }] : [],
+      cover: coverUrl ? [{ rawValue: payload.imageUrl, normalizedValue: {
         sourceUrl: coverUrl, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED',
-      },
-    }] : [],
+      } }] : [],
+    },
+    releaseYearEvidence: [rawYearEvidence(payload.datePublished)].filter(Boolean),
   };
 }
 
-function finalize(record, entriesByField) {
-  const overallState = sourceOverallState(record);
+export function isNormalizedFieldValue(fieldPath, value) {
+  if (fieldPath === 'externalIds') return hasExactKeys(value, ['sourceId', 'value']) && typeof value.sourceId === 'string'
+    && typeof value.value === 'string' && value.sourceId && value.value;
+  if (fieldPath === 'titles') return hasExactKeys(value, ['locale', 'value']) && typeof value.locale === 'string'
+    && typeof value.value === 'string' && value.locale && value.value;
+  if (fieldPath === 'format') return FORMAT_VALUES.includes(value);
+  if (fieldPath === 'status') return STATUS_VALUES.includes(value);
+  if (fieldPath === 'season') return SEASON_VALUES.includes(value);
+  if (fieldPath === 'startDate' || fieldPath === 'endDate') return normalizedDate(value) === value;
+  if (fieldPath === 'episodeCount') return safeInteger(value) !== null;
+  if (fieldPath === 'sourceMaterialType') return SOURCE_MATERIAL_VALUES.includes(value);
+  if (fieldPath === 'officialSiteUrl') return normalizedHttpUrl(value) === value;
+  if (fieldPath === 'studios') return hasExactKeys(value, ['id', 'name', 'role']) && typeof value.id === 'string'
+    && (typeof value.name === 'string' || value.name === null) && typeof value.role === 'string';
+  if (fieldPath === 'relations') return hasExactKeys(value, ['format', 'targetId', 'title', 'type'])
+    && typeof value.targetId === 'string'
+    && RELATION_VALUES.includes(value.type) && (typeof value.title === 'string' || value.title === null)
+    && FORMAT_VALUES.includes(value.format);
+  if (fieldPath === 'sourceGenres') return typeof value === 'string' && value.length > 0;
+  if (fieldPath === 'coreGenres') return CORE_GENRES.includes(value);
+  if (fieldPath === 'characters') return hasExactKeys(value, ['canonicalName', 'id', 'localizedNames', 'role'])
+    && typeof value.id === 'string'
+    && ['MAIN', 'SUPPORTING'].includes(value.role) && typeof value.canonicalName === 'string'
+    && Array.isArray(value.localizedNames) && value.localizedNames.every((name) => isNormalizedFieldValue('titles', name));
+  if (fieldPath === 'castings') return hasExactKeys(value, ['characterId', 'creditedName', 'language', 'personId', 'roleType'])
+    && typeof value.characterId === 'string'
+    && typeof value.personId === 'string' && value.language === 'ja'
+    && ['MAIN', 'SUPPORTING'].includes(value.roleType) && typeof value.creditedName === 'string';
+  if (fieldPath === 'cover') return hasExactKeys(value, ['distributionStatus', 'rightsStatus', 'sourceUrl'])
+    && normalizedHttpUrl(value.sourceUrl) === value.sourceUrl
+    && value.rightsStatus === 'TEST_ONLY_UNKNOWN' && value.distributionStatus === 'PROHIBITED';
+  return false;
+}
+
+function finalize(record, normalized, overallState) {
+  const entriesByField = normalized.entries;
   const fieldStates = {};
   const fieldValues = [];
-  const values = {};
+  const summaries = {};
   for (const fieldPath of CANONICAL_FIELD_PATHS) {
     const isCollection = COLLECTION_FIELD_PATHS.includes(fieldPath);
-    const entries = overallState ? [] : uniqueEntries(entriesByField[fieldPath] ?? []);
+    const entries = overallState ? [] : uniqueEntries(entriesByField[fieldPath] ?? [], fieldPath);
     if (entries.length > 0) {
-      fieldStates[fieldPath] = 'VALUE';
-      values[fieldPath] = isCollection
-        ? entries.map(({ normalizedValue }) => normalizedValue)
-        : entries[0].normalizedValue;
-      for (const entry of entries) fieldValues.push({ fieldPath, ...entry, status: 'VALUE' });
+      const scalarConflict = !isCollection && entries.length > 1;
+      fieldStates[fieldPath] = scalarConflict ? 'CONFLICTED' : 'VALUE';
+      summaries[fieldPath] = isCollection
+        ? entries.map(({ normalizedValue }) => structuredClone(normalizedValue))
+        : entries.length === 1 ? structuredClone(entries[0].normalizedValue) : null;
+      for (const entry of entries) fieldValues.push({
+        fieldPath, rawValue: structuredClone(entry.rawValue),
+        normalizedValue: structuredClone(entry.normalizedValue), status: 'VALUE',
+      });
     } else {
       const state = overallState ?? 'SOURCE_NOT_AVAILABLE';
       fieldStates[fieldPath] = state;
-      values[fieldPath] = isCollection ? [] : null;
+      summaries[fieldPath] = isCollection ? [] : null;
       fieldValues.push({ fieldPath, rawValue: null, normalizedValue: null, status: state });
     }
   }
-  const releaseYear = values.startDate ? Number(values.startDate.slice(0, 4)) : null;
-  return Object.freeze({
+  fieldValues.sort((left, right) => compareText(left.fieldPath, right.fieldPath)
+    || compareText(stableStringify(left.normalizedValue), stableStringify(right.normalizedValue))
+    || compareText(stableStringify(left.rawValue), stableStringify(right.rawValue)));
+  const releaseYearEvidence = [...new Set(normalized.releaseYearEvidence.filter((year) => safeYear(year) !== null))]
+    .sort((left, right) => left - right);
+  return deepFrozenSnapshot({
     sourceRecordId: record.sourceRecordId,
     targetKey: record.targetKey,
     sourceId: record.sourceId,
     sourceEntityId: record.sourceEntityId,
     retrievedAt: record.fetchedAt,
-    releaseYear,
-    ...values,
-    fieldStates: Object.freeze(fieldStates),
-    fieldValues: Object.freeze(fieldValues.map((entry) => Object.freeze(entry))),
+    releaseYear: releaseYearEvidence.length === 1 ? releaseYearEvidence[0] : null,
+    releaseYearEvidence,
+    ...summaries,
+    fieldStates,
+    fieldValues,
   });
 }
 
-/** Converts one immutable SourceRecord into a source-neutral normalized candidate. */
-export function normalizeSourceRecord(record) {
-  if (!record || typeof record !== 'object' || typeof record.sourceRecordId !== 'string'
-    || typeof record.targetKey !== 'string' || typeof record.sourceId !== 'string'
-    || typeof record.sourceEntityId !== 'string' || typeof record.fetchedAt !== 'string'
-    || !record.payload || typeof record.payload !== 'object') throw schemaError();
-  const entries = record.sourceId === 'anilist' ? anilistFields(record)
+/** Converts one validated immutable SourceRecord into an independent normalized snapshot. */
+export function normalizeSourceRecord(input) {
+  const record = deepFrozenSnapshot(input);
+  const overallState = validateSourceRecord(record);
+  if (overallState) return finalize(record, { entries: {}, releaseYearEvidence: [] }, overallState);
+  const normalized = record.sourceId === 'anilist' ? anilistFields(record)
     : record.sourceId === 'wikidata' ? wikidataFields(record)
       : record.sourceId === 'anilife_public' ? anilifeFields(record) : null;
-  if (!entries) throw schemaError();
-  return finalize(record, entries);
+  if (!normalized) throw schemaError();
+  return finalize(record, normalized, null);
 }

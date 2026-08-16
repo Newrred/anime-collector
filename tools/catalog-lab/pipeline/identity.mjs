@@ -29,15 +29,34 @@ function targetNumber(target, names) {
   return null;
 }
 
+function candidateYears(candidate) {
+  if (Number.isSafeInteger(candidate?.releaseYear) && candidate.releaseYear >= 0) {
+    return [candidate.releaseYear];
+  }
+  return [...new Set((Array.isArray(candidate?.releaseYearEvidence)
+    ? candidate.releaseYearEvidence : []).filter((value) => Number.isSafeInteger(value) && value >= 0))];
+}
+
+function referenceNumbers(record, names) {
+  if (names.includes('releaseYear')) return candidateYears(record);
+  const value = targetNumber(record, names);
+  return value === null ? [] : [value];
+}
+
 function exactAniListReferenceNumbers({ target, referenceRecords, names }) {
   const targetAniListId = targetExternalId(target, 'anilist');
   const values = new Set((Array.isArray(referenceRecords) ? referenceRecords : [])
     .filter((record) => record?.sourceId === 'anilist'
       && record.targetKey === target.targetKey
       && candidateExternalId(record, 'anilist') === targetAniListId)
-    .map((record) => targetNumber(record, names)).filter((value) => value !== null));
+    .flatMap((record) => referenceNumbers(record, names)));
   return values.size === 1 ? { value: [...values][0], conflicted: false }
     : { value: null, conflicted: values.size > 1 };
+}
+
+function absenceOnly(candidate, status) {
+  return Array.isArray(candidate?.fieldValues) && candidate.fieldValues.length > 0
+    && candidate.fieldValues.every((field) => field?.status === status);
 }
 
 /** Applies only approved exact identity rules. Every non-exact outcome is sent to review. */
@@ -55,12 +74,23 @@ export function resolveIdentity({ target, candidate, sourceId, referenceRecords 
       : decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIST_ID_MISMATCH_V1');
   }
   if (sourceId === 'wikidata') {
+    if (absenceOnly(candidate, 'SOURCE_NOT_AVAILABLE')) {
+      return targetAniListId && candidate.sourceEntityId === `P8729:${targetAniListId}`
+        ? decision('MATCHED', 'EXACT_ID', 'WIKIDATA_ABSENCE_TARGET_V1')
+        : decision('PENDING_REVIEW', 'AMBIGUOUS', 'WIKIDATA_ID_MISMATCH_V1');
+    }
     return targetAniListId && candidateExternalId(candidate, 'anilist') === targetAniListId
       ? decision('MATCHED', 'EXACT_ID', 'WIKIDATA_P8729_V1')
       : decision('PENDING_REVIEW', 'AMBIGUOUS', 'WIKIDATA_ID_MISMATCH_V1');
   }
   if (sourceId !== 'anilife_public') {
     return decision('PENDING_REVIEW', 'AMBIGUOUS', 'IDENTITY_SOURCE_UNSUPPORTED_V1');
+  }
+
+  if (absenceOnly(candidate, 'NOT_FETCHED')) {
+    return candidate.sourceEntityId === 'UNBOUND'
+      ? decision('MATCHED', 'EXACT_RULE', 'ANILIFE_UNBOUND_TARGET_V1')
+      : decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_INSUFFICIENT_EVIDENCE_V1');
   }
 
   if (candidate.exactTitleCandidateCount > 1) {
@@ -80,7 +110,11 @@ export function resolveIdentity({ target, candidate, sourceId, referenceRecords 
   }
   const targetYear = targetNumber(target, ['releaseYear', 'seedReleaseYear', 'seasonYear'])
     ?? referenceYear.value;
-  const candidateYear = targetNumber(candidate, ['releaseYear', 'seasonYear']);
+  const candidateYearEvidence = candidateYears(candidate);
+  if (candidateYearEvidence.length > 1) {
+    return decision('PENDING_REVIEW', 'AMBIGUOUS', 'ANILIFE_REFERENCE_CONFLICT_V1');
+  }
+  const candidateYear = candidateYearEvidence[0] ?? null;
   if (targetYear !== null && candidateYear !== null) {
     return targetYear === candidateYear
       ? decision('MATCHED', 'EXACT_RULE', 'ANILIFE_TITLE_YEAR_V1')

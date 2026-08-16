@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { stableStringify } from '../../tools/catalog-lab/lib/hash.mjs';
+import { sha256, stableStringify } from '../../tools/catalog-lab/lib/hash.mjs';
+import { toPathKey } from '../../tools/catalog-lab/lib/path-key.mjs';
+import genreConfig from '../../tools/catalog-lab/config/core-genre-map.json' with { type: 'json' };
+import sourceRegistry from '../../tools/catalog-lab/config/source-registry.json' with { type: 'json' };
 import {
   CORE_GENRES,
   FIELD_STATES,
@@ -29,22 +32,71 @@ const target = Object.freeze({
   episodeCount: 26,
 });
 
-function sourceRecord(sourceId, payload, overrides = {}) {
-  return {
-    sourceRecordId: `${sourceId}-record`,
-    targetKey: target.targetKey,
-    sourceId,
-    sourceEntityId: sourceId === 'anilist' ? '1' : sourceId === 'wikidata' ? 'Q1' : '101',
-    fetchStatus: 'FETCHED',
-    fetchedAt: '2026-08-17T01:02:03.000Z',
-    requestFingerprint: `${sourceId}:fixture`,
-    responseStatus: 200,
-    payloadHash: `${sourceId}-payload-hash`,
-    parserVersion: `${sourceId}-v1`,
-    rawPayloadRef: `raw/${sourceId}/record.json`,
-    payload,
-    ...overrides,
+function sourceRecord(sourceId, inputPayload, overrides = {}) {
+  const successDefaults = {
+    anilist: {
+      id: 1, idMal: null, title: { romaji: null, english: null, native: null }, synonyms: [],
+      format: null, status: null, startDate: { year: null, month: null, day: null },
+      endDate: { year: null, month: null, day: null }, season: null, seasonYear: null,
+      episodes: null, source: null, genres: [], coverImage: {}, studios: { nodes: [] },
+      relations: { edges: [] }, externalLinks: [], characters: [],
+    },
+    wikidata: {
+      externalIds: {}, labels: {}, aliases: {},
+      claims: { P8729: [{ mainsnak: { datavalue: { value: '1', type: 'string' } } }] },
+      sitelinks: {},
+    },
+    anilife_public: {
+      contentId: '101', title: null, alternateName: null, datePublished: null,
+      numberOfEpisodes: null, imageUrl: null, publicPageUrl: 'https://anilife1.tv/content/101',
+    },
   };
+  const isAbsence = inputPayload?.fieldState === 'NOT_FETCHED'
+    || inputPayload?.errorCode === 'SOURCE_NOT_AVAILABLE';
+  const defaults = structuredClone(successDefaults[sourceId] ?? {});
+  const payload = isAbsence ? structuredClone(inputPayload) : {
+    ...defaults,
+    ...structuredClone(inputPayload),
+    ...(sourceId === 'wikidata' ? {
+      claims: { ...defaults.claims, ...structuredClone(inputPayload.claims ?? {}) },
+    } : {}),
+  };
+  const sourceEntityId = overrides.sourceEntityId
+    ?? (sourceId === 'anilist' ? '1' : sourceId === 'wikidata' ? 'Q1' : '101');
+  const responseStatus = overrides.responseStatus ?? 200;
+  const envelopeIdentity = {
+    sourceId,
+    targetKey: overrides.targetKey ?? target.targetKey,
+    sourceEntityId,
+    responseStatus,
+    requestFingerprint: overrides.requestFingerprint ?? `${sourceId}:fixture`,
+    parserVersion: overrides.parserVersion ?? `${sourceId}-v1`,
+    payload,
+  };
+  const sourceRecordId = overrides.sourceRecordId ?? sha256(envelopeIdentity);
+  return {
+    sourceRecordId,
+    targetKey: envelopeIdentity.targetKey,
+    sourceId,
+    sourceEntityId,
+    fetchStatus: overrides.fetchStatus
+      ?? (responseStatus >= 200 && responseStatus < 300 ? 'FETCHED' : 'FAILED_PERMANENT'),
+    fetchedAt: overrides.fetchedAt ?? '2026-08-17T01:02:03.000Z',
+    requestFingerprint: envelopeIdentity.requestFingerprint,
+    responseStatus,
+    payloadHash: overrides.payloadHash ?? sha256(payload),
+    parserVersion: envelopeIdentity.parserVersion,
+    rawPayloadRef: overrides.rawPayloadRef
+      ?? `raw/${toPathKey(sourceId)}/${toPathKey(envelopeIdentity.targetKey)}/${sourceRecordId}.json`,
+    payload,
+  };
+}
+
+function assertDeepFrozen(value, seen = new Set()) {
+  if (value === null || typeof value !== 'object' || seen.has(value)) return;
+  seen.add(value);
+  assert.equal(Object.isFrozen(value), true);
+  for (const child of Object.values(value)) assertDeepFrozen(child, seen);
 }
 
 test('normalization exports the explicit finite vocabularies', () => {
@@ -68,6 +120,7 @@ test('normalization exports the explicit finite vocabularies', () => {
     'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery',
     'Romance', 'Sci-Fi', 'Slice of Life', 'Sports', 'Supernatural', 'Thriller',
   ]);
+  assert.deepEqual(CORE_GENRES, genreConfig.genres);
 });
 
 test('AniList normalization applies Unicode NFKC, enum maps, core genres and preserves zero', () => {
@@ -199,7 +252,7 @@ test('Wikidata normalization accepts signed precision-day timestamps without los
   assert.equal(normalized.startDate, '1998-04-03');
   assert.equal(normalized.releaseYear, 1998);
   const claimInput = normalized.fieldValues.find((row) => row.fieldPath === 'startDate');
-  assert.equal(claimInput.rawValue, '+1998-04-03T00:00:00Z');
+  assert.deepEqual(claimInput.rawValue, timeValue);
   assert.equal(claimInput.normalizedValue, '1998-04-03');
 });
 
@@ -212,7 +265,7 @@ test('Wikidata date normalization keeps the raw value paired with the selected v
     ] }, sitelinks: {},
   }));
   const claimInput = normalized.fieldValues.find((row) => row.fieldPath === 'startDate');
-  assert.equal(claimInput.rawValue, '+1998-04-03T00:00:00Z');
+  assert.deepEqual(claimInput.rawValue, { time: '+1998-04-03T00:00:00Z', precision: 11 });
   assert.equal(claimInput.normalizedValue, '1998-04-03');
 });
 
@@ -340,7 +393,7 @@ test('FieldClaims have deterministic IDs and preserve raw provenance for every c
     && claim.normalizedValue.locale === 'und');
   assert.deepEqual(titleClaim.rawValue, { locale: 'und', value: '  Ｃｏｗｂｏｙ Bebop ' });
   assert.equal(titleClaim.sourceId, 'anilife_public');
-  assert.equal(titleClaim.sourceRecordId, 'anilife_public-record');
+  assert.equal(titleClaim.sourceRecordId, normalized.sourceRecordId);
   assert.equal(titleClaim.retrievedAt, '2026-08-17T01:02:03.000Z');
   assert.equal(titleClaim.confidenceClass, 'EXACT_RULE');
   assert.equal(titleClaim.ruleId, 'ANILIFE_TITLE_YEAR_V1');
@@ -424,7 +477,7 @@ test('conflicting episode counts remain conflicted while source absence does not
   const claims = buildFieldClaims({ target, normalizedRecords: [anilist, anilifeConflict] });
   const episodeClaims = claims.filter((row) => row.fieldPath === 'episodeCount');
   assert.deepEqual(episodeClaims.map((row) => row.normalizedValue).sort((a, b) => a - b), [0, 26]);
-  assert.equal(episodeClaims.every((row) => row.status === 'CONFLICTED'), true);
+  assert.equal(episodeClaims.every((row) => row.status === 'VALUE'), true);
 
   const unavailable = normalizeSourceRecord(sourceRecord('anilife_public', {
     contentId: '101', title: 'Cowboy Bebop', datePublished: '1998-04-03', numberOfEpisodes: null,
@@ -501,9 +554,367 @@ test('canonical content hash changes when a claim value changes but not when cla
   const reordered = buildCanonicalRevision([...claims].reverse());
   assert.equal(first.revision.contentHash, reordered.revision.contentHash);
 
-  const changedClaims = claims.map((claim) => claim.fieldPath === 'episodeCount'
-    ? { ...claim, normalizedValue: 25, rawValue: 25 }
-    : claim);
-  const changed = buildCanonicalRevision(changedClaims);
+  const changedNormalized = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: '1998-04-03', numberOfEpisodes: 25,
+  }));
+  const changed = buildCanonicalRevision(buildFieldClaims({
+    target, normalizedRecords: [changedNormalized],
+  }));
   assert.notEqual(first.revision.contentHash, changed.revision.contentHash);
+});
+
+test('source claims stay immutable when a later source introduces a scalar conflict', () => {
+  const anilist = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' }, episodes: 26,
+  }));
+  const anilife = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: '1998-04-03', numberOfEpisodes: 24,
+  }));
+  const partialClaims = buildFieldClaims({ target, normalizedRecords: [anilist] });
+  const completeClaims = buildFieldClaims({ target, normalizedRecords: [anilist, anilife] });
+  const partialEpisode = partialClaims.find((claim) => claim.fieldPath === 'episodeCount');
+  const rebuiltEpisode = completeClaims.find((claim) => claim.claimId === partialEpisode.claimId);
+  assert.deepEqual(rebuiltEpisode, partialEpisode);
+  assert.equal(partialEpisode.status, 'VALUE');
+
+  const canonical = buildCanonicalRevision([...partialClaims, ...completeClaims]);
+  assert.deepEqual(canonical.episodeCount, { state: 'CONFLICTED', values: [24, 26] });
+});
+
+test('canonical rights derive from authoritative claim policy and reject policy spoofing', () => {
+  const policyBySource = Object.fromEntries(sourceRegistry.map((row) => [row.sourceId, row.catalogPromotion]));
+  const anilist = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' },
+  }));
+  const anilistClaims = buildFieldClaims({ target, normalizedRecords: [anilist] });
+  assert.equal(anilistClaims.every((claim) => (
+    claim.catalogPromotion === policyBySource.anilist
+  )), true);
+  assert.equal(buildCanonicalRevision(anilistClaims).distributionStatus, 'PROHIBITED');
+
+  const wikidata = normalizeSourceRecord(sourceRecord('wikidata', {
+    externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+  }));
+  const [wikidataClaim] = buildFieldClaims({ target, normalizedRecords: [wikidata] });
+  assert.throws(() => buildCanonicalRevision([
+    { ...wikidataClaim, catalogPromotion: 'PROHIBITED' },
+  ]), { code: 'FIELD_CLAIM_SOURCE_POLICY_INVALID' });
+  assert.throws(() => buildCanonicalRevision([
+    { ...wikidataClaim, sourceId: 'future_source', catalogPromotion: 'PROHIBITED' },
+  ]), { code: 'FIELD_CLAIM_SOURCE_POLICY_INVALID' });
+});
+
+test('collection natural-key collisions are conflicted and totally ordered', () => {
+  const firstRecord = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, idMal: 2, title: { romaji: 'Cowboy Bebop' },
+    studios: { nodes: [{ id: 14, name: 'Sunrise', isAnimationStudio: true }] },
+    relations: { edges: [{
+      relationType: 'SEQUEL', node: { id: 3, type: 'ANIME', title: { romaji: 'First' }, format: 'MOVIE' },
+    }] },
+    characters: [{
+      role: 'MAIN', node: { id: 10, name: { full: 'Spike', native: null, alternative: [] } },
+      voiceActors: [{
+        id: 20, name: { full: 'Actor A', native: null, alternative: [] }, language: 'JAPANESE',
+      }],
+    }],
+  }));
+  const secondRecord = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, idMal: 3, title: { romaji: 'Cowboy Bebop' },
+    studios: { nodes: [{ id: 14, name: 'Renamed Sunrise', isAnimationStudio: true }] },
+    relations: { edges: [{
+      relationType: 'SEQUEL', node: { id: 3, type: 'ANIME', title: { romaji: 'Second' }, format: 'MOVIE' },
+    }] },
+    characters: [{
+      role: 'SUPPORTING', node: { id: 10, name: { full: 'Spike Spiegel', native: null, alternative: [] } },
+      voiceActors: [{
+        id: 20, name: { full: 'Actor B', native: null, alternative: [] }, language: 'JAPANESE',
+      }],
+    }],
+  }));
+  const claims = buildFieldClaims({ target, normalizedRecords: [firstRecord, secondRecord] });
+  const forward = buildCanonicalRevision(claims);
+  const reverse = buildCanonicalRevision([...claims].reverse());
+  assert.equal(stableStringify(forward), stableStringify(reverse));
+  for (const fieldPath of ['externalIds', 'studios', 'relations', 'characters', 'castings']) {
+    assert.equal(forward[fieldPath].state, 'CONFLICTED', fieldPath);
+    assert.equal(forward[fieldPath].values.length >= 2, true, fieldPath);
+  }
+});
+
+test('Wikidata preserves every valid scalar candidate before canonical conflict assessment', () => {
+  const firstDate = { time: '+1998-04-03T00:00:00Z', precision: 11 };
+  const secondDate = { time: '+1999-04-03T00:00:00Z', precision: 11 };
+  const normalized = normalizeSourceRecord(sourceRecord('wikidata', {
+    externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+    claims: {
+      P577: [
+        { mainsnak: { datavalue: { value: firstDate, type: 'time' } } },
+        { mainsnak: { datavalue: { value: secondDate, type: 'time' } } },
+      ],
+      P856: [
+        { mainsnak: { datavalue: { value: 'https://example.test/one', type: 'string' } } },
+        { mainsnak: { datavalue: { value: 'https://example.test/two', type: 'string' } } },
+      ],
+    },
+  }));
+  assert.deepEqual(normalized.fieldValues.filter((row) => row.fieldPath === 'startDate')
+    .map((row) => row.normalizedValue), ['1998-04-03', '1999-04-03']);
+  assert.deepEqual(normalized.fieldValues.filter((row) => row.fieldPath === 'officialSiteUrl')
+    .map((row) => row.normalizedValue), ['https://example.test/one', 'https://example.test/two']);
+  const canonical = buildCanonicalRevision(buildFieldClaims({ target, normalizedRecords: [normalized] }));
+  assert.equal(canonical.startDate.state, 'CONFLICTED');
+  assert.equal(canonical.officialSiteUrl.state, 'CONFLICTED');
+});
+
+test('partial-year evidence supports exact AniLife matching without inventing a full date', () => {
+  const manifestTarget = {
+    targetKey: target.targetKey,
+    moemoaAnimeId: target.moemoaAnimeId,
+    seedExternalIds: target.seedExternalIds,
+    seedTitles: target.seedTitles,
+  };
+  const anilist = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' }, seasonYear: 1998,
+    startDate: { year: 1998, month: null, day: null },
+  }));
+  const anilife = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: '1998', numberOfEpisodes: 26,
+  }));
+  assert.deepEqual(anilist.releaseYearEvidence, [1998]);
+  assert.deepEqual(anilife.releaseYearEvidence, [1998]);
+  assert.equal(anilife.startDate, null);
+  assert.deepEqual(resolveIdentity({
+    target: manifestTarget, candidate: anilife, sourceId: 'anilife_public',
+    referenceRecords: [anilist],
+  }), { status: 'MATCHED', confidenceClass: 'EXACT_RULE', ruleId: 'ANILIFE_TITLE_YEAR_V1' });
+
+  const conflictingReference = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' }, seasonYear: 1999,
+    startDate: { year: 1998, month: 4, day: 3 },
+  }));
+  assert.deepEqual(resolveIdentity({
+    target: manifestTarget, candidate: anilife, sourceId: 'anilife_public',
+    referenceRecords: [conflictingReference],
+  }), {
+    status: 'PENDING_REVIEW', confidenceClass: 'AMBIGUOUS', ruleId: 'ANILIFE_REFERENCE_CONFLICT_V1',
+  });
+});
+
+test('SourceRecord validation rejects integrity, state and per-source payload drift', () => {
+  const validAniList = sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } });
+  const cases = [
+    { name: 'payload hash', record: { ...validAniList, payloadHash: '0'.repeat(64) }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
+    { name: 'record id', record: { ...validAniList, sourceRecordId: '0'.repeat(64) }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
+    { name: 'raw ref', record: { ...validAniList, rawPayloadRef: 'raw/anilist/wrong.json' }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
+    {
+      name: '5xx with values',
+      record: sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } }, {
+        responseStatus: 500, fetchStatus: 'FAILED_PERMANENT',
+      }),
+      code: 'SOURCE_RECORD_STATE_INVALID',
+    },
+    {
+      name: 'AniLife schema drift',
+      record: sourceRecord('anilife_public', {
+        contentId: '101', title: 'Cowboy Bebop', errorCode: 'SOURCE_SCHEMA_DRIFT',
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'malformed collection',
+      record: sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' }, synonyms: {} }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'mismatched P8729',
+      record: sourceRecord('wikidata', {
+        externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+        claims: { P8729: [{ mainsnak: { datavalue: { value: '2', type: 'string' } } }] },
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'P8729 bound to another target',
+      record: sourceRecord('wikidata', {
+        externalIds: { anilist: '2' }, labels: { en: 'Cowboy Bebop' },
+        claims: { P8729: [{ mainsnak: { datavalue: { value: '2', type: 'string' } } }] },
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'nested AniList schema drift',
+      record: sourceRecord('anilist', {
+        id: 1, title: { romaji: 'Cowboy Bebop', unexpected: 'drift' },
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+    {
+      name: 'malformed Wikidata scalar candidate',
+      record: sourceRecord('wikidata', {
+        externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+        claims: { P577: [{ mainsnak: { datavalue: { value: { precision: 11 }, type: 'time' } } }] },
+      }),
+      code: 'SOURCE_SCHEMA_DRIFT',
+    },
+  ];
+  for (const { name, record, code } of cases) {
+    assert.throws(() => normalizeSourceRecord(record), { code }, name);
+  }
+  let payloadGetterInvoked = false;
+  const accessorRecord = sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } });
+  Object.defineProperty(accessorRecord.payload.title, 'romaji', {
+    enumerable: true,
+    get() { payloadGetterInvoked = true; return 'Cowboy Bebop'; },
+  });
+  assert.throws(() => normalizeSourceRecord(accessorRecord), { code: 'SOURCE_SCHEMA_DRIFT' });
+  assert.equal(payloadGetterInvoked, false);
+});
+
+test('source-specific absence binding rejects wrong-target and unsupported records', () => {
+  const wrongWikidata = sourceRecord('wikidata', {
+    errorCode: 'SOURCE_NOT_AVAILABLE', externalIds: { anilist: '1' },
+  }, { sourceEntityId: 'P8729:2', responseStatus: 404, fetchStatus: 'FAILED_PERMANENT' });
+  assert.throws(() => normalizeSourceRecord(wrongWikidata), { code: 'SOURCE_SCHEMA_DRIFT' });
+
+  const unsupported = sourceRecord('unsupported_source', { fieldState: 'NOT_FETCHED' }, {
+    sourceEntityId: 'UNBOUND', responseStatus: 0, fetchStatus: 'FAILED_PERMANENT',
+  });
+  assert.throws(() => normalizeSourceRecord(unsupported), { code: 'SOURCE_SCHEMA_DRIFT' });
+});
+
+test('normalized and FieldClaim persistence inputs are strictly validated', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' },
+  }));
+  const malformedNormalized = structuredClone(normalized);
+  malformedNormalized.fieldValues.push({
+    fieldPath: 'unknownField', rawValue: 'x', normalizedValue: 'x', status: 'VALUE',
+  });
+  assert.throws(() => buildFieldClaims({
+    target, normalizedRecords: [malformedNormalized],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
+
+  const inconsistentState = structuredClone(normalized);
+  inconsistentState.fieldStates.titles = 'SOURCE_NOT_AVAILABLE';
+  inconsistentState.titles = [];
+  assert.throws(() => buildFieldClaims({
+    target, normalizedRecords: [inconsistentState],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
+
+  const extraValueKey = structuredClone(normalized);
+  extraValueKey.titles[0].unexpected = 'drift';
+  assert.throws(() => buildFieldClaims({
+    target, normalizedRecords: [extraValueKey],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
+
+  const mismatchedSourceEntity = structuredClone(normalized);
+  mismatchedSourceEntity.sourceEntityId = '2';
+  assert.throws(() => buildFieldClaims({
+    target, normalizedRecords: [mismatchedSourceEntity],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
+
+  let fieldGetterInvoked = false;
+  const accessorNormalized = structuredClone(normalized);
+  Object.defineProperty(accessorNormalized.fieldValues, 0, {
+    enumerable: true,
+    get() { fieldGetterInvoked = true; return normalized.fieldValues[0]; },
+  });
+  assert.throws(() => buildFieldClaims({
+    target, normalizedRecords: [accessorNormalized],
+  }), { code: 'NORMALIZED_RECORD_INVALID' });
+  assert.equal(fieldGetterInvoked, false);
+
+  const [claim] = buildFieldClaims({ target, normalizedRecords: [normalized] });
+  const invalidClaims = [
+    { ...claim, entityType: 'Person' },
+    { ...claim, fieldPath: 'unknownField' },
+    { ...claim, status: 'PUBLISHED' },
+    { ...claim, confidenceClass: 'SCORE_0_9' },
+    { ...claim, catalogPromotion: 'ALLOWED' },
+  ];
+  for (const invalid of invalidClaims) {
+    assert.throws(() => buildCanonicalRevision([invalid]), { code: 'FIELD_CLAIM_INVALID' });
+  }
+  assert.throws(() => buildCanonicalRevision([{ ...claim, normalizedValue: 'tampered' }]), {
+    code: 'FIELD_CLAIM_ID_INVALID',
+  });
+});
+
+test('normalized records, claims and canonical revisions are independent deep-frozen snapshots', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' },
+    characters: [{
+      role: 'MAIN', node: { id: 10, name: { full: 'Spike', native: null, alternative: [] } },
+      voiceActors: [],
+    }],
+  }));
+  const titleField = normalized.fieldValues.find((row) => row.fieldPath === 'titles');
+  assert.notEqual(normalized.titles[0], titleField.normalizedValue);
+  assertDeepFrozen(normalized);
+  assert.throws(() => { normalized.titles[0].value = 'mutated'; }, TypeError);
+
+  const claims = buildFieldClaims({ target, normalizedRecords: [normalized] });
+  const titleClaim = claims.find((claim) => claim.fieldPath === 'titles');
+  assert.notEqual(titleClaim.normalizedValue, normalized.titles[0]);
+  assertDeepFrozen(claims);
+  assert.throws(() => { titleClaim.normalizedValue.value = 'mutated'; }, TypeError);
+
+  const canonical = buildCanonicalRevision(claims);
+  assert.notEqual(canonical.titles.value[0], titleClaim.normalizedValue);
+  assertDeepFrozen(canonical);
+  assert.throws(() => { canonical.fieldProvenance[0].claimIds.push('mutated'); }, TypeError);
+});
+
+test('FieldClaim rawValue retains the complete projected evidence used by normalization', () => {
+  const timeValue = { time: '+1998-04-03T00:00:00Z', precision: 11, calendarmodel: 'Q1985727' };
+  const wikidata = normalizeSourceRecord(sourceRecord('wikidata', {
+    externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+    claims: {
+      P577: [{ mainsnak: { datavalue: { value: timeValue, type: 'time' } } }],
+      P136: [{ mainsnak: { datavalue: { value: { id: 'Q201658' }, type: 'wikibase-entityid' } } }],
+      P272: [{ mainsnak: { datavalue: { value: { id: 'Q312103' }, type: 'wikibase-entityid' } } }],
+    },
+  }));
+  assert.deepEqual(wikidata.fieldValues.find((row) => row.fieldPath === 'startDate').rawValue, timeValue);
+  assert.deepEqual(wikidata.fieldValues.find((row) => row.fieldPath === 'sourceGenres').rawValue,
+    { id: 'Q201658' });
+  assert.deepEqual(wikidata.fieldValues.find((row) => row.fieldPath === 'studios').rawValue,
+    { id: 'Q312103' });
+
+  const characterEdge = {
+    role: 'MAIN', node: { id: 10, name: { full: 'Spike', native: null, alternative: [] } },
+    voiceActors: [{
+      id: 20, name: { full: 'Actor', native: null, alternative: [] }, language: 'JAPANESE',
+    }],
+  };
+  const anilist = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' }, characters: [characterEdge],
+  }));
+  assert.deepEqual(anilist.fieldValues.find((row) => row.fieldPath === 'characters').rawValue, {
+    role: characterEdge.role, node: characterEdge.node,
+  });
+  assert.deepEqual(anilist.fieldValues.find((row) => row.fieldPath === 'castings').rawValue, {
+    character: { role: characterEdge.role, node: characterEdge.node },
+    voiceActor: characterEdge.voiceActors[0],
+  });
+});
+
+test('date and URL normalization are anchored and fail closed', () => {
+  const malformedDate = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: '1998-04-03garbage',
+    imageUrl: 'https://user:secret@example.test/cover.jpg',
+  }));
+  assert.equal(malformedDate.startDate, null);
+  assert.deepEqual(malformedDate.releaseYearEvidence, []);
+  assert.equal(malformedDate.cover, null);
+
+  const urls = normalizeSourceRecord(sourceRecord('wikidata', {
+    externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
+    claims: { P856: [
+      { mainsnak: { datavalue: { value: 'javascript:alert(1)', type: 'string' } } },
+      { mainsnak: { datavalue: { value: 'https://EXAMPLE.test:443/path', type: 'string' } } },
+    ] },
+  }));
+  assert.deepEqual(urls.fieldValues.filter((row) => row.fieldPath === 'officialSiteUrl')
+    .map((row) => row.normalizedValue), ['https://example.test/path']);
 });
