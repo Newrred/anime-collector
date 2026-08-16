@@ -1,3 +1,5 @@
+import { isAniLifeIdentityEvidence } from './normalize.mjs';
+
 export const CONFIDENCE_CLASSES = Object.freeze([
   'EXACT_ID', 'EXACT_RULE', 'REVIEWED', 'AMBIGUOUS',
 ]);
@@ -61,9 +63,9 @@ function absenceOnly(candidate, status) {
 
 function exactTitleCandidateCount(candidate) {
   const evidence = candidate?.identityEvidence;
-  return evidence?.version === 'IDENTITY_EVIDENCE_V1'
-    && evidence.evidenceSource === 'REVIEWED_LOCAL_BINDING'
-    && Number.isSafeInteger(evidence.exactTitleCandidateCount)
+  return isAniLifeIdentityEvidence(evidence, {
+    targetKey: candidate?.targetKey, contentId: candidate?.sourceEntityId,
+  })
     ? evidence.exactTitleCandidateCount : null;
 }
 

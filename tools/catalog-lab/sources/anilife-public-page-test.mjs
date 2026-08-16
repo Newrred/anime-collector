@@ -1,9 +1,17 @@
 import { createHttpClient } from '../lib/http.mjs';
+import { sha256, stableStringify } from '../lib/hash.mjs';
 
 const ANILIFE_ORIGIN = 'https://anilife1.tv';
 const SITEMAP_URL = `${ANILIFE_ORIGIN}/sitemap.xml`;
-const PARSER_VERSION = 'anilife-public-page-test-v1';
+const PARSER_VERSION = 'anilife-public-page-test-v2';
 const MANUAL_REVIEW_EVIDENCE = 'MANUAL_PUBLIC_PAGE_REVIEW';
+const IDENTITY_EVIDENCE_VERSION = 'ANILIFE_IDENTITY_EVIDENCE_V1';
+const IDENTITY_RULE = 'EXACT_TITLE_CANDIDATE_COUNT_V1';
+const CANDIDATE_COUNT_BASIS = 'MANUAL_EXACT_TITLE_CANDIDATE_REVIEW';
+const IDENTITY_EVIDENCE_KEYS = Object.freeze([
+  'candidateCountBasis', 'contentId', 'evidenceHash', 'exactTitleCandidateCount',
+  'reviewReference', 'reviewedAt', 'reviewedBy', 'ruleId', 'targetKey', 'version',
+]);
 const ALLOWED_JSON_LD_TYPES = new Set(['TVSeries', 'Movie', 'VideoObject']);
 const MAX_SITEMAP_BYTES = 5 * 1024 * 1024;
 
@@ -83,6 +91,41 @@ function ownDataValue(record, key) {
   const descriptor = Object.getOwnPropertyDescriptor(record, key);
   if (!descriptor || !Object.hasOwn(descriptor, 'value')) return undefined;
   return descriptor.value;
+}
+
+function hasExactKeys(value, keys) {
+  return isPlainRecord(value)
+    && stableStringify(Object.keys(value).sort()) === stableStringify([...keys].sort());
+}
+
+function exactIsoTimestamp(value) {
+  if (typeof value !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value)) return false;
+  try {
+    return new Date(value).toISOString() === value;
+  } catch {
+    return false;
+  }
+}
+
+function validatedIdentityEvidence(value, { targetKey, contentId }) {
+  if (value === undefined || value === null) return null;
+  const evidence = snapshotJsonRecord(value);
+  const { evidenceHash, ...content } = evidence;
+  if (!hasExactKeys(evidence, IDENTITY_EVIDENCE_KEYS)
+    || evidence.version !== IDENTITY_EVIDENCE_VERSION
+    || evidence.targetKey !== targetKey
+    || evidence.contentId !== contentId
+    || evidence.ruleId !== IDENTITY_RULE
+    || evidence.candidateCountBasis !== CANDIDATE_COUNT_BASIS
+    || !Number.isSafeInteger(evidence.exactTitleCandidateCount)
+    || evidence.exactTitleCandidateCount < 1
+    || !exactIsoTimestamp(evidence.reviewedAt)
+    || typeof evidence.reviewedBy !== 'string' || !evidence.reviewedBy.trim()
+    || typeof evidence.reviewReference !== 'string' || !evidence.reviewReference.trim()
+    || !/^[a-f0-9]{64}$/u.test(evidenceHash)
+    || evidenceHash !== sha256(content)) throw sourceSchemaDrift();
+  return Object.freeze(evidence);
 }
 
 function textValue(value) {
@@ -173,7 +216,7 @@ function openGraphValue(html, property) {
   return null;
 }
 
-function projectJsonLd(record, { contentId, publicPageUrl }) {
+function projectJsonLd(record, { contentId, publicPageUrl, identityEvidence }) {
   return {
     contentId,
     title: textValue(record.name),
@@ -182,12 +225,15 @@ function projectJsonLd(record, { contentId, publicPageUrl }) {
     numberOfEpisodes: episodeCount(record.numberOfEpisodes),
     imageUrl: imageValue(record.image),
     publicPageUrl,
+    identityEvidence,
   };
 }
 
-function parseAllowedPayload(html, { contentId, publicPageUrl }) {
+function parseAllowedPayload(html, { contentId, publicPageUrl, identityEvidence }) {
   const { record, schemaDrift } = parseJsonLd(html);
-  if (!schemaDrift && record) return projectJsonLd(record, { contentId, publicPageUrl });
+  if (!schemaDrift && record) return projectJsonLd(record, {
+    contentId, publicPageUrl, identityEvidence,
+  });
   const title = openGraphValue(html, 'og:title');
   const imageUrl = openGraphValue(html, 'og:image');
   if (!title && !imageUrl) throw sourceSchemaDrift();
@@ -196,6 +242,7 @@ function parseAllowedPayload(html, { contentId, publicPageUrl }) {
     ...(title ? { title } : {}),
     ...(imageUrl ? { imageUrl } : {}),
     publicPageUrl,
+    identityEvidence,
     errorCode: 'SOURCE_SCHEMA_DRIFT',
   });
 }
@@ -314,7 +361,7 @@ async function readSitemapBody(response) {
  * Validates one manually reviewed local binding. Content discovery and free-text lookup are
  * deliberately unsupported: this adapter accepts only a numeric, reviewed content id.
  */
-export function validateAniLifeBinding(binding) {
+export function validateAniLifeBinding(binding, { targetKey } = {}) {
   const snapshot = snapshotJsonRecord(binding);
   const evidence = ownDataValue(snapshot, 'evidence');
   const contentId = ownDataValue(snapshot, 'contentId');
@@ -323,7 +370,10 @@ export function validateAniLifeBinding(binding) {
     throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife content binding must be a numeric public content id');
   }
   contentPageUrl(contentId);
-  return Object.freeze({ contentId });
+  const identityEvidence = validatedIdentityEvidence(ownDataValue(snapshot, 'identityEvidence'), {
+    targetKey, contentId,
+  });
+  return Object.freeze(identityEvidence === null ? { contentId } : { contentId, identityEvidence });
 }
 
 function bindingForTarget(bindings, targetKey) {
@@ -372,7 +422,9 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
           yield unboundEnvelope({ target, clock });
           continue;
         }
-        const { contentId } = validateAniLifeBinding(foundBinding.binding);
+        const { contentId, identityEvidence = null } = validateAniLifeBinding(foundBinding.binding, {
+          targetKey: target.targetKey,
+        });
         const publicPageUrl = contentPageUrl(contentId);
         const sitemapResponse = await requestApprovedPublicPage(http, assertApprovedPublicUrl(SITEMAP_URL).href);
         const sitemap = await readSitemapBody(sitemapResponse);
@@ -392,7 +444,7 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
           fetchedAt: clock.now(),
           requestFingerprint: `public-content:${contentId}`,
           parserVersion: PARSER_VERSION,
-          payload: parseAllowedPayload(html, { contentId, publicPageUrl }),
+          payload: parseAllowedPayload(html, { contentId, publicPageUrl, identityEvidence }),
         });
       }
     },

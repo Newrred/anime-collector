@@ -1,6 +1,6 @@
 import { sha256, stableStringify } from '../lib/hash.mjs';
 import { CANONICAL_FIELD_PATHS, COLLECTION_FIELD_PATHS, deepFrozenSnapshot } from './normalize.mjs';
-import { validateFieldClaim } from './claims.mjs';
+import { authenticateFieldClaims } from './claims.mjs';
 
 function typedError(code, message) {
   const error = new Error(message);
@@ -101,8 +101,13 @@ function provenanceFor(fieldPath, claims) {
   return {
     fieldPath,
     claimIds: rows.map((claim) => claim.claimId),
+    claimVersions: rows.map((claim) => ({
+      claimId: claim.claimId,
+      contentHash: claim.contentIntegrity.contentHash,
+    })),
     claims: rows.map((claim) => ({
       claimId: claim.claimId,
+      contentHash: claim.contentIntegrity.contentHash,
       sourceId: claim.sourceId,
       sourceRecordId: claim.sourceRecordId,
       catalogPromotion: claim.catalogPromotion,
@@ -121,9 +126,19 @@ function frozenSnapshot(value) {
 }
 
 /** Rebuilds a complete deterministic CanonicalAnime revision without overwriting conflicts. */
-export function buildCanonicalRevision(inputClaims) {
-  const claims = frozenSnapshot(inputClaims);
-  if (!Array.isArray(claims) || claims.length === 0) {
+export function buildCanonicalRevision(input) {
+  let directClaims;
+  try {
+    directClaims = Array.isArray(input);
+  } catch {
+    throw typedError('FIELD_CLAIM_AUTH_INPUT_INVALID', 'Authenticated FieldClaim input is invalid');
+  }
+  if (directClaims) {
+    throw typedError('CANONICAL_CLAIMS_UNTRUSTED',
+      'Canonical revisions require claims authenticated against trusted SourceRecords');
+  }
+  const claims = frozenSnapshot(authenticateFieldClaims(input));
+  if (claims.length === 0) {
     throw typedError('CANONICAL_CLAIMS_REQUIRED', 'Canonical revision requires at least one FieldClaim');
   }
   const claimsById = new Map();
@@ -132,7 +147,6 @@ export function buildCanonicalRevision(inputClaims) {
     if (existing && stableStringify(existing) !== stableStringify(claim)) {
       throw typedError('FIELD_CLAIM_ID_COLLISION', 'Deterministic FieldClaim ID maps to different content');
     }
-    validateFieldClaim(claim);
     if (!existing) claimsById.set(claim.claimId, claim);
   }
   const uniqueClaims = [...claimsById.values()];

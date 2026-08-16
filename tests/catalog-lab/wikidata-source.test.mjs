@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
+import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
+import { normalizeSourceRecord } from '../../tools/catalog-lab/pipeline/normalize.mjs';
+import { storeSourceEnvelope } from '../../tools/catalog-lab/pipeline/raw-store.mjs';
 import { createWikidataAdapter } from '../../tools/catalog-lab/sources/wikidata.mjs';
 import { collectEnvelopes } from './helpers/collect-envelopes.mjs';
 
+const repoRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const fixture = (name) => readFile(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')
   .then(JSON.parse);
 const clock = Object.freeze({ now: () => '2026-08-17T00:00:00.000Z' });
@@ -19,6 +26,15 @@ function target(anilistId) {
 
 function requestValues(query) {
   return [...query.matchAll(/"(\d+)"/g)].map((match) => match[1]);
+}
+
+async function withWorkspace(run) {
+  const workspaceRoot = await mkdtemp(join(tmpdir(), 'moemoa-wikidata-integration-'));
+  try {
+    return await run(await openCatalogWorkspace({ repoRoot, workspaceRoot, create: true }));
+  } finally {
+    await rm(workspaceRoot, { recursive: true, force: true });
+  }
 }
 
 test('Wikidata maps exact P8729 values and projects only approved CC0 fields', async () => {
@@ -46,6 +62,8 @@ test('Wikidata maps exact P8729 values and projects only approved CC0 fields', a
   assert.equal(envelopes[0].payload.externalIds.anilist, '1');
   assert.equal(envelopes[0].payload.labels.ko, '카우보이 비밥');
   assert.deepEqual(Object.keys(envelopes[0].payload.claims), ['P8729', 'P856', 'P577', 'P136', 'P272']);
+  assert.deepEqual(envelopes[0].payload.claims.P856[1].mainsnak, { snaktype: 'somevalue' });
+  assert.deepEqual(envelopes[0].payload.claims.P136[1].mainsnak, { snaktype: 'novalue' });
   assert.deepEqual(Object.keys(envelopes[0].payload.labels).sort(), ['en', 'ja', 'ko']);
   assert.deepEqual(Object.keys(envelopes[0].payload.aliases).sort(), ['en', 'ko']);
   assert.deepEqual(envelopes[0].payload.sitelinks, entities.entities.Q101244908.sitelinks);
@@ -60,6 +78,49 @@ test('Wikidata maps exact P8729 values and projects only approved CC0 fields', a
   assert.equal(api.init.headers['user-agent'], userAgent);
   assert.equal(requests.some(({ url }) => url.includes('wbsearchentities')), false);
   assert.equal(requests.some(({ url }) => /search|title=/i.test(url)), false);
+});
+
+test('Wikidata adapter envelope stores and normalizes its explicit snak union without rewriting', async () => {
+  await withWorkspace(async (workspace) => {
+    const [mapping, entities] = await Promise.all([
+      fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+    ]);
+    const http = {
+      async request({ url }) {
+        return new Response(JSON.stringify(url.startsWith('https://query.wikidata.org/')
+          ? { ...mapping, results: { bindings: [mapping.results.bindings[0]] } }
+          : entities), { status: 200 });
+      },
+    };
+    const [envelope] = await collectEnvelopes(createWikidataAdapter({ userAgent }), {
+      targets: [target(1)], http, workspace, clock,
+    });
+    assert.equal(envelope.payload.claims.P8729[0].mainsnak.snaktype, 'value');
+    const stored = await storeSourceEnvelope({ workspace, envelope });
+    const record = JSON.parse(await readFile(stored.path, 'utf8'));
+    const normalized = normalizeSourceRecord(record);
+    assert.equal(normalized.externalIds.some((id) => id.sourceId === 'wikidata'
+      && id.value === 'Q101244908'), true);
+    assert.equal(normalized.startDate, '1998-04-03');
+  });
+});
+
+test('Wikidata adapter rejects value claims without an explicit snaktype', async () => {
+  const [mapping, entities] = await Promise.all([
+    fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+  ]);
+  const malformed = structuredClone(entities);
+  delete malformed.entities.Q101244908.claims.P8729[0].mainsnak.snaktype;
+  const http = {
+    async request({ url }) {
+      return new Response(JSON.stringify(url.startsWith('https://query.wikidata.org/')
+        ? { ...mapping, results: { bindings: [mapping.results.bindings[0]] } }
+        : malformed), { status: 200 });
+    },
+  };
+  await assert.rejects(collectEnvelopes(createWikidataAdapter({ userAgent }), {
+    targets: [target(1)], http, workspace: {}, clock,
+  }), { code: 'SOURCE_SCHEMA_DRIFT' });
 });
 
 test('Wikidata keeps WDQS at 25 IDs and wbgetentities at 50 QIDs', async () => {
@@ -88,7 +149,7 @@ test('Wikidata keeps WDQS at 25 IDs and wbgetentities at 50 QIDs', async () => {
         const entities = Object.fromEntries(ids.map((qid) => [qid, {
           ...structuredClone(baseEntities.entities.Q101244908),
           id: qid,
-          claims: { P8729: [{ mainsnak: { datavalue: { value: String(Number(qid.slice(1)) - 100000000), type: 'string' } } }] },
+          claims: { P8729: [{ mainsnak: { snaktype: 'value', datavalue: { value: String(Number(qid.slice(1)) - 100000000), type: 'string' } } }] },
         }]));
         return new Response(JSON.stringify({ entities }), { status: 200 });
       }
@@ -149,7 +210,7 @@ test('Wikidata never records a rejected WDQS QID when the entity P8729 is missin
             ...entities.entities.Q101244908,
             claims: {
               ...entities.entities.Q101244908.claims,
-              P8729: [{ mainsnak: { datavalue: { value: '121', type: 'string' } } }],
+              P8729: [{ mainsnak: { snaktype: 'value', datavalue: { value: '121', type: 'string' } } }],
             },
           },
         },

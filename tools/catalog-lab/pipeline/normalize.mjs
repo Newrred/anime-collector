@@ -88,7 +88,11 @@ const ANILIST_KEYS = Object.freeze([
 const WIKIDATA_KEYS = Object.freeze(['aliases', 'claims', 'externalIds', 'labels', 'sitelinks']);
 const ANILIFE_KEYS = Object.freeze([
   'alternateName', 'contentId', 'datePublished', 'imageUrl', 'numberOfEpisodes', 'publicPageUrl',
-  'title',
+  'identityEvidence', 'title',
+]);
+const ANILIFE_IDENTITY_EVIDENCE_KEYS = Object.freeze([
+  'candidateCountBasis', 'contentId', 'evidenceHash', 'exactTitleCandidateCount',
+  'reviewReference', 'reviewedAt', 'reviewedBy', 'ruleId', 'targetKey', 'version',
 ]);
 const WIKIDATA_PROPERTIES = new Set(['P8729', 'P856', 'P577', 'P136', 'P272']);
 
@@ -184,6 +188,23 @@ export function isExactIsoTimestamp(value) {
   } catch {
     return false;
   }
+}
+
+export function isAniLifeIdentityEvidence(value, { targetKey, contentId } = {}) {
+  if (!hasExactKeys(value, ANILIFE_IDENTITY_EVIDENCE_KEYS)) return false;
+  const { evidenceHash, ...content } = value;
+  return value.version === 'ANILIFE_IDENTITY_EVIDENCE_V1'
+    && value.targetKey === targetKey
+    && value.contentId === contentId
+    && value.ruleId === 'EXACT_TITLE_CANDIDATE_COUNT_V1'
+    && value.candidateCountBasis === 'MANUAL_EXACT_TITLE_CANDIDATE_REVIEW'
+    && Number.isSafeInteger(value.exactTitleCandidateCount)
+    && value.exactTitleCandidateCount >= 1
+    && isExactIsoTimestamp(value.reviewedAt)
+    && typeof value.reviewedBy === 'string' && Boolean(value.reviewedBy.trim())
+    && typeof value.reviewReference === 'string' && Boolean(value.reviewReference.trim())
+    && /^[a-f0-9]{64}$/u.test(evidenceHash)
+    && evidenceHash === sha256(content);
 }
 
 function compareText(left, right) {
@@ -409,7 +430,10 @@ function validateAniLifePayload(record) {
     || !optionalString(payload.title) || !optionalString(payload.alternateName)
     || !optionalString(payload.datePublished) || !optionalString(payload.imageUrl)
     || !optionalString(payload.publicPageUrl) || (payload.numberOfEpisodes !== null
-      && payload.numberOfEpisodes !== undefined && safeInteger(payload.numberOfEpisodes) === null)) throw schemaError();
+      && payload.numberOfEpisodes !== undefined && safeInteger(payload.numberOfEpisodes) === null)
+    || !(payload.identityEvidence === null || isAniLifeIdentityEvidence(payload.identityEvidence, {
+      targetKey: record.targetKey, contentId: record.sourceEntityId,
+    }))) throw schemaError();
 }
 
 function targetAniListId(targetKey) {
@@ -582,7 +606,7 @@ function wikidataFields(record) {
   const missingEntry = (snak) => ({
     rawValue: snak.mainsnak,
     normalizedValue: null,
-    status: snak.snaktype === 'novalue' ? 'SOURCE_NOT_AVAILABLE' : 'NOT_FETCHED',
+    status: 'SOURCE_NOT_AVAILABLE',
   });
   const dateEntries = wikidataSnaks(payload, 'P577').map((snak) => {
     if (snak.snaktype !== 'value') return missingEntry(snak);
@@ -635,11 +659,7 @@ function anilifeFields(record) {
       } }] : [],
     },
     releaseYearEvidence: [rawYearEvidence(payload.datePublished)].filter(Boolean),
-    identityEvidence: {
-      version: 'IDENTITY_EVIDENCE_V1',
-      evidenceSource: 'REVIEWED_LOCAL_BINDING',
-      exactTitleCandidateCount: 1,
-    },
+    identityEvidence: payload.identityEvidence,
   };
 }
 

@@ -4,9 +4,11 @@ import {
   CANONICAL_FIELD_PATHS,
   COLLECTION_FIELD_PATHS,
   deepFrozenSnapshot,
+  isAniLifeIdentityEvidence,
   isExactIsoTimestamp,
   isNormalizedFieldValue,
   isPlainRecord,
+  normalizeSourceRecord,
 } from './normalize.mjs';
 import { CONFIDENCE_CLASSES, resolveIdentity } from './identity.mjs';
 
@@ -59,16 +61,11 @@ function normalizedInvalid() {
 }
 
 function validIdentityEvidence(record) {
-  if (record.identityEvidence === null) return record.sourceId !== 'anilife_public'
-    || record.sourceEntityId === 'UNBOUND';
+  if (record.identityEvidence === null) return true;
   return record.sourceId === 'anilife_public'
-    && hasExactKeys(record.identityEvidence, [
-      'evidenceSource', 'exactTitleCandidateCount', 'version',
-    ])
-    && record.identityEvidence.version === 'IDENTITY_EVIDENCE_V1'
-    && record.identityEvidence.evidenceSource === 'REVIEWED_LOCAL_BINDING'
-    && Number.isSafeInteger(record.identityEvidence.exactTitleCandidateCount)
-    && record.identityEvidence.exactTitleCandidateCount >= 1;
+    && isAniLifeIdentityEvidence(record.identityEvidence, {
+      targetKey: record.targetKey, contentId: record.sourceEntityId,
+    });
 }
 
 function normalizedSourceBindingValid(record) {
@@ -186,7 +183,7 @@ function claimContentHash(content) {
   return sha256({ version: CLAIM_INTEGRITY_VERSION, content });
 }
 
-/** Validates a persisted FieldClaim, including its authoritative policy and deterministic ID. */
+/** Validates FieldClaim schema/checksum drift; source authentication requires authenticateFieldClaims(). */
 export function validateFieldClaim(input) {
   const claim = frozenSnapshot(input, 'FIELD_CLAIM_INVALID');
   if (!hasExactKeys(claim, CLAIM_KEYS) || claim.entityType !== 'Anime'
@@ -284,4 +281,61 @@ export function buildFieldClaims(input) {
     }
   }
   return frozenSnapshot([...claimsById.values()].sort(claimOrder), 'FIELD_CLAIM_INVALID');
+}
+
+function uniquePersistedClaims(claims) {
+  const byId = new Map();
+  for (const claim of claims) {
+    if (!isPlainRecord(claim) || typeof claim.claimId !== 'string') throw claimInvalid();
+    const existing = byId.get(claim.claimId);
+    if (existing && stableStringify(existing) !== stableStringify(claim)) {
+      throw typedError('FIELD_CLAIM_ID_COLLISION', 'Deterministic FieldClaim ID maps to different content');
+    }
+    if (!existing) byId.set(claim.claimId, validateFieldClaim(claim));
+  }
+  return [...byId.values()].sort(claimOrder);
+}
+
+function uniqueNormalizedRecords(records, code) {
+  const byId = new Map();
+  for (const record of records) {
+    const existing = byId.get(record.sourceRecordId);
+    if (existing && stableStringify(existing) !== stableStringify(record)) {
+      throw typedError(code, 'SourceRecord identity maps to different normalized content');
+    }
+    if (!existing) byId.set(record.sourceRecordId, record);
+  }
+  return [...byId.values()].sort((left, right) => compareText(left.sourceRecordId, right.sourceRecordId));
+}
+
+/**
+ * Rebuilds claims from caller-trusted immutable SourceRecords and compares every persisted layer.
+ * FieldClaim contentIntegrity is a drift checksum; this reconstruction is the trust decision.
+ */
+export function authenticateFieldClaims(input) {
+  const request = frozenSnapshot(input, 'FIELD_CLAIM_AUTH_INPUT_INVALID');
+  if (!hasExactKeys(request, ['fieldClaims', 'normalizedRecords', 'sourceRecords', 'target'])
+    || !Array.isArray(request.sourceRecords) || request.sourceRecords.length === 0
+    || !Array.isArray(request.normalizedRecords) || !Array.isArray(request.fieldClaims)) {
+    throw typedError('FIELD_CLAIM_AUTH_INPUT_INVALID', 'Authenticated FieldClaim input is invalid');
+  }
+  const rebuiltRecords = uniqueNormalizedRecords(
+    request.sourceRecords.map((sourceRecord) => normalizeSourceRecord(sourceRecord)),
+    'SOURCE_RECORD_AUTHENTICATION_INVALID',
+  );
+  const persistedRecords = uniqueNormalizedRecords(
+    request.normalizedRecords.map((record) => validateNormalizedRecord(record)),
+    'NORMALIZED_RECORD_AUTHENTICATION_INVALID',
+  );
+  if (stableStringify(persistedRecords) !== stableStringify(rebuiltRecords)) {
+    throw typedError('NORMALIZED_RECORD_AUTHENTICATION_INVALID',
+      'Normalized records do not match trusted SourceRecords');
+  }
+  const rebuiltClaims = buildFieldClaims({ target: request.target, normalizedRecords: rebuiltRecords });
+  const persistedClaims = uniquePersistedClaims(request.fieldClaims);
+  if (stableStringify(persistedClaims) !== stableStringify(rebuiltClaims)) {
+    throw typedError('FIELD_CLAIM_AUTHENTICATION_INVALID',
+      'FieldClaims do not match claims rebuilt from trusted SourceRecords');
+  }
+  return rebuiltClaims;
 }

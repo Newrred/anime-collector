@@ -3,11 +3,15 @@ import { assertSourceEndpoint } from '../contracts/catalogContracts.mjs';
 
 const WDQS_URL = 'https://query.wikidata.org/sparql';
 const WIKIDATA_API_URL = 'https://www.wikidata.org/w/api.php';
-const PARSER_VERSION = 'wikidata-p8729-v1';
+const PARSER_VERSION = 'wikidata-p8729-v2';
 const WDQS_ANILIST_BATCH_SIZE = 25;
 const ENTITY_BATCH_SIZE = 50;
 const LANGUAGES = Object.freeze(['ko', 'ja', 'en']);
 const CLAIM_PROPERTIES = Object.freeze(['P8729', 'P856', 'P577', 'P136', 'P272']);
+const DATAVALUE_TYPES = Object.freeze({
+  P8729: 'string', P856: 'string', P577: 'time',
+  P136: 'wikibase-entityid', P272: 'wikibase-entityid',
+});
 
 function sourceSchemaDrift() {
   const error = new Error('Wikidata response does not match the requested target schema');
@@ -112,9 +116,33 @@ function projectLanguageValues(values, isAliases = false) {
 
 function projectClaims(claims) {
   if (!claims || typeof claims !== 'object') return {};
-  return Object.fromEntries(CLAIM_PROPERTIES
-    .filter((property) => Array.isArray(claims[property]))
-    .map((property) => [property, structuredClone(claims[property])]));
+  const projected = {};
+  for (const property of CLAIM_PROPERTIES) {
+    if (!(property in claims)) continue;
+    if (!Array.isArray(claims[property])) throw sourceSchemaDrift();
+    projected[property] = claims[property].map((claim) => {
+      const snak = claim?.mainsnak;
+      if (!claim || typeof claim !== 'object' || !snak || typeof snak !== 'object'
+        || !['value', 'novalue', 'somevalue'].includes(snak.snaktype)) throw sourceSchemaDrift();
+      if (snak.snaktype !== 'value') {
+        if (Object.hasOwn(snak, 'datavalue')) throw sourceSchemaDrift();
+        return structuredClone(claim);
+      }
+      if (!snak.datavalue || typeof snak.datavalue !== 'object'
+        || snak.datavalue.type !== DATAVALUE_TYPES[property]
+        || !Object.hasOwn(snak.datavalue, 'value')) throw sourceSchemaDrift();
+      const value = snak.datavalue.value;
+      const validValue = property === 'P8729' ? typeof value === 'string' && /^[1-9]\d*$/u.test(value)
+        : property === 'P856' ? typeof value === 'string'
+          : property === 'P577' ? value && typeof value === 'object'
+            && typeof value.time === 'string' && Number.isInteger(value.precision)
+            : value && typeof value === 'object' && typeof value.id === 'string'
+              && /^Q[1-9]\d*$/u.test(value.id);
+      if (!validValue) throw sourceSchemaDrift();
+      return structuredClone(claim);
+    });
+  }
+  return projected;
 }
 
 function projectSitelinks(sitelinks) {
@@ -124,9 +152,9 @@ function projectSitelinks(sitelinks) {
     .map(([key, sitelink]) => [key, { site: sitelink.site, title: sitelink.title }]));
 }
 
-function hasExactP8729(entity, anilistId) {
-  return Array.isArray(entity?.claims?.P8729) && entity.claims.P8729.some((claim) => (
-    claim?.mainsnak?.datavalue?.value === anilistId
+function hasExactP8729(claims, anilistId) {
+  return Array.isArray(claims?.P8729) && claims.P8729.some((claim) => (
+    claim.mainsnak.snaktype === 'value' && claim.mainsnak.datavalue.value === anilistId
   ));
 }
 
@@ -143,7 +171,7 @@ function sourceNotAvailableEnvelope({ target, anilistId, clock }) {
   });
 }
 
-function sourceEnvelope({ target, anilistId, qid, entity, clock }) {
+function sourceEnvelope({ target, anilistId, qid, entity, claims, clock }) {
   return Object.freeze({
     sourceId: 'wikidata',
     targetKey: target.targetKey,
@@ -156,7 +184,7 @@ function sourceEnvelope({ target, anilistId, qid, entity, clock }) {
       externalIds: { anilist: anilistId },
       labels: projectLanguageValues(entity.labels),
       aliases: projectLanguageValues(entity.aliases, true),
-      claims: projectClaims(entity.claims),
+      claims,
       sitelinks: projectSitelinks(entity.sitelinks),
     }),
   });
@@ -184,11 +212,12 @@ export function createWikidataAdapter({ userAgent, fetchImpl = globalThis.fetch 
       for (const { target, anilistId } of rows) {
         const qid = mappings.get(anilistId);
         const entity = qid ? entities.get(qid) : undefined;
-        if (!qid || !entity || !hasExactP8729(entity, anilistId)) {
+        const claims = entity ? projectClaims(entity.claims) : null;
+        if (!qid || !entity || !hasExactP8729(claims, anilistId)) {
           yield sourceNotAvailableEnvelope({ target, anilistId, clock });
           continue;
         }
-        yield sourceEnvelope({ target, anilistId, qid, entity, clock });
+        yield sourceEnvelope({ target, anilistId, qid, entity, claims, clock });
       }
     },
   });

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+import { sha256 } from '../../tools/catalog-lab/lib/hash.mjs';
 import {
   createAniLifePublicPageAdapter,
   validateAniLifeBinding,
@@ -30,6 +31,22 @@ function createFixtureHttp({ sitemap, content, requests }) {
   };
 }
 
+function reviewedIdentityEvidence(exactTitleCandidateCount, overrides = {}) {
+  const content = {
+    version: 'ANILIFE_IDENTITY_EVIDENCE_V1',
+    targetKey: 'ANILIST:1',
+    contentId: '1',
+    ruleId: 'EXACT_TITLE_CANDIDATE_COUNT_V1',
+    candidateCountBasis: 'MANUAL_EXACT_TITLE_CANDIDATE_REVIEW',
+    exactTitleCandidateCount,
+    reviewedAt: '2026-08-16T00:00:00.000Z',
+    reviewedBy: 'catalog-reviewer',
+    reviewReference: 'bindings/anilife.json#ANILIST:1',
+    ...overrides,
+  };
+  return { ...content, evidenceHash: sha256(content) };
+}
+
 test('AniLife adapter only fetches manually bound public content pages', async () => {
   const [sitemap, content] = await Promise.all([
     fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
@@ -52,6 +69,7 @@ test('AniLife adapter only fetches manually bound public content pages', async (
     numberOfEpisodes: 26,
     imageUrl: 'https://anilife1.tv/images/cowboy-bebop.jpg',
     publicPageUrl: 'https://anilife1.tv/content/1',
+    identityEvidence: null,
   });
   assert.deepEqual(requests, [
     'https://anilife1.tv/sitemap.xml',
@@ -86,6 +104,36 @@ test('AniLife requires a reviewed numeric binding and rejects API-shaped content
     () => validateAniLifeBinding({ contentId: '1', evidence: 'UNREVIEWED' }),
     { code: 'SOURCE_SCHEMA_DRIFT' },
   );
+});
+
+test('AniLife retains only target-bound hashed uniqueness evidence from the reviewed binding', async () => {
+  const identityEvidence = reviewedIdentityEvidence(2);
+  assert.deepEqual(validateAniLifeBinding({
+    contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW', identityEvidence,
+  }, { targetKey: target.targetKey }), {
+    contentId: '1', identityEvidence,
+  });
+
+  for (const malformed of [
+    reviewedIdentityEvidence(1, { targetKey: 'ANILIST:121' }),
+    { ...reviewedIdentityEvidence(1), evidenceHash: '0'.repeat(64) },
+  ]) {
+    assert.throws(() => validateAniLifeBinding({
+      contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW', identityEvidence: malformed,
+    }, { targetKey: target.targetKey }), { code: 'SOURCE_SCHEMA_DRIFT' });
+  }
+
+  const [sitemap, content] = await Promise.all([
+    fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
+  ]);
+  const requests = [];
+  const [envelope] = await collectEnvelopes(createAniLifePublicPageAdapter(), {
+    targets: [target], http: createFixtureHttp({ sitemap, content, requests }), workspace: {}, clock,
+    bindings: { 'ANILIST:1': {
+      contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW', identityEvidence,
+    } },
+  });
+  assert.deepEqual(envelope.payload.identityEvidence, identityEvidence);
 });
 
 test('AniLife rejects explicit falsey, inherited, and prototype-backed bindings before requests', async () => {
@@ -340,7 +388,7 @@ test('AniLife falls back to OpenGraph title and image while classifying malforme
   assert.equal(envelope.payload.imageUrl, 'https://anilife1.tv/images/cowboy-bebop.jpg?x=1&y=2');
   assert.equal(envelope.payload.errorCode, 'SOURCE_SCHEMA_DRIFT');
   assert.deepEqual(Object.keys(envelope.payload).sort(), [
-    'contentId', 'errorCode', 'imageUrl', 'publicPageUrl', 'title',
+    'contentId', 'errorCode', 'identityEvidence', 'imageUrl', 'publicPageUrl', 'title',
   ]);
 });
 
