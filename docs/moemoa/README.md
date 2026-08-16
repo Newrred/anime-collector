@@ -1,11 +1,11 @@
 # MOEMOA 문서 인덱스와 Source of Truth
 
-- 기준일: 2026-08-16
-- 현재 단계: **첫 Private Vertical Slice 진행 중 → Web-first Shared UI Readiness 설계 승인, 구현 계획 작성 전 사용자 문서 검토**
+- 기준일: 2026-08-17
+- 현재 단계: **로컬 카탈로그 랩 10→100 표본 설계 승인 → 구현 ExecPlan 작성 전 사용자 문서 검토**. Web-first Shared UI 설계는 승인 상태로 대기한다.
 
 이 파일은 문서를 찾기 위한 인덱스다. 제품 결정을 새로 만들지 않으며, 내용이 충돌할 때는 아래 source hierarchy를 따른다.
 
-빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [ADR-0002](adr/0002-memory-local-domain-and-owner-boundary.md) · [ADR-0003](adr/0003-android-image-intake-spike-toolchain.md) · [테스트 증거](reports/private-slice-test-evidence.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
+빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [ADR-0002](adr/0002-memory-local-domain-and-owner-boundary.md) · [ADR-0003](adr/0003-android-image-intake-spike-toolchain.md) · [테스트 증거](reports/private-slice-test-evidence.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
 
 ## 1. 먼저 읽을 것
 
@@ -39,7 +39,7 @@ reports/open-decision-questions.md
 | 6 | `reports/implementation-gap-analysis.md` | 확정 결정과 코드 사이의 Gap 분석과 권장 단계안. 승인된 ExecPlan은 아님 |
 | 7 | `reports/architecture-options.md`, `reports/open-decision-questions.md` | 기반 결정의 비교 이력과 아직 승인 전인 선택지를 함께 포함. 확정값은 항상 `01`/Decision Log에서 확인 |
 | 8 | `references/` | 리서치 배경과 과거 방향 기록 |
-| 9 | `docs/product/`, `docs/superpowers/`의 legacy 항목, 배포용 단일본/Word | legacy 또는 frozen snapshot. 단, `docs/superpowers/README.md`에서 `CURRENT_APPROVED_DESIGN`으로 분류한 설계서는 우선순위 4를 따름 |
+| 9 | `docs/product/`, `docs/superpowers/`의 legacy 항목, 배포용 단일본/Word | legacy 또는 frozen snapshot. 단, `docs/superpowers/README.md`에서 현행 승인 설계로 분류한 문서는 우선순위 4를 따름 |
 
 상위 자료와 하위 자료가 충돌하면 상위 자료를 우선한다. 코드와 확정 제품 결정이 충돌하면 코드를 사실로, 결정 문서를 목표로 기록하고 임의로 둘을 합치지 않는다.
 
@@ -77,6 +77,7 @@ reports/open-decision-questions.md
 | `07_QA_ANALYTICS_LAUNCH_OPERATIONS.md` | `CURRENT` | 테스트, privacy-safe analytics, 운영 기준. 베타 수치는 제안값 |
 | `08_CODEX_PHASE_RUNBOOK.md` | `CURRENT_GATED` | 승인된 local-first 실행 순서와 단계별 gate. 첫 slice 내부 Web-first UI 순서 포함 |
 | `09_CHANGE_CONTROL_AND_REPORTING.md` | `CURRENT` | Decision Log, ADR, 변경·테스트 보고 규칙 |
+| `../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 3,998개 target roster 기반 세 출처 로컬 10→100 표본 수집 설계. 전체 수집과 production 발행은 별도 gate |
 
 ## 5. 저장소 감사 산출물
 
