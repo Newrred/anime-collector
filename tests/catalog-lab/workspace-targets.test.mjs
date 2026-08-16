@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -31,6 +31,26 @@ test('workspace rejects a path inside the git worktree', async () => {
   );
 });
 
+test('workspace rejects case-variant and junction paths into the git worktree', async () => {
+  await assert.rejects(
+    openCatalogWorkspace({ repoRoot: repoRoot.toUpperCase(), workspaceRoot: join(repoRoot, '.cache', 'catalog') }),
+    { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
+  );
+
+  const outsideRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-junction-'));
+  const junctionRoot = join(outsideRoot, 'into-repository');
+  try {
+    await symlink(repoRoot, junctionRoot, 'junction');
+    await assert.rejects(
+      openCatalogWorkspace({ repoRoot, workspaceRoot: junctionRoot }),
+      { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
+    );
+  } finally {
+    await unlink(junctionRoot).catch(() => {});
+    await rm(outsideRoot, { recursive: true, force: true });
+  }
+});
+
 test('workspace creates and validates the catalog sentinel outside the repository', async () => {
   const workspaceRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-lab-'));
   try {
@@ -40,9 +60,21 @@ test('workspace creates and validates the catalog sentinel outside the repositor
       kind: 'MOEMOA_CATALOG_LAB',
       schemaVersion: 1,
     });
+    assert.throws(() => workspace.resolve('..', 'outside-workspace'), {
+      code: 'CATALOG_WORKSPACE_PATH_ESCAPE',
+    });
   } finally {
     await rm(workspaceRoot, { recursive: true, force: true });
   }
+});
+
+test('golden manifest does not require sample100 capacity', async () => {
+  const goldenOnlyRows = rows.filter((row) => goldenIds.includes(row.anilistId));
+  const manifest = await buildTargetManifest({
+    profile: 'golden', rows: goldenOnlyRows, idMapStore: new Map(), clock, uuid,
+  });
+
+  assert.deepEqual(manifest.map((row) => row.seedExternalIds[0].value), goldenIds);
 });
 
 test('golden manifest uses the approved ten ids and stable internal ids', async () => {
@@ -68,12 +100,56 @@ test('sample100 includes golden targets plus ninety deterministic unique selecti
 test('registry exposes four approved sources and blocks over-scope execution', async () => {
   const registry = await loadSourceRegistry({ repoRoot });
   assert.equal(registry.length, 4);
+  assert.deepEqual(registry.map((entry) => entry.executionScope), [
+    'TARGET_ROSTER_ONLY', 'LOCAL_TEST_MAX_100', 'LOCAL_SAMPLE_MAX_100', 'LOCAL_TEST_MAX_100',
+  ]);
+  assert.deepEqual(registry.find((entry) => entry.sourceId === 'anilife_public').blockedPaths,
+    ['/api/', '/archive', '/history', '/settings', '/login', '/notifications']);
   assert.doesNotThrow(() => assertSourceExecution(
     registry.find((entry) => entry.sourceId === 'anilist'), 100,
   ));
   assert.throws(() => assertSourceExecution(
     registry.find((entry) => entry.sourceId === 'anilife_public'), 101,
   ), { code: 'SOURCE_SCOPE_EXCEEDED' });
+  assert.throws(() => assertSourceExecution({
+    sourceId: 'unregistered', status: 'approved', executionScope: 'LOCAL_TEST_MAX_100',
+  }, 1), { code: 'SOURCE_NOT_REGISTERED' });
+});
+
+test('registry rejects entries missing required policy fields', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-registry-'));
+  const registryFile = join(fixtureRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json');
+  try {
+    await mkdir(dirname(registryFile), { recursive: true });
+    await writeFile(registryFile, JSON.stringify([{
+      sourceId: 'anilist',
+      status: 'approved',
+      executionScope: 'LOCAL_TEST_MAX_100',
+    }]));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('registry rejects source-specific blocked-path policy drift', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-registry-'));
+  const registryFile = join(fixtureRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json');
+  try {
+    const registry = JSON.parse(await readFile(
+      join(repoRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json'), 'utf8',
+    ));
+    registry.find((entry) => entry.sourceId === 'anilife_public').blockedPaths = ['/api/'];
+    await mkdir(dirname(registryFile), { recursive: true });
+    await writeFile(registryFile, JSON.stringify(registry));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
 });
 
 test('logical ids never become raw Windows path segments', () => {

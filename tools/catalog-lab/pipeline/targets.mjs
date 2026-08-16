@@ -15,14 +15,19 @@ function storeId(idMapStore, key, value) {
   else idMapStore[key] = value;
 }
 
-function selectSampleRows(rows, goldenIds) {
-  const goldenSet = new Set(goldenIds);
+function findGoldenRows(rows, goldenIds) {
   const goldenRows = goldenIds.map((id) => rows.find((row) => String(row.anilistId) === id));
   if (goldenRows.some((row) => !row)) {
     const error = new Error('Approved golden target is missing from the aliases roster');
     error.code = 'GOLDEN_TARGET_MISSING';
     throw error;
   }
+  return goldenRows;
+}
+
+function selectSampleRows(rows, goldenIds) {
+  const goldenSet = new Set(goldenIds);
+  const goldenRows = findGoldenRows(rows, goldenIds);
   const remaining = rows
     .filter((row) => !goldenSet.has(String(row.anilistId)))
     .sort((left, right) => Number(left.anilistId) - Number(right.anilistId));
@@ -68,7 +73,7 @@ function toTargetRecord(row, { idMapStore, clock, uuid }) {
 export async function buildTargetManifest({ profile, rows, idMapStore, clock, uuid }) {
   const goldenIds = await loadGoldenIds();
   const selectedRows = profile === 'golden'
-    ? selectSampleRows(rows, goldenIds).slice(0, goldenIds.length)
+    ? findGoldenRows(rows, goldenIds)
     : profile === 'sample100'
       ? selectSampleRows(rows, goldenIds)
       : null;
