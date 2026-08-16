@@ -43,6 +43,52 @@ async function quarantineCorruptRecord(path) {
   }
 }
 
+function waitForRepairLock() {
+  return new Promise((resolve) => setTimeout(resolve, 5));
+}
+
+async function acquireRepairLock(path, { onRepairLocked, onRepairWaiting } = {}) {
+  const lockPath = `${path}.repair.lock`;
+  let waiting = false;
+  while (true) {
+    try {
+      const file = await open(lockPath, 'wx');
+      try {
+        await onRepairLocked?.();
+      } catch (error) {
+        await file.close();
+        await rm(lockPath, { force: true });
+        throw error;
+      }
+      return async () => {
+        await file.close();
+        await rm(lockPath, { force: true });
+      };
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      if (!waiting) {
+        waiting = true;
+        await onRepairWaiting?.();
+      }
+      await waitForRepairLock();
+    }
+  }
+}
+
+async function publishRecord(directory, path, record) {
+  const temporaryPath = await writeDurableTemporaryRecord(directory, path, record);
+  try {
+    await link(temporaryPath, path);
+    await rm(temporaryPath);
+    await syncDirectory(directory);
+    return true;
+  } catch (error) {
+    await rm(temporaryPath, { force: true });
+    if (error.code === 'EEXIST') return false;
+    throw error;
+  }
+}
+
 async function syncDirectory(directory) {
   try {
     const handle = await open(directory, 'r');
@@ -56,7 +102,9 @@ async function syncDirectory(directory) {
   }
 }
 
-export async function storeSourceEnvelope({ workspace, envelope }) {
+export async function storeSourceEnvelope({
+  workspace, envelope, onRepairLocked, onRepairWaiting,
+}) {
   const sourceRecordId = sha256(sourceRecordIdentity(envelope));
   const sourcePath = toPathKey(envelope.sourceId);
   const targetPath = toPathKey(envelope.targetKey);
@@ -80,19 +128,23 @@ export async function storeSourceEnvelope({ workspace, envelope }) {
   };
   await mkdir(directory, { recursive: true });
   while (true) {
-    const temporaryPath = await writeDurableTemporaryRecord(directory, path, record);
-    try {
-      await link(temporaryPath, path);
-      await rm(temporaryPath);
-      await syncDirectory(directory);
+    if (await publishRecord(directory, path, record)) {
       return Object.freeze({ sourceRecordId, created: true, path });
-    } catch (error) {
-      await rm(temporaryPath, { force: true });
-      if (error.code !== 'EEXIST') throw error;
+    }
+    if (await isValidExistingRecord(path, sourceRecordId, record.payloadHash)) {
+      return Object.freeze({ sourceRecordId, created: false, path });
+    }
+    const releaseRepairLock = await acquireRepairLock(path, { onRepairLocked, onRepairWaiting });
+    try {
       if (await isValidExistingRecord(path, sourceRecordId, record.payloadHash)) {
         return Object.freeze({ sourceRecordId, created: false, path });
       }
       await quarantineCorruptRecord(path);
+      if (await publishRecord(directory, path, record)) {
+        return Object.freeze({ sourceRecordId, created: true, path });
+      }
+    } finally {
+      await releaseRepairLock();
     }
   }
 }

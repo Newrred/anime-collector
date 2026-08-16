@@ -35,6 +35,12 @@ function createEnvelope(payload = { id: 1, title: { native: 'Test title' } }) {
   };
 }
 
+function deferred() {
+  let resolve;
+  const promise = new Promise((next) => { resolve = next; });
+  return { promise, resolve };
+}
+
 test('stable serialization gives equivalent object key order the same SHA-256 hash', () => {
   assert.equal(stableStringify({ b: 2, a: { d: 4, c: 3 } }), '{"a":{"c":3,"d":4},"b":2}');
   assert.equal(sha256({ a: 1, b: 2 }), sha256({ b: 2, a: 1 }));
@@ -78,6 +84,49 @@ test('a corrupt content-addressed raw record is quarantined before a complete im
     assert.equal(record.payloadHash, sha256(envelope.payload));
     assert.deepEqual(record.payload, envelope.payload);
     assert.equal((await readdir(directory)).some((name) => name.includes('.corrupt.')), true);
+  });
+});
+
+test('competing corrupt-record repair never quarantines a valid publication', { timeout: 1000 }, async () => {
+  await withWorkspace(async (workspace) => {
+    const firstEnvelope = createEnvelope();
+    const secondEnvelope = { ...createEnvelope(), fetchedAt: '2026-08-17T00:01:00.000Z' };
+    const { fetchedAt, ...identity } = firstEnvelope;
+    const sourceRecordId = sha256(identity);
+    const directory = workspace.resolve('raw', 'anilist', 'anilist-1');
+    const path = workspace.resolve('raw', 'anilist', 'anilist-1', `${sourceRecordId}.json`);
+    const firstRepairLocked = deferred();
+    const releaseFirstRepair = deferred();
+    const secondRepairWaiting = deferred();
+    await mkdir(directory, { recursive: true });
+    await writeFile(path, '{"sourceRecordId":"partial"', 'utf8');
+
+    const first = storeSourceEnvelope({
+      workspace,
+      envelope: firstEnvelope,
+      onRepairLocked: async () => {
+        firstRepairLocked.resolve();
+        await releaseFirstRepair.promise;
+      },
+    });
+    await firstRepairLocked.promise;
+    const second = storeSourceEnvelope({
+      workspace,
+      envelope: secondEnvelope,
+      onRepairWaiting: async () => secondRepairWaiting.resolve(),
+    });
+    await secondRepairWaiting.promise;
+    releaseFirstRepair.resolve();
+
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+    const record = JSON.parse(await readFile(path, 'utf8'));
+    const quarantined = (await readdir(directory)).filter((name) => name.includes('.corrupt.'));
+
+    assert.equal(firstResult.created, true);
+    assert.equal(secondResult.created, false);
+    assert.equal(record.fetchedAt, firstEnvelope.fetchedAt);
+    assert.equal(quarantined.length, 1);
+    assert.equal((await readdir(directory)).some((name) => name.includes('.repair.lock')), false);
   });
 });
 
