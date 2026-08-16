@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -60,6 +60,27 @@ test('same envelope is stored once and changed content creates a new immutable r
   });
 });
 
+test('a corrupt content-addressed raw record is quarantined before a complete immutable revision is published', async () => {
+  await withWorkspace(async (workspace) => {
+    const envelope = createEnvelope();
+    const { fetchedAt, ...identity } = envelope;
+    const sourceRecordId = sha256(identity);
+    const directory = workspace.resolve('raw', 'anilist', 'anilist-1');
+    const path = workspace.resolve('raw', 'anilist', 'anilist-1', `${sourceRecordId}.json`);
+    await mkdir(directory, { recursive: true });
+    await writeFile(path, '{"sourceRecordId":"partial"', 'utf8');
+
+    const result = await storeSourceEnvelope({ workspace, envelope });
+    const record = JSON.parse(await readFile(path, 'utf8'));
+
+    assert.equal(result.created, true);
+    assert.equal(record.sourceRecordId, sourceRecordId);
+    assert.equal(record.payloadHash, sha256(envelope.payload));
+    assert.deepEqual(record.payload, envelope.payload);
+    assert.equal((await readdir(directory)).some((name) => name.includes('.corrupt.')), true);
+  });
+});
+
 test('state writes are atomic and an orphaned temporary file never replaces the checkpoint', async () => {
   await withWorkspace(async (workspace) => {
     const stateStore = createStateStore({ workspace });
@@ -100,6 +121,81 @@ test('429 honors Retry-After and stops after five retries', async (t) => {
   });
   assert.equal(fetchImpl.mock.callCount(), 6);
   assert.deepEqual(sleeps, [2000, 2000, 2000, 2000, 2000]);
+});
+
+test('HTTP request forwards the declared RequestInit unchanged', async () => {
+  const init = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: 'Bearer test' },
+    body: '{"query":"query Media"}',
+  };
+  let received;
+  const http = createHttpClient({
+    fetchImpl: async (url, requestInit) => {
+      received = { url, requestInit };
+      return new Response('{"data":{}}', { status: 200 });
+    },
+  });
+
+  await http.request({ url: 'https://example.test/graphql', init });
+  assert.equal(received.url, 'https://example.test/graphql');
+  assert.equal(received.requestInit, init);
+});
+
+function cancellableFailure(status, headers = {}) {
+  let cancelled = 0;
+  return {
+    ok: false,
+    status,
+    headers: new Headers(headers),
+    body: { cancel: async () => { cancelled += 1; } },
+    get cancelled() { return cancelled; },
+  };
+}
+
+test('every retried and terminal non-success response body is cancelled', async () => {
+  const responses = Array.from({ length: 5 }, () => cancellableFailure(503));
+  const retried = [...responses];
+  const http = createHttpClient({
+    fetchImpl: async () => retried.shift(), sleep: async () => {}, random: () => 0,
+  });
+
+  await assert.rejects(http.request({ url: 'https://example.test/retry' }), {
+    code: 'SOURCE_RETRY_EXHAUSTED',
+  });
+  assert.equal(retried.length, 0);
+  assert.deepEqual(responses.map((response) => response.cancelled), [1, 1, 1, 1, 1]);
+
+  const terminal = cancellableFailure(404);
+  await assert.rejects(createHttpClient({ fetchImpl: async () => terminal }).request({
+    url: 'https://example.test/missing',
+  }), { code: 'SOURCE_NOT_FOUND' });
+  assert.equal(terminal.cancelled, 1);
+});
+
+test('Retry-After accepts only delay-seconds or future HTTP dates and otherwise falls back to backoff', async () => {
+  const cases = [
+    { value: '2', expected: 2000 },
+    { value: 'Mon, 17 Aug 2026 00:00:02 GMT', expected: 2000 },
+    { value: '-1', expected: 500 },
+    { value: 'not a retry date', expected: 500 },
+    { value: 'Sun, 16 Aug 2026 23:59:59 GMT', expected: 500 },
+  ];
+  for (const { value, expected } of cases) {
+    const sleeps = [];
+    let call = 0;
+    const http = createHttpClient({
+      fetchImpl: async () => (++call === 1
+        ? new Response('', { status: 429, headers: { 'Retry-After': value } })
+        : new Response('', { status: 200 })),
+      sleep: async (milliseconds) => sleeps.push(milliseconds),
+      random: () => 0,
+      now: () => Date.parse('Mon, 17 Aug 2026 00:00:00 GMT'),
+    });
+
+    await http.request({ url: 'https://example.test/rate-limit' });
+    assert.deepEqual(sleeps, [expected], value);
+  }
 });
 
 test('404 is not retried', async (t) => {

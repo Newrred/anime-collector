@@ -25,10 +25,28 @@ function sourceError(code, { status, cause } = {}) {
 function retryAfterMilliseconds(response, now) {
   const value = response.headers?.get('retry-after');
   if (!value) return null;
-  const seconds = Number(value);
-  if (Number.isFinite(seconds) && seconds >= 0) return Math.round(seconds * 1000);
-  const date = Date.parse(value);
-  return Number.isNaN(date) ? null : Math.max(0, date - now());
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = Number(trimmed);
+    return Number.isSafeInteger(seconds) ? seconds * 1000 : null;
+  }
+  if (!/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/.test(trimmed)) {
+    return null;
+  }
+  const timestamp = Date.parse(trimmed);
+  const current = now();
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toUTCString() !== trimmed || timestamp <= current) {
+    return null;
+  }
+  return timestamp - current;
+}
+
+async function discardResponse(response) {
+  try {
+    await response?.body?.cancel?.();
+  } catch {
+    // A cleanup failure must not replace the classified source failure.
+  }
 }
 
 function retryDelay(attempt, { random }) {
@@ -51,16 +69,22 @@ export function createHttpClient({
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
 
   return Object.freeze({
-    async request({ url, kind = 'DATA', ...init }) {
+    async request({ url, init = {}, kind = 'DATA' }) {
       let attempt = 0;
       while (true) {
         let response;
         let failure;
         let cause;
+        let rateLimitDelay;
         try {
           response = await fetchImpl(url, init);
           if (response.ok) return response;
           failure = classifyHttpFailure(response.status);
+          try {
+            if (failure === 'RATE_LIMITED') rateLimitDelay = retryAfterMilliseconds(response, now);
+          } finally {
+            await discardResponse(response);
+          }
         } catch (error) {
           failure = 'FAILED_RETRYABLE';
           cause = error;
@@ -76,7 +100,7 @@ export function createHttpClient({
         }
 
         const delay = failure === 'RATE_LIMITED'
-          ? retryAfterMilliseconds(response, now) ?? retryDelay(attempt, { random })
+          ? rateLimitDelay ?? retryDelay(attempt, { random })
           : retryDelay(attempt, { random });
         await sleep(delay);
         attempt += 1;
