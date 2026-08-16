@@ -197,6 +197,18 @@ test('transient failures retry four times before the fifth attempt is exhausted'
   assert.deepEqual(sleeps, [500, 1000, 2000, 4000]);
 });
 
+test('redirect-error fetch failure is typed and never retried', async (t) => {
+  const redirectFailure = new TypeError('fetch failed');
+  redirectFailure.cause = new Error('unexpected redirect');
+  const fetchImpl = t.mock.fn(async () => { throw redirectFailure; });
+  const http = createHttpClient({ fetchImpl, sleep: async () => { throw new Error('Must not sleep'); } });
+
+  await assert.rejects(http.request({
+    url: 'https://example.test/data', kind: 'DATA', init: { redirect: 'error' },
+  }), { code: 'SOURCE_REDIRECT_FORBIDDEN' });
+  assert.equal(fetchImpl.mock.callCount(), 1);
+});
+
 test('429 honors Retry-After and stops after five retries', async (t) => {
   const sleeps = [];
   const fetchImpl = t.mock.fn(async () => new Response('', {

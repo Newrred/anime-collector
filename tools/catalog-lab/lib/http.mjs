@@ -22,6 +22,14 @@ function sourceError(code, { status, cause } = {}) {
   return error;
 }
 
+function isRedirectFailure(error, seen = new Set()) {
+  if (!error || typeof error !== 'object' || seen.has(error)) return false;
+  seen.add(error);
+  return error.code === 'SOURCE_REDIRECT_FORBIDDEN'
+    || /redirect/i.test(String(error.message ?? ''))
+    || isRedirectFailure(error.cause, seen);
+}
+
 function retryAfterMilliseconds(response, now) {
   const value = response.headers?.get('retry-after');
   if (!value) return null;
@@ -86,6 +94,9 @@ export function createHttpClient({
             await discardResponse(response);
           }
         } catch (error) {
+          if (init?.redirect === 'error' && isRedirectFailure(error)) {
+            throw sourceError('SOURCE_REDIRECT_FORBIDDEN', { cause: error });
+          }
           failure = 'FAILED_RETRYABLE';
           cause = error;
         }

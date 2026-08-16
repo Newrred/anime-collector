@@ -42,6 +42,20 @@ function isPlainRecord(value) {
   return prototype === Object.prototype || prototype === null;
 }
 
+function snapshotJsonRecord(value) {
+  try {
+    if (!isPlainRecord(value)) throw new TypeError('Binding is not a record');
+    const cloned = structuredClone(value);
+    const serialized = JSON.stringify(cloned);
+    if (typeof serialized !== 'string') throw new TypeError('Binding is not JSON-safe');
+    const snapshot = JSON.parse(serialized);
+    if (!isPlainRecord(snapshot)) throw new TypeError('Binding is not a record');
+    return snapshot;
+  } catch {
+    throw sourceSchemaDrift();
+  }
+}
+
 function ownDataValue(record, key) {
   const descriptor = Object.getOwnPropertyDescriptor(record, key);
   if (!descriptor || !Object.hasOwn(descriptor, 'value')) return undefined;
@@ -101,16 +115,31 @@ function parseAttributes(markup) {
   return values;
 }
 
-const NAMED_HTML_ENTITIES = Object.freeze({ amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' });
+const NAMED_HTML_ENTITIES = Object.freeze({
+  amp: '&', apos: "'", copy: '©', cent: '¢', euro: '€', gt: '>', hellip: '…',
+  laquo: '«', lt: '<', mdash: '—', nbsp: '\u00a0', ndash: '–', pound: '£', quot: '"',
+  raquo: '»', reg: '®', trade: '™', yen: '¥',
+});
 
 function decodeHtmlEntities(value) {
-  return String(value).replace(/&(?:(#x[0-9a-f]+)|(#\d+)|([a-z]+));/gi, (match, hex, decimal, named) => {
-    if (named) return NAMED_HTML_ENTITIES[named.toLowerCase()] ?? match;
+  if (typeof value !== 'string') return null;
+  let rejected = false;
+  const decoded = value.replace(/&(?:(#x[0-9a-f]+)|(#\d+)|([a-z][a-z0-9]*));/gi, (match, hex, decimal, named) => {
+    if (named) {
+      const replacement = NAMED_HTML_ENTITIES[named.toLowerCase()];
+      if (replacement !== undefined) return replacement;
+      rejected = true;
+      return '';
+    }
     const codePoint = Number.parseInt((hex ?? decimal).slice(hex ? 2 : 1), hex ? 16 : 10);
     if (!Number.isSafeInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff
-      || (codePoint >= 0xd800 && codePoint <= 0xdfff)) return match;
+      || (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+      rejected = true;
+      return '';
+    }
     return String.fromCodePoint(codePoint);
   });
+  return rejected ? null : decoded;
 }
 
 function openGraphValue(html, property) {
@@ -149,22 +178,69 @@ function parseAllowedPayload(html, { contentId, publicPageUrl }) {
 }
 
 function sitemapHasContentUrl(xml, publicPageUrl) {
-  const cleaned = String(xml)
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<\?[\s\S]*?\?>/g, '')
-    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/gi, '');
-  const urlset = /<urlset\b[^>]*>([\s\S]*?)<\/urlset\s*>/i.exec(cleaned);
-  if (!urlset) return false;
-  for (const url of urlset[1].matchAll(/<url\b[^>]*>([\s\S]*?)<\/url\s*>/gi)) {
-    const match = /<loc\b[^>]*>([^<]*)<\/loc\s*>/i.exec(url[1]);
-    if (!match) continue;
+  for (const locator of extractSitemapLocators(xml) ?? []) {
     try {
-      if (assertApprovedPublicUrl(match[1].trim()).href === publicPageUrl) return true;
+      if (assertApprovedPublicUrl(locator).href === publicPageUrl) return true;
     } catch {
       // Sitemap entries outside the narrow public allowlist are never followed.
     }
   }
   return false;
+}
+
+function extractSitemapLocators(xml) {
+  const value = String(xml);
+  if (value.length > 5_000_000) return null;
+  const tokens = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[[\s\S]*?\]\]>|<[^>]*>/g;
+  const stack = [];
+  const locators = [];
+  let rootOpened = false;
+  let rootClosed = false;
+  let location = 0;
+  let tokenCount = 0;
+
+  const text = (chunk) => {
+    if (stack.join('/') === 'urlset/url/loc') locators[locators.length - 1] += chunk;
+    else if (['urlset/url/lastmod', 'urlset/url/changefreq', 'urlset/url/priority'].includes(stack.join('/'))) {
+      return true;
+    }
+    else if (chunk.trim()) return false;
+    return true;
+  };
+
+  for (const match of value.matchAll(tokens)) {
+    if (++tokenCount > 100_000 || !text(value.slice(location, match.index))) return null;
+    location = match.index + match[0].length;
+    const token = match[0];
+    if (token.startsWith('<!--') || token.startsWith('<?')) continue;
+    if (token.startsWith('<![CDATA[')) {
+      if (stack.join('/') !== 'urlset/url/loc') return null;
+      locators[locators.length - 1] += token.slice(9, -3);
+      continue;
+    }
+    if (token.startsWith('<!')) return null;
+    const closing = /^<\/([A-Za-z][A-Za-z0-9-]*)\s*>$/.exec(token);
+    if (closing) {
+      if (stack.at(-1) !== closing[1]) return null;
+      stack.pop();
+      if (closing[1] === 'urlset') rootClosed = true;
+      continue;
+    }
+    const opening = /^<([A-Za-z][A-Za-z0-9-]*)(?:\s+[^<>]*)?\s*(\/?)>$/.exec(token);
+    if (!opening || rootClosed) return null;
+    const [, name, selfClosing] = opening;
+    const parent = stack.at(-1);
+    const allowed = (!rootOpened && name === 'urlset')
+      || (parent === 'urlset' && name === 'url')
+      || (parent === 'url' && ['loc', 'lastmod', 'changefreq', 'priority'].includes(name));
+    if (!allowed || stack.length > 2) return null;
+    if (!rootOpened) rootOpened = true;
+    if (name === 'loc' && selfClosing) return null;
+    if (name === 'loc') locators.push('');
+    if (!selfClosing) stack.push(name);
+  }
+  if (!text(value.slice(location)) || stack.length !== 0 || !rootOpened || !rootClosed) return null;
+  return locators.map((locator) => locator.trim());
 }
 
 async function requestApprovedPublicPage(http, url) {
@@ -191,11 +267,9 @@ function isRedirectFailure(error) {
  * deliberately unsupported: this adapter accepts only a numeric, reviewed content id.
  */
 export function validateAniLifeBinding(binding) {
-  if (!isPlainRecord(binding)) {
-    throw sourceSchemaDrift();
-  }
-  const evidence = ownDataValue(binding, 'evidence');
-  const contentId = ownDataValue(binding, 'contentId');
+  const snapshot = snapshotJsonRecord(binding);
+  const evidence = ownDataValue(snapshot, 'evidence');
+  const contentId = ownDataValue(snapshot, 'contentId');
   if (evidence !== MANUAL_REVIEW_EVIDENCE) throw sourceSchemaDrift();
   if (typeof contentId !== 'string' || !/^[1-9]\d*$/.test(contentId)) {
     throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife content binding must be a numeric public content id');
@@ -240,11 +314,12 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
   return Object.freeze({
     async *collect({ targets, http = defaultHttp, clock, bindings }) {
       if (!Array.isArray(targets) || !http || typeof http.request !== 'function' || !clock
-        || typeof clock.now !== 'function' || !isPlainRecord(bindings)) {
+        || typeof clock.now !== 'function') {
         throw sourceSchemaDrift();
       }
+      const safeBindings = snapshotJsonRecord(bindings);
       for (const target of targets) {
-        const foundBinding = bindingForTarget(bindings, target?.targetKey);
+        const foundBinding = bindingForTarget(safeBindings, target?.targetKey);
         if (!foundBinding.found) {
           yield unboundEnvelope({ target, clock });
           continue;
