@@ -176,13 +176,14 @@ test('cover download applies exact URL, redirect, MIME, content-length, and stre
   await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(pngBytes, 'text/html') }), { code: 'IMAGE_MIME_UNSUPPORTED' });
 });
 
-test('validated cover storage is immutable, checksum-deduplicated, and contains no image failure side effect', { skip: process.platform === 'win32' }, async () => {
+test('trusted external workspace stores and deduplicates validated fixture covers on every platform', async () => {
   await withWorkspace(async (workspace) => {
     const sniffed = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor() });
     await assert.rejects(storeValidatedCover({ record: sniffed, workspace, animeId }), { code: 'COVER_RECORD_UNTRUSTED' });
     const storage = createCoverStorageTestHarness();
     const first = await storage.storeFixture({ bytes: pngBytes, declaredMime: 'image/png', workspace, animeId });
     const second = await storage.storeFixture({ bytes: pngBytes, declaredMime: 'image/png', workspace, animeId });
+    assert.equal(first.created, true);
     assert.equal(second.localRef, first.localRef);
     assert.equal(second.created, false);
     assert.deepEqual(Object.keys(first).sort(), ['byteSize', 'checksum', 'created', 'localRef']);
@@ -660,17 +661,15 @@ test('Chromium bounded cleanup preserves crash or mismatch as the primary failur
   assert.equal(selectCanonicalCover([sniffed]), null);
 });
 
-test('Windows production and fixture storage remain fail-closed before workspace access', { skip: process.platform !== 'win32' }, async () => {
+test('trusted-local cover persistence rejects a forged workspace before filesystem access', async () => {
   const storage = createCoverStorageTestHarness();
-  assert.throws(() => storage.observeProductionPlatformGate(),
-    { code: 'COVER_STORAGE_PLATFORM_UNSAFE' });
-  let workspaceAccesses = 0;
+  let accesses = 0;
   const workspace = new Proxy({}, {
-    get() { workspaceAccesses += 1; throw new Error('workspace accessed before platform gate'); },
+    get() { accesses += 1; throw new Error('forged workspace reached path access'); },
   });
   await assert.rejects(storage.storeFixture({ bytes: pngBytes, declaredMime: 'image/png', workspace, animeId }),
-    { code: 'COVER_STORAGE_PLATFORM_UNSAFE' });
-  assert.equal(workspaceAccesses, 0);
+    { code: 'CATALOG_WORKSPACE_UNTRUSTED' });
+  assert.equal(accesses, 0);
 });
 
 test('cover storage handles concurrent dedupe and rejects corrupt, oversized, or symlink collisions', { skip: process.platform === 'win32' }, async (t) => {

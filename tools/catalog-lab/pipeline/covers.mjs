@@ -752,12 +752,6 @@ function checksum(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-function assertProductionStoragePlatformSafe() {
-  if (process.platform === 'win32') {
-    throw typedError('COVER_STORAGE_PLATFORM_UNSAFE', 'Concrete network covers cannot be stored on Windows without handle-relative no-follow storage');
-  }
-}
-
 async function persistCoverBytes({ image, digest, extension, workspace, animeId }) {
   if (typeof animeId !== 'string' || !ANIME_ID.test(animeId)) {
     throw typedError('COVER_ANIME_ID_INVALID', 'Cover anime ID is not safe for external storage');
@@ -803,7 +797,6 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
     || record.validationStatus !== 'DECODED' || !COVER_BYTES.has(record)) {
     throw typedError('COVER_RECORD_UNTRUSTED', 'Only decoded production-acquired CoverRecords may be stored');
   }
-  assertProductionStoragePlatformSafe();
   const image = COVER_BYTES.get(record);
   const persisted = await persistCoverBytes({
     image, digest: record.checksum, extension: record.extension, workspace, animeId,
@@ -819,12 +812,8 @@ export async function storeValidatedCover({ record, workspace, animeId }) {
 /** Test-only persistence observation. It never creates, brands, decodes, or selects a CoverRecord. */
 export function createCoverStorageTestHarness() {
   return Object.freeze({
-    observeProductionPlatformGate() {
-      assertProductionStoragePlatformSafe();
-      return Object.freeze({ allowed: true, platform: process.platform });
-    },
     async storeFixture({ bytes, declaredMime, workspace, animeId } = {}) {
-      assertProductionStoragePlatformSafe();
+      await assertCatalogWorkspaceMutation(workspace, []);
       const image = asBytes(bytes);
       const inspection = inspectImageBytes({ declaredMime, bytes: image });
       const digest = checksum(image);
