@@ -75,12 +75,7 @@ function errorCode(error) {
 }
 
 function sourceState(stage, extra = {}) {
-  const checkpoints = stage === 'COMPLETED'
-    ? ['PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED', 'CLAIMS_BUILT', 'IMAGE_VALIDATED', 'COMPLETED']
-    : stage === 'MATCHED' ? ['PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED']
-      : stage === 'NORMALIZED' ? ['PENDING', 'FETCHED', 'NORMALIZED']
-        : stage === 'FETCHED' ? ['PENDING', 'FETCHED'] : ['PENDING', stage];
-  return { stage, checkpoints, ...extra };
+  return { stage, ...extra };
 }
 
 function ensureInputs({ targets, registry, selectedSources }) {
@@ -150,11 +145,12 @@ export function createDefaultCoverPipeline() {
     }
     for (const candidate of candidates) {
       try {
+        const client = clients?.get?.(candidate.sourceId);
+        if (!client?.schedule) throw typedError('COVER_SOURCE_NOT_SELECTED', 'Cover source is not selected for this run');
         const download = () => downloadCoverCandidate({
           candidate, policy: getApprovedCoverSourcePolicy(candidate.sourceId), transport,
         });
-        const client = clients?.get?.(candidate.sourceId);
-        const sniffed = client?.schedule ? await client.schedule(download) : await download();
+        const sniffed = await client.schedule(download);
         const decoded = await decodeCoverWithChromium({ record: sniffed });
         const stored = await storeValidatedCover({ record: decoded, workspace, animeId: target.moemoaAnimeId });
         const selected = selectCanonicalCover([stored]);
@@ -224,14 +220,21 @@ export async function runCatalogPipeline({
       growth.claims += written.claimsCreated;
       growth.canonicalRevisions += Number(written.created);
       current = { contentHash: written.contentHash };
+      for (const sourceId of selectedSources) {
+        if (sources[sourceId]?.stage === 'MATCHED') {
+          const checkpoint = sourceState('CLAIMS_BUILT', { sourceRecordId: sources[sourceId].sourceRecordId });
+          await stateStore.write({ sourceId, targetKey: target.targetKey, state: checkpoint });
+          sources[sourceId] = checkpoint;
+        }
+      }
       return { sourceRecords, normalizedRecords };
     };
     for (const sourceId of selectedSources) {
       const prior = await stateStore.read({ sourceId, targetKey: target.targetKey });
-      if (!refresh && prior?.stage === 'COMPLETED' && prior.sourceRecordId) {
+      if (!refresh && ['COMPLETED', 'CLAIMS_BUILT', 'IMAGE_VALIDATED'].includes(prior?.stage) && prior.sourceRecordId) {
         const record = await store.readSourceRecord({ sourceId, targetKey: target.targetKey, sourceRecordId: prior.sourceRecordId });
         if (record) {
-          sources[sourceId] = sourceState('COMPLETED', { sourceRecordId: prior.sourceRecordId, resumed: true });
+          sources[sourceId] = sourceState(prior.stage, { sourceRecordId: prior.sourceRecordId, resumed: true });
           continue;
         }
       }
@@ -310,12 +313,16 @@ export async function runCatalogPipeline({
     } catch (error) {
       cover = frozen({ status: 'FAILED', errorCode: errorCode(error) });
     }
+    const coverValidated = cover?.status === 'STORED' && typeof cover.localRef === 'string';
     for (const sourceId of selectedSources) {
-      if (sources[sourceId]?.stage === 'MATCHED') {
-        const completed = sourceState('COMPLETED', { sourceRecordId: sources[sourceId].sourceRecordId });
-        await stateStore.write({ sourceId, targetKey: target.targetKey, state: completed });
-        sources[sourceId] = completed;
-      }
+      if (!['CLAIMS_BUILT', 'IMAGE_VALIDATED'].includes(sources[sourceId]?.stage)) continue;
+      if (!coverValidated) continue;
+      const validated = sourceState('IMAGE_VALIDATED', { sourceRecordId: sources[sourceId].sourceRecordId });
+      await stateStore.write({ sourceId, targetKey: target.targetKey, state: validated });
+      sources[sourceId] = validated;
+      const completed = sourceState('COMPLETED', { sourceRecordId: validated.sourceRecordId });
+      await stateStore.write({ sourceId, targetKey: target.targetKey, state: completed });
+      sources[sourceId] = completed;
     }
     for (const sourceId of EXECUTABLE_SOURCES) {
       if (sources[sourceId]) continue;

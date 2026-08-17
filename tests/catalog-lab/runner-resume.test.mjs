@@ -210,6 +210,7 @@ test('cover failures preserve text canonical and write a finite classified snaps
     assert.ok(result.targets.every((row) => row.currentCanonicalHash));
     assert.ok(result.targets.every((row) => row.cover.status === 'FAILED'));
     assert.ok(result.targets.every((row) => row.cover.errorCode === 'IMAGE_DECODE_FAILED'));
+    assert.ok(result.targets.every((row) => row.sources.anilist.stage === 'CLAIMS_BUILT'));
   });
 });
 
@@ -222,9 +223,7 @@ test('runner snapshots selected and retained source checkpoints with the declare
     secondInput.selectedSources = ['wikidata'];
     const second = await runCatalogPipeline(secondInput);
     const sourceStates = second.targets[0].sources;
-    assert.ok(sourceStates.anilist.checkpoints.includes('MATCHED'));
-    assert.ok(sourceStates.anilist.checkpoints.includes('CLAIMS_BUILT'));
-    assert.ok(sourceStates.anilist.checkpoints.includes('IMAGE_VALIDATED'));
+    assert.equal(sourceStates.anilist.stage, 'COMPLETED');
     assert.ok(sourceStates.anilist.sourceRecordId, JSON.stringify(sourceStates.anilist));
     assert.equal(second.targets[0].currentCanonicalHash, first.targets[0].currentCanonicalHash);
   });
