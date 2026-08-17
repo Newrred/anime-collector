@@ -1,12 +1,16 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 
 import { atomicWriteJson } from '../lib/atomic-json.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
 import { CANONICAL_FIELD_PATHS } from '../pipeline/normalize.mjs';
 import { createCatalogArtifactStore } from '../pipeline/artifact-store.mjs';
+import { inspectImageBytes } from '../pipeline/covers.mjs';
+import { sha256 } from '../lib/hash.mjs';
 
 export const QUALITY_SCHEMA_VERSION = 1;
+const goldenTargetsUrl = new URL('../config/golden-targets.json', import.meta.url);
 
 function reportError(code, message) {
   const error = new Error(message);
@@ -27,6 +31,29 @@ function defaultFieldStates() {
   return Object.fromEntries(CANONICAL_FIELD_PATHS.map((field) => [field, 'NOT_FETCHED']));
 }
 
+async function approvedGoldenIds() {
+  return JSON.parse(await readFile(goldenTargetsUrl, 'utf8'));
+}
+
+function isCanonicalHash(value) {
+  return typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
+}
+
+function expectedCoverRef(target, checksum) {
+  return typeof target?.moemoaAnimeId === 'string' && isCanonicalHash(checksum)
+    ? new RegExp(`^images/covers/${toPathKey(target.moemoaAnimeId)}/${checksum}\\.(?:jpg|png|webp)$`, 'u') : null;
+}
+
+function manifestShapeIsApproved(manifest, ids) {
+  return Array.isArray(manifest) && manifest.length === ids.length && new Set(ids).size === 10
+    && manifest.every((target, index) => target?.targetKey === `ANILIST:${ids[index]}`
+      && target?.seedExternalIds?.length === 1
+      && target.seedExternalIds[0]?.sourceId === 'anilist'
+      && target.seedExternalIds[0]?.value === ids[index])
+    && new Set(manifest.map((target) => target.targetKey)).size === 10
+    && new Set(manifest.map((target) => target.moemoaAnimeId)).size === 10;
+}
+
 function canonicalFieldStates(canonical) {
   if (!canonical || typeof canonical !== 'object') return defaultFieldStates();
   return Object.fromEntries(CANONICAL_FIELD_PATHS.map((field) => [
@@ -42,13 +69,11 @@ function displayTitle(target, canonical) {
   return seed?.value ?? target.targetKey;
 }
 
-function sanitizeCover(value) {
+function sanitizeCover(value, target) {
   const cover = value && typeof value === 'object' ? value : {};
+  const refPattern = expectedCoverRef(target, cover.checksum);
   const localRef = typeof cover.localRef === 'string'
-    && !cover.localRef.includes('\\')
-    && !cover.localRef.startsWith('/')
-    && !/^[A-Za-z]:/u.test(cover.localRef)
-    && !cover.localRef.split('/').includes('..')
+    && Boolean(refPattern?.test(cover.localRef))
     ? cover.localRef : null;
   return Object.freeze({
     status: typeof cover.status === 'string' ? cover.status : 'NOT_STORED',
@@ -60,6 +85,39 @@ function sanitizeCover(value) {
     localRef,
     errorCode: typeof cover.errorCode === 'string' && /^[A-Z0-9_]+$/u.test(cover.errorCode) ? cover.errorCode : null,
   });
+}
+
+function canonicalIsConsistent(canonical, target, currentHash) {
+  if (!canonical || typeof canonical !== 'object' || !isCanonicalHash(currentHash)
+    || canonical.id !== target.moemoaAnimeId || canonical.revision?.algorithm !== 'SHA-256'
+    || canonical.revision?.contentHash !== currentHash) return false;
+  const { revision, ...core } = canonical;
+  return sha256(core) === currentHash;
+}
+
+async function inspectCover({ workspace, target, observation }) {
+  const cover = sanitizeCover(observation, target);
+  if (cover.status !== 'STORED' || !cover.localRef || !cover.checksum
+    || !Number.isSafeInteger(cover.byteSize) || cover.byteSize < 1
+    || !Number.isSafeInteger(cover.width) || cover.width < 1
+    || !Number.isSafeInteger(cover.height) || cover.height < 1) {
+    return { cover, valid: false };
+  }
+  try {
+    const path = workspace.resolve(...cover.localRef.split('/'));
+    const [info, bytes] = await Promise.all([stat(path), readFile(path)]);
+    const metadata = inspectImageBytes({ bytes });
+    const digest = createHash('sha256').update(bytes).digest('hex');
+    const extension = cover.localRef.slice(cover.localRef.lastIndexOf('.') + 1);
+    return {
+      cover,
+      valid: info.isFile() && info.size === cover.byteSize && bytes.byteLength === cover.byteSize
+        && digest === cover.checksum && metadata.byteSize === cover.byteSize
+        && metadata.width === cover.width && metadata.height === cover.height && metadata.extension === extension,
+    };
+  } catch {
+    return { cover, valid: false };
+  }
 }
 
 function sourceStates(snapshot, targetKey) {
@@ -79,14 +137,15 @@ function countValues(rows, selector) {
   return counts;
 }
 
-function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount }) {
+function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved }) {
   const blockers = [];
+  if (!manifestApproved) blockers.push('MANIFEST_INVALID');
   if (targetCount !== 10) blockers.push('TARGET_COUNT_NOT_TEN');
   if (canonicalCount !== 10) blockers.push('CANONICAL_COUNT_INCOMPLETE');
   if (coverStoredCount !== 10) blockers.push('COVER_COUNT_INCOMPLETE');
   for (const row of targets) {
-    if (!row.canonicalHash) blockers.push(`CANONICAL_MISSING:${row.targetKey}`);
-    if (row.cover.status !== 'STORED') blockers.push(`COVER_NOT_STORED:${row.targetKey}`);
+    if (!row.canonicalValid) blockers.push(`CANONICAL_INVALID:${row.targetKey}`);
+    if (!row.coverValid) blockers.push(`COVER_INVALID:${row.targetKey}`);
   }
   return blockers;
 }
@@ -97,6 +156,8 @@ export async function buildQualityReport({ workspace, profile } = {}) {
   if (profile !== 'golden') throw reportError('TARGET_PROFILE_INVALID', 'Quality reports support only the golden profile');
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest(profile);
+  const goldenIds = await approvedGoldenIds();
+  const manifestApproved = manifestShapeIsApproved(manifest, goldenIds);
   const snapshot = await store.readRunSnapshot();
   const targets = [];
   for (const target of Array.isArray(manifest) ? manifest : []) {
@@ -104,21 +165,24 @@ export async function buildQualityReport({ workspace, profile } = {}) {
     const canonical = current?.contentHash
       ? await readJson(workspace.resolve('canonical', toPathKey(target.moemoaAnimeId), `${current.contentHash}.json`))
       : null;
-    const cover = sanitizeCover(await store.writeCoverObservation(target));
+    const canonicalValid = canonicalIsConsistent(canonical, target, current?.contentHash);
+    const coverInspection = await inspectCover({ workspace, target, observation: await store.writeCoverObservation(target) });
     targets.push(Object.freeze({
       targetKey: target.targetKey,
       moemoaAnimeId: target.moemoaAnimeId,
       displayTitle: displayTitle(target, canonical),
       sources: Object.freeze(sourceStates(snapshot, target.targetKey)),
       fieldStates: Object.freeze(canonicalFieldStates(canonical)),
-      canonicalHash: /^[a-f0-9]{64}$/u.test(current?.contentHash ?? '') ? current.contentHash : null,
-      cover,
+      canonicalHash: canonicalValid ? current.contentHash : null,
+      cover: coverInspection.cover,
+      canonicalValid,
+      coverValid: coverInspection.valid,
     }));
   }
   const targetCount = targets.length;
   const canonicalCount = targets.filter((row) => row.canonicalHash).length;
-  const coverStoredCount = targets.filter((row) => row.cover.status === 'STORED' && row.cover.localRef).length;
-  const blockers = blockersFor({ targets, targetCount, canonicalCount, coverStoredCount });
+  const coverStoredCount = targets.filter((row) => row.coverValid).length;
+  const blockers = blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved });
   return Object.freeze({
     schemaVersion: QUALITY_SCHEMA_VERSION,
     profile,
@@ -135,8 +199,14 @@ export async function buildQualityReport({ workspace, profile } = {}) {
       images: Number.isSafeInteger(snapshot?.growth?.images) ? snapshot.growth.images : 0,
     }),
     gate: Object.freeze({ passed: blockers.length === 0, blockers: Object.freeze(blockers) }),
-    targets: Object.freeze(targets),
+    targets: Object.freeze(targets.map(({ canonicalValid: _canonicalValid, coverValid: _coverValid, ...target }) => Object.freeze(target))),
   });
+}
+
+/** Strict internal artifact gate used by the CLI in addition to the existing runner validation. */
+export async function inspectGoldenArtifacts({ workspace, profile = 'golden' } = {}) {
+  const report = await buildQualityReport({ workspace, profile });
+  return Object.freeze({ valid: report.gate.passed, blockers: report.gate.blockers });
 }
 
 /** Renders the sanitized report without paths, raw payloads, or remote diagnostics. */

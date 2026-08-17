@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -12,9 +13,13 @@ import { loadSourceRegistry } from '../../tools/catalog-lab/contracts/catalogCon
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
 import { createCatalogArtifactStore } from '../../tools/catalog-lab/pipeline/artifact-store.mjs';
 import { runCatalogPipeline } from '../../tools/catalog-lab/pipeline/runner.mjs';
+import { buildTargetManifest } from '../../tools/catalog-lab/pipeline/targets.mjs';
+import { toPathKey } from '../../tools/catalog-lab/lib/path-key.mjs';
+import { pngBytes } from './fixtures/cover-valid-images.mjs';
 
 const repoRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const fixedNow = '2026-08-17T00:00:00.000Z';
+const goldenIds = [1, 121, 5114, 7902, 21519, 227, 120377, 112151, 129874, 131681];
 
 function target(index) {
   return Object.freeze({
@@ -72,16 +77,32 @@ function silentDependencies(workspaceRoot) {
 }
 
 async function seedGoldenWorkspace(workspace) {
-  const targets = Array.from({ length: 10 }, (_, index) => target(index + 1));
+  const idMap = Object.fromEntries(goldenIds.map((id) => [
+    `ANILIST:${id}`, target(id).moemoaAnimeId,
+  ]));
+  const aliases = JSON.parse(await readFile(join(repoRoot, 'src', 'data', 'aliases.json'), 'utf8'));
+  const targets = await buildTargetManifest({
+    profile: 'golden', rows: aliases, idMapStore: idMap,
+    clock: { now: () => fixedNow }, uuid: () => { throw new Error('stable id map is required'); },
+  });
   const registry = await loadSourceRegistry({ repoRoot });
-  await createCatalogArtifactStore({ workspace }).writeManifest('golden', targets);
+  const checksum = createHash('sha256').update(pngBytes).digest('hex');
+  for (const row of targets) {
+    const directory = workspace.resolve('images', 'covers', toPathKey(row.moemoaAnimeId));
+    await mkdir(directory, { recursive: true });
+    await writeFile(join(directory, `${checksum}.png`), pngBytes);
+  }
+  const store = createCatalogArtifactStore({ workspace });
+  await store.writeIdMap(idMap);
+  await store.writeManifest('golden', targets);
   await runCatalogPipeline({
     workspace, targets, registry, adapters: { anilist: fixtureAdapter() }, bindings: {},
     selectedSources: ['anilist'], allowNetwork: true, clock: { now: () => fixedNow },
     httpFactory: () => ({ async request() { return new Response('{}'); } }),
     coverPipeline: async ({ target: row }) => ({
-      status: 'STORED', sourceId: 'anilist', sourceRecordId: '0'.repeat(64), checksum: 'a'.repeat(64),
-      byteSize: 12, width: 1, height: 1, localRef: `images/covers/${row.moemoaAnimeId}/fixture.png`, created: false,
+      status: 'STORED', sourceId: 'anilist', sourceRecordId: '0'.repeat(64), checksum,
+      byteSize: pngBytes.byteLength, width: 1, height: 1,
+      localRef: `images/covers/${toPathKey(row.moemoaAnimeId)}/${checksum}.png`, created: false,
     }),
   });
   return targets;
@@ -151,6 +172,54 @@ test('quality report exposes ten target/source/field/cover states and no raw pay
   });
 });
 
+test('validate and report block missing or inconsistent current canonical and cover artifacts', async () => {
+  await withWorkspace(async (workspaceRoot, workspace) => {
+    await seedGoldenWorkspace(workspace);
+    const deps = silentDependencies(workspaceRoot);
+    assert.equal(await runCli(['validate'], deps), CLI_EXIT.OK);
+    const first = target(1);
+    await writeFile(workspace.resolve('current', `${toPathKey(first.moemoaAnimeId)}.json`), JSON.stringify({
+      animeId: first.moemoaAnimeId, contentHash: 'not-a-hash',
+    }));
+    assert.equal(await runCli(['validate'], deps), CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.equal(await runCli(['report'], deps), CLI_EXIT.QUALITY_GATE_FAILED);
+  });
+  await withWorkspace(async (workspaceRoot, workspace) => {
+    await seedGoldenWorkspace(workspace);
+    const first = target(1);
+    await writeFile(workspace.resolve('covers', `${toPathKey(first.moemoaAnimeId)}.json`), JSON.stringify({
+      status: 'STORED', checksum: 'a'.repeat(64), byteSize: 1, width: 1, height: 1,
+      localRef: 'https://source.example/cover.png',
+    }));
+    const report = await buildQualityReport({ workspace, profile: 'golden' });
+    assert.equal(report.gate.passed, false);
+    assert.equal(report.targets[0].cover.localRef, null);
+    assert.equal(JSON.stringify(report).includes('https://source.example/cover.png'), false);
+    assert.equal(await runCli(['validate'], silentDependencies(workspaceRoot)), CLI_EXIT.QUALITY_GATE_FAILED);
+  });
+});
+
+test('targets rejects a pre-existing manifest that is not the approved stable golden ten', async () => {
+  await withWorkspace(async (workspaceRoot) => {
+    const deps = silentDependencies(workspaceRoot);
+    assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets'], deps), CLI_EXIT.OK);
+    const manifestPath = join(workspaceRoot, 'manifests', 'golden.json');
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    const intactManifest = structuredClone(manifest);
+    manifest[0].targetKey = 'ANILIST:999999';
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    assert.equal(await runCli(['targets'], deps), CLI_EXIT.USAGE_OR_SAFETY);
+
+    await writeFile(manifestPath, JSON.stringify(intactManifest));
+    const idMapPath = join(workspaceRoot, 'state', 'id-map.json');
+    const idMap = JSON.parse(await readFile(idMapPath, 'utf8'));
+    idMap[intactManifest[0].targetKey] = 'anime:wrong-stable-id';
+    await writeFile(idMapPath, JSON.stringify(idMap));
+    assert.equal(await runCli(['targets'], deps), CLI_EXIT.USAGE_OR_SAFETY);
+  });
+});
+
 test('guard reports only relative leaking paths in tracked and explicit build roots', async () => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-'));
   try {
@@ -175,6 +244,32 @@ test('guard reports only relative leaking paths in tracked and explicit build ro
     assert.match(rendered, /dist[\\/]leaked-cover\.png/);
     assert.equal(rendered.includes('SECRET_PAYLOAD_DO_NOT_ECHO'), false);
     assert.equal(rendered.includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without exposing content', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-text-'));
+  try {
+    const buildRoot = join(fixtureRoot, 'dist');
+    await mkdir(buildRoot, { recursive: true });
+    const cases = {
+      'nested.js': 'window.catalog = { nested: { rawPayloadRef: "SECRET_JS" } };',
+      'page.html': '<script>const row = { "rawPayloadRef": "SECRET_HTML" };</script>',
+      'records.ndjson': '{"ok":true}\n{"rawPayloadRef":"SECRET_NDJSON"}\n',
+      'large.txt': `${'x'.repeat((2 * 1024 * 1024) + 8)} "rawPayloadRef":"SECRET_LARGE"`,
+    };
+    await Promise.all(Object.entries(cases).map(([name, value]) => writeFile(join(buildRoot, name), value)));
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot, trackedFiles: async () => [], buildRoots: [buildRoot],
+      stdout: { write(value) { output.push(value); } }, stderr: { write(value) { output.push(value); } },
+    });
+    const rendered = output.join('');
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    for (const name of Object.keys(cases)) assert.match(rendered, new RegExp(`dist[\\\\/]${name.replace('.', '\\.')}`));
+    assert.equal(/SECRET_(?:JS|HTML|NDJSON|LARGE)/u.test(rendered), false);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }
