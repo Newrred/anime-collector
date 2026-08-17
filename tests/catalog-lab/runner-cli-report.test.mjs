@@ -145,6 +145,25 @@ test('init and targets create only an external sentinel, stable ID map, and ten-
   });
 });
 
+test('init and targets use the default UUID generator to create the golden ten manifest', async () => {
+  await withWorkspace(async (workspaceRoot) => {
+    const output = [];
+    const deps = {
+      repoRoot,
+      workspaceRoot,
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+      clock: { now: () => fixedNow },
+    };
+    assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets', '--profile', 'golden'], deps), CLI_EXIT.OK);
+    const manifest = JSON.parse(await readFile(join(workspaceRoot, 'manifests', 'golden.json'), 'utf8'));
+    assert.equal(manifest.length, 10);
+    assert.equal(manifest.every((row) => /^anime:[0-9a-f-]{36}$/u.test(row.moemoaAnimeId)), true);
+    assert.equal(output.some((value) => value.includes('Catalog command rejected')), false);
+  });
+});
+
 test('bind-anilife stores only a manifest target and numeric reviewed public content id', async () => {
   await withWorkspace(async (workspaceRoot) => {
     const deps = silentDependencies(workspaceRoot);

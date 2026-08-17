@@ -298,7 +298,7 @@ async function targetManifestOrCreate(workspace, dependencies) {
   const manifest = await buildTargetManifest({
     profile: 'golden', rows: aliases, idMapStore: idMap,
     clock: dependencies.clock ?? { now: () => new Date().toISOString() },
-    uuid: dependencies.uuid ?? crypto.randomUUID,
+    uuid: dependencies.uuid ?? (() => crypto.randomUUID()),
   });
   await store.writeIdMap(idMap);
   await store.writeManifest('golden', manifest);
