@@ -11,7 +11,7 @@ import { runCatalogPipeline, validateGoldenArtifacts } from './pipeline/runner.m
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
 import { createAniListTestAdapter } from './sources/anilist-test.mjs';
 import { createWikidataAdapter } from './sources/wikidata.mjs';
-import { inspectGoldenArtifacts, writeQualityReport } from './reports/quality-report.mjs';
+import { hasApprovedGoldenManifest, inspectGoldenArtifacts, writeQualityReport } from './reports/quality-report.mjs';
 
 export const CLI_EXIT = Object.freeze({
   OK: 0, QUALITY_GATE_FAILED: 2, SOURCE_PAUSED: 3, USAGE_OR_SAFETY: 64,
@@ -23,8 +23,10 @@ const DEFAULT_BUILD_ROOTS = Object.freeze(['dist', 'android/app/src', 'test-outp
 const GUARD_SCAN_CHUNK_BYTES = 64 * 1024;
 const GUARD_SCAN_OVERLAP_BYTES = 128;
 const GUARD_SCAN_MAX_BYTES = 64 * 1024 * 1024;
-const RAW_RECORD_KEY = /\brawPayloadRef\b(?:["']\s*)?\s*:/u;
-const EXTERNAL_LOCAL_REF = /["']localRef["']\s*:\s*["'](?:images\/covers\/|https?:\/\/|[A-Za-z]:)/u;
+const RAW_JSON_RECORD = /[\[{,]\s*["']rawPayloadRef["']\s*:\s*["'][^"'\r\n]+["']/u;
+const RAW_QUOTED_RECORD = /["']rawPayloadRef["']\s*:\s*["'][^"'\r\n]+["']/u;
+const RAW_SCRIPT_RECORD = /[\{;]\s*rawPayloadRef\s*:\s*["'][^"'\r\n]+["']/u;
+const EXTERNAL_LOCAL_REF = /(?:["']localRef["']|\blocalRef)\s*:\s*["'](?:images\/covers\/|https?:\/\/|[A-Za-z]:[\\/])/u;
 
 function repoFromModule() {
   return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -92,35 +94,13 @@ async function targetManifest(workspace, dependencies = {}) {
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest('golden');
   if (!Array.isArray(manifest) || manifest.length !== 10) throw typedError('GOLDEN_MANIFEST_REQUIRED', 'Golden target manifest is required');
-  await assertApprovedGoldenManifest({ store, manifest, repoRoot: dependencies.repoRoot ?? repoFromModule() });
+  await assertApprovedGoldenManifest({ workspace, manifest, repoRoot: dependencies.repoRoot ?? repoFromModule() });
   return { store, manifest };
 }
 
-async function assertApprovedGoldenManifest({ store, manifest, repoRoot }) {
-  const [goldenIds, aliases, idMap] = await Promise.all([
-    readFile(resolve(repoRoot, 'tools', 'catalog-lab', 'config', 'golden-targets.json'), 'utf8').then(JSON.parse),
-    readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8').then(JSON.parse),
-    store.readIdMap(),
-  ]);
-  if (!idMap || typeof idMap !== 'object' || Array.isArray(idMap) || !Array.isArray(goldenIds)
-    || goldenIds.length !== 10 || new Set(goldenIds).size !== 10 || manifest.length !== 10
-    || new Set(manifest.map((target) => target?.targetKey)).size !== 10
-    || new Set(manifest.map((target) => target?.moemoaAnimeId)).size !== 10) {
+async function assertApprovedGoldenManifest({ workspace, manifest, repoRoot }) {
+  if (!await hasApprovedGoldenManifest({ workspace, manifest, repoRoot })) {
     throw typedError('GOLDEN_MANIFEST_INVALID', 'Golden target manifest is not approved');
-  }
-  for (const [index, anilistId] of goldenIds.entries()) {
-    const row = aliases.find((candidate) => String(candidate?.anilistId) === anilistId);
-    const target = manifest[index];
-    const expectedTitles = [
-      ...(row?.ko ? [{ locale: 'ko', value: row.ko }] : []),
-      ...(Array.isArray(row?.aliases) ? row.aliases.filter(Boolean).map((value) => ({ locale: 'und', value })) : []),
-    ];
-    if (!row || target?.targetKey !== `ANILIST:${anilistId}` || typeof target.moemoaAnimeId !== 'string'
-      || idMap[target.targetKey] !== target.moemoaAnimeId || target.seedSource !== 'legacy_aliases'
-      || target.targetStatus !== 'ACTIVE' || JSON.stringify(target.seedExternalIds) !== JSON.stringify([{ sourceId: 'anilist', value: anilistId }])
-      || JSON.stringify(target.seedTitles) !== JSON.stringify(expectedTitles)) {
-      throw typedError('GOLDEN_MANIFEST_INVALID', 'Golden target manifest is not approved');
-    }
   }
 }
 
@@ -153,7 +133,16 @@ function hasImageSignature(bytes) {
     || (bytes.length >= 12 && bytes.subarray(0, 4).equals(Buffer.from('RIFF')) && bytes.subarray(8, 12).equals(Buffer.from('WEBP')));
 }
 
-async function leakedArtifact(path, fileName) {
+function hasStructuredLeak(text, relativeFile) {
+  const markdown = relativeFile.endsWith('.md');
+  // Markdown is scanned for serialized JSON records; prose naming a field is not an artifact.
+  if (RAW_JSON_RECORD.test(text)) return true;
+  // JavaScript-like artifacts additionally permit identifier-form object properties.
+  return !markdown && (RAW_QUOTED_RECORD.test(text) || RAW_SCRIPT_RECORD.test(text) || EXTERNAL_LOCAL_REF.test(text));
+}
+
+async function leakedArtifact(path, relativeFile) {
+  const fileName = relativeFile.split('/').at(-1);
   if (fileName === 'TEST_ONLY.json') return true;
   const handle = await open(path, 'r').catch(() => null);
   if (!handle) return false;
@@ -171,7 +160,7 @@ async function leakedArtifact(path, fileName) {
       position += result.bytesRead;
       total += result.bytesRead;
       const text = tail + chunk.subarray(0, result.bytesRead).toString('utf8');
-      if (RAW_RECORD_KEY.test(text) || EXTERNAL_LOCAL_REF.test(text)) return true;
+      if (hasStructuredLeak(text, relativeFile)) return true;
       tail = text.slice(-GUARD_SCAN_OVERLAP_BYTES);
     }
     // A textual artifact larger than this fixed 64 MiB budget is blocked rather than accepted unscanned.
@@ -205,18 +194,13 @@ async function runGuard(dependencies) {
   const tracked = await (dependencies.trackedFiles ?? (() => listTrackedFiles(repoRoot)))();
   const roots = dependencies.buildRoots ?? DEFAULT_BUILD_ROOTS.map((root) => resolve(repoRoot, root));
   const rootFiles = (await Promise.all(roots.map((root) => filesUnder(root)))).flat();
-  const trackedSet = new Set(tracked);
   const leaks = [];
   for (const path of [...new Set([...tracked, ...rootFiles])]) {
     const rel = relativePath(repoRoot, path);
     if (!rel) continue;
     // Existing application launcher/splash resources are not catalog covers.
     if (isKnownAndroidBootstrapAsset(rel)) continue;
-    // Human-authored Markdown may document the guard marker; it is not a generated or distributable artifact.
-    if (rel.endsWith('.md')) continue;
-    // Source tests deliberately contain adversarial key literals; generated test output remains scanned via build roots.
-    if (trackedSet.has(path) && /(?:^|\/)tests\/.*\.test\.[cm]?[jt]s$/u.test(rel)) continue;
-    if (await leakedArtifact(path, rel.split('/').at(-1))) leaks.push(rel);
+    if (await leakedArtifact(path, rel)) leaks.push(rel);
   }
   return [...new Set(leaks)].sort();
 }
@@ -287,12 +271,12 @@ export async function runCli(argv, dependencies = {}) {
     const { manifest } = await targetManifest(workspace, dependencies);
     if (command === 'validate') {
       const result = await validateGoldenArtifacts({ workspace, targets: manifest });
-      const strict = await inspectGoldenArtifacts({ workspace, profile: 'golden' });
+      const strict = await inspectGoldenArtifacts({ workspace, profile: 'golden', repoRoot: dependencies.repoRoot ?? repoFromModule() });
       const valid = result.valid && strict.valid;
       writeLine(stdout, valid ? 'Golden artifacts valid' : 'Golden artifacts blocked');
       return valid ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
     }
-    const report = await writeQualityReport({ workspace, profile: 'golden' });
+    const report = await writeQualityReport({ workspace, profile: 'golden', repoRoot: dependencies.repoRoot ?? repoFromModule() });
     writeLine(stdout, report.gate.passed ? 'Quality report written' : 'Quality report written with blockers');
     return report.gate.passed ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
   } catch (error) {
@@ -305,7 +289,7 @@ async function targetManifestOrCreate(workspace, dependencies) {
   const store = createCatalogArtifactStore({ workspace });
   const current = await store.readManifest('golden');
   if (Array.isArray(current)) {
-    await assertApprovedGoldenManifest({ store, manifest: current, repoRoot: dependencies.repoRoot ?? repoFromModule() });
+    await assertApprovedGoldenManifest({ workspace, manifest: current, repoRoot: dependencies.repoRoot ?? repoFromModule() });
     return { store, manifest: current };
   }
   const repoRoot = dependencies.repoRoot ?? repoFromModule();
@@ -318,7 +302,7 @@ async function targetManifestOrCreate(workspace, dependencies) {
   });
   await store.writeIdMap(idMap);
   await store.writeManifest('golden', manifest);
-  await assertApprovedGoldenManifest({ store, manifest, repoRoot });
+  await assertApprovedGoldenManifest({ workspace, manifest, repoRoot });
   return { store, manifest };
 }
 

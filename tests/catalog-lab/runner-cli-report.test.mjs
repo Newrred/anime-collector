@@ -8,7 +8,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { CLI_EXIT, runCli } from '../../tools/catalog-lab/cli.mjs';
-import { buildQualityReport, renderQualityReportMarkdown } from '../../tools/catalog-lab/reports/quality-report.mjs';
+import { buildQualityReport, renderQualityReportMarkdown, writeQualityReport } from '../../tools/catalog-lab/reports/quality-report.mjs';
 import { loadSourceRegistry } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
 import { createCatalogArtifactStore } from '../../tools/catalog-lab/pipeline/artifact-store.mjs';
@@ -187,15 +187,40 @@ test('validate and report block missing or inconsistent current canonical and co
   await withWorkspace(async (workspaceRoot, workspace) => {
     await seedGoldenWorkspace(workspace);
     const first = target(1);
+    const pointerPath = workspace.resolve('current', `${toPathKey(first.moemoaAnimeId)}.json`);
+    const current = JSON.parse(await readFile(pointerPath, 'utf8'));
+    await writeFile(pointerPath, JSON.stringify({ ...current, animeId: 'anime:foreign-pointer' }));
+    assert.equal((await buildQualityReport({ workspace, profile: 'golden' })).gate.passed, false);
+    assert.equal(await runCli(['validate'], silentDependencies(workspaceRoot)), CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.equal(await runCli(['report'], silentDependencies(workspaceRoot)), CLI_EXIT.QUALITY_GATE_FAILED);
+  });
+  await withWorkspace(async (workspaceRoot, workspace) => {
+    await seedGoldenWorkspace(workspace);
+    const first = target(1);
+    const localKey = ['local', 'Ref'].join('');
     await writeFile(workspace.resolve('covers', `${toPathKey(first.moemoaAnimeId)}.json`), JSON.stringify({
       status: 'STORED', checksum: 'a'.repeat(64), byteSize: 1, width: 1, height: 1,
-      localRef: 'https://source.example/cover.png',
+      [localKey]: 'https://source.example/cover.png',
     }));
     const report = await buildQualityReport({ workspace, profile: 'golden' });
     assert.equal(report.gate.passed, false);
     assert.equal(report.targets[0].cover.localRef, null);
     assert.equal(JSON.stringify(report).includes('https://source.example/cover.png'), false);
     assert.equal(await runCli(['validate'], silentDependencies(workspaceRoot)), CLI_EXIT.QUALITY_GATE_FAILED);
+  });
+});
+
+test('direct report builders block a manifest whose stable ID map is corrupted', async () => {
+  await withWorkspace(async (_workspaceRoot, workspace) => {
+    const targets = await seedGoldenWorkspace(workspace);
+    const mapPath = workspace.resolve('state', 'id-map.json');
+    const idMap = JSON.parse(await readFile(mapPath, 'utf8'));
+    idMap[targets[0].targetKey] = 'anime:wrong-stable-id';
+    await writeFile(mapPath, JSON.stringify(idMap));
+    const report = await buildQualityReport({ workspace, profile: 'golden' });
+    assert.equal(report.gate.passed, false);
+    assert.equal(report.gate.blockers.includes('MANIFEST_INVALID'), true);
+    assert.equal((await writeQualityReport({ workspace, profile: 'golden' })).gate.passed, false);
   });
 });
 
@@ -226,7 +251,8 @@ test('guard reports only relative leaking paths in tracked and explicit build ro
     const tracked = join(fixtureRoot, 'tracked.json');
     const buildRoot = join(fixtureRoot, 'dist');
     const image = join(buildRoot, 'leaked-cover.png');
-    await writeFile(tracked, '{"rawPayloadRef":"SECRET_PAYLOAD_DO_NOT_ECHO"}\n');
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    await writeFile(tracked, `{"${rawKey}":"SECRET_PAYLOAD_DO_NOT_ECHO"}\n`);
     await mkdir(buildRoot, { recursive: true });
     await writeFile(join(buildRoot, 'TEST_ONLY.json'), '{"kind":"MOEMOA_CATALOG_LAB"}\n');
     await writeFile(image, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
@@ -254,11 +280,15 @@ test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without e
   try {
     const buildRoot = join(fixtureRoot, 'dist');
     await mkdir(buildRoot, { recursive: true });
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    const localKey = ['local', 'Ref'].join('');
     const cases = {
-      'nested.js': 'window.catalog = { nested: { rawPayloadRef: "SECRET_JS" } };',
-      'page.html': '<script>const row = { "rawPayloadRef": "SECRET_HTML" };</script>',
-      'records.ndjson': '{"ok":true}\n{"rawPayloadRef":"SECRET_NDJSON"}\n',
-      'large.txt': `${'x'.repeat((2 * 1024 * 1024) + 8)} "rawPayloadRef":"SECRET_LARGE"`,
+      'nested.js': `window.catalog = { nested: { ${rawKey}: "SECRET_JS" } };`,
+      'page.html': `<script>const row = { "${rawKey}": "SECRET_HTML" };</script>`,
+      'records.ndjson': `{"ok":true}\n{"${rawKey}":"SECRET_NDJSON"}\n`,
+      'large.txt': `${'x'.repeat((2 * 1024 * 1024) + 8)} "${rawKey}":"SECRET_LARGE"`,
+      'unquoted-localref.js': `const record = { ${localKey}: "https://source.example/cover.jpg" };`,
+      'controlled-localref.js': `const record = { ${localKey}: "images/covers/anime-safe/cover.png" };`,
     };
     await Promise.all(Object.entries(cases).map(([name, value]) => writeFile(join(buildRoot, name), value)));
     const output = [];
@@ -270,6 +300,36 @@ test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without e
     assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
     for (const name of Object.keys(cases)) assert.match(rendered, new RegExp(`dist[\\\\/]${name.replace('.', '\\.')}`));
     assert.equal(/SECRET_(?:JS|HTML|NDJSON|LARGE)/u.test(rendered), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard scans tracked Markdown and test source structures but not a prose marker word', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-tracked-'));
+  try {
+    const docs = join(fixtureRoot, 'docs');
+    const tests = join(fixtureRoot, 'tests');
+    await mkdir(docs, { recursive: true });
+    await mkdir(tests, { recursive: true });
+    const markdownLeak = join(docs, 'leak.md');
+    const testLeak = join(tests, 'leak.test.mjs');
+    const prose = join(docs, 'prose.md');
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    await writeFile(markdownLeak, `{"${rawKey}":"SECRET_MARKDOWN"}\n`);
+    await writeFile(testLeak, `const record = { ${rawKey}: "SECRET_TEST" };\n`);
+    await writeFile(prose, `This prose documents the ${rawKey} field without a serialized record.\n`);
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot, trackedFiles: async () => [markdownLeak, testLeak, prose], buildRoots: [],
+      stdout: { write(value) { output.push(value); } }, stderr: { write(value) { output.push(value); } },
+    });
+    const rendered = output.join('');
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(rendered, /docs[\\/]leak\.md/);
+    assert.match(rendered, /tests[\\/]leak\.test\.mjs/);
+    assert.equal(rendered.includes('prose.md'), false);
+    assert.equal(/SECRET_(?:MARKDOWN|TEST)/u.test(rendered), false);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }

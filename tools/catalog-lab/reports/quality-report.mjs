@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { atomicWriteJson } from '../lib/atomic-json.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
@@ -10,7 +12,10 @@ import { inspectImageBytes } from '../pipeline/covers.mjs';
 import { sha256 } from '../lib/hash.mjs';
 
 export const QUALITY_SCHEMA_VERSION = 1;
-const goldenTargetsUrl = new URL('../config/golden-targets.json', import.meta.url);
+
+function repoFromModule() {
+  return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+}
 
 function reportError(code, message) {
   const error = new Error(message);
@@ -31,10 +36,6 @@ function defaultFieldStates() {
   return Object.fromEntries(CANONICAL_FIELD_PATHS.map((field) => [field, 'NOT_FETCHED']));
 }
 
-async function approvedGoldenIds() {
-  return JSON.parse(await readFile(goldenTargetsUrl, 'utf8'));
-}
-
 function isCanonicalHash(value) {
   return typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
 }
@@ -44,14 +45,35 @@ function expectedCoverRef(target, checksum) {
     ? new RegExp(`^images/covers/${toPathKey(target.moemoaAnimeId)}/${checksum}\\.(?:jpg|png|webp)$`, 'u') : null;
 }
 
-function manifestShapeIsApproved(manifest, ids) {
-  return Array.isArray(manifest) && manifest.length === ids.length && new Set(ids).size === 10
-    && manifest.every((target, index) => target?.targetKey === `ANILIST:${ids[index]}`
-      && target?.seedExternalIds?.length === 1
-      && target.seedExternalIds[0]?.sourceId === 'anilist'
-      && target.seedExternalIds[0]?.value === ids[index])
-    && new Set(manifest.map((target) => target.targetKey)).size === 10
-    && new Set(manifest.map((target) => target.moemoaAnimeId)).size === 10;
+/** Exact Golden-ten manifest gate shared by report builders and CLI commands. */
+export async function hasApprovedGoldenManifest({ workspace, manifest, repoRoot = repoFromModule() } = {}) {
+  try {
+    const store = createCatalogArtifactStore({ workspace });
+    const [goldenIds, aliases, idMap] = await Promise.all([
+      readFile(resolve(repoRoot, 'tools', 'catalog-lab', 'config', 'golden-targets.json'), 'utf8').then(JSON.parse),
+      readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8').then(JSON.parse),
+      store.readIdMap(),
+    ]);
+    if (!idMap || typeof idMap !== 'object' || Array.isArray(idMap) || !Array.isArray(goldenIds)
+      || goldenIds.length !== 10 || new Set(goldenIds).size !== 10 || !Array.isArray(manifest)
+      || manifest.length !== 10 || new Set(manifest.map((target) => target?.targetKey)).size !== 10
+      || new Set(manifest.map((target) => target?.moemoaAnimeId)).size !== 10) return false;
+    return goldenIds.every((anilistId, index) => {
+      const row = aliases.find((candidate) => String(candidate?.anilistId) === anilistId);
+      const target = manifest[index];
+      const expectedTitles = [
+        ...(row?.ko ? [{ locale: 'ko', value: row.ko }] : []),
+        ...(Array.isArray(row?.aliases) ? row.aliases.filter(Boolean).map((value) => ({ locale: 'und', value })) : []),
+      ];
+      return Boolean(row) && target?.targetKey === `ANILIST:${anilistId}` && typeof target.moemoaAnimeId === 'string'
+        && idMap[target.targetKey] === target.moemoaAnimeId && target.seedSource === 'legacy_aliases'
+        && target.targetStatus === 'ACTIVE'
+        && JSON.stringify(target.seedExternalIds) === JSON.stringify([{ sourceId: 'anilist', value: anilistId }])
+        && JSON.stringify(target.seedTitles) === JSON.stringify(expectedTitles);
+    });
+  } catch {
+    return false;
+  }
 }
 
 function canonicalFieldStates(canonical) {
@@ -87,8 +109,9 @@ function sanitizeCover(value, target) {
   });
 }
 
-function canonicalIsConsistent(canonical, target, currentHash) {
-  if (!canonical || typeof canonical !== 'object' || !isCanonicalHash(currentHash)
+function canonicalIsConsistent(canonical, target, current) {
+  const currentHash = current?.contentHash;
+  if (!canonical || typeof canonical !== 'object' || current?.animeId !== target.moemoaAnimeId || !isCanonicalHash(currentHash)
     || canonical.id !== target.moemoaAnimeId || canonical.revision?.algorithm !== 'SHA-256'
     || canonical.revision?.contentHash !== currentHash) return false;
   const { revision, ...core } = canonical;
@@ -151,21 +174,21 @@ function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, m
 }
 
 /** Projects external golden artifacts into a JSON-safe, raw-data-free quality summary. */
-export async function buildQualityReport({ workspace, profile } = {}) {
+export async function buildQualityReport({ workspace, profile, repoRoot } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
   if (profile !== 'golden') throw reportError('TARGET_PROFILE_INVALID', 'Quality reports support only the golden profile');
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest(profile);
-  const goldenIds = await approvedGoldenIds();
-  const manifestApproved = manifestShapeIsApproved(manifest, goldenIds);
+  const manifestApproved = await hasApprovedGoldenManifest({ workspace, manifest, repoRoot });
   const snapshot = await store.readRunSnapshot();
   const targets = [];
-  for (const target of Array.isArray(manifest) ? manifest : []) {
+  for (const target of manifestApproved ? manifest : []) {
     const current = await store.readCurrent(target.moemoaAnimeId);
-    const canonical = current?.contentHash
+    const pointerValid = current?.animeId === target.moemoaAnimeId && isCanonicalHash(current?.contentHash);
+    const canonical = pointerValid
       ? await readJson(workspace.resolve('canonical', toPathKey(target.moemoaAnimeId), `${current.contentHash}.json`))
       : null;
-    const canonicalValid = canonicalIsConsistent(canonical, target, current?.contentHash);
+    const canonicalValid = canonicalIsConsistent(canonical, target, current);
     const coverInspection = await inspectCover({ workspace, target, observation: await store.writeCoverObservation(target) });
     targets.push(Object.freeze({
       targetKey: target.targetKey,
@@ -204,8 +227,8 @@ export async function buildQualityReport({ workspace, profile } = {}) {
 }
 
 /** Strict internal artifact gate used by the CLI in addition to the existing runner validation. */
-export async function inspectGoldenArtifacts({ workspace, profile = 'golden' } = {}) {
-  const report = await buildQualityReport({ workspace, profile });
+export async function inspectGoldenArtifacts({ workspace, profile = 'golden', repoRoot } = {}) {
+  const report = await buildQualityReport({ workspace, profile, repoRoot });
   return Object.freeze({ valid: report.gate.passed, blockers: report.gate.blockers });
 }
 
@@ -234,8 +257,8 @@ export function renderQualityReportMarkdown(report) {
 }
 
 /** Writes report artifacts only into the authenticated external catalog workspace. */
-export async function writeQualityReport({ workspace, profile } = {}) {
-  const report = await buildQualityReport({ workspace, profile });
+export async function writeQualityReport({ workspace, profile, repoRoot } = {}) {
+  const report = await buildQualityReport({ workspace, profile, repoRoot });
   const directory = await assertCatalogWorkspaceMutation(workspace, ['reports', profile]);
   await mkdir(directory, { recursive: true });
   await atomicWriteJson(workspace.resolve('reports', profile, 'quality-report.json'), report);
