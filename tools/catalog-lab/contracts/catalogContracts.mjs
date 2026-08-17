@@ -11,7 +11,7 @@ export const SOURCE_EXECUTION_SCOPES = Object.freeze([
 const VALIDATED_REGISTRY_ENTRIES = new WeakSet();
 const APPROVED_SOURCE_POLICIES = Object.freeze({
   legacy_aliases: Object.freeze({
-    sourceRole: 'crosscheck_only', executionScope: 'TARGET_ROSTER_ONLY',
+    sourceRole: 'seed_baseline', executionScope: 'TARGET_ROSTER_ONLY',
     allowedMethod: 'local_file', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 0,
     allowedPaths: Object.freeze(['src/data/aliases.json']),
     allowedFields: Object.freeze(['anilistId', 'ko', 'aliases']),

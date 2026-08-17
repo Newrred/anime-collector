@@ -162,6 +162,8 @@ Source fetch
 
 한 필드에 여러 출처의 값이 있을 수 있다.
 
+기존 3,998개 `aliases.json` row의 `ko`는 고유한 AniList ID와 같이 검증될 때 로컬 테스트 canonical의 기본 한국어 제목 claim으로 보존한다. 같은 row의 나머지 `aliases`는 검색·매칭에 사용하지만 제목 claim으로 자동 승격하지 않는다. Wikidata·기타 출처의 한국어 제목은 교차검증·보완 후보로 별도 출처를 유지한다.
+
 ```text
 FieldClaim
 - entityType

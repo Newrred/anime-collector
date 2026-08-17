@@ -3,7 +3,7 @@
     "sourceId": "legacy_aliases",
     "sourceName": "Legacy aliases roster",
     "baseUrl": "https://github.com/Newrred/anime-collector",
-    "sourceRole": "crosscheck_only",
+    "sourceRole": "seed_baseline",
     "status": "approved",
     "executionScope": "TARGET_ROSTER_ONLY",
     "allowedMethod": "local_file",
@@ -22,7 +22,7 @@
     "termsReviewedAt": "2026-08-17",
     "reviewedBy": "MOEMOA catalog lab",
     "userAgent": "MOEMOA-Catalog-Lab/0.1 (personal local test; https://github.com/Newrred/anime-collector)",
-    "notes": "Read-only legacy target roster; never promoted to catalog data."
+    "notes": "Read-only target roster. Its uniquely AniList-bound Korean title is retained as a TEST_ONLY canonical baseline; other aliases remain matching/search seeds. Production promotion and redistribution remain prohibited."
   },
   {
     "sourceId": "anilist",

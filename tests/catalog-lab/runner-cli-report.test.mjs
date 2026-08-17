@@ -187,7 +187,9 @@ test('quality report exposes ten target/source/field/cover states and no raw pay
     assert.equal(JSON.stringify(report).includes(workspace.root), false);
     assert.equal(report.targets.every((row) => row.sources.anilist && row.cover.status === 'STORED'), true);
     assert.equal(report.targets.every((row) => row.fieldStates.titles === 'VALUE'), true);
-    assert.match(renderQualityReportMarkdown(report), /Golden test 1/);
+    const markdown = renderQualityReportMarkdown(report);
+    assert.match(markdown, /카우보이 비밥/);
+    assert.match(markdown, /프리크리/);
   });
 });
 

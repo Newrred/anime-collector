@@ -330,7 +330,7 @@ Registry의 초기 실행값은 다음과 같이 고정한다.
 
 ```json
 [
-  {"sourceId":"legacy_aliases","sourceRole":"crosscheck_only","status":"approved","executionScope":"TARGET_ROSTER_ONLY","catalogPromotion":"PROHIBITED","redistributionStatus":"PROHIBITED","minIntervalMs":0,"maxConcurrency":1},
+  {"sourceId":"legacy_aliases","sourceRole":"seed_baseline","status":"approved","executionScope":"TARGET_ROSTER_ONLY","catalogPromotion":"PROHIBITED","redistributionStatus":"PROHIBITED","minIntervalMs":0,"maxConcurrency":1},
   {"sourceId":"anilist","sourceRole":"crosscheck_only","status":"approved","executionScope":"LOCAL_TEST_MAX_100","catalogPromotion":"PROHIBITED","redistributionStatus":"PROHIBITED","minIntervalMs":800,"maxConcurrency":1},
   {"sourceId":"wikidata","sourceRole":"direct_import","status":"approved","executionScope":"LOCAL_SAMPLE_MAX_100","catalogPromotion":"FIELD_REVIEW_REQUIRED","redistributionStatus":"CC0","minIntervalMs":1000,"maxConcurrency":1},
   {"sourceId":"anilife_public","sourceRole":"crosscheck_only","status":"approved","executionScope":"LOCAL_TEST_MAX_100","catalogPromotion":"PROHIBITED","redistributionStatus":"PROHIBITED","minIntervalMs":1500,"maxConcurrency":1,"blockedPaths":["/api/","/archive","/history","/settings","/login","/notifications"]}

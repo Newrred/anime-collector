@@ -563,6 +563,81 @@ test('every claim carries source promotion policy and prohibited sources cannot 
     .every((claim) => claim.catalogPromotion === 'FIELD_REVIEW_REQUIRED'), true);
 });
 
+test('legacy Korean seed title becomes the canonical baseline without promoting legacy aliases', () => {
+  const legacyTarget = Object.freeze({
+    targetKey: 'ANILIST:227',
+    moemoaAnimeId: 'anime:22222222-2222-4222-8222-222222222222',
+    seedSource: 'legacy_aliases',
+    seedExternalIds: Object.freeze([{ sourceId: 'anilist', value: '227' }]),
+    seedTitles: Object.freeze([
+      { locale: 'ko', value: '프리크리' },
+      { locale: 'und', value: 'FLCL' },
+      { locale: 'und', value: 'フリクリ' },
+    ]),
+    targetStatus: 'ACTIVE',
+    createdAt: '2026-08-17T00:00:00.97Z',
+  });
+  const record = sourceRecord('anilist', {
+    id: 227, title: { romaji: 'FLCL', english: 'FLCL', native: 'フリクリ' },
+    synonyms: [], characters: [],
+  }, { targetKey: legacyTarget.targetKey, sourceEntityId: '227' });
+  const normalized = normalizeSourceRecord(record);
+  const claims = buildFieldClaims({ target: legacyTarget, normalizedRecords: [normalized] });
+  const legacyClaims = claims.filter((claim) => claim.sourceId === 'legacy_aliases');
+
+  assert.equal(legacyClaims.length, 1);
+  assert.equal(legacyClaims[0].fieldPath, 'titles');
+  assert.deepEqual(legacyClaims[0].normalizedValue, { locale: 'ko', value: '프리크리' });
+  assert.deepEqual(legacyClaims[0].rawValue, { anilistId: '227', ko: '프리크리' });
+  assert.equal(legacyClaims[0].catalogPromotion, 'PROHIBITED');
+  assert.equal(legacyClaims[0].confidenceClass, 'EXACT_ID');
+  assert.equal(legacyClaims[0].ruleId, 'LEGACY_ALIAS_ANILIST_ID_V1');
+  assert.equal(legacyClaims[0].retrievedAt, '2026-08-17T00:00:00.970Z');
+  assert.equal(claims.some((claim) => claim.sourceId === 'legacy_aliases'
+    && claim.normalizedValue?.locale === 'und'), false);
+
+  const canonical = buildCanonicalRevision({
+    target: legacyTarget,
+    sourceRecords: [record],
+    normalizedRecords: [normalized],
+    fieldClaims: claims,
+  });
+  assert.equal(canonical.titles.state, 'VALUE');
+  assert.deepEqual(canonical.titles.value[0], { locale: 'ko', value: '프리크리' });
+  assert.equal(canonical.titles.value.some((title) => title.locale === 'ko'
+    && title.value === '프리크리'), true);
+});
+
+test('legacy Korean baseline fails closed unless its AniList ID and title are unambiguous', () => {
+  const record = sourceRecord('anilist', {
+    id: 1, title: { romaji: 'Cowboy Bebop' }, synonyms: [], characters: [],
+  });
+  const normalized = normalizeSourceRecord(record);
+  const manifestTarget = {
+    ...target,
+    seedSource: 'legacy_aliases',
+    targetStatus: 'ACTIVE',
+    createdAt: '2026-08-17T00:00:00.000Z',
+  };
+  assert.throws(() => buildFieldClaims({
+    target: {
+      ...manifestTarget,
+      seedExternalIds: [{ sourceId: 'anilist', value: '999' }],
+    },
+    normalizedRecords: [normalized],
+  }), { code: 'LEGACY_SEED_INVALID' });
+  assert.throws(() => buildFieldClaims({
+    target: {
+      ...manifestTarget,
+      seedTitles: [
+        { locale: 'ko', value: '카우보이 비밥' },
+        { locale: 'ko', value: '카우보이 비밥 TV' },
+      ],
+    },
+    normalizedRecords: [normalized],
+  }), { code: 'LEGACY_SEED_INVALID' });
+});
+
 test('absence-only source records retain target-bound provenance claims', () => {
   const wikidataUnavailable = normalizeSourceRecord(sourceRecord('wikidata', {
     errorCode: 'SOURCE_NOT_AVAILABLE', externalIds: { anilist: '1' },

@@ -23,8 +23,10 @@ const NORMALIZED_META_KEYS = Object.freeze([
 ]);
 const CLAIM_STATUSES = Object.freeze(['VALUE', 'SOURCE_NOT_AVAILABLE', 'NOT_FETCHED']);
 const PROMOTION_VALUES = Object.freeze([...new Set(Object.values(SOURCE_PROMOTION_POLICY))]);
-const SOURCE_IDS = Object.freeze(['anilist', 'wikidata', 'anilife_public']);
+const NORMALIZED_SOURCE_IDS = Object.freeze(['anilist', 'wikidata', 'anilife_public']);
+const CLAIM_SOURCE_IDS = Object.freeze(['legacy_aliases', ...NORMALIZED_SOURCE_IDS]);
 const CLAIM_INTEGRITY_VERSION = 'FIELD_CLAIM_CONTENT_V1';
+const LEGACY_SEED_RECORD_VERSION = 'LEGACY_ALIAS_KO_SEED_V1';
 
 function typedError(code, message) {
   const error = new Error(message);
@@ -112,7 +114,7 @@ function validSummary(record, fieldPath) {
 export function validateNormalizedRecord(input) {
   const record = frozenSnapshot(input, 'NORMALIZED_RECORD_INVALID');
   const expectedKeys = [...NORMALIZED_META_KEYS, ...CANONICAL_FIELD_PATHS];
-  if (!hasExactKeys(record, expectedKeys) || !SOURCE_IDS.includes(record.sourceId)
+  if (!hasExactKeys(record, expectedKeys) || !NORMALIZED_SOURCE_IDS.includes(record.sourceId)
     || typeof record.sourceRecordId !== 'string' || !/^[a-f0-9]{64}$/u.test(record.sourceRecordId)
     || typeof record.targetKey !== 'string' || !record.targetKey
     || typeof record.sourceEntityId !== 'string' || !record.sourceEntityId
@@ -200,7 +202,7 @@ export function validateFieldClaim(input) {
     throw claimInvalid();
   }
   const policy = SOURCE_PROMOTION_POLICY[claim.sourceId];
-  if (!SOURCE_IDS.includes(claim.sourceId) || !policy || policy !== claim.catalogPromotion) {
+  if (!CLAIM_SOURCE_IDS.includes(claim.sourceId) || !policy || policy !== claim.catalogPromotion) {
     throw typedError('FIELD_CLAIM_SOURCE_POLICY_INVALID', 'FieldClaim source promotion policy is invalid');
   }
   const expectedId = sha256([
@@ -223,6 +225,101 @@ export function validateFieldClaim(input) {
   return claim;
 }
 
+function createFieldClaim({
+  target, fieldPath, rawValue, normalizedValue, sourceId, sourceRecordId,
+  ruleId, confidenceClass, status, retrievedAt,
+}) {
+  const claimContent = {
+    claimId: sha256([target.moemoaAnimeId, fieldPath, normalizedValue, sourceRecordId]),
+    entityType: 'Anime',
+    entityId: target.moemoaAnimeId,
+    fieldPath,
+    rawValue: structuredClone(rawValue),
+    normalizedValue: structuredClone(normalizedValue),
+    sourceId,
+    sourceRecordId,
+    catalogPromotion: SOURCE_PROMOTION_POLICY[sourceId],
+    ruleId,
+    confidenceClass,
+    status,
+    retrievedAt,
+    reviewedAt: null,
+    reviewedBy: null,
+  };
+  const claim = {
+    ...claimContent,
+    contentIntegrity: {
+      version: CLAIM_INTEGRITY_VERSION,
+      algorithm: 'SHA-256',
+      contentHash: claimContentHash(claimContent),
+    },
+  };
+  return validateFieldClaim(claim);
+}
+
+function canonicalSeedTimestamp(value) {
+  const match = typeof value === 'string'
+    ? value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.)(\d{1,3})Z$/u) : null;
+  if (!match) return null;
+  const canonical = `${match[1]}${match[2].padEnd(3, '0')}Z`;
+  try {
+    return new Date(canonical).toISOString() === canonical ? canonical : null;
+  } catch {
+    return null;
+  }
+}
+
+function legacyKoreanSeedClaim(target) {
+  if (target.seedSource !== 'legacy_aliases') return null;
+  const targetAniListId = target.targetKey.match(/^ANILIST:([1-9]\d*)$/u)?.[1];
+  const anilistIds = Array.isArray(target.seedExternalIds)
+    ? target.seedExternalIds.filter((entry) => entry?.sourceId === 'anilist') : [];
+  const koreanTitles = Array.isArray(target.seedTitles)
+    ? target.seedTitles.filter((entry) => entry?.locale === 'ko') : [];
+  const retrievedAt = canonicalSeedTimestamp(target.createdAt);
+  if (!targetAniListId || anilistIds.length !== 1 || String(anilistIds[0]?.value) !== targetAniListId
+    || koreanTitles.length !== 1 || typeof koreanTitles[0]?.value !== 'string'
+    || !retrievedAt) {
+    throw typedError('LEGACY_SEED_INVALID', 'Legacy Korean title seed is invalid');
+  }
+  const rawKoreanTitle = koreanTitles[0].value;
+  const normalizedValue = {
+    locale: 'ko',
+    value: rawKoreanTitle.normalize('NFKC').trim().replace(/\s+/gu, ' '),
+  };
+  if (!isNormalizedFieldValue('titles', normalizedValue)) {
+    throw typedError('LEGACY_SEED_INVALID', 'Legacy Korean title seed is invalid');
+  }
+  const rawValue = { anilistId: targetAniListId, ko: rawKoreanTitle };
+  const sourceRecordId = sha256({
+    version: LEGACY_SEED_RECORD_VERSION,
+    sourceId: 'legacy_aliases',
+    sourcePath: 'src/data/aliases.json',
+    targetKey: target.targetKey,
+    rawValue,
+  });
+  return createFieldClaim({
+    target,
+    fieldPath: 'titles',
+    rawValue,
+    normalizedValue,
+    sourceId: 'legacy_aliases',
+    sourceRecordId,
+    ruleId: 'LEGACY_ALIAS_ANILIST_ID_V1',
+    confidenceClass: 'EXACT_ID',
+    status: 'VALUE',
+    retrievedAt,
+  });
+}
+
+function addUniqueClaim(claimsById, claim) {
+  const existing = claimsById.get(claim.claimId);
+  if (existing && stableStringify(existing) !== stableStringify(claim)) {
+    throw typedError('FIELD_CLAIM_ID_COLLISION', 'Deterministic FieldClaim ID maps to different content');
+  }
+  if (!existing) claimsById.set(claim.claimId, claim);
+}
+
 /** Builds deterministic immutable source claims. Conflict state is derived only in canonical revisions. */
 export function buildFieldClaims(input) {
   const request = frozenSnapshot(input, 'FIELD_CLAIM_INPUT_INVALID');
@@ -240,44 +337,27 @@ export function buildFieldClaims(input) {
     return validateNormalizedRecord(record);
   });
   const claimsById = new Map();
+  const seedClaim = legacyKoreanSeedClaim(targetSnapshot);
+  if (seedClaim) addUniqueClaim(claimsById, seedClaim);
   for (const record of records) {
     const identity = resolveIdentity({
       target: targetSnapshot, candidate: record, sourceId: record.sourceId, referenceRecords: records,
     });
     if (identity.status !== 'MATCHED') continue;
     for (const field of record.fieldValues) {
-      const normalizedValue = structuredClone(field.normalizedValue);
-      const content = {
-        claimId: sha256([targetSnapshot.moemoaAnimeId, field.fieldPath, normalizedValue, record.sourceRecordId]),
-        entityType: 'Anime',
-        entityId: targetSnapshot.moemoaAnimeId,
+      const claim = createFieldClaim({
+        target: targetSnapshot,
         fieldPath: field.fieldPath,
-        rawValue: structuredClone(field.rawValue),
-        normalizedValue,
+        rawValue: field.rawValue,
+        normalizedValue: field.normalizedValue,
         sourceId: record.sourceId,
         sourceRecordId: record.sourceRecordId,
-        catalogPromotion: SOURCE_PROMOTION_POLICY[record.sourceId],
         ruleId: identity.ruleId,
         confidenceClass: identity.confidenceClass,
         status: field.status,
         retrievedAt: record.retrievedAt,
-        reviewedAt: null,
-        reviewedBy: null,
-      };
-      const claim = {
-        ...content,
-        contentIntegrity: {
-          version: CLAIM_INTEGRITY_VERSION,
-          algorithm: 'SHA-256',
-          contentHash: claimContentHash(content),
-        },
-      };
-      validateFieldClaim(claim);
-      const existing = claimsById.get(claim.claimId);
-      if (existing && stableStringify(existing) !== stableStringify(claim)) {
-        throw typedError('FIELD_CLAIM_ID_COLLISION', 'Deterministic FieldClaim ID maps to different content');
-      }
-      if (!existing) claimsById.set(claim.claimId, claim);
+      });
+      addUniqueClaim(claimsById, claim);
     }
   }
   return frozenSnapshot([...claimsById.values()].sort(claimOrder), 'FIELD_CLAIM_INVALID');

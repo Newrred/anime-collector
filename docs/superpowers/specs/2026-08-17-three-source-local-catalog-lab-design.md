@@ -63,10 +63,10 @@ MOEMOA의 기존 3,998개 별칭 목록을 우선 수집 대상 명단으로 사
 
 ### 4.1 기존 3,998개 목록
 
-`src/data/aliases.json`은 감사 시점 기준 3,998개의 고유 AniList ID와 `ko`, `aliases`를 가진다. 출처·수집 시각·parser version·검증 상태는 없으므로 카탈로그 사실 원본이 아니라 우선 수집 대상과 검색·매칭 seed로만 사용한다.
+`src/data/aliases.json`은 감사 시점 기준 3,998개의 고유 AniList ID와 `ko`, `aliases`를 가진다. 모든 row의 AniList ID가 고유하고 한국어 제목이 하나이므로, `ko`는 ID에 구속된 **로컬 테스트 기본 한국어 제목**으로 canonical에 보존한다. `aliases`는 검색·매칭 seed로만 사용한다. 이 결정은 출처·수집 시각·parser version이 없는 legacy 자료의 프로덕션 재배포나 자동 게시까지 승인하지 않는다.
 
 ```text
-역할: target roster + legacy matching seed
+역할: target roster + TEST_ONLY Korean title baseline + legacy matching seed
 자동 발행: 금지
 보존 상태: LEGACY_UNVERIFIED
 ```
@@ -268,6 +268,8 @@ rawPayloadRef
 
 raw payload는 immutable이다. 같은 source entity의 응답이 바뀌면 기존 파일을 덮어쓰지 않고 새 fetch revision을 만든다.
 
+`legacy_aliases` 한국어 기본 제목은 네트워크 fetch가 아니므로 별도 raw payload를 만들지 않는다. 대신 검증된 TargetRecord의 `targetKey + AniList ID + ko + source path`를 해싱한 결정적 evidence ID를 FieldClaim의 `sourceRecordId`로 사용한다. canonical 인증 시에는 저장된 claim을 신뢰하지 않고 TargetRecord에서 같은 claim을 재생성해 비교한다.
+
 ### 8.3 FieldClaim
 
 ```text
@@ -332,6 +334,7 @@ CONFLICTED
 
 ```text
 aliases 3,998 target roster
+→ AniList ID에 구속된 legacy `ko`를 TEST_ONLY 기본 제목 claim으로 보존
 → source별 immutable fetch
 → source별 normalize
 → exact identity resolution
@@ -345,12 +348,13 @@ aliases 3,998 target roster
 
 필드 처리 원칙:
 
-1. 기존 AniList ID는 AniList fetch와 Wikidata `P8729` 연결에만 사용한다.
-2. AniList 값은 테스트 canonical의 구조 검증에 사용할 수 있지만 production promotion은 금지한다.
-3. Wikidata 값은 CC0 source claim으로 독립 보관한다.
-4. AniLife 값은 한국어 제목, 연도, 화수, 표지 후보의 교차검증에만 사용한다.
-5. 출처 충돌 시 priority로 조용히 덮어쓰지 않고 `CONFLICTED` claim을 만든다.
-6. 값이 없는 필드는 추측하지 않고 누락 상태와 확인한 출처를 기록한다.
+1. 기존 AniList ID는 legacy `ko`를 정확한 작품에 구속하고, AniList fetch와 Wikidata `P8729` 연결에 사용한다.
+2. ID와 유일하게 결합된 legacy `ko`는 TEST_ONLY canonical의 기본 한국어 제목으로 보존하고, legacy `aliases`는 자동 승격하지 않는다.
+3. AniList 값은 테스트 canonical의 구조 검증에 사용할 수 있지만 production promotion은 금지한다.
+4. Wikidata 값은 CC0 source claim으로 독립 보관한다.
+5. Wikidata·AniLife의 한국어 제목은 legacy 기본값의 교차검증·보완 후보로 보존한다.
+6. 출처 충돌 시 priority로 조용히 덮어쓰지 않고 `CONFLICTED` claim을 만든다.
+7. 값이 없는 필드는 추측하지 않고 누락 상태와 확인한 출처를 기록한다.
 
 ## 10. 작품 자동 매칭 규칙
 

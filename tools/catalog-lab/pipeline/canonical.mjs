@@ -24,8 +24,12 @@ function totalOrder(parts) {
 
 const GENERIC_ORDER = totalOrder([]);
 
-function collectionOrder(fieldPath) {
-  if (fieldPath === 'titles') return totalOrder([(value) => value.locale, (value) => value.value]);
+function collectionOrder(fieldPath, preferredValues = new Set()) {
+  if (fieldPath === 'titles') return totalOrder([
+    (value) => (preferredValues.has(stableStringify(value)) ? 0 : 1),
+    (value) => value.locale,
+    (value) => value.value,
+  ]);
   if (fieldPath === 'externalIds') return totalOrder([(value) => value.sourceId, (value) => value.value]);
   if (fieldPath === 'studios') return totalOrder([(value) => value.id, (value) => value.name, (value) => value.role]);
   if (fieldPath === 'relations') return totalOrder([(value) => value.targetId, (value) => value.type]);
@@ -64,9 +68,13 @@ function absentState(claims) {
 }
 
 function collectionFieldValue(fieldPath, claims) {
+  const preferredValues = fieldPath === 'titles'
+    ? new Set(claims.filter((claim) => claim.status === 'VALUE'
+      && claim.sourceId === 'legacy_aliases').map((claim) => stableStringify(claim.normalizedValue)))
+    : new Set();
   const values = uniqueSorted(
     claims.filter((claim) => claim.status === 'VALUE').map((claim) => claim.normalizedValue),
-    collectionOrder(fieldPath),
+    collectionOrder(fieldPath, preferredValues),
   );
   if (values.length === 0) return { state: absentState(claims), value: [] };
   const groups = new Map();
