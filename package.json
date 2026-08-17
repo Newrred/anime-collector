@@ -25,7 +25,15 @@
     "collect:anilife:first-season": "node scripts/collect-anilife-first-season.mjs",
     "collect:anilife:2010-2027": "node scripts/collect-anilife-seasons.mjs --from=2010 --to=2027",
     "build:aliases:auto": "node scripts/build-aliases-from-anilife.mjs",
-    "build:aliases:auto:sample": "node scripts/build-aliases-from-anilife.mjs --limit=120"
+    "build:aliases:auto:sample": "node scripts/build-aliases-from-anilife.mjs --limit=120",
+    "catalog:test": "node tests/catalog-lab/run-tests.mjs",
+    "catalog:init": "node tools/catalog-lab/cli.mjs init",
+    "catalog:targets": "node tools/catalog-lab/cli.mjs targets",
+    "catalog:bind-anilife": "node tools/catalog-lab/cli.mjs bind-anilife",
+    "catalog:collect": "node tools/catalog-lab/cli.mjs collect",
+    "catalog:validate": "node tools/catalog-lab/cli.mjs validate",
+    "catalog:report": "node tools/catalog-lab/cli.mjs report",
+    "catalog:guard": "node tools/catalog-lab/cli.mjs guard"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

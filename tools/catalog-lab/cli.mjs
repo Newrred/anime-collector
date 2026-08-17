@@ -1,0 +1,268 @@
+import { execFile } from 'node:child_process';
+import { readFile, readdir, readFile as readFileBytes } from 'node:fs/promises';
+import { dirname, relative, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { CATALOG_LAB_USER_AGENT, loadSourceRegistry } from './contracts/catalogContracts.mjs';
+import { openCatalogWorkspace } from './lib/workspace.mjs';
+import { createCatalogArtifactStore } from './pipeline/artifact-store.mjs';
+import { buildTargetManifest } from './pipeline/targets.mjs';
+import { runCatalogPipeline, validateGoldenArtifacts } from './pipeline/runner.mjs';
+import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
+import { createAniListTestAdapter } from './sources/anilist-test.mjs';
+import { createWikidataAdapter } from './sources/wikidata.mjs';
+import { writeQualityReport } from './reports/quality-report.mjs';
+
+export const CLI_EXIT = Object.freeze({
+  OK: 0, QUALITY_GATE_FAILED: 2, SOURCE_PAUSED: 3, USAGE_OR_SAFETY: 64,
+});
+
+const COMMANDS = new Set(['init', 'targets', 'bind-anilife', 'collect', 'validate', 'report', 'guard']);
+const SOURCE_IDS = new Set(['anilist', 'wikidata', 'anilife_public']);
+const DEFAULT_BUILD_ROOTS = Object.freeze(['dist', 'android/app/src', 'test-output', 'test-results', '.vercel/output']);
+
+function repoFromModule() {
+  return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+}
+
+function typedError(code, message) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+function usageError(message) {
+  return typedError('CLI_USAGE_OR_SAFETY', message);
+}
+
+function parseArgs(argv) {
+  if (!Array.isArray(argv) || argv.length === 0 || !COMMANDS.has(argv[0])) throw usageError('Command is not supported');
+  const options = {};
+  for (let index = 1; index < argv.length; index += 1) {
+    const token = argv[index];
+    if (!token.startsWith('--') || Object.hasOwn(options, token)) throw usageError('Arguments are invalid');
+    if (token === '--allow-network' || token === '--refresh') options[token] = true;
+    else {
+      const value = argv[index + 1];
+      if (typeof value !== 'string' || value.startsWith('--')) throw usageError('Option value is required');
+      options[token] = value;
+      index += 1;
+    }
+  }
+  return { command: argv[0], options };
+}
+
+function onlyOptions(options, allowed) {
+  if (Object.keys(options).some((option) => !allowed.has(option))) throw usageError('Option is not supported for this command');
+}
+
+function exactGolden(options) {
+  if ((options['--profile'] ?? 'golden') !== 'golden') throw usageError('Only the golden profile is supported');
+}
+
+function selectedSources(value) {
+  if (typeof value !== 'string' || !value) throw usageError('Collection requires --sources');
+  const rows = value.split(',');
+  if (rows.some((source) => !SOURCE_IDS.has(source)) || new Set(rows).size !== rows.length) throw usageError('Collection sources are invalid');
+  return rows;
+}
+
+function io(dependencies) {
+  return {
+    stdout: dependencies.stdout ?? process.stdout,
+    stderr: dependencies.stderr ?? process.stderr,
+  };
+}
+
+function writeLine(stream, message) {
+  stream.write(`${message}\n`);
+}
+
+async function openWorkspace(dependencies, create) {
+  const repoRoot = dependencies.repoRoot ?? repoFromModule();
+  return openCatalogWorkspace({ repoRoot, workspaceRoot: dependencies.workspaceRoot ?? process.env.MOEMOA_CATALOG_LAB_DIR, create });
+}
+
+async function targetManifest(workspace) {
+  const store = createCatalogArtifactStore({ workspace });
+  const manifest = await store.readManifest('golden');
+  if (!Array.isArray(manifest) || manifest.length !== 10) throw typedError('GOLDEN_MANIFEST_REQUIRED', 'Golden target manifest is required');
+  return { store, manifest };
+}
+
+function defaultAdapters() {
+  return Object.freeze({
+    anilist: createAniListTestAdapter(),
+    wikidata: createWikidataAdapter({ userAgent: CATALOG_LAB_USER_AGENT }),
+    anilife_public: createAniLifePublicPageAdapter(),
+  });
+}
+
+async function listTrackedFiles(repoRoot) {
+  return new Promise((resolvePromise, reject) => {
+    execFile('git', ['-C', repoRoot, 'ls-files', '-z'], { encoding: 'buffer' }, (error, stdout) => {
+      if (error) return reject(error);
+      const files = stdout.toString('utf8').split('\0').filter(Boolean).map((path) => resolve(repoRoot, path));
+      return resolvePromise(files);
+    });
+  });
+}
+
+function relativePath(repoRoot, path) {
+  const value = relative(repoRoot, path).replaceAll('\\', '/');
+  return value && !value.startsWith('../') && value !== '..' ? value : null;
+}
+
+function hasImageSignature(bytes) {
+  return (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])))
+    || (bytes.length >= 3 && bytes.subarray(0, 3).equals(Buffer.from([255, 216, 255])))
+    || (bytes.length >= 12 && bytes.subarray(0, 4).equals(Buffer.from('RIFF')) && bytes.subarray(8, 12).equals(Buffer.from('WEBP')));
+}
+
+function leakedArtifact(bytes, fileName) {
+  if (fileName === 'TEST_ONLY.json') return true;
+  if (hasImageSignature(bytes)) return true;
+  const text = bytes.subarray(0, 2 * 1024 * 1024).toString('utf8');
+  try {
+    const value = JSON.parse(text);
+    return Boolean(value && typeof value === 'object' && !Array.isArray(value)
+      && ('rawPayloadRef' in value || ('payload' in value && 'sourceRecordId' in value) || ('localRef' in value && /^images\/covers\//u.test(value.localRef))));
+  } catch {
+    return false;
+  }
+}
+
+function isKnownAndroidBootstrapAsset(path) {
+  return /^android\/app\/src\/main\/res\/(?:drawable(?:-(?:land|port)-(?:mdpi|hdpi|xhdpi|xxhdpi|xxxhdpi))?\/splash|mipmap-(?:mdpi|hdpi|xhdpi|xxhdpi|xxxhdpi)\/ic_launcher(?:_foreground|_round)?)\.png$/u.test(path);
+}
+
+async function filesUnder(root) {
+  const files = [];
+  const walk = async (directory) => {
+    let entries;
+    try { entries = await readdir(directory, { withFileTypes: true }); } catch (error) { if (error.code === 'ENOENT') return; throw error; }
+    for (const entry of entries) {
+      const path = resolve(directory, entry.name);
+      if (entry.isDirectory()) await walk(path);
+      else if (entry.isFile()) files.push(path);
+    }
+  };
+  await walk(root);
+  return files;
+}
+
+async function runGuard(dependencies) {
+  const repoRoot = dependencies.repoRoot ?? repoFromModule();
+  const tracked = await (dependencies.trackedFiles ?? (() => listTrackedFiles(repoRoot)))();
+  const roots = dependencies.buildRoots ?? DEFAULT_BUILD_ROOTS.map((root) => resolve(repoRoot, root));
+  const rootFiles = (await Promise.all(roots.map((root) => filesUnder(root)))).flat();
+  const leaks = [];
+  for (const path of [...new Set([...tracked, ...rootFiles])]) {
+    const rel = relativePath(repoRoot, path);
+    if (!rel) continue;
+    // Existing application launcher/splash resources are not catalog covers.
+    if (isKnownAndroidBootstrapAsset(rel)) continue;
+    const bytes = await readFileBytes(path).catch(() => null);
+    if (bytes && leakedArtifact(bytes, rel.split('/').at(-1))) leaks.push(rel);
+  }
+  return [...new Set(leaks)].sort();
+}
+
+function hasPausedSources(summary) {
+  return summary.targets?.some((target) => Object.values(target.sources ?? {}).some((state) => state?.stage === 'SOURCE_PAUSED'));
+}
+
+/** Runs one intentionally narrow local-only catalog command without calling process.exit(). */
+export async function runCli(argv, dependencies = {}) {
+  const { stdout, stderr } = io(dependencies);
+  try {
+    const { command, options } = parseArgs(argv);
+    if (command === 'guard') {
+      onlyOptions(options, new Set());
+      const leaks = await runGuard(dependencies);
+      if (leaks.length) {
+        writeLine(stderr, `Catalog guard blocked: ${leaks.join(', ')}`);
+        return CLI_EXIT.QUALITY_GATE_FAILED;
+      }
+      writeLine(stdout, 'Catalog guard: no leaks');
+      return CLI_EXIT.OK;
+    }
+    if (command === 'init') {
+      onlyOptions(options, new Set());
+      await openWorkspace(dependencies, true);
+      writeLine(stdout, 'Catalog workspace initialized');
+      return CLI_EXIT.OK;
+    }
+    if (command === 'targets') {
+      onlyOptions(options, new Set(['--profile'])); exactGolden(options);
+      const workspace = await openWorkspace(dependencies, false);
+      const { store } = await targetManifestOrCreate(workspace, dependencies);
+      const manifest = await store.readManifest('golden');
+      writeLine(stdout, `Golden targets: ${manifest.length}`);
+      return CLI_EXIT.OK;
+    }
+    if (command === 'bind-anilife') {
+      onlyOptions(options, new Set(['--anilist-id', '--content-id']));
+      if (!/^[1-9]\d*$/u.test(options['--anilist-id'] ?? '') || !/^[1-9]\d*$/u.test(options['--content-id'] ?? '')) throw usageError('AniLife ids must be numeric');
+      const workspace = await openWorkspace(dependencies, false);
+      const { store, manifest } = await targetManifest(workspace);
+      const target = manifest.find((row) => row.targetKey === `ANILIST:${options['--anilist-id']}`);
+      if (!target) throw usageError('AniLife binding target is not in the golden manifest');
+      const binding = validateAniLifeBinding({ contentId: options['--content-id'], evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' }, { targetKey: target.targetKey });
+      await store.writeAniLifeBinding(target.targetKey, { ...binding, evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' });
+      writeLine(stdout, 'AniLife binding stored');
+      return CLI_EXIT.OK;
+    }
+    if (command === 'collect') {
+      onlyOptions(options, new Set(['--profile', '--sources', '--allow-network', '--refresh'])); exactGolden(options);
+      if (options['--allow-network'] !== true) throw usageError('Collection requires --allow-network');
+      const workspace = await openWorkspace(dependencies, false);
+      const { store, manifest } = await targetManifest(workspace);
+      const summary = await runCatalogPipeline({
+        workspace, targets: manifest, registry: await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() }),
+        adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(), selectedSources: selectedSources(options['--sources']),
+        allowNetwork: true, refresh: options['--refresh'] === true, clock: dependencies.clock,
+        httpFactory: dependencies.httpFactory,
+        ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),
+      });
+      writeLine(stdout, `Collection: ${summary.counts.targets} targets`);
+      return hasPausedSources(summary) ? CLI_EXIT.SOURCE_PAUSED : CLI_EXIT.OK;
+    }
+    exactGolden(options);
+    onlyOptions(options, new Set(['--profile']));
+    const workspace = await openWorkspace(dependencies, false);
+    const { manifest } = await targetManifest(workspace);
+    if (command === 'validate') {
+      const result = await validateGoldenArtifacts({ workspace, targets: manifest });
+      writeLine(stdout, result.valid ? 'Golden artifacts valid' : 'Golden artifacts blocked');
+      return result.valid ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
+    }
+    const report = await writeQualityReport({ workspace, profile: 'golden' });
+    writeLine(stdout, report.gate.passed ? 'Quality report written' : 'Quality report written with blockers');
+    return report.gate.passed ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
+  } catch (error) {
+    writeLine(stderr, `Catalog command rejected: ${error?.code ?? 'CATALOG_COMMAND_FAILED'}`);
+    return CLI_EXIT.USAGE_OR_SAFETY;
+  }
+}
+
+async function targetManifestOrCreate(workspace, dependencies) {
+  const store = createCatalogArtifactStore({ workspace });
+  const current = await store.readManifest('golden');
+  if (Array.isArray(current)) return { store, manifest: current };
+  const repoRoot = dependencies.repoRoot ?? repoFromModule();
+  const aliases = JSON.parse(await readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8'));
+  const idMap = (await store.readIdMap()) ?? {};
+  const manifest = await buildTargetManifest({
+    profile: 'golden', rows: aliases, idMapStore: idMap,
+    clock: dependencies.clock ?? { now: () => new Date().toISOString() },
+    uuid: dependencies.uuid ?? crypto.randomUUID,
+  });
+  await store.writeIdMap(idMap);
+  await store.writeManifest('golden', manifest);
+  return { store, manifest };
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  process.exitCode = await runCli(process.argv.slice(2));
+}
