@@ -88,9 +88,7 @@ export function createCatalogArtifactStore({ workspace }) {
 
   async function writeManifest(profile, manifest) {
     const parts = ['manifests', `${toPathKey(profile)}.json`];
-    const path = await assertCatalogWorkspaceMutation(workspace, parts);
-    await atomicWriteJson(path, snapshot(manifest));
-    return Object.freeze({ path });
+    return writeImmutableJson(workspace, parts, manifest);
   }
 
   async function readAniLifeBindings() {
@@ -115,6 +113,11 @@ export function createCatalogArtifactStore({ workspace }) {
 
   async function readSourceRecord({ sourceId, targetKey, sourceRecordId }) {
     await assertCatalogWorkspaceMutation(workspace, []);
+    if (!['anilist', 'wikidata', 'anilife_public'].includes(sourceId)
+      || typeof targetKey !== 'string' || !/^ANILIST:[1-9]\d*$/u.test(targetKey)
+      || typeof sourceRecordId !== 'string' || !/^[a-f0-9]{64}$/u.test(sourceRecordId)) {
+      throw typedError('CATALOG_ARTIFACT_INVALID', 'Source record path segments are invalid');
+    }
     return readJson(workspace.resolve('raw', toPathKey(sourceId), toPathKey(targetKey), `${sourceRecordId}.json`));
   }
 

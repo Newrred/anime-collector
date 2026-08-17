@@ -43,17 +43,21 @@ export function createRateLimitedHttpClient({ http, minIntervalMs, now = Date.no
   }
   let lastStart = null;
   let queue = Promise.resolve();
+  const schedule = (operation) => {
+    const next = queue.then(async () => {
+      const elapsed = lastStart === null ? minIntervalMs : now() - lastStart;
+      const wait = Math.max(0, minIntervalMs - elapsed);
+      if (wait) await sleep(wait);
+      lastStart = now();
+      return operation();
+    });
+    queue = next.catch(() => {});
+    return next;
+  };
   return Object.freeze({
+    schedule,
     request(input) {
-      const next = queue.then(async () => {
-        const elapsed = lastStart === null ? minIntervalMs : now() - lastStart;
-        const wait = Math.max(0, minIntervalMs - elapsed);
-        if (wait) await sleep(wait);
-        lastStart = now();
-        return http.request(input);
-      });
-      queue = next.catch(() => {});
-      return next;
+      return schedule(() => http.request(input));
     },
   });
 }
@@ -71,7 +75,12 @@ function errorCode(error) {
 }
 
 function sourceState(stage, extra = {}) {
-  return { stage, ...extra };
+  const checkpoints = stage === 'COMPLETED'
+    ? ['PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED', 'CLAIMS_BUILT', 'IMAGE_VALIDATED', 'COMPLETED']
+    : stage === 'MATCHED' ? ['PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED']
+      : stage === 'NORMALIZED' ? ['PENDING', 'FETCHED', 'NORMALIZED']
+        : stage === 'FETCHED' ? ['PENDING', 'FETCHED'] : ['PENDING', stage];
+  return { stage, checkpoints, ...extra };
 }
 
 function ensureInputs({ targets, registry, selectedSources }) {
@@ -133,13 +142,19 @@ function coverCandidates({ target, normalizedRecords }) {
 /** Uses only exact normalized cover fields and the approved production download/decode/storage chain. */
 export function createDefaultCoverPipeline() {
   const transport = createPinnedCoverTransport();
-  return async ({ target, normalizedRecords, workspace }) => {
+  return async ({ target, normalizedRecords, workspace, clients }) => {
     const failures = [];
-    for (const candidate of coverCandidates({ target, normalizedRecords })) {
+    let candidates;
+    try { candidates = coverCandidates({ target, normalizedRecords }); } catch (error) {
+      return frozen({ status: 'FAILED', errorCode: errorCode(error), failures: [errorCode(error)] });
+    }
+    for (const candidate of candidates) {
       try {
-        const sniffed = await downloadCoverCandidate({
+        const download = () => downloadCoverCandidate({
           candidate, policy: getApprovedCoverSourcePolicy(candidate.sourceId), transport,
         });
+        const client = clients?.get?.(candidate.sourceId);
+        const sniffed = client?.schedule ? await client.schedule(download) : await download();
         const decoded = await decodeCoverWithChromium({ record: sniffed });
         const stored = await storeValidatedCover({ record: decoded, workspace, animeId: target.moemoaAnimeId });
         const selected = selectCanonicalCover([stored]);
@@ -246,10 +261,10 @@ export async function runCatalogPipeline({
           }) });
           sources[sourceId] = sourceState('PENDING_REVIEW', { sourceRecordId: persisted.sourceRecordId });
         } else {
-          await stateStore.write({ sourceId, targetKey: target.targetKey, state: sourceState('COMPLETED', {
+          await stateStore.write({ sourceId, targetKey: target.targetKey, state: sourceState('MATCHED', {
             sourceRecordId: persisted.sourceRecordId,
           }) });
-          sources[sourceId] = sourceState('COMPLETED', { sourceRecordId: persisted.sourceRecordId });
+          sources[sourceId] = sourceState('MATCHED', { sourceRecordId: persisted.sourceRecordId });
         }
         try {
           await rebuildCurrent();
@@ -274,15 +289,38 @@ export async function runCatalogPipeline({
       }
     }
 
+    try {
+      await rebuildCurrent();
+    } catch {
+      // Resume keeps the prior pointer while an authenticated replacement cannot be rebuilt.
+    }
+
     const sourceRecords = await availableRecords({ stateStore, store, target });
     const normalizedRecords = sourceRecords.map((record) => normalizeSourceRecord(record));
 
-    let cover = await store.writeCoverObservation(target);
-    if (refresh || !cover?.localRef) {
-      const observation = await runCoverPipeline(coverPipeline, { target, normalizedRecords, workspace });
-      cover = observation;
-      await store.writeCoverObservation(target, observation);
-      growth.images += Number(observation?.created === true);
+    let cover;
+    try {
+      cover = await store.writeCoverObservation(target);
+      if (refresh || !cover?.localRef) {
+        const observation = await runCoverPipeline(coverPipeline, { target, normalizedRecords, workspace, clients });
+        cover = observation;
+        await store.writeCoverObservation(target, observation);
+        growth.images += Number(observation?.created === true);
+      }
+    } catch (error) {
+      cover = frozen({ status: 'FAILED', errorCode: errorCode(error) });
+    }
+    for (const sourceId of selectedSources) {
+      if (sources[sourceId]?.stage === 'MATCHED') {
+        const completed = sourceState('COMPLETED', { sourceRecordId: sources[sourceId].sourceRecordId });
+        await stateStore.write({ sourceId, targetKey: target.targetKey, state: completed });
+        sources[sourceId] = completed;
+      }
+    }
+    for (const sourceId of EXECUTABLE_SOURCES) {
+      if (sources[sourceId]) continue;
+      const retained = await stateStore.read({ sourceId, targetKey: target.targetKey });
+      if (retained) sources[sourceId] = retained;
     }
     targetRows.push({
       targetKey: target.targetKey,

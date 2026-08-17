@@ -11,6 +11,7 @@ import { buildCanonicalRevision } from '../../tools/catalog-lab/pipeline/canonic
 import { buildFieldClaims } from '../../tools/catalog-lab/pipeline/claims.mjs';
 import { normalizeSourceRecord } from '../../tools/catalog-lab/pipeline/normalize.mjs';
 import { storeSourceEnvelope } from '../../tools/catalog-lab/pipeline/raw-store.mjs';
+import { createStateStore } from '../../tools/catalog-lab/pipeline/state-store.mjs';
 import { createCatalogArtifactStore } from '../../tools/catalog-lab/pipeline/artifact-store.mjs';
 import { createRateLimitedHttpClient, runCatalogPipeline } from '../../tools/catalog-lab/pipeline/runner.mjs';
 
@@ -77,7 +78,7 @@ function adapterFor(sourceId, { failure } = {}) {
   });
 }
 
-async function fixtureInput(workspace, { wikidataFailure, refresh = false } = {}) {
+async function fixtureInput(workspace, { wikidataFailure, refresh = false, coverPipeline } = {}) {
   return {
     workspace,
     targets: Array.from({ length: 10 }, (_, index) => target(index + 1)),
@@ -92,10 +93,10 @@ async function fixtureInput(workspace, { wikidataFailure, refresh = false } = {}
     refresh,
     clock,
     httpFactory: () => ({ async request() { return new Response('{}'); } }),
-    coverPipeline: async ({ target: row }) => ({
+    coverPipeline: coverPipeline ?? (async ({ target: row }) => ({
       status: 'STORED', sourceId: 'anilist', localRef: `images/covers/${row.moemoaAnimeId}/fixture.png`,
       byteSize: 12, created: false,
-    }),
+    })),
   };
 }
 
@@ -173,4 +174,67 @@ test('runner rejects network omission, target overflow, unregistered sources, an
   await assert.rejects(runCatalogPipeline({
     workspace: {}, targets: [], registry: [], adapters: {}, bindings: {}, selectedSources: [], allowNetwork: false,
   }), { code: 'CATALOG_WORKSPACE_UNTRUSTED' });
+});
+
+test('resume rebuilds current after an interrupted completed source checkpoint', async () => {
+  await withWorkspace(async (workspace) => {
+    const input = await fixtureInput(workspace);
+    const row = input.targets[0];
+    const persisted = await storeSourceEnvelope({ workspace, envelope: envelope('anilist', row) });
+    await createStateStore({ workspace }).write({
+      sourceId: 'anilist', targetKey: row.targetKey,
+      state: { stage: 'COMPLETED', sourceRecordId: persisted.sourceRecordId },
+    });
+    input.selectedSources = ['anilist'];
+    const result = await runCatalogPipeline(input);
+    assert.ok(result.targets[0].currentCanonicalHash);
+  });
+});
+
+test('artifact store rejects a changed golden manifest after its first immutable write', async () => {
+  await withWorkspace(async (workspace) => {
+    const store = createCatalogArtifactStore({ workspace });
+    await store.writeManifest('golden', [target(1)]);
+    await assert.rejects(store.writeManifest('golden', [target(2)]), { code: 'CATALOG_ARTIFACT_COLLISION' });
+    assert.deepEqual(await store.readManifest('golden'), [target(1)]);
+  });
+});
+
+test('cover failures preserve text canonical and write a finite classified snapshot', async () => {
+  await withWorkspace(async (workspace) => {
+    const failure = Object.assign(new Error('cover pipeline rejected'), { code: 'IMAGE_DECODE_FAILED' });
+    const result = await runCatalogPipeline(await fixtureInput(workspace, {
+      refresh: true,
+      coverPipeline: async () => { throw failure; },
+    }));
+    assert.ok(result.targets.every((row) => row.currentCanonicalHash));
+    assert.ok(result.targets.every((row) => row.cover.status === 'FAILED'));
+    assert.ok(result.targets.every((row) => row.cover.errorCode === 'IMAGE_DECODE_FAILED'));
+  });
+});
+
+test('runner snapshots selected and retained source checkpoints with the declared intermediate stages', async () => {
+  await withWorkspace(async (workspace) => {
+    const firstInput = await fixtureInput(workspace);
+    firstInput.selectedSources = ['anilist'];
+    const first = await runCatalogPipeline(firstInput);
+    const secondInput = await fixtureInput(workspace, { refresh: true });
+    secondInput.selectedSources = ['wikidata'];
+    const second = await runCatalogPipeline(secondInput);
+    const sourceStates = second.targets[0].sources;
+    assert.ok(sourceStates.anilist.checkpoints.includes('MATCHED'));
+    assert.ok(sourceStates.anilist.checkpoints.includes('CLAIMS_BUILT'));
+    assert.ok(sourceStates.anilist.checkpoints.includes('IMAGE_VALIDATED'));
+    assert.ok(sourceStates.anilist.sourceRecordId, JSON.stringify(sourceStates.anilist));
+    assert.equal(second.targets[0].currentCanonicalHash, first.targets[0].currentCanonicalHash);
+  });
+});
+
+test('artifact store rejects unsafe source-record path segments', async () => {
+  await withWorkspace(async (workspace) => {
+    const store = createCatalogArtifactStore({ workspace });
+    await assert.rejects(store.readSourceRecord({
+      sourceId: '../anilist', targetKey: 'ANILIST:1', sourceRecordId: '../escape',
+    }), { code: 'CATALOG_ARTIFACT_INVALID' });
+  });
 });
