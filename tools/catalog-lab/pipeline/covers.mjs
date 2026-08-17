@@ -138,7 +138,7 @@ function inspectJpeg(bytes) {
     if (length < 2 || offset + length > bytes.length) throw imageTooShort();
     if (SOF_MARKERS.has(marker)) {
       if (length < 8) throw typedError('IMAGE_STRUCTURE_INVALID', 'JPEG SOF segment is invalid');
-      dimensions = validateDimensions(u16be(bytes, offset + 3), u16be(bytes, offset + 5));
+      dimensions = validateDimensions(u16be(bytes, offset + 5), u16be(bytes, offset + 3));
     }
     if (marker === 0xda) {
       sawScan = true;

@@ -21,7 +21,7 @@ import {
   storeValidatedCover,
 } from '../../tools/catalog-lab/pipeline/covers.mjs';
 import {
-  jpegBytes, pngBytes, truncatedPngBytes, webpBytes, webpVp8xBytes,
+  jpegBytes, nonSquareJpegBytes, pngBytes, truncatedPngBytes, webpBytes, webpVp8xBytes,
 } from './fixtures/cover-valid-images.mjs';
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
 
@@ -149,6 +149,12 @@ test('inspectImageBytes recognizes only bounded JPEG, PNG, and WebP structures',
   });
 });
 
+test('inspectImageBytes preserves non-square JPEG SOF width and height', () => {
+  assert.deepEqual(inspectImageBytes({ declaredMime: COVER_MIME.JPEG, bytes: nonSquareJpegBytes }), {
+    mimeType: COVER_MIME.JPEG, extension: 'jpg', width: 2, height: 3, byteSize: nonSquareJpegBytes.byteLength,
+  });
+});
+
 test('cover validation rejects spoofed MIME, truncation, unsafe pixels, and unsafe MIME', () => {
   assert.throws(() => inspectImageBytes({ declaredMime: COVER_MIME.JPEG, bytes: pngBytes }),
     { code: 'IMAGE_MIME_SIGNATURE_MISMATCH' });
@@ -213,6 +219,15 @@ test('Chromium lifecycle observation decodes real synthetic JPEG, PNG, and WebP 
     assert.deepEqual(observation, { ok: true, dimensions: { width: 1, height: 1 } }, mimeType);
     assert.equal(sniffed.validationStatus, 'SNIFFED', mimeType);
   }
+});
+
+test('non-square JPEG structural dimensions agree with Chromium decode', async () => {
+  const sniffed = await downloadCoverCandidate({
+    candidate: candidate(), policy, transport: transportFor(nonSquareJpegBytes, COVER_MIME.JPEG),
+  });
+  const observation = await observeDecodeWithChromium(sniffed);
+  assert.deepEqual(observation, { ok: true, dimensions: { width: 2, height: 3 } });
+  assert.deepEqual({ width: sniffed.width, height: sniffed.height }, observation.dimensions);
 });
 
 test('canonical cover selection is deterministic: exact identity, decoded state, area, source ID', () => {
