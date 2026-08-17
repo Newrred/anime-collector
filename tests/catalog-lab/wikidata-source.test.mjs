@@ -122,6 +122,35 @@ test('Wikidata adapter envelope stores and normalizes its explicit snak union wi
   });
 });
 
+test('Wikidata target envelope retains only the matching P8729 identity', async () => {
+  await withWorkspace(async (workspace) => {
+    const [mapping, fixtureBody] = await Promise.all([
+      fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),
+    ]);
+    const entities = structuredClone(fixtureBody);
+    entities.entities.Q101244908.claims.P8729.push({ mainsnak: {
+      snaktype: 'value', property: 'P8729', datatype: 'external-id',
+      datavalue: { value: '2', type: 'string' },
+    } });
+    const http = {
+      async request({ url }) {
+        return new Response(JSON.stringify(url.startsWith('https://query.wikidata.org/')
+          ? { ...mapping, results: { bindings: [mapping.results.bindings[0]] } }
+          : entities), { status: 200 });
+      },
+    };
+
+    const [envelope] = await collectEnvelopes(createWikidataAdapter({ userAgent }), {
+      targets: [target(1)], http, workspace, clock,
+    });
+
+    assert.deepEqual(envelope.payload.claims.P8729.map((claim) => claim.mainsnak.datavalue.value), ['1']);
+    const stored = await storeSourceEnvelope({ workspace, envelope });
+    const record = JSON.parse(await readFile(stored.path, 'utf8'));
+    assert.equal(normalizeSourceRecord(record).targetKey, 'ANILIST:1');
+  });
+});
+
 test('Wikidata adapter rejects value claims without an explicit snaktype', async () => {
   const [mapping, entities] = await Promise.all([
     fixture('wikidata-p8729.json'), fixture('wikidata-entities.json'),

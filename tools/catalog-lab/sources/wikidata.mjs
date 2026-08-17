@@ -128,13 +128,13 @@ function projectLanguageValues(values, isAliases = false) {
   return projected;
 }
 
-function projectClaims(claims) {
+function projectClaims(claims, anilistId) {
   if (!isPlainJsonRecord(claims)) throw sourceSchemaDrift();
   const projected = {};
   for (const property of CLAIM_PROPERTIES) {
     if (!(property in claims)) continue;
     if (!Array.isArray(claims[property])) throw sourceSchemaDrift();
-    projected[property] = claims[property].map((claim) => {
+    const propertyClaims = claims[property].map((claim) => {
       const snak = claim?.mainsnak;
       if (!isPlainJsonRecord(claim) || !isPlainJsonRecord(snak)
         || !['value', 'novalue', 'somevalue'].includes(snak.snaktype)
@@ -158,6 +158,10 @@ function projectClaims(claims) {
       if (!validValue) throw sourceSchemaDrift();
       return structuredClone(claim);
     });
+    projected[property] = property === 'P8729'
+      ? propertyClaims.filter((claim) => claim.mainsnak.snaktype === 'value'
+        && claim.mainsnak.datavalue.value === anilistId)
+      : propertyClaims;
   }
   return projected;
 }
@@ -229,7 +233,7 @@ export function createWikidataAdapter({ userAgent, fetchImpl = globalThis.fetch 
       for (const { target, anilistId } of rows) {
         const qid = mappings.get(anilistId);
         const entity = qid ? entities.get(qid) : undefined;
-        const claims = entity ? projectClaims(entity.claims) : null;
+        const claims = entity ? projectClaims(entity.claims, anilistId) : null;
         if (!qid || !entity || !hasExactP8729(claims, anilistId)) {
           yield sourceNotAvailableEnvelope({ target, anilistId, clock });
           continue;
