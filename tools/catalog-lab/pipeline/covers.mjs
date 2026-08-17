@@ -26,6 +26,7 @@ const MAX_COVER_PIXELS = 12_000_000;
 const IMAGE_ATTEMPT_TIMEOUT_MS = 10_000;
 const IMAGE_OVERALL_TIMEOUT_MS = 45_000;
 const MAX_NODE_TIMER_DELAY_MS = 2_147_483_647;
+const RETRY_AFTER_VALID_TOO_LARGE = Object.freeze({ kind: 'VALID_TOO_LARGE' });
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 const SOF_MARKERS = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 const COVER_RECORDS = new WeakSet();
@@ -349,17 +350,17 @@ function retryAfterMilliseconds(headers, now) {
   if (!raw) return null;
   const value = raw.trim();
   if (/^\d+$/u.test(value)) {
-    const seconds = Number(value);
-    if (!Number.isSafeInteger(seconds)) return null;
-    const milliseconds = seconds * 1000;
-    return Number.isSafeInteger(milliseconds) && milliseconds <= MAX_NODE_TIMER_DELAY_MS ? milliseconds : null;
+    const milliseconds = BigInt(value) * 1000n;
+    if (milliseconds > BigInt(MAX_NODE_TIMER_DELAY_MS)) return RETRY_AFTER_VALID_TOO_LARGE;
+    return Object.freeze({ kind: 'VALID', milliseconds: Number(milliseconds) });
   }
   if (!/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat), \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} \d{2}:\d{2}:\d{2} GMT$/u.test(value)) return null;
   const timestamp = Date.parse(value);
   const current = now();
-  const milliseconds = timestamp - current;
-  return Number.isFinite(timestamp) && new Date(timestamp).toUTCString() === value && timestamp > current
-    && Number.isSafeInteger(milliseconds) && milliseconds <= MAX_NODE_TIMER_DELAY_MS ? milliseconds : null;
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toUTCString() !== value || timestamp <= current) return null;
+  const milliseconds = Math.ceil(timestamp - current);
+  if (!Number.isSafeInteger(milliseconds) || milliseconds > MAX_NODE_TIMER_DELAY_MS) return RETRY_AFTER_VALID_TOO_LARGE;
+  return Object.freeze({ kind: 'VALID', milliseconds });
 }
 
 function retryDelay(attempt, random) {
@@ -451,10 +452,10 @@ function requestConcreteAttempt({ url, address, hostname, maxBytes, httpsRequest
       if (!Number.isInteger(status) || status < 200 || status >= 300) {
         const failure = Number.isInteger(status) ? classifyHttpFailure(status) : 'FAILED_PERMANENT';
         const retryable = failure === 'RATE_LIMITED' || failure === 'FAILED_RETRYABLE';
-        const retryAfterMs = status === 429 ? retryAfterMilliseconds(headers, now) : null;
+        const retryAfter = status === 429 ? retryAfterMilliseconds(headers, now) : null;
         incoming.destroy?.();
         finish(reject, typedError('IMAGE_HTTP_STATUS_INVALID', 'Pinned cover response is not successful', {
-          status, retryable, retryAfterMs,
+          status, retryable, retryAfter,
         }));
         return;
       }
@@ -540,7 +541,10 @@ function createConcreteDownloader({
             status: failure?.status, cause: failure,
           });
         }
-        const delay = failure?.retryAfterMs ?? retryDelay(attempt, random);
+        if (failure?.retryAfter?.kind === 'VALID_TOO_LARGE') throw overallTimeoutError();
+        const delay = failure?.retryAfter?.kind === 'VALID'
+          ? failure.retryAfter.milliseconds
+          : retryDelay(attempt, random);
         const remaining = Math.ceil(deadlineAt - now());
         if (operation.signal.aborted) throw operation.signal.reason;
         if (remaining < 1 || delay >= remaining) throw overallTimeoutError();
@@ -820,6 +824,7 @@ export function createCoverStorageTestHarness() {
       return Object.freeze({ allowed: true, platform: process.platform });
     },
     async storeFixture({ bytes, declaredMime, workspace, animeId } = {}) {
+      assertProductionStoragePlatformSafe();
       const image = asBytes(bytes);
       const inspection = inspectImageBytes({ declaredMime, bytes: image });
       const digest = checksum(image);

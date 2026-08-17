@@ -176,7 +176,7 @@ test('cover download applies exact URL, redirect, MIME, content-length, and stre
   await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(pngBytes, 'text/html') }), { code: 'IMAGE_MIME_UNSUPPORTED' });
 });
 
-test('validated cover storage is immutable, checksum-deduplicated, and contains no image failure side effect', async () => {
+test('validated cover storage is immutable, checksum-deduplicated, and contains no image failure side effect', { skip: process.platform === 'win32' }, async () => {
   await withWorkspace(async (workspace) => {
     const sniffed = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor() });
     await assert.rejects(storeValidatedCover({ record: sniffed, workspace, animeId }), { code: 'COVER_RECORD_UNTRUSTED' });
@@ -414,8 +414,8 @@ test('concrete image transport rejects an in-range Retry-After that cannot fit t
   assert.deepEqual(legacySleeps, []);
 });
 
-test('concrete image transport never passes timer-overflow or unsafe Retry-After multiplication to a timer', async () => {
-  for (const retryAfter of ['2147484', '9007199254741']) {
+test('concrete image transport rejects valid oversized Retry-After values without a retry timer', async () => {
+  for (const retryAfter of ['2147484', '9007199254741', 'Fri, 31 Dec 9999 23:59:59 GMT']) {
     const calls = [];
     const scheduled = [];
     let nextHandle = 0;
@@ -440,11 +440,12 @@ test('concrete image transport never passes timer-overflow or unsafe Retry-After
         clearTimeout(handle) { active.delete(handle); },
       },
       random: () => 0,
+      now: () => Date.parse('Mon, 17 Aug 2026 00:00:00 GMT'),
     });
-    const record = await downloadCoverCandidate({ candidate: candidate(), policy, transport });
-    assert.equal(record.validationStatus, 'SNIFFED', retryAfter);
-    assert.equal(calls.length, 2, retryAfter);
-    assert.deepEqual(scheduled, [500], retryAfter);
+    await assert.rejects(downloadCoverCandidate({ candidate: candidate(), policy, transport }),
+      { code: 'IMAGE_TIMEOUT' }, retryAfter);
+    assert.equal(calls.length, 1, retryAfter);
+    assert.deepEqual(scheduled, [], retryAfter);
     assert.equal(active.size, 0, retryAfter);
   }
 });
@@ -659,13 +660,20 @@ test('Chromium bounded cleanup preserves crash or mismatch as the primary failur
   assert.equal(selectCanonicalCover([sniffed]), null);
 });
 
-test('Windows production storage remains fail-closed before storage mechanics', { skip: process.platform !== 'win32' }, () => {
+test('Windows production and fixture storage remain fail-closed before workspace access', { skip: process.platform !== 'win32' }, async () => {
   const storage = createCoverStorageTestHarness();
   assert.throws(() => storage.observeProductionPlatformGate(),
     { code: 'COVER_STORAGE_PLATFORM_UNSAFE' });
+  let workspaceAccesses = 0;
+  const workspace = new Proxy({}, {
+    get() { workspaceAccesses += 1; throw new Error('workspace accessed before platform gate'); },
+  });
+  await assert.rejects(storage.storeFixture({ bytes: pngBytes, declaredMime: 'image/png', workspace, animeId }),
+    { code: 'COVER_STORAGE_PLATFORM_UNSAFE' });
+  assert.equal(workspaceAccesses, 0);
 });
 
-test('cover storage handles concurrent dedupe and rejects corrupt, oversized, or symlink collisions', async (t) => {
+test('cover storage handles concurrent dedupe and rejects corrupt, oversized, or symlink collisions', { skip: process.platform === 'win32' }, async (t) => {
   await withWorkspace(async (workspace) => {
     const storage = createCoverStorageTestHarness();
     const storeFixture = () => storage.storeFixture({ bytes: pngBytes, declaredMime: 'image/png', workspace, animeId });
