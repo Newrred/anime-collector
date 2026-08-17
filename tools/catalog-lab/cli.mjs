@@ -25,7 +25,7 @@ const GUARD_SCAN_OVERLAP_BYTES = 128;
 const GUARD_SCAN_MAX_BYTES = 64 * 1024 * 1024;
 const RAW_JSON_RECORD = /[\[{,]\s*["']rawPayloadRef["']\s*:\s*["'][^"'\r\n]+["']/u;
 const RAW_QUOTED_RECORD = /["']rawPayloadRef["']\s*:\s*["'][^"'\r\n]+["']/u;
-const RAW_SCRIPT_RECORD = /[\{;]\s*rawPayloadRef\s*:\s*["'][^"'\r\n]+["']/u;
+const RAW_SCRIPT_RECORD = /[\{,;]\s*rawPayloadRef\s*:\s*["'][^"'\r\n]+["']/gu;
 const EXTERNAL_LOCAL_REF = /(?:["']localRef["']|\blocalRef)\s*:\s*["'](?:images\/covers\/|https?:\/\/|[A-Za-z]:[\\/])/u;
 
 function repoFromModule() {
@@ -133,12 +133,22 @@ function hasImageSignature(bytes) {
     || (bytes.length >= 12 && bytes.subarray(0, 4).equals(Buffer.from('RIFF')) && bytes.subarray(8, 12).equals(Buffer.from('WEBP')));
 }
 
+function hasRawScriptRecord(text) {
+  for (const match of text.matchAll(RAW_SCRIPT_RECORD)) {
+    const boundary = match.index;
+    const objectStart = text.lastIndexOf('{', boundary);
+    // A spread-based fixture override is source code, not a serialized record.
+    if (objectStart < 0 || !text.slice(objectStart, boundary).includes('...')) return true;
+  }
+  return false;
+}
+
 function hasStructuredLeak(text, relativeFile) {
   const markdown = relativeFile.endsWith('.md');
   // Markdown is scanned for serialized JSON records; prose naming a field is not an artifact.
   if (RAW_JSON_RECORD.test(text)) return true;
   // JavaScript-like artifacts additionally permit identifier-form object properties.
-  return !markdown && (RAW_QUOTED_RECORD.test(text) || RAW_SCRIPT_RECORD.test(text) || EXTERNAL_LOCAL_REF.test(text));
+  return !markdown && (RAW_QUOTED_RECORD.test(text) || hasRawScriptRecord(text) || EXTERNAL_LOCAL_REF.test(text));
 }
 
 async function leakedArtifact(path, relativeFile) {

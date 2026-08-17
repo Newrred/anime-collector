@@ -284,6 +284,7 @@ test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without e
     const localKey = ['local', 'Ref'].join('');
     const cases = {
       'nested.js': `window.catalog = { nested: { ${rawKey}: "SECRET_JS" } };`,
+      'comma-raw.js': `const record = { sourceId: "anilist", ${rawKey}: "raw/anilist/SECRET_COMMA.json" };`,
       'page.html': `<script>const row = { "${rawKey}": "SECRET_HTML" };</script>`,
       'records.ndjson': `{"ok":true}\n{"${rawKey}":"SECRET_NDJSON"}\n`,
       'large.txt': `${'x'.repeat((2 * 1024 * 1024) + 8)} "${rawKey}":"SECRET_LARGE"`,
@@ -299,7 +300,7 @@ test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without e
     const rendered = output.join('');
     assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
     for (const name of Object.keys(cases)) assert.match(rendered, new RegExp(`dist[\\\\/]${name.replace('.', '\\.')}`));
-    assert.equal(/SECRET_(?:JS|HTML|NDJSON|LARGE)/u.test(rendered), false);
+    assert.equal(/SECRET_(?:JS|COMMA|HTML|NDJSON|LARGE)/u.test(rendered), false);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }
@@ -330,6 +331,25 @@ test('guard scans tracked Markdown and test source structures but not a prose ma
     assert.match(rendered, /tests[\\/]leak\.test\.mjs/);
     assert.equal(rendered.includes('prose.md'), false);
     assert.equal(/SECRET_(?:MARKDOWN|TEST)/u.test(rendered), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard does not mistake a spread fixture override for a serialized raw record', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-spread-'));
+  try {
+    const source = join(fixtureRoot, 'tests', 'fixture.test.mjs');
+    await mkdir(dirname(source), { recursive: true });
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    await writeFile(source, `const fixture = { ...validRecord, ${rawKey}: "raw/anilist/fixture.json" };\n`);
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot, trackedFiles: async () => [source], buildRoots: [],
+      stdout: { write(value) { output.push(value); } }, stderr: { write(value) { output.push(value); } },
+    });
+    assert.equal(code, CLI_EXIT.OK);
+    assert.equal(output.join('').includes('fixture.test.mjs'), false);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }
