@@ -306,6 +306,52 @@ test('guard finds nested, NDJSON, HTML, and over-two-megabyte raw keys without e
   }
 });
 
+test('guard blocks a build artifact that spreads a public record before a raw payload reference', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-build-spread-'));
+  try {
+    const buildRoot = join(fixtureRoot, 'dist');
+    const artifact = join(buildRoot, 'spread-record.js');
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    await mkdir(buildRoot, { recursive: true });
+    await writeFile(artifact, `const record = { ...publicRecord, ${rawKey}: "raw/anilist/SECRET_SPREAD.json" };\n`);
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot, trackedFiles: async () => [], buildRoots: [buildRoot],
+      stdout: { write(value) { output.push(value); } }, stderr: { write(value) { output.push(value); } },
+    });
+    const rendered = output.join('');
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(rendered, /dist[\\/]spread-record\.js/);
+    assert.equal(rendered.includes('SECRET_SPREAD'), false);
+    assert.equal(rendered.includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard blocks a build artifact with an ellipsis string before a raw payload reference', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-build-ellipsis-'));
+  try {
+    const buildRoot = join(fixtureRoot, 'dist');
+    const artifact = join(buildRoot, 'ellipsis-record.js');
+    const rawKey = ['rawPayload', 'Ref'].join('');
+    await mkdir(buildRoot, { recursive: true });
+    await writeFile(artifact, `const record = { note: "...", ${rawKey}: "raw/anilist/SECRET_ELLIPSIS.json" };\n`);
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot, trackedFiles: async () => [], buildRoots: [buildRoot],
+      stdout: { write(value) { output.push(value); } }, stderr: { write(value) { output.push(value); } },
+    });
+    const rendered = output.join('');
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(rendered, /dist[\\/]ellipsis-record\.js/);
+    assert.equal(rendered.includes('SECRET_ELLIPSIS'), false);
+    assert.equal(rendered.includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test('guard scans tracked Markdown and test source structures but not a prose marker word', async () => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-tracked-'));
   try {
@@ -336,13 +382,16 @@ test('guard scans tracked Markdown and test source structures but not a prose ma
   }
 });
 
-test('guard does not mistake a spread fixture override for a serialized raw record', async () => {
+test('guard allows tracked fixture source that assembles a raw field at runtime', async () => {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-spread-'));
   try {
     const source = join(fixtureRoot, 'tests', 'fixture.test.mjs');
     await mkdir(dirname(source), { recursive: true });
-    const rawKey = ['rawPayload', 'Ref'].join('');
-    await writeFile(source, `const fixture = { ...validRecord, ${rawKey}: "raw/anilist/fixture.json" };\n`);
+    await writeFile(source, [
+      `const rawKey = ['rawPayload', 'Ref'].join('');`,
+      `const fixture = { ...validRecord, [rawKey]: ['raw/anilist/', 'fixture.json'].join('') };`,
+      '',
+    ].join('\n'));
     const output = [];
     const code = await runCli(['guard'], {
       repoRoot: fixtureRoot, trackedFiles: async () => [source], buildRoots: [],

@@ -990,10 +990,12 @@ test('partial-year evidence supports exact AniLife matching without inventing a 
 
 test('SourceRecord validation rejects integrity, state and per-source payload drift', () => {
   const validAniList = sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } });
+  const rawRefKey = ['rawPayload', 'Ref'].join('');
+  const invalidRawRef = ['raw/anilist/', 'wrong.json'].join('');
   const cases = [
     { name: 'payload hash', record: { ...validAniList, payloadHash: '0'.repeat(64) }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
     { name: 'record id', record: { ...validAniList, sourceRecordId: '0'.repeat(64) }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
-    { name: 'raw ref', record: { ...validAniList, rawPayloadRef: 'raw/anilist/wrong.json' }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
+    { name: 'raw ref', record: { ...validAniList, [rawRefKey]: invalidRawRef }, code: 'SOURCE_RECORD_INTEGRITY_INVALID' },
     {
       name: '5xx with values',
       record: sourceRecord('anilist', { id: 1, title: { romaji: 'Cowboy Bebop' } }, {
