@@ -13,7 +13,7 @@ import { normalizeSourceRecord } from '../../tools/catalog-lab/pipeline/normaliz
 import { storeSourceEnvelope } from '../../tools/catalog-lab/pipeline/raw-store.mjs';
 import { createStateStore } from '../../tools/catalog-lab/pipeline/state-store.mjs';
 import { createCatalogArtifactStore } from '../../tools/catalog-lab/pipeline/artifact-store.mjs';
-import { createRateLimitedHttpClient, runCatalogPipeline } from '../../tools/catalog-lab/pipeline/runner.mjs';
+import { createDefaultCoverPipeline, createRateLimitedHttpClient, runCatalogPipeline } from '../../tools/catalog-lab/pipeline/runner.mjs';
 
 const repoRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const clock = Object.freeze({ now: () => '2026-08-17T00:00:00.000Z' });
@@ -43,7 +43,9 @@ function anilistPayload(id) {
     id, idMal: null, title: { romaji: `Test title ${id}`, english: null, native: null }, synonyms: [],
     format: 'TV', status: 'FINISHED', startDate: { year: 2000, month: null, day: null },
     endDate: { year: null, month: null, day: null }, season: null, seasonYear: null,
-    episodes: 1, source: null, genres: [], coverImage: {}, studios: { nodes: [] },
+    episodes: 1, source: null, genres: [],
+    coverImage: { extraLarge: `https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx${id}.jpg` },
+    studios: { nodes: [] },
     relations: { edges: [] }, externalLinks: [], characters: [],
   };
 }
@@ -235,5 +237,27 @@ test('artifact store rejects unsafe source-record path segments', async () => {
     await assert.rejects(store.readSourceRecord({
       sourceId: '../anilist', targetKey: 'ANILIST:1', sourceRecordId: '../escape',
     }), { code: 'CATALOG_ARTIFACT_INVALID' });
+  });
+});
+
+test('default cover pipeline refuses retained unselected source before any client or transport request', async () => {
+  await withWorkspace(async (workspace) => {
+    const initial = await fixtureInput(workspace, {
+      coverPipeline: async () => { throw Object.assign(new Error('defer cover'), { code: 'IMAGE_DECODE_FAILED' }); },
+    });
+    initial.selectedSources = ['anilist'];
+    const first = await runCatalogPipeline(initial);
+    let requests = 0;
+    const refresh = await fixtureInput(workspace, { refresh: true });
+    refresh.selectedSources = ['wikidata'];
+    refresh.coverPipeline = createDefaultCoverPipeline();
+    refresh.httpFactory = () => ({ async request() { requests += 1; throw new Error('unexpected request'); } });
+    const second = await runCatalogPipeline(refresh);
+
+    assert.equal(requests, 0);
+    assert.equal(second.targets[0].cover.status, 'FAILED');
+    assert.equal(second.targets[0].cover.errorCode, 'COVER_SOURCE_NOT_SELECTED');
+    assert.equal(second.targets[0].sources.wikidata.stage, 'FAILED_PERMANENT');
+    assert.equal(second.targets[0].currentCanonicalHash, first.targets[0].currentCanonicalHash);
   });
 });
