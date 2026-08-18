@@ -4,6 +4,10 @@ import assert from "node:assert/strict";
 import { createLegacyAliasTitleResolver } from "../../src/features/memory/adapters/catalog/legacyAliasTitleResolver.js";
 import { createAniListTitleResolver } from "../../src/features/memory/adapters/catalog/anilistTitleResolver.js";
 import { createCombinedTitleResolver } from "../../src/features/memory/application/titleResolver.js";
+import {
+  createDevCatalogTitleResolver,
+  createFallbackCatalogTitleResolver,
+} from "../../src/features/memory/adapters/catalog/devCatalogTitleResolver.js";
 
 const legacyRows = [
   {
@@ -113,4 +117,58 @@ test("combined resolver returns local results when the provider fails or times o
   assert.equal(timeoutResponse.remoteStatus, "TIMED_OUT");
   assert.equal(failedResponse.results[0].verificationState, "LEGACY_UNVERIFIED");
   assert.equal(timeoutResponse.results[0].displayTitle, "장송의 프리렌");
+});
+
+test("development catalog resolver accepts only the allowlisted local test DTO", async () => {
+  const requests = [];
+  const resolver = createDevCatalogTitleResolver({
+    fetchImpl: async (url, init) => {
+      requests.push({ url, init });
+      return new Response(JSON.stringify({
+        schemaVersion: 1,
+        results: [{
+          kind: "ANIME_REF",
+          displayTitle: "장송의 프리렌",
+          aliases: ["Frieren: Beyond Journey's End"],
+          genres: [],
+          sourceBinding: { provider: "ANILIST", externalId: "154587" },
+          verificationState: "PROVIDER_CANDIDATE",
+          catalogSource: "LOCAL_TEST_SERVICE_PROJECTION",
+          readiness: "READY_WITH_GAPS",
+          coverPreviewUrl: "/__moemoa-dev/catalog/cover/154587",
+        }],
+      }), { headers: { "Content-Type": "application/json" } });
+    },
+  });
+
+  const results = await resolver.search(" 프리렌 ");
+  assert.equal(requests.length, 1);
+  assert.match(requests[0].url, /q=%ED%94%84%EB%A6%AC%EB%A0%8C$/u);
+  assert.equal(requests[0].init.credentials, "same-origin");
+  assert.equal(results[0].catalogSource, "LOCAL_TEST_SERVICE_PROJECTION");
+  assert.doesNotMatch(JSON.stringify(results), /rawPayloadRef|localRef|checksum|https?:|[A-Z]:\\/iu);
+
+  const privateField = ["raw", "Payload", "Ref"].join("");
+  const leaking = createDevCatalogTitleResolver({
+    fetchImpl: async () => new Response(JSON.stringify({
+      schemaVersion: 1,
+      results: [{ ...results[0], [privateField]: "raw/anilist/private.json" }],
+    })),
+  });
+  await assert.rejects(leaking.search("프리렌"), { code: "DEV_CATALOG_RESPONSE_INVALID" });
+});
+
+test("development catalog fallback calls AniList only when the local endpoint is unavailable", async () => {
+  let fallbackCalls = 0;
+  const fallback = { search: async () => { fallbackCalls += 1; return [{ displayTitle: "fallback" }]; } };
+  const unavailable = createFallbackCatalogTitleResolver({
+    primary: { search: async () => { throw new Error("local detail"); } }, fallback,
+  });
+  const empty = createFallbackCatalogTitleResolver({
+    primary: { search: async () => [] }, fallback,
+  });
+
+  assert.deepEqual(await unavailable.search("frieren"), [{ displayTitle: "fallback" }]);
+  assert.deepEqual(await empty.search("frieren"), []);
+  assert.equal(fallbackCalls, 1);
 });

@@ -466,6 +466,16 @@ PrivateTitle 생성
 - 기본 재실행은 `COMPLETED` source-target과 저장된 cover를 재사용한다. `full3998 --refresh`는 우발적 전체 재수집을 막기 위해 허용하지 않는다.
 - 전체 결과, raw payload, 표지는 Git·build·Vercel·APK에 포함하지 않는다.
 
+### 11.2 개발 UI의 TEST_ONLY read 계약
+
+- 개발 UI는 `MOEMOA_CATALOG_LAB_DIR`로 명시한 외부 branded workspace를 읽기 전용으로만 연다.
+- 브라우저는 raw·normalized·claim·canonical 파일을 직접 읽지 않는다. 개발 서버가 hash와 target identity를 검증한 완성 `ServiceProjection`만 최소 DTO로 변환한다.
+- 최소 DTO는 표시 제목, 검색 별칭, numeric AniList binding, readiness, 상대 cover preview URL만 허용한다. source/official URL, `localRef`, checksum, raw reference, 절대 경로는 내보내지 않는다.
+- 표지는 `STORED` observation, 작품별 controlled path, byte size, SHA-256, JPEG/PNG/WebP signature와 dimensions가 모두 맞을 때 loopback 개발 서버에서만 제공한다.
+- 수집 중 invalid/partial projection은 해당 refresh에서 건너뛰며, 수집 process나 외부 workspace 파일을 수정·삭제·재생성하지 않는다.
+- 이 read model은 production catalog나 `VisualAsset`이 아니다. production build·Git·Vercel·APK에 데이터나 endpoint client가 포함되지 않아야 한다.
+- 실행 방법은 repository root에서 환경 변수를 지정한 뒤 `npm.cmd run dev`이다. 환경 변수가 없거나 workspace 검증에 실패하면 개발 catalog를 비활성화하고 기존 local/PrivateTitle 경로를 유지한다.
+
 ## 12. 데이터 품질 지표
 
 - 필수 필드 완성률

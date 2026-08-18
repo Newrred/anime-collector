@@ -783,6 +783,9 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-16] 사용자 피드백: 현재 APK는 정보 위계·가독성이 약하고 작은 화면의 잘림이 많아 실사용 테스트 전에 공용 UI 안정화가 필요함.
 [2026-08-16] 결정: Android native/local 기반은 유지하고, 기능 확장을 동결한 채 Web-first Shared UI Readiness를 Milestone 4A로 선행함. Web 제품 전체 선출시나 production image persistence는 범위에 없음.
 [2026-08-16] 문서: UI 순서 Decision과 디자인 명세를 추가하고 current index·architecture·runbook·ExecPlan·test evidence의 상태를 일치시킴. 코드·DB·APK 변경 없음.
+[2026-08-18] 완료: 수집 중인 외부 branded TEST_ONLY workspace의 완성 ServiceProjection을 Web 개발 제목 검색에서 읽는 read-only adapter를 추가. loopback DEV endpoint가 최소 제목 DTO와 검증된 cover preview만 제공하며 raw·URL·hash·localRef·절대 경로는 브라우저에 전달하지 않음.
+[2026-08-18] 실데이터 smoke: 증가 중인 full3998 projection에서 exact title 검색과 작품별 checksum cover 읽기, 실제 Astro same-origin search/cover 200을 확인. 외부 workspace에는 쓰지 않음.
+[2026-08-18] 검증: catalog 186 pass/1 Windows skip, Web unit 93/93, Astro production build, catalog guard, production dist DEV-marker scan 통과. DB/schema/dependency 변경 없음.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -802,6 +805,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 - title resolver와 3,998-row alias payload는 Archive/detail runtime에서 정적으로 import하지 않고 첫 검색 시 lazy load한다. 이는 catalog 경계를 바꾸지 않는 번들 분리이며 신규 dependency나 schema 변경이 없다.
 - image replacement는 신규 schema 없이 기존 `MediaOperation.kind=REPLACE`, `previousAssetId`, VisualAsset lifecycle을 사용한다. 교체 command 결과와 telemetry에는 opaque ID·enum·boolean만 포함하고 ticket, source URI, native path, checksum은 포함하지 않는다.
 - API 36 emulator 기능 검증은 통과했지만 실제 APK의 가독성·잘림 문제로 제품 가설을 평가하기에는 UI readiness가 부족했다. 기능 수용 테스트 통과와 실사용 준비 완료를 분리하고 Milestone 4A를 추가했다.
+- full3998 수집 완료를 기다리지 않고 완성된 ServiceProjection만 짧은 TTL 뒤 개발 검색에 반영한다. 수집 데이터의 TEST_ONLY 권리·배포 제한을 유지하기 위해 cover는 개발 검색 preview에서만 쓰고 저장되는 AnimeRef/VisualAsset에는 넣지 않는다.
 
 ### 변경 기록 규칙
 

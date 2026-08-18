@@ -229,6 +229,22 @@ AniList 런타임이 남아 있다면:
 - new code에서 직접 호출 금지
 - 제거 계획과 테스트
 
+### 10.1 수집 중 TEST_ONLY 데이터를 쓰는 개발 adapter
+
+```text
+external TEST_ONLY ServiceProjection/Cover
+→ Node-only validated read model
+→ loopback Astro DEV middleware
+→ allowlisted browser TitleResolver DTO
+→ existing local resolver + MemoryTitleSelector
+```
+
+- `tools/dev-catalog/*`만 외부 filesystem을 읽고 브라우저 component는 filesystem·raw artifact를 알지 못한다.
+- DEV TitleResolver는 local projection endpoint를 우선하며 endpoint 자체가 불가할 때만 기존 AniList resolver로 복구한다. 검색 결과가 0개인 것은 정상 결과이므로 외부 요청을 자동 추가하지 않는다.
+- 기존 legacy alias는 계속 별도 local resolver이고 같은 numeric AniList ID만 화면 후보에서 병합한다.
+- TEST_ONLY cover URL은 검색 후보의 일시 preview capability일 뿐 Card/AnimeRef/VisualAsset에 영구 저장하지 않는다.
+- production static build에는 DEV endpoint client, 외부 경로, 수집 이미지가 없어야 한다.
+
 ## 11. 이미지 추상화
 
 ```text
