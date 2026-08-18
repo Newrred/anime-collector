@@ -35,6 +35,7 @@ format
 episodeCount
 status
 officialSiteUrl
+officialLinks[]            // service projection 후보 목록
 sourceMaterialType
 ```
 
@@ -198,6 +199,39 @@ DEPRECATED
 - public record는 승인된 FieldClaim으로 구성한다.
 - 값 변경은 CatalogRevision에 남긴다.
 - 이전 값을 복구할 수 있어야 한다.
+
+### 5.6 Service projection
+
+`CanonicalAnime`은 출처별 증거와 충돌을 보존하는 내부 기록이다. 실제 서비스 검색·표시에 쓰는 값은 별도 `ServiceProjection`으로 파생한다. 이 층은 canonical 증거를 삭제하거나 고치지 않는다.
+
+한국어 제목 정책:
+
+- 승인된 `legacy_aliases` row의 유일한 `ko` 제목을 대표 한국어 제목으로 사용한다.
+- AniList·Wikidata 등에서 얻은 추가 한국어 제목은 provenance를 유지하되 자동 검색·표시에서 격리한다.
+- 격리 후보는 `KOREAN_TITLE_CANDIDATES_QUARANTINED` 검토 항목으로 집계한다.
+- 이미 확인된 불완전 legacy 제목은 수정값을 추측하지 않고 `INCOMPLETE_LEGACY_KOREAN_TITLE` 수동 검토 항목으로 남긴다.
+
+공식 링크 정책:
+
+- `officialSiteUrl` claim의 단일 값·충돌 값에서 정규화된 `officialLinks[]` 후보를 파생한다.
+- 같은 host/path의 HTTP·HTTPS 변형은 HTTPS를 우선하고, 같은 host에서 `/en`, `/ja` 같은 locale 경로만 다른 경우 하나의 동등 후보군으로 본다.
+- 서로 다른 host 또는 의미상 다른 path는 자동 선택하지 않고 `PENDING_REVIEW`로 둔다.
+- 호환용 대표 URL은 동등 후보군일 때만 결정론적으로 파생하며, 보고서에는 URL 원문 대신 개수와 검토 상태만 기록한다.
+
+서비스 완성도 등급:
+
+```text
+REQUIRED    externalIds, preferredTitle, format, status, cover
+RECOMMENDED episodeCount, sourceMaterialType, studios, sourceGenres
+OPTIONAL    officialLinks, coreGenres, characters, castings, relations,
+            season, startDate, endDate
+```
+
+- REQUIRED 누락은 `BLOCKED`다.
+- 검토 항목이 있으면 `READY_WITH_REVIEW`다.
+- REQUIRED는 충족했지만 RECOMMENDED가 비면 `READY_WITH_GAPS`다.
+- OPTIONAL 누락만으로 서비스 gate를 실패시키지 않는다.
+- 구조·해시·표지 무결성 gate와 서비스 완성도 gate를 함께 보고하되 의미를 구분한다.
 
 ## 6. 정규화 규칙
 
@@ -413,6 +447,8 @@ PrivateTitle 생성
 - rate limit과 backoff를 적용한다.
 - source unavailable 시 기존 published 값은 유지한다.
 - conflict 자동 overwrite를 금지한다.
+- `catalog:rebuild --profile golden|sample100`은 저장된 SourceRecord와 CoverRecord만 사용하며 네트워크를 호출하지 않는다.
+- offline rebuild는 모든 대상을 먼저 검증한 뒤 canonical pointer를 전환하고, 같은 입력을 반복했을 때 raw·image·claim·canonical 중복 성장이 없어야 한다.
 
 ## 12. 데이터 품질 지표
 
@@ -425,6 +461,10 @@ PrivateTitle 생성
 - import failure rate
 - source별 오류율
 - PrivateTitle 검색 실패·승격 수
+- service readiness 상태별 수량
+- 격리된 한국어 제목 후보 수
+- 공식 링크 후보 및 검토 대기 수
+- REQUIRED/RECOMMENDED/OPTIONAL 등급별 누락 수
 
 ## 13. 관리자 기능 최소 범위
 

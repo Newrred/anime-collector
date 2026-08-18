@@ -126,7 +126,20 @@ export function createCatalogArtifactStore({ workspace }) {
     return writeImmutableJson(workspace, sourcePath(normalized), normalized);
   }
 
-  async function writeCanonical({ target, sourceRecords, normalizedRecords, claims, canonical }) {
+  async function writeCurrent(target, contentHash) {
+    const animePath = targetPath(target);
+    if (typeof contentHash !== 'string' || !/^[a-f0-9]{64}$/u.test(contentHash)) {
+      throw typedError('CATALOG_ARTIFACT_INVALID', 'Canonical pointer hash is invalid');
+    }
+    const pointerPath = await assertCatalogWorkspaceMutation(workspace, ['current', `${animePath}.json`]);
+    await atomicWriteJson(pointerPath, {
+      animeId: target.moemoaAnimeId,
+      contentHash,
+    });
+    return Object.freeze({ path: pointerPath, contentHash });
+  }
+
+  async function writeCanonical({ target, sourceRecords, normalizedRecords, claims, canonical, updateCurrent = true }) {
     const rebuilt = canonicalInput({ target, sourceRecords, normalizedRecords, claims });
     if (stableStringify(rebuilt) !== stableStringify(canonical)) {
       throw typedError('CATALOG_ARTIFACT_CANONICAL_MISMATCH', 'Canonical revision does not match authenticated inputs');
@@ -139,11 +152,7 @@ export function createCatalogArtifactStore({ workspace }) {
     const revisionWrite = await writeImmutableJson(
       workspace, ['canonical', animePath, `${canonical.revision.contentHash}.json`], canonical,
     );
-    const pointerPath = await assertCatalogWorkspaceMutation(workspace, ['current', `${animePath}.json`]);
-    await atomicWriteJson(pointerPath, {
-      animeId: target.moemoaAnimeId,
-      contentHash: canonical.revision.contentHash,
-    });
+    if (updateCurrent) await writeCurrent(target, canonical.revision.contentHash);
     return Object.freeze({
       created: revisionWrite.created,
       contentHash: canonical.revision.contentHash,
@@ -156,6 +165,43 @@ export function createCatalogArtifactStore({ workspace }) {
   async function readCurrent(moemoaAnimeId) {
     await assertCatalogWorkspaceMutation(workspace, []);
     return readJson(workspace.resolve('current', `${toPathKey(moemoaAnimeId)}.json`));
+  }
+
+  async function readCanonical(target, contentHash) {
+    await assertCatalogWorkspaceMutation(workspace, []);
+    const animePath = targetPath(target);
+    if (typeof contentHash !== 'string' || !/^[a-f0-9]{64}$/u.test(contentHash)) {
+      throw typedError('CATALOG_ARTIFACT_INVALID', 'Canonical revision hash is invalid');
+    }
+    return readJson(workspace.resolve('canonical', animePath, `${contentHash}.json`));
+  }
+
+  async function readServiceProjection(target) {
+    await assertCatalogWorkspaceMutation(workspace, []);
+    return readJson(workspace.resolve('service-projections', `${targetPath(target)}.json`));
+  }
+
+  async function writeServiceProjection(target, projection) {
+    const animePath = targetPath(target);
+    if (!projection || typeof projection !== 'object' || projection.animeId !== target.moemoaAnimeId
+      || projection.targetKey !== target.targetKey || typeof projection.projectionHash !== 'string'
+      || !/^[a-f0-9]{64}$/u.test(projection.projectionHash)) {
+      throw typedError('CATALOG_ARTIFACT_INVALID', 'Service projection identity is invalid');
+    }
+    const expected = snapshot(projection);
+    const { projectionHash, ...core } = expected;
+    if (sha256(core) !== projectionHash) {
+      throw typedError('CATALOG_ARTIFACT_INVALID', 'Service projection integrity is invalid');
+    }
+    const path = await assertCatalogWorkspaceMutation(workspace, ['service-projections', `${animePath}.json`]);
+    const prior = await readJson(path);
+    await atomicWriteJson(path, expected);
+    return Object.freeze({
+      path,
+      created: prior === null,
+      changed: prior === null || stableStringify(prior) !== stableStringify(expected),
+      projection: expected,
+    });
   }
 
   async function writeCoverObservation(target, observation) {
@@ -178,14 +224,28 @@ export function createCatalogArtifactStore({ workspace }) {
     return Object.freeze({ path });
   }
 
+  async function readRebuildSnapshot(profile = 'golden') {
+    await assertCatalogWorkspaceMutation(workspace, []);
+    return readJson(workspace.resolve('runs', toPathKey(profile), 'rebuild-current.json'));
+  }
+
+  async function writeRebuildSnapshot(profile, snapshotValue) {
+    const parts = ['runs', toPathKey(profile), 'rebuild-current.json'];
+    const path = await assertCatalogWorkspaceMutation(workspace, parts);
+    await atomicWriteJson(path, snapshot(snapshotValue));
+    return Object.freeze({ path });
+  }
+
   return Object.freeze({
     readIdMap, writeIdMap,
     readManifest, writeManifest,
     readAniLifeBindings, writeAniLifeBinding,
     readSourceRecord,
     writeNormalized,
-    writeCanonical, readCurrent,
+    writeCanonical, readCanonical, readCurrent, writeCurrent,
+    readServiceProjection, writeServiceProjection,
     writeCoverObservation,
     readRunSnapshot, writeRunSnapshot,
+    readRebuildSnapshot, writeRebuildSnapshot,
   });
 }

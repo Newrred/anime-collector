@@ -9,10 +9,11 @@ import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
 import { CANONICAL_FIELD_PATHS } from '../pipeline/normalize.mjs';
 import { createCatalogArtifactStore } from '../pipeline/artifact-store.mjs';
 import { inspectImageBytes } from '../pipeline/covers.mjs';
-import { sha256 } from '../lib/hash.mjs';
+import { sha256, stableStringify } from '../lib/hash.mjs';
+import { buildServiceProjection } from '../pipeline/service-projection.mjs';
 import { TARGET_PROFILE_COUNTS, targetIdsForProfile } from '../pipeline/targets.mjs';
 
-export const QUALITY_SCHEMA_VERSION = 1;
+export const QUALITY_SCHEMA_VERSION = 2;
 
 function repoFromModule() {
   return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -93,11 +94,63 @@ function canonicalFieldStates(canonical) {
   ]));
 }
 
-function displayTitle(target, canonical) {
+function displayTitle(target, canonical, projection) {
+  if (projection?.preferredTitle?.locale === 'ko' && typeof projection.preferredTitle.value === 'string') {
+    return projection.preferredTitle.value;
+  }
   const titles = canonical?.titles?.value;
   if (Array.isArray(titles) && typeof titles[0]?.value === 'string') return titles[0].value;
   const seed = target?.seedTitles?.find((title) => typeof title?.value === 'string');
   return seed?.value ?? target.targetKey;
+}
+
+const SERVICE_READINESS = new Set(['BLOCKED', 'READY_WITH_REVIEW', 'READY_WITH_GAPS', 'READY']);
+const SERVICE_TIERS = Object.freeze(['required', 'recommended', 'optional']);
+
+function serviceProjectionIsConsistent(projection, target, current, canonical, cover) {
+  if (!projection || typeof projection !== 'object' || projection.targetKey !== target.targetKey
+    || projection.animeId !== target.moemoaAnimeId || projection.canonicalHash !== current?.contentHash
+    || typeof projection.projectionHash !== 'string' || !isCanonicalHash(projection.projectionHash)
+    || !SERVICE_READINESS.has(projection.readiness?.status)
+    || projection.preferredTitle?.locale !== 'ko' || typeof projection.preferredTitle?.value !== 'string') return false;
+  try {
+    return stableStringify(projection) === stableStringify(buildServiceProjection({ target, canonical, cover }));
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeServiceProjection(projection, valid) {
+  if (!valid) return Object.freeze({
+    preferredTitle: null,
+    serviceReadiness: 'BLOCKED',
+    fieldTiers: Object.freeze(Object.fromEntries(SERVICE_TIERS.map((tier) => [tier, Object.freeze({})]))),
+    quarantinedTitleCount: 0,
+    officialLinkCount: 0,
+    officialLinkReviewCount: 0,
+    primaryOfficialSiteAvailable: false,
+    reviewReasonCodes: Object.freeze([]),
+  });
+  const fieldTiers = Object.fromEntries(SERVICE_TIERS.map((tier) => [
+    tier,
+    Object.freeze(Object.fromEntries(Object.entries(projection.fieldTiers?.[tier] ?? {}).filter(([, state]) => (
+      typeof state === 'string' && /^[A-Z0-9_]+$/u.test(state)
+    )))),
+  ]));
+  const reviewReasonCodes = [...new Set((projection.reviewItems ?? [])
+    .map((item) => item?.reasonCode)
+    .filter((code) => typeof code === 'string' && /^[A-Z0-9_]+$/u.test(code)))].sort();
+  return Object.freeze({
+    preferredTitle: Object.freeze({ locale: 'ko', value: projection.preferredTitle.value }),
+    serviceReadiness: projection.readiness.status,
+    fieldTiers: Object.freeze(fieldTiers),
+    quarantinedTitleCount: Array.isArray(projection.quarantinedTitles) ? projection.quarantinedTitles.length : 0,
+    officialLinkCount: Array.isArray(projection.officialLinks) ? projection.officialLinks.length : 0,
+    officialLinkReviewCount: Array.isArray(projection.officialLinks)
+      ? projection.officialLinks.filter((link) => link?.reviewState === 'PENDING_REVIEW').length : 0,
+    primaryOfficialSiteAvailable: typeof projection.primaryOfficialSiteUrl === 'string',
+    reviewReasonCodes: Object.freeze(reviewReasonCodes),
+  });
 }
 
 function sanitizeCover(value, target) {
@@ -169,6 +222,19 @@ function countValues(rows, selector) {
   return counts;
 }
 
+function countFieldTierStates(rows) {
+  return Object.freeze(Object.fromEntries(SERVICE_TIERS.map((tier) => [
+    tier,
+    Object.freeze(rows.reduce((fields, row) => {
+      for (const [field, state] of Object.entries(row.fieldTiers[tier])) {
+        fields[field] ??= {};
+        fields[field][state] = (fields[field][state] ?? 0) + 1;
+      }
+      return fields;
+    }, {})),
+  ])));
+}
+
 function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved, expectedCount }) {
   const blockers = [];
   if (!manifestApproved) blockers.push('MANIFEST_INVALID');
@@ -178,8 +244,16 @@ function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, m
   for (const row of targets) {
     if (!row.canonicalValid) blockers.push(`CANONICAL_INVALID:${row.targetKey}`);
     if (!row.coverValid) blockers.push(`COVER_INVALID:${row.targetKey}`);
+    if (!row.serviceProjectionValid) blockers.push(`SERVICE_PROJECTION_INVALID:${row.targetKey}`);
   }
   return blockers;
+}
+
+function serviceBlockersFor(targets) {
+  return targets.flatMap((row) => (
+    row.serviceProjectionValid && row.serviceReadiness !== 'BLOCKED'
+      ? [] : [`SERVICE_NOT_READY:${row.targetKey}`]
+  ));
 }
 
 /** Projects external profile artifacts into a JSON-safe, raw-data-free quality summary. */
@@ -191,6 +265,7 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
   const manifest = await store.readManifest(profile);
   const manifestApproved = await hasApprovedTargetManifest({ workspace, profile, manifest, repoRoot });
   const snapshot = await store.readRunSnapshot(profile);
+  const rebuildSnapshot = await store.readRebuildSnapshot(profile);
   const targets = [];
   for (const target of manifestApproved ? manifest : []) {
     const current = await store.readCurrent(target.moemoaAnimeId);
@@ -199,17 +274,24 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
       ? await readJson(workspace.resolve('canonical', toPathKey(target.moemoaAnimeId), `${current.contentHash}.json`))
       : null;
     const canonicalValid = canonicalIsConsistent(canonical, target, current);
-    const coverInspection = await inspectCover({ workspace, target, observation: await store.writeCoverObservation(target) });
+    const coverObservation = await store.writeCoverObservation(target);
+    const coverInspection = await inspectCover({ workspace, target, observation: coverObservation });
+    const projection = await store.readServiceProjection(target);
+    const serviceProjectionValid = canonicalValid
+      && serviceProjectionIsConsistent(projection, target, current, canonical, coverObservation);
+    const service = sanitizeServiceProjection(projection, serviceProjectionValid);
     targets.push(Object.freeze({
       targetKey: target.targetKey,
       moemoaAnimeId: target.moemoaAnimeId,
-      displayTitle: displayTitle(target, canonical),
+      displayTitle: displayTitle(target, canonical, serviceProjectionValid ? projection : null),
       sources: Object.freeze(sourceStates(snapshot, target.targetKey)),
       fieldStates: Object.freeze(canonicalFieldStates(canonical)),
       canonicalHash: canonicalValid ? current.contentHash : null,
       cover: coverInspection.cover,
+      ...service,
       canonicalValid,
       coverValid: coverInspection.valid,
+      serviceProjectionValid,
     }));
   }
   const targetCount = targets.length;
@@ -218,23 +300,48 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
   const blockers = blockersFor({
     targets, targetCount, canonicalCount, coverStoredCount, manifestApproved, expectedCount,
   });
+  const serviceBlockers = serviceBlockersFor(targets);
+  blockers.push(...serviceBlockers);
   return Object.freeze({
     schemaVersion: QUALITY_SCHEMA_VERSION,
     profile,
-    generatedAt: snapshot?.generatedAt ?? null,
+    generatedAt: rebuildSnapshot?.generatedAt ?? snapshot?.generatedAt ?? null,
     targetCount,
     canonicalCount,
     coverStoredCount,
     sourceStateCounts: Object.freeze(countValues(targets, (row) => row.sources)),
     fieldStateCounts: Object.freeze(countValues(targets, (row) => row.fieldStates)),
+    serviceReadinessCounts: Object.freeze(targets.reduce((counts, row) => ({
+      ...counts,
+      [row.serviceReadiness]: (counts[row.serviceReadiness] ?? 0) + 1,
+    }), {})),
+    fieldTierStateCounts: countFieldTierStates(targets),
+    serviceTotals: Object.freeze({
+      quarantinedTitles: targets.reduce((sum, row) => sum + row.quarantinedTitleCount, 0),
+      officialLinks: targets.reduce((sum, row) => sum + row.officialLinkCount, 0),
+      officialLinksPendingReview: targets.reduce((sum, row) => sum + row.officialLinkReviewCount, 0),
+      targetsWithReview: targets.filter((row) => row.reviewReasonCodes.length > 0).length,
+      manualTitleReviews: targets.filter((row) => row.reviewReasonCodes.includes('INCOMPLETE_LEGACY_KOREAN_TITLE')).length,
+    }),
     growth: Object.freeze({
       sourceRecords: Number.isSafeInteger(snapshot?.growth?.sourceRecords) ? snapshot.growth.sourceRecords : 0,
       claims: Number.isSafeInteger(snapshot?.growth?.claims) ? snapshot.growth.claims : 0,
       canonicalRevisions: Number.isSafeInteger(snapshot?.growth?.canonicalRevisions) ? snapshot.growth.canonicalRevisions : 0,
       images: Number.isSafeInteger(snapshot?.growth?.images) ? snapshot.growth.images : 0,
     }),
+    rebuildGrowth: Object.freeze({
+      sourceRecords: Number.isSafeInteger(rebuildSnapshot?.growth?.sourceRecords) ? rebuildSnapshot.growth.sourceRecords : 0,
+      claims: Number.isSafeInteger(rebuildSnapshot?.growth?.claims) ? rebuildSnapshot.growth.claims : 0,
+      canonicalRevisions: Number.isSafeInteger(rebuildSnapshot?.growth?.canonicalRevisions) ? rebuildSnapshot.growth.canonicalRevisions : 0,
+      images: Number.isSafeInteger(rebuildSnapshot?.growth?.images) ? rebuildSnapshot.growth.images : 0,
+      serviceProjections: Number.isSafeInteger(rebuildSnapshot?.growth?.serviceProjections) ? rebuildSnapshot.growth.serviceProjections : 0,
+    }),
+    serviceGate: Object.freeze({ passed: serviceBlockers.length === 0, blockers: Object.freeze(serviceBlockers) }),
     gate: Object.freeze({ passed: blockers.length === 0, blockers: Object.freeze(blockers) }),
-    targets: Object.freeze(targets.map(({ canonicalValid: _canonicalValid, coverValid: _coverValid, ...target }) => Object.freeze(target))),
+    targets: Object.freeze(targets.map(({
+      canonicalValid: _canonicalValid, coverValid: _coverValid,
+      serviceProjectionValid: _serviceProjectionValid, ...target
+    }) => Object.freeze(target))),
   });
 }
 
@@ -259,7 +366,10 @@ export function renderQualityReportMarkdown(report) {
     `# ${title} Catalog Quality Report`,
     '',
     `Gate: ${report.gate.passed ? 'PASS' : 'BLOCKED'}`,
+    `Service gate: ${report.serviceGate.passed ? 'PASS' : 'BLOCKED'}`,
     `Targets: ${report.targetCount}; canonical: ${report.canonicalCount}; stored covers: ${report.coverStoredCount}`,
+    `Service readiness: ${Object.entries(report.serviceReadinessCounts).map(([state, count]) => `${state}=${count}`).join(', ')}`,
+    `Review backlog: titles=${report.serviceTotals.quarantinedTitles}; official links=${report.serviceTotals.officialLinksPendingReview}; targets=${report.serviceTotals.targetsWithReview}`,
     '',
   ];
   for (const row of report.targets) {
@@ -268,7 +378,13 @@ export function renderQualityReportMarkdown(report) {
     const cover = row.cover.checksum
       ? `${row.cover.status}; ${row.cover.checksum}; ${row.cover.width}x${row.cover.height}; ${row.cover.byteSize} bytes`
       : `${row.cover.status}${row.cover.errorCode ? ` (${row.cover.errorCode})` : ''}`;
-    lines.push(`## ${row.displayTitle}`, '', `- Target: ${row.targetKey}`, `- Sources: ${sources}`, `- Fields: ${fields}`, `- Cover: ${cover}`, '');
+    const gaps = Object.entries(row.fieldTiers).flatMap(([tier, states]) => Object.entries(states)
+      .filter(([, state]) => state !== 'VALUE').map(([field, state]) => `${tier}.${field}=${state}`)).join(', ') || 'none';
+    lines.push(
+      `## ${row.displayTitle}`, '', `- Target: ${row.targetKey}`, `- Sources: ${sources}`,
+      `- Fields: ${fields}`, `- Service: ${row.serviceReadiness}; gaps: ${gaps}`,
+      `- Review: ${row.reviewReasonCodes.join(', ') || 'none'}`, `- Cover: ${cover}`, '',
+    );
   }
   if (report.gate.blockers.length > 0) lines.push('## Blockers', '', ...report.gate.blockers.map((blocker) => `- ${blocker}`), '');
   return `${lines.join('\n')}\n`;

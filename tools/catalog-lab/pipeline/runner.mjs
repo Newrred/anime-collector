@@ -16,6 +16,7 @@ import { normalizeSourceRecord } from './normalize.mjs';
 import { storeSourceEnvelope } from './raw-store.mjs';
 import { createStateStore } from './state-store.mjs';
 import { createCatalogArtifactStore } from './artifact-store.mjs';
+import { buildServiceProjection } from './service-projection.mjs';
 import { TARGET_PROFILE_COUNTS } from './targets.mjs';
 
 export const JOB_STATES = Object.freeze([
@@ -316,6 +317,14 @@ export async function runCatalogPipeline({
       cover = frozen({ status: 'FAILED', errorCode: errorCode(error) });
     }
     const coverValidated = cover?.status === 'STORED' && typeof cover.localRef === 'string';
+    let serviceProjection = null;
+    if (current?.contentHash) {
+      const canonical = await store.readCanonical(target, current.contentHash);
+      if (canonical) {
+        serviceProjection = buildServiceProjection({ target, canonical, cover });
+        await store.writeServiceProjection(target, serviceProjection);
+      }
+    }
     for (const sourceId of selectedSources) {
       if (!['CLAIMS_BUILT', 'IMAGE_VALIDATED'].includes(sources[sourceId]?.stage)) continue;
       if (!coverValidated) continue;
@@ -336,6 +345,7 @@ export async function runCatalogPipeline({
       moemoaAnimeId: target.moemoaAnimeId,
       sources,
       cover,
+      serviceReadiness: serviceProjection?.readiness?.status ?? null,
       currentCanonicalHash: current?.contentHash ?? null,
     });
   }
@@ -354,6 +364,106 @@ export async function runCatalogPipeline({
   return summary;
 }
 
+function ensureRebuildInputs({ profile, targets, clock }) {
+  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
+    throw typedError('SOURCE_SCOPE_EXCEEDED', 'Rebuild target count does not match its approved profile');
+  }
+  if (!clock || typeof clock.now !== 'function') {
+    throw typedError('CATALOG_RUNNER_INPUT_INVALID', 'Rebuild clock is invalid');
+  }
+}
+
+/** Rebuilds canonical and service-safe artifacts exclusively from authenticated local SourceRecords. */
+export async function rebuildCatalogProfile({
+  workspace, profile = 'golden', targets, clock = { now: () => new Date().toISOString() },
+} = {}) {
+  await assertCatalogWorkspaceMutation(workspace, []);
+  ensureRebuildInputs({ profile, targets, clock });
+  const store = createCatalogArtifactStore({ workspace });
+  const stateStore = createStateStore({ workspace });
+  const prepared = [];
+
+  for (const target of targets) {
+    const previousCurrent = await store.readCurrent(target.moemoaAnimeId);
+    if (previousCurrent?.animeId !== target.moemoaAnimeId
+      || !/^[a-f0-9]{64}$/u.test(previousCurrent?.contentHash ?? '')) {
+      throw typedError('CATALOG_REBUILD_BASELINE_INVALID', 'Rebuild requires an authenticated current pointer');
+    }
+    const sourceRecords = await availableRecords({ stateStore, store, target });
+    if (sourceRecords.length === 0) {
+      throw typedError('CATALOG_REBUILD_SOURCE_MISSING', 'Rebuild requires a persisted SourceRecord');
+    }
+    const normalizedRecords = sourceRecords.map((record) => normalizeSourceRecord(record));
+    const claims = buildFieldClaims({ target, normalizedRecords });
+    if (claims.length === 0) throw typedError('CATALOG_REBUILD_CLAIMS_MISSING', 'Rebuild produced no field claims');
+    const canonical = buildCanonicalRevision({
+      target, sourceRecords, normalizedRecords, fieldClaims: claims,
+    });
+    const cover = await store.writeCoverObservation(target);
+    const projection = buildServiceProjection({ target, canonical, cover });
+    prepared.push({
+      target, previousCurrent, sourceRecords, normalizedRecords, claims, canonical, cover, projection,
+    });
+  }
+
+  const growth = { sourceRecords: 0, claims: 0, canonicalRevisions: 0, images: 0, serviceProjections: 0 };
+  for (const item of prepared) {
+    const written = await store.writeCanonical({
+      target: item.target,
+      sourceRecords: item.sourceRecords,
+      normalizedRecords: item.normalizedRecords,
+      claims: item.claims,
+      canonical: item.canonical,
+      updateCurrent: false,
+    });
+    growth.claims += written.claimsCreated;
+    growth.canonicalRevisions += Number(written.created);
+    const projectionWrite = await store.writeServiceProjection(item.target, item.projection);
+    growth.serviceProjections += Number(projectionWrite.created);
+  }
+
+  const updated = [];
+  try {
+    for (const item of prepared) {
+      await store.writeCurrent(item.target, item.canonical.revision.contentHash);
+      updated.push(item);
+    }
+  } catch (error) {
+    for (const item of updated.reverse()) {
+      await store.writeCurrent(item.target, item.previousCurrent.contentHash);
+    }
+    throw error;
+  }
+
+  const summary = frozen({
+    profile,
+    mode: 'OFFLINE_REBUILD',
+    generatedAt: clock.now(),
+    networkRequests: 0,
+    counts: {
+      targets: prepared.length,
+      inputSourceRecords: prepared.reduce((sum, item) => sum + item.sourceRecords.length, 0),
+      canonical: prepared.length,
+      serviceProjections: prepared.length,
+      reusedCovers: prepared.filter((item) => item.cover?.status === 'STORED').length,
+      readiness: prepared.reduce((counts, item) => ({
+        ...counts,
+        [item.projection.readiness.status]: (counts[item.projection.readiness.status] ?? 0) + 1,
+      }), {}),
+    },
+    growth,
+    targets: prepared.map((item) => ({
+      targetKey: item.target.targetKey,
+      canonicalHash: item.canonical.revision.contentHash,
+      projectionHash: item.projection.projectionHash,
+      readiness: item.projection.readiness.status,
+    })),
+  });
+  await store.writeRebuildSnapshot(profile, summary);
+  return summary;
+}
+
 export async function validateCatalogArtifacts({ workspace, profile = 'golden', targets } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
   const expectedCount = TARGET_PROFILE_COUNTS[profile];
@@ -365,9 +475,15 @@ export async function validateCatalogArtifacts({ workspace, profile = 'golden', 
   for (const target of targets) {
     const current = await store.readCurrent(target.moemoaAnimeId);
     const cover = await store.writeCoverObservation(target);
-    rows.push({ targetKey: target.targetKey, canonical: current?.contentHash ?? null, cover: cover?.localRef ?? null });
+    const projection = await store.readServiceProjection(target);
+    rows.push({
+      targetKey: target.targetKey,
+      canonical: current?.contentHash ?? null,
+      cover: cover?.localRef ?? null,
+      serviceProjection: projection?.canonicalHash === current?.contentHash ? projection.projectionHash : null,
+    });
   }
-  return frozen({ valid: rows.every((row) => row.canonical && row.cover), targets: rows });
+  return frozen({ valid: rows.every((row) => row.canonical && row.cover && row.serviceProjection), targets: rows });
 }
 
 export async function validateGoldenArtifacts(input = {}) {

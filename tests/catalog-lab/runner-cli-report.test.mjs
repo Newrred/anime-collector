@@ -240,9 +240,41 @@ test('quality report exposes ten target/source/field/cover states and no raw pay
     assert.equal(JSON.stringify(report).includes(workspace.root), false);
     assert.equal(report.targets.every((row) => row.sources.anilist && row.cover.status === 'STORED'), true);
     assert.equal(report.targets.every((row) => row.fieldStates.titles === 'VALUE'), true);
+    assert.equal(report.serviceGate.passed, true);
+    assert.equal(report.targets.every((row) => row.serviceReadiness !== 'BLOCKED'), true);
+    assert.equal(report.targets.every((row) => row.preferredTitle?.locale === 'ko'), true);
+    assert.equal(report.targets.every((row) => row.fieldTiers.required.cover === 'VALUE'), true);
     const markdown = renderQualityReportMarkdown(report);
     assert.match(markdown, /카우보이 비밥/);
     assert.match(markdown, /프리크리/);
+  });
+});
+
+test('rebuild command reuses local sources and covers while writing deterministic service projections', async () => {
+  await withWorkspace(async (workspaceRoot, workspace) => {
+    const targets = await seedGoldenWorkspace(workspace);
+    const collectionSnapshotBefore = await readFile(workspace.resolve('runs', 'golden', 'current.json'), 'utf8');
+    const output = [];
+    const deps = {
+      ...silentDependencies(workspaceRoot),
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+      adapters: new Proxy({}, { get() { throw new Error('rebuild must not read adapters'); } }),
+      httpFactory() { throw new Error('rebuild must not create an HTTP client'); },
+    };
+
+    assert.equal(await runCli(['rebuild', '--profile', 'golden'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['rebuild', '--profile', 'golden'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['rebuild', '--profile', 'golden', '--allow-network'], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await readFile(workspace.resolve('runs', 'golden', 'current.json'), 'utf8'), collectionSnapshotBefore);
+    const snapshot = JSON.parse(await readFile(workspace.resolve('runs', 'golden', 'rebuild-current.json'), 'utf8'));
+    assert.equal(snapshot.networkRequests, 0);
+    assert.equal(snapshot.counts.serviceProjections, 10);
+    assert.equal(snapshot.growth.sourceRecords, 0);
+    assert.equal(snapshot.growth.images, 0);
+    const projection = await createCatalogArtifactStore({ workspace }).readServiceProjection(targets[0]);
+    assert.equal(projection.preferredTitle.locale, 'ko');
+    assert.match(output.join(''), /Offline rebuild: 10 targets; network requests: 0/);
   });
 });
 

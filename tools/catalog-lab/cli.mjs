@@ -7,7 +7,7 @@ import { CATALOG_LAB_USER_AGENT, loadSourceRegistry } from './contracts/catalogC
 import { openCatalogWorkspace } from './lib/workspace.mjs';
 import { createCatalogArtifactStore } from './pipeline/artifact-store.mjs';
 import { buildTargetManifest, TARGET_PROFILE_COUNTS } from './pipeline/targets.mjs';
-import { runCatalogPipeline, validateCatalogArtifacts } from './pipeline/runner.mjs';
+import { rebuildCatalogProfile, runCatalogPipeline, validateCatalogArtifacts } from './pipeline/runner.mjs';
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
 import { createAniListTestAdapter } from './sources/anilist-test.mjs';
 import { createWikidataAdapter } from './sources/wikidata.mjs';
@@ -17,7 +17,7 @@ export const CLI_EXIT = Object.freeze({
   OK: 0, QUALITY_GATE_FAILED: 2, SOURCE_PAUSED: 3, USAGE_OR_SAFETY: 64,
 });
 
-const COMMANDS = new Set(['init', 'targets', 'bind-anilife', 'collect', 'validate', 'report', 'guard']);
+const COMMANDS = new Set(['init', 'targets', 'bind-anilife', 'collect', 'rebuild', 'validate', 'report', 'guard']);
 const SOURCE_IDS = new Set(['anilist', 'wikidata', 'anilife_public']);
 const DEFAULT_BUILD_ROOTS = Object.freeze(['dist', 'android/app/src', 'test-output', 'test-results', '.vercel/output']);
 const GUARD_SCAN_CHUNK_BYTES = 64 * 1024;
@@ -276,6 +276,14 @@ export async function runCli(argv, dependencies = {}) {
     const profile = selectedProfile(options);
     const workspace = await openWorkspace(dependencies, false);
     const { manifest } = await targetManifest(workspace, profile, dependencies);
+    if (command === 'rebuild') {
+      const summary = await rebuildCatalogProfile({
+        workspace, profile, targets: manifest,
+        clock: dependencies.clock ?? { now: () => new Date().toISOString() },
+      });
+      writeLine(stdout, `Offline rebuild: ${summary.counts.targets} targets; network requests: ${summary.networkRequests}`);
+      return CLI_EXIT.OK;
+    }
     if (command === 'validate') {
       const result = await validateCatalogArtifacts({ workspace, profile, targets: manifest });
       const strict = await inspectCatalogArtifacts({ workspace, profile, repoRoot: dependencies.repoRoot ?? repoFromModule() });

@@ -254,6 +254,17 @@ Codex는 기반을 구현할 수 있지만 이 게이트가 통과되지 않으�
 - 원본·표지·canonical·보고서는 `D:\hong\Web\Anime\MOEMOA_CATALOG_LAB_TEST`의 TEST_ONLY workspace에만 저장한다.
 - 100개 실행 승인은 3,998개 전체 수집, Git/Vercel/APK 포함, production 게시를 승인하지 않는다.
 
+### SAMPLE100-SEMANTIC-HARDENING-01
+
+상태: **승인·구현 (2026-08-18)**
+
+- canonical 원본 증거는 유지하고 검색·표시용 `ServiceProjection`을 별도로 파생한다.
+- 기존 목록의 유일한 한국어 `ko` 제목을 대표 제목으로 유지하며, 외부 출처 한국어 후보는 자동 검색·표시에서 격리하고 검토 목록에 둔다.
+- 공식 링크는 복수 후보로 보존하고 동등성이 확인되는 경우에만 대표 링크를 자동 파생한다.
+- 서비스 완성도는 REQUIRED/RECOMMENDED/OPTIONAL로 나누며 선택 항목 누락만으로 게시 차단하지 않는다.
+- `catalog:rebuild`는 저장된 SourceRecord와 CoverRecord만 사용하고 네트워크를 호출하지 않는다.
+- 이 구현도 TEST_ONLY이며 3,998개 전체 수집 또는 production 승격을 승인하지 않는다.
+
 ## 5. 아직 사용자가 결정해야 할 항목
 
 Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하되 선택하지 않는다.

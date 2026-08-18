@@ -13,7 +13,9 @@ import { normalizeSourceRecord } from '../../tools/catalog-lab/pipeline/normaliz
 import { storeSourceEnvelope } from '../../tools/catalog-lab/pipeline/raw-store.mjs';
 import { createStateStore } from '../../tools/catalog-lab/pipeline/state-store.mjs';
 import { createCatalogArtifactStore } from '../../tools/catalog-lab/pipeline/artifact-store.mjs';
-import { createDefaultCoverPipeline, createRateLimitedHttpClient, runCatalogPipeline } from '../../tools/catalog-lab/pipeline/runner.mjs';
+import {
+  createDefaultCoverPipeline, createRateLimitedHttpClient, rebuildCatalogProfile, runCatalogPipeline,
+} from '../../tools/catalog-lab/pipeline/runner.mjs';
 
 const repoRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const clock = Object.freeze({ now: () => '2026-08-17T00:00:00.000Z' });
@@ -31,8 +33,14 @@ function target(index = 1) {
   return Object.freeze({
     targetKey: `ANILIST:${index}`,
     moemoaAnimeId: `anime:11111111-1111-4111-8111-${String(index).padStart(12, '0')}`,
+    seedSource: 'legacy_aliases',
     seedExternalIds: Object.freeze([{ sourceId: 'anilist', value: String(index) }]),
-    seedTitles: Object.freeze([{ locale: 'und', value: `Test title ${index}` }]),
+    seedTitles: Object.freeze([
+      { locale: 'ko', value: `테스트 제목 ${index}` },
+      { locale: 'und', value: `Test title ${index}` },
+    ]),
+    targetStatus: 'ACTIVE',
+    createdAt: clock.now(),
     releaseYear: 2000,
     episodeCount: 1,
   });
@@ -97,7 +105,7 @@ async function fixtureInput(workspace, { wikidataFailure, refresh = false, cover
     httpFactory: () => ({ async request() { return new Response('{}'); } }),
     coverPipeline: coverPipeline ?? (async ({ target: row }) => ({
       status: 'STORED', sourceId: 'anilist', localRef: `images/covers/${row.moemoaAnimeId}/fixture.png`,
-      byteSize: 12, created: false,
+      checksum: 'a'.repeat(64), byteSize: 12, width: 1, height: 1, created: false,
     })),
   };
 }
@@ -152,6 +160,38 @@ test('runner resumes completed source-target stages without duplicate records or
     assert.equal(second.growth.claims, 0);
     assert.equal(second.growth.canonicalRevisions, 0);
     assert.equal(second.growth.images, 0);
+  });
+});
+
+test('offline rebuild derives deterministic service projections without network or raw and cover growth', async () => {
+  await withWorkspace(async (workspace) => {
+    const input = await fixtureInput(workspace);
+    const collected = await runCatalogPipeline(input);
+    const store = createCatalogArtifactStore({ workspace });
+    const currentBefore = await Promise.all(input.targets.map((row) => store.readCurrent(row.moemoaAnimeId)));
+    const coversBefore = await Promise.all(input.targets.map((row) => store.writeCoverObservation(row)));
+
+    const first = await rebuildCatalogProfile({
+      workspace, profile: 'golden', targets: input.targets, clock,
+    });
+    const second = await rebuildCatalogProfile({
+      workspace, profile: 'golden', targets: input.targets, clock,
+    });
+
+    assert.equal(first.networkRequests, 0);
+    assert.equal(first.counts.targets, 10);
+    assert.equal(first.counts.serviceProjections, 10);
+    assert.equal(first.counts.reusedCovers, 10);
+    assert.equal(first.growth.sourceRecords, 0);
+    assert.equal(first.growth.images, 0);
+    assert.equal(second.growth.claims, 0);
+    assert.equal(second.growth.canonicalRevisions, 0);
+    assert.equal(second.growth.sourceRecords, 0);
+    assert.equal(second.growth.images, 0);
+    assert.deepEqual(await Promise.all(input.targets.map((row) => store.readCurrent(row.moemoaAnimeId))), currentBefore);
+    assert.deepEqual(await Promise.all(input.targets.map((row) => store.writeCoverObservation(row))), coversBefore);
+    assert.equal((await store.readServiceProjection(input.targets[0])).canonicalHash, collected.targets[0].currentCanonicalHash);
+    assert.equal((await store.readRebuildSnapshot('golden')).counts.serviceProjections, 10);
   });
 });
 

@@ -31,6 +31,7 @@
     "catalog:targets": "node tools/catalog-lab/cli.mjs targets",
     "catalog:bind-anilife": "node tools/catalog-lab/cli.mjs bind-anilife",
     "catalog:collect": "node tools/catalog-lab/cli.mjs collect",
+    "catalog:rebuild": "node tools/catalog-lab/cli.mjs rebuild",
     "catalog:validate": "node tools/catalog-lab/cli.mjs validate",
     "catalog:report": "node tools/catalog-lab/cli.mjs report",
     "catalog:guard": "node tools/catalog-lab/cli.mjs guard"
