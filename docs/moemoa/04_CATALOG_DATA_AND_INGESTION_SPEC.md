@@ -207,16 +207,18 @@ DEPRECATED
 한국어 제목 정책:
 
 - 승인된 `legacy_aliases` row의 유일한 `ko` 제목을 대표 한국어 제목으로 사용한다.
-- AniList·Wikidata 등에서 얻은 추가 한국어 제목은 provenance를 유지하되 자동 검색·표시에서 격리한다.
-- 격리 후보는 `KOREAN_TITLE_CANDIDATES_QUARANTINED` 검토 항목으로 집계한다.
-- 이미 확인된 불완전 legacy 제목은 수정값을 추측하지 않고 `INCOMPLETE_LEGACY_KOREAN_TITLE` 수동 검토 항목으로 남긴다.
+- AniList·Wikidata 등에서 얻은 추가 한국어 제목은 NFKC·기호·공백을 정규화해 비교한다. 최소 길이와 유사도 기준을 만족하면 검색 별칭으로 자동 허용한다.
+- 낮은 신뢰도 후보는 provenance를 유지하되 자동 검색·표시에서 격리하며, 수동 검토가 아닌 `KOREAN_TITLE_CANDIDATES_QUARANTINED` warning으로 집계한다.
+- 불완전 legacy 제목은 닫히지 않은 괄호, 값 형태 이상, 짧은 조사형 제목과 충분히 긴 대체 제목의 조합, known anomaly로 감지한다. 사용 가능한 영문·로마자·일문 제목이 있으면 자동 fallback하고 warning을 남긴다.
+- fallback도 만들 수 없어 REQUIRED 대표 제목이 비는 경우에만 수동 검토 대상으로 남긴다.
 
 공식 링크 정책:
 
 - `officialSiteUrl` claim의 단일 값·충돌 값에서 정규화된 `officialLinks[]` 후보를 파생한다.
 - 같은 host/path의 HTTP·HTTPS 변형은 HTTPS를 우선하고, 같은 host에서 `/en`, `/ja` 같은 locale 경로만 다른 경우 하나의 동등 후보군으로 본다.
-- 서로 다른 host 또는 의미상 다른 path는 자동 선택하지 않고 `PENDING_REVIEW`로 둔다.
-- 호환용 대표 URL은 동등 후보군일 때만 결정론적으로 파생하며, 보고서에는 URL 원문 대신 개수와 검토 상태만 기록한다.
+- 서로 다른 host 또는 path도 HTTPS, 비스트리밍·비배급 보조 사이트, 작품명과 일치하는 host, locale, 작품 전용 path 순으로 대표 링크를 결정론적으로 선택한다.
+- 선택되지 않은 후보는 보조 링크로 보존하고 자동 선택 warning만 남긴다. 공식 링크 후보 때문에 수동 검토 큐를 만들지 않는다.
+- 보고서에는 URL 원문 대신 후보 수와 자동 선택 상태만 기록한다.
 
 서비스 완성도 등급:
 

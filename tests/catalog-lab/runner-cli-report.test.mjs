@@ -241,6 +241,8 @@ test('quality report exposes ten target/source/field/cover states and no raw pay
     assert.equal(report.targets.every((row) => row.sources.anilist && row.cover.status === 'STORED'), true);
     assert.equal(report.targets.every((row) => row.fieldStates.titles === 'VALUE'), true);
     assert.equal(report.serviceGate.passed, true);
+    assert.equal(report.serviceTotals.targetsWithReview, 0);
+    assert.equal(report.serviceTotals.officialLinksPendingReview, 0);
     assert.equal(report.targets.every((row) => row.serviceReadiness !== 'BLOCKED'), true);
     assert.equal(report.targets.every((row) => row.preferredTitle?.locale === 'ko'), true);
     assert.equal(report.targets.every((row) => row.fieldTiers.required.cover === 'VALUE'), true);

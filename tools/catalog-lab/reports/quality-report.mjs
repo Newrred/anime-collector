@@ -95,7 +95,7 @@ function canonicalFieldStates(canonical) {
 }
 
 function displayTitle(target, canonical, projection) {
-  if (projection?.preferredTitle?.locale === 'ko' && typeof projection.preferredTitle.value === 'string') {
+  if (typeof projection?.preferredTitle?.locale === 'string' && typeof projection.preferredTitle.value === 'string') {
     return projection.preferredTitle.value;
   }
   const titles = canonical?.titles?.value;
@@ -112,7 +112,8 @@ function serviceProjectionIsConsistent(projection, target, current, canonical, c
     || projection.animeId !== target.moemoaAnimeId || projection.canonicalHash !== current?.contentHash
     || typeof projection.projectionHash !== 'string' || !isCanonicalHash(projection.projectionHash)
     || !SERVICE_READINESS.has(projection.readiness?.status)
-    || projection.preferredTitle?.locale !== 'ko' || typeof projection.preferredTitle?.value !== 'string') return false;
+    || typeof projection.preferredTitle?.locale !== 'string'
+    || typeof projection.preferredTitle?.value !== 'string') return false;
   try {
     return stableStringify(projection) === stableStringify(buildServiceProjection({ target, canonical, cover }));
   } catch {
@@ -126,10 +127,12 @@ function sanitizeServiceProjection(projection, valid) {
     serviceReadiness: 'BLOCKED',
     fieldTiers: Object.freeze(Object.fromEntries(SERVICE_TIERS.map((tier) => [tier, Object.freeze({})]))),
     quarantinedTitleCount: 0,
+    autoAcceptedTitleAliasCount: 0,
     officialLinkCount: 0,
     officialLinkReviewCount: 0,
     primaryOfficialSiteAvailable: false,
     reviewReasonCodes: Object.freeze([]),
+    warningReasonCodes: Object.freeze([]),
   });
   const fieldTiers = Object.fromEntries(SERVICE_TIERS.map((tier) => [
     tier,
@@ -140,16 +143,24 @@ function sanitizeServiceProjection(projection, valid) {
   const reviewReasonCodes = [...new Set((projection.reviewItems ?? [])
     .map((item) => item?.reasonCode)
     .filter((code) => typeof code === 'string' && /^[A-Z0-9_]+$/u.test(code)))].sort();
+  const warningReasonCodes = [...new Set((projection.qualityWarnings ?? [])
+    .map((item) => item?.reasonCode)
+    .filter((code) => typeof code === 'string' && /^[A-Z0-9_]+$/u.test(code)))].sort();
   return Object.freeze({
-    preferredTitle: Object.freeze({ locale: 'ko', value: projection.preferredTitle.value }),
+    preferredTitle: Object.freeze({
+      locale: projection.preferredTitle.locale, value: projection.preferredTitle.value,
+    }),
     serviceReadiness: projection.readiness.status,
     fieldTiers: Object.freeze(fieldTiers),
     quarantinedTitleCount: Array.isArray(projection.quarantinedTitles) ? projection.quarantinedTitles.length : 0,
+    autoAcceptedTitleAliasCount: Array.isArray(projection.autoAcceptedTitleAliases)
+      ? projection.autoAcceptedTitleAliases.length : 0,
     officialLinkCount: Array.isArray(projection.officialLinks) ? projection.officialLinks.length : 0,
     officialLinkReviewCount: Array.isArray(projection.officialLinks)
-      ? projection.officialLinks.filter((link) => link?.reviewState === 'PENDING_REVIEW').length : 0,
+      ? projection.officialLinks.filter((link) => link?.selectionState === 'PENDING_REVIEW').length : 0,
     primaryOfficialSiteAvailable: typeof projection.primaryOfficialSiteUrl === 'string',
     reviewReasonCodes: Object.freeze(reviewReasonCodes),
+    warningReasonCodes: Object.freeze(warningReasonCodes),
   });
 }
 
@@ -318,10 +329,13 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
     fieldTierStateCounts: countFieldTierStates(targets),
     serviceTotals: Object.freeze({
       quarantinedTitles: targets.reduce((sum, row) => sum + row.quarantinedTitleCount, 0),
+      autoAcceptedTitleAliases: targets.reduce((sum, row) => sum + row.autoAcceptedTitleAliasCount, 0),
       officialLinks: targets.reduce((sum, row) => sum + row.officialLinkCount, 0),
       officialLinksPendingReview: targets.reduce((sum, row) => sum + row.officialLinkReviewCount, 0),
-      targetsWithReview: targets.filter((row) => row.reviewReasonCodes.length > 0).length,
-      manualTitleReviews: targets.filter((row) => row.reviewReasonCodes.includes('INCOMPLETE_LEGACY_KOREAN_TITLE')).length,
+      targetsWithReview: targets.filter((row) => row.reviewReasonCodes.length > 0 || row.serviceReadiness === 'BLOCKED').length,
+      targetsWithWarnings: targets.filter((row) => row.warningReasonCodes.length > 0).length,
+      automaticTitleFallbacks: targets.filter((row) => row.warningReasonCodes.includes('PREFERRED_TITLE_FALLBACK_USED')).length,
+      officialLinkAutoSelections: targets.filter((row) => row.warningReasonCodes.includes('OFFICIAL_LINK_AUTO_SELECTED')).length,
     }),
     growth: Object.freeze({
       sourceRecords: Number.isSafeInteger(snapshot?.growth?.sourceRecords) ? snapshot.growth.sourceRecords : 0,
@@ -369,7 +383,8 @@ export function renderQualityReportMarkdown(report) {
     `Service gate: ${report.serviceGate.passed ? 'PASS' : 'BLOCKED'}`,
     `Targets: ${report.targetCount}; canonical: ${report.canonicalCount}; stored covers: ${report.coverStoredCount}`,
     `Service readiness: ${Object.entries(report.serviceReadinessCounts).map(([state, count]) => `${state}=${count}`).join(', ')}`,
-    `Review backlog: titles=${report.serviceTotals.quarantinedTitles}; official links=${report.serviceTotals.officialLinksPendingReview}; targets=${report.serviceTotals.targetsWithReview}`,
+    `Manual review: targets=${report.serviceTotals.targetsWithReview}; warning targets=${report.serviceTotals.targetsWithWarnings}`,
+    `Automation: aliases=${report.serviceTotals.autoAcceptedTitleAliases}; quarantined=${report.serviceTotals.quarantinedTitles}; official links=${report.serviceTotals.officialLinkAutoSelections}; title fallbacks=${report.serviceTotals.automaticTitleFallbacks}`,
     '',
   ];
   for (const row of report.targets) {
@@ -383,7 +398,8 @@ export function renderQualityReportMarkdown(report) {
     lines.push(
       `## ${row.displayTitle}`, '', `- Target: ${row.targetKey}`, `- Sources: ${sources}`,
       `- Fields: ${fields}`, `- Service: ${row.serviceReadiness}; gaps: ${gaps}`,
-      `- Review: ${row.reviewReasonCodes.join(', ') || 'none'}`, `- Cover: ${cover}`, '',
+      `- Review: ${row.reviewReasonCodes.join(', ') || 'none'}`,
+      `- Warnings: ${row.warningReasonCodes.join(', ') || 'none'}`, `- Cover: ${cover}`, '',
     );
   }
   if (report.gate.blockers.length > 0) lines.push('## Blockers', '', ...report.gate.blockers.map((blocker) => `- ${blocker}`), '');

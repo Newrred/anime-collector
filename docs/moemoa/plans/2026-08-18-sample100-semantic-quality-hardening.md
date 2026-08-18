@@ -6,6 +6,8 @@
 > 상위 계획: `docs/moemoa/plans/2026-08-17-three-source-local-catalog-lab.md`
 > 전체 3,998개 수집 상태: `FULL-CATALOG-INGESTION-GATE-01` 미통과
 
+> **후속 정책:** 이 문서의 26개 review backlog는 초기 보수 기준의 완료 증거다. 현재 운영 기준은 `2026-08-18-review-queue-minimization.md`가 대체하며, 낮은 위험 후보는 warning/자동 처리로 분리한다.
+
 ## 1. 목적과 사용자 결과
 
 100개 실데이터에서 확인한 한국어 별칭 오염, 단일 공식 사이트 모델의 과도한 충돌, 필드별 누락과 구조 품질 게이트의 차이를 보완한다. 구현 후 사용자는 네트워크를 다시 호출하지 않고 저장된 `SourceRecord`로 claims·canonical·품질 보고서를 재생성하고, 서비스 노출 가능 값과 검토 대기 값을 구분해서 확인할 수 있다.
