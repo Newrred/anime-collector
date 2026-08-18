@@ -130,7 +130,7 @@ The golden-10 phase is complete only when fresh evidence shows:
 - tracked/build/Android/Vercel leakage: 0 files and 0 payload matches;
 - existing catalog and unit regressions pass.
 
-After the user reviews the ten records and report, a separate approval may authorize the representative 100-title run. The 3,998-title run remains separately gated.
+The user reviewed the ten-record result and authorized the representative 100-title phase on 2026-08-18. The phase first creates and validates the deterministic `sample100` manifest, then may collect AniList + Wikidata into the trusted local workspace. AniLife remains excluded until exact public-page binding is available. The 3,998-title run remains separately gated.
 
 ## 9. Immediate Implementation Boundary
 
@@ -142,4 +142,4 @@ The next implementation plan contains only:
 4. run and inspect the real golden-10 collection;
 5. stop for user review.
 
-Web integration, Android integration, representative-100 collection, and full-3,998 collection remain later phases.
+Web integration, Android integration, and full-3,998 collection remain later phases. Representative-100 target generation and local AniList + Wikidata collection are now the active approved phase.

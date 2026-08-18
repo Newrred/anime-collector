@@ -166,13 +166,13 @@ export function createCatalogArtifactStore({ workspace }) {
     return Object.freeze({ path, observation: snapshot(observation) });
   }
 
-  async function readRunSnapshot() {
+  async function readRunSnapshot(profile = 'golden') {
     await assertCatalogWorkspaceMutation(workspace, []);
-    return readJson(workspace.resolve('runs', 'golden', 'current.json'));
+    return readJson(workspace.resolve('runs', toPathKey(profile), 'current.json'));
   }
 
-  async function writeRunSnapshot(snapshotValue) {
-    const parts = ['runs', 'golden', 'current.json'];
+  async function writeRunSnapshot(profile, snapshotValue) {
+    const parts = ['runs', toPathKey(profile), 'current.json'];
     const path = await assertCatalogWorkspaceMutation(workspace, parts);
     await atomicWriteJson(path, snapshot(snapshotValue));
     return Object.freeze({ path });

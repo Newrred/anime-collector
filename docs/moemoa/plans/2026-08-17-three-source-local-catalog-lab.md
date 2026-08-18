@@ -2,11 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-> **계획 상태: `DRAFT FOR USER REVIEW`**
+> **계획 상태: `IN PROGRESS — GOLDEN 10 COMPLETE, SAMPLE100 APPROVED`**
 > 작성일: 2026-08-17
 > 기준 저장소: `master@bb89002`
 > 승인 설계: `docs/superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md`
 > 대량 수집 상태: `FULL-CATALOG-INGESTION-GATE-01` 미통과
+> 표본 수집 상태: `REPRESENTATIVE-100-INGESTION-01` 2026-08-18 승인; target manifest 검증 후 AniList + Wikidata 실행
 
 **Goal:** 기존 3,998개 `legacy_unverified` 목록을 target roster로 사용해 AniList·Wikidata·AniLife 공개 페이지의 로컬 10→100 표본을 안전하게 수집·정규화·검증하고, 외부 네트워크 없이 Web 제목 검색에서 읽을 수 있는 테스트 카탈로그를 만든다.
 

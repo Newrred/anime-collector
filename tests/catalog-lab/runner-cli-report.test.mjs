@@ -117,16 +117,16 @@ function runSubprocess(args, env = {}) {
   });
 }
 
-test('subprocess CLI rejects collection without an exact golden network gate', async () => {
+test('subprocess CLI rejects collection without an authenticated external workspace', async () => {
   const result = await runSubprocess(['tools/catalog-lab/cli.mjs', 'collect', '--profile', 'sample100', '--sources', 'anilist', '--allow-network']);
   assert.equal(result.code, CLI_EXIT.USAGE_OR_SAFETY);
-  assert.match(result.stderr, /CLI_USAGE_OR_SAFETY/);
+  assert.match(result.stderr, /CATALOG_WORKSPACE_REQUIRED/);
 });
 
-test('CLI refuses collection without exact network permission or with a non-golden profile', async () => {
+test('CLI refuses collection without exact network permission or with an unknown profile', async () => {
   assert.equal(await runCli(['collect', '--profile', 'golden'], silentDependencies()), CLI_EXIT.USAGE_OR_SAFETY);
   assert.equal(await runCli([
-    'collect', '--profile', 'sample100', '--sources', 'anilist', '--allow-network',
+    'collect', '--profile', 'sample101', '--sources', 'anilist', '--allow-network',
   ], silentDependencies()), CLI_EXIT.USAGE_OR_SAFETY);
 });
 
@@ -161,6 +161,59 @@ test('init and targets use the default UUID generator to create the golden ten m
     assert.equal(manifest.length, 10);
     assert.equal(manifest.every((row) => /^anime:[0-9a-f-]{36}$/u.test(row.moemoaAnimeId)), true);
     assert.equal(output.some((value) => value.includes('Catalog command rejected')), false);
+  });
+});
+
+test('sample100 creates the deterministic approved 100-target manifest and profile report', async () => {
+  await withWorkspace(async (workspaceRoot, workspace) => {
+    const deps = silentDependencies(workspaceRoot);
+    assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets', '--profile', 'sample100'], deps), CLI_EXIT.OK);
+    const manifest = JSON.parse(await readFile(join(workspaceRoot, 'manifests', 'sample100.json'), 'utf8'));
+    const idMap = JSON.parse(await readFile(join(workspaceRoot, 'state', 'id-map.json'), 'utf8'));
+    assert.equal(manifest.length, 100);
+    assert.deepEqual(manifest.slice(0, 10).map((row) => Number(row.seedExternalIds[0].value)), goldenIds);
+    assert.equal(new Set(manifest.map((row) => row.targetKey)).size, 100);
+    assert.equal(new Set(manifest.map((row) => row.moemoaAnimeId)).size, 100);
+    assert.equal(manifest.every((row) => row.seedTitles.filter((title) => title.locale === 'ko').length === 1), true);
+    assert.equal(Object.keys(idMap).length, 100);
+    assert.equal(await runCli(['targets', '--profile', 'sample100'], deps), CLI_EXIT.OK);
+    assert.deepEqual(JSON.parse(await readFile(join(workspaceRoot, 'manifests', 'sample100.json'), 'utf8')), manifest);
+
+    const report = await buildQualityReport({ workspace, profile: 'sample100' });
+    assert.equal(report.profile, 'sample100');
+    assert.equal(report.targetCount, 100);
+    assert.equal(report.gate.passed, false);
+    assert.match(renderQualityReportMarkdown(report), /Sample 100 Catalog Quality Report/);
+  });
+});
+
+test('sample100 collection accepts exactly 100 targets and stores a profile-isolated run snapshot', async () => {
+  await withWorkspace(async (workspaceRoot) => {
+    const deps = {
+      ...silentDependencies(workspaceRoot),
+      adapters: {
+        anilist: Object.freeze({
+          async *collect() {
+            const error = new Error('synthetic permanent source failure');
+            error.code = 'SYNTHETIC_SOURCE_FAILURE';
+            throw error;
+          },
+        }),
+      },
+      httpFactory: () => ({ async request() { throw new Error('network must not be reached'); } }),
+      coverPipeline: async () => ({ status: 'FAILED', errorCode: 'NO_COVER_CANDIDATE' }),
+    };
+    assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets', '--profile', 'sample100'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli([
+      'collect', '--profile', 'sample100', '--sources', 'anilist', '--allow-network',
+    ], deps), CLI_EXIT.OK);
+    const snapshot = JSON.parse(await readFile(join(workspaceRoot, 'runs', 'sample100', 'current.json'), 'utf8'));
+    assert.equal(snapshot.profile, 'sample100');
+    assert.equal(snapshot.counts.targets, 100);
+    assert.equal(snapshot.targets.length, 100);
+    await assert.rejects(readFile(join(workspaceRoot, 'runs', 'golden', 'current.json'), 'utf8'), { code: 'ENOENT' });
   });
 });
 

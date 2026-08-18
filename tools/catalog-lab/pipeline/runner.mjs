@@ -16,6 +16,7 @@ import { normalizeSourceRecord } from './normalize.mjs';
 import { storeSourceEnvelope } from './raw-store.mjs';
 import { createStateStore } from './state-store.mjs';
 import { createCatalogArtifactStore } from './artifact-store.mjs';
+import { TARGET_PROFILE_COUNTS } from './targets.mjs';
 
 export const JOB_STATES = Object.freeze([
   'PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED', 'CLAIMS_BUILT',
@@ -78,9 +79,10 @@ function sourceState(stage, extra = {}) {
   return { stage, ...extra };
 }
 
-function ensureInputs({ targets, registry, selectedSources }) {
-  if (!Array.isArray(targets) || targets.length !== 10) {
-    throw typedError('SOURCE_SCOPE_EXCEEDED', 'Catalog runner is restricted to the golden ten targets');
+function ensureInputs({ profile, targets, registry, selectedSources }) {
+  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
+    throw typedError('SOURCE_SCOPE_EXCEEDED', 'Catalog runner target count does not match its approved profile');
   }
   if (!Array.isArray(selectedSources) || selectedSources.length === 0
     || new Set(selectedSources).size !== selectedSources.length) {
@@ -183,13 +185,13 @@ function countStages(targetRows) {
 }
 
 export async function runCatalogPipeline({
-  workspace, targets, registry, adapters, bindings = {}, selectedSources, allowNetwork,
+  workspace, profile = 'golden', targets, registry, adapters, bindings = {}, selectedSources, allowNetwork,
   refresh = false, clock = { now: () => new Date().toISOString() }, httpFactory = () => createHttpClient(),
   coverPipeline = createDefaultCoverPipeline(),
 } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
   if (allowNetwork !== true) throw typedError('CATALOG_NETWORK_PERMISSION_REQUIRED', 'Network collection requires explicit permission');
-  ensureInputs({ targets, registry, selectedSources });
+  ensureInputs({ profile, targets, registry, selectedSources });
   if (!clock || typeof clock.now !== 'function' || typeof httpFactory !== 'function') {
     throw typedError('CATALOG_RUNNER_INPUT_INVALID', 'Catalog runner clock or HTTP factory is invalid');
   }
@@ -345,17 +347,18 @@ export async function runCatalogPipeline({
     sourceStates: countStages(targetRows),
   };
   const summary = frozen({
-    profile: 'golden', counts, growth, targets: targetRows,
+    profile, counts, growth, targets: targetRows,
     canonicalHash: targetRows[0]?.currentCanonicalHash ?? null,
   });
-  await store.writeRunSnapshot(summary);
+  await store.writeRunSnapshot(profile, summary);
   return summary;
 }
 
-export async function validateGoldenArtifacts({ workspace, targets } = {}) {
+export async function validateCatalogArtifacts({ workspace, profile = 'golden', targets } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
-  if (!Array.isArray(targets) || targets.length !== 10) {
-    throw typedError('SOURCE_SCOPE_EXCEEDED', 'Validation is restricted to the golden ten targets');
+  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
+    throw typedError('SOURCE_SCOPE_EXCEEDED', 'Validation target count does not match its approved profile');
   }
   const store = createCatalogArtifactStore({ workspace });
   const rows = [];
@@ -365,4 +368,8 @@ export async function validateGoldenArtifacts({ workspace, targets } = {}) {
     rows.push({ targetKey: target.targetKey, canonical: current?.contentHash ?? null, cover: cover?.localRef ?? null });
   }
   return frozen({ valid: rows.every((row) => row.canonical && row.cover), targets: rows });
+}
+
+export async function validateGoldenArtifacts(input = {}) {
+  return validateCatalogArtifacts({ ...input, profile: 'golden' });
 }

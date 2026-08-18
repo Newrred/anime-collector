@@ -3,6 +3,8 @@
 > **문서 상태: `GATED TARGET SPEC`**
 > 내부 ID·provenance·표본 검증의 목표 기준이다. `SOURCE-01`과 `FULL-CATALOG-INGESTION-GATE-01` 통과 전 전체 수집·승격을 실행하지 않는다.
 
+> 2026-08-18: `REPRESENTATIVE-100-INGESTION-01`이 승인되어 골든 10개를 포함한 `sample100` 로컬 표본까지 실행할 수 있다. 전체 3,998개 수집 게이트는 그대로 유지한다.
+
 ## 1. 목적
 
 여러 출처에서 필요한 raw facts를 수집하되, MOEMOA가 자체 내부 ID·스키마·정규화·검증·변경 이력을 운영할 수 있게 한다.

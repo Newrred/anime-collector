@@ -6,12 +6,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { CATALOG_LAB_USER_AGENT, loadSourceRegistry } from './contracts/catalogContracts.mjs';
 import { openCatalogWorkspace } from './lib/workspace.mjs';
 import { createCatalogArtifactStore } from './pipeline/artifact-store.mjs';
-import { buildTargetManifest } from './pipeline/targets.mjs';
-import { runCatalogPipeline, validateGoldenArtifacts } from './pipeline/runner.mjs';
+import { buildTargetManifest, TARGET_PROFILE_COUNTS } from './pipeline/targets.mjs';
+import { runCatalogPipeline, validateCatalogArtifacts } from './pipeline/runner.mjs';
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
 import { createAniListTestAdapter } from './sources/anilist-test.mjs';
 import { createWikidataAdapter } from './sources/wikidata.mjs';
-import { hasApprovedGoldenManifest, inspectGoldenArtifacts, writeQualityReport } from './reports/quality-report.mjs';
+import { hasApprovedTargetManifest, inspectCatalogArtifacts, writeQualityReport } from './reports/quality-report.mjs';
 
 export const CLI_EXIT = Object.freeze({
   OK: 0, QUALITY_GATE_FAILED: 2, SOURCE_PAUSED: 3, USAGE_OR_SAFETY: 64,
@@ -63,8 +63,10 @@ function onlyOptions(options, allowed) {
   if (Object.keys(options).some((option) => !allowed.has(option))) throw usageError('Option is not supported for this command');
 }
 
-function exactGolden(options) {
-  if ((options['--profile'] ?? 'golden') !== 'golden') throw usageError('Only the golden profile is supported');
+function selectedProfile(options) {
+  const profile = options['--profile'] ?? 'golden';
+  if (!TARGET_PROFILE_COUNTS[profile]) throw usageError('Catalog profile is invalid');
+  return profile;
 }
 
 function selectedSources(value) {
@@ -90,17 +92,21 @@ async function openWorkspace(dependencies, create) {
   return openCatalogWorkspace({ repoRoot, workspaceRoot: dependencies.workspaceRoot ?? process.env.MOEMOA_CATALOG_LAB_DIR, create });
 }
 
-async function targetManifest(workspace, dependencies = {}) {
+async function targetManifest(workspace, profile, dependencies = {}) {
   const store = createCatalogArtifactStore({ workspace });
-  const manifest = await store.readManifest('golden');
-  if (!Array.isArray(manifest) || manifest.length !== 10) throw typedError('GOLDEN_MANIFEST_REQUIRED', 'Golden target manifest is required');
-  await assertApprovedGoldenManifest({ workspace, manifest, repoRoot: dependencies.repoRoot ?? repoFromModule() });
+  const manifest = await store.readManifest(profile);
+  if (!Array.isArray(manifest) || manifest.length !== TARGET_PROFILE_COUNTS[profile]) {
+    throw typedError('TARGET_MANIFEST_REQUIRED', 'Approved target manifest is required');
+  }
+  await assertApprovedTargetManifest({
+    workspace, profile, manifest, repoRoot: dependencies.repoRoot ?? repoFromModule(),
+  });
   return { store, manifest };
 }
 
-async function assertApprovedGoldenManifest({ workspace, manifest, repoRoot }) {
-  if (!await hasApprovedGoldenManifest({ workspace, manifest, repoRoot })) {
-    throw typedError('GOLDEN_MANIFEST_INVALID', 'Golden target manifest is not approved');
+async function assertApprovedTargetManifest({ workspace, profile, manifest, repoRoot }) {
+  if (!await hasApprovedTargetManifest({ workspace, profile, manifest, repoRoot })) {
+    throw typedError('TARGET_MANIFEST_INVALID', 'Target manifest is not approved');
   }
 }
 
@@ -231,18 +237,18 @@ export async function runCli(argv, dependencies = {}) {
       return CLI_EXIT.OK;
     }
     if (command === 'targets') {
-      onlyOptions(options, new Set(['--profile'])); exactGolden(options);
+      onlyOptions(options, new Set(['--profile']));
+      const profile = selectedProfile(options);
       const workspace = await openWorkspace(dependencies, false);
-      const { store } = await targetManifestOrCreate(workspace, dependencies);
-      const manifest = await store.readManifest('golden');
-      writeLine(stdout, `Golden targets: ${manifest.length}`);
+      const { manifest } = await targetManifestOrCreate(workspace, profile, dependencies);
+      writeLine(stdout, `${profile} targets: ${manifest.length}`);
       return CLI_EXIT.OK;
     }
     if (command === 'bind-anilife') {
       onlyOptions(options, new Set(['--anilist-id', '--content-id']));
       if (!/^[1-9]\d*$/u.test(options['--anilist-id'] ?? '') || !/^[1-9]\d*$/u.test(options['--content-id'] ?? '')) throw usageError('AniLife ids must be numeric');
       const workspace = await openWorkspace(dependencies, false);
-      const { store, manifest } = await targetManifest(workspace, dependencies);
+      const { store, manifest } = await targetManifest(workspace, 'golden', dependencies);
       const target = manifest.find((row) => row.targetKey === `ANILIST:${options['--anilist-id']}`);
       if (!target) throw usageError('AniLife binding target is not in the golden manifest');
       const binding = validateAniLifeBinding({ contentId: options['--content-id'], evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' }, { targetKey: target.targetKey });
@@ -251,12 +257,13 @@ export async function runCli(argv, dependencies = {}) {
       return CLI_EXIT.OK;
     }
     if (command === 'collect') {
-      onlyOptions(options, new Set(['--profile', '--sources', '--allow-network', '--refresh'])); exactGolden(options);
+      onlyOptions(options, new Set(['--profile', '--sources', '--allow-network', '--refresh']));
+      const profile = selectedProfile(options);
       if (options['--allow-network'] !== true) throw usageError('Collection requires --allow-network');
       const workspace = await openWorkspace(dependencies, false);
-      const { store, manifest } = await targetManifest(workspace, dependencies);
+      const { store, manifest } = await targetManifest(workspace, profile, dependencies);
       const summary = await runCatalogPipeline({
-        workspace, targets: manifest, registry: await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() }),
+        workspace, profile, targets: manifest, registry: await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() }),
         adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(), selectedSources: selectedSources(options['--sources']),
         allowNetwork: true, refresh: options['--refresh'] === true, clock: dependencies.clock,
         httpFactory: dependencies.httpFactory,
@@ -265,18 +272,18 @@ export async function runCli(argv, dependencies = {}) {
       writeLine(stdout, `Collection: ${summary.counts.targets} targets`);
       return hasPausedSources(summary) ? CLI_EXIT.SOURCE_PAUSED : CLI_EXIT.OK;
     }
-    exactGolden(options);
     onlyOptions(options, new Set(['--profile']));
+    const profile = selectedProfile(options);
     const workspace = await openWorkspace(dependencies, false);
-    const { manifest } = await targetManifest(workspace, dependencies);
+    const { manifest } = await targetManifest(workspace, profile, dependencies);
     if (command === 'validate') {
-      const result = await validateGoldenArtifacts({ workspace, targets: manifest });
-      const strict = await inspectGoldenArtifacts({ workspace, profile: 'golden', repoRoot: dependencies.repoRoot ?? repoFromModule() });
+      const result = await validateCatalogArtifacts({ workspace, profile, targets: manifest });
+      const strict = await inspectCatalogArtifacts({ workspace, profile, repoRoot: dependencies.repoRoot ?? repoFromModule() });
       const valid = result.valid && strict.valid;
-      writeLine(stdout, valid ? 'Golden artifacts valid' : 'Golden artifacts blocked');
+      writeLine(stdout, valid ? 'Catalog artifacts valid' : 'Catalog artifacts blocked');
       return valid ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
     }
-    const report = await writeQualityReport({ workspace, profile: 'golden', repoRoot: dependencies.repoRoot ?? repoFromModule() });
+    const report = await writeQualityReport({ workspace, profile, repoRoot: dependencies.repoRoot ?? repoFromModule() });
     writeLine(stdout, report.gate.passed ? 'Quality report written' : 'Quality report written with blockers');
     return report.gate.passed ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
   } catch (error) {
@@ -285,24 +292,26 @@ export async function runCli(argv, dependencies = {}) {
   }
 }
 
-async function targetManifestOrCreate(workspace, dependencies) {
+async function targetManifestOrCreate(workspace, profile, dependencies) {
   const store = createCatalogArtifactStore({ workspace });
-  const current = await store.readManifest('golden');
+  const current = await store.readManifest(profile);
   if (Array.isArray(current)) {
-    await assertApprovedGoldenManifest({ workspace, manifest: current, repoRoot: dependencies.repoRoot ?? repoFromModule() });
+    await assertApprovedTargetManifest({
+      workspace, profile, manifest: current, repoRoot: dependencies.repoRoot ?? repoFromModule(),
+    });
     return { store, manifest: current };
   }
   const repoRoot = dependencies.repoRoot ?? repoFromModule();
   const aliases = JSON.parse(await readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8'));
   const idMap = (await store.readIdMap()) ?? {};
   const manifest = await buildTargetManifest({
-    profile: 'golden', rows: aliases, idMapStore: idMap,
+    profile, rows: aliases, idMapStore: idMap,
     clock: dependencies.clock ?? { now: () => new Date().toISOString() },
     uuid: dependencies.uuid ?? (() => crypto.randomUUID()),
   });
   await store.writeIdMap(idMap);
-  await store.writeManifest('golden', manifest);
-  await assertApprovedGoldenManifest({ workspace, manifest, repoRoot });
+  await store.writeManifest(profile, manifest);
+  await assertApprovedTargetManifest({ workspace, profile, manifest, repoRoot });
   return { store, manifest };
 }
 

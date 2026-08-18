@@ -10,6 +10,7 @@ import { CANONICAL_FIELD_PATHS } from '../pipeline/normalize.mjs';
 import { createCatalogArtifactStore } from '../pipeline/artifact-store.mjs';
 import { inspectImageBytes } from '../pipeline/covers.mjs';
 import { sha256 } from '../lib/hash.mjs';
+import { TARGET_PROFILE_COUNTS, targetIdsForProfile } from '../pipeline/targets.mjs';
 
 export const QUALITY_SCHEMA_VERSION = 1;
 
@@ -45,20 +46,24 @@ function expectedCoverRef(target, checksum) {
     ? new RegExp(`^images/covers/${toPathKey(target.moemoaAnimeId)}/${checksum}\\.(?:jpg|png|webp)$`, 'u') : null;
 }
 
-/** Exact Golden-ten manifest gate shared by report builders and CLI commands. */
-export async function hasApprovedGoldenManifest({ workspace, manifest, repoRoot = repoFromModule() } = {}) {
+/** Exact deterministic manifest gate shared by report builders and CLI commands. */
+export async function hasApprovedTargetManifest({
+  workspace, profile = 'golden', manifest, repoRoot = repoFromModule(),
+} = {}) {
   try {
     const store = createCatalogArtifactStore({ workspace });
-    const [goldenIds, aliases, idMap] = await Promise.all([
-      readFile(resolve(repoRoot, 'tools', 'catalog-lab', 'config', 'golden-targets.json'), 'utf8').then(JSON.parse),
+    const [aliases, idMap] = await Promise.all([
       readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8').then(JSON.parse),
       store.readIdMap(),
     ]);
-    if (!idMap || typeof idMap !== 'object' || Array.isArray(idMap) || !Array.isArray(goldenIds)
-      || goldenIds.length !== 10 || new Set(goldenIds).size !== 10 || !Array.isArray(manifest)
-      || manifest.length !== 10 || new Set(manifest.map((target) => target?.targetKey)).size !== 10
-      || new Set(manifest.map((target) => target?.moemoaAnimeId)).size !== 10) return false;
-    return goldenIds.every((anilistId, index) => {
+    const expectedCount = TARGET_PROFILE_COUNTS[profile];
+    const expectedIds = expectedCount ? await targetIdsForProfile({ profile, rows: aliases }) : [];
+    if (!expectedCount || !idMap || typeof idMap !== 'object' || Array.isArray(idMap)
+      || expectedIds.length !== expectedCount || new Set(expectedIds).size !== expectedCount
+      || !Array.isArray(manifest) || manifest.length !== expectedCount
+      || new Set(manifest.map((target) => target?.targetKey)).size !== expectedCount
+      || new Set(manifest.map((target) => target?.moemoaAnimeId)).size !== expectedCount) return false;
+    return expectedIds.every((anilistId, index) => {
       const row = aliases.find((candidate) => String(candidate?.anilistId) === anilistId);
       const target = manifest[index];
       const expectedTitles = [
@@ -74,6 +79,10 @@ export async function hasApprovedGoldenManifest({ workspace, manifest, repoRoot 
   } catch {
     return false;
   }
+}
+
+export async function hasApprovedGoldenManifest(input = {}) {
+  return hasApprovedTargetManifest({ ...input, profile: 'golden' });
 }
 
 function canonicalFieldStates(canonical) {
@@ -160,12 +169,12 @@ function countValues(rows, selector) {
   return counts;
 }
 
-function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved }) {
+function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved, expectedCount }) {
   const blockers = [];
   if (!manifestApproved) blockers.push('MANIFEST_INVALID');
-  if (targetCount !== 10) blockers.push('TARGET_COUNT_NOT_TEN');
-  if (canonicalCount !== 10) blockers.push('CANONICAL_COUNT_INCOMPLETE');
-  if (coverStoredCount !== 10) blockers.push('COVER_COUNT_INCOMPLETE');
+  if (targetCount !== expectedCount) blockers.push('TARGET_COUNT_INCOMPLETE');
+  if (canonicalCount !== expectedCount) blockers.push('CANONICAL_COUNT_INCOMPLETE');
+  if (coverStoredCount !== expectedCount) blockers.push('COVER_COUNT_INCOMPLETE');
   for (const row of targets) {
     if (!row.canonicalValid) blockers.push(`CANONICAL_INVALID:${row.targetKey}`);
     if (!row.coverValid) blockers.push(`COVER_INVALID:${row.targetKey}`);
@@ -173,14 +182,15 @@ function blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, m
   return blockers;
 }
 
-/** Projects external golden artifacts into a JSON-safe, raw-data-free quality summary. */
+/** Projects external profile artifacts into a JSON-safe, raw-data-free quality summary. */
 export async function buildQualityReport({ workspace, profile, repoRoot } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
-  if (profile !== 'golden') throw reportError('TARGET_PROFILE_INVALID', 'Quality reports support only the golden profile');
+  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  if (!expectedCount) throw reportError('TARGET_PROFILE_INVALID', 'Quality report profile is invalid');
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest(profile);
-  const manifestApproved = await hasApprovedGoldenManifest({ workspace, manifest, repoRoot });
-  const snapshot = await store.readRunSnapshot();
+  const manifestApproved = await hasApprovedTargetManifest({ workspace, profile, manifest, repoRoot });
+  const snapshot = await store.readRunSnapshot(profile);
   const targets = [];
   for (const target of manifestApproved ? manifest : []) {
     const current = await store.readCurrent(target.moemoaAnimeId);
@@ -205,7 +215,9 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
   const targetCount = targets.length;
   const canonicalCount = targets.filter((row) => row.canonicalHash).length;
   const coverStoredCount = targets.filter((row) => row.coverValid).length;
-  const blockers = blockersFor({ targets, targetCount, canonicalCount, coverStoredCount, manifestApproved });
+  const blockers = blockersFor({
+    targets, targetCount, canonicalCount, coverStoredCount, manifestApproved, expectedCount,
+  });
   return Object.freeze({
     schemaVersion: QUALITY_SCHEMA_VERSION,
     profile,
@@ -228,17 +240,23 @@ export async function buildQualityReport({ workspace, profile, repoRoot } = {}) 
 
 /** Strict internal artifact gate used by the CLI in addition to the existing runner validation. */
 export async function inspectGoldenArtifacts({ workspace, profile = 'golden', repoRoot } = {}) {
+  const report = await buildQualityReport({ workspace, profile: 'golden', repoRoot });
+  return Object.freeze({ valid: report.gate.passed, blockers: report.gate.blockers });
+}
+
+export async function inspectCatalogArtifacts({ workspace, profile = 'golden', repoRoot } = {}) {
   const report = await buildQualityReport({ workspace, profile, repoRoot });
   return Object.freeze({ valid: report.gate.passed, blockers: report.gate.blockers });
 }
 
 /** Renders the sanitized report without paths, raw payloads, or remote diagnostics. */
 export function renderQualityReportMarkdown(report) {
-  if (!report || report.schemaVersion !== QUALITY_SCHEMA_VERSION || report.profile !== 'golden') {
+  if (!report || report.schemaVersion !== QUALITY_SCHEMA_VERSION || !TARGET_PROFILE_COUNTS[report.profile]) {
     throw reportError('QUALITY_REPORT_INVALID', 'Quality report is invalid');
   }
+  const title = report.profile === 'golden' ? 'Golden' : 'Sample 100';
   const lines = [
-    '# Golden Catalog Quality Report',
+    `# ${title} Catalog Quality Report`,
     '',
     `Gate: ${report.gate.passed ? 'PASS' : 'BLOCKED'}`,
     `Targets: ${report.targetCount}; canonical: ${report.canonicalCount}; stored covers: ${report.coverStoredCount}`,

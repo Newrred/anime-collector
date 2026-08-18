@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 
 const goldenTargetsUrl = new URL('../config/golden-targets.json', import.meta.url);
 
+export const TARGET_PROFILE_COUNTS = Object.freeze({ golden: 10, sample100: 100 });
+
 async function loadGoldenIds() {
   return JSON.parse(await readFile(goldenTargetsUrl, 'utf8'));
 }
@@ -42,6 +44,26 @@ function selectSampleRows(rows, goldenIds) {
   return [...goldenRows, ...selected];
 }
 
+async function rowsForProfile(profile, rows) {
+  const goldenIds = await loadGoldenIds();
+  const selectedRows = profile === 'golden'
+    ? findGoldenRows(rows, goldenIds)
+    : profile === 'sample100'
+      ? selectSampleRows(rows, goldenIds)
+      : null;
+  if (!selectedRows || selectedRows.length !== TARGET_PROFILE_COUNTS[profile]) {
+    const error = new Error('Catalog target profile is invalid');
+    error.code = 'TARGET_PROFILE_INVALID';
+    throw error;
+  }
+  return selectedRows;
+}
+
+/** Returns the exact deterministic AniList ID order approved for a target profile. */
+export async function targetIdsForProfile({ profile, rows }) {
+  return Object.freeze((await rowsForProfile(profile, rows)).map((row) => String(row.anilistId)));
+}
+
 function toTargetRecord(row, { idMapStore, clock, uuid }) {
   const anilistId = String(row.anilistId);
   const targetKey = `ANILIST:${anilistId}`;
@@ -71,16 +93,6 @@ function toTargetRecord(row, { idMapStore, clock, uuid }) {
  * @param {{profile: 'golden'|'sample100', rows: Array<Record<string, unknown>>, idMapStore: Map<string, string>|Record<string, string>, clock: {now(): string}, uuid: () => string}} input
  */
 export async function buildTargetManifest({ profile, rows, idMapStore, clock, uuid }) {
-  const goldenIds = await loadGoldenIds();
-  const selectedRows = profile === 'golden'
-    ? findGoldenRows(rows, goldenIds)
-    : profile === 'sample100'
-      ? selectSampleRows(rows, goldenIds)
-      : null;
-  if (!selectedRows) {
-    const error = new Error('Catalog target profile is invalid');
-    error.code = 'TARGET_PROFILE_INVALID';
-    throw error;
-  }
+  const selectedRows = await rowsForProfile(profile, rows);
   return Object.freeze(selectedRows.map((row) => toTargetRecord(row, { idMapStore, clock, uuid })));
 }

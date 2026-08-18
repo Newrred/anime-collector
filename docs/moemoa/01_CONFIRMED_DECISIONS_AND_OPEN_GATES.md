@@ -244,6 +244,16 @@ Codex는 기반을 구현할 수 있지만 이 게이트가 통과되지 않으�
 - 요청 제한과 오류 복구
 - 데이터 품질 대시보드
 
+### REPRESENTATIVE-100-INGESTION-01
+
+상태: **승인 (2026-08-18)**
+
+- 기존 3,998개 목록에서 골든 10개를 포함한 결정적 표본 100개를 사용한다.
+- 먼저 네트워크 없이 `sample100` target manifest를 생성·검증한 뒤 AniList + Wikidata 수집을 실행한다.
+- AniLife는 public origin 복구와 수동 exact binding 전에는 100개 실행 출처에 포함하지 않는다.
+- 원본·표지·canonical·보고서는 `D:\hong\Web\Anime\MOEMOA_CATALOG_LAB_TEST`의 TEST_ONLY workspace에만 저장한다.
+- 100개 실행 승인은 3,998개 전체 수집, Git/Vercel/APK 포함, production 게시를 승인하지 않는다.
+
 ## 5. 아직 사용자가 결정해야 할 항목
 
 Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하되 선택하지 않는다.
