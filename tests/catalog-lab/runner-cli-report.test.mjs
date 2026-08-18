@@ -188,6 +188,45 @@ test('sample100 creates the deterministic approved 100-target manifest and profi
   });
 });
 
+test('full3998 CLI creates the exact manifest and delegates safe batch options without network in the test', async () => {
+  await withWorkspace(async (workspaceRoot) => {
+    const calls = [];
+    const deps = {
+      ...silentDependencies(workspaceRoot),
+      runBatches: async (input) => {
+        calls.push(input);
+        return { counts: { targets: 3998 }, stoppedForSourcePause: false };
+      },
+      batchSleep: async () => { throw new Error('injected coordinator owns sleeps'); },
+    };
+    assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets', '--profile', 'full3998'], deps), CLI_EXIT.OK);
+    const manifest = JSON.parse(await readFile(join(workspaceRoot, 'manifests', 'full3998.json'), 'utf8'));
+    assert.equal(manifest.length, 3998);
+    assert.equal(new Set(manifest.map((row) => row.targetKey)).size, 3998);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
+      '--pause-seconds', '120', '--allow-network',
+    ], deps), CLI_EXIT.OK);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].targets.length, 3998);
+    assert.equal(calls[0].batchSize, 100);
+    assert.equal(calls[0].pauseMs, 120_000);
+    assert.deepEqual(calls[0].selectedSources, ['anilist']);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '101',
+      '--pause-seconds', '120', '--allow-network',
+    ], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
+      '--pause-seconds', '30', '--allow-network',
+    ], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--refresh', '--allow-network',
+    ], deps), CLI_EXIT.USAGE_OR_SAFETY);
+  });
+});
+
 test('sample100 collection accepts exactly 100 targets and stores a profile-isolated run snapshot', async () => {
   await withWorkspace(async (workspaceRoot) => {
     const deps = {

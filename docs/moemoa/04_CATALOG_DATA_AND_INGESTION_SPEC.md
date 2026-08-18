@@ -5,6 +5,8 @@
 
 > 2026-08-18: `REPRESENTATIVE-100-INGESTION-01`이 승인되어 골든 10개를 포함한 `sample100` 로컬 표본까지 실행할 수 있다. 전체 3,998개 수집 게이트는 그대로 유지한다.
 
+> 2026-08-18: `FULL3998-BATCH-CODE-01`로 100개 이하 순차 batch·resume·progress snapshot 코드 구현이 승인됐다. 사용자가 진술한 AniList 로컬 테스트 저장 허가 metadata를 Source Registry에 기록하되 실제 전체 네트워크 실행과 production 승격은 이번 승인에 포함하지 않는다.
+
 ## 1. 목적
 
 여러 출처에서 필요한 raw facts를 수집하되, MOEMOA가 자체 내부 ID·스키마·정규화·검증·변경 이력을 운영할 수 있게 한다.
@@ -449,8 +451,19 @@ PrivateTitle 생성
 - rate limit과 backoff를 적용한다.
 - source unavailable 시 기존 published 값은 유지한다.
 - conflict 자동 overwrite를 금지한다.
-- `catalog:rebuild --profile golden|sample100`은 저장된 SourceRecord와 CoverRecord만 사용하며 네트워크를 호출하지 않는다.
+- `catalog:rebuild --profile golden|sample100|full3998`은 저장된 SourceRecord와 CoverRecord만 사용하며 네트워크를 호출하지 않는다.
 - offline rebuild는 모든 대상을 먼저 검증한 뒤 canonical pointer를 전환하고, 같은 입력을 반복했을 때 raw·image·claim·canonical 중복 성장이 없어야 한다.
+
+### 11.1 full3998 batch 실행 계약
+
+- `full3998` manifest는 기존 `aliases.json` 3,998개 row의 순서와 고유 AniList ID를 그대로 고정한다.
+- 전체 profile 승인 수와 현재 batch 수를 분리해 검증한다. 100개 제한 source를 100개씩 반복 호출하는 방식으로 전체 범위를 우회할 수 없다.
+- 사용자 진술 기반 로컬 테스트 전체 저장 허가가 Registry에 기록된 AniList만 `LOCAL_TEST_FULL_ROSTER_BATCHED` scope를 사용할 수 있다.
+- 각 batch는 최대 100개이며 기본 휴식은 120초다. AniList 요청 시작 간격은 최소 2.5초이고 더 낮은 server limit 또는 reset header를 받으면 추가 감속한다.
+- `429`는 `Retry-After`를 따르고 `401/403` 또는 `SOURCE_PAUSED`는 다음 batch를 차단한다.
+- batch 완료 직후 누적 target/canonical/cover/source-state/growth snapshot을 외부 TEST_ONLY workspace에 기록한다.
+- 기본 재실행은 `COMPLETED` source-target과 저장된 cover를 재사용한다. `full3998 --refresh`는 우발적 전체 재수집을 막기 위해 허용하지 않는다.
+- 전체 결과, raw payload, 표지는 Git·build·Vercel·APK에 포함하지 않는다.
 
 ## 12. 데이터 품질 지표
 

@@ -375,7 +375,11 @@ export function renderQualityReportMarkdown(report) {
   if (!report || report.schemaVersion !== QUALITY_SCHEMA_VERSION || !TARGET_PROFILE_COUNTS[report.profile]) {
     throw reportError('QUALITY_REPORT_INVALID', 'Quality report is invalid');
   }
-  const title = report.profile === 'golden' ? 'Golden' : 'Sample 100';
+  const title = {
+    golden: 'Golden',
+    sample100: 'Sample 100',
+    full3998: 'Full 3,998',
+  }[report.profile];
   const lines = [
     `# ${title} Catalog Quality Report`,
     '',

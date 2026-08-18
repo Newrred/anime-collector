@@ -3,9 +3,10 @@ import { open, readFile, readdir } from 'node:fs/promises';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { CATALOG_LAB_USER_AGENT, loadSourceRegistry } from './contracts/catalogContracts.mjs';
+import { CATALOG_LAB_USER_AGENT, assertSourceExecution, loadSourceRegistry } from './contracts/catalogContracts.mjs';
 import { openCatalogWorkspace } from './lib/workspace.mjs';
 import { createCatalogArtifactStore } from './pipeline/artifact-store.mjs';
+import { runCatalogBatches } from './pipeline/batches.mjs';
 import { buildTargetManifest, TARGET_PROFILE_COUNTS } from './pipeline/targets.mjs';
 import { rebuildCatalogProfile, runCatalogPipeline, validateCatalogArtifacts } from './pipeline/runner.mjs';
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
@@ -74,6 +75,16 @@ function selectedSources(value) {
   const rows = value.split(',');
   if (rows.some((source) => !SOURCE_IDS.has(source)) || new Set(rows).size !== rows.length) throw usageError('Collection sources are invalid');
   return rows;
+}
+
+function boundedIntegerOption(value, { fallback, minimum, maximum, name }) {
+  const candidate = value ?? String(fallback);
+  if (!/^\d+$/u.test(candidate)) throw usageError(`${name} must be an integer`);
+  const parsed = Number(candidate);
+  if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw usageError(`${name} is outside its safe range`);
+  }
+  return parsed;
 }
 
 function io(dependencies) {
@@ -257,14 +268,51 @@ export async function runCli(argv, dependencies = {}) {
       return CLI_EXIT.OK;
     }
     if (command === 'collect') {
-      onlyOptions(options, new Set(['--profile', '--sources', '--allow-network', '--refresh']));
+      onlyOptions(options, new Set([
+        '--profile', '--sources', '--allow-network', '--refresh', '--batch-size', '--pause-seconds',
+      ]));
       const profile = selectedProfile(options);
       if (options['--allow-network'] !== true) throw usageError('Collection requires --allow-network');
       const workspace = await openWorkspace(dependencies, false);
       const { store, manifest } = await targetManifest(workspace, profile, dependencies);
+      const sources = selectedSources(options['--sources']);
+      const registry = await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() });
+      if (profile === 'full3998') {
+        if (options['--refresh'] === true) throw usageError('Full collection refresh is intentionally disabled');
+        const batchSize = boundedIntegerOption(options['--batch-size'], {
+          fallback: 100, minimum: 1, maximum: 100, name: '--batch-size',
+        });
+        const pauseSeconds = boundedIntegerOption(options['--pause-seconds'], {
+          fallback: 120, minimum: 60, maximum: 3600, name: '--pause-seconds',
+        });
+        for (const sourceId of sources) {
+          assertSourceExecution(registry.find((entry) => entry.sourceId === sourceId), batchSize, {
+            profileTargetCount: manifest.length,
+          });
+        }
+        const summary = await (dependencies.runBatches ?? runCatalogBatches)({
+          workspace, profile, targets: manifest, registry,
+          adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(),
+          selectedSources: sources, allowNetwork: true, refresh: false, clock: dependencies.clock,
+          httpFactory: dependencies.httpFactory,
+          ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),
+          batchSize, pauseMs: pauseSeconds * 1000,
+          runBatch: dependencies.runBatch ?? runCatalogPipeline,
+          writeSnapshot: (snapshot) => store.writeRunSnapshot(profile, snapshot),
+          ...(dependencies.batchSleep ? { sleep: dependencies.batchSleep } : {}),
+          onProgress: ({ batchNumber, totalBatches, processedTargets }) => {
+            writeLine(stdout, `Batch ${batchNumber}/${totalBatches}: ${processedTargets}/${manifest.length} targets`);
+          },
+        });
+        writeLine(stdout, `Collection: ${summary.counts.targets} targets`);
+        return summary.stoppedForSourcePause ? CLI_EXIT.SOURCE_PAUSED : CLI_EXIT.OK;
+      }
+      if (options['--batch-size'] !== undefined || options['--pause-seconds'] !== undefined) {
+        throw usageError('Batch options require the full3998 profile');
+      }
       const summary = await runCatalogPipeline({
-        workspace, profile, targets: manifest, registry: await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() }),
-        adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(), selectedSources: selectedSources(options['--sources']),
+        workspace, profile, targets: manifest, registry,
+        adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(), selectedSources: sources,
         allowNetwork: true, refresh: options['--refresh'] === true, clock: dependencies.clock,
         httpFactory: dependencies.httpFactory,
         ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),

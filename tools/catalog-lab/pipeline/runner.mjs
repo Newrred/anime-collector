@@ -44,14 +44,34 @@ export function createRateLimitedHttpClient({ http, minIntervalMs, now = Date.no
     throw new TypeError('Rate-limited HTTP client requires a request client and clock');
   }
   let lastStart = null;
+  let effectiveMinIntervalMs = minIntervalMs;
+  let blockedUntil = 0;
   let queue = Promise.resolve();
+  const observeRateLimit = (result) => {
+    const limitValue = result?.headers?.get?.('x-ratelimit-limit');
+    if (/^[1-9]\d*$/u.test(limitValue ?? '')) {
+      const limit = Number(limitValue);
+      if (Number.isSafeInteger(limit)) {
+        effectiveMinIntervalMs = Math.max(minIntervalMs, Math.ceil(60_000 / limit));
+      }
+    }
+    const remainingValue = result?.headers?.get?.('x-ratelimit-remaining');
+    const resetValue = result?.headers?.get?.('x-ratelimit-reset');
+    if (remainingValue === '0' && /^[1-9]\d*$/u.test(resetValue ?? '')) {
+      const reset = Number(resetValue) * 1000;
+      if (Number.isSafeInteger(reset) && reset > now()) blockedUntil = Math.max(blockedUntil, reset);
+    }
+  };
   const schedule = (operation) => {
     const next = queue.then(async () => {
-      const elapsed = lastStart === null ? minIntervalMs : now() - lastStart;
-      const wait = Math.max(0, minIntervalMs - elapsed);
+      const current = now();
+      const elapsed = lastStart === null ? effectiveMinIntervalMs : current - lastStart;
+      const wait = Math.max(0, effectiveMinIntervalMs - elapsed, blockedUntil - current);
       if (wait) await sleep(wait);
       lastStart = now();
-      return operation();
+      const result = await operation();
+      observeRateLimit(result);
+      return result;
     });
     queue = next.catch(() => {});
     return next;
@@ -80,9 +100,12 @@ function sourceState(stage, extra = {}) {
   return { stage, ...extra };
 }
 
-function ensureInputs({ profile, targets, registry, selectedSources }) {
+function ensureInputs({ profile, targets, approvedTargetCount, registry, selectedSources }) {
   const expectedCount = TARGET_PROFILE_COUNTS[profile];
-  if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
+  if (!expectedCount || !Array.isArray(targets) || approvedTargetCount !== expectedCount
+    || targets.length < 1 || targets.length > approvedTargetCount
+    || (profile !== 'full3998' && targets.length !== expectedCount)
+    || (profile === 'full3998' && targets.length > 100)) {
     throw typedError('SOURCE_SCOPE_EXCEEDED', 'Catalog runner target count does not match its approved profile');
   }
   if (!Array.isArray(selectedSources) || selectedSources.length === 0
@@ -94,7 +117,7 @@ function ensureInputs({ profile, targets, registry, selectedSources }) {
       throw typedError('SOURCE_NOT_REGISTERED', 'Catalog source is not registered for collection');
     }
     const entry = Array.isArray(registry) ? registry.find((row) => row?.sourceId === sourceId) : null;
-    assertSourceExecution(entry, targets.length);
+    assertSourceExecution(entry, targets.length, { profileTargetCount: approvedTargetCount });
   }
 }
 
@@ -188,12 +211,13 @@ function countStages(targetRows) {
 export async function runCatalogPipeline({
   workspace, profile = 'golden', targets, registry, adapters, bindings = {}, selectedSources, allowNetwork,
   refresh = false, clock = { now: () => new Date().toISOString() }, httpFactory = () => createHttpClient(),
-  coverPipeline = createDefaultCoverPipeline(),
+  coverPipeline = createDefaultCoverPipeline(), approvedTargetCount = targets?.length, persistSnapshot = true,
 } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
   if (allowNetwork !== true) throw typedError('CATALOG_NETWORK_PERMISSION_REQUIRED', 'Network collection requires explicit permission');
-  ensureInputs({ profile, targets, registry, selectedSources });
-  if (!clock || typeof clock.now !== 'function' || typeof httpFactory !== 'function') {
+  ensureInputs({ profile, targets, approvedTargetCount, registry, selectedSources });
+  if (!clock || typeof clock.now !== 'function' || typeof httpFactory !== 'function'
+    || typeof persistSnapshot !== 'boolean') {
     throw typedError('CATALOG_RUNNER_INPUT_INVALID', 'Catalog runner clock or HTTP factory is invalid');
   }
   const registryById = new Map(registry.map((entry) => [entry.sourceId, entry]));
@@ -360,7 +384,7 @@ export async function runCatalogPipeline({
     profile, counts, growth, targets: targetRows,
     canonicalHash: targetRows[0]?.currentCanonicalHash ?? null,
   });
-  await store.writeRunSnapshot(profile, summary);
+  if (persistSnapshot) await store.writeRunSnapshot(profile, summary);
   return summary;
 }
 

@@ -150,6 +150,69 @@ test('rate-limited source client spaces serialized request starts by the registr
   assert.deepEqual(starts, [0, 800]);
 });
 
+test('rate-limited source client slows future starts for server limits and exhausted reset windows', async () => {
+  let time = 0;
+  const starts = [];
+  const responses = [
+    new Response('{}', {
+      headers: {
+        'X-RateLimit-Limit': '20',
+        'X-RateLimit-Remaining': '1',
+      },
+    }),
+    new Response('{}', {
+      headers: {
+        'X-RateLimit-Limit': '20',
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': '10',
+      },
+    }),
+    new Response('{}'),
+  ];
+  const client = createRateLimitedHttpClient({
+    http: { async request() { starts.push(time); return responses.shift(); } },
+    minIntervalMs: 2500,
+    now: () => time,
+    sleep: async (milliseconds) => { time += milliseconds; },
+  });
+
+  await client.request({ url: 'https://example.test/1' });
+  await client.request({ url: 'https://example.test/2' });
+  await client.request({ url: 'https://example.test/3' });
+
+  assert.deepEqual(starts, [0, 3000, 10_000]);
+});
+
+test('full3998 runner accepts only an approved full-roster source and a batch of at most 100', async () => {
+  await withWorkspace(async (workspace) => {
+    const input = await fixtureInput(workspace);
+    const accepted = await runCatalogPipeline({
+      ...input,
+      profile: 'full3998',
+      approvedTargetCount: 3998,
+      persistSnapshot: false,
+      selectedSources: ['anilist'],
+    });
+    assert.equal(accepted.counts.targets, 10);
+
+    await assert.rejects(runCatalogPipeline({
+      ...input,
+      profile: 'full3998',
+      approvedTargetCount: 3998,
+      persistSnapshot: false,
+      selectedSources: ['wikidata'],
+    }), { code: 'SOURCE_SCOPE_EXCEEDED' });
+
+    await assert.rejects(runCatalogPipeline({
+      ...input,
+      profile: 'full3998',
+      approvedTargetCount: 3999,
+      persistSnapshot: false,
+      selectedSources: ['anilist'],
+    }), { code: 'SOURCE_SCOPE_EXCEEDED' });
+  });
+});
+
 test('runner resumes completed source-target stages without duplicate records or images', async () => {
   await withWorkspace(async (workspace) => {
     const first = await runCatalogPipeline(await fixtureInput(workspace));

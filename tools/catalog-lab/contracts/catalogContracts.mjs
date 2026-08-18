@@ -6,6 +6,7 @@ export const SOURCE_EXECUTION_SCOPES = Object.freeze([
   'TARGET_ROSTER_ONLY',
   'LOCAL_TEST_MAX_100',
   'LOCAL_SAMPLE_MAX_100',
+  'LOCAL_TEST_FULL_ROSTER_BATCHED',
 ]);
 
 const VALIDATED_REGISTRY_ENTRIES = new WeakSet();
@@ -17,10 +18,14 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
     allowedFields: Object.freeze(['anilistId', 'ko', 'aliases']),
   }),
   anilist: Object.freeze({
-    sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_MAX_100',
-    allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 800,
+    sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_FULL_ROSTER_BATCHED',
+    allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 2500,
     allowedPaths: Object.freeze(['/']),
     allowedFields: Object.freeze(['media', 'relations', 'characters', 'staff', 'coverImage']),
+    permissionBasis: 'USER_ATTESTED_ANILIST_PERMISSION',
+    permissionRecordedAt: '2026-08-17T20:00:00+09:00',
+    permissionScope: 'LOCAL_TEST_FULL_ROSTER_STORAGE',
+    permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
   }),
   wikidata: Object.freeze({
     sourceRole: 'direct_import', executionScope: 'LOCAL_SAMPLE_MAX_100',
@@ -143,14 +148,16 @@ export async function loadSourceRegistry({ repoRoot }) {
  *
  * @param {{sourceId?: string, status?: string, executionScope?: string}} registryEntry
  * @param {number} targetCount
+ * @param {{profileTargetCount?: number}} options
  */
-export function assertSourceExecution(registryEntry, targetCount) {
+export function assertSourceExecution(registryEntry, targetCount, { profileTargetCount = targetCount } = {}) {
   if (!registryEntry || !VALIDATED_REGISTRY_ENTRIES.has(registryEntry)) {
     const error = new Error('Catalog source is not registered for execution');
     error.code = 'SOURCE_NOT_REGISTERED';
     throw error;
   }
-  if (!Number.isInteger(targetCount) || targetCount < 1) {
+  if (!Number.isInteger(targetCount) || targetCount < 1
+    || !Number.isInteger(profileTargetCount) || profileTargetCount < targetCount) {
     const error = new Error('Catalog target count must be a positive integer');
     error.code = 'SOURCE_TARGET_COUNT_INVALID';
     throw error;
@@ -161,8 +168,14 @@ export function assertSourceExecution(registryEntry, targetCount) {
     throw error;
   }
   if ((registryEntry.executionScope === 'LOCAL_TEST_MAX_100'
-    || registryEntry.executionScope === 'LOCAL_SAMPLE_MAX_100') && targetCount > 100) {
+    || registryEntry.executionScope === 'LOCAL_SAMPLE_MAX_100') && profileTargetCount > 100) {
     const error = new Error('Catalog source execution scope exceeds 100 targets');
+    error.code = 'SOURCE_SCOPE_EXCEEDED';
+    throw error;
+  }
+  if (registryEntry.executionScope === 'LOCAL_TEST_FULL_ROSTER_BATCHED'
+    && (targetCount > 100 || profileTargetCount > 3998)) {
+    const error = new Error('Catalog source execution scope exceeds its approved full-roster batch');
     error.code = 'SOURCE_SCOPE_EXCEEDED';
     throw error;
   }

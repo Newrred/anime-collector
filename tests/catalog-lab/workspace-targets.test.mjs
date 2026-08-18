@@ -145,12 +145,40 @@ test('sample100 includes golden targets plus ninety deterministic unique selecti
   assert.equal(new Set(manifest.map((row) => row.seedExternalIds[0].value)).size, 100);
 });
 
+test('full3998 preserves the exact legacy roster order with unique bound targets', async () => {
+  const manifest = await buildTargetManifest({
+    profile: 'full3998', rows, idMapStore: new Map(), clock, uuid,
+  });
+
+  assert.equal(manifest.length, 3998);
+  assert.deepEqual(
+    manifest.map((row) => row.seedExternalIds[0].value),
+    rows.map((row) => row.anilistId),
+  );
+  assert.equal(new Set(manifest.map((row) => row.targetKey)).size, 3998);
+  assert.equal(new Set(manifest.map((row) => row.moemoaAnimeId)).size, 3998);
+  assert.equal(manifest.every((row) => row.seedTitles.some((title) => title.locale === 'ko')), true);
+});
+
 test('registry exposes four approved sources and blocks over-scope execution', async () => {
   const registry = await loadSourceRegistry({ repoRoot });
   assert.equal(registry.length, 4);
   assert.deepEqual(registry.map((entry) => entry.executionScope), [
-    'TARGET_ROSTER_ONLY', 'LOCAL_TEST_MAX_100', 'LOCAL_SAMPLE_MAX_100', 'LOCAL_TEST_MAX_100',
+    'TARGET_ROSTER_ONLY', 'LOCAL_TEST_FULL_ROSTER_BATCHED', 'LOCAL_SAMPLE_MAX_100', 'LOCAL_TEST_MAX_100',
   ]);
+  const anilist = registry.find((entry) => entry.sourceId === 'anilist');
+  assert.equal(anilist.minIntervalMs, 2500);
+  assert.deepEqual({
+    permissionBasis: anilist.permissionBasis,
+    permissionRecordedAt: anilist.permissionRecordedAt,
+    permissionScope: anilist.permissionScope,
+    permissionEvidenceLocation: anilist.permissionEvidenceLocation,
+  }, {
+    permissionBasis: 'USER_ATTESTED_ANILIST_PERMISSION',
+    permissionRecordedAt: '2026-08-17T20:00:00+09:00',
+    permissionScope: 'LOCAL_TEST_FULL_ROSTER_STORAGE',
+    permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
+  });
   assert.deepEqual(registry.find((entry) => entry.sourceId === 'anilife_public').blockedPaths,
     ['/api/', '/archive', '/history', '/settings', '/login', '/notifications']);
   const wikidata = registry.find((entry) => entry.sourceId === 'wikidata');
@@ -163,9 +191,16 @@ test('registry exposes four approved sources and blocks over-scope execution', a
   assert.throws(() => assertSourceEndpoint('wikidata', 'https://www.wikidata.org/w/api.php/extra'), {
     code: 'SOURCE_ENDPOINT_FORBIDDEN',
   });
-  assert.doesNotThrow(() => assertSourceExecution(
-    registry.find((entry) => entry.sourceId === 'anilist'), 100,
-  ));
+  assert.doesNotThrow(() => assertSourceExecution(anilist, 100, { profileTargetCount: 3998 }));
+  assert.throws(() => assertSourceExecution(anilist, 101, { profileTargetCount: 3998 }), {
+    code: 'SOURCE_SCOPE_EXCEEDED',
+  });
+  assert.throws(() => assertSourceExecution(anilist, 100, { profileTargetCount: 3999 }), {
+    code: 'SOURCE_SCOPE_EXCEEDED',
+  });
+  assert.throws(() => assertSourceExecution(wikidata, 100, { profileTargetCount: 3998 }), {
+    code: 'SOURCE_SCOPE_EXCEEDED',
+  });
   assert.throws(() => assertSourceExecution(
     registry.find((entry) => entry.sourceId === 'anilife_public'), 101,
   ), { code: 'SOURCE_SCOPE_EXCEEDED' });
