@@ -150,6 +150,26 @@ test('rate-limited source client spaces serialized request starts by the registr
   assert.deepEqual(starts, [0, 800]);
 });
 
+test('rate-limited source client chooses each AniList start gap from 2.5 to 10 seconds', async () => {
+  let time = 0;
+  const starts = [];
+  const samples = [0, 1 - Number.EPSILON];
+  const client = createRateLimitedHttpClient({
+    http: { async request() { starts.push(time); return new Response('{}'); } },
+    minIntervalMs: 2500,
+    maxIntervalMs: 10_000,
+    random: () => samples.shift(),
+    now: () => time,
+    sleep: async (milliseconds) => { time += milliseconds; },
+  });
+
+  await client.request({ url: 'https://example.test/1' });
+  await client.request({ url: 'https://example.test/2' });
+  await client.request({ url: 'https://example.test/3' });
+
+  assert.deepEqual(starts, [0, 2500, 12_500]);
+});
+
 test('rate-limited source client slows future starts for server limits and exhausted reset windows', async () => {
   let time = 0;
   const starts = [];

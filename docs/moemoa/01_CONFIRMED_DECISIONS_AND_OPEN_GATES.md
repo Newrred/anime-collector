@@ -273,7 +273,7 @@ Codex는 기반을 구현할 수 있지만 이 게이트가 통과되지 않으�
 
 - 검증된 `sample100` 파이프라인을 유지하며 기존 3,998개 목록을 최대 100개씩 순차 처리하는 `full3998` 코드 경로를 추가한다.
 - source-target checkpoint를 재사용하고 batch 직후 aggregate progress를 저장한다. 완전히 재개된 batch는 추가 휴식을 생략하고 `SOURCE_PAUSED`가 나오면 다음 batch를 실행하지 않는다.
-- AniList 시작 간격은 현재 degraded limit보다 보수적인 2.5초를 기본으로 하고 response rate-limit header, `Retry-After`, batch 간 기본 120초 휴식을 함께 적용한다.
+- AniList 요청 시작 간격은 매번 2.5~10초 범위에서 새로 선택하고, response rate-limit header나 `Retry-After`가 요구하는 더 느린 제한을 우선한다. 실제 작업이 있었던 batch 사이 휴식도 매번 120~200초 범위에서 새로 선택한다.
 - 사용자는 2026-08-17 약 20:00 KST에 AniList로부터 로컬 테스트 저장 허가를 받았다고 진술했다. 증빙 원문은 사용자 보관이며 저장소에는 최소 permission metadata만 기록한다.
 - 이 허가는 로컬 TEST_ONLY 저장에만 적용한다. production 승격, Git/Vercel/APK 포함, 재배포, 상업 이용 권한으로 확대하지 않는다.
 - 2026-08-18 작업은 코드와 mock 검증까지만 승인하며 실제 3,998개 네트워크 실행은 포함하지 않는다. 따라서 `FULL-CATALOG-INGESTION-GATE-01` 상태는 이번 코드 구현만으로 자동 통과하지 않는다.

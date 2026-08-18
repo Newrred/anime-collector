@@ -18,6 +18,15 @@ function frozen(value) {
   return Object.freeze(structuredClone(value));
 }
 
+function randomIntegerInclusive(minimum, maximum, random) {
+  if (minimum === maximum) return minimum;
+  const sample = random();
+  if (typeof sample !== 'number' || !Number.isFinite(sample) || sample < 0 || sample >= 1) {
+    throw batchError('Full catalog batch random source is invalid');
+  }
+  return minimum + Math.floor(sample * (maximum - minimum + 1));
+}
+
 function countSourceStates(targetRows) {
   const counts = {};
   for (const row of targetRows) {
@@ -78,11 +87,13 @@ export async function runCatalogBatches(input = {}) {
     profile,
     targets,
     batchSize = MAX_BATCH_TARGETS,
-    pauseMs = 120_000,
+    pauseMinMs = 120_000,
+    pauseMaxMs = 200_000,
     selectedSources,
     runBatch,
     writeSnapshot,
     sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    random = Math.random,
     onProgress = () => {},
     clock = { now: () => new Date().toISOString() },
     ...pipelineInput
@@ -90,8 +101,10 @@ export async function runCatalogBatches(input = {}) {
   if (!Array.isArray(selectedSources) || selectedSources.length === 0
     || typeof runBatch !== 'function' || typeof writeSnapshot !== 'function'
     || typeof sleep !== 'function' || typeof onProgress !== 'function'
+    || typeof random !== 'function'
     || !clock || typeof clock.now !== 'function'
-    || !Number.isInteger(pauseMs) || pauseMs < 60_000 || pauseMs > 3_600_000) {
+    || !Number.isInteger(pauseMinMs) || pauseMinMs < 60_000
+    || !Number.isInteger(pauseMaxMs) || pauseMaxMs < pauseMinMs || pauseMaxMs > 3_600_000) {
     throw batchError('Full catalog batch coordinator input is invalid');
   }
   const plan = planTargetBatches({ profile, targets, batchSize });
@@ -114,6 +127,11 @@ export async function runCatalogBatches(input = {}) {
     summaries.push(summary);
     const targetRows = summaries.flatMap((row) => row.targets ?? []);
     const paused = hasSourcePause(summary);
+    const shouldPause = !paused && batch.batchNumber < plan.length
+      && batchPerformedNetworkWork(summary, selectedSources);
+    const scheduledPauseMs = shouldPause
+      ? randomIntegerInclusive(pauseMinMs, pauseMaxMs, random)
+      : null;
     latest = frozen({
       profile,
       mode: 'BATCHED_COLLECTION',
@@ -134,7 +152,9 @@ export async function runCatalogBatches(input = {}) {
       canonicalHash: targetRows[0]?.currentCanonicalHash ?? null,
       batchProgress: {
         batchSize,
-        pauseMs,
+        pauseMinMs,
+        pauseMaxMs,
+        scheduledPauseMs,
         completedBatches: summaries.length,
         totalBatches: plan.length,
         nextBatchNumber: summaries.length < plan.length ? summaries.length + 1 : null,
@@ -148,11 +168,10 @@ export async function runCatalogBatches(input = {}) {
       batchTargets: batch.targets.length,
       processedTargets: targetRows.length,
       stoppedForSourcePause: paused,
+      scheduledPauseMs,
     }));
     if (paused) return frozen({ ...latest, stoppedForSourcePause: true });
-    if (batch.batchNumber < plan.length && batchPerformedNetworkWork(summary, selectedSources)) {
-      await sleep(pauseMs);
-    }
+    if (scheduledPauseMs !== null) await sleep(scheduledPauseMs);
   }
 
   return frozen({ ...latest, stoppedForSourcePause: false });

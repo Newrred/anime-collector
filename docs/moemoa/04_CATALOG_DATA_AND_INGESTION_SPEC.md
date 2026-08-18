@@ -459,7 +459,8 @@ PrivateTitle 생성
 - `full3998` manifest는 기존 `aliases.json` 3,998개 row의 순서와 고유 AniList ID를 그대로 고정한다.
 - 전체 profile 승인 수와 현재 batch 수를 분리해 검증한다. 100개 제한 source를 100개씩 반복 호출하는 방식으로 전체 범위를 우회할 수 없다.
 - 사용자 진술 기반 로컬 테스트 전체 저장 허가가 Registry에 기록된 AniList만 `LOCAL_TEST_FULL_ROSTER_BATCHED` scope를 사용할 수 있다.
-- 각 batch는 최대 100개이며 기본 휴식은 120초다. AniList 요청 시작 간격은 최소 2.5초이고 더 낮은 server limit 또는 reset header를 받으면 추가 감속한다.
+- 각 batch는 최대 100개이며 실제 작업이 있었던 batch 사이에는 매번 120~200초 범위의 랜덤 휴식을 둔다. AniList 요청 시작 간격도 매번 2.5~10초 범위에서 새로 선택하고, 더 낮은 server limit 또는 reset header가 요구하는 더 느린 하한은 우선 적용한다.
+- CLI의 기본 범위는 120~200초이며 필요할 때만 `--pause-min-seconds`와 `--pause-max-seconds`로 안전 범위 안에서 함께 조정한다. 이전 고정값 `--pause-seconds` 옵션은 오해를 막기 위해 허용하지 않는다.
 - `429`는 `Retry-After`를 따르고 `401/403` 또는 `SOURCE_PAUSED`는 다음 batch를 차단한다.
 - batch 완료 직후 누적 target/canonical/cover/source-state/growth snapshot을 외부 TEST_ONLY workspace에 기록한다.
 - 기본 재실행은 `COMPLETED` source-target과 저장된 cover를 재사용한다. `full3998 --refresh`는 우발적 전체 재수집을 막기 위해 허용하지 않는다.

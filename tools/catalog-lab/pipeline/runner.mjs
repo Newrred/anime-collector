@@ -37,10 +37,22 @@ function frozen(value) {
   return Object.freeze(structuredClone(value));
 }
 
+function randomIntegerInclusive(minimum, maximum, random) {
+  if (minimum === maximum) return minimum;
+  const sample = random();
+  if (typeof sample !== 'number' || !Number.isFinite(sample) || sample < 0 || sample >= 1) {
+    throw new TypeError('Rate-limited HTTP client random source is invalid');
+  }
+  return minimum + Math.floor(sample * (maximum - minimum + 1));
+}
+
 /** Serializes starts, including overlapping callers, without modifying the delegated HTTP client. */
-export function createRateLimitedHttpClient({ http, minIntervalMs, now = Date.now, sleep }) {
+export function createRateLimitedHttpClient({
+  http, minIntervalMs, maxIntervalMs = minIntervalMs, now = Date.now, sleep, random = Math.random,
+}) {
   if (!http || typeof http.request !== 'function' || !Number.isInteger(minIntervalMs) || minIntervalMs < 0
-    || typeof now !== 'function' || typeof sleep !== 'function') {
+    || !Number.isInteger(maxIntervalMs) || maxIntervalMs < minIntervalMs
+    || typeof now !== 'function' || typeof sleep !== 'function' || typeof random !== 'function') {
     throw new TypeError('Rate-limited HTTP client requires a request client and clock');
   }
   let lastStart = null;
@@ -65,8 +77,11 @@ export function createRateLimitedHttpClient({ http, minIntervalMs, now = Date.no
   const schedule = (operation) => {
     const next = queue.then(async () => {
       const current = now();
-      const elapsed = lastStart === null ? effectiveMinIntervalMs : current - lastStart;
-      const wait = Math.max(0, effectiveMinIntervalMs - elapsed, blockedUntil - current);
+      const elapsed = lastStart === null ? 0 : current - lastStart;
+      const interval = lastStart === null ? 0 : randomIntegerInclusive(
+        effectiveMinIntervalMs, Math.max(maxIntervalMs, effectiveMinIntervalMs), random,
+      );
+      const wait = Math.max(0, interval - elapsed, blockedUntil - current);
       if (wait) await sleep(wait);
       lastStart = now();
       const result = await operation();
@@ -225,6 +240,7 @@ export async function runCatalogPipeline({
     const entry = registryById.get(sourceId);
     return [sourceId, createRateLimitedHttpClient({
       http: httpFactory({ sourceId, registryEntry: entry }), minIntervalMs: entry.minIntervalMs,
+      maxIntervalMs: entry.maxIntervalMs ?? entry.minIntervalMs,
       now: Date.now, sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
     })];
   }));

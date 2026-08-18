@@ -168,6 +168,7 @@ test('registry exposes four approved sources and blocks over-scope execution', a
   ]);
   const anilist = registry.find((entry) => entry.sourceId === 'anilist');
   assert.equal(anilist.minIntervalMs, 2500);
+  assert.equal(anilist.maxIntervalMs, 10_000);
   assert.deepEqual({
     permissionBasis: anilist.permissionBasis,
     permissionRecordedAt: anilist.permissionRecordedAt,

@@ -19,7 +19,8 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
   }),
   anilist: Object.freeze({
     sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_FULL_ROSTER_BATCHED',
-    allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 2500,
+    allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED',
+    minIntervalMs: 2500, maxIntervalMs: 10000,
     allowedPaths: Object.freeze(['/']),
     allowedFields: Object.freeze(['media', 'relations', 'characters', 'staff', 'coverImage']),
     permissionBasis: 'USER_ATTESTED_ANILIST_PERMISSION',
@@ -92,7 +93,10 @@ function validateRegistry(registry) {
     }
     if (!Array.isArray(entry.allowedPaths) || !Array.isArray(entry.allowedFields)
       || !Array.isArray(entry.evidenceUrls) || !Number.isInteger(entry.minIntervalMs)
-      || entry.minIntervalMs < 0 || entry.maxConcurrency !== 1 || entry.status !== 'approved') {
+      || entry.minIntervalMs < 0
+      || ('maxIntervalMs' in entry && (!Number.isInteger(entry.maxIntervalMs)
+        || entry.maxIntervalMs < entry.minIntervalMs))
+      || entry.maxConcurrency !== 1 || entry.status !== 'approved') {
       throw registryInvalidError();
     }
     const policy = APPROVED_SOURCE_POLICIES[entry.sourceId];

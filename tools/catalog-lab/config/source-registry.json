@@ -39,6 +39,7 @@
     "persistentStorageStatus": "LOCAL_TEST_ONLY",
     "redistributionStatus": "PROHIBITED",
     "minIntervalMs": 2500,
+    "maxIntervalMs": 10000,
     "maxConcurrency": 1,
     "termsUrl": "https://docs.anilist.co/guide/terms-of-use",
     "robotsUrl": "https://anilist.co/robots.txt",

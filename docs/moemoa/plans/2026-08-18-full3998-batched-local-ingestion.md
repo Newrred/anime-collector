@@ -34,9 +34,9 @@
 - batch 완료 직후 aggregate progress snapshot 저장.
 - 기존 source-target checkpoint 기반 기본 resume.
 - 실제 네트워크 작업이 없었던 완전 재개 batch의 휴식 생략.
-- batch 사이 기본 120초 휴식과 CLI 범위 검증.
+- 실제 작업이 있었던 batch 사이마다 120~200초 범위에서 새로 뽑는 랜덤 휴식과 CLI 범위 검증.
 - AniList 전체 로컬 테스트 허가 metadata와 최대 100개 batch 제한.
-- AniList 기본 시작 간격 2.5초 및 rate-limit response header 기반 추가 감속.
+- AniList 요청 시작 간격을 매번 2.5~10초 범위에서 새로 뽑고 rate-limit response header가 요구하는 더 느린 하한을 우선 적용.
 - source pause 발생 시 다음 batch로 진행하지 않는 fail-closed 동작.
 - 코드·mock 기반 검증과 전체 회귀.
 
@@ -56,7 +56,7 @@ aliases.json 3,998 rows
 → 기존 runCatalogPipeline(batch, approvedTargetCount=3998)
 → source-target checkpoint / raw / canonical / cover / projection
 → batch aggregate snapshot 저장
-→ 실제 요청이 있었고 다음 batch가 있으면 120초 휴식
+→ 실제 요청이 있었고 다음 batch가 있으면 120~200초 랜덤 휴식
 → SOURCE_PAUSED면 즉시 정지
 → 재실행 시 COMPLETED source-target과 저장된 cover 재사용
 ```
@@ -86,7 +86,7 @@ aliases.json 3,998 rows
 1. full3998 manifest와 source scope RED 회귀.
 2. deterministic batch plan·pause·pause-stop·resume 판단 RED 회귀.
 3. runner/CLI 최소 구현과 mock GREEN.
-4. AniList 2.5초 및 response-header 감속 GREEN.
+4. AniList 2.5~10초 랜덤 간격 및 response-header 감속 GREEN.
 5. 전체 catalog/unit/build/guard 회귀와 문서 완료 기록.
 
 ## 9. 테스트와 검증
@@ -97,7 +97,8 @@ aliases.json 3,998 rows
 - 완전 resume batch는 추가 batch pause를 만들지 않음.
 - non-full source가 100개 batch로 전체 scope를 우회하지 못함.
 - AniList는 full3998/100 batch 허용, 101 batch와 3,999 profile 거부.
-- limiter의 2.5초 시작 간격, 낮은 server limit와 remaining/reset header 반영.
+- limiter의 2.5~10초 랜덤 시작 간격 경계값, 낮은 server limit와 remaining/reset header 반영.
+- batch 휴식의 120~200초 랜덤 경계값과 테스트 난수 주입 재현성.
 - `npm run catalog:test`, `npm run test:unit`, `npm run build`, `npm run catalog:guard`, `git diff --check`.
 - 실제 AniList/Wikidata/AniLife/cover 네트워크 요청은 0.
 
@@ -124,7 +125,7 @@ aliases.json 3,998 rows
 ## 13. 위험과 완화
 
 - batch 분할로 기존 100개 제한을 우회: 전체 profile count를 source contract에 함께 전달해 허가 없는 source는 차단한다.
-- API degraded limit: 기본 2.5초 간격과 response header 감속, 429 `Retry-After`, batch 휴식을 함께 사용한다.
+- API degraded limit: 2.5~10초 랜덤 간격과 response header 감속, 429 `Retry-After`, 120~200초 랜덤 batch 휴식을 함께 사용한다.
 - 장시간 실행 중 중단: batch 직후 snapshot과 per-target checkpoint를 기록한다.
 - 재실행 때 불필요한 장시간 휴식: 모든 source가 resumed인 batch는 batch 간 휴식을 생략한다.
 - 권한 오해: user-attested local-test permission과 금지된 production/redistribution를 Registry에 분리한다.
@@ -146,21 +147,25 @@ aliases.json 3,998 rows
 [2026-08-18] RED→GREEN: batch module 부재, server rate header 미반영, runner의 부분 batch 거부, CLI batch 옵션 부재를 각각 회귀로 고정 후 구현.
 [2026-08-18] 보강: 잘못된 target/result가 aggregate snapshot으로 들어가는 경계를 RED→GREEN으로 차단.
 [2026-08-18] 전체 검증: catalog 182 pass / 0 fail / 기존 Windows skip 1, unit 91/91, build 성공, guard no leaks, syntax/diff check 통과.
+[2026-08-18] 사용자 조정 승인: batch 간 휴식은 매번 120~200초, AniList 요청 간격은 매번 2.5~10초 범위에서 새로 선택한다. 실제 네트워크 실행 제외는 유지한다.
+[2026-08-18] 조정 RED→GREEN: 고정 120초/2.5초와 새 CLI·Registry 계약 부재로 focused 6개 실패를 확인한 뒤, 최소·중간·최대 난수 경계와 resume 생략을 포함해 focused 55/55 통과.
+[2026-08-18] 조정 후 전체 검증: catalog 183 pass / 0 fail / 기존 Windows skip 1, unit 91/91, build 성공, guard no leaks, syntax/diff check 통과.
 ```
 
 ## 16. 발견 사항과 계획 변경
 
 - `sample100`의 source-target checkpoint는 profile과 무관한 target/source key이므로 full3998에서 동일 작품을 만나면 안전하게 재사용된다.
 - 단순히 runner에 100개만 전달하면 기존 source scope를 우회할 수 있어, `approvedTargetCount=3998`와 실제 `targets.length<=100`을 동시에 검증하도록 계약을 분리했다.
-- AniList 공식 rate-limit response는 다음 요청 전에 확인할 수 있으므로 wrapper가 `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`을 관찰해 기본 2.5초보다 느린 제한만 반영한다. 기존 HTTP 계층의 `Retry-After` 처리는 유지한다.
+- AniList 공식 rate-limit response는 다음 요청 전에 확인할 수 있으므로 wrapper가 `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`을 관찰한다. 일반 구간은 2.5~10초 균등 정수 난수로 시작 간격을 선택하고, 서버가 10초보다 느린 하한을 요구하면 그 하한을 적용한다. 기존 HTTP 계층의 `Retry-After` 처리는 유지한다.
+- production 난수는 `Math.random`을 사용하되 테스트에서는 난수 함수를 주입해 최소·중간·최대 경계와 resume 휴식 생략을 결정적으로 검증한다.
 - aggregate snapshot은 batch 결과의 target 순서·identity·count가 승인 slice와 정확히 일치할 때만 기록한다.
 - full3998에서 `--refresh`를 금지하고 기본 resume만 제공해 우발적인 전체 재다운로드를 막았다.
 
 ## 17. 완료 보고
 
-- 목표 달성: `full3998` immutable manifest, 40개 기본 batch(39×100 + 1×98), 60~3,600초 휴식 범위, 기본 120초, resume-aware 휴식 생략, source-pause 조기 종료, aggregate snapshot, 보수적 AniList limiter를 구현했다.
+- 목표 달성: `full3998` immutable manifest, 40개 기본 batch(39×100 + 1×98), batch별 120~200초 랜덤 휴식, resume-aware 휴식 생략, source-pause 조기 종료, aggregate snapshot, 2.5~10초 랜덤 AniList limiter를 구현했다.
 - 기존 10개·100개 명령과 데이터 schema는 유지했다. 프로덕션 DB/data migration은 없다.
 - 실제 AniList/Wikidata/AniLife/cover 네트워크 요청은 0이며 `D:\hong\Web\Anime\MOEMOA_CATALOG_LAB_TEST`의 기존 수집 데이터도 변경하지 않았다.
-- 검증: Node v24.19.0에서 catalog 182 pass / 0 fail / 기존 Windows symlink 조건부 skip 1, unit 91/91, Astro build 11 pages 성공(기존 662.82kB chunk warning), catalog guard no leaks, syntax 및 `git diff --check` 통과.
+- 검증: Node v24.19.0에서 catalog 183 pass / 0 fail / 기존 Windows symlink 조건부 skip 1, unit 91/91, Astro build 11 pages 성공(기존 662.82kB chunk warning), catalog guard no leaks, syntax 및 `git diff --check` 통과.
 - 권리 경계: user-attested permission metadata만 저장했고 증빙 원문은 사용자 보관이다. production 승격·재배포·상업 이용은 계속 금지한다.
 - 남은 게이트: 실제 full3998 네트워크 실행, 완료 후 validate/report/rebuild 결과 검수, production source 권리 결정은 별도다.

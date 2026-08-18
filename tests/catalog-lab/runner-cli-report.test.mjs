@@ -198,6 +198,7 @@ test('full3998 CLI creates the exact manifest and delegates safe batch options w
         return { counts: { targets: 3998 }, stoppedForSourcePause: false };
       },
       batchSleep: async () => { throw new Error('injected coordinator owns sleeps'); },
+      batchRandom: () => 0.5,
     };
     assert.equal(await runCli(['init'], deps), CLI_EXIT.OK);
     assert.equal(await runCli(['targets', '--profile', 'full3998'], deps), CLI_EXIT.OK);
@@ -206,20 +207,30 @@ test('full3998 CLI creates the exact manifest and delegates safe batch options w
     assert.equal(new Set(manifest.map((row) => row.targetKey)).size, 3998);
     assert.equal(await runCli([
       'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
-      '--pause-seconds', '120', '--allow-network',
+      '--pause-min-seconds', '120', '--pause-max-seconds', '200', '--allow-network',
     ], deps), CLI_EXIT.OK);
     assert.equal(calls.length, 1);
     assert.equal(calls[0].targets.length, 3998);
     assert.equal(calls[0].batchSize, 100);
-    assert.equal(calls[0].pauseMs, 120_000);
+    assert.equal(calls[0].pauseMinMs, 120_000);
+    assert.equal(calls[0].pauseMaxMs, 200_000);
+    assert.equal(calls[0].random(), 0.5);
     assert.deepEqual(calls[0].selectedSources, ['anilist']);
     assert.equal(await runCli([
       'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '101',
-      '--pause-seconds', '120', '--allow-network',
+      '--pause-min-seconds', '120', '--pause-max-seconds', '200', '--allow-network',
     ], deps), CLI_EXIT.USAGE_OR_SAFETY);
     assert.equal(await runCli([
       'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
-      '--pause-seconds', '30', '--allow-network',
+      '--pause-min-seconds', '30', '--pause-max-seconds', '200', '--allow-network',
+    ], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
+      '--pause-min-seconds', '200', '--pause-max-seconds', '199', '--allow-network',
+    ], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await runCli([
+      'collect', '--profile', 'full3998', '--sources', 'anilist', '--batch-size', '100',
+      '--pause-seconds', '120', '--allow-network',
     ], deps), CLI_EXIT.USAGE_OR_SAFETY);
     assert.equal(await runCli([
       'collect', '--profile', 'full3998', '--sources', 'anilist', '--refresh', '--allow-network',

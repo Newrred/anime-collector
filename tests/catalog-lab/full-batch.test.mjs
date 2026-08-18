@@ -71,8 +71,11 @@ test('batch coordinator persists aggregate progress and pauses only after batche
   const snapshots = [];
   const sleeps = [];
   const calls = [];
+  const randomSamples = [0, 0.5, 1 - Number.EPSILON];
+  let randomIndex = 0;
   const result = await runCatalogBatches({
-    profile: 'full3998', targets: roster, batchSize: 100, pauseMs: 120_000,
+    profile: 'full3998', targets: roster, batchSize: 100,
+    pauseMinMs: 120_000, pauseMaxMs: 200_000,
     selectedSources: ['anilist'],
     runBatch: async (input) => {
       calls.push(input);
@@ -80,6 +83,7 @@ test('batch coordinator persists aggregate progress and pauses only after batche
     },
     writeSnapshot: async (snapshot) => { snapshots.push(snapshot); },
     sleep: async (milliseconds) => { sleeps.push(milliseconds); },
+    random: () => randomSamples[randomIndex++ % randomSamples.length],
   });
 
   assert.equal(calls.length, 40);
@@ -90,7 +94,12 @@ test('batch coordinator persists aggregate progress and pauses only after batche
   assert.equal(snapshots.at(-1).batchProgress.totalBatches, 40);
   assert.equal(snapshots.at(-1).batchProgress.nextBatchNumber, null);
   assert.equal(snapshots.at(-1).growth.sourceRecords, 3898);
-  assert.deepEqual(sleeps, Array(38).fill(120_000));
+  assert.equal(sleeps.length, 38);
+  assert.deepEqual(sleeps.slice(0, 3), [120_000, 160_000, 200_000]);
+  assert.equal(sleeps.every((milliseconds) => milliseconds >= 120_000 && milliseconds <= 200_000), true);
+  assert.equal(snapshots[0].batchProgress.scheduledPauseMs, null);
+  assert.deepEqual(snapshots.slice(1, 4).map((snapshot) => snapshot.batchProgress.scheduledPauseMs), [120_000, 160_000, 200_000]);
+  assert.equal(snapshots.at(-1).batchProgress.scheduledPauseMs, null);
   assert.equal(result.stoppedForSourcePause, false);
 });
 
@@ -99,7 +108,8 @@ test('batch coordinator stops after persisting a source pause and never starts t
   const sleeps = [];
   let calls = 0;
   const result = await runCatalogBatches({
-    profile: 'full3998', targets: targets(), batchSize: 100, pauseMs: 120_000,
+    profile: 'full3998', targets: targets(), batchSize: 100,
+    pauseMinMs: 120_000, pauseMaxMs: 200_000, random: () => 0.5,
     selectedSources: ['anilist'],
     runBatch: async (input) => {
       calls += 1;
@@ -115,14 +125,17 @@ test('batch coordinator stops after persisting a source pause and never starts t
   assert.equal(snapshots.at(-1).batchProgress.completedBatches, 2);
   assert.equal(snapshots.at(-1).batchProgress.nextBatchNumber, 3);
   assert.equal(result.stoppedForSourcePause, true);
-  assert.deepEqual(sleeps, [120_000]);
+  assert.deepEqual(sleeps, [160_000]);
+  assert.equal(snapshots[0].batchProgress.scheduledPauseMs, 160_000);
+  assert.equal(snapshots[1].batchProgress.scheduledPauseMs, null);
 });
 
 test('batch coordinator rejects a result for a different target before progress is persisted', async () => {
   const roster = targets();
   let writes = 0;
   await assert.rejects(runCatalogBatches({
-    profile: 'full3998', targets: roster, batchSize: 100, pauseMs: 120_000,
+    profile: 'full3998', targets: roster, batchSize: 100,
+    pauseMinMs: 120_000, pauseMaxMs: 200_000,
     selectedSources: ['anilist'],
     runBatch: async (input) => {
       const summary = batchSummary(input.targets, input.selectedSources);
@@ -134,7 +147,13 @@ test('batch coordinator rejects a result for a different target before progress 
   }), { code: 'CATALOG_BATCH_RESULT_INVALID' });
   assert.equal(writes, 0);
   await assert.rejects(runCatalogBatches({
-    profile: 'full3998', targets: roster, batchSize: 100, pauseMs: 59_999,
+    profile: 'full3998', targets: roster, batchSize: 100,
+    pauseMinMs: 59_999, pauseMaxMs: 200_000,
+    selectedSources: ['anilist'], runBatch: async () => {}, writeSnapshot: async () => {},
+  }), { code: 'CATALOG_BATCH_INVALID' });
+  await assert.rejects(runCatalogBatches({
+    profile: 'full3998', targets: roster, batchSize: 100,
+    pauseMinMs: 200_000, pauseMaxMs: 199_999,
     selectedSources: ['anilist'], runBatch: async () => {}, writeSnapshot: async () => {},
   }), { code: 'CATALOG_BATCH_INVALID' });
 });

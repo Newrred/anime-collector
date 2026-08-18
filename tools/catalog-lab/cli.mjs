@@ -269,7 +269,8 @@ export async function runCli(argv, dependencies = {}) {
     }
     if (command === 'collect') {
       onlyOptions(options, new Set([
-        '--profile', '--sources', '--allow-network', '--refresh', '--batch-size', '--pause-seconds',
+        '--profile', '--sources', '--allow-network', '--refresh', '--batch-size',
+        '--pause-min-seconds', '--pause-max-seconds',
       ]));
       const profile = selectedProfile(options);
       if (options['--allow-network'] !== true) throw usageError('Collection requires --allow-network');
@@ -282,8 +283,11 @@ export async function runCli(argv, dependencies = {}) {
         const batchSize = boundedIntegerOption(options['--batch-size'], {
           fallback: 100, minimum: 1, maximum: 100, name: '--batch-size',
         });
-        const pauseSeconds = boundedIntegerOption(options['--pause-seconds'], {
-          fallback: 120, minimum: 60, maximum: 3600, name: '--pause-seconds',
+        const pauseMinSeconds = boundedIntegerOption(options['--pause-min-seconds'], {
+          fallback: 120, minimum: 60, maximum: 3600, name: '--pause-min-seconds',
+        });
+        const pauseMaxSeconds = boundedIntegerOption(options['--pause-max-seconds'], {
+          fallback: 200, minimum: pauseMinSeconds, maximum: 3600, name: '--pause-max-seconds',
         });
         for (const sourceId of sources) {
           assertSourceExecution(registry.find((entry) => entry.sourceId === sourceId), batchSize, {
@@ -296,18 +300,21 @@ export async function runCli(argv, dependencies = {}) {
           selectedSources: sources, allowNetwork: true, refresh: false, clock: dependencies.clock,
           httpFactory: dependencies.httpFactory,
           ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),
-          batchSize, pauseMs: pauseSeconds * 1000,
+          batchSize, pauseMinMs: pauseMinSeconds * 1000, pauseMaxMs: pauseMaxSeconds * 1000,
           runBatch: dependencies.runBatch ?? runCatalogPipeline,
           writeSnapshot: (snapshot) => store.writeRunSnapshot(profile, snapshot),
           ...(dependencies.batchSleep ? { sleep: dependencies.batchSleep } : {}),
-          onProgress: ({ batchNumber, totalBatches, processedTargets }) => {
-            writeLine(stdout, `Batch ${batchNumber}/${totalBatches}: ${processedTargets}/${manifest.length} targets`);
+          ...(dependencies.batchRandom ? { random: dependencies.batchRandom } : {}),
+          onProgress: ({ batchNumber, totalBatches, processedTargets, scheduledPauseMs }) => {
+            const pause = scheduledPauseMs === null ? '' : `; next pause ${Math.ceil(scheduledPauseMs / 1000)}s`;
+            writeLine(stdout, `Batch ${batchNumber}/${totalBatches}: ${processedTargets}/${manifest.length} targets${pause}`);
           },
         });
         writeLine(stdout, `Collection: ${summary.counts.targets} targets`);
         return summary.stoppedForSourcePause ? CLI_EXIT.SOURCE_PAUSED : CLI_EXIT.OK;
       }
-      if (options['--batch-size'] !== undefined || options['--pause-seconds'] !== undefined) {
+      if (options['--batch-size'] !== undefined || options['--pause-min-seconds'] !== undefined
+        || options['--pause-max-seconds'] !== undefined) {
         throw usageError('Batch options require the full3998 profile');
       }
       const summary = await runCatalogPipeline({
