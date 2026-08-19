@@ -8,6 +8,7 @@ import {
   createDevCatalogTitleResolver,
   createFallbackCatalogTitleResolver,
 } from "../../src/features/memory/adapters/catalog/devCatalogTitleResolver.js";
+import { createSupabaseCatalogTitleResolver } from "../../src/features/memory/adapters/catalog/supabaseCatalogTitleResolver.js";
 
 const legacyRows = [
   {
@@ -171,4 +172,41 @@ test("development catalog fallback calls AniList only when the local endpoint is
   assert.deepEqual(await unavailable.search("frieren"), [{ displayTitle: "fallback" }]);
   assert.deepEqual(await empty.search("frieren"), []);
   assert.equal(fallbackCalls, 1);
+});
+
+test("Supabase catalog resolver maps only bounded active-release search fields", async () => {
+  const calls = [];
+  const resolver = createSupabaseCatalogTitleResolver({
+    client: {
+      rpc: async (name, args) => {
+        calls.push({ name, args });
+        return { data: [{
+          anime_id: "anime:11111111-1111-4111-8111-000000154587",
+          anilist_id: 154587,
+          preferred_title: "장송의 프리렌",
+          preferred_locale: "ko",
+          search_aliases: [{ locale: "en", value: "Frieren: Beyond Journey's End" }],
+          format: "TV", status: "FINISHED", episode_count: 28,
+          source_material_type: "MANGA", release_year: 2023, season: "FALL",
+          studios: ["Madhouse"], genres: ["Adventure", "Fantasy"],
+          readiness: "READY", cover_asset_id: "asset:placeholder",
+        }], error: null };
+      },
+    },
+  });
+  const results = await resolver.search(" 프리렌 ");
+  assert.deepEqual(calls, [{ name: "search_catalog_anime", args: { search_query: "프리렌", result_limit: 8 } }]);
+  assert.deepEqual(results, [{
+    kind: "ANIME_REF",
+    animeId: "anime:11111111-1111-4111-8111-000000154587",
+    displayTitle: "장송의 프리렌",
+    aliases: ["Frieren: Beyond Journey's End"],
+    genres: ["Adventure", "Fantasy"],
+    sourceBinding: { provider: "ANILIST", externalId: "154587" },
+    verificationState: "PROVIDER_CANDIDATE",
+    catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
+    readiness: "READY",
+    coverAssetId: "asset:placeholder",
+  }]);
+  assert.doesNotMatch(JSON.stringify(results), /row_hash|search_text|payload|localRef|checksum/iu);
 });

@@ -34,7 +34,10 @@
     "catalog:rebuild": "node tools/catalog-lab/cli.mjs rebuild",
     "catalog:validate": "node tools/catalog-lab/cli.mjs validate",
     "catalog:report": "node tools/catalog-lab/cli.mjs report",
-    "catalog:guard": "node tools/catalog-lab/cli.mjs guard"
+    "catalog:guard": "node tools/catalog-lab/cli.mjs guard",
+    "catalog:preview:export": "node tools/catalog-preview/cli.mjs export",
+    "catalog:preview:validate": "node tools/catalog-preview/cli.mjs validate",
+    "catalog:preview:upload": "node tools/catalog-preview/cli.mjs upload"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
