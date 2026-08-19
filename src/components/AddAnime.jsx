@@ -143,7 +143,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
       return;
     }
 
-    const key = `catalog-v2:${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
+    const key = `${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
     const cached = cacheRef.current.get(key);
       if (cached) {
       const isFresh = isFreshSearchCacheEntry(cached, Date.now());
@@ -172,27 +172,6 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
       const rememberRows = (rows) => {
         if (Array.isArray(rows) && rows.length > 0) fallbackRows = rows;
       };
-
-      try {
-        const { searchLibraryCatalog } = await import("../features/catalog/catalogConsumer.js");
-        const catalog = await searchLibraryCatalog(query);
-        if (!alive) return;
-        if (catalog.status === "READY" && catalog.results.length > 0) {
-          const rows = catalog.results.slice(0, 10);
-          setSearchCacheEntry(cacheRef.current, key, rows);
-          persistSearchCacheMap(cacheRef.current)
-            .then((nextMap) => {
-              if (nextMap instanceof Map) cacheRef.current = nextMap;
-            })
-            .catch(() => {});
-          setResults(rows);
-          setLoading(false);
-          setLoadingStage("");
-          return;
-        }
-      } catch {
-        // The established AniList/Wikidata path remains the bounded fallback.
-      }
 
       function buildMergedResults(ids, candidateMap, mediaMap) {
         const merged = ids

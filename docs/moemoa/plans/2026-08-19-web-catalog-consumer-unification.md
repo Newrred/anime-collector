@@ -61,7 +61,7 @@ Catalog detail animeId
 - `src/features/catalog/*`: search/detail safe projection과 Library compatibility adapter.
 - `src/features/memory/application/titleResolver.js`: remote 우선 dedupe 정책.
 - `src/features/memory/components/*`: 사용자용 결과 문구와 detail deep-link 복원.
-- `src/components/AddAnime.jsx`: catalog-first 점진적 cutover.
+- `src/components/search/TopNavGlobalSearch.jsx`, `src/domain/search/quickActionRemote.js`: 실제 메인/Library 공통 검색의 catalog-first 점진적 cutover.
 - `tests/unit/*`, `tests/*.spec.ts`: 계약·E2E.
 - `CODEX_START_HERE.md`, 기존 ExecPlan/증거 문서: 실제 상태 동기화.
 
@@ -122,7 +122,8 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 [2026-08-19] RED: unmatched Legacy 후보, 홍보성 대표 제목, detail source binding, AnimeRef 변환 계약의 실패를 확인.
 [2026-08-19] GREEN: shared title-quality/Library compatibility adapter, catalog-first AddAnime, exact detail deep-link를 구현.
 [2026-08-19] 보강: Library detail read를 상위 8개로 강제 제한하고 한 후보의 malformed detail은 정상 후보와 격리했다.
-[2026-08-19] 로컬 검증: unit 101/101, catalog 191 pass/1 skip, Memory Chromium 11/11, Library Chromium 7 pass/2 live skip, build와 guard 통과.
+[2026-08-19] Preview 발견: `AddAnime.jsx`는 현재 import되지 않는 구형 컴포넌트이고 실제 상단 검색은 `TopNavGlobalSearch`→`quickActionRemote` 경로임을 확인. 실제 사용 경로로 cutover를 이동하고 catalog/fallback cache를 분리했다.
+[2026-08-19] 로컬 검증: unit 102/102, catalog 191 pass/1 skip, Memory Chromium 11/11, Library Chromium 7 pass/2 live skip, build와 guard 통과.
 ```
 
 ## 16. 발견 사항과 계획 변경

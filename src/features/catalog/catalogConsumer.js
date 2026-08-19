@@ -10,9 +10,10 @@ const dateParts = (value) => {
   return { year: Number(match[1]), month: match[2] ? Number(match[2]) : null, day: match[3] ? Number(match[3]) : null };
 };
 
-const titleFor = (detail, locales, fallback = null) => (
-  detail.titles.find((row) => locales.includes(row.locale))?.value || fallback
-);
+const titleFor = (detail, locales, fallback = null) => {
+  const acceptedLocales = new Set(locales);
+  return detail.titles.find((row) => acceptedLocales.has(row.locale))?.value || fallback;
+};
 
 export function detailToTitleChoice(detail) {
   if (!detail || !ANIME_ID.test(String(detail.animeId || ""))
@@ -22,12 +23,20 @@ export function detailToTitleChoice(detail) {
   }
   const displayTitle = String(detail.preferredTitle?.value || "").trim();
   if (!displayTitle) throw new Error("CATALOG_DETAIL_TITLE_CHOICE_INVALID");
+  const aliases = [];
+  const seenTitles = new Set([displayTitle]);
+  for (const row of detail.titles) {
+    const value = String(row?.value || "").trim();
+    if (!value || seenTitles.has(value)) continue;
+    seenTitles.add(value);
+    aliases.push(value);
+    if (aliases.length >= 24) break;
+  }
   return {
     kind: "ANIME_REF",
     animeId: detail.animeId,
     displayTitle,
-    aliases: [...new Set(detail.titles.map((row) => String(row?.value || "").trim())
-      .filter((value) => value && value !== displayTitle))].slice(0, 24),
+    aliases,
     genres: (detail.genres.core.length ? detail.genres.core : detail.genres.source).slice(0, 16),
     sourceBinding: { ...detail.sourceBinding },
     verificationState: "PROVIDER_CANDIDATE",
