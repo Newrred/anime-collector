@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
@@ -5,6 +6,7 @@ import { atomicWriteJson } from '../catalog-lab/lib/atomic-json.mjs';
 import { sha256, stableStringify } from '../catalog-lab/lib/hash.mjs';
 import { toPathKey } from '../catalog-lab/lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../catalog-lab/lib/workspace.mjs';
+import { inspectImageBytes } from '../catalog-lab/pipeline/covers.mjs';
 import {
   SERVICE_PROJECTION_V2_POLICY_VERSION,
   SERVICE_PROJECTION_V2_SCHEMA_VERSION,
@@ -80,7 +82,28 @@ async function loadTargetInputs(workspace, target) {
   const serviceProjection = await readJson(
     await safePath(workspace, ['service-projections', `${key}.json`]), 512 * 1024,
   );
-  return { key, current, canonical, serviceProjection };
+  const cover = await readJson(await safePath(workspace, ['covers', `${key}.json`]), 64 * 1024);
+  const extension = /\.([a-z0-9]+)$/u.exec(String(cover?.localRef ?? ''))?.[1];
+  const expectedRef = typeof cover?.checksum === 'string' && extension
+    ? `images/covers/${key}/${cover.checksum}.${extension}` : '';
+  if (cover?.status !== 'STORED' || cover?.sourceId !== 'anilist' || !HASH.test(cover?.checksum ?? '')
+    || cover.localRef !== expectedRef || !['jpg', 'png', 'webp'].includes(extension)) {
+    throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Stored AniList cover binding is invalid');
+  }
+  const coverBytes = await readFile(await safePath(workspace, cover.localRef.split('/')));
+  const mimeType = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[extension];
+  const inspected = inspectImageBytes({ declaredMime: mimeType, bytes: coverBytes });
+  const digest = createHash('sha256').update(coverBytes).digest('hex');
+  if (digest !== cover.checksum || inspected.byteSize !== cover.byteSize
+    || inspected.width !== cover.width || inspected.height !== cover.height
+    || inspected.extension !== extension || inspected.mimeType !== mimeType) {
+    throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Stored AniList cover bytes do not match metadata');
+  }
+  const coverAsset = {
+    sourceProvider: 'ANILIST', checksum: digest, byteSize: inspected.byteSize,
+    width: inspected.width, height: inspected.height, mimeType, extension,
+  };
+  return { key, current, canonical, serviceProjection, coverAsset, coverLocalRef: cover.localRef };
 }
 
 export function buildCatalogDbRows(releaseId, bundle) {
@@ -94,7 +117,11 @@ export function buildCatalogDbRows(releaseId, bundle) {
     asset: Object.freeze({
       release_id: releaseId, asset_id: bundle.asset.assetId, anime_id: bundle.animeId,
       kind: bundle.asset.kind, availability: bundle.asset.availability,
-      rights_basis: bundle.asset.rightsBasis, row_hash: bundle.asset.rowHash,
+      rights_basis: bundle.asset.rightsBasis, source_provider: bundle.asset.sourceProvider,
+      bucket_id: 'catalog-covers-preview', object_path: bundle.asset.objectPath,
+      checksum: bundle.asset.checksum, byte_size: bundle.asset.byteSize,
+      width: bundle.asset.width, height: bundle.asset.height, mime_type: bundle.asset.mimeType,
+      row_hash: bundle.asset.rowHash,
     }),
     search: Object.freeze({
       release_id: releaseId, anime_id: bundle.animeId,
@@ -133,6 +160,7 @@ export async function exportServiceProjectionV2({ workspace, profile = 'full3998
       targetKey: target.targetKey,
       canonicalHash: input.current.contentHash,
       projectionHash: input.serviceProjection.projectionHash,
+      coverChecksum: input.coverAsset.checksum,
     });
   }
   const releaseHash = sha256({
@@ -149,7 +177,7 @@ export async function exportServiceProjectionV2({ workspace, profile = 'full3998
   for (let index = 0; index < manifest.length; index += 1) {
     const target = manifest[index];
     const input = await loadTargetInputs(workspace, target);
-    const bundle = buildServiceProjectionV2({ target, ...input, peoplePageSize });
+    const bundle = buildServiceProjectionV2({ target, ...input, coverAsset: input.coverAsset, peoplePageSize });
     const db = buildCatalogDbRows(releaseId, bundle);
     const key = input.key;
     await writeDeterministicJson(workspace, [...base, 'search', `${key}.json`], bundle.search);
@@ -170,6 +198,7 @@ export async function exportServiceProjectionV2({ workspace, profile = 'full3998
       searchHash: bundle.search.rowHash,
       detailHash: bundle.detail.rowHash,
       assetHash: bundle.asset.rowHash,
+      coverChecksum: bundle.asset.checksum,
       peopleHashes: bundle.people.map((page) => page.rowHash),
       bundleHash: bundle.bundleHash,
     });
@@ -226,6 +255,7 @@ export async function validateServiceProjectionV2Release({ workspace, profile = 
       || db.asset.row_hash !== asset.rowHash || db.people.length !== entry.peopleHashes.length) {
       throw typedError('CATALOG_PREVIEW_RELEASE_INVALID', 'Release row binding is invalid');
     }
+    await readValidatedCoverBytes({ workspace, animeId: entry.animeId, asset });
     const people = [];
     for (let index = 0; index < entry.peopleHashes.length; index += 1) {
       const page = await readJson(await safePath(workspace, [
@@ -276,4 +306,26 @@ export async function readReleaseManifest({ workspace, profile = 'full3998' } = 
   return readJson(await safePath(workspace, [
     'service-projections-v2', 'releases', pointer.releaseId, 'release.json',
   ]), 8 * 1024 * 1024);
+}
+
+export async function readValidatedCoverBytes({ workspace, animeId, asset } = {}) {
+  if (!workspace || !asset || asset.animeId !== animeId || !HASH.test(asset.checksum ?? '')) {
+    throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Cover read binding is invalid');
+  }
+  const key = toPathKey(animeId);
+  const observation = await readJson(await safePath(workspace, ['covers', `${key}.json`]), 64 * 1024);
+  const expectedRef = `images/covers/${key}/${asset.checksum}.${asset.objectPath?.split('.').pop()}`;
+  if (observation?.status !== 'STORED' || observation.sourceId !== 'anilist'
+    || observation.checksum !== asset.checksum || observation.localRef !== expectedRef) {
+    throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Cover observation differs from release asset');
+  }
+  const bytes = await readFile(await safePath(workspace, observation.localRef.split('/')));
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  const inspected = inspectImageBytes({ declaredMime: asset.mimeType, bytes });
+  if (digest !== asset.checksum || inspected.byteSize !== asset.byteSize
+    || inspected.width !== asset.width || inspected.height !== asset.height
+    || inspected.mimeType !== asset.mimeType) {
+    throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Cover bytes differ from release asset');
+  }
+  return bytes;
 }

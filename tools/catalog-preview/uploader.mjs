@@ -1,4 +1,9 @@
-import { readReleaseDbRows, readReleaseManifest, validateServiceProjectionV2Release } from './export-v2.mjs';
+import {
+  readReleaseDbRows,
+  readReleaseManifest,
+  readValidatedCoverBytes,
+  validateServiceProjectionV2Release,
+} from './export-v2.mjs';
 
 function typedError(code, message) {
   const error = new Error(message);
@@ -21,8 +26,8 @@ function previewConfig(env) {
   if (environment !== 'preview' || !actualRef || !expectedRef || actualRef !== expectedRef || !serviceKey) {
     throw typedError('CATALOG_PREVIEW_REMOTE_CONFIG_INVALID', 'Exact Preview Supabase configuration is required');
   }
-  if (permission !== 'approved_metadata_only') {
-    throw typedError('CATALOG_PREVIEW_PERMISSION_REQUIRED', 'Cloud metadata permission gate is not approved');
+  if (permission !== 'approved_metadata_and_covers_preview') {
+    throw typedError('CATALOG_PREVIEW_PERMISSION_REQUIRED', 'Cloud metadata and cover Preview permission gate is not approved');
   }
   return Object.freeze({ url, serviceKey, projectRef: actualRef });
 }
@@ -69,6 +74,47 @@ async function upsert(config, table, rows, conflict, fetchImpl) {
     fetchImpl,
   });
 }
+
+async function uploadCover(config, asset, bytes, fetchImpl) {
+  const path = `/storage/v1/object/${asset.bucket_id}/${asset.object_path.split('/').map(encodeURIComponent).join('/')}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+  let response;
+  try {
+    response = await fetchImpl(`${config.url}${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: config.serviceKey,
+        Authorization: `Bearer ${config.serviceKey}`,
+        'Content-Type': asset.mime_type,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'x-upsert': 'false',
+      },
+      body: bytes,
+      signal: controller.signal,
+    });
+  } catch {
+    throw typedError('CATALOG_PREVIEW_COVER_UPLOAD_FAILED', 'Preview cover upload request failed');
+  } finally { clearTimeout(timeout); }
+  if (response.ok) return;
+  if (response.status === 409) {
+    const existing = await fetchImpl(`${config.url}/storage/v1/object/public/${asset.bucket_id}/${asset.object_path
+      .split('/').map(encodeURIComponent).join('/')}`, { method: 'HEAD' });
+    if (existing.ok && Number(existing.headers.get('content-length')) === asset.byte_size) return;
+  }
+  throw typedError('CATALOG_PREVIEW_COVER_UPLOAD_FAILED', `Preview cover upload was rejected (${response.status})`);
+}
+
+async function eachWithConcurrency(rows, concurrency, callback) {
+  let cursor = 0;
+  await Promise.all(Array.from({ length: Math.min(concurrency, rows.length) }, async () => {
+    while (cursor < rows.length) {
+      const index = cursor;
+      cursor += 1;
+      await callback(rows[index]);
+    }
+  }));
+}
 /** Uploads a validated immutable release; disabled unless allowUpload and the rights/environment gates agree. */
 export async function uploadCatalogPreview({
   workspace,
@@ -96,7 +142,7 @@ export async function uploadCatalogPreview({
     status: 'STAGING',
   }], 'id', fetchImpl);
 
-  const counts = { assets: 0, search: 0, details: 0, people: 0 };
+  const counts = { assets: 0, coverObjects: 0, search: 0, details: 0, people: 0 };
   for (let index = 0; index < release.entries.length; index += batchSize) {
     const slice = release.entries.slice(index, index + batchSize);
     const bundles = await Promise.all(slice.map((entry) => readReleaseDbRows({
@@ -106,6 +152,17 @@ export async function uploadCatalogPreview({
     const search = bundles.map((row) => row.search);
     const details = bundles.map((row) => row.detail);
     const people = bundles.flatMap((row) => row.people);
+    await eachWithConcurrency(bundles, 6, async (row) => {
+      const bytes = await readValidatedCoverBytes({
+        workspace, animeId: row.asset.anime_id, asset: {
+          animeId: row.asset.anime_id, checksum: row.asset.checksum,
+          byteSize: row.asset.byte_size, width: row.asset.width, height: row.asset.height,
+          mimeType: row.asset.mime_type, objectPath: row.asset.object_path,
+        },
+      });
+      await uploadCover(config, row.asset, bytes, fetchImpl);
+      counts.coverObjects += 1;
+    });
     await upsert(config, 'catalog_assets', assets, 'release_id,asset_id', fetchImpl);
     await upsert(config, 'catalog_anime_search', search, 'release_id,anime_id', fetchImpl);
     await upsert(config, 'catalog_anime_details', details, 'release_id,anime_id', fetchImpl);

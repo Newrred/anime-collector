@@ -1,5 +1,12 @@
 create extension if not exists pg_trgm with schema extensions;
 
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'catalog-covers-preview', 'catalog-covers-preview', true, 8388608,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do nothing;
+
 create table if not exists public.catalog_releases (
   id text primary key,
   profile text not null,
@@ -23,9 +30,17 @@ create table if not exists public.catalog_assets (
   release_id text not null references public.catalog_releases(id) on delete cascade,
   asset_id text not null,
   anime_id text not null,
-  kind text not null check (kind = 'SYSTEM_DESIGN'),
-  availability text not null check (availability = 'SERVICE_GENERATED'),
-  rights_basis text not null check (rights_basis = 'SYSTEM_GENERATED'),
+  kind text not null check (kind = 'COVER_IMAGE'),
+  availability text not null check (availability = 'PREVIEW_STORAGE'),
+  rights_basis text not null check (rights_basis = 'USER_CONFIRMED_PREVIEW_PERMISSION'),
+  source_provider text not null check (source_provider = 'ANILIST'),
+  bucket_id text not null check (bucket_id = 'catalog-covers-preview'),
+  object_path text not null check (object_path ~ '^covers/anime-[a-f0-9-]+/[a-f0-9]{64}\.(jpg|png|webp)$'),
+  checksum text not null check (checksum ~ '^[a-f0-9]{64}$'),
+  byte_size integer not null check (byte_size between 1 and 8388608),
+  width integer not null check (width between 1 and 10000),
+  height integer not null check (height between 1 and 10000),
+  mime_type text not null check (mime_type in ('image/jpeg', 'image/png', 'image/webp')),
   row_hash text not null check (row_hash ~ '^[a-f0-9]{64}$'),
   primary key (release_id, asset_id),
   unique (release_id, anime_id)
@@ -87,6 +102,20 @@ alter table public.catalog_assets enable row level security;
 alter table public.catalog_anime_search enable row level security;
 alter table public.catalog_anime_details enable row level security;
 alter table public.catalog_anime_people enable row level security;
+
+revoke all on table public.catalog_releases, public.catalog_active_release, public.catalog_assets,
+  public.catalog_anime_search, public.catalog_anime_details, public.catalog_anime_people
+  from public, anon, authenticated;
+grant select on table public.catalog_releases, public.catalog_active_release, public.catalog_assets,
+  public.catalog_anime_search, public.catalog_anime_details, public.catalog_anime_people
+  to anon, authenticated;
+grant select, insert, update, delete on table public.catalog_releases, public.catalog_active_release,
+  public.catalog_assets, public.catalog_anime_search, public.catalog_anime_details,
+  public.catalog_anime_people to service_role;
+
+drop policy if exists "read preview catalog covers" on storage.objects;
+create policy "read preview catalog covers" on storage.objects for select to anon, authenticated
+using (bucket_id = 'catalog-covers-preview');
 
 drop policy if exists "read active catalog release" on public.catalog_releases;
 create policy "read active catalog release" on public.catalog_releases for select to anon, authenticated
@@ -161,7 +190,7 @@ $$;
 create or replace function public.activate_catalog_release(requested_release_id text, requested_release_hash text)
 returns void
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 declare
@@ -169,12 +198,10 @@ declare
   actual_search integer;
   actual_detail integer;
   actual_asset integer;
+  actual_storage integer;
   actual_people integer;
   expected_people integer;
 begin
-  if auth.role() <> 'service_role' then
-    raise exception 'CATALOG_RELEASE_ACTIVATION_FORBIDDEN';
-  end if;
   select target_count, people_page_count into expected_count, expected_people
   from public.catalog_releases
   where id = requested_release_id and release_hash = requested_release_hash and status = 'STAGING';
@@ -182,8 +209,14 @@ begin
   select count(*) into actual_search from public.catalog_anime_search where release_id = requested_release_id;
   select count(*) into actual_detail from public.catalog_anime_details where release_id = requested_release_id;
   select count(*) into actual_asset from public.catalog_assets where release_id = requested_release_id;
+  select count(*) into actual_storage
+  from public.catalog_assets asset
+  join storage.objects object
+    on object.bucket_id = asset.bucket_id and object.name = asset.object_path
+  where asset.release_id = requested_release_id;
   select count(*) into actual_people from public.catalog_anime_people where release_id = requested_release_id;
-  if actual_search <> expected_count or actual_detail <> expected_count or actual_asset <> expected_count then
+  if actual_search <> expected_count or actual_detail <> expected_count
+    or actual_asset <> expected_count or actual_storage <> expected_count then
     raise exception 'CATALOG_RELEASE_INCOMPLETE';
   end if;
   if actual_people <> expected_people then raise exception 'CATALOG_RELEASE_PEOPLE_INCOMPLETE'; end if;
@@ -197,4 +230,5 @@ $$;
 
 revoke all on function public.activate_catalog_release(text, text) from public, anon, authenticated;
 grant execute on function public.activate_catalog_release(text, text) to service_role;
+revoke all on function public.search_catalog_anime(text, integer) from public;
 grant execute on function public.search_catalog_anime(text, integer) to anon, authenticated;

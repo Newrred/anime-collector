@@ -1,6 +1,6 @@
 # Supabase Preview 카탈로그 Vertical Slice ExecPlan
 
-> 계획 상태: `LOCAL IMPLEMENTATION COMPLETE / REMOTE PREVIEW BLOCKED`
+> 계획 상태: `SCHEMA READY / REMOTE DATA UPLOAD CREDENTIAL PENDING`
 > 승인 근거: 2026-08-19 사용자 요청 — Canonical → Service Projection v2 → DB 변환·검증 → Supabase Preview → Vercel Preview → 검색·상세·카드 작성 검증.
 
 ## 1. 목적과 사용자 결과
@@ -13,7 +13,7 @@
 - `ACCOUNT-01`: 로그인 없이 LOCAL_ONLY 카드를 작성할 수 있고, 로그인은 Preview 인증·향후 동기화에 사용한다.
 - `CATALOG-01/02`: canonical provenance는 보존하고 서비스 read model은 별도 파생한다.
 - `CARD-01`, `STORAGE-LOCAL-01`: Complete Card의 visual과 로컬 영구 저장 계약을 유지한다.
-- `IMAGE-01/02`, `IMAGE-SYNC-01`: 로그인만으로 사용자 이미지나 수집 표지를 cloud에 업로드하지 않는다.
+- `IMAGE-01/02`, `IMAGE-SYNC-01`: 사용자 이미지는 cloud에 업로드하지 않는다. 수집 표지는 2026-08-19 확인된 Preview 허가 범위에서만 별도 bucket에 업로드한다.
 - `BACKEND-01`, `AUTH-01`: 이번 선택은 Supabase direct/RLS의 Preview vertical slice로 제한한다. Production 공급자와 guest→account 승격 정책을 최종 확정하지 않는다.
 
 ## 3. 현재 상태와 저장소 증거
@@ -42,7 +42,7 @@
 
 - AniList/AniLife/Wikidata 재수집.
 - raw, normalized, claim, canonical 원본의 cloud upload.
-- 현재 수집 표지의 Supabase Storage 업로드. 로컬 테스트 허가는 cloud 재배포 권한으로 확대하지 않는다.
+- Production 표지 배포. 이번 작업은 사용자가 확인한 Supabase Preview 저장·표시 범위로만 제한한다.
 - 사용자 LOCAL_ONLY 이미지 자동 업로드 또는 PRIVATE_CLOUD/Public 활성화.
 - Production Supabase cutover, master production 배포, Public UGC.
 - guest→account 데이터 승격 및 sync conflict 정책의 최종 확정.
@@ -94,7 +94,7 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 3. Supabase migration/RLS/search RPC와 service-role uploader를 구현한다.
 4. Supabase catalog adapter, detail UI, card composer 진입을 연결한다.
 5. unit/catalog/build/guard/react-doctor/E2E를 통과한다.
-6. 별도 Supabase Preview project가 제공되면 migration dry-run→apply, metadata upload, count/hash 검증을 수행한다.
+6. 별도 Supabase Preview project가 제공되면 migration apply, metadata+cover upload, count/hash 검증을 수행한다.
 7. Vercel Preview 환경변수를 연결하고 실제 URL smoke/E2E를 수행한다.
 
 ## 9. 테스트와 검증
@@ -112,7 +112,7 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 - browser에는 `PUBLIC_SUPABASE_URL`과 publishable/anon key만 둔다. service-role key는 로컬 uploader 환경변수에서만 사용하고 로그·Git·Vercel client bundle에 넣지 않는다.
 - catalog RLS는 공개 read-only이며 mutation policy를 만들지 않는다.
 - 사용자 카드 note, 이미지, 검색 원문은 ordinary analytics/log에 넣지 않는다.
-- 기존 수집 표지는 로컬 테스트 허가 범위이므로 cloud에 올리지 않는다. Preview는 placeholder/system design을 사용한다.
+- 수집 표지는 사용자 확인에 따라 Preview bucket에 checksum 기반 immutable object로 올린다. 이 결정은 Production 배포 허가가 아니다.
 - 실데이터 metadata도 출처별 cloud 저장/재배포 권한이 확인되기 전에는 실제 remote upload gate를 통과하지 않는다.
 
 ## 11. 관찰 가능성·분석 이벤트
@@ -149,23 +149,23 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 ```text
 [2026-08-19] 시작: 사용자 요청으로 Supabase Preview catalog vertical slice 범위 확정.
 [2026-08-19] 확인: 기존 Supabase PKCE/Google login과 split sync code는 있으나 repository-managed Supabase migration/config와 catalog schema는 없음.
-[2026-08-19] 결정: 기존 LOCAL_ONLY 카드 작성은 유지하고, catalog metadata read + auth만 Preview Supabase에 연결. 수집 표지와 사용자 이미지는 upload 제외.
+[2026-08-19] 결정: 기존 LOCAL_ONLY 카드 작성은 유지하고, catalog metadata read + 표지만 Preview Supabase에 연결. 사용자 이미지는 upload 제외.
 [2026-08-19] RED→GREEN: Service Projection v2 module 부재를 확인한 뒤 search/detail/people/system-design asset 분리 계약 4개를 구현하고 통과.
 [2026-08-19] 실데이터 export: full3998 전체를 immutable release `catalog-v2-52487fc3ef22eb9df3ca0a78`로 생성. 3,998 targets, 4,899 people pages, 20,893 files, 약 128.75 MiB.
 [2026-08-19] 실데이터 validate: 모든 canonical/v1 identity, row hash, bundle hash, DB row equivalence, count/reference를 재검증. release hash `52487fc3ef22eb9df3ca0a78d6e3b0b43cfdebaf7395f78f9110af4f3be4f556`.
 [2026-08-19] Supabase: additive migration, read-only active-release RLS, bounded trigram search RPC, service-role-only activation, dry-run-default uploader 구현.
 [2026-08-19] Web: Supabase search adapter, 작품 상세, people pagination, detail→LOCAL_ONLY card title prefill 연결. Supabase 미설정/실패 시 기존 resolver 경로 유지.
 [2026-08-19] 검증: focused 12/12, unit 95/95, catalog 190 pass/1 Windows skip, build 성공, system-design card E2E 1/1, React Doctor changed 100/100, 외부 과거 test-results를 보존한 임시 격리 상태에서 catalog guard no leaks.
-[2026-08-19] 차단: 별도 Supabase Preview project 연결이 현재 환경에 없고, AniList cloud metadata 저장·Preview 제공 권한이 로컬 TEST_ONLY 허가 범위를 넘어선다. 실제 remote migration/upload와 Vercel Preview smoke는 실행하지 않음.
+[2026-08-19] 해소: 사용자가 AniList metadata와 표지의 cloud Preview 저장·표시 허가를 확인함. Newrred 조직의 Singapore `moemoa-preview` 프로젝트를 생성하고 migration을 적용함.
 ```
 
 ## 16. 발견 사항과 계획 변경
 
 - `BACKEND-01/AUTH-01`은 Production 기준 미정이므로 이번 Supabase 선택은 Preview adapter로 격리한다.
 - v1 `ServiceProjection`의 policy 이름에는 V2 문자열이 있으나 schemaVersion은 1이고 상세 값이 없다. 혼동을 피하기 위해 새 schemaVersion 2 계약을 별도 모듈·폴더로 만든다.
-- 표지 cloud 권리 게이트를 우회하지 않기 위해 3,998개 모두 `SYSTEM_DESIGN` placeholder asset을 사용한다. 기존 812MB 로컬 표지는 v2 release나 DB row에 복제하지 않는다.
-- Supabase project 연결 도구가 없어 권한 분리형 Supabase 플러그인 설치를 요청했다. service-role secret을 대화나 client env로 전달받지 않는다.
+- 표지 권리 게이트 해소 후 3,998개 모두 `COVER_IMAGE` asset으로 재생성했다. 원본 localRef는 내보내지 않고 checksum·크기·MIME·서비스 object path만 Projection v2에 포함한다.
+- Supabase Preview 프로젝트 `okchpyagfucpzpyrfgol`에 schema/RLS/bucket을 적용했다. service-role secret은 대화·Git·Vercel client env에 넣지 않는다.
 
 ## 17. 완료 보고
 
-로컬 구현과 full3998 변환·검증은 완료됐다. 원격 완료 조건은 별도 Preview 프로젝트 연결, metadata cloud 권한 확인, migration dry-run/apply, upload/activate, Vercel Preview env 연결, 실제 URL의 검색·상세·로그인·LOCAL_ONLY 카드 E2E다.
+표지 포함 full3998 변환·검증과 Supabase schema 적용은 완료됐다. 원격 완료 조건은 service-role 로컬 주입 후 upload/activate, Vercel Preview env 연결, 실제 URL의 검색·상세·LOCAL_ONLY 카드 E2E다.

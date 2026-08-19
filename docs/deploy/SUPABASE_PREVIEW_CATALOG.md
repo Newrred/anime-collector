@@ -1,6 +1,6 @@
 # Supabase Preview 카탈로그 배포
 
-이 문서는 Production이 아닌 별도 Supabase Preview 프로젝트에 Service Projection v2 메타데이터를 배포하는 절차다. 수집 표지, raw/normalized/claim/canonical 원본, 사용자 이미지는 업로드하지 않는다.
+이 문서는 Production이 아닌 별도 Supabase Preview 프로젝트에 Service Projection v2 메타데이터와 검증된 AniList 표지를 배포하는 절차다. raw/normalized/claim/canonical 원본과 사용자 이미지는 업로드하지 않는다. 표지 권한 근거는 2026-08-19 사용자가 확인한 Preview 저장·표시 허가이며 Production 권한으로 확대 해석하지 않는다.
 
 ## 저장소에서 재현되는 구성
 
@@ -19,7 +19,7 @@ MOEMOA_SUPABASE_ENV=preview
 MOEMOA_SUPABASE_URL=https://<preview-project-ref>.supabase.co
 MOEMOA_SUPABASE_PREVIEW_PROJECT_REF=<preview-project-ref>
 MOEMOA_SUPABASE_SERVICE_ROLE_KEY=<local secret; never PUBLIC_*>
-MOEMOA_CATALOG_CLOUD_PERMISSION=approved_metadata_only
+MOEMOA_CATALOG_CLOUD_PERMISSION=approved_metadata_and_covers_preview
 ```
 
 `MOEMOA_CATALOG_CLOUD_PERMISSION`은 출처별 metadata cloud 저장·Preview 제공 권한을 확인한 뒤에만 설정한다. 현재 AniList 허가는 로컬 TEST_ONLY 저장 범위이므로 권한 확대 확인 전 실제 3,998개 업로드를 실행하지 않는다.
@@ -46,7 +46,7 @@ PUBLIC_SUPABASE_URL=https://<preview-project-ref>.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=<preview publishable/anon key>
 ```
 
-Service-role key는 Vercel과 브라우저 bundle에 넣지 않는다. 환경변수 변경은 기존 deployment에 소급되지 않으므로 새 Preview deployment를 만든다. Google OAuth를 시험한다면 Supabase Auth redirect allowlist에 Preview callback URL을 추가한다.
+Service-role key는 Vercel과 브라우저 bundle에 넣지 않는다. 표지는 service-role 로컬 업로더가 `catalog-covers-preview` bucket에 checksum 경로로 올리고, 브라우저는 공개 읽기 URL만 사용한다. 환경변수 변경은 기존 deployment에 소급되지 않으므로 새 Preview deployment를 만든다. Google OAuth를 시험한다면 Supabase Auth redirect allowlist에 Preview callback URL을 추가한다.
 
 ## 배포 검증
 

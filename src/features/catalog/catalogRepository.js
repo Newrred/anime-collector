@@ -20,7 +20,7 @@ function safeTitles(rows) {
   return result.some((row) => !row.locale || !row.value) ? null : result;
 }
 
-function safeDetail(payload, animeId) {
+function safeDetail(payload, animeId, cover) {
   if (!payload || payload.schemaVersion !== 2 || payload.animeId !== animeId) return null;
   const titles = safeTitles(payload.titles);
   const studios = Array.isArray(payload.studios) && payload.studios.length <= 32
@@ -67,7 +67,20 @@ function safeDetail(payload, animeId) {
       pageSize: Number(payload.people?.pageSize) || 30,
     },
     readiness: text(payload.readiness?.status, 40) || "BLOCKED",
+    cover,
   };
+}
+
+function safeCover(row, animeId, client) {
+  if (!row || row.anime_id !== animeId || row.kind !== "COVER_IMAGE"
+    || row.availability !== "PREVIEW_STORAGE" || row.rights_basis !== "USER_CONFIRMED_PREVIEW_PERMISSION"
+    || row.bucket_id !== "catalog-covers-preview" || !/^covers\/anime-[a-f0-9-]+\/[a-f0-9]{64}\.(jpg|png|webp)$/iu.test(row.object_path || "")
+    || !Number.isSafeInteger(row.width) || !Number.isSafeInteger(row.height)
+    || typeof client?.storage?.from !== "function") return null;
+  const result = client.storage.from(row.bucket_id).getPublicUrl(row.object_path);
+  const publicUrl = text(result?.data?.publicUrl, 2048);
+  try { if (!publicUrl || new URL(publicUrl).protocol !== "https:") return null; } catch { return null; }
+  return { publicUrl, width: row.width, height: row.height };
 }
 
 function safePeople(payload, animeId, requestedPage) {
@@ -102,7 +115,14 @@ export function createSupabaseCatalogRepository({ client = supabase } = {}) {
         .select("anime_id,payload").eq("anime_id", animeId).maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      const result = safeDetail(data.payload, animeId);
+      const coverAssetId = text(data.payload?.coverAssetId, 96);
+      if (!coverAssetId) throw new Error("CATALOG_DETAIL_RESPONSE_INVALID");
+      const { data: coverRow, error: coverError } = await client.from("catalog_assets")
+        .select("asset_id,anime_id,kind,availability,rights_basis,bucket_id,object_path,width,height")
+        .eq("asset_id", coverAssetId).maybeSingle();
+      if (coverError) throw coverError;
+      const cover = safeCover(coverRow, animeId, client);
+      const result = cover ? safeDetail(data.payload, animeId, cover) : null;
       if (!result) throw new Error("CATALOG_DETAIL_RESPONSE_INVALID");
       return result;
     },
