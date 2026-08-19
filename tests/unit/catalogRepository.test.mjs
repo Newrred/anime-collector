@@ -1,0 +1,50 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { createSupabaseCatalogRepository } from "../../src/features/catalog/catalogRepository.js";
+
+const animeId = "anime:11111111-1111-4111-8111-000000000001";
+
+function clientFor(rows) {
+  return {
+    from(table) {
+      const filters = {};
+      const chain = {
+        select() { return chain; },
+        eq(key, value) { filters[key] = value; return chain; },
+        async maybeSingle() { return { data: rows(table, filters), error: null }; },
+      };
+      return chain;
+    },
+  };
+}
+
+test("catalog repository returns service-safe detail and paginated people", async () => {
+  const repository = createSupabaseCatalogRepository({
+    client: clientFor((table) => table === "catalog_anime_details" ? {
+      anime_id: animeId,
+      payload: {
+        schemaVersion: 2, animeId,
+        preferredTitle: { locale: "ko", value: "카우보이 비밥" },
+        titles: [{ locale: "ko", value: "카우보이 비밥" }, { locale: "en", value: "Cowboy Bebop" }],
+        release: { format: "TV", status: "FINISHED", episodeCount: 26, startDate: "1998-04-03", sourceMaterialType: "ORIGINAL" },
+        studios: [{ name: "Sunrise", role: "ANIMATION_PRODUCTION" }],
+        genres: { core: ["Action"], source: ["Action", "Sci-Fi"] },
+        officialLinks: [], relations: [],
+        people: { characterCount: 1, castingCount: 1, pageCount: 1, pageSize: 30 },
+        readiness: { status: "READY" }, rowHash: "private-integrity-field",
+      },
+    } : {
+      anime_id: animeId, page: 1,
+      payload: {
+        schemaVersion: 2, animeId, page: 1, totalCount: 1,
+        entries: [{ characterId: "character:1", canonicalName: "Spike", role: "MAIN", castings: [{ creditedName: "Koichi Yamadera", language: "JAPANESE", roleType: "VOICE" }] }],
+      },
+    }),
+  });
+  const detail = await repository.getDetail(animeId);
+  const people = await repository.getPeople(animeId, 1);
+  assert.equal(detail.preferredTitle.value, "카우보이 비밥");
+  assert.equal(people.entries[0].castings[0].creditedName, "Koichi Yamadera");
+  assert.doesNotMatch(JSON.stringify({ detail, people }), /rowHash|localRef|checksum/u);
+});

@@ -51,6 +51,13 @@ export function useMemoryCardComposer() {
   } = state;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const requestedTitle = String(new URLSearchParams(window.location.search).get("title") || "")
+      .normalize("NFKC").trim().replace(/\s+/gu, " ").slice(0, 120);
+    if (requestedTitle) updateState({ title: requestedTitle });
+  }, []);
+
+  useEffect(() => {
     let active = true;
     let timer = null;
 

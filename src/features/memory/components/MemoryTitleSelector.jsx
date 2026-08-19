@@ -1,5 +1,7 @@
 const candidateLabel = (candidate) => (
-  candidate.verificationState === "PROVIDER_CANDIDATE"
+  candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
+    ? "MOEMOA catalog"
+    : candidate.verificationState === "PROVIDER_CANDIDATE"
     ? "AniList candidate"
     : "Legacy data · unverified"
 );
@@ -71,6 +73,11 @@ export default function MemoryTitleSelector({
                 </span>
                 <span className="status-badge">{candidateLabel(candidate)}</span>
               </button>
+              {candidate.animeId && candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2" && (
+                <a className="memory-composer__catalog-detail-link" href={`/catalog/detail/?${new URLSearchParams({ id: candidate.animeId })}`}>
+                  상세 정보 보기
+                </a>
+              )}
             </li>
           ))}
         </ul>
