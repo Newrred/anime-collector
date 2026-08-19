@@ -157,6 +157,7 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 [2026-08-19] Web: Supabase search adapter, 작품 상세, people pagination, detail→LOCAL_ONLY card title prefill 연결. Supabase 미설정/실패 시 기존 resolver 경로 유지.
 [2026-08-19] 검증: focused 12/12, unit 95/95, catalog 190 pass/1 Windows skip, build 성공, system-design card E2E 1/1, React Doctor changed 100/100, 외부 과거 test-results를 보존한 임시 격리 상태에서 catalog guard no leaks.
 [2026-08-19] 해소: 사용자가 AniList metadata와 표지의 cloud Preview 저장·표시 허가를 확인함. Newrred 조직의 Singapore `moemoa-preview` 프로젝트를 생성하고 migration을 적용함.
+[2026-08-19] 발견: Vercel의 기존 인증용 `PUBLIC_SUPABASE_*`가 빌드 환경에서 `.env.production`보다 우선되어 Preview 검색이 과거 프로젝트로 향함. 인증 연결은 유지하고 카탈로그를 `PUBLIC_CATALOG_SUPABASE_*` 전용 client로 분리함.
 ```
 
 ## 16. 발견 사항과 계획 변경

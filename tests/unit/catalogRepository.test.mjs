@@ -2,8 +2,25 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createSupabaseCatalogRepository } from "../../src/features/catalog/catalogRepository.js";
+import { resolveCatalogSupabaseConfig } from "../../src/features/catalog/catalogSupabaseClient.js";
 
 const animeId = "anime:11111111-1111-4111-8111-000000000001";
+
+test("catalog client uses its dedicated public configuration instead of auth Supabase variables", () => {
+  assert.deepEqual(resolveCatalogSupabaseConfig({
+    PUBLIC_SUPABASE_URL: "https://legacy-auth.supabase.co",
+    PUBLIC_SUPABASE_ANON_KEY: "legacy-auth-key",
+    PUBLIC_CATALOG_SUPABASE_URL: "https://catalog.supabase.co/",
+    PUBLIC_CATALOG_SUPABASE_ANON_KEY: "catalog-publishable-key",
+  }), {
+    url: "https://catalog.supabase.co",
+    publishableKey: "catalog-publishable-key",
+  });
+  assert.equal(resolveCatalogSupabaseConfig({
+    PUBLIC_SUPABASE_URL: "https://legacy-auth.supabase.co",
+    PUBLIC_SUPABASE_ANON_KEY: "legacy-auth-key",
+  }), null);
+});
 
 function clientFor(rows) {
   return {

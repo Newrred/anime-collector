@@ -1,4 +1,4 @@
-import { supabase } from "../../lib/supabaseClient.js";
+import { catalogSupabase } from "./catalogSupabaseClient.js";
 
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
@@ -106,7 +106,7 @@ function safePeople(payload, animeId, requestedPage) {
   return { page: requestedPage, totalCount: Number(payload.totalCount) || 0, entries };
 }
 
-export function createSupabaseCatalogRepository({ client = supabase } = {}) {
+export function createSupabaseCatalogRepository({ client = catalogSupabase } = {}) {
   if (typeof client?.from !== "function") throw new TypeError("Supabase catalog client is required");
   return Object.freeze({
     async getDetail(animeId) {
