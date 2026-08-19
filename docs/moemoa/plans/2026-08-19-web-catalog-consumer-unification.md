@@ -124,6 +124,8 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 [2026-08-19] 보강: Library detail read를 상위 8개로 강제 제한하고 한 후보의 malformed detail은 정상 후보와 격리했다.
 [2026-08-19] Preview 발견: `AddAnime.jsx`는 현재 import되지 않는 구형 컴포넌트이고 실제 상단 검색은 `TopNavGlobalSearch`→`quickActionRemote` 경로임을 확인. 실제 사용 경로로 cutover를 이동하고 catalog/fallback cache를 분리했다.
 [2026-08-19] Preview 보강: exact AnimeRef가 선택된 deep-link에서 no-result 안내가 동시에 보이던 조건을 제거했다.
+[2026-08-19] Preview 완료: `bfe02bb` immutable deployment에서 Supabase cover URL 기반 `나루토` 8개 결과, 홍보성 제목 부재와 clean alias, detail/people, exact AnimeRef 선택과 Archive 저장을 확인.
+[2026-08-19] 반응형 완료: 390×844 메인 검색 sheet와 card composer의 document scroll width가 viewport 이하이며 browser warning/error가 0임을 확인.
 [2026-08-19] 로컬 검증: unit 102/102, catalog 191 pass/1 skip, Memory Chromium 11/11, Library Chromium 7 pass/2 live skip, build와 guard 통과.
 ```
 
@@ -133,4 +135,24 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 
 ## 17. 완료 보고
 
-상태: `IN PROGRESS — LOCAL GATES PASSED / PREVIEW E2E PENDING`
+상태: `COMPLETED — PREVIEW ONLY`
+
+사용자 결과:
+
+- 메인/Library와 Memory composer가 같은 Supabase active catalog를 우선 사용한다.
+- catalog 결과가 있으면 unmatched Legacy 후보를 섞지 않고, 강한 홍보성 대표 제목은 clean alias로 표시한다.
+- 작품 상세에서 카드 작성으로 이동해도 내부 `animeId`가 유지되어 PrivateTitle이 아닌 정확한 AnimeRef로 저장된다.
+- 한 후보의 malformed detail은 나머지 정상 결과를 제거하지 않으며 상세 읽기는 상위 8개로 제한된다.
+
+실제 변경 범위:
+
+- catalog safe repository/consumer/title-quality projection.
+- 실제 `TopNavGlobalSearch`의 `quickActionRemote` catalog-first 경로와 catalog/fallback cache 분리.
+- Memory resolver dedupe·사용자용 배지·detail deep-link 복원.
+- unit/Chromium 회귀와 기준 문서 갱신.
+
+마이그레이션·의존성: 없음. Supabase schema/RLS/active release와 IndexedDB schema는 변경하지 않았다.
+
+롤백: `a4c263a`, `a3e959e`, `bfe02bb`의 Web consumer 커밋을 revert하면 기존 AniList/Legacy 검색으로 복귀하며 DB rollback은 필요 없다.
+
+다음 승인 게이트: Production/master 병합 및 Production 표지 권한. 이번 완료는 보호된 Vercel Preview에만 해당한다.

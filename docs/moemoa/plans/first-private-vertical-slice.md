@@ -788,7 +788,8 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-18] 검증: catalog 186 pass/1 Windows skip, Web unit 93/93, Astro production build, catalog guard, production dist DEV-marker scan 통과. DB/schema/dependency 변경 없음.
 [2026-08-19] 완료: Service Projection v2 3,998개를 Supabase Preview active release로 적재하고 전용 public client·RLS read model로 검색/상세/인물/표지를 실제 Preview에서 검증했다. Production/master와 Production 표지 권한은 범위 밖이다.
 [2026-08-19] 구현: Library와 Memory composer의 검색을 Supabase catalog 우선으로 통합하고, catalog 결과가 있을 때 unmatched Legacy 후보를 숨기며 강한 홍보성 제목은 presentation alias로 대체한다. 상세→카드 링크는 animeId를 유지해 정확한 AnimeRef를 저장한다.
-[2026-08-19] 로컬 검증: Web unit 102/102, catalog 191 pass/1 Windows skip, Chromium Memory 11/11, Library 7 pass/2 live skip, Astro build, catalog guard 통과. Preview 기능 브랜치 실주소 재검증은 consumer slice 완료 게이트로 남아 있다.
+[2026-08-19] 로컬 검증: Web unit 102/102, catalog 191 pass/1 Windows skip, Chromium Memory 11/11, Library 7 pass/2 live skip, Astro build, catalog guard 통과. 이어진 Preview 실주소 검증으로 consumer slice 게이트를 닫았다.
+[2026-08-19] Preview 검증: `bfe02bb` immutable deployment에서 실제 Supabase 표지 기반 8개 검색, 홍보성 대표 제목 제거, 상세/인물, 상세→AnimeRef 선택→local-only Archive 저장을 확인했다. 390×844에서 horizontal overflow 0, 브라우저 warning/error 0이었다.
 ```
 
 ## 16. 발견 사항과 계획 변경
