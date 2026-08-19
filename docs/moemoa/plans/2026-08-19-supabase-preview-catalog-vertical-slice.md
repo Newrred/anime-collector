@@ -158,6 +158,9 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 [2026-08-19] 검증: focused 12/12, unit 95/95, catalog 190 pass/1 Windows skip, build 성공, system-design card E2E 1/1, React Doctor changed 100/100, 외부 과거 test-results를 보존한 임시 격리 상태에서 catalog guard no leaks.
 [2026-08-19] 해소: 사용자가 AniList metadata와 표지의 cloud Preview 저장·표시 허가를 확인함. Newrred 조직의 Singapore `moemoa-preview` 프로젝트를 생성하고 migration을 적용함.
 [2026-08-19] 발견: Vercel의 기존 인증용 `PUBLIC_SUPABASE_*`가 빌드 환경에서 `.env.production`보다 우선되어 Preview 검색이 과거 프로젝트로 향함. 인증 연결은 유지하고 카탈로그를 `PUBLIC_CATALOG_SUPABASE_*` 전용 client로 분리함.
+[2026-08-19] 원격 적재 완료: release `catalog-v2-8af2e03bc80789f59b4eaf7c`를 활성화. search/detail/assets 각 3,998개, people 4,899 pages, cover objects 3,998개와 로컬·원격 총 byte `812094371` 일치를 확인함.
+[2026-08-19] Preview 완료: Newrred commit `25f6c75`의 Vercel Preview가 READY. 실제 Chromium에서 영문 검색 → 한국어 상세 제목 → 460×640 Supabase Storage 표지 → 캐릭터·성우 → 제목 prefill → `LOCAL_ONLY` 시스템 디자인 카드 → Archive 흐름 통과, 브라우저 오류 0건.
+[2026-08-19] 최종 검증: unit 96/96, catalog 191 pass/1 기존 Windows skip, build 성공, React Doctor 100/100, catalog guard no leaks, client bundle service-role/secret 0건. Vercel build error 0건, 최근 1시간 runtime error 0건.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -169,4 +172,4 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 
 ## 17. 완료 보고
 
-표지 포함 full3998 변환·검증과 Supabase schema 적용은 완료됐다. 원격 완료 조건은 service-role 로컬 주입 후 upload/activate, Vercel Preview env 연결, 실제 URL의 검색·상세·LOCAL_ONLY 카드 E2E다.
+Preview vertical slice 완료. 표지 포함 full3998 Projection v2 생성·검증, Supabase migration/RLS/Storage 적재·활성화, Vercel Preview 연결, 실제 검색·상세·표지·인물·LOCAL_ONLY 카드 E2E를 모두 확인했다. Production 배포와 Production 데이터 권한, 인증 공급자 확정, 사용자 이미지 cloud upload는 여전히 범위 밖이며 별도 승인 게이트다.
