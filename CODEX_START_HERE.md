@@ -1,7 +1,7 @@
 # CODEX START HERE — MOEMOA
 
-> **현재 저장소 상태 — 2026-08-16**
-> MOEMOA 인수인계 패키지 설치와 최초 저장소 감사가 완료됐고, `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`과 첫 Private Vertical Slice가 사용자 승인으로 확정됐다. Android local image intake, Private Card/Archive 영구 저장, TitleResolver/AnimeRef, 안전한 이미지 교체 기반까지 구현됐다. APK 사용성 검토 결과에 따라 현재 최우선 순서는 **공용 Memory UI를 Web 모바일·데스크톱에서 먼저 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness 단계**다. 이는 Web 제품 전체를 먼저 출시한다는 뜻이 아니며, Android local-only 첫 slice 안의 실행 순서 조정이다. 아래 Phase 0~1 설명은 새 저장소에 다시 설치하거나 코드가 크게 바뀌어 재감사할 때 사용한다.
+> **현재 저장소 상태 — 2026-08-19**
+> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 표지의 Supabase Preview 적재도 완료됐으며, 현재 기능 브랜치에서는 **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**을 검증 중이다. Production/master 병합과 Production 표지 사용 권한은 여전히 별도 승인 게이트다. 다음 큰 순서는 공용 Memory UI를 Web 모바일·데스크톱에서 충분히 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness다.
 
 ## 1. 목적
 
@@ -91,7 +91,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 
 ### Phase 2 — 기술 방향과 ExecPlan
 
-현재 상태: **제안서와 ExecPlan 승인 완료, 첫 slice 진행 중. 2026-08-16 Web-first Shared UI Readiness 순서가 추가 승인됨.**
+현재 상태: **첫 slice와 Web-first 순서는 승인·진행 중이며, 2026-08-19 Supabase Preview catalog consumer 통합 slice가 구현·검증 중이다.**
 
 읽기:
 
@@ -206,4 +206,4 @@ Android Share Target 또는 Photo Picker
 prompts/moemoa/01_BOOTSTRAP_REPOSITORY_AUDIT.md
 ```
 
-이 저장소에서는 최초 감사, 기반 세 결정, architecture proposal과 first slice ExecPlan 승인, local-only Card/Archive 기반, Android 영구 media boundary, local alias/AniList TitleResolver와 AnimeRef 저장, 안전한 image replacement와 재시작 cleanup 복구까지 완료됐다. 현재는 2026-08-16 승인된 Web-first Shared UI Readiness 설계를 구현 계획으로 전환하기 전 사용자 문서 검토 단계다. 현재 구현 상태는 `docs/moemoa/plans/first-private-vertical-slice.md`와 `docs/moemoa/reports/private-slice-test-evidence.md`, UI 실행 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
+이 저장소에서는 최초 감사, 기반 세 결정, local-only Card/Archive, Android 영구 media boundary, AnimeRef 저장, 안전한 image replacement와 재시작 cleanup 복구까지 완료됐다. Service Projection v2는 Supabase Preview에 별도 active release로 적재됐고, Web consumer 통합은 `docs/moemoa/plans/2026-08-19-web-catalog-consumer-unification.md`를 따른다. 첫 slice 전체 상태는 `docs/moemoa/plans/first-private-vertical-slice.md`, 테스트 증거는 `docs/moemoa/reports/private-slice-test-evidence.md`, UI 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.

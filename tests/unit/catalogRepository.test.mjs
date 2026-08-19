@@ -43,6 +43,7 @@ test("catalog repository returns service-safe detail and paginated people", asyn
       anime_id: animeId,
       payload: {
         schemaVersion: 2, animeId,
+        externalIds: [{ provider: "anilist", externalId: "1" }],
         preferredTitle: { locale: "ko", value: "카우보이 비밥" },
         titles: [{ locale: "ko", value: "카우보이 비밥" }, { locale: "en", value: "Cowboy Bebop" }],
         release: { format: "TV", status: "FINISHED", episodeCount: 26, startDate: "1998-04-03", sourceMaterialType: "ORIGINAL" },
@@ -69,6 +70,7 @@ test("catalog repository returns service-safe detail and paginated people", asyn
   const detail = await repository.getDetail(animeId);
   const people = await repository.getPeople(animeId, 1);
   assert.equal(detail.preferredTitle.value, "카우보이 비밥");
+  assert.deepEqual(detail.sourceBinding, { provider: "ANILIST", externalId: "1" });
   assert.match(detail.cover.publicUrl, /catalog-covers-preview/u);
   assert.equal(people.entries[0].castings[0].creditedName, "Koichi Yamadera");
   assert.doesNotMatch(JSON.stringify({ detail, people }), /rowHash|localRef|checksum/u);

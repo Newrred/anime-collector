@@ -1,3 +1,8 @@
+import {
+  isPromotionalCatalogTitle,
+  selectCatalogDisplayTitle,
+} from "../../../catalog/catalogTitleQuality.js";
+
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const READINESS = new Set(["BLOCKED", "READY_WITH_REVIEW", "READY_WITH_GAPS", "READY"]);
 
@@ -16,7 +21,7 @@ const stringList = (value, maximumItems, maximumLength) => {
 function mapRow(row) {
   const animeId = normalizeText(row?.anime_id, 80);
   const externalId = String(row?.anilist_id ?? "");
-  const displayTitle = normalizeText(row?.preferred_title);
+  const preferredTitle = normalizeText(row?.preferred_title);
   const aliases = Array.isArray(row?.search_aliases) && row.search_aliases.length <= 32
     ? row.search_aliases.flatMap((title) => {
       const value = normalizeText(title?.value);
@@ -24,13 +29,15 @@ function mapRow(row) {
     }) : null;
   const genres = stringList(row?.genres, 8, 80);
   const assetId = normalizeText(row?.cover_asset_id, 96);
+  const safeAliases = aliases?.filter((title) => !isPromotionalCatalogTitle(title));
+  const displayTitle = selectCatalogDisplayTitle(preferredTitle, safeAliases);
   if (!animeId || !ANIME_ID.test(animeId) || !/^[1-9]\d{0,11}$/u.test(externalId)
-    || !displayTitle || !aliases || !genres || !READINESS.has(row?.readiness) || !assetId) return null;
+    || !displayTitle || !safeAliases || !genres || !READINESS.has(row?.readiness) || !assetId) return null;
   return {
     kind: "ANIME_REF",
     animeId,
     displayTitle,
-    aliases: [...new Set(aliases.filter((title) => title !== displayTitle))].slice(0, 24),
+    aliases: [...new Set(safeAliases.filter((title) => title !== displayTitle))].slice(0, 24),
     genres,
     sourceBinding: { provider: "ANILIST", externalId },
     verificationState: "PROVIDER_CANDIDATE",

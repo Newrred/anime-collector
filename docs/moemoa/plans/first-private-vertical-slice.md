@@ -484,7 +484,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4A — Web-first Shared UI Readiness
 
-상태: `[ ] DESIGN APPROVED / IMPLEMENTATION PLAN PENDING REVIEW`
+상태: `[~] IN PROGRESS — CATALOG CONSUMER SLICE IMPLEMENTED`
 
 이 단계는 Milestone 4의 기능 흐름을 실제 사용 가능한 공용 UI로 끌어올리는 선행 gate다. 신규 제품 기능이나 Web production media 기능을 추가하지 않는다.
 
@@ -786,6 +786,9 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-18] 완료: 수집 중인 외부 branded TEST_ONLY workspace의 완성 ServiceProjection을 Web 개발 제목 검색에서 읽는 read-only adapter를 추가. loopback DEV endpoint가 최소 제목 DTO와 검증된 cover preview만 제공하며 raw·URL·hash·localRef·절대 경로는 브라우저에 전달하지 않음.
 [2026-08-18] 실데이터 smoke: 증가 중인 full3998 projection에서 exact title 검색과 작품별 checksum cover 읽기, 실제 Astro same-origin search/cover 200을 확인. 외부 workspace에는 쓰지 않음.
 [2026-08-18] 검증: catalog 186 pass/1 Windows skip, Web unit 93/93, Astro production build, catalog guard, production dist DEV-marker scan 통과. DB/schema/dependency 변경 없음.
+[2026-08-19] 완료: Service Projection v2 3,998개를 Supabase Preview active release로 적재하고 전용 public client·RLS read model로 검색/상세/인물/표지를 실제 Preview에서 검증했다. Production/master와 Production 표지 권한은 범위 밖이다.
+[2026-08-19] 구현: Library와 Memory composer의 검색을 Supabase catalog 우선으로 통합하고, catalog 결과가 있을 때 unmatched Legacy 후보를 숨기며 강한 홍보성 제목은 presentation alias로 대체한다. 상세→카드 링크는 animeId를 유지해 정확한 AnimeRef를 저장한다.
+[2026-08-19] 로컬 검증: Web unit 101/101, catalog 191 pass/1 Windows skip, Chromium Memory 11/11, Library 7 pass/2 live skip, Astro build, catalog guard 통과. Preview 기능 브랜치 실주소 재검증은 consumer slice 완료 게이트로 남아 있다.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -820,7 +823,19 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 
 ## 17. 완료 보고
 
-상태: `NOT STARTED`
+상태: `IN PROGRESS`
+
+완료된 사용자 결과:
+
+- local-only Card/Archive와 AnimeRef 저장, metadata 수정, 이미지 교체·삭제·복구 진입점.
+- Supabase Preview catalog 검색/상세/인물/표지 read model과 Library/Memory 공통 consumer.
+- catalog 결과 우선 dedupe, Legacy fallback 유지, 홍보성 표시 제목 격리, 상세→AnimeRef deep-link.
+
+남은 첫 slice 완료 게이트:
+
+- Web-first UI readiness의 전체 viewport/accessibility/visual 승인.
+- Android 적용과 물리 실기기 검증.
+- export·전체 filesystem orphan scan·최종 rollback rehearsal.
 
 완료 시 다음을 채운다.
 

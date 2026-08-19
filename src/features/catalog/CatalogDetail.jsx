@@ -55,7 +55,10 @@ export default function CatalogDetail() {
   );
 
   const genres = detail.genres.core.length ? detail.genres.core : detail.genres.source;
-  const cardHref = `/memory/new/?${new URLSearchParams({ title: detail.preferredTitle.value })}`;
+  const cardHref = `/memory/new/?${new URLSearchParams({
+    animeId: detail.animeId,
+    title: detail.preferredTitle.value,
+  })}`;
   return (
     <div className="catalog-detail page-shell">
       <header className="catalog-detail__hero surface-card">

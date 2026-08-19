@@ -52,9 +52,33 @@ export function useMemoryCardComposer() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const requestedTitle = String(new URLSearchParams(window.location.search).get("title") || "")
+    let active = true;
+    const parameters = new URLSearchParams(window.location.search);
+    const requestedTitle = String(parameters.get("title") || "")
       .normalize("NFKC").trim().replace(/\s+/gu, " ").slice(0, 120);
     if (requestedTitle) updateState({ title: requestedTitle });
+    const requestedAnimeId = String(parameters.get("animeId") || "");
+    if (requestedAnimeId) {
+      const generation = titleSearchGeneration.current;
+      const testChoice = import.meta.env.DEV
+        ? globalThis.__MOEMOA_TEST_CATALOG_TITLE_CHOICE__
+        : null;
+      const choicePromise = testChoice
+        ? Promise.resolve(structuredClone(testChoice))
+        : import("../../catalog/catalogConsumer.js")
+          .then(({ loadCatalogTitleChoice }) => loadCatalogTitleChoice(requestedAnimeId));
+      choicePromise.then((choice) => {
+        if (!active || generation !== titleSearchGeneration.current || !choice) return;
+        updateState({
+          title: choice.displayTitle,
+          selectedTitleChoice: choice,
+          titleResults: [],
+          titleSearchStatus: "ready",
+          remoteTitleStatus: "READY",
+        });
+      }).catch(() => {});
+    }
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { catalogSupabase } from "./catalogSupabaseClient.js";
+import { isPromotionalCatalogTitle, selectCatalogDisplayTitle } from "./catalogTitleQuality.js";
 
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
@@ -20,9 +21,19 @@ function safeTitles(rows) {
   return result.some((row) => !row.locale || !row.value) ? null : result;
 }
 
+function safeSourceBinding(rows) {
+  if (!Array.isArray(rows) || rows.length < 1 || rows.length > 32) return null;
+  const anilist = rows.find((row) => String(row?.provider || "").toLowerCase() === "anilist");
+  const externalId = String(anilist?.externalId ?? "");
+  return /^[1-9]\d{0,11}$/u.test(externalId)
+    ? { provider: "ANILIST", externalId }
+    : null;
+}
+
 function safeDetail(payload, animeId, cover) {
   if (!payload || payload.schemaVersion !== 2 || payload.animeId !== animeId) return null;
   const titles = safeTitles(payload.titles);
+  const sourceBinding = safeSourceBinding(payload.externalIds);
   const studios = Array.isArray(payload.studios) && payload.studios.length <= 32
     ? payload.studios.flatMap((row) => {
       const name = text(row?.name);
@@ -37,14 +48,19 @@ function safeDetail(payload, animeId, cover) {
       try { if (new URL(url).protocol !== "https:") return []; } catch { return []; }
       return [{ url, role: text(row?.role, 80) || "SECONDARY_OFFICIAL" }];
     }) : null;
-  if (!titles || !studios || !coreGenres || !sourceGenres || !officialLinks) return null;
+  if (!titles || !sourceBinding || !studios || !coreGenres || !sourceGenres || !officialLinks) return null;
+  const safeDisplayTitles = titles.filter((row) => !isPromotionalCatalogTitle(row.value));
+  const displayTitle = selectCatalogDisplayTitle(payload.preferredTitle?.value, safeDisplayTitles.map((row) => row.value));
+  if (!displayTitle) return null;
+  const displayTitleRow = safeDisplayTitles.find((row) => row.value === displayTitle);
   return {
     animeId,
+    sourceBinding,
     preferredTitle: {
-      locale: text(payload.preferredTitle?.locale, 20) || "und",
-      value: text(payload.preferredTitle?.value) || titles[0].value,
+      locale: displayTitleRow?.locale || "und",
+      value: displayTitle,
     },
-    titles,
+    titles: safeDisplayTitles,
     release: {
       format: text(payload.release?.format, 40), status: text(payload.release?.status, 40),
       season: text(payload.release?.season, 20), startDate: text(payload.release?.startDate, 40),

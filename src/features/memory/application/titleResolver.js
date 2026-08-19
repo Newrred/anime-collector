@@ -14,10 +14,12 @@ const uniqueAliases = (displayTitle, values) => {
 };
 
 const mergeCandidates = (localResults, remoteResults) => {
-  const merged = new Map(localResults.map((candidate) => [sourceKey(candidate), structuredClone(candidate)]));
+  if (remoteResults.length === 0) return structuredClone(localResults);
+  const localBySource = new Map(localResults.map((candidate) => [sourceKey(candidate), candidate]));
+  const merged = new Map();
   for (const remote of remoteResults) {
     const key = sourceKey(remote);
-    const local = merged.get(key);
+    const local = localBySource.get(key);
     merged.set(key, {
       ...structuredClone(remote),
       aliases: uniqueAliases(remote.displayTitle, [

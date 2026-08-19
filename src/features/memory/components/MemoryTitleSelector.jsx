@@ -1,9 +1,9 @@
 const candidateLabel = (candidate) => (
   candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
-    ? "MOEMOA catalog"
+    ? "작품 정보 있음"
     : candidate.verificationState === "PROVIDER_CANDIDATE"
-    ? "AniList candidate"
-    : "Legacy data · unverified"
+    ? "온라인 작품 후보"
+    : "이전 제목 후보"
 );
 
 export default function MemoryTitleSelector({

@@ -412,7 +412,7 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   await page.goto("/memory/new/");
   await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
   await page.getByRole("button", { name: "작품 검색" }).click();
-  await expect(page.getByText("AniList candidate")).toBeVisible();
+  await expect(page.getByText("온라인 작품 후보")).toBeVisible();
   await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
   await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
@@ -442,6 +442,52 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   expect(stored.cards[0].animeRefId).toBe(stored.animeRefs[0].id);
   expect(stored.cards[0].privateTitleId).toBeNull();
   expect(stored.animeRefs[0].sourceKey).toBe("ANILIST:154587");
+  expect(stored.privateTitles).toEqual([]);
+});
+
+test("catalog detail deep-link restores the exact AnimeRef before saving", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_CATALOG_TITLE_CHOICE__ = {
+      kind: "ANIME_REF",
+      animeId: "anime:11111111-1111-4111-8111-000000000001",
+      displayTitle: "카우보이 비밥",
+      aliases: ["Cowboy Bebop", "カウボーイビバップ"],
+      genres: ["Action", "Sci-Fi"],
+      sourceBinding: { provider: "ANILIST", externalId: "1" },
+      verificationState: "PROVIDER_CANDIDATE",
+      catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
+      readiness: "READY",
+    };
+  });
+
+  await page.goto("/memory/new/?animeId=anime%3A11111111-1111-4111-8111-000000000001&title=temporary");
+  await expect(page.getByLabel("작품 또는 카드 제목")).toHaveValue("카우보이 비밥");
+  await expect(page.getByText("작품 정보 있음")).toBeVisible();
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await expect(page.getByRole("heading", { name: "카우보이 비밥" })).toBeVisible();
+
+  const stored = await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction(["memory_cards", "anime_refs", "private_titles"], "readonly");
+    const readAll = (store: string) => new Promise<unknown[]>((resolve, reject) => {
+      const read = transaction.objectStore(store).getAll();
+      read.onsuccess = () => resolve(read.result);
+      read.onerror = () => reject(read.error);
+    });
+    const [cards, animeRefs, privateTitles] = await Promise.all([
+      readAll("memory_cards"), readAll("anime_refs"), readAll("private_titles"),
+    ]);
+    database.close();
+    return { cards, animeRefs, privateTitles };
+  });
+
+  expect(stored.cards).toHaveLength(1);
+  expect(stored.animeRefs).toHaveLength(1);
   expect(stored.privateTitles).toEqual([]);
 });
 
