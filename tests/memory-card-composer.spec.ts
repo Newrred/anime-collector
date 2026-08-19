@@ -463,6 +463,7 @@ test("catalog detail deep-link restores the exact AnimeRef before saving", async
   await page.goto("/memory/new/?animeId=anime%3A11111111-1111-4111-8111-000000000001&title=temporary");
   await expect(page.getByLabel("작품 또는 카드 제목")).toHaveValue("카우보이 비밥");
   await expect(page.getByText("작품 정보 있음")).toBeVisible();
+  await expect(page.getByText("일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.")).toBeHidden();
   await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "카우보이 비밥" })).toBeVisible();

@@ -123,6 +123,7 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 [2026-08-19] GREEN: shared title-quality/Library compatibility adapter, catalog-first AddAnime, exact detail deep-link를 구현.
 [2026-08-19] 보강: Library detail read를 상위 8개로 강제 제한하고 한 후보의 malformed detail은 정상 후보와 격리했다.
 [2026-08-19] Preview 발견: `AddAnime.jsx`는 현재 import되지 않는 구형 컴포넌트이고 실제 상단 검색은 `TopNavGlobalSearch`→`quickActionRemote` 경로임을 확인. 실제 사용 경로로 cutover를 이동하고 catalog/fallback cache를 분리했다.
+[2026-08-19] Preview 보강: exact AnimeRef가 선택된 deep-link에서 no-result 안내가 동시에 보이던 조건을 제거했다.
 [2026-08-19] 로컬 검증: unit 102/102, catalog 191 pass/1 skip, Memory Chromium 11/11, Library Chromium 7 pass/2 live skip, build와 guard 통과.
 ```
 

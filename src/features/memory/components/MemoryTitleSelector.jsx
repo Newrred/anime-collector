@@ -83,7 +83,7 @@ export default function MemoryTitleSelector({
         </ul>
       )}
 
-      {titleSearchStatus === "ready" && titleResults.length === 0 && (
+      {!selectedTitleChoice && titleSearchStatus === "ready" && titleResults.length === 0 && (
         <p className="memory-composer__title-status">일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.</p>
       )}
       {["UNAVAILABLE", "TIMED_OUT"].includes(remoteTitleStatus) && (
