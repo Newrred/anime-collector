@@ -1,5 +1,6 @@
 .catalog-detail { display: grid; gap: var(--layout-gap-md); padding-block: var(--space-8); }
 .catalog-detail__hero { display: flex; align-items: end; justify-content: space-between; gap: var(--space-6); }
+.catalog-detail__cover { width: clamp(120px, 18vw, 220px); aspect-ratio: 2 / 3; object-fit: cover; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
 .catalog-detail__hero h1 { margin: var(--space-2) 0; font-size: clamp(2rem, 5vw, 4rem); }
 .catalog-detail__hero p { color: var(--text-secondary); }
 .catalog-detail__eyebrow { color: var(--accent-strong) !important; font-weight: var(--fw-bold); }
@@ -16,6 +17,7 @@
 .catalog-detail__links { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
 @media (max-width: 720px) {
   .catalog-detail__hero { align-items: stretch; flex-direction: column; }
+  .catalog-detail__cover { width: min(48vw, 180px); }
   .catalog-detail__facts dl, .catalog-detail__people ul { grid-template-columns: 1fr; }
   .catalog-detail__people li { align-items: flex-start; flex-direction: column; }
   .catalog-detail__people li > span { text-align: left; }

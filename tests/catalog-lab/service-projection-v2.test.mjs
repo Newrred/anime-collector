@@ -76,9 +76,14 @@ function serviceV1(canonicalHash) {
   return { ...core, projectionHash: sha256(core) };
 }
 
-test('v2 separates bounded search, detail, people, and system placeholder asset records', () => {
+const coverAsset = Object.freeze({
+  sourceProvider: 'ANILIST', checksum: 'a'.repeat(64), byteSize: 1024,
+  width: 460, height: 650, mimeType: 'image/jpeg', extension: 'jpg',
+});
+
+test('v2 separates bounded search, detail, people, and permission-bound cover asset records', () => {
   const record = canonical();
-  const bundle = buildServiceProjectionV2({ target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash), peoplePageSize: 1 });
+  const bundle = buildServiceProjectionV2({ target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash), coverAsset, peoplePageSize: 1 });
 
   assert.equal(bundle.search.preferredTitle, '카우보이 비밥');
   assert.equal(bundle.search.releaseYear, 1998);
@@ -87,36 +92,40 @@ test('v2 separates bounded search, detail, people, and system placeholder asset 
   assert.equal(bundle.detail.people.characterCount, 2);
   assert.equal(bundle.people.length, 2);
   assert.equal(bundle.people[0].entries[0].castings[0].creditedName, 'Koichi Yamadera');
-  assert.equal(bundle.asset.kind, 'SYSTEM_DESIGN');
-  assert.equal(bundle.asset.storageRef, undefined);
+  assert.equal(bundle.asset.kind, 'COVER_IMAGE');
+  assert.equal(bundle.asset.rightsBasis, 'USER_CONFIRMED_PREVIEW_PERMISSION');
+  assert.equal(bundle.asset.objectPath, `covers/anime-11111111-1111-4111-8111-000000000001/${'a'.repeat(64)}.jpg`);
   assert.equal(validateServiceProjectionV2Bundle(bundle), true);
 });
 
 test('v2 output is deterministic and rejects canonical/v1 identity drift', () => {
   const record = canonical();
-  const input = { target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash) };
+  const input = { target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash), coverAsset };
   assert.deepEqual(buildServiceProjectionV2(input), buildServiceProjectionV2(input));
   assert.throws(() => buildServiceProjectionV2({ ...input, serviceProjection: { ...input.serviceProjection, animeId: 'anime:22222222-2222-4222-8222-222222222222' } }), /identity/i);
 });
 
-test('v2 does not expose local cover references, source URLs, or canonical provenance', () => {
+test('v2 exposes only service object identity and never local cover references or canonical provenance', () => {
   const record = canonical();
   const serialized = JSON.stringify(buildServiceProjectionV2({
     target,
     canonical: record,
     serviceProjection: serviceV1(record.revision.contentHash),
-    cover: { status: 'STORED', localRef: 'images/covers/private/file.jpg', checksum: 'a'.repeat(64) },
+    coverAsset,
   }));
-  assert.doesNotMatch(serialized, /localRef|rawPayloadRef|sourceRecordId|images\/covers|checksum/u);
+  assert.doesNotMatch(serialized, /localRef|rawPayloadRef|sourceRecordId|images\/covers/u);
+  assert.match(serialized, /USER_CONFIRMED_PREVIEW_PERMISSION/u);
 });
 
 test('database rows preserve bounded projections without source or filesystem evidence', () => {
   const record = canonical();
-  const bundle = buildServiceProjectionV2({ target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash) });
+  const bundle = buildServiceProjectionV2({ target, canonical: record, serviceProjection: serviceV1(record.revision.contentHash), coverAsset });
   const rows = buildCatalogDbRows('catalog-v2-test', bundle);
   assert.equal(rows.search.anilist_id, 1);
   assert.match(rows.search.search_text, /카우보이 비밥/u);
   assert.equal(rows.detail.payload.animeId, target.moemoaAnimeId);
-  assert.equal(rows.asset.kind, 'SYSTEM_DESIGN');
-  assert.doesNotMatch(JSON.stringify(rows), /localRef|rawPayloadRef|sourceRecordId|checksum/u);
+  assert.equal(rows.asset.kind, 'COVER_IMAGE');
+  assert.equal(rows.asset.bucket_id, 'catalog-covers-preview');
+  assert.equal(rows.asset.checksum, 'a'.repeat(64));
+  assert.doesNotMatch(JSON.stringify(rows), /localRef|rawPayloadRef|sourceRecordId/u);
 });

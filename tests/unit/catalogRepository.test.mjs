@@ -7,6 +7,7 @@ const animeId = "anime:11111111-1111-4111-8111-000000000001";
 
 function clientFor(rows) {
   return {
+    storage: { from: (bucket) => ({ getPublicUrl: (path) => ({ data: { publicUrl: `https://example.supabase.co/storage/v1/object/public/${bucket}/${path}` } }) }) },
     from(table) {
       const filters = {};
       const chain = {
@@ -32,8 +33,14 @@ test("catalog repository returns service-safe detail and paginated people", asyn
         genres: { core: ["Action"], source: ["Action", "Sci-Fi"] },
         officialLinks: [], relations: [],
         people: { characterCount: 1, castingCount: 1, pageCount: 1, pageSize: 30 },
-        readiness: { status: "READY" }, rowHash: "private-integrity-field",
+        readiness: { status: "READY" }, coverAssetId: "asset:cover", rowHash: "private-integrity-field",
       },
+    } : table === "catalog_assets" ? {
+      asset_id: "asset:cover", anime_id: animeId, kind: "COVER_IMAGE",
+      availability: "PREVIEW_STORAGE", rights_basis: "USER_CONFIRMED_PREVIEW_PERMISSION",
+      bucket_id: "catalog-covers-preview",
+      object_path: `covers/anime-11111111-1111-4111-8111-000000000001/${"a".repeat(64)}.jpg`,
+      width: 460, height: 650,
     } : {
       anime_id: animeId, page: 1,
       payload: {
@@ -45,6 +52,7 @@ test("catalog repository returns service-safe detail and paginated people", asyn
   const detail = await repository.getDetail(animeId);
   const people = await repository.getPeople(animeId, 1);
   assert.equal(detail.preferredTitle.value, "카우보이 비밥");
+  assert.match(detail.cover.publicUrl, /catalog-covers-preview/u);
   assert.equal(people.entries[0].castings[0].creditedName, "Koichi Yamadera");
   assert.doesNotMatch(JSON.stringify({ detail, people }), /rowHash|localRef|checksum/u);
 });

@@ -1,7 +1,7 @@
 import { sha256 } from '../lib/hash.mjs';
 
 export const SERVICE_PROJECTION_V2_SCHEMA_VERSION = 2;
-export const SERVICE_PROJECTION_V2_POLICY_VERSION = 'SERVICE_PROJECTION_V2_PREVIEW_2026_08_19';
+export const SERVICE_PROJECTION_V2_POLICY_VERSION = 'SERVICE_PROJECTION_V2_PREVIEW_COVERS_2026_08_19';
 
 const HASH = /^[a-f0-9]{64}$/u;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
@@ -185,6 +185,39 @@ function safeInteger(value, minimum = 0) {
   return Number.isSafeInteger(number) && number >= minimum ? number : null;
 }
 
+function coverAssetRow(animeId, cover) {
+  const extension = text(cover?.extension, 8);
+  const checksum = text(cover?.checksum, 64);
+  const sourceProvider = text(cover?.sourceProvider, 40);
+  const mimeType = text(cover?.mimeType, 80);
+  const byteSize = safeInteger(cover?.byteSize, 1);
+  const width = safeInteger(cover?.width, 1);
+  const height = safeInteger(cover?.height, 1);
+  const expectedMime = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[extension];
+  if (!HASH.test(checksum ?? '') || sourceProvider !== 'ANILIST' || mimeType !== expectedMime
+    || byteSize === null || width === null || height === null || width > 10_000 || height > 10_000) {
+    throw typedError('SERVICE_PROJECTION_V2_COVER_INVALID', 'A validated AniList cover descriptor is required');
+  }
+  const pathKey = animeId.replace(':', '-');
+  const assetId = `asset:${sha256(['COVER_IMAGE', animeId, checksum]).slice(0, 40)}`;
+  return hashed({
+    schemaVersion: SERVICE_PROJECTION_V2_SCHEMA_VERSION,
+    policyVersion: SERVICE_PROJECTION_V2_POLICY_VERSION,
+    assetId,
+    animeId,
+    kind: 'COVER_IMAGE',
+    availability: 'PREVIEW_STORAGE',
+    rightsBasis: 'USER_CONFIRMED_PREVIEW_PERMISSION',
+    sourceProvider,
+    checksum,
+    byteSize,
+    width,
+    height,
+    mimeType,
+    objectPath: `covers/${pathKey}/${checksum}.${extension}`,
+  });
+}
+
 /** Creates service-safe, payload-bounded projections from one authenticated canonical revision. */
 export function buildServiceProjectionV2(input = {}) {
   const target = clone(input.target);
@@ -204,19 +237,11 @@ export function buildServiceProjectionV2(input = {}) {
   const sourceGenres = stringValues(canonical.sourceGenres, 32);
   const coreGenres = stringValues(canonical.coreGenres, 16);
   const people = peopleRows(canonical);
-  const assetId = `asset:${sha256(['SYSTEM_DESIGN', target.moemoaAnimeId]).slice(0, 40)}`;
+  const asset = coverAssetRow(target.moemoaAnimeId, input.coverAsset);
+  const assetId = asset.assetId;
   const releaseYear = /^\d{4}/u.exec(String(scalar(canonical.startDate) ?? ''))?.[0];
   const aliases = titles.filter((row) => row.locale !== preferred.locale || row.value !== preferred.value);
 
-  const asset = hashed({
-    schemaVersion: SERVICE_PROJECTION_V2_SCHEMA_VERSION,
-    policyVersion: SERVICE_PROJECTION_V2_POLICY_VERSION,
-    assetId,
-    animeId: target.moemoaAnimeId,
-    kind: 'SYSTEM_DESIGN',
-    availability: 'SERVICE_GENERATED',
-    rightsBasis: 'SYSTEM_GENERATED',
-  });
   const search = hashed({
     schemaVersion: SERVICE_PROJECTION_V2_SCHEMA_VERSION,
     policyVersion: SERVICE_PROJECTION_V2_POLICY_VERSION,

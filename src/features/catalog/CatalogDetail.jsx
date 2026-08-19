@@ -59,6 +59,13 @@ export default function CatalogDetail() {
   return (
     <div className="catalog-detail page-shell">
       <header className="catalog-detail__hero surface-card">
+        <img
+          className="catalog-detail__cover"
+          src={detail.cover.publicUrl}
+          width={detail.cover.width}
+          height={detail.cover.height}
+          alt={`${detail.preferredTitle.value} 표지`}
+        />
         <div>
           <p className="catalog-detail__eyebrow">MOEMOA Catalog</p>
           <h1>{detail.preferredTitle.value}</h1>
