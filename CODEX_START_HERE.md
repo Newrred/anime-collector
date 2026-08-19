@@ -1,7 +1,7 @@
 # CODEX START HERE — MOEMOA
 
 > **현재 저장소 상태 — 2026-08-19**
-> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 표지의 Supabase Preview 적재도 완료됐으며, 현재 기능 브랜치에서는 **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**을 검증 중이다. Production/master 병합과 Production 표지 사용 권한은 여전히 별도 승인 게이트다. 다음 큰 순서는 공용 Memory UI를 Web 모바일·데스크톱에서 충분히 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness다.
+> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 표지의 Supabase 적재, **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**도 Preview 검증을 마쳤다. 2026-08-19 사용자가 현재 카탈로그 metadata와 작품별 대표 표지의 Production 저장·표시 허가를 확인해 master 배포가 승인됐다. 이 승인은 raw payload·추가 이미지·애니 캡처·팬아트·사용자 이미지·Public UGC에는 적용되지 않는다. 다음 큰 순서는 공용 Memory UI를 Web 모바일·데스크톱에서 충분히 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness다.
 
 ## 1. 목적
 

@@ -143,6 +143,7 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 - 외부 실행 전 필요: 별도 Supabase Preview project ref/URL/publishable key/service-role key와 Vercel Preview project 접근.
 - 별도 게이트: AniList 기반 metadata와 표지를 cloud에 저장·재배포할 권한. 확인 전 remote에는 synthetic/허용 데이터만 사용한다.
 - Production backend/auth provider 확정은 이번 Preview 결과 후 결정한다.
+- 2026-08-19 후속 승인: 사용자가 현재 AniList 기반 metadata와 작품별 대표 표지의 Production 저장·표시 허가를 확인했다. 이 승인으로 Web catalog read model의 Production 사용은 허용하되 auth provider 확정, 사용자 이미지 cloud upload, Public UGC는 포함하지 않는다.
 
 ## 15. 진행 기록
 
@@ -161,6 +162,7 @@ Search 응답은 최대 12개 summary만, detail은 한 작품만, people은 30�
 [2026-08-19] 원격 적재 완료: release `catalog-v2-8af2e03bc80789f59b4eaf7c`를 활성화. search/detail/assets 각 3,998개, people 4,899 pages, cover objects 3,998개와 로컬·원격 총 byte `812094371` 일치를 확인함.
 [2026-08-19] Preview 완료: Newrred commit `25f6c75`의 Vercel Preview가 READY. 실제 Chromium에서 영문 검색 → 한국어 상세 제목 → 460×640 Supabase Storage 표지 → 캐릭터·성우 → 제목 prefill → `LOCAL_ONLY` 시스템 디자인 카드 → Archive 흐름 통과, 브라우저 오류 0건.
 [2026-08-19] 최종 검증: unit 96/96, catalog 191 pass/1 기존 Windows skip, build 성공, React Doctor 100/100, catalog guard no leaks, client bundle service-role/secret 0건. Vercel build error 0건, 최근 1시간 runtime error 0건.
+[2026-08-19] Production 권리 승인: 사용자가 현재 release의 metadata와 작품별 대표 표지 1개를 MOEMOA Production Web에서 저장·표시할 허가를 확인함. raw·추가 이미지·UGC는 계속 제외.
 ```
 
 ## 16. 발견 사항과 계획 변경

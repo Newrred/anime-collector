@@ -35,7 +35,6 @@ Supabase Preview의 확정된 Service Projection v2를 카드 작성뿐 아니�
 ### 제외
 
 - Legacy row 삭제·canonical 자동 승격.
-- Production/master 배포와 Production 표지 권한 확대.
 - 사용자 이미지 cloud upload, 로그인·sync, Board, Public UGC.
 - Library 저장 schema의 파괴적 변경.
 
@@ -89,8 +88,8 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 
 - 브라우저에는 publishable key와 active read model만 둔다. RLS public read 범위는 변경하지 않는다.
 - 검색어·note를 analytics/ordinary log에 추가하지 않는다.
-- catalog cover는 Preview 표시 전용이며 Memory `VisualAsset`으로 저장하지 않는다.
-- Production rights 범위로 확대하지 않는다.
+- catalog cover는 승인된 검색·상세 presentation asset이며 Memory `VisualAsset`으로 저장하지 않는다.
+- Production 승인은 현재 Service Projection v2 3,998개와 작품별 대표 표지 1개에만 적용하고 raw·추가 이미지·UGC로 확대하지 않는다.
 
 ## 11. 관찰 가능성·분석 이벤트
 
@@ -107,11 +106,11 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 - Library legacy UI shape 차이: 별도 compatibility adapter와 기존 callback 계약 테스트.
 - Supabase N+1 detail 요청: 최대 8개 bounded 병렬 요청으로 시작하고 실제 latency를 측정; 필요 시 후속 batch RPC.
 - 의심 제목 오탐: 강한 홍보성 prefix만 presentation에서 제외하고 canonical 원문은 보존.
-- Preview 권한 혼동: feature branch와 전용 env 이름 유지, Production 병합 금지.
+- Preview/Production 혼동: catalog client는 전용 `PUBLIC_CATALOG_SUPABASE_*`를 사용하고 기존 인증 Supabase 연결과 분리한다.
 
 ## 14. 필요한 사용자 결정
 
-이번 범위는 2026-08-19 사용자 승인으로 진행한다. Production/master 병합과 표지 Production 권한은 별도 승인이다.
+2026-08-19 사용자가 현재 카탈로그 metadata와 작품별 대표 표지의 Production 저장·표시 허가 및 master 배포를 승인했다. 허가 원문은 사용자가 보관하고 저장소에는 범위와 확인 시점만 기록한다.
 
 ## 15. 진행 기록
 
@@ -127,6 +126,7 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 [2026-08-19] Preview 완료: `bfe02bb` immutable deployment에서 Supabase cover URL 기반 `나루토` 8개 결과, 홍보성 제목 부재와 clean alias, detail/people, exact AnimeRef 선택과 Archive 저장을 확인.
 [2026-08-19] 반응형 완료: 390×844 메인 검색 sheet와 card composer의 document scroll width가 viewport 이하이며 browser warning/error가 0임을 확인.
 [2026-08-19] 로컬 검증: unit 102/102, catalog 191 pass/1 skip, Memory Chromium 11/11, Library Chromium 7 pass/2 live skip, build와 guard 통과.
+[2026-08-19] Production 승인: 사용자가 Service Projection v2 3,998개와 작품별 대표 표지의 Production 저장·표시 허가를 확인하고 master 병합을 승인.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -135,7 +135,7 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 
 ## 17. 완료 보고
 
-상태: `COMPLETED — PREVIEW ONLY`
+상태: `COMPLETED — PRODUCTION RELEASE APPROVED`
 
 사용자 결과:
 
@@ -155,4 +155,4 @@ DB migration 없음. active release와 기존 IndexedDB schema를 그대로 사�
 
 롤백: `a4c263a`, `a3e959e`, `bfe02bb`의 Web consumer 커밋을 revert하면 기존 AniList/Legacy 검색으로 복귀하며 DB rollback은 필요 없다.
 
-다음 승인 게이트: Production/master 병합 및 Production 표지 권한. 이번 완료는 보호된 Vercel Preview에만 해당한다.
+다음 승인 게이트: 이번 Production 배포의 실제 주소 E2E와 오류 관찰 완료. 사용자 이미지 cloud upload와 Public UGC는 계속 비활성 상태다.
