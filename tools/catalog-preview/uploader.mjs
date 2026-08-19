@@ -11,6 +11,15 @@ function typedError(code, message) {
   return error;
 }
 
+export function createPreviewAdminHeaders(serviceKey) {
+  const value = String(serviceKey ?? '').trim();
+  if (/^sb_secret_[A-Za-z0-9_-]{20,}$/u.test(value)) return Object.freeze({ apikey: value });
+  if (/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/u.test(value)) {
+    return Object.freeze({ apikey: value, Authorization: `Bearer ${value}` });
+  }
+  throw typedError('CATALOG_PREVIEW_REMOTE_CONFIG_INVALID', 'A Supabase secret or legacy service-role key is required');
+}
+
 function previewConfig(env) {
   const environment = String(env.MOEMOA_SUPABASE_ENV ?? '').trim();
   const url = String(env.MOEMOA_SUPABASE_URL ?? '').trim().replace(/\/+$/u, '');
@@ -29,13 +38,12 @@ function previewConfig(env) {
   if (permission !== 'approved_metadata_and_covers_preview') {
     throw typedError('CATALOG_PREVIEW_PERMISSION_REQUIRED', 'Cloud metadata and cover Preview permission gate is not approved');
   }
-  return Object.freeze({ url, serviceKey, projectRef: actualRef });
+  return Object.freeze({ url, authHeaders: createPreviewAdminHeaders(serviceKey), projectRef: actualRef });
 }
 
 function headers(config, prefer = '') {
   return {
-    apikey: config.serviceKey,
-    Authorization: `Bearer ${config.serviceKey}`,
+    ...config.authHeaders,
     'Content-Type': 'application/json',
     Accept: 'application/json',
     ...(prefer ? { Prefer: prefer } : {}),
@@ -75,6 +83,53 @@ async function upsert(config, table, rows, conflict, fetchImpl) {
   });
 }
 
+async function readRemoteHashes(config, table, select, releaseId, fetchImpl) {
+  const rows = [];
+  for (let offset = 0; offset < 10_000; offset += 1_000) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30_000);
+    let response;
+    try {
+      response = await fetchImpl(`${config.url}/rest/v1/${table}?select=${encodeURIComponent(select)}&release_id=eq.${encodeURIComponent(releaseId)}`, {
+        method: 'GET', headers: { ...config.authHeaders, Accept: 'application/json', Range: `${offset}-${offset + 999}`, 'Range-Unit': 'items' }, signal: controller.signal,
+      });
+    } catch {
+      throw typedError('CATALOG_PREVIEW_RESUME_FAILED', 'Preview resume query failed');
+    } finally { clearTimeout(timeout); }
+    if (!response.ok) throw typedError('CATALOG_PREVIEW_RESUME_FAILED', `Preview resume query was rejected (${response.status})`);
+    const page = await response.json();
+    if (!Array.isArray(page) || page.length > 1_000) throw typedError('CATALOG_PREVIEW_RESUME_FAILED', 'Preview resume response is invalid');
+    rows.push(...page);
+    if (page.length < 1_000) return rows;
+  }
+  throw typedError('CATALOG_PREVIEW_RESUME_FAILED', 'Preview resume response exceeds the allowed boundary');
+}
+
+async function completedRemoteEntries(config, release, fetchImpl) {
+  const [assets, search, details, people] = await Promise.all([
+    readRemoteHashes(config, 'catalog_assets', 'anime_id,row_hash', release.releaseId, fetchImpl),
+    readRemoteHashes(config, 'catalog_anime_search', 'anime_id,row_hash', release.releaseId, fetchImpl),
+    readRemoteHashes(config, 'catalog_anime_details', 'anime_id,row_hash', release.releaseId, fetchImpl),
+    readRemoteHashes(config, 'catalog_anime_people', 'anime_id,page,row_hash', release.releaseId, fetchImpl),
+  ]);
+  const assetHashes = new Map(assets.map((row) => [row.anime_id, row.row_hash]));
+  const searchHashes = new Map(search.map((row) => [row.anime_id, row.row_hash]));
+  const detailHashes = new Map(details.map((row) => [row.anime_id, row.row_hash]));
+  const peopleHashes = new Map();
+  for (const row of people) {
+    const list = peopleHashes.get(row.anime_id) ?? [];
+    list[row.page - 1] = row.row_hash;
+    peopleHashes.set(row.anime_id, list);
+  }
+  return new Set(release.entries.flatMap((entry) => (
+    assetHashes.get(entry.animeId) === entry.assetHash
+      && searchHashes.get(entry.animeId) === entry.searchHash
+      && detailHashes.get(entry.animeId) === entry.detailHash
+      && JSON.stringify(peopleHashes.get(entry.animeId) ?? []) === JSON.stringify(entry.peopleHashes)
+      ? [entry.animeId] : []
+  )));
+}
+
 async function uploadCover(config, asset, bytes, fetchImpl) {
   const path = `/storage/v1/object/${asset.bucket_id}/${asset.object_path.split('/').map(encodeURIComponent).join('/')}`;
   const controller = new AbortController();
@@ -84,8 +139,7 @@ async function uploadCover(config, asset, bytes, fetchImpl) {
     response = await fetchImpl(`${config.url}${path}`, {
       method: 'POST',
       headers: {
-        apikey: config.serviceKey,
-        Authorization: `Bearer ${config.serviceKey}`,
+        ...config.authHeaders,
         'Content-Type': asset.mime_type,
         'Cache-Control': 'public, max-age=31536000, immutable',
         'x-upsert': 'false',
@@ -97,7 +151,7 @@ async function uploadCover(config, asset, bytes, fetchImpl) {
     throw typedError('CATALOG_PREVIEW_COVER_UPLOAD_FAILED', 'Preview cover upload request failed');
   } finally { clearTimeout(timeout); }
   if (response.ok) return;
-  if (response.status === 409) {
+  if (response.status === 400 || response.status === 409) {
     const existing = await fetchImpl(`${config.url}/storage/v1/object/public/${asset.bucket_id}/${asset.object_path
       .split('/').map(encodeURIComponent).join('/')}`, { method: 'HEAD' });
     if (existing.ok && Number(existing.headers.get('content-length')) === asset.byte_size) return;
@@ -123,11 +177,13 @@ export async function uploadCatalogPreview({
   env = process.env,
   fetchImpl = globalThis.fetch,
   batchSize = 100,
+  onProgress = () => {},
 } = {}) {
   const validation = await validateServiceProjectionV2Release({ workspace, profile });
   const release = await readReleaseManifest({ workspace, profile });
   if (!allowUpload) return Object.freeze({ ...validation, mode: 'DRY_RUN', uploaded: false });
-  if (typeof fetchImpl !== 'function' || !Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 500) {
+  if (typeof fetchImpl !== 'function' || typeof onProgress !== 'function'
+    || !Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 500) {
     throw typedError('CATALOG_PREVIEW_UPLOAD_CONFIG_INVALID', 'Uploader configuration is invalid');
   }
   const config = previewConfig(env);
@@ -142,9 +198,17 @@ export async function uploadCatalogPreview({
     status: 'STAGING',
   }], 'id', fetchImpl);
 
-  const counts = { assets: 0, coverObjects: 0, search: 0, details: 0, people: 0 };
-  for (let index = 0; index < release.entries.length; index += batchSize) {
-    const slice = release.entries.slice(index, index + batchSize);
+  const completed = await completedRemoteEntries(config, release, fetchImpl);
+  const pendingEntries = release.entries.filter((entry) => !completed.has(entry.animeId));
+  const existingPeople = release.entries.filter((entry) => completed.has(entry.animeId))
+    .reduce((sum, entry) => sum + entry.peopleHashes.length, 0);
+  const counts = {
+    assets: completed.size, coverObjects: completed.size, search: completed.size,
+    details: completed.size, people: existingPeople,
+  };
+  if (completed.size) onProgress(Object.freeze({ completed: completed.size, total: release.entries.length }));
+  for (let index = 0; index < pendingEntries.length; index += batchSize) {
+    const slice = pendingEntries.slice(index, index + batchSize);
     const bundles = await Promise.all(slice.map((entry) => readReleaseDbRows({
       workspace, releaseId: release.releaseId, entry,
     })));
@@ -171,6 +235,7 @@ export async function uploadCatalogPreview({
     counts.search += search.length;
     counts.details += details.length;
     counts.people += people.length;
+    onProgress(Object.freeze({ completed: Math.min(completed.size + index + slice.length, release.entries.length), total: release.entries.length }));
   }
   await request(config, '/rest/v1/rpc/activate_catalog_release', {
     body: { requested_release_id: release.releaseId, requested_release_hash: release.releaseHash },

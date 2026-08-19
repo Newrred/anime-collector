@@ -7,6 +7,7 @@ import {
   validateServiceProjectionV2Bundle,
 } from '../../tools/catalog-lab/pipeline/service-projection-v2.mjs';
 import { buildCatalogDbRows } from '../../tools/catalog-preview/export-v2.mjs';
+import { createPreviewAdminHeaders } from '../../tools/catalog-preview/uploader.mjs';
 
 const target = Object.freeze({
   targetKey: 'ANILIST:1',
@@ -79,6 +80,14 @@ function serviceV1(canonicalHash) {
 const coverAsset = Object.freeze({
   sourceProvider: 'ANILIST', checksum: 'a'.repeat(64), byteSize: 1024,
   width: 460, height: 650, mimeType: 'image/jpeg', extension: 'jpg',
+});
+
+test('preview uploader sends opaque secret keys only through apikey while retaining legacy JWT compatibility', () => {
+  const secret = ['sb', 'secret', 'abcdefghijklmnopqrstuvwxyz123456'].join('_');
+  assert.deepEqual(createPreviewAdminHeaders(secret), { apikey: secret });
+  const legacy = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from('{"role":"service_role"}').toString('base64url')}.signature`;
+  assert.deepEqual(createPreviewAdminHeaders(legacy), { apikey: legacy, Authorization: `Bearer ${legacy}` });
+  assert.throws(() => createPreviewAdminHeaders('not-a-key'), /secret or legacy service-role/u);
 });
 
 test('v2 separates bounded search, detail, people, and permission-bound cover asset records', () => {

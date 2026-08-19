@@ -33,6 +33,7 @@ if (!process.exitCode) {
     else if (command === 'validate') result = await validateServiceProjectionV2Release({ workspace, profile });
     else if (command === 'upload') result = await uploadCatalogPreview({
       workspace, profile, allowUpload: args.includes('--allow-upload'),
+      onProgress: ({ completed, total }) => process.stderr.write(`Catalog Preview upload: ${completed}/${total}\n`),
     });
     else throw Object.assign(new Error(), { code: 'COMMAND_INVALID' });
     process.stdout.write(`${JSON.stringify(result)}\n`);
