@@ -484,7 +484,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4A — Web-first Shared UI Readiness
 
-상태: `[~] IN PROGRESS — CATALOG CONSUMER SLICE IMPLEMENTED`
+상태: `[~] IN PROGRESS — DISCOVERABILITY GATE DEFINED`
 
 이 단계는 Milestone 4의 기능 흐름을 실제 사용 가능한 공용 UI로 끌어올리는 선행 gate다. 신규 제품 기능이나 Web production media 기능을 추가하지 않는다.
 
@@ -497,6 +497,28 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 - keyboard-only focus, visible focus, reduced motion, screenshot visual baseline을 추가한다.
 - 기존 domain/application/repository/native bridge 계약과 IndexedDB schema 1은 변경하지 않는다.
 - 각 큰 UI checkpoint에서 `astro build`→`cap sync android`→debug APK→cold launch smoke를 유지한다.
+
+#### Milestone 4A-1 — Memory Card 발견성과 진입 동선
+
+현재 `/memory/new/` 기능은 직접 URL에서 작동하지만 Home과 공통 navigation에 명확한 진입점이 없고, 상단 검색은 기존 Library 추가 흐름으로 이어진다. 이를 기능 부재처럼 느끼게 하는 출시 차단 사용성 결함으로 취급한다.
+
+- Home 첫 화면의 primary action을 결과가 분명한 `메모리 카드 만들기`로 연결한다.
+- desktop/mobile 공통 상단 navigation에 `/memory/new/` 진입점을 제공한다. 모바일에서 숨겨진 overflow menu만을 유일한 경로로 두지 않는다.
+- 상단 검색의 기존 Library 행동과 Memory Card 행동을 명확히 분리한다.
+- 작품 검색 결과에서는 `이 작품으로 카드 만들기`를 primary, `Library에 추가`를 secondary action으로 표현한다.
+- catalog 상세의 카드 작성 action은 내부 `animeId`를 deep-link로 유지해 정확한 `AnimeRef`를 복원한다.
+- 카드 작성 action은 Library를 암묵적으로 추가·수정하지 않고, Library action은 Card 또는 Draft를 암묵적으로 생성하지 않는다.
+- Archive의 빈 상태와 일반 상태 모두 새 카드 작성 진입점을 제공한다.
+- 기존 Library/Tier 전체 navigation 재설계, DB schema 변경, Board·sync·Public 기능 추가는 이 sub-milestone에 포함하지 않는다.
+
+완료 증거:
+
+- `/`에서 직접 URL을 알지 못하는 사용자가 primary CTA 한 번으로 `/memory/new/`에 진입.
+- 공통 상단 navigation에서 desktop/mobile 모두 카드 작성 진입점이 보이고 44×44px touch target과 overflow 기준을 통과.
+- 검색 결과와 catalog 상세에서 `카드 만들기`와 `Library에 추가`가 서로 다른 label·위계·결과를 가짐.
+- `이 작품으로 카드 만들기` E2E가 exact `AnimeRef`를 저장하고 Library count를 변경하지 않음.
+- `Library에 추가` 회귀가 Memory Card/Draft count를 변경하지 않음.
+- 사람 검토에서 첫 화면 10초 안에 카드 작성 진입점을 지목하고 두 행동의 차이를 설명.
 
 완료 증거:
 
@@ -720,6 +742,8 @@ export_failed
 | system design 품질 부족 | 이미지 없는 사용자 이탈 | 소수 deterministic template로 시작, 사용 데이터 후 확장 |
 | export만 있고 restore 없음 | 완전한 백업 기대 불일치 | UI에 export 범위 명시, restore를 다음 별도 plan으로 추적 |
 | app uninstall | LOCAL_ONLY 완전 손실 | 첫 카드 이후 export 안내, 후속 opt-in cloud backup gate |
+| 카드 작성 route가 navigation에서 숨겨짐 | 핵심 기능이 없는 것으로 인식·첫 Card 전환 실패 | Milestone 4A-1, Home/공통 nav/search/detail E2E와 사람 발견성 검토 |
+| `Library에 추가`와 `카드 만들기` 혼동 | 의도하지 않은 Library 변경 또는 Card 미생성 | 명시적 label·primary/secondary 위계·상호 비변경 계약 테스트 |
 
 ## 14. 승인된 사용자 결정과 재검토 조건
 
@@ -736,6 +760,12 @@ export_failed
 6. 공용 Memory UI를 Web 내부 테스트 surface에서 먼저 완성·검증하는 것.
 7. Web UI Readiness Gate 뒤 Android 전용 적응과 실기기 검증으로 복귀하는 것.
 8. Web production image persistence, Board, sync, cloud, Public의 기존 후속 gate를 유지하는 것.
+
+2026-08-20 사용자는 기존 Web-first 범위 안에서 다음 기준 보완을 승인했다.
+
+9. 기능의 direct URL 작동과 사용자의 발견 가능성을 별도 완료 조건으로 구분하는 것.
+10. Home·공통 navigation·검색 결과·catalog 상세에 명확한 Memory Card 작성 진입점을 제공하는 것.
+11. `Library에 추가`와 `이 작품으로 카드 만들기`를 서로 다른 행동과 테스트 계약으로 유지하는 것.
 
 DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI 폐기와 별도 Android UI 구축처럼 승인 범위를 바꾸는 중대한 trade-off가 발견되면 실행을 멈추고 다시 결정받는다.
 
@@ -790,6 +820,8 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-19] 구현: Library와 Memory composer의 검색을 Supabase catalog 우선으로 통합하고, catalog 결과가 있을 때 unmatched Legacy 후보를 숨기며 강한 홍보성 제목은 presentation alias로 대체한다. 상세→카드 링크는 animeId를 유지해 정확한 AnimeRef를 저장한다.
 [2026-08-19] 로컬 검증: Web unit 102/102, catalog 191 pass/1 Windows skip, Chromium Memory 11/11, Library 7 pass/2 live skip, Astro build, catalog guard 통과. 이어진 Preview 실주소 검증으로 consumer slice 게이트를 닫았다.
 [2026-08-19] Preview 검증: `bfe02bb` immutable deployment에서 실제 Supabase 표지 기반 8개 검색, 홍보성 대표 제목 제거, 상세/인물, 상세→AnimeRef 선택→local-only Archive 저장을 확인했다. 390×844에서 horizontal overflow 0, 브라우저 warning/error 0이었다.
+[2026-08-20] 발견: 최신 Preview에서 `/memory/new/` direct route는 작동하지만 Home·공통 navigation에 카드 작성 entry가 없고 상단 검색은 Library 추가로 이어져 사용자가 핵심 기능을 찾지 못함.
+[2026-08-20] 계획 보완: Milestone 4A-1을 추가해 Home/상단 navigation/search/detail의 발견성, Library/Card action 분리, direct-route가 아닌 실제 시작점 E2E를 Web UI Readiness 선행 gate로 고정함.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -809,6 +841,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 - title resolver와 3,998-row alias payload는 Archive/detail runtime에서 정적으로 import하지 않고 첫 검색 시 lazy load한다. 이는 catalog 경계를 바꾸지 않는 번들 분리이며 신규 dependency나 schema 변경이 없다.
 - image replacement는 신규 schema 없이 기존 `MediaOperation.kind=REPLACE`, `previousAssetId`, VisualAsset lifecycle을 사용한다. 교체 command 결과와 telemetry에는 opaque ID·enum·boolean만 포함하고 ticket, source URI, native path, checksum은 포함하지 않는다.
 - API 36 emulator 기능 검증은 통과했지만 실제 APK의 가독성·잘림 문제로 제품 가설을 평가하기에는 UI readiness가 부족했다. 기능 수용 테스트 통과와 실사용 준비 완료를 분리하고 Milestone 4A를 추가했다.
+- Preview 실사용 확인에서 카드 작성 route의 기능 통과와 사용자 발견성은 별개임이 드러났다. `/memory/new/` direct 접근만으로 완료 처리하지 않고 Home·navigation·search/detail entry를 Milestone 4A-1로 분리했다.
 - full3998 수집 완료를 기다리지 않고 완성된 ServiceProjection만 짧은 TTL 뒤 개발 검색에 반영한다. 수집 데이터의 TEST_ONLY 권리·배포 제한을 유지하기 위해 cover는 개발 검색 preview에서만 쓰고 저장되는 AnimeRef/VisualAsset에는 넣지 않는다.
 
 ### 변경 기록 규칙
@@ -834,6 +867,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 
 남은 첫 slice 완료 게이트:
 
+- Home·공통 navigation·검색·상세에서 Memory Card 작성 발견성과 Library 행동 분리 승인.
 - Web-first UI readiness의 전체 viewport/accessibility/visual 승인.
 - Android 적용과 물리 실기기 검증.
 - export·전체 filesystem orphan scan·최종 rollback rehearsal.
