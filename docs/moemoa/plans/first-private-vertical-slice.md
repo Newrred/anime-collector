@@ -822,6 +822,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-19] Preview 검증: `bfe02bb` immutable deployment에서 실제 Supabase 표지 기반 8개 검색, 홍보성 대표 제목 제거, 상세/인물, 상세→AnimeRef 선택→local-only Archive 저장을 확인했다. 390×844에서 horizontal overflow 0, 브라우저 warning/error 0이었다.
 [2026-08-20] 발견: 최신 Preview에서 `/memory/new/` direct route는 작동하지만 Home·공통 navigation에 카드 작성 entry가 없고 상단 검색은 Library 추가로 이어져 사용자가 핵심 기능을 찾지 못함.
 [2026-08-20] 계획 보완: Milestone 4A-1을 추가해 Home/상단 navigation/search/detail의 발견성, Library/Card action 분리, direct-route가 아닌 실제 시작점 E2E를 Web UI Readiness 선행 gate로 고정함.
+[2026-08-20] Milestone 4A-1 구현: Home primary CTA, desktop/mobile 공통 navigation, 검색 결과의 `카드 만들기`/`Library에 추가` 분리, Archive 빈 상태 진입점을 연결함. Supabase catalog 검색 행은 내부 `animeId`를 유지해 composer exact AnimeRef deep-link를 복원하며 카드 action은 Library mutation을 호출하지 않음. 320px overflow·직접 진입 Chromium E2E와 unit/build는 통과했고, Preview 실주소 및 사람 10초 발견성 승인은 남아 있음.
 ```
 
 ## 16. 발견 사항과 계획 변경

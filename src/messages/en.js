@@ -4,6 +4,8 @@ const enMessages = {
     library: "Library",
     showcase: "Profile & Minihome",
     tier: "Tier",
+    createMemory: "Create memory card",
+    memoryShort: "Card",
     account: "Account & Sync",
     localeMenu: "Language",
     navigationTitle: "Browse",
@@ -190,6 +192,8 @@ const enMessages = {
     noResult: "Nothing matched in your records or search results.",
     noRecentLibrary: "No recently opened records yet.",
     quickLog: "Quick log",
+    createMemory: "Create card",
+    addToLibrary: "Add to Library",
     add: "Add",
     loading: "Searching...",
     statusOptions: [
@@ -415,6 +419,7 @@ const enMessages = {
   },
   homeOnboarding: {
     eyebrow: "Your private anime journal",
+    createMemory: "Create memory card",
     firstTitle: "Start with one anime you remember",
     firstTitleLead: "Add a title now. You can write as much or as little as you want later.",
     addFirstTitle: "Add your first title",

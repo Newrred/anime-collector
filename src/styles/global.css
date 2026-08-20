@@ -464,7 +464,7 @@ h3 {
   margin: calc(-1 * var(--page-pad)) calc(-1 * var(--page-pad)) var(--space-5);
   padding: var(--space-3) var(--page-pad);
   display: grid;
-  grid-template-columns: auto auto minmax(360px, 1fr) auto;
+  grid-template-columns: auto auto auto minmax(280px, 1fr) auto;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid color-mix(in srgb, var(--surface-strong) 24%, transparent);
@@ -488,6 +488,51 @@ h3 {
   width: 100%;
   max-width: 460px;
   justify-self: center;
+}
+
+.top-nav__memory-action {
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 14px;
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.top-nav__memory-action-plus {
+  display: none;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.top-nav__memory-action-short {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .top-nav__memory-action {
+    padding-inline: 10px;
+    gap: 3px;
+  }
+
+  .top-nav__memory-action-plus {
+    display: inline;
+  }
+
+  .top-nav__memory-action-short {
+    display: inline;
+  }
+
+  .top-nav__memory-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 .top-nav__links--routes .top-nav__link {
@@ -834,6 +879,8 @@ h3 {
 .quick-action-row__actions {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
 }
 
@@ -5520,7 +5567,7 @@ h3 {
 
 @media (max-width: 900px) {
   .top-nav {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
 
   .top-nav__brand {
@@ -5533,7 +5580,7 @@ h3 {
   }
 
   .top-nav__search-slot {
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 1;
     display: flex;
     justify-content: center;
@@ -5541,10 +5588,15 @@ h3 {
   }
 
   .top-nav__menu {
-    grid-column: 3;
+    grid-column: 4;
     grid-row: 1;
     justify-self: end;
     margin-left: 0;
+  }
+
+  .top-nav__memory-action {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .quick-action__desktop {
@@ -6110,9 +6162,33 @@ html[data-theme="light"] body {
   }
 
   .top-nav {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
     align-items: center;
     column-gap: 10px;
+  }
+
+  .top-nav__memory-action {
+    padding-inline: 8px;
+  }
+
+  .top-nav__memory-action-plus {
+    display: inline;
+  }
+
+  .top-nav__memory-action-short {
+    display: inline;
+  }
+
+  .top-nav__memory-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .data-menu-actions {

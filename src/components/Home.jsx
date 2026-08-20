@@ -350,9 +350,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="action-row">
+                <a href={`${base}memory/new/`} className="btn">
+                  {onboardingCopy.createMemory}
+                </a>
                 {Number.isFinite(heroAnimeId) ? (
                   <>
-                    <a href={heroPrimaryHref} className="btn">
+                    <a href={heroPrimaryHref} className="btn btn--subtle">
                       {copy.quickRecord}
                     </a>
                     <a href={heroSecondaryHref} className="btn btn--subtle">
@@ -361,7 +364,7 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <button type="button" className="btn" onClick={openGlobalQuickAction}>
+                    <button type="button" className="btn btn--subtle" onClick={openGlobalQuickAction}>
                       {locale === "en" ? "Add a title" : "작품 추가"}
                     </button>
                     <a href={heroSecondaryHref} className="btn btn--subtle">
@@ -420,6 +423,7 @@ export default function Home() {
           stage={onboardingState.stage}
           onAddTitle={openGlobalQuickAction}
           libraryHref={onboardingLibraryHref}
+          memoryHref={`${base}memory/new/`}
         />
       )}
     </div>

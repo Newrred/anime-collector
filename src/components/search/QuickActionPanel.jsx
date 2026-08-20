@@ -23,6 +23,7 @@ export default function QuickActionPanel({
   onPickRecentQuery,
   onOpenDetail,
   onOpenQuickLog,
+  onCreateMemory,
   onAddRemote,
 }) {
   const copy = getMessageGroup(locale, "globalQuickAction");
@@ -105,6 +106,9 @@ export default function QuickActionPanel({
                     </span>
                   </button>
                   <div className="quick-action-row__actions">
+                    <button type="button" className="btn btn--subtle btn--sm" onClick={() => onCreateMemory(row)}>
+                      {copy.createMemory}
+                    </button>
                     <button type="button" className="btn btn--subtle btn--sm" onClick={() => onOpenQuickLog(row.id)}>
                       {copy.quickLog}
                     </button>
@@ -125,7 +129,7 @@ export default function QuickActionPanel({
             {!loading && remoteRows.length ? (
               remoteRows.map((row) => (
                 <div key={`remote-${row.id}`} className="quick-action-row">
-                  <button type="button" className="quick-action-row__main" onClick={() => onAddRemote(row)}>
+                  <button type="button" className="quick-action-row__main" onClick={() => onCreateMemory(row)}>
                     {row.poster ? (
                       <img src={row.poster} alt={row.title} className="quick-action-row__poster" loading="lazy" />
                     ) : (
@@ -137,8 +141,11 @@ export default function QuickActionPanel({
                     </span>
                   </button>
                   <div className="quick-action-row__actions">
+                    <button type="button" className="btn btn--sm" onClick={() => onCreateMemory(row)}>
+                      {copy.createMemory}
+                    </button>
                     <button type="button" className="btn btn--subtle btn--sm" onClick={() => onAddRemote(row)}>
-                      {copy.add}
+                      {copy.addToLibrary}
                     </button>
                   </div>
                 </div>

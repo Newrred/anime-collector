@@ -309,10 +309,11 @@ async function addByQuery(
     const input = await openGlobalSearch(page);
     await input.fill(query);
 
+    const addLabel = locale === "KO" ? "기록장에 추가" : "Add to Library";
     const remoteRow = page.locator(".quick-action-section").filter({
-      has: page.locator(".quick-action-row__actions .btn"),
+      has: page.getByRole("button", { name: addLabel }),
     }).last();
-    const addButton = remoteRow.locator(".quick-action-row__actions .btn").first();
+    const addButton = remoteRow.getByRole("button", { name: addLabel }).first();
     await expect(addButton).toBeVisible({ timeout: 20000 });
     const title = (await remoteRow.locator(".quick-action-row__title").first().innerText()).trim();
     if (expectedTitle) expect(title, `${query} fixture result title`).toBe(expectedTitle);

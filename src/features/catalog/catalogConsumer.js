@@ -54,6 +54,7 @@ function libraryRow(candidate, detail) {
   const romaji = titleFor(detail, ["romaji"], english);
   return {
     id: Number(candidate.sourceBinding.externalId),
+    animeId: candidate.animeId,
     ko: titleFor(detail, ["ko"], null),
     src: "moemoa-catalog",
     sourceRank: -1,

@@ -9,6 +9,7 @@ test("fresh browser uses English shell and primary navigation", async ({ page })
   await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create memory card", exact: true }).first()).toBeVisible();
   await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
@@ -22,12 +23,28 @@ test("mobile menu identifies the current route accessibly", async ({ page }) => 
   await expect(current).toHaveAttribute("aria-current", "page");
 });
 
-test("new visitor sees one primary add-title action", async ({ page }) => {
+test("new visitor sees memory card creation as the primary action", async ({ page }) => {
   await clearAppState(page);
   await installAppState(page, { locale: "en" });
   await page.goto("/");
+  const createCard = page.locator(".home-empty-state").getByRole("link", { name: "Create memory card", exact: true });
+  await expect(createCard.first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(1);
   await expect(page.locator(".library-card")).toHaveCount(0);
+});
+
+test("mobile exposes memory card creation without opening the overflow menu", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await clearAppState(page);
+  await installAppState(page, { locale: "en" });
+  await page.goto("/");
+
+  const createCard = page.locator(".top-nav__memory-action:visible");
+  await expect(createCard).toHaveAccessibleName("Create memory card");
+  await expect(createCard).toContainText("Card");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await createCard.click();
+  await expect(page).toHaveURL(/\/memory\/new\/?$/u);
 });
 
 test("unconfigured cloud stays local-only and never claims a cloud backup", async ({ page }) => {

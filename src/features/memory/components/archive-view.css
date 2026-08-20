@@ -30,6 +30,11 @@
   text-align: center;
 }
 
+.memory-archive__empty-action {
+  display: inline-flex;
+  margin-top: 12px;
+}
+
 .memory-archive__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

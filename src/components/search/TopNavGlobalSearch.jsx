@@ -5,6 +5,7 @@ import { useGlobalQuickActionSource } from "../../hooks/useGlobalQuickActionSour
 import { searchLocalLibrary, mapLocalLibraryRow } from "../../domain/search/libraryLocalSearch.js";
 import { searchRemoteCandidates } from "../../domain/search/quickActionRemote.js";
 import { addAnimeFromQuickAction, openLibraryDeepLink } from "../../domain/search/quickActionActions.js";
+import { buildMemoryCardHref } from "../../domain/search/memoryCardNavigation.js";
 import { IconSearch } from "../ui/AppIcons.jsx";
 import QuickActionPanel from "./QuickActionPanel.jsx";
 import GlobalQuickActionSheet from "./GlobalQuickActionSheet.jsx";
@@ -192,6 +193,13 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     openLibraryDeepLink({ base, animeId: result.item.anilistId, focus: "detail" });
   }
 
+  function handleCreateMemory(row) {
+    rememberQuery();
+    setDesktopOpen(false);
+    setMobileOpen(false);
+    window.location.href = buildMemoryCardHref({ base, row });
+  }
+
   function handleOpenDetail(animeId) {
     rememberQuery();
     setDesktopOpen(false);
@@ -227,6 +235,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         }}
         onOpenDetail={handleOpenDetail}
         onOpenQuickLog={handleOpenQuickLog}
+        onCreateMemory={handleCreateMemory}
         onAddRemote={handleAddRemote}
       />
     );

@@ -4,6 +4,8 @@ const koMessages = {
     library: "기록장",
     showcase: "프로필 & 미니홈",
     tier: "티어",
+    createMemory: "메모리 카드 만들기",
+    memoryShort: "카드",
     account: "계정 및 동기화",
     localeMenu: "언어 선택",
     navigationTitle: "탐색",
@@ -190,6 +192,8 @@ const koMessages = {
     noResult: "내 기록과 검색 결과에서 일치하는 작품이 없어요.",
     noRecentLibrary: "아직 최근에 연 기록이 없어요.",
     quickLog: "빠른 기록",
+    createMemory: "카드 만들기",
+    addToLibrary: "기록장에 추가",
     add: "추가",
     loading: "검색 중...",
     statusOptions: [
@@ -415,6 +419,7 @@ const koMessages = {
   },
   homeOnboarding: {
     eyebrow: "나만의 애니 감상 기록",
+    createMemory: "메모리 카드 만들기",
     firstTitle: "기억나는 애니 한 편부터 시작해 보세요",
     firstTitleLead: "지금 작품을 추가하세요. 기록은 나중에 길게 써도, 짧게 써도 됩니다.",
     addFirstTitle: "첫 작품 추가하기",

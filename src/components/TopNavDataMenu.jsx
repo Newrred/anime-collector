@@ -140,6 +140,12 @@ export default function TopNavDataMenu({
           </a>
         </div>
 
+        <a className="btn top-nav__memory-action" href={`${base}memory/new/`} aria-label={copy.createMemory}>
+          <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
+          <span className="top-nav__memory-action-short" aria-hidden>{copy.memoryShort}</span>
+          <span className="top-nav__memory-action-label">{copy.createMemory}</span>
+        </a>
+
         <div className="top-nav__search-slot">
           <TopNavGlobalSearch base={base} locale={locale} />
         </div>

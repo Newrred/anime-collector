@@ -22,6 +22,7 @@ export function projectCatalogQuickRows(results, libraryIdSet = new Set()) {
       return [{
         kind: "remote",
         id,
+        catalogAnimeId: String(row?.catalogAnimeId || row?.animeId || "").trim() || null,
         ko: row?.ko || null,
         media,
         src: "moemoa-catalog",

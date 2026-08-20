@@ -36,7 +36,7 @@ export default function ArchiveView() {
           <h1 className="pageTitle">Memory Archive</h1>
           <p className="pageLead">내가 남긴 장면과 감상을 이 기기에서 다시 꺼내보세요.</p>
         </div>
-        <a className="btn" href="/memory/new/index.html">새 카드 만들기</a>
+        <a className="btn" href="/memory/new/">새 카드 만들기</a>
       </header>
 
       {status === "loading" && <p className="surface-card memory-archive__state">Archive를 불러오고 있어요…</p>}
@@ -49,6 +49,7 @@ export default function ArchiveView() {
         <section className="surface-card memory-archive__state">
           <h2>아직 저장한 카드가 없어요.</h2>
           <p>기억하고 싶은 장면 한 장으로 첫 카드를 만들어 보세요.</p>
+          <a className="btn memory-archive__empty-action" href="/memory/new/">첫 카드 만들기</a>
         </section>
       )}
 

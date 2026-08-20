@@ -53,6 +53,7 @@ test("catalog Library search projects bounded detail rows into the existing UI c
   assert.equal(outcome.status, "READY");
   assert.equal(outcome.results.length, 1);
   assert.equal(outcome.results[0].id, 1);
+  assert.equal(outcome.results[0].animeId, animeId);
   assert.equal(outcome.results[0].ko, "카우보이 비밥");
   assert.equal(outcome.results[0].media.title.english, "Cowboy Bebop");
   assert.equal(outcome.results[0].media.coverImage.large, detail.cover.publicUrl);
