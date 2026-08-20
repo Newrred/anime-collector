@@ -106,7 +106,13 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     setLoading(true);
 
     const timer = window.setTimeout(() => {
-      searchRemoteCandidates(trimmed, libraryIdSet)
+      const testSearch = import.meta.env.DEV
+        ? globalThis.__MOEMOA_TEST_GLOBAL_SEARCH__?.search
+        : null;
+      const search = typeof testSearch === "function"
+        ? testSearch(trimmed, libraryIdSet)
+        : searchRemoteCandidates(trimmed, libraryIdSet);
+      Promise.resolve(search)
         .then((rows) => {
           if (!alive) return;
           setRemoteRows(rows);
