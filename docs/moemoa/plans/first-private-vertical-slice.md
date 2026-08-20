@@ -484,7 +484,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4A — Web-first Shared UI Readiness
 
-상태: `[~] IN PROGRESS — DISCOVERABILITY GATE DEFINED`
+상태: `[~] IN PROGRESS — 4A-1 AUTOMATED/PREVIEW PASS; HUMAN 10-SECOND GATE PENDING`
 
 이 단계는 Milestone 4의 기능 흐름을 실제 사용 가능한 공용 UI로 끌어올리는 선행 gate다. 신규 제품 기능이나 Web production media 기능을 추가하지 않는다.
 
@@ -823,6 +823,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-20] 발견: 최신 Preview에서 `/memory/new/` direct route는 작동하지만 Home·공통 navigation에 카드 작성 entry가 없고 상단 검색은 Library 추가로 이어져 사용자가 핵심 기능을 찾지 못함.
 [2026-08-20] 계획 보완: Milestone 4A-1을 추가해 Home/상단 navigation/search/detail의 발견성, Library/Card action 분리, direct-route가 아닌 실제 시작점 E2E를 Web UI Readiness 선행 gate로 고정함.
 [2026-08-20] Milestone 4A-1 구현: Home primary CTA, desktop/mobile 공통 navigation, 검색 결과의 `카드 만들기`/`Library에 추가` 분리, Archive 빈 상태 진입점을 연결함. Supabase catalog 검색 행은 내부 `animeId`를 유지해 composer exact AnimeRef deep-link를 복원하며 카드 action은 Library mutation을 호출하지 않음. 320px overflow·직접 진입 Chromium E2E와 unit/build는 통과했고, Preview 실주소 및 사람 10초 발견성 승인은 남아 있음.
+[2026-08-20] Milestone 4A-1 Preview 검증: feature branch `d937126`의 Vercel Preview가 `READY`임을 확인했다. 실제 Supabase `나루토` 검색에서 Card action은 내부 catalog `animeId`와 제목을 composer의 `AnimeRef`로 복원했고, Library action은 numeric AniList ID 20만 Library에 추가했다. Card를 저장하지 않은 상태에서 Archive는 계속 비어 있었다. 320×844, 390×844, 1440×900에서 horizontal overflow와 console error가 없었고, 남은 4A-1 gate는 사람의 첫 화면 10초 발견성·행동 구분 확인이다.
 ```
 
 ## 16. 발견 사항과 계획 변경

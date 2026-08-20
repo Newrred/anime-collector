@@ -101,6 +101,31 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 | sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,730,977 bytes |
 | `react-doctor --verbose --scope changed --base HEAD` | PASS | 100/100; 변경분 진단 issue 0건, detail reducer와 runtime 최종-view 경계 정리 후 재검증 |
 
+### Milestone 4A-1 discoverability checkpoint — 2026-08-20
+
+구현·검증 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`와 이 ExecPlan의 Milestone 4A-1이다. Production/master 병합과 최종 배포는 수행하지 않았다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| 행동 분리 E2E | PASS | `memory-card-discovery.spec.ts` 2/2. catalog Card action은 exact internal `animeId`를 composer에 전달하면서 Library/Card draft를 변경하지 않고, Library action은 Library row만 추가하며 Memory Card/Draft를 만들지 않음 |
+| 관련 Chromium 회귀 | PASS | `index`, `memory-card-discovery`, `memory-card-composer`, `library-userflow` 합계 28 passed, live 2 skipped |
+| Web unit | PASS | 103/103 |
+| Astro production build | PASS | 12 pages; 기존 `aliases` 662.82 kB chunk warning만 유지 |
+| production test seam | PASS | `dist`에서 `__MOEMOA_TEST_GLOBAL_SEARCH__` marker 0건 |
+| catalog artifact guard | PASS | 생성된 E2E test output 정리 후 `Catalog guard: no leaks` |
+| React quality scan | PASS | changed scope score 97 |
+| Vercel feature Preview | PASS | `d937126`, target `preview`, 상태 `READY`; production/master 미변경 |
+| 실제 catalog 검색 | PASS | Supabase `나루토` 검색에서 8개 결과와 분리된 `Create card`/`Add to Library` action 확인 |
+| 실제 Card 진입 | PASS | 첫 결과가 내부 catalog UUID와 제목 `나루토`를 `/memory/new/`에 전달하고 지연 조회 뒤 `작품 정보 있음` AnimeRef로 복원; 저장 전 Archive는 비어 있음 |
+| 실제 Library 진입 | PASS | 첫 결과가 `/library/?animeId=20`에 1건만 추가; 이후 Archive는 계속 empty state와 첫 Card CTA를 표시 |
+| responsive/console | PASS | 320×844, 390×844, 1440×900 horizontal overflow 0; Preview console error 0 |
+
+남은 승인 gate:
+
+- 설명을 받지 않은 사용자가 첫 화면에서 10초 안에 `Create memory card`를 지목한다.
+- 같은 사용자가 `Create card`와 `Add to Library`의 결과 차이를 설명한다.
+- 이 사람 검토 전에는 Milestone 4A-1을 완전 완료로 표시하지 않는다.
+
 ## 6. API 36 emulator runtime evidence
 
 Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.
