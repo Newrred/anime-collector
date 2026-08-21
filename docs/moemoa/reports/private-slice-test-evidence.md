@@ -226,7 +226,7 @@ Memory locale/backup boundary evidence:
 - 저장 완료·이미지 오류 상태는 번역된 문장을 저장하지 않고 message key/error code를 보존해 화면 언어 변경 즉시 다시 번역한다.
 - 준비된 private image가 있는 상태에서 언어를 바꿔도 native ticket claim은 한 번만 실행되며 preview와 ticket ownership을 유지한다.
 - legacy JSON 수동 backup은 Memory Card/이미지를 포함하거나 복구하지 않는다고 Data 화면에 명시한다. 신규 Memory DB/export 구현은 추가하지 않았다.
-- RED→GREEN locale E2E, Web unit 108/108, 관련 Chromium 37/37, late picker cleanup 10회 반복, Astro build, React Doctor 100/100, 독립 review 승인을 확인했다.
+- RED→GREEN locale E2E, Web unit 108/108, 관련 Chromium 37/37, 전체 Chromium 59 pass/2 live skip, late picker cleanup 10회 반복, Astro build, React Doctor 100/100, 독립 review 승인을 확인했다.
 
 현재 한계:
 
