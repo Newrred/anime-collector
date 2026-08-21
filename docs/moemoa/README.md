@@ -194,9 +194,10 @@ AUTH-01을 보류해도 `ACCOUNT-01`을 지키기 위한 설치별 Guest Owner I
 첫 slice와 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog` 순서는 승인됐다. Android native/local 기반과 emulator end-to-end 일부, Supabase catalog consumer, Web의 Memory Card 발견성 진입 동선도 구현·검증됐다. 현재 다음 순서는 아래와 같다.
 
 1. `decisions/2026-08-16-web-first-shared-ui-readiness.md`, 현행 UI 설계서, `plans/first-private-vertical-slice.md`를 현재 실행 기준으로 사용한다.
-2. Home과 legacy WatchLog 중심 화면을 실제 Memory Card/Archive 의미에 맞추고, Memory 화면의 locale·LOCAL_ONLY/backup 문구·오류 상태·남은 접근성을 정리한다.
-3. 승인 viewport와 상태 fixture의 기능·layout·accessibility·visual 자동 검증을 통과시킨다.
-4. 사람 검토로 10초 발견성, Card/Library 행동 구분, 첫 Card 저장→Archive→상세 재열람을 확인해 Web UI gate를 닫는다.
-5. 같은 UI를 Android에 적용해 safe-area·keyboard·back·native media를 실기기에서 검증한다.
-6. export·전체 복구·feature flag·device matrix 등 첫 slice 잔여 항목을 마감한다.
-7. 그 뒤 다음 승인 gate인 Private Board + Web read path로 이동한다.
+2. `[완료 — 32a9389]` Home에서 실제 Memory Card/Archive의 최근 카드·개수를 읽고 기존 Library/WatchLog와 별도 영역으로 표시한다.
+3. Memory 화면의 locale·LOCAL_ONLY/backup 문구·오류 상태·남은 접근성을 정리한다.
+4. 승인 viewport와 상태 fixture의 기능·layout·accessibility·visual 자동 검증을 통과시킨다.
+5. 사람 검토로 10초 발견성, Card/Library 행동 구분, 첫 Card 저장→Archive→상세 재열람을 확인해 Web UI gate를 닫는다.
+6. 같은 UI를 Android에 적용해 safe-area·keyboard·back·native media를 실기기에서 검증한다.
+7. export·전체 복구·feature flag·device matrix 등 첫 slice 잔여 항목을 마감한다.
+8. 그 뒤 다음 승인 gate인 Private Board + Web read path로 이동한다.

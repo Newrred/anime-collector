@@ -828,6 +828,8 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-21] 공용 Memory shell 보강: `/memory/new/`, `/archive/`, `/memory/card/`에 같은 base-aware navigation과 단일 main landmark를 적용하고, PWA route cache가 detail query를 보존한 채 offline deep-link를 재사용하도록 고정했다.
 [2026-08-21] 접근성 보강: Library 상세 modal을 dialog로 명시하고 keyboard focus trap·닫은 뒤 trigger focus 복귀·background scroll lock을 추가했다. 이 보강은 4A-1 사람 검토나 전체 Web visual gate를 대신하지 않는다.
 [2026-08-21] 검증: Web unit 107/107, Library Chromium 9 pass/2 live skip, 관련 Memory/layout Chromium 23 pass, Astro production build를 통과했다. 전체 browser suite의 가장 최근 완전 실행은 54 pass/2 live skip이며, 이후 변경은 영향받는 focused suite로 재검증했다. Android 검증은 로컬 SDK platform 36 package metadata/라이선스 환경 문제로 이번 checkpoint에서 재실행하지 못했다. Production 배포와 push는 수행하지 않았다.
+[2026-08-21] Home Memory source 정렬: `32a9389`에서 Home이 실제 `moemoa-memory-v1` Archive를 읽어 최근 Memory Card, complete card count, 상세/Archive 진입을 표시한다. Memory Card가 하나라도 있으면 legacy Library/WatchLog가 비어 있어도 카드 중심 Home이 열리며, 그 경우 “첫 애니 추가” legacy 대시보드를 함께 노출하지 않는다. 기존 WatchLog row를 Memory Card로 변환하거나 두 저장소를 병합하지 않았다.
+[2026-08-21] Home TDD/검증: RED는 Memory Card count를 무시한 onboarding unit 3 pass/1 fail과 실제 Composer→Home E2E 0/1에서 확인했다. GREEN은 Web unit 108/108, Home Chromium 9/9, Memory composer/discovery 13/13, layout/design-system 12/12, Astro build, React Doctor changed scope 92/100·issue 0이다. 320×720 실제 카드 Home에서 horizontal overflow도 없었다. Android·schema·Supabase·배포 변경은 없다.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -871,6 +873,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 - Supabase Preview catalog 검색/상세/인물/표지 read model과 Library/Memory 공통 consumer.
 - catalog 결과 우선 dedupe, Legacy fallback 유지, 홍보성 표시 제목 격리, 상세→AnimeRef deep-link.
 - Home·공통 navigation·검색·상세의 Card 작성 진입과 Library 행동 격리, 세 Memory route 공통 shell·offline deep-link, Library 상세 modal focus 격리.
+- Home의 실제 Memory Archive 최근 카드·complete count·상세/Archive 진입과 legacy Library/WatchLog 분리 표시.
 
 남은 첫 slice 완료 게이트:
 

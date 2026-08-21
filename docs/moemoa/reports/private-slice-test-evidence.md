@@ -148,6 +148,24 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 - 320/360/390/412px, 768px, 1280/1440px의 전체 state/accessibility/approved visual baseline.
 - Android toolchain 복구 뒤 `cap sync`·unit·APK·cold launch smoke와 최종 실기기 검증.
 
+### Home Memory Archive source checkpoint — 2026-08-21
+
+Commit `32a9389`는 Home의 “기억” 의미를 legacy WatchLog가 아니라 실제 `moemoa-memory-v1` Complete Card와 연결한다. 기존 Library/WatchLog는 삭제·변환·병합하지 않고 별도 legacy 화면과 데이터로 유지한다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| onboarding unit RED | EXPECTED FAIL | 3 pass/1 fail; Memory Card 1개가 있어도 actual `add-first-title`, expected `active` |
+| 실제 Home flow RED | EXPECTED FAIL | Composer에서 system design Card 저장→Home 이동 뒤 `Memory Archive` region 부재 |
+| Memory-only legacy 혼입 RED | EXPECTED FAIL | Memory Card만 있는 Home에서 legacy `Add your first anime`가 함께 노출됨 |
+| Web unit GREEN | PASS | 108/108; `memoryCardCount > 0`의 Home 활성화와 기존 onboarding 계약 포함 |
+| Home Chromium GREEN | PASS | 9/9; 실제 Card 저장→Home 최근 카드·1개 count·detail/Archive 링크, WatchLog 0건 유지, 320×720 overflow 없음 |
+| Memory composer/discovery | PASS | 13/13; create/replace/recovery/AnimeRef와 Library/Card 역방향 격리 유지 |
+| layout/design-system | PASS | 12/12; `.last-run.json` status `passed`, failed test 0 |
+| Astro production build | PASS | 12 pages; 기존 `useUiPreferences` 850.55 kB warning만 유지 |
+| React Doctor | PASS | changed scope, base `a661a94`, score 92/100, issue 0 |
+
+미변경 범위: IndexedDB schema 1, Android native media, Supabase, legacy migration, backup/export, Public/UGC, production deployment.
+
 ## 6. API 36 emulator runtime evidence
 
 Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.
