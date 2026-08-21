@@ -1,9 +1,9 @@
-const candidateLabel = (candidate) => (
+const candidateLabel = (candidate, copy) => (
   candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
-    ? "작품 정보 있음"
+    ? copy.catalogCandidate
     : candidate.verificationState === "PROVIDER_CANDIDATE"
-    ? "온라인 작품 후보"
-    : "이전 제목 후보"
+    ? copy.providerCandidate
+    : copy.legacyCandidate
 );
 
 export default function MemoryTitleSelector({
@@ -17,11 +17,12 @@ export default function MemoryTitleSelector({
   onSearch,
   onSelectTitle,
   onClearSelected,
+  copy,
 }) {
   return (
     <section className="memory-composer__title-search">
       <div className="memory-composer__field">
-        <label id="memory-title-heading" htmlFor="memory-title-input">작품 또는 카드 제목</label>
+        <label id="memory-title-heading" htmlFor="memory-title-input">{copy.label}</label>
         <div className="memory-composer__title-input-row">
           <input
             id="memory-title-input"
@@ -29,7 +30,7 @@ export default function MemoryTitleSelector({
             value={title}
             maxLength={120}
             onChange={onTitleChange}
-            placeholder="예: 프리렌"
+            placeholder={copy.placeholder}
           />
           <button
             type="button"
@@ -37,7 +38,7 @@ export default function MemoryTitleSelector({
             disabled={!runtimeReady || title.trim().length < 2 || titleSearchStatus === "searching"}
             onClick={onSearch}
           >
-            {titleSearchStatus === "searching" ? "검색 중…" : "작품 검색"}
+            {titleSearchStatus === "searching" ? copy.searching : copy.search}
           </button>
         </div>
       </div>
@@ -45,37 +46,37 @@ export default function MemoryTitleSelector({
       {selectedTitleChoice ? (
         <div className="memory-composer__selected-title">
           <div>
-            <span className="status-badge">{candidateLabel(selectedTitleChoice)}</span>
+            <span className="status-badge">{candidateLabel(selectedTitleChoice, copy)}</span>
             <strong>{selectedTitleChoice.displayTitle}</strong>
           </div>
           <button type="button" className="btn btn--subtle" onClick={onClearSelected}>
-            선택 해제
+            {copy.clear}
           </button>
         </div>
       ) : title.trim() ? (
         <p className="memory-composer__private-title-note">
-          검색 결과를 선택하지 않으면 “{title.trim()}”을 개인 제목으로 저장합니다.
+          {copy.privateTitle(title.trim())}
         </p>
       ) : null}
 
       {titleResults.length > 0 && (
-        <ul className="memory-composer__title-results" aria-label="작품 검색 결과">
+        <ul className="memory-composer__title-results" aria-label={copy.resultLabel}>
           {titleResults.map((candidate) => (
             <li key={`${candidate.sourceBinding.provider}:${candidate.sourceBinding.externalId}`}>
               <button
                 type="button"
-                aria-label={`${candidate.displayTitle} 선택`}
+                aria-label={copy.select(candidate.displayTitle)}
                 onClick={() => onSelectTitle(candidate)}
               >
                 <span>
                   <strong>{candidate.displayTitle}</strong>
                   {candidate.aliases?.[0] && <small>{candidate.aliases[0]}</small>}
                 </span>
-                <span className="status-badge">{candidateLabel(candidate)}</span>
+                <span className="status-badge">{candidateLabel(candidate, copy)}</span>
               </button>
               {candidate.animeId && candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2" && (
                 <a className="memory-composer__catalog-detail-link" href={`/catalog/detail/?${new URLSearchParams({ id: candidate.animeId })}`}>
-                  상세 정보 보기
+                  {copy.viewDetails}
                 </a>
               )}
             </li>
@@ -84,11 +85,11 @@ export default function MemoryTitleSelector({
       )}
 
       {!selectedTitleChoice && titleSearchStatus === "ready" && titleResults.length === 0 && (
-        <p className="memory-composer__title-status">일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.</p>
+        <p className="memory-composer__title-status">{copy.noMatch}</p>
       )}
       {["UNAVAILABLE", "TIMED_OUT"].includes(remoteTitleStatus) && (
         <p className="memory-composer__title-status">
-          온라인 검색을 사용할 수 없어요. 로컬 결과 또는 입력한 개인 제목으로 계속할 수 있어요.
+          {copy.offline}
         </p>
       )}
     </section>

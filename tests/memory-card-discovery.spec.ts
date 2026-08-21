@@ -99,8 +99,8 @@ test("catalog search card action preserves the exact AnimeRef without changing L
   await row.getByRole("button", { name: "Create card" }).click();
 
   await expect(page).toHaveURL(new RegExp(`/memory/new/\\?animeId=${encodeURIComponent(catalogAnimeId)}`));
-  await expect(page.getByLabel("작품 또는 카드 제목")).toHaveValue("카우보이 비밥");
-  await expect(page.getByText("작품 정보 있음")).toBeVisible();
+  await expect(page.getByLabel("Anime or card title")).toHaveValue("카우보이 비밥");
+  await expect(page.getByText("Catalog match")).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"))).toEqual([]);
   expect(await memoryCardCount(page)).toBe(0);
 });

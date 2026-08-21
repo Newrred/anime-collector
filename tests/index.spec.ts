@@ -40,10 +40,10 @@ test("saved Memory Card becomes Home's archive source without a legacy Library o
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });
 
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("Home Memory Fixture");
-  await page.getByLabel("짧은 감상").fill("A real card, separate from the legacy log.");
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  await page.getByRole("button", { name: "카드 저장" }).click();
+  await page.getByLabel("Anime or card title").fill("Home Memory Fixture");
+  await page.getByLabel("Short reflection").fill("A real card, separate from the legacy log.");
+  await page.getByRole("button", { name: "Use system design" }).click();
+  await page.getByRole("button", { name: "Save card" }).click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
 
   await page.setViewportSize({ width: 320, height: 720 });

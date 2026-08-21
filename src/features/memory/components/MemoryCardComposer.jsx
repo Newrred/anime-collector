@@ -1,7 +1,7 @@
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import MemoryTitleSelector from "./MemoryTitleSelector.jsx";
 import { useMemoryCardComposer } from "./useMemoryCardComposer.js";
-import MemoryRouteShell from "./MemoryRouteShell.jsx";
+import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-composer.css";
 
 const formatBytes = (value) => {
@@ -12,6 +12,16 @@ const formatBytes = (value) => {
 };
 
 export default function MemoryCardComposer({ base = "/" }) {
+  return (
+    <MemoryRouteShell base={base} currentRoute="memory-new">
+      <MemoryCardComposerContent base={base} />
+    </MemoryRouteShell>
+  );
+}
+
+function MemoryCardComposerContent({ base }) {
+  const { copy } = useMemoryRouteUi();
+  const composerCopy = copy.composer;
   const {
     runtime,
     ticket,
@@ -41,19 +51,16 @@ export default function MemoryCardComposer({ base = "/" }) {
   } = useMemoryCardComposer({ base });
 
   return (
-    <MemoryRouteShell base={base} currentRoute="memory-new">
     <div className="memory-composer page-shell page-shell--narrow">
       <section className="surface-card memory-composer__intro">
         <div className="pageHeader">
-          <p className="memory-composer__eyebrow">한 장면에서 시작하는 개인 기록</p>
-          <h1 className="pageTitle">나만의 애니 메모리 카드</h1>
-          <p className="pageLead">
-            기억하고 싶은 장면과 짧은 감상을 한 장의 카드로 정리해 보세요.
-          </p>
+          <p className="memory-composer__eyebrow">{composerCopy.eyebrow}</p>
+          <h1 className="pageTitle">{composerCopy.title}</h1>
+          <p className="pageLead">{composerCopy.lead}</p>
         </div>
         <div className="memory-composer__privacy">
-          <strong>내 기기에만 비공개로 저장</strong>
-          <span>서버 업로드 없이 앱 전용 공간에 보관하며 원본 경로는 웹 화면에 전달되지 않아요.</span>
+          <strong>{composerCopy.privacyTitle}</strong>
+          <span>{composerCopy.privacyBody}</span>
         </div>
       </section>
 
@@ -61,8 +68,8 @@ export default function MemoryCardComposer({ base = "/" }) {
         <section className="memory-composer__image-section" aria-labelledby="memory-image-heading">
           <div className="memory-composer__section-head">
             <div>
-              <h2 id="memory-image-heading">기억할 장면</h2>
-              <p>시스템 사진 선택기나 다른 앱의 공유 메뉴에서 한 장을 가져올 수 있어요.</p>
+              <h2 id="memory-image-heading">{composerCopy.imageHeading}</h2>
+              <p>{composerCopy.imageHelp}</p>
             </div>
             {ticket && (
               <span className="status-badge">
@@ -76,13 +83,14 @@ export default function MemoryCardComposer({ base = "/" }) {
               className="memory-composer__preview memory-composer__system-preview"
               spec={designSpec}
               title={displayTitle}
+              copy={copy.systemDesign}
             />
           ) : ticket ? (
             <div className="memory-composer__preview-wrap">
               <img
                 className="memory-composer__preview"
                 src={ticket.previewDataUrl}
-                alt={displayTitle ? `${displayTitle} 메모리 카드 미리보기` : "선택한 이미지 미리보기"}
+                alt={displayTitle ? composerCopy.cardPreview(displayTitle) : composerCopy.selectedPreview}
               />
             </div>
           ) : (
@@ -90,15 +98,19 @@ export default function MemoryCardComposer({ base = "/" }) {
               <span aria-hidden="true">＋</span>
               <p>
                 {status === "browser"
-                  ? "이미지 가져오기는 현재 Android 앱에서만 사용할 수 있어요."
+                  ? composerCopy.browserOnly
                   : busy
-                    ? "이미지를 안전하게 준비하고 있어요…"
-                    : "아직 선택한 이미지가 없어요."}
+                    ? composerCopy.preparing
+                    : composerCopy.noImage}
               </p>
             </div>
           )}
 
-          {message && <p className="memory-composer__error" role="alert">{message}</p>}
+          {message && (
+            <p className="memory-composer__error" role="alert">
+              {copy.errors[message] || copy.errors.fallback}
+            </p>
+          )}
 
           <div className="action-row memory-composer__image-actions">
             <button
@@ -107,11 +119,11 @@ export default function MemoryCardComposer({ base = "/" }) {
               onClick={chooseImage}
               disabled={!runtime?.imageIntake.available || busy}
             >
-              {ticket ? "다른 이미지 선택" : "이미지 선택"}
+              {ticket ? composerCopy.chooseAnotherImage : composerCopy.chooseImage}
             </button>
             {ticket && (
               <button type="button" className="btn btn--subtle" onClick={removeImage} disabled={busy}>
-                이미지 제거
+                {composerCopy.removeImage}
               </button>
             )}
             <button
@@ -120,7 +132,7 @@ export default function MemoryCardComposer({ base = "/" }) {
               onClick={useSystemDesign}
               disabled={!runtime || busy}
             >
-              시스템 디자인 사용
+              {composerCopy.useSystemDesign}
             </button>
           </div>
         </section>
@@ -137,17 +149,18 @@ export default function MemoryCardComposer({ base = "/" }) {
             onSearch={searchTitles}
             onSelectTitle={selectTitle}
             onClearSelected={clearSelectedTitle}
+            copy={copy.titleSelector}
           />
 
           <label className="memory-composer__field">
-            <span>짧은 감상</span>
+            <span>{composerCopy.noteLabel}</span>
             <textarea
               className="textarea"
               value={note}
               maxLength={500}
               rows={5}
               onChange={changeNote}
-              placeholder="이 장면을 남기고 싶은 이유를 적어보세요."
+              placeholder={composerCopy.notePlaceholder}
             />
             <small>{note.length}/500</small>
           </label>
@@ -159,23 +172,22 @@ export default function MemoryCardComposer({ base = "/" }) {
                 checked={rightsConfirmed}
                 onChange={changeRightsConfirmed}
               />
-              <span>이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.</span>
+              <span>{composerCopy.rights}</span>
             </label>
           ) : designSpec ? (
             <p className="memory-composer__rights">
-              시스템 디자인은 이미지 파일 대신 재현 가능한 디자인 정보만 저장합니다.
+              {composerCopy.designStorage}
             </p>
           ) : null}
         </div>
 
         <div className="memory-composer__save-gate">
           <button type="submit" className="btn" disabled={!canSave}>
-            {status === "saving" ? "카드 저장 중…" : "카드 저장"}
+            {status === "saving" ? composerCopy.saving : composerCopy.save}
           </button>
-          <p>저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.</p>
+          <p>{composerCopy.saveHint}</p>
         </div>
       </form>
     </div>
-    </MemoryRouteShell>
   );
 }

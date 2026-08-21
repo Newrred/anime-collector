@@ -2,7 +2,7 @@ import { useEffect, useReducer } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
-import MemoryRouteShell from "./MemoryRouteShell.jsx";
+import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
 
 const INITIAL_STATE = Object.freeze({
@@ -16,7 +16,27 @@ const INITIAL_STATE = Object.freeze({
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
+const localizedMessage = (message, copy) => {
+  if (!message) return "";
+  if (message.scope === "detail") return copy.detail[message.key] || "";
+  if (message.scope === "replacement") return copy.replacement[message.key] || "";
+  if (message.scope === "error") {
+    return copy.errors[message.code] || copy.errors.replacementFallback;
+  }
+  return "";
+};
+
 export default function MemoryCardDetail({ base = "/" }) {
+  return (
+    <MemoryRouteShell base={base} currentRoute="memory-card">
+      <MemoryCardDetailContent base={base} />
+    </MemoryRouteShell>
+  );
+}
+
+function MemoryCardDetailContent({ base }) {
+  const { copy } = useMemoryRouteUi();
+  const detailCopy = copy.detail;
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
   const { runtime, bundle, previewDataUrl, note, status, message } = state;
 
@@ -60,12 +80,12 @@ export default function MemoryCardDetail({ base = "/" }) {
       updateState({
         bundle: { ...bundle, card },
         note: card.note || "",
-        message: "변경 내용을 이 기기에 저장했어요.",
+        message: { scope: "detail", key: "saved" },
         status: "ready",
       });
     } catch {
       updateState({
-        message: "변경 내용을 저장하지 못했어요. 다시 시도해 주세요.",
+        message: { scope: "detail", key: "saveFailed" },
         status: "ready",
       });
     }
@@ -74,7 +94,7 @@ export default function MemoryCardDetail({ base = "/" }) {
   const remove = async () => {
     if (!runtime || !bundle || status === "deleting") return;
     const confirmed = window.confirm(
-      "이 카드를 기기에서 삭제할까요? 이미지와 감상도 함께 삭제되며 되돌릴 수 없어요.",
+      detailCopy.deleteConfirm,
     );
     if (!confirmed) return;
     updateState({ status: "deleting", message: "" });
@@ -83,7 +103,7 @@ export default function MemoryCardDetail({ base = "/" }) {
       window.location.assign(`${base}archive/`);
     } catch {
       updateState({
-        message: "카드를 완전히 삭제하지 못했어요. 앱을 다시 열어 복구를 시도해 주세요.",
+        message: { scope: "detail", key: "deleteFailed" },
         status: "ready",
       });
     }
@@ -97,48 +117,44 @@ export default function MemoryCardDetail({ base = "/" }) {
     updateState(result.bundle ? {
       bundle: result.bundle,
       previewDataUrl: result.previewDataUrl || ticket.previewDataUrl,
-      message: result.cleanupPending
-        ? "새 이미지를 이 기기에 저장했어요. 이전 이미지 정리는 앱을 다시 열 때 마무리합니다."
-        : "새 이미지를 이 기기에 저장했어요.",
+      message: {
+        scope: "detail",
+        key: result.cleanupPending ? "imageSavedCleanup" : "imageSaved",
+      },
     } : {
-      message: "새 이미지는 저장됐어요. 화면을 다시 열면 변경된 카드를 확인할 수 있어요.",
+      message: { scope: "detail", key: "imageSavedRefresh" },
     });
   };
 
   if (status === "loading") {
     return (
-      <MemoryRouteShell base={base} currentRoute="memory-card">
-        <div className="memory-detail page-shell page-shell--narrow"><p>카드를 불러오고 있어요…</p></div>
-      </MemoryRouteShell>
+      <div className="memory-detail page-shell page-shell--narrow"><p>{detailCopy.loading}</p></div>
     );
   }
   if (status === "not-found" || status === "error") {
     return (
-      <MemoryRouteShell base={base} currentRoute="memory-card">
       <div className="memory-detail page-shell page-shell--narrow">
         <section className="surface-card memory-detail__state">
-          <h1>카드를 찾을 수 없어요.</h1>
-          <a className="btn" href={`${base}archive/`}>Archive로 돌아가기</a>
+          <h1>{detailCopy.notFound}</h1>
+          <a className="btn" href={`${base}archive/`}>{detailCopy.backToArchive}</a>
         </section>
       </div>
-      </MemoryRouteShell>
     );
   }
 
   return (
-    <MemoryRouteShell base={base} currentRoute="memory-card">
     <div className="memory-detail page-shell page-shell--narrow">
       <header className="memory-detail__header">
-        <a href={`${base}archive/`}>← Memory Archive</a>
-        <span className="status-badge">Private · Local only</span>
+        <a href={`${base}archive/`}>{detailCopy.archiveLink}</a>
+        <span className="status-badge">{detailCopy.privacy}</span>
       </header>
       <article className="surface-card memory-detail__card">
         {bundle.asset.designSpec ? (
-          <SystemDesignPreview spec={bundle.asset.designSpec} title={bundle.title.displayTitle} />
+          <SystemDesignPreview spec={bundle.asset.designSpec} title={bundle.title.displayTitle} copy={copy.systemDesign} />
         ) : previewDataUrl ? (
-          <img src={previewDataUrl} alt={`${bundle.title.displayTitle} 메모리 카드`} />
+          <img src={previewDataUrl} alt={detailCopy.cardAlt(bundle.title.displayTitle)} />
         ) : (
-          <div className="memory-detail__missing-image">이미지를 불러올 수 없어요.</div>
+          <div className="memory-detail__missing-image">{detailCopy.missingImage}</div>
         )}
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
@@ -149,10 +165,11 @@ export default function MemoryCardDetail({ base = "/" }) {
             onReplace={replaceImage}
             onBusyChange={(isBusy) => updateState({ status: isBusy ? "replacing" : "ready" })}
             onMessage={(nextMessage) => updateState({ message: nextMessage })}
+            copy={copy.replacement}
           />
           <form onSubmit={save}>
             <label className="memory-detail__field">
-              <span>짧은 감상</span>
+              <span>{detailCopy.noteLabel}</span>
               <textarea
                 className="textarea"
                 value={note}
@@ -162,10 +179,14 @@ export default function MemoryCardDetail({ base = "/" }) {
               />
               <small>{note.length}/500</small>
             </label>
-            {message && <p className="memory-detail__message" role="status">{message}</p>}
+            {message && (
+              <p className="memory-detail__message" role="status">
+                {localizedMessage(message, copy)}
+              </p>
+            )}
             <div className="memory-detail__actions">
               <button className="btn" type="submit" disabled={status !== "ready"}>
-                {status === "saving" ? "저장 중…" : "변경 저장"}
+                {status === "saving" ? detailCopy.saving : detailCopy.save}
               </button>
               <button
                 className="btn btn--danger"
@@ -173,13 +194,12 @@ export default function MemoryCardDetail({ base = "/" }) {
                 disabled={status !== "ready"}
                 onClick={remove}
               >
-                {status === "deleting" ? "삭제 중…" : "카드 삭제"}
+                {status === "deleting" ? detailCopy.deleting : detailCopy.remove}
               </button>
             </div>
           </form>
         </div>
       </article>
     </div>
-    </MemoryRouteShell>
   );
 }
