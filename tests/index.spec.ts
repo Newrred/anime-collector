@@ -35,6 +35,35 @@ test("new visitor sees memory card creation as the primary action", async ({ pag
   await expect(page.locator(".library-card")).toHaveCount(0);
 });
 
+test("saved Memory Card becomes Home's archive source without a legacy Library or log", async ({ page }) => {
+  await clearAppState(page);
+  await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("작품 또는 카드 제목").fill("Home Memory Fixture");
+  await page.getByLabel("짧은 감상").fill("A real card, separate from the legacy log.");
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  const memory = page.getByRole("region", { name: "Memory Archive" });
+  await expect(memory).toBeVisible();
+  await expect(memory).toContainText("1 memory card");
+  await expect(memory).toContainText("Latest memory card");
+  await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
+  await expect(memory.getByRole("link", { name: "Open Archive" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(0);
+  await expect(page.getByText("Add your first anime", { exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  const legacyLogs = await page.evaluate(() => JSON.parse(
+    localStorage.getItem("anime:watchLogs:v1") || "[]",
+  ));
+  expect(legacyLogs).toEqual([]);
+});
+
 test("mobile exposes memory card creation without opening the overflow menu", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await clearAppState(page);
