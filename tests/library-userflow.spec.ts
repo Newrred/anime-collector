@@ -9,6 +9,19 @@ const quickLogFixture = {
   mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
 };
 
+test("closing a Library deep link clears it so reload does not reopen the detail", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/?animeId=1");
+  await expect(page.locator(".modal")).toBeVisible();
+
+  await page.locator(".modalCloseBtn").click();
+
+  await expect(page.locator(".modal")).toBeHidden();
+  await expect(page).toHaveURL(/\/library\/?$/u);
+  await page.reload();
+  await expect(page.locator(".modal")).toBeHidden();
+});
+
 test("opening and cancelling quick log does not persist a row", async ({ page }) => {
   await installAppState(page, quickLogFixture);
   await page.goto("/library/?animeId=1&focus=quick-log");
@@ -317,11 +330,18 @@ async function addByQuery(
     await expect(addButton).toBeVisible({ timeout: 20000 });
     const title = (await remoteRow.locator(".quick-action-row__title").first().innerText()).trim();
     if (expectedTitle) expect(title, `${query} fixture result title`).toBe(expectedTitle);
+    const libraryCountBefore = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]").length);
 
-    await Promise.all([
-      page.waitForURL(/\/library\/\?animeId=\d+/, { timeout: 10000 }),
-      addButton.click(),
-    ]);
+    await addButton.click();
+    await expect.poll(
+      () => page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]").length),
+    ).toBe(libraryCountBefore + 1);
+    await expect(page.getByRole("status")).toBeVisible();
+    const addedAnimeId = await page.evaluate(() => {
+      const rows = JSON.parse(localStorage.getItem("anime:list:v1") || "[]");
+      return rows[rows.length - 1]?.anilistId;
+    });
+    await page.goto(`/library/?animeId=${addedAnimeId}`);
     await expect(page.locator(".modal")).toBeVisible();
     await page.locator(".modalCloseBtn").click();
     await expect(page.locator(".modal")).toBeHidden();

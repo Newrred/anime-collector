@@ -67,6 +67,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   const [remoteRows, setRemoteRows] = useState([]);
   const [recentQueries, setRecentQueries] = useState(() => readQuickSearchRecent());
   const [quickAddStatus, setQuickAddStatus] = useState(() => readQuickAddStatus());
+  const [actionFeedback, setActionFeedback] = useState(null);
+  const [addingAnimeId, setAddingAnimeId] = useState(null);
   const rootRef = useRef(null);
   const desktopInputRef = useRef(null);
   const mobileInputRef = useRef(null);
@@ -192,11 +194,18 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   }
 
   async function handleAddRemote(row) {
-    const result = await addAnimeFromQuickAction(row.media, quickAddStatus);
-    rememberQuery();
-    setDesktopOpen(false);
-    setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId: result.item.anilistId, focus: "detail" });
+    if (addingAnimeId !== null) return;
+    setAddingAnimeId(row.id);
+    setActionFeedback(null);
+    try {
+      const result = await addAnimeFromQuickAction(row.media, quickAddStatus);
+      rememberQuery();
+      setActionFeedback({ tone: "success", message: result.alreadyExists ? copy.alreadyInLibrary : copy.addedToLibrary });
+    } catch {
+      setActionFeedback({ tone: "error", message: copy.addToLibraryFailed });
+    } finally {
+      setAddingAnimeId(null);
+    }
   }
 
   function handleCreateMemory(row) {
@@ -230,6 +239,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         recentRows={recentRows}
         recentQueries={recentQueries}
         loading={loading}
+        actionFeedback={actionFeedback}
+        addingAnimeId={addingAnimeId}
         quickAddStatus={quickAddStatus}
         onQuickAddStatusChange={setQuickAddStatus}
         onPickRecentQuery={(value) => {

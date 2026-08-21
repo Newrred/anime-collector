@@ -18,6 +18,8 @@ export default function QuickActionPanel({
   recentRows = [],
   recentQueries = [],
   loading = false,
+  actionFeedback = null,
+  addingAnimeId = null,
   quickAddStatus = "미분류",
   onQuickAddStatusChange,
   onPickRecentQuery,
@@ -36,6 +38,14 @@ export default function QuickActionPanel({
 
   return (
     <div className="quick-action-panel">
+      {actionFeedback ? (
+        <div
+          className={`small page-feedback quick-action-panel__feedback is-${actionFeedback.tone || "success"}`}
+          role={actionFeedback.tone === "error" ? "alert" : "status"}
+        >
+          {actionFeedback.message}
+        </div>
+      ) : null}
       {showRecents ? (
         <>
           <Section title={copy.recentLibraryTitle}>
@@ -144,8 +154,13 @@ export default function QuickActionPanel({
                     <button type="button" className="btn btn--sm" onClick={() => onCreateMemory(row)}>
                       {copy.createMemory}
                     </button>
-                    <button type="button" className="btn btn--subtle btn--sm" onClick={() => onAddRemote(row)}>
-                      {copy.addToLibrary}
+                    <button
+                      type="button"
+                      className="btn btn--subtle btn--sm"
+                      onClick={() => onAddRemote(row)}
+                      disabled={addingAnimeId !== null}
+                    >
+                      {Number(addingAnimeId) === Number(row.id) ? copy.addingToLibrary : copy.addToLibrary}
                     </button>
                   </div>
                 </div>

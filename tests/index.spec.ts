@@ -8,6 +8,7 @@ test("fresh browser uses English shell and primary navigation", async ({ page })
   const primary = page.locator(".top-nav__links--routes");
   await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Archive" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Create memory card", exact: true }).first()).toBeVisible();
   await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
@@ -21,6 +22,7 @@ test("mobile menu identifies the current route accessibly", async ({ page }) => 
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
   const current = page.locator(".top-nav-mobile-links").getByRole("link", { name: "Library" });
   await expect(current).toHaveAttribute("aria-current", "page");
+  await expect(page.locator(".top-nav-mobile-links").getByRole("link", { name: "Archive" })).toBeVisible();
 });
 
 test("new visitor sees memory card creation as the primary action", async ({ page }) => {

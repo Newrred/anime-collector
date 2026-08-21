@@ -1,6 +1,6 @@
 import { deriveKoTitleFromMedia } from "../animeTitles.js";
 import { LIBRARY_EVENT, LIBRARY_STATUS } from "../../components/library/libraryCopy.js";
-import { readLibraryListPreferred, writeLibraryList } from "../../repositories/libraryRepo.js";
+import { readLibraryListPreferred, writeLibraryListDurable } from "../../repositories/libraryRepo.js";
 import { appendWatchLog, createWatchLog } from "../../repositories/watchLogRepo.js";
 
 function normalizeStatusValue(rawStatus) {
@@ -31,11 +31,13 @@ function dispatchQuickActionEvent(name) {
   window.dispatchEvent(new CustomEvent(name));
 }
 
-export async function addAnimeFromQuickAction(media, statusValue) {
+export async function addAnimeFromQuickAction(media, statusValue, repositories = {}) {
   const id = Number(media?.id);
   if (!Number.isFinite(id)) throw new Error("Invalid media id");
 
-  const list = await readLibraryListPreferred([]);
+  const readList = repositories.readLibraryListPreferred || readLibraryListPreferred;
+  const writeList = repositories.writeLibraryListDurable || writeLibraryListDurable;
+  const list = await readList([]);
   const current = Array.isArray(list) ? list : [];
   const existing = current.find((item) => Number(item?.anilistId) === id);
   if (existing) {
@@ -54,7 +56,7 @@ export async function addAnimeFromQuickAction(media, statusValue) {
     addedAt: Date.now(),
   };
 
-  writeLibraryList([...current, item]);
+  await writeList([...current, item]);
 
   let initialLog = null;
   const eventType = eventTypeFromStatus(initialStatus);

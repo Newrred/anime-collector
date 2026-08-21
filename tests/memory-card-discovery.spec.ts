@@ -81,8 +81,8 @@ async function memoryCardCount(page: Page) {
   });
 }
 
-async function searchCatalogResult(page: Page) {
-  await page.goto("/");
+async function searchCatalogResult(page: Page, path = "/") {
+  await page.goto(path);
   const search = page.locator(".quick-action__input:visible");
   await search.fill("Cowboy Bebop");
   const row = page.locator(".quick-action-row").filter({
@@ -107,11 +107,14 @@ test("catalog search card action preserves the exact AnimeRef without changing L
 
 test("catalog search Library action adds only the Library row and creates no Memory draft", async ({ page }) => {
   await installCatalogSearchFixture(page);
-  const row = await searchCatalogResult(page);
+  const row = await searchCatalogResult(page, "/library/");
+  await expect(page.locator(".library-card")).toHaveCount(0);
 
   await row.getByRole("button", { name: "Add to Library" }).click();
 
-  await expect(page).toHaveURL(/\/library\/\?animeId=1/u);
+  await expect(page).toHaveURL(/\/library\/?$/u);
+  await expect(page.getByRole("status")).toHaveText("Added to Library.");
+  await expect(page.locator(".library-card")).toHaveCount(1);
   const library = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"));
   expect(library).toHaveLength(1);
   expect(library[0].anilistId).toBe(1);

@@ -2,6 +2,7 @@ const koMessages = {
   topNavDataMenu: {
     home: "홈",
     library: "기록장",
+    archive: "아카이브",
     showcase: "프로필 & 미니홈",
     tier: "티어",
     createMemory: "메모리 카드 만들기",
@@ -194,6 +195,10 @@ const koMessages = {
     quickLog: "빠른 기록",
     createMemory: "카드 만들기",
     addToLibrary: "기록장에 추가",
+    addingToLibrary: "추가 중...",
+    addedToLibrary: "기록장에 추가했어요.",
+    alreadyInLibrary: "이미 기록장에 있어요.",
+    addToLibraryFailed: "작품을 추가하지 못했어요. 다시 시도해 주세요.",
     add: "추가",
     loading: "검색 중...",
     statusOptions: [

@@ -132,6 +132,13 @@ export default function TopNavDataMenu({
             {copy.library}
           </a>
           <a
+            href={`${base}archive/`}
+            className={`top-nav__link top-nav__link--primary${currentRoute === "archive" ? " is-active" : ""}`}
+            aria-current={currentRoute === "archive" ? "page" : undefined}
+          >
+            {copy.archive}
+          </a>
+          <a
             href={`${base}tier/`}
             className={`top-nav__link top-nav__link--primary${currentRoute === "tier" ? " is-active" : ""}`}
             aria-current={currentRoute === "tier" ? "page" : undefined}
@@ -272,6 +279,14 @@ export default function TopNavDataMenu({
                       onClick={() => setDataMenuOpen(false)}
                     >
                       {copy.library}
+                    </a>
+                    <a
+                      href={`${base}archive/`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "archive" ? " is-active" : ""}`}
+                      aria-current={currentRoute === "archive" ? "page" : undefined}
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      {copy.archive}
                     </a>
                     <a
                       href={`${base}tier/`}

@@ -2,6 +2,7 @@ const enMessages = {
   topNavDataMenu: {
     home: "Home",
     library: "Library",
+    archive: "Archive",
     showcase: "Profile & Minihome",
     tier: "Tier",
     createMemory: "Create memory card",
@@ -194,6 +195,10 @@ const enMessages = {
     quickLog: "Quick log",
     createMemory: "Create card",
     addToLibrary: "Add to Library",
+    addingToLibrary: "Adding...",
+    addedToLibrary: "Added to Library.",
+    alreadyInLibrary: "Already in Library.",
+    addToLibraryFailed: "Couldn't add this title. Try again.",
     add: "Add",
     loading: "Searching...",
     statusOptions: [
