@@ -85,6 +85,8 @@ test("unconfigured cloud stays local-only and never claims a cloud backup", asyn
   await expect(syncCard).toContainText("Local only");
   await expect(syncCard).toContainText("Unavailable");
   await expect(syncCard).not.toContainText("Cloud backup found");
+  await expect(page.getByText(/Private Memory Cards currently stay local/u)).toBeVisible();
+  await expect(page.getByText(/Memory Cards and their images are not included/u)).toBeVisible();
 });
 
 test("visitor with one logged title is asked to add more titles", async ({ page }) => {
