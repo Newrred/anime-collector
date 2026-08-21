@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import MemoryCardComposer from "../../features/memory/components/MemoryCardComposer.jsx";
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout>
-  <MemoryCardComposer client:only="react" />
+  <MemoryCardComposer base={base} client:only="react" />
 </BaseLayout>

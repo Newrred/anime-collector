@@ -1,6 +1,7 @@
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import MemoryTitleSelector from "./MemoryTitleSelector.jsx";
 import { useMemoryCardComposer } from "./useMemoryCardComposer.js";
+import MemoryRouteShell from "./MemoryRouteShell.jsx";
 import "./memory-card-composer.css";
 
 const formatBytes = (value) => {
@@ -10,7 +11,7 @@ const formatBytes = (value) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 };
 
-export default function MemoryCardComposer() {
+export default function MemoryCardComposer({ base = "/" }) {
   const {
     runtime,
     ticket,
@@ -37,15 +38,11 @@ export default function MemoryCardComposer() {
     saveCard,
     changeNote,
     changeRightsConfirmed,
-  } = useMemoryCardComposer();
+  } = useMemoryCardComposer({ base });
 
   return (
+    <MemoryRouteShell base={base} currentRoute="memory-new">
     <div className="memory-composer page-shell page-shell--narrow">
-      <header className="memory-composer__header">
-        <a className="memory-composer__back" href="/">MOEMOA</a>
-        <span className="status-badge">Private vertical slice</span>
-      </header>
-
       <section className="surface-card memory-composer__intro">
         <div className="pageHeader">
           <p className="memory-composer__eyebrow">한 장면에서 시작하는 개인 기록</p>
@@ -179,5 +176,6 @@ export default function MemoryCardComposer() {
         </div>
       </form>
     </div>
+    </MemoryRouteShell>
   );
 }

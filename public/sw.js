@@ -1,8 +1,12 @@
-const CACHE_NAME = "ani-site-cache-v1";
+const CACHE_NAME = "ani-site-cache-v2";
 const PRECACHE_PATHS = [
   "./",
   "./index.html",
   "./tier/",
+  "./library/",
+  "./archive/",
+  "./memory/new/",
+  "./memory/card/",
   "./manifest.webmanifest",
   "./favicon.ico",
   "./favicon.svg",
@@ -14,7 +18,6 @@ function toScopeUrl(path) {
 
 function shouldBypassCache(url) {
   if (url.pathname.includes("/auth/callback")) return true;
-  if (url.search) return true;
   if (url.searchParams.has("code")) return true;
   if (url.searchParams.has("access_token")) return true;
   if (url.searchParams.has("refresh_token")) return true;
@@ -55,11 +58,11 @@ self.addEventListener("fetch", (event) => {
       fetch(request)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put(`${url.origin}${url.pathname}`, copy));
           return res;
         })
         .catch(async () => {
-          const cached = await caches.match(request);
+          const cached = await caches.match(request, { ignoreSearch: true });
           if (cached) return cached;
           return (
             (await caches.match(toScopeUrl("./index.html"))) ||

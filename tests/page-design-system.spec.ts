@@ -10,6 +10,9 @@ const ROUTES = [
   { route: "/profile/", root: ".profile-page", leadSelector: ".minihome-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/data/", root: ".data-grid", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/help/", root: ".help-page", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/memory/new/", root: ".memory-composer", leadSelector: ".memory-composer__intro", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/archive/", root: ".memory-archive", leadSelector: ".memory-archive__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/memory/card/", root: ".memory-detail", leadSelector: ".memory-detail__state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/u/?handle=playwright-user", root: ".profile-page", leadSelector: ".profile-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
 ];
 
@@ -113,6 +116,7 @@ test.describe("Page Design System Consistency", () => {
         await expect(page.locator("html")).toHaveAttribute("lang", "en");
         await expect(page.locator(".top-nav")).toBeVisible();
         await expect(page.locator(routeConfig.root)).toBeVisible();
+        await expect(page.locator("main")).toHaveCount(1);
 
         const metrics = await collectDesignMetrics(
           page,

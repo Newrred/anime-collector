@@ -2,6 +2,7 @@ import { useEffect, useReducer } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
+import MemoryRouteShell from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
 
 const INITIAL_STATE = Object.freeze({
@@ -15,7 +16,7 @@ const INITIAL_STATE = Object.freeze({
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
-export default function MemoryCardDetail() {
+export default function MemoryCardDetail({ base = "/" }) {
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
   const { runtime, bundle, previewDataUrl, note, status, message } = state;
 
@@ -79,7 +80,7 @@ export default function MemoryCardDetail() {
     updateState({ status: "deleting", message: "" });
     try {
       await runtime.deleteCard(bundle.card.id);
-      window.location.assign("/archive/index.html");
+      window.location.assign(`${base}archive/`);
     } catch {
       updateState({
         message: "카드를 완전히 삭제하지 못했어요. 앱을 다시 열어 복구를 시도해 주세요.",
@@ -105,23 +106,30 @@ export default function MemoryCardDetail() {
   };
 
   if (status === "loading") {
-    return <main className="memory-detail page-shell page-shell--narrow"><p>카드를 불러오고 있어요…</p></main>;
+    return (
+      <MemoryRouteShell base={base} currentRoute="memory-card">
+        <div className="memory-detail page-shell page-shell--narrow"><p>카드를 불러오고 있어요…</p></div>
+      </MemoryRouteShell>
+    );
   }
   if (status === "not-found" || status === "error") {
     return (
-      <main className="memory-detail page-shell page-shell--narrow">
+      <MemoryRouteShell base={base} currentRoute="memory-card">
+      <div className="memory-detail page-shell page-shell--narrow">
         <section className="surface-card memory-detail__state">
           <h1>카드를 찾을 수 없어요.</h1>
-          <a className="btn" href="/archive/index.html">Archive로 돌아가기</a>
+          <a className="btn" href={`${base}archive/`}>Archive로 돌아가기</a>
         </section>
-      </main>
+      </div>
+      </MemoryRouteShell>
     );
   }
 
   return (
-    <main className="memory-detail page-shell page-shell--narrow">
+    <MemoryRouteShell base={base} currentRoute="memory-card">
+    <div className="memory-detail page-shell page-shell--narrow">
       <header className="memory-detail__header">
-        <a href="/archive/index.html">← Memory Archive</a>
+        <a href={`${base}archive/`}>← Memory Archive</a>
         <span className="status-badge">Private · Local only</span>
       </header>
       <article className="surface-card memory-detail__card">
@@ -171,6 +179,7 @@ export default function MemoryCardDetail() {
           </form>
         </div>
       </article>
-    </main>
+    </div>
+    </MemoryRouteShell>
   );
 }

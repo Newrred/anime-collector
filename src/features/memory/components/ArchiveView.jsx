@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
+import MemoryRouteShell from "./MemoryRouteShell.jsx";
 import "./archive-view.css";
 
-export default function ArchiveView() {
+export default function ArchiveView({ base = "/" }) {
   const [items, setItems] = useState([]);
   const [status, setStatus] = useState("loading");
 
@@ -28,15 +29,16 @@ export default function ArchiveView() {
   }, []);
 
   return (
-    <main className="memory-archive page-shell">
+    <MemoryRouteShell base={base} currentRoute="archive">
+    <div className="memory-archive page-shell">
       <header className="memory-archive__header">
         <div>
-          <a className="memory-archive__brand" href="/">MOEMOA</a>
+          <a className="memory-archive__brand" href={base}>MOEMOA</a>
           <p className="memory-archive__eyebrow">Private · Local only</p>
           <h1 className="pageTitle">Memory Archive</h1>
           <p className="pageLead">내가 남긴 장면과 감상을 이 기기에서 다시 꺼내보세요.</p>
         </div>
-        <a className="btn" href="/memory/new/">새 카드 만들기</a>
+        <a className="btn" href={`${base}memory/new/`}>새 카드 만들기</a>
       </header>
 
       {status === "loading" && <p className="surface-card memory-archive__state">Archive를 불러오고 있어요…</p>}
@@ -49,7 +51,7 @@ export default function ArchiveView() {
         <section className="surface-card memory-archive__state">
           <h2>아직 저장한 카드가 없어요.</h2>
           <p>기억하고 싶은 장면 한 장으로 첫 카드를 만들어 보세요.</p>
-          <a className="btn memory-archive__empty-action" href="/memory/new/">첫 카드 만들기</a>
+          <a className="btn memory-archive__empty-action" href={`${base}memory/new/`}>첫 카드 만들기</a>
         </section>
       )}
 
@@ -70,7 +72,7 @@ export default function ArchiveView() {
                 </span>
                 <a
                   className="memory-archive__card-link"
-                  href={`/memory/card/index.html?id=${encodeURIComponent(card.id)}`}
+                  href={`${base}memory/card/?id=${encodeURIComponent(card.id)}`}
                 >
                   <h2>{title.displayTitle}</h2>
                 </a>
@@ -80,6 +82,7 @@ export default function ArchiveView() {
           ))}
         </section>
       )}
-    </main>
+    </div>
+    </MemoryRouteShell>
   );
 }

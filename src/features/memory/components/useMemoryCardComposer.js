@@ -35,7 +35,7 @@ const INITIAL_STATE = Object.freeze({
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
-export function useMemoryCardComposer() {
+export function useMemoryCardComposer({ base = "/" } = {}) {
   const saveInFlight = useRef(false);
   const titleSearchGeneration = useRef(0);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
@@ -256,7 +256,7 @@ export function useMemoryCardComposer() {
         note: state.note,
         rightsConfirmed,
       });
-      window.location.assign("/archive/index.html");
+      window.location.assign(`${base}archive/`);
     } catch (error) {
       saveInFlight.current = false;
       updateState({ status: "ready", message: errorMessage(error?.code) });
