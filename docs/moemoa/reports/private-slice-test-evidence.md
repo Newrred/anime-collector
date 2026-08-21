@@ -126,6 +126,28 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 - 같은 사용자가 `Create card`와 `Add to Library`의 결과 차이를 설명한다.
 - 이 사람 검토 전에는 Milestone 4A-1을 완전 완료로 표시하지 않는다.
 
+### Milestone 4A post-discovery reliability checkpoint — 2026-08-21
+
+이 checkpoint는 Milestone 4A-1의 자동/Preview 통과 이후 발견된 Library quick action 문맥, 공용 Memory route shell, offline deep-link, modal 접근성 회귀를 보강한 결과다. Production 배포나 사람 사용성 gate 통과를 의미하지 않는다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| Library quick action 문맥·데이터 격리 | PASS | `defdafa`; 저장 완료를 기다린 뒤 현재 quick-action에서 성공 상태와 Library refresh를 표시하고, Card/Draft를 만들지 않음. detail modal close 뒤 URL query 제거 회귀 포함 |
+| Memory route shell·offline navigation | PASS | `c3f7618`; 세 Memory route의 공통 base-aware navigation, 단일 main landmark, query를 보존하는 PWA offline detail route 정책 |
+| Library modal keyboard 격리 | PASS | `9d3505b`; dialog semantics, focus trap, trigger focus 복귀, background scroll lock |
+| Web unit | PASS | 107/107 |
+| Library Chromium | PASS | 9 passed, live 2 skipped |
+| 관련 Memory/layout Chromium | PASS | 23 passed |
+| 가장 최근 전체 Chromium 완전 실행 | PASS | 54 passed, live 2 skipped; 이후 변경은 위 영향받는 focused suite로 재검증 |
+| Astro production build | PASS | 기존 large chunk warning 유지, build failure 없음 |
+| Android checkpoint | BLOCKED | 로컬 SDK platform 36 package metadata/라이선스 환경 문제로 unit/sync/APK를 이번 checkpoint에서 재실행하지 못함. Web 통과를 Android 통과로 간주하지 않음 |
+
+남은 gate:
+
+- 설명 없는 사람의 10초 발견성·Card/Library 행동 구분.
+- 320/360/390/412px, 768px, 1280/1440px의 전체 state/accessibility/approved visual baseline.
+- Android toolchain 복구 뒤 `cap sync`·unit·APK·cold launch smoke와 최종 실기기 검증.
+
 ## 6. API 36 emulator runtime evidence
 
 Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.

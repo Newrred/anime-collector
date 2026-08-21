@@ -1,7 +1,7 @@
 # CODEX START HERE — MOEMOA
 
-> **현재 저장소 상태 — 2026-08-19**
-> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 표지의 Supabase 적재, **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**도 Preview 검증을 마쳤다. 2026-08-19 사용자가 현재 카탈로그 metadata와 작품별 대표 표지의 Production 저장·표시 허가를 확인해 master 배포가 승인됐다. 이 승인은 raw payload·추가 이미지·애니 캡처·팬아트·사용자 이미지·Public UGC에는 적용되지 않는다. 다음 큰 순서는 공용 Memory UI를 Web 모바일·데스크톱에서 충분히 다듬고 검증한 뒤 Android에 적용하는 Web-first Shared UI Readiness다.
+> **현재 저장소 상태 — 2026-08-21**
+> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 대표 표지의 Supabase 적재, **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**도 Preview 검증을 마쳤다. Web-first Shared UI Readiness의 발견성 구현과 Preview 검증 뒤에는 Library 빠른 추가의 화면·데이터 격리, 세 Memory route의 공통 shell·offline deep-link, Library 상세 modal의 focus 격리를 로컬 branch에서 보강했다. Milestone 4A-1 자동/Preview 검증은 통과했지만 사람의 10초 발견성·행동 구분과 전체 viewport/accessibility/visual gate는 아직 남아 있다. 2026-08-19 사용자가 확인한 Production catalog 허가는 raw payload·추가 이미지·애니 캡처·팬아트·사용자 이미지·Public UGC로 확대되지 않는다. 다음 큰 순서는 남은 Web UI gate를 닫은 뒤 같은 공용 UI를 Android에 적용하는 것이다.
 
 ## 1. 목적
 

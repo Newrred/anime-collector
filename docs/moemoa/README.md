@@ -1,7 +1,7 @@
 # MOEMOA 문서 인덱스와 Source of Truth
 
-- 기준일: 2026-08-17
-- 현재 단계: **로컬 카탈로그 랩 10→100 표본 ExecPlan 작성 완료 → 사용자 계획 검토와 실행 방식 선택 대기**. Web-first Shared UI 설계는 승인 상태로 대기한다.
+- 기준일: 2026-08-21
+- 현재 단계: **첫 Private Vertical Slice의 Milestone 4A — Web-first Shared UI Readiness 진행 중**. 3,998개 Service Projection v2·대표 표지의 Supabase 적재와 Web catalog consumer Preview 검증, Milestone 4A-1 자동/Preview 검증은 완료됐다. 사람의 10초 발견성·행동 구분과 전체 viewport/accessibility/visual gate는 아직 남아 있으며, 이 gate 전에는 Android UI 확장이나 Board·sync·Public을 시작하지 않는다.
 
 이 파일은 문서를 찾기 위한 인덱스다. 제품 결정을 새로 만들지 않으며, 내용이 충돌할 때는 아래 source hierarchy를 따른다.
 
@@ -191,12 +191,12 @@ AUTH-01을 보류해도 `ACCOUNT-01`을 지키기 위한 설치별 Guest Owner I
 
 ## 10. 다음 작업
 
-첫 slice와 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog` 순서는 승인됐다. Android native/local 기반과 emulator end-to-end 일부도 이미 구현·검증됐다. APK 사용성 피드백에 따라 현재 다음 순서는 아래와 같다.
+첫 slice와 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog` 순서는 승인됐다. Android native/local 기반과 emulator end-to-end 일부, Supabase catalog consumer, Web의 Memory Card 발견성 진입 동선도 구현·검증됐다. 현재 다음 순서는 아래와 같다.
 
-1. `decisions/2026-08-16-web-first-shared-ui-readiness.md`와 현행 UI 설계서를 기준으로 삼는다.
-2. 사용자가 설계 문서를 검토해 변경할 내용을 확정한다.
-3. 검토 승인 뒤 별도 구현 계획을 작성한다.
-4. Web 모바일·데스크톱 공용 UI gate를 통과시킨다.
+1. `decisions/2026-08-16-web-first-shared-ui-readiness.md`, 현행 UI 설계서, `plans/first-private-vertical-slice.md`를 현재 실행 기준으로 사용한다.
+2. Home과 legacy WatchLog 중심 화면을 실제 Memory Card/Archive 의미에 맞추고, Memory 화면의 locale·LOCAL_ONLY/backup 문구·오류 상태·남은 접근성을 정리한다.
+3. 승인 viewport와 상태 fixture의 기능·layout·accessibility·visual 자동 검증을 통과시킨다.
+4. 사람 검토로 10초 발견성, Card/Library 행동 구분, 첫 Card 저장→Archive→상세 재열람을 확인해 Web UI gate를 닫는다.
 5. 같은 UI를 Android에 적용해 safe-area·keyboard·back·native media를 실기기에서 검증한다.
 6. export·전체 복구·feature flag·device matrix 등 첫 slice 잔여 항목을 마감한다.
 7. 그 뒤 다음 승인 gate인 Private Board + Web read path로 이동한다.

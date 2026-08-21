@@ -824,6 +824,10 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-20] 계획 보완: Milestone 4A-1을 추가해 Home/상단 navigation/search/detail의 발견성, Library/Card action 분리, direct-route가 아닌 실제 시작점 E2E를 Web UI Readiness 선행 gate로 고정함.
 [2026-08-20] Milestone 4A-1 구현: Home primary CTA, desktop/mobile 공통 navigation, 검색 결과의 `카드 만들기`/`Library에 추가` 분리, Archive 빈 상태 진입점을 연결함. Supabase catalog 검색 행은 내부 `animeId`를 유지해 composer exact AnimeRef deep-link를 복원하며 카드 action은 Library mutation을 호출하지 않음. 320px overflow·직접 진입 Chromium E2E와 unit/build는 통과했고, Preview 실주소 및 사람 10초 발견성 승인은 남아 있음.
 [2026-08-20] Milestone 4A-1 Preview 검증: feature branch `d937126`의 Vercel Preview가 `READY`임을 확인했다. 실제 Supabase `나루토` 검색에서 Card action은 내부 catalog `animeId`와 제목을 composer의 `AnimeRef`로 복원했고, Library action은 numeric AniList ID 20만 Library에 추가했다. Card를 저장하지 않은 상태에서 Archive는 계속 비어 있었다. 320×844, 390×844, 1440×900에서 horizontal overflow와 console error가 없었고, 남은 4A-1 gate는 사람의 첫 화면 10초 발견성·행동 구분 확인이다.
+[2026-08-21] 발견성 이후 보강: `Add to Library`는 Library 상세 화면을 배경에 남기거나 다른 Memory route를 여는 대신 현재 quick-action 문맥에서 IndexedDB 저장 완료를 기다리고 성공 상태와 Library refresh를 표시한다. 상세 modal을 닫으면 URL의 detail query도 제거해 reload 시 의도치 않게 다시 열리지 않게 했다.
+[2026-08-21] 공용 Memory shell 보강: `/memory/new/`, `/archive/`, `/memory/card/`에 같은 base-aware navigation과 단일 main landmark를 적용하고, PWA route cache가 detail query를 보존한 채 offline deep-link를 재사용하도록 고정했다.
+[2026-08-21] 접근성 보강: Library 상세 modal을 dialog로 명시하고 keyboard focus trap·닫은 뒤 trigger focus 복귀·background scroll lock을 추가했다. 이 보강은 4A-1 사람 검토나 전체 Web visual gate를 대신하지 않는다.
+[2026-08-21] 검증: Web unit 107/107, Library Chromium 9 pass/2 live skip, 관련 Memory/layout Chromium 23 pass, Astro production build를 통과했다. 전체 browser suite의 가장 최근 완전 실행은 54 pass/2 live skip이며, 이후 변경은 영향받는 focused suite로 재검증했다. Android 검증은 로컬 SDK platform 36 package metadata/라이선스 환경 문제로 이번 checkpoint에서 재실행하지 못했다. Production 배포와 push는 수행하지 않았다.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -866,10 +870,11 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 - local-only Card/Archive와 AnimeRef 저장, metadata 수정, 이미지 교체·삭제·복구 진입점.
 - Supabase Preview catalog 검색/상세/인물/표지 read model과 Library/Memory 공통 consumer.
 - catalog 결과 우선 dedupe, Legacy fallback 유지, 홍보성 표시 제목 격리, 상세→AnimeRef deep-link.
+- Home·공통 navigation·검색·상세의 Card 작성 진입과 Library 행동 격리, 세 Memory route 공통 shell·offline deep-link, Library 상세 modal focus 격리.
 
 남은 첫 slice 완료 게이트:
 
-- Home·공통 navigation·검색·상세에서 Memory Card 작성 발견성과 Library 행동 분리 승인.
+- Milestone 4A-1 사람 검토에서 10초 안의 Memory Card 작성 발견과 Card/Library 행동 차이 설명 승인.
 - Web-first UI readiness의 전체 viewport/accessibility/visual 승인.
 - Android 적용과 물리 실기기 검증.
 - export·전체 filesystem orphan scan·최종 rollback rehearsal.
