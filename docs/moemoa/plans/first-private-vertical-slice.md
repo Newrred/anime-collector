@@ -830,6 +830,9 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-21] 검증: Web unit 107/107, Library Chromium 9 pass/2 live skip, 관련 Memory/layout Chromium 23 pass, Astro production build를 통과했다. 전체 browser suite의 가장 최근 완전 실행은 54 pass/2 live skip이며, 이후 변경은 영향받는 focused suite로 재검증했다. Android 검증은 로컬 SDK platform 36 package metadata/라이선스 환경 문제로 이번 checkpoint에서 재실행하지 못했다. Production 배포와 push는 수행하지 않았다.
 [2026-08-21] Home Memory source 정렬: `32a9389`에서 Home이 실제 `moemoa-memory-v1` Archive를 읽어 최근 Memory Card, complete card count, 상세/Archive 진입을 표시한다. Memory Card가 하나라도 있으면 legacy Library/WatchLog가 비어 있어도 카드 중심 Home이 열리며, 그 경우 “첫 애니 추가” legacy 대시보드를 함께 노출하지 않는다. 기존 WatchLog row를 Memory Card로 변환하거나 두 저장소를 병합하지 않았다.
 [2026-08-21] Home TDD/검증: RED는 Memory Card count를 무시한 onboarding unit 3 pass/1 fail과 실제 Composer→Home E2E 0/1에서 확인했다. GREEN은 Web unit 108/108, Home Chromium 9/9, Memory composer/discovery 13/13, layout/design-system 12/12, Astro build, React Doctor changed scope 92/100·issue 0이다. 320×720 실제 카드 Home에서 horizontal overflow도 없었다. Android·schema·Supabase·배포 변경은 없다.
+[2026-08-21] backup 경계 정정: `0e36162`에서 기존 JSON 내보내기/가져오기가 Library·Tier·WatchLog·설정용이며 신규 Memory Card와 이미지를 포함하거나 복구하지 않음을 영문/한글 Data 화면에 명시했다. backup/export 구현 자체는 변경하지 않았다.
+[2026-08-21] Memory locale 정렬: `79276aa`에서 `/memory/new/`, `/archive/`, `/memory/card/` 본문·상태·오류·이미지 교체 문구를 공통 영어/한국어 message group과 route context에 연결했다. 상태에는 번역 문자열 대신 message key/error code를 보존해 언어 전환 뒤 즉시 다시 번역하고, native ticket claim은 재실행하지 않는다.
+[2026-08-21] locale TDD/검증: KO→EN 작성→Archive→상세와 저장 완료 EN→KO, 이미지 오류 KO→EN을 RED→GREEN으로 고정했다. prepared ticket claim은 언어 변경 전후 1회임을 검증했다. Web unit 108/108, 관련 Chromium 37/37, late picker cleanup 10회 반복 10/10, Astro build, React Doctor 100/100·issue 0, 독립 review 승인. schema·Android·Supabase·배포 변경은 없다.
 ```
 
 ## 16. 발견 사항과 계획 변경

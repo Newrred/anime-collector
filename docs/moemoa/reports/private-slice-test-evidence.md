@@ -220,6 +220,14 @@ TitleResolver/AnimeRef evidence:
 - Composer E2E에서 candidate 선택 저장, provider unavailable PrivateTitle 저장, 검색 중 query 변경 뒤 stale response 폐기를 검증했다.
 - alias/AniList resolver는 dynamic import로 분리돼 검색 전 Archive/detail 초기 bundle에는 포함되지 않는다.
 
+Memory locale/backup boundary evidence:
+
+- 작성·Archive·상세 route가 하나의 locale context를 사용하며 fresh 기본값은 영어, 한국어 선택도 페이지 이동 뒤 유지한다.
+- 저장 완료·이미지 오류 상태는 번역된 문장을 저장하지 않고 message key/error code를 보존해 화면 언어 변경 즉시 다시 번역한다.
+- 준비된 private image가 있는 상태에서 언어를 바꿔도 native ticket claim은 한 번만 실행되며 preview와 ticket ownership을 유지한다.
+- legacy JSON 수동 backup은 Memory Card/이미지를 포함하거나 복구하지 않는다고 Data 화면에 명시한다. 신규 Memory DB/export 구현은 추가하지 않았다.
+- RED→GREEN locale E2E, Web unit 108/108, 관련 Chromium 37/37, late picker cleanup 10회 반복, Astro build, React Doctor 100/100, 독립 review 승인을 확인했다.
+
 현재 한계:
 
 - 현재 Memory UI는 기능 검증용이며 가독성·잘림·시각 회귀 gate를 통과하기 전에는 dogfood-ready로 간주하지 않는다.
