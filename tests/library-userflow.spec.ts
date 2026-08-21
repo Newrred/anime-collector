@@ -22,6 +22,23 @@ test("closing a Library deep link clears it so reload does not reopen the detail
   await expect(page.locator(".modal")).toBeHidden();
 });
 
+test("Library detail keeps keyboard focus inside and returns it to the opened card", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.goto("/library/");
+  const card = page.locator(".library-grid .library-card").first();
+  await expect(card).toBeVisible();
+  await card.click();
+
+  const dialog = page.getByRole("dialog", { name: "Fixture Anime" });
+  await expect(dialog).toBeVisible();
+  await expect(page.locator(".modalCloseBtn")).toBeFocused();
+
+  await page.keyboard.press("Shift+Tab");
+  await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.modal')))).toBe(true);
+  await page.locator(".modalCloseBtn").click();
+  await expect(card).toBeFocused();
+});
+
 test("opening and cancelling quick log does not persist a row", async ({ page }) => {
   await installAppState(page, quickLogFixture);
   await page.goto("/library/?animeId=1&focus=quick-log");
