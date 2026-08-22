@@ -101,6 +101,71 @@ Capacitor 8.5.0은 active/latest stable이고 Node 22+, Android Studio 2025.2.1+
 | sync 후 `gradlew testDebugUnitTest assembleDebug` | PASS | Android unit 30/30, debug APK 11,730,977 bytes |
 | `react-doctor --verbose --scope changed --base HEAD` | PASS | 100/100; 변경분 진단 issue 0건, detail reducer와 runtime 최종-view 경계 정리 후 재검증 |
 
+### Milestone 4A-1 discoverability checkpoint — 2026-08-20
+
+구현·검증 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`와 이 ExecPlan의 Milestone 4A-1이다. Production/master 병합과 최종 배포는 수행하지 않았다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| 행동 분리 E2E | PASS | `memory-card-discovery.spec.ts` 2/2. catalog Card action은 exact internal `animeId`를 composer에 전달하면서 Library/Card draft를 변경하지 않고, Library action은 Library row만 추가하며 Memory Card/Draft를 만들지 않음 |
+| 관련 Chromium 회귀 | PASS | `index`, `memory-card-discovery`, `memory-card-composer`, `library-userflow` 합계 28 passed, live 2 skipped |
+| Web unit | PASS | 103/103 |
+| Astro production build | PASS | 12 pages; 기존 `aliases` 662.82 kB chunk warning만 유지 |
+| production test seam | PASS | `dist`에서 `__MOEMOA_TEST_GLOBAL_SEARCH__` marker 0건 |
+| catalog artifact guard | PASS | 생성된 E2E test output 정리 후 `Catalog guard: no leaks` |
+| React quality scan | PASS | changed scope score 97 |
+| Vercel feature Preview | PASS | `d937126`, target `preview`, 상태 `READY`; production/master 미변경 |
+| 실제 catalog 검색 | PASS | Supabase `나루토` 검색에서 8개 결과와 분리된 `Create card`/`Add to Library` action 확인 |
+| 실제 Card 진입 | PASS | 첫 결과가 내부 catalog UUID와 제목 `나루토`를 `/memory/new/`에 전달하고 지연 조회 뒤 `작품 정보 있음` AnimeRef로 복원; 저장 전 Archive는 비어 있음 |
+| 실제 Library 진입 | PASS | 첫 결과가 `/library/?animeId=20`에 1건만 추가; 이후 Archive는 계속 empty state와 첫 Card CTA를 표시 |
+| responsive/console | PASS | 320×844, 390×844, 1440×900 horizontal overflow 0; Preview console error 0 |
+
+남은 승인 gate:
+
+- 설명을 받지 않은 사용자가 첫 화면에서 10초 안에 `Create memory card`를 지목한다.
+- 같은 사용자가 `Create card`와 `Add to Library`의 결과 차이를 설명한다.
+- 이 사람 검토 전에는 Milestone 4A-1을 완전 완료로 표시하지 않는다.
+
+### Milestone 4A post-discovery reliability checkpoint — 2026-08-21
+
+이 checkpoint는 Milestone 4A-1의 자동/Preview 통과 이후 발견된 Library quick action 문맥, 공용 Memory route shell, offline deep-link, modal 접근성 회귀를 보강한 결과다. Production 배포나 사람 사용성 gate 통과를 의미하지 않는다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| Library quick action 문맥·데이터 격리 | PASS | `defdafa`; 저장 완료를 기다린 뒤 현재 quick-action에서 성공 상태와 Library refresh를 표시하고, Card/Draft를 만들지 않음. detail modal close 뒤 URL query 제거 회귀 포함 |
+| Memory route shell·offline navigation | PASS | `c3f7618`; 세 Memory route의 공통 base-aware navigation, 단일 main landmark, query를 보존하는 PWA offline detail route 정책 |
+| Library modal keyboard 격리 | PASS | `9d3505b`; dialog semantics, focus trap, trigger focus 복귀, background scroll lock |
+| Web unit | PASS | 107/107 |
+| Library Chromium | PASS | 9 passed, live 2 skipped |
+| 관련 Memory/layout Chromium | PASS | 23 passed |
+| 가장 최근 전체 Chromium 완전 실행 | PASS | 54 passed, live 2 skipped; 이후 변경은 위 영향받는 focused suite로 재검증 |
+| Astro production build | PASS | 기존 large chunk warning 유지, build failure 없음 |
+| Android checkpoint | BLOCKED | 로컬 SDK platform 36 package metadata/라이선스 환경 문제로 unit/sync/APK를 이번 checkpoint에서 재실행하지 못함. Web 통과를 Android 통과로 간주하지 않음 |
+
+남은 gate:
+
+- 설명 없는 사람의 10초 발견성·Card/Library 행동 구분.
+- 320/360/390/412px, 768px, 1280/1440px의 전체 state/accessibility/approved visual baseline.
+- Android toolchain 복구 뒤 `cap sync`·unit·APK·cold launch smoke와 최종 실기기 검증.
+
+### Home Memory Archive source checkpoint — 2026-08-21
+
+Commit `32a9389`는 Home의 “기억” 의미를 legacy WatchLog가 아니라 실제 `moemoa-memory-v1` Complete Card와 연결한다. 기존 Library/WatchLog는 삭제·변환·병합하지 않고 별도 legacy 화면과 데이터로 유지한다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| onboarding unit RED | EXPECTED FAIL | 3 pass/1 fail; Memory Card 1개가 있어도 actual `add-first-title`, expected `active` |
+| 실제 Home flow RED | EXPECTED FAIL | Composer에서 system design Card 저장→Home 이동 뒤 `Memory Archive` region 부재 |
+| Memory-only legacy 혼입 RED | EXPECTED FAIL | Memory Card만 있는 Home에서 legacy `Add your first anime`가 함께 노출됨 |
+| Web unit GREEN | PASS | 108/108; `memoryCardCount > 0`의 Home 활성화와 기존 onboarding 계약 포함 |
+| Home Chromium GREEN | PASS | 9/9; 실제 Card 저장→Home 최근 카드·1개 count·detail/Archive 링크, WatchLog 0건 유지, 320×720 overflow 없음 |
+| Memory composer/discovery | PASS | 13/13; create/replace/recovery/AnimeRef와 Library/Card 역방향 격리 유지 |
+| layout/design-system | PASS | 12/12; `.last-run.json` status `passed`, failed test 0 |
+| Astro production build | PASS | 12 pages; 기존 `useUiPreferences` 850.55 kB warning만 유지 |
+| React Doctor | PASS | changed scope, base `a661a94`, score 92/100, issue 0 |
+
+미변경 범위: IndexedDB schema 1, Android native media, Supabase, legacy migration, backup/export, Public/UGC, production deployment.
+
 ## 6. API 36 emulator runtime evidence
 
 Computer Use 없이 Android emulator/ADB와 WebView CDP만 사용했다.
@@ -154,6 +219,14 @@ TitleResolver/AnimeRef evidence:
 - selected catalog candidate를 저장한 뒤 IndexedDB에는 AnimeRef와 `card.animeRefId`만 있고 PrivateTitle row는 없었으며, 재개된 IMPORT journal도 같은 AnimeRef를 보존했다.
 - Composer E2E에서 candidate 선택 저장, provider unavailable PrivateTitle 저장, 검색 중 query 변경 뒤 stale response 폐기를 검증했다.
 - alias/AniList resolver는 dynamic import로 분리돼 검색 전 Archive/detail 초기 bundle에는 포함되지 않는다.
+
+Memory locale/backup boundary evidence:
+
+- 작성·Archive·상세 route가 하나의 locale context를 사용하며 fresh 기본값은 영어, 한국어 선택도 페이지 이동 뒤 유지한다.
+- 저장 완료·이미지 오류 상태는 번역된 문장을 저장하지 않고 message key/error code를 보존해 화면 언어 변경 즉시 다시 번역한다.
+- 준비된 private image가 있는 상태에서 언어를 바꿔도 native ticket claim은 한 번만 실행되며 preview와 ticket ownership을 유지한다.
+- legacy JSON 수동 backup은 Memory Card/이미지를 포함하거나 복구하지 않는다고 Data 화면에 명시한다. 신규 Memory DB/export 구현은 추가하지 않았다.
+- RED→GREEN locale E2E, Web unit 108/108, 관련 Chromium 37/37, 전체 Chromium 59 pass/2 live skip, late picker cleanup 10회 반복, Astro build, React Doctor 100/100, 독립 review 승인을 확인했다.
 
 현재 한계:
 

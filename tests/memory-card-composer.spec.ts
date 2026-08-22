@@ -1,5 +1,101 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem("ui:locale:v1") == null) {
+      localStorage.setItem("ui:locale:v1", JSON.stringify("ko"));
+    }
+  });
+});
+
+test("Memory routes follow the selected English locale from composer through detail", async ({ page }) => {
+  await page.goto("/memory/new/");
+  await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();
+
+  await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
+  await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "EN" }).click();
+
+  await expect(page.getByRole("heading", { name: "My anime memory card" })).toBeVisible();
+  await page.getByRole("button", { name: "Use system design" }).click();
+  await page.getByLabel("Anime or card title").fill("Frieren");
+  await page.getByLabel("Short reflection").fill("A quiet journey worth remembering.");
+  await page.getByRole("button", { name: "Save card" }).click();
+
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
+  await expect(page.getByRole("heading", { name: "Memory Archive" })).toBeVisible();
+  await expect(page.getByText("Revisit the scenes and reflections saved on this device.")).toBeVisible();
+  await page.getByRole("link", { name: "Frieren" }).click();
+
+  await expect(page.getByLabel("Short reflection")).toHaveValue("A quiet journey worth remembering.");
+  await expect(page.getByRole("button", { name: "Save changes" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Delete card" })).toBeVisible();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Changes saved on this device.")).toBeVisible();
+
+  await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
+  await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "KO" }).click();
+  await expect(page.getByText("변경 내용을 이 기기에 저장했어요.")).toBeVisible();
+});
+
+test("changing locale does not re-claim or discard the prepared private image", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => {
+        const count = Number(sessionStorage.getItem("locale-claim-count") || "0") + 1;
+        sessionStorage.setItem("locale-claim-count", String(count));
+        return {
+          ticket: {
+            ticketId: "locale-ticket",
+            mimeType: "image/jpeg",
+            byteSize: 42,
+            width: 1280,
+            height: 720,
+            createdAtEpochMs: 123,
+            previewDataUrl: "data:image/jpeg;base64,cHJldmlldw==",
+            localOnly: true,
+          },
+          processing: false,
+          errorCode: null,
+        };
+      },
+      pick: async () => ({ ticket: null, cancelled: true }),
+      discard: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
+  await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
+  await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "EN" }).click();
+
+  await expect(page.getByAltText("Selected image preview")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("locale-claim-count"))).toBe("1");
+});
+
+test("prepared image errors retranslate without retrying the native claim", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => {
+        const count = Number(sessionStorage.getItem("locale-error-claim-count") || "0") + 1;
+        sessionStorage.setItem("locale-error-claim-count", String(count));
+        return { ticket: null, processing: false, errorCode: "IMAGE_TOO_LARGE" };
+      },
+      pick: async () => ({ ticket: null, cancelled: true }),
+      discard: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await expect(page.getByText("20MB 이하의 이미지를 선택해 주세요.")).toBeVisible();
+  await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
+  await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "EN" }).click();
+
+  await expect(page.getByText("Choose an image up to 20MB.")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("locale-error-claim-count"))).toBe("1");
+});
+
 test("browser route explains Android-only image intake without exposing a file input", async ({ page }) => {
   await page.goto("/memory/new/");
 
@@ -277,10 +373,11 @@ test("late picker result is discarded after leaving detail and rapid clicks open
     button.click();
   });
   await page.getByRole("link", { name: "← Memory Archive" }).click();
-  await page.waitForTimeout(200);
 
   expect(await page.evaluate(() => sessionStorage.getItem("picker-call-count"))).toBe("1");
-  expect(await page.evaluate(() => sessionStorage.getItem("discarded-late-ticket"))).toBe("ticket-late");
+  await expect.poll(() => page.evaluate(() => (
+    sessionStorage.getItem("discarded-late-ticket")
+  ))).toBe("ticket-late");
   expect(await page.evaluate(() => JSON.parse(
     localStorage.getItem("moemoa:pending-ticket-cleanup:v1") || "[]",
   ))).toEqual(["ticket-late"]);
@@ -382,14 +479,14 @@ test("browser can create a deterministic system design card without an image upl
   await page.goto("/memory/new/");
   await page.getByLabel("작품 또는 카드 제목").fill("A Place Further Than the Universe");
   await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  await expect(page.getByText("System design preview")).toBeVisible();
+  await expect(page.getByText("시스템 디자인 미리보기")).toBeVisible();
 
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
   await expect(
     page.getByRole("heading", { name: "A Place Further Than the Universe" }),
   ).toBeVisible();
-  await expect(page.getByText("System design preview")).toBeVisible();
+  await expect(page.getByText("시스템 디자인 미리보기")).toBeVisible();
 });
 
 test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle", async ({ page }) => {
@@ -412,7 +509,7 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   await page.goto("/memory/new/");
   await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
   await page.getByRole("button", { name: "작품 검색" }).click();
-  await expect(page.getByText("AniList candidate")).toBeVisible();
+  await expect(page.getByText("온라인 작품 후보")).toBeVisible();
   await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
   await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
@@ -442,6 +539,53 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   expect(stored.cards[0].animeRefId).toBe(stored.animeRefs[0].id);
   expect(stored.cards[0].privateTitleId).toBeNull();
   expect(stored.animeRefs[0].sourceKey).toBe("ANILIST:154587");
+  expect(stored.privateTitles).toEqual([]);
+});
+
+test("catalog detail deep-link restores the exact AnimeRef before saving", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_CATALOG_TITLE_CHOICE__ = {
+      kind: "ANIME_REF",
+      animeId: "anime:11111111-1111-4111-8111-000000000001",
+      displayTitle: "카우보이 비밥",
+      aliases: ["Cowboy Bebop", "カウボーイビバップ"],
+      genres: ["Action", "Sci-Fi"],
+      sourceBinding: { provider: "ANILIST", externalId: "1" },
+      verificationState: "PROVIDER_CANDIDATE",
+      catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
+      readiness: "READY",
+    };
+  });
+
+  await page.goto("/memory/new/?animeId=anime%3A11111111-1111-4111-8111-000000000001&title=temporary");
+  await expect(page.getByLabel("작품 또는 카드 제목")).toHaveValue("카우보이 비밥");
+  await expect(page.getByText("작품 정보 있음")).toBeVisible();
+  await expect(page.getByText("일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.")).toBeHidden();
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+  await expect(page.getByRole("heading", { name: "카우보이 비밥" })).toBeVisible();
+
+  const stored = await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction(["memory_cards", "anime_refs", "private_titles"], "readonly");
+    const readAll = (store: string) => new Promise<unknown[]>((resolve, reject) => {
+      const read = transaction.objectStore(store).getAll();
+      read.onsuccess = () => resolve(read.result);
+      read.onerror = () => reject(read.error);
+    });
+    const [cards, animeRefs, privateTitles] = await Promise.all([
+      readAll("memory_cards"), readAll("anime_refs"), readAll("private_titles"),
+    ]);
+    database.close();
+    return { cards, animeRefs, privateTitles };
+  });
+
+  expect(stored.cards).toHaveLength(1);
+  expect(stored.animeRefs).toHaveLength(1);
   expect(stored.privateTitles).toEqual([]);
 });
 

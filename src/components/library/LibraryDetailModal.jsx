@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GenresRow } from "./LibraryUi.jsx";
 import { formatStatusLabel, formatEventLabel } from "./libraryCopy.js";
 import { getMessageGroup } from "../../domain/messages.js";
@@ -60,10 +60,49 @@ export default function LibraryDetailModal({
 }) {
   const copy = getMessageGroup(locale, "libraryDetailModal");
   const [activeTab, setActiveTab] = useState("overview");
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
   useEffect(() => {
     if (open) setActiveTab("overview");
   }, [open, selectedId]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      if (returnFocus?.isConnected) returnFocus.focus();
+    };
+  }, [open, selectedId]);
+
+  function keepFocusInsideDialog(event) {
+    if (event.key !== "Tab" || !dialogRef.current) return;
+    const focusable = Array.from(
+      dialogRef.current.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((element) => !element.hasAttribute("hidden"));
+    if (focusable.length === 0) {
+      event.preventDefault();
+      dialogRef.current.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   if (!open || !selected) return null;
 
@@ -75,11 +114,17 @@ export default function LibraryDetailModal({
       }}
     >
       <div
+        ref={dialogRef}
         className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`library-detail-title-${selectedId}`}
+        tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
+        onKeyDown={keepFocusInsideDialog}
       >
-        <button type="button" className="modalCloseBtn" onClick={onClose} aria-label={copy.close} title={copy.close}>
+        <button ref={closeButtonRef} type="button" className="modalCloseBtn" onClick={onClose} aria-label={copy.close} title={copy.close}>
           <IconX size={14} />
         </button>
         <div className="modalBody">
@@ -102,7 +147,7 @@ export default function LibraryDetailModal({
           </div>
 
           <div className="modalMain">
-            <h2 className="modalTitle">{selectedTitle}</h2>
+            <h2 id={`library-detail-title-${selectedId}`} className="modalTitle">{selectedTitle}</h2>
             <div className="small modalMeta">
               {selectedMedia?.seasonYear ? `${selectedMedia.seasonYear} · ` : ""}
               {selectedMedia?.format || ""}

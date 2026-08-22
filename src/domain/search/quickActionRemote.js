@@ -10,6 +10,7 @@ import {
   persistSearchCacheMap,
   setSearchCacheEntry,
 } from "../../repositories/searchCacheRepo.js";
+import { projectCatalogQuickRows } from "./catalogQuickActionProjection.js";
 
 function isHangulQuery(query) {
   return /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(String(query || ""));
@@ -75,8 +76,27 @@ export async function searchRemoteCandidates(query, libraryIdSet = new Set()) {
   const trimmed = String(query || "").trim();
   if (trimmed.length < 2) return [];
 
-  const key = `quick:${normalizeText(trimmed)}`;
   const cache = (await loadSearchCacheMap().catch(() => new Map())) || new Map();
+  const catalogKey = `quick:catalog-v2:${normalizeText(trimmed)}`;
+  const catalogCached = cache.get(catalogKey);
+  if (catalogCached && isFreshSearchCacheEntry(catalogCached, Date.now())) {
+    return projectCatalogQuickRows(catalogCached.results, libraryIdSet);
+  }
+
+  try {
+    const { searchLibraryCatalog } = await import("../../features/catalog/catalogConsumer.js");
+    const catalog = await searchLibraryCatalog(trimmed);
+    const catalogRows = projectCatalogQuickRows(catalog?.results, libraryIdSet);
+    if (catalog?.status === "READY" && catalogRows.length > 0) {
+      setSearchCacheEntry(cache, catalogKey, catalogRows);
+      persistSearchCacheMap(cache).catch(() => {});
+      return catalogRows;
+    }
+  } catch {
+    // The established AniList/Wikidata path remains the bounded fallback.
+  }
+
+  const key = `quick:${normalizeText(trimmed)}`;
   const cached = cache.get(key);
 
   if (cached && isFreshSearchCacheEntry(cached, Date.now())) {

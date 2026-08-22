@@ -6,7 +6,17 @@ const DESKTOP_VIEWPORTS = [
   { name: "d1440", width: 1440, height: 900 },
 ];
 
-const ROUTES = ["/", "/library/", "/tier/", "/profile/", "/data/", "/help/"];
+const ROUTES = [
+  "/",
+  "/library/",
+  "/tier/",
+  "/profile/",
+  "/data/",
+  "/help/",
+  "/memory/new/",
+  "/archive/",
+  "/memory/card/",
+];
 
 async function measureOverflow(page: import("@playwright/test").Page) {
   return page.evaluate(() => {

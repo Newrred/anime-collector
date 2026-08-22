@@ -6,7 +6,17 @@ const MOBILE_VIEWPORTS = [
   { name: "m390", width: 390, height: 844 },
 ];
 
-const ROUTES = ["/", "/library/", "/tier/", "/profile/", "/data/", "/help/"];
+const ROUTES = [
+  "/",
+  "/library/",
+  "/tier/",
+  "/profile/",
+  "/data/",
+  "/help/",
+  "/memory/new/",
+  "/archive/",
+  "/memory/card/",
+];
 
 async function measureOverflow(page: import("@playwright/test").Page) {
   return page.evaluate(() => {

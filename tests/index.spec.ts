@@ -8,7 +8,9 @@ test("fresh browser uses English shell and primary navigation", async ({ page })
   const primary = page.locator(".top-nav__links--routes");
   await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Archive" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create memory card", exact: true }).first()).toBeVisible();
   await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
@@ -20,14 +22,60 @@ test("mobile menu identifies the current route accessibly", async ({ page }) => 
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
   const current = page.locator(".top-nav-mobile-links").getByRole("link", { name: "Library" });
   await expect(current).toHaveAttribute("aria-current", "page");
+  await expect(page.locator(".top-nav-mobile-links").getByRole("link", { name: "Archive" })).toBeVisible();
 });
 
-test("new visitor sees one primary add-title action", async ({ page }) => {
+test("new visitor sees memory card creation as the primary action", async ({ page }) => {
   await clearAppState(page);
   await installAppState(page, { locale: "en" });
   await page.goto("/");
+  const createCard = page.locator(".home-empty-state").getByRole("link", { name: "Create memory card", exact: true });
+  await expect(createCard.first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(1);
   await expect(page.locator(".library-card")).toHaveCount(0);
+});
+
+test("saved Memory Card becomes Home's archive source without a legacy Library or log", async ({ page }) => {
+  await clearAppState(page);
+  await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("Anime or card title").fill("Home Memory Fixture");
+  await page.getByLabel("Short reflection").fill("A real card, separate from the legacy log.");
+  await page.getByRole("button", { name: "Use system design" }).click();
+  await page.getByRole("button", { name: "Save card" }).click();
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  const memory = page.getByRole("region", { name: "Memory Archive" });
+  await expect(memory).toBeVisible();
+  await expect(memory).toContainText("1 memory card");
+  await expect(memory).toContainText("Latest memory card");
+  await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
+  await expect(memory.getByRole("link", { name: "Open Archive" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(0);
+  await expect(page.getByText("Add your first anime", { exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  const legacyLogs = await page.evaluate(() => JSON.parse(
+    localStorage.getItem("anime:watchLogs:v1") || "[]",
+  ));
+  expect(legacyLogs).toEqual([]);
+});
+
+test("mobile exposes memory card creation without opening the overflow menu", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await clearAppState(page);
+  await installAppState(page, { locale: "en" });
+  await page.goto("/");
+
+  const createCard = page.locator(".top-nav__memory-action:visible");
+  await expect(createCard).toHaveAccessibleName("Create memory card");
+  await expect(createCard).toContainText("Card");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await createCard.click();
+  await expect(page).toHaveURL(/\/memory\/new\/?$/u);
 });
 
 test("unconfigured cloud stays local-only and never claims a cloud backup", async ({ page }) => {
@@ -37,6 +85,8 @@ test("unconfigured cloud stays local-only and never claims a cloud backup", asyn
   await expect(syncCard).toContainText("Local only");
   await expect(syncCard).toContainText("Unavailable");
   await expect(syncCard).not.toContainText("Cloud backup found");
+  await expect(page.getByText(/Private Memory Cards currently stay local/u)).toBeVisible();
+  await expect(page.getByText(/Memory Cards and their images are not included/u)).toBeVisible();
 });
 
 test("visitor with one logged title is asked to add more titles", async ({ page }) => {

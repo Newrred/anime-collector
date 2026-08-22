@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { isSupabaseConfigured, supabase } from "../../lib/supabaseClient.js";
+import { catalogSupabase, isCatalogSupabaseConfigured } from "./catalogSupabaseClient.js";
 import { createSupabaseCatalogRepository } from "./catalogRepository.js";
 import "./catalog-detail.css";
 
@@ -17,9 +17,9 @@ export default function CatalogDetail() {
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !animeId) { setStatus("unavailable"); return undefined; }
+    if (!isCatalogSupabaseConfigured || !animeId) { setStatus("unavailable"); return undefined; }
     let active = true;
-    const repository = createSupabaseCatalogRepository({ client: supabase });
+    const repository = createSupabaseCatalogRepository({ client: catalogSupabase });
     repository.getDetail(animeId).then(async (row) => {
       if (!active) return;
       if (!row) { setStatus("missing"); return; }
@@ -37,7 +37,7 @@ export default function CatalogDetail() {
     if (!detail || nextPage > detail.people.pageCount) return;
     setStatus("loading-more");
     try {
-      const repository = createSupabaseCatalogRepository({ client: supabase });
+      const repository = createSupabaseCatalogRepository({ client: catalogSupabase });
       const page = await repository.getPeople(animeId, nextPage);
       if (page) setPeople((current) => [...current, ...page.entries]);
       setNextPage((current) => current + 1);
@@ -55,7 +55,10 @@ export default function CatalogDetail() {
   );
 
   const genres = detail.genres.core.length ? detail.genres.core : detail.genres.source;
-  const cardHref = `/memory/new/?${new URLSearchParams({ title: detail.preferredTitle.value })}`;
+  const cardHref = `/memory/new/?${new URLSearchParams({
+    animeId: detail.animeId,
+    title: detail.preferredTitle.value,
+  })}`;
   return (
     <div className="catalog-detail page-shell">
       <header className="catalog-detail__hero surface-card">

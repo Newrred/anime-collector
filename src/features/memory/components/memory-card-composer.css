@@ -4,20 +4,12 @@
   padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
 }
 
-.memory-composer__header,
 .memory-composer__section-head,
 .memory-composer__save-gate {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--layout-gap-md);
-}
-
-.memory-composer__back {
-  color: var(--text-primary);
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.08em;
-  text-decoration: none;
 }
 
 .memory-composer__intro,

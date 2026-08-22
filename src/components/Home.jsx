@@ -10,12 +10,14 @@ import ResurfacingCards from "./home/ResurfacingCards";
 import CharacterInsightSheet from "./home/CharacterInsightSheet";
 import HomeShowcasePreview from "./home/HomeShowcasePreview.jsx";
 import HomeEmptyState from "./home/HomeEmptyState.jsx";
+import HomeMemoryOverview from "./home/HomeMemoryOverview.jsx";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { StatBars } from "./library/LibraryUi.jsx";
 import { formatGenreLabel, formatStatusLabel } from "./library/libraryCopy.js";
 import { getMessageGroup } from "../domain/messages.js";
 import { SCORE_MAX, normalizeRewatchCount, normalizeScoreValue } from "../domain/animeState";
+import { useHomeMemoryArchive } from "../features/memory/components/useHomeMemoryArchive.js";
 
 function buildLibraryHref(base, anilistId, focus = "") {
   const params = new URLSearchParams();
@@ -163,8 +165,10 @@ export default function Home() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "home");
   const onboardingCopy = getMessageGroup(locale, "homeOnboarding");
+  const memoryCopy = getMessageGroup(locale, "homeMemory");
   const tasteCopy = getMessageGroup(locale, "libraryStatsPanel");
   const { items, logs, mediaMap, titleById } = useShowcaseSource(locale);
+  const memoryArchive = useHomeMemoryArchive();
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [recapYear, setRecapYear] = useState(null);
@@ -199,7 +203,15 @@ export default function Home() {
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
-  const onboardingState = deriveOnboardingState({ itemCount: items.length, logCount: logs.length });
+  const legacyOnboardingState = deriveOnboardingState({
+    itemCount: items.length,
+    logCount: logs.length,
+  });
+  const onboardingState = deriveOnboardingState({
+    itemCount: items.length,
+    logCount: logs.length,
+    memoryCardCount: memoryArchive.count,
+  });
   const firstItemId = Number(items?.[0]?.anilistId);
   const onboardingLibraryHref = Number.isFinite(firstItemId)
     ? buildLibraryHref(base, firstItemId, "quick-log")
@@ -319,7 +331,12 @@ export default function Home() {
         onInstallPwa={onClickInstallPwa}
       />
 
-      {onboardingState.stage === "active" ? (
+      {memoryArchive.status === "loading" ? (
+        <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
+      ) : onboardingState.stage === "active" ? (
+        <>
+      <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
+      {legacyOnboardingState.stage === "active" ? (
         <>
       <section className="pageHeader">
         {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
@@ -350,9 +367,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="action-row">
+                <a href={`${base}memory/new/`} className="btn">
+                  {onboardingCopy.createMemory}
+                </a>
                 {Number.isFinite(heroAnimeId) ? (
                   <>
-                    <a href={heroPrimaryHref} className="btn">
+                    <a href={heroPrimaryHref} className="btn btn--subtle">
                       {copy.quickRecord}
                     </a>
                     <a href={heroSecondaryHref} className="btn btn--subtle">
@@ -361,7 +381,7 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <button type="button" className="btn" onClick={openGlobalQuickAction}>
+                    <button type="button" className="btn btn--subtle" onClick={openGlobalQuickAction}>
                       {locale === "en" ? "Add a title" : "작품 추가"}
                     </button>
                     <a href={heroSecondaryHref} className="btn btn--subtle">
@@ -414,13 +434,21 @@ export default function Home() {
         onClose={() => setSelectedCharacter(null)}
       />
         </>
+      ) : null}
+        </>
       ) : (
-        <HomeEmptyState
-          copy={onboardingCopy}
-          stage={onboardingState.stage}
-          onAddTitle={openGlobalQuickAction}
-          libraryHref={onboardingLibraryHref}
-        />
+        <>
+          {memoryArchive.status === "error" ? (
+            <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
+          ) : null}
+          <HomeEmptyState
+            copy={onboardingCopy}
+            stage={onboardingState.stage}
+            onAddTitle={openGlobalQuickAction}
+            libraryHref={onboardingLibraryHref}
+            memoryHref={`${base}memory/new/`}
+          />
+        </>
       )}
     </div>
   );

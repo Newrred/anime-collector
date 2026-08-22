@@ -26,8 +26,13 @@
 }
 
 .memory-archive__state {
-  padding: 32px;
+  padding: 24px;
   text-align: center;
+}
+
+.memory-archive__empty-action {
+  display: inline-flex;
+  margin-top: 12px;
 }
 
 .memory-archive__grid {

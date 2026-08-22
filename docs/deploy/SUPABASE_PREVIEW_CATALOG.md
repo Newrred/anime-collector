@@ -42,8 +42,8 @@ supabase db push
 Preview 범위에만 다음 두 값을 둔다.
 
 ```text
-PUBLIC_SUPABASE_URL=https://<preview-project-ref>.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=<preview publishable/anon key>
+PUBLIC_CATALOG_SUPABASE_URL=https://<preview-project-ref>.supabase.co
+PUBLIC_CATALOG_SUPABASE_ANON_KEY=<preview publishable/anon key>
 ```
 
 Service-role key는 Vercel과 브라우저 bundle에 넣지 않는다. 표지는 service-role 로컬 업로더가 `catalog-covers-preview` bucket에 checksum 경로로 올리고, 브라우저는 공개 읽기 URL만 사용한다. 환경변수 변경은 기존 deployment에 소급되지 않으므로 새 Preview deployment를 만든다. Google OAuth를 시험한다면 Supabase Auth redirect allowlist에 Preview callback URL을 추가한다.
@@ -60,7 +60,7 @@ Service-role key는 Vercel과 브라우저 bundle에 넣지 않는다. 표지는
 
 ## 롤백
 
-- Web: Vercel Preview의 두 `PUBLIC_SUPABASE_*` 값을 제거하고 새 deployment를 만든다.
+- Web: Vercel Preview의 두 `PUBLIC_CATALOG_SUPABASE_*` 값을 제거하고 새 deployment를 만든다.
 - Catalog: 이전 release를 다시 `activate_catalog_release`로 활성화한다.
 - 실패한 STAGING release 삭제는 참조 count와 active pointer를 확인한 뒤 별도 승인 하에 수행한다.
 - 외부 TEST_ONLY canonical과 로컬 Memory IndexedDB는 이 배포로 변경되지 않는다.

@@ -2,8 +2,25 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createSupabaseCatalogRepository } from "../../src/features/catalog/catalogRepository.js";
+import { resolveCatalogSupabaseConfig } from "../../src/features/catalog/catalogSupabaseClient.js";
 
 const animeId = "anime:11111111-1111-4111-8111-000000000001";
+
+test("catalog client uses its dedicated public configuration instead of auth Supabase variables", () => {
+  assert.deepEqual(resolveCatalogSupabaseConfig({
+    PUBLIC_SUPABASE_URL: "https://legacy-auth.supabase.co",
+    PUBLIC_SUPABASE_ANON_KEY: "legacy-auth-key",
+    PUBLIC_CATALOG_SUPABASE_URL: "https://catalog.supabase.co/",
+    PUBLIC_CATALOG_SUPABASE_ANON_KEY: "catalog-publishable-key",
+  }), {
+    url: "https://catalog.supabase.co",
+    publishableKey: "catalog-publishable-key",
+  });
+  assert.equal(resolveCatalogSupabaseConfig({
+    PUBLIC_SUPABASE_URL: "https://legacy-auth.supabase.co",
+    PUBLIC_SUPABASE_ANON_KEY: "legacy-auth-key",
+  }), null);
+});
 
 function clientFor(rows) {
   return {
@@ -26,6 +43,7 @@ test("catalog repository returns service-safe detail and paginated people", asyn
       anime_id: animeId,
       payload: {
         schemaVersion: 2, animeId,
+        externalIds: [{ provider: "anilist", externalId: "1" }],
         preferredTitle: { locale: "ko", value: "카우보이 비밥" },
         titles: [{ locale: "ko", value: "카우보이 비밥" }, { locale: "en", value: "Cowboy Bebop" }],
         release: { format: "TV", status: "FINISHED", episodeCount: 26, startDate: "1998-04-03", sourceMaterialType: "ORIGINAL" },
@@ -52,6 +70,7 @@ test("catalog repository returns service-safe detail and paginated people", asyn
   const detail = await repository.getDetail(animeId);
   const people = await repository.getPeople(animeId, 1);
   assert.equal(detail.preferredTitle.value, "카우보이 비밥");
+  assert.deepEqual(detail.sourceBinding, { provider: "ANILIST", externalId: "1" });
   assert.match(detail.cover.publicUrl, /catalog-covers-preview/u);
   assert.equal(people.entries[0].castings[0].creditedName, "Koichi Yamadera");
   assert.doesNotMatch(JSON.stringify({ detail, people }), /rowHash|localRef|checksum/u);

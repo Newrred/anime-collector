@@ -1,22 +1,7 @@
 import { useEffect, useReducer, useRef } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 
-const ERROR_MESSAGES = {
-  IMAGE_TOO_LARGE: "20MB 이하의 이미지를 선택해 주세요.",
-  UNSUPPORTED_IMAGE_TYPE: "JPEG, PNG, WebP 이미지만 사용할 수 있어요.",
-  IMAGE_DECODE_FAILED: "이 이미지를 읽을 수 없어요. 다른 이미지를 선택해 주세요.",
-  IMAGE_TOO_COMPLEX: "이미지가 너무 커서 미리보기를 만들 수 없어요.",
-  UNSUPPORTED_SOURCE_URI: "이 앱에서 안전하게 읽을 수 있는 이미지가 아니에요.",
-  PREVIEW_UNAVAILABLE: "이미지 미리보기를 불러오지 못했어요.",
-  LOCAL_USE_CONFIRMATION_REQUIRED: "개인 기록 용도 확인이 필요해요.",
-  MEDIA_STORAGE_FULL: "기기 저장 공간이 부족해요.",
-  MEDIA_PROMOTION_FAILED: "이미지를 기기에 보관하지 못했어요. 다시 시도해 주세요.",
-  OPERATION_IN_PROGRESS: "카드를 저장하고 있어요. 잠시만 기다려 주세요.",
-};
-
-const errorMessage = (code) => (
-  ERROR_MESSAGES[String(code || "")] || "이미지를 가져오지 못했어요. 다시 시도해 주세요."
-);
+const errorCode = (code) => String(code || "fallback");
 
 const INITIAL_STATE = Object.freeze({
   runtime: null,
@@ -35,7 +20,7 @@ const INITIAL_STATE = Object.freeze({
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
-export function useMemoryCardComposer() {
+export function useMemoryCardComposer({ base = "/" } = {}) {
   const saveInFlight = useRef(false);
   const titleSearchGeneration = useRef(0);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
@@ -52,9 +37,33 @@ export function useMemoryCardComposer() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const requestedTitle = String(new URLSearchParams(window.location.search).get("title") || "")
+    let active = true;
+    const parameters = new URLSearchParams(window.location.search);
+    const requestedTitle = String(parameters.get("title") || "")
       .normalize("NFKC").trim().replace(/\s+/gu, " ").slice(0, 120);
     if (requestedTitle) updateState({ title: requestedTitle });
+    const requestedAnimeId = String(parameters.get("animeId") || "");
+    if (requestedAnimeId) {
+      const generation = titleSearchGeneration.current;
+      const testChoice = import.meta.env.DEV
+        ? globalThis.__MOEMOA_TEST_CATALOG_TITLE_CHOICE__
+        : null;
+      const choicePromise = testChoice
+        ? Promise.resolve(structuredClone(testChoice))
+        : import("../../catalog/catalogConsumer.js")
+          .then(({ loadCatalogTitleChoice }) => loadCatalogTitleChoice(requestedAnimeId));
+      choicePromise.then((choice) => {
+        if (!active || generation !== titleSearchGeneration.current || !choice) return;
+        updateState({
+          title: choice.displayTitle,
+          selectedTitleChoice: choice,
+          titleResults: [],
+          titleSearchStatus: "ready",
+          remoteTitleStatus: "READY",
+        });
+      }).catch(() => {});
+    }
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -76,11 +85,11 @@ export function useMemoryCardComposer() {
         }
         updateState({
           status: result.errorCode ? "error" : "empty",
-          message: result.errorCode ? errorMessage(result.errorCode) : "",
+          message: result.errorCode ? errorCode(result.errorCode) : "",
         });
       } catch (error) {
         if (!active) return;
-        updateState({ status: "error", message: errorMessage(error?.code) });
+        updateState({ status: "error", message: errorCode(error?.code) });
       }
     };
 
@@ -96,7 +105,7 @@ export function useMemoryCardComposer() {
       claim(activeRuntime);
     }).catch((error) => {
       if (!active) return;
-      updateState({ status: "error", message: errorMessage(error?.code) });
+      updateState({ status: "error", message: errorCode(error?.code) });
     });
     return () => {
       active = false;
@@ -119,7 +128,7 @@ export function useMemoryCardComposer() {
       }
       updateState({ ticket: result.ticket, designSpec: null, status: "ready" });
     } catch (error) {
-      updateState({ status: "error", message: errorMessage(error?.code) });
+      updateState({ status: "error", message: errorCode(error?.code) });
     }
   };
 
@@ -142,7 +151,7 @@ export function useMemoryCardComposer() {
         status: "ready",
       });
     } catch (error) {
-      updateState({ status: "error", message: errorMessage(error?.code) });
+      updateState({ status: "error", message: errorCode(error?.code) });
     }
   };
 
@@ -210,7 +219,7 @@ export function useMemoryCardComposer() {
       await runtime.imageIntake.discard(ticket.ticketId);
       updateState({ ticket: null, status: "empty", message: "" });
     } catch (error) {
-      updateState({ status: "error", message: errorMessage(error?.code) });
+      updateState({ status: "error", message: errorCode(error?.code) });
     }
   };
 
@@ -232,10 +241,10 @@ export function useMemoryCardComposer() {
         note: state.note,
         rightsConfirmed,
       });
-      window.location.assign("/archive/index.html");
+      window.location.assign(`${base}archive/`);
     } catch (error) {
       saveInFlight.current = false;
-      updateState({ status: "ready", message: errorMessage(error?.code) });
+      updateState({ status: "ready", message: errorCode(error?.code) });
     }
   };
 

@@ -174,6 +174,39 @@ test("development catalog fallback calls AniList only when the local endpoint is
   assert.equal(fallbackCalls, 1);
 });
 
+test("combined resolver hides unmatched legacy candidates when catalog results exist", async () => {
+  const localResolver = {
+    search: async () => legacyRows.map((row) => ({
+      kind: "ANIME_REF",
+      displayTitle: row.ko,
+      aliases: row.aliases,
+      genres: [],
+      sourceBinding: { provider: "ANILIST", externalId: String(row.anilistId) },
+      verificationState: "LEGACY_UNVERIFIED",
+    })),
+  };
+  const remoteResolver = {
+    search: async () => [{
+      kind: "ANIME_REF",
+      animeId: "anime:11111111-1111-4111-8111-000000154587",
+      displayTitle: "장송의 프리렌",
+      aliases: ["Frieren: Beyond Journey's End"],
+      genres: ["Fantasy"],
+      sourceBinding: { provider: "ANILIST", externalId: "154587" },
+      verificationState: "PROVIDER_CANDIDATE",
+      catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
+      readiness: "READY",
+      coverAssetId: "asset:placeholder",
+    }],
+  };
+  const response = await createCombinedTitleResolver({
+    localResolver, remoteResolver, remoteTimeoutMs: 50,
+  }).search("프리렌");
+
+  assert.equal(response.results.length, 1);
+  assert.equal(response.results[0].sourceBinding.externalId, "154587");
+});
+
 test("Supabase catalog resolver maps only bounded active-release search fields", async () => {
   const calls = [];
   const resolver = createSupabaseCatalogTitleResolver({
@@ -209,4 +242,27 @@ test("Supabase catalog resolver maps only bounded active-release search fields",
     coverAssetId: "asset:placeholder",
   }]);
   assert.doesNotMatch(JSON.stringify(results), /row_hash|search_text|payload|localRef|checksum/iu);
+});
+
+test("Supabase catalog resolver replaces a promotional preferred title with a clean alias", async () => {
+  const resolver = createSupabaseCatalogTitleResolver({
+    client: {
+      rpc: async () => ({ data: [{
+        anime_id: "anime:11111111-1111-4111-8111-000000000021",
+        anilist_id: 21,
+        preferred_title: "(고화질)나루토 질풍전",
+        preferred_locale: "ko",
+        search_aliases: [
+          { locale: "en", value: "Naruto: Shippuden" },
+          { locale: "ja", value: "NARUTO -ナルト- 疾風伝" },
+        ],
+        studios: ["Pierrot"], genres: ["Action"], readiness: "READY_WITH_GAPS",
+        cover_asset_id: "asset:placeholder",
+      }], error: null }),
+    },
+  });
+
+  const [candidate] = await resolver.search("나루토");
+  assert.equal(candidate.displayTitle, "Naruto: Shippuden");
+  assert.doesNotMatch(JSON.stringify(candidate), /고화질/u);
 });

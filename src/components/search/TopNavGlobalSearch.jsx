@@ -5,6 +5,7 @@ import { useGlobalQuickActionSource } from "../../hooks/useGlobalQuickActionSour
 import { searchLocalLibrary, mapLocalLibraryRow } from "../../domain/search/libraryLocalSearch.js";
 import { searchRemoteCandidates } from "../../domain/search/quickActionRemote.js";
 import { addAnimeFromQuickAction, openLibraryDeepLink } from "../../domain/search/quickActionActions.js";
+import { buildMemoryCardHref } from "../../domain/search/memoryCardNavigation.js";
 import { IconSearch } from "../ui/AppIcons.jsx";
 import QuickActionPanel from "./QuickActionPanel.jsx";
 import GlobalQuickActionSheet from "./GlobalQuickActionSheet.jsx";
@@ -66,6 +67,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   const [remoteRows, setRemoteRows] = useState([]);
   const [recentQueries, setRecentQueries] = useState(() => readQuickSearchRecent());
   const [quickAddStatus, setQuickAddStatus] = useState(() => readQuickAddStatus());
+  const [actionFeedback, setActionFeedback] = useState(null);
+  const [addingAnimeId, setAddingAnimeId] = useState(null);
   const rootRef = useRef(null);
   const desktopInputRef = useRef(null);
   const mobileInputRef = useRef(null);
@@ -105,7 +108,13 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     setLoading(true);
 
     const timer = window.setTimeout(() => {
-      searchRemoteCandidates(trimmed, libraryIdSet)
+      const testSearch = import.meta.env.DEV
+        ? globalThis.__MOEMOA_TEST_GLOBAL_SEARCH__?.search
+        : null;
+      const search = typeof testSearch === "function"
+        ? testSearch(trimmed, libraryIdSet)
+        : searchRemoteCandidates(trimmed, libraryIdSet);
+      Promise.resolve(search)
         .then((rows) => {
           if (!alive) return;
           setRemoteRows(rows);
@@ -185,11 +194,25 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   }
 
   async function handleAddRemote(row) {
-    const result = await addAnimeFromQuickAction(row.media, quickAddStatus);
+    if (addingAnimeId !== null) return;
+    setAddingAnimeId(row.id);
+    setActionFeedback(null);
+    try {
+      const result = await addAnimeFromQuickAction(row.media, quickAddStatus);
+      rememberQuery();
+      setActionFeedback({ tone: "success", message: result.alreadyExists ? copy.alreadyInLibrary : copy.addedToLibrary });
+    } catch {
+      setActionFeedback({ tone: "error", message: copy.addToLibraryFailed });
+    } finally {
+      setAddingAnimeId(null);
+    }
+  }
+
+  function handleCreateMemory(row) {
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId: result.item.anilistId, focus: "detail" });
+    window.location.href = buildMemoryCardHref({ base, row });
   }
 
   function handleOpenDetail(animeId) {
@@ -216,6 +239,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         recentRows={recentRows}
         recentQueries={recentQueries}
         loading={loading}
+        actionFeedback={actionFeedback}
+        addingAnimeId={addingAnimeId}
         quickAddStatus={quickAddStatus}
         onQuickAddStatusChange={setQuickAddStatus}
         onPickRecentQuery={(value) => {
@@ -227,6 +252,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         }}
         onOpenDetail={handleOpenDetail}
         onOpenQuickLog={handleOpenQuickLog}
+        onCreateMemory={handleCreateMemory}
         onAddRemote={handleAddRemote}
       />
     );

@@ -1,6 +1,6 @@
 import aliasSeed from "../../../data/aliases.json";
 import { searchAnimeByTitle } from "../../../lib/anilist.js";
-import { isSupabaseConfigured, supabase } from "../../../lib/supabaseClient.js";
+import { catalogSupabase, isCatalogSupabaseConfigured } from "../../catalog/catalogSupabaseClient.js";
 import { createAniListTitleResolver } from "../adapters/catalog/anilistTitleResolver.js";
 import {
   createDevCatalogTitleResolver,
@@ -11,9 +11,9 @@ import { createSupabaseCatalogTitleResolver } from "../adapters/catalog/supabase
 import { createCombinedTitleResolver } from "../application/titleResolver.js";
 
 const aniListResolver = createAniListTitleResolver({ searchAnime: searchAnimeByTitle, limit: 8 });
-const previewCatalogResolver = isSupabaseConfigured
+const previewCatalogResolver = isCatalogSupabaseConfigured
   ? createFallbackCatalogTitleResolver({
-    primary: createSupabaseCatalogTitleResolver({ client: supabase, limit: 8 }),
+    primary: createSupabaseCatalogTitleResolver({ client: catalogSupabase, limit: 8 }),
     fallback: aniListResolver,
   })
   : aniListResolver;

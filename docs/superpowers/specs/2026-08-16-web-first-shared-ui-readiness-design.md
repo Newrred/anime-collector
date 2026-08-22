@@ -2,6 +2,7 @@
 
 > **문서 상태: `APPROVED DESIGN`**
 > 승인일: 2026-08-16
+> 발견성·진입 동선 보완 승인일: 2026-08-20
 > 승인자: 사용자
 > 적용 범위: 첫 Private Vertical Slice의 공통 Memory UI 안정화
 > 실행 계획: `docs/moemoa/plans/first-private-vertical-slice.md`
@@ -47,7 +48,9 @@ Android native 기반 유지·동결
 사용자가 설명 없이 다음 흐름을 완료할 수 있는 공통 UI를 만든다.
 
 ```text
-카드 만들기 진입
+Home 또는 공통 navigation에서 카드 만들기 발견
+→ 작품 검색 결과·작품 상세에서 카드 만들기와 Library 추가를 구분
+→ 카드 만들기 진입
 → 이미지 또는 시스템 디자인 확인
 → 작품 검색 또는 PrivateTitle
 → 선택적 짧은 감상
@@ -65,7 +68,8 @@ Web은 이 UI를 빠르게 반복·검증하는 작업 surface다. Android는 �
 - `/memory/new/` 카드 작성 UI.
 - `/archive/` 목록·빈 상태·재방문 UI.
 - `/memory/card/` 상세·수정·교체·삭제 UI.
-- 핵심 Memory 흐름으로 들어가는 최소 navigation entry.
+- Home 첫 화면과 공통 상단 navigation의 명확한 `메모리 카드 만들기` 진입점.
+- 검색 결과·작품 상세의 `이 작품으로 카드 만들기`와 기존 `Library에 추가` 행동 분리.
 - Memory 범위의 typography, spacing, surface, button, input, feedback, image frame 규칙.
 - 모바일 우선 responsive layout과 데스크톱 확장.
 - loading, empty, error, offline, provider failure, missing image, cleanup pending 상태.
@@ -143,6 +147,16 @@ UI는 IndexedDB, Capacitor plugin, AniList를 직접 호출하지 않는다. 데
 
 ## 7. 화면별 구조
 
+### 진입과 발견성
+
+- Home의 첫 화면에는 `/memory/new/`로 이동하는 `메모리 카드 만들기`를 primary action으로 둔다.
+- 공통 상단 navigation에는 현재 route와 무관하게 이해 가능한 카드 작성 진입점을 둔다. 모바일에서 숨겨진 overflow menu만을 유일한 진입점으로 사용하지 않는다.
+- 기존 상단 작품 검색은 Library 관리 행동임을 명확히 표시한다. 검색 결과에서 `이 작품으로 카드 만들기`는 primary, `Library에 추가`는 secondary action으로 구분한다.
+- catalog 상세에는 선택한 내부 `animeId`를 유지하는 `이 작품으로 카드 만들기`를 제공한다. 이 행동은 Library row를 생성하거나 수정하지 않는다.
+- Archive의 빈 상태와 일반 상태 모두 새 카드 작성 행동을 제공한다.
+- direct URL `/memory/new/` 접근 성공만으로 발견성 gate를 통과한 것으로 간주하지 않는다.
+- CTA label은 `추가`, `기록`, `만들기`처럼 목적이 불명확한 단독 표현을 피하고 결과 객체인 `메모리 카드`를 포함한다.
+
 ### 카드 작성
 
 ```text
@@ -201,6 +215,10 @@ UI는 IndexedDB, Capacitor plugin, AniList를 직접 호출하지 않는다. 데
 
 ### 자동 검증
 
+- `/`에서 primary CTA를 거쳐 `/memory/new/`에 도달하는 E2E.
+- 공통 상단 navigation에서 `/memory/new/`에 도달하는 desktop/mobile E2E.
+- 검색 결과와 catalog 상세의 `이 작품으로 카드 만들기`가 정확한 `AnimeRef`를 유지하고 Library를 변경하지 않는 계약 테스트.
+- `Library에 추가`는 Card/Draft를 생성하지 않는 역방향 계약 테스트.
 - Memory 세 route의 document/body/child horizontal overflow 0.5px 이하.
 - 사용자에게 보이는 text button 최소 높이 44px.
 - long-title, long-copy, empty, error, missing-image fixture.
@@ -212,6 +230,9 @@ UI는 IndexedDB, Capacitor plugin, AniList를 직접 호출하지 않는다. 데
 
 ### 사람 검토
 
+- 첫 화면을 본 사용자가 설명 없이 10초 안에 카드 작성 진입점을 지목.
+- Home 또는 상단 navigation에서 한 번의 명확한 선택으로 카드 작성 화면에 진입.
+- 같은 작품 검색 결과에서 `카드 만들기`와 `Library에 추가`의 차이를 설명.
 - 설명 없이 첫 Card를 2분 이내 저장.
 - 저장 직후 Archive에서 방금 만든 Card를 발견.
 - 이미지가 왜 필요한지와 시스템 디자인 대안을 이해.
@@ -253,13 +274,14 @@ Web screenshot 통과를 Android UI 통과로 간주하지 않는다.
 ## 12. 실행 순서
 
 1. 문서와 state matrix를 기준선으로 고정한다.
-2. Memory-scoped UI primitives와 layout shell을 정리한다.
-3. 카드 작성 화면을 모바일 우선으로 재구성한다.
-4. Archive와 상세 화면을 같은 규칙으로 맞춘다.
-5. Web 기능·layout·accessibility·visual gate를 통과한다.
-6. Android shell 적응과 실기기 UI gate를 수행한다.
-7. 첫 Slice의 orphan/MISSING, export, TTL, feature flag, device matrix를 완료한다.
-8. Milestone 7 완료 보고 뒤 Private Board + Web read path 승인을 연다.
+2. Home·공통 navigation·검색·상세의 카드 작성 진입 계약을 구현하고 Library 행동과 분리한다.
+3. Memory-scoped UI primitives와 layout shell을 정리한다.
+4. 카드 작성 화면을 모바일 우선으로 재구성한다.
+5. Archive와 상세 화면을 같은 규칙으로 맞춘다.
+6. Web 기능·발견성·layout·accessibility·visual gate를 통과한다.
+7. Android shell 적응과 실기기 UI gate를 수행한다.
+8. 첫 Slice의 orphan/MISSING, export, TTL, feature flag, device matrix를 완료한다.
+9. Milestone 7 완료 보고 뒤 Private Board + Web read path 승인을 연다.
 
 ## 13. 롤백
 

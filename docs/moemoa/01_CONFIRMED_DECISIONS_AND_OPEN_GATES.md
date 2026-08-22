@@ -153,6 +153,17 @@ spoiler/content rating
 
 MOEMOA는 자체 내부 ID, 관계 타입, 중복 판별, 검증 상태를 운영한다.
 
+### CATALOG-PROD-01 — 승인된 카탈로그와 대표 표지의 Production 표시
+
+상태: **확정 — 2026-08-19**
+
+- 사용자는 2026-08-19 AniList 기반 카탈로그 metadata와 작품별 대표 표지를 MOEMOA Production에서 저장·표시하는 허가를 받았다고 확인했다.
+- 허가 증빙 원문은 사용자가 보관하며 저장소에는 승인 범위와 확인 시점만 기록한다.
+- 승인 범위는 현재 검증된 Service Projection v2 3,998개와 그 작품별 대표 표지 1개를 Production Web의 검색·상세 화면에서 제공하는 용도다.
+- raw payload, 추가 이미지, 애니 장면 캡처, 팬아트, 사용자 이미지, Public UGC 권한으로 확대하지 않는다.
+- 대표 표지는 catalog presentation asset이며 Memory Card의 사용자 `VisualAsset`으로 복사하지 않는다.
+- 공급자 조건이 변경되거나 허가가 철회되면 `PUBLIC_CATALOG_SUPABASE_*`를 제거하거나 Web consumer 커밋을 revert해 기존 fallback으로 즉시 전환한다.
+
 ### LEGACY-01 — 보수적 legacy 보존·승격
 
 상태: **확정 — 2026-08-11**

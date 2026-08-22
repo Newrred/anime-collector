@@ -391,6 +391,31 @@ export default function Library() {
   }, [items, storageHydrated]);
 
   useEffect(() => {
+    let alive = true;
+
+    async function refreshLibraryFromStorage() {
+      const preferred = await readLibraryListPreferred([]).catch(() => []);
+      if (!alive || !Array.isArray(preferred)) return;
+      setItems(
+        dedupeByAnilistId(
+          preferred.map((item, index) =>
+            normalizeItem(
+              item,
+              Number.isFinite(Number(item?.addedAt)) ? Number(item.addedAt) : index
+            )
+          )
+        )
+      );
+    }
+
+    window.addEventListener("moemoa:library-updated", refreshLibraryFromStorage);
+    return () => {
+      alive = false;
+      window.removeEventListener("moemoa:library-updated", refreshLibraryFromStorage);
+    };
+  }, [setItems]);
+
+  useEffect(() => {
     setItems((prev) => {
       const source = Array.isArray(prev) ? prev : [];
       const normalized = dedupeByAnilistId(
@@ -1284,6 +1309,12 @@ export default function Library() {
   function closeSelectedModal() {
     commitModalDraft();
     setSelectedId(null);
+    if (typeof window !== "undefined") {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.delete("animeId");
+      nextUrl.searchParams.delete("focus");
+      window.history.replaceState(window.history.state, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+    }
   }
 
   function appendSelectedWatchLog(eventType, overrides = {}, options = {}) {
