@@ -21,6 +21,67 @@ const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 900 },
 ];
 
+const SHARED_VISUAL_SPEC = Object.freeze({
+  version: 1,
+  templateId: "memory-gradient",
+  paletteId: "violet-night",
+  patternSeed: "shared-geometry",
+  titleLayout: "BOTTOM_LEFT",
+  genreTokens: ["Drama"],
+});
+const WIDE_SYNTHETIC_IMAGE = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22400%22 viewBox=%220 0 800 400%22%3E%3Crect width=%22800%22 height=%22400%22 fill=%22%235d52c7%22/%3E%3C/svg%3E";
+
+async function prepareReactClient(page: import("@playwright/test").Page) {
+  try {
+    await page.evaluate(() => import("/@id/react-dom/client").then(() => true));
+  } catch (error) {
+    if (!String(error).includes("Execution context was destroyed")) throw error;
+  }
+  await page.waitForLoadState("domcontentloaded");
+}
+
+async function mountSharedVisualGeometry(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await prepareReactClient(page);
+  await page.evaluate(async ({ imageSrc, systemSpec }) => {
+    const React = (await import("/@id/react")).default;
+    const { createRoot } = (await import("/@id/react-dom/client")).default;
+    const [{ default: MemoryCardPreview }, { default: MemoryVisual }] = await Promise.all([
+      import("/src/features/memory/components/MemoryCardPreview.jsx"),
+      import("/src/features/memory/components/MemoryVisual.jsx"),
+    ]);
+    const element = React.createElement;
+    const root = document.createElement("div");
+    document.body.replaceChildren(root);
+    createRoot(root).render(element("main", { className: "memory-visual-scope shared-visual-geometry" }, [
+      element(MemoryCardPreview, {
+        key: "grid",
+        href: "/memory/card/?id=geometry-grid",
+        title: "A very long grid title that must stay within exactly two visual lines without losing its accessible name",
+        cue: "A cue that is also long enough to confirm the two-line clamp stays inside the card body at narrow widths.",
+        visual: { kind: "IMAGE", src: imageSrc, alt: "Wide synthetic memory scene" },
+        variant: "grid",
+        missingLabel: "Visual unavailable",
+      }),
+      element(MemoryCardPreview, {
+        key: "featured",
+        href: "/memory/card/?id=geometry-featured",
+        title: "Featured system memory",
+        visual: { kind: "SYSTEM_DESIGN", designSpec: systemSpec },
+        variant: "featured",
+        systemCopy: { label: "System design preview", fallbackTitle: "Featured system memory" },
+        missingLabel: "Visual unavailable",
+      }),
+      element("div", { key: "detail", className: "detail-visual-fixture" },
+        element(MemoryVisual, {
+          visual: { kind: "IMAGE", src: imageSrc, alt: "Complete detail scene" },
+          fit: "contain",
+        })),
+    ]));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }, { imageSrc: WIDE_SYNTHETIC_IMAGE, systemSpec: SHARED_VISUAL_SPEC });
+}
+
 async function seedMockAuth(page: import("@playwright/test").Page) {
   await page.addInitScript(
     ({ sessionKey, profileKey }) => {
@@ -141,4 +202,37 @@ test.describe("Page Design System Consistency", () => {
       await context.close();
     });
   }
+});
+
+test("shared memory visuals keep grid crop, detail containment, and text clamps stable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mountSharedVisualGeometry(page);
+
+  const metrics = await page.evaluate(() => {
+    const gridVisual = document.querySelector(".memory-preview--grid .memory-visual");
+    const systemVisual = document.querySelector(".memory-preview--featured .memory-visual");
+    const gridImage = gridVisual?.querySelector("img");
+    const detailImage = document.querySelector(".detail-visual-fixture img");
+    const title = document.querySelector(".memory-preview--grid .memory-preview__title");
+    const cue = document.querySelector(".memory-preview--grid .memory-preview__cue");
+    const gridRect = gridVisual?.getBoundingClientRect();
+    const systemRect = systemVisual?.getBoundingClientRect();
+    return {
+      gridRatio: gridRect ? gridRect.width / gridRect.height : 0,
+      systemRatio: systemRect ? systemRect.width / systemRect.height : 0,
+      gridFit: gridImage ? getComputedStyle(gridImage).objectFit : "",
+      detailFit: detailImage ? getComputedStyle(detailImage).objectFit : "",
+      titleClamp: title ? getComputedStyle(title).webkitLineClamp : "",
+      cueClamp: cue ? getComputedStyle(cue).webkitLineClamp : "",
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  });
+
+  expect(metrics.gridRatio).toBeCloseTo(0.8, 2);
+  expect(metrics.systemRatio).toBeCloseTo(0.8, 2);
+  expect(metrics.gridFit).toBe("cover");
+  expect(metrics.detailFit).toBe("contain");
+  expect(metrics.titleClamp).toBe("2");
+  expect(metrics.cueClamp).toBe("2");
+  expect(metrics.overflow).toBeLessThanOrEqual(0.5);
 });

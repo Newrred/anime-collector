@@ -1,6 +1,8 @@
 .system-design-preview {
   display: flex;
-  min-height: 220px;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 4 / 5;
   flex-direction: column;
   justify-content: flex-end;
   gap: 8px;
@@ -43,4 +45,32 @@
 
 .system-design-preview small {
   opacity: 0.72;
+}
+
+/* Keep the artwork composition stable when a page also supplies a generic preview class. */
+.system-design-preview[data-pattern-token] {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .system-design-preview,
+  .system-design-preview::before {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .system-design-preview {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  .system-design-preview::before {
+    border-color: CanvasText;
+  }
 }

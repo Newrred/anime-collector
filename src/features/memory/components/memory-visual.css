@@ -1,0 +1,75 @@
+.memory-visual-scope {
+  --memory-visual-aspect: 4 / 5;
+  --memory-visual-radius: 12px;
+  --memory-visual-border: color-mix(in srgb, var(--border, #324057) 82%, transparent);
+  --memory-visual-surface: color-mix(in srgb, var(--panel, #111d2f) 88%, #6674c8 12%);
+  --memory-visual-muted: var(--muted, #a9b6ca);
+}
+
+.memory-visual {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: var(--memory-visual-aspect);
+  overflow: hidden;
+  border: 1px solid var(--memory-visual-border);
+  border-radius: var(--memory-visual-radius);
+  background: var(--memory-visual-surface);
+  isolation: isolate;
+  place-items: center;
+}
+
+.memory-visual__image,
+.memory-visual > .system-design-preview {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: inherit;
+}
+
+.memory-visual__image {
+  display: block;
+  object-fit: cover;
+}
+
+.memory-visual--contain .memory-visual__image {
+  object-fit: contain;
+}
+
+.memory-visual--missing {
+  align-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: var(--memory-visual-muted);
+  text-align: center;
+}
+
+.memory-visual__missing-mark {
+  font-size: clamp(1.8rem, 8vw, 3rem);
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.memory-visual__missing-label {
+  max-width: 18ch;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-visual,
+  .memory-visual * {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .memory-visual {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    forced-color-adjust: auto;
+  }
+}

@@ -902,7 +902,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Image-first design specification approved and refined.
 - [x] Detailed implementation plan written.
 - [x] Task 1: deterministic visual runner and guard policy.
-- [ ] Task 2: shared memory visual components.
+- [x] Task 2: shared memory visual components.
 - [ ] Task 3: header/search hierarchy.
 - [ ] Task 4: Home composition.
 - [ ] Task 5: Composer composition.
@@ -920,6 +920,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: Playwright reports inside the repository caused Astro's watcher to observe transient output. Visual-test reports now use the untracked sibling directory `.moemoa-ui-test-results` outside the repository.
 - 2026-08-24: Task 1 keeps an empty, valid baseline manifest and a no-screenshot infrastructure smoke. Task 8 remains the only step allowed to create and review the 18 pixel baselines.
 - 2026-08-24: one full catalog verification initially hit the pre-existing intermittent Chromium image-decode startup timeout; its isolated rerun and the next full rerun passed, so no unrelated cover-pipeline change was made.
+- 2026-08-24: direct mobile visual inspection exposed a cascade conflict between the generic Composer preview class and `SystemDesignPreview`; a real-page regression now locks the vertical 4:5 composition and child containment.
+- 2026-08-24: display-component tests preload React's client renderer because a clean Vite cache may optimize that dependency and reload once on first import; the product components retain no test-only route or runtime seam.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 
