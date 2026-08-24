@@ -116,7 +116,7 @@ export default function QuickActionPanel({
                     </span>
                   </button>
                   <div className="quick-action-row__actions">
-                    <button type="button" className="btn btn--subtle btn--sm" onClick={() => onCreateMemory(row)}>
+                    <button type="button" className="btn btn--subtle btn--sm quick-action-row__create-action" onClick={() => onCreateMemory(row)}>
                       {copy.createMemory}
                     </button>
                     <button type="button" className="btn btn--subtle btn--sm" onClick={() => onOpenQuickLog(row.id)}>
@@ -138,8 +138,8 @@ export default function QuickActionPanel({
             {loading ? <div className="small page-feedback">{copy.loading}</div> : null}
             {!loading && remoteRows.length ? (
               remoteRows.map((row) => (
-                <div key={`remote-${row.id}`} className="quick-action-row">
-                  <button type="button" className="quick-action-row__main" onClick={() => onCreateMemory(row)}>
+                <div key={`remote-${row.id}`} className="quick-action-row quick-action-row--choice">
+                  <div className="quick-action-row__main">
                     {row.poster ? (
                       <img src={row.poster} alt={row.title} className="quick-action-row__poster" loading="lazy" />
                     ) : (
@@ -149,19 +149,25 @@ export default function QuickActionPanel({
                       <span className="quick-action-row__title">{row.title}</span>
                       <span className="quick-action-row__meta">{row.subtitle}</span>
                     </span>
-                  </button>
-                  <div className="quick-action-row__actions">
-                    <button type="button" className="btn btn--sm" onClick={() => onCreateMemory(row)}>
-                      {copy.createMemory}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn--subtle btn--sm"
-                      onClick={() => onAddRemote(row)}
-                      disabled={addingAnimeId !== null}
-                    >
-                      {Number(addingAnimeId) === Number(row.id) ? copy.addingToLibrary : copy.addToLibrary}
-                    </button>
+                  </div>
+                  <div className="quick-action-row__actions quick-action-row__actions--choice" role="group" aria-label={copy.actionChoice}>
+                    <div className="quick-action-row__action-option is-primary">
+                      <button type="button" className="btn btn--sm quick-action-row__create-action" onClick={() => onCreateMemory(row)}>
+                        {copy.createMemory}
+                      </button>
+                      <small>{copy.createMemoryEffect}</small>
+                    </div>
+                    <div className="quick-action-row__action-option">
+                      <button
+                        type="button"
+                        className="btn btn--subtle btn--sm quick-action-row__library-action"
+                        onClick={() => onAddRemote(row)}
+                        disabled={addingAnimeId !== null}
+                      >
+                        {Number(addingAnimeId) === Number(row.id) ? copy.addingToLibrary : copy.addToLibrary}
+                      </button>
+                      <small>{copy.addToLibraryEffect}</small>
+                    </div>
                   </div>
                 </div>
               ))

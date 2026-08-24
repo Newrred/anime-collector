@@ -25,6 +25,19 @@ test("mobile menu identifies the current route accessibly", async ({ page }) => 
   await expect(page.locator(".top-nav-mobile-links").getByRole("link", { name: "Archive" })).toBeVisible();
 });
 
+test("mobile menu closes on Escape and returns focus to its trigger", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await clearAppState(page);
+  await page.goto("/library/");
+
+  const trigger = page.locator(".top-nav__mobile-menu-trigger:visible");
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Manage" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Manage" })).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
 test("new visitor sees memory card creation as the primary action", async ({ page }) => {
   await clearAppState(page);
   await installAppState(page, { locale: "en" });

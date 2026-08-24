@@ -96,13 +96,55 @@ test("catalog search card action preserves the exact AnimeRef without changing L
   await installCatalogSearchFixture(page);
   const row = await searchCatalogResult(page);
 
-  await row.getByRole("button", { name: "Create card" }).click();
+  await row.getByRole("button", { name: "Create memory card" }).click();
 
   await expect(page).toHaveURL(new RegExp(`/memory/new/\\?animeId=${encodeURIComponent(catalogAnimeId)}`));
   await expect(page.getByLabel("Anime or card title")).toHaveValue("카우보이 비밥");
   await expect(page.getByText("Catalog match")).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"))).toEqual([]);
   expect(await memoryCardCount(page)).toBe(0);
+});
+
+test("catalog result exposes one explicit Memory action and a separate Library-only action", async ({ page }) => {
+  await installCatalogSearchFixture(page);
+  const row = await searchCatalogResult(page);
+
+  await expect(row.locator(".quick-action-row__create-action")).toHaveCount(1);
+  await expect(row.locator(".quick-action-row__library-action")).toHaveCount(1);
+  await expect(row.getByRole("group", { name: "Choose how to use this title" })).toBeVisible();
+  await expect(row.getByRole("button")).toHaveCount(2);
+  await expect(row.getByText("Starts a private card without adding this title to Library.", { exact: true })).toBeVisible();
+  await expect(row.getByText("Adds this title to Library only. No Memory Card is created.", { exact: true })).toBeVisible();
+
+  const hierarchy = await row.evaluate((element) => {
+    const primary = element.querySelector(".quick-action-row__create-action");
+    const secondary = element.querySelector(".quick-action-row__library-action");
+    return {
+      primaryBackground: primary ? getComputedStyle(primary).backgroundColor : "",
+      secondaryBackground: secondary ? getComputedStyle(secondary).backgroundColor : "",
+    };
+  });
+  expect(hierarchy.primaryBackground).not.toBe(hierarchy.secondaryBackground);
+});
+
+test("desktop and mobile search close on Escape and restore focus to their invoking control", async ({ page }) => {
+  await installCatalogSearchFixture(page);
+  await page.goto("/");
+
+  const desktopInput = page.locator(".quick-action__input:visible");
+  await desktopInput.fill("Cowboy Bebop");
+  await expect(page.locator(".quick-action__desktop .quick-action-panel")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".quick-action__desktop .quick-action-panel")).toHaveCount(0);
+  await expect(desktopInput).toBeFocused();
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  const mobileTrigger = page.locator(".quick-action__mobile-trigger:visible");
+  await mobileTrigger.click();
+  await expect(page.getByRole("dialog", { name: "Add title · Find my record" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Add title · Find my record" })).toHaveCount(0);
+  await expect(mobileTrigger).toBeFocused();
 });
 
 test("catalog search Library action adds only the Library row and creates no Memory draft", async ({ page }) => {

@@ -6,6 +6,47 @@ const MOBILE_VIEWPORTS = [
   { name: "m390", width: 390, height: 844 },
 ];
 
+test("320px header keeps primary controls separate and at least 44px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+  await page.goto("/");
+  await expect(page.locator(".top-nav")).toBeVisible();
+
+  const metrics = await page.evaluate(() => {
+    const selectors = [
+      ".top-nav__brand",
+      ".top-nav__memory-action",
+      ".quick-action__mobile-trigger",
+      ".top-nav__mobile-menu-trigger",
+    ];
+    const rects = selectors.map((selector) => {
+      const element = document.querySelector(`${selector}:not([hidden])`);
+      const rect = element?.getBoundingClientRect();
+      return rect ? { selector, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height } : null;
+    }).filter(Boolean);
+    const overlaps = [];
+    for (let first = 0; first < rects.length; first += 1) {
+      for (let second = first + 1; second < rects.length; second += 1) {
+        const a = rects[first];
+        const b = rects[second];
+        if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5
+          && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) {
+          overlaps.push(`${a.selector}:${b.selector}`);
+        }
+      }
+    }
+    return { rects, overlaps, viewport: innerWidth };
+  });
+
+  expect(metrics.rects).toHaveLength(4);
+  expect(metrics.rects.every((rect) => rect.width >= 44 && rect.height >= 44)).toBe(true);
+  expect(metrics.rects.every((rect) => rect.left >= -0.5 && rect.right <= metrics.viewport + 0.5)).toBe(true);
+  expect(metrics.overlaps).toEqual([]);
+  await expect(page.locator(".quick-action__mobile-trigger:visible")).toHaveAccessibleName(
+    "Open add title / find record search",
+  );
+});
+
 const ROUTES = [
   "/",
   "/library/",

@@ -15,6 +15,7 @@ import {
 } from "./ui/AppIcons.jsx";
 import AuthSheet from "./auth/AuthSheet.jsx";
 import TopNavGlobalSearch from "./search/TopNavGlobalSearch.jsx";
+import "./top-nav-readiness.css";
 
 function ActionLabel({ icon, children }) {
   return (
@@ -43,6 +44,7 @@ export default function TopNavDataMenu({
 }) {
   const copy = getMessageGroup(locale, "topNavDataMenu");
   const dataMenuRef = useRef(null);
+  const menuReturnFocusRef = useRef(null);
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const auth = useAuthSession(`${base}data/`);
@@ -67,6 +69,19 @@ export default function TopNavDataMenu({
     document.addEventListener("mousedown", onDocDown);
     return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
+
+  useEffect(() => {
+    if (!dataMenuOpen && !localeMenuOpen) return undefined;
+    function onKeyDown(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setDataMenuOpen(false);
+      setLocaleMenuOpen(false);
+      requestAnimationFrame(() => menuReturnFocusRef.current?.focus());
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dataMenuOpen, localeMenuOpen]);
 
   function openDataPage() {
     if (typeof window === "undefined") return;
@@ -172,7 +187,8 @@ export default function TopNavDataMenu({
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={(event) => {
+                menuReturnFocusRef.current = event.currentTarget;
                 setLocaleMenuOpen((v) => !v);
                 setDataMenuOpen(false);
               }}
@@ -188,7 +204,8 @@ export default function TopNavDataMenu({
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={(event) => {
+                menuReturnFocusRef.current = event.currentTarget;
                 setDataMenuOpen((v) => !v);
                 setLocaleMenuOpen(false);
               }}
@@ -205,7 +222,8 @@ export default function TopNavDataMenu({
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={(event) => {
+                menuReturnFocusRef.current = event.currentTarget;
                 setDataMenuOpen((v) => !v);
                 setLocaleMenuOpen(false);
               }}

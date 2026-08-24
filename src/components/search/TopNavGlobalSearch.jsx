@@ -72,6 +72,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   const rootRef = useRef(null);
   const desktopInputRef = useRef(null);
   const mobileInputRef = useRef(null);
+  const mobileTriggerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 900px)");
 
   const libraryIdSet = useMemo(
@@ -169,6 +170,13 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         if (tag === "input" || tag === "textarea" || document.activeElement?.isContentEditable) return;
         event.preventDefault();
         focusInput();
+        return;
+      }
+
+      if (!withMeta && key === "escape" && desktopOpen && !mobileOpen) {
+        event.preventDefault();
+        setDesktopOpen(false);
+        requestAnimationFrame(() => desktopInputRef.current?.focus());
       }
     }
 
@@ -181,7 +189,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("moemoa:quick-action-open", onOpenQuickAction);
     };
-  }, [isMobile]);
+  }, [desktopOpen, isMobile, mobileOpen]);
 
   useEffect(() => {
     writeQuickAddStatus(quickAddStatus);
@@ -227,6 +235,11 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     setDesktopOpen(false);
     setMobileOpen(false);
     openLibraryDeepLink({ base, animeId, focus: "quick-log" });
+  }
+
+  function closeMobileSearch() {
+    setMobileOpen(false);
+    requestAnimationFrame(() => mobileTriggerRef.current?.focus());
   }
 
   function renderPanel() {
@@ -283,6 +296,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         </div>
 
         <button
+          ref={mobileTriggerRef}
           type="button"
           className="data-menu-trigger quick-action__mobile-trigger"
           onClick={() => {
@@ -303,7 +317,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         open={mobileOpen}
         title={copy.title}
         closeLabel={copy.closeSearchSheet}
-        onClose={() => setMobileOpen(false)}
+        onClose={closeMobileSearch}
       >
         <div className="quick-action-sheet__search">
           <div className="quick-action__input-wrap">
