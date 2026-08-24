@@ -24,7 +24,7 @@ async function prepareReactClient(page: import('@playwright/test').Page) {
 async function renderMemoryDisplayFixtures(page: import('@playwright/test').Page) {
   await page.goto('/');
   await prepareReactClient(page);
-  await page.evaluate(async ({ imageSrc, longTitle, systemSpec }) => {
+  const render = () => page.evaluate(async ({ imageSrc, longTitle, systemSpec }) => {
     const React = (await import('/@id/react')).default;
     const { createRoot } = (await import('/@id/react-dom/client')).default;
     const [{ default: MemoryCardPreview }, { default: MemoryVisual }] = await Promise.all([
@@ -78,6 +78,15 @@ async function renderMemoryDisplayFixtures(page: import('@playwright/test').Page
     ]));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   }, { imageSrc: SYNTHETIC_IMAGE, longTitle: LONG_MEMORY_TITLE, systemSpec: SYSTEM_SPEC });
+
+  try {
+    await render();
+  } catch (error) {
+    if (!String(error).includes('Execution context was destroyed')) throw error;
+    await page.waitForLoadState('domcontentloaded');
+    await prepareReactClient(page);
+    await render();
+  }
 }
 
 test('isolated visual test surface uses its owned server without the Astro toolbar', async ({ page }) => {
@@ -188,4 +197,32 @@ test('composer system design keeps its vertical composition inside the mobile fr
   expect(layout.direction).toBe('column');
   expect(layout.rootRight).toBeLessThanOrEqual(layout.viewportWidth + 0.5);
   expect(layout.childrenInside).toBe(true);
+});
+
+test('composer keeps the visual beside the form only when desktop height can support it', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/memory/new/');
+  await page.getByRole('button', { name: 'Use system design', exact: true }).click();
+
+  const spacious = await page.evaluate(() => {
+    const visual = document.querySelector('.memory-composer__visual-column');
+    const fields = document.querySelector('.memory-composer__form-column');
+    const visualRect = visual?.getBoundingClientRect();
+    const fieldsRect = fields?.getBoundingClientRect();
+    return {
+      sideBySide: Boolean(visualRect && fieldsRect && visualRect.right < fieldsRect.left),
+      position: visual ? getComputedStyle(visual).position : '',
+    };
+  });
+  expect(spacious.sideBySide).toBe(true);
+  expect(spacious.position).toBe('sticky');
+
+  await page.setViewportSize({ width: 1024, height: 768 });
+  const compact = await page.locator('.memory-composer__visual-column').evaluate((element) => ({
+    position: getComputedStyle(element).position,
+    right: element.getBoundingClientRect().right,
+    viewportWidth: innerWidth,
+  }));
+  expect(compact.position).toBe('static');
+  expect(compact.right).toBeLessThanOrEqual(compact.viewportWidth + 0.5);
 });

@@ -905,7 +905,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 2: shared memory visual components.
 - [x] Task 3: header/search hierarchy.
 - [x] Task 4: Home composition.
-- [ ] Task 5: Composer composition.
+- [x] Task 5: Composer composition.
 - [ ] Task 6: Archive gallery.
 - [ ] Task 7: Detail and Library distinction.
 - [ ] Task 8: visual/cross-browser/human gate and document sync.
@@ -927,6 +927,9 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: Task 4 now keys the top-level Home composition to the real private Memory Archive: no card shows one visual-first starting promise, a real card shows the latest `MemoryCardPreview`, and loading/error states no longer render an empty-archive claim.
 - 2026-08-24: direct desktop inspection refined the Korean specimen title to avoid a mid-word line break; automated 320/390/768/1440 rendering keeps the primary Create action in the first viewport with no horizontal overflow.
 - 2026-08-24: a running process on port 4321 proved that general `run-e2e.mjs` can violate visual-test isolation. Task 3-8 verification commands now use the Task 1 `run-visual-e2e.mjs` owner/cleanup path.
+- 2026-08-24: Task 5 now presents one ordered creative flow: visual → title → reflection → rights → Save. The disabled Save control exposes the next actionable requirement in adjacent text, while image errors remain a single assertive announcement.
+- 2026-08-24: the Composer keeps its preview beside the fields above 900px, but makes it sticky only when the viewport is taller than 800px; automated 320px and 1024×768 checks lock the mobile reading order and compact-height fallback.
+- 2026-08-24: a clean Vite dependency optimization can reload the isolated display fixture after its initial preload. The fixture retries only that classified execution-context reload once; product runtime behavior remains unchanged.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 

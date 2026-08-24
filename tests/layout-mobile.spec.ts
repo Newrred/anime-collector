@@ -85,6 +85,41 @@ test("320px header keeps primary controls separate and at least 44px", async ({ 
   );
 });
 
+test("320px composer follows visual, title, reflection, rights, and save order", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+  await page.goto("/memory/new/");
+  await page.getByRole("button", { name: "Use system design" }).click();
+  await page.getByLabel("Anime or card title").fill("Mobile flow");
+
+  const geometry = await page.evaluate(() => {
+    const selectors = [
+      ".memory-composer__visual-column",
+      ".memory-composer__title-search",
+      ".memory-composer__reflection-step",
+      ".memory-composer__rights-step",
+      ".memory-composer__save-gate",
+    ];
+    const rows = selectors.map((selector) => {
+      const node = document.querySelector(selector);
+      const rect = node?.getBoundingClientRect();
+      return rect ? { selector, top: rect.top, right: rect.right } : null;
+    });
+    return {
+      rows,
+      overflow: document.documentElement.scrollWidth - innerWidth,
+      viewportWidth: innerWidth,
+    };
+  });
+
+  expect(geometry.rows.every(Boolean)).toBe(true);
+  expect(geometry.rows.map((row) => row.top)).toEqual(
+    [...geometry.rows.map((row) => row.top)].sort((a, b) => a - b),
+  );
+  expect(geometry.rows.every((row) => row.right <= geometry.viewportWidth + 0.5)).toBe(true);
+  expect(geometry.overflow).toBeLessThanOrEqual(0.5);
+});
+
 const ROUTES = [
   "/",
   "/library/",

@@ -102,7 +102,15 @@ test("browser route explains Android-only image intake without exposing a file i
   await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();
   await expect(page.getByText("이미지 가져오기는 현재 Android 앱에서만 사용할 수 있어요.")).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "카드 저장" })).toBeDisabled();
+  const save = page.getByRole("button", { name: "카드 저장" });
+  await expect(save).toBeDisabled();
+  await expect(page.locator("#memory-save-reason")).toContainText("먼저 이미지 또는 시스템 디자인을 선택해 주세요.");
+
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await expect(page.locator("#memory-save-reason")).toContainText("작품 또는 카드 제목을 입력해 주세요.");
+  await page.getByLabel("작품 또는 카드 제목").fill("Flow fixture");
+  await expect(save).toBeEnabled();
+  await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.");
 });
 
 test("private card saves once and remains visible in Archive after reload", async ({ page }) => {
@@ -143,6 +151,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
   await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
   await page.getByLabel("짧은 감상").fill("The quiet journey stayed with me.");
+  await expect(page.locator("#memory-save-reason")).toContainText("이미지 사용 권리를 확인해 주세요.");
   await page.getByRole("checkbox").check();
 
   const save = page.getByRole("button", { name: "카드 저장" });

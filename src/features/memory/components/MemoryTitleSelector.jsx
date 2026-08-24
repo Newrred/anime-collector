@@ -18,11 +18,13 @@ export default function MemoryTitleSelector({
   onSelectTitle,
   onClearSelected,
   copy,
+  stepLabel,
 }) {
   return (
     <section className="memory-composer__title-search">
+      <p className="memory-composer__step-label">{stepLabel}</p>
       <div className="memory-composer__field">
-        <label id="memory-title-heading" htmlFor="memory-title-input">{copy.label}</label>
+        <label id="memory-title-heading" className="memory-composer__step-heading" htmlFor="memory-title-input">{copy.label}</label>
         <div className="memory-composer__title-input-row">
           <input
             id="memory-title-input"
