@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
@@ -428,6 +428,306 @@ test('guard reports only relative leaking paths in tracked and explicit build ro
     assert.match(rendered, /dist[\\/]leaked-cover\.png/);
     assert.equal(rendered.includes('SECRET_PAYLOAD_DO_NOT_ECHO'), false);
     assert.equal(rendered.includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard allows only an exact manifest-bound synthetic UI screenshot', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-'));
+  try {
+    const snapshot = join(
+      fixtureRoot,
+      'tests',
+      'visual',
+      'ui-readiness.visual.spec.ts-snapshots',
+      'home-empty-chromium-win32.png',
+    );
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    await mkdir(dirname(snapshot), { recursive: true });
+    await writeFile(snapshot, pngBytes);
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        path: 'tests/visual/ui-readiness.visual.spec.ts-snapshots/home-empty-chromium-win32.png',
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: 'home-empty-en-dark-390x844',
+        sha256: createHash('sha256').update(pngBytes).digest('hex'),
+        byteSize: pngBytes.byteLength,
+        width: 1,
+        height: 1,
+      }],
+    }));
+
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [snapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    });
+
+    assert.equal(code, CLI_EXIT.OK);
+    assert.equal(output.join(''), 'Catalog guard: no leaks\n');
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard blocks a manifest-bound UI screenshot when its bytes or metadata change', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-tamper-'));
+  try {
+    const relativeSnapshot = 'tests/visual/ui-readiness.visual.spec.ts-snapshots/home-empty-chromium-win32.png';
+    const snapshot = join(fixtureRoot, ...relativeSnapshot.split('/'));
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    await mkdir(dirname(snapshot), { recursive: true });
+    await writeFile(snapshot, pngBytes);
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        path: relativeSnapshot,
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: 'home-empty-en-dark-390x844',
+        sha256: '0'.repeat(64),
+        byteSize: pngBytes.byteLength + 1,
+        width: 2,
+        height: 1,
+      }],
+    }));
+
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [snapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    });
+
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(output.join(''), /tests[\\/]visual[\\/]ui-readiness\.visual\.spec\.ts-snapshots/);
+    assert.equal(output.join('').includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard fails closed for duplicate or missing visual baseline manifest entries', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-manifest-'));
+  try {
+    const relativeSnapshot = 'tests/visual/ui-readiness.visual.spec.ts-snapshots/archive-empty-chromium-win32.png';
+    const snapshot = join(fixtureRoot, ...relativeSnapshot.split('/'));
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    await mkdir(dirname(snapshot), { recursive: true });
+    await writeFile(snapshot, pngBytes);
+    const entry = {
+      path: relativeSnapshot,
+      assetClass: 'TEST_UI_SCREENSHOT',
+      scenario: 'archive-empty-ko-dark-320x720',
+      sha256: createHash('sha256').update(pngBytes).digest('hex'),
+      byteSize: pngBytes.byteLength,
+      width: 1,
+      height: 1,
+    };
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [entry, { ...entry }],
+    }));
+
+    const duplicateOutput = [];
+    assert.equal(await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [snapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { duplicateOutput.push(value); } },
+      stderr: { write(value) { duplicateOutput.push(value); } },
+    }), CLI_EXIT.QUALITY_GATE_FAILED);
+
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{ ...entry, path: entry.path.replace('archive-empty', 'missing-detail') }],
+    }));
+    const missingOutput = [];
+    assert.equal(await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { missingOutput.push(value); } },
+      stderr: { write(value) { missingOutput.push(value); } },
+    }), CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.equal(missingOutput.join('').includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard blocks an unmanifested PNG even when it is not supplied as a tracked file', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-extra-'));
+  try {
+    const snapshotDirectory = join(fixtureRoot, 'tests', 'visual', 'ui-readiness.visual.spec.ts-snapshots');
+    const approvedSnapshot = join(snapshotDirectory, 'home-active-chromium-win32.png');
+    const extraSnapshot = join(snapshotDirectory, 'unreviewed-extra-chromium-win32.png');
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    await mkdir(snapshotDirectory, { recursive: true });
+    await writeFile(approvedSnapshot, pngBytes);
+    await writeFile(extraSnapshot, pngBytes);
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        path: 'tests/visual/ui-readiness.visual.spec.ts-snapshots/home-active-chromium-win32.png',
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: 'home-active-en-dark-1440x900',
+        sha256: createHash('sha256').update(pngBytes).digest('hex'),
+        byteSize: pngBytes.byteLength,
+        width: 1,
+        height: 1,
+      }],
+    }));
+
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [approvedSnapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    });
+
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(output.join(''), /unreviewed-extra-chromium-win32\.png/);
+    assert.equal(output.join('').includes(fixtureRoot), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard rejects unsafe visual baseline paths, metadata, dimensions, and file sizes', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-bounds-'));
+  try {
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    const snapshotDirectory = join(fixtureRoot, 'tests', 'visual', 'ui-readiness.visual.spec.ts-snapshots');
+    const largeSnapshot = join(snapshotDirectory, 'oversized-chromium-win32.png');
+    const largeBytes = Buffer.concat([Buffer.from(pngBytes), Buffer.alloc((8 * 1024 * 1024) + 1)]);
+    await mkdir(snapshotDirectory, { recursive: true });
+    await writeFile(largeSnapshot, largeBytes);
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        path: 'tests/visual/ui-readiness.visual.spec.ts-snapshots/oversized-chromium-win32.png',
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: '../unsafe scenario',
+        sha256: createHash('sha256').update(largeBytes).digest('hex'),
+        byteSize: largeBytes.byteLength,
+        width: 5000,
+        height: 1,
+      }, {
+        path: '../outside.png',
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: 'outside',
+        sha256: 'a'.repeat(64),
+        byteSize: 1,
+        width: 1,
+        height: 1,
+      }],
+    }));
+
+    const output = [];
+    const code = await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [largeSnapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    });
+
+    assert.equal(code, CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.equal(output.join('').includes(fixtureRoot), false);
+    assert.equal(output.join('').includes('..'), false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard rejects a symlinked visual baseline instead of approving its target', async (t) => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-link-'));
+  try {
+    const snapshotDirectory = join(fixtureRoot, 'tests', 'visual', 'ui-readiness.visual.spec.ts-snapshots');
+    const target = join(fixtureRoot, 'synthetic-target.png');
+    const snapshot = join(snapshotDirectory, 'linked-chromium-win32.png');
+    const manifestPath = join(fixtureRoot, 'tests', 'visual', 'visual-baseline-manifest.json');
+    await mkdir(snapshotDirectory, { recursive: true });
+    await writeFile(target, pngBytes);
+    try {
+      await symlink(target, snapshot, 'file');
+    } catch (error) {
+      if (error?.code === 'EPERM') {
+        t.skip('ordinary Windows token cannot create a file symlink');
+        return;
+      }
+      throw error;
+    }
+    await writeFile(manifestPath, JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        path: 'tests/visual/ui-readiness.visual.spec.ts-snapshots/linked-chromium-win32.png',
+        assetClass: 'TEST_UI_SCREENSHOT',
+        scenario: 'linked-baseline',
+        sha256: createHash('sha256').update(pngBytes).digest('hex'),
+        byteSize: pngBytes.byteLength,
+        width: 1,
+        height: 1,
+      }],
+    }));
+    const output = [];
+    assert.equal(await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [snapshot, manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    }), CLI_EXIT.QUALITY_GATE_FAILED);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('guard rejects a visual baseline manifest reached through a linked directory', async (t) => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-cli-guard-visual-manifest-link-'));
+  try {
+    const testsDirectory = join(fixtureRoot, 'tests');
+    const externalVisualDirectory = join(fixtureRoot, 'external-visual');
+    const linkedVisualDirectory = join(testsDirectory, 'visual');
+    await mkdir(testsDirectory, { recursive: true });
+    await mkdir(externalVisualDirectory, { recursive: true });
+    await writeFile(join(externalVisualDirectory, 'visual-baseline-manifest.json'), JSON.stringify({
+      schemaVersion: 1,
+      entries: [],
+    }));
+    try {
+      await symlink(
+        externalVisualDirectory,
+        linkedVisualDirectory,
+        process.platform === 'win32' ? 'junction' : 'dir',
+      );
+    } catch (error) {
+      if (error?.code === 'EPERM') {
+        t.skip('current token cannot create a directory link');
+        return;
+      }
+      throw error;
+    }
+
+    const manifestPath = join(linkedVisualDirectory, 'visual-baseline-manifest.json');
+    const output = [];
+    assert.equal(await runCli(['guard'], {
+      repoRoot: fixtureRoot,
+      trackedFiles: async () => [manifestPath],
+      buildRoots: [],
+      stdout: { write(value) { output.push(value); } },
+      stderr: { write(value) { output.push(value); } },
+    }), CLI_EXIT.QUALITY_GATE_FAILED);
+    assert.match(output.join(''), /tests[\\/]visual[\\/]visual-baseline-manifest\.json/);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }

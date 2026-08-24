@@ -12,6 +12,7 @@ import { rebuildCatalogProfile, runCatalogPipeline, validateCatalogArtifacts } f
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
 import { createAniListTestAdapter } from './sources/anilist-test.mjs';
 import { createWikidataAdapter } from './sources/wikidata.mjs';
+import { inspectVisualBaselinePolicy } from './visual-baseline-policy.mjs';
 import { hasApprovedTargetManifest, inspectCatalogArtifacts, writeQualityReport } from './reports/quality-report.mjs';
 
 export const CLI_EXIT = Object.freeze({
@@ -208,15 +209,17 @@ async function filesUnder(root) {
 
 async function runGuard(dependencies) {
   const repoRoot = dependencies.repoRoot ?? repoFromModule();
+  const visualBaselinePolicy = await inspectVisualBaselinePolicy({ repoRoot });
   const tracked = await (dependencies.trackedFiles ?? (() => listTrackedFiles(repoRoot)))();
   const roots = dependencies.buildRoots ?? DEFAULT_BUILD_ROOTS.map((root) => resolve(repoRoot, root));
   const rootFiles = (await Promise.all(roots.map((root) => filesUnder(root)))).flat();
-  const leaks = [];
+  const leaks = [...visualBaselinePolicy.violations];
   for (const path of [...new Set([...tracked, ...rootFiles])]) {
     const rel = relativePath(repoRoot, path);
     if (!rel) continue;
     // Existing application launcher/splash resources are not catalog covers.
     if (isKnownAndroidBootstrapAsset(rel)) continue;
+    if (visualBaselinePolicy.approvedPaths.has(rel)) continue;
     if (await leakedArtifact(path, rel)) leaks.push(rel);
   }
   return [...new Set(leaks)].sort();

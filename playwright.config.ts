@@ -1,10 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const configuredBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321';
+const parsedBaseUrl = new URL(configuredBaseUrl);
+if (parsedBaseUrl.protocol !== 'http:'
+  || !['127.0.0.1', 'localhost'].includes(parsedBaseUrl.hostname)
+  || parsedBaseUrl.username || parsedBaseUrl.password
+  || (parsedBaseUrl.pathname !== '/' && parsedBaseUrl.pathname !== '')) {
+  throw new Error('PLAYWRIGHT_BASE_URL must be an uncredentialed loopback HTTP origin');
+}
+
 const webServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER
   ? undefined
   : {
-      command: 'node node_modules/astro/astro.js dev --host 127.0.0.1 --port 4321',
-      url: 'http://localhost:4321',
+      command: `node node_modules/astro/astro.js dev --host ${parsedBaseUrl.hostname} --port ${parsedBaseUrl.port || '80'} --strictPort`,
+      url: configuredBaseUrl,
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
     };
@@ -34,7 +43,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:4321',
+    baseURL: configuredBaseUrl,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

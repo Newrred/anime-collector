@@ -244,6 +244,7 @@ There is no persistent-data migration.
 - Create: `scripts/update-visual-baseline-manifest.mjs`
 - Create: `tools/catalog-lab/visual-baseline-policy.mjs`
 - Create: `tests/visual/visual-baseline-manifest.json`
+- Create: `tests/visual/ui-readiness.visual.spec.ts` (Task 1 infrastructure smoke; Task 8 expands this into the reviewed matrix)
 - Modify: `scripts/run-e2e.mjs`
 - Modify: `playwright.config.ts`
 - Modify: `package.json`
@@ -321,7 +322,7 @@ Expected GREEN: exact approved synthetic screenshot fixture allowed; all adversa
 **Step 4: Commit**
 
 ```powershell
-git add package.json playwright.config.ts scripts/run-e2e.mjs scripts/run-visual-e2e.mjs scripts/lib/isolatedE2eServer.mjs scripts/update-visual-baseline-manifest.mjs tools/catalog-lab/cli.mjs tools/catalog-lab/visual-baseline-policy.mjs tests/catalog-lab/runner-cli-report.test.mjs tests/ui-readiness-functional.spec.ts tests/unit/visualRunner.test.mjs tests/visual/visual-baseline-manifest.json
+git add package.json playwright.config.ts scripts/run-e2e.mjs scripts/run-visual-e2e.mjs scripts/lib/isolatedE2eServer.mjs scripts/update-visual-baseline-manifest.mjs tools/catalog-lab/cli.mjs tools/catalog-lab/visual-baseline-policy.mjs tests/catalog-lab/runner-cli-report.test.mjs tests/ui-readiness-functional.spec.ts tests/unit/visualRunner.test.mjs tests/visual/ui-readiness.visual.spec.ts tests/visual/visual-baseline-manifest.json
 git commit -m "test(ui): isolate reviewed visual baselines"
 ```
 
@@ -900,7 +901,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Reference patterns reviewed from AniList, Letterboxd, and Pinterest.
 - [x] Image-first design specification approved and refined.
 - [x] Detailed implementation plan written.
-- [ ] Task 1: deterministic visual runner and guard policy.
+- [x] Task 1: deterministic visual runner and guard policy.
 - [ ] Task 2: shared memory visual components.
 - [ ] Task 3: header/search hierarchy.
 - [ ] Task 4: Home composition.
@@ -915,6 +916,10 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - The catalog guard deliberately blocks tracked image signatures. The plan adds a checksum-bound reviewed baseline mechanism instead of weakening or excluding the visual-test directory.
 - The existing Library “memory” indicator is derived from WatchLogs. The plan introduces an exact AnimeRef-bound Memory Card count and relabels legacy logs.
 - Pixel baselines across three browser engines would create platform noise without improving behavior confidence. Chromium owns pixels; Firefox/WebKit retain functional/layout coverage.
+- 2026-08-24: the owned visual server readiness probe also needed a per-request timeout; a TCP connection that never returned HTTP could otherwise stall the runner indefinitely.
+- 2026-08-24: Playwright reports inside the repository caused Astro's watcher to observe transient output. Visual-test reports now use the untracked sibling directory `.moemoa-ui-test-results` outside the repository.
+- 2026-08-24: Task 1 keeps an empty, valid baseline manifest and a no-screenshot infrastructure smoke. Task 8 remains the only step allowed to create and review the 18 pixel baselines.
+- 2026-08-24: one full catalog verification initially hit the pre-existing intermittent Chromium image-decode startup timeout; its isolated rerun and the next full rerun passed, so no unrelated cover-pipeline change was made.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 
