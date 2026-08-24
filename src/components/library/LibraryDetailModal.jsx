@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { GenresRow } from "./LibraryUi.jsx";
+import { GenresRow, LibraryRecordFacts } from "./LibraryUi.jsx";
 import { formatStatusLabel, formatEventLabel } from "./libraryCopy.js";
 import { getMessageGroup } from "../../domain/messages.js";
 import { IconPlus, IconTrash, IconX } from "../ui/AppIcons.jsx";
@@ -22,6 +22,9 @@ export default function LibraryDetailModal({
   selectedScoreLabel,
   selectedStarsFill,
   selectedLogs,
+  selectedQuickLogCount,
+  selectedMemoryCardCount,
+  memoryCardCountsStatus,
   logsLoading,
   selectedCharacters,
   memoDraft,
@@ -153,6 +156,14 @@ export default function LibraryDetailModal({
               {selectedMedia?.format || ""}
               {selectedMedia?.episodes ? ` · ${selectedMedia.episodes}${copy.episodes}` : ""}
             </div>
+
+            <LibraryRecordFacts
+              statusLabel={formatStatusLabel(selected.status || "미분류", locale)}
+              quickLogCount={selectedQuickLogCount}
+              memoryCardCount={selectedMemoryCardCount}
+              memoryCardCountsStatus={memoryCardCountsStatus}
+              copy={copy}
+            />
 
             <GenresRow
               genres={safeGenres(selectedMedia)}

@@ -221,6 +221,12 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await page.getByRole("link", { name: "Frieren" }).click();
   await expect(page).toHaveURL(/\/memory\/card\/(?:index\.html)?\?id=/);
   await expect(page.getByRole("heading", { name: "Frieren" })).toBeVisible();
+  await expect(page.locator(".memory-detail__visual .memory-visual")).toBeVisible();
+  expect(await page.evaluate(() => {
+    const visual = document.querySelector(".memory-detail__visual");
+    const utilities = document.querySelector(".memory-detail__body");
+    return Boolean(visual && utilities && (visual.compareDocumentPosition(utilities) & Node.DOCUMENT_POSITION_FOLLOWING));
+  })).toBe(true);
   await page.getByLabel("짧은 감상").fill("A quieter memory after revisiting.");
   await page.getByRole("button", { name: "변경 저장" }).click();
   await expect(page.getByText("변경 내용을 이 기기에 저장했어요.")).toBeVisible();
@@ -228,8 +234,16 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await page.reload();
   await expect(page.getByLabel("짧은 감상")).toHaveValue("A quieter memory after revisiting.");
 
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "카드 삭제" }).click();
+  const deleteButton = page.getByRole("button", { name: "카드 삭제" });
+  await deleteButton.click();
+  const deleteDialog = page.getByRole("dialog", { name: "메모리 카드 삭제" });
+  await expect(deleteDialog).toBeVisible();
+  await deleteDialog.getByRole("button", { name: "취소" }).click();
+  await expect(deleteDialog).toBeHidden();
+  await expect(deleteButton).toBeFocused();
+
+  await deleteButton.click();
+  await deleteDialog.getByRole("button", { name: "카드 삭제 확인" }).click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
   await expect(page.getByRole("heading", { name: "Frieren" })).toHaveCount(0);
   await page.reload();
@@ -277,7 +291,7 @@ test("card detail replaces a local image only after explicit rights confirmation
       getPreview: async (localRef: string) => (
         sessionStorage.getItem(`moemoa-test-preview:${localRef}`)
       ),
-      deleteAsset: async () => true,
+      deleteAsset: async () => sessionStorage.getItem("replacement-cleanup-fails") !== "true",
     };
   });
 
@@ -335,6 +349,13 @@ test("card detail replaces a local image only after explicit rights confirmation
   const oldAsset = stored.assets.find(({ id }) => id === replacement.previousAssetId);
   expect(oldAsset.state).toBe("DELETED");
   expect(oldAsset.localRef).toBeNull();
+
+  await page.evaluate(() => sessionStorage.setItem("replacement-cleanup-fails", "true"));
+  await page.getByRole("button", { name: "이미지 교체" }).click();
+  await page.getByLabel("이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.").check();
+  await page.getByRole("button", { name: "이 이미지로 교체" }).click();
+  await expect(page.getByText("새 이미지를 이 기기에 저장했어요. 이전 이미지 정리는 앱을 다시 열 때 마무리합니다.")).toBeVisible();
+  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,bmV3LXByZXZpZXc=");
 });
 
 test("missing local image exposes recovery and delete actions", async ({ page }) => {

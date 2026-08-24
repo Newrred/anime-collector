@@ -39,6 +39,91 @@ test("Library detail keeps keyboard focus inside and returns it to the opened ca
   await expect(card).toBeFocused();
 });
 
+test("Library separates membership, quick logs, and exact AnimeRef memory cards", async ({ page }) => {
+  await installAppState(page, {
+    locale: "en",
+    list: [
+      { anilistId: 1, status: "완료", score: 9, memo: "fixture", addedAt: 2 },
+      { anilistId: 2, status: "보는중", score: null, memo: "", addedAt: 1 },
+    ],
+    watchLogs: [{ id: "log-1", anilistId: 1, eventType: "completed", createdAt: 1, updatedAt: 1 }],
+    mediaById: {
+      "1": {
+        id: 1,
+        title: { english: "Fixture Anime", romaji: "Fixture Anime" },
+        genres: ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Supernatural"],
+      },
+      "2": { id: 2, title: { english: "Second Anime", romaji: "Second Anime" }, genres: [] },
+    },
+  });
+  await page.goto("/");
+  await page.evaluate(async () => {
+    const { getPlatformMemoryRuntime } = await import("/src/features/memory/runtime/platformMemoryRuntime.js");
+    const runtime = await getPlatformMemoryRuntime();
+    await runtime.createCard({
+      titleChoice: {
+        kind: "ANIME_REF",
+        displayTitle: "Fixture Anime",
+        aliases: ["Fixture Anime"],
+        genres: [],
+        sourceBinding: { provider: "ANILIST", externalId: "1" },
+        verificationState: "PROVIDER_CANDIDATE",
+      },
+      systemDesignSpec: {
+        version: 1,
+        templateId: "memory-gradient",
+        paletteId: "violet-night",
+        patternSeed: "library-memory-count",
+        titleLayout: "BOTTOM_LEFT",
+        genreTokens: [],
+      },
+      note: "Exact memory binding",
+      rightsConfirmed: false,
+    });
+  });
+  await page.goto("/library/");
+
+  const first = page.locator(".library-card").filter({ hasText: "Fixture Anime" });
+  const second = page.locator(".library-card").filter({ hasText: "Second Anime" });
+  await expect(first).toContainText("Completed");
+  await expect(first).toContainText("1 quick log");
+  await expect(first).toContainText("1 memory card");
+  await expect(second).toContainText("Watching");
+  await expect(second).toContainText("No quick logs");
+  await expect(second).toContainText("No memory cards");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await first.click();
+  const facts = page.getByRole("group", { name: "Record facts" });
+  await expect(facts).toContainText("Library status");
+  await expect(facts).toContainText("Completed");
+  await expect(facts).toContainText("Quick logs");
+  await expect(facts).toContainText("1");
+  await expect(facts).toContainText("Memory cards");
+  await expect(facts).toContainText("1");
+  await expect.poll(() => page.evaluate(() => {
+    const tabs = document.querySelector(".library-modal-tabs")?.getBoundingClientRect();
+    const panel = document.querySelector(".library-modal-panel")?.getBoundingClientRect();
+    return Boolean(tabs && panel && tabs.height >= 36 && panel.top >= tabs.bottom);
+  })).toBe(true);
+});
+
+test("Library reports unavailable Memory counts instead of silently claiming zero", async ({ page }) => {
+  await installAppState(page, quickLogFixture);
+  await page.addInitScript(() => {
+    const open = IDBFactory.prototype.open;
+    IDBFactory.prototype.open = function failMemoryArchive(name, ...args) {
+      if (String(name) === "moemoa-memory-v1") throw new Error("simulated memory archive failure");
+      return open.call(this, name, ...args);
+    };
+  });
+  await page.goto("/library/");
+
+  const card = page.locator(".library-card").filter({ hasText: "Fixture Anime" });
+  await expect(card).toContainText("Memory cards unavailable");
+  await expect(card).not.toContainText("No memory cards");
+});
+
 test("opening and cancelling quick log does not persist a row", async ({ page }) => {
   await installAppState(page, quickLogFixture);
   await page.goto("/library/?animeId=1&focus=quick-log");
@@ -212,12 +297,10 @@ type AddAttempt = {
 };
 
 type FlowMetrics = {
-  sectionCount: number;
-  noMemoryRows: number;
-  recentRows: number;
-  thisTimeRows: number;
-  maxCardOverflow: number;
-  minCardGap: number;
+  emptyMemoryState: boolean;
+  createMemoryVisible: boolean;
+  legacyResurfacingSections: number;
+  horizontalOverflow: number;
 };
 
 const KO_QUERIES = [
@@ -445,41 +528,16 @@ async function assertUnconfiguredCloudInEnglish(page: Page) {
   await expect(syncCard).not.toContainText("Cloud backup found");
 }
 
-async function evaluateHomeDiscovery(page: Page): Promise<FlowMetrics> {
+async function evaluateHomeMemoryBoundary(page: Page): Promise<FlowMetrics> {
   return page.evaluate(() => {
-    const sectionBlocks = Array.from(document.querySelectorAll(".home-resurfacing-grid .home-section-block"));
-    const noMemoryRows = document.querySelectorAll(".home-resurfacing-grid .home-section-block:nth-child(1) .list-stack .list-card").length;
-    const recentRows = document.querySelectorAll(".home-resurfacing-grid .home-section-block:nth-child(2) .list-stack .list-card").length;
-    const thisTimeRows = document.querySelectorAll(".home-resurfacing-grid .home-section-block:nth-child(3) .list-stack .list-card").length;
-
-    const cards = Array.from(document.querySelectorAll(".home-resurfacing-grid .list-card")) as HTMLElement[];
-    let maxCardOverflow = 0;
-    let minCardGap = Number.POSITIVE_INFINITY;
-
-    for (const card of cards) {
-      const rect = card.getBoundingClientRect();
-      const overflow = Math.max(rect.right - window.innerWidth, 0, -rect.left);
-      if (overflow > maxCardOverflow) maxCardOverflow = overflow;
-    }
-
-    const stacks = Array.from(document.querySelectorAll(".home-resurfacing-grid .list-stack")) as HTMLElement[];
-    for (const stack of stacks) {
-      const stackCards = Array.from(stack.querySelectorAll(":scope > .list-card")) as HTMLElement[];
-      for (let i = 1; i < stackCards.length; i += 1) {
-        const prev = stackCards[i - 1].getBoundingClientRect();
-        const current = stackCards[i].getBoundingClientRect();
-        const gap = current.top - prev.bottom;
-        if (gap < minCardGap) minCardGap = gap;
-      }
-    }
+    const createMemory = document.querySelector('.home-empty-state a[href$="memory/new/"]');
+    const createRect = createMemory?.getBoundingClientRect();
 
     return {
-      sectionCount: sectionBlocks.length,
-      noMemoryRows,
-      recentRows,
-      thisTimeRows,
-      maxCardOverflow: Number(maxCardOverflow.toFixed(2)),
-      minCardGap: Number((Number.isFinite(minCardGap) ? minCardGap : 0).toFixed(2)),
+      emptyMemoryState: Boolean(document.querySelector(".home-empty-state")),
+      createMemoryVisible: Boolean(createRect && createRect.width > 0 && createRect.height > 0),
+      legacyResurfacingSections: document.querySelectorAll(".home-resurfacing-grid .home-section-block").length,
+      horizontalOverflow: Number(Math.max(document.documentElement.scrollWidth - window.innerWidth, 0).toFixed(2)),
     };
   });
 }
@@ -536,7 +594,7 @@ async function runFlow(
   const persistedWatchLogs = await readWatchLogCount(page);
 
   await page.goto("/", { waitUntil: "networkidle" });
-  const discovery = await evaluateHomeDiscovery(page);
+  const homeBoundary = await evaluateHomeMemoryBoundary(page);
   await screenshot(page, testInfo, "home-after-logs.png");
 
   const report = {
@@ -548,7 +606,7 @@ async function runFlow(
     addedCount: addAttempts.filter((row) => row.added).length,
     addedByCardDelta: Math.max(cardsAfter - cardsBefore, 0),
     addAttempts,
-    discovery,
+    homeBoundary,
   };
 
   await testInfo.attach("ux-flow-report", {
@@ -570,10 +628,10 @@ async function expectFlowContract(browser: Browser, testInfo: TestInfo, viewport
   expect(report.logsCreated, `${viewport.name} should create the three requested quick logs`).toBe(3);
   expect(report.persistedWatchLogs, `${viewport.name} should persist exactly the three saved quick logs`).toBe(3);
 
-  expect(report.discovery.sectionCount, `${viewport.name} discovery section blocks`).toBeGreaterThanOrEqual(2);
-  expect(report.discovery.recentRows, `${viewport.name} recent discovery rows`).toBeGreaterThanOrEqual(1);
-  expect(report.discovery.maxCardOverflow, `${viewport.name} discovery card overflow`).toBeLessThanOrEqual(0.5);
-  expect(report.discovery.minCardGap, `${viewport.name} discovery card vertical gap`).toBeGreaterThanOrEqual(4);
+  expect(report.homeBoundary.emptyMemoryState, `${viewport.name} keeps Library logs separate from Memory cards`).toBe(true);
+  expect(report.homeBoundary.createMemoryVisible, `${viewport.name} keeps the Memory Card entry visible`).toBe(true);
+  expect(report.homeBoundary.legacyResurfacingSections, `${viewport.name} does not present legacy logs as Memory cards`).toBe(0);
+  expect(report.homeBoundary.horizontalOverflow, `${viewport.name} memory-first Home overflow`).toBeLessThanOrEqual(0.5);
   expect(report.addAttempts.length, `${viewport.name} query attempt count`).toBe(KO_QUERIES.length + EN_QUERIES.length);
   expect(report.addedCount, `${viewport.name} searches should add every fixture title`).toBe(KO_QUERIES.length + EN_QUERIES.length);
   if (mode === "fixture") {
@@ -586,7 +644,7 @@ test.describe("Library UX fixture flow", () => {
   test.setTimeout(120000);
 
   for (const viewport of VIEWPORTS) {
-    test(`search/add/log/discovery flow works (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
+    test(`search/add/log keeps Home memory-first (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
       test.skip(browserName !== "chromium", "flow test is validated on chromium");
       await expectFlowContract(browser, testInfo, viewport, "fixture");
     });
@@ -598,7 +656,7 @@ test.describe("Library UX live flow", () => {
   test.setTimeout(240000);
 
   for (const viewport of VIEWPORTS) {
-    test(`search/add/log/discovery flow works (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
+    test(`search/add/log keeps Home memory-first (${viewport.name})`, async ({ browser, browserName }, testInfo) => {
       test.skip(browserName !== "chromium", "flow test is validated on chromium");
       await expectFlowContract(browser, testInfo, viewport, "live");
     });

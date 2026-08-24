@@ -16,27 +16,20 @@
 }
 
 .memory-detail__card {
-  overflow: hidden;
-  padding: 0;
-}
-
-.memory-detail__card > img,
-.memory-detail__missing-image {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-}
-
-.memory-detail__missing-image {
   display: grid;
-  place-items: center;
-  background: rgba(127, 100, 168, 0.12);
-  color: var(--text-muted, #a79ebd);
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(22px, 3.5vw, 40px);
+  align-items: start;
+  padding: clamp(16px, 2.8vw, 28px);
+}
+
+.memory-detail__visual,
+.memory-detail__body {
+  min-width: 0;
 }
 
 .memory-detail__body {
-  padding: 24px;
+  align-self: stretch;
 }
 
 .memory-detail__replacement {
@@ -121,7 +114,57 @@
   text-align: center;
 }
 
-@media (max-width: 620px) {
+.memory-detail__dialog-backdrop {
+  position: fixed;
+  z-index: 80;
+  display: grid;
+  padding: 20px;
+  background: color-mix(in srgb, #020711 72%, transparent);
+  inset: 0;
+  place-items: center;
+}
+
+.memory-detail__dialog-dismiss {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  inset: 0;
+}
+
+.memory-detail__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  display: grid;
+  gap: 14px;
+  padding: clamp(20px, 4vw, 30px);
+  box-shadow: 0 28px 90px rgb(0 0 0 / 0.42);
+}
+
+.memory-detail__dialog h2,
+.memory-detail__dialog p {
+  margin: 0;
+}
+
+.memory-detail__dialog p {
+  color: var(--text-secondary, #a79ebd);
+  line-height: 1.55;
+}
+
+.memory-detail__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .memory-detail__card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .memory-detail__replacement-head,
   .memory-detail__replacement-review {
     align-items: stretch;
@@ -130,5 +173,15 @@
 
   .memory-detail__replacement-head {
     flex-direction: column;
+  }
+
+  .memory-detail__dialog-actions .btn {
+    flex: 1 1 140px;
+  }
+}
+
+@media (forced-colors: active) {
+  .memory-detail__dialog-backdrop {
+    background: Canvas;
   }
 }

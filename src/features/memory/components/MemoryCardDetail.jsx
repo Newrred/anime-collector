@@ -1,7 +1,7 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
-import SystemDesignPreview from "./SystemDesignPreview.jsx";
+import MemoryVisual from "./MemoryVisual.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
 
@@ -12,6 +12,7 @@ const INITIAL_STATE = Object.freeze({
   note: "",
   status: "loading",
   message: "",
+  deleteDialogOpen: false,
 });
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
@@ -38,7 +39,10 @@ function MemoryCardDetailContent({ base }) {
   const { copy } = useMemoryRouteUi();
   const detailCopy = copy.detail;
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
-  const { runtime, bundle, previewDataUrl, note, status, message } = state;
+  const { runtime, bundle, previewDataUrl, note, status, message, deleteDialogOpen } = state;
+  const deleteTriggerRef = useRef(null);
+  const deleteCancelRef = useRef(null);
+  const deleteDialogRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -91,13 +95,45 @@ function MemoryCardDetailContent({ base }) {
     }
   };
 
+  useEffect(() => {
+    if (!deleteDialogOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const focusFrame = window.requestAnimationFrame(() => deleteCancelRef.current?.focus());
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [deleteDialogOpen]);
+
+  const closeDeleteDialog = () => {
+    updateState({ deleteDialogOpen: false });
+    window.requestAnimationFrame(() => deleteTriggerRef.current?.focus());
+  };
+
+  const keepDeleteDialogFocus = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeDeleteDialog();
+      return;
+    }
+    if (event.key !== "Tab" || !deleteDialogRef.current) return;
+    const focusable = [...deleteDialogRef.current.querySelectorAll("button:not([disabled])")];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!first || !last) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   const remove = async () => {
     if (!runtime || !bundle || status === "deleting") return;
-    const confirmed = window.confirm(
-      detailCopy.deleteConfirm,
-    );
-    if (!confirmed) return;
-    updateState({ status: "deleting", message: "" });
+    updateState({ status: "deleting", message: "", deleteDialogOpen: false });
     try {
       await runtime.deleteCard(bundle.card.id);
       window.location.assign(`${base}archive/`);
@@ -149,13 +185,26 @@ function MemoryCardDetailContent({ base }) {
         <span className="status-badge">{detailCopy.privacy}</span>
       </header>
       <article className="surface-card memory-detail__card">
-        {bundle.asset.designSpec ? (
-          <SystemDesignPreview spec={bundle.asset.designSpec} title={bundle.title.displayTitle} copy={copy.systemDesign} />
-        ) : previewDataUrl ? (
-          <img src={previewDataUrl} alt={detailCopy.cardAlt(bundle.title.displayTitle)} />
-        ) : (
-          <div className="memory-detail__missing-image">{detailCopy.missingImage}</div>
-        )}
+        <div className="memory-detail__visual">
+          <MemoryVisual
+            visual={bundle.asset.designSpec
+              ? { kind: "SYSTEM_DESIGN", designSpec: bundle.asset.designSpec }
+              : previewDataUrl
+                ? {
+                    kind: "IMAGE",
+                    src: previewDataUrl,
+                    alt: detailCopy.cardAlt(bundle.title.displayTitle),
+                  }
+                : { kind: "MISSING" }}
+            fit="contain"
+            systemCopy={{
+              label: copy.systemDesign.label,
+              fallbackTitle: bundle.title.displayTitle,
+              footer: copy.systemDesign.footer,
+            }}
+            missingLabel={detailCopy.missingImage}
+          />
+        </div>
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
           <MemoryImageReplacement
@@ -189,10 +238,11 @@ function MemoryCardDetailContent({ base }) {
                 {status === "saving" ? detailCopy.saving : detailCopy.save}
               </button>
               <button
+                ref={deleteTriggerRef}
                 className="btn btn--danger"
                 type="button"
                 disabled={status !== "ready"}
-                onClick={remove}
+                onClick={() => updateState({ deleteDialogOpen: true })}
               >
                 {status === "deleting" ? detailCopy.deleting : detailCopy.remove}
               </button>
@@ -200,6 +250,38 @@ function MemoryCardDetailContent({ base }) {
           </form>
         </div>
       </article>
+      {deleteDialogOpen && (
+        <div className="memory-detail__dialog-backdrop">
+          <button
+            className="memory-detail__dialog-dismiss"
+            type="button"
+            tabIndex={-1}
+            aria-label={detailCopy.deleteCancel}
+            onClick={closeDeleteDialog}
+          />
+          <section
+            ref={deleteDialogRef}
+            className="surface-card memory-detail__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="memory-delete-dialog-title"
+            aria-describedby="memory-delete-dialog-description"
+            tabIndex={-1}
+            onKeyDown={keepDeleteDialogFocus}
+          >
+            <h2 id="memory-delete-dialog-title">{detailCopy.deleteDialogTitle}</h2>
+            <p id="memory-delete-dialog-description">{detailCopy.deleteConfirm}</p>
+            <div className="memory-detail__dialog-actions">
+              <button ref={deleteCancelRef} className="btn btn--subtle" type="button" onClick={closeDeleteDialog}>
+                {detailCopy.deleteCancel}
+              </button>
+              <button className="btn btn--danger" type="button" onClick={remove}>
+                {detailCopy.deleteConfirmAction}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

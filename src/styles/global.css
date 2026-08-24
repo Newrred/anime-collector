@@ -2031,7 +2031,7 @@ h3 {
 
 .modalMain {
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
   gap: 10px;
   min-height: 0;
   overflow: hidden;
@@ -2865,6 +2865,37 @@ h3 {
   margin-left: auto;
   background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface-soft));
   border-color: color-mix(in srgb, var(--accent) 20%, var(--border-subtle));
+}
+
+.library-quick-log-chip {
+  background: var(--surface-soft);
+  border-color: var(--border-subtle);
+}
+
+.library-record-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 14px 6px;
+}
+
+.library-record-fact {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.library-record-fact span {
+  color: var(--text-secondary);
+  font-size: var(--type-label-size);
+}
+
+.library-record-fact strong {
+  overflow-wrap: anywhere;
 }
 
 .library-top-note {

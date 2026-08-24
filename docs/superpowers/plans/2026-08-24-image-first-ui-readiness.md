@@ -907,7 +907,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 4: Home composition.
 - [x] Task 5: Composer composition.
 - [x] Task 6: Archive gallery.
-- [ ] Task 7: Detail and Library distinction.
+- [x] Task 7: Detail and Library distinction.
 - [ ] Task 8: visual/cross-browser/human gate and document sync.
 
 ## 16. Discoveries and plan changes
@@ -932,6 +932,11 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: a clean Vite dependency optimization can reload the isolated display fixture after its initial preload. The fixture retries only that classified execution-context reload once; product runtime behavior remains unchanged.
 - 2026-08-24: Task 6 replaces Archive-specific cards with the shared `MemoryCardPreview`, preserves repository ordering, and locks 1/2/3/4 columns at 320/360/768/1200px with a 148px minimum card width and one page-level Create action.
 - 2026-08-24: direct 360px inspection exposed a long-word overflow inside the narrow system-design thumbnail. Archive-scoped padding, responsive type, and `overflow-wrap` now keep the complete design title inside its 4:5 frame; a real-browser width assertion prevents regression.
+- 2026-08-24: the persisted AnimeRef record has no `title.kind` discriminator. Task 7 therefore counts only bundles whose `card.animeRefId` exactly equals `title.id`, `privateTitleId` is absent, and the source binding is an exact canonical AniList integer string; custom, foreign, ambiguous, and malformed records remain excluded.
+- 2026-08-24: Library now presents membership status, legacy Quick logs, and real Memory Card counts as separate facts. Archive-load failure renders Memory Cards unavailable instead of silently claiming zero, and Library loads the Memory runtime only at the page boundary.
+- 2026-08-24: direct 390px inspection exposed an implicit-grid regression after the new Library fact row collapsed the tab strip to four pixels and overlapped the panel. The modal now owns six explicit rows, and a dense-genre mobile geometry regression locks a full-height tab strip before the panel.
+- 2026-08-24: Detail reuses the shared `MemoryVisual`, preserves replacement/cleanup application ownership, and replaces the browser confirmation with a focus-trapped in-app delete dialog whose Cancel restores focus. The cleanup-pending E2E now proves the new image remains current while old-file cleanup is deferred.
+- 2026-08-24: the legacy Library fixture still expected WatchLogs alone to unlock old Home resurfacing sections. Its contract now verifies the approved boundary instead: Library titles and Quick logs do not impersonate Memory Cards, while the Memory Card entry remains visible without horizontal overflow.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 

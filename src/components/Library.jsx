@@ -65,6 +65,7 @@ import {
 } from "./library/libraryCopy.js";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { getMessageGroup } from "../domain/messages.js";
+import { buildMemoryCardCountsByAniListId } from "../features/memory/components/memory-card-counts.js";
 import { deriveKoTitleFromMedia, firstHangulSynonym, pickDisplayMediaTitle, pickDisplayTitle } from "../domain/animeTitles";
 import {
   SYNC_SNAPSHOT_VERSION,
@@ -337,6 +338,8 @@ export default function Library() {
   const [quickLogCharacterMeta, setQuickLogCharacterMeta] = useState({});
   const [quickLogContext, setQuickLogContext] = useState(null);
   const [relatedKoTitleById, setRelatedKoTitleById] = useState({});
+  const [memoryCardCountsByAniListId, setMemoryCardCountsByAniListId] = useState(new Map());
+  const [memoryCardCountsStatus, setMemoryCardCountsStatus] = useState("loading");
 
   const [backupMsg, setBackupMsg] = useState("");
   const [canInstallPwa, setCanInstallPwa] = useState(false);
@@ -384,6 +387,24 @@ export default function Library() {
       alive = false;
     };
   }, [setItems]);
+
+  useEffect(() => {
+    let alive = true;
+    import("../features/memory/runtime/platformMemoryRuntime.js")
+      .then(({ getPlatformMemoryRuntime }) => getPlatformMemoryRuntime())
+      .then((runtime) => runtime.listArchive())
+      .then((archive) => {
+        if (!alive) return;
+        setMemoryCardCountsByAniListId(buildMemoryCardCountsByAniListId(archive));
+        setMemoryCardCountsStatus("ready");
+      })
+      .catch(() => {
+        if (alive) setMemoryCardCountsStatus("error");
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!storageHydrated) return;
@@ -973,11 +994,20 @@ export default function Library() {
     return map;
   }, [selectedLogs, quickLogOpen, items.length]);
 
-  function getMemoryStateLabel(anilistId) {
+  function getQuickLogStateLabel(anilistId) {
     const count = logCountByAnimeId.get(Number(anilistId)) || 0;
-    if (count <= 0) return copy.memoryEmpty;
-    if (count === 1) return copy.memoryOne;
-    return copy.memoryMany(count);
+    if (count <= 0) return copy.quickLogEmpty;
+    if (count === 1) return copy.quickLogOne;
+    return copy.quickLogMany(count);
+  }
+
+  function getMemoryCardStateLabel(anilistId) {
+    if (memoryCardCountsStatus === "loading") return copy.memoryCardLoading;
+    if (memoryCardCountsStatus !== "ready") return copy.memoryCardUnavailable;
+    const count = memoryCardCountsByAniListId.get(Number(anilistId)) || 0;
+    if (count <= 0) return copy.memoryCardEmpty;
+    if (count === 1) return copy.memoryCardOne;
+    return copy.memoryCardMany(count);
   }
 
   const selected = selectedId ? items.find((x) => x.anilistId === selectedId) : null;
@@ -1887,7 +1917,8 @@ export default function Library() {
                         ★★★★★
                       </span>
                     </span>
-                    <span className="status-badge library-memory-chip">{getMemoryStateLabel(it.anilistId)}</span>
+                    <span className="status-badge library-quick-log-chip">{getQuickLogStateLabel(it.anilistId)}</span>
+                    <span className="status-badge library-memory-chip">{getMemoryCardStateLabel(it.anilistId)}</span>
                   </div>
 
                   <GenresRow
@@ -1922,6 +1953,9 @@ export default function Library() {
         selectedScoreLabel={selectedScoreLabel}
         selectedStarsFill={selectedStarsFill}
         selectedLogs={selectedLogs}
+        selectedQuickLogCount={logCountByAnimeId.get(Number(selectedId)) || 0}
+        selectedMemoryCardCount={memoryCardCountsByAniListId.get(Number(selectedId)) || 0}
+        memoryCardCountsStatus={memoryCardCountsStatus}
         logsLoading={logsLoading}
         selectedCharacters={selectedCharacters}
         memoDraft={memoDraft}

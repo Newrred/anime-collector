@@ -111,4 +111,29 @@ function GenresRow({ genres, max = 3, compact = false, formatGenreLabel = (value
   );
 }
 
-export { Chip, StatBars, SegTabButton, CollapsiblePanelHeader, GenresRow };
+function LibraryRecordFacts({ statusLabel, quickLogCount, memoryCardCount, memoryCardCountsStatus, copy }) {
+  return (
+    <div className="library-record-facts" role="group" aria-label={copy.recordFacts}>
+      <div className="library-record-fact">
+        <span>{copy.libraryStatus}</span>
+        <strong>{statusLabel}</strong>
+      </div>
+      <div className="library-record-fact">
+        <span>{copy.quickLogs}</span>
+        <strong>{quickLogCount}</strong>
+      </div>
+      <div className="library-record-fact">
+        <span>{copy.memoryCards}</span>
+        <strong>
+          {memoryCardCountsStatus === "ready"
+            ? memoryCardCount
+            : memoryCardCountsStatus === "loading"
+              ? copy.memoryCardsLoading
+              : copy.memoryCardsUnavailable}
+        </strong>
+      </div>
+    </div>
+  );
+}
+
+export { Chip, StatBars, SegTabButton, CollapsiblePanelHeader, GenresRow, LibraryRecordFacts };
