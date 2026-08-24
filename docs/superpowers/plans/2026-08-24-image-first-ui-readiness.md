@@ -906,7 +906,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 3: header/search hierarchy.
 - [x] Task 4: Home composition.
 - [x] Task 5: Composer composition.
-- [ ] Task 6: Archive gallery.
+- [x] Task 6: Archive gallery.
 - [ ] Task 7: Detail and Library distinction.
 - [ ] Task 8: visual/cross-browser/human gate and document sync.
 
@@ -930,6 +930,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: Task 5 now presents one ordered creative flow: visual → title → reflection → rights → Save. The disabled Save control exposes the next actionable requirement in adjacent text, while image errors remain a single assertive announcement.
 - 2026-08-24: the Composer keeps its preview beside the fields above 900px, but makes it sticky only when the viewport is taller than 800px; automated 320px and 1024×768 checks lock the mobile reading order and compact-height fallback.
 - 2026-08-24: a clean Vite dependency optimization can reload the isolated display fixture after its initial preload. The fixture retries only that classified execution-context reload once; product runtime behavior remains unchanged.
+- 2026-08-24: Task 6 replaces Archive-specific cards with the shared `MemoryCardPreview`, preserves repository ordering, and locks 1/2/3/4 columns at 320/360/768/1200px with a 148px minimum card width and one page-level Create action.
+- 2026-08-24: direct 360px inspection exposed a long-word overflow inside the narrow system-design thumbnail. Archive-scoped padding, responsive type, and `overflow-wrap` now keep the complete design title inside its 4:5 frame; a real-browser width assertion prevents regression.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 

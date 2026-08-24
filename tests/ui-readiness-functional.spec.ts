@@ -89,6 +89,38 @@ async function renderMemoryDisplayFixtures(page: import('@playwright/test').Page
   }
 }
 
+async function seedSystemDesignArchive(page: import('@playwright/test').Page, count = 4) {
+  await page.addInitScript(() => {
+    localStorage.setItem('ui:locale:v1', JSON.stringify('en'));
+  });
+  await page.goto('/');
+  await page.evaluate(async (cardCount) => {
+    const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+    const runtime = await getPlatformMemoryRuntime();
+    for (let index = 1; index <= cardCount; index += 1) {
+      await runtime.createCard({
+        titleChoice: {
+          kind: 'PRIVATE_TITLE',
+          displayTitle: index === cardCount ? 'Violet Evergarden' : `Memory ${index}`,
+        },
+        systemDesignSpec: {
+          version: 1,
+          templateId: 'memory-gradient',
+          paletteId: 'violet-night',
+          patternSeed: `archive-gallery-${index}`,
+          titleLayout: 'BOTTOM_LEFT',
+          genreTokens: ['Drama'],
+        },
+        note: `Reflection ${index}`,
+        rightsConfirmed: false,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+  }, count);
+  await page.goto('/archive/');
+  await expect(page.locator('.memory-archive__grid')).toBeVisible();
+}
+
 test('isolated visual test surface uses its owned server without the Astro toolbar', async ({ page }) => {
   await page.goto('/');
 
@@ -123,6 +155,52 @@ test('shared memory displays cover every visual kind without owning save or dele
   expect(componentSources.join('\n')).not.toMatch(
     /getPlatformMemoryRuntime|indexedDB|localStorage|deleteCard|saveCard|window\.location/u,
   );
+});
+
+test('Archive presents ordered 4:5 cards in the approved responsive columns', async ({ page }) => {
+  await seedSystemDesignArchive(page);
+
+  await expect(page.locator('.memory-preview--grid')).toHaveCount(4);
+  await expect(page.locator('.memory-preview__title')).toHaveText([
+    'Violet Evergarden',
+    'Memory 3',
+    'Memory 2',
+    'Memory 1',
+  ]);
+  await expect(page.getByRole('link', { name: 'Violet Evergarden', exact: true })).toHaveAttribute('href', /memory\/card\/\?id=/u);
+
+  for (const specimen of [
+    { width: 320, height: 720, columns: 1 },
+    { width: 360, height: 760, columns: 2 },
+    { width: 768, height: 900, columns: 3 },
+    { width: 1200, height: 900, columns: 4 },
+  ]) {
+    await page.setViewportSize(specimen);
+    const geometry = await page.locator('.memory-archive__grid').evaluate((grid) => {
+      const cards = [...grid.querySelectorAll('.memory-archive__card')];
+      const firstCard = cards[0]?.getBoundingClientRect();
+      const firstVisual = cards[0]?.querySelector('.memory-visual')?.getBoundingClientRect();
+      const systemTitle = cards[0]?.querySelector('.system-design-preview strong');
+      return {
+        columns: getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length,
+        cardWidth: firstCard?.width || 0,
+        visualRatio: firstVisual ? firstVisual.width / firstVisual.height : 0,
+        systemTitleFits: systemTitle ? systemTitle.scrollWidth <= systemTitle.clientWidth + 0.5 : false,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    expect(geometry.columns).toBe(specimen.columns);
+    expect(geometry.cardWidth).toBeGreaterThanOrEqual(148);
+    expect(geometry.visualRatio).toBeCloseTo(0.8, 1);
+    expect(geometry.systemTitleFits).toBe(true);
+    expect(geometry.overflow).toBeLessThanOrEqual(0.5);
+  }
+
+  const firstLink = page.getByRole('link', { name: 'Violet Evergarden', exact: true });
+  await firstLink.focus();
+  await expect(firstLink).toBeFocused();
+  expect(await firstLink.evaluate((link) => parseFloat(getComputedStyle(link).outlineWidth))).toBeGreaterThanOrEqual(3);
+  await expect(page.locator('.memory-archive a[href$="memory/new/"]')).toHaveCount(1);
 });
 
 test('Home archive loading and error states never render an empty-archive claim', async ({ page }) => {

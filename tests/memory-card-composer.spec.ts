@@ -113,6 +113,58 @@ test("browser route explains Android-only image intake without exposing a file i
   await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.");
 });
 
+test("empty Archive exposes one page-level create action", async ({ page }) => {
+  await page.goto("/archive/");
+
+  await expect(page.getByRole("heading", { name: "Memory Archive" })).toBeVisible();
+  await expect(page.getByText("아직 저장한 카드가 없어요.")).toBeVisible();
+  await expect(page.locator('.memory-archive a[href$="memory/new/"]')).toHaveCount(1);
+});
+
+test("Archive turns an unavailable private preview into a recoverable visual state", async ({ page }) => {
+  await page.addInitScript(() => {
+    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+    window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
+      available: true,
+      claim: async () => ({
+        ticket: {
+          ticketId: "missing-preview-ticket",
+          mimeType: "image/jpeg",
+          byteSize: 42,
+          width: 800,
+          height: 1000,
+          createdAtEpochMs: 123,
+          previewDataUrl,
+          localOnly: true,
+        },
+        processing: false,
+        errorCode: null,
+      }),
+      pick: async () => ({ ticket: null, cancelled: true }),
+      discard: async () => true,
+      promoteTicket: async ({ assetId }) => ({
+        localRef: `asset:${assetId}`,
+        checksumSha256: "c".repeat(64),
+        mimeType: "image/jpeg",
+        byteSize: 42,
+        width: 800,
+        height: 1000,
+      }),
+      getPreview: async () => null,
+      deleteAsset: async () => true,
+    };
+  });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("작품 또는 카드 제목").fill("Missing scene");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "카드 저장" }).click();
+
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
+  await expect(page.getByRole("status", { name: "이미지를 불러올 수 없어요." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Missing scene", exact: true })).toBeVisible();
+});
+
 test("private card saves once and remains visible in Archive after reload", async ({ page }) => {
   await page.addInitScript(() => {
     const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
