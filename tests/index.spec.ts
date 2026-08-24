@@ -42,9 +42,26 @@ test("new visitor sees memory card creation as the primary action", async ({ pag
   await clearAppState(page);
   await installAppState(page, { locale: "en" });
   await page.goto("/");
-  const createCard = page.locator(".home-empty-state").getByRole("link", { name: "Create memory card", exact: true });
+  const emptyHome = page.locator(".home-empty-state");
+  const createCard = emptyHome.getByRole("link", { name: "Create memory card", exact: true });
   await expect(createCard.first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(1);
+  await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toHaveCount(1);
+  await expect(emptyHome.locator(".memory-visual--system .system-design-preview")).toBeVisible();
+  await expect(emptyHome.getByText("Saved only on this device for now. Creating a card does not publish it.")).toBeVisible();
+  const readingOrder = await emptyHome.locator(
+    ".home-empty-state__promise, .home-empty-state__specimen, .home-empty-state__actions, .home-empty-state__local-note",
+  ).evaluateAll((nodes) => nodes.map((node) => [
+    "home-empty-state__promise",
+    "home-empty-state__specimen",
+    "home-empty-state__actions",
+    "home-empty-state__local-note",
+  ].find((className) => node.classList.contains(className))));
+  expect(readingOrder).toEqual([
+    "home-empty-state__promise",
+    "home-empty-state__specimen",
+    "home-empty-state__actions",
+    "home-empty-state__local-note",
+  ]);
   await expect(page.locator(".library-card")).toHaveCount(0);
 });
 
@@ -67,7 +84,9 @@ test("saved Memory Card becomes Home's archive source without a legacy Library o
   await expect(memory).toContainText("Latest memory card");
   await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "Open Archive" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add your first title" })).toHaveCount(0);
+  await expect(memory.getByRole("link", { name: "Create another memory" })).toBeVisible();
+  await expect(memory.locator(".memory-preview--featured")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Search or add a title" })).toHaveCount(0);
   await expect(page.getByText("Add your first anime", { exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
@@ -102,17 +121,19 @@ test("unconfigured cloud stays local-only and never claims a cloud backup", asyn
   await expect(page.getByText(/Memory Cards and their images are not included/u)).toBeVisible();
 });
 
-test("visitor with one logged title is asked to add more titles", async ({ page }) => {
+test("visitor without a Memory Card keeps the memory-led empty Home", async ({ page }) => {
   await installAppState(page, {
     locale: "en",
     list: [{ anilistId: 1, status: "completed", addedAt: 1 }],
     watchLogs: [{ id: "log-1", anilistId: 1, createdAt: 1, updatedAt: 1 }],
   });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Add two more titles" })).toHaveCount(1);
+  const emptyHome = page.locator(".home-empty-state");
+  await expect(emptyHome.getByRole("link", { name: "Create memory card", exact: true })).toBeVisible();
+  await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toBeVisible();
 });
 
-test("home first-memory CTA creates one log only after save", async ({ page }) => {
+test("empty Home primary CTA opens the card composer without creating a legacy log", async ({ page }) => {
   await installAppState(page, {
     locale: "en",
     list: [{ anilistId: 1, status: "completed", addedAt: 1 }],
@@ -120,12 +141,10 @@ test("home first-memory CTA creates one log only after save", async ({ page }) =
     mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
   });
   await page.goto("/");
-  await page.getByRole("link", { name: "Write your first memory" }).click();
-  const sheet = page.locator(".log-sheet");
-  await expect(sheet).toBeVisible();
-  await sheet.getByRole("button", { name: "Save" }).click();
+  await page.locator(".home-empty-state").getByRole("link", { name: "Create memory card", exact: true }).click();
+  await expect(page).toHaveURL(/\/memory\/new\/?$/u);
   const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
-  expect(logs).toHaveLength(1);
+  expect(logs).toEqual([]);
 });
 
 test("seeded returning visitor sees the home shell", async ({ page }) => {

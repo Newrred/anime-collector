@@ -410,7 +410,7 @@ Assert at 320px and desktop:
 Run:
 
 ```powershell
-node scripts/run-e2e.mjs tests/index.spec.ts tests/memory-card-discovery.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/index.spec.ts tests/memory-card-discovery.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
 ```
 
 Expected RED: the new hierarchy, focus-return, and geometry assertions fail.
@@ -427,7 +427,7 @@ Expected RED: the new hierarchy, focus-return, and geometry assertions fail.
 **Step 3: Verify and commit**
 
 ```powershell
-node scripts/run-e2e.mjs tests/index.spec.ts tests/memory-card-discovery.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/index.spec.ts tests/memory-card-discovery.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
 npm.cmd run test:unit
 git diff --check
 git add src/components/top-nav-readiness.css src/components/TopNavDataMenu.jsx src/components/search/TopNavGlobalSearch.jsx src/components/search/QuickActionPanel.jsx src/messages/en.js src/messages/ko.js tests/index.spec.ts tests/memory-card-discovery.spec.ts tests/layout-mobile.spec.ts
@@ -466,7 +466,7 @@ Assert 320/390/768/1440 geometry, `max-width: 1200px`, readable copy width no mo
 Expected RED command:
 
 ```powershell
-node scripts/run-e2e.mjs tests/index.spec.ts tests/layout-desktop.spec.ts tests/layout-mobile.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/index.spec.ts tests/layout-desktop.spec.ts tests/layout-mobile.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
 ```
 
 **Step 2: Implement the two Home compositions**
@@ -480,7 +480,7 @@ node scripts/run-e2e.mjs tests/index.spec.ts tests/layout-desktop.spec.ts tests/
 **Step 3: Verify and commit**
 
 ```powershell
-node scripts/run-e2e.mjs tests/index.spec.ts tests/layout-desktop.spec.ts tests/layout-mobile.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/index.spec.ts tests/layout-desktop.spec.ts tests/layout-mobile.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
 npm.cmd run test:unit
 git diff --check
 git add src/components/home/home-readiness.css src/components/Home.jsx src/components/home/HomeEmptyState.jsx src/components/home/HomeMemoryOverview.jsx src/messages/en.js src/messages/ko.js tests/index.spec.ts tests/layout-desktop.spec.ts tests/layout-mobile.spec.ts tests/ui-readiness-functional.spec.ts
@@ -518,7 +518,7 @@ Assert:
 Run:
 
 ```powershell
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
 ```
 
 Expected RED: new reading-order, blocked-save explanation, and responsive layout assertions fail.
@@ -536,7 +536,7 @@ Expected RED: new reading-order, blocked-save explanation, and responsive layout
 **Step 3: Verify and commit**
 
 ```powershell
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1
 npm.cmd run test:unit
 git diff --check
 git add src/features/memory/components/MemoryRouteShell.jsx src/features/memory/components/MemoryCardComposer.jsx src/features/memory/components/MemoryTitleSelector.jsx src/features/memory/components/memory-card-composer.css src/messages/en.js src/messages/ko.js tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts
@@ -572,7 +572,7 @@ Cover:
 Run:
 
 ```powershell
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts tests/layout-desktop.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts tests/layout-desktop.spec.ts --project=chromium --workers=1
 ```
 
 Expected RED: the breakpoint and state-specific assertions fail.
@@ -588,7 +588,7 @@ Expected RED: the breakpoint and state-specific assertions fail.
 **Step 3: Verify and commit**
 
 ```powershell
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts tests/layout-desktop.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts tests/layout-desktop.spec.ts --project=chromium --workers=1
 npm.cmd run test:unit
 git diff --check
 git add src/features/memory/components/ArchiveView.jsx src/features/memory/components/archive-view.css src/messages/en.js src/messages/ko.js tests/memory-card-composer.spec.ts tests/ui-readiness-functional.spec.ts tests/layout-mobile.spec.ts tests/layout-desktop.spec.ts
@@ -636,7 +636,7 @@ Run:
 
 ```powershell
 npm.cmd run test:unit
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/library-userflow.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/library-userflow.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
 ```
 
 Expected RED: mapper is missing, Detail lacks in-app confirmation, and Library has no real Memory Card count.
@@ -670,7 +670,7 @@ The production implementation should accept canonical numeric strings without co
 
 ```powershell
 npm.cmd run test:unit
-node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/library-userflow.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
+node scripts/run-visual-e2e.mjs tests/memory-card-composer.spec.ts tests/library-userflow.spec.ts tests/ui-readiness-functional.spec.ts --project=chromium --workers=1
 git diff --check
 git add src/features/memory/components/memory-card-counts.js tests/unit/memoryCardCounts.test.mjs src/features/memory/components/MemoryCardDetail.jsx src/features/memory/components/MemoryImageReplacement.jsx src/features/memory/components/memory-card-detail.css src/components/Library.jsx src/components/library/LibraryUi.jsx src/components/library/LibraryDetailModal.jsx src/messages/en.js src/messages/ko.js tests/memory-card-composer.spec.ts tests/library-userflow.spec.ts tests/ui-readiness-functional.spec.ts
 git commit -m "feat(ui): distinguish library logs and memory cards"
@@ -758,7 +758,7 @@ Run:
 
 ```powershell
 npm.cmd run test:e2e:visual
-node scripts/run-e2e.mjs tests/ui-readiness-functional.spec.ts --project=chromium --project=firefox --project=webkit --workers=1
+node scripts/run-visual-e2e.mjs tests/ui-readiness-functional.spec.ts --project=chromium --project=firefox --project=webkit --workers=1
 ```
 
 Firefox/WebKit do not compare pixels.
@@ -904,7 +904,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 1: deterministic visual runner and guard policy.
 - [x] Task 2: shared memory visual components.
 - [x] Task 3: header/search hierarchy.
-- [ ] Task 4: Home composition.
+- [x] Task 4: Home composition.
 - [ ] Task 5: Composer composition.
 - [ ] Task 6: Archive gallery.
 - [ ] Task 7: Detail and Library distinction.
@@ -924,6 +924,9 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: display-component tests preload React's client renderer because a clean Vite cache may optimize that dependency and reload once on first import; the product components retain no test-only route or runtime seam.
 - 2026-08-24: Task 3's 320px header check passed, while an exploratory all-route 320px run exposed 24px of pre-existing `/data/` overflow. The header task keeps the established 360/390 all-route matrix; Task 8's explicit 320px reflow gate must resolve and lock the Data page separately.
 - 2026-08-24: direct 320px browser inspection confirmed that the four primary header controls remain legible and separate, the search sheet fits without horizontal clipping, and Escape returns focus to the invoking search or menu control.
+- 2026-08-24: Task 4 now keys the top-level Home composition to the real private Memory Archive: no card shows one visual-first starting promise, a real card shows the latest `MemoryCardPreview`, and loading/error states no longer render an empty-archive claim.
+- 2026-08-24: direct desktop inspection refined the Korean specimen title to avoid a mid-word line break; automated 320/390/768/1440 rendering keeps the primary Create action in the first viewport with no horizontal overflow.
+- 2026-08-24: a running process on port 4321 proved that general `run-e2e.mjs` can violate visual-test isolation. Task 3-8 verification commands now use the Task 1 `run-visual-e2e.mjs` owner/cleanup path.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 

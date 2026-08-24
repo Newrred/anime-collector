@@ -18,6 +18,7 @@ import { formatGenreLabel, formatStatusLabel } from "./library/libraryCopy.js";
 import { getMessageGroup } from "../domain/messages.js";
 import { SCORE_MAX, normalizeRewatchCount, normalizeScoreValue } from "../domain/animeState";
 import { useHomeMemoryArchive } from "../features/memory/components/useHomeMemoryArchive.js";
+import "./home/home-readiness.css";
 
 function buildLibraryHref(base, anilistId, focus = "") {
   const params = new URLSearchParams();
@@ -207,15 +208,6 @@ export default function Home() {
     itemCount: items.length,
     logCount: logs.length,
   });
-  const onboardingState = deriveOnboardingState({
-    itemCount: items.length,
-    logCount: logs.length,
-    memoryCardCount: memoryArchive.count,
-  });
-  const firstItemId = Number(items?.[0]?.anilistId);
-  const onboardingLibraryHref = Number.isFinite(firstItemId)
-    ? buildLibraryHref(base, firstItemId, "quick-log")
-    : `${base}library/`;
 
   const heroEntry = useMemo(
     () => resurfacing?.recentLogs?.[0] ?? resurfacing?.missingMemory?.[0] ?? items?.[0] ?? null,
@@ -331,9 +323,9 @@ export default function Home() {
         onInstallPwa={onClickInstallPwa}
       />
 
-      {memoryArchive.status === "loading" ? (
+      {memoryArchive.status === "loading" || memoryArchive.status === "error" ? (
         <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
-      ) : onboardingState.stage === "active" ? (
+      ) : memoryArchive.latest ? (
         <>
       <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
       {legacyOnboardingState.stage === "active" ? (
@@ -437,18 +429,11 @@ export default function Home() {
       ) : null}
         </>
       ) : (
-        <>
-          {memoryArchive.status === "error" ? (
-            <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
-          ) : null}
-          <HomeEmptyState
-            copy={onboardingCopy}
-            stage={onboardingState.stage}
-            onAddTitle={openGlobalQuickAction}
-            libraryHref={onboardingLibraryHref}
-            memoryHref={`${base}memory/new/`}
-          />
-        </>
+        <HomeEmptyState
+          copy={onboardingCopy}
+          onAddTitle={openGlobalQuickAction}
+          memoryHref={`${base}memory/new/`}
+        />
       )}
     </div>
   );

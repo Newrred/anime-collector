@@ -1,8 +1,17 @@
-import SystemDesignPreview from "../../features/memory/components/SystemDesignPreview.jsx";
+import MemoryCardPreview from "../../features/memory/components/MemoryCardPreview.jsx";
 
 export default function HomeMemoryOverview({ base, copy, memory }) {
   const titleId = "home-memory-overview-title";
   const latest = memory.latest;
+  const visual = latest?.asset?.designSpec
+    ? { kind: "SYSTEM_DESIGN", designSpec: latest.asset.designSpec }
+    : latest?.previewDataUrl
+      ? {
+          kind: "IMAGE",
+          src: latest.previewDataUrl,
+          alt: copy.imageAlt(latest.title.displayTitle),
+        }
+      : { kind: "MISSING" };
 
   return (
     <section className="home-section-block home-memory-overview" aria-labelledby={titleId}>
@@ -12,54 +21,44 @@ export default function HomeMemoryOverview({ base, copy, memory }) {
       </div>
 
       {memory.status === "loading" && (
-        <p className="surface-card" role="status">{copy.loading}</p>
+        <div className="surface-card home-memory-state home-memory-state--loading" role="status">
+          <span className="home-memory-state__pulse" aria-hidden="true" />
+          <p>{copy.loading}</p>
+        </div>
       )}
 
       {memory.status === "error" && (
-        <div className="surface-card ui-panel-stack" role="alert">
+        <div className="surface-card ui-panel-stack home-memory-state home-memory-state--error" role="alert">
           <strong>{copy.errorTitle}</strong>
           <p>{copy.errorLead}</p>
           <a className="btn btn--subtle" href={`${base}archive/`}>{copy.openArchive}</a>
         </div>
       )}
 
-      {memory.status === "ready" && !latest && (
-        <div className="surface-card ui-panel-stack">
-          <strong>{copy.emptyTitle}</strong>
-          <p>{copy.emptyLead}</p>
-          <a className="btn" href={`${base}memory/new/`}>{copy.createCard}</a>
-        </div>
-      )}
-
       {memory.status === "ready" && latest && (
-        <article className="surface-card home-focus-card">
-          <div className="home-focus-card__layout">
-            <div className="home-focus-card__body">
-              <span className="status-badge">{copy.count(memory.count)}</span>
-              <p className="small home-focus-card__source">{copy.latest}</p>
-              <a
-                href={`${base}memory/card/?id=${encodeURIComponent(latest.card.id)}`}
-                className="home-memory-overview__card-link"
-              >
-                <h3 className="home-focus-card__title">{latest.title.displayTitle}</h3>
-              </a>
-              {latest.card.note ? <p className="home-focus-card__cue">{latest.card.note}</p> : null}
-              <div className="action-row">
-                <a className="btn" href={`${base}archive/`}>{copy.openArchive}</a>
-                <a className="btn btn--subtle" href={`${base}memory/new/`}>{copy.createCard}</a>
-              </div>
-            </div>
-            <div className="home-focus-card__visual">
-              {latest.asset.designSpec ? (
-                <SystemDesignPreview spec={latest.asset.designSpec} title={latest.title.displayTitle} />
-              ) : latest.previewDataUrl ? (
-                <img src={latest.previewDataUrl} alt={copy.imageAlt(latest.title.displayTitle)} />
-              ) : (
-                <div className="ui-empty-state ui-empty-state--compact">{copy.imageMissing}</div>
-              )}
+        <div className="surface-card home-memory-overview__featured">
+          <MemoryCardPreview
+            href={`${base}memory/card/?id=${encodeURIComponent(latest.card.id)}`}
+            title={latest.title.displayTitle}
+            cue={latest.card.note || ""}
+            badge={copy.latest}
+            visual={visual}
+            variant="featured"
+            systemCopy={{
+              label: copy.systemLabel,
+              fallbackTitle: latest.title.displayTitle,
+              footer: copy.systemFooter,
+            }}
+            missingLabel={copy.imageMissing}
+          />
+          <div className="home-memory-overview__utility">
+            <span className="status-badge">{copy.count(memory.count)}</span>
+            <div className="action-row">
+              <a className="btn" href={`${base}archive/`}>{copy.openArchive}</a>
+              <a className="btn btn--subtle" href={`${base}memory/new/`}>{copy.createAnother}</a>
             </div>
           </div>
-        </article>
+        </div>
       )}
     </section>
   );

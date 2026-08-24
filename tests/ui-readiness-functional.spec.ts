@@ -116,6 +116,51 @@ test('shared memory displays cover every visual kind without owning save or dele
   );
 });
 
+test('Home archive loading and error states never render an empty-archive claim', async ({ page }) => {
+  await page.goto('/');
+  await prepareReactClient(page);
+  await page.evaluate(async () => {
+    const React = (await import('/@id/react')).default;
+    const { createRoot } = (await import('/@id/react-dom/client')).default;
+    const { default: HomeMemoryOverview } = await import('/src/components/home/HomeMemoryOverview.jsx');
+    const copy = {
+      eyebrow: 'Private · Local only',
+      title: 'Memory Archive',
+      loading: 'Loading your memory cards…',
+      errorTitle: 'Memory Archive is unavailable',
+      errorLead: 'Retry the private card storage.',
+      emptyTitle: 'No memory cards yet',
+      emptyLead: 'Start a private memory.',
+      latest: 'Latest memory card',
+      count: (count) => `${count} memories`,
+      openArchive: 'Open Archive',
+      createCard: 'Create memory card',
+      createAnother: 'Create another memory',
+      imageAlt: (title) => `${title} memory card`,
+      imageMissing: 'Preview unavailable',
+      systemLabel: 'System design preview',
+      systemFooter: 'MOEMOA · Private memory',
+    };
+    const root = document.createElement('div');
+    root.id = 'home-memory-state-fixture';
+    document.body.replaceChildren(root);
+    const clientRoot = createRoot(root);
+    window.renderHomeMemoryState = (status) => clientRoot.render(React.createElement(HomeMemoryOverview, {
+      base: '/',
+      copy,
+      memory: { status, count: 0, latest: null },
+    }));
+    window.renderHomeMemoryState('loading');
+  });
+
+  await expect(page.locator('.home-memory-state--loading')).toBeVisible();
+  await expect(page.getByText('No memory cards yet', { exact: true })).toHaveCount(0);
+  await page.evaluate(() => window.renderHomeMemoryState('error'));
+  await expect(page.locator('.home-memory-state--error')).toBeVisible();
+  await expect(page.locator('.home-memory-state--loading')).toHaveCount(0);
+  await expect(page.getByText('No memory cards yet', { exact: true })).toHaveCount(0);
+});
+
 test('composer system design keeps its vertical composition inside the mobile frame', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/memory/new/');

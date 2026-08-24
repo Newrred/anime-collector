@@ -6,6 +6,44 @@ const MOBILE_VIEWPORTS = [
   { name: "m390", width: 390, height: 844 },
 ];
 
+test("empty Home keeps its primary action in view at 320px and 390px", async ({ browser }) => {
+  for (const viewport of [
+    { width: 320, height: 720 },
+    { width: 390, height: 844 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+    await page.goto("/");
+    await expect(page.locator(".home-empty-state")).toBeVisible();
+
+    const geometry = await page.evaluate(() => {
+      const home = document.querySelector(".home-page");
+      const copy = document.querySelector(".home-empty-state__copy");
+      const cta = document.querySelector(".home-empty-state__actions .btn");
+      const homeRect = home?.getBoundingClientRect();
+      const copyRect = copy?.getBoundingClientRect();
+      const ctaRect = cta?.getBoundingClientRect();
+      return {
+        homeWidth: homeRect?.width || 0,
+        copyWidth: copyRect?.width || 0,
+        ctaTop: ctaRect?.top || -1,
+        ctaBottom: ctaRect?.bottom || 9999,
+        viewportWidth: innerWidth,
+        viewportHeight: innerHeight,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+
+    expect(geometry.homeWidth).toBeLessThanOrEqual(Math.min(1200, geometry.viewportWidth));
+    expect(geometry.copyWidth).toBeLessThanOrEqual(680);
+    expect(geometry.ctaTop).toBeGreaterThanOrEqual(0);
+    expect(geometry.ctaBottom).toBeLessThanOrEqual(geometry.viewportHeight);
+    expect(geometry.overflow).toBeLessThanOrEqual(0.5);
+    await context.close();
+  }
+});
+
 test("320px header keeps primary controls separate and at least 44px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });

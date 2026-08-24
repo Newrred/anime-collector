@@ -18,6 +18,37 @@ const ROUTES = [
   "/memory/card/",
 ];
 
+test("Home editorial composition stays bounded at 768px and 1440px", async ({ browser }) => {
+  for (const viewport of [
+    { width: 768, height: 900 },
+    { width: 1440, height: 900 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+    await page.goto("/");
+    await expect(page.locator(".home-empty-state")).toBeVisible();
+
+    const geometry = await page.evaluate(() => {
+      const home = document.querySelector(".home-page");
+      const copy = document.querySelector(".home-empty-state__copy");
+      const homeRect = home?.getBoundingClientRect();
+      const copyRect = copy?.getBoundingClientRect();
+      return {
+        homeWidth: homeRect?.width || 0,
+        copyWidth: copyRect?.width || 0,
+        viewportWidth: innerWidth,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+
+    expect(geometry.homeWidth).toBeLessThanOrEqual(Math.min(1200, geometry.viewportWidth));
+    expect(geometry.copyWidth).toBeLessThanOrEqual(680);
+    expect(geometry.overflow).toBeLessThanOrEqual(0.5);
+    await context.close();
+  }
+});
+
 async function measureOverflow(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
     const vw = window.innerWidth;
