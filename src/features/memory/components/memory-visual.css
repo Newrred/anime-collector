@@ -1,9 +1,9 @@
 .memory-visual-scope {
   --memory-visual-aspect: 4 / 5;
   --memory-visual-radius: 12px;
-  --memory-visual-border: color-mix(in srgb, var(--border, #324057) 82%, transparent);
-  --memory-visual-surface: color-mix(in srgb, var(--panel, #111d2f) 88%, #6674c8 12%);
-  --memory-visual-muted: var(--muted, #a9b6ca);
+  --memory-visual-border: color-mix(in srgb, var(--border-subtle, #324057) 82%, transparent);
+  --memory-visual-surface: color-mix(in srgb, var(--bg-surface, #111d2f) 88%, #6674c8 12%);
+  --memory-visual-muted: var(--text-secondary, #a9b6ca);
 }
 
 .memory-visual {

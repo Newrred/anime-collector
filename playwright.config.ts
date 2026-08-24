@@ -30,6 +30,7 @@ const webServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER
  */
 export default defineConfig({
   testDir: './tests',
+  testIgnore: process.env.MOEMOA_VISUAL_TEST === '1' ? [] : ['**/visual/**'],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

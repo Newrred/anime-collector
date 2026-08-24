@@ -1,4 +1,167 @@
 {
   "schemaVersion": 1,
-  "entries": []
+  "entries": [
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/archive-empty-ko-dark-320x720-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "archive-empty-ko-dark-320x720-chromium-win32",
+      "sha256": "f09ff461d4dd0bf63aac767bfb365d06141b84c8e581927c143405fa09cc48bd",
+      "byteSize": 27788,
+      "width": 320,
+      "height": 720
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/archive-populated-en-dark-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "archive-populated-en-dark-390x844-chromium-win32",
+      "sha256": "c9ce0601c2a4ff43be61bc5170750cc84ff0c430e96b9707d115c05e12d4e1bb",
+      "byteSize": 144951,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/archive-populated-ko-light-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "archive-populated-ko-light-1440x900-chromium-win32",
+      "sha256": "a5af4ed6891d61712ef38d1f4b004b54e7f40e6cf4c9a3a75d8034bc1c89ffe0",
+      "byteSize": 286070,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/composer-empty-en-dark-320x720-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "composer-empty-en-dark-320x720-chromium-win32",
+      "sha256": "ff0c2c05e4cfbf7def5cd05113b198501681b5182508014c3b845919aa953b85",
+      "byteSize": 44969,
+      "width": 320,
+      "height": 720
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/composer-error-ko-dark-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "composer-error-ko-dark-1440x900-chromium-win32",
+      "sha256": "afe7d419af222792f14e7a2e747310da82605a4bce66b5aa3dbde4f1af8ac457",
+      "byteSize": 96759,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/composer-system-ko-light-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "composer-system-ko-light-390x844-chromium-win32",
+      "sha256": "3f4dbd0ce8f4da8341b3d0913ff3ffe0af091f2d253f45fa2c408ab9cda1e18f",
+      "byteSize": 114883,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/composer-title-en-dark-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "composer-title-en-dark-1440x900-chromium-win32",
+      "sha256": "4d0d6c4a956dd2e1eb5f9c70d423c7acf87c54979d00261be7eee25ea0a76a16",
+      "byteSize": 99761,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/detail-missing-ko-dark-320x720-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "detail-missing-ko-dark-320x720-chromium-win32",
+      "sha256": "dd562dbd0c307c9a1cc02e2d97ec9b029e82e630fff6ded95ec275e0102e7d5b",
+      "byteSize": 28183,
+      "width": 320,
+      "height": 720
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/detail-ready-en-dark-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "detail-ready-en-dark-390x844-chromium-win32",
+      "sha256": "7706e86134456769ce73e70dc22e5902626076032032139a90cf3caf9ab49cf3",
+      "byteSize": 122555,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/detail-ready-ko-light-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "detail-ready-ko-light-1440x900-chromium-win32",
+      "sha256": "6e51587bcf0bc32bbff518b2c6dc072ed2094c89f89be63eb176c1d627841ed4",
+      "byteSize": 187227,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/home-active-en-dark-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "home-active-en-dark-1440x900-chromium-win32",
+      "sha256": "a3c9f42eea01232a1ec9e4dee00b71a4e6412bbb8c51c21a811019bcdb52075c",
+      "byteSize": 257885,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/home-active-ko-dark-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "home-active-ko-dark-390x844-chromium-win32",
+      "sha256": "a5a5925572ca84e6f416919c152b3bdbdeadd72800e6cf83431f5b3318cd7598",
+      "byteSize": 114882,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/home-empty-en-dark-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "home-empty-en-dark-390x844-chromium-win32",
+      "sha256": "1fde21a609057c177e1f64e9115ed5ad40c4197597a8194f9e312461fb60b895",
+      "byteSize": 89912,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/home-empty-ko-light-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "home-empty-ko-light-1440x900-chromium-win32",
+      "sha256": "053badfab6a64de456b586c9722d49598dfa7314c2baa58d1d55bd91a49e3f51",
+      "byteSize": 145405,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/library-added-ko-light-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "library-added-ko-light-1440x900-chromium-win32",
+      "sha256": "1434163be98dcb8f93f59cbd3ac96d040ba4cab55de02ac53ed4b1d0a40bbde1",
+      "byteSize": 99189,
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/library-search-en-dark-390x844-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "library-search-en-dark-390x844-chromium-win32",
+      "sha256": "e53b8329d7fa9993fb40348d9e2bd2463b41606ca8ce6c9f2b9bda7de5272dd8",
+      "byteSize": 35042,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/navigation-en-dark-320x720-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "navigation-en-dark-320x720-chromium-win32",
+      "sha256": "23da3fcb44a42cc519afa843ba72d84d891d3c5d8091d3cf5b68893db89f34de",
+      "byteSize": 33463,
+      "width": 320,
+      "height": 720
+    },
+    {
+      "path": "tests/visual/ui-readiness.visual.spec.ts-snapshots/navigation-ko-light-1440x900-chromium-win32.png",
+      "assetClass": "TEST_UI_SCREENSHOT",
+      "scenario": "navigation-ko-light-1440x900-chromium-win32",
+      "sha256": "e1bb4b09f82d46b3caf73de549e47342912e12bbbd9b0b9582575b64b2443ba7",
+      "byteSize": 129721,
+      "width": 1440,
+      "height": 900
+    }
+  ]
 }

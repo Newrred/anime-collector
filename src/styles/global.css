@@ -6149,6 +6149,11 @@ html[data-theme="light"] body {
 
 /* Mobile layout stability fixes */
 @media (max-width: 720px) {
+  :root {
+    --size-control-md: 44px;
+    --size-icon-btn: 44px;
+  }
+
   .top-nav {
     inline-size: auto;
     width: auto;

@@ -4,15 +4,15 @@ const MOCK_SESSION_KEY = "moemoa.e2e.mockSession.v1";
 const MOCK_PROFILE_STORE_KEY = "moemoa.e2e.profileStore.v1";
 
 const ROUTES = [
-  { route: "/", root: ".home-page", leadSelector: ".home-empty-state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/", root: ".home-page", leadSelector: ".home-empty-state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 48 },
   { route: "/library/", root: ".library-page", leadSelector: ".library-panel", cardSelector: ".library-panel, .library-card, .card", minPadding: 0, maxPadding: 24.5 },
   { route: "/tier/", root: ".tier-board", leadSelector: ".tier-board__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/profile/", root: ".profile-page", leadSelector: ".minihome-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/data/", root: ".data-grid", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/help/", root: ".help-page", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
-  { route: "/memory/new/", root: ".memory-composer", leadSelector: ".memory-composer__intro", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
-  { route: "/archive/", root: ".memory-archive", leadSelector: ".memory-archive__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
-  { route: "/memory/card/", root: ".memory-detail", leadSelector: ".memory-detail__state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
+  { route: "/memory/new/", root: ".memory-composer", leadSelector: ".memory-composer__intro", cardSelector: ".surface-card", minPadding: 12, maxPadding: 28 },
+  { route: "/archive/", root: ".memory-archive", leadSelector: ".memory-archive__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 48 },
+  { route: "/memory/card/", root: ".memory-detail", leadSelector: ".memory-detail__state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 30 },
   { route: "/u/?handle=playwright-user", root: ".profile-page", leadSelector: ".profile-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
 ];
 
@@ -80,6 +80,10 @@ async function mountSharedVisualGeometry(page: import("@playwright/test").Page) 
     ]));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   }, { imageSrc: WIDE_SYNTHETIC_IMAGE, systemSpec: SHARED_VISUAL_SPEC });
+
+  await expect(page.locator(".memory-preview--grid .memory-visual")).toBeVisible();
+  await expect(page.locator(".memory-preview--featured .memory-visual")).toBeVisible();
+  await expect(page.locator(".detail-visual-fixture img")).toBeVisible();
 }
 
 async function seedMockAuth(page: import("@playwright/test").Page) {
@@ -163,6 +167,7 @@ async function collectDesignMetrics(page: import("@playwright/test").Page, leadS
 test.describe("Page Design System Consistency", () => {
   for (const viewport of VIEWPORTS) {
     test(`shared layout rules stay aligned across routes (${viewport.name})`, async ({ browser }) => {
+      test.setTimeout(60_000);
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
       });

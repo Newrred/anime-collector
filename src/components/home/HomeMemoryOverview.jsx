@@ -55,7 +55,7 @@ export default function HomeMemoryOverview({ base, copy, memory }) {
             <span className="status-badge">{copy.count(memory.count)}</span>
             <div className="action-row">
               <a className="btn" href={`${base}archive/`}>{copy.openArchive}</a>
-              <a className="btn btn--subtle" href={`${base}memory/new/`}>{copy.createAnother}</a>
+              <a className="btn btn--subtle" href={`${base}memory/new/`} data-astro-reload>{copy.createAnother}</a>
             </div>
           </div>
         </div>

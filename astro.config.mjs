@@ -11,5 +11,8 @@ const repoRoot = fileURLToPath(new URL('.', import.meta.url));
 // https://astro.build/config
 export default defineConfig({
   site,
+  devToolbar: {
+    enabled: process.env.MOEMOA_VISUAL_TEST !== '1',
+  },
   integrations: [react(), createDevelopmentCatalogIntegration({ repoRoot })]
 });

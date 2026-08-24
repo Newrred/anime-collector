@@ -131,6 +131,7 @@ test('visual runner owns and closes its Astro child after Playwright succeeds', 
   assert.equal(children[0].options.env.CI, '1');
   assert.equal(children[1].options.env.PLAYWRIGHT_EXTERNAL_SERVER, '1');
   assert.equal(children[1].options.env.PLAYWRIGHT_BASE_URL, 'http://127.0.0.1:45678');
+  assert.equal(children[1].options.env.MOEMOA_VISUAL_TEST, '1');
   assert.equal(Object.hasOwn(children[1].options.env, 'NO_COLOR'), false);
   assert.equal(
     children[1].options.env.PLAYWRIGHT_HTML_OUTPUT_DIR,

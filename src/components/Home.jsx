@@ -359,7 +359,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="action-row">
-                <a href={`${base}memory/new/`} className="btn">
+                <a href={`${base}memory/new/`} className="btn" data-astro-reload>
                   {onboardingCopy.createMemory}
                 </a>
                 {Number.isFinite(heroAnimeId) ? (

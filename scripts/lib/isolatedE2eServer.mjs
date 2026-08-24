@@ -177,6 +177,7 @@ export async function runIsolatedE2E({
           PLAYWRIGHT_BASE_URL: baseUrl,
           PLAYWRIGHT_HTML_OPEN: 'never',
           PLAYWRIGHT_HTML_OUTPUT_DIR: resolve(artifactRoot, 'report'),
+          MOEMOA_VISUAL_TEST: '1',
         }),
       },
     );

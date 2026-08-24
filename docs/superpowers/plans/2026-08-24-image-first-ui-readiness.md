@@ -908,7 +908,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 5: Composer composition.
 - [x] Task 6: Archive gallery.
 - [x] Task 7: Detail and Library distinction.
-- [ ] Task 8: visual/cross-browser/human gate and document sync.
+- [x] Task 8A: 18 Golden Screenshots, cross-browser/functional gate, and document sync.
+- [ ] Task 8B: independent no-explanation human acceptance gate (checks 1/2/3/6/7/8/9).
 
 ## 16. Discoveries and plan changes
 
@@ -937,6 +938,15 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: direct 390px inspection exposed an implicit-grid regression after the new Library fact row collapsed the tab strip to four pixels and overlapped the panel. The modal now owns six explicit rows, and a dense-genre mobile geometry regression locks a full-height tab strip before the panel.
 - 2026-08-24: Detail reuses the shared `MemoryVisual`, preserves replacement/cleanup application ownership, and replaces the browser confirmation with a focus-trapped in-app delete dialog whose Cancel restores focus. The cleanup-pending E2E now proves the new image remains current while old-file cleanup is deferred.
 - 2026-08-24: the legacy Library fixture still expected WatchLogs alone to unlock old Home resurfacing sections. Its contract now verifies the approved boundary instead: Library titles and Quick logs do not impersonate Memory Cards, while the Memory Card entry remains visible without horizontal overflow.
+- 2026-08-24: the 18 approved Chromium baselines now cover navigation, empty/active Home, empty/selected/error Composer, empty/populated Archive, READY/MISSING Detail, and Library/Memory action separation across 320/390/1440, Korean/English, and dark/light fixtures. Every image was directly reviewed and is checksum-, dimension-, and manifest-bound.
+- 2026-08-24: WebKit exposed a ClientRouter-only crash when a valid local Memory detail was opened after Archive navigation; a direct document navigation rendered the same card correctly. Memory creation and preview/detail entry links now use document navigation where no pending native picker cleanup must finish. Detail-to-Archive remains client navigation so late picker ownership cleanup completes before unmount.
+- 2026-08-24: old E2E fixtures used arbitrary text bytes behind a JPEG data URL. WebKit correctly rejected those bytes, so the tests now use a valid project-owned synthetic 1×1 JPEG that matches the production preview contract; production media handling was not weakened.
+- 2026-08-24: the shared-visual geometry test could inspect WebKit before React committed layout. The failure reproduced 3/10 with retries disabled; waiting for the actual visual elements fixed it and the same case passed 20/20. The final full three-browser run passed without retries or flaky recovery.
+- 2026-08-24: the ordinary E2E flow intentionally produced six diagnostic screenshots under `test-results`; `catalog:guard` blocked them. A final focused Playwright cleanup run removed those generated artifacts and the guard then reported no leaks. The approved 18 baselines remain the only tracked image set.
+- 2026-08-24: React Doctor scored 89/100 with six advisory findings in pre-existing Home/menu code (array iteration, render-local pure helpers, component size, and custom modal preferences). Task 8 changes in those files are navigation attributes only; no new actionable runtime finding was introduced. A separate refactor should address those warnings without expanding this visual-baseline commit.
+- 2026-08-24: independent review found that the initial 36-case matrix did not explicitly prove every Task 8 criterion. The dedicated matrix is now 51/51 and names 200% zoom as the equivalent 320 CSS-pixel reflow boundary, numerical dark/light contrast, heading/field/error associations, Korean/English long-copy overflow, saving/saved announcements, and the exact Archive breakpoint. Its settle contract now holds a project font and a featured-card image request open, proves both resources are genuinely unsettled, releases them, then compares the same featured card and 4:5 visual geometry before/after. Existing three-browser Memory lifecycle coverage remains the cleanup-pending proof.
+- 2026-08-24: the first Library golden exposed a broken empty cover because the visual fixture populated search data without the cache used after Library persistence. A project-owned synthetic 2:3 cover is now cached through the same application path; search and Library screenshots show a decoded image, and the Library golden asserts non-zero natural dimensions before capture.
+- 2026-08-24: Archive retains the approved 1200px four-column media query. The runtime boundary test uses 1199 and 1201 because Firefox represents a requested 1200px test viewport as 1199.916 visual CSS pixels; the one-pixel upper specimen avoids testing an engine rounding artifact.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 
@@ -964,3 +974,20 @@ At completion, append:
 ```
 
 Implementation is complete only when this report is evidence-backed, all blocking checks pass, and no required task remains.
+
+### Completion report — 2026-08-24
+
+- Commits: Tasks 1–7 through `38f43ed`; Task 8 is the local `test(ui): lock visual readiness baseline` commit containing this report.
+- Implemented tasks: deterministic 18-screen fixture/baseline system, manifest-bound guard, cross-browser state/layout/accessibility coverage, mobile/readability refinements, and WebKit-safe Memory navigation.
+- Unit: 119/119 pass.
+- Catalog: 197 pass, 2 Windows capability skips, 0 fail.
+- Chromium focused: the expanded Task 8 functional matrix passed as part of the 51/51 three-browser run with retries disabled.
+- Golden Screenshots: 18/18 pass at 0.001 maximum pixel difference; all 18 directly reviewed.
+- Firefox/WebKit: dedicated Task 8 matrix 51/51 across Chromium/Firefox/WebKit. The pre-review full ordinary E2E was 242 pass/13 conditional skips/0 fail with retries disabled; the post-review affected Memory lifecycle matrix is 48/48. WebKit geometry stability remains 20/20.
+- Build: 12 static pages pass. Existing `useUiPreferences` chunk warning remains (867.04 kB); Task 8 added no production dependency or new import chain.
+- Catalog guard: no leaks after generated `test-results` cleanup; exact 18-entry visual manifest accepted.
+- React Doctor: 89/100, six advisory findings in pre-existing Home/top-nav structures; no Task 8 navigation-attribute finding.
+- Human acceptance gate: internal direct visual review and objective automated walkthrough complete. Checks 4/5 have internal visual evidence; no independent unexplained tester was used, so checks 1/2/3/6/7/8/9 remain pending and the nine-point human gate is not claimed as passed.
+- Known issues: independent usability gate, Android physical-device adaptation/verification, existing bundle-size warning, and pre-existing React Doctor structure advisories.
+- Recommended next slice: run the independent nine-check usability session; if accepted, adapt the approved shared UI to Android and execute the physical-device matrix before export/restore or social scope.
+- Push/deploy status: not performed; final deployment remains on hold.

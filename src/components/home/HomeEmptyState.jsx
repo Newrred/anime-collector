@@ -31,7 +31,7 @@ export default function HomeEmptyState({ copy, onAddTitle, memoryHref }) {
       </div>
 
       <div className="home-empty-state__actions">
-        <a className="btn" href={memoryHref}>{copy.createMemory}</a>
+        <a className="btn" href={memoryHref} data-astro-reload>{copy.createMemory}</a>
         <button type="button" className="btn btn--subtle" onClick={onAddTitle}>
           {copy.searchTitles}
         </button>

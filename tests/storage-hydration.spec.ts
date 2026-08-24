@@ -357,7 +357,7 @@ test("IDB-only watch logs reach snapshot export before any Library scoped read",
   });
 });
 
-test("Home initial entry hydrates an IDB-only watch log without export or Library", async ({ page }) => {
+test("Home initial entry preserves an IDB-only watch log without presenting it as a Memory Card", async ({ page }) => {
   await seedIdbOnlyState(page, {
     list: [
       { anilistId: 777, status: "completed", addedAt: 1 },
@@ -378,5 +378,10 @@ test("Home initial entry hydrates an IDB-only watch log without export or Librar
   });
 
   await page.goto("/");
-  await expect(page.locator(".home-focus-card__cue")).toHaveText("Home hydrates this memory directly");
+  await expect(page.locator(".home-empty-state")).toBeVisible();
+  await expect(page.locator(".home-focus-card__cue")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => {
+    const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");
+    return rows.map((row) => row.cue);
+  })).toContain("Home hydrates this memory directly");
 });

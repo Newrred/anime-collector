@@ -1,4 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { jpegBytes, nonSquareJpegBytes } from "./catalog-lab/fixtures/cover-valid-images.mjs";
+
+// Project-owned 1×1 JPEG bytes keep the browser fixture aligned with the
+// native bridge contract without introducing third-party artwork.
+const SYNTHETIC_JPEG_BASE64 = Buffer.from(jpegBytes).toString("base64");
+const SYNTHETIC_IMAGE_PREVIEW = `data:image/jpeg;base64,${SYNTHETIC_JPEG_BASE64}`;
+const SYNTHETIC_IMAGE_PREVIEW_ALT = `data:image/jpeg;base64,${Buffer.from(nonSquareJpegBytes).toString("base64")}`;
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -38,7 +45,7 @@ test("Memory routes follow the selected English locale from composer through det
 });
 
 test("changing locale does not re-claim or discard the prepared private image", async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
       claim: async () => {
@@ -52,7 +59,7 @@ test("changing locale does not re-claim or discard the prepared private image", 
             width: 1280,
             height: 720,
             createdAtEpochMs: 123,
-            previewDataUrl: "data:image/jpeg;base64,cHJldmlldw==",
+            previewDataUrl,
             localOnly: true,
           },
           processing: false,
@@ -62,7 +69,7 @@ test("changing locale does not re-claim or discard the prepared private image", 
       pick: async () => ({ ticket: null, cancelled: true }),
       discard: async () => true,
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
@@ -122,8 +129,7 @@ test("empty Archive exposes one page-level create action", async ({ page }) => {
 });
 
 test("Archive turns an unavailable private preview into a recoverable visual state", async ({ page }) => {
-  await page.addInitScript(() => {
-    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+  await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
       claim: async () => ({
@@ -153,7 +159,7 @@ test("Archive turns an unavailable private preview into a recoverable visual sta
       getPreview: async () => null,
       deleteAsset: async () => true,
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
   await page.getByLabel("작품 또는 카드 제목").fill("Missing scene");
@@ -166,14 +172,13 @@ test("Archive turns an unavailable private preview into a recoverable visual sta
 });
 
 test("private card saves once and remains visible in Archive after reload", async ({ page }) => {
-  await page.addInitScript(() => {
-    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+  await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
       claim: async () => ({
         ticket: {
           ticketId: "ticket-1",
-          mimeType: "image/png",
+          mimeType: "image/jpeg",
           byteSize: 42,
           width: 1920,
           height: 1080,
@@ -189,7 +194,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
       promoteTicket: async ({ assetId }) => ({
         localRef: `asset:${assetId}`,
         checksumSha256: "a".repeat(64),
-        mimeType: "image/png",
+        mimeType: "image/jpeg",
         byteSize: 42,
         width: 1920,
         height: 1080,
@@ -197,7 +202,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
       getPreview: async () => previewDataUrl,
       deleteAsset: async () => true,
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
@@ -251,9 +256,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
 });
 
 test("card detail replaces a local image only after explicit rights confirmation", async ({ page }) => {
-  await page.addInitScript(() => {
-    const oldPreview = "data:image/jpeg;base64,b2xkLXByZXZpZXc=";
-    const newPreview = "data:image/jpeg;base64,bmV3LXByZXZpZXc=";
+  await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
       mimeType: "image/jpeg",
@@ -293,7 +296,7 @@ test("card detail replaces a local image only after explicit rights confirmation
       ),
       deleteAsset: async () => sessionStorage.getItem("replacement-cleanup-fails") !== "true",
     };
-  });
+  }, { oldPreview: SYNTHETIC_IMAGE_PREVIEW, newPreview: SYNTHETIC_IMAGE_PREVIEW_ALT });
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
@@ -303,13 +306,13 @@ test("card detail replaces a local image only after explicit rights confirmation
   await page.getByRole("link", { name: "Frieren" }).click();
 
   const currentImage = page.getByAltText("Frieren 메모리 카드");
-  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,b2xkLXByZXZpZXc=");
+  await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
   await page.getByRole("button", { name: "이미지 교체" }).click();
   await expect(page.getByAltText("새 이미지 미리보기")).toHaveAttribute(
     "src",
-    "data:image/jpeg;base64,bmV3LXByZXZpZXc=",
+    SYNTHETIC_IMAGE_PREVIEW_ALT,
   );
-  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,b2xkLXByZXZpZXc=");
+  await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
 
   const applyReplacement = page.getByRole("button", { name: "이 이미지로 교체" });
   await expect(applyReplacement).toBeDisabled();
@@ -317,7 +320,7 @@ test("card detail replaces a local image only after explicit rights confirmation
   await expect(applyReplacement).toBeEnabled();
   await applyReplacement.click();
 
-  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,bmV3LXByZXZpZXc=");
+  await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW_ALT);
   await expect(page.getByText("새 이미지를 이 기기에 저장했어요.")).toBeVisible();
 
   const stored = await page.evaluate(async () => {
@@ -355,12 +358,11 @@ test("card detail replaces a local image only after explicit rights confirmation
   await page.getByLabel("이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.").check();
   await page.getByRole("button", { name: "이 이미지로 교체" }).click();
   await expect(page.getByText("새 이미지를 이 기기에 저장했어요. 이전 이미지 정리는 앱을 다시 열 때 마무리합니다.")).toBeVisible();
-  await expect(currentImage).toHaveAttribute("src", "data:image/jpeg;base64,bmV3LXByZXZpZXc=");
+  await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW_ALT);
 });
 
 test("missing local image exposes recovery and delete actions", async ({ page }) => {
-  await page.addInitScript(() => {
-    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+  await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
       claim: async () => ({
@@ -390,7 +392,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
       getPreview: async () => null,
       deleteAsset: async () => true,
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
@@ -405,8 +407,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
 });
 
 test("late picker result is discarded after leaving detail and rapid clicks open only one picker", async ({ page }) => {
-  await page.addInitScript(() => {
-    const previewDataUrl = "data:image/jpeg;base64,cHJldmlldw==";
+  await page.addInitScript((previewDataUrl) => {
     const ticket = (ticketId: string) => ({
       ticketId,
       mimeType: "image/jpeg",
@@ -441,7 +442,7 @@ test("late picker result is discarded after leaving detail and rapid clicks open
       getPreview: async () => previewDataUrl,
       deleteAsset: async () => true,
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
@@ -472,9 +473,7 @@ test("late picker result is discarded after leaving detail and rapid clicks open
 });
 
 test("pre-reservation replacement rejection keeps the ticket until discard is confirmed", async ({ page }) => {
-  await page.addInitScript(() => {
-    const oldPreview = "data:image/jpeg;base64,b2xkLXByZXZpZXc=";
-    const newPreview = "data:image/jpeg;base64,bmV3LXByZXZpZXc=";
+  await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
       mimeType: "image/jpeg",
@@ -510,7 +509,7 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
       getPreview: async () => oldPreview,
       deleteAsset: async () => true,
     };
-  });
+  }, { oldPreview: SYNTHETIC_IMAGE_PREVIEW, newPreview: SYNTHETIC_IMAGE_PREVIEW_ALT });
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();

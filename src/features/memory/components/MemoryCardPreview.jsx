@@ -27,7 +27,7 @@ export default function MemoryCardPreview({
           {badge ? <span className="memory-preview__badge">{badge}</span> : null}
           {dateLabel ? <span className="memory-preview__date">{dateLabel}</span> : null}
         </div>
-        <a className="memory-preview__link" href={href}>
+        <a className="memory-preview__link" href={href} data-astro-reload>
           <h3 className="memory-preview__title">{displayTitle}</h3>
         </a>
         {cue ? <p className="memory-preview__cue">{cue}</p> : null}

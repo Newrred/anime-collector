@@ -72,7 +72,7 @@ function ArchiveContent({ base }) {
             <p className="memory-archive__summary">{archiveCopy.count(items.length)}</p>
           )}
         </div>
-        <a className="btn" href={`${base}memory/new/`}>{archiveCopy.create}</a>
+        <a className="btn" href={`${base}memory/new/`} data-astro-reload>{archiveCopy.create}</a>
       </header>
 
       {status === "loading" && (

@@ -484,7 +484,7 @@ DB upgrade callback은 store/index 생성만 담당하고 네트워크·filesyst
 
 ### Milestone 4A — Web-first Shared UI Readiness
 
-상태: `[~] IN PROGRESS — 4A-1 AUTOMATED/PREVIEW PASS; HUMAN 10-SECOND GATE PENDING`
+상태: `[~] IN PROGRESS — AUTOMATED/VISUAL/CROSS-BROWSER PASS; INDEPENDENT HUMAN + ANDROID GATES PENDING`
 
 이 단계는 Milestone 4의 기능 흐름을 실제 사용 가능한 공용 UI로 끌어올리는 선행 gate다. 신규 제품 기능이나 Web production media 기능을 추가하지 않는다.
 
@@ -833,6 +833,11 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-21] backup 경계 정정: `0e36162`에서 기존 JSON 내보내기/가져오기가 Library·Tier·WatchLog·설정용이며 신규 Memory Card와 이미지를 포함하거나 복구하지 않음을 영문/한글 Data 화면에 명시했다. backup/export 구현 자체는 변경하지 않았다.
 [2026-08-21] Memory locale 정렬: `79276aa`에서 `/memory/new/`, `/archive/`, `/memory/card/` 본문·상태·오류·이미지 교체 문구를 공통 영어/한국어 message group과 route context에 연결했다. 상태에는 번역 문자열 대신 message key/error code를 보존해 언어 전환 뒤 즉시 다시 번역하고, native ticket claim은 재실행하지 않는다.
 [2026-08-21] locale TDD/검증: KO→EN 작성→Archive→상세와 저장 완료 EN→KO, 이미지 오류 KO→EN을 RED→GREEN으로 고정했다. prepared ticket claim은 언어 변경 전후 1회임을 검증했다. Web unit 108/108, 관련 Chromium 37/37, 전체 Chromium 59 pass/2 live skip, late picker cleanup 10회 반복 10/10, Astro build, React Doctor 100/100·issue 0, 독립 review 승인. schema·Android·Supabase·배포 변경은 없다.
+[2026-08-24] Milestone 4A 자동·시각 게이트: 승인된 synthetic/project-owned fixture만으로 18개 Chromium Golden Screenshot을 확정하고 직접 검토했다. navigation, Home, Composer, Archive, Detail, Library/Memory 분리를 320/390/1440, KO/EN, dark/light 상태로 고정했으며 manifest·checksum·dimension이 일치하는 파일만 catalog guard가 허용한다.
+[2026-08-24] 교차 브라우저 검증: Task 8 전용 Chromium/Firefox/WebKit matrix를 51/51로 확장해 200%/320 CSS px reflow, 수치 대비, heading·field·error 연결, KO/EN 긴 문구, saving/saved, Archive 1200px 경계를 명시적으로 고정했다. font/image settle은 featured card의 project font와 image 응답을 실제로 보류해 loading/incomplete 상태를 증명한 뒤 해제하고, 동일 card·4:5 visual geometry가 0.5px 이내로 유지되는지 비교한다. pre-review 전체 E2E는 retries 0에서 242 pass/13 조건부 skip/0 fail, post-review 영향 범위 Memory lifecycle은 48/48이다. WebKit geometry 반복 20/20, Web unit 119/119, catalog 197 pass/2 Windows skip, visual 18/18, Astro 12-page build, catalog guard no leaks를 확인했다.
+[2026-08-24] WebKit 보강: valid local Memory detail은 direct load에서는 정상이나 Astro ClientRouter 전환에서만 WebKit crash가 발생했다. pending picker cleanup이 없는 Card 작성·preview/detail 진입은 document navigation으로 고정하고, cleanup을 끝내야 하는 Detail→Archive는 client navigation을 유지했다. E2E의 가짜 JPEG byte도 production preview 계약과 같은 유효한 project-owned synthetic JPEG로 교체했다.
+[2026-08-24] 독립 리뷰 보강: 초기 Library golden의 빈 cover/cache fixture를 project-owned 2:3 synthetic cover로 교체하고 decode를 assertion으로 고정했다. Archive는 승인된 1200px breakpoint를 유지하며 Firefox의 1199.916px test viewport 반올림을 피하기 위해 runtime upper specimen만 1201px를 사용한다.
+[2026-08-24] 사람 게이트 상태: 18개 화면의 잘림·위계·한/영 의미는 내부 직접 검토와 자동 검증 근거가 있다. 그러나 설명을 받지 않은 별도 테스터는 아직 없으므로 9개 사람 항목 전체 통과를 주장하지 않는다. 독립 행동 항목 1/2/3/6/7/8/9와 Android 적용·물리 실기기 검증이 다음 gate다. push·merge·deploy는 수행하지 않았다.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -880,8 +885,8 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 
 남은 첫 slice 완료 게이트:
 
-- Milestone 4A-1 사람 검토에서 10초 안의 Memory Card 작성 발견과 Card/Library 행동 차이 설명 승인.
-- Web-first UI readiness의 전체 viewport/accessibility/visual 승인.
+- Milestone 4A 독립 사람 검토에서 10초 발견성, Card/Library 행동 구분, 첫 카드 저장·재발견과 PRIVATE/LOCAL_ONLY 의미 승인.
+- Web-first UI의 자동 viewport/accessibility/18-screen visual gate는 통과했으며, 별도 테스터의 전체 9항목 승인만 남음.
 - Android 적용과 물리 실기기 검증.
 - export·전체 filesystem orphan scan·최종 rollback rehearsal.
 

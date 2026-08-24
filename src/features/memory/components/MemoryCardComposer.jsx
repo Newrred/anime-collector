@@ -79,7 +79,11 @@ function MemoryCardComposerContent({ base }) {
 
       <form className="surface-card memory-composer__form" onSubmit={saveCard}>
         <div className="memory-composer__workspace">
-          <section className="memory-composer__visual-column" aria-labelledby="memory-image-heading">
+          <section
+            className="memory-composer__visual-column"
+            aria-labelledby="memory-image-heading"
+            aria-describedby={message ? "memory-composer-error" : undefined}
+          >
             <div className="memory-composer__section-head">
               <div>
                 <p className="memory-composer__step-label">{composerCopy.stepVisual}</p>
@@ -122,7 +126,7 @@ function MemoryCardComposerContent({ base }) {
             )}
 
             {message && (
-              <p className="memory-composer__error" role="alert" aria-live="assertive">
+              <p id="memory-composer-error" className="memory-composer__error" role="alert" aria-live="assertive">
                 {copy.errors[message] || copy.errors.fallback}
               </p>
             )}

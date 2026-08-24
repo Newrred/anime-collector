@@ -228,9 +228,28 @@ Memory locale/backup boundary evidence:
 - legacy JSON 수동 backup은 Memory Card/이미지를 포함하거나 복구하지 않는다고 Data 화면에 명시한다. 신규 Memory DB/export 구현은 추가하지 않았다.
 - RED→GREEN locale E2E, Web unit 108/108, 관련 Chromium 37/37, 전체 Chromium 59 pass/2 live skip, late picker cleanup 10회 반복, Astro build, React Doctor 100/100, 독립 review 승인을 확인했다.
 
+### Web-first image-first UI readiness gate — 2026-08-24
+
+Task 8은 기능 확장 없이 공용 Memory UI의 시각 기준, 상태 표현, 브라우저 호환성, 데이터 경계를 잠갔다. Production 배포·Android 반영·외부 사용자 테스트는 수행하지 않았다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| Golden Screenshot | PASS | 18/18 Chromium pixel baseline 통과, 최대 차이 0.001. navigation 2, Home 4, Composer 4, Archive 3, Detail 3, Library/Memory 분리 2개를 320/390/1440·KO/EN·dark/light로 직접 검토 |
+| Task 8 교차 브라우저 matrix | PASS | Chromium/Firefox/WebKit 합계 51/51. 200% zoom의 320 CSS px reflow, 1199/1200 media-query 경계(브라우저 fractional rounding은 1201 specimen), 수치화한 dark/light 대비, heading·label·error 연결, KO/EN 긴 문구, saving/saved live status를 검증. featured card에는 project font와 image 응답을 실제로 보류해 loading/incomplete precondition을 확인하고, 응답 해제 뒤 동일 card·4:5 visual geometry가 0.5px 이내로 유지되는지 명시적으로 비교 |
+| Web E2E | PASS | pre-review 전체 run은 retries 0에서 242 pass/13 조건부 skip/0 fail/0 flaky recovery. post-review 영향 범위 Memory lifecycle은 유효한 synthetic JPEG로 Chromium/Firefox/WebKit 48/48; create→Archive→Detail, image replace/missing/delete, cleanup-pending, Library/Card 격리 포함 |
+| WebKit 안정성 반복 | PASS | React layout commit을 명시적으로 기다린 뒤 shared visual geometry 20/20. valid Memory detail의 ClientRouter-only crash는 필요한 entry link의 document navigation으로 해소 |
+| Web unit | PASS | 119/119 |
+| Catalog | PASS | 197 pass/2 Windows capability skip/0 fail |
+| Astro production build | PASS | 12 pages. 기존 `useUiPreferences` 867.04 kB chunk warning 유지; 신규 dependency/import chain 없음 |
+| Catalog guard | PASS | 18개 baseline만 manifest·SHA-256·size·dimension으로 허용. ordinary E2E가 만든 임시 PNG 6개를 실제 차단했고 cleanup 뒤 no leaks |
+| React Doctor | REVIEWED | 89/100, 6개 advisory. Home/menu의 기존 iteration/helper/component/dialog 구조이며 이번 변경 행은 navigation attribute뿐이라 Task 8 신규 기능 결함으로 판정하지 않음 |
+| 사람 acceptance | PARTIAL/PENDING | 18개 화면의 잘림·위계·KO/EN 의미는 내부 직접 검토 완료. 설명 없는 별도 테스터가 없으므로 9항목 전체 PASS를 주장하지 않으며 행동 항목 1/2/3/6/7/8/9는 pending |
+
+시각 baseline에는 synthetic/project-owned image만 들어 있다. Search→Library 저장 경로도 project-owned synthetic 2:3 cover와 cache를 사용하며 캡처 전에 실제 decode를 확인한다. AniList/AniLife cover, 사용자 캡처, fan art, raw catalog record, URL, secret, 절대 경로는 포함하지 않는다. 기존 Memory schema 1, native media lifecycle, Supabase release, legacy Library/WatchLog 데이터는 변경하지 않았다.
+
 현재 한계:
 
-- 현재 Memory UI는 기능 검증용이며 가독성·잘림·시각 회귀 gate를 통과하기 전에는 dogfood-ready로 간주하지 않는다.
+- 공용 Web Memory UI는 자동 viewport/accessibility/시각 회귀와 내부 직접 시각 검토를 통과했다. 다만 독립 no-explanation 사람 gate와 Android 적용·물리 실기기 gate 전에는 전체 첫 slice를 dogfood-ready로 완료 처리하지 않는다.
 - 물리 실기기와 실제 외부 앱 Share Target은 아직 검증하지 않았다.
 - orphan final file, DB-only missing file의 전체 filesystem reconciliation과 `MISSING` 자동 분류는 아직 없다. 상세 화면의 수동 교체·삭제 복구 진입점만 구현됐다.
 - ZIP export/Android share, staging/export TTL cleanup은 구현 전이다.

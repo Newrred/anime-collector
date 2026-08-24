@@ -172,7 +172,7 @@ function MemoryCardDetailContent({ base }) {
       <div className="memory-detail page-shell page-shell--narrow">
         <section className="surface-card memory-detail__state">
           <h1>{detailCopy.notFound}</h1>
-          <a className="btn" href={`${base}archive/`}>{detailCopy.backToArchive}</a>
+          <a className="btn" href={`${base}archive/`} data-astro-reload>{detailCopy.backToArchive}</a>
         </section>
       </div>
     );

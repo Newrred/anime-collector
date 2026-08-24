@@ -2,7 +2,7 @@
   display: grid;
   min-width: 0;
   gap: 14px;
-  color: var(--text, #f5f7fb);
+  color: var(--text-primary, #f5f7fb);
 }
 
 .memory-preview__body {
