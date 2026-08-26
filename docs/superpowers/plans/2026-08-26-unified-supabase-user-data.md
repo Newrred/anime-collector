@@ -642,7 +642,7 @@ git commit -m "chore(db): pin local Supabase test tooling"
 - Consumes: existing `auth.users` and catalog schema without changing either.
 - Produces: the eleven approved user tables, same-owner composite keys, checks, indexes, and empty additive migration.
 
-- [ ] **Step 1: Write the failing schema test**
+- [x] **Step 1: Write the failing schema test**
 
 Create a pgTAP test that checks every approved table and the critical columns:
 
@@ -675,7 +675,7 @@ select * from finish();
 rollback;
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 ```powershell
 npm.cmd run supabase:test -- supabase/tests/database/memory_user_schema.test.sql
@@ -683,7 +683,7 @@ npm.cmd run supabase:test -- supabase/tests/database/memory_user_schema.test.sql
 
 Expected: FAIL because `public.user_profiles` and the other new tables do not exist.
 
-- [ ] **Step 3: Implement the schema migration**
+- [x] **Step 3: Implement the schema migration**
 
 Use `text` + check constraints for states so the contract can be extended through reviewed migrations. Every user-owned content table includes:
 
@@ -717,7 +717,7 @@ create unique index memory_visual_assets_current_card_idx
   where is_current and deleted_at is null;
 ```
 
-- [ ] **Step 4: Reset and verify GREEN**
+- [x] **Step 4: Reset and verify GREEN**
 
 ```powershell
 npm.cmd run supabase:reset
@@ -727,7 +727,7 @@ npm.cmd run supabase:lint
 
 Expected: schema test passes and lint exits 0.
 
-- [ ] **Step 5: Verify the migration is additive**
+- [x] **Step 5: Verify the migration is additive**
 
 Run local SQL counts through `npx supabase db dump --local --data-only --schema public` or Studio query and record:
 
@@ -738,7 +738,7 @@ new user row counts = 0
 legacy compatibility tables absent
 ```
 
-- [ ] **Step 6: Commit the schema**
+- [x] **Step 6: Commit the schema**
 
 ```powershell
 git add supabase/migrations/20260826000100_memory_user_schema.sql supabase/tests/database/memory_user_schema.test.sql
@@ -2119,6 +2119,11 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-08-26 16:12] 검증: local catalog migration 2개 reset·parity PASS, DB lint 0 errors, 기존 unit 119 pass, Web build 12 pages.
 [2026-08-26 16:12] 환경 발견: Windows Docker Desktop 4.63.0의 안전한 기본 설정에서는 Vector의 Docker log source가 닫힌 2375 포트에 연결하지 못함. core stack은 `--exclude vector`로 정상 검증했으며 비암호화 Docker API는 열지 않음.
 [2026-08-26 16:12] 범위: local Docker와 feature worktree만 변경. remote Supabase, Vercel, OAuth provider, 사용자 데이터에는 변경 없음.
+[2026-08-26 16:26] 완료: Task 2 / 신규 정규화 user table 11개, same-owner composite FK 6개, sync·tombstone·PRIVATE/LOCAL_ONLY 제약과 승인 index 구현.
+[2026-08-26 16:26] TDD: migration 전 pgTAP 18/19 expected FAIL → migration 후 19/19 PASS. pgTAP schema overload는 description 인자로 명확히 고정.
+[2026-08-26 16:26] 검증: local reset migration 3개 PASS, DB lint 0 errors, catalog table 6개 보존, 신규 table 11개/row 0, legacy compatibility table 0.
+[2026-08-26 16:26] 검증: 임시 transaction에서 valid insert와 title-source XOR, cross-owner FK, note 10,000자, PRIVATE, tombstone, LOCAL_ONLY cloud-null, current-asset uniqueness를 확인하고 rollback.
+[2026-08-26 16:26] 범위: local migration/test와 feature worktree 문서만 변경. RPC/RLS/retention 및 remote Supabase 적용은 Task 3 이후 gate로 유지.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

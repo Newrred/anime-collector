@@ -1,6 +1,6 @@
 # Unified Supabase User Data 테스트 증거
 
-> **상태: `IN PROGRESS — TASK 1 COMPLETE`**
+> **상태: `IN PROGRESS — TASK 2 COMPLETE`**
 > 시작일: 2026-08-26
 > ExecPlan: `../../superpowers/plans/2026-08-26-unified-supabase-user-data.md`
 > Worktree: `D:\hong\Web\Anime\anime-collector\.worktrees\unified-supabase-user-data`
@@ -92,3 +92,59 @@ npm.cmd run supabase:start -- --exclude vector
 ```
 
 이 제한은 local Analytics/Studio Logs 가시성에만 해당한다. Task 1의 범위에서는 원격 Supabase project, hosted catalog data, OAuth provider, Vercel environment를 읽거나 변경하지 않았다.
+
+## 7. Task 2 schema TDD
+
+### RED
+
+Migration을 만들기 전에 `memory_user_schema.test.sql`을 먼저 작성하고 실행했다.
+
+```text
+Files=1, Tests=19, Failed=18
+Result: FAIL
+```
+
+신규 user table·column·index 18개가 없어서 실패했고, 계획대로 legacy `user_snapshots` 부재 검사 1개만 통과했다.
+
+Migration 적용 직후 첫 GREEN 시도에서는 실제 DB에 11개 table이 존재했지만 pgTAP 검사가 계속 실패했다. 로컬 함수 정의와 공식 pgTAP signature를 확인한 결과, 설명이 없는 문자열 인자가 `schema/table` 대신 `table/description` overload로 해석된 것이 원인이었다. 각 schema assertion에 명시적인 description 인자를 추가해 대상 schema/table/column/index를 고정했다.
+
+### GREEN
+
+| 검증 | 결과 |
+| --- | --- |
+| `supabase:reset` | PASS, catalog 2개 + user schema 1개 migration 적용 |
+| schema pgTAP | PASS, 19/19 |
+| `supabase:lint` | PASS, 0 schema errors |
+| catalog table 보존 | PASS, 6/6 |
+| 신규 user table | PASS, 11/11 |
+| 신규 user row | PASS, 0 |
+| legacy compatibility table | PASS, 0 |
+| same-owner composite FK | PASS, 6/6 |
+| required partial/sequence index | PASS, 2/2 |
+
+임시 SQL transaction에서 정상 Profile/Device/PrivateTitle/Card/VisualAsset insert를 수행한 뒤 아래 위반이 실제 constraint로 거부되는 것도 확인했다.
+
+- Card title source가 0개 또는 2개인 경우.
+- 다른 user의 PrivateTitle을 참조하는 경우.
+- note가 10,000자를 초과하거나 visibility가 `PRIVATE`이 아닌 경우.
+- DRAFT Card에 tombstone이 설정된 경우.
+- `LOCAL_ONLY` VisualAsset에 cloud path를 저장하는 경우.
+- 한 Card에 active current asset을 두 개 저장하는 경우.
+
+검증 fixture와 행은 transaction 종료 시 모두 rollback했다.
+
+### Explicit operational bounds
+
+설계에서 숫자 없이 `bounded`로 표현된 필드는 보수적인 DB 상한을 명시했다.
+
+| 필드 | 상한 |
+| --- | --- |
+| locale | 35자, BCP-47 형태 검사 |
+| time zone, app version, rewatch intent | 각 100자 |
+| normalized private title | 160자 |
+| imported counts JSON | UTF-8 representation 4 KiB |
+| preference payload, system design spec | 각 UTF-8 representation 32 KiB |
+| MIME type | 255자 |
+| Board position key | 128자 |
+
+RPC, deferred Complete Card invariant, RLS, grants, retention maintenance는 Task 3 범위로 남겼다. 원격 Supabase에는 migration을 적용하지 않았다.
