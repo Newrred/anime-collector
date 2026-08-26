@@ -502,7 +502,7 @@ Record before/after Auth user count, every new user table count, catalog 3,998 c
 - Consumes: committed repository state and the current First Private Slice completion report.
 - Produces: a clean isolated worktree, exact baseline commit, baseline test evidence, and an explicit decision on the remaining First Slice ordering gate.
 
-- [ ] **Step 1: Preserve the current dirty workspace**
+- [x] **Step 1: Preserve the current dirty workspace**
 
 Run in the current workspace:
 
@@ -514,22 +514,23 @@ git diff --cached --name-only
 
 Expected: existing UI/APK edits are listed and no command discards or stages them. If execution starts from another machine, verify the changes were committed or intentionally excluded before creating the feature worktree.
 
-- [ ] **Step 2: Create the implementation worktree using the required skill**
+- [x] **Step 2: Create the implementation worktree using the required skill**
 
 Invoke `superpowers:using-git-worktrees` and create a branch named `feat/unified-supabase-user-data` from the latest committed `master` containing this plan. Do not copy uncommitted files into the worktree.
 
-- [ ] **Step 3: Run the current baseline**
+- [x] **Step 3: Run the current baseline**
 
 ```powershell
 npm.cmd run test:unit
 npm.cmd run build
+npm.cmd run android:sync
 npm.cmd run android:test
 npm.cmd run android:assemble:debug
 ```
 
 Expected: all commands exit 0. If a command fails, record the exact failure before editing implementation files and stop if the required environment cannot be restored.
 
-- [ ] **Step 4: Record the ordering gate**
+- [x] **Step 4: Record the ordering gate**
 
 Add an evidence row stating one of these exact outcomes:
 
@@ -540,7 +541,9 @@ FIRST_SLICE_GATE=EXPLICITLY_REORDERED_BY_USER
 
 Remote/Auth cutover tasks cannot begin without one of these values. Local schema and adapter work may be prepared behind a disabled feature flag.
 
-- [ ] **Step 5: Commit baseline evidence**
+Recorded result: `FIRST_SLICE_GATE=EXPLICITLY_REORDERED_BY_USER` — explicitly approved by the user on 2026-08-26 16:01 KST. All later remote/Preview/Production gates remain separate.
+
+- [x] **Step 5: Commit baseline evidence**
 
 ```powershell
 git add docs/superpowers/plans/2026-08-26-unified-supabase-user-data.md docs/moemoa/reports/unified-user-data-test-evidence.md
@@ -2106,6 +2109,10 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-08-26] 발견: Supabase catalog candidate의 anime:<uuid>가 local AnimeRef에 저장되지 않아 promotion 전 catalog binding 보완이 필요함.
 [2026-08-26] 결정 반영: legacy cloud sync consumer를 신규 Memory account surface에서 제거하되 legacy local code/data는 삭제하지 않음.
 [2026-08-26] 상태: 이 ExecPlan 작성만 수행. 제품 코드, local/remote DB, OAuth, Vercel env는 변경하지 않음.
+[2026-08-26 15:54] 완료: Task 0 Steps 1~3 / worktree feat/unified-supabase-user-data@f00e81c / unit 119 pass, Web build 12 pages, Android unit 30 pass, debug APK 11,520,657 bytes.
+[2026-08-26 15:54] 발견: fresh worktree Android 검증은 generated Cordova Gradle file 때문에 android:sync를 먼저 요구함. sync 후 동일 test/build 통과.
+[2026-08-26 15:54] 차단: First Private Slice 독립 사용자·Android 실기기·export/orphan/rollback gate가 남아 있어 FIRST_SLICE_GATE 승인 값 필요.
+[2026-08-26 16:01] 변경: First Private Slice 완결 후 account 순서 → FIRST_SLICE_GATE=EXPLICITLY_REORDERED_BY_USER / 사용자가 account·sync 구현 선행을 명시 승인 / remote·Preview·Production gate는 유지.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.
