@@ -40,7 +40,12 @@
     "catalog:guard": "node tools/catalog-lab/cli.mjs guard",
     "catalog:preview:export": "node tools/catalog-preview/cli.mjs export",
     "catalog:preview:validate": "node tools/catalog-preview/cli.mjs validate",
-    "catalog:preview:upload": "node tools/catalog-preview/cli.mjs upload"
+    "catalog:preview:upload": "node tools/catalog-preview/cli.mjs upload",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset --local",
+    "supabase:test": "supabase test db --local",
+    "supabase:lint": "supabase db lint --local --level error"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -58,6 +63,7 @@
     "@astrojs/check": "^0.9.6",
     "@capacitor/cli": "8.5.0",
     "@playwright/test": "^1.58.2",
+    "supabase": "2.115.0",
     "typescript": "^5.9.3"
   }
 }

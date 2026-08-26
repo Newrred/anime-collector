@@ -9,6 +9,10 @@ node_modules/
 # isolated Codex feature worktrees
 .worktrees/
 
+# generated local Supabase state
+supabase/.temp/
+supabase/.branches/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

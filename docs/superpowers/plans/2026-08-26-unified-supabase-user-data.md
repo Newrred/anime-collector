@@ -563,7 +563,7 @@ git commit -m "docs: record unified user data baseline"
 - Consumes: Node 22+ and a running Docker Desktop Linux engine.
 - Produces: `npm run supabase:start`, `supabase:reset`, `supabase:test`, `supabase:lint`, all pinned to CLI 2.115.0.
 
-- [ ] **Step 1: Add the exact dev dependency and scripts**
+- [x] **Step 1: Add the exact dev dependency and scripts**
 
 ```powershell
 npm.cmd install --save-dev --save-exact supabase@2.115.0
@@ -581,7 +581,7 @@ Add these scripts to `package.json`:
 }
 ```
 
-- [ ] **Step 2: Ignore only generated local Supabase state**
+- [x] **Step 2: Ignore only generated local Supabase state**
 
 Append to `.gitignore`:
 
@@ -590,7 +590,7 @@ supabase/.temp/
 supabase/.branches/
 ```
 
-- [ ] **Step 3: Keep local Auth configuration secret-free**
+- [x] **Step 3: Keep local Auth configuration secret-free**
 
 Keep `site_url = "http://127.0.0.1:4321"` and add exact callback allowlist entries:
 
@@ -604,7 +604,7 @@ additional_redirect_urls = [
 
 Do not put a Google client secret in `config.toml`. Local Google OAuth configuration, when manually exercised, uses `secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"`.
 
-- [ ] **Step 4: Start Docker Desktop and verify the pinned CLI**
+- [x] **Step 4: Start Docker Desktop and verify the pinned CLI**
 
 ```powershell
 npx.cmd supabase --version
@@ -614,7 +614,9 @@ npx.cmd supabase status
 
 Expected: CLI reports `2.115.0`; local API is `http://127.0.0.1:54321`; no credential value is copied into evidence.
 
-- [ ] **Step 5: Reset the existing catalog migrations locally**
+Windows note: Docker Desktop 4.63.0에서 비암호화 Docker API `tcp://localhost:2375`를 열지 않은 경우 Supabase Vector 로그 수집기만 재시작한다. 보안 설정을 낮추지 않고 core local stack을 사용할 때는 `npm run supabase:start -- --exclude vector`를 사용한다. 이 예외는 local Analytics/Studio Logs에만 영향을 주며 DB, Auth, REST, Storage, Studio UI에는 영향을 주지 않는다. 기본 `supabase:start` script는 cross-platform 기준 명령으로 유지한다.
+
+- [x] **Step 5: Reset the existing catalog migrations locally**
 
 ```powershell
 npm.cmd run supabase:reset
@@ -623,7 +625,7 @@ npm.cmd run supabase:lint
 
 Expected: both catalog migrations apply and lint exits 0.
 
-- [ ] **Step 6: Commit the test toolchain**
+- [x] **Step 6: Commit the test toolchain**
 
 ```powershell
 git add package.json package-lock.json .gitignore supabase/config.toml
@@ -2113,6 +2115,10 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-08-26 15:54] 발견: fresh worktree Android 검증은 generated Cordova Gradle file 때문에 android:sync를 먼저 요구함. sync 후 동일 test/build 통과.
 [2026-08-26 15:54] 차단: First Private Slice 독립 사용자·Android 실기기·export/orphan/rollback gate가 남아 있어 FIRST_SLICE_GATE 승인 값 필요.
 [2026-08-26 16:01] 변경: First Private Slice 완결 후 account 순서 → FIRST_SLICE_GATE=EXPLICITLY_REORDERED_BY_USER / 사용자가 account·sync 구현 선행을 명시 승인 / remote·Preview·Production gate는 유지.
+[2026-08-26 16:12] 완료: Task 1 / Supabase CLI 2.115.0 exact pin, local scripts, generated-state ignore, Web·Android callback allowlist를 추가하고 secret-free config를 확인.
+[2026-08-26 16:12] 검증: local catalog migration 2개 reset·parity PASS, DB lint 0 errors, 기존 unit 119 pass, Web build 12 pages.
+[2026-08-26 16:12] 환경 발견: Windows Docker Desktop 4.63.0의 안전한 기본 설정에서는 Vector의 Docker log source가 닫힌 2375 포트에 연결하지 못함. core stack은 `--exclude vector`로 정상 검증했으며 비암호화 Docker API는 열지 않음.
+[2026-08-26 16:12] 범위: local Docker와 feature worktree만 변경. remote Supabase, Vercel, OAuth provider, 사용자 데이터에는 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

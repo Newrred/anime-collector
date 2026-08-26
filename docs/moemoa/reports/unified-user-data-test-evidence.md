@@ -1,6 +1,6 @@
 # Unified Supabase User Data 테스트 증거
 
-> **상태: `IN PROGRESS — TASK 0 COMPLETE`**
+> **상태: `IN PROGRESS — TASK 1 COMPLETE`**
 > 시작일: 2026-08-26
 > ExecPlan: `../../superpowers/plans/2026-08-26-unified-supabase-user-data.md`
 > Worktree: `D:\hong\Web\Anime\anime-collector\.worktrees\unified-supabase-user-data`
@@ -64,3 +64,31 @@ FIRST_SLICE_GATE=EXPLICITLY_REORDERED_BY_USER
 ```
 
 이 승인은 Production 배포, Preview migration, Google provider 설정, Vercel 환경 변경, Public/UGC, 사용자 이미지 cloud upload 승인이 아니다. 해당 항목은 ExecPlan의 개별 실행 게이트를 그대로 유지한다.
+
+## 6. Task 1 local Supabase toolchain
+
+| 항목 | 결과 |
+| --- | --- |
+| Supabase CLI | PASS, exact `2.115.0` dev dependency 및 lockfile pin |
+| npm scripts | PASS, start/stop/reset/test/lint contract 일치 |
+| generated state | PASS, `supabase/.temp/`, `supabase/.branches/` ignore |
+| Auth callback allowlist | PASS, loopback 2개와 Android custom scheme 1개 |
+| secret hygiene | PASS, `config.toml`에 Google secret 또는 원격 credential 없음 |
+| local API | PASS, `http://127.0.0.1:54321` |
+| local migrations | PASS, catalog migration 2개 reset 및 local history 일치 |
+| DB lint | PASS, 0 schema errors |
+| existing regression | PASS, unit 119 tests 및 Web 12-page build |
+
+`supabase:test`는 Task 2에서 pgTAP contract test를 처음 추가한 뒤 실행한다. CLI 2.115.0은 test file이 0개이면 실패하므로 Task 1에서는 script 존재와 명령 contract만 검증하고, 빈 test suite를 성공으로 오인하지 않았다.
+
+### Windows Vector local limitation
+
+Docker Desktop 4.63.0의 현재 안전한 설정에서는 Supabase Vector container가 `http://host.docker.internal:2375`의 Docker log source에 연결하지 못하고 재시작했다. DB, Auth, REST, Storage, Studio 등 core service는 모두 정상 상태였고 migration reset 및 lint도 통과했다.
+
+Docker daemon을 비암호화 TCP 2375로 노출하지 않았다. 대신 실행 중인 local stack을 정상 종료한 뒤 아래 명령으로 Vector 로그 수집기만 제외해 core stack을 재기동하고 검증했다.
+
+```powershell
+npm.cmd run supabase:start -- --exclude vector
+```
+
+이 제한은 local Analytics/Studio Logs 가시성에만 해당한다. Task 1의 범위에서는 원격 Supabase project, hosted catalog data, OAuth provider, Vercel environment를 읽거나 변경하지 않았다.
