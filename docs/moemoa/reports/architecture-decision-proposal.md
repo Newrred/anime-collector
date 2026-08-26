@@ -6,9 +6,11 @@
 > 승인일: 2026-08-12
 > 승인 기록: `../decisions/2026-08-12-first-private-slice-approval.md`
 
-이 문서는 `TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`을 변경하지 않는다. local-only first slice 경계는 승인됐고 exact Capacitor/Android toolchain은 ADR-0003 environment gate를 따른다.
+이 문서의 local-only first slice 경계는 승인됐고 exact Capacitor/Android toolchain은 ADR-0003 environment gate를 따른다. `TECH-01`, `STORAGE-LOCAL-01`은 그대로 유지한다. Remote legacy/Auth/sync 내용은 2026-08-26 통합 Supabase 결정·설계가 우선한다.
 
 > **2026-08-16 실행 순서 보완:** Android native/local 기반은 유지하고, 공용 Memory UI를 Web 내부 테스트 surface에서 먼저 안정화한 뒤 Android에 적용한다. 이는 아래 Android local-only 경계나 후속 Board/Web production 범위를 변경하지 않는다. 상세 기준은 `../decisions/2026-08-16-web-first-shared-ui-readiness.md`와 `../../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
+
+> **2026-08-26 identity 보완:** local Guest Owner는 유지하되 Google 로그인 시 `auth.users.id` 기반 account namespace로 명시적·멱등 승격한다. Remote에 별도 AccountLink/Owner compatibility table은 만들지 않는다. 상세 기준은 `../decisions/2026-08-26-unified-supabase-user-data.md`와 `../../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md`를 따른다.
 
 ## 1. 결론 요약
 
@@ -144,8 +146,8 @@ ownerId = guest:<uuid>
 
 - 모든 command는 `OwnerContext`를 명시적으로 받는다.
 - owner가 다른 entity를 참조하면 domain/repository 양쪽에서 거부한다.
-- 로그인은 이 owner를 덮어쓰지 않는다. 향후 `AccountLink`가 guest owner와 account owner를 연결하거나 승격한다.
-- 로그아웃·계정 전환·병합은 `AUTH-01` 승인 전 구현하지 않는다.
+- 로그인 시작만으로 이 owner를 덮어쓰지 않는다. 사용자가 preview를 확인하고 승인한 뒤 entity UUID를 유지한 채 `account:<auth.users.id>` namespace로 멱등 승격한다.
+- 로그아웃은 remote row를 Guest 소유로 되돌리지 않는다. 자동 account 간 병합은 금지하고, 계정 전환은 owner-scoped local namespace를 분리한다.
 
 ### AP-04 — title은 내부 reference, provider는 출처 binding
 

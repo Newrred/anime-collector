@@ -126,6 +126,39 @@ spoiler/content rating
 - 로그인 시 기존 로컬 데이터를 계정에 안전하게 승격한다.
 - 카드 메타데이터 동기화와 이미지 클라우드 백업 동의를 분리한다.
 
+### BACKEND-01 — 단일 Supabase project + 역할 분리 client/RPC
+
+상태: **확정 — 2026-08-26**
+
+- 현재 catalog Supabase project를 Auth와 신규 사용자 metadata까지 담당하는 단일 project로 확장한다.
+- Catalog read-only client와 Auth/user session client는 같은 project를 가리키되 runtime 역할과 설정을 분리한다.
+- Catalog는 기존 anon read-only RLS/RPC를 유지한다.
+- Private user row는 owner RLS로 읽고 mutation은 version·operation·상태 전이를 검증하는 RPC로 제한한다.
+- 초기에는 별도 standalone backend를 두지 않으며 privileged 관리 작업은 service-role 전용 로컬/운영 도구로 격리한다.
+- 상세 설계: `../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md`
+
+### AUTH-01 — Supabase Google Auth + local Guest 명시적 승격
+
+상태: **확정 — 2026-08-26**
+
+- 첫 account provider는 기존 Supabase Auth + Google OAuth 하나만 사용한다.
+- Remote private row owner는 `auth.users.id`이며 별도 remote Workspace/Guest row를 만들지 않는다.
+- 로그인 전 Guest Owner와 entity는 local-only로 유지한다.
+- 로그인 시 local bundle preview/backup 가능 상태에서 idempotent promotion operation을 실행하고 성공 뒤 account namespace로 전환한다.
+- Entity UUID를 유지하고 account 간 자동 병합을 금지한다.
+- Legacy Supabase Auth 사용자가 0명이므로 account/UUID/session migration을 하지 않는다.
+
+### SYNC-01 — normalized entity sync + explicit conflict
+
+상태: **확정 — 2026-08-26**
+
+- Whole JSON snapshot 대신 Memory Card, VisualAsset metadata, Board, preference를 entity row로 동기화한다.
+- 각 entity는 optimistic `version`, server timestamp, tombstone을 가진다.
+- 같은 entity의 base version이 다르면 timestamp로 자동 덮어쓰지 않고 사용자 conflict resolution으로 보낸다.
+- Delete tombstone은 stale update보다 우선하며 30일 보존한다.
+- Operation ID와 request hash로 retry를 idempotent하게 만들고 server-generated `sync_seq`로 변경분을 pull한다.
+- 사용자 이미지 file은 sync하지 않는다. `LOCAL_ONLY` metadata와 system-design spec만 Phase 1 대상이다.
+
 ### CATALOG-01 — 제한된 자체 카탈로그
 
 상태: **확정**
@@ -164,17 +197,17 @@ MOEMOA는 자체 내부 ID, 관계 타입, 중복 판별, 검증 상태를 운�
 - 대표 표지는 catalog presentation asset이며 Memory Card의 사용자 `VisualAsset`으로 복사하지 않는다.
 - 공급자 조건이 변경되거나 허가가 철회되면 `PUBLIC_CATALOG_SUPABASE_*`를 제거하거나 Web consumer 커밋을 revert해 기존 fallback으로 즉시 전환한다.
 
-### LEGACY-01 — 보수적 legacy 보존·승격
+### LEGACY-01 — Production legacy migration 없음
 
-상태: **확정 — 2026-08-11**
+상태: **확정 — 2026-08-11 / 수정 확정 — 2026-08-26**
 
-- Library는 `legacy title state`로 보존한다.
-- WatchLog는 MemoryCard `DRAFT` seed 또는 `LegacyMemorySignal`로 보존한다.
-- Tier는 legacy read-only로 보존하고 Board로 자동 변환하지 않는다.
-- 사용자가 작품과 VisualAsset을 확인·연결한 뒤에만 Complete Card로 승격한다.
-- 원본 legacy record와 ID/timestamp를 유지하고 destructive migration을 금지한다.
-- Tier→Board opt-in 변환은 별도 결정 전 기본 제공하지 않는다.
-- 상세 결정 기록: `decisions/2026-08-11-foundation-decisions.md`
+- 2026-08-11 보수적 보존안은 실제 사용자 legacy 데이터가 있을 가능성을 전제로 했다.
+- 사용자는 2026-08-26 legacy Supabase 실제 사용자가 0명이었고 기존 구조 호환이 필요 없다고 확인했다.
+- 신규 remote schema에 legacy Library/WatchLog/Tier/snapshot table을 만들지 않는다.
+- Legacy Auth user, UUID, session, cloud row를 export/import하지 않는다.
+- Legacy record를 신규 Card/Board로 자동 변환하지 않는다.
+- 이 변경은 현재 작업 트리나 개발자 기기의 local data를 즉시 destructive 삭제하는 승인이 아니다.
+- 상세 변경 기록: `decisions/2026-08-26-unified-supabase-user-data.md`
 
 ## 3. 작업 기준으로 유지할 항목
 
@@ -296,9 +329,6 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 
 | ID | 미정 항목 | 필요한 제안 |
 | --- | --- | --- |
-| BACKEND-01 | API·DB·오브젝트 스토리지 | 기존 구성 확인, 변경 필요성, 비용·운영 비교 |
-| AUTH-01 | 인증 공급자와 익명→계정 승격 | 기존 인증과 충돌 여부, 계정 병합 규칙 |
-| SYNC-01 | 동기화 충돌 정책 | 카드 본문, Board 순서, 삭제 대 수정의 규칙 |
 | IMAGE-SYNC-01 | Private 이미지 백업 | 수동 동의, 용량·포맷·보관·삭제 기준 |
 | AGE-01 | 공개 UGC 연령 | 18+ 베타 또는 미성년자 지원 시 추가 요건 |
 | MODERATION-01 | 사전 심사 대 사후 심사 | 초기 베타 권장안과 운영량 추정 |
@@ -313,7 +343,7 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 | GROWTH-02 | 첫 검증 국가 범위 | 필리핀 단일 또는 싱가포르 교차 검증 범위 |
 | GROWTH-03 | 광고 최적화 이벤트 | 클릭·가입보다 첫 Complete Card 저장 중심 여부 |
 
-`TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`은 2026-08-11 사용자 승인으로 확정 섹션에 승격했다. `DEPLOY-01`, `IMAGE-PUBLIC-01`, `GROWTH-01~03` 등 이 표에 남은 항목은 여전히 미정이며, 등록 자체가 결정을 확정하지 않는다. 세부 옵션과 잠정 권장안은 `reports/open-decision-questions.md`를 따른다.
+`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 확정 섹션에 반영됐다. `IMAGE-SYNC-01`, `DEPLOY-01`, `IMAGE-PUBLIC-01`, `GROWTH-01~03` 등 이 표에 남은 항목은 여전히 미정이며, 등록 자체가 결정을 확정하지 않는다. 세부 옵션과 잠정 권장안은 `reports/open-decision-questions.md`를 따른다.
 
 ## 6. 결정 변경 규칙
 

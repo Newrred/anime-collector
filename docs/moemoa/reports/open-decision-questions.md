@@ -1,7 +1,7 @@
 # MOEMOA 사용자 결정 질문
 
-> **문서 상태: `MIXED — FOUNDATION CONFIRMED / REMAINING DECISION QUEUE`**
-> TECH/STORAGE/LEGACY는 확정 이력이며, 나머지 선택지는 제안이다. 각 항목은 사용자 선택과 Decision Log 기록 전에는 확정이 아니다.
+> **문서 상태: `MIXED — FOUNDATION + REMOTE METADATA CONFIRMED / REMAINING DECISION QUEUE`**
+> TECH/STORAGE와 2026-08-26 확정된 BACKEND/AUTH/SYNC/수정 LEGACY는 결정 이력이다. IMAGE-SYNC/Public/운영 선택지는 사용자 선택과 Decision Log 기록 전에는 확정이 아니다.
 
 작성일: 2026-08-11  
 목적: 구현자가 임의로 고정하면 안 되는 선택을 실제 개발 gate 순서로 정리한다.  
@@ -9,19 +9,20 @@
 
 ## 1. 지금 결정할 항목 요약
 
-`TECH-01`, `STORAGE-LOCAL-01`, `LEGACY-01`은 2026-08-11 사용자 승인으로 **CONFIRMED**됐다. 상세 기록은 `decisions/2026-08-11-foundation-decisions.md`를 따른다. 다음 단계는 이 결정을 전제로 한 Phase 2 architecture proposal/ADR와 첫 Private Vertical Slice ExecPlan 작성이다.
+`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 **CONFIRMED**됐다. 상세 기록은 `decisions/2026-08-11-foundation-decisions.md`와 `decisions/2026-08-26-unified-supabase-user-data.md`를 따른다.
 
-`BACKEND-01`과 `AUTH-01`은 local-only 단계에서는 명시적으로 보류할 수 있지만 metadata cloud sync 전에 결정해야 한다. 다만 `ACCOUNT-01`을 지키기 위한 설치별 Guest Owner ID와 owner-scoped local namespace는 local slice의 필수 불변조건이며, `AUTH-01`은 account identity 연결·승격·전환 세부만 결정한다.
+Guest Owner ID와 owner-scoped local namespace는 local slice의 필수 불변조건이며, remote Guest row는 만들지 않는다. 로그인 시 idempotent promotion 뒤 `auth.users.id` 소유 remote row와 local account namespace로 전환한다.
 
 | 상태/결정 시점 | ID | 질문 | 확정값 또는 잠정 권장 |
 | --- | --- | --- | --- |
 | `[CONFIRMED]` | TECH-01 | Android 구현 방식을 무엇으로 할까? | 2. Capacitor shell |
 | `[CONFIRMED]` | STORAGE-LOCAL-01 | Android local image 원본을 어디에 둘까? | 1. 앱 전용 filesystem + DB metadata |
-| `[CONFIRMED]` | LEGACY-01 | 기존 WatchLog/Tier를 어떻게 이전할까? | 1. WatchLog는 Draft seed, Tier는 legacy 보존 |
-| remote schema 전 | BACKEND-01 | backend 경계를 어디에 둘까? | 1. 초기 Supabase 유지 + privileged function 최소화 |
-| account sync 전 | AUTH-01 | 인증 공급자와 guest 승격을 어떻게 할까? | 1. 기존 Supabase/Google 재사용 + preview 후 명시적 병합 |
+| `[CONFIRMED 2026-08-26]` | LEGACY-01 | 실제 사용자 0명인 legacy를 이전할까? | Production migration/compatibility table 없음 |
+| `[CONFIRMED 2026-08-26]` | BACKEND-01 | backend 경계를 어디에 둘까? | 단일 Supabase + read RLS + validated mutation RPC |
+| `[CONFIRMED 2026-08-26]` | AUTH-01 | 인증 공급자와 guest 승격을 어떻게 할까? | Google Auth + explicit idempotent promotion |
+| `[CONFIRMED 2026-08-26]` | SYNC-01 | 충돌·삭제를 어떻게 처리할까? | entity version conflict + tombstone 우선 + sync sequence |
 
-`SYNC-01`, `IMAGE-SYNC-01` 등도 local-only slice 이후 metadata/cloud 작업 전에 결정해도 된다. Public 관련 결정은 private 사용성 검증 이후로 미룬다.
+`IMAGE-SYNC-01`, `STORAGE-01`, `PRIVACY-01`은 user image cloud 작업 전에 결정해야 한다. Public 관련 결정은 private 사용성 검증 이후로 미룬다.
 
 ## 2. 확정 적용 규칙 — 선택 불필요
 
@@ -55,6 +56,8 @@
 
 ### BACKEND-01 — API·DB·object storage 경계
 
+상태: **CONFIRMED — 2026-08-26, 옵션 1을 단일 Supabase/RPC 계약으로 구체화**
+
 질문: 두 client가 Supabase에 직접 접근할까, application API를 둘까?
 
 선택:
@@ -63,11 +66,12 @@
 2. Direct Supabase/RLS를 장기 고정. 운영은 단순하지만 sync/orchestration과 validation이 두 client에 분산될 수 있다.
 3. 처음부터 thin application API. sync commit, validation, rate limit, audit는 유리하지만 local-first private beta 단계부터 운영 범위가 커진다.
 
-필수 확인: 실제 production table/RLS, region, backup, Storage/Edge Function 상태는 현재 `UNKNOWN`.  
-미결정 시 기본값: local-only slice만 구현하고 remote schema는 변경하지 않음.  
-차단 범위: cloud schema, sync endpoint, account delete, moderation.
+확정 결과: 현재 catalog Supabase project를 Auth/user metadata까지 담당하는 단일 project로 사용한다. Catalog read client와 Auth/user session client는 역할을 분리하고, private read는 owner RLS, mutation은 version·operation·state를 검증하는 RPC를 사용한다. 별도 standalone API는 초기 범위에 두지 않는다.
+남은 차단 범위: 승인된 ExecPlan 전 migration/env cutover 금지. User image cloud와 Public/moderation은 별도 gate다.
 
 ### AUTH-01 — 인증 공급자, guest→account 승격과 계정 전환
+
+상태: **CONFIRMED — 2026-08-26, 공급자 1 + linking 1 + 명시적 승격**
 
 질문 1: 첫 account beta의 인증 공급자를 어떻게 구성할까?
 
@@ -98,9 +102,8 @@
 - 로그아웃 시 이 기기의 계정 data를 유지할지, 제거 선택을 줄지?
 - A→B 전환 시 A의 local cache를 잠금 보존할지 완전 제거할지?
 
-잠정 권장: 공급자는 질문 1의 1, linking은 질문 2의 1, 승격은 질문 3의 1. 암호화되지 않은 공용 기기 위험을 안내하고 “이 기기에서 제거” 선택을 제공한다. account namespace는 반드시 분리한다. Android 인증은 Web callback을 단순 재사용했다고 간주하지 않고 App Link/PKCE 실기기 테스트를 통과해야 한다.  
-미결정 시 기본값: 계정 sync를 구현하지 않고 guest-only.  
-차단 범위: account identity/link mapping, promotion migration, logout/account switch E2E. Guest Owner의 논리 ID와 local namespace 자체는 차단하지 않는다.
+확정 결과: Google provider 하나만 사용하고 provider linking은 보류한다. Guest bundle은 backup/manifest/hash 준비 뒤 idempotent operation으로 `auth.users.id` owner에 승격하며 server 성공 뒤 local account namespace로 전환한다. Entity UUID를 유지하고 account 간 자동 병합을 금지한다. Android는 App Link/PKCE 실기기 검증을 통과해야 한다.
+남은 차단 범위: 승인된 ExecPlan 전 account schema/promotion 구현과 env cutover 금지. Logout/account switch의 namespace 격리 E2E는 구현 gate다.
 
 ### STORAGE-LOCAL-01 — local image 저장 방식
 
@@ -119,23 +122,25 @@
 
 ### LEGACY-01 — Library/WatchLog/Tier 이전 의미
 
-상태: **CONFIRMED — 옵션 1, 보수적 이전**
+상태: **REVISED CONFIRMED — 2026-08-26, production migration 없음**
 
 질문: 기존 사용 기록을 새 제품에서 어떤 의미로 보존할까?
 
 선택:
 
-1. **보수적 이전 — 권장.** Library는 legacy title state, WatchLog는 Draft seed/LegacyMemorySignal, Tier는 legacy read-only 보존. 사용자가 이미지 연결 후 Card를 Complete로 승격한다.
+1. **보수적 이전 — 2026-08-11 당시 선택.** Library는 legacy title state, WatchLog는 Draft seed/LegacyMemorySignal, Tier는 legacy read-only 보존. 사용자가 이미지 연결 후 Card를 Complete로 승격한다.
 2. 적극적 이전. WatchLog마다 system design image를 자동 생성해 Complete Card로 만든다. Archive가 즉시 풍부해지지만 사용자가 만들지 않은 Card가 대량 생성될 수 있다.
 3. 새 workspace로 시작하고 legacy는 별도 import 화면에서 선택. 가장 깔끔하지만 과거 기록 접근성이 떨어진다.
 
-추가 결정: Tier를 Board로 opt-in 변환할 경우 `topic → Board`, `anime membership → 해당 작품의 대표 Card` mapping을 사용자에게 preview할지.  
-확정 결과: Tier→Board 기본 자동 변환 없음. Library는 legacy title state, WatchLog는 Draft seed/LegacyMemorySignal, Tier는 legacy read-only로 보존한다.  
-남은 차단 범위: ExecPlan 승인 전 migration codec 실행 금지. 첫 실행 UX와 rollback fixture를 계획에 포함한다.
+수정 근거: legacy Supabase의 실제 사용자가 0명이었고 사용자가 기존 구조의 production 호환이 필요 없다고 확인했다.
+확정 결과: 신규 remote schema에 Library/WatchLog/Tier/snapshot compatibility table을 만들거나 old Auth/row를 이전하지 않는다. 자동 Card/Board 변환도 하지 않는다. 이 결정은 작업 트리나 개발자 local data의 즉시 destructive 삭제 승인이 아니다.
+남은 차단 범위: legacy cloud sync 호출은 신규 adapter cutover 계획에서 격리하며 destructive code/data cleanup은 별도 승인한다.
 
 ## 4. G1 — metadata sync와 private backup 전
 
 ### SYNC-01 — 충돌과 삭제 정책
+
+상태: **CONFIRMED — 2026-08-26, base version conflict + tombstone 우선**
 
 질문: Web/Android에서 같은 entity를 수정했을 때 무엇을 우선할까?
 
@@ -157,8 +162,8 @@
 2. **삭제 tombstone 우선, retention 내 복구함 제공 — 권장.** 수정본은 conflict backup으로 보존.
 3. 수정이 삭제를 되살림. 의도치 않은 부활 위험이 크다.
 
-미결정 시 기본값: metadata multi-device sync 미구현.  
-차단 범위: revision/tombstone schema, sync algorithm, conflict UI.
+확정 결과: normalized entity row, optimistic version, operation ID/request hash, server `sync_seq`를 사용한다. Base version mismatch는 자동 덮어쓰지 않고 사용자 선택으로 보내며 delete tombstone은 stale update보다 우선하고 30일 보존한다.
+남은 차단 범위: 승인된 ExecPlan 전 revision/tombstone/RPC schema와 conflict UI 구현 금지.
 
 ### IMAGE-SYNC-01 — private image cloud backup
 
@@ -415,9 +420,9 @@ local-first에서는 광고 platform에 사용자 note/image/title을 보내지 
 
 ```text
 1. [완료] TECH-01 + STORAGE-LOCAL-01
-2. [완료] LEGACY-01
+2. [완료] LEGACY-01, 2026-08-26 실제 사용자 0명 조건으로 production migration 없음으로 수정
    └─ local-only vertical slice 시작
-3. BACKEND-01 + AUTH-01 + SYNC-01
+3. [완료] BACKEND-01 + AUTH-01 + SYNC-01
 4. IMAGE-SYNC-01 + STORAGE-01 + PRIVACY-01
 5. SOURCE-01 + TAG-01
 6. DEPLOY-01 + BETA-01
@@ -434,10 +439,11 @@ local-first에서는 광고 platform에 사용자 note/image/title을 보내지 
 ```text
 TECH-01: 2, Astro/React + Capacitor shell; spike는 ExecPlan에 포함
 STORAGE-LOCAL-01: 1
-LEGACY-01: 1
-BACKEND-01: local-only 동안 보류, cloud 전 1
-AUTH-01: local-only 동안 보류, account sync 전 공급자 1 + linking 1 + 승격 1
+LEGACY-01: 실제 사용자 0명; production migration/compatibility 없음
+BACKEND-01: 단일 Supabase project + read RLS + validated mutation RPC
+AUTH-01: Supabase Google Auth + linking 보류 + 명시적 idempotent Guest 승격
+SYNC-01: normalized entity version conflict + tombstone 우선 + sync sequence
 DEPLOY-01: 1인지 production 확인 후 결정
 ```
 
-나머지는 `보류` 상태다. 보류된 기능은 adapter/feature flag 뒤에 두고 public/cloud 동작을 켜지 않는다. 이 답변은 code 구현 승인이 아니라 Phase 2 proposal/ExecPlan 작성의 입력이다.
+나머지 항목은 `보류` 상태다. 보류된 기능은 adapter/feature flag 뒤에 두고 image cloud/Public 동작을 켜지 않는다. 확정된 remote metadata 설계도 승인된 ExecPlan 전에는 code/schema 구현 승인이 아니다.

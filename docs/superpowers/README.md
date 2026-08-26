@@ -7,6 +7,7 @@
 
 | 문서 | 상태 | 사용 범위 |
 | --- | --- | --- |
+| `specs/2026-08-26-unified-supabase-user-data-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 단일 Supabase project의 Auth·Memory Card metadata·Board·sync schema/RLS/RPC 계약. 사용자 이미지 cloud backup/Public은 별도 gate이며 구현은 후속 ExecPlan 승인 전 금지 |
 | `specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 기존 3,998개 target roster와 AniList·Wikidata·AniLife 공개 페이지를 이용한 로컬 10→100 표본 수집·검증 설계. 전체 수집과 production 발행은 별도 gate |
 | `specs/2026-08-16-web-first-shared-ui-readiness-design.md` | `CURRENT_APPROVED_DESIGN` | 첫 Private Slice 안에서 Web 공용 UI를 먼저 검증하고 Android에 적용하는 UI 범위·품질 gate. 구현 계획 작성 전 사용자 검토 기준 |
 | `plans/2026-08-03-product-readiness.md` | `COMPLETED_LEGACY_PLAN` | 현재 Library/WatchLog 기반 onboarding 구현 이력. 새 Card P0 계획으로 재실행 금지 |

@@ -1,10 +1,10 @@
 # MOEMOA Web/Android 아키텍처 선택지
 
-> **문서 상태: `MIXED — TECH-01 CONFIRMED / BACKEND-01 PROPOSAL`**
-> client 옵션 비교의 결론은 2026-08-11 사용자 승인으로 확정됐다. backend와 세부 architecture는 여전히 제안이며 ADR/ExecPlan 승인 전 구현하지 않는다.
+> **문서 상태: `MIXED HISTORY — TECH-01/BACKEND-01 CONFIRMED`**
+> client 옵션 비교의 결론은 2026-08-11, backend/user metadata 경계는 2026-08-26 사용자 승인으로 확정됐다. 이 문서의 backend 선택지는 비교 이력이며 최신 contract는 통합 Supabase 결정·설계를 따른다.
 
-작성일: 2026-08-11  
-상태: `TECH-01` 옵션 B 확정, `BACKEND-01` 미정. 상세 결정은 `decisions/2026-08-11-foundation-decisions.md`, 기술 경계는 `adr/0001-capacitor-client-and-local-media-boundary.md`.  
+작성일: 2026-08-11
+상태: `TECH-01` 옵션 B, `BACKEND-01` 단일 Supabase + read RLS + validated mutation RPC 확정. 상세 결정은 `decisions/2026-08-11-foundation-decisions.md`, `decisions/2026-08-26-unified-supabase-user-data.md`, 기술 경계는 `adr/0001-capacitor-client-and-local-media-boundary.md`.
 현재 기준: Astro 5 + React 19 정적 Web/PWA + 브라우저 IndexedDB/localStorage + Supabase JS direct access (`package.json:23-36`, `astro.config.mjs:6-11`).
 
 ## 1. 선택 시 고정 조건
@@ -18,7 +18,7 @@
 - Complete Card는 `Anime 또는 PrivateTitle + VisualAsset`이다.
 - Public UGC는 별도 gate 통과 전 default off다.
 - local image와 cloud backup 동의를 분리한다.
-- legacy 데이터는 보존하며 destructive migration을 하지 않는다.
+- 실제 사용자가 없었던 legacy cloud 구조는 신규 production schema로 이전하지 않으며 destructive local cleanup은 별도 승인한다.
 
 현재 가장 큰 기술 위험은 화면 렌더링이 아니라 **Android가 전달한 이미지 URI를 안전한 앱 소유 파일로 바꾸고, 오프라인/프로세스 종료/계정 전환/삭제를 견디게 하는 것**이다.
 
@@ -321,7 +321,7 @@ React 이름은 같지만 현재 DOM/CSS/Astro 화면을 React Native가 직접 
 
 ## 8. Backend 선택지
 
-Android client 기술과 별도로 BACKEND-01을 결정해야 한다.
+Android client 기술과 별도로 비교했던 BACKEND-01 선택지다. 최신 결론은 2026-08-26 통합 Supabase 결정 문서를 따른다.
 
 ### B1. Supabase direct access 유지 + RLS/Edge Function 보강
 
@@ -363,7 +363,7 @@ Android client 기술과 별도로 BACKEND-01을 결정해야 한다.
 - local-first 초기 private Card만 검증할 때는 과도할 수 있음
 - 기존 direct query를 단계적으로 격리해야 함
 
-### Backend 잠정안
+### Backend 당시 잠정안
 
 Phase 1 local-only와 초기 metadata sync까지는 B1을 기본으로 검증하되, 다음 기능 전에 B2 전환 기준을 재평가하는 것이 합리적이다.
 
@@ -373,7 +373,7 @@ Phase 1 local-only와 초기 metadata sync까지는 B1을 기본으로 검증하
 - client별 sync 로직 drift 발생
 - abuse/rate limit가 RLS만으로 부족
 
-이 또한 확정이 아니라 BACKEND-01 결정용 권장 출발점이다.
+이 절은 2026-08-11 당시 BACKEND-01 결정을 위한 권장 출발점이었다. 2026-08-26에는 B1을 보강한 단일 Supabase + read RLS + validated mutation RPC로 확정됐다.
 
 ## 9. 선택 전 3개 time-boxed spike
 
@@ -439,6 +439,6 @@ Client/local-only slice 승인 조건:
 - Guest Owner namespace와 local DB/storage 방식 확정
 - `[완료]` 사용자가 TECH-01과 STORAGE-LOCAL-01을 Decision Log에서 승인
 
-Backend 초기 B1은 이 조합의 **remote 단계 잠정안**이며 local-only slice 시작 조건이 아니다. Supabase production 상태를 read-only로 확인하고 사용자가 BACKEND-01을 승인하기 전에는 remote schema나 sync endpoint를 변경하지 않는다.
+Backend 초기 B1은 이 조합의 **당시 remote 단계 잠정안**이었으며 local-only slice 시작 조건이 아니었다. BACKEND-01은 2026-08-26 승인됐지만, 실제 remote schema나 sync endpoint 변경은 승인된 상세 설계의 별도 ExecPlan과 검증을 거쳐야 한다.
 
 client 조건을 통과하지 못하면 A로 축소하거나 C로 전환한다. TECH/STORAGE 승인 전에는 dependency 설치, Android scaffold, local DB migration을 실행하지 않는다.

@@ -1,7 +1,7 @@
 # 06. 아키텍처와 첫 Vertical Slice 계획
 
 > **문서 상태: `CURRENT CONSTRAINTS / GATED DESIGN`**
-> 공통 도메인/local-first 제약, Astro/React + Capacitor client 방향, 첫 Private Vertical Slice는 승인되어 구현 중이다. 2026-08-16에는 첫 slice 내부 실행 순서를 `Web 공용 UI readiness → Android 적용·실기기 검증`으로 보완했다. backend 형태, account linking/promotion schema, sync 규칙은 `BACKEND-01`, `AUTH-01`, `SYNC-01` 승인 전에는 확정하지 않는다. Guest Owner ID와 owner-scoped local namespace는 `ACCOUNT-01`에서 파생되는 필수 불변조건이다.
+> 공통 도메인/local-first 제약, Astro/React + Capacitor client 방향, 첫 Private Vertical Slice는 승인되어 구현 중이다. 2026-08-16에는 첫 slice 내부 실행 순서를 `Web 공용 UI readiness → Android 적용·실기기 검증`으로 보완했다. 2026-08-26에는 `BACKEND-01`, `AUTH-01`, `SYNC-01`을 단일 Supabase project, Google Auth, explicit Guest promotion, normalized metadata sync로 확정했다. Private image cloud backup과 Public 관련 gate는 계속 미정이다.
 
 확정 근거: `decisions/2026-08-11-foundation-decisions.md`, `adr/0001-capacitor-client-and-local-media-boundary.md`.
 
@@ -23,7 +23,7 @@ Android Client
    │
    ├── Shared API contract / domain types
    │
-Backend boundary — Supabase direct/RLS adapter 또는 thin API (`BACKEND-01` 미정)
+Backend boundary — single Supabase project + read RLS + validated mutation RPC
    ├── Auth and account linking
    ├── Catalog
    ├── Memory Card / Archive / Board
@@ -40,7 +40,7 @@ Data
    └── raw catalog staging
 ```
 
-위 `Backend boundary`는 논리적 애플리케이션 경계다. Supabase direct/RLS adapter 또는 thin API 중 어느 배포 형태를 뜻하는지는 아직 미정이다. 실제 디렉터리와 기술 선택은 완료된 저장소 감사를 바탕으로 Phase 2에서 제안·승인한다.
+위 `Backend boundary`는 2026-08-26 확정된 논리적 애플리케이션 경계다. Catalog read와 Auth/user session client는 같은 Supabase project를 사용하되 역할을 분리한다. Private read는 owner RLS, mutation은 version·operation·상태 전이를 검증하는 RPC를 사용한다. 별도 standalone thin API는 초기 범위에 포함하지 않으며, 필요성은 운영 증거가 생길 때 재검토한다. 상세 contract는 `../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md`를 따른다.
 
 ## 3. 도메인 경계
 
@@ -67,7 +67,7 @@ Data
 - Owner (`GUEST | ACCOUNT`)
 - DeviceIdentity
 - User
-- AccountLink
+- GuestPromotion
 - SyncOperation
 - Conflict
 - Export/Restore/Delete
@@ -128,7 +128,7 @@ MemoryCard는 Anime 또는 PrivateTitle 중 정확히 하나에 연결된다.
 
 Draft에서는 `visualAssetId`가 비어 있을 수 있지만 Complete 상태에는 정확히 하나의 VisualAsset이 필요하다. VisualAsset은 업로드 파일뿐 아니라 시스템·텍스트 디자인도 포함하며, `localRef`와 object key 같은 파일 수명주기 필드는 file-backed asset에만 적용한다.
 
-`Owner`는 제품 데이터의 소유 경계를 나타내고, `DeviceIdentity`는 기기 식별, `User`는 인증 주체다. local slice부터 설치별 Guest Owner ID와 owner-scoped namespace를 둔다. 로그인 승격 시 entity ID를 가능한 한 유지하되 owner 전환과 계정 혼입 방지를 별도 규칙으로 검증한다. account identity/link mapping, promotion transaction, remote conflict의 구체 schema는 `AUTH-01`과 `SYNC-01` 승인 전 고정하지 않는다.
+`Owner`는 제품 데이터의 소유 경계를 나타내고, `DeviceIdentity`는 기기 식별, `User`는 인증 주체다. local slice부터 설치별 Guest Owner ID와 owner-scoped namespace를 둔다. Remote private row의 owner는 `auth.users.id`이며 Guest row는 remote에 만들지 않는다. 로그인 승격은 entity UUID를 유지하는 idempotent promotion transaction으로 수행하고, 성공 뒤에만 local account namespace로 전환한다. Account 간 자동 병합은 금지한다.
 
 ## 6. Local-first 저장
 
@@ -151,34 +151,37 @@ CONFLICT
 ## 7. 로그인 승격
 
 - 비로그인 owner identity를 유지한다.
-- 로그인 후 기존 로컬 entity ID를 가능한 한 유지한다.
-- server ID와 local ID 관계를 명시한다.
-- 중복 업로드 방지용 idempotency key를 사용한다.
+- 첫 provider는 Supabase Google OAuth 하나만 사용한다.
+- 로그인 후 기존 로컬 entity UUID를 유지한다.
+- Remote owner는 `auth.users.id`, local account owner는 `account:<auth user uuid>`로 명시한다.
+- 승격 전 manifest/hash와 Guest backup을 준비하고 중복 업로드 방지용 operation ID를 사용한다.
+- Server transaction 완료 뒤에만 local owner를 account namespace로 전환한다.
+- 실패하면 Guest 원본을 유지하고 같은 operation을 재시도한다.
 - 이미지 백업은 별도 opt-in.
 
 ## 8. 동기화 충돌
 
-최종 규칙은 `SYNC-01`에서 확정한다. Codex는 다음 옵션을 비교한다.
+`SYNC-01`은 2026-08-26 다음과 같이 확정됐다.
 
 ### Card scalar fields
 
-- version + last-write-wins
-- field-level merge
-- explicit conflict UI
+- Base version이 같으면 mutation을 적용하고 version을 증가시킨다.
+- 다르면 timestamp last-write-wins를 사용하지 않고 explicit conflict UI로 보낸다.
+- 사용자가 선택한 결과는 새 idempotent resolution operation으로 적용한다.
 
 ### Board order
 
-- position token/lexicographic ordering
-- operation log
-- server canonical list
+- Bounded lexicographic `position_key`를 사용한다.
+- Membership/reorder mutation도 base version을 검사한다.
+- Stale reorder는 자동 전체 덮어쓰기하지 않고 conflict로 반환한다.
 
 ### Delete versus edit
 
-- tombstone 우선
-- grace period 복구
-- conflict prompt
+- Delete tombstone이 stale edit보다 우선한다.
+- Tombstone은 30일 보존하며 명시적 복구 operation만 허용한다.
+- Operation ID/request hash와 server `sync_seq`로 retry와 incremental pull을 관리한다.
 
-어떤 규칙을 선택하든 삭제된 카드가 다른 Board나 Web에서 재생성되지 않아야 한다.
+이 규칙에 따라 삭제된 카드가 다른 Board나 Web에서 stale update로 재생성되지 않아야 한다.
 
 ## 9. Web/Android 코드 공유
 

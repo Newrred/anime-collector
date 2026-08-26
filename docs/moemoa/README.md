@@ -1,11 +1,11 @@
 # MOEMOA 문서 인덱스와 Source of Truth
 
-- 기준일: 2026-08-21
+- 기준일: 2026-08-26
 - 현재 단계: **첫 Private Vertical Slice의 Milestone 4A — Web-first Shared UI Readiness 진행 중**. 3,998개 Service Projection v2·대표 표지의 Supabase 적재와 Web catalog consumer Preview 검증, Milestone 4A-1 자동/Preview 검증은 완료됐다. 사람의 10초 발견성·행동 구분과 전체 viewport/accessibility/visual gate는 아직 남아 있으며, 이 gate 전에는 Android UI 확장이나 Board·sync·Public을 시작하지 않는다.
 
 이 파일은 문서를 찾기 위한 인덱스다. 제품 결정을 새로 만들지 않으며, 내용이 충돌할 때는 아래 source hierarchy를 따른다.
 
-빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [로컬 카탈로그 랩 ExecPlan](plans/2026-08-17-three-source-local-catalog-lab.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [ADR-0002](adr/0002-memory-local-domain-and-owner-boundary.md) · [ADR-0003](adr/0003-android-image-intake-spike-toolchain.md) · [테스트 증거](reports/private-slice-test-evidence.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
+빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [통합 Supabase 결정](decisions/2026-08-26-unified-supabase-user-data.md) · [통합 Supabase 설계](../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
 
 ## 1. 먼저 읽을 것
 
@@ -73,11 +73,12 @@ reports/open-decision-questions.md
 | `03_REPOSITORY_AUDIT_PROTOCOL.md` | `CURRENT` | 감사 방법. 최초 감사는 완료됐지만 재감사에 재사용 |
 | `04_CATALOG_DATA_AND_INGESTION_SPEC.md` | `GATED` | Source Registry와 표본 ingestion 기준 |
 | `05_IMAGE_UGC_POLICY_MODERATION_SPEC.md` | `GATED` | 이미지 수명주기와 UGC 운영 gate |
-| `06_ARCHITECTURE_AND_VERTICAL_SLICE_PLAN.md` | `CURRENT_GATED` | 승인된 첫 slice 구조와 전체 P0 제약. backend/auth/sync 등 후속 gate는 계속 미정 |
+| `06_ARCHITECTURE_AND_VERTICAL_SLICE_PLAN.md` | `CURRENT_GATED` | 승인된 첫 slice 구조와 전체 P0 제약. backend/auth/metadata sync는 2026-08-26 확정, image cloud/Public은 계속 gated |
 | `07_QA_ANALYTICS_LAUNCH_OPERATIONS.md` | `CURRENT` | 테스트, privacy-safe analytics, 운영 기준. 베타 수치는 제안값 |
 | `08_CODEX_PHASE_RUNBOOK.md` | `CURRENT_GATED` | 승인된 local-first 실행 순서와 단계별 gate. 첫 slice 내부 Web-first UI 순서 포함 |
 | `09_CHANGE_CONTROL_AND_REPORTING.md` | `CURRENT` | Decision Log, ADR, 변경·테스트 보고 규칙 |
 | `../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 3,998개 target roster 기반 세 출처 로컬 10→100 표본 수집 설계. 전체 수집과 production 발행은 별도 gate |
+| `../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 단일 Supabase Auth·Memory metadata·Board·sync schema/RLS/RPC 계약. 구현은 후속 ExecPlan 승인 필요 |
 | `plans/2026-08-17-three-source-local-catalog-lab.md` | `DRAFT_EXECPLAN_FOR_REVIEW` | 위 설계를 Task 1~10의 TDD 구현·검증·롤백 단위로 변환. 사용자 실행 방식 선택 전 코드 작업 금지 |
 
 ## 5. 저장소 감사 산출물
@@ -86,7 +87,7 @@ reports/open-decision-questions.md
 | --- | --- | --- |
 | `reports/repository-audit.md` | `EVIDENCE_SNAPSHOT` | `master@e71f211`, 2026-08-11 기준 현재 구현 사실 |
 | `reports/implementation-gap-analysis.md` | `ANALYSIS` | legacy migration Gap과 권장 단계. 승인된 ADR/ExecPlan보다 우선하지 않음 |
-| `reports/architecture-options.md` | `MIXED` | TECH-01 Capacitor 방향은 확정. BACKEND와 상세 architecture는 proposal |
+| `reports/architecture-options.md` | `MIXED_HISTORY` | TECH-01과 BACKEND-01 선택 비교 이력. 최신 backend contract는 2026-08-26 결정·설계가 우선 |
 | `reports/open-decision-questions.md` | `MIXED` | TECH/STORAGE/LEGACY 해결 이력과 BACKEND/AUTH/SYNC/이미지/운영 선택 queue |
 | `reports/architecture-decision-proposal.md` | `APPROVED` | local-only Card/Archive의 상세 모듈, DB, native bridge, transaction 경계 |
 | `plans/first-private-vertical-slice.md` | `APPROVED_IN_PROGRESS` | 구현 범위·마일스톤·검증·롤백 계획. Android 기반 구현 뒤 Web-first Shared UI Readiness가 현재 선행 gate |
@@ -98,7 +99,7 @@ reports/open-decision-questions.md
 | --- | --- |
 | `TECH-01` | Astro/React + Capacitor Android shell |
 | `STORAGE-LOCAL-01` | app-private filesystem + DB metadata |
-| `LEGACY-01` | Library legacy state, WatchLog Draft seed, Tier read-only; 자동 Board 변환 없음 |
+| `LEGACY-01` | 2026-08-26 실제 사용자 0명 확인으로 production migration/compatibility table 없음; 자동 변환 없음 |
 
 상세 기록: `decisions/2026-08-11-foundation-decisions.md`.
 
@@ -107,11 +108,12 @@ reports/open-decision-questions.md
 | `decisions/2026-08-11-foundation-decisions.md` | `CONFIRMED` | TECH/STORAGE/LEGACY 선택과 결과 |
 | `decisions/2026-08-12-first-private-slice-approval.md` | `CONFIRMED` | Android local-only 첫 slice 범위와 후속 slice 분리 |
 | `decisions/2026-08-16-web-first-shared-ui-readiness.md` | `CONFIRMED` | 첫 slice 내부에서 공용 UI를 Web로 먼저 검증한 뒤 Android에 적용하는 순서 |
+| `decisions/2026-08-26-unified-supabase-user-data.md` | `CONFIRMED` | 단일 Supabase project, Google Auth, Guest 승격, normalized metadata sync, legacy migration 제외 |
 | `adr/0001-capacitor-client-and-local-media-boundary.md` | `ACCEPTED` | Capacitor client와 app-private media의 논리 경계 |
 
-BACKEND-01, AUTH-01, SYNC-01은 remote metadata sync 전에 결정할 수 있다. Public 관련 결정은 private 사용성·이미지 lifecycle 검증 뒤로 둔다.
+BACKEND-01, AUTH-01, SYNC-01은 2026-08-26 확정됐다. Public 및 user image cloud 관련 결정은 private 사용성·이미지 lifecycle 검증 뒤로 둔다.
 
-AUTH-01을 보류해도 `ACCOUNT-01`을 지키기 위한 설치별 Guest Owner ID와 owner-scoped local namespace는 local slice에 필요하다. AUTH-01은 인증 공급자, guest→account 연결·승격, logout/account switch와 remote account schema를 차단한다.
+`ACCOUNT-01`을 지키기 위한 설치별 Guest Owner ID와 owner-scoped local namespace는 local slice에 계속 필요하다. 확정된 AUTH-01은 Google 인증, 명시적 guest→account 승격, logout/account switch, remote account schema의 구현 기준을 제공한다.
 
 ## 6. Reference와 과거 문서
 
