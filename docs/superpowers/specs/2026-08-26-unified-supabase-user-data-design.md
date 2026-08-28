@@ -264,6 +264,7 @@ Archive는 별도 table이 아니다. `memory_cards`의 owner/status/tombstone i
 | `request_hash` | normalized request SHA-256 |
 | `result_status` | `APPLIED`, `CONFLICT`, `REJECTED` |
 | result | applied version/seq 또는 bounded error code |
+| `result_payload` | 최대 1 MiB의 완전한 mutation result snapshot. 이후 entity가 바뀌어도 동일 operation/hash 재시도에 최초 결과를 그대로 반환한다. |
 | `created_at` | server time |
 
 동일 operation ID와 동일 request hash는 기존 결과를 반환한다. 같은 ID에 다른 hash가 오면 거부한다.

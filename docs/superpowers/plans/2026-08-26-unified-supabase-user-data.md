@@ -758,7 +758,7 @@ git commit -m "feat(db): add normalized memory user schema"
 - Consumes: Task 2 tables.
 - Produces: `ensure_user_profile`, `register_user_device`, `promote_guest_memory`, `apply_memory_card_mutation`, `apply_board_mutation`, `pull_memory_changes`, `resolve_memory_conflict`, plus service-role-only retention maintenance.
 
-- [ ] **Step 1: Write failing security tests for anon, user A, and user B**
+- [x] **Step 1: Write failing security tests for anon, user A, and user B**
 
 Create transaction-scoped users and JWT claims. Test these exact outcomes:
 
@@ -785,7 +785,7 @@ select throws_ok(
 
 Also assert user A cannot read/reference user B rows and `anon` cannot execute any private mutation RPC. Create matching `auth.users` fixtures before inserting user-owned rows; do not rely on JWT claims alone to satisfy auth foreign keys.
 
-- [ ] **Step 2: Write failing RPC tests**
+- [x] **Step 2: Write failing RPC tests**
 
 Test exact behaviors:
 
@@ -805,7 +805,7 @@ promotion bundle over 2 MiB returns PROMOTION_BUNDLE_TOO_LARGE
 COMPLETE_PRIVATE commit without one current READY asset fails
 ```
 
-- [ ] **Step 3: Run both tests and verify RED**
+- [x] **Step 3: Run both tests and verify RED**
 
 ```powershell
 npm.cmd run supabase:test -- supabase/tests/database/memory_user_security.test.sql
@@ -814,7 +814,7 @@ npm.cmd run supabase:test -- supabase/tests/database/memory_user_rpc.test.sql
 
 Expected: FAIL because policies/functions are absent.
 
-- [ ] **Step 4: Implement private helpers and public RPC signatures**
+- [x] **Step 4: Implement private helpers and public RPC signatures**
 
 Create non-exposed helper schema and pin every definer function:
 
@@ -879,11 +879,13 @@ $$;
 
 All other RPCs use the same `auth.uid()` guard, empty search path, schema-qualified names, bounded text/array/json validation, operation result recording, and one database transaction. `apply_memory_card_mutation` accepts only `PRIVATE_TITLE`, `MEMORY_CARD`, and `VISUAL_ASSET`; `apply_board_mutation` accepts only `MEMORY_BOARD` and `MEMORY_BOARD_CARD`. Unknown or cross-family entity types are rejected before any row change.
 
-- [ ] **Step 5: Add complete-card deferred validation**
+`sync_operations.result_payload` stores the complete bounded mutation response (maximum 1 MiB). This is required so an old operation replay returns the original `remoteEntity` snapshot even after the entity receives later mutations; reconstructing the response from the current row is not idempotent.
+
+- [x] **Step 5: Add complete-card deferred validation**
 
 Create a constraint trigger that runs at transaction end and requires each non-deleted `COMPLETE_PRIVATE` Card to have exactly one non-deleted `READY` current asset owned by the same user. DRAFT and DELETED cards are exempt. Promotion and card mutation RPC tests must exercise both valid insert orders.
 
-- [ ] **Step 6: Apply RLS and least-privilege grants**
+- [x] **Step 6: Apply RLS and least-privilege grants**
 
 For every user table:
 
@@ -898,7 +900,7 @@ create policy memory_cards_select_own
 
 Repeat the owner-select policy for each table with `user_id`. Revoke execute from `public`, `anon`, and `authenticated` on all new functions, then grant only the seven public RPC signatures to `authenticated`. Do not alter existing catalog grants/policies.
 
-- [ ] **Step 7: Implement and test 30-day retention**
+- [x] **Step 7: Implement and test 30-day retention**
 
 Create `public.purge_expired_memory_tombstones(p_now timestamptz default now())` as a pinned `security definer` maintenance function. It must be executable only by `service_role`/database owner, never by `anon` or `authenticated`. In one transaction it:
 
@@ -910,7 +912,7 @@ Create `public.purge_expired_memory_tombstones(p_now timestamptz default now())`
 
 The retention migration enables `pg_cron` and creates one named daily job, `moemoa-memory-retention-daily`, calling the function. pgTAP must prove 29-day tombstones remain, 31-day tombstones purge, the watermark advances, an older pull requests full resync, and authenticated users cannot invoke the maintenance function.
 
-- [ ] **Step 8: Reset and verify GREEN**
+- [x] **Step 8: Reset and verify GREEN**
 
 ```powershell
 npm.cmd run supabase:reset
@@ -920,7 +922,7 @@ npm.cmd run supabase:lint
 
 Expected: all pgTAP files pass, lint exits 0, catalog anonymous read tests remain green.
 
-- [ ] **Step 9: Commit functions and security separately from application code**
+- [x] **Step 9: Commit functions and security separately from application code**
 
 ```powershell
 git add supabase/migrations/20260826000200_memory_user_functions.sql supabase/migrations/20260826000300_memory_user_security.sql supabase/migrations/20260826000400_memory_user_retention.sql supabase/tests/database/memory_user_security.test.sql supabase/tests/database/memory_user_rpc.test.sql
@@ -2124,6 +2126,11 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-08-26 16:26] 검증: local reset migration 3개 PASS, DB lint 0 errors, catalog table 6개 보존, 신규 table 11개/row 0, legacy compatibility table 0.
 [2026-08-26 16:26] 검증: 임시 transaction에서 valid insert와 title-source XOR, cross-owner FK, note 10,000자, PRIVATE, tombstone, LOCAL_ONLY cloud-null, current-asset uniqueness를 확인하고 rollback.
 [2026-08-26 16:26] 범위: local migration/test와 feature worktree 문서만 변경. RPC/RLS/retention 및 remote Supabase 적용은 Task 3 이후 gate로 유지.
+[2026-08-28 11:36] 완료: Task 3 / public RPC 7개, owner RLS 11개, direct write 차단, deferred COMPLETE_PRIVATE asset invariant, 30일 retention/cron 구현.
+[2026-08-28 11:36] TDD: security/RPC missing-feature RED 확인 → local reset 후 pgTAP 92/92 PASS, DB lint 0 errors.
+[2026-08-28 11:36] 발견 및 보완: 현재 entity에서 operation 결과를 재구성하면 후속 mutation 뒤 idempotent replay가 달라짐 → bounded result_payload snapshot으로 최초 결과를 고정하고 회귀 테스트 1개 추가.
+[2026-08-28 11:36] 검증: SECURITY DEFINER 8개 모두 empty search_path, authenticated RPC grant 정확히 7개, private function execute 0개, RLS table 11개, write grant 0개, daily cron 1개, catalog table 6개/anon read 보존.
+[2026-08-28 11:36] 범위: local Supabase와 feature worktree만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.
