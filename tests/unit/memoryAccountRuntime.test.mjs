@@ -53,6 +53,14 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
       calls.push(["countCompleteCards", ownerId]);
       return ownerId === GUEST_A ? guestCards : 0;
     },
+    async readOwnerPromotionBundle() {
+      return { owner: owners.get(GUEST_A), animeRefs: [], privateTitles: [], cards: [], visualAssets: [], mediaOperations: [], boards: [], boardCards: [] };
+    },
+    async resolvePromotionTitleChoice(input) { return input.choice; },
+    async beginPromotionJournal(input) { return { ...input, status: "STARTED", remoteResult: null }; },
+    async markPromotionRemoteCompleted() {},
+    async listRecoverablePromotions() { return []; },
+    async commitPromotionToAccount(input) { return { accountOwnerId: input.accountOwnerId, guestOwnerId: GUEST_A }; },
   };
   if (String(activeOwnerId).startsWith("account:")) {
     const userId = String(activeOwnerId).slice(8);
@@ -70,6 +78,9 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
       calls.push(["registerDevice", input]);
       if (failRpc) throw Object.assign(new Error("select private.secret"), { code: "MEMORY_GATEWAY_FAILED" });
       return { id: input.deviceId, installationId: input.installationId, platform: input.platform, appVersion: input.appVersion, lastSyncSeq: 0 };
+    },
+    async promoteGuest() {
+      return { status: "COMPLETED", importedCounts: { privateTitles: 0, cards: 0, visualAssets: 0, boards: 0, boardCards: 0 }, nextSyncSeq: 0 };
     },
   };
 
@@ -145,12 +156,12 @@ test("concurrent initialization is deduplicated and reload state keeps the same 
   assert.equal(harness.calls.filter(([name, input]) => name === "registerDevice" && input.deviceId === DEVICE_A).length, 2);
 });
 
-test("sign out preserves Account rows and rotates to a fresh Guest namespace", async () => {
+test("sign out preserves Account rows and returns to the installation Guest namespace", async () => {
   const harness = createHarness({ guestCards: 0 });
   await harness.runtime.initializeAccountSession(session(USER_A));
   const signedOut = await harness.runtime.handleSignedOut();
   assert.equal(signedOut.status, "LOCAL_ONLY");
-  assert.equal(harness.getActive().id, `guest:${GUEST_B_UUID}`);
+  assert.equal(harness.getActive().id, GUEST_A);
   assert.equal(harness.owners.has(`account:${USER_A}`), true);
   assert.equal(harness.owners.has(GUEST_A), true);
 });

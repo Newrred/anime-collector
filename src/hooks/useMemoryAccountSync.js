@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getPlatformMemoryAccountRuntime } from "../features/memory/runtime/platformMemoryAccountRuntime.js";
 
@@ -7,15 +7,30 @@ const INITIAL_STATE = Object.freeze({
   status: "LOADING",
   guestCardCount: 0,
   errorCode: null,
+  promotionPreview: null,
+  promotionBusy: false,
+  promotionErrorCode: null,
 });
 
 export function useMemoryAccountSync({ session, authLoading = false } = {}) {
   const [state, setState] = useState(INITIAL_STATE);
   const [retryToken, setRetryToken] = useState(0);
+  const activeUserId = useRef(session?.user?.id || null);
+
+  useEffect(() => {
+    activeUserId.current = session?.user?.id || null;
+  }, [session?.user?.id]);
 
   useEffect(() => {
     let alive = true;
-    setState((current) => ({ ...current, status: "LOADING", errorCode: null }));
+    setState((current) => ({
+      ...current,
+      status: "LOADING",
+      errorCode: null,
+      promotionPreview: null,
+      promotionBusy: false,
+      promotionErrorCode: null,
+    }));
     if (authLoading) {
       return () => {
         alive = false;
@@ -46,16 +61,52 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     return () => {
       alive = false;
     };
-  }, [authLoading, session?.user?.id, retryToken]);
+  }, [authLoading, session, retryToken]);
 
   const retry = useCallback(() => setRetryToken((value) => value + 1), []);
+  const buildPromotionPreview = useCallback(async () => {
+    const userId = activeUserId.current;
+    setState((current) => ({ ...current, promotionBusy: true, promotionErrorCode: null }));
+    try {
+      const runtime = await getPlatformMemoryAccountRuntime();
+      const preview = await runtime.buildPromotionPreview();
+      if (activeUserId.current !== userId) return null;
+      setState((current) => ({ ...current, promotionPreview: preview, promotionBusy: false }));
+      return preview;
+    } catch (error) {
+      if (activeUserId.current === userId) {
+        setState((current) => ({ ...current, promotionBusy: false, promotionErrorCode: error?.code || "PROMOTION_FAILED" }));
+      }
+      return null;
+    }
+  }, []);
+  const cancelPromotionPreview = useCallback(() => {
+    setState((current) => ({ ...current, promotionPreview: null, promotionErrorCode: null }));
+  }, []);
+  const promote = useCallback(async (titleChoices) => {
+    const userId = activeUserId.current;
+    setState((current) => ({ ...current, promotionBusy: true, promotionErrorCode: null }));
+    try {
+      const runtime = await getPlatformMemoryAccountRuntime();
+      const next = await runtime.promote({ titleChoices });
+      if (activeUserId.current !== userId) return null;
+      setState((current) => ({ ...current, ...next, promotionPreview: null, promotionBusy: false }));
+      return next;
+    } catch (error) {
+      if (activeUserId.current === userId) {
+        setState((current) => ({ ...current, promotionBusy: false, promotionErrorCode: error?.code || "PROMOTION_FAILED" }));
+      }
+      return null;
+    }
+  }, []);
 
   return Object.freeze({
     ...state,
     loading: state.status === "LOADING" || state.status === "INITIALIZING",
     retry,
-    buildPromotionPreview: async () => null,
-    promote: async () => null,
+    buildPromotionPreview,
+    cancelPromotionPreview,
+    promote,
     syncNow: async () => null,
   });
 }

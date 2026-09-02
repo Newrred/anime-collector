@@ -55,6 +55,15 @@ export function getPlatformMemoryAccountRuntime() {
       appVersion: String(import.meta.env.PUBLIC_APP_VERSION || "web-v1"),
       locale: browserLocale(),
       timeZone: browserTimeZone(),
+      resolveCatalogBinding: async (animeRef) => {
+        const { getPlatformTitleResolver } = await import("./platformTitleResolver.js");
+        const response = await getPlatformTitleResolver().search(animeRef.displayTitle);
+        return (response?.results || []).find((candidate) => (
+          candidate?.animeId
+          && candidate?.sourceBinding?.provider === animeRef.sourceBinding?.provider
+          && String(candidate?.sourceBinding?.externalId || "") === String(animeRef.sourceBinding?.externalId || "")
+        )) || null;
+      },
     });
   })().catch((error) => {
     runtimePromise = null;

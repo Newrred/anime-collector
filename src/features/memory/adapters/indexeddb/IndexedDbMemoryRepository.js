@@ -5,9 +5,15 @@ import {
 import { openMemoryDatabase } from "./memoryDb.js";
 import {
   activateOwner,
+  beginPromotionJournal,
+  commitPromotionToAccount,
   ensureAccountOwner,
   ensureInstallationIdentity,
   getActiveOwner,
+  listRecoverablePromotions,
+  markPromotionRemoteCompleted,
+  readOwnerPromotionBundle,
+  resolvePromotionTitleChoice,
   rotateGuestOwnerAfterPromotion,
 } from "./memoryOwnerStore.js";
 import {
@@ -103,6 +109,30 @@ export class IndexedDbMemoryRepository {
 
   rotateGuestOwnerAfterPromotion(input) {
     return rotateGuestOwnerAfterPromotion(this.database, input);
+  }
+
+  readOwnerPromotionBundle(ownerId) {
+    return readOwnerPromotionBundle(this.database, ownerId);
+  }
+
+  resolvePromotionTitleChoice(input) {
+    return resolvePromotionTitleChoice(this.database, input);
+  }
+
+  beginPromotionJournal(input) {
+    return beginPromotionJournal(this.database, input);
+  }
+
+  markPromotionRemoteCompleted(input) {
+    return markPromotionRemoteCompleted(this.database, input);
+  }
+
+  listRecoverablePromotions(accountOwnerId) {
+    return listRecoverablePromotions(this.database, accountOwnerId);
+  }
+
+  commitPromotionToAccount(input) {
+    return commitPromotionToAccount(this.database, input);
   }
 
   createBoard(board) {

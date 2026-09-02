@@ -21,6 +21,38 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
     const guestOwner: any = { id: guestOwnerId, kind: "GUEST", createdAt: "2026-09-02T00:00:00.000Z" };
     const accountOwner: any = { id: `account:${userId}`, kind: "ACCOUNT", userId, createdAt: "2026-09-02T00:00:00.000Z" };
     let activeOwner: any = activeAccount ? accountOwner : guestOwner;
+    let currentGuestOwnerId = guestOwnerId;
+    let promotionJournal: any = null;
+    const animeRefId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const cardIds = ["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "cccccccc-cccc-4ccc-8ccc-cccccccccccc"];
+    const assetIds = ["dddddddd-dddd-4ddd-8ddd-dddddddddddd", "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"];
+    const sync = { remoteVersion: 0, syncState: "LOCAL_ONLY", clientUpdatedAt: "2026-09-02T00:00:00.000Z", serverUpdatedAt: null, lastOperationId: null };
+    let animeRef: any = {
+      id: animeRefId, catalogAnimeId: null, displayTitle: "Naruto", normalizedTitle: "naruto",
+      aliases: [], genres: ["Action"], sourceKey: "ANILIST:20",
+      sourceBinding: { provider: "ANILIST", externalId: "20" }, verificationState: "PROVIDER_CANDIDATE",
+      createdAt: "2026-09-02T00:00:00.000Z", updatedAt: "2026-09-02T00:00:00.000Z",
+    };
+    let promoted = false;
+    const promotionBundle = () => {
+      const cards = cardIds.slice(0, guestCards).map((id, index) => ({
+        id, ownerId: guestOwnerId, animeRefId, privateTitleId: null, visualAssetId: assetIds[index],
+        status: "COMPLETE_PRIVATE", note: `Memory ${index + 1}`, watchedAt: null,
+        watchedAtPrecision: "UNKNOWN", episode: null, sceneCue: null, emotionTags: [], rewatchIntent: null,
+        createdAt: "2026-09-02T00:00:00.000Z", updatedAt: "2026-09-02T00:00:00.000Z", deletedAt: null, sync,
+      }));
+      const visualAssets = assetIds.slice(0, guestCards).map((id) => ({
+        id, ownerId: guestOwnerId, imageType: "UNKNOWN", state: "READY", storageScope: "LOCAL_ONLY",
+        visibility: "PRIVATE", rightsBasis: "UNKNOWN", localRef: `asset:${id}`, checksumSha256: "a".repeat(64),
+        mimeType: "image/png", byteSize: 1024, width: 800, height: 1000, designSpec: null, isCurrent: true,
+        createdAt: "2026-09-02T00:00:00.000Z", updatedAt: "2026-09-02T00:00:00.000Z", deletedAt: null, sync,
+      }));
+      return {
+        owner: owners.get(guestOwnerId), animeRefs: guestCards ? [animeRef] : [], privateTitles: [], cards,
+        visualAssets, mediaOperations: cards.map((card, index) => ({ id: `operation-${index}`, ownerId: guestOwnerId, cardId: card.id, assetId: card.visualAssetId })),
+        boards: [], boardCards: [],
+      };
+    };
     const owners = new Map([[guestOwnerId, guestOwner], [accountOwner.id, accountOwner]]);
     const deviceStates = new Map();
     (window as any).__MOEMOA_TEST_MEMORY_CALLS__ = calls;
@@ -28,7 +60,7 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
       enabled: true,
       repository: {
         async ensureInstallationIdentity() {
-          return { installationId, guestOwner: owners.get(guestOwnerId) };
+          return { installationId, guestOwner: owners.get(currentGuestOwnerId) };
         },
         async getActiveOwner() { return structuredClone(activeOwner); },
         async ensureAccountOwner({ userId: nextUserId }: any) {
@@ -48,6 +80,30 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
           return structuredClone(owner);
         },
         async countCompleteCards(ownerId: string) { return ownerId === guestOwnerId ? guestCards : 0; },
+        async readOwnerPromotionBundle() { return structuredClone(promotionBundle()); },
+        async resolvePromotionTitleChoice({ choice }: any) {
+          calls.push("resolve_promotion_title");
+          if (choice.kind === "CATALOG") animeRef = { ...animeRef, catalogAnimeId: choice.catalogAnimeId };
+          return structuredClone(choice);
+        },
+        async beginPromotionJournal(input: any) {
+          promotionJournal ||= { ...input, status: "STARTED", remoteResult: null };
+          if (promotionJournal.sourceHash !== input.sourceHash) throw Object.assign(new Error("changed"), { code: "PROMOTION_SOURCE_HASH_MISMATCH" });
+          return structuredClone(promotionJournal);
+        },
+        async markPromotionRemoteCompleted({ result }: any) {
+          promotionJournal = { ...promotionJournal, status: "REMOTE_COMPLETED", remoteResult: structuredClone(result) };
+        },
+        async listRecoverablePromotions() { return []; },
+        async commitPromotionToAccount({ accountOwnerId, newGuestUuid }: any) {
+          promoted = true;
+          activeOwner = owners.get(accountOwnerId);
+          const nextGuest = { id: `guest:${newGuestUuid}`, kind: "GUEST", createdAt: "2026-09-02T00:00:00.000Z" };
+          owners.set(nextGuest.id, nextGuest);
+          currentGuestOwnerId = nextGuest.id;
+          promotionJournal = { ...promotionJournal, status: "COMPLETED" };
+          return { accountOwnerId, guestOwnerId: nextGuest.id };
+        },
       },
       gateway: {
         async ensureUserProfile(input: any) {
@@ -59,6 +115,21 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
           calls.push("register_user_device");
           return { ...input, id: input.deviceId, lastSyncSeq: 0 };
         },
+        async promoteGuest(input: any) {
+          calls.push("promote_guest_memory");
+          if (JSON.stringify(input.bundle).includes("localRef")) throw new Error("localRef leaked");
+          return {
+            status: "COMPLETED",
+            importedCounts: {
+              privateTitles: input.bundle.privateTitles.length,
+              cards: input.bundle.cards.length,
+              visualAssets: input.bundle.visualAssets.length,
+              boards: input.bundle.boards.length,
+              boardCards: input.bundle.boardCards.length,
+            },
+            nextSyncSeq: 7,
+          };
+        },
       },
       readDeviceSyncState: async (ownerId: string) => structuredClone(deviceStates.get(ownerId) || null),
       writeDeviceSyncState: async (state: any) => { deviceStates.set(state.ownerId, structuredClone(state)); },
@@ -67,6 +138,10 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
       appVersion: "e2e",
       locale: "en",
       timeZone: "UTC",
+      resolveCatalogBinding: async () => ({
+        kind: "ANIME_REF", animeId: "anime:ffffffff-ffff-4fff-8fff-ffffffffffff", displayTitle: "Naruto",
+        sourceBinding: { provider: "ANILIST", externalId: "20" },
+      }),
     };
   }, {
     signedIn: Boolean(options.signedIn),
@@ -123,4 +198,37 @@ test("account initialization failure stays retryable and hides raw database erro
   await expect(page.getByText("Account initialization failed — retry", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry account setup" })).toBeVisible();
   await expect(page.getByText("select private.secret")).toHaveCount(0);
+});
+
+test("promotion preview is explicit, cancellable, and moves metadata only after one confirmation", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await installAccountAdapters(page, { signedIn: true, guestCards: 2 });
+  await page.goto("/data/");
+  await page.getByRole("button", { name: "Review Guest records" }).click();
+  await expect(page.getByRole("heading", { name: "Move Guest records to this account" })).toBeVisible();
+  await expect(page.getByText("Original image files stay only on this device.", { exact: false })).toBeVisible();
+  await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
+  const previewReflow = await page.evaluate(() => {
+    const panel = document.querySelector<HTMLElement>("[data-memory-account-status]");
+    const preview = document.querySelector<HTMLElement>(".promotion-preview");
+    return {
+      panelFits: Boolean(panel && panel.scrollWidth <= panel.clientWidth),
+      previewFits: Boolean(preview && preview.scrollWidth <= preview.clientWidth),
+    };
+  });
+  expect(previewReflow).toEqual({ panelFits: true, previewFits: true });
+
+  await page.getByRole("button", { name: "Cancel" }).click();
+  expect(await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__)).toEqual([
+    "ensure_user_profile", "register_user_device",
+  ]);
+
+  await page.getByRole("button", { name: "Review Guest records" }).click();
+  await page.getByLabel("Use exact catalog match: Naruto").check();
+  await page.getByRole("button", { name: "Move records" }).click();
+  await expect(page.getByText("Signed in — no Guest data", { exact: true })).toBeVisible();
+  const calls = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
+  expect(calls).toEqual([
+    "ensure_user_profile", "register_user_device", "resolve_promotion_title", "promote_guest_memory",
+  ]);
 });

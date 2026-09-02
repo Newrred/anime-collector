@@ -1,3 +1,9 @@
+import {
+  buildGuestPromotionManifest,
+  resolvePromotionTitleChoice,
+} from "../application/buildGuestPromotionManifest.js";
+import { createPromoteGuestMemory } from "../application/promoteGuestMemory.js";
+
 const USER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const clone = (value) => value == null ? value : structuredClone(value);
@@ -24,6 +30,12 @@ const requireDependencies = (input) => {
     "activateOwner",
     "rotateGuestOwnerAfterPromotion",
     "countCompleteCards",
+    "readOwnerPromotionBundle",
+    "resolvePromotionTitleChoice",
+    "beginPromotionJournal",
+    "markPromotionRemoteCompleted",
+    "listRecoverablePromotions",
+    "commitPromotionToAccount",
   ];
   if (!input.repository || requiredRepository.some((method) => typeof input.repository[method] !== "function")
     || !input.gateway || typeof input.gateway.ensureUserProfile !== "function"
@@ -60,6 +72,10 @@ export function createMemoryAccountRuntime(input = {}) {
   let initializingUserId = null;
   let registeredUserId = null;
   let signedOut = null;
+  let promotionOperationId = null;
+  let promotionPreview = null;
+  let promotionInFlight = null;
+  const promotion = createPromoteGuestMemory({ repository, gateway, uuid, clock });
 
   const setState = (next) => {
     state = Object.freeze({ enabled: true, errorCode: null, ...next });
@@ -77,6 +93,7 @@ export function createMemoryAccountRuntime(input = {}) {
     signedOut = null;
     initializingUserId = userId;
     initialization = (async () => {
+      if (promotionInFlight) await promotionInFlight.catch(() => null);
       let guestOwnerId = null;
       let guestCardCount = 0;
       let accountOwnerId = null;
@@ -121,6 +138,12 @@ export function createMemoryAccountRuntime(input = {}) {
           updatedAt: String(clock.now()),
         };
         await writeDeviceSyncState(committedDeviceState);
+        const recovered = await promotion.recoverPromotion({ accountOwnerId: accountOwner.id });
+        if (recovered.length > 0) {
+          const recoveredIdentity = await repository.ensureInstallationIdentity({ uuid: uuid(), now: String(clock.now()) });
+          guestOwnerId = recoveredIdentity.guestOwner.id;
+          guestCardCount = Number(await repository.countCompleteCards(guestOwnerId)) || 0;
+        }
         await repository.activateOwner({ ownerId: accountOwner.id, now: String(clock.now()) });
         registeredUserId = userId;
         return setState({
@@ -154,13 +177,14 @@ export function createMemoryAccountRuntime(input = {}) {
   const handleSignedOut = async () => {
     if (signedOut) return signedOut;
     signedOut = (async () => {
+      if (promotionInFlight) await promotionInFlight.catch(() => null);
       registeredUserId = null;
       const now = String(clock.now());
-      await repository.ensureInstallationIdentity({ uuid: uuid(), now });
+      const identity = await repository.ensureInstallationIdentity({ uuid: uuid(), now });
       const activeOwner = await repository.getActiveOwner();
-      let guestOwner = activeOwner;
+      let guestOwner = identity.guestOwner;
       if (activeOwner?.kind === "ACCOUNT") {
-        guestOwner = await repository.rotateGuestOwnerAfterPromotion({ uuid: uuid(), now });
+        guestOwner = await repository.activateOwner({ ownerId: identity.guestOwner.id, now });
       }
       return setState({
         status: "LOCAL_ONLY",
@@ -171,14 +195,77 @@ export function createMemoryAccountRuntime(input = {}) {
     return signedOut;
   };
 
+  const buildPreview = async () => {
+    if (!state.userId || !state.accountOwnerId || !state.guestOwnerId || state.guestCardCount < 1) return null;
+    const manifest = await buildGuestPromotionManifest({ repository, guestOwnerId: state.guestOwnerId });
+    const unresolvedAnimeRefs = await Promise.all(manifest.unresolvedAnimeRefs.map(async (animeRef) => {
+      if (typeof input.resolveCatalogBinding !== "function") return { ...animeRef, catalogCandidate: null };
+      try {
+        const candidate = await input.resolveCatalogBinding(animeRef);
+        const exactSource = candidate?.sourceBinding?.provider === animeRef.sourceBinding?.provider
+          && String(candidate?.sourceBinding?.externalId || "") === String(animeRef.sourceBinding?.externalId || "");
+        return { ...animeRef, catalogCandidate: exactSource && candidate?.animeId ? structuredClone(candidate) : null };
+      } catch {
+        return { ...animeRef, catalogCandidate: null };
+      }
+    }));
+    promotionPreview = Object.freeze({ ...manifest, unresolvedAnimeRefs: Object.freeze(unresolvedAnimeRefs) });
+    return clone(promotionPreview);
+  };
+
+  const promote = async ({ titleChoices = [] } = {}) => {
+    if (promotionInFlight) return promotionInFlight;
+    promotionInFlight = (async () => {
+      const preview = promotionPreview || await buildPreview();
+      if (!preview) return null;
+      const context = {
+        userId: state.userId,
+        guestOwnerId: state.guestOwnerId,
+        accountOwnerId: state.accountOwnerId,
+        deviceId: state.deviceId,
+      };
+      const choicesByAnimeRef = new Map(titleChoices.map((row) => [row.animeRefId, row.choice]));
+      await Promise.all(preview.unresolvedAnimeRefs.map((animeRef) => {
+        const choice = choicesByAnimeRef.get(animeRef.id);
+        if (!choice) fail("PROMOTION_TITLE_CHOICE_REQUIRED", "Every unresolved title needs a choice");
+        return resolvePromotionTitleChoice({
+          repository,
+          guestOwnerId: context.guestOwnerId,
+          animeRefId: animeRef.id,
+          choice,
+          now: String(clock.now()),
+        });
+      }));
+      promotionOperationId ||= String(uuid()).toLowerCase();
+      const result = await promotion.execute({
+        userId: context.userId,
+        guestOwnerId: context.guestOwnerId,
+        accountOwnerId: context.accountOwnerId,
+        deviceId: context.deviceId,
+        operationId: promotionOperationId,
+      });
+      const identity = await repository.ensureInstallationIdentity({ uuid: uuid(), now: String(clock.now()) });
+      promotionPreview = null;
+      promotionOperationId = null;
+      return setState({
+        ...state,
+        status: "ACCOUNT_READY",
+        guestOwnerId: identity.guestOwner.id,
+        guestCardCount: 0,
+        lastSyncSeq: Number(result.nextSyncSeq),
+      });
+    })().finally(() => { promotionInFlight = null; });
+    return promotionInFlight;
+  };
+
   return Object.freeze({
     enabled: true,
     get status() { return state.status; },
     getState: async () => clone(state),
     initializeAccountSession: initialize,
     handleSignedOut,
-    buildPromotionPreview: async () => null,
-    promote: async () => null,
+    buildPromotionPreview: buildPreview,
+    promote,
     syncNow: async () => null,
   });
 }

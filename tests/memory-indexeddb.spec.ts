@@ -249,6 +249,146 @@ test("memory database survives reopen and does not mutate the legacy database", 
   expect(result.legacyMarker).toBe("unchanged");
 });
 
+test("Guest promotion keeps local image refs while atomically moving every owner-scoped row", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const memoryDb = await import("/src/features/memory/adapters/indexeddb/memoryDb.js");
+    const repositoryModule = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const createModule = await import("/src/features/memory/application/createMemoryCard.js");
+    const manifestModule = await import("/src/features/memory/application/buildGuestPromotionManifest.js");
+    const syncStore = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const deleteDatabase = (name: string) => new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(name);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error(`blocked delete: ${name}`));
+    });
+    const requestValue = <T>(request: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+
+    const now = "2026-09-02T03:00:00.000Z";
+    const userId = "11111111-1111-4111-8111-111111111111";
+    const guestUuid = "22222222-2222-4222-8222-222222222222";
+    const deviceId = "33333333-3333-4333-8333-333333333333";
+    const promotionId = "44444444-4444-4444-8444-444444444444";
+    const nextGuestUuid = "55555555-5555-4555-8555-555555555555";
+    const catalogId = "anime:66666666-6666-4666-8666-666666666666";
+    await deleteDatabase(memoryDb.MEMORY_DB_NAME);
+    const repository = await repositoryModule.IndexedDbMemoryRepository.open();
+    const identity = await repository.ensureInstallationIdentity({ uuid: guestUuid, now });
+    const guestOwnerId = identity.guestOwner.id;
+    const account = await repository.ensureAccountOwner({ userId, now });
+    await syncStore.writeDeviceSyncState(repository.database, {
+      ownerId: account.id, userId, installationId: identity.installationId,
+      deviceId, lastSyncSeq: 0, updatedAt: now,
+    });
+
+    const createCard = async ({ cardId, assetId, animeRefId, operationId, externalId, title }: any) => {
+      const command = createModule.createMemoryCardCommand({
+        repository,
+        localMedia: {
+          promoteTicket: async () => ({
+            localRef: `asset:${assetId}`, checksumSha256: assetId[0].repeat(64),
+            mimeType: "image/png", byteSize: 2048, width: 800, height: 1000,
+          }),
+        },
+        telemetry: { track: () => {} },
+        clock: { now: () => now },
+        ids: { next: (kind: string) => ({ card: cardId, asset: assetId, animeRef: animeRefId })[kind] },
+      });
+      await command.execute({
+        operationId, ownerId: guestOwnerId, intakeTicketId: `ticket-${externalId}`,
+        rightsConfirmed: true,
+        titleChoice: {
+          kind: "ANIME_REF", displayTitle: title, aliases: [], genres: ["Action"],
+          sourceBinding: { provider: "ANILIST", externalId }, verificationState: "PROVIDER_CANDIDATE",
+        },
+      });
+    };
+    const first = {
+      cardId: "77777777-7777-4777-8777-777777777777",
+      assetId: "88888888-8888-4888-8888-888888888888",
+      animeRefId: "99999999-9999-4999-8999-999999999999",
+      operationId: "create-first", externalId: "20", title: "Naruto",
+    };
+    const second = {
+      cardId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      assetId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      animeRefId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      operationId: "create-second", externalId: "154587", title: "Frieren",
+    };
+    await createCard(first);
+    await createCard(second);
+    await repository.resolvePromotionTitleChoice({
+      guestOwnerId, animeRefId: first.animeRefId,
+      choice: { kind: "CATALOG", catalogAnimeId: catalogId }, now,
+    });
+    await repository.resolvePromotionTitleChoice({
+      guestOwnerId, animeRefId: second.animeRefId,
+      choice: { kind: "KEEP_PRIVATE" }, now,
+    });
+    const boardId = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+    await repository.createBoard({ id: boardId, ownerId: guestOwnerId, title: "Favorites", description: "", createdAt: now });
+    await repository.addCardToBoard({
+      id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", ownerId: guestOwnerId,
+      boardOwnerId: guestOwnerId, cardOwnerId: guestOwnerId, boardId, cardId: first.cardId,
+      positionKey: "h".repeat(24), createdAt: now,
+    });
+
+    const manifest = await manifestModule.buildGuestPromotionManifest({ repository, guestOwnerId });
+    const journal = await repository.beginPromotionJournal({
+      operationId: promotionId, userId, accountOwnerId: account.id, guestOwnerId,
+      deviceId, sourceHash: manifest.sourceHash, startedAt: now,
+    });
+    const remoteResult = { status: "COMPLETED", importedCounts: manifest.counts, nextSyncSeq: 11 };
+    await repository.markPromotionRemoteCompleted({
+      operationId: promotionId, sourceHash: manifest.sourceHash, result: remoteResult, now,
+    });
+    await repository.commitPromotionToAccount({
+      operationId: promotionId, userId, accountOwnerId: account.id, guestOwnerId,
+      deviceId, sourceHash: manifest.sourceHash, result: remoteResult, newGuestUuid: nextGuestUuid, now,
+    });
+
+    const stores = ["private_titles", "memory_cards", "visual_assets", "media_operations", "memory_boards", "memory_board_cards"];
+    const transaction = repository.database.transaction([...stores, "account_promotions", "device_sync_state"], "readonly");
+    const rows = Object.fromEntries(await Promise.all(stores.map(async (storeName) => [
+      storeName,
+      await requestValue(transaction.objectStore(storeName).getAll()),
+    ])));
+    const completedJournal = await requestValue(transaction.objectStore("account_promotions").get(promotionId));
+    const device = await requestValue(transaction.objectStore("device_sync_state").get(account.id));
+    const activeOwner = await repository.getActiveOwner();
+    const nextIdentity = await repository.ensureInstallationIdentity({ uuid: "ffffffff-ffff-4fff-8fff-ffffffffffff", now });
+    repository.close();
+    return {
+      journalStarted: journal.status,
+      counts: manifest.counts,
+      remoteHasLocalRef: JSON.stringify(manifest.remoteBundle).includes("localRef"),
+      allMoved: Object.values(rows).flat().every((row: any) => row.ownerId === account.id),
+      localRefs: rows.visual_assets.map((row: any) => row.localRef).sort(),
+      completedStatus: completedJournal.status,
+      activeOwnerId: activeOwner.id,
+      nextGuestOwnerId: nextIdentity.guestOwner.id,
+      lastSyncSeq: device.lastSyncSeq,
+    };
+  });
+
+  expect(result.journalStarted).toBe("STARTED");
+  expect(result.counts).toEqual({ privateTitles: 1, cards: 2, visualAssets: 2, boards: 1, boardCards: 1 });
+  expect(result.remoteHasLocalRef).toBe(false);
+  expect(result.allMoved).toBe(true);
+  expect(result.localRefs).toEqual([
+    "asset:88888888-8888-4888-8888-888888888888",
+    "asset:bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  ]);
+  expect(result.completedStatus).toBe("COMPLETED");
+  expect(result.activeOwnerId).toBe("account:11111111-1111-4111-8111-111111111111");
+  expect(result.nextGuestOwnerId).toBe("guest:55555555-5555-4555-8555-555555555555");
+  expect(result.lastSyncSeq).toBe(11);
+});
+
 test("image replacement atomically switches the card and scrubs the previous asset", async ({ page }) => {
   await page.goto("/favicon.svg");
 

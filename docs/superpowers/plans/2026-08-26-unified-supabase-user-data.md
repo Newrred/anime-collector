@@ -1436,17 +1436,21 @@ git commit -m "feat(auth): register memory accounts and devices"
 - Modify: `src/features/memory/adapters/indexeddb/memoryOwnerStore.js`
 - Modify: `src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js`
 - Modify: `src/features/memory/runtime/createMemoryAccountRuntime.js`
+- Modify: `src/features/memory/runtime/platformMemoryAccountRuntime.js`
+- Modify: `src/hooks/useMemoryAccountSync.js`
 - Modify: `src/components/data/MemoryAccountPanel.jsx`
 - Modify: `src/messages/en.js`
 - Modify: `src/messages/ko.js`
+- Modify: `src/styles/global.css`
 - Test: `tests/unit/guestPromotion.test.mjs`
 - Modify: `tests/memory-account-sync.spec.ts`
+- Modify: `tests/memory-indexeddb.spec.ts`
 
 **Interfaces:**
 - Consumes: authenticated account, stable device, Guest bundle, catalog bindings, `promoteGuest()` gateway.
 - Produces: `buildGuestPromotionManifest`, `resolvePromotionTitleChoice`, `promoteGuestMemory.execute`, `recoverPromotion`.
 
-- [ ] **Step 1: Write failing manifest tests**
+- [x] **Step 1: Write failing manifest tests**
 
 For a deterministic Guest fixture assert:
 
@@ -1466,7 +1470,7 @@ assert.equal(JSON.stringify(manifest.remoteBundle).includes("localRef"), false);
 
 Build the same logical bundle in different insertion order and assert the same hash. A changed note must produce a different hash.
 
-- [ ] **Step 2: Write failing promotion saga tests**
+- [x] **Step 2: Write failing promotion saga tests**
 
 Test the state matrix:
 
@@ -1483,13 +1487,13 @@ success → localRef remains local on this device but never appears in remote bu
 success → a new installation Guest owner is created for later signed-out use
 ```
 
-- [ ] **Step 3: Run tests and verify RED**
+- [x] **Step 3: Run tests and verify RED**
 
 ```powershell
 node tests/unit/guestPromotion.test.mjs
 ```
 
-- [ ] **Step 4: Implement manifest and title-decision transaction**
+- [x] **Step 4: Implement manifest and title-decision transaction**
 
 `buildGuestPromotionManifest` reads a transactionally consistent owner bundle and returns:
 
@@ -1506,7 +1510,7 @@ node tests/unit/guestPromotion.test.mjs
 
 It rejects counts/bytes above the approved hard limits before network access. `resolvePromotionTitleChoice` requires the displayed AnimeRef ID and either an exact `catalogAnimeId` or `KEEP_PRIVATE`; it never accepts a fuzzy title string as identity.
 
-- [ ] **Step 5: Implement the server-first/local-second saga**
+- [x] **Step 5: Implement the server-first/local-second saga**
 
 The application command signature is:
 
@@ -1528,11 +1532,11 @@ type PromoteGuestMemoryResult = {
 
 Persist a local `STARTED` journal before RPC. Mark it `REMOTE_COMPLETED` with the validated result before attempting the local owner transaction. Local recovery searches only these journals at runtime initialization.
 
-- [ ] **Step 6: Add explicit promotion preview UX**
+- [x] **Step 6: Add explicit promotion preview UX**
 
 The panel displays counts, LOCAL_ONLY image limitation, each unresolved title choice, and a single confirmation. Closing/cancelling makes no change. Never imply that logging in alone uploads files.
 
-- [ ] **Step 7: Verify unit and E2E GREEN**
+- [x] **Step 7: Verify unit and E2E GREEN**
 
 ```powershell
 node tests/unit/guestPromotion.test.mjs
@@ -1540,7 +1544,7 @@ npm.cmd run test:e2e -- tests/memory-account-sync.spec.ts --project=chromium --w
 npm.cmd run test:unit
 ```
 
-- [ ] **Step 8: Commit Guest promotion**
+- [x] **Step 8: Commit Guest promotion**
 
 ```powershell
 git add src/features/memory/application src/features/memory/adapters/indexeddb src/features/memory/runtime src/components/data/MemoryAccountPanel.jsx src/messages/en.js src/messages/ko.js tests/unit/guestPromotion.test.mjs tests/memory-account-sync.spec.ts
@@ -2150,6 +2154,11 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 12:00] 보완: Auth session 로딩 중 null을 sign-out으로 오인할 수 있는 race를 발견 → authLoading gate와 기존 Account 복원 회귀 E2E 추가.
 [2026-09-02 12:00] 보안: implicit token fragment 거부, current-origin/app-base next allowlist, raw OAuth/Postgres error redaction, legacy snapshot cloud 호출 0건 확인.
 [2026-09-02 12:00] 범위: Auth profile/device 등록까지만 구현. Guest promotion, metadata sync, remote Supabase/Vercel/Production 변경 없음.
+[2026-09-02 13:10] 완료: Task 8 / deterministic Guest manifest, explicit title decision, STARTED→REMOTE_COMPLETED→COMPLETED journal, server-first/local-second promotion, startup recovery, preview UX 구현.
+[2026-09-02 13:10] TDD: application module-not-found RED 확인 → Guest promotion unit 6/6, 전체 unit 164/164, Chromium account+real IndexedDB 10/10, Web build 13 pages, React Doctor changed scope 100/100.
+[2026-09-02 13:10] 검증: insertion-order 불변 SHA-256, note 변경 hash 차이, 2 MiB/entity preflight, unresolved AnimeRef RPC 0건, exact catalog/KEEP_PRIVATE 변환, network/local commit 실패 복구, localRef remote redaction·local 보존, 전 owner-scoped row 원자적 Account 전환, 신규 Guest 회전 확인.
+[2026-09-02 13:10] 보완: 로그인만으로 Guest 기록을 옮기지 않고 preview·단일 확인을 요구. 로그아웃은 promotion으로 회전된 current installation Guest 또는 미승격 기존 Guest를 활성화해 기록을 숨기지 않음. Data account panel의 320px 긴 문구/버튼 최소 폭도 보완.
+[2026-09-02 13:10] 범위: local IndexedDB/공용 Web UI와 feature worktree 문서만 변경. remote Supabase migration, Vercel, OAuth provider, Production, 이미지 업로드 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

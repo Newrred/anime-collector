@@ -1758,6 +1758,8 @@ h3 {
 
 .list-stack {
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--layout-gap-tight);
 }
 
@@ -2462,6 +2464,61 @@ h3 {
   flex-wrap: wrap;
 }
 
+.promotion-preview {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.promotion-preview__counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.promotion-preview__counts > div {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-plain);
+}
+
+.promotion-preview__counts dt {
+  color: var(--text-tertiary);
+  font-size: var(--fs-xs);
+}
+
+.promotion-preview__counts dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+}
+
+.promotion-preview__warning {
+  padding: var(--space-3);
+  border-left: 3px solid var(--accent);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.promotion-preview__choice {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.promotion-preview__choice label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
 .sync-callback-card {
   max-width: 520px;
   margin-inline: auto;
@@ -2518,7 +2575,16 @@ h3 {
 
 .status-panel {
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--layout-gap-sm);
+}
+
+.data-grid > *,
+.status-panel > *,
+.sync-card > *,
+.manual-tools > * {
+  min-width: 0;
 }
 
 .manual-tools {
@@ -4669,6 +4735,30 @@ h3 {
 
   .surface-card {
     padding: var(--inset-panel-compact);
+  }
+
+  .status-panel .btn {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .status-panel .btn__label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .data-grid .small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .sync-card__header {
+    flex-direction: column;
+  }
+
+  .sync-card__status {
+    max-width: 100%;
+    white-space: normal;
   }
 
   .action-row {
