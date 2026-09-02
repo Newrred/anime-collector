@@ -2213,6 +2213,10 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 15:05] 차단: 통합 Supabase public Auth settings의 Google provider=false. Step 7 완료에는 Google OAuth client ID/secret 설정과 허용 redirect 등록이 필요하며 Production 변경 없는 Preview branch 생성 방식에 대한 명시적 Git push 승인이 필요.
 [2026-09-02 15:22] 승인 변경: 사용자가 Preview 대신 메인 Production 배포를 명시 승인. 기존 UI/Android 수정과 통합 user-data branch를 합치되 Google provider=false인 동안 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1`은 off로 유지한다.
 [2026-09-02 15:29] Production 전 검증: merge 후 unit 190/190, build 13 pages, Chromium 109 pass·3 live skip. 남아 있던 legacy `PUBLIC_SUPABASE_*`가 flag off 상태에서 Auth를 노출하지 않도록 Auth entry도 feature flag로 차단했고 legacy-shaped env 주입 회귀 10/10을 확인.
+[2026-09-02 15:54] 승인 및 완료: Production `PUBLIC_SUPABASE_*`를 통합 project okchpyagfucpzpyrfgol로 전환하고 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1=1` 설정. Preview/Development는 legacy project와 flag unset 상태로 분리 보존. Production 재배포와 주요 route/bundle/runtime error 회귀 검증 통과.
+[2026-09-02 16:04] 실제 Web OAuth 발견: Google 인증 및 Auth user 생성은 성공했으나 final redirect가 localhost:3000으로 fallback되어 profile/device 등록 전 중단. 원격 Auth log와 DB count로 확인.
+[2026-09-02 16:18] 수정 및 배포: Web redirectTo를 exact `/auth/callback/`로 고정하고 next는 origin-scoped localStorage에만 보존. unit 191/191, build 13 pages, React Doctor 100/100, commit 80b1daf, Production deployment dpl_3r9GWwuDQNtmzZoH7yM2Dcip2cjY READY.
+[2026-09-02 16:40] Web acceptance: 사용자가 Supabase Site URL/Redirect URL 교정 후 moemoa.xyz Google 로그인과 앱 복귀 정상 확인. 현재 세션의 Supabase connector 미노출로 profile/device row 독립 재조회는 보류; Android physical-device OAuth gate는 유지.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

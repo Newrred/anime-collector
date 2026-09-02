@@ -1,6 +1,6 @@
 # Unified Supabase User Data 테스트 증거
 
-> **상태: `IN PROGRESS — TASK 12 LOCAL + REMOTE READ-ONLY CHECKS COMPLETE / PREVIEW MUTATION APPROVAL REQUIRED`**
+> **상태: `IN PROGRESS — PRODUCTION WEB GOOGLE OAUTH SMOKE COMPLETE / ANDROID PHYSICAL DEVICE PENDING`**
 > 시작일: 2026-08-26
 > ExecPlan: `../../superpowers/plans/2026-08-26-unified-supabase-user-data.md`
 > Worktree: `D:\hong\Web\Anime\anime-collector\.worktrees\unified-supabase-user-data`
@@ -247,6 +247,17 @@ Hosted performance advisor가 composite foreign key 4개에 covering index가 �
 - merge 후 unit 190/190, build 13 pages, Chromium 109 pass·3 intentional live skip을 확인했다.
 - legacy-shaped `PUBLIC_SUPABASE_*`가 존재해도 flag off이면 계정 Auth 진입이 local-only로 남는 회귀 흐름 10/10을 추가 확인했다.
 
+### Production account cutover and Web OAuth smoke — 2026-09-02 16:40 KST
+
+- 사용자가 Google provider credential 설정과 Production account sync 활성화를 명시 승인했다.
+- Vercel Production의 `PUBLIC_SUPABASE_URL`/public key를 통합 project `okchpyagfucpzpyrfgol`로 전환하고 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1=1`을 설정했다. Preview와 Development는 legacy project 및 flag unset 상태로 분리 보존했다.
+- commit `42985bd`를 Production에 재배포한 뒤 주요 route HTTP 200, Production bundle의 unified ref 포함/legacy ref 미포함/service-role pattern 미포함, Vercel runtime error 0을 확인했다.
+- 최초 실제 Google OAuth는 Google 인증과 Auth user 생성까지 성공했지만 Supabase가 `http://localhost:3000/?code=...`로 반환했다. 당시 원격 Auth log의 callback referer도 localhost였고 profile/device row는 0이었다.
+- 원인은 Production `redirectTo`가 `next` query를 포함해 exact allowlist와 어긋날 수 있었고 Supabase Site URL이 localhost fallback으로 남아 있던 조합이었다.
+- Web callback 목적지를 exact `https://www.moemoa.xyz/auth/callback/`로 고정하고 `next`는 origin-scoped localStorage에만 보존하는 회귀 테스트를 추가했다. unit 191/191, Web build 13 pages, React Doctor 100/100 후 commit `80b1daf`를 master에 push했고 Vercel deployment `dpl_3r9GWwuDQNtmzZoH7yM2Dcip2cjY`가 READY/Production alias 상태다.
+- 사용자가 Supabase Site URL/Redirect URL을 Production 주소로 교정한 뒤 `moemoa.xyz`에서 실제 Google 로그인과 앱 복귀가 정상임을 확인했다.
+- 현재 세션에는 Supabase DB connector가 노출되지 않아 성공 직후 profile/device row의 독립 재조회는 보류했다. Web OAuth의 사용자 acceptance는 통과했으며 Android 물리기기 OAuth는 별도 gate로 남는다.
+
 ### Remote read-only BEFORE audit
 
 연결된 Supabase 커넥터로 project `okchpyagfucpzpyrfgol`을 읽기 전용 조회했다.
@@ -261,4 +272,4 @@ Hosted performance advisor가 composite foreign key 4개에 covering index가 �
 
 로컬 외부 workspace의 현재 Projection v2 pointer는 역사적으로 기록된 `52487f…f556` release를 가리키지만 hosted active release는 위 `8af2e0…3bb4c`다. 이번 user migration의 회귀 기준은 실제 변경 대상인 hosted BEFORE hash로 고정했다. 두 catalog release 내용의 차이를 임의로 업로드하거나 활성화하지 않는다.
 
-공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하다. 이 조건을 충족해 Task 12 Step 2를 완료했다. Step 4는 CLI token 기반 dry-run 대신 연결된 Supabase 커넥터의 read-only migration/schema 조회로 동등한 BEFORE 사실을 검증했으며, 원격 mutation은 없었다. 이제 Step 5의 명시적 Preview mutation 승인이 필요하다.
+공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하다. 이 조건을 충족해 Task 12 Step 2를 완료했다. Step 4는 CLI token 기반 dry-run 대신 연결된 Supabase 커넥터의 read-only migration/schema 조회로 동등한 BEFORE 사실을 검증했다. 이후 사용자의 단계별 승인을 받아 remote migration, Google provider, Production env cutover와 Web OAuth acceptance까지 진행했다. 남은 외부 검증은 profile/device row 독립 재조회와 Android 물리기기 OAuth다.
