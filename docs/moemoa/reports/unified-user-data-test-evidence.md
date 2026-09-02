@@ -1,6 +1,6 @@
 # Unified Supabase User Data 테스트 증거
 
-> **상태: `IN PROGRESS — TASK 2 COMPLETE`**
+> **상태: `IN PROGRESS — TASK 12 LOCAL NON-DB CHECKS COMPLETE / EXTERNAL GATES BLOCKED`**
 > 시작일: 2026-08-26
 > ExecPlan: `../../superpowers/plans/2026-08-26-unified-supabase-user-data.md`
 > Worktree: `D:\hong\Web\Anime\anime-collector\.worktrees\unified-supabase-user-data`
@@ -148,3 +148,46 @@ Migration 적용 직후 첫 GREEN 시도에서는 실제 DB에 11개 table이 �
 | Board position key | 128자 |
 
 RPC, deferred Complete Card invariant, RLS, grants, retention maintenance는 Task 3 범위로 남겼다. 원격 Supabase에는 migration을 적용하지 않았다.
+
+## 8. Task 3~11 구현 증거 요약
+
+| Task | commit | 핵심 결과 | 검증 |
+| ---: | --- | --- | --- |
+| 3 | `c0239c6` | owner RLS 11개, RPC 7개, direct write 차단, 30일 tombstone/cron | local pgTAP 92/92, DB lint 0 errors |
+| 4 | `e0f159f` | Account/Guest owner, catalog ID, IndexedDB v2 sync stores | unit 129/129, real IDB 3/3, build 12 pages |
+| 5 | `894ad5` | Private Board CRUD와 N:M membership, `/boards/` | unit 135/135, Board E2E 3/3, build 13 pages |
+| 6 | `1cd3200` | remote DTO redaction, SHA-256 request, Supabase gateway | unit 146/146, build 13 pages |
+| 7 | `831f298` | feature-flagged Web account runtime, PKCE callback, profile/device | unit 158/158, account E2E 5/5 |
+| 8 | `2291917` | 명시적 Guest promotion과 server-first/local-second 복구 journal | unit 164/164, account/IDB E2E 10/10 |
+| 9 | `f0c19d1` | entity outbox push/pull, conflict, tombstone, cursor full-resync | 관련 unit/E2E와 build 통과 |
+| 10 | `e24c80a` | Card/Board mutation 원자 outbox와 cross-device 상태 | unit 176/176, focused E2E 26/26, real IDB 7/7 |
+| 11 | `a098d5c` | Capacitor Browser/App 기반 Android external OAuth callback | unit 180/180 당시, Android static 2/2, Android unit/APK PASS |
+
+Task 11의 물리기기 Google OAuth는 연결된 Android 기기가 없어 아직 실행하지 않았다. 구현은 exact `com.newrred.moemoa://auth/callback`, one-time PKCE code exchange, cold/warm callback, 중복 callback 차단을 자동 검증한다.
+
+## 9. Task 12 로컬 검증 — 2026-09-02
+
+### 완료
+
+| 항목 | 결과 |
+| --- | --- |
+| allowlisted remote verifier | `okchpyagfucpzpyrfgol` 외 project 거부, Management API read-only endpoint만 사용 |
+| catalog regression guard | target/search/detail/assets/cover 3,998 및 release hash `52487f…f556` 고정 |
+| secret boundary | access token은 환경변수 전용, 출력은 count/hash/boolean만 허용 |
+| JS unit | 185 passed, 0 failed, 0 skipped |
+| Chromium E2E | 103 passed, 0 failed, 3 intentional live skips, 2.8분 |
+| Astro build | 13 pages, PASS |
+| React Doctor | changed scope 100/100, issue 0 |
+| Android sync | Web 13 pages + `@capacitor/app`, `@capacitor/browser` 2 plugins |
+| Android unit | 31 passed, 0 failed, 0 skipped |
+| Android APK | 14,807,372 bytes, SHA-256 `457416CF43EF488EB01CB62B738043A6213A8F0A40C26AE068B225A8231CEBCC` |
+
+전체 E2E 첫 실행은 신규 Memory account 문구로 바뀐 뒤 남아 있던 legacy `Unavailable`/이전 local-only 문구 assertion 1건 때문에 102 pass, 3 skip, 1 fail이었다. 실제 패널은 `Local only`, Guest namespace, cloud backup 미주장을 올바르게 표시했다. 테스트를 현재 계약으로 교정한 뒤 대상 10/10과 전체 103/103이 통과했다.
+
+### 현재 환경 차단
+
+- Docker Desktop 앱과 `com.docker.service`가 정지 상태다. Codex의 비관리자 세션에서는 service를 시작할 수 없어 Task 12의 fresh `supabase:reset/test/lint` 재실행이 남았다. Task 3 시점의 마지막 실제 local DB 결과는 pgTAP 92/92 및 lint 0 errors다.
+- 현재 process/user/machine scope에 `SUPABASE_ACCESS_TOKEN`이 없어서 CLI link와 Management API read-only BEFORE 검증을 실행하지 못했다.
+- 원격 migration, Google provider/callback, Vercel Preview env, test Auth row, Production에는 변경을 가하지 않았다.
+
+공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하며, remote read-only query는 `database_read` 권한이 있는 access token을 요구한다. 두 환경 조건이 준비되면 Task 12 Step 2와 Step 4를 재개한다. Step 5의 명시적 Preview mutation 승인은 그 결과가 일치한 뒤 별도로 받는다.

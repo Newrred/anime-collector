@@ -1882,7 +1882,7 @@ git commit -m "feat(android): complete Google OAuth callback"
 - Consumes: all local implementation tasks and explicit Preview execution approval.
 - Produces: local full verification, linked dry-run, additive Preview migration, Preview OAuth/env smoke, feature-flag rollback evidence, and no Production change.
 
-- [ ] **Step 1: Implement an allowlisted verification tool**
+- [x] **Step 1: Implement an allowlisted verification tool**
 
 The tool requires:
 
@@ -1909,7 +1909,7 @@ npm.cmd run android:assemble:debug
 
 Expected: 0 failures. Record counts, skips, environment, and duration rather than only writing “pass”.
 
-- [ ] **Step 3: Run React quality verification**
+- [x] **Step 3: Run React quality verification**
 
 Use the `react-doctor` skill on the changed React scope. Any regression from the recorded baseline must be fixed or documented before Preview migration.
 
@@ -2184,6 +2184,14 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 13:10] 검증: insertion-order 불변 SHA-256, note 변경 hash 차이, 2 MiB/entity preflight, unresolved AnimeRef RPC 0건, exact catalog/KEEP_PRIVATE 변환, network/local commit 실패 복구, localRef remote redaction·local 보존, 전 owner-scoped row 원자적 Account 전환, 신규 Guest 회전 확인.
 [2026-09-02 13:10] 보완: 로그인만으로 Guest 기록을 옮기지 않고 preview·단일 확인을 요구. 로그아웃은 promotion으로 회전된 current installation Guest 또는 미승격 기존 Guest를 활성화해 기록을 숨기지 않음. Data account panel의 320px 긴 문구/버튼 최소 폭도 보완.
 [2026-09-02 13:10] 범위: local IndexedDB/공용 Web UI와 feature worktree 문서만 변경. remote Supabase migration, Vercel, OAuth provider, Production, 이미지 업로드 변경 없음.
+[2026-09-02] 완료: Task 9 / commit f0c19d1 / entity outbox push·incremental pull·explicit conflict·tombstone·cursor full resync 구현 및 관련 unit/E2E/build 통과.
+[2026-09-02] 완료: Task 10 / commit e24c80a / Card·Board mutation 원자 outbox와 truthful cross-device 상태 / unit 176, focused E2E 26, real IDB E2E 7 모두 PASS.
+[2026-09-02] 완료: Task 11 local implementation / commit a098d5c / Capacitor external-browser OAuth와 exact Android callback / unit 180, Android static 2, Android unit/APK PASS.
+[2026-09-02] 차단: Task 11 physical-device OAuth는 연결된 Android 기기와 hosted callback allowlist가 없어 미실행. remote provider 설정은 Task 12 승인 게이트 유지.
+[2026-09-02 14:15] 완료: Task 12 Steps 1, 3 및 Step 2 non-DB 범위 / allowlisted read-only verifier, exact catalog release hash guard, unit 185/185, Chromium 103 pass·3 live skip, build 13 pages, React Doctor 100/100, Android 31/31, APK 14,807,372 bytes.
+[2026-09-02 14:15] 발견 및 보완: 신규 account copy 뒤 남은 legacy E2E 문구 assertion 1건을 현재 Local only/Guest namespace/no-cloud-claim 계약으로 교정하고 전체 suite 0 fail 확인.
+[2026-09-02 14:15] 차단: Docker Desktop daemon을 현재 비관리자 Codex 세션에서 시작할 수 없어 fresh local DB reset/test/lint가 남음. SUPABASE_ACCESS_TOKEN도 없어 linked migration list/dry-run/read-only BEFORE 검증은 미실행.
+[2026-09-02 14:15] 범위: remote Supabase migration, Google provider, Vercel Preview env/test Auth, Production 변경 없음. Step 5 mutation 승인은 Step 2/4 통과 뒤 별도 요청.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

@@ -46,7 +46,8 @@
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",
     "supabase:test": "supabase test db --local",
-    "supabase:lint": "supabase db lint --local --level error"
+    "supabase:lint": "supabase db lint --local --level error",
+    "supabase:verify:user-data": "node tools/supabase-user-data/verify.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
