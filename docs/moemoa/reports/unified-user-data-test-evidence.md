@@ -172,7 +172,7 @@ Task 11의 물리기기 Google OAuth는 연결된 Android 기기가 없어 아�
 | 항목 | 결과 |
 | --- | --- |
 | allowlisted remote verifier | `okchpyagfucpzpyrfgol` 외 project 거부, Management API read-only endpoint만 사용 |
-| catalog regression guard | target/search/detail/assets/cover 3,998 및 release hash `52487f…f556` 고정 |
+| catalog regression guard | target/search/detail/assets/cover 3,998 및 현재 hosted release hash `8af2e0…3bb4c` 고정 |
 | secret boundary | access token은 환경변수 전용, 출력은 count/hash/boolean만 허용 |
 | JS unit | 185 passed, 0 failed, 0 skipped |
 | Chromium E2E | 103 passed, 0 failed, 3 intentional live skips, 2.8분 |
@@ -189,5 +189,19 @@ Task 11의 물리기기 Google OAuth는 연결된 Android 기기가 없어 아�
 - Docker Desktop 앱과 `com.docker.service`가 정지 상태다. Codex의 비관리자 세션에서는 service를 시작할 수 없어 Task 12의 fresh `supabase:reset/test/lint` 재실행이 남았다. Task 3 시점의 마지막 실제 local DB 결과는 pgTAP 92/92 및 lint 0 errors다.
 - 현재 process/user/machine scope에 `SUPABASE_ACCESS_TOKEN`이 없어서 CLI link와 Management API read-only BEFORE 검증을 실행하지 못했다.
 - 원격 migration, Google provider/callback, Vercel Preview env, test Auth row, Production에는 변경을 가하지 않았다.
+
+### Remote read-only BEFORE audit
+
+연결된 Supabase 커넥터로 project `okchpyagfucpzpyrfgol`을 읽기 전용 조회했다.
+
+- project는 `moemoa-preview`, Singapore, `ACTIVE_HEALTHY`다.
+- 원격 migration은 `20260819021327 catalog_preview_read_model`, `20260819021408 catalog_preview_foreign_key_indexes` 두 개뿐이다.
+- 로컬 catalog migration의 SQL 의미는 원격 6개 table/column/constraint, RLS policy 6개, index 14개, 함수 2개와 권한, Storage bucket/policy와 일치했다.
+- 로컬 파일 timestamp를 원격 이력과 동일하게 정렬했다. 원격 migration repair나 DB mutation은 실행하지 않았다.
+- hosted active release는 `catalog-v2-8af2e03bc80789f59b4eaf7c`, hash `8af2e03bc80789f59b4eaf7c2d6904242561ddafecd3b6c9f7351f0a8cb3bb4c`다.
+- active target/search/detail/assets/cover는 각각 3,998, people page/row는 각각 4,899다.
+- 신규 user table 11개, legacy `user_snapshots`, Auth user는 모두 0이다.
+
+로컬 외부 workspace의 현재 Projection v2 pointer는 역사적으로 기록된 `52487f…f556` release를 가리키지만 hosted active release는 위 `8af2e0…3bb4c`다. 이번 user migration의 회귀 기준은 실제 변경 대상인 hosted BEFORE hash로 고정했다. 두 catalog release 내용의 차이를 임의로 업로드하거나 활성화하지 않는다.
 
 공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하며, remote read-only query는 `database_read` 권한이 있는 access token을 요구한다. 두 환경 조건이 준비되면 Task 12 Step 2와 Step 4를 재개한다. Step 5의 명시적 Preview mutation 승인은 그 결과가 일치한 뒤 별도로 받는다.

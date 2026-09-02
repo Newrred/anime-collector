@@ -69,8 +69,8 @@ test("Supabase user-data verification calls only the read-only management endpoi
 });
 
 const catalogRow = {
-  release_id: "catalog-v2-52487fc3ef22eb9df3ca0a78",
-  release_hash: "52487fc3ef22eb9df3ca0a78d6e3b0b43cfdebaf7395f78f9110af4f3be4f556",
+  release_id: "catalog-v2-8af2e03bc80789f59b4eaf7c",
+  release_hash: "8af2e03bc80789f59b4eaf7c2d6904242561ddafecd3b6c9f7351f0a8cb3bb4c",
   target_count: 3998,
   people_page_count: 4899,
   search_count: 3998,

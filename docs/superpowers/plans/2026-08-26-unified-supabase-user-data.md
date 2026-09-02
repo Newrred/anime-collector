@@ -2192,6 +2192,9 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 14:15] 발견 및 보완: 신규 account copy 뒤 남은 legacy E2E 문구 assertion 1건을 현재 Local only/Guest namespace/no-cloud-claim 계약으로 교정하고 전체 suite 0 fail 확인.
 [2026-09-02 14:15] 차단: Docker Desktop daemon을 현재 비관리자 Codex 세션에서 시작할 수 없어 fresh local DB reset/test/lint가 남음. SUPABASE_ACCESS_TOKEN도 없어 linked migration list/dry-run/read-only BEFORE 검증은 미실행.
 [2026-09-02 14:15] 범위: remote Supabase migration, Google provider, Vercel Preview env/test Auth, Production 변경 없음. Step 5 mutation 승인은 Step 2/4 통과 뒤 별도 요청.
+[2026-09-02 14:24] 원격 read-only audit: project ACTIVE_HEALTHY, catalog migration version 20260819021327/021408, user table 0, Auth user 0, target/search/detail/assets/cover 3,998, people 4,899, hosted hash 8af2e0…3bb4c.
+[2026-09-02 14:24] 보완: 원격 schema가 로컬 catalog SQL과 의미상 일치함을 table/constraint/RLS/index/function/grant/bucket policy로 확인. 원격 repair 대신 로컬 catalog migration 파일 timestamp를 실제 원격 이력에 정렬함.
+[2026-09-02 14:24] 발견: 외부 local Projection pointer의 역사 hash 52487f…f556과 hosted active hash 8af2e0…3bb4c가 다름. User migration 회귀 guard는 실제 hosted BEFORE hash를 사용하고 catalog upload/activation은 범위 밖으로 유지.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

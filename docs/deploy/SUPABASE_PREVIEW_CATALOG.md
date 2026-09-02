@@ -5,7 +5,7 @@
 ## 저장소에서 재현되는 구성
 
 - `supabase/config.toml`: 로컬 Preview 설정.
-- `supabase/migrations/20260819000100_catalog_preview_read_model.sql`: additive catalog schema, RLS, 검색 RPC, release activation.
+- `supabase/migrations/20260819021327_catalog_preview_read_model.sql`: additive catalog schema, RLS, 검색 RPC, release activation.
 - `npm run catalog:preview:export -- --profile full3998`: 외부 TEST_ONLY canonical에서 immutable v2 release 생성.
 - `npm run catalog:preview:validate -- --profile full3998`: 전체 count/hash/reference 재검증.
 - `npm run catalog:preview:upload -- --profile full3998`: 기본 dry-run.

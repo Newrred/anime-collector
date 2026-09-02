@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 
 const APPROVED_PROJECT_REF = "okchpyagfucpzpyrfgol";
-const EXPECTED_CATALOG_RELEASE_HASH = "52487fc3ef22eb9df3ca0a78d6e3b0b43cfdebaf7395f78f9110af4f3be4f556";
+const EXPECTED_CATALOG_RELEASE_HASH = "8af2e03bc80789f59b4eaf7c2d6904242561ddafecd3b6c9f7351f0a8cb3bb4c";
 const USER_TABLES = Object.freeze([
   "user_profiles", "user_devices", "user_account_promotions", "user_preferences",
   "memory_private_titles", "memory_cards", "memory_visual_assets", "memory_boards",
