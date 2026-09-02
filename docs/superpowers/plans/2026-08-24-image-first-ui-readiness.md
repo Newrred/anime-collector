@@ -815,6 +815,68 @@ git commit -m "test(ui): lock visual readiness baseline"
 
 Do not push, merge, deploy, or copy the test catalog into the repository without a separate user instruction.
 
+### Task 9: Human-gate corrective pass for Home, mobile menu, and Composer
+
+**Why this task exists:**
+
+The 2026-09-02 owner walkthrough failed the pending no-explanation human gate even though the automated geometry and screenshot suite passed. Production captures showed that controls are technically present but the visual hierarchy still reads as a prototype: Home leaves most of a desktop viewport empty, the mobile menu exposes a 1,035px settings stack inside an 844px viewport, and the 1,616px mobile Composer renders five equally weighted steps with weak input/action affordances. This is a correction to Task 8's readiness claim, not a new product direction.
+
+**Files:**
+
+- Modify: `src/components/Home.jsx`
+- Modify: `src/components/home/HomeEmptyState.jsx`
+- Modify: `src/components/home/home-readiness.css`
+- Modify: `src/components/TopNavDataMenu.jsx`
+- Modify: `src/components/top-nav-readiness.css`
+- Modify: `src/features/memory/components/MemoryCardComposer.jsx`
+- Modify: `src/features/memory/components/MemoryTitleSelector.jsx`
+- Modify: `src/features/memory/components/memory-card-composer.css`
+- Modify: `src/messages/en.js`
+- Modify: `src/messages/ko.js`
+- Modify: focused Home/navigation/Composer E2E and visual fixtures where the approved UI contract changes
+- Update: `tests/visual/ui-readiness.visual.spec.ts-snapshots/*.png` and `tests/visual/visual-baseline-manifest.json` only after direct review
+
+**Step 1: Capture and record production evidence**
+
+- Capture Home, open mobile menu, and Composer at 390×844 plus Home and Composer at 1440×900.
+- Record DOM geometry, total page/menu height, input and action rectangles, overflow, and functional state.
+- Keep captures outside the repository until they are deliberately promoted as reviewed baselines.
+
+**Step 2: Restore a clear Home starting decision**
+
+- Present one dominant `Create memory card` action, a visibly secondary title-search path, and a compact three-part explanation of the card result.
+- Keep the image-first specimen above the mobile fold without shrinking it into decoration.
+- Use the desktop viewport as an intentional hero composition rather than a small panel surrounded by empty space.
+- Preserve local/private truth and do not imply cloud backup or publishing.
+
+**Step 3: Turn the mobile manage panel into navigation first, utilities second**
+
+- Make the primary destinations recognizable as navigation rows rather than identical settings buttons.
+- Place the account state in one compact card and move infrequent Profile, theme/language, install, data, and Help actions into a clearly separated utility region.
+- Keep every target at least 44×44, preserve Escape/outside-click/focus-return behavior, and avoid requiring a full-panel scroll merely to reach the account action.
+
+**Step 4: Make the Composer a guided creative flow**
+
+- Visually distinguish required steps, optional reflection, current choice, and disabled/satisfied save states.
+- On Web, make `Use system design` the clear available primary visual action; explain Android-only image intake without presenting a disabled control as the first apparent path.
+- Give title search a persistent label, helper text, clear input boundary, and Enter-to-search behavior while retaining private-title fallback.
+- Keep the approved order visual → title → reflection → rights → Save, but reduce repeated boxed surfaces and make the active next requirement obvious.
+- Preserve storage, rights, runtime, catalog, and save semantics unchanged.
+
+**Step 5: Verify behavior and visual quality**
+
+- Run focused Home/navigation/Composer E2E at 320×720, 390×844, 1024×768, and 1440×900.
+- Verify keyboard search, menu focus return, one primary action per decision, disabled-state explanation, no horizontal overflow, and Korean/English copy.
+- Capture matching after images and directly compare them with the production before set at readable scale.
+- Update affected Golden Screenshots and manifest only after the new captures pass direct review.
+- Run unit, focused Chromium, build, catalog guard, React Doctor, and `git diff --check` before declaring this correction complete.
+
+**Exclusions and gates:**
+
+- No domain/storage/database migration.
+- No Android shell changes in this task; Android consumes the shared UI only after the Web human gate passes.
+- No public UGC, private image upload, production deployment, push, or merge without separate approval.
+
 ## 9. Test strategy and acceptance criteria
 
 ### Automated layers
@@ -909,7 +971,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 6: Archive gallery.
 - [x] Task 7: Detail and Library distinction.
 - [x] Task 8A: 18 Golden Screenshots, cross-browser/functional gate, and document sync.
-- [ ] Task 8B: independent no-explanation human acceptance gate (checks 1/2/3/6/7/8/9).
+- [ ] Task 8B: independent no-explanation human acceptance gate (checks 1/2/3/6/7/8/9); Task 9 correction is implemented, but the owner/independent recheck is still required.
+- [x] Task 9: Home, mobile manage menu, and Composer human-gate corrective pass. Direct before/after capture review and automated browser gates are complete; this does not claim the separate human gate.
 
 ## 16. Discoveries and plan changes
 
@@ -947,6 +1010,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: independent review found that the initial 36-case matrix did not explicitly prove every Task 8 criterion. The dedicated matrix is now 51/51 and names 200% zoom as the equivalent 320 CSS-pixel reflow boundary, numerical dark/light contrast, heading/field/error associations, Korean/English long-copy overflow, saving/saved announcements, and the exact Archive breakpoint. Its settle contract now holds a project font and a featured-card image request open, proves both resources are genuinely unsettled, releases them, then compares the same featured card and 4:5 visual geometry before/after. Existing three-browser Memory lifecycle coverage remains the cleanup-pending proof.
 - 2026-08-24: the first Library golden exposed a broken empty cover because the visual fixture populated search data without the cache used after Library persistence. A project-owned synthetic 2:3 cover is now cached through the same application path; search and Library screenshots show a decoded image, and the Library golden asserts non-zero natural dimensions before capture.
 - 2026-08-24: Archive retains the approved 1200px four-column media query. The runtime boundary test uses 1199 and 1201 because Firefox represents a requested 1200px test viewport as 1199.916 visual CSS pixels; the one-pixel upper specimen avoids testing an engine rounding artifact.
+- 2026-09-02: the owner's production walkthrough is accepted as a failed human gate, superseding any implication that automated screenshot parity alone established usability. Direct 390×844 captures measured a 1,035px mobile manage-menu stack and a 1,616px Composer; direct 1440×900 captures showed underscaled content and excessive unused space. Task 9 was added to correct affordance, hierarchy, density, and search guidance without changing product or persistence semantics.
+- 2026-09-02: Task 9 makes Home a deliberate image-first hero with one dominant Create action and a secondary title-search path; the mobile manage menu is navigation-first and its 390×844 panel now fits without internal scrolling (`754px` client/scroll height); Composer exposes the first available visual action within a 320×720 viewport, adds required/optional/complete guidance, explicit field boundaries, and Enter-to-search. Storage, rights, catalog, save, and Library/Card domain behavior are unchanged.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 
@@ -991,3 +1056,20 @@ Implementation is complete only when this report is evidence-backed, all blockin
 - Known issues: independent usability gate, Android physical-device adaptation/verification, existing bundle-size warning, and pre-existing React Doctor structure advisories.
 - Recommended next slice: run the independent nine-check usability session; if accepted, adapt the approved shared UI to Android and execute the physical-device matrix before export/restore or social scope.
 - Push/deploy status: not performed; final deployment remains on hold.
+
+### Corrective completion report — 2026-09-02
+
+- Commits: not created; Task 9 remains a reviewed local working-tree change.
+- Implemented tasks: Home hierarchy and first-viewport CTA, navigation-first mobile manage panel, guided Composer steps and clearer title search/input affordances, Korean/English copy, and focused regression coverage.
+- Unit: 191/191 pass.
+- Catalog: 197 pass, 2 Windows capability skips, 0 fail.
+- Chromium focused: 42/42 pass for Home/layout/Composer flows, including the new 320×720 first-action check.
+- Golden Screenshots: 18/18 pass after 16 affected baselines were regenerated and directly reviewed; manifest/checksums updated.
+- Firefox/WebKit: the 54-case UI matrix initially passed 50 and exposed two shared issues; compact-height positioning and disabled-button contrast were corrected, then all affected cases passed 6/6 across Chromium/Firefox/WebKit.
+- Build: Astro production build passes; the existing large `useUiPreferences` chunk warning remains.
+- Catalog guard: no leaks.
+- React Doctor: changed scope 89/100 with three maintainability advisories for component/control-flow size and no score regression.
+- Human acceptance gate: pending. Direct implementation review is complete, but the owner/independent no-explanation walkthrough must be repeated against the resulting build.
+- Known issues: Android adaptation and physical-device validation remain separate; bundle-size and component-size advisories remain; Composer is clearer but intentionally uses a longer guided mobile page.
+- Recommended next slice: owner visual walkthrough, then either a narrow correction from observed friction or approval to adapt the shared UI to Android.
+- Push/deploy status: not performed.

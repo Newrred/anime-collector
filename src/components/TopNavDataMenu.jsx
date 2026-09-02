@@ -5,13 +5,19 @@ import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
 import {
+  IconArchiveBox,
+  IconArrowRight,
+  IconBoard,
+  IconBookOpen,
   IconDatabase,
   IconGear,
   IconGlobe,
   IconHelp,
+  IconHome,
   IconMenu,
   IconMoon,
   IconSun,
+  IconTrophy,
   IconX,
 } from "./ui/AppIcons.jsx";
 import AuthSheet from "./auth/AuthSheet.jsx";
@@ -285,7 +291,14 @@ export default function TopNavDataMenu({
               aria-label={copy.manage}
             >
               <div className="data-menu-stack">
-                <section className="data-menu-section top-nav-mobile-only">
+                <header className="data-menu-mobile-head top-nav-mobile-only">
+                  <div>
+                    <strong>{copy.menuTitle}</strong>
+                    <span>{copy.menuLead}</span>
+                  </div>
+                </header>
+
+                <section className="data-menu-section data-menu-section--navigation top-nav-mobile-only">
                   <div className="data-menu-section-head">
                     <span className="data-menu-section-icon" aria-hidden>
                       <IconMenu />
@@ -299,7 +312,8 @@ export default function TopNavDataMenu({
                       aria-current={currentRoute === "home" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.home}
+                      <ActionLabel icon={<IconHome size={17} />}>{copy.home}</ActionLabel>
+                      <IconArrowRight size={14} />
                     </a>
                     <a
                       href={`${base}library/`}
@@ -307,7 +321,8 @@ export default function TopNavDataMenu({
                       aria-current={currentRoute === "library" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.library}
+                      <ActionLabel icon={<IconBookOpen size={17} />}>{copy.library}</ActionLabel>
+                      <IconArrowRight size={14} />
                     </a>
                     <a
                       href={`${base}archive/`}
@@ -315,7 +330,8 @@ export default function TopNavDataMenu({
                       aria-current={currentRoute === "archive" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.archive}
+                      <ActionLabel icon={<IconArchiveBox size={17} />}>{copy.archive}</ActionLabel>
+                      <IconArrowRight size={14} />
                     </a>
                     <a
                       href={`${base}boards/`}
@@ -323,7 +339,8 @@ export default function TopNavDataMenu({
                       aria-current={currentRoute === "boards" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.boards}
+                      <ActionLabel icon={<IconBoard size={17} />}>{copy.boards}</ActionLabel>
+                      <IconArrowRight size={14} />
                     </a>
                     <a
                       href={`${base}tier/`}
@@ -331,59 +348,13 @@ export default function TopNavDataMenu({
                       aria-current={currentRoute === "tier" ? "page" : undefined}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      {copy.tier}
+                      <ActionLabel icon={<IconTrophy size={17} />}>{copy.tier}</ActionLabel>
+                      <IconArrowRight size={14} />
                     </a>
                   </div>
                 </section>
 
-                <section className="data-menu-section top-nav-mobile-only">
-                  <div className="data-menu-section-head">
-                    <span className="data-menu-section-icon" aria-hidden>
-                      <IconGlobe />
-                    </span>
-                    <div className="data-menu-section-title">{copy.appearanceTitle}</div>
-                  </div>
-                  <div className="top-nav-mobile-preferences">
-                    <button type="button" className="btn btn--subtle" onClick={handleToggleTheme}>
-                      {theme === "dark" ? copy.switchToLight : copy.switchToDark}
-                    </button>
-                    <div className="top-nav-mobile-locale-row">
-                      <button
-                        type="button"
-                        className={`btn btn--subtle${locale === "ko" ? " is-active" : ""}`}
-                        onClick={() => handleSelectLocale("ko")}
-                      >
-                        KO
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn btn--subtle${locale === "en" ? " is-active" : ""}`}
-                        onClick={() => handleSelectLocale("en")}
-                      >
-                        EN
-                      </button>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="data-menu-section">
-                  <div className="data-menu-section-head">
-                    <span className="data-menu-section-icon" aria-hidden>
-                      <IconGear />
-                    </span>
-                    <div className="data-menu-section-title">{copy.profileMinihomeTitle}</div>
-                  </div>
-                  <p className="small data-menu-section-summary">{copy.profileMinihomeSummary}</p>
-                  <a
-                    href={`${base}profile/`}
-                    className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
-                    onClick={() => setDataMenuOpen(false)}
-                  >
-                    <ActionLabel icon={<IconGear />}>{copy.openProfileMinihome}</ActionLabel>
-                  </a>
-                </section>
-
-                <section className="data-menu-section">
+                <section className="data-menu-section data-menu-section--account">
                   <AuthSheet
                     embedded
                     copy={getMessageGroup(locale, "authSheet")}
@@ -407,6 +378,37 @@ export default function TopNavDataMenu({
                   />
                 </section>
 
+                <section className="data-menu-section data-menu-section--appearance top-nav-mobile-only">
+                  <div className="data-menu-section-head">
+                    <span className="data-menu-section-icon" aria-hidden>
+                      <IconGlobe />
+                    </span>
+                    <div className="data-menu-section-title">{copy.appearanceTitle}</div>
+                  </div>
+                  <div className="top-nav-mobile-preferences">
+                    <button type="button" className="btn btn--subtle top-nav-mobile-theme" onClick={handleToggleTheme}>
+                      {theme === "dark" ? <IconSun size={16} /> : <IconMoon size={16} />}
+                      <span>{theme === "dark" ? copy.themeLight : copy.themeDark}</span>
+                    </button>
+                    <div className="top-nav-mobile-locale-row" aria-label={copy.localeMenu}>
+                      <button
+                        type="button"
+                        className={`btn btn--subtle${locale === "ko" ? " is-active" : ""}`}
+                        onClick={() => handleSelectLocale("ko")}
+                      >
+                        KO
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn--subtle${locale === "en" ? " is-active" : ""}`}
+                        onClick={() => handleSelectLocale("en")}
+                      >
+                        EN
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
                 {preferenceControls ? (
                   <section className="data-menu-section">
                     <div className="data-menu-preferences">
@@ -415,44 +417,40 @@ export default function TopNavDataMenu({
                   </section>
                 ) : null}
 
-                <section className="data-menu-section">
+                <section className="data-menu-section data-menu-section--utilities">
                   <div className="data-menu-section-head">
                     <span className="data-menu-section-icon" aria-hidden>
-                      <IconDatabase />
+                      <IconGear />
                     </span>
-                    <div className="data-menu-section-title">{copy.dataToolsTitle}</div>
+                    <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
-                  <p className="small data-menu-section-summary">{copy.dataToolsSummary}</p>
-                  <div className="data-menu-body">
-                    {canInstallPwa && (
+                  <div className="data-menu-utility-grid">
+                    <a
+                      href={`${base}profile/`}
+                      className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      <ActionLabel icon={<IconGear size={15} />}>{copy.profileShort}</ActionLabel>
+                    </a>
+                    <a
+                      href={`${base}help/`}
+                      className="btn btn--subtle data-menu-link"
+                      onClick={() => setDataMenuOpen(false)}
+                    >
+                      <ActionLabel icon={<IconHelp size={15} />}>{copy.help}</ActionLabel>
+                    </a>
+                    {canInstallPwa ? (
                       <button
-                        className="btn"
+                        className="btn btn--subtle"
                         onClick={async () => {
                           await handleInstallPwaClick();
                           setDataMenuOpen(false);
                         }}
                       >
-                        {copy.installApp}
+                        <ActionLabel icon={<IconDatabase size={15} />}>{copy.installApp}</ActionLabel>
                       </button>
-                    )}
+                    ) : null}
                   </div>
-                </section>
-
-                <section className="data-menu-section">
-                  <div className="data-menu-section-head">
-                    <span className="data-menu-section-icon" aria-hidden>
-                      <IconHelp />
-                    </span>
-                    <div className="data-menu-section-title">{copy.helpTitle}</div>
-                  </div>
-                  <p className="small data-menu-section-summary">{copy.helpSummary}</p>
-                  <a
-                    href={`${base}help/`}
-                    className="btn btn--subtle data-menu-link"
-                    onClick={() => setDataMenuOpen(false)}
-                  >
-                    <ActionLabel icon={<IconHelp />}>{copy.openHelpPage}</ActionLabel>
-                  </a>
                 </section>
               </div>
             </div>

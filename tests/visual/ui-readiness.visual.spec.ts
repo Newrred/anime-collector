@@ -89,7 +89,7 @@ test('Composer — 390 KO light system design selected', async ({ page }) => {
   await prepare(page, { width: 390, height: 844, locale: 'ko', theme: 'light' });
   await page.goto('/memory/new/');
   await page.locator('#memory-title-input').fill('바이올렛 에버가든');
-  await page.locator('.memory-composer__image-actions button').last().click();
+  await page.getByRole('button', { name: '시스템 디자인 사용' }).click();
   await expect(page.locator('.memory-composer__system-preview')).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expectReadyPage(page, '.memory-composer', 'composer-system-ko-light-390x844.png');
@@ -174,7 +174,7 @@ test('Library/Memory split — 1440 KO light added-to-Library status', async ({ 
   await page.goto('/library/');
   await openCatalogSearch(page, { mobile: false });
   await page.locator('.quick-action-row__library-action').click();
-  await expect(page.locator('.quick-action-panel__feedback[role="status"]')).toBeVisible();
+  await expect(page.locator('.quick-action-panel__feedback [role="status"]')).toBeVisible();
   const storedCover = page.locator('.library-grid .library-card img').first();
   await expect(storedCover).toBeVisible();
   await expect.poll(() => storedCover.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);

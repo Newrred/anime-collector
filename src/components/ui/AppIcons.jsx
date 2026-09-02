@@ -330,6 +330,59 @@ function IconMenu(props) {
   );
 }
 
+function IconHome(props) {
+  return (
+    <IconBase {...props}>
+      <path d="m3.5 10.5 8.5-7 8.5 7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.5 9.5V21h13V9.5" strokeLinejoin="round" />
+      <path d="M9.5 21v-6h5v6" />
+    </IconBase>
+  );
+}
+
+function IconBookOpen(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 4.5h5.2A2.8 2.8 0 0 1 12 7.3V20a3.4 3.4 0 0 0-3.2-2.2H4Z" strokeLinejoin="round" />
+      <path d="M20 4.5h-5.2A2.8 2.8 0 0 0 12 7.3V20a3.4 3.4 0 0 1 3.2-2.2H20Z" strokeLinejoin="round" />
+    </IconBase>
+  );
+}
+
+function IconArchiveBox(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 8h16v12H4Z" strokeLinejoin="round" />
+      <path d="M3 4h18v4H3Z" strokeLinejoin="round" />
+      <path d="M9 12h6" strokeLinecap="round" />
+    </IconBase>
+  );
+}
+
+function IconBoard(props) {
+  return (
+    <IconBase {...props}>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1" />
+    </IconBase>
+  );
+}
+
+function IconTrophy(props) {
+  return (
+    <IconBase {...props}>
+      <path d="M8 4h8v4a4 4 0 0 1-8 0Z" strokeLinejoin="round" />
+      <path d="M8 6H5v2a4 4 0 0 0 4 4" />
+      <path d="M16 6h3v2a4 4 0 0 1-4 4" />
+      <path d="M12 12v5" />
+      <path d="M8 21h8" strokeLinecap="round" />
+      <path d="M9 17h6v4H9Z" strokeLinejoin="round" />
+    </IconBase>
+  );
+}
+
 export {
   IconArrowRight,
   IconBase,
@@ -347,7 +400,11 @@ export {
   IconGlobe,
   IconGrip,
   IconHelp,
+  IconHome,
   IconImage,
+  IconBookOpen,
+  IconArchiveBox,
+  IconBoard,
   IconLogOut,
   IconMenu,
   IconMobile,
@@ -360,6 +417,7 @@ export {
   IconSortAsc,
   IconSortDesc,
   IconSun,
+  IconTrophy,
   IconTrash,
   IconUpload,
   IconUser,

@@ -103,11 +103,12 @@ test("prepared image errors retranslate without retrying the native claim", asyn
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("locale-error-claim-count"))).toBe("1");
 });
 
-test("browser route explains Android-only image intake without exposing a file input", async ({ page }) => {
+test("browser route presents system design as the available visual path without exposing a file input", async ({ page }) => {
   await page.goto("/memory/new/");
 
   await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();
-  await expect(page.getByText("이미지 가져오기는 현재 Android 앱에서만 사용할 수 있어요.")).toBeVisible();
+  await expect(page.getByText("웹에서는 시스템 디자인으로 바로 시작")).toBeVisible();
+  await expect(page.getByText(/직접 이미지 가져오기는 Android 앱에서 연결됩니다/)).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
   const save = page.getByRole("button", { name: "카드 저장" });
   await expect(save).toBeDisabled();

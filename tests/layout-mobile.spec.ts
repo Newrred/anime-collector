@@ -120,6 +120,22 @@ test("320px composer follows visual, title, reflection, rights, and save order",
   expect(geometry.overflow).toBeLessThanOrEqual(0.5);
 });
 
+test("320px composer exposes the first available visual action in the opening viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await installAppState(page, { locale: "en", list: [], watchLogs: [] });
+  await page.goto("/memory/new/");
+
+  const cta = page.getByRole("button", { name: "Use system design" });
+  await expect(cta).toBeVisible();
+  const geometry = await cta.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight };
+  });
+
+  expect(geometry.top).toBeGreaterThanOrEqual(0);
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
+});
+
 const ROUTES = [
   "/",
   "/library/",

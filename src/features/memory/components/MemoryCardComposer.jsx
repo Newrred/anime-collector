@@ -2,6 +2,7 @@ import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import MemoryTitleSelector from "./MemoryTitleSelector.jsx";
 import { useMemoryCardComposer } from "./useMemoryCardComposer.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
+import { IconImage, IconPlus, IconShield } from "../../../components/ui/AppIcons.jsx";
 import "./memory-card-composer.css";
 
 const formatBytes = (value) => {
@@ -62,6 +63,10 @@ function MemoryCardComposerContent({ base }) {
             ? composerCopy.saveBlockedRights
             : composerCopy.saveHint;
   const statusAnnouncement = status === "saving" ? composerCopy.saving : "";
+  const hasVisual = Boolean(ticket || designSpec);
+  const hasTitle = Boolean(title.trim());
+  const hasRights = Boolean(designSpec || (ticket && rightsConfirmed));
+  const currentProgressIndex = !hasVisual ? 0 : !hasTitle ? 1 : canSave ? 3 : 2;
 
   return (
     <div className="memory-composer page-shell page-shell--wide">
@@ -72,15 +77,30 @@ function MemoryCardComposerContent({ base }) {
           <p className="pageLead">{composerCopy.lead}</p>
         </div>
         <div className="memory-composer__privacy">
+          <IconShield size={17} />
           <strong>{composerCopy.privacyTitle}</strong>
-          <span>{composerCopy.privacyBody}</span>
+          <span className="memory-composer__privacy-long">{composerCopy.privacyBody}</span>
+          <span className="memory-composer__privacy-short">{composerCopy.privacyBodyShort}</span>
         </div>
+        <ol className="memory-composer__progress" aria-label={composerCopy.progressLabel}>
+          {[
+            [composerCopy.progressVisual, hasVisual],
+            [composerCopy.progressTitle, hasTitle],
+            [composerCopy.progressReflection, Boolean(note.trim())],
+            [composerCopy.progressSave, status === "saved"],
+          ].map(([label, complete], index) => (
+            <li key={label} className={complete ? "is-complete" : index === currentProgressIndex ? "is-current" : ""}>
+              <span>{complete ? "✓" : index + 1}</span>
+              <strong>{label}</strong>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <form className="surface-card memory-composer__form" onSubmit={saveCard}>
+      <form className="memory-composer__form" onSubmit={saveCard}>
         <div className="memory-composer__workspace">
           <section
-            className="memory-composer__visual-column"
+            className={`memory-composer__visual-column memory-composer__step-card${hasVisual ? " is-complete" : " is-current"}`}
             aria-labelledby="memory-image-heading"
             aria-describedby={message ? "memory-composer-error" : undefined}
           >
@@ -90,12 +110,22 @@ function MemoryCardComposerContent({ base }) {
                 <h2 id="memory-image-heading">{composerCopy.imageHeading}</h2>
                 <p>{composerCopy.imageHelp}</p>
               </div>
-              {ticket && (
+              {ticket ? (
                 <span className="status-badge">
                   {ticket.width}×{ticket.height} · {formatBytes(ticket.byteSize)}
                 </span>
+              ) : (
+                <span className={`memory-composer__requirement${hasVisual ? " is-complete" : ""}`}>
+                  {hasVisual ? composerCopy.done : composerCopy.required}
+                </span>
               )}
             </div>
+
+            {status === "browser" && !designSpec && !ticket ? (
+              <button type="button" className="btn memory-composer__visual-primary memory-composer__empty-cta" onClick={useSystemDesign}>
+                {composerCopy.useSystemDesign}
+              </button>
+            ) : null}
 
             {designSpec ? (
               <SystemDesignPreview
@@ -114,14 +144,15 @@ function MemoryCardComposerContent({ base }) {
               </div>
             ) : (
               <div className="memory-composer__empty-image">
-                <span aria-hidden="true">＋</span>
+                <span className="memory-composer__empty-image-icon" aria-hidden="true"><IconImage size={34} /></span>
                 <p>
                   {status === "browser"
-                    ? composerCopy.browserOnly
+                    ? composerCopy.webVisualTitle
                     : busy
                       ? composerCopy.preparing
                       : composerCopy.noImage}
                 </p>
+                {status === "browser" ? <small>{composerCopy.webVisualBody}</small> : null}
               </div>
             )}
 
@@ -131,15 +162,19 @@ function MemoryCardComposerContent({ base }) {
               </p>
             )}
 
+            {runtime?.imageIntake.available || ticket ? (
             <div className="action-row memory-composer__image-actions" role="group" aria-label={composerCopy.visualChoices}>
-              <button
-                type="button"
-                className={`btn${runtime?.imageIntake.available ? "" : " btn--subtle"}`}
-                onClick={chooseImage}
-                disabled={!runtime?.imageIntake.available || busy}
-              >
-                {ticket ? composerCopy.chooseAnotherImage : composerCopy.chooseImage}
-              </button>
+              {runtime?.imageIntake.available ? (
+                <button
+                  type="button"
+                  className="btn memory-composer__visual-primary"
+                  onClick={chooseImage}
+                  disabled={busy}
+                >
+                  <IconPlus size={17} />
+                  {ticket ? composerCopy.chooseAnotherImage : composerCopy.chooseImage}
+                </button>
+              ) : null}
               {ticket && (
                 <button type="button" className="btn btn--subtle" onClick={removeImage} disabled={busy}>
                   {composerCopy.removeImage}
@@ -147,13 +182,14 @@ function MemoryCardComposerContent({ base }) {
               )}
               <button
                 type="button"
-                className={`btn${runtime?.imageIntake.available ? " btn--subtle" : ""}`}
+                className={`btn memory-composer__system-action${runtime?.imageIntake.available ? " btn--subtle" : " memory-composer__visual-primary"}`}
                 onClick={useSystemDesign}
                 disabled={!runtime || busy}
               >
                 {composerCopy.useSystemDesign}
               </button>
             </div>
+            ) : null}
           </section>
 
           <div className="memory-composer__form-column">
@@ -170,10 +206,16 @@ function MemoryCardComposerContent({ base }) {
               onClearSelected={clearSelectedTitle}
               copy={copy.titleSelector}
               stepLabel={composerCopy.stepTitle}
+              requiredLabel={composerCopy.required}
+              completeLabel={composerCopy.done}
+              complete={hasTitle}
             />
 
-            <section className="memory-composer__reflection-step">
-              <p className="memory-composer__step-label">{composerCopy.stepReflection}</p>
+            <section className="memory-composer__reflection-step memory-composer__step-card">
+              <div className="memory-composer__step-card-head">
+                <p className="memory-composer__step-label">{composerCopy.stepReflection}</p>
+                <span className="memory-composer__requirement is-optional">{composerCopy.optional}</span>
+              </div>
               <label className="memory-composer__field" htmlFor="memory-reflection-input">
                 <span>{composerCopy.noteLabel}</span>
                 <textarea
@@ -189,8 +231,13 @@ function MemoryCardComposerContent({ base }) {
               </label>
             </section>
 
-            <section className="memory-composer__rights-step" aria-labelledby="memory-rights-heading">
-              <p className="memory-composer__step-label">{composerCopy.stepRights}</p>
+            <section className={`memory-composer__rights-step memory-composer__step-card${hasRights ? " is-complete" : ""}`} aria-labelledby="memory-rights-heading">
+              <div className="memory-composer__step-card-head">
+                <p className="memory-composer__step-label">{composerCopy.stepRights}</p>
+                <span className={`memory-composer__requirement${hasRights ? " is-complete" : ""}`}>
+                  {hasRights ? composerCopy.done : composerCopy.required}
+                </span>
+              </div>
               <h2 id="memory-rights-heading" className="memory-composer__step-heading">{composerCopy.rightsHeading}</h2>
               {ticket ? (
                 <label className="memory-composer__rights">
@@ -212,10 +259,10 @@ function MemoryCardComposerContent({ base }) {
               )}
             </section>
 
-            <div className="memory-composer__save-gate">
+            <div className={`memory-composer__save-gate memory-composer__step-card${canSave ? " is-current" : ""}`}>
               <div>
                 <p className="memory-composer__step-label">{composerCopy.stepSave}</p>
-                <button type="submit" className="btn" disabled={!canSave} aria-describedby="memory-save-reason">
+                <button type="submit" className="btn memory-composer__save-button" disabled={!canSave} aria-describedby="memory-save-reason">
                   {status === "saving" ? composerCopy.saving : composerCopy.save}
                 </button>
               </div>

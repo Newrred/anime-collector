@@ -10,6 +10,20 @@
   justify-content: center;
 }
 
+.top-nav .top-nav__memory-action {
+  border-color: #d8ff72;
+  background: #d8ff72;
+  color: #17210b;
+  font-weight: var(--fw-bold);
+}
+
+.top-nav .top-nav__memory-action:hover,
+.top-nav .top-nav__memory-action:focus-visible {
+  border-color: #e7ffa8;
+  background: #e7ffa8;
+  color: #101806;
+}
+
 .top-nav .quick-action__input {
   height: 44px;
 }
@@ -47,11 +61,125 @@
   color: var(--text-secondary);
 }
 
+.data-menu-mobile-head {
+  padding: 2px 2px 4px;
+}
+
+.data-menu-mobile-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.data-menu-mobile-head strong {
+  font-size: var(--type-title-md-size);
+}
+
+.data-menu-mobile-head span {
+  color: var(--text-tertiary);
+  font-size: var(--type-caption-size);
+}
+
+.data-menu-section--account .auth-sheet {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, #d8ff72 14%, var(--border-subtle));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-surface-2) 66%, transparent);
+}
+
+.data-menu-section--account .auth-sheet__avatar {
+  color: #d8ff72;
+}
+
+.data-menu-utility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.data-menu-utility-grid .btn {
+  min-width: 0;
+}
+
+.data-menu-utility-grid .data-menu-action-label {
+  min-width: 0;
+}
+
+.data-menu-utility-grid .data-menu-action-label > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 900px) {
   .top-nav .quick-action__mobile-trigger,
   .top-nav .top-nav__mobile-menu-trigger {
     width: 100%;
     height: 44px;
+  }
+
+  .top-nav .top-nav__mobile-menu-trigger[aria-expanded="true"] {
+    border-color: color-mix(in srgb, #d8ff72 38%, var(--border-strong));
+    background: color-mix(in srgb, #d8ff72 10%, var(--bg-surface));
+  }
+
+  .data-menu-panel--manage .data-menu-stack {
+    gap: 10px;
+  }
+
+  .data-menu-panel--manage .data-menu-section + .data-menu-section {
+    padding-top: 10px;
+  }
+
+  .data-menu-section--navigation .top-nav-mobile-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .data-menu-section--navigation .data-menu-link {
+    justify-content: space-between;
+    min-width: 0;
+    padding: 10px;
+    text-align: left;
+  }
+
+  .data-menu-section--navigation .data-menu-link .data-menu-action-label {
+    min-width: 0;
+  }
+
+  .data-menu-section--navigation .data-menu-link .data-menu-action-label > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .data-menu-section--navigation .data-menu-link.is-active {
+    border-color: color-mix(in srgb, #d8ff72 32%, var(--border-strong));
+    background: color-mix(in srgb, #d8ff72 10%, var(--bg-surface-2));
+    color: var(--text-primary);
+  }
+
+  .top-nav-mobile-preferences {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .top-nav-mobile-theme,
+  .top-nav-mobile-locale-row .btn {
+    min-height: 44px;
+  }
+
+  .data-menu-section--account .auth-sheet__body {
+    gap: 6px;
+  }
+
+  .data-menu-section--account .auth-sheet__hint {
+    line-height: 1.35;
+  }
+
+  .data-menu-mobile-head span {
+    display: none;
+  }
+
+  .data-menu-section--account .auth-sheet {
+    padding: 12px;
   }
 }
 

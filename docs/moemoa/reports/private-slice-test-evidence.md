@@ -258,6 +258,27 @@ Task 8은 기능 확장 없이 공용 Memory UI의 시각 기준, 상태 표현,
 - schema v1의 `anime_refs.source_key` index는 비고유이므로 여러 탭이 동시에 같은 후보를 최초 저장하면 중복 AnimeRef가 생길 여지가 있다.
 - alias 데이터는 검색 시에만 lazy-load되지만 662.82 kB chunk 경고가 남아 있어 후속 인덱싱·분할 최적화가 필요하다.
 
+### Web-first human-gate corrective checkpoint — 2026-09-02
+
+Owner의 실제 production walkthrough에서 Home, 모바일 manage menu, Composer의 발견성과 시각 위계가 부족하다는 판정을 받았다. 자동 screenshot parity를 사람 사용성 통과로 간주하지 않고 Task 9 보정 후 같은 화면을 다시 capture·검증했다. Production 배포·push·Android 변경은 수행하지 않았다.
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| Home | PASS | 한 개의 우세한 Create CTA, 보조 title-search, 3-step 설명, image-first specimen을 320/390/1440에서 직접 검토; 모바일 primary CTA가 첫 viewport 안에 위치 |
+| 모바일 manage menu | PASS | navigation-first 구성과 compact account/utilities 적용; 390×844에서 panel `clientHeight=754`, `scrollHeight=754`로 내부 scroll 없음 |
+| Composer | PASS | visual→title→reflection→rights→Save 흐름과 required/optional/complete 상태, 명시적 field boundary, Enter-to-search 적용; 320×720에서 첫 사용 가능 visual action이 viewport 안에 위치 |
+| Chromium focused | PASS | Home/index, mobile/desktop layout, Composer 42/42 |
+| Golden Screenshot | PASS | 18/18; 영향받은 16개 baseline 재생성·직접 검토, manifest hash/dimension 동기화 |
+| Cross-browser UI matrix | PASS | 최초 50/54에서 compact-height position과 light disabled-button contrast 두 원인을 수정; 영향 case를 Chromium/Firefox/WebKit에서 6/6 재실행 |
+| Web unit | PASS | 191/191 |
+| Catalog | PASS | 197 pass, 2 Windows capability skip, 0 fail |
+| Astro production build | PASS | 기존 `useUiPreferences` large chunk warning 유지 |
+| Catalog guard | PASS | no leaks |
+| React Doctor | REVIEWED | changed scope 89/100; TopNav/Composer/TitleSelector control-flow·component-size maintainability advisory 3개, score regression 없음 |
+| 사람 acceptance | PENDING | 구현자 직접 capture 검토까지 완료. owner/독립 no-explanation 재검토는 아직 수행하지 않음 |
+
+미변경 범위: IndexedDB/Supabase schema, local-only storage와 rights semantics, Library/Card domain action, native media lifecycle, Android shell, external image/data, production deployment.
+
 ## 7. Dependency audit finding
 
 `npm audit --omit=dev` 결과 production dependency tree에 17건이 남아 있다: high 12, moderate 3, low 2. 주요 경로는 Astro/Vite/Rollup/Sharp 및 그 전이 의존성이다. 자동 전체 수정은 Astro 7 breaking upgrade를 요구하므로 첫 native spike와 결합하지 않는다.

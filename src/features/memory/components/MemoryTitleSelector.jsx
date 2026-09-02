@@ -1,3 +1,5 @@
+import { IconSearch } from "../../../components/ui/AppIcons.jsx";
+
 const candidateLabel = (candidate, copy) => (
   candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
     ? copy.catalogCandidate
@@ -19,12 +21,21 @@ export default function MemoryTitleSelector({
   onClearSelected,
   copy,
   stepLabel,
+  requiredLabel,
+  completeLabel,
+  complete = false,
 }) {
   return (
-    <section className="memory-composer__title-search">
-      <p className="memory-composer__step-label">{stepLabel}</p>
+    <section className={`memory-composer__title-search memory-composer__step-card${complete ? " is-complete" : " is-current"}`}>
+      <div className="memory-composer__step-card-head">
+        <p className="memory-composer__step-label">{stepLabel}</p>
+        <span className={`memory-composer__requirement${complete ? " is-complete" : ""}`}>
+          {complete ? completeLabel : requiredLabel}
+        </span>
+      </div>
       <div className="memory-composer__field">
         <label id="memory-title-heading" className="memory-composer__step-heading" htmlFor="memory-title-input">{copy.label}</label>
+        <p className="memory-composer__field-help">{copy.helper}</p>
         <div className="memory-composer__title-input-row">
           <input
             id="memory-title-input"
@@ -32,6 +43,11 @@ export default function MemoryTitleSelector({
             value={title}
             maxLength={120}
             onChange={onTitleChange}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter") return;
+              event.preventDefault();
+              if (runtimeReady && title.trim().length >= 2 && titleSearchStatus !== "searching") onSearch();
+            }}
             placeholder={copy.placeholder}
           />
           <button
@@ -40,9 +56,13 @@ export default function MemoryTitleSelector({
             disabled={!runtimeReady || title.trim().length < 2 || titleSearchStatus === "searching"}
             onClick={onSearch}
           >
+            <IconSearch size={16} />
             {titleSearchStatus === "searching" ? copy.searching : copy.search}
           </button>
         </div>
+        {!selectedTitleChoice && title.trim().length < 2 ? (
+          <small className="memory-composer__search-hint">{copy.searchHint}</small>
+        ) : null}
       </div>
 
       {selectedTitleChoice ? (
