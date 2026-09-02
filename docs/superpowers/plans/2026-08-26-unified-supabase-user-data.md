@@ -1763,7 +1763,7 @@ git commit -m "feat(memory): enqueue account metadata changes"
 - Consumes: Supabase PKCE client and approved custom URI `com.newrred.moemoa://auth/callback`.
 - Produces: external Google consent, safe callback exchange, duplicate/cold-start handling, and base-aware local navigation.
 
-- [ ] **Step 1: Add official plugins at verified compatible versions**
+- [x] **Step 1: Add official plugins at verified compatible versions**
 
 ```powershell
 npm.cmd install --save-exact @capacitor/app@8.1.1 @capacitor/browser@8.0.4
@@ -1771,7 +1771,7 @@ npm.cmd install --save-exact @capacitor/app@8.1.1 @capacitor/browser@8.0.4
 
 These versions declare `@capacitor/core >=8.0.0` and match the current Capacitor 8 project. Do not add a community OAuth plugin or native Google token SDK in this slice.
 
-- [ ] **Step 2: Write failing callback allowlist tests**
+- [x] **Step 2: Write failing callback allowlist tests**
 
 ```js
 assert.deepEqual(parseNativeAuthCallback(
@@ -1784,18 +1784,18 @@ assert.equal(parseNativeAuthCallback("com.newrred.moemoa://auth/callback?access_
 
 Test `App.getLaunchUrl()` cold start, `appUrlOpen` warm start, same code handled once, code exchange error redaction, and safe `next` navigation.
 
-- [ ] **Step 3: Write failing Android/static route tests**
+- [x] **Step 3: Write failing Android/static route tests**
 
 The Playwright test asserts the built callback route initializes the Web callback bootstrap. `NativeRoutesTest` separately asserts the manifest includes one VIEW/BROWSABLE callback filter with the exact scheme/host/path. The build/resource scan asserts no service-role string is present in `dist` or merged Android resources.
 
-- [ ] **Step 4: Run tests and verify RED**
+- [x] **Step 4: Run tests and verify RED**
 
 ```powershell
 node tests/unit/nativeOAuth.test.mjs
 npm.cmd run test:e2e -- tests/android-auth-static.spec.ts --project=chromium --workers=1
 ```
 
-- [ ] **Step 5: Implement native PKCE flow**
+- [x] **Step 5: Implement native PKCE flow**
 
 On native platform, call `signInWithOAuth` with:
 
@@ -1811,7 +1811,7 @@ On native platform, call `signInWithOAuth` with:
 
 Open the returned HTTPS authorization URL with `Browser.open`. The callback installer handles both launch URL and warm events, accepts only exact scheme/host/path, exchanges `code` in the WebView that owns the PKCE verifier, closes the browser, consumes the callback once, and navigates to the sanitized stored `next` path.
 
-- [ ] **Step 6: Add the exact Android intent filter**
+- [x] **Step 6: Add the exact Android intent filter**
 
 ```xml
 <intent-filter>
@@ -1827,7 +1827,7 @@ Open the returned HTTPS authorization URL with `Browser.open`. The callback inst
 
 Keep `launchMode="singleTask"` and existing image Share Target filter unchanged.
 
-- [ ] **Step 7: Sync Android and run automated verification**
+- [x] **Step 7: Sync Android and run automated verification**
 
 ```powershell
 npm.cmd run build
@@ -1852,12 +1852,20 @@ kill app during browser → callback relaunch → exchange or safe retry
 logout → fresh Guest namespace, account rows hidden
 ```
 
-- [ ] **Step 9: Commit Android Auth**
+- [x] **Step 9: Commit Android Auth**
 
 ```powershell
 git add package.json package-lock.json src/features/auth/nativeOAuth.js src/repositories/authRepo.js src/layouts/BaseLayout.astro android/app/src/main/AndroidManifest.xml android/app/src/test/java/com/newrred/moemoa/NativeRoutesTest.java tests/unit/nativeOAuth.test.mjs tests/android-auth-static.spec.ts
 git commit -m "feat(android): complete Google OAuth callback"
 ```
+
+**Implemented locally 2026-09-02:**
+
+- Official Capacitor App 8.1.1 and Browser 8.0.4 plugins were checked against the npm registry and Capacitor 8 documentation, installed, synchronized, and included in the generated tracked Gradle plugin wiring.
+- Native Google sign-in uses an external HTTPS authorization URL and the exact `com.newrred.moemoa://auth/callback` redirect. Cold and warm callbacks accept only one bounded authorization code, reject foreign/implicit-token URLs, exchange once in the originating WebView, and navigate only to an app-local path.
+- Android keeps `singleTask` and the existing image Share Target while adding one exact VIEW/BROWSABLE intent filter. Error reporting contains only bounded codes.
+- Automated evidence: 4/4 native OAuth unit tests, 2/2 Android Auth static Chromium tests, Android unit tests, 13-route Web build, Capacitor sync with both plugins, and Debug APK assembly. Client/merged-resource secret scans returned no findings.
+- Step 8 remains a Preview/device gate: no Android device is connected, and the Supabase redirect allowlist has not been remotely changed. It must be completed after explicit Preview configuration approval; Production remains untouched.
 
 ### Task 12: Verify, apply to Preview, rehearse rollback, and document evidence
 

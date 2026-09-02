@@ -5,6 +5,9 @@ import {
   readMockAuthSession,
 } from "./mockAuthStorage.js";
 import { resolveWebOAuthNext } from "../features/auth/webOAuth.js";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
+import { startNativeGoogleOAuth } from "../features/auth/nativeOAuth.js";
 
 const AUTH_NEXT_STORAGE_KEY = "auth.redirect.next";
 
@@ -47,6 +50,16 @@ export async function signInWithGoogle(next = "/data/") {
     origin: window.location.origin,
     base: basePath(),
   });
+  if (Capacitor.isNativePlatform()) {
+    return startNativeGoogleOAuth({
+      supabase,
+      browser: Browser,
+      persistNext: persistPendingAuthNext,
+      rawNext: safeNext,
+      origin: window.location.origin,
+      base: basePath(),
+    });
+  }
   persistPendingAuthNext(safeNext);
   const redirect = new URL(`${basePath()}auth/callback/`, window.location.origin);
   redirect.searchParams.set("next", safeNext);

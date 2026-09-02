@@ -54,6 +54,26 @@ const authReturnGuardScript = `
   </head>
   <body>
     <ClientRouter />
+    <script>
+      import { Capacitor } from "@capacitor/core";
+      import { App } from "@capacitor/app";
+      import { Browser } from "@capacitor/browser";
+      import { installNativeOAuthCallback } from "../features/auth/nativeOAuth.js";
+      import { consumePendingAuthNext, exchangeCodeForSession } from "../repositories/authRepo.js";
+
+      if (Capacitor.isNativePlatform() && !globalThis.__moemoaNativeOAuthCallback) {
+        globalThis.__moemoaNativeOAuthCallback = installNativeOAuthCallback({
+          app: App,
+          browser: Browser,
+          exchangeCode: exchangeCodeForSession,
+          consumeNext: consumePendingAuthNext,
+          navigate: (path) => window.location.replace(path),
+          origin: window.location.origin,
+          base: import.meta.env.BASE_URL,
+          report: ({ code }) => console.error("native auth callback failed", { code }),
+        });
+      }
+    </script>
     <div class="app-shell">
       <main class="container page-wrap">
         <slot />
