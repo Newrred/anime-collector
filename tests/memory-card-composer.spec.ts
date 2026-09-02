@@ -120,6 +120,19 @@ test("browser route explains Android-only image intake without exposing a file i
   await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.");
 });
 
+test("native card save opens the packaged Archive document", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as typeof window & { androidBridge?: Record<string, unknown> }).androidBridge = {};
+  });
+  await page.goto("/memory/new/");
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByLabel("작품 또는 카드 제목").fill("Native route memory");
+
+  await page.getByRole("button", { name: "카드 저장" }).click();
+
+  await expect(page).toHaveURL(/\/archive\/index\.html$/u);
+});
+
 test("empty Archive exposes one page-level create action", async ({ page }) => {
   await page.goto("/archive/");
 

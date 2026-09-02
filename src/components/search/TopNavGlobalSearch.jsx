@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { getMessageGroup } from "../../domain/messages.js";
 import { pushQuickSearchRecent, readQuickAddStatus, readQuickSearchRecent, writeQuickAddStatus } from "../../repositories/quickActionPrefRepo.js";
 import { useGlobalQuickActionSource } from "../../hooks/useGlobalQuickActionSource.js";
@@ -208,7 +209,11 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     try {
       const result = await addAnimeFromQuickAction(row.media, quickAddStatus);
       rememberQuery();
-      setActionFeedback({ tone: "success", message: result.alreadyExists ? copy.alreadyInLibrary : copy.addedToLibrary });
+      setActionFeedback({
+        tone: "success",
+        message: result.alreadyExists ? copy.alreadyInLibrary : copy.addedToLibrary,
+        animeId: row.id,
+      });
     } catch {
       setActionFeedback({ tone: "error", message: copy.addToLibraryFailed });
     } finally {
@@ -220,21 +225,21 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    window.location.href = buildMemoryCardHref({ base, row });
+    window.location.assign(buildMemoryCardHref({ base, native: Capacitor.isNativePlatform(), row }));
   }
 
   function handleOpenDetail(animeId) {
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId, focus: "detail" });
+    openLibraryDeepLink({ base, animeId, focus: "detail", native: Capacitor.isNativePlatform() });
   }
 
   function handleOpenQuickLog(animeId) {
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId, focus: "quick-log" });
+    openLibraryDeepLink({ base, animeId, focus: "quick-log", native: Capacitor.isNativePlatform() });
   }
 
   function closeMobileSearch() {

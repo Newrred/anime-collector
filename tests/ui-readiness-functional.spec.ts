@@ -676,6 +676,23 @@ test('detail delete dialog traps focus, cancels safely, and confirms deletion', 
   await expect(page.getByRole('link', { name: 'Delete dialog memory', exact: true })).toHaveCount(0);
 });
 
+test('native card deletion opens the packaged Archive document', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as typeof window & { androidBridge?: Record<string, unknown> }).androidBridge = {};
+  });
+  await installVisualFixtureState(page, { locale: 'en', theme: 'dark' });
+  const [cardId] = await seedSystemDesignCards(page, [{
+    title: 'Native delete memory',
+    note: 'The native delete route must resolve to a packaged document.',
+  }]);
+  await openMemoryDetail(page, cardId);
+
+  await page.getByRole('button', { name: 'Delete card' }).click();
+  await page.getByRole('button', { name: 'Confirm card deletion' }).click();
+
+  await expect(page).toHaveURL(/\/archive\/index\.html$/u);
+});
+
 test('mobile search closes with Escape and restores focus to its invoker', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installVisualFixtureState(page, { locale: 'en', theme: 'dark' });
