@@ -19,7 +19,7 @@
 - User image bytes and device `localRef` remain `LOCAL_ONLY`; only metadata and reproducible system-design specs synchronize.
 - Public profile/Card/Board policies, private image cloud backup, account-deletion UX, provider linking, email OTP, and standalone backend are out of scope.
 - No service-role/secret value may enter Git, Vercel client variables, browser bundles, APK resources, ordinary logs, or test snapshots.
-- Production deployment remains deferred. Remote migration, Google provider configuration, Preview environment cutover, and Production cutover are separate execution gates.
+- Production deployment was deferred until the user's explicit 2026-09-02 approval. The approved first cutover ships the integrated Web/Android code with `PUBLIC_MEMORY_ACCOUNT_SYNC_V1` unset/off; Google provider setup and Production account-sync activation remain separate gates.
 - Existing uncommitted UI/APK changes must be committed, moved to their own worktree, or otherwise preserved before this plan is executed; they must never be discarded to make this plan's workspace clean.
 
 ---
@@ -96,7 +96,7 @@
 - Legacy cloud table creation, old Auth UUID migration, old session preservation.
 - Legacy Library/WatchLog/Tier to Card/Board conversion.
 - Account deletion UX or Auth admin deletion automation before `PRIVACY-01`.
-- Production deployment or Production feature flag activation.
+- Production account-sync feature flag activation before Google provider/callback verification.
 - iOS and additional authentication providers.
 
 ## 5. 아키텍처·데이터 흐름
@@ -2133,7 +2133,7 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 3. Current catalog Supabase project에서 Google provider와 callback allowlist 변경.
 4. Vercel Preview의 `PUBLIC_SUPABASE_*` 및 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1=1` 설정.
 5. Preview test Auth/metadata 생성과 선택적 cleanup.
-6. Production migration/env/deployment. 이 계획의 기본 범위에서는 계속 보류한다.
+6. Production code deployment with account sync disabled; enable Production account sync only after Google provider/callback verification.
 
 `IMAGE-SYNC-01`, `STORAGE-01`, `PRIVACY-01`, Public 관련 gate는 이 계획으로 확정되지 않는다.
 
@@ -2211,6 +2211,8 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 15:05] Vercel audit: CLI user newrred 및 project newrreds-projects/anime-collector 확인. 기존 PUBLIC_SUPABASE_*는 Production/Preview/Development 공통 legacy project nftnor…를 가리키고 sync flag는 없음.
 [2026-09-02 15:05] 안전 중단: 공통 env update는 Production까지 바꾸므로 confirmation 전에 취소. branch-scoped Preview override는 remote branch 부재로 저장 전 거부. Git push나 Vercel env 실제 변경 없음.
 [2026-09-02 15:05] 차단: 통합 Supabase public Auth settings의 Google provider=false. Step 7 완료에는 Google OAuth client ID/secret 설정과 허용 redirect 등록이 필요하며 Production 변경 없는 Preview branch 생성 방식에 대한 명시적 Git push 승인이 필요.
+[2026-09-02 15:22] 승인 변경: 사용자가 Preview 대신 메인 Production 배포를 명시 승인. 기존 UI/Android 수정과 통합 user-data branch를 합치되 Google provider=false인 동안 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1`은 off로 유지한다.
+[2026-09-02 15:29] Production 전 검증: merge 후 unit 190/190, build 13 pages, Chromium 109 pass·3 live skip. 남아 있던 legacy `PUBLIC_SUPABASE_*`가 flag off 상태에서 Auth를 노출하지 않도록 Auth entry도 feature flag로 차단했고 legacy-shaped env 주입 회귀 10/10을 확인.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

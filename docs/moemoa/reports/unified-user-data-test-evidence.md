@@ -239,6 +239,14 @@ Hosted performance advisor가 composite foreign key 4개에 covering index가 �
 - 통합 project `okchpyagfucpzpyrfgol`의 public Auth settings에서 Google provider는 비활성화 상태다. provider 설정에는 Google OAuth client ID/secret이 필요하며 현재 connector/CLI에서 안전하게 제공할 수 있는 credential이 없다.
 - legacy project settings 확인은 해당 hostname DNS가 존재하지 않아 실패했다. 기존 credential 재사용 가능성을 전제로 하지 않는다.
 
+### Production code deployment approval — 2026-09-02 15:22 KST
+
+- 사용자가 Preview 대신 메인 Production 배포를 명시 승인했다.
+- Production 첫 배포는 통합 Web/Android 코드만 대상으로 하고 `PUBLIC_MEMORY_ACCOUNT_SYNC_V1`은 unset/off 상태를 유지한다.
+- Google provider와 정확한 Production callback이 검증되기 전에는 계정 로그인·동기화를 활성화하지 않는다.
+- merge 후 unit 190/190, build 13 pages, Chromium 109 pass·3 intentional live skip을 확인했다.
+- legacy-shaped `PUBLIC_SUPABASE_*`가 존재해도 flag off이면 계정 Auth 진입이 local-only로 남는 회귀 흐름 10/10을 추가 확인했다.
+
 ### Remote read-only BEFORE audit
 
 연결된 Supabase 커넥터로 project `okchpyagfucpzpyrfgol`을 읽기 전용 조회했다.

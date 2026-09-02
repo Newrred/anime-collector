@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getAuthSession, onAuthSessionChange, signInWithGoogle, signOutFromCloud } from "../repositories/authRepo.js";
-import { isSupabaseConfigured } from "../lib/supabaseClient.js";
+import { isMemoryAccountSyncEnabled, isSupabaseConfigured } from "../lib/supabaseClient.js";
+
+const isAccountAuthEnabled = isMemoryAccountSyncEnabled && isSupabaseConfigured;
 
 export function useAuthSession(nextPath = "/data/") {
   const [session, setSession] = useState(null);
@@ -9,6 +11,12 @@ export function useAuthSession(nextPath = "/data/") {
 
   useEffect(() => {
     let alive = true;
+    if (!isAccountAuthEnabled) {
+      setSession(null);
+      setLoading(false);
+      return undefined;
+    }
+
     getAuthSession()
       .then((currentSession) => {
         if (!alive) return;
@@ -35,6 +43,7 @@ export function useAuthSession(nextPath = "/data/") {
 
   async function signIn(path = nextPath) {
     setError("");
+    if (!isAccountAuthEnabled) throw new Error("Account sync disabled");
     await signInWithGoogle(path);
   }
 
@@ -45,7 +54,7 @@ export function useAuthSession(nextPath = "/data/") {
   }
 
   return {
-    configured: isSupabaseConfigured,
+    configured: isAccountAuthEnabled,
     loading,
     session,
     user: session?.user || null,
