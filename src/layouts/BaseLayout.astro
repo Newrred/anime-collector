@@ -61,5 +61,11 @@ const authReturnGuardScript = `
     </div>
     {analyticsEnabled ? <Analytics /> : null}
     {isProd && <script is:inline type="module" src={toBasePath("register-sw.js")}></script>}
+    <script>
+      import { Capacitor } from "@capacitor/core";
+      import { installNativeAppLinkNavigation } from "../domain/search/memoryCardNavigation.js";
+
+      installNativeAppLinkNavigation({ native: Capacitor.isNativePlatform() });
+    </script>
   </body>
 </html>

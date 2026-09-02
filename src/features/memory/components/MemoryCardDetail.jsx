@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
+import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import MemoryVisual from "./MemoryVisual.jsx";
@@ -136,7 +138,10 @@ function MemoryCardDetailContent({ base }) {
     updateState({ status: "deleting", message: "", deleteDialogOpen: false });
     try {
       await runtime.deleteCard(bundle.card.id);
-      window.location.assign(`${base}archive/`);
+      window.location.assign(toPlatformAppHref(`${base}archive/`, {
+        native: Capacitor.isNativePlatform(),
+        origin: window.location.origin,
+      }));
     } catch {
       updateState({
         message: { scope: "detail", key: "deleteFailed" },

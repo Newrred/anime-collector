@@ -337,6 +337,7 @@ const koMessages = {
     addedToLibrary: "기록장에 추가했어요.",
     alreadyInLibrary: "이미 기록장에 있어요.",
     addToLibraryFailed: "작품을 추가하지 못했어요. 다시 시도해 주세요.",
+    openLibrary: "기록장 열기",
     add: "추가",
     loading: "검색 중...",
     statusOptions: [

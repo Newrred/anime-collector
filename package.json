@@ -25,6 +25,7 @@
     "android:sync": "npm run build && cap sync android",
     "android:test": "cd android && gradlew.bat testDebugUnitTest",
     "android:assemble:debug": "cd android && gradlew.bat assembleDebug",
+    "android:verify:web-routes": "node scripts/verify-android-static-routes.mjs",
     "collect:anilife:first-season": "node scripts/collect-anilife-first-season.mjs",
     "collect:anilife:2010-2027": "node scripts/collect-anilife-seasons.mjs --from=2010 --to=2027",
     "build:aliases:auto": "node scripts/build-aliases-from-anilife.mjs",

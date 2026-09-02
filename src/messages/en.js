@@ -337,6 +337,7 @@ const enMessages = {
     addedToLibrary: "Added to Library.",
     alreadyInLibrary: "Already in Library.",
     addToLibraryFailed: "Couldn't add this title. Try again.",
+    openLibrary: "Open Library",
     add: "Add",
     loading: "Searching...",
     statusOptions: [

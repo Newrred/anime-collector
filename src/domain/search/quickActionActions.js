@@ -2,6 +2,7 @@ import { deriveKoTitleFromMedia } from "../animeTitles.js";
 import { LIBRARY_EVENT, LIBRARY_STATUS } from "../../components/library/libraryCopy.js";
 import { readLibraryListPreferred, writeLibraryListDurable } from "../../repositories/libraryRepo.js";
 import { appendWatchLog, createWatchLog } from "../../repositories/watchLogRepo.js";
+import { toPlatformAppHref } from "./memoryCardNavigation.js";
 
 function normalizeStatusValue(rawStatus) {
   const value = String(rawStatus || "").trim();
@@ -88,13 +89,23 @@ export async function addAnimeFromQuickAction(media, statusValue, repositories =
   return { item, alreadyExists: false, initialLog };
 }
 
-export function openLibraryDeepLink({ base = "/", animeId, focus = "" }) {
+export function openLibraryDeepLink({
+  base = "/",
+  animeId,
+  focus = "",
+  native = false,
+  locationRef = typeof window !== "undefined" ? window.location : null,
+}) {
   const id = Number(animeId);
   if (!Number.isFinite(id)) return;
-  if (typeof window === "undefined") return;
+  if (!locationRef) return;
 
   const params = new URLSearchParams();
   params.set("animeId", String(id));
   if (focus && focus !== "detail") params.set("focus", focus);
-  window.location.href = `${base}library/?${params.toString()}`;
+  const href = toPlatformAppHref(`${base}library/?${params.toString()}`, {
+    native,
+    origin: locationRef.origin || "https://localhost",
+  });
+  locationRef.assign(href);
 }

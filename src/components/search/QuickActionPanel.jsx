@@ -41,9 +41,19 @@ export default function QuickActionPanel({
       {actionFeedback ? (
         <div
           className={`small page-feedback quick-action-panel__feedback is-${actionFeedback.tone || "success"}`}
-          role={actionFeedback.tone === "error" ? "alert" : "status"}
         >
-          {actionFeedback.message}
+          <span role={actionFeedback.tone === "error" ? "alert" : "status"}>
+            {actionFeedback.message}
+          </span>
+          {actionFeedback.tone === "success" && Number.isFinite(Number(actionFeedback.animeId)) ? (
+            <button
+              type="button"
+              className="btn btn--subtle btn--sm"
+              onClick={() => onOpenDetail(actionFeedback.animeId)}
+            >
+              {copy.openLibrary}
+            </button>
+          ) : null}
         </div>
       ) : null}
       {showRecents ? (

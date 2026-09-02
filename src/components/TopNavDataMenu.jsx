@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { getMessageGroup } from "../domain/messages.js";
+import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
 import { deriveSyncPresentation } from "../domain/syncPresentation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useSyncStatus } from "../hooks/useSyncStatus.js";
@@ -85,7 +87,10 @@ export default function TopNavDataMenu({
 
   function openDataPage() {
     if (typeof window === "undefined") return;
-    window.location.href = `${base}data/`;
+    window.location.assign(toPlatformAppHref(`${base}data/`, {
+      native: Capacitor.isNativePlatform(),
+      origin: window.location.origin,
+    }));
   }
 
   async function handleInstallPwaClick() {

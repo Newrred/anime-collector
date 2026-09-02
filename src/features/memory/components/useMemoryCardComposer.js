@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
+import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 
 const errorCode = (code) => String(code || "fallback");
@@ -241,7 +243,10 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
         note: state.note,
         rightsConfirmed,
       });
-      window.location.assign(`${base}archive/`);
+      window.location.assign(toPlatformAppHref(`${base}archive/`, {
+        native: Capacitor.isNativePlatform(),
+        origin: window.location.origin,
+      }));
     } catch (error) {
       saveInFlight.current = false;
       updateState({ status: "ready", message: errorCode(error?.code) });
