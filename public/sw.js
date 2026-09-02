@@ -5,6 +5,7 @@ const PRECACHE_PATHS = [
   "./tier/",
   "./library/",
   "./archive/",
+  "./boards/",
   "./memory/new/",
   "./memory/card/",
   "./manifest.webmanifest",

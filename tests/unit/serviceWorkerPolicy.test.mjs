@@ -38,9 +38,12 @@ test("service worker precaches every private memory route shell", async () => {
 
   assert.equal(addAllCalls.length, 1);
   assert.deepEqual(
-    Array.from(addAllCalls[0], String).filter((url) => url.includes("/archive/") || url.includes("/memory/")),
+    Array.from(addAllCalls[0], String).filter((url) => (
+      url.includes("/archive/") || url.includes("/boards/") || url.includes("/memory/")
+    )),
     [
       "https://example.test/app/archive/",
+      "https://example.test/app/boards/",
       "https://example.test/app/memory/new/",
       "https://example.test/app/memory/card/",
     ],

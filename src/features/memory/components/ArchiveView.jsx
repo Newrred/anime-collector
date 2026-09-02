@@ -90,6 +90,16 @@ function ArchiveContent({ base }) {
         </section>
       )}
 
+      {status === "ready" && items.length >= 3 && (
+        <section className="surface-card memory-archive__board-suggestion">
+          <div>
+            <h2>{archiveCopy.boardSuggestionTitle}</h2>
+            <p>{archiveCopy.boardSuggestionBody}</p>
+          </div>
+          <a className="btn btn--subtle" href={`${base}boards/`}>{archiveCopy.boardSuggestionAction}</a>
+        </section>
+      )}
+
       {items.length > 0 && (
         <section className="memory-archive__grid" aria-label={archiveCopy.listLabel}>
           {items.map(({ card, title, asset, previewDataUrl }) => (

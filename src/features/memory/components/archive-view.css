@@ -44,6 +44,18 @@
   margin: 0;
 }
 
+.memory-archive__board-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.memory-archive__board-suggestion h2,
+.memory-archive__board-suggestion p { margin: 0; }
+.memory-archive__board-suggestion p { margin-top: 6px; color: var(--text-secondary); }
+
 .memory-archive__state p {
   max-width: 44ch;
   color: var(--text-secondary, #a79ebd);
@@ -77,6 +89,7 @@
     align-items: stretch;
     flex-direction: column;
   }
+  .memory-archive__board-suggestion { align-items: stretch; flex-direction: column; }
 
   .memory-archive__header .btn {
     width: 100%;

@@ -4,6 +4,11 @@ import { createDeleteMemoryCardCommand } from "../application/deleteMemoryCard.j
 import { createMemoryOperationReconciler } from "../application/reconcileMemoryOperations.js";
 import { createReplaceMemoryCardImageCommand } from "../application/replaceMemoryCardImage.js";
 import { createDeferredTicketCleanup } from "./deferredTicketCleanup.js";
+import {
+  createBoardCard,
+  createMemoryBoard,
+  positionBetween,
+} from "../domain/memoryBoard.js";
 
 export function createMemoryRuntime({
   repository,
@@ -107,6 +112,82 @@ export function createMemoryRuntime({
     async listArchive() {
       const owner = await initialize();
       return repository.listArchive(owner.id);
+    },
+
+    async createBoard(input) {
+      const owner = await initialize();
+      const board = createMemoryBoard({
+        id: input.id || uuid(),
+        ownerId: owner.id,
+        title: input.title,
+        description: input.description,
+        now: clock.now(),
+      });
+      return repository.createBoard(board);
+    },
+
+    async updateBoard(boardId, changes) {
+      const owner = await initialize();
+      return repository.updateBoard({
+        ownerId: owner.id,
+        boardId,
+        changes,
+        now: clock.now(),
+      });
+    },
+
+    async deleteBoard(boardId) {
+      const owner = await initialize();
+      return repository.deleteBoard({ ownerId: owner.id, boardId, now: clock.now() });
+    },
+
+    async listBoards() {
+      const owner = await initialize();
+      return repository.listBoards(owner.id);
+    },
+
+    async getBoard(boardId) {
+      const owner = await initialize();
+      return repository.getBoard(owner.id, boardId);
+    },
+
+    async addCardToBoard(boardId, cardId) {
+      const owner = await initialize();
+      const detail = await repository.getBoard(owner.id, boardId);
+      if (!detail) throw Object.assign(new Error("Private Board was not found"), { code: "BOARD_NOT_FOUND" });
+      const lastPosition = detail.items.at(-1)?.membership.positionKey || null;
+      const membership = createBoardCard({
+        id: uuid(),
+        ownerId: owner.id,
+        boardOwnerId: detail.board.ownerId,
+        cardOwnerId: owner.id,
+        boardId,
+        cardId,
+        positionKey: positionBetween(lastPosition, null),
+        now: clock.now(),
+      });
+      return repository.addCardToBoard(membership);
+    },
+
+    async removeCardFromBoard(boardId, cardId) {
+      const owner = await initialize();
+      return repository.removeCardFromBoard({
+        ownerId: owner.id,
+        boardId,
+        cardId,
+        now: clock.now(),
+      });
+    },
+
+    async reorderBoardCard(boardId, cardId, { leftPosition = null, rightPosition = null } = {}) {
+      const owner = await initialize();
+      return repository.reorderBoardCard({
+        ownerId: owner.id,
+        boardId,
+        cardId,
+        positionKey: positionBetween(leftPosition, rightPosition),
+        now: clock.now(),
+      });
     },
 
     async getCard(cardId) {

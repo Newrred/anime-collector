@@ -10,6 +10,16 @@ import {
   getActiveOwner,
   rotateGuestOwnerAfterPromotion,
 } from "./memoryOwnerStore.js";
+import {
+  addCardToBoard,
+  createBoard,
+  deleteBoard,
+  getBoard,
+  listBoards,
+  removeCardFromBoard,
+  reorderBoardCard,
+  updateBoard,
+} from "./memoryBoardStore.js";
 
 const requestResult = (request) => new Promise((resolve, reject) => {
   request.onsuccess = () => resolve(request.result ?? null);
@@ -93,6 +103,47 @@ export class IndexedDbMemoryRepository {
 
   rotateGuestOwnerAfterPromotion(input) {
     return rotateGuestOwnerAfterPromotion(this.database, input);
+  }
+
+  createBoard(board) {
+    return createBoard(this.database, board);
+  }
+
+  updateBoard(input) {
+    return updateBoard(this.database, input);
+  }
+
+  deleteBoard(input) {
+    return deleteBoard(this.database, input);
+  }
+
+  addCardToBoard(membership) {
+    return addCardToBoard(this.database, membership);
+  }
+
+  removeCardFromBoard(input) {
+    return removeCardFromBoard(this.database, input);
+  }
+
+  reorderBoardCard(input) {
+    return reorderBoardCard(this.database, input);
+  }
+
+  listBoards(ownerId) {
+    return listBoards(this.database, ownerId);
+  }
+
+  async getBoard(ownerId, boardId) {
+    const result = await getBoard(this.database, ownerId, boardId);
+    if (!result) return null;
+    const memberships = await Promise.all(result.memberships.map(async (membership) => ({
+      membership,
+      bundle: await this.getCardBundle(ownerId, membership.cardId),
+    })));
+    return {
+      board: result.board,
+      items: memberships.filter((item) => item.bundle),
+    };
   }
 
   async getOperation(ownerId, operationId) {
@@ -438,9 +489,25 @@ export class IndexedDbMemoryRepository {
       throw Object.assign(new Error("Cross-owner delete rejected"), { code: "CROSS_OWNER_REFERENCE" });
     }
     const transaction = this.database.transaction(
-      ["memory_cards", "visual_assets", "media_operations"],
+      ["memory_cards", "visual_assets", "media_operations", "memory_board_cards"],
       "readwrite",
     );
+    const memberships = transaction.objectStore("memory_board_cards");
+    const rows = await requestResult(memberships.getAll());
+    for (const row of rows.filter((item) => (
+      item.ownerId === operation.ownerId && item.cardId === card.id && !item.deletedAt
+    ))) {
+      memberships.put({
+        ...row,
+        deletedAt: card.deletedAt,
+        updatedAt: card.updatedAt,
+        sync: {
+          ...(row.sync || createDefaultSyncEnvelope(card.updatedAt)),
+          syncState: "LOCAL_ONLY",
+          clientUpdatedAt: card.updatedAt,
+        },
+      });
+    }
     transaction.objectStore("memory_cards").put(card);
     transaction.objectStore("visual_assets").put(asset);
     transaction.objectStore("media_operations").add(operation);

@@ -1130,7 +1130,7 @@ git commit -m "feat(memory): add account owner and sync-ready local schema"
 - Consumes: active local owner and COMPLETE_PRIVATE cards.
 - Produces: `createBoard`, `updateBoard`, `deleteBoard`, `addCardToBoard`, `removeCardFromBoard`, `reorderBoardCard`, `listBoards`, `getBoard`.
 
-- [ ] **Step 1: Write failing Board domain tests**
+- [x] **Step 1: Write failing Board domain tests**
 
 ```js
 const board = createMemoryBoard({
@@ -1153,7 +1153,7 @@ assert.throws(() => createMemoryBoard({
 
 Test one Card in two Boards, duplicate membership rejection, cross-owner Card rejection, stable position ordering, remove-membership without Card deletion, and Board tombstone behavior.
 
-- [ ] **Step 2: Run unit test and verify RED**
+- [x] **Step 2: Run unit test and verify RED**
 
 ```powershell
 node tests/unit/memoryBoard.test.mjs
@@ -1161,7 +1161,7 @@ node tests/unit/memoryBoard.test.mjs
 
 Expected: module-not-found failure.
 
-- [ ] **Step 3: Implement Board domain and repository methods**
+- [x] **Step 3: Implement Board domain and repository methods**
 
 Use bounded lexicographic position keys with a pure interface:
 
@@ -1173,7 +1173,7 @@ export declare function createBoardCard(input: CreateBoardCardInput): LocalMemor
 
 Repository membership writes include Board/Card/owner validation in one readwrite transaction. Deleting a Card tombstones active memberships; deleting a Board does not delete Cards.
 
-- [ ] **Step 4: Run unit test and verify GREEN**
+- [x] **Step 4: Run unit test and verify GREEN**
 
 ```powershell
 node tests/unit/memoryBoard.test.mjs
@@ -1182,7 +1182,7 @@ npm.cmd run test:unit
 
 Expected: Board tests and the full unit suite pass.
 
-- [ ] **Step 5: Write the failing Board E2E**
+- [x] **Step 5: Write the failing Board E2E**
 
 The Playwright flow must prove:
 
@@ -1199,11 +1199,11 @@ seed 3 Complete Cards
 
 Include 320×720 keyboard/touch assertions and PRIVATE copy.
 
-- [ ] **Step 6: Implement the shared Board route and navigation**
+- [x] **Step 6: Implement the shared Board route and navigation**
 
 `MemoryBoardView` reads only the Memory runtime. It displays list/detail in the static `/boards/` route using `?id=<board uuid>`, never imports Supabase directly, and exposes create/edit/delete/membership/reorder actions.
 
-- [ ] **Step 7: Run Board E2E and build**
+- [x] **Step 7: Run Board E2E and build**
 
 ```powershell
 npm.cmd run test:e2e -- tests/memory-board.spec.ts --project=chromium --workers=1
@@ -1213,7 +1213,7 @@ npm.cmd run android:verify:web-routes
 
 Expected: Board flow passes, `/boards/index.html` exists, Android route verification passes.
 
-- [ ] **Step 8: Commit the local Board slice**
+- [x] **Step 8: Commit the local Board slice**
 
 ```powershell
 git add package.json scripts/verify-android-static-routes.mjs src/features/memory src/components/TopNavDataMenu.jsx src/messages/en.js src/messages/ko.js src/pages/boards.astro tests/unit/nativeAppNavigation.test.mjs tests/unit/memoryBoard.test.mjs tests/memory-board.spec.ts
@@ -2135,6 +2135,11 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 09:44] TDD: owner/catalog/schema focused test 4개 파일 expected RED → focused 32/32 PASS, 전체 unit 129/129 PASS, Chromium IndexedDB 3/3 PASS, Web build 12 pages.
 [2026-09-02 09:44] 검증: moemoa-memory-v1 이름 유지, 기존 v1 Card note/owner 보존, anime-collector-db 미접근, Account owner 재시작 후 활성 상태 및 catalogAnimeId 영속화 확인.
 [2026-09-02 09:44] 범위: local IndexedDB/domain/runtime와 feature worktree 문서만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
+[2026-09-02 09:58] 완료: Task 5 / Private Board CRUD, N:M Card membership, 사전식 순서, Archive 추천 동선, 공용 /boards/ route와 Android 정적 route 검증 구현.
+[2026-09-02 09:58] TDD: memoryBoard module-not-found RED 확인 → Board domain 4/4 PASS, 전체 unit 135/135 PASS, Chromium Board flow 3/3 PASS, Web build 13 pages, Android static route 5/5 PASS.
+[2026-09-02 09:58] 발견 및 보완: 동일 /boards/ query 전환에서 Astro가 기존 client state를 재사용함 → Board 내부 query link를 data-astro-reload로 고정하고 재현 E2E 통과.
+[2026-09-02 09:58] 검증: 한 Card의 두 Board membership, 중복 UI 차단, reorder, 관계 제거 후 Archive/다른 Board 보존, Board tombstone 후 Card 보존, Card tombstone 시 active membership tombstone, 320×720 keyboard/overflow 확인. React Doctor 90/100·issue 0.
+[2026-09-02 09:58] 범위: local IndexedDB/공용 Web UI/정적 Android route와 feature worktree 문서만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

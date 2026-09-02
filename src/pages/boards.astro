@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import MemoryBoardView from "../features/memory/components/MemoryBoardView.jsx";
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout>
+  <MemoryBoardView base={base} client:only="react" />
+</BaseLayout>
