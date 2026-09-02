@@ -2,45 +2,18 @@ import { useEffect, useState } from "react";
 import {
   consumePendingAuthNext,
   exchangeCodeForSession,
-  setAuthSession,
 } from "../../repositories/authRepo.js";
+import { parseWebOAuthCallback } from "../../features/auth/webOAuth.js";
 
-function explainAuthError(error, fallbackDescription = "") {
-  const raw = String(error?.message || fallbackDescription || error || "").trim();
-  const lower = raw.toLowerCase();
+const CALLBACK_MESSAGES = Object.freeze({
+  IMPLICIT_TOKEN_REJECTED: "This sign-in response is no longer accepted. Start Google sign-in again.",
+  OAUTH_PROVIDER_ERROR: "Google sign-in was cancelled or could not be completed. Please try again.",
+  AUTH_CODE_MISSING: "The one-time sign-in code is missing. Start Google sign-in again.",
+  AUTH_CODE_INVALID: "The one-time sign-in code is invalid. Start Google sign-in again.",
+  PKCE_EXCHANGE_FAILED: "The one-time sign-in code could not be verified. Start again from the same browser.",
+});
 
-  if (lower.includes("pkce code verifier not found")) {
-    return "PKCE verifier is missing. Start login again from the same origin. Do not mix localhost and 127.0.0.1, clear site data for both, then retry.";
-  }
-
-  if (lower.includes("bad_code_verifier") || lower.includes("code verifier")) {
-    return "The saved PKCE verifier does not match. Start login again from the same origin and retry.";
-  }
-
-  return raw || "Failed to complete sign-in.";
-}
-
-function resolveSafeNext(rawNext, base = "/") {
-  const fallback = new URL(`${base}data/`, window.location.origin);
-  const next = String(rawNext || consumePendingAuthNext() || "").trim();
-  if (!next) return `${fallback.pathname}${fallback.search}${fallback.hash}`;
-
-  try {
-    const url = new URL(next, window.location.origin);
-    if (url.origin !== window.location.origin) {
-      return `${fallback.pathname}${fallback.search}${fallback.hash}`;
-    }
-
-    const normalizedBase = String(base || "/").endsWith("/") ? String(base || "/") : `${String(base || "/")}/`;
-    if (normalizedBase !== "/" && !url.pathname.startsWith(normalizedBase)) {
-      return `${fallback.pathname}${fallback.search}${fallback.hash}`;
-    }
-
-    return `${url.pathname}${url.search}${url.hash}`;
-  } catch {
-    return `${fallback.pathname}${fallback.search}${fallback.hash}`;
-  }
-}
+const errorCode = (error) => CALLBACK_MESSAGES[error?.code] ? error.code : "PKCE_EXCHANGE_FAILED";
 
 export default function AuthCallbackClient({ base = "/" }) {
   const [message, setMessage] = useState("Signing you in...");
@@ -49,44 +22,30 @@ export default function AuthCallbackClient({ base = "/" }) {
     let alive = true;
 
     async function run() {
-      const params = new URLSearchParams(window.location.search);
-      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-      const code = params.get("code");
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
-      const errorDescription =
-        params.get("error_description") ||
-        hashParams.get("error_description") ||
-        "";
-      const next = resolveSafeNext(params.get("next"), base);
-
       try {
-        if (errorDescription) throw new Error(errorDescription);
-
-        if (code) {
-          await exchangeCodeForSession(code);
-        } else if (accessToken && refreshToken) {
-          await setAuthSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-        } else {
-          throw new Error("Missing authorization response");
-        }
-
-        window.location.replace(next);
+        const callback = parseWebOAuthCallback({
+          search: window.location.search,
+          hash: window.location.hash,
+          origin: window.location.origin,
+          base,
+          pendingNext: consumePendingAuthNext(),
+        });
+        await exchangeCodeForSession(callback.code);
+        window.location.replace(callback.next);
       } catch (error) {
-        console.error("auth callback failed", error);
+        const code = errorCode(error);
+        console.error("auth callback failed", { code });
         if (alive) {
-          setMessage(explainAuthError(error, errorDescription));
+          setMessage(CALLBACK_MESSAGES[code]);
         }
       }
     }
 
     run().catch((error) => {
-      console.error("auth callback failed", error);
+      const code = errorCode(error);
+      console.error("auth callback failed", { code });
       if (alive) {
-        setMessage(explainAuthError(error));
+        setMessage(CALLBACK_MESSAGES[code]);
       }
     });
 

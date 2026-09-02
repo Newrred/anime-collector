@@ -1351,7 +1351,7 @@ git commit -m "feat(memory): add Supabase metadata gateway"
 - Consumes: Supabase Auth session, Task 4 local owner repository, Task 6 gateway.
 - Produces: feature-flagged `initializeAccountSession(session)`, profile/device registration, login/logout namespace behavior; sync remains disabled in this task.
 
-- [ ] **Step 1: Write failing account runtime and Web callback tests**
+- [x] **Step 1: Write failing account runtime and Web callback tests**
 
 Prove these cases:
 
@@ -1365,7 +1365,7 @@ profile/device RPC failure → Auth session remains valid, Guest data unchanged
 Web callback accepts only a PKCE code, rejects token fragments, and sanitizes next to the current app base
 ```
 
-- [ ] **Step 2: Write the failing UI E2E state test**
+- [x] **Step 2: Write the failing UI E2E state test**
 
 Using injected test Auth/gateway adapters, assert Data Center shows these distinct states without contacting legacy snapshot tables:
 
@@ -1378,7 +1378,7 @@ Account initialization failed — retry
 
 Capture fake Supabase calls and assert no call targets `user_snapshots`, `user_library_items`, `user_watch_logs`, or `user_character_pins`.
 
-- [ ] **Step 3: Run focused tests and verify RED**
+- [x] **Step 3: Run focused tests and verify RED**
 
 ```powershell
 node tests/unit/webOAuth.test.mjs
@@ -1386,7 +1386,7 @@ node tests/unit/memoryAccountRuntime.test.mjs
 npm.cmd run test:e2e -- tests/memory-account-sync.spec.ts --project=chromium --workers=1
 ```
 
-- [ ] **Step 4: Implement feature-flagged account composition**
+- [x] **Step 4: Implement feature-flagged account composition**
 
 Resolve `PUBLIC_MEMORY_ACCOUNT_SYNC_V1 === "1"`. When disabled, return:
 
@@ -1405,11 +1405,11 @@ When enabled and authenticated, call `ensureUserProfile` and `registerDevice`, b
 
 Harden the existing Web callback at the same boundary: `AuthCallbackClient` delegates query parsing and base-aware `next` validation to pure `webOAuth.js`, exchanges only a one-time PKCE `code`, and removes the implicit `access_token`/`refresh_token` fallback. Error logging uses an allowlisted code and never prints the callback URL, token, or raw provider error.
 
-- [ ] **Step 5: Replace new Memory UI consumers, not legacy local tools**
+- [x] **Step 5: Replace new Memory UI consumers, not legacy local tools**
 
 `TopNavDataMenu` and `DataCenter` use `useMemoryAccountSync`. Keep manual legacy export/import tools visually labeled as Library/Tier/WatchLog local tools. Do not delete `syncRepo.js`, `useSyncStatus.js`, or legacy tables in this task; ensure the new Memory surfaces no longer import them.
 
-- [ ] **Step 6: Run focused and full verification**
+- [x] **Step 6: Run focused and full verification**
 
 ```powershell
 node tests/unit/webOAuth.test.mjs
@@ -1421,7 +1421,7 @@ npm.cmd run build
 
 Expected: account initialization states pass; existing Memory/Library UI tests remain green.
 
-- [ ] **Step 7: Commit Web account registration**
+- [x] **Step 7: Commit Web account registration**
 
 ```powershell
 git add src/lib/supabaseClient.js src/repositories/authRepo.js src/features/auth/webOAuth.js src/features/memory/runtime src/hooks/useMemoryAccountSync.js src/components/auth/AuthCallbackClient.jsx src/components/data/MemoryAccountPanel.jsx src/components/DataCenter.jsx src/components/TopNavDataMenu.jsx src/messages/en.js src/messages/ko.js tests/unit/webOAuth.test.mjs tests/unit/memoryAccountRuntime.test.mjs tests/memory-account-sync.spec.ts
@@ -2144,6 +2144,12 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 10:16] TDD: contract/gateway module-not-found RED → focused 11/11 PASS, 전체 unit 146/146 PASS, Web build 13 pages.
 [2026-09-02 10:16] 검증: localRef/preview/sourcePath/owner redaction, catalogAnimeId gate, 1 MiB payload, exact 7 RPC params, foreign-owner/unknown-field/state/version rejection, raw Postgres error redaction.
 [2026-09-02 10:16] 범위: pure contract와 injected gateway, feature worktree 문서만 변경. remote Supabase/Vercel/Auth/사용자 데이터 변경 없음.
+[2026-09-02 12:00] 완료: Task 7 / feature-flagged Web Account runtime, profile/device registration, PKCE-code-only callback, Memory 계정 UI 구현.
+[2026-09-02 12:00] TDD: callback/runtime module-not-found와 account UI state RED → focused unit 12/12 PASS, account E2E 5/5 PASS, 전체 unit 158/158 PASS.
+[2026-09-02 12:00] 검증: 관련 Memory/Library E2E 23 PASS·live 2 SKIP, Web build 13 pages, React Doctor changed scope 87/100·issue 0, Node 24.19.0.
+[2026-09-02 12:00] 보완: Auth session 로딩 중 null을 sign-out으로 오인할 수 있는 race를 발견 → authLoading gate와 기존 Account 복원 회귀 E2E 추가.
+[2026-09-02 12:00] 보안: implicit token fragment 거부, current-origin/app-base next allowlist, raw OAuth/Postgres error redaction, legacy snapshot cloud 호출 0건 확인.
+[2026-09-02 12:00] 범위: Auth profile/device 등록까지만 구현. Guest promotion, metadata sync, remote Supabase/Vercel/Production 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

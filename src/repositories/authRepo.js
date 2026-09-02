@@ -4,6 +4,7 @@ import {
   clearMockAuthSession,
   readMockAuthSession,
 } from "./mockAuthStorage.js";
+import { resolveWebOAuthNext } from "../features/auth/webOAuth.js";
 
 const AUTH_NEXT_STORAGE_KEY = "auth.redirect.next";
 
@@ -41,9 +42,14 @@ export async function signInWithGoogle(next = "/data/") {
   if (!supabase) throw new Error("Supabase env missing");
   if (typeof window === "undefined") throw new Error("Window unavailable");
 
-  persistPendingAuthNext(next);
+  const safeNext = resolveWebOAuthNext({
+    rawNext: next,
+    origin: window.location.origin,
+    base: basePath(),
+  });
+  persistPendingAuthNext(safeNext);
   const redirect = new URL(`${basePath()}auth/callback/`, window.location.origin);
-  redirect.searchParams.set("next", next);
+  redirect.searchParams.set("next", safeNext);
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -99,21 +105,6 @@ export function onAuthSessionChange(callback) {
 export async function exchangeCodeForSession(code) {
   if (!supabase) throw new Error("Supabase env missing");
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) throw error;
-  return data?.session || null;
-}
-
-export async function setAuthSession(tokens) {
-  if (!supabase) throw new Error("Supabase env missing");
-  const accessToken = String(tokens?.access_token || "").trim();
-  const refreshToken = String(tokens?.refresh_token || "").trim();
-  if (!accessToken || !refreshToken) {
-    throw new Error("Missing session tokens");
-  }
-  const { data, error } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  });
   if (error) throw error;
   return data?.session || null;
 }

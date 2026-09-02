@@ -8,12 +8,11 @@ import { readLastExportAtMs } from "../repositories/backupRepo";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { useAuthSession } from "../hooks/useAuthSession.js";
-import { useSyncStatus } from "../hooks/useSyncStatus.js";
+import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
 import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { IconShield } from "./ui/AppIcons.jsx";
-import SyncStatusCard from "./data/SyncStatusCard.jsx";
-import ConflictResolveModal from "./data/ConflictResolveModal.jsx";
+import MemoryAccountPanel from "./data/MemoryAccountPanel.jsx";
 import ManualDataTools from "./data/ManualDataTools.jsx";
 
 function formatBytes(value) {
@@ -28,10 +27,9 @@ function formatBytes(value) {
 export default function DataCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "dataCenter");
-  const syncCopy = getMessageGroup(locale, "syncStatus");
-  const conflictCopy = getMessageGroup(locale, "syncConflict");
+  const accountCopy = getMessageGroup(locale, "memoryAccount");
   const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}data/`);
-  const sync = useSyncStatus({ session: auth.session, autoSync: true });
+  const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState(copy.checking);
   const [usage, setUsage] = useState(null);
@@ -247,26 +245,8 @@ export default function DataCenter() {
         {message && <div className="small page-feedback">{message}</div>}
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
-      <SyncStatusCard
-        locale={locale}
-        copy={syncCopy}
-        auth={auth}
-        sync={sync}
-        onSignIn={() => auth.signIn(`${base}data/`)}
-        onSignOut={() => auth.signOut()}
-      />
+      <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} />
       <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
-      <ConflictResolveModal
-        open={Boolean(sync.conflict)}
-        locale={locale}
-        copy={conflictCopy}
-        conflict={sync.conflict}
-        syncing={sync.syncing}
-        onClose={() => sync.dismissConflict()}
-        onKeepLocal={() => sync.keepLocalVersion()}
-        onUseCloud={() => sync.useCloudVersion()}
-        onExportBackup={() => sync.exportConflictBackup()}
-      />
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
-import { deriveSyncPresentation } from "../domain/syncPresentation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
-import { useSyncStatus } from "../hooks/useSyncStatus.js";
+import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
 import {
   IconDatabase,
   IconGear,
@@ -48,15 +47,15 @@ export default function TopNavDataMenu({
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const auth = useAuthSession(`${base}data/`);
-  const sync = useSyncStatus({ session: auth.session, autoSync: false });
-  const syncPresentation = deriveSyncPresentation({
-    configured: sync.configured,
-    connected: Boolean(auth.session?.user),
-    loading: sync.loading,
-    remoteChecked: sync.remoteChecked,
-    remoteMissing: sync.remoteMissing,
-    status: sync.status,
-  });
+  const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
+  const accountCopy = getMessageGroup(locale, "memoryAccount");
+  const accountTone = account.status === "INITIALIZATION_FAILED"
+    ? "disabled"
+    : account.loading
+      ? "pending"
+      : auth.session?.user
+        ? "connected"
+        : "offline-local";
 
   useEffect(() => {
     function onDocDown(e) {
@@ -220,12 +219,12 @@ export default function TopNavDataMenu({
               aria-controls={panelId}
               aria-label={copy.manage}
               title={copy.manage}
-              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(syncPresentation.tone)}${sync.syncing ? " is-syncing" : ""}`}
+              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(accountTone)}${account.loading ? " is-syncing" : ""}`}
             >
               <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 <IconGear />
               </span>
-              <span className={`sync-dot ${syncToneClass(syncPresentation.tone)}`} aria-hidden />
+              <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
             </button>
             <button
               type="button"
@@ -238,12 +237,12 @@ export default function TopNavDataMenu({
               aria-controls={panelId}
               aria-label={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
               title={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
-              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(syncPresentation.tone)}${sync.syncing ? " is-syncing" : ""}`}
+              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(accountTone)}${account.loading ? " is-syncing" : ""}`}
             >
               <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
                 {dataMenuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
               </span>
-              <span className={`sync-dot ${syncToneClass(syncPresentation.tone)}`} aria-hidden />
+              <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
             </button>
           </div>
 
@@ -386,18 +385,16 @@ export default function TopNavDataMenu({
                     session={auth.session}
                     configured={auth.configured}
                     loading={auth.loading}
-                    syncStatus={getMessageGroup(locale, "syncStatus").statusLabels?.[syncPresentation.tone] || syncPresentation.tone}
-                    syncing={sync.syncing}
-                    showSyncActions={syncPresentation.showSyncActions}
+                    syncStatus={accountCopy.statusTitles?.[account.status] || accountCopy.statusTitles.LOCAL_ONLY}
+                    syncing={account.loading}
+                    showSyncActions={false}
                     onSignIn={async () => {
                       await auth.signIn(`${base}data/`);
                     }}
                     onSignOut={async () => {
                       await auth.signOut();
                     }}
-                    onSyncNow={async () => {
-                      await sync.syncNow().catch(() => {});
-                    }}
+                    onSyncNow={async () => {}}
                     onOpenData={() => {
                       setDataMenuOpen(false);
                       openDataPage();

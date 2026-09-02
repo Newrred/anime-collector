@@ -519,12 +519,13 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
   await expect(mobileMenu).toBeHidden();
 }
 
-async function assertUnconfiguredCloudInEnglish(page: Page) {
+async function assertLocalMemoryAccountInEnglish(page: Page) {
   await page.goto("/data/", { waitUntil: "networkidle" });
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   const syncCard = page.locator(".sync-card");
+  await expect(syncCard).toContainText("Memory account");
   await expect(syncCard).toContainText("Local only");
-  await expect(syncCard).toContainText("Unavailable");
+  await expect(syncCard).toContainText("Metadata sync does not start automatically");
   await expect(syncCard).not.toContainText("Cloud backup found");
 }
 
@@ -571,7 +572,7 @@ async function runFlow(
   const cardsBefore = await page.locator(".library-grid .library-card").count();
   if (mode === "fixture") {
     expect(cardsBefore, "fresh fixture flow starts with an empty library").toBe(0);
-    await assertUnconfiguredCloudInEnglish(page);
+    await assertLocalMemoryAccountInEnglish(page);
     await page.goto("/library/", { waitUntil: "networkidle" });
     await expect(page.locator(".library-page")).toBeVisible();
   }

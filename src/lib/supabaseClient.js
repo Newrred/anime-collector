@@ -5,6 +5,7 @@ const url = env.PUBLIC_SUPABASE_URL;
 const anonKey = env.PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(url && anonKey);
+export const isMemoryAccountSyncEnabled = env.PUBLIC_MEMORY_ACCOUNT_SYNC_V1 === "1";
 
 export const supabase = isSupabaseConfigured
   ? createClient(url, anonKey, {
