@@ -85,3 +85,6 @@ docs/deploy/VERCEL_SETUP.md
 .codex-dev-4322.log
 .tmp-astro-dev.err.log
 .tmp-astro-dev.log
+.vercel/
+.env.local
+.env.*.local

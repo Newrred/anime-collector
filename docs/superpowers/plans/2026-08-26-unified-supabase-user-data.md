@@ -371,10 +371,11 @@ type PromotionResult = { status: "COMPLETED"; importedCounts: Record<string, num
 | `package.json`, `package-lock.json` | Supabase CLI exact dev dependency, DB scripts, Capacitor Auth plugins |
 | `.gitignore` | `supabase/.temp/`, `.branches/` 제외 |
 | `supabase/config.toml` | local callback URLs; Google secret은 `env()` reference만 사용 |
-| `supabase/migrations/20260826000100_memory_user_schema.sql` | tables, checks, indexes, cascade FKs |
-| `supabase/migrations/20260826000200_memory_user_functions.sql` | validation helpers, profile/device/promotion/mutation/pull RPC |
-| `supabase/migrations/20260826000300_memory_user_security.sql` | RLS, grants, function execute allowlist |
-| `supabase/migrations/20260826000400_memory_user_retention.sql` | 30-day tombstone purge function and daily pg_cron job |
+| `supabase/migrations/20260902054107_memory_user_schema.sql` | tables, checks, indexes, cascade FKs |
+| `supabase/migrations/20260902054119_memory_user_functions.sql` | validation helpers, profile/device/promotion/mutation/pull RPC |
+| `supabase/migrations/20260902054132_memory_user_security.sql` | RLS, grants, function execute allowlist |
+| `supabase/migrations/20260902055512_memory_user_retention.sql` | 30-day tombstone purge function and daily pg_cron job |
+| `supabase/migrations/20260902055852_memory_user_foreign_key_indexes.sql` | covering indexes required by the hosted performance advisor |
 | `supabase/tests/database/memory_user_schema.test.sql` | schema/constraint/index contract |
 | `supabase/tests/database/memory_user_security.test.sql` | anon/user A/user B RLS and grant contract |
 | `supabase/tests/database/memory_user_rpc.test.sql` | idempotency/version/tombstone/promotion/pull contract |
@@ -447,10 +448,11 @@ type PromotionResult = { status: "COMPLETED"; importedCounts: Record<string, num
 
 ### 7.1 Remote migration order
 
-1. `20260826000100`: additive tables, constraints, indexes only.
-2. `20260826000200`: private helpers, deferred invariant trigger, public RPCs.
-3. `20260826000300`: enable RLS, revoke direct mutations/function defaults, grant own-row SELECT and exact RPC execute.
-4. `20260826000400`: enable `pg_cron`, add a service-role-only tombstone purge function, and schedule the named daily retention job.
+1. `20260902054107`: additive tables, constraints, indexes only.
+2. `20260902054119`: private helpers, deferred invariant trigger, public RPCs.
+3. `20260902054132`: enable RLS, revoke direct mutations/function defaults, grant own-row SELECT and exact RPC execute.
+4. `20260902055512`: enable `pg_cron`, add a service-role-only tombstone purge function, and schedule the named daily retention job.
+5. `20260902055852`: add four non-semantic covering indexes required by the hosted performance advisor.
 
 Catalog tables, active release pointer, cover bucket, and existing catalog functions are not altered. Every user-owned FK to `auth.users(id)` uses `on delete cascade`, but account deletion UI is not implemented.
 
@@ -635,7 +637,7 @@ git commit -m "chore(db): pin local Supabase test tooling"
 ### Task 2: Create the additive user schema with pgTAP contract tests
 
 **Files:**
-- Create: `supabase/migrations/20260826000100_memory_user_schema.sql`
+- Create: `supabase/migrations/20260902054107_memory_user_schema.sql`
 - Create: `supabase/tests/database/memory_user_schema.test.sql`
 
 **Interfaces:**
@@ -741,16 +743,16 @@ legacy compatibility tables absent
 - [x] **Step 6: Commit the schema**
 
 ```powershell
-git add supabase/migrations/20260826000100_memory_user_schema.sql supabase/tests/database/memory_user_schema.test.sql
+git add supabase/migrations/20260902054107_memory_user_schema.sql supabase/tests/database/memory_user_schema.test.sql
 git commit -m "feat(db): add normalized memory user schema"
 ```
 
 ### Task 3: Add validated RPCs, deferred invariants, RLS, and grants
 
 **Files:**
-- Create: `supabase/migrations/20260826000200_memory_user_functions.sql`
-- Create: `supabase/migrations/20260826000300_memory_user_security.sql`
-- Create: `supabase/migrations/20260826000400_memory_user_retention.sql`
+- Create: `supabase/migrations/20260902054119_memory_user_functions.sql`
+- Create: `supabase/migrations/20260902054132_memory_user_security.sql`
+- Create: `supabase/migrations/20260902055512_memory_user_retention.sql`
 - Create: `supabase/tests/database/memory_user_security.test.sql`
 - Create: `supabase/tests/database/memory_user_rpc.test.sql`
 
@@ -925,7 +927,7 @@ Expected: all pgTAP files pass, lint exits 0, catalog anonymous read tests remai
 - [x] **Step 9: Commit functions and security separately from application code**
 
 ```powershell
-git add supabase/migrations/20260826000200_memory_user_functions.sql supabase/migrations/20260826000300_memory_user_security.sql supabase/migrations/20260826000400_memory_user_retention.sql supabase/tests/database/memory_user_security.test.sql supabase/tests/database/memory_user_rpc.test.sql
+git add supabase/migrations/20260902054119_memory_user_functions.sql supabase/migrations/20260902054132_memory_user_security.sql supabase/migrations/20260902055512_memory_user_retention.sql supabase/tests/database/memory_user_security.test.sql supabase/tests/database/memory_user_rpc.test.sql
 git commit -m "feat(db): add memory sync RPC and owner RLS"
 ```
 
@@ -1893,7 +1895,7 @@ The tool requires:
 
 It reads credentials only from environment, refuses another project ref, prints table counts/hashes/grant booleans but never keys/tokens/row notes, and exits nonzero on catalog count/hash regression or unexpected legacy/new table state.
 
-- [ ] **Step 2: Run the complete local verification ladder**
+- [x] **Step 2: Run the complete local verification ladder**
 
 ```powershell
 npm.cmd run supabase:reset
@@ -1913,7 +1915,7 @@ Expected: 0 failures. Record counts, skips, environment, and duration rather tha
 
 Use the `react-doctor` skill on the changed React scope. Any regression from the recorded baseline must be fixed or documented before Preview migration.
 
-- [ ] **Step 4: Link and inspect remote migration history read-only**
+- [x] **Step 4: Link and inspect remote migration history read-only**
 
 ```powershell
 npx.cmd supabase link --project-ref okchpyagfucpzpyrfgol
@@ -1924,7 +1926,9 @@ node tools/supabase-user-data/verify.mjs --project-ref okchpyagfucpzpyrfgol --ex
 
 Expected: only the four 20260826 migrations appear in dry-run and before counts match the recorded catalog release. If not, stop at the migration-history gate in section 7.3.
 
-- [ ] **Step 5: Request and record explicit Preview mutation approval**
+Execution note (2026-09-02): `SUPABASE_ACCESS_TOKEN` was not present, so the literal CLI `link` and `db push --dry-run` commands were not used. The installed Supabase connector's read-only migration/schema/catalog queries established the same BEFORE facts without mutation: remote contains only the two catalog migrations, their timestamps and schema semantics match the two local catalog files, and the only local-only files are the four `20260826` user migrations. The allowlisted verifier's expected hosted release/count/hash were also cross-checked against the read-only result. No migration repair or remote write was performed.
+
+- [x] **Step 5: Request and record explicit Preview mutation approval**
 
 Approval must separately cover:
 
@@ -1938,7 +1942,7 @@ temporary test Auth/account rows created by the smoke flow
 
 Production env/deployment is not included.
 
-- [ ] **Step 6: Apply additive migrations after approval**
+- [x] **Step 6: Apply additive migrations after approval**
 
 ```powershell
 npx.cmd supabase db push --linked --skip-vault
@@ -2195,6 +2199,18 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 14:24] 원격 read-only audit: project ACTIVE_HEALTHY, catalog migration version 20260819021327/021408, user table 0, Auth user 0, target/search/detail/assets/cover 3,998, people 4,899, hosted hash 8af2e0…3bb4c.
 [2026-09-02 14:24] 보완: 원격 schema가 로컬 catalog SQL과 의미상 일치함을 table/constraint/RLS/index/function/grant/bucket policy로 확인. 원격 repair 대신 로컬 catalog migration 파일 timestamp를 실제 원격 이력에 정렬함.
 [2026-09-02 14:24] 발견: 외부 local Projection pointer의 역사 hash 52487f…f556과 hosted active hash 8af2e0…3bb4c가 다름. User migration 회귀 guard는 실제 hosted BEFORE hash를 사용하고 catalog upload/activation은 범위 밖으로 유지.
+[2026-09-02 14:39] 완료: Task 12 Step 2 / Docker core stack fresh reset에서 catalog 2개 + user 4개 migration 적용, pgTAP Files=3 Tests=92 전부 PASS, DB lint schema error 0.
+[2026-09-02 14:39] 완료: Task 12 Step 4 / Supabase connector read-only audit와 local migration 목록 대조로 remote existing 2개 및 pending user migration 정확히 4개 확인. CLI access token은 없었고 remote mutation/repair는 실행하지 않음.
+[2026-09-02 14:39] 차단: Task 12 Step 5 / Preview migration·Google provider/callback·Vercel Preview env/flag·temporary test Auth rows에 대한 명시적 mutation 승인 필요. Production은 계속 제외.
+[2026-09-02 14:44] 승인: Task 12 Step 5 / 사용자가 Preview additive user migrations, Google provider/callback, 동일 Supabase Vercel Preview env, account sync flag, temporary test Auth/metadata rows를 승인. Production·image cloud/Public 제외.
+[2026-09-02 14:44] 부분 완료: Task 12 Step 6 / remote version 20260902054107 schema, 20260902054119 functions, 20260902054132 security 적용. user table 11개 RLS, row/Auth user 0, direct authenticated DML 0, exact RPC 7, catalog 3,998/hash 불변 확인.
+[2026-09-02 14:44] 차단: `memory_user_retention`은 30일 초과 tombstone·sync_changes 영구 삭제 cron을 설치하므로 해당 파괴적 수명주기에 대한 별도 명시 승인 필요. migration 적용 전 거부됐고 우회하지 않음.
+[2026-09-02 14:55] 승인: 사용자가 `30일 보존 정책 승인`으로 30일 초과 tombstone·sync_changes 영구 삭제와 daily cron 설치를 명시 승인.
+[2026-09-02 14:55] 완료: Task 12 Step 6 / retention remote version 20260902055512 적용. pg_cron 설치, `moemoa-memory-retention-daily` 1개 active, schedule `15 3 * * *`, service_role only execute 확인. catalog 3,998/hash 불변, user/Auth row 0.
+[2026-09-02 14:58] 보완: hosted performance advisor가 신규 composite FK covering index 4개 누락을 보고. schema pgTAP 4 expected FAIL → 별도 migration 20260902055852 적용 → local pgTAP 96/96, lint 0, hosted unindexed-FK advisor 0. 의미·권한·데이터 변경 없음.
+[2026-09-02 15:05] Vercel audit: CLI user newrred 및 project newrreds-projects/anime-collector 확인. 기존 PUBLIC_SUPABASE_*는 Production/Preview/Development 공통 legacy project nftnor…를 가리키고 sync flag는 없음.
+[2026-09-02 15:05] 안전 중단: 공통 env update는 Production까지 바꾸므로 confirmation 전에 취소. branch-scoped Preview override는 remote branch 부재로 저장 전 거부. Git push나 Vercel env 실제 변경 없음.
+[2026-09-02 15:05] 차단: 통합 Supabase public Auth settings의 Google provider=false. Step 7 완료에는 Google OAuth client ID/secret 설정과 허용 redirect 등록이 필요하며 Production 변경 없는 Preview branch 생성 방식에 대한 명시적 Git push 승인이 필요.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

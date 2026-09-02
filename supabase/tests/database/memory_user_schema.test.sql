@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(19);
+select plan(23);
 
 select has_table('public', 'user_profiles', 'user_profiles table exists');
 select has_table('public', 'user_devices', 'user_devices table exists');
@@ -22,6 +22,10 @@ select has_column('public', 'memory_visual_assets', 'design_spec', 'visual asset
 select has_column('public', 'user_profiles', 'minimum_retained_sync_seq', 'profiles keep the sync retention watermark');
 select has_index('public', 'memory_visual_assets', 'memory_visual_assets_current_card_idx', 'one current asset index exists');
 select has_index('public', 'sync_changes', 'sync_changes_user_seq_idx', 'per-user sync sequence index exists');
+select has_index('public', 'memory_board_cards', 'memory_board_cards_owner_card_idx', 'board membership card foreign key is covered');
+select has_index('public', 'memory_visual_assets', 'memory_visual_assets_owner_card_idx', 'visual asset card foreign key is covered');
+select has_index('public', 'sync_operations', 'sync_operations_owner_device_idx', 'sync operation device foreign key is covered');
+select has_index('public', 'user_account_promotions', 'user_account_promotions_owner_device_idx', 'promotion device foreign key is covered');
 select hasnt_table('public', 'user_snapshots', 'legacy user_snapshots table remains absent');
 
 select * from finish();

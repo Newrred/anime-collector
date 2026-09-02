@@ -1,6 +1,6 @@
 # Unified Supabase User Data 테스트 증거
 
-> **상태: `IN PROGRESS — TASK 12 LOCAL NON-DB CHECKS COMPLETE / EXTERNAL GATES BLOCKED`**
+> **상태: `IN PROGRESS — TASK 12 LOCAL + REMOTE READ-ONLY CHECKS COMPLETE / PREVIEW MUTATION APPROVAL REQUIRED`**
 > 시작일: 2026-08-26
 > ExecPlan: `../../superpowers/plans/2026-08-26-unified-supabase-user-data.md`
 > Worktree: `D:\hong\Web\Anime\anime-collector\.worktrees\unified-supabase-user-data`
@@ -184,11 +184,60 @@ Task 11의 물리기기 Google OAuth는 연결된 Android 기기가 없어 아�
 
 전체 E2E 첫 실행은 신규 Memory account 문구로 바뀐 뒤 남아 있던 legacy `Unavailable`/이전 local-only 문구 assertion 1건 때문에 102 pass, 3 skip, 1 fail이었다. 실제 패널은 `Local only`, Guest namespace, cloud backup 미주장을 올바르게 표시했다. 테스트를 현재 계약으로 교정한 뒤 대상 10/10과 전체 103/103이 통과했다.
 
-### 현재 환경 차단
+### Fresh local DB verification
 
-- Docker Desktop 앱과 `com.docker.service`가 정지 상태다. Codex의 비관리자 세션에서는 service를 시작할 수 없어 Task 12의 fresh `supabase:reset/test/lint` 재실행이 남았다. Task 3 시점의 마지막 실제 local DB 결과는 pgTAP 92/92 및 lint 0 errors다.
-- 현재 process/user/machine scope에 `SUPABASE_ACCESS_TOKEN`이 없어서 CLI link와 Management API read-only BEFORE 검증을 실행하지 못했다.
+사용자가 Docker Desktop을 시작한 뒤 Vector만 제외한 core stack을 기동하고, 동일 작업 트리에서 전체 DB ladder를 다시 실행했다.
+
+| 명령 | 결과 |
+| --- | --- |
+| `supabase:start -- --exclude vector` | PASS, local core stack started |
+| `supabase:reset` | PASS, catalog 2개 + user 4개를 빈 DB에 순서대로 적용 |
+| `supabase:test` | PASS, Files=3, Tests=92, 0 failed |
+| `supabase:lint` | PASS, public/private/extensions schema error 0 |
+
+`supabase:reset`의 `no files matched ... seed.sql`은 seed가 없는 현재 구성에 대한 warning이며 migration 실패가 아니다. CLI는 계획에 고정한 2.115.0을 유지했고, 검증 도중 표시된 2.116.0 upgrade는 이번 범위에서 수행하지 않았다.
+
+### 남은 외부 변경 게이트
+
+- 현재 process/user/machine scope에 `SUPABASE_ACCESS_TOKEN`이 없어 CLI `link`/`db push --dry-run` 자체는 실행하지 않았다.
+- 대신 이미 연결된 Supabase 커넥터의 read-only schema/migration/catalog 조회와 로컬 migration 파일 목록을 대조했다. 원격 기존 2개와 로컬 기존 2개가 일치하며, 당시 적용 후보는 신규 user migration 정확히 4개였다. 실제 적용 후 로컬 파일명은 Supabase가 기록한 remote version `20260902054107`~`20260902055512`에 맞췄다.
 - 원격 migration, Google provider/callback, Vercel Preview env, test Auth row, Production에는 변경을 가하지 않았다.
+
+### Preview mutation 진행 — 2026-09-02 14:44 KST
+
+사용자는 Task 12 Step 5의 Preview 전용 변경 5개(사용자 migration, Google provider/callback, 동일 Supabase를 가리키는 Vercel Preview 변수, account sync flag, 명시적으로 식별되는 test Auth/metadata row)를 승인했다. Production과 사용자 이미지 cloud upload/Public은 제외했다.
+
+승인 후 Supabase migration connector로 아래 세 migration을 순서대로 적용했다.
+
+| Remote version | Migration | 결과 |
+| --- | --- | --- |
+| `20260902054107` | `memory_user_schema` | PASS |
+| `20260902054119` | `memory_user_functions` | PASS |
+| `20260902054132` | `memory_user_security` | PASS |
+
+네 번째 `memory_user_retention`은 매일 03:15 UTC에 30일보다 오래된 tombstone과 `sync_changes` 이력을 영구 삭제하는 `pg_cron` job을 설치한다. 파괴적 side effect에 대한 별도 명시 승인이 필요하다는 안전 게이트로 적용 전 거부됐으며 우회하지 않았다.
+
+부분 적용 직후 read-only 검증 결과:
+
+- 신규 user table 11/11, 전부 RLS enabled, 전체 row 0, Auth user 0.
+- owner SELECT policy 11개, authenticated direct INSERT/UPDATE/DELETE grant 0개.
+- authenticated 공개 RPC는 설계된 7개만 존재하고 private helper의 PUBLIC execute는 0개다.
+- security advisor의 `SECURITY DEFINER executable` 경고 7개는 의도한 authenticated RPC surface이며 각 함수 내부 `auth.uid()` 검증, empty `search_path`, exact grant를 pgTAP과 schema query로 확인했다.
+- hosted catalog target/search/detail/assets/cover는 각각 3,998, people은 4,899, release hash는 `8af2e03bc80789f59b4eaf7c2d6904242561ddafecd3b6c9f7351f0a8cb3bb4c`로 변경 전과 같다.
+- `pg_cron`과 retention job은 아직 설치되지 않았다.
+
+사용자는 이어서 `30일 보존 정책 승인`을 명시했다. `memory_user_retention`은 remote version `20260902055512`로 적용됐고, `pg_cron`, `moemoa-memory-retention-daily` job 1개, active=true, schedule `15 3 * * *`, service-role-only execute를 확인했다. 적용 직후에도 user/Auth row는 0이고 catalog count/hash는 불변이다.
+
+Hosted performance advisor가 composite foreign key 4개에 covering index가 없다고 보고해 계획이 허용한 non-semantic index 보완을 수행했다. pgTAP에 index assertion 4개를 먼저 추가해 4/96 expected FAIL을 확인한 뒤 `20260902055852_memory_user_foreign_key_indexes.sql`을 생성·적용했다. 이후 local pgTAP 96/96, DB lint error 0이며 hosted advisor의 unindexed foreign key 항목은 4개에서 0개가 됐다. 신규 DB가 비어 있어 unused-index INFO는 초기 상태의 정상 관찰값으로 유지한다.
+
+### Preview Auth/Vercel configuration audit
+
+- Vercel CLI 59.11.1의 로그인 사용자는 `newrred`, 연결 대상은 `newrreds-projects/anime-collector`임을 확인했다.
+- 기존 `PUBLIC_SUPABASE_URL`/`PUBLIC_SUPABASE_ANON_KEY`는 Production·Preview·Development 공통으로 legacy project `nftnorjthfwsczkdydeq`를 가리킨다. `PUBLIC_MEMORY_ACCOUNT_SYNC_V1`은 없다.
+- 공통 변수를 update하면 Production도 바뀌므로 confirmation 전에 취소했다. 실제 Vercel env 변경은 없었다.
+- 현재 기능 branch 전용 Preview override 추가도 시도했으나 branch가 아직 GitHub에 없어서 Vercel이 저장 전에 거부했다. Git push는 별도 승인 전 수행하지 않았다.
+- 통합 project `okchpyagfucpzpyrfgol`의 public Auth settings에서 Google provider는 비활성화 상태다. provider 설정에는 Google OAuth client ID/secret이 필요하며 현재 connector/CLI에서 안전하게 제공할 수 있는 credential이 없다.
+- legacy project settings 확인은 해당 hostname DNS가 존재하지 않아 실패했다. 기존 credential 재사용 가능성을 전제로 하지 않는다.
 
 ### Remote read-only BEFORE audit
 
@@ -204,4 +253,4 @@ Task 11의 물리기기 Google OAuth는 연결된 Android 기기가 없어 아�
 
 로컬 외부 workspace의 현재 Projection v2 pointer는 역사적으로 기록된 `52487f…f556` release를 가리키지만 hosted active release는 위 `8af2e0…3bb4c`다. 이번 user migration의 회귀 기준은 실제 변경 대상인 hosted BEFORE hash로 고정했다. 두 catalog release 내용의 차이를 임의로 업로드하거나 활성화하지 않는다.
 
-공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하며, remote read-only query는 `database_read` 권한이 있는 access token을 요구한다. 두 환경 조건이 준비되면 Task 12 Step 2와 Step 4를 재개한다. Step 5의 명시적 Preview mutation 승인은 그 결과가 일치한 뒤 별도로 받는다.
+공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하다. 이 조건을 충족해 Task 12 Step 2를 완료했다. Step 4는 CLI token 기반 dry-run 대신 연결된 Supabase 커넥터의 read-only migration/schema 조회로 동등한 BEFORE 사실을 검증했으며, 원격 mutation은 없었다. 이제 Step 5의 명시적 Preview mutation 승인이 필요하다.
