@@ -1243,7 +1243,7 @@ gateway.readEntities(input)
 gateway.resolveConflict(input)
 ```
 
-- [ ] **Step 1: Write failing redaction/hash tests**
+- [x] **Step 1: Write failing redaction/hash tests**
 
 ```js
 const dto = toRemoteVisualAsset(localCardBundle);
@@ -1263,7 +1263,7 @@ assert.match(first.requestHash, /^[a-f0-9]{64}$/u);
 
 Test all length/item/state bounds and reject a remote response with an unknown field/state/version.
 
-- [ ] **Step 2: Write failing gateway call tests**
+- [x] **Step 2: Write failing gateway call tests**
 
 With a fake Supabase client, assert exact RPC names and parameter keys. Example:
 
@@ -1282,14 +1282,14 @@ assert.deepEqual(calls[0], ["apply_memory_card_mutation", {
 
 Assert gateway errors expose only allowlisted codes, not Postgres query text or payload content.
 
-- [ ] **Step 3: Run tests and verify RED**
+- [x] **Step 3: Run tests and verify RED**
 
 ```powershell
 node tests/unit/memorySyncContract.test.mjs
 node tests/unit/supabaseMemoryGateway.test.mjs
 ```
 
-- [ ] **Step 4: Implement pure contract functions**
+- [x] **Step 4: Implement pure contract functions**
 
 Export these exact functions:
 
@@ -1309,11 +1309,11 @@ export declare function parsePromotionResult(value: unknown): PromotionResult;
 
 Use the existing stable serialization style, but only SHA-256 is accepted for remote requests; an FNV fallback must not be sent to the server.
 
-- [ ] **Step 5: Implement the gateway with dependency injection**
+- [x] **Step 5: Implement the gateway with dependency injection**
 
 The constructor rejects clients without `rpc`/`from`, never imports service-role values, and validates every returned row before exposing it to the application layer.
 
-- [ ] **Step 6: Run tests and verify GREEN**
+- [x] **Step 6: Run tests and verify GREEN**
 
 ```powershell
 node tests/unit/memorySyncContract.test.mjs
@@ -1321,7 +1321,7 @@ node tests/unit/supabaseMemoryGateway.test.mjs
 npm.cmd run test:unit
 ```
 
-- [ ] **Step 7: Commit the remote contract adapter**
+- [x] **Step 7: Commit the remote contract adapter**
 
 ```powershell
 git add src/features/memory/sync src/features/memory/adapters/supabase tests/unit/memorySyncContract.test.mjs tests/unit/supabaseMemoryGateway.test.mjs
@@ -2140,6 +2140,10 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-09-02 09:58] 발견 및 보완: 동일 /boards/ query 전환에서 Astro가 기존 client state를 재사용함 → Board 내부 query link를 data-astro-reload로 고정하고 재현 E2E 통과.
 [2026-09-02 09:58] 검증: 한 Card의 두 Board membership, 중복 UI 차단, reorder, 관계 제거 후 Archive/다른 Board 보존, Board tombstone 후 Card 보존, Card tombstone 시 active membership tombstone, 320×720 keyboard/overflow 확인. React Doctor 90/100·issue 0.
 [2026-09-02 09:58] 범위: local IndexedDB/공용 Web UI/정적 Android route와 feature worktree 문서만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
+[2026-09-02 10:16] 완료: Task 6 / whitelist Remote DTO, SHA-256 mutation request, Supabase metadata gateway와 5-table read allowlist 구현.
+[2026-09-02 10:16] TDD: contract/gateway module-not-found RED → focused 11/11 PASS, 전체 unit 146/146 PASS, Web build 13 pages.
+[2026-09-02 10:16] 검증: localRef/preview/sourcePath/owner redaction, catalogAnimeId gate, 1 MiB payload, exact 7 RPC params, foreign-owner/unknown-field/state/version rejection, raw Postgres error redaction.
+[2026-09-02 10:16] 범위: pure contract와 injected gateway, feature worktree 문서만 변경. remote Supabase/Vercel/Auth/사용자 데이터 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.
