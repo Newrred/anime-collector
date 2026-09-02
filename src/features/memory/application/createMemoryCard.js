@@ -2,7 +2,9 @@ import {
   MemoryDomainError,
   assertCompletePrivateCard,
   createAnimeRef,
+  createDefaultSyncEnvelope,
   createPrivateTitle,
+  requireOwnerId,
 } from "../domain/memoryDomain.js";
 import { normalizeSystemDesignSpec } from "../domain/systemDesign.js";
 
@@ -83,7 +85,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
     async execute(rawInput) {
       const input = rawInput && typeof rawInput === "object" ? rawInput : {};
       const operationId = requiredId(input.operationId, "operationId");
-      const ownerId = requiredId(input.ownerId, "ownerId");
+      const ownerId = requireOwnerId(input.ownerId);
       const hasNativeTicket = Boolean(String(input.intakeTicketId || "").trim());
       const hasSystemDesign = Boolean(input.systemDesignSpec);
       if (hasNativeTicket === hasSystemDesign) {
@@ -135,6 +137,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       } else {
         const proposed = createAnimeRef({
           id: requiredId(ids.next("animeRef"), "anime reference id"),
+          catalogAnimeId: input.titleChoice.animeId ?? null,
           displayTitle: input.titleChoice.displayTitle,
           aliases: input.titleChoice.aliases,
           genres: input.titleChoice.genres,
@@ -145,8 +148,12 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         const existingAnimeRef = typeof repository.findAnimeRefBySourceKey === "function"
           ? await repository.findAnimeRefBySourceKey(proposed.sourceKey)
           : null;
-        const shouldUpgrade = existingAnimeRef?.verificationState === "LEGACY_UNVERIFIED"
-          && proposed.verificationState === "PROVIDER_CANDIDATE";
+        const shouldUpgrade = (
+          existingAnimeRef?.verificationState === "LEGACY_UNVERIFIED"
+          && proposed.verificationState === "PROVIDER_CANDIDATE"
+        ) || (
+          !existingAnimeRef?.catalogAnimeId && Boolean(proposed.catalogAnimeId)
+        );
         animeRef = existingAnimeRef
           ? (shouldUpgrade
             ? { ...proposed, id: existingAnimeRef.id, createdAt: existingAnimeRef.createdAt }
@@ -166,6 +173,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         status: "DRAFT",
         note: normalizeNote(input.note),
         watchedAt: null,
+        watchedAtPrecision: "UNKNOWN",
         episode: null,
         sceneCue: null,
         emotionTags: [],
@@ -173,6 +181,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
+        sync: createDefaultSyncEnvelope(now),
       };
       const asset = {
         id: assetId,
@@ -197,9 +206,11 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         width: null,
         height: null,
         designSpec,
+        isCurrent: true,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
+        sync: createDefaultSyncEnvelope(now),
       };
       const operation = {
         id: operationId,
@@ -239,8 +250,19 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       }
 
       const completedAt = String(clock.now());
-      const completeAsset = { ...asset, ...media, state: "READY", updatedAt: completedAt };
-      const completeCard = { ...card, status: "COMPLETE_PRIVATE", updatedAt: completedAt };
+      const completeAsset = {
+        ...asset,
+        ...media,
+        state: "READY",
+        updatedAt: completedAt,
+        sync: { ...asset.sync, clientUpdatedAt: completedAt },
+      };
+      const completeCard = {
+        ...card,
+        status: "COMPLETE_PRIVATE",
+        updatedAt: completedAt,
+        sync: { ...card.sync, clientUpdatedAt: completedAt },
+      };
       const result = {
         operationId,
         cardId,

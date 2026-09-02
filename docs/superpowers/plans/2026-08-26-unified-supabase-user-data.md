@@ -948,7 +948,7 @@ git commit -m "feat(db): add memory sync RPC and owner RLS"
 - Consumes: current v1 Guest/Card/Asset/media journal and catalog candidate `animeId`.
 - Produces: `createAccountOwner`, `requireOwnerId`, `catalogAnimeId`, active owner APIs, schema-v2 stores, sync-envelope normalization.
 
-- [ ] **Step 1: Write failing owner and catalog-binding tests**
+- [x] **Step 1: Write failing owner and catalog-binding tests**
 
 ```js
 const account = createAccountOwner({
@@ -973,7 +973,7 @@ assert.equal(anime.catalogAnimeId, "anime:33333333-3333-4333-8333-333333333333")
 
 Also assert a malformed account UUID or catalog ID is rejected, and provider-only legacy AnimeRef may keep `catalogAnimeId: null` until promotion preview.
 
-- [ ] **Step 2: Write the failing v1→v2 database test**
+- [x] **Step 2: Write the failing v1→v2 database test**
 
 Seed a fake version-1 database with one Guest Card and verify the v2 upgrade:
 
@@ -1000,7 +1000,7 @@ assert.equal(existingCard.note, "preserve me");
 
 Assert the legacy `anime-collector-db` test fixture is never opened or mutated.
 
-- [ ] **Step 3: Run focused tests and verify RED**
+- [x] **Step 3: Run focused tests and verify RED**
 
 ```powershell
 node tests/unit/memoryAccountOwner.test.mjs
@@ -1011,7 +1011,7 @@ node tests/unit/createMemoryCard.test.mjs
 
 Expected: missing Account owner/catalog field and DB version assertions fail.
 
-- [ ] **Step 4: Implement the owner and AnimeRef contract**
+- [x] **Step 4: Implement the owner and AnimeRef contract**
 
 Replace the Guest-only validator with:
 
@@ -1031,7 +1031,7 @@ export function createAccountOwner({ userId, now }) {
 
 `createAnimeRef()` validates and stores `catalogAnimeId` when present. `createMemoryCardCommand()` passes `input.titleChoice.animeId` into that field. Provider artwork remains excluded.
 
-- [ ] **Step 5: Implement schema v2 and owner/sync store modules**
+- [x] **Step 5: Implement schema v2 and owner/sync store modules**
 
 `memoryOwnerStore.js` exports these exact functions:
 
@@ -1086,11 +1086,11 @@ export declare function writeDeviceSyncState(
 
 The actual implementations use IndexedDB request/transaction helpers and validate owner scope before returning rows.
 
-- [ ] **Step 6: Make runtime commands use the active owner**
+- [x] **Step 6: Make runtime commands use the active owner**
 
 `initialize()` returns the active Guest or Account owner. Existing create/list/get/update/delete/replace methods continue passing one explicit owner ID. Signing out later changes only active owner selection; it does not rewrite account rows into Guest rows.
 
-- [ ] **Step 7: Run all local Memory tests and verify GREEN**
+- [x] **Step 7: Run all local Memory tests and verify GREEN**
 
 ```powershell
 npm.cmd run test:unit
@@ -1099,7 +1099,7 @@ npm.cmd run build
 
 Expected: all unit tests and build pass; v1 Card content is unchanged after v2 open.
 
-- [ ] **Step 8: Commit the local identity/schema upgrade**
+- [x] **Step 8: Commit the local identity/schema upgrade**
 
 ```powershell
 git add src/features/memory tests/unit/memoryAccountOwner.test.mjs tests/unit/memoryDbV2.test.mjs tests/unit/memoryDomain.test.mjs tests/unit/createMemoryCard.test.mjs
@@ -2131,6 +2131,10 @@ Never attach user ID, email, note, image reference/hash, title, Board name, or f
 [2026-08-28 11:36] 발견 및 보완: 현재 entity에서 operation 결과를 재구성하면 후속 mutation 뒤 idempotent replay가 달라짐 → bounded result_payload snapshot으로 최초 결과를 고정하고 회귀 테스트 1개 추가.
 [2026-08-28 11:36] 검증: SECURITY DEFINER 8개 모두 empty search_path, authenticated RPC grant 정확히 7개, private function execute 0개, RLS table 11개, write grant 0개, daily cron 1개, catalog table 6개/anon read 보존.
 [2026-08-28 11:36] 범위: local Supabase와 feature worktree만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
+[2026-09-02 09:44] 완료: Task 4 / Account·Guest active owner, catalogAnimeId 보존, IndexedDB v2 13-store schema, owner-scoped sync 준비 저장소 구현.
+[2026-09-02 09:44] TDD: owner/catalog/schema focused test 4개 파일 expected RED → focused 32/32 PASS, 전체 unit 129/129 PASS, Chromium IndexedDB 3/3 PASS, Web build 12 pages.
+[2026-09-02 09:44] 검증: moemoa-memory-v1 이름 유지, 기존 v1 Card note/owner 보존, anime-collector-db 미접근, Account owner 재시작 후 활성 상태 및 catalogAnimeId 영속화 확인.
+[2026-09-02 09:44] 범위: local IndexedDB/domain/runtime와 feature worktree 문서만 변경. remote Supabase, Vercel, OAuth provider, 실제 사용자 데이터에는 변경 없음.
 ```
 
 실행자는 각 Task 완료 시 다음 형식으로 한 줄을 추가한다.

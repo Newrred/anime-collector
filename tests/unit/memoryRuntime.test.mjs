@@ -48,6 +48,41 @@ test("runtime initializes one guest owner and scopes create/archive commands to 
   assert.equal(calls.find(([name]) => name === "archive")[1], OWNER_ID);
 });
 
+test("runtime preserves an already active Account owner instead of forcing Guest", async () => {
+  const accountOwner = {
+    id: "account:22222222-2222-4222-8222-222222222222",
+    kind: "ACCOUNT",
+    userId: "22222222-2222-4222-8222-222222222222",
+    createdAt: "2026-08-12T00:00:00.000Z",
+  };
+  const calls = [];
+  const runtime = createMemoryRuntime({
+    repository: {
+      ensureInstallationIdentity: async (input) => {
+        calls.push(["identity", input]);
+        return {
+          installationId: input.uuid,
+          guestOwner: { id: OWNER_ID, kind: "GUEST", createdAt: input.now },
+        };
+      },
+      getActiveOwner: async () => accountOwner,
+      activateOwner: async () => { throw new Error("active account must not be replaced"); },
+      listArchive: async (ownerId) => {
+        calls.push(["archive", ownerId]);
+        return [];
+      },
+    },
+    imageIntake: { available: false },
+    createCommand: { execute: async () => ({}) },
+    uuid: () => "11111111-1111-4111-8111-111111111111",
+    clock: { now: () => "2026-08-12T00:00:00.000Z" },
+  });
+
+  assert.deepEqual(await runtime.initialize(), accountOwner);
+  assert.deepEqual(await runtime.listArchive(), []);
+  assert.equal(calls.find(([name]) => name === "archive")[1], accountOwner.id);
+});
+
 test("runtime exposes title search without initializing an owner or logging the query", async () => {
   const calls = [];
   const runtime = createMemoryRuntime({

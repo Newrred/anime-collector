@@ -1,7 +1,15 @@
-import { createGuestOwner } from "../../domain/memoryDomain.js";
+import {
+  createDefaultSyncEnvelope,
+  requireOwnerId,
+} from "../../domain/memoryDomain.js";
 import { openMemoryDatabase } from "./memoryDb.js";
-
-const GUEST_OWNER_META_KEY = "installationGuestOwnerId";
+import {
+  activateOwner,
+  ensureAccountOwner,
+  ensureInstallationIdentity,
+  getActiveOwner,
+  rotateGuestOwnerAfterPromotion,
+} from "./memoryOwnerStore.js";
 
 const requestResult = (request) => new Promise((resolve, reject) => {
   request.onsuccess = () => resolve(request.result ?? null);
@@ -16,9 +24,35 @@ const transactionDone = (transaction) => new Promise((resolve, reject) => {
 
 const clone = (value) => value == null ? value : structuredClone(value);
 
+const normalizePrivateTitle = (title) => ({
+  ...title,
+  deletedAt: title.deletedAt ?? null,
+  sync: title.sync || createDefaultSyncEnvelope(title.updatedAt || title.createdAt),
+});
+
+const normalizeAnimeRef = (animeRef) => ({
+  ...animeRef,
+  catalogAnimeId: animeRef.catalogAnimeId ?? null,
+});
+
+const normalizeCard = (card) => ({
+  ...card,
+  watchedAtPrecision: card.watchedAtPrecision || "UNKNOWN",
+  deletedAt: card.deletedAt ?? null,
+  sync: card.sync || createDefaultSyncEnvelope(card.updatedAt || card.createdAt),
+});
+
+const normalizeAsset = (asset) => ({
+  ...asset,
+  isCurrent: asset.isCurrent ?? (asset.state === "READY" && asset.deletedAt == null),
+  deletedAt: asset.deletedAt ?? null,
+  sync: asset.sync || createDefaultSyncEnvelope(asset.updatedAt || asset.createdAt),
+});
+
 const requireOwner = async (database, ownerId) => {
+  const validOwnerId = requireOwnerId(ownerId);
   const transaction = database.transaction("owners", "readonly");
-  const owner = await requestResult(transaction.objectStore("owners").get(ownerId));
+  const owner = await requestResult(transaction.objectStore("owners").get(validOwnerId));
   await transactionDone(transaction);
   if (!owner) throw Object.assign(new Error("Owner does not exist"), { code: "OWNER_NOT_FOUND" });
   return owner;
@@ -38,20 +72,27 @@ export class IndexedDbMemoryRepository {
   }
 
   async ensureGuestOwner({ uuid, now }) {
-    const read = this.database.transaction(["meta", "owners"], "readonly");
-    const existingMeta = await requestResult(read.objectStore("meta").get(GUEST_OWNER_META_KEY));
-    const existingOwner = existingMeta
-      ? await requestResult(read.objectStore("owners").get(existingMeta.value))
-      : null;
-    await transactionDone(read);
-    if (existingOwner) return clone(existingOwner);
+    return (await ensureInstallationIdentity(this.database, { uuid, now })).guestOwner;
+  }
 
-    const owner = createGuestOwner({ uuid, now });
-    const write = this.database.transaction(["meta", "owners"], "readwrite");
-    write.objectStore("owners").put(owner);
-    write.objectStore("meta").put({ key: GUEST_OWNER_META_KEY, value: owner.id, updatedAt: String(now) });
-    await transactionDone(write);
-    return clone(owner);
+  ensureInstallationIdentity(input) {
+    return ensureInstallationIdentity(this.database, input);
+  }
+
+  getActiveOwner() {
+    return getActiveOwner(this.database);
+  }
+
+  ensureAccountOwner(input) {
+    return ensureAccountOwner(this.database, input);
+  }
+
+  activateOwner(input) {
+    return activateOwner(this.database, input);
+  }
+
+  rotateGuestOwnerAfterPromotion(input) {
+    return rotateGuestOwnerAfterPromotion(this.database, input);
   }
 
   async getOperation(ownerId, operationId) {
@@ -107,10 +148,10 @@ export class IndexedDbMemoryRepository {
       [titleStore, "memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    if (title) transaction.objectStore(titleStore).add(title);
-    else transaction.objectStore(titleStore).put(animeRef);
-    transaction.objectStore("memory_cards").add(card);
-    transaction.objectStore("visual_assets").add(asset);
+    if (title) transaction.objectStore(titleStore).add(normalizePrivateTitle(title));
+    else transaction.objectStore(titleStore).put(normalizeAnimeRef(animeRef));
+    transaction.objectStore("memory_cards").add(normalizeCard(card));
+    transaction.objectStore("visual_assets").add(normalizeAsset(asset));
     transaction.objectStore("media_operations").add(operation);
     await transactionDone(transaction);
   }
@@ -138,9 +179,11 @@ export class IndexedDbMemoryRepository {
       [titleStore, "memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    transaction.objectStore(titleStore).put(title || animeRef);
-    transaction.objectStore("memory_cards").put(card);
-    transaction.objectStore("visual_assets").put(asset);
+    transaction.objectStore(titleStore).put(
+      title ? normalizePrivateTitle(title) : normalizeAnimeRef(animeRef),
+    );
+    transaction.objectStore("memory_cards").put(normalizeCard(card));
+    transaction.objectStore("visual_assets").put(normalizeAsset({ ...asset, isCurrent: true }));
     transaction.objectStore("media_operations").put(operation);
     await transactionDone(transaction);
   }

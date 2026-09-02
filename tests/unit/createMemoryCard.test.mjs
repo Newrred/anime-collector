@@ -200,6 +200,7 @@ test("selected catalog candidate creates an AnimeRef card without retaining prov
     ownerId: OWNER_ID,
     titleChoice: {
       kind: "ANIME_REF",
+      animeId: "anime:11111111-1111-4111-8111-000000154587",
       displayTitle: "Frieren: Beyond Journey's End",
       aliases: ["Sousou no Frieren", "葬送のフリーレン"],
       genres: ["Adventure", "Fantasy"],
@@ -232,6 +233,10 @@ test("selected catalog candidate creates an AnimeRef card without retaining prov
     provider: "ANILIST",
     externalId: "154587",
   });
+  assert.equal(
+    repository.animeRefs.get("anime-ref-1").catalogAnimeId,
+    "anime:11111111-1111-4111-8111-000000154587",
+  );
   assert.equal("coverImage" in repository.animeRefs.get("anime-ref-1"), false);
   assert.deepEqual(calls.events, [
     { name: "system_design_selected", properties: { templateId: "memory-gradient" } },

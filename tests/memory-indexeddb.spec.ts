@@ -98,6 +98,7 @@ test("memory database survives reopen and does not mutate the legacy database", 
       ownerId: owner.id,
       titleChoice: {
         kind: "ANIME_REF",
+        animeId: "anime:11111111-1111-4111-8111-000000154587",
         displayTitle: "Frieren: Beyond Journey's End",
         aliases: ["Sousou no Frieren"],
         genres: ["Adventure", "Fantasy"],
@@ -156,6 +157,14 @@ test("memory database survives reopen and does not mutate the legacy database", 
         updatedAt: "2026-08-12T01:30:00.000Z",
       },
     });
+    const accountOwner = await repository.ensureAccountOwner({
+      userId: "33333333-3333-4333-8333-333333333333",
+      now: "2026-08-12T01:45:00.000Z",
+    });
+    await repository.activateOwner({
+      ownerId: accountOwner.id,
+      now: "2026-08-12T01:45:00.000Z",
+    });
     repository.close();
 
     const reopened = await repositoryModule.IndexedDbMemoryRepository.open();
@@ -163,6 +172,7 @@ test("memory database survives reopen and does not mutate the legacy database", 
       uuid: "22222222-2222-4222-8222-222222222222",
       now: "2026-08-12T02:00:00.000Z",
     });
+    const activeOwner = await reopened.getActiveOwner();
     const recovery = await reconcileModule.createMemoryOperationReconciler({
       repository: reopened,
       localMedia: {
@@ -188,6 +198,7 @@ test("memory database survives reopen and does not mutate the legacy database", 
     return {
       ownerId: owner.id,
       sameOwnerId: sameOwner.id,
+      activeOwnerId: activeOwner?.id || null,
       archive,
       otherArchive,
       stores,
@@ -199,6 +210,9 @@ test("memory database survives reopen and does not mutate the legacy database", 
 
   expect(result.ownerId).toBe("guest:11111111-1111-4111-8111-111111111111");
   expect(result.sameOwnerId).toBe(result.ownerId);
+  expect(result.activeOwnerId).toBe(
+    "account:33333333-3333-4333-8333-333333333333",
+  );
   expect(result.archive).toHaveLength(3);
   expect(result.archive.every(({ card }) => card.status === "COMPLETE_PRIVATE")).toBe(true);
   expect(result.archive.map(({ title }) => title.displayTitle).sort()).toEqual([
@@ -209,18 +223,27 @@ test("memory database survives reopen and does not mutate the legacy database", 
   expect(result.animeRefBundle.card.privateTitleId).toBeNull();
   expect(result.animeRefBundle.card.animeRefId).toBe("anime-ref-catalog");
   expect(result.animeRefBundle.title.verificationState).toBe("PROVIDER_CANDIDATE");
+  expect(result.animeRefBundle.title.catalogAnimeId).toBe(
+    "anime:11111111-1111-4111-8111-000000154587",
+  );
   expect(result.animeRefBundle.title.sourceKey).toBe("ANILIST:154587");
   expect(result.animeRefBundle.title.coverImage).toBeUndefined();
   expect(result.archive.every(({ asset }) => asset.state === "READY")).toBe(true);
   expect(result.recovery).toEqual({ recovered: 1, failed: 0 });
   expect(result.otherArchive).toEqual([]);
   expect(result.stores).toEqual([
+    "account_promotions",
     "anime_refs",
+    "device_sync_state",
     "media_operations",
+    "memory_board_cards",
+    "memory_boards",
     "memory_cards",
     "meta",
     "owners",
     "private_titles",
+    "sync_conflicts",
+    "sync_outbox",
     "visual_assets",
   ]);
   expect(result.legacyMarker).toBe("unchanged");

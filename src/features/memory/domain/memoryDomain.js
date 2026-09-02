@@ -1,4 +1,5 @@
-const GUEST_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const OWNER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CATALOG_ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ANIME_VERIFICATION_STATES = new Set(["LEGACY_UNVERIFIED", "PROVIDER_CANDIDATE"]);
 
 export class MemoryDomainError extends Error {
@@ -13,12 +14,11 @@ const fail = (code, message) => {
   throw new MemoryDomainError(code, message);
 };
 
-const requireGuestOwnerId = (ownerId) => {
+export const requireOwnerId = (ownerId) => {
   const value = String(ownerId || "");
-  if (!value.startsWith("guest:") || !GUEST_UUID.test(value.slice(6))) {
-    fail("INVALID_OWNER_ID", "A valid guest owner id is required");
-  }
-  return value;
+  if (value.startsWith("guest:") && OWNER_UUID.test(value.slice(6))) return value;
+  if (value.startsWith("account:") && OWNER_UUID.test(value.slice(8))) return value;
+  return fail("INVALID_OWNER_ID", "A valid Memory owner id is required");
 };
 
 const requireId = (value, field) => {
@@ -46,21 +46,39 @@ const normalizeUniqueText = (values, { maxItems, maxLength }) => {
 };
 
 export function createGuestOwner({ uuid, now }) {
-  if (!GUEST_UUID.test(String(uuid || ""))) {
+  if (!OWNER_UUID.test(String(uuid || ""))) {
     fail("INVALID_OWNER_ID", "A version 4 UUID is required for a guest owner");
   }
   return Object.freeze({
-    id: `guest:${String(uuid).toLowerCase()}`,
+    id: requireOwnerId(`guest:${String(uuid).toLowerCase()}`),
     kind: "GUEST",
     createdAt: String(now),
   });
 }
 
+export function createAccountOwner({ userId, now }) {
+  const id = requireOwnerId(`account:${String(userId || "").toLowerCase()}`);
+  return Object.freeze({
+    id,
+    kind: "ACCOUNT",
+    userId: id.slice(8),
+    createdAt: String(now),
+  });
+}
+
+export const createDefaultSyncEnvelope = (now) => Object.freeze({
+  remoteVersion: 0,
+  syncState: "LOCAL_ONLY",
+  clientUpdatedAt: String(now),
+  serverUpdatedAt: null,
+  lastOperationId: null,
+});
+
 export function createPrivateTitle({ id, ownerId, displayTitle, optionalGenres = [], now }) {
   const title = normalizeDisplayTitle(displayTitle);
   return Object.freeze({
     id: requireId(id, "PrivateTitle id"),
-    ownerId: requireGuestOwnerId(ownerId),
+    ownerId: requireOwnerId(ownerId),
     displayTitle: title,
     normalizedTitle: title.toLocaleLowerCase("en-US"),
     optionalGenres: Object.freeze(optionalGenres.flatMap((genre) => {
@@ -69,11 +87,14 @@ export function createPrivateTitle({ id, ownerId, displayTitle, optionalGenres =
     })),
     createdAt: String(now),
     updatedAt: String(now),
+    deletedAt: null,
+    sync: createDefaultSyncEnvelope(now),
   });
 }
 
 export function createAnimeRef({
   id,
+  catalogAnimeId = null,
   displayTitle,
   aliases = [],
   genres = [],
@@ -91,8 +112,15 @@ export function createAnimeRef({
   }
 
   const title = normalizeDisplayTitle(displayTitle);
+  const normalizedCatalogAnimeId = catalogAnimeId == null || catalogAnimeId === ""
+    ? null
+    : String(catalogAnimeId).toLowerCase();
+  if (normalizedCatalogAnimeId && !CATALOG_ANIME_ID.test(normalizedCatalogAnimeId)) {
+    fail("INVALID_CATALOG_ANIME_ID", "A valid catalog Anime id is required");
+  }
   return Object.freeze({
     id: requireId(id, "AnimeRef id"),
+    catalogAnimeId: normalizedCatalogAnimeId,
     displayTitle: title,
     normalizedTitle: title.toLocaleLowerCase("en-US"),
     aliases: normalizeUniqueText(aliases, { maxItems: 24, maxLength: 120 }),
@@ -110,7 +138,7 @@ export function assertCompletePrivateCard({ card, title, animeRef, asset }) {
     fail("CARD_NOT_COMPLETE_PRIVATE", "Card must be COMPLETE_PRIVATE");
   }
 
-  const ownerId = requireGuestOwnerId(card.ownerId);
+  const ownerId = requireOwnerId(card.ownerId);
   const hasPrivateTitle = Boolean(card.privateTitleId);
   const hasAnimeRef = Boolean(card.animeRefId);
   if (!hasPrivateTitle && !hasAnimeRef) {

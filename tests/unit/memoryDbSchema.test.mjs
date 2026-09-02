@@ -34,7 +34,7 @@ class FakeDatabase {
 
 test("memory schema is isolated under the canonical v1 database", () => {
   assert.equal(MEMORY_DB_NAME, "moemoa-memory-v1");
-  assert.equal(MEMORY_DB_VERSION, 1);
+  assert.equal(MEMORY_DB_VERSION, 2);
 });
 
 test("schema upgrade creates only the owner-scoped memory stores and indexes", () => {
@@ -50,6 +50,12 @@ test("schema upgrade creates only the owner-scoped memory stores and indexes", (
     "visual_assets",
     "media_operations",
     "meta",
+    "account_promotions",
+    "device_sync_state",
+    "memory_boards",
+    "memory_board_cards",
+    "sync_outbox",
+    "sync_conflicts",
   ]);
   assert.deepEqual(
     database.stores.get("memory_cards").indexes.map(({ name, keyPath }) => ({ name, keyPath })),
@@ -73,5 +79,5 @@ test("schema upgrade is idempotent when stores already exist", () => {
   const database = new FakeDatabase();
   upgradeMemoryDatabase(database);
   assert.doesNotThrow(() => upgradeMemoryDatabase(database));
-  assert.equal(database.stores.size, 7);
+  assert.equal(database.stores.size, 13);
 });

@@ -50,9 +50,30 @@ export function createMemoryRuntime({
   const deferredTicketCleanup = ticketCleanup || createDeferredTicketCleanup();
   let ownerPromise = null;
 
+  const initializeOwner = async () => {
+    const now = clock.now();
+    const generatedUuid = uuid();
+    if (
+      typeof repository.ensureInstallationIdentity === "function"
+      && typeof repository.getActiveOwner === "function"
+    ) {
+      const identity = await repository.ensureInstallationIdentity({
+        uuid: generatedUuid,
+        now,
+      });
+      const activeOwner = await repository.getActiveOwner();
+      if (activeOwner) return activeOwner;
+      if (typeof repository.activateOwner === "function") {
+        return repository.activateOwner({ ownerId: identity.guestOwner.id, now });
+      }
+      return identity.guestOwner;
+    }
+    return repository.ensureGuestOwner({ uuid: generatedUuid, now });
+  };
+
   const initialize = () => {
     if (!ownerPromise) {
-      ownerPromise = repository.ensureGuestOwner({ uuid: uuid(), now: clock.now() })
+      ownerPromise = initializeOwner()
         .then(async (owner) => {
           await operationReconciler.execute(owner.id);
           await deferredTicketCleanup.flush((ticketId) => imageIntake.discard(ticketId));

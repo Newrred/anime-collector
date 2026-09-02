@@ -74,6 +74,7 @@ test("anime reference keeps only normalized title facts and explicit AniList pro
 
   assert.deepEqual(animeRef, {
     id: "anime-ref-1",
+    catalogAnimeId: null,
     displayTitle: "Frieren: Beyond Journey's End",
     normalizedTitle: "frieren: beyond journey's end",
     aliases: ["Sousou no Frieren", "葬送のフリーレン"],
