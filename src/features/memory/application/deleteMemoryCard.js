@@ -1,4 +1,6 @@
 import { MemoryApplicationError } from "./createMemoryCard.js";
+import { toRemoteBoardCard, toRemoteMemoryCard, toRemoteVisualAsset } from "../sync/memorySyncContract.js";
+import { prepareAccountSyncOperations } from "./prepareAccountSyncOperations.js";
 
 const safeDeleteError = (error) => {
   const code = /^[A-Z][A-Z0-9_]{2,63}$/.test(String(error?.code || ""))
@@ -42,7 +44,7 @@ export function buildDeleteCompletion({ card, asset, operation, now }) {
   };
 }
 
-export function createDeleteMemoryCardCommand({ repository, localMedia, telemetry, clock }) {
+export function createDeleteMemoryCardCommand({ repository, localMedia, telemetry, clock, ids }) {
   return Object.freeze({
     async execute({ ownerId, cardId, operationId }) {
       const existing = await repository.getOperation(ownerId, operationId);
@@ -80,7 +82,36 @@ export function createDeleteMemoryCardCommand({ repository, localMedia, telemetr
         createdAt: now,
         updatedAt: now,
       };
-      await repository.planDelete({ card, asset, operation });
+      const memberships = typeof repository.listCardBoardMemberships === "function"
+        ? await repository.listCardBoardMemberships(ownerId, cardId)
+        : [];
+      const syncOperations = await prepareAccountSyncOperations({
+        repository,
+        ownerId,
+        ids,
+        createdAt: now,
+        specs: () => [
+          {
+            entityType: "MEMORY_CARD", entityId: card.id, operationType: "DELETE",
+            baseVersion: card.sync?.remoteVersion,
+            payload: toRemoteMemoryCard({ card, title: bundle.title }),
+          },
+          {
+            entityType: "VISUAL_ASSET", entityId: asset.id, operationType: "DELETE",
+            baseVersion: asset.sync?.remoteVersion,
+            payload: toRemoteVisualAsset({
+              card,
+              asset: { ...asset, state: "DELETED", isCurrent: false },
+            }),
+          },
+          ...memberships.map((membership) => ({
+            entityType: "MEMORY_BOARD_CARD", entityId: membership.id, operationType: "DELETE",
+            baseVersion: membership.sync?.remoteVersion,
+            payload: toRemoteBoardCard({ ...membership, deletedAt: now, updatedAt: now }),
+          })),
+        ],
+      });
+      await repository.planDelete({ card, asset, operation, syncOperations });
 
       try {
         if (bundle.asset.localRef) {

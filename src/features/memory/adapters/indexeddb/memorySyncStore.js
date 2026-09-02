@@ -58,11 +58,14 @@ const validateOperation = (operation) => {
     payload: clone(value.payload),
     state: String(value.state || ""),
     createdAt: requireText(value.createdAt, "createdAt"),
+    ordinal: Number(value.ordinal ?? 0),
   };
   if (!ENTITY_TYPES.has(normalized.entityType)
     || !OPERATION_TYPES.has(normalized.operationType)
     || !OPERATION_STATES.has(normalized.state)
     || !Number.isSafeInteger(normalized.baseVersion)
+    || !Number.isSafeInteger(normalized.ordinal)
+    || normalized.ordinal < 0
     || normalized.baseVersion < 0
     || !HASH.test(normalized.requestHash)) {
     fail("SYNC_RECORD_INVALID", "Sync operation fields are invalid");
@@ -103,8 +106,16 @@ export async function listPendingSyncOperations(database, ownerId, limit = 50) {
   await transactionDone(transaction);
   return clone((rows || [])
     .filter((row) => row.ownerId === validOwnerId && row.state === "PENDING")
-    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+    .sort((left, right) => left.createdAt.localeCompare(right.createdAt)
+      || Number(left.ordinal || 0) - Number(right.ordinal || 0)
+      || left.id.localeCompare(right.id))
     .slice(0, maximum));
+}
+
+export function appendSyncOperationsToTransaction(transaction, operations = []) {
+  if (!operations.length) return;
+  const outbox = transaction.objectStore("sync_outbox");
+  for (const operation of operations) outbox.add(validateOperation(operation));
 }
 
 export async function readDeviceSyncState(database, ownerId) {

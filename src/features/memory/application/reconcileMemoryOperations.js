@@ -6,12 +6,18 @@ import {
   requireConfirmedDeletion,
   scrubReplacedAsset,
 } from "./replaceMemoryCardImage.js";
+import {
+  toRemoteMemoryCard,
+  toRemotePrivateTitle,
+  toRemoteVisualAsset,
+} from "../sync/memorySyncContract.js";
+import { prepareAccountSyncOperations } from "./prepareAccountSyncOperations.js";
 
 const safeErrorCode = (error) => /^[A-Z][A-Z0-9_]{2,63}$/.test(String(error?.code || ""))
   ? String(error.code)
   : "OPERATION_RECOVERY_FAILED";
 
-export function createMemoryOperationReconciler({ repository, localMedia, clock }) {
+export function createMemoryOperationReconciler({ repository, localMedia, clock, ids }) {
   return Object.freeze({
     async execute(ownerId) {
       const operations = await repository.listRecoverableOperations(ownerId);
@@ -59,12 +65,23 @@ export function createMemoryOperationReconciler({ repository, localMedia, clock 
               result,
             };
             assertCompletePrivateCard({ card, title: bundle.title, animeRef: bundle.animeRef, asset });
+            const remoteTitle = bundle.title || bundle.animeRef;
+            const syncOperations = await prepareAccountSyncOperations({
+              repository, ownerId, ids, createdAt: now,
+              specs: () => [
+                ...(bundle.title ? [{ entityType: "PRIVATE_TITLE", entityId: bundle.title.id, operationType: "UPSERT", baseVersion: bundle.title.sync?.remoteVersion, payload: toRemotePrivateTitle(bundle.title) }] : []),
+                { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card: { ...card, status: "DRAFT" }, title: remoteTitle }) },
+                { entityType: "VISUAL_ASSET", entityId: asset.id, operationType: "UPSERT", baseVersion: asset.sync?.remoteVersion, payload: toRemoteVisualAsset({ card, asset }) },
+                { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card, title: remoteTitle }) },
+              ],
+            });
             await repository.completeCreate({
               title: bundle.title,
               animeRef: bundle.animeRef,
               card,
               asset,
               operation: completedOperation,
+              syncOperations,
             });
           } else if (operation.kind === "DELETE") {
             if (bundle.asset.localRef) {
@@ -124,11 +141,22 @@ export function createMemoryOperationReconciler({ repository, localMedia, clock 
                 animeRef: bundle.animeRef,
                 asset: replacementAsset,
               });
+              const remoteTitle = bundle.title || bundle.animeRef;
+              const syncOperations = await prepareAccountSyncOperations({
+                repository, ownerId, ids, createdAt: now,
+                specs: () => [
+                  { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card: { ...card, status: "DRAFT" }, title: remoteTitle }) },
+                  { entityType: "VISUAL_ASSET", entityId: previousAsset.id, operationType: "DELETE", baseVersion: previousAsset.sync?.remoteVersion, payload: toRemoteVisualAsset({ card, asset: { ...previousAsset, state: "DELETED", isCurrent: false } }) },
+                  { entityType: "VISUAL_ASSET", entityId: replacementAsset.id, operationType: "UPSERT", baseVersion: replacementAsset.sync?.remoteVersion, payload: toRemoteVisualAsset({ card, asset: { ...replacementAsset, isCurrent: true } }) },
+                  { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card, title: remoteTitle }) },
+                ],
+              });
               await repository.commitReplace({
                 card,
                 replacementAsset,
                 previousAsset,
                 operation: replacementOperation,
+                syncOperations,
               });
             }
             await requireConfirmedDeletion(localMedia, previousAsset.localRef);

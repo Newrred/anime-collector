@@ -1,5 +1,6 @@
 import { createDefaultSyncEnvelope, requireOwnerId } from "../../domain/memoryDomain.js";
 import { createBoardCard, createMemoryBoard } from "../../domain/memoryBoard.js";
+import { appendSyncOperationsToTransaction } from "./memorySyncStore.js";
 
 const requestResult = (request) => new Promise((resolve, reject) => {
   request.onsuccess = () => resolve(request.result ?? null);
@@ -18,13 +19,16 @@ const fail = (code, message, transaction = null) => {
   throw Object.assign(new Error(message), { code });
 };
 
-const touchSync = (entity, now) => ({
+const touchSync = (entity, now, syncOperations = []) => ({
   ...(entity.sync || createDefaultSyncEnvelope(now)),
-  syncState: "LOCAL_ONLY",
+  syncState: syncOperations.some((operation) => operation.entityId === entity.id) ? "PENDING" : "LOCAL_ONLY",
   clientUpdatedAt: String(now),
+  ...(syncOperations.some((operation) => operation.entityId === entity.id)
+    ? { lastOperationId: syncOperations.filter((operation) => operation.entityId === entity.id).at(-1).id }
+    : {}),
 });
 
-export async function createBoard(database, board) {
+export async function createBoard(database, board, syncOperations = []) {
   const normalized = createMemoryBoard({
     id: board.id,
     ownerId: board.ownerId,
@@ -33,7 +37,7 @@ export async function createBoard(database, board) {
     now: board.createdAt,
   });
   const ownerId = normalized.ownerId;
-  const transaction = database.transaction(["owners", "memory_boards"], "readwrite");
+  const transaction = database.transaction(["owners", "memory_boards", ...(syncOperations.length ? ["sync_outbox"] : [])], "readwrite");
   const owners = transaction.objectStore("owners");
   const boards = transaction.objectStore("memory_boards");
   const [owner, existing] = await Promise.all([
@@ -42,14 +46,16 @@ export async function createBoard(database, board) {
   ]);
   if (!owner) fail("OWNER_NOT_FOUND", "Board owner does not exist", transaction);
   if (existing) fail("BOARD_EXISTS", "Board already exists", transaction);
-  boards.add(normalized);
+  const stored = { ...normalized, sync: touchSync(normalized, normalized.updatedAt, syncOperations) };
+  boards.add(stored);
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
-  return clone(normalized);
+  return clone(stored);
 }
 
-export async function updateBoard(database, { ownerId, boardId, changes, now }) {
+export async function updateBoard(database, { ownerId, boardId, changes, now, syncOperations = [] }) {
   const validOwnerId = requireOwnerId(ownerId);
-  const transaction = database.transaction("memory_boards", "readwrite");
+  const transaction = database.transaction(["memory_boards", ...(syncOperations.length ? ["sync_outbox"] : [])], "readwrite");
   const boards = transaction.objectStore("memory_boards");
   const current = await requestResult(boards.get(boardId));
   if (!current || current.ownerId !== validOwnerId || current.deletedAt) {
@@ -68,16 +74,17 @@ export async function updateBoard(database, { ownerId, boardId, changes, now }) 
     description: validated.description,
     visibility: "PRIVATE",
     updatedAt: String(now),
-    sync: touchSync(current, now),
+    sync: touchSync(current, now, syncOperations),
   };
   boards.put(updated);
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
   return clone(updated);
 }
 
-export async function deleteBoard(database, { ownerId, boardId, now }) {
+export async function deleteBoard(database, { ownerId, boardId, now, syncOperations = [] }) {
   const validOwnerId = requireOwnerId(ownerId);
-  const transaction = database.transaction(["memory_boards", "memory_board_cards"], "readwrite");
+  const transaction = database.transaction(["memory_boards", "memory_board_cards", ...(syncOperations.length ? ["sync_outbox"] : [])], "readwrite");
   const boards = transaction.objectStore("memory_boards");
   const memberships = transaction.objectStore("memory_board_cards");
   const [board, rows] = await Promise.all([
@@ -88,19 +95,20 @@ export async function deleteBoard(database, { ownerId, boardId, now }) {
     fail("BOARD_NOT_FOUND", "Private Board was not found", transaction);
   }
   const timestamp = String(now);
-  boards.put({ ...board, deletedAt: timestamp, updatedAt: timestamp, sync: touchSync(board, timestamp) });
+  boards.put({ ...board, deletedAt: timestamp, updatedAt: timestamp, sync: touchSync(board, timestamp, syncOperations) });
   for (const row of rows.filter((item) => (
     item.ownerId === validOwnerId && item.boardId === boardId && !item.deletedAt
   ))) {
-    memberships.put({ ...row, deletedAt: timestamp, updatedAt: timestamp, sync: touchSync(row, timestamp) });
+    memberships.put({ ...row, deletedAt: timestamp, updatedAt: timestamp, sync: touchSync(row, timestamp, syncOperations) });
   }
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
 }
 
-export async function addCardToBoard(database, membership) {
+export async function addCardToBoard(database, membership, syncOperations = []) {
   const ownerId = requireOwnerId(membership.ownerId);
   const transaction = database.transaction(
-    ["memory_boards", "memory_cards", "memory_board_cards"],
+    ["memory_boards", "memory_cards", "memory_board_cards", ...(syncOperations.length ? ["sync_outbox"] : [])],
     "readwrite",
   );
   const boards = transaction.objectStore("memory_boards");
@@ -129,14 +137,16 @@ export async function addCardToBoard(database, membership) {
   const stored = tombstone
     ? { ...normalized, id: tombstone.id, createdAt: tombstone.createdAt }
     : normalized;
-  memberships.put(stored);
+  const pending = { ...stored, sync: touchSync(stored, stored.updatedAt, syncOperations) };
+  memberships.put(pending);
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
-  return clone(stored);
+  return clone(pending);
 }
 
-export async function removeCardFromBoard(database, { ownerId, boardId, cardId, now }) {
+export async function removeCardFromBoard(database, { ownerId, boardId, cardId, now, syncOperations = [] }) {
   const validOwnerId = requireOwnerId(ownerId);
-  const transaction = database.transaction("memory_board_cards", "readwrite");
+  const transaction = database.transaction(["memory_board_cards", ...(syncOperations.length ? ["sync_outbox"] : [])], "readwrite");
   const memberships = transaction.objectStore("memory_board_cards");
   const rows = await requestResult(memberships.getAll());
   const membership = rows.find((row) => (
@@ -148,16 +158,17 @@ export async function removeCardFromBoard(database, { ownerId, boardId, cardId, 
     ...membership,
     deletedAt: timestamp,
     updatedAt: timestamp,
-    sync: touchSync(membership, timestamp),
+    sync: touchSync(membership, timestamp, syncOperations),
   };
   memberships.put(removed);
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
   return clone(removed);
 }
 
-export async function reorderBoardCard(database, { ownerId, boardId, cardId, positionKey, now }) {
+export async function reorderBoardCard(database, { ownerId, boardId, cardId, positionKey, now, syncOperations = [] }) {
   const validOwnerId = requireOwnerId(ownerId);
-  const transaction = database.transaction("memory_board_cards", "readwrite");
+  const transaction = database.transaction(["memory_board_cards", ...(syncOperations.length ? ["sync_outbox"] : [])], "readwrite");
   const memberships = transaction.objectStore("memory_board_cards");
   const rows = await requestResult(memberships.getAll());
   const membership = rows.find((row) => (
@@ -173,9 +184,10 @@ export async function reorderBoardCard(database, { ownerId, boardId, cardId, pos
     ...membership,
     positionKey: validated.positionKey,
     updatedAt: String(now),
-    sync: touchSync(membership, now),
+    sync: touchSync(membership, now, syncOperations),
   };
   memberships.put(updated);
+  appendSyncOperationsToTransaction(transaction, syncOperations);
   await transactionDone(transaction);
   return clone(updated);
 }

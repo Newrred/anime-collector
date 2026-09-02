@@ -1677,7 +1677,7 @@ git commit -m "feat(sync): synchronize memory metadata by entity"
 - Consumes: Task 9 outbox APIs.
 - Produces: every account-owned local content mutation and outbox append in the same IndexedDB transaction.
 
-- [ ] **Step 1: Write failing transaction tests**
+- [x] **Step 1: Write failing transaction tests**
 
 For create/update/delete/replace/Board mutations assert:
 
@@ -1689,7 +1689,7 @@ LOCAL_ONLY image replacement → asset metadata enqueued, localRef excluded
 Card delete → Card/asset/membership tombstones enqueued in deterministic order
 ```
 
-- [ ] **Step 2: Run command tests and verify RED**
+- [x] **Step 2: Run command tests and verify RED**
 
 ```powershell
 node tests/unit/createMemoryCard.test.mjs
@@ -1699,11 +1699,11 @@ node tests/unit/replaceMemoryCardImage.test.mjs
 node tests/unit/memoryBoard.test.mjs
 ```
 
-- [ ] **Step 3: Append the outbox in existing local transactions**
+- [x] **Step 3: Append the outbox in existing local transactions**
 
 Repository methods receive a `syncOperation` only for `ACCOUNT` owners. The operation contains remote DTO, base version, operation ID, request hash, and no image bytes/path. Existing media operation journal remains separate.
 
-- [ ] **Step 4: Render cross-device asset availability honestly**
+- [x] **Step 4: Render cross-device asset availability honestly**
 
 UI state rules:
 
@@ -1716,11 +1716,11 @@ sync error/conflict → Card remains readable and editable locally with status b
 
 Never show catalog cover as a replacement for the user's missing VisualAsset.
 
-- [ ] **Step 5: Remove legacy cloud sync consumers from Memory account surfaces**
+- [x] **Step 5: Remove legacy cloud sync consumers from Memory account surfaces**
 
 The import graph for `TopNavDataMenu`, `DataCenter`, Memory routes, and Board routes must not reach `syncRepo.js`, `snapshotCodec.js`, or `cloudSyncTables.js`. Legacy manual local tools may retain their own imports.
 
-- [ ] **Step 6: Run regression E2E and import-boundary assertions**
+- [x] **Step 6: Run regression E2E and import-boundary assertions**
 
 ```powershell
 npm.cmd run test:e2e -- tests/memory-account-sync.spec.ts tests/memory-card-composer.spec.ts tests/memory-board.spec.ts --project=chromium --workers=1
@@ -1731,12 +1731,20 @@ rg -n "syncRepo|snapshotCodec|cloudSyncTables" src/components/TopNavDataMenu.jsx
 
 Expected: tests/build pass; the final `rg` returns no Memory account consumer import.
 
-- [ ] **Step 7: Commit mutation integration**
+- [x] **Step 7: Commit mutation integration**
 
 ```powershell
 git add src/features/memory src/components/DataCenter.jsx src/components/TopNavDataMenu.jsx src/messages/en.js src/messages/ko.js tests
 git commit -m "feat(memory): enqueue account metadata changes"
 ```
+
+**Implemented 2026-09-02:**
+
+- Guest writes remain local-only. Account Card and Board writes append their remote-safe outbox rows in the same IndexedDB transaction as the content change; an outbox constraint failure aborts the content transaction.
+- Complete Card creation and image replacement enqueue invariant-safe remote sequences (`DRAFT` Card → current `READY` asset → `COMPLETE_PRIVATE` Card). Delete queues Card, asset, and sorted Board-membership tombstones without copying `localRef` or image bytes.
+- The Memory runtime rechecks the active owner after Auth activation instead of retaining a stale Guest owner. Interrupted import/replacement recovery produces the same Account outbox sequence.
+- Archive, detail, and Board surfaces keep local records readable during pending/conflict states and identify a local-only user image that is unavailable on the current device. They never substitute a catalog cover.
+- Verification evidence: 176/176 unit tests, 26/26 focused Memory Chromium E2E, 7/7 real IndexedDB Chromium E2E, 13-route production build, empty legacy-sync import-boundary search, and React Doctor 91/100 for the Task diff with one pre-existing Board-component complexity warning. No remote migration, environment cutover, deployment, or push was performed.
 
 ### Task 11: Add Android external-browser OAuth and verified callback handling
 

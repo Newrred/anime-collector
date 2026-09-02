@@ -25,6 +25,7 @@ function MemoryBoardContent({ base }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const selectedBoardId = useMemo(readBoardId, []);
+  const syncLabel = (entity) => boardCopy.syncStates?.[entity?.sync?.syncState] || "";
 
   const refresh = useCallback(async (activeRuntime, boardId = selectedBoardId) => {
     const [nextBoards, nextArchive, nextDetail] = await Promise.all([
@@ -153,6 +154,7 @@ function MemoryBoardContent({ base }) {
                 }}>
                   <div>
                     <span className="memory-boards__privacy">{boardCopy.privateBadge}</span>
+                    {syncLabel(detail.board) ? <span className="status-badge">{syncLabel(detail.board)}</span> : null}
                     <label>
                       <span className="sr-only">{boardCopy.titleLabel}</span>
                       <input className="memory-boards__title-input" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={80} required />
@@ -192,6 +194,7 @@ function MemoryBoardContent({ base }) {
                             <a href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}>
                               <strong>{bundle.title.displayTitle}</strong>
                               <span>{bundle.card.note || boardCopy.noReflection}</span>
+                              {syncLabel(bundle.card) ? <small className="status-badge">{syncLabel(bundle.card)}</small> : null}
                             </a>
                             <div className="memory-boards__card-actions">
                               <button type="button" className="btn btn--subtle" disabled={index === 0} aria-label={boardCopy.moveUp(bundle.title.displayTitle)} onClick={() => run(

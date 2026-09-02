@@ -27,6 +27,8 @@ const toArchiveVisual = ({ asset, previewDataUrl, title, archiveCopy }) => {
   return { kind: "MISSING" };
 };
 
+const syncLabel = (entity, copy) => copy.syncStates?.[entity?.sync?.syncState] || "";
+
 export default function ArchiveView({ base = "/" }) {
   return (
     <MemoryRouteShell base={base} currentRoute="archive">
@@ -111,6 +113,7 @@ function ArchiveContent({ base }) {
               cue={card.note || ""}
               dateLabel={formatArchiveDate(card.updatedAt, locale)}
               badge={asset.designSpec ? archiveCopy.systemDesign : archiveCopy.privateImage}
+              syncBadge={syncLabel(card, archiveCopy)}
               visual={toArchiveVisual({ asset, previewDataUrl, title, archiveCopy })}
               variant="grid"
               systemCopy={{
@@ -118,7 +121,9 @@ function ArchiveContent({ base }) {
                 fallbackTitle: title.displayTitle,
                 footer: copy.systemDesign.footer,
               }}
-              missingLabel={archiveCopy.missingImage}
+              missingLabel={!asset.designSpec && !asset.localRef
+                ? archiveCopy.unavailableOnDevice
+                : archiveCopy.missingImage}
             />
           ))}
         </section>

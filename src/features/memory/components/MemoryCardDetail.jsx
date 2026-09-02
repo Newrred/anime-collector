@@ -27,6 +27,8 @@ const localizedMessage = (message, copy) => {
   return "";
 };
 
+const syncLabel = (entity, copy) => copy.syncStates?.[entity?.sync?.syncState] || "";
+
 export default function MemoryCardDetail({ base = "/" }) {
   return (
     <MemoryRouteShell base={base} currentRoute="memory-card">
@@ -182,7 +184,10 @@ function MemoryCardDetailContent({ base }) {
     <div className="memory-detail page-shell page-shell--narrow">
       <header className="memory-detail__header">
         <a href={`${base}archive/`}>{detailCopy.archiveLink}</a>
-        <span className="status-badge">{detailCopy.privacy}</span>
+        <span className="memory-detail__badges">
+          <span className="status-badge">{detailCopy.privacy}</span>
+          {syncLabel(bundle.card, detailCopy) ? <span className="status-badge">{syncLabel(bundle.card, detailCopy)}</span> : null}
+        </span>
       </header>
       <article className="surface-card memory-detail__card">
         <div className="memory-detail__visual">
@@ -202,7 +207,9 @@ function MemoryCardDetailContent({ base }) {
               fallbackTitle: bundle.title.displayTitle,
               footer: copy.systemDesign.footer,
             }}
-            missingLabel={detailCopy.missingImage}
+            missingLabel={!bundle.asset.designSpec && !bundle.asset.localRef
+              ? detailCopy.unavailableOnDevice
+              : detailCopy.missingImage}
           />
         </div>
         <div className="memory-detail__body">

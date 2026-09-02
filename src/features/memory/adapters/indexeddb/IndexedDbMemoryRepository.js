@@ -39,6 +39,7 @@ import {
   listPendingSyncOperations,
   readDeviceSyncState,
   rebaseSyncOperation,
+  appendSyncOperationsToTransaction,
 } from "./memorySyncStore.js";
 
 const requestResult = (request) => new Promise((resolve, reject) => {
@@ -78,6 +79,20 @@ const normalizeAsset = (asset) => ({
   deletedAt: asset.deletedAt ?? null,
   sync: asset.sync || createDefaultSyncEnvelope(asset.updatedAt || asset.createdAt),
 });
+
+const withPendingSync = (entity, syncOperations, now = entity.updatedAt) => {
+  const matching = (syncOperations || []).filter((operation) => operation.entityId === entity.id);
+  if (!matching.length) return entity;
+  return {
+    ...entity,
+    sync: {
+      ...(entity.sync || createDefaultSyncEnvelope(now)),
+      syncState: "PENDING",
+      clientUpdatedAt: String(now),
+      lastOperationId: matching.at(-1).id,
+    },
+  };
+};
 
 const requireOwner = async (database, ownerId) => {
   const validOwnerId = requireOwnerId(ownerId);
@@ -149,8 +164,8 @@ export class IndexedDbMemoryRepository {
     return commitPromotionToAccount(this.database, input);
   }
 
-  createBoard(board) {
-    return createBoard(this.database, board);
+  createBoard(board, options) {
+    return createBoard(this.database, board, options?.syncOperations || []);
   }
 
   updateBoard(input) {
@@ -161,8 +176,8 @@ export class IndexedDbMemoryRepository {
     return deleteBoard(this.database, input);
   }
 
-  addCardToBoard(membership) {
-    return addCardToBoard(this.database, membership);
+  addCardToBoard(membership, options) {
+    return addCardToBoard(this.database, membership, options?.syncOperations || []);
   }
 
   removeCardFromBoard(input) {
@@ -238,6 +253,16 @@ export class IndexedDbMemoryRepository {
     };
   }
 
+  async listCardBoardMemberships(ownerId, cardId) {
+    const transaction = this.database.transaction("memory_board_cards", "readonly");
+    const rows = await requestResult(transaction.objectStore("memory_board_cards").getAll());
+    await transactionDone(transaction);
+    return clone(rows.filter((row) => row.ownerId === ownerId && row.cardId === cardId && !row.deletedAt)
+      .sort((left, right) => left.boardId.localeCompare(right.boardId)
+        || left.positionKey.localeCompare(right.positionKey)
+        || left.id.localeCompare(right.id)));
+  }
+
   async getOperation(ownerId, operationId) {
     const transaction = this.database.transaction("media_operations", "readonly");
     const operation = await requestResult(transaction.objectStore("media_operations").get(operationId));
@@ -299,7 +324,7 @@ export class IndexedDbMemoryRepository {
     await transactionDone(transaction);
   }
 
-  async completeCreate({ title = null, animeRef = null, card, asset, operation }) {
+  async completeCreate({ title = null, animeRef = null, card, asset, operation, syncOperations = [] }) {
     const existing = await this.getOperation(operation.ownerId, operation.id);
     if (!existing || existing.cardId !== card.id || existing.assetId !== asset.id) {
       throw Object.assign(new Error("Create reservation does not match completion"), {
@@ -319,15 +344,16 @@ export class IndexedDbMemoryRepository {
 
     const titleStore = title ? "private_titles" : "anime_refs";
     const transaction = this.database.transaction(
-      [titleStore, "memory_cards", "visual_assets", "media_operations"],
+      [...new Set([titleStore, "memory_cards", "visual_assets", "media_operations", ...(syncOperations.length ? ["sync_outbox"] : [])])],
       "readwrite",
     );
     transaction.objectStore(titleStore).put(
-      title ? normalizePrivateTitle(title) : normalizeAnimeRef(animeRef),
+      title ? normalizePrivateTitle(withPendingSync(title, syncOperations)) : normalizeAnimeRef(animeRef),
     );
-    transaction.objectStore("memory_cards").put(normalizeCard(card));
-    transaction.objectStore("visual_assets").put(normalizeAsset({ ...asset, isCurrent: true }));
+    transaction.objectStore("memory_cards").put(normalizeCard(withPendingSync(card, syncOperations)));
+    transaction.objectStore("visual_assets").put(normalizeAsset(withPendingSync({ ...asset, isCurrent: true }, syncOperations)));
     transaction.objectStore("media_operations").put(operation);
+    appendSyncOperationsToTransaction(transaction, syncOperations);
     await transactionDone(transaction);
   }
 
@@ -386,8 +412,11 @@ export class IndexedDbMemoryRepository {
     return clone({ card, title, asset });
   }
 
-  async updateCardMetadata({ ownerId, cardId, changes, now }) {
-    const transaction = this.database.transaction("memory_cards", "readwrite");
+  async updateCardMetadata({ ownerId, cardId, changes, now, syncOperations = [] }) {
+    const transaction = this.database.transaction(
+      ["memory_cards", ...(syncOperations.length ? ["sync_outbox"] : [])],
+      "readwrite",
+    );
     const cards = transaction.objectStore("memory_cards");
     const current = await requestResult(cards.get(cardId));
     if (!current || current.ownerId !== ownerId || current.status !== "COMPLETE_PRIVATE") {
@@ -399,9 +428,11 @@ export class IndexedDbMemoryRepository {
       ...(Object.hasOwn(changes || {}, "note") ? { note: changes.note } : {}),
       updatedAt: String(now),
     };
-    cards.put(card);
+    const stored = withPendingSync(card, syncOperations, now);
+    cards.put(stored);
+    appendSyncOperationsToTransaction(transaction, syncOperations);
     await transactionDone(transaction);
-    return clone(card);
+    return clone(stored);
   }
 
   async reserveReplace({ card, previousAsset, replacementAsset, operation }) {
@@ -464,7 +495,7 @@ export class IndexedDbMemoryRepository {
     await transactionDone(transaction);
   }
 
-  async commitReplace({ card, replacementAsset, previousAsset, operation }) {
+  async commitReplace({ card, replacementAsset, previousAsset, operation, syncOperations = [] }) {
     if (
       card.ownerId !== operation.ownerId ||
       replacementAsset.ownerId !== operation.ownerId ||
@@ -481,7 +512,7 @@ export class IndexedDbMemoryRepository {
     }
 
     const transaction = this.database.transaction(
-      ["memory_cards", "visual_assets", "media_operations"],
+      ["memory_cards", "visual_assets", "media_operations", ...(syncOperations.length ? ["sync_outbox"] : [])],
       "readwrite",
     );
     const cards = transaction.objectStore("memory_cards");
@@ -519,12 +550,14 @@ export class IndexedDbMemoryRepository {
       visualAssetId: replacementAsset.id,
       updatedAt: card.updatedAt,
     };
-    cards.put(committedCard);
-    assets.put(replacementAsset);
-    assets.put(previousAsset);
+    const pendingCard = withPendingSync(committedCard, syncOperations, card.updatedAt);
+    cards.put(pendingCard);
+    assets.put(withPendingSync(replacementAsset, syncOperations, replacementAsset.updatedAt));
+    assets.put(withPendingSync(previousAsset, syncOperations, previousAsset.updatedAt));
     operations.put(operation);
+    appendSyncOperationsToTransaction(transaction, syncOperations);
     await transactionDone(transaction);
-    return clone(committedCard);
+    return clone(pendingCard);
   }
 
   async completeReplace({ replacementAsset, previousAsset, operation }) {
@@ -571,17 +604,17 @@ export class IndexedDbMemoryRepository {
         code: "OPERATION_RESERVATION_MISMATCH",
       });
     }
-    assets.put(previousAsset);
+    assets.put({ ...previousAsset, sync: storedPreviousAsset.sync });
     operations.put(operation);
     await transactionDone(transaction);
   }
 
-  async planDelete({ card, asset, operation }) {
+  async planDelete({ card, asset, operation, syncOperations = [] }) {
     if ([card.ownerId, asset.ownerId].some((ownerId) => ownerId !== operation.ownerId)) {
       throw Object.assign(new Error("Cross-owner delete rejected"), { code: "CROSS_OWNER_REFERENCE" });
     }
     const transaction = this.database.transaction(
-      ["memory_cards", "visual_assets", "media_operations", "memory_board_cards"],
+      ["memory_cards", "visual_assets", "media_operations", "memory_board_cards", ...(syncOperations.length ? ["sync_outbox"] : [])],
       "readwrite",
     );
     const memberships = transaction.objectStore("memory_board_cards");
@@ -593,16 +626,13 @@ export class IndexedDbMemoryRepository {
         ...row,
         deletedAt: card.deletedAt,
         updatedAt: card.updatedAt,
-        sync: {
-          ...(row.sync || createDefaultSyncEnvelope(card.updatedAt)),
-          syncState: "LOCAL_ONLY",
-          clientUpdatedAt: card.updatedAt,
-        },
+        sync: withPendingSync(row, syncOperations, card.updatedAt).sync,
       });
     }
-    transaction.objectStore("memory_cards").put(card);
-    transaction.objectStore("visual_assets").put(asset);
+    transaction.objectStore("memory_cards").put(withPendingSync(card, syncOperations, card.updatedAt));
+    transaction.objectStore("visual_assets").put(withPendingSync(asset, syncOperations, asset.updatedAt));
     transaction.objectStore("media_operations").add(operation);
+    appendSyncOperationsToTransaction(transaction, syncOperations);
     await transactionDone(transaction);
   }
 
@@ -616,8 +646,14 @@ export class IndexedDbMemoryRepository {
       ["memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    transaction.objectStore("memory_cards").put(card);
-    transaction.objectStore("visual_assets").put(asset);
+    const cards = transaction.objectStore("memory_cards");
+    const assets = transaction.objectStore("visual_assets");
+    const [storedCard, storedAsset] = await Promise.all([
+      requestResult(cards.get(card.id)),
+      requestResult(assets.get(asset.id)),
+    ]);
+    cards.put({ ...card, sync: storedCard?.sync || card.sync });
+    assets.put({ ...asset, sync: storedAsset?.sync || asset.sync });
     transaction.objectStore("media_operations").put(operation);
     await transactionDone(transaction);
   }

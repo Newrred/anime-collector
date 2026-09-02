@@ -1,4 +1,6 @@
 import { MemoryApplicationError, normalizeLocalMediaResult } from "./createMemoryCard.js";
+import { toRemoteMemoryCard, toRemoteVisualAsset } from "../sync/memorySyncContract.js";
+import { prepareAccountSyncOperations } from "./prepareAccountSyncOperations.js";
 
 const safeCode = (error, fallback) => (
   /^[A-Z][A-Z0-9_]{2,63}$/.test(String(error?.code || "")) ? String(error.code) : fallback
@@ -179,11 +181,43 @@ export function createReplaceMemoryCardImageCommand({ repository, localMedia, te
         result: pendingResult,
         updatedAt: switchedAt,
       };
+      const syncOperations = await prepareAccountSyncOperations({
+        repository,
+        ownerId,
+        ids,
+        createdAt: switchedAt,
+        specs: () => [
+          {
+            entityType: "MEMORY_CARD", entityId: switchedCard.id, operationType: "UPSERT",
+            baseVersion: switchedCard.sync?.remoteVersion,
+            payload: toRemoteMemoryCard({ card: { ...switchedCard, status: "DRAFT" }, title: bundle.title }),
+          },
+          {
+            entityType: "VISUAL_ASSET", entityId: pendingPreviousAsset.id, operationType: "DELETE",
+            baseVersion: pendingPreviousAsset.sync?.remoteVersion,
+            payload: toRemoteVisualAsset({
+              card: switchedCard,
+              asset: { ...pendingPreviousAsset, state: "DELETED", isCurrent: false },
+            }),
+          },
+          {
+            entityType: "VISUAL_ASSET", entityId: readyAsset.id, operationType: "UPSERT",
+            baseVersion: readyAsset.sync?.remoteVersion,
+            payload: toRemoteVisualAsset({ card: switchedCard, asset: { ...readyAsset, isCurrent: true } }),
+          },
+          {
+            entityType: "MEMORY_CARD", entityId: switchedCard.id, operationType: "UPSERT",
+            baseVersion: switchedCard.sync?.remoteVersion,
+            payload: toRemoteMemoryCard({ card: switchedCard, title: bundle.title }),
+          },
+        ],
+      });
       await repository.commitReplace({
         card: switchedCard,
         replacementAsset: readyAsset,
         previousAsset: pendingPreviousAsset,
         operation: switchedOperation,
+        syncOperations,
       });
 
       try {

@@ -7,6 +7,12 @@ import {
   requireOwnerId,
 } from "../domain/memoryDomain.js";
 import { normalizeSystemDesignSpec } from "../domain/systemDesign.js";
+import {
+  toRemoteMemoryCard,
+  toRemotePrivateTitle,
+  toRemoteVisualAsset,
+} from "../sync/memorySyncContract.js";
+import { prepareAccountSyncOperations } from "./prepareAccountSyncOperations.js";
 
 const SAFE_ERROR_CODE = /^[A-Z][A-Z0-9_]{2,63}$/;
 
@@ -278,12 +284,50 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       };
 
       assertCompletePrivateCard({ card: completeCard, title, animeRef, asset: completeAsset });
+      const remoteTitle = title || animeRef;
+      const syncOperations = await prepareAccountSyncOperations({
+        repository,
+        ownerId,
+        ids,
+        createdAt: completedAt,
+        specs: () => [
+          ...(title ? [{
+            entityType: "PRIVATE_TITLE",
+            entityId: title.id,
+            operationType: "UPSERT",
+            baseVersion: title.sync?.remoteVersion,
+            payload: toRemotePrivateTitle(title),
+          }] : []),
+          {
+            entityType: "MEMORY_CARD",
+            entityId: completeCard.id,
+            operationType: "UPSERT",
+            baseVersion: completeCard.sync?.remoteVersion,
+            payload: toRemoteMemoryCard({ card: { ...completeCard, status: "DRAFT" }, title: remoteTitle }),
+          },
+          {
+            entityType: "VISUAL_ASSET",
+            entityId: completeAsset.id,
+            operationType: "UPSERT",
+            baseVersion: completeAsset.sync?.remoteVersion,
+            payload: toRemoteVisualAsset({ card: completeCard, asset: completeAsset }),
+          },
+          {
+            entityType: "MEMORY_CARD",
+            entityId: completeCard.id,
+            operationType: "UPSERT",
+            baseVersion: completeCard.sync?.remoteVersion,
+            payload: toRemoteMemoryCard({ card: completeCard, title: remoteTitle }),
+          },
+        ],
+      });
       await repository.completeCreate({
         title,
         animeRef,
         card: completeCard,
         asset: completeAsset,
         operation: completeOperation,
+        syncOperations,
       });
 
       if (hasSystemDesign) {

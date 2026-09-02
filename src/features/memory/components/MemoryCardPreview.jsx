@@ -7,6 +7,7 @@ export default function MemoryCardPreview({
   cue = "",
   dateLabel = "",
   badge = "",
+  syncBadge = "",
   visual,
   variant = "grid",
   systemCopy = {},
@@ -24,7 +25,10 @@ export default function MemoryCardPreview({
       <MemoryVisual visual={visual} systemCopy={visualSystemCopy} missingLabel={missingLabel} />
       <div className="memory-preview__body">
         <div className="memory-preview__meta">
-          {badge ? <span className="memory-preview__badge">{badge}</span> : null}
+          <span className="memory-preview__badges">
+            {badge ? <span className="memory-preview__badge">{badge}</span> : null}
+            {syncBadge ? <span className="status-badge">{syncBadge}</span> : null}
+          </span>
           {dateLabel ? <span className="memory-preview__date">{dateLabel}</span> : null}
         </div>
         <a className="memory-preview__link" href={href} data-astro-reload>

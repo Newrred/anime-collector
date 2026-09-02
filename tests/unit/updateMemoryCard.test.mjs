@@ -56,3 +56,42 @@ test("metadata update rejects cross-owner and deleted card access", async () => 
     { code: "CARD_NOT_FOUND" },
   );
 });
+
+test("account metadata update prepares a remote-safe outbox operation", async () => {
+  const userId = "11111111-1111-4111-8111-111111111111";
+  const ownerId = `account:${userId}`;
+  const cardId = "22222222-2222-4222-8222-222222222222";
+  const titleId = "33333333-3333-4333-8333-333333333333";
+  let captured = null;
+  const command = createUpdateMemoryCardCommand({
+    repository: {
+      getCardBundle: async () => ({
+        card: {
+          id: cardId, ownerId, privateTitleId: titleId, animeRefId: null,
+          status: "COMPLETE_PRIVATE", note: "old", watchedAt: null,
+          watchedAtPrecision: "UNKNOWN", episode: null, sceneCue: null,
+          emotionTags: [], rewatchIntent: null, createdAt: "2026-09-02T00:00:00.000Z",
+          updatedAt: "2026-09-02T00:00:00.000Z", deletedAt: null,
+          sync: { remoteVersion: 7, syncState: "SYNCED" },
+        },
+        title: { id: titleId, ownerId, displayTitle: "Frieren" },
+      }),
+      readDeviceSyncState: async () => ({ deviceId: "44444444-4444-4444-8444-444444444444" }),
+      updateCardMetadata: async (input) => {
+        captured = structuredClone(input);
+        return { ...input.changes, id: input.cardId, updatedAt: input.now };
+      },
+    },
+    telemetry: { track: () => {} },
+    clock: { now: () => "2026-09-02T01:00:00.000Z" },
+    ids: { next: () => "55555555-5555-4555-8555-555555555555" },
+  });
+
+  await command.execute({ ownerId, cardId, note: "new private note" });
+
+  assert.equal(captured.syncOperations.length, 1);
+  assert.equal(captured.syncOperations[0].baseVersion, 7);
+  assert.equal(captured.syncOperations[0].entityType, "MEMORY_CARD");
+  assert.equal(captured.syncOperations[0].payload.note, "new private note");
+  assert.doesNotMatch(JSON.stringify(captured.syncOperations), /localRef|asset:/);
+});

@@ -235,7 +235,7 @@ test("sync store returns only bounded pending operations for the requested owner
 
   await appendSyncOperation(database, operation);
 
-  assert.deepEqual(await listPendingSyncOperations(database, ACCOUNT_OWNER_ID, 10), [operation]);
+  assert.deepEqual(await listPendingSyncOperations(database, ACCOUNT_OWNER_ID, 10), [{ ...operation, ordinal: 0 }]);
   assert.deepEqual(await listPendingSyncOperations(database, GUEST_OWNER_ID, 10), []);
 });
 

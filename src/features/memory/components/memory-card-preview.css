@@ -29,6 +29,19 @@
   white-space: nowrap;
 }
 
+.memory-preview__badges {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-preview__badges .status-badge {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  font-size: 0.68rem;
+}
+
 .memory-preview__date {
   flex: 0 0 auto;
 }

@@ -1,5 +1,182 @@
 import { expect, test } from "@playwright/test";
 
+test("account card completion and outbox append are atomic and remote-safe", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const { MEMORY_DB_NAME } = await import("/src/features/memory/adapters/indexeddb/memoryDb.js");
+    const { IndexedDbMemoryRepository } = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const { writeDeviceSyncState } = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const { createMemoryCardCommand } = await import("/src/features/memory/application/createMemoryCard.js");
+    const remove = () => new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(MEMORY_DB_NAME);
+      request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
+    });
+    const readAll = (repository: any, storeName: string) => new Promise<any[]>((resolve, reject) => {
+      const request = repository.database.transaction(storeName, "readonly").objectStore(storeName).getAll();
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    const now = "2026-09-02T00:00:00.000Z";
+    const userId = "11111111-1111-4111-8111-111111111111";
+    await remove();
+    const repository = await IndexedDbMemoryRepository.open();
+    const identity = await repository.ensureInstallationIdentity({ uuid: "22222222-2222-4222-8222-222222222222", now });
+    const owner = await repository.ensureAccountOwner({ userId, now });
+    await repository.activateOwner({ ownerId: owner.id, now });
+    await writeDeviceSyncState(repository.database, {
+      ownerId: owner.id, userId, installationId: identity.installationId,
+      deviceId: "33333333-3333-4333-8333-333333333333", lastSyncSeq: 0, updatedAt: now,
+    });
+    const values: Record<string, string[]> = {
+      card: ["44444444-4444-4444-8444-444444444444"],
+      asset: ["55555555-5555-4555-8555-555555555555"],
+      privateTitle: ["66666666-6666-4666-8666-666666666666"],
+      syncOperation: [
+        "77777777-7777-4777-8777-777777777777",
+        "88888888-8888-4888-8888-888888888888",
+        "99999999-9999-4999-8999-999999999999",
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      ],
+    };
+    const command = createMemoryCardCommand({
+      repository,
+      localMedia: { promoteTicket: async () => ({
+        localRef: "asset:private-image", checksumSha256: "a".repeat(64), mimeType: "image/png",
+        byteSize: 1024, width: 800, height: 1000,
+      }) },
+      telemetry: { track: () => {} }, clock: { now: () => now },
+      ids: { next: (kind: string) => values[kind].shift() },
+    });
+    await command.execute({
+      operationId: "create-account", ownerId: owner.id, intakeTicketId: "ticket-account",
+      rightsConfirmed: true, titleChoice: { kind: "PRIVATE_TITLE", displayTitle: "Frieren" },
+    });
+    const cards = await readAll(repository, "memory_cards");
+    const outbox = await readAll(repository, "sync_outbox");
+
+    const duplicate = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    const failingValues: Record<string, string[]> = {
+      card: ["cccccccc-cccc-4ccc-8ccc-cccccccccccc"],
+      asset: ["dddddddd-dddd-4ddd-8ddd-dddddddddddd"],
+      privateTitle: ["eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"],
+      syncOperation: [duplicate, duplicate, duplicate, duplicate],
+    };
+    const failingCommand = createMemoryCardCommand({
+      repository,
+      localMedia: { promoteTicket: async () => ({ localRef: "asset:failed", checksumSha256: "b".repeat(64), mimeType: "image/png", byteSize: 1, width: 1, height: 1 }) },
+      telemetry: { track: () => {} }, clock: { now: () => now },
+      ids: { next: (kind: string) => failingValues[kind].shift() },
+    });
+    let failure = "";
+    try {
+      await failingCommand.execute({ operationId: "create-failed", ownerId: owner.id, intakeTicketId: "ticket-failed", rightsConfirmed: true, titleChoice: { kind: "PRIVATE_TITLE", displayTitle: "Violet Evergarden" } });
+    } catch (error: any) { failure = error?.name || "error"; }
+    const failedCard = (await readAll(repository, "memory_cards")).find((row) => row.id === "cccccccc-cccc-4ccc-8ccc-cccccccccccc");
+    const finalOutbox = await readAll(repository, "sync_outbox");
+    repository.close();
+    return {
+      complete: cards[0]?.status,
+      syncState: cards[0]?.sync?.syncState,
+      types: outbox.map((row) => `${row.ordinal}:${row.entityType}:${row.operationType}`),
+      leaksLocalRef: JSON.stringify(outbox).includes("localRef") || JSON.stringify(outbox).includes("asset:private-image"),
+      failure,
+      failedCardStatus: failedCard?.status,
+      atomicOutboxCount: finalOutbox.length,
+    };
+  });
+  expect(result.complete).toBe("COMPLETE_PRIVATE");
+  expect(result.syncState).toBe("PENDING");
+  expect(result.types).toEqual([
+    "0:PRIVATE_TITLE:UPSERT", "1:MEMORY_CARD:UPSERT", "2:VISUAL_ASSET:UPSERT", "3:MEMORY_CARD:UPSERT",
+  ]);
+  expect(result.leaksLocalRef).toBe(false);
+  expect(result.failure).toBeTruthy();
+  expect(result.failedCardStatus).toBe("DRAFT");
+  expect(result.atomicOutboxCount).toBe(4);
+});
+
+test("account Board mutations enqueue atomically in deterministic order", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const { MEMORY_DB_NAME } = await import("/src/features/memory/adapters/indexeddb/memoryDb.js");
+    const { IndexedDbMemoryRepository } = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const { writeDeviceSyncState } = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const { createMemoryRuntime } = await import("/src/features/memory/runtime/createMemoryRuntime.js");
+    const { createMemoryBoard } = await import("/src/features/memory/domain/memoryBoard.js");
+    const remove = () => new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(MEMORY_DB_NAME);
+      request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
+    });
+    const readAll = (repository: any, storeName: string) => new Promise<any[]>((resolve, reject) => {
+      const request = repository.database.transaction(storeName, "readonly").objectStore(storeName).getAll();
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    const now = "2026-09-02T02:00:00.000Z";
+    const userId = "11111111-1111-4111-8111-111111111111";
+    await remove();
+    const repository = await IndexedDbMemoryRepository.open();
+    const identity = await repository.ensureInstallationIdentity({ uuid: crypto.randomUUID(), now });
+    const owner = await repository.ensureAccountOwner({ userId, now });
+    await repository.activateOwner({ ownerId: owner.id, now });
+    await writeDeviceSyncState(repository.database, {
+      ownerId: owner.id, userId, installationId: identity.installationId,
+      deviceId: crypto.randomUUID(), lastSyncSeq: 0, updatedAt: now,
+    });
+    const cardId = crypto.randomUUID();
+    const titleId = crypto.randomUUID();
+    const assetId = crypto.randomUUID();
+    const seed = repository.database.transaction(["private_titles", "memory_cards", "visual_assets"], "readwrite");
+    const sync = { remoteVersion: 1, syncState: "SYNCED", clientUpdatedAt: now, serverUpdatedAt: now, lastOperationId: null };
+    seed.objectStore("private_titles").put({ id: titleId, ownerId: owner.id, displayTitle: "Frieren", normalizedTitle: "frieren", optionalGenres: [], createdAt: now, updatedAt: now, deletedAt: null, sync });
+    seed.objectStore("memory_cards").put({ id: cardId, ownerId: owner.id, animeRefId: null, privateTitleId: titleId, visualAssetId: assetId, status: "COMPLETE_PRIVATE", note: null, watchedAt: null, watchedAtPrecision: "UNKNOWN", episode: null, sceneCue: null, emotionTags: [], rewatchIntent: null, createdAt: now, updatedAt: now, deletedAt: null, sync });
+    seed.objectStore("visual_assets").put({ id: assetId, ownerId: owner.id, imageType: "SYSTEM_DESIGN", storageScope: "LOCAL_ONLY", visibility: "PRIVATE", rightsBasis: "SYSTEM_GENERATED", state: "READY", localRef: null, designSpec: { version: 1 }, isCurrent: true, createdAt: now, updatedAt: now, deletedAt: null, sync });
+    await new Promise<void>((resolve, reject) => { seed.oncomplete = () => resolve(); seed.onerror = () => reject(seed.error); });
+    let tick = Date.parse(now);
+    const runtime = createMemoryRuntime({
+      repository,
+      imageIntake: { discard: async () => true, getPreview: async () => null, deleteAsset: async () => true },
+      uuid: () => crypto.randomUUID(), clock: { now: () => new Date(tick += 1).toISOString() },
+    });
+    const board = await runtime.createBoard({ title: "Favorites", description: "Best scenes" });
+    await runtime.addCardToBoard(board.id, cardId);
+    await runtime.updateBoard(board.id, { title: "Favorites 2026" });
+    const detail = await runtime.getBoard(board.id);
+    await runtime.reorderBoardCard(board.id, cardId);
+    await runtime.deleteBoard(board.id);
+    const rows = await repository.listPendingSyncOperations(owner.id, 50);
+
+    const doomedId = crypto.randomUUID();
+    const doomed = createMemoryBoard({ id: doomedId, ownerId: owner.id, title: "Must rollback", now });
+    const duplicate = crypto.randomUUID();
+    const duplicateOperation = {
+      id: duplicate, ownerId: owner.id, entityType: "MEMORY_BOARD", entityId: doomedId,
+      operationType: "UPSERT", baseVersion: 0, requestHash: "f".repeat(64), payload: { id: doomedId },
+      state: "PENDING", ordinal: 0, createdAt: now,
+    };
+    let aborted = false;
+    try { await repository.createBoard(doomed, { syncOperations: [duplicateOperation, duplicateOperation] }); }
+    catch { aborted = true; }
+    const boards = await readAll(repository, "memory_boards");
+    repository.close();
+    return {
+      detailCount: detail.items.length,
+      order: rows.map((row) => `${row.entityType}:${row.operationType}`),
+      allPending: rows.every((row) => row.state === "PENDING"),
+      deletedMembershipPending: rows.filter((row) => row.entityType === "MEMORY_BOARD_CARD" && row.operationType === "DELETE").length,
+      aborted,
+      doomedExists: boards.some((row) => row.id === doomedId),
+    };
+  });
+  expect(result.detailCount).toBe(1);
+  expect(result.order).toEqual([
+    "MEMORY_BOARD:UPSERT", "MEMORY_BOARD_CARD:UPSERT", "MEMORY_BOARD:UPSERT",
+    "MEMORY_BOARD_CARD:UPSERT", "MEMORY_BOARD:DELETE", "MEMORY_BOARD_CARD:DELETE",
+  ]);
+  expect(result.allPending).toBe(true);
+  expect(result.deletedMembershipPending).toBe(1);
+  expect(result.aborted).toBe(true);
+  expect(result.doomedExists).toBe(false);
+});
+
 test("memory database survives reopen and does not mutate the legacy database", async ({ page }) => {
   // A static same-origin asset establishes IndexedDB access without mounting either app runtime.
   await page.goto("/favicon.svg");
