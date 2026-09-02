@@ -2,9 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildWebOAuthRedirect,
   parseWebOAuthCallback,
   resolveWebOAuthNext,
 } from "../../src/features/auth/webOAuth.js";
+
+test("Web OAuth uses the exact allowlisted callback URL and keeps next navigation local", () => {
+  assert.equal(buildWebOAuthRedirect({
+    origin: "https://www.moemoa.xyz",
+    base: "/",
+  }), "https://www.moemoa.xyz/auth/callback/");
+});
 
 test("Web callback accepts one bounded PKCE code and a same-app next path", () => {
   assert.deepEqual(parseWebOAuthCallback({

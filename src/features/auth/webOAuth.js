@@ -18,6 +18,11 @@ const normalizeBase = (base) => {
   return withLeadingSlash.endsWith("/") ? withLeadingSlash : `${withLeadingSlash}/`;
 };
 
+export function buildWebOAuthRedirect({ origin, base = "/" }) {
+  const safeOrigin = new URL(String(origin || ""));
+  return new URL(`${normalizeBase(base)}auth/callback/`, safeOrigin).toString();
+}
+
 export function resolveWebOAuthNext({ rawNext = "", pendingNext = "", origin, base = "/" }) {
   const safeOrigin = new URL(String(origin || ""));
   const appBase = normalizeBase(base);

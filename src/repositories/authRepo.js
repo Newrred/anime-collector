@@ -4,7 +4,10 @@ import {
   clearMockAuthSession,
   readMockAuthSession,
 } from "./mockAuthStorage.js";
-import { resolveWebOAuthNext } from "../features/auth/webOAuth.js";
+import {
+  buildWebOAuthRedirect,
+  resolveWebOAuthNext,
+} from "../features/auth/webOAuth.js";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { startNativeGoogleOAuth } from "../features/auth/nativeOAuth.js";
@@ -61,12 +64,14 @@ export async function signInWithGoogle(next = "/data/") {
     });
   }
   persistPendingAuthNext(safeNext);
-  const redirect = new URL(`${basePath()}auth/callback/`, window.location.origin);
-  redirect.searchParams.set("next", safeNext);
+  const redirectTo = buildWebOAuthRedirect({
+    origin: window.location.origin,
+    base: basePath(),
+  });
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: redirect.toString() },
+    options: { redirectTo },
   });
   if (error) throw error;
 }
