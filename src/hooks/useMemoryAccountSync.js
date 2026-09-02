@@ -10,6 +10,11 @@ const INITIAL_STATE = Object.freeze({
   promotionPreview: null,
   promotionBusy: false,
   promotionErrorCode: null,
+  syncBusy: false,
+  syncResultCode: null,
+  syncErrorCode: null,
+  conflicts: [],
+  conflictBusy: false,
 });
 
 export function useMemoryAccountSync({ session, authLoading = false } = {}) {
@@ -30,6 +35,9 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
       promotionPreview: null,
       promotionBusy: false,
       promotionErrorCode: null,
+      syncBusy: false,
+      syncErrorCode: null,
+      conflicts: [],
     }));
     if (authLoading) {
       return () => {
@@ -99,6 +107,42 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
       return null;
     }
   }, []);
+  const syncNow = useCallback(async () => {
+    const userId = activeUserId.current;
+    setState((current) => ({ ...current, syncBusy: true, syncErrorCode: null }));
+    try {
+      const runtime = await getPlatformMemoryAccountRuntime();
+      const next = await runtime.syncNow();
+      if (activeUserId.current !== userId) return null;
+      setState((current) => ({ ...current, ...next, syncBusy: false }));
+      return next;
+    } catch (error) {
+      if (activeUserId.current === userId) {
+        setState((current) => ({ ...current, syncBusy: false, syncResultCode: "ERROR", syncErrorCode: error?.code || "MEMORY_GATEWAY_FAILED" }));
+      }
+      return null;
+    }
+  }, []);
+  const resolveConflict = useCallback(async (conflictId, selection) => {
+    const userId = activeUserId.current;
+    setState((current) => ({ ...current, conflictBusy: true, syncErrorCode: null }));
+    try {
+      const runtime = await getPlatformMemoryAccountRuntime();
+      const next = await runtime.resolveConflict({ conflictId, selection });
+      if (activeUserId.current !== userId) return null;
+      setState((current) => ({ ...current, ...next, conflictBusy: false }));
+      return next;
+    } catch (error) {
+      if (activeUserId.current === userId) {
+        setState((current) => ({ ...current, conflictBusy: false, syncErrorCode: error?.code || "CONFLICT_RESOLUTION_FAILED" }));
+      }
+      return null;
+    }
+  }, []);
+  const exportConflictBackup = useCallback(async (conflictId) => {
+    const runtime = await getPlatformMemoryAccountRuntime();
+    return runtime.exportConflictBackup(conflictId);
+  }, []);
 
   return Object.freeze({
     ...state,
@@ -107,6 +151,8 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     buildPromotionPreview,
     cancelPromotionPreview,
     promote,
-    syncNow: async () => null,
+    syncNow,
+    resolveConflict,
+    exportConflictBackup,
   });
 }

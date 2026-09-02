@@ -22,12 +22,16 @@ const createClient = ({ rpcResult = { data: mutationResult, error: null }, rows 
       return {
         select(columns) {
           calls.push(["select", columns]);
-          return {
+          const query = {
             async in(column, values) {
               calls.push(["in", column, values]);
               return { data: rows, error: null };
             },
+            eq(column, value) { calls.push(["eq", column, value]); return query; },
+            order(column, options) { calls.push(["order", column, options]); return query; },
+            async range(from, to) { calls.push(["range", from, to]); return { data: rows, error: null }; },
           };
+          return query;
         },
       };
     },
@@ -115,6 +119,13 @@ test("readEntities uses an allowlisted table and rejects foreign or unknown rows
   assert.equal(calls[0][1], "memory_cards");
   assert.deepEqual(calls.at(-1), ["in", "id", [ENTITY_ID]]);
   assert.equal(result[0].titleSnapshot, "Frieren");
+  const all = await gateway.readAllEntities({ entityType: "MEMORY_CARD", userId: USER_ID, limit: 200 });
+  assert.equal(all[0].id, ENTITY_ID);
+  assert.deepEqual(calls.slice(-3), [
+    ["eq", "user_id", USER_ID],
+    ["order", "id", { ascending: true }],
+    ["range", 0, 199],
+  ]);
 
   const foreign = createClient({ rows: [{ ...row, user_id: "77777777-7777-4777-8777-777777777777" }] });
   await assert.rejects(

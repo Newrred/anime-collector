@@ -3,6 +3,8 @@ import {
   resolvePromotionTitleChoice,
 } from "../application/buildGuestPromotionManifest.js";
 import { createPromoteGuestMemory } from "../application/promoteGuestMemory.js";
+import { createResolveMemoryConflict } from "../application/resolveMemoryConflict.js";
+import { createMemoryMetadataSync } from "../application/syncMemoryMetadata.js";
 
 const USER_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -20,6 +22,8 @@ const createDisabledRuntime = () => ({
   buildPromotionPreview: async () => null,
   promote: async () => null,
   syncNow: async () => null,
+  resolveConflict: async () => null,
+  exportConflictBackup: async () => null,
 });
 
 const requireDependencies = (input) => {
@@ -76,6 +80,9 @@ export function createMemoryAccountRuntime(input = {}) {
   let promotionPreview = null;
   let promotionInFlight = null;
   const promotion = createPromoteGuestMemory({ repository, gateway, uuid, clock });
+  const metadataSync = createMemoryMetadataSync({ repository, gateway, clock, readDeviceSyncState });
+  const resolveMemoryConflict = createResolveMemoryConflict({ repository, gateway, uuid, clock });
+  let syncInFlight = null;
 
   const setState = (next) => {
     state = Object.freeze({ enabled: true, errorCode: null, ...next });
@@ -94,6 +101,7 @@ export function createMemoryAccountRuntime(input = {}) {
     initializingUserId = userId;
     initialization = (async () => {
       if (promotionInFlight) await promotionInFlight.catch(() => null);
+      if (syncInFlight) await syncInFlight.catch(() => null);
       let guestOwnerId = null;
       let guestCardCount = 0;
       let accountOwnerId = null;
@@ -178,6 +186,7 @@ export function createMemoryAccountRuntime(input = {}) {
     if (signedOut) return signedOut;
     signedOut = (async () => {
       if (promotionInFlight) await promotionInFlight.catch(() => null);
+      if (syncInFlight) await syncInFlight.catch(() => null);
       registeredUserId = null;
       const now = String(clock.now());
       const identity = await repository.ensureInstallationIdentity({ uuid: uuid(), now });
@@ -258,6 +267,60 @@ export function createMemoryAccountRuntime(input = {}) {
     return promotionInFlight;
   };
 
+  const syncNow = async () => {
+    if (syncInFlight) return syncInFlight;
+    if (!state.userId || !state.accountOwnerId || !state.deviceId) {
+      fail("ACCOUNT_SYNC_UNAVAILABLE", "A ready Memory account is required");
+    }
+    const context = { userId: state.userId, ownerId: state.accountOwnerId, deviceId: state.deviceId };
+    syncInFlight = (async () => {
+      setState({ ...state, syncBusy: true, syncErrorCode: null });
+      const result = await metadataSync.syncNow(context);
+      const conflicts = typeof repository.listOpenSyncConflicts === "function"
+        ? await repository.listOpenSyncConflicts(context.ownerId)
+        : [];
+      const deviceState = await readDeviceSyncState(context.ownerId);
+      return setState({
+        ...state,
+        syncBusy: false,
+        syncResultCode: result.status,
+        syncErrorCode: result.errorCode || result.push?.lastErrorCode || null,
+        conflicts,
+        lastSyncSeq: Number(deviceState?.lastSyncSeq ?? state.lastSyncSeq ?? 0),
+      });
+    })().catch((error) => {
+      setState({ ...state, syncBusy: false, syncResultCode: "ERROR", syncErrorCode: error?.code || "MEMORY_GATEWAY_FAILED" });
+      throw error;
+    }).finally(() => { syncInFlight = null; });
+    return syncInFlight;
+  };
+
+  const resolveConflict = async ({ conflictId, selection }) => {
+    if (!state.userId || !state.accountOwnerId || !state.deviceId) fail("ACCOUNT_SYNC_UNAVAILABLE", "A ready Memory account is required");
+    await resolveMemoryConflict({
+      ownerId: state.accountOwnerId,
+      userId: state.userId,
+      deviceId: state.deviceId,
+      conflictId,
+      selection,
+    });
+    const conflicts = await repository.listOpenSyncConflicts(state.accountOwnerId);
+    return setState({ ...state, conflicts, syncResultCode: conflicts.length ? "CONFLICT" : "SYNCED", syncErrorCode: null });
+  };
+
+  const exportConflictBackup = async (conflictId) => {
+    if (!state.accountOwnerId) return null;
+    const conflict = await repository.getSyncConflict(state.accountOwnerId, conflictId);
+    return conflict ? clone({
+      schemaVersion: 1,
+      exportedAt: String(clock.now()),
+      entityType: conflict.entityType,
+      entityId: conflict.entityId,
+      local: conflict.localEntity,
+      cloud: conflict.remoteEntity,
+    }) : null;
+  };
+
   return Object.freeze({
     enabled: true,
     get status() { return state.status; },
@@ -266,6 +329,8 @@ export function createMemoryAccountRuntime(input = {}) {
     handleSignedOut,
     buildPromotionPreview: buildPreview,
     promote,
-    syncNow: async () => null,
+    syncNow,
+    resolveConflict,
+    exportConflictBackup,
   });
 }

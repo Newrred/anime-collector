@@ -2580,6 +2580,31 @@ h3 {
   gap: var(--layout-gap-sm);
 }
 
+.memory-conflict__compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap-sm);
+}
+
+.memory-conflict__compare > article {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--bg-elevated) 86%, var(--bg-app));
+}
+
+.memory-conflict__note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+  .memory-conflict__compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .data-grid > *,
 .status-panel > *,
 .sync-card > *,

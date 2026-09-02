@@ -1569,7 +1569,7 @@ git commit -m "feat(auth): promote guest memory idempotently"
 - Consumes: Task 6 gateway, promoted account owner, local outbox/cursor.
 - Produces: `enqueueMutation`, `flushOutbox`, `pullChanges`, `syncNow`, `resolveConflict`.
 
-- [ ] **Step 1: Write failing sync engine tests**
+- [x] **Step 1: Write failing sync engine tests**
 
 Test these exact scenarios with fake gateway/repository clocks:
 
@@ -1587,18 +1587,18 @@ malformed remote payload → no local mutation and sync status ERROR
 account switch during request → stale result discarded
 ```
 
-- [ ] **Step 2: Write failing conflict UI E2E**
+- [x] **Step 2: Write failing conflict UI E2E**
 
 Seed one local note and one remote note for the same Card. Assert the dialog shows title snapshot plus local/cloud note values, allows backup export, and applies only the explicitly selected version. Analytics/test logs must not contain either note.
 
-- [ ] **Step 3: Run tests and verify RED**
+- [x] **Step 3: Run tests and verify RED**
 
 ```powershell
 node tests/unit/memorySyncEngine.test.mjs
 npm.cmd run test:e2e -- tests/memory-account-sync.spec.ts --project=chromium --workers=1
 ```
 
-- [ ] **Step 4: Implement bounded outbox processing**
+- [x] **Step 4: Implement bounded outbox processing**
 
 `flushOutbox({ ownerId, signal })` processes at most 50 operations in creation order and stops on conflict, auth failure, or network failure. It may continue past an `APPLIED` idempotent retry. It returns only counts and codes:
 
@@ -1612,11 +1612,11 @@ npm.cmd run test:e2e -- tests/memory-account-sync.spec.ts --project=chromium --w
 }
 ```
 
-- [ ] **Step 5: Implement pull and full-resync transactions**
+- [x] **Step 5: Implement pull and full-resync transactions**
 
 `pullChanges` requests at most 200 changes. For each change it fetches only allowlisted entity fields, validates owner/version, and commits row + cursor together. Full resync replaces only clean `SYNCED` metadata in the current account namespace; pending/outbox/conflict rows are preserved and compared against the resync result. It never removes another account namespace, a pending local edit, a conflict backup, or a local file. After the bounded full read commits, the cursor becomes the validated `nextSyncSeq` returned with the full-resync response.
 
-- [ ] **Step 6: Implement explicit conflict resolution**
+- [x] **Step 6: Implement explicit conflict resolution**
 
 `resolveMemoryConflict` accepts:
 
@@ -1626,7 +1626,7 @@ type ConflictSelection = "KEEP_LOCAL" | "USE_CLOUD";
 
 `KEEP_LOCAL` submits `RESOLVE_CONFLICT` using the current remote version. `USE_CLOUD` first writes an exportable local conflict backup record, then applies the validated remote entity. Both mark the conflict resolved only after durable local commit.
 
-- [ ] **Step 7: Run focused and full tests GREEN**
+- [x] **Step 7: Run focused and full tests GREEN**
 
 ```powershell
 node tests/unit/memorySyncEngine.test.mjs
@@ -1635,12 +1635,21 @@ npm.cmd run test:unit
 npm.cmd run build
 ```
 
-- [ ] **Step 8: Commit sync and conflict behavior**
+- [x] **Step 8: Commit sync and conflict behavior**
 
 ```powershell
 git add src/features/memory/application src/features/memory/adapters/indexeddb src/features/memory/runtime src/components/data/MemoryConflictDialog.jsx src/components/data/MemoryAccountPanel.jsx src/hooks/useMemoryAccountSync.js tests/unit/memorySyncEngine.test.mjs tests/memory-account-sync.spec.ts
 git commit -m "feat(sync): synchronize memory metadata by entity"
 ```
+
+**Implemented 2026-09-02:**
+
+- Explicit `Sync now` is the only trigger; account initialization still performs no metadata push or pull.
+- Outbox processing is capped at 50 ordered operations, rebases a later same-entity operation only after the earlier version commits, and leaves network failures retryable with bounded codes.
+- Incremental pull is capped at 200 change records and coalesces repeated change records for one entity to the page's current version before an atomic row/cursor commit.
+- Expired cursors use an owner-filtered, allowlisted, paginated full metadata read capped at 5,000 rows per entity type. Clean `SYNCED` rows may be replaced; pending/conflict rows and local image files remain protected.
+- `KEEP_LOCAL` uses `resolve_memory_conflict`; `USE_CLOUD` durably stores the local comparison backup before applying the cloud row. Neither path logs note content.
+- Verification evidence: 175/175 unit tests, 7/7 account/conflict Chromium E2E, 5/5 real IndexedDB Chromium E2E, 13-route production build, and React Doctor 97/100 with no reported issues. No remote migration, environment cutover, or deployment was performed.
 
 ### Task 10: Enqueue Card/Board mutations and expose truthful cross-device states
 

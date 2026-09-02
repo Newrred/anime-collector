@@ -61,6 +61,10 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
     async markPromotionRemoteCompleted() {},
     async listRecoverablePromotions() { return []; },
     async commitPromotionToAccount(input) { return { accountOwnerId: input.accountOwnerId, guestOwnerId: GUEST_A }; },
+    async listPendingSyncOperations() { calls.push(["listPendingSyncOperations"]); return []; },
+    async countPendingSyncOperations() { return 0; },
+    async listOpenSyncConflicts() { return []; },
+    async getSyncConflict() { return null; },
   };
   if (String(activeOwnerId).startsWith("account:")) {
     const userId = String(activeOwnerId).slice(8);
@@ -81,6 +85,10 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
     },
     async promoteGuest() {
       return { status: "COMPLETED", importedCounts: { privateTitles: 0, cards: 0, visualAssets: 0, boards: 0, boardCards: 0 }, nextSyncSeq: 0 };
+    },
+    async pullChanges({ afterSeq }) {
+      calls.push(["pullChanges", afterSeq]);
+      return { changes: [], nextSyncSeq: afterSeq, minimumRetainedSyncSeq: 0, requiresFullResync: false };
     },
   };
 
@@ -185,12 +193,14 @@ test("profile or device failure keeps Auth valid and Guest data unchanged", asyn
   assert.equal(await harness.runtime.getState().then((state) => state.guestCardCount), 3);
 });
 
-test("an authenticated account with no Guest cards reports ready without starting sync", async () => {
+test("an authenticated account stays idle until the user explicitly starts sync", async () => {
   const harness = createHarness({ guestCards: 0 });
   const result = await harness.runtime.initializeAccountSession(session(USER_A));
   assert.equal(result.status, "ACCOUNT_READY");
   assert.equal(await harness.runtime.buildPromotionPreview(), null);
   assert.equal(await harness.runtime.promote(), null);
-  assert.equal(await harness.runtime.syncNow(), null);
   assert.equal(harness.calls.some(([name]) => name.includes("sync")), false);
+  const synced = await harness.runtime.syncNow();
+  assert.equal(synced.syncResultCode, "SYNCED");
+  assert.equal(harness.calls.filter(([name]) => name === "pullChanges").length, 1);
 });

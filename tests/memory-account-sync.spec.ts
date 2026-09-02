@@ -6,8 +6,8 @@ const DEVICE_ID = "33333333-3333-4333-8333-333333333333";
 const GUEST_OWNER_ID = `guest:${INSTALLATION_ID}`;
 const MOCK_SESSION_KEY = "moemoa.e2e.mockSession.v1";
 
-async function installAccountAdapters(page: Page, options: { signedIn?: boolean; guestCards?: number; fail?: boolean; activeAccount?: boolean } = {}) {
-  await page.addInitScript(({ signedIn, guestCards, fail, activeAccount, userId, installationId, deviceId, guestOwnerId, sessionKey }) => {
+async function installAccountAdapters(page: Page, options: { signedIn?: boolean; guestCards?: number; fail?: boolean; activeAccount?: boolean; conflict?: boolean } = {}) {
+  await page.addInitScript(({ signedIn, guestCards, fail, activeAccount, conflict, userId, installationId, deviceId, guestOwnerId, sessionKey }) => {
     localStorage.setItem("ui:locale:v1", JSON.stringify("en"));
     if (signedIn) {
       localStorage.setItem(sessionKey, JSON.stringify({
@@ -23,6 +23,12 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
     let activeOwner: any = activeAccount ? accountOwner : guestOwner;
     let currentGuestOwnerId = guestOwnerId;
     let promotionJournal: any = null;
+    let openConflict: any = conflict ? {
+      id: "memory-conflict-1", ownerId: accountOwner.id, entityType: "MEMORY_CARD",
+      entityId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", state: "OPEN", remoteVersion: 2,
+      localEntity: { id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", titleSnapshot: "Naruto", note: "Local private note" },
+      remoteEntity: { id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", titleSnapshot: "Naruto", note: "Cloud private note", version: 2 },
+    } : null;
     const animeRefId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
     const cardIds = ["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "cccccccc-cccc-4ccc-8ccc-cccccccccccc"];
     const assetIds = ["dddddddd-dddd-4ddd-8ddd-dddddddddddd", "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"];
@@ -104,6 +110,14 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
           promotionJournal = { ...promotionJournal, status: "COMPLETED" };
           return { accountOwnerId, guestOwnerId: nextGuest.id };
         },
+        async listPendingSyncOperations() { calls.push("list_sync_outbox"); return []; },
+        async countPendingSyncOperations() { return 0; },
+        async listOpenSyncConflicts() { return openConflict ? [structuredClone(openConflict)] : []; },
+        async getSyncConflict(_ownerId: string, conflictId: string) { return openConflict?.id === conflictId ? structuredClone(openConflict) : null; },
+        async commitConflictResolution({ selection }: any) { calls.push(`resolve_${selection}`); openConflict = null; },
+        async hasPendingEntityOperation() { return false; },
+        async commitPulledChange() {},
+        async commitFullResync() {},
       },
       gateway: {
         async ensureUserProfile(input: any) {
@@ -130,6 +144,16 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
             nextSyncSeq: 7,
           };
         },
+        async pullChanges({ afterSeq }: any) {
+          calls.push("pull_memory_changes");
+          return { changes: [], nextSyncSeq: afterSeq, minimumRetainedSyncSeq: 0, requiresFullResync: false };
+        },
+        async readEntities() { return []; },
+        async readAllEntities() { return []; },
+        async resolveConflict() {
+          calls.push("resolve_memory_conflict");
+          return { status: "APPLIED", entityVersion: 3, syncSeq: 3, errorCode: null, remoteEntity: null };
+        },
       },
       readDeviceSyncState: async (ownerId: string) => structuredClone(deviceStates.get(ownerId) || null),
       writeDeviceSyncState: async (state: any) => { deviceStates.set(state.ownerId, structuredClone(state)); },
@@ -148,6 +172,7 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
     guestCards: Number(options.guestCards || 0),
     fail: Boolean(options.fail),
     activeAccount: Boolean(options.activeAccount),
+    conflict: Boolean(options.conflict),
     userId: USER_ID,
     installationId: INSTALLATION_ID,
     deviceId: DEVICE_ID,
@@ -231,4 +256,24 @@ test("promotion preview is explicit, cancellable, and moves metadata only after 
   expect(calls).toEqual([
     "ensure_user_profile", "register_user_device", "resolve_promotion_title", "promote_guest_memory",
   ]);
+});
+
+test("explicit sync exposes local and cloud notes without logging either value", async ({ page }) => {
+  await installAccountAdapters(page, { signedIn: true, guestCards: 0, conflict: true });
+  await page.goto("/data/");
+  await page.getByRole("button", { name: "Sync now" }).click();
+  await expect(page.getByRole("heading", { name: "Review Memory conflict" })).toBeVisible();
+  await expect(page.getByText("Local private note", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cloud private note", { exact: true })).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Save comparison JSON" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain("moemoa-memory-conflict");
+  const callsBefore = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
+  expect(JSON.stringify(callsBefore)).not.toContain("private note");
+  await page.getByRole("button", { name: "Use cloud version" }).click();
+  await expect(page.getByRole("heading", { name: "Review Memory conflict" })).toHaveCount(0);
+  const callsAfter = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
+  expect(callsAfter).toContain("resolve_USE_CLOUD");
+  expect(callsAfter).not.toContain("resolve_KEEP_LOCAL");
 });

@@ -389,6 +389,71 @@ test("Guest promotion keeps local image refs while atomically moving every owner
   expect(result.lastSyncSeq).toBe(11);
 });
 
+test("sync conflict keeps the local row until an explicit cloud selection commits with a backup", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const memoryDb = await import("/src/features/memory/adapters/indexeddb/memoryDb.js");
+    const repositoryModule = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const syncStore = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const remove = () => new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(memoryDb.MEMORY_DB_NAME);
+      request.onsuccess = () => resolve(); request.onerror = () => reject(request.error);
+    });
+    await remove();
+    const repository = await repositoryModule.IndexedDbMemoryRepository.open();
+    const now = "2026-09-02T05:00:00.000Z";
+    const userId = "11111111-1111-4111-8111-111111111111";
+    const owner = await repository.ensureAccountOwner({ userId, now });
+    await repository.activateOwner({ ownerId: owner.id, now });
+    await syncStore.writeDeviceSyncState(repository.database, {
+      ownerId: owner.id, userId, installationId: "22222222-2222-4222-8222-222222222222",
+      deviceId: "33333333-3333-4333-8333-333333333333", lastSyncSeq: 0, updatedAt: now,
+    });
+    const cardId = "44444444-4444-4444-8444-444444444444";
+    const transaction = repository.database.transaction("memory_cards", "readwrite");
+    transaction.objectStore("memory_cards").put({
+      id: cardId, ownerId: owner.id, catalogAnimeId: "anime:55555555-5555-4555-8555-555555555555",
+      animeRefId: null, privateTitleId: null, titleSnapshot: "Naruto", visualAssetId: null,
+      status: "COMPLETE_PRIVATE", note: "local note", watchedAt: null, watchedAtPrecision: "UNKNOWN",
+      episode: null, sceneCue: null, emotionTags: [], rewatchIntent: null,
+      createdAt: now, updatedAt: now, deletedAt: null,
+      sync: { remoteVersion: 1, syncState: "PENDING", clientUpdatedAt: now, serverUpdatedAt: now, lastOperationId: null },
+    });
+    await new Promise<void>((resolve, reject) => { transaction.oncomplete = () => resolve(); transaction.onerror = () => reject(transaction.error); });
+    const operation = {
+      id: "66666666-6666-4666-8666-666666666666", ownerId: owner.id, entityType: "MEMORY_CARD",
+      entityId: cardId, operationType: "UPSERT", baseVersion: 1, requestHash: "a".repeat(64),
+      payload: { id: cardId, titleSnapshot: "Naruto", note: "local note" }, state: "PENDING", createdAt: now,
+    };
+    await repository.enqueueMutation(operation);
+    const remote = {
+      entityType: "MEMORY_CARD", id: cardId, userId, catalogAnimeId: "anime:55555555-5555-4555-8555-555555555555",
+      privateTitleId: null, titleSnapshot: "Naruto", status: "COMPLETE_PRIVATE", note: "cloud note",
+      watchedAt: null, watchedAtPrecision: "UNKNOWN", episode: null, sceneCue: null, emotionTags: [],
+      rewatchIntent: null, visibility: "PRIVATE", version: 2, createdAt: now, clientUpdatedAt: now,
+      serverUpdatedAt: now, deletedAt: null,
+    };
+    await repository.commitSyncMutation({
+      ownerId: owner.id, operation,
+      result: { status: "CONFLICT", entityVersion: 2, syncSeq: null, errorCode: "BASE_VERSION_MISMATCH", remoteEntity: remote }, now,
+    });
+    const conflict = (await repository.listOpenSyncConflicts(owner.id))[0];
+    const before = await new Promise<any>((resolve, reject) => {
+      const tx = repository.database.transaction("memory_cards", "readonly"); const request = tx.objectStore("memory_cards").get(cardId);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    await repository.commitConflictResolution({ ownerId: owner.id, conflictId: conflict.id, selection: "USE_CLOUD", operation: null, result: null, now });
+    const afterConflict = await repository.getSyncConflict(owner.id, conflict.id);
+    const after = await new Promise<any>((resolve, reject) => {
+      const tx = repository.database.transaction("memory_cards", "readonly"); const request = tx.objectStore("memory_cards").get(cardId);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    repository.close();
+    return { beforeNote: before.note, beforeState: before.sync.syncState, afterNote: after.note, afterState: after.sync.syncState, conflictState: afterConflict.state, backupNote: afterConflict.localBackup.note };
+  });
+  expect(result).toEqual({ beforeNote: "local note", beforeState: "CONFLICT", afterNote: "cloud note", afterState: "SYNCED", conflictState: "RESOLVED", backupNote: "local note" });
+});
+
 test("image replacement atomically switches the card and scrubs the previous asset", async ({ page }) => {
   await page.goto("/favicon.svg");
 

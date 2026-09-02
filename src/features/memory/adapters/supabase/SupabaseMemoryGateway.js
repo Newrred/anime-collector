@@ -342,4 +342,33 @@ export class SupabaseMemoryGateway {
     }
     return response.data.map((row) => parseEntityRow(entityType, model, row, validUserId));
   }
+
+  async readAllEntities({ entityType, userId, limit = 5000 }) {
+    const model = READ_MODELS[entityType];
+    const validUserId = uuid(userId, "userId");
+    const maximum = safeInteger(limit, { min: 1, max: 5000 });
+    if (!model) fail("SYNC_REQUEST_INVALID", "Entity read request is invalid");
+    const rows = [];
+    const pageSize = 200;
+    for (let offset = 0; offset < maximum; offset += pageSize) {
+      let response;
+      try {
+        response = await this.client
+          .from(model.table)
+          .select(model.columns.join(","))
+          .eq("user_id", validUserId)
+          .order("id", { ascending: true })
+          .range(offset, Math.min(offset + pageSize - 1, maximum - 1));
+      } catch (error) {
+        throw sanitizeRemoteError(error);
+      }
+      if (response?.error) throw sanitizeRemoteError(response.error);
+      if (!Array.isArray(response?.data) || response.data.length > pageSize) {
+        fail("SYNC_RESPONSE_INVALID", "Entity read response is invalid");
+      }
+      rows.push(...response.data.map((row) => parseEntityRow(entityType, model, row, validUserId)));
+      if (response.data.length < pageSize) return rows;
+    }
+    fail("SYNC_FULL_RESYNC_LIMIT", "Full Memory resync exceeded its local bound");
+  }
 }

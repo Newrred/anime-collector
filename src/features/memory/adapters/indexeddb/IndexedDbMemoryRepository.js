@@ -26,6 +26,20 @@ import {
   reorderBoardCard,
   updateBoard,
 } from "./memoryBoardStore.js";
+import {
+  appendSyncOperation,
+  commitConflictResolution,
+  commitFullResync,
+  commitPulledChange,
+  commitSyncMutation,
+  countPendingSyncOperations,
+  getSyncConflict,
+  hasPendingEntityOperation,
+  listOpenSyncConflicts,
+  listPendingSyncOperations,
+  readDeviceSyncState,
+  rebaseSyncOperation,
+} from "./memorySyncStore.js";
 
 const requestResult = (request) => new Promise((resolve, reject) => {
   request.onsuccess = () => resolve(request.result ?? null);
@@ -157,6 +171,54 @@ export class IndexedDbMemoryRepository {
 
   reorderBoardCard(input) {
     return reorderBoardCard(this.database, input);
+  }
+
+  enqueueMutation(operation) {
+    return appendSyncOperation(this.database, operation);
+  }
+
+  listPendingSyncOperations(ownerId, limit) {
+    return listPendingSyncOperations(this.database, ownerId, limit);
+  }
+
+  countPendingSyncOperations(ownerId) {
+    return countPendingSyncOperations(this.database, ownerId);
+  }
+
+  rebaseSyncOperation(input) {
+    return rebaseSyncOperation(this.database, input);
+  }
+
+  commitSyncMutation(input) {
+    return commitSyncMutation(this.database, input);
+  }
+
+  readDeviceSyncState(ownerId) {
+    return readDeviceSyncState(this.database, ownerId);
+  }
+
+  hasPendingEntityOperation(ownerId, entityType, entityId) {
+    return hasPendingEntityOperation(this.database, ownerId, entityType, entityId);
+  }
+
+  commitPulledChange(input) {
+    return commitPulledChange(this.database, input);
+  }
+
+  commitFullResync(input) {
+    return commitFullResync(this.database, input);
+  }
+
+  listOpenSyncConflicts(ownerId) {
+    return listOpenSyncConflicts(this.database, ownerId);
+  }
+
+  getSyncConflict(ownerId, conflictId) {
+    return getSyncConflict(this.database, ownerId, conflictId);
+  }
+
+  commitConflictResolution(input) {
+    return commitConflictResolution(this.database, input);
   }
 
   listBoards(ownerId) {
