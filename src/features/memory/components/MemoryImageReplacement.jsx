@@ -134,6 +134,10 @@ export default function MemoryImageReplacement({
     }
   };
 
+  if (!runtime.imageIntake.available) {
+    return <p className="memory-detail__replacement-note">{copy.androidOnly}</p>;
+  }
+
   return (
     <section className="memory-detail__replacement" aria-label={copy.regionLabel}>
       <div className="memory-detail__replacement-head">

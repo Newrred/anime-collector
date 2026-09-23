@@ -279,6 +279,21 @@ Owner의 실제 production walkthrough에서 Home, 모바일 manage menu, Compos
 
 미변경 범위: IndexedDB/Supabase schema, local-only storage와 rights semantics, Library/Card domain action, native media lifecycle, Android shell, external image/data, production deployment.
 
+### Composer mobile catalog-search corrective checkpoint — 2026-09-03
+
+| 검증 | 결과 | 증거 |
+| --- | --- | --- |
+| 모바일 키보드 | PASS | title input이 `type=search`, `inputmode=search`, `enterkeyhint=search`; input current value를 사용하고 runtime 준비 전 Enter도 await 후 실행 |
+| 교차 브라우저 | PASS | 390×844 Enter→result→poster→선택→AnimeRef 저장을 Chromium/Firefox/WebKit 3/3 통과. 초기 WebKit runtime-readiness race를 재현 후 수정 |
+| 한글 검색 | PASS | Production-config Supabase에서 `프리렌` 결과가 `장송의 프리렌`, 2기, 특별편 순서로 반환; 기존 exact AniList binding 유지 |
+| 대표 표지 | PASS | active `catalog_assets`를 한 번의 bounded query로 조회하고 path/rights/storage/dimension 검증 후 3개 이미지 모두 460px natural width로 decode |
+| persistence 경계 | PASS | E2E 저장 뒤 AnimeRef에 `coverPreviewUrl`과 image data가 없음. catalog cover는 검색 presentation 전용 |
+| UI 회귀 | PASS | Composer/mobile layout 25/25, Golden Screenshot 18/18, horizontal overflow 없음 |
+| Unit/build/guard | PASS | Unit 194/194, Astro 13 pages, catalog guard no leaks |
+| React Doctor | REVIEWED | changed scope 92/100; bounded resolver iteration 1건과 기존 Composer complexity 1건 advisory |
+
+DB migration, RPC 변경, catalog re-ingestion, provider 변경, analytics query logging, push/deploy는 수행하지 않았다.
+
 ## 7. Dependency audit finding
 
 `npm audit --omit=dev` 결과 production dependency tree에 17건이 남아 있다: high 12, moderate 3, low 2. 주요 경로는 Astro/Vite/Rollup/Sharp 및 그 전이 의존성이다. 자동 전체 수정은 Astro 7 breaking upgrade를 요구하므로 첫 native spike와 결합하지 않는다.

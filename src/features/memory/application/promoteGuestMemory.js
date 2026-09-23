@@ -52,6 +52,8 @@ export function createPromoteGuestMemory({ repository, gateway, uuid, clock } = 
     async execute(rawInput) {
       const input = validateInput(rawInput);
       const manifest = await buildGuestPromotionManifest({ repository, guestOwnerId: input.guestOwnerId });
+      rawInput.assertCurrent?.();
+      if (rawInput.expectedSourceHash && manifest.sourceHash !== rawInput.expectedSourceHash) fail("PROMOTION_SOURCE_HASH_MISMATCH", "Promotion source changed after review");
       if (manifest.unresolvedAnimeRefs.length > 0) {
         fail("PROMOTION_CATALOG_MAPPING_REQUIRED", "Every AnimeRef needs an explicit promotion choice");
       }
@@ -60,6 +62,7 @@ export function createPromoteGuestMemory({ repository, gateway, uuid, clock } = 
         sourceHash: manifest.sourceHash,
         startedAt: String(clock.now()),
       });
+      rawInput.assertCurrent?.();
       if (journal.status === "COMPLETED") return structuredClone(journal.remoteResult);
       if (journal.status === "REMOTE_COMPLETED") {
         await commitLocal(journal);
@@ -88,17 +91,19 @@ export function createPromoteGuestMemory({ repository, gateway, uuid, clock } = 
         result,
         now: String(clock.now()),
       });
+      rawInput.assertCurrent?.();
       await commitLocal(completedJournal);
       return structuredClone(result);
     },
 
-    async recoverPromotion({ accountOwnerId } = {}) {
+    async recoverPromotion({ accountOwnerId, assertCurrent } = {}) {
       const ownerId = requireOwnerId(accountOwnerId);
       if (!ownerId.startsWith("account:")) fail("PROMOTION_INPUT_INVALID", "An Account owner is required");
       const journals = await repository.listRecoverablePromotions(ownerId);
       const recovered = [];
       for (const journal of journals) {
         if (journal.status !== "REMOTE_COMPLETED" || !journal.remoteResult) continue;
+        assertCurrent?.();
         await commitLocal(journal);
         recovered.push(structuredClone(journal.remoteResult));
       }

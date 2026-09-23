@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
 import {
   ANDROID_STATIC_ROUTES,
   verifyAndroidStaticRoutes,
+  verifyPackagedAndroidRoutes,
 } from "../../scripts/verify-android-static-routes.mjs";
 import * as navigation from "../../src/domain/search/memoryCardNavigation.js";
 import { openLibraryDeepLink } from "../../src/domain/search/quickActionActions.js";
@@ -29,6 +30,19 @@ test("static route verification rejects a missing generated Board shell", async 
   await mkdir(path.dirname(nativeFile), { recursive: true });
   await writeFile(nativeFile, 'return "/memory/new/index.html";');
   await assert.rejects(() => verifyAndroidStaticRoutes(root), { code: "ENOENT" });
+});
+
+test("packaged route verification requires My Titles even when every older shell exists", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "moemoa-packaged-routes-"));
+  const publicRoot = path.join(root, "android/app/src/main/assets/public");
+  for (const route of ANDROID_STATIC_ROUTES) {
+    const file = path.join(publicRoot, route);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, "ok");
+  }
+  assert.equal((await verifyPackagedAndroidRoutes(root)).routeCount, 15);
+  await unlink(path.join(publicRoot, "titles/index.html"));
+  await assert.rejects(() => verifyPackagedAndroidRoutes(root), { code: "ENOENT" });
 });
 
 test("native Memory Card navigation targets the packaged index document", () => {

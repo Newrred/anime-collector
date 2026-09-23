@@ -1,0 +1,4234 @@
+[
+  {
+    "anilistId": 67,
+    "title": "Basilisk: Kouga Ninpouchou",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/67/Basilisk-Kouga-Ninpouchou/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ebc02840-c27b-49ff-9af9-45a05c919366",
+        "title": "바질리스크 ~오우카인법첩~",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 94,
+    "title": "Kidou Senshi Gundam SEED DESTINY",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/94/Kidou-Senshi-Gundam-SEED-DESTINY/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:25f680ed-b38d-41a0-8674-20db52af86d1",
+        "title": "기동전사 건담 SEED FREEDOM",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:3813361c-fac1-416e-8ff2-9f9391dd10f9",
+        "title": "기동전사 건담 SEED",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 97,
+    "title": "Last Exile",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/97/Last-Exile/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:32c48b39-a945-44e9-a30a-874703285f0e",
+        "title": "라스트 엑자일-은빛날개의 팜",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 298,
+    "title": ".hack//Tasogare no Udewa Densetsu",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/298/hackTasogare-no-Udewa-Densetsu/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:32279ada-e544-46b8-8135-c29eafa34e6a",
+        "title": "닷핵 루츠!",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 352,
+    "title": "Motto! Ojamajo Doremi",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/352/Motto-Ojamajo-Doremi/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4235d562-b189-44fe-b7f4-3bd2f714640e",
+        "title": "꼬마마법사 레미 ƒ 스페셜 -개구리 바위의 비밀-",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:a531a967-05e6-48e5-a011-876fa7b2f9a3",
+        "title": "꼬마마법사 레미 #",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 390,
+    "title": "Suzuka",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/390/Suzuka/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:6826bd4e-0fe9-4604-b17a-2dda8937a081",
+        "title": "후우카",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 551,
+    "title": "Grappler Baki: Saidai Tournament-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/551/Grappler-Baki-Saidai-Tournament-hen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:a11aebc4-1a8f-40d2-8253-e2e1691e91c3",
+        "title": "바키 1기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 849,
+    "title": "Suzumiya Haruhi no Yuuutsu",
+    "decision": "COMBINED_EXISTING_ENTRY",
+    "pageUrl": "https://anilist.co/anime/849/Suzumiya-Haruhi-no-Yuuutsu/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:55006433-5f1f-4ed6-b5dc-8c4b8aef545d",
+        "id": 4382,
+        "title": "스즈미야 하루히의 우울 1~2기",
+        "year": 2009,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:55006433-5f1f-4ed6-b5dc-8c4b8aef545d",
+        "title": "스즈미야 하루히의 우울 1~2기",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:8a77b2e8-ece2-4784-830e-1332c5a700cf",
+        "title": "러키 스타",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:e2dd9b0f-aa44-46e7-9eb4-0a70840a1bc1",
+        "title": "[극장판]스즈미야 하루히의 소실",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 878,
+    "title": "Zegapain",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/878/Zegapain/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:29b64b01-d827-40dc-84b4-e53ffe2f81bc",
+        "title": "제가페인 STA",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1018,
+    "title": "Majutsushi Orphen: Revenge",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1018/Majutsushi-Orphen-Revenge/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d60990ba-344b-4642-bcf9-562053d6799b",
+        "title": "마술사 오펜 뜻밖의 여행",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1088,
+    "title": "Choujikuu Yousai Macross",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1088/Choujikuu-Yousai-Macross/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c50535f9-d06d-41aa-ab06-9cbd64f0efce",
+        "title": "마크로스 제로",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1104,
+    "title": "Shinkon Gattai Godannar!! SECOND SEASON",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1104/Shinkon-Gattai-Godannar-SECOND-SEASON/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7ed6bbde-af16-4ef4-bf3c-c8f17b998d83",
+        "title": "신혼합체 고단나",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1186,
+    "title": "Battle Athletess Daiundoukai (TV)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1186/Battle-Athletess-Daiundoukai-TV/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:103b6fbc-c7d1-4fa1-829a-a89407d1b515",
+        "title": "배틀 애슬리테스 대운동회 ReSTART!",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1519,
+    "title": "BLACK LAGOON: The Second Barrage",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1519/BLACK-LAGOON-The-Second-Barrage/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7ecf77b0-7eca-4c52-abe6-4b27c818e7db",
+        "title": "블랙 라군",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:f5364ff3-75e9-4f4e-bbd7-3208a31a0218",
+        "title": "[SP]블랙 라군",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:fc87df89-4c68-4da6-8037-f47eeea3d259",
+        "title": "[OVA]블랙 라군 - 로베르타즈 블러드 트레일",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1534,
+    "title": "Futari wa Precure: Splash☆Star",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1534/Futari-wa-Precure-SplashStar/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1cc4bdde-4389-4971-8c1e-d650544f06bf",
+        "title": "극장판 프리큐어 올스타즈 F",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:6fbd3f94-c172-4422-92c6-7c020c0ea6a4",
+        "title": "너와 아이돌 프리큐어♪",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:8c92966d-bb9a-4c3a-a797-2fbb8c7caca8",
+        "title": "명탐정 프리큐어!",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:99453528-bf56-481a-94c1-65fbb5f761a8",
+        "title": "스타☆트윙클 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:b3978ee4-d496-43ae-b4c9-1252da3cd372",
+        "title": "힐링굿♡프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:bfd5d59a-ff7f-412a-9f99-d8dc7217188d",
+        "title": "허긋토! 프리큐어 ♡ 두사람은 프리큐어 올스타즈 메모리즈",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:c31503af-19d2-4c0c-816d-afb23c42d0bb",
+        "title": "희망의 힘 ~어른 프리큐어'23~",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:e03399d2-12a3-4c41-95fc-9ad606833ca3",
+        "title": "허긋토! 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:ff3af159-158b-41b5-ae0f-7b3df893e488",
+        "title": "펼쳐지는 스카이! 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 1546,
+    "title": "Negima!?",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1546/Negima/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:022042cd-f2bb-4a24-b342-7b23c172348f",
+        "title": "마법선생 네기마 1기",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:0e38f75d-71cc-42da-b5c7-2dc178560e6a",
+        "title": "UQ HOLDER! -마법선생 네기마 2",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 1565,
+    "title": "Pocket Monsters Diamond & Pearl",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/1565/Pocket-Monsters-Diamond-Pearl/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8a365556-e587-429f-b7c8-15bd43d13fbf",
+        "title": "포켓몬스터 AG",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:cb8358ae-4f74-46b0-976e-c7d2470bacba",
+        "title": "포켓몬스터 베스트 위시",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 2213,
+    "title": "Black Jack (TV)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/2213/Black-Jack-TV/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4ad88472-a6bd-41b7-8690-d6a09b5ba5c8",
+        "title": "영 블랙잭",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 2684,
+    "title": "BUZZER BEATER (2007)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/2684/BUZZER-BEATER-2007/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e05d8490-6f8e-4cba-a11f-39c5c43a4dea",
+        "title": "버저비터",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 2819,
+    "title": "Dragon Quest: Abel Yuusha Densetsu",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/2819/Dragon-Quest-Abel-Yuusha-Densetsu/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3d80809f-42c8-4e6f-9c19-b48b2c8752b0",
+        "title": "드래곤 퀘스트 다이의 대모험 (2020)",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 3281,
+    "title": "Kinnikuman: Kinnikusei Oui Soudatsu-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/3281/Kinnikuman-Kinnikusei-Oui-Soudatsu-hen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d3821c62-5010-49db-a751-1d56e87fdcd1",
+        "title": "(더빙) 쾌걸 근육맨 2세",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:f252c420-c2ec-4b64-b0ff-969d2110423d",
+        "title": "근육맨 완벽초인시조 편(3기)",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 3579,
+    "title": "Getter Robo",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/3579/Getter-Robo/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:535d66e9-0f0e-47e9-8d2c-7ef16593eb28",
+        "title": "겟타로보 아크",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 3667,
+    "title": "Strike Witches",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/3667/Strike-Witches/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:f70f02aa-0cd3-4b25-a562-d86028e17529",
+        "id": 1862,
+        "title": "스트라이크 위치스 1기",
+        "year": 2007,
+        "format": "OVA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8d375d27-93e6-4ece-bc54-9817fa537e58",
+        "title": "브레이브 위치스",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:b20b108a-1660-449f-be99-ead44de25a39",
+        "title": "스트라이크 위치스 501부대 발진합니다!",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:c4ef7477-f0dd-4d6f-96c1-abefc0ee7a59",
+        "title": "연맹공군 항공마법 음악대 루미너스 위치즈",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:f70f02aa-0cd3-4b25-a562-d86028e17529",
+        "title": "스트라이크 위치스 1기",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:ff0cbd80-c679-481a-a582-00a244a569ee",
+        "title": "스트라이크 위치스 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 3692,
+    "title": "Yes! Precure 5 GoGo!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/3692/Yes-Precure-5-GoGo/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1cc4bdde-4389-4971-8c1e-d650544f06bf",
+        "title": "극장판 프리큐어 올스타즈 F",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:530065d7-f2a0-45ec-b17c-0622dbdedd40",
+        "title": "쁘띠큐어: 프리큐어 요정들",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:c31503af-19d2-4c0c-816d-afb23c42d0bb",
+        "title": "희망의 힘 ~어른 프리큐어'23~",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 4192,
+    "title": "Hayate no Gotoku!!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/4192/Hayate-no-Gotoku/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c1326286-fcbf-4a9c-bbb4-13157af4e28c",
+        "title": "극장판 하야테처럼! HEAVEN IS A PLACE ON EARTH",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 4814,
+    "title": "Junjou Romantica 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/4814/Junjou-Romantica-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7ea51b9c-ead7-4a7b-a813-df04abd9e8aa",
+        "title": "순정 로맨티카 3기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 5967,
+    "title": "Kinnikuman II Sei: ULTIMATE MUSCLE",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/5967/Kinnikuman-II-Sei-ULTIMATE-MUSCLE/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d3821c62-5010-49db-a751-1d56e87fdcd1",
+        "title": "(더빙) 쾌걸 근육맨 2세",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 6165,
+    "title": "WHITE ALBUM 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/6165/WHITE-ALBUM-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:555f61fe-c470-4223-bba2-152cefc66b03",
+        "id": 4720,
+        "title": "화이트 앨범",
+        "year": 2009,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:555f61fe-c470-4223-bba2-152cefc66b03",
+        "title": "화이트 앨범",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 6444,
+    "title": "Tegami Bachi",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/6444/Tegami-Bachi/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:8dc7fac4-a927-401e-8d1a-0577f17cff54",
+        "id": 5538,
+        "title": "Letter Bee: Light and Blue Night Fantasy",
+        "year": 2008,
+        "format": "SPECIAL"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:55f9676e-6d75-459b-b994-74ab7fae535b",
+        "title": "레터 비 리버스",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:8dc7fac4-a927-401e-8d1a-0577f17cff54",
+        "title": "Letter Bee: Light and Blue Night Fantasy",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 6676,
+    "title": "Asura Cryin' 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/6676/Asura-Cryin-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:84b287df-75bc-435e-97db-204c1596161f",
+        "id": 5342,
+        "title": "아수라 크라잉 1기",
+        "year": 2009,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:84b287df-75bc-435e-97db-204c1596161f",
+        "title": "아수라 크라잉 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 8158,
+    "title": "Gegege no Kitarou: Jigoku-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/8158/Gegege-no-Kitarou-Jigoku-hen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c6d2aee3-d2ea-4e7c-af25-459c156c1009",
+        "title": "게게게의 키타로 6기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 8577,
+    "title": "Aki-Sora: Yume no Naka",
+    "decision": "EVIDENCE_UNAVAILABLE",
+    "pageUrl": null,
+    "status": null,
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1ac908cd-f069-418e-b75c-f5a6f2151ebc",
+        "title": "아키소라",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 9203,
+    "title": "K-ON!!: Ura-On!!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/9203/K-ON-Ura-On/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3a154dc2-76e3-4ac1-9b93-9d5422d55470",
+        "title": "케이온!! (2기)",
+        "type": "SIDE_STORY"
+      },
+      {
+        "animeId": "anime:bbc4391b-cbdf-48ef-ac93-f35fb59b5022",
+        "title": "케이온! 스페셜",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 9883,
+    "title": "Osomatsu-kun (1988)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/9883/Osomatsu-kun-1988/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3456ab5a-5ca7-41c0-969d-c05ef66578b0",
+        "title": "오소마츠 씨",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 9969,
+    "title": "Gintama'",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/9969/Gintama/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:f2d5315a-9027-4227-94a3-1d5e1fe4c8cb",
+        "id": 918,
+        "title": "은혼",
+        "year": 2006,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7aa039bd-31f8-4800-b7f8-a5f12c199401",
+        "title": "은혼 온 시어터 2D 바라가키 편",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:7c046175-67b5-4fa7-84dd-19ca28412bc6",
+        "title": "스켓 댄스",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:f2d5315a-9027-4227-94a3-1d5e1fe4c8cb",
+        "title": "은혼",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 10378,
+    "title": "Shinryaku!? Ika Musume",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10378/Shinryaku-Ika-Musume/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:64b14326-75d9-4a3f-857b-73b2bdde1990",
+        "id": 8557,
+        "title": "침략! 오징어 소녀",
+        "year": 2010,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:502aa51d-284c-4a64-b3ce-2ccb8a57d808",
+        "title": "침략!! 오징어 소녀 OVA",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:64b14326-75d9-4a3f-857b-73b2bdde1990",
+        "title": "침략! 오징어 소녀",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 10447,
+    "title": "Aquarion EVOL",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10447/Aquarion-EVOL/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:2f300286-a1e5-4abe-8e78-2da6f7961a77",
+        "title": "아쿠에리온 로고스",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:d82d8ec1-4f88-4aad-a346-44fd07de5c1f",
+        "title": "창성의 아쿠에리온",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 10507,
+    "title": "Inazuma Eleven GO",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10507/Inazuma-Eleven-GO/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5fe3afd4-19bd-44cd-9975-8cbf7a16505b",
+        "title": "이나즈마 일레븐",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 10521,
+    "title": "WORKING'!!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10521/WORKING/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:cb80bd56-3a27-4bfa-927c-2e702c25cd26",
+        "id": 6956,
+        "title": "WORKING!! 1기",
+        "year": 2010,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:cb80bd56-3a27-4bfa-927c-2e702c25cd26",
+        "title": "WORKING!! 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 10620,
+    "title": "Mirai Nikki",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10620/Mirai-Nikki/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:e5b1e353-5dd8-457c-9526-a61fb32873c2",
+        "id": 8460,
+        "title": "미래일기",
+        "year": 2010,
+        "format": "OVA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7cb7756d-1b63-489a-bab4-4c1fdb66f664",
+        "title": "[스페셜]미래일기 리다이얼",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:e5b1e353-5dd8-457c-9526-a61fb32873c2",
+        "title": "미래일기",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 10924,
+    "title": "Queen's Blade OVA",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/10924/Queens-Blade-OVA/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:453d8b17-2843-4795-b985-06f148de2edb",
+        "title": "퀸즈 블레이드: 아름다운 투사들",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:cf20f6c9-a10c-4ab5-8a9e-4a8a2b174a2b",
+        "title": "퀸즈 블레이드 리벨리온",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 11021,
+    "title": "Muv-Luv Alternative: Total Eclipse",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/11021/Muv-Luv-Alternative-Total-Eclipse/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4d1904b8-9bf1-48de-895e-b4e8d881d5d9",
+        "title": "마브러브 얼터너티브 1기",
+        "type": "SIDE_STORY"
+      },
+      {
+        "animeId": "anime:85f4cffd-af9d-4947-ad60-b19ba422f9c9",
+        "title": "슈바르체스마켄!",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 11179,
+    "title": "Papa no Iukoto wo Kikinasai!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/11179/Papa-no-Iukoto-wo-Kikinasai/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1f895c0d-7479-4e39-ad15-c5a0fa28ec33",
+        "title": "아빠 말 좀 들어라!",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 11341,
+    "title": "Tantei Opera Milky Holmes Dai 2 Maku",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/11341/Tantei-Opera-Milky-Holmes-Dai-2-Maku/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:40b341a6-c838-436a-b7de-1d02ca9d115a",
+        "title": "두 사람은 밀키홈즈(3기)",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 11741,
+    "title": "Fate/Zero 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/11741/FateZero-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:a6ed7d46-b0bb-4417-a584-88c95137091c",
+        "id": 10087,
+        "title": "페이트 제로",
+        "year": 2011,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1474b567-3d0f-48b8-b801-23d8356dfd82",
+        "title": "부탁해! 아인츠베른 상담실",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:3db5bc8d-de76-46ce-86b9-bcb1eda5d4b9",
+        "title": "페이트/스테이 나이트",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:43c997d9-d359-4f45-ad75-6e9debcb9ddb",
+        "title": "[극장판]페이트/스테이 나이트 [헤븐즈 필] 제1장",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:4bbe7005-ee96-428d-8f0d-2ea6e36b5763",
+        "title": "페이트/스테이 나이트 UBW [언리미티드 블레이드 워크스]",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:a6ed7d46-b0bb-4417-a584-88c95137091c",
+        "title": "페이트 제로",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:c87a6a3b-be9b-49fd-bb90-29414cffd1bd",
+        "title": "[극장판]페이트/스테이 나이트 UBW [언리미티드 블레이드 워크스]",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:dcbec004-7c13-4c8a-b5e4-53318024c31c",
+        "title": "로드 엘멜로이 2세의 사건부: [레일 체펠린] 그레이스 노트",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 14093,
+    "title": "Pocket Monsters Best Wishes! Season 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/14093/Pocket-Monsters-Best-Wishes-Season-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:cb8358ae-4f74-46b0-976e-c7d2470bacba",
+        "title": "포켓몬스터 베스트 위시",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 14645,
+    "title": "Hiiro no Kakera Dai Ni Shou",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/14645/Hiiro-no-Kakera-Dai-Ni-Shou/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9d1d6af3-bcc1-4e94-a628-196b5daecbbc",
+        "title": "비색의 조각 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 15417,
+    "title": "Gintama': Enchousen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/15417/Gintama-Enchousen/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:f2d5315a-9027-4227-94a3-1d5e1fe4c8cb",
+        "id": 918,
+        "title": "은혼",
+        "year": 2006,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:2d55575d-7303-4f67-86dd-8976389c8a75",
+        "title": "은혼 On Theater 2D 일국경성편",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:41387fde-340a-47a7-a6fd-c1ffd67f0b29",
+        "title": "극장판 은혼 온 시어터 2D 금혼편",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:507676a3-4908-44e7-b662-e67e0cd10420",
+        "title": "은혼 극장판 2기 : 해결사여 영원하라",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 16385,
+    "title": "Dog Days''",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/16385/Dog-Days/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:95717dfd-1535-4f12-886d-5bb4c8eab52e",
+        "title": "DOG DAYS'(2기)",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 17389,
+    "title": "Kingdom 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/17389/Kingdom-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3589a693-e909-4c3a-ac67-d1eefbb00869",
+        "title": "킹덤 1기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:896a6822-8ac1-4ec3-b6a9-bb610be6f775",
+        "title": "킹덤 3기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 18055,
+    "title": "Hakkenden: Touhou Hakken Ibun 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/18055/Hakkenden-Touhou-Hakken-Ibun-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:553bbe24-9b20-4e59-ac9f-2daceb0067d5",
+        "title": "팔견전 -동방팔견이문-",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 18295,
+    "title": "Kakumeiki Valvrave 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/18295/Kakumeiki-Valvrave-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:992628b8-5c3d-4770-9dc5-fe884ecaefcf",
+        "title": "혁명기 발브레이브",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 19613,
+    "title": "Initial D Final Stage",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/19613/Initial-D-Final-Stage/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:374df9a6-a3c6-49b3-b128-9cd2aae135a3",
+        "title": "이니셜D Fifth Stage",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:ddfad839-36e1-4215-9fad-0b6089b7ff4f",
+        "title": "MF고스트",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 19703,
+    "title": "Kyousougiga (TV)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/19703/Kyousougiga-TV/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:5cde3416-ec71-4731-a1b2-39bbcfa38f24",
+        "id": 10893,
+        "title": "쿄소기가",
+        "year": 2011,
+        "format": "ONA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5cde3416-ec71-4731-a1b2-39bbcfa38f24",
+        "title": "쿄소기가",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:98aa6360-c85e-43d5-b8dc-17c3e7ded444",
+        "title": "쿄소기가 특별편",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 20181,
+    "title": "Aikatsu! 2",
+    "decision": "COMBINED_EXISTING_ENTRY",
+    "pageUrl": "https://anilist.co/anime/20181/Aikatsu-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1209d998-bebd-40b8-a8bf-f3e4dd1549b2",
+        "title": "아이카츠 3 ~4기",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:7c62966b-94a5-416d-b9f6-230609a843be",
+        "title": "아이카츠 1~2기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:97dfd89f-04cf-4585-b46f-1db71fcd45bc",
+        "title": "아이카츠 온 퍼레이드! OVA",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 20474,
+    "title": "JoJo no Kimyou na Bouken: Stardust Crusaders",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20474/JoJo-no-Kimyou-na-Bouken-Stardust-Crusaders/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:f35bb960-d202-4555-9943-ad9a17b16375",
+        "id": 20799,
+        "title": "죠죠의 기묘한 모험: 스타더스트 크루세이더즈",
+        "year": 2015,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:815de5d3-241f-4582-af21-b51551448649",
+        "title": "죠죠의 기묘한 모험",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:f35bb960-d202-4555-9943-ad9a17b16375",
+        "title": "죠죠의 기묘한 모험: 스타더스트 크루세이더즈",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20593,
+    "title": "Hanamonogatari",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20593/Hanamonogatari/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:71c287e2-d6a3-4a53-8224-908087c1b8b3",
+        "title": "속·오와리모노가타리",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20666,
+    "title": "Space☆Dandy 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20666/SpaceDandy-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9101ace6-0974-4cb8-8e88-6cce66e03dd1",
+        "title": "스페이스 댄디 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20762,
+    "title": "Sidonia no Kishi: Daikyuu Wakusei Seneki",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20762/Sidonia-no-Kishi-Daikyuu-Wakusei-Seneki/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:66eeaf4b-9640-46ae-b123-2a529921137d",
+        "title": "시도니아의 기사 -사랑을 잣는 별-",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20792,
+    "title": "Fate/stay night: Unlimited Blade Works 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20792/Fatestay-night-Unlimited-Blade-Works-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4bbe7005-ee96-428d-8f0d-2ea6e36b5763",
+        "title": "페이트/스테이 나이트 UBW [언리미티드 블레이드 워크스]",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20801,
+    "title": "Kamisama Hajimemashita◎",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20801/Kamisama-Hajimemashita/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:163dfce9-2a6f-47d5-917b-74e3f4d21644",
+        "title": "[OAD]오늘부터 신령님 2기",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:361d6905-569d-407e-9d79-19511dbe71ae",
+        "title": "오늘부터 신령님 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20848,
+    "title": "Tantei Kageki Milky Holmes TD",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20848/Tantei-Kageki-Milky-Holmes-TD/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:40b341a6-c838-436a-b7de-1d02ca9d115a",
+        "title": "두 사람은 밀키홈즈(3기)",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20853,
+    "title": "Aldnoah.Zero Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20853/AldnoahZero-Part-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:064f1f93-d9a6-4a38-a2ef-2f950429bcf0",
+        "id": 181440,
+        "title": "알드노아 제로 비의 단장 -The Penultimate Truth-",
+        "year": 2025,
+        "format": "OVA"
+      },
+      {
+        "animeId": "anime:350583a2-874f-4b19-b7b0-01fdf8f4c512",
+        "id": 185714,
+        "title": "알드노아. 제로 (Re+)",
+        "year": 2025,
+        "format": "MOVIE"
+      },
+      {
+        "animeId": "anime:78e750cf-cc8e-4c13-8393-d7f384f60b20",
+        "id": 20632,
+        "title": "알드노아. 제로",
+        "year": 2014,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:064f1f93-d9a6-4a38-a2ef-2f950429bcf0",
+        "title": "알드노아 제로 비의 단장 -The Penultimate Truth-",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:350583a2-874f-4b19-b7b0-01fdf8f4c512",
+        "title": "알드노아. 제로 (Re+)",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:78e750cf-cc8e-4c13-8393-d7f384f60b20",
+        "title": "알드노아. 제로",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20879,
+    "title": "Durarara!!x2 Ten",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20879/Durararax2-Ten/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:6eba6b77-a038-4e00-bfb7-66858686615d",
+        "title": "듀라라라!!×2",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 20996,
+    "title": "Gintama°",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/20996/Gintama/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:f2d5315a-9027-4227-94a3-1d5e1fe4c8cb",
+        "id": 918,
+        "title": "은혼",
+        "year": 2006,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:507676a3-4908-44e7-b662-e67e0cd10420",
+        "title": "은혼 극장판 2기 : 해결사여 영원하라",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21004,
+    "title": "Kaitou Joker 2",
+    "decision": "COMBINED_EXISTING_ENTRY",
+    "pageUrl": "https://anilist.co/anime/21004/Kaitou-Joker-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1bbb2313-82cb-4d6b-81b2-cac7195f962c",
+        "title": "(더빙판)괴도 조커 1~4기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21094,
+    "title": "THE IDOLM@STER Cinderella Girls 2nd SEASON",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21094/THE-IDOLMSTER-Cinderella-Girls-2nd-SEASON/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:9e890095-6e72-4c9a-8cf4-5bfecd76bca9",
+        "id": 20693,
+        "title": "아이돌 마스터 신데렐라 걸즈",
+        "year": 2015,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9e890095-6e72-4c9a-8cf4-5bfecd76bca9",
+        "title": "아이돌 마스터 신데렐라 걸즈",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21170,
+    "title": "Ansatsu Kyoushitsu 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21170/Ansatsu-Kyoushitsu-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:36e5b594-7623-4426-a9cf-232c88f95e2e",
+        "title": "극장판 암살교실: 365일의 시간",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:4939fced-b7a9-4815-ba66-3113689b37bc",
+        "title": "암살교실 1기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:4bf0fcef-4d34-4982-b6ca-10a98cae9cf5",
+        "title": "쿠로코의 농구 1기",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:53f30eb1-dcc7-4266-b786-3be9dce02f93",
+        "title": "사이키 쿠스오의 재난",
+        "type": "CHARACTER_CROSSOVER"
+      }
+    ]
+  },
+  {
+    "anilistId": 21180,
+    "title": "Saenai Heroine no Sodatekata ♭",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21180/Saenai-Heroine-no-Sodatekata-/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5971f5eb-d4b2-449a-9f3d-be52c02d8c51",
+        "title": "시원찮은 그녀를 위한 육성방법",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:5c8af55b-3ec9-4e88-a28a-8bc61e46e03d",
+        "title": "[극장판]시원찮은 그녀를 위한 육성방법 피날레",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21241,
+    "title": "Ushio to Tora 2 (TV)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21241/Ushio-to-Tora-2-TV/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:cef26647-885b-4045-98d9-0d0663d7fc78",
+        "title": "요괴소년 호야",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21258,
+    "title": "Akagami no Shirayuki-hime 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21258/Akagami-no-Shirayuki-hime-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:16a63df3-e0cd-4973-9df3-d47c753b45b5",
+        "title": "빨강머리 백설공주",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21287,
+    "title": "Soukyuu no Fafner: EXODUS 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21287/Soukyuu-no-Fafner-EXODUS-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0626b522-f456-4a9f-8666-18b95ecef787",
+        "title": "창궁의 파프너 THE BEYOND",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:3c9befdb-ac93-4d06-b78b-9ce463bed720",
+        "title": "창궁의 파프너 EXODUS",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21300,
+    "title": "Terra Formars: Revenge",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21300/Terra-Formars-Revenge/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:14dae125-93e2-443a-8206-812fa8e620f2",
+        "title": "테라포마스",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21307,
+    "title": "Aikatsu! 4",
+    "decision": "COMBINED_EXISTING_ENTRY",
+    "pageUrl": "https://anilist.co/anime/21307/Aikatsu-4/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1209d998-bebd-40b8-a8bf-f3e4dd1549b2",
+        "title": "아이카츠 3 ~4기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:2a730e20-8c99-4b49-ad37-fb61707f8be8",
+        "title": "아이카츠! 10th STORY~미래에의 STARWAY~",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21364,
+    "title": "GATE: Jieitai Kanochi nite, Kaku Tatakaeri Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21364/GATE-Jieitai-Kanochi-nite-Kaku-Tatakaeri-Part-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:54b85dbe-2c9b-44b8-b69d-5d0659a91092",
+        "title": "게이트 - 자위대. 그의 땅에서, 이처럼 싸우며",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21390,
+    "title": "Gakusen Toshi Asterisk 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21390/Gakusen-Toshi-Asterisk-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:6b9fff75-e278-4ea0-a895-02e03d3fb48d",
+        "title": "학전도시 애스터리스크",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21394,
+    "title": "Magi: Sinbad no Bouken",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21394/Magi-Sinbad-no-Bouken/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:c3e5e5ff-85ee-4f79-a3c8-29698be737e8",
+        "id": 20609,
+        "title": "마기 신드바드의 모험 (2016)",
+        "year": 2014,
+        "format": "OVA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:04dbefbb-fb5d-46a0-8125-808501622a75",
+        "title": "마기",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:c3e5e5ff-85ee-4f79-a3c8-29698be737e8",
+        "title": "마기 신드바드의 모험 (2016)",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 21476,
+    "title": "SHOW BY ROCK!!#",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21476/SHOW-BY-ROCK/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:02e01a69-de5f-4f30-9acd-2ad451ff9d89",
+        "title": "쇼 바이 락!! Mashumairesh!!",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:ca89ee08-e751-407e-bd98-269de102860b",
+        "title": "쇼 바이 락!! (1기)",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21506,
+    "title": "Mahoutsukai Precure!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21506/Mahoutsukai-Precure/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:16056194-52e4-4382-a771-ba23ddbca3b0",
+        "title": "마법사 프리큐어!! ~미래의 날들~",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:1cc4bdde-4389-4971-8c1e-d650544f06bf",
+        "title": "극장판 프리큐어 올스타즈 F",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:530065d7-f2a0-45ec-b17c-0622dbdedd40",
+        "title": "쁘띠큐어: 프리큐어 요정들",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:6fbd3f94-c172-4422-92c6-7c020c0ea6a4",
+        "title": "너와 아이돌 프리큐어♪",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:77e5bc93-b8fc-4197-aa2f-0638c585a106",
+        "title": "원더풀 프리큐어! 더 무비!",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:8c92966d-bb9a-4c3a-a797-2fbb8c7caca8",
+        "title": "명탐정 프리큐어!",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:99453528-bf56-481a-94c1-65fbb5f761a8",
+        "title": "스타☆트윙클 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:b3978ee4-d496-43ae-b4c9-1252da3cd372",
+        "title": "힐링굿♡프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:bfd5d59a-ff7f-412a-9f99-d8dc7217188d",
+        "title": "허긋토! 프리큐어 ♡ 두사람은 프리큐어 올스타즈 메모리즈",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:e03399d2-12a3-4c41-95fc-9ad606833ca3",
+        "title": "허긋토! 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:ff3af159-158b-41b5-ae0f-7b3df893e488",
+        "title": "펼쳐지는 스카이! 프리큐어",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 21679,
+    "title": "Bungou Stray Dogs 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21679/Bungou-Stray-Dogs-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:56bd174b-1c3f-4502-ba21-c14bcc24224c",
+        "title": "문호 스트레이독스 3기",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:71d69c48-2bc1-47e0-a31b-90c08ff340a6",
+        "title": "문호 스트레이독스",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:bfaf3cee-92fd-4814-b6a2-1ba35ecf902a",
+        "title": "[극장판]문호 스트레이독스 DEAD APPLE",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 21733,
+    "title": "Shouwa Genroku Rakugo Shinjuu: Sukeroku Futatabi-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21733/Shouwa-Genroku-Rakugo-Shinjuu-Sukeroku-Futatabi-hen/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:7f998ac1-e182-4b5f-a1f6-076a344db88a",
+        "id": 20972,
+        "title": "쇼와 겐로쿠 라쿠고 심중",
+        "year": 2016,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7f998ac1-e182-4b5f-a1f6-076a344db88a",
+        "title": "쇼와 겐로쿠 라쿠고 심중",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21745,
+    "title": "Owarimonogatari (Ge)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21745/Owarimonogatari-Ge/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:7692c2d0-d87e-4169-9391-e710defdcd1e",
+        "id": 21262,
+        "title": "오와리모노가타리",
+        "year": 2015,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:71c287e2-d6a3-4a53-8224-908087c1b8b3",
+        "title": "속·오와리모노가타리",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:8f1891e7-774e-4bd0-9162-bd7e93d73573",
+        "title": "[스페셜]츠키모노가타리",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21799,
+    "title": "Ajin 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21799/Ajin-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:efbbf182-18b0-426f-a069-feb44929aae5",
+        "title": "아인 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 21839,
+    "title": "12-sai.: Chiccha na Mune no Tokimeki 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/21839/12-sai-Chiccha-na-Mune-no-Tokimeki-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e607bfd2-2dea-41c9-bab1-5d0d6f110484",
+        "title": "12세 ~작은 가슴의 두근거림~",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 87496,
+    "title": "Kemono Friends",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/87496/Kemono-Friends/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e101e5bb-1ed3-4e8f-89bf-695a919af266",
+        "title": "케모노 프렌즈 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 87498,
+    "title": "Saiyuuki RELOAD BLAST",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/87498/Saiyuuki-RELOAD-BLAST/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:64e67eab-c08f-45e0-b4ca-923b72be3954",
+        "title": "최유기 RELOAD -ZEROIN-",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 87539,
+    "title": "Ryuu no Haisha",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/87539/Ryuu-no-Haisha/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:86501afb-66d6-4d27-8cd8-a9359afcfa4a",
+        "id": 20947,
+        "title": "Japan Anima(tor)’s Exhibition",
+        "year": 2014,
+        "format": "ONA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:86501afb-66d6-4d27-8cd8-a9359afcfa4a",
+        "title": "Japan Anima(tor)’s Exhibition",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 97904,
+    "title": "TSUKIPRO THE ANIMATION",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/97904/TSUKIPRO-THE-ANIMATION/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:39c043c4-8f95-4869-b7c4-304cdb020cf5",
+        "title": "츠키우타 The ANIMATION 2",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:44103ead-da45-4c58-98d5-e5e73b2dfc8c",
+        "title": "바즈록 디 애니메이션",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:70f579fd-b065-452f-8507-ab18eb6a7d05",
+        "title": "츠키프로 디 애니메이션 2",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 98421,
+    "title": "Rilu Rilu Fairilu: Mahou no Kagami",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/98421/Rilu-Rilu-Fairilu-Mahou-no-Kagami/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:fa3be7d5-47bd-49e7-92e3-ba9c9f1b0eb9",
+        "title": "(더빙)리루리루 페어리루 ~요정의 문~",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 98436,
+    "title": "Mahoutsukai no Yome",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/98436/Mahoutsukai-no-Yome/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:41eff086-993b-4f47-b927-817b15cfc270",
+        "id": 21688,
+        "title": "The Ancient Magus' Bride: Those Awaiting a Star",
+        "year": 2016,
+        "format": "OVA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:41eff086-993b-4f47-b927-817b15cfc270",
+        "title": "The Ancient Magus' Bride: Those Awaiting a Star",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:5f4e5ed7-cd4f-4d4c-b79b-7db0711f82d0",
+        "title": "마법사의 신부: 서쪽의 소년과 청람의 기사",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 98438,
+    "title": "Hoozuki no Reitetsu 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/98438/Hoozuki-no-Reitetsu-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:0e54dc99-5669-4054-9475-1fa657520906",
+        "id": 20431,
+        "title": "호오즈키의 냉철",
+        "year": 2014,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0e54dc99-5669-4054-9475-1fa657520906",
+        "title": "호오즈키의 냉철",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 99476,
+    "title": "Yowamushi Pedal: GLORY LINE",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/99476/Yowamushi-Pedal-GLORY-LINE/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:84960a10-8fed-494e-b47e-34e47ffd6f41",
+        "title": "겁쟁이 페달 LIMIT BREAK",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:fb0c8fa7-c55d-4c6e-a8d8-48f516f090ce",
+        "title": "겁쟁이 페달 NEW GENERATION",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 99557,
+    "title": "Thunderbolt Fantasy: Touriken Yuuki 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/99557/Thunderbolt-Fantasy-Touriken-Yuuki-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:21f59593-3876-410c-a6b0-2a55846d26f1",
+        "title": "Thunderbolt Fantasy 동리검유기 3기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 100298,
+    "title": "Megalo Box",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100298/Megalo-Box/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:21826c4e-be02-450e-8bb8-4b1796689f4d",
+        "title": "NOMAD 메갈로 복스 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 100745,
+    "title": "Captain Tsubasa (2018)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100745/Captain-Tsubasa-2018/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5c2d6e0b-4315-46ae-bdf3-d90e3b5f0482",
+        "title": "캡틴 츠바사 시즌 2 주니어 유스 편",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 100773,
+    "title": "Shokugeki no Souma: San no Sara - Tootsuki Ressha-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100773/Shokugeki-no-Souma-San-no-Sara-Tootsuki-Ressha-hen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9416ab32-d3fa-4a1f-9ab7-1563453f8128",
+        "title": "식극의 소마 네 번째 접시",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:a089ad54-7f88-41d9-8548-bc08561ac561",
+        "title": "식극의 소마 세 번째 접시",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 100790,
+    "title": "Oshiri Tantei",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100790/Oshiri-Tantei/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9492189c-21bd-4643-aedf-f04467627edb",
+        "title": "엉덩이 탐정: 별과 달",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:9fb54e3a-cc05-46ff-9507-76718f45b63e",
+        "title": "극장판 엉덩이 탐정 작별, 사랑스런 파트너(엉덩이)여",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:efebe2fd-ad00-46cb-a828-172d6386ddee",
+        "title": "엉덩이 댄디 : 젊은 시절",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 100791,
+    "title": "Yuuki Yuuna wa Yuusha de Aru: Washio Sumi no Shou",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100791/Yuuki-Yuuna-wa-Yuusha-de-Aru-Washio-Sumi-no-Shou/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:34316945-e734-4dbe-80f2-a300fa990437",
+        "title": "유우키 유우나는 용사다",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:6aa5c284-9996-4364-b78d-ce6d126b8d7c",
+        "title": "[극장판]유우키 유우나는 용자다 -와시오 스미의 장- 제3장 약속",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:88883efc-91dd-4e94-a095-52398be058cd",
+        "title": "유우키 유우나는 용사다 츄룻토!",
+        "type": "CHARACTER_CROSSOVER"
+      },
+      {
+        "animeId": "anime:9d3798b2-5f0d-4ff0-9514-c78c5c7ec9fb",
+        "title": "[극장판]유우키 유우나는 용자다 -와시오 스미의 장- 제1장 친구",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:da7f0e3d-1ffa-4011-bf96-725334af9ad0",
+        "title": "[극장판]유우키 유우나는 용자다 -와시오 스미의 장- 제2장 영혼",
+        "type": "ALTERNATIVE_VERSION"
+      }
+    ]
+  },
+  {
+    "anilistId": 100957,
+    "title": "Lupin III: PART 5",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/100957/Lupin-III-PART-5/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3d07d881-ba20-4f0f-877c-c42cac475652",
+        "title": "루팡 3세 PART 6",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 101046,
+    "title": "Binan Koukou Chikyuu Bouei-bu HAPPY KISS!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/101046/Binan-Koukou-Chikyuu-Bouei-bu-HAPPY-KISS/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3a4dd9c9-564d-4eeb-acdf-266a7cef02bd",
+        "title": "극장판 미남고교 지구방위부 ETERNAL LOVE!",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:bab4afca-b3d8-4894-aa15-08f472bab65c",
+        "title": "미남고교 지구방위부 하이카라!",
+        "type": "OTHER"
+      }
+    ]
+  },
+  {
+    "anilistId": 101228,
+    "title": "Zoids Wild",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/101228/Zoids-Wild/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:16f516d8-e695-4b76-9597-08f1196e84ac",
+        "title": "조이드 와일드 제로",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 101340,
+    "title": "Muhyo to Rouji no Mahouritsu Soudan Jimusho",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/101340/Muhyo-to-Rouji-no-Mahouritsu-Soudan-Jimusho/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:97344863-a0c2-4808-b488-2fec5956f70b",
+        "title": "무효와 로지의 마법률 상담 사무소 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 101474,
+    "title": "Overlord III",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/101474/Overlord-III/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0f513552-6d15-4520-a1f2-d0f214cd822d",
+        "title": "플레플레 플레이아데스 3",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:24796f35-c5fc-4810-a753-412c029560af",
+        "title": "오버로드 2기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:64088273-b49b-430c-ad2a-519194cf6aba",
+        "title": "오버로드 IV",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 101925,
+    "title": "Gintama.: Shirogane no Tamashii-hen - Kouhan-sen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/101925/Gintama-Shirogane-no-Tamashii-hen-Kouhan-sen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:352742ce-d18e-462c-a136-0aa8755a3953",
+        "title": "은혼 더 세미 파이널",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 102351,
+    "title": "Tokyo Ghoul:re 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/102351/Tokyo-Ghoulre-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:02f2c52d-bd25-403e-a639-f4dfc3697910",
+        "title": "도쿄 구울:re",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 102974,
+    "title": "Gurazeni 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/102974/Gurazeni-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:15cc0062-4b16-489a-b794-1fe9e2808382",
+        "title": "그라제니 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 103713,
+    "title": "Bishoujo Senshi Sailor Moon: Eternal - Zenpen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/103713/Bishoujo-Senshi-Sailor-Moon-Eternal-Zenpen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:51615631-f34f-4468-bed8-78d3654af7db",
+        "title": "Pretty Guardian Sailor Moon Eternal The Movie Part 2",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:684f753c-2e09-40c1-9229-b1e1a3f34cb6",
+        "title": "미소녀전사 세일러문 Crystal - 3부",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 104578,
+    "title": "Shingeki no Kyojin Season 3 Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/104578/Shingeki-no-Kyojin-Season-3-Part-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:149c7511-e66e-4eb9-92c2-0476cfd7456b",
+        "id": 99147,
+        "title": "진격의 거인 3기",
+        "year": 2018,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:149c7511-e66e-4eb9-92c2-0476cfd7456b",
+        "title": "진격의 거인 3기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:5bce3171-9ae4-4c30-b2e3-5b8fe2cdb6d9",
+        "title": "극장판 진격의 거인 ~크로니클~",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:615a061d-c7ac-4d41-9450-ccf60b40023b",
+        "title": "진격의 거인 The Final Season",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 105749,
+    "title": "Diamond no Ace act II",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/105749/Diamond-no-Ace-act-II/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:01b7feef-0ba8-412f-bf99-f5b6de368a2e",
+        "title": "다이아몬드A 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 106541,
+    "title": "Nora to Oujo to Noraneko Heart 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/106541/Nora-to-Oujo-to-Noraneko-Heart-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:542ccb29-52a4-4b34-b53b-ce68b86011c2",
+        "title": "노라와 황녀와 길고양이 하트",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 107447,
+    "title": "Aikatsu Friends!: Kagayaki no Jewel",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/107447/Aikatsu-Friends-Kagayaki-no-Jewel/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ed8cf051-a42e-408a-8163-4605171570ed",
+        "title": "아이카츠 온 퍼레이드!",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 107651,
+    "title": "A3! SEASON SPRING & SUMMER",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/107651/A3-SEASON-SPRING-SUMMER/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:31d3472b-1fa9-4cae-9888-e9f1254f058b",
+        "title": "A3! SEASON AUTUMN & WINTER",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 107666,
+    "title": "Shin Chuuka Ichiban!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/107666/Shin-Chuuka-Ichiban/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:f3258d80-ab7f-4d61-8f6e-e8829b4368f0",
+        "title": "요리왕 비룡 더 마스터 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 108039,
+    "title": "Kidou Senshi Gundam: THE ORIGIN - Zenya Akai Suisei",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/108039/Kidou-Senshi-Gundam-THE-ORIGIN-Zenya-Akai-Suisei/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:691ae478-44fc-42f0-842e-045337168044",
+        "title": "기동전사 건담 디 오리진",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:6bb7fccb-d03b-49b8-b01b-5da5ccfeada5",
+        "title": "기동전사 건담",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 108631,
+    "title": "Hataraku Saibou!!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/108631/Hataraku-Saibou/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1f5324e0-39f7-4532-a8dd-53a5e041482c",
+        "title": "일하는 세포",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 111048,
+    "title": "Kengan Ashura Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/111048/Kengan-Ashura-Part-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ae349e0a-00ca-4f27-9090-f5c4a085e70d",
+        "title": "겐간 아슈라 2기 파트 1",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:ea97cce5-84f5-482a-b499-920c2da6e4b9",
+        "title": "켄간 아슈라 1기 파트 1",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 112641,
+    "title": "Kaguya-sama wa Kokurasetai?: Tensaitachi no Renai Zunousen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/112641/Kaguya-sama-wa-Kokurasetai-Tensaitachi-no-Renai-Zunousen/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:513bf2ea-7695-49de-a2c0-68cb2d3dd899",
+        "title": "[OVA]카구야 님은 고백받고 싶어 ~천재들의 연애 두뇌전~ (2기)",
+        "type": "OTHER"
+      },
+      {
+        "animeId": "anime:77ef9d7d-564c-40b3-935d-0376fc4ce1a2",
+        "title": "카구야 님은 고백받고 싶어 -울트라 로맨틱-",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:c6adbafd-a3e4-4b08-85bb-557f78ac7a4b",
+        "title": "카구야 님은 고백받고 싶어 ~천재들의 연애 두뇌전~",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 113242,
+    "title": "Duel Masters!!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/113242/Duel-Masters/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5a272bc8-ead1-440a-8eff-f6ce31556b0c",
+        "title": "듀얼 마스터즈 킹",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 113538,
+    "title": "Haikyuu!! TO THE TOP 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/113538/Haikyuu-TO-THE-TOP-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:33a988ac-1f39-4fe4-8443-07a602ecb1f1",
+        "id": 106625,
+        "title": "하이큐!! TO THE TOP",
+        "year": 2020,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:33a988ac-1f39-4fe4-8443-07a602ecb1f1",
+        "title": "하이큐!! TO THE TOP",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:77ea68f5-51a3-47ec-94fc-3d7d4cbf6087",
+        "title": "극장판 하이큐 쓰레기장의 결전",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 114308,
+    "title": "Sword Art Online: Alicization - War of Underworld Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/114308/Sword-Art-Online-Alicization-War-of-Underworld-Part-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:843aaf14-bb53-4450-8cd2-e1babca0c53e",
+        "title": "소드 아트 온라인 앨리시제이션 War of Underworld",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 119661,
+    "title": "Re:Zero kara Hajimeru Isekai Seikatsu 2nd Season Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/119661/ReZero-kara-Hajimeru-Isekai-Seikatsu-2nd-Season-Part-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:4278ae6b-ef67-4c9a-87a5-4b78339fc485",
+        "id": 108632,
+        "title": "Re: 제로부터 시작하는 이세계 생활 2nd Season",
+        "year": 2020,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4278ae6b-ef67-4c9a-87a5-4b78339fc485",
+        "title": "Re: 제로부터 시작하는 이세계 생활 2nd Season",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:5610d0c3-6d7f-49a2-80d9-2db9cfaf4790",
+        "title": "Re: 제로부터 시작하는 이세계 생활 3기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 127721,
+    "title": "IDOLiSH7: Third BEAT!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/127721/IDOLiSH7-Third-BEAT/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5fc85cf8-8d5d-4d8f-89b0-3483fb62d2b9",
+        "title": "아이돌리쉬7 Second BEAT!",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:920214d5-1082-420a-8005-7e5fefd6fc57",
+        "title": "아이돌리쉬 세븐 Third BEAT! 파트 2",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 128827,
+    "title": "Cardfight!! Vanguard: overDress Season 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/128827/Cardfight-Vanguard-overDress-Season-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5d4d1223-6b1a-4a49-a164-a66838eaa558",
+        "title": "카드파이트!! 뱅가드 will+Dress",
+        "type": "PREQUEL"
+      },
+      {
+        "animeId": "anime:a5c2be2b-2b49-49be-b56a-1b78e5776aa4",
+        "title": "카드파이트!! 뱅가드 overDress",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 129608,
+    "title": "THE Big O (2003)",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/129608/THE-Big-O-2003/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c309f34f-6f58-4e33-9f05-61d28528b97d",
+        "title": "더 빅 오",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 130584,
+    "title": "DUEL MASTERS King!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/130584/DUEL-MASTERS-King/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5a272bc8-ead1-440a-8eff-f6ce31556b0c",
+        "title": "듀얼 마스터즈 킹",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 130777,
+    "title": "Mewkledreamy Mix!",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/130777/Mewkledreamy-Mix/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9f973398-212b-4429-8d6b-93efadd938ef",
+        "title": "꿈속의 뮤",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 138511,
+    "title": "Fate/kaleid liner Prisma☆Illya: FINALE",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/138511/Fatekaleid-liner-PrismaIllya-FINALE/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0a45cf22-e59c-420c-8bd9-5ed7edcb1655",
+        "title": "극장판 Fate/kaleid liner 프리즈마☆이리야 Licht 이름없는 소녀",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 149939,
+    "title": "Ranma 1/2: Nettou-hen",
+    "decision": "COMBINED_EXISTING_ENTRY",
+    "pageUrl": "https://anilist.co/anime/149939/Ranma-12-Nettou-hen/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:9b02b7d4-7b46-4941-b6e1-02cb1c4a8944",
+        "id": 210,
+        "title": "란마 1⁄2",
+        "year": 1989,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3ef4c2a2-3828-4011-87c6-68b896b3863b",
+        "title": "란마1/2 2기",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:5197036e-c5b4-4793-b69d-03750e42febf",
+        "title": "란마 1/2 (2024)",
+        "type": "ALTERNATIVE_VERSION"
+      },
+      {
+        "animeId": "anime:9b02b7d4-7b46-4941-b6e1-02cb1c4a8944",
+        "title": "란마 1⁄2",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 152677,
+    "title": "Tantei wa mou, Shindeiru. Season 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/152677/Tantei-wa-mou-Shindeiru-Season-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ed295597-b718-4052-b2ff-7ea8ec4e25e3",
+        "title": "탐정은 이미 죽었다 1기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 153676,
+    "title": "SK∞ 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/153676/SK-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b196ce33-3661-4807-8ff4-599a1dda0998",
+        "title": "SK∞ 에스케이 에이트",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 155158,
+    "title": "Kidou Senshi Gundam: Suisei no Majo Season 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/155158/Kidou-Senshi-Gundam-Suisei-no-Majo-Season-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:94737c11-3f11-44b8-8a40-b39cfb5c540b",
+        "id": 139274,
+        "title": "기동전사 건담 수성의 마녀",
+        "year": 2022,
+        "format": "TV"
+      },
+      {
+        "animeId": "anime:fd825878-dd4e-4df1-acef-e59c6a6ab9a3",
+        "id": 146922,
+        "title": "기동전사 건담 수성의 마녀 PROLOGUE",
+        "year": 2022,
+        "format": "SPECIAL"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:94737c11-3f11-44b8-8a40-b39cfb5c540b",
+        "title": "기동전사 건담 수성의 마녀",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 155168,
+    "title": "Hataraku Maou-sama!! 2nd Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/155168/Hataraku-Maou-sama-2nd-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3e945302-d8cf-4e98-88e6-012d54dfe60b",
+        "title": "알바 뛰는 마왕님!!",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 155211,
+    "title": "Dungeon ni Deai wo Motomeru no wa Machigatteiru Darou ka IV: Shin Shou Yakusai-hen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/155211/Dungeon-ni-Deai-wo-Motomeru-no-wa-Machigatteiru-Darou-ka-IV-Shin-Shou-Yakusai-hen/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:003af2a9-5576-4a2e-b78b-a58f4efc1fee",
+        "id": 129196,
+        "title": "던전에서 만남을 추구하면 안 되는 걸까 4기",
+        "year": 2022,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:003af2a9-5576-4a2e-b78b-a58f4efc1fee",
+        "title": "던전에서 만남을 추구하면 안 되는 걸까 4기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:8011a578-dbd9-4273-b530-8e5ea1c52b5a",
+        "title": "던전에서 만남을 추구하면 안 되는 걸까 5기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 160803,
+    "title": "Mahou Shoujo Ikusei Keikaku: restart",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/160803/Mahou-Shoujo-Ikusei-Keikaku-restart/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:dbd126d0-a058-4cb4-bf68-49be046959b8",
+        "id": 21340,
+        "title": "마법소녀 육성계획",
+        "year": 2016,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:dbd126d0-a058-4cb4-bf68-49be046959b8",
+        "title": "마법소녀 육성계획",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 162314,
+    "title": "Shingeki no Kyojin: The Final Season - Kanketsu-hen Kouhen",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/162314/Shingeki-no-Kyojin-The-Final-Season-Kanketsu-hen-Kouhen/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:d3f53dfd-831b-40f3-9698-c9dd35087409",
+        "id": 146984,
+        "title": "Attack on Titan Final Season THE FINAL CHAPTERS Special 1",
+        "year": 2023,
+        "format": "SPECIAL"
+      },
+      {
+        "animeId": "anime:54ef867c-600e-446c-919f-52811822b86b",
+        "id": 131681,
+        "title": "진격의 거인 The Final Season 파트 2",
+        "year": 2022,
+        "format": "TV"
+      },
+      {
+        "animeId": "anime:615a061d-c7ac-4d41-9450-ccf60b40023b",
+        "id": 110277,
+        "title": "진격의 거인 The Final Season",
+        "year": 2020,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d3f53dfd-831b-40f3-9698-c9dd35087409",
+        "title": "Attack on Titan Final Season THE FINAL CHAPTERS Special 1",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 163256,
+    "title": "Duel Masters WIN: Duel Wars",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/163256/Duel-Masters-WIN-Duel-Wars/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8d16dc06-0b63-4639-ad96-caf51c63e5c8",
+        "title": "듀얼 마스터즈 LOST - 추억의 수정",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 164440,
+    "title": "Ooi! Tonbo",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/164440/Ooi-Tonbo/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:ea0b88ac-f6c2-48b9-aa20-faf05cd92138",
+        "id": 178729,
+        "title": "어~이! 톤보 2기",
+        "year": 2024,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ea0b88ac-f6c2-48b9-aa20-faf05cd92138",
+        "title": "어~이! 톤보 2기",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 165523,
+    "title": "BORUTO: NARUTO NEXT GENERATIONS Part 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/165523/BORUTO-NARUTO-NEXT-GENERATIONS-Part-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:f78924d2-b8e0-4685-842b-8daea6921e59",
+        "title": "보루토: 나루토 넥스트 제너레이션즈",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 167151,
+    "title": "Sabikui Bisco 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/167151/Sabikui-Bisco-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4f62426d-505a-4291-97a0-891e9457f8f4",
+        "title": "녹을 먹는 비스코",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 169579,
+    "title": "Sekai Saikou no Ansatsusha, Isekai Kizoku ni Tensei suru 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/169579/Sekai-Saikou-no-Ansatsusha-Isekai-Kizoku-ni-Tensei-suru-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:b776ad2b-5c9b-40d3-866a-f100ed417de8",
+        "id": 129898,
+        "title": "세계 최고의 암살자, 이세계 귀족으로 전생하다",
+        "year": 2021,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b776ad2b-5c9b-40d3-866a-f100ed417de8",
+        "title": "세계 최고의 암살자, 이세계 귀족으로 전생하다",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 172192,
+    "title": "Kikansha no Mahou wa Tokubetsu desu 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/172192/Kikansha-no-Mahou-wa-Tokubetsu-desu-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:f8d57f3b-067c-492c-ad5e-7f8f247e41bc",
+        "id": 163142,
+        "title": "(더빙)귀환자의 마법은 특별해야 합니다",
+        "year": 2023,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:f8d57f3b-067c-492c-ad5e-7f8f247e41bc",
+        "title": "(더빙)귀환자의 마법은 특별해야 합니다",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 176314,
+    "title": "Sasaki to Pii-chan Season 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/176314/Sasaki-to-Pii-chan-Season-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b6509f76-fc75-4a07-ad89-acdb8d3d479b",
+        "title": "사사키와 피짱",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 177704,
+    "title": "MASHLE: Sanma Taisou Shinkakusha Saishuu Shiken-hen",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/177704/MASHLE-Sanma-Taisou-Shinkakusha-Saishuu-Shiken-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9760a0db-1382-4f8a-9b2c-e30b26f0b638",
+        "title": "마슐: 신각자 후보 선발시험 편",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 177880,
+    "title": "Osomatsu-san 4th Season",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/177880/Osomatsu-san-4th-Season/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5778c50f-e0ed-4a70-83a9-c88dcacf6c04",
+        "title": "오소마츠 씨 3기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 178083,
+    "title": "Tokyo Revengers: Santen Sensou-hen",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/178083/Tokyo-Revengers-Santen-Sensou-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3b25a1c5-b129-45dc-b165-a4ed47cb82c9",
+        "title": "도쿄 리벤저스: 천축편",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 178467,
+    "title": "Tsuki ga Michibiku Isekai Douchuu 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/178467/Tsuki-ga-Michibiku-Isekai-Douchuu-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:af9f57a1-1bda-4bc9-8919-57a7477f7c07",
+        "title": "달이 이끄는 이세계 여행 제2막",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 179981,
+    "title": "Chiyu Mahou no Machigatta Tsukaikata 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/179981/Chiyu-Mahou-no-Machigatta-Tsukaikata-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4e490530-55c4-4a50-9a05-899adcb1e87c",
+        "title": "치유마법의 잘못된 사용법",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 181641,
+    "title": "Tokidoki Bosotto Rossiya-go de Dereru Tonari no Alya-san Season 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/181641/Tokidoki-Bosotto-Rossiya-go-de-Dereru-Tonari-no-Alya-san-Season-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8111aec9-d9da-4efa-9365-2444e15087fa",
+        "title": "가끔씩 툭하고 러시아어로 부끄러워하는 옆자리의 아랴 양",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 181951,
+    "title": "Ookami to Koushinryou: MERCHANT MEETS THE WISE WOLF 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/181951/Ookami-to-Koushinryou-MERCHANT-MEETS-THE-WISE-WOLF-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8afa33f4-ab34-4a69-af2d-a77e7c9b07d7",
+        "title": "늑대와 향신료 MERCHANT MEETS THE WISE WOLF",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 182434,
+    "title": "5-Oku-nen Button Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/182434/5-Oku-nen-Button-Part-2/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:18dd0a2e-ea5b-4bad-ab06-f32b098fbb9e",
+        "title": "5억 년 버튼 ~스가하라 소타의 숏숏~",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 182544,
+    "title": "Mahou Shoujo ni Akogarete 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/182544/Mahou-Shoujo-ni-Akogarete-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:94e8e6d9-c446-49d0-8d00-b77a53396c7b",
+        "title": "(무삭제)마법소녀를 동경해서",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 183159,
+    "title": "Sinbi Apateu: Ghost Ball X-ui Tansaeng",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/183159/Sinbi-Apateu-Ghost-Ball-X-ui-Tansaeng/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:f5ffe679-300a-4fdc-880d-ad22d80da0ca",
+        "title": "[극장판]신비아파트:금빛도깨비와 비밀의 동굴",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 184072,
+    "title": "Yuru Camp△ SEASON 4",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/184072/Yuru-Camp-SEASON-4/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b156ccd5-dcd0-4567-b072-43dc92bad191",
+        "title": "유루캠△ 3기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 184141,
+    "title": "Boukyaku Battery (TV) 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/184141/Boukyaku-Battery-TV-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:263fdde5-e076-4a09-b5d1-58b549ecb4eb",
+        "title": "망각 배터리",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 184376,
+    "title": "Death March Kara Hajimaru Isekai Kyousoukyoku (Zoku-hen)",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/184376/Death-March-Kara-Hajimaru-Isekai-Kyousoukyoku-Zoku-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:25f1e29b-4883-4f4a-b0b7-1aec382c5d6e",
+        "title": "데스마치에서 시작하는 이세계 광상곡",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 185515,
+    "title": "2.5-jigen no Ririsa 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/185515/25-jigen-no-Ririsa-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:06e732f4-0679-49c3-8ea5-de2130977a05",
+        "title": "2.5차원의 유혹",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 185644,
+    "title": "Oshiri Tantei 8",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/185644/Oshiri-Tantei-8/",
+    "status": "Finished",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:33ca6beb-4764-4b0b-a200-80fe44e71b7a",
+        "title": "엉덩이 탐정 9",
+        "type": "PREQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 185657,
+    "title": "Skip to Loafer 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/185657/Skip-to-Loafer-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b2f8d469-9fdf-463c-b353-befef1fe4bad",
+        "title": "스킵과 로퍼",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 185699,
+    "title": "Ramen Aka Neko: Sono ni",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/185699/Ramen-Aka-Neko-Sono-ni/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0cb27c0f-cc1e-41d1-8058-57c114409136",
+        "title": "라멘 아카네코",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 185756,
+    "title": "Tensei Kizoku, Kantei Skill de Nariagaru 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/185756/Tensei-Kizoku-Kantei-Skill-de-Nariagaru-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:272ef1a9-db97-4da1-ad06-b0a5c31dee6e",
+        "title": "전생 귀족, 감정 스킬로 성공하다 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 186336,
+    "title": "IDOLiSH7 4th Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/186336/IDOLiSH7-4th-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:920214d5-1082-420a-8005-7e5fefd6fc57",
+        "title": "아이돌리쉬 세븐 Third BEAT! 파트 2",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 186712,
+    "title": "Bocchi the Rock! 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/186712/Bocchi-the-Rock-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0f656b71-d84c-42a1-8c3f-0a102f9f6d11",
+        "title": "BOCCHI THE ROCK! Recap Part 2",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:702a5fe8-6c2a-4bff-9db4-790c5ea32dc2",
+        "title": "봇치 더 록!",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 186743,
+    "title": "Toaru Kagaku no Railgun 4th Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/186743/Toaru-Kagaku-no-Railgun-4th-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:677a2246-e574-4fbe-b995-8c1081ccf18e",
+        "title": "어떤 과학의 초전자포 T",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 187924,
+    "title": "Kono Subarashii Sekai ni Shukufuku wo! 4",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/187924/Kono-Subarashii-Sekai-ni-Shukufuku-wo-4/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:bc738bb3-2405-4978-a490-d0bd65c2d8a4",
+        "title": "이 멋진 세계에 축복을! 3",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 188665,
+    "title": "Rurouni Kenshin: Meiji Kenkaku Romantan 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/188665/Rurouni-Kenshin-Meiji-Kenkaku-Romantan-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4f3d51f0-d9c0-40e4-8944-3889e642b4cf",
+        "title": "바람의 검심 -메이지 검객 낭만기- 교토동란",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 188892,
+    "title": "Kuroiwa Medaka ni Watashi no Kawaii ga Tsuujinai 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/188892/Kuroiwa-Medaka-ni-Watashi-no-Kawaii-ga-Tsuujinai-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8a8d03bc-6e0c-447a-bec0-13e6b31185db",
+        "title": "쿠로이와 메다카에게 내 귀여움이 통하지 않아",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 189121,
+    "title": "BanG Dream! It's MyGO!!!!! / Ave Mujica (Zoku-hen)",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/189121/BanG-Dream-Its-MyGO-Ave-Mujica-Zoku-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:491a9e17-d46f-4d5b-bea5-97efdaf04a1b",
+        "title": "뱅드림! Ave Mujica",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 189123,
+    "title": "Ao no Hako Season 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/189123/Ao-no-Hako-Season-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:10da6f76-6187-4067-9aa0-c5c82469464f",
+        "title": "푸른 상자",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 189323,
+    "title": "Shangri-La Frontier 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/189323/Shangri-La-Frontier-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4be998aa-7af3-46f0-a7ff-85164f31ae7b",
+        "title": "샹그릴라 프론티어 ~망겜 헌터, 갓겜에 도전하다~ 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 189796,
+    "title": "Make Heroine ga Oosugiru! 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/189796/Make-Heroine-ga-Oosugiru-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1c96cfdd-e8b0-4d7f-81d8-770f8c40dd4e",
+        "title": "패배 히로인이 너무 많아!",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 191788,
+    "title": "Aoashi 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/191788/Aoashi-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7add01f8-4e82-4ea4-aa11-da830bcaec0c",
+        "title": "아오아시",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 194453,
+    "title": "Ninja Kamui: Red Vendetta",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/194453/Ninja-Kamui-Red-Vendetta/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:dc655fb4-a0b3-436d-9380-226a622a5c30",
+        "title": "닌자 카무이",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 195210,
+    "title": "A-Rank Party wo Ridatsu Shita Ore wa, Moto Oshiegotachi to Meikyuu Shinbu wo Mezasu. 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/195210/A-Rank-Party-wo-Ridatsu-Shita-Ore-wa-Moto-Oshiegotachi-to-Meikyuu-Shinbu-wo-Mezasu-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5e631b01-843e-46ee-96d9-efb43ae199e2",
+        "title": "A랭크 파티를 이탈한 나는, 전 제자들과 미궁 심부를 목표로 한다.",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 195516,
+    "title": "Kusuriya no Hitorigoto 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/195516/Kusuriya-no-Hitorigoto-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:b0a2741f-2db3-4303-97de-09ab5f74bf3b",
+        "title": "약사의 혼잣말 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 196893,
+    "title": "Kinnikuman: Kanpeki Choujin Shiso-hen Season 3",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/196893/Kinnikuman-Kanpeki-Choujin-Shiso-hen-Season-3/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:f89ca456-611a-40e5-a4d3-b9b8aca0870a",
+        "title": "근육맨 완벽초인시조 편 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 197824,
+    "title": "Isekai Nonbiri Nouka 2",
+    "decision": "ALREADY_PRESENT",
+    "pageUrl": "https://anilist.co/anime/197824/Isekai-Nonbiri-Nouka-2/",
+    "status": "Finished",
+    "existingMatches": [
+      {
+        "animeId": "anime:0bf2b777-be5a-48eb-bf91-600502ab4e29",
+        "id": null,
+        "title": "이세계 유유자적 농가 2",
+        "year": 2026,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c4ee4f8e-7273-4383-9258-c1dc89538861",
+        "title": "이세계 유유자적 농가",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 198692,
+    "title": "Izure Saikyou no Renkinjutsushi? 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/198692/Izure-Saikyou-no-Renkinjutsushi-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5dd789b3-6a5e-4c5f-9877-8858cb501df4",
+        "title": "언젠가 최강의 연금술사?",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 198727,
+    "title": "Chitose-kun wa Ramune Bin no Naka Part 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/198727/Chitose-kun-wa-Ramune-Bin-no-Naka-Part-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:55ac7fd2-aa04-4795-8120-765aed0dcad9",
+        "id": 180082,
+        "title": "치토세 군은 라무네 병 속에",
+        "year": 2025,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:55ac7fd2-aa04-4795-8120-765aed0dcad9",
+        "title": "치토세 군은 라무네 병 속에",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 198966,
+    "title": "Dandadan 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/198966/Dandadan-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9201d7a9-0ccf-4a05-aca6-7cfc70f29a92",
+        "title": "단다단 제2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199068,
+    "title": "Shin Tennis no Ouji-sama: U-17 WORLD CUP Kesshou Member Ketteisen",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199068/Shin-Tennis-no-Ouji-sama-U-17-WORLD-CUP-Kesshou-Member-Ketteisen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9aafffae-b096-4a4b-ac96-343b832d5b1b",
+        "title": "신 테니스의 왕자 U-17 WORLD CUP SEMIFINAL",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199185,
+    "title": "Tate no Yuusha no Nariagari Season 5",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199185/Tate-no-Yuusha-no-Nariagari-Season-5/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:325729be-f933-4416-b679-366396b53976",
+        "title": "방패 용사 성공담 4기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199217,
+    "title": "Re:Monster 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199217/ReMonster-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e7eb80ba-b850-4c08-bff9-d3802613edd1",
+        "title": "리 몬스터",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199337,
+    "title": "Shin Samurai-den YAIBA 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199337/Shin-Samurai-den-YAIBA-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:121583df-e26f-40f5-a807-b85b2224d64f",
+        "title": "진 사무라이전 야이바",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199342,
+    "title": "Hikaru ga Shinda Natsu 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199342/Hikaru-ga-Shinda-Natsu-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:a18a0463-a103-4fb1-8611-a63699b5a1e0",
+        "title": "히카루가 죽은 여름",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199404,
+    "title": "Blue Lock: NEO EGOIST LEAGUE",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199404/Blue-Lock-NEO-EGOIST-LEAGUE/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:69995c7c-8581-4fd1-b6a8-c7da72f27140",
+        "title": "블루 록 VS. U-20 JAPAN",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199426,
+    "title": "Hotel Inhumans 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199426/Hotel-Inhumans-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:defe3f81-b219-4c85-8f49-79c766b0a3f3",
+        "title": "호텔 인휴먼즈",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 199793,
+    "title": "Witch Watch 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/199793/Witch-Watch-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d4d15a5a-c1ca-480c-bd21-48908fccb73a",
+        "title": "위치 워치",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 201388,
+    "title": "Dark Gathering 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/201388/Dark-Gathering-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:84c976fb-6f9f-4169-ba02-4afc329f44fd",
+        "title": "다크 개더링",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 203855,
+    "title": "Saijaku Tamer wa Gomi Hiroi no Tabi wo Hajimemashita. 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/203855/Saijaku-Tamer-wa-Gomi-Hiroi-no-Tabi-wo-Hajimemashita-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:21681901-49c1-449a-bce3-01a2819cbb59",
+        "title": "최약 테이머는 폐지 줍는 여행을 시작했습니다",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204286,
+    "title": "Taiyou yori mo Mabushii Hoshi 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204286/Taiyou-yori-mo-Mabushii-Hoshi-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:0001475c-e514-4698-9a84-f10f9879a4d9",
+        "title": "태양보다 눈부신 별",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204363,
+    "title": "SAKAMOTO DAYS 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204363/SAKAMOTO-DAYS-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:705de39d-acf4-4608-9ff9-2d5f6df21d08",
+        "title": "사카모토 데이즈 파트2",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204389,
+    "title": "Yasei no Last Boss ga Arawareta! 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204389/Yasei-no-Last-Boss-ga-Arawareta-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4d089a98-e8dc-4a67-b86e-71719e686cc8",
+        "title": "야생의 라스트 보스가 나타났다!",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204436,
+    "title": "Gachiakuta 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204436/Gachiakuta-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d9f988ff-9469-4b14-ba15-a3af2147e5d7",
+        "title": "가치아쿠타",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204604,
+    "title": "Undead Unluck 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204604/Undead-Unluck-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9177fe84-2511-46dd-a4c5-42ed6bac19dd",
+        "title": "언데드 언럭 Winter편",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204650,
+    "title": "Tougen Anki: Nikko・Kegon no Taki-hen",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204650/Tougen-Anki-Nikko-Kegon-no-Taki-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e06156c6-e5e3-4d1f-ad35-ad19c5426937",
+        "title": "도원암귀",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204688,
+    "title": "Kingdom (Zoku-hen)",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204688/Kingdom-Zoku-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4c6b4a53-2b25-416d-a23f-97e44cb8b798",
+        "title": "킹덤 6",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 204747,
+    "title": "One Punch Man 3 Part 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/204747/One-Punch-Man-3-Part-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7d71cb11-d0b7-4d0b-aa46-15559c638bf1",
+        "title": "원펀맨 3기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 205432,
+    "title": "Isshun de Chiryou Shiteita no ni Yakutatazu to Tsuihou Sareta Tensai Chiyushi, Yami Healer Toshite Tanoshiku Ikiru 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/205432/Isshun-de-Chiryou-Shiteita-no-ni-Yakutatazu-to-Tsuihou-Sareta-Tensai-Chiyushi-Yami-Healer-Toshite-Tanoshiku-Ikiru-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:7604099d-42b1-44a4-837f-269620946c4d",
+        "id": 175872,
+        "title": "순식간에 치유해줬더니 쓸모없다며 추방당한 천재 치유사, 어둠의 힐러로 즐겁게 살다",
+        "year": 2025,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:7604099d-42b1-44a4-837f-269620946c4d",
+        "title": "순식간에 치유해줬더니 쓸모없다며 추방당한 천재 치유사, 어둠의 힐러로 즐겁게 살다",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 206814,
+    "title": "Dragon Ball Super: Beerus",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/206814/Dragon-Ball-Super-Beerus/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4b57a732-ab4c-49b6-8036-793194b606d7",
+        "title": "드래곤볼 슈퍼",
+        "type": "RECAP"
+      },
+      {
+        "animeId": "anime:742afa6c-f04e-44fb-b5ce-85e3edf1a865",
+        "title": "드래곤볼 Z",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:a4d8ccbb-0e25-4e08-821e-2b1cc57c2585",
+        "title": "드래곤볼 Z KAI",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 207385,
+    "title": "Dungeon ni Deai wo Motomeru no wa Machigatteiru Darou ka VI",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/207385/Dungeon-ni-Deai-wo-Motomeru-no-wa-Machigatteiru-Darou-ka-VI/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:8011a578-dbd9-4273-b530-8e5ea1c52b5a",
+        "title": "던전에서 만남을 추구하면 안 되는 걸까 5기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209032,
+    "title": "Mahou no Shimai LuluttoLilly Part 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209032/Mahou-no-Shimai-LuluttoLilly-Part-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:ec845f1c-c2b9-4e9c-9102-555b326c5473",
+        "id": 178749,
+        "title": "마법의 자매 룰루토 릴리",
+        "year": 2026,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:ec845f1c-c2b9-4e9c-9102-555b326c5473",
+        "title": "마법의 자매 룰루토 릴리",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209247,
+    "title": "Boku no Kokoro no Yabai Yatsu 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209247/Boku-no-Kokoro-no-Yabai-Yatsu-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:2dee9d22-a896-4ff4-a710-953aeedd450f",
+        "title": "내 마음의 위험한 녀석 2기",
+        "type": "SEQUEL"
+      },
+      {
+        "animeId": "anime:33c5944f-5385-42d1-8396-3d71b309d7c9",
+        "title": "극장판 내 마음의 위험한 녀석",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209670,
+    "title": "Yuusha Party wo Oidasareta Kiyou Binbou 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209670/Yuusha-Party-wo-Oidasareta-Kiyou-Binbou-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:874802e7-ba3e-4449-8d53-a37f8c7ca471",
+        "id": 187264,
+        "title": "용사 파티에서 쫓겨난 다재무능",
+        "year": 2026,
+        "format": "ONA"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:874802e7-ba3e-4449-8d53-a37f8c7ca471",
+        "title": "용사 파티에서 쫓겨난 다재무능",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209762,
+    "title": "Mayonaka Heart Tune 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209762/Mayonaka-Heart-Tune-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:cbe9a221-5ef4-4757-9a44-76cb89308f2a",
+        "title": "한밤중 하트튠",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209800,
+    "title": "Yoroi Shinden Samurai Troopers Part 2",
+    "decision": "ADD",
+    "pageUrl": "https://anilist.co/anime/209800/Yoroi-Shinden-Samurai-Troopers-Part-2/",
+    "status": "Releasing",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:aa68cfce-1a8e-4439-8be5-11b51962af11",
+        "title": "개진전 사무라이 트루퍼",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209827,
+    "title": "[Oshi no Ko] Final Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209827/Oshi-no-Ko-Final-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:4fdd83f1-cd9f-4c05-b893-b1fad5b6706b",
+        "title": "【최애의 아이】 3기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209872,
+    "title": "Ranma 1/2 (2024) 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209872/Ranma-12-2024-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3ef4c2a2-3828-4011-87c6-68b896b3863b",
+        "title": "란마1/2 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209876,
+    "title": "MF Ghost Final Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209876/MF-Ghost-Final-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:13441a97-ddd1-4eaa-937b-def7848f28f4",
+        "title": "MF고스트 3기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209939,
+    "title": "Sousou no Frieren 3rd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209939/Sousou-no-Frieren-3rd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1ecaf615-2d40-4720-95a5-7c46bfa548d1",
+        "title": "장송의 프리렌 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209963,
+    "title": "Yuusha Kei ni Shosu: Choubatsu Yuusha 9004-tai Keimu Kiroku 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209963/Yuusha-Kei-ni-Shosu-Choubatsu-Yuusha-9004-tai-Keimu-Kiroku-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:27c9aef3-fff8-4891-bc77-af698819b41b",
+        "title": "용사형에 처함 징벌용사 9004부대 형무기록",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 209984,
+    "title": "Fate/strange Fake (Zoku-hen)",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/209984/Fatestrange-Fake-Zoku-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:a008d775-35b8-4416-bb09-c84bab1c1986",
+        "title": "페이트/스트레인지 페이크",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 210199,
+    "title": "The Fable 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/210199/The-Fable-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e92f8a8b-2abb-459e-94a9-744288244f3d",
+        "title": "더 페이블",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 210483,
+    "title": "Isekai Maou to Shoukan Shoujo no Dorei Majutsu ULT",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/210483/Isekai-Maou-to-Shoukan-Shoujo-no-Dorei-Majutsu-ULT/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:1780f873-6525-45a7-ba97-076091c85d49",
+        "title": "이세계 마왕과 소환 소녀의 노예 마술 Ω",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 211495,
+    "title": "Boushoku no Berserk 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/211495/Boushoku-no-Berserk-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:36a0e2e4-94e4-4769-a5b7-404ed5bb56c1",
+        "title": "폭식의 베르세르크",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 212503,
+    "title": "Hyouken no Majutsushi ga Sekai wo Suberu II",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/212503/Hyouken-no-Majutsushi-ga-Sekai-wo-Suberu-II/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:3a58a767-4d23-4825-9930-d90c219fd087",
+        "title": "빙검의 마술사가 세계를 다스린다",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213360,
+    "title": "Akane-banashi 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213360/Akane-banashi-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:6f4a08f9-3809-47ee-9765-57db9f22bea4",
+        "title": "아카네 이야기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213579,
+    "title": "Snowball Earth 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213579/Snowball-Earth-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:d0ce43ac-2d07-464c-bf00-a9369ea1f9a8",
+        "title": "스노우볼 어스",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213656,
+    "title": "Tsue to Tsurugi no Wistoria Season 3",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213656/Tsue-to-Tsurugi-no-Wistoria-Season-3/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9e2ae58d-40ef-4cb1-83f9-5a8683c732eb",
+        "title": "지팡이와 검의 위스토리아 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213657,
+    "title": "Yozakura-san Chi no Daisakusen 2nd Season Part 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213657/Yozakura-san-Chi-no-Daisakusen-2nd-Season-Part-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:e01141ba-76f3-4676-a35f-195ff2747736",
+        "title": "요자쿠라 일가의 대작전 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213805,
+    "title": "Koori no Jouheki 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213805/Koori-no-Jouheki-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:9a13f3ed-5614-43a0-bb6a-94b5294bbe90",
+        "title": "얼음 성벽",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213860,
+    "title": "Lv2 Kara Cheat datta Moto Yuusha Kouho no Mattari Isekai Life 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213860/Lv2-Kara-Cheat-datta-Moto-Yuusha-Kouho-no-Mattari-Isekai-Life-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:37c91f6e-4301-40e6-9911-d6ee6d76feb4",
+        "title": "Lv2부터 치트였던 전직 용사 후보의 유유자적 이세계 라이프",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 213872,
+    "title": "Hitoribocchi no Isekai Kouryaku 2nd Season",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/213872/Hitoribocchi-no-Isekai-Kouryaku-2nd-Season/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:fb5ea8d6-f8f9-4e62-8b38-b0288f946e8f",
+        "title": "외톨이의 이세계 공략",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 214536,
+    "title": "Cardfight!! Vanguard Divinez Unmei Seisen-hen",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/214536/Cardfight-Vanguard-Divinez-Unmei-Seisen-hen/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:c7466106-98eb-49be-88f7-5fd5419fdc1a",
+        "title": "카드파이트!! 뱅가드 Divinez 세이센 편",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 214650,
+    "title": "Mato Seihei no Slave 3",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/214650/Mato-Seihei-no-Slave-3/",
+    "status": "Not Yet Released",
+    "existingMatches": [
+      {
+        "animeId": "anime:3b5edbf9-7ad8-4b8d-ae73-0c81c5f7bc76",
+        "id": 141821,
+        "title": "마도정병의 슬레이브",
+        "year": 2024,
+        "format": "TV"
+      }
+    ],
+    "incomingRelations": [
+      {
+        "animeId": "anime:5bf46d44-1a2c-418d-a188-a3fc8fc8165f",
+        "title": "마도정병의 슬레이브 2기",
+        "type": "SEQUEL"
+      }
+    ]
+  },
+  {
+    "anilistId": 216272,
+    "title": "Tefuda ga Oome no Victoria 2",
+    "decision": "UNRELEASED",
+    "pageUrl": "https://anilist.co/anime/216272/Tefuda-ga-Oome-no-Victoria-2/",
+    "status": "Not Yet Released",
+    "existingMatches": [],
+    "incomingRelations": [
+      {
+        "animeId": "anime:591e63ec-2b3b-46a1-b5c9-cd59639bde26",
+        "title": "히든 카드가 많은 빅토리아",
+        "type": "SEQUEL"
+      }
+    ]
+  }
+]

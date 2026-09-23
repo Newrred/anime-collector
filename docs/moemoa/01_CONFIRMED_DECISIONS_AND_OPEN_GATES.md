@@ -1,6 +1,7 @@
 # 01. 확정 결정과 미정 게이트
 
 > **문서 상태: `CANONICAL PRODUCT DECISIONS`**
+> **최종 갱신:** `2026-09-23 — PUBLIC-LAUNCH-V2-01 출시 범위 승인`
 > 제품 범위와 gate에 관한 최상위 기준이다. `미정` 표에 등록된 항목과 보고서의 권장안은 사용자 승인 전 확정 결정이 아니다.
 
 ## 1. 사용법
@@ -39,7 +40,7 @@
 
 ### CARD-01 — 이미지 우선 Memory Card
 
-상태: **확정**
+상태: **확정 / 2026-09-03 보완 확정**
 
 완료 조건:
 
@@ -49,13 +50,21 @@ Anime 또는 PrivateTitle
 = Complete Memory Card
 ```
 
-- 사용자 이미지를 강력 권장한다.
-- 사용자가 이미지를 제공하지 못하면 서비스 디자인 카드를 생성한다.
+지원하는 Visual source:
+
+- 사용자 기기 이미지 또는 사용자가 가져온 이미지 — **강력 권장**
+- 사용자가 명시적으로 선택한 승인된 작품 대표 표지
+- 시스템 디자인 또는 텍스트 중심 디자인
+
+추가 규칙:
+
 - 작품 제목만 있으면 Draft다.
 - 작품 장르 태그는 카탈로그에서 자동 연결한다.
-- 감상, 감정, 날짜, 에피소드·장면, 재감상 의도는 선택 항목이다.
+- 감상, 감정, 날짜, 에피소드·장면, 재감상 의도는 기본적으로 선택 항목이다.
+- 단, 작품 대표 표지를 VisualAsset으로 사용하는 경우에는 `감상·감정·날짜·에피소드·장면·재감상 의도` 중 최소 하나를 개인 기억 신호로 입력해야 Complete가 된다.
 - 사용자 메모는 긴 리뷰가 아니라 짧은 기억 신호를 우선한다.
-
+- 작품을 저장하는 행동은 Memory Card를 자동 생성하지 않는다.
+- Memory Card를 생성하는 행동은 작품 저장 상태를 자동 생성하지 않는다.
 ### BOARD-01 — Private Board P0
 
 상태: **확정**
@@ -69,11 +78,12 @@ Anime 또는 PrivateTitle
 
 ### IMAGE-01 — 이미지 유형 전체를 데이터 모델에서 구분
 
-상태: **확정**
+상태: **확정 / 2026-09-03 보완 확정**
 
 지원 대상:
 
 - 사용자 기기 이미지
+- 승인된 작품 대표 표지 reference
 - 시스템 디자인 카드
 - 텍스트 중심 디자인 카드
 - 애니 장면 캡처
@@ -86,8 +96,9 @@ Anime 또는 PrivateTitle
 
 ```text
 imageType
-storageScope
-visibility
+sourceKind
+storageScope 또는 동등한 저장 출처 구분
+visibility 또는 동등한 사용자 기록 공개 상태
 rightsBasis
 creator/source
 license/permission
@@ -95,6 +106,7 @@ moderationStatus
 spoiler/content rating
 ```
 
+작품 대표 표지는 `imageType = CATALOG_COVER`, `rightsBasis = EXPLICIT_PERMISSION` 또는 동등한 명시적 값으로 구분한다. 사용자 소유 카드의 privacy와 카탈로그 원본 파일의 접근 범위는 별개 속성으로 취급한다.
 ### IMAGE-02 — 유형별 Public 제어
 
 상태: **정책 확정 / 활성화 게이트 별도**
@@ -150,7 +162,7 @@ spoiler/content rating
 
 ### SYNC-01 — normalized entity sync + explicit conflict
 
-상태: **확정 — 2026-08-26**
+상태: **확정 — 2026-08-26 / 2026-09-03 보완**
 
 - Whole JSON snapshot 대신 Memory Card, VisualAsset metadata, Board, preference를 entity row로 동기화한다.
 - 각 entity는 optimistic `version`, server timestamp, tombstone을 가진다.
@@ -158,7 +170,8 @@ spoiler/content rating
 - Delete tombstone은 stale update보다 우선하며 30일 보존한다.
 - Operation ID와 request hash로 retry를 idempotent하게 만들고 server-generated `sync_seq`로 변경분을 pull한다.
 - 사용자 이미지 file은 sync하지 않는다. `LOCAL_ONLY` metadata와 system-design spec만 Phase 1 대상이다.
-
+- 작품 대표 표지 기반 Memory는 이미지 bytes를 사용자 데이터로 복제하지 않고 `catalogCoverId` 또는 동등한 안정적 reference metadata만 동기화할 수 있다.
+- 작품 저장 상태, 평점, WatchLog의 신규 remote sync는 `TITLE-STATE-SYNC-01`이 결정되기 전 자동으로 범위에 추가하지 않는다.
 ### CATALOG-01 — 제한된 자체 카탈로그
 
 상태: **확정**
@@ -186,16 +199,118 @@ spoiler/content rating
 
 MOEMOA는 자체 내부 ID, 관계 타입, 중복 판별, 검증 상태를 운영한다.
 
-### CATALOG-PROD-01 — 승인된 카탈로그와 대표 표지의 Production 표시
+### CATALOG-PROD-01 — 승인된 카탈로그와 대표 표지의 Production 및 VisualAsset 사용
 
-상태: **확정 — 2026-08-19**
+상태: **확정 — 2026-08-19 / 사용 범위 확대 확정 — 2026-09-03**
 
-- 사용자는 2026-08-19 AniList 기반 카탈로그 metadata와 작품별 대표 표지를 MOEMOA Production에서 저장·표시하는 허가를 받았다고 확인했다.
-- 허가 증빙 원문은 사용자가 보관하며 저장소에는 승인 범위와 확인 시점만 기록한다.
-- 승인 범위는 현재 검증된 Service Projection v2 3,998개와 그 작품별 대표 표지 1개를 Production Web의 검색·상세 화면에서 제공하는 용도다.
-- raw payload, 추가 이미지, 애니 장면 캡처, 팬아트, 사용자 이미지, Public UGC 권한으로 확대하지 않는다.
-- 대표 표지는 catalog presentation asset이며 Memory Card의 사용자 `VisualAsset`으로 복사하지 않는다.
-- 공급자 조건이 변경되거나 허가가 철회되면 `PUBLIC_CATALOG_SUPABASE_*`를 제거하거나 Web consumer 커밋을 revert해 기존 fallback으로 즉시 전환한다.
+- 사용자는 2026-09-03 작품별 대표 표지를 MOEMOA에서 자유롭게 사용할 수 있는 승인을 받았다고 확인했다.
+- 허가 증빙 원문은 사용자가 보관하며 저장소에는 승인 범위와 확인 시점, 출처 식별 정보만 기록한다.
+- 대표 표지는 Production의 검색, 작품 목록, 작품 상세, 작품별 기억 묶음에서 표시할 수 있다.
+- 사용자가 명시적으로 선택하면 대표 표지를 Memory Card의 `VisualAsset`으로 사용할 수 있다.
+- 작품 저장 또는 검색 결과 노출만으로 표지 기반 Memory Card를 자동 생성하지 않는다.
+- 카드마다 대표 표지 bytes를 복제하지 않고 `catalogCoverId` 또는 동등한 immutable reference로 재사용하는 것을 기본으로 한다.
+- 표지 기반 Memory Visual은 `CATALOG_COVER`와 `EXPLICIT_PERMISSION`을 기록하고, 카드의 개인 감상·날짜·Board membership과 카탈로그 원본 자산을 분리한다.
+- 대표 표지 기반 Memory Card는 Complete가 되기 위해 개인 기억 신호를 최소 하나 가져야 한다.
+- 대표 표지를 VisualAsset으로 사용할 수 있다는 결정은 애니 장면 캡처, 팬아트, 사용자 이미지, 다른 추가 이미지의 사용 권한을 자동 확대하지 않는다.
+- Public Card/Board 활성화는 대표 표지 사용 승인과 별개로 `UGC-GATE-01`, `IMAGE-PUBLIC-01`을 따른다.
+- 공급자 조건이나 허가가 변경되면 새 표지 선택을 끌 수 있는 기능 플래그와 기존 reference의 `MISSING/REPLACE` 복구 경로를 유지한다.
+
+### ANILIFE-PROD-01 — 별도 출처 승인을 전제로 한 Production 게시
+
+상태: **무제한 사용·재배포 허가 사용자 확인 / 내부 필드 검토 대기 — 2026-09-03**
+
+- 사용자는 AniLife 데이터의 Production 게시를 별도 승인을 받은 뒤 진행하는 절차에 동의했다. 이 결정 자체를 AniLife 권리자의 승인으로 간주하지 않는다.
+- 사용자는 2026-09-03 14:07 KST에 AniLife 재배포 허가를 받았다고 확인했고, 이어 작품 정보와 표지, 영구 저장, 상업적 Production 표시, 재배포, 리사이즈·가공을 포함해 제한이 없다고 확인했다. 증빙 원문은 사용자가 보관하며 저장소에는 이 진술과 확인 시각만 기록한다.
+- Production 승인 기록에는 승인 주체, 대상 origin, 허용 필드, 저장·가공·표시·재배포·상업 이용 범위, 승인 시각, 만료·철회 조건, 증빙 위치 또는 해시, 내부 확인자를 포함한다.
+- 권리 범위는 AniLife 작품 정보와 표지를 포함한다. 각 값과 이미지는 작품 식별·스키마·이미지 안전성·품질 검토를 통과한 뒤 Production 후보가 된다.
+- 도메인이 바뀌어도 같은 승인 주체의 AniLife 출처임을 확인하기 전에는 새 origin에 권리 승인을 적용하지 않는다.
+- 기존 `CATALOG-PROD-01`의 대표 표지 사용 결정은 승인된 대표 표지를 사용할 수 있다는 제품 결정이며, AniLife가 그 승인 출처라는 뜻은 아니다.
+- 외부 권리 게이트는 사용자 확인으로 충족됐다. 현재 `FIELD_REVIEW_REQUIRED` claim과 표지는 내부 데이터·이미지 검토를 통과한 뒤 Production 게시 상태로 바꾼다.
+- 철회·만료 시 신규 게시를 중지하고 해당 출처 필드·asset을 대체 또는 비노출할 수 있어야 하며, 감사 metadata는 보존한다.
+
+### IA-01 — 작품 허브형 Library·Memory 통합
+
+상태: **확정 — 2026-09-03**
+
+- Library와 Memory Card의 write model은 독립적으로 유지한다.
+- 사용자 경험은 공통 `Title Hub`에서 통합한다.
+- 작품 상세는 작품 식별, 저장 여부, 시청 상태·평점·WatchLog, 관련 Memory Card 0..N을 함께 보여준다.
+- 작품 목록과 Memory 상세, 검색 결과, Board의 Memory 상세에서 같은 Title Hub로 이동할 수 있어야 한다.
+- 작품을 저장하지 않았어도 Memory Card가 있으면 Title Hub에서 해당 작품과 Memory를 열람할 수 있다.
+- 작품 저장을 해제해도 Memory Card와 Board membership은 유지한다.
+- Memory Card를 삭제해도 작품 저장 상태와 WatchLog는 유지한다.
+
+### TITLE-COLLECTION-01 — `내 작품`의 포함 집합
+
+상태: **확정 — 2026-09-03**
+
+`내 작품 / My Titles`의 전체 목록은 다음 합집합으로 계산한다.
+
+```text
+명시적으로 저장한 작품
+UNION
+Complete Memory Card가 하나 이상 연결된 작품 또는 PrivateTitle
+```
+
+- `저장됨`, `미저장`, `기억 N개`는 서로 독립된 상태로 표시한다.
+- Memory만 있는 작품을 Library에 저장된 것으로 표시하지 않는다.
+- 저장만 있고 Memory가 없는 작품도 목록에 표시하고 첫 Memory 진입점을 제공한다.
+- PrivateTitle은 가짜 공식 표지를 만들지 않고 별도의 PrivateTitle placeholder 또는 시스템 타일로 구분한다.
+- 이 집합은 기본적으로 파생 projection이며, 별도의 중복 영구 entity로 저장하지 않는다.
+
+### TITLE-VIEW-01 — `표지 보기`와 `기억 함께 보기`
+
+상태: **확정 — 2026-09-03**
+
+`내 작품 / My Titles`는 동일한 작품 집합, 필터, 정렬을 다음 두 표현으로 제공한다.
+
+1. `표지 보기 / Poster View`
+   - 승인된 공식 표지 중심의 고밀도 grid
+   - 작품명, 저장·시청 상태, 평점 선택 표시, Memory 수를 압축 표시
+   - 개인 Memory preview는 표시하지 않는다.
+2. `기억 함께 보기 / Memory View`
+   - 공식 표지를 작품 앨범의 anchor로 사용
+   - 사용자 이미지·장면 이미지·시스템 디자인 등 관련 Memory preview 2~3개, `+N`, 최신 기억 신호를 함께 표시
+   - 표지 기반 Memory는 Memory 수에는 포함하되, 같은 공식 표지가 anchor와 반복되지 않도록 다른 Memory가 있으면 preview 우선순위를 낮춘다.
+
+추가 규칙:
+
+- 보기 전환은 데이터를 생성·삭제·수정하지 않는다.
+- 필터, 정렬, scroll/focus 문맥을 가능한 범위에서 유지한다.
+- 사용자가 선택한 마지막 모드를 preference로 저장한다.
+- 선택 기록이 없고 Memory가 하나 이상이면 Memory View, Memory가 없으면 Poster View를 기본값으로 한다.
+- 첫 Memory 저장 직후 모드를 강제로 바꾸지 않고 Memory View 안내와 명시적 전환 action만 제공한다.
+
+### LIBRARY-INTEGRATION-01 — 기존 Library 유지·축소·통합
+
+상태: **확정 — 2026-09-03**
+
+- 최종 선택은 `통합`이며 실행 방식은 `기능 축소형 통합`이다.
+- 작품 저장 여부, 시청 상태, 평점, 재시청 횟수, WatchLog, 기존 local Library 데이터는 유지한다.
+- 사용자-facing 독립 `Library` 메뉴와 `Library Card` 명칭은 제거하고 `작품 / Titles`, 작품 항목, Title Hub로 재구성한다.
+- 기존 AniList ID 중심 local Library는 adapter 뒤에서 읽고, 신규 canonical TitleRef와 분리한다.
+- 실제 운영 legacy 사용자가 0명이므로 legacy remote schema를 만들지 않는다.
+- 개발 기기의 local Library 데이터는 export·rollback 근거 없이 destructive 삭제하거나 자동 변환하지 않는다.
+- 기존 `/library/` direct route와 query는 전환 기간에 alias 또는 safe redirect로 유지한다.
+- WatchLog와 긴 legacy memo는 Memory Card로 자동 변환하지 않는다.
+
+### NAMING-01 — 사용자-facing 명칭
+
+상태: **확정 — 2026-09-03**
+
+| 역할 | 한국어 | 영어 |
+| --- | --- | --- |
+| 전체 개인 Memory | 기억 | Memories |
+| 화면 제목 | 기억 아카이브 | Memory Archive |
+| 작품 인덱스 | 작품 | Titles |
+| 화면 제목 | 내 작품 | My Titles |
+| Memory 생성 행동 | 기억 남기기 | Add Memory |
+| 작품 저장 행동 | 작품 저장 | Save Title |
+| 작품별 통합 상세 | 작품 상세 | Title Hub |
+| 보기 모드 1 | 표지 보기 | Poster View |
+| 보기 모드 2 | 기억 함께 보기 | Memory View |
+
+`Library`, `Add to Library`, `Library Card`는 legacy·내부 호환 문맥 외에는 신규 사용자 copy로 사용하지 않는다.
 
 ### LEGACY-01 — Production legacy migration 없음
 
@@ -215,7 +330,9 @@ MOEMOA는 자체 내부 ID, 관계 타입, 중복 판별, 검증 상태를 운�
 
 - 일반 애니 트래커를 대체하는 것이 아니라 이미지 중심 개인 기억 아카이브다.
 - 작품 DB보다 Memory Card, Archive, Board가 우선이다.
-
+- 단, `작품 / Titles`의 Poster View에서는 공식 표지를 작품 탐색의 중심으로 사용할 수 있다.
+- Home, Memories, Board와 Title Hub의 Memory 본문에서는 사용자 개인 이미지와 기억 신호가 제품의 주 콘텐츠다.
+- 공식 표지를 VisualAsset으로 사용할 수 있어도 작품 저장과 Memory 작성의 의미를 합치지 않는다.
 ### MARKET-01 — 초기 시장
 
 - 영어 우선.
@@ -323,6 +440,22 @@ Codex는 기반을 구현할 수 있지만 이 게이트가 통과되지 않으�
 - 2026-08-18 작업은 코드와 mock 검증까지만 승인하며 실제 3,998개 네트워크 실행은 포함하지 않는다. 따라서 `FULL-CATALOG-INGESTION-GATE-01` 상태는 이번 코드 구현만으로 자동 통과하지 않는다.
 - ExecPlan: `plans/2026-08-18-full3998-batched-local-ingestion.md`
 
+### ANILIST-PROD-01
+
+상태: **승인·구현·증분 보강 실행 완료 (2026-09-03)**
+
+- 사용자는 AniList 자료의 Production 저장·표시·배포 승인을 받았다고 2026-09-03 재확인했다. 증빙 원문은 사용자가 보관하고 저장소에는 최소 permission metadata만 기록한다.
+- AniList 필드와 표지는 `PERMISSIONED` 권리 상태로 저장하되, 작품 identity와 field review를 통과한 값만 Production 후보가 된다.
+- `increment-2026-09` 226건은 MOEMOA ID와 `ANILIFE:<id>` target key를 유지한다. AniList ID는 제목·연도·형식·고유 표지 근거로 정확히 연결된 작품에만 선택적으로 추가한다.
+- 기존 AniLife의 단일값·표지는 덮어쓰지 않고 AniList는 빈 단일 필드와 추가 가능한 collection 필드를 보강한다. 중복 ID, 기존 3,998건과의 중복, 근거 부족은 자동 반영하지 않는다.
+- 실제 운영 DB upload·release 활성화·Web/Android 배포는 이 수집 실행과 별도다.
+- 세부 결정: `decisions/2026-09-03-anilist-production-permission.md`
+- ExecPlan: `plans/2026-09-03-anilist-increment-enrichment.md`
+
+### SOURCE-INDEPENDENT-CATALOG-01 (2026-09-07 승인)
+
+AniList ID는 선택적 내부 확인 정보이며 사용자용 외부 이동을 제공하지 않는다. MOEMOA UUID만으로 검색·상세·저장·Memory 연결을 지원한다. 승인된 AniLife 표지를 지원하되 개별 데이터 검증은 유지한다. [결정](decisions/2026-09-07-source-independent-catalog.md), [구현 결과](reports/2026-09-07-source-independent-catalog.md).
+
 ## 5. 아직 사용자가 결정해야 할 항목
 
 Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하되 선택하지 않는다.
@@ -330,6 +463,7 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 | ID | 미정 항목 | 필요한 제안 |
 | --- | --- | --- |
 | IMAGE-SYNC-01 | Private 이미지 백업 | 수동 동의, 용량·포맷·보관·삭제 기준 |
+| TITLE-STATE-SYNC-01 | 작품 저장 상태·평점·WatchLog remote sync | 신규 normalized entity, 승격·충돌·삭제·Web/Android 정합성 |
 | AGE-01 | 공개 UGC 연령 | 18+ 베타 또는 미성년자 지원 시 추가 요건 |
 | MODERATION-01 | 사전 심사 대 사후 심사 | 초기 베타 권장안과 운영량 추정 |
 | SOURCE-01 | 출처별 사용 등급 | 직접 적재, 공식 검증, 대조 전용, 금지 |
@@ -343,7 +477,7 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 | GROWTH-02 | 첫 검증 국가 범위 | 필리핀 단일 또는 싱가포르 교차 검증 범위 |
 | GROWTH-03 | 광고 최적화 이벤트 | 클릭·가입보다 첫 Complete Card 저장 중심 여부 |
 
-`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 확정 섹션에 반영됐다. `IMAGE-SYNC-01`, `DEPLOY-01`, `IMAGE-PUBLIC-01`, `GROWTH-01~03` 등 이 표에 남은 항목은 여전히 미정이며, 등록 자체가 결정을 확정하지 않는다. 세부 옵션과 잠정 권장안은 `reports/open-decision-questions.md`를 따른다.
+`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 확정 섹션에 반영됐다. `IMAGE-SYNC-01`, `TITLE-STATE-SYNC-01`, `DEPLOY-01`, `IMAGE-PUBLIC-01`, `GROWTH-01~03` 등 이 표에 남은 항목은 여전히 미정이며, 등록 자체가 결정을 확정하지 않는다. 세부 옵션과 잠정 권장안은 `reports/open-decision-questions.md`를 따른다.
 
 ## 6. 결정 변경 규칙
 
@@ -351,3 +485,18 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - Codex는 `제안`과 `확정`을 분리해 표시한다.
 - 사용자 승인 전에는 새로운 선택지를 코드에 영구 고정하지 않는다.
 - 임시 선택은 feature flag, adapter, configuration으로 격리한다.
+
+
+## 7. Decision Log — PUBLIC-LAUNCH-V2-01 (2026-09-23)
+
+- status: CONFIRMED — 출시 목표/격리 개발 범위 승인, 운영 활성 승인 아님.
+- context: 9/22 마감의 Private-only 전제와 Pro V2의 정식 출시 목표가 다름. 사용자에게 차이를 설명한 뒤 “작업 시작해줘” 승인.
+- options: Private-only 중간 상태로 종료 / 계정·공개 보드·공개 미니홈·팔로우·최소 운영까지 첫 정식 출시로 완성.
+- chosen option: 후자. 개인 기록과 Web+Android 대상 유지. 공개할 이미지의 명시 선택·전달용 사본 준비만 포함하며 private 이미지 자동 백업은 제외.
+- reason: 실제 사용자가 작성→선택 공개→방문→팔로우 재방문→철회할 수 있는 연결된 서비스를 출시한다.
+- consequences: 공개 신고/차단/조치/이의/감사/kill switch, 서버 한도, 카탈로그 후보 갱신/승인 게시/복구를 출시 게이트로 유지. Guest-only는 중간 검증 상태. DM/댓글/추천 피드/갤러리 전면 재설계 제외.
+- preserved: 표지 명시 선택과 개인 신호, 작품 저장/기억 생성 독립, Board N:M, 로컬 원본과 내부 ID, 이미지 유형별 권리 게이트, Git 기반 배포.
+- files/modules affected: [ExecPlan](release-v2/01_RELEASE_EXECUTION_PLAN.md), [단일 진행판](release-v2/03_RELEASE_WORKBOARD.md), 계정·Public·운영 코드군. 첫 실행 M0는 앱 수정 없이 기준점/문서만 반영.
+- migration impact: 이번 결정 자체는 없음. 실제 DB 적용/운영 Public/배포/파괴적 변경은 정확한 후보와 별도 승인 대상.
+- approved by/date: 사용자, 2026-09-23, V2 범위 확인 후 작업 시작 지시.
+- review date/trigger: 범위·권리·비용·플랫폼 변경 또는 M5 출시 후보 승인. 외부 값은 진행판 D01~D06에서 관리.

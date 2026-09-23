@@ -16,9 +16,7 @@ const titleFor = (detail, locales, fallback = null) => {
 };
 
 export function detailToTitleChoice(detail) {
-  if (!detail || !ANIME_ID.test(String(detail.animeId || ""))
-    || detail.sourceBinding?.provider !== "ANILIST"
-    || !/^[1-9]\d{0,11}$/u.test(String(detail.sourceBinding?.externalId || ""))) {
+  if (!detail || !ANIME_ID.test(String(detail.animeId || ""))) {
     throw new Error("CATALOG_DETAIL_TITLE_CHOICE_INVALID");
   }
   const displayTitle = String(detail.preferredTitle?.value || "").trim();
@@ -38,29 +36,33 @@ export function detailToTitleChoice(detail) {
     displayTitle,
     aliases,
     genres: (detail.genres.core.length ? detail.genres.core : detail.genres.source).slice(0, 16),
-    sourceBinding: { ...detail.sourceBinding },
+    sourceBinding: detail.sourceBinding ? { ...detail.sourceBinding } : null,
     verificationState: "PROVIDER_CANDIDATE",
     catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
     readiness: detail.readiness,
+    coverPreviewUrl: detail.cover.publicUrl,
+    catalogCoverRef: { ...detail.cover.catalogCoverRef },
   };
 }
 
 function libraryRow(candidate, detail) {
   if (!detail || detail.animeId !== candidate.animeId
-    || detail.sourceBinding.externalId !== candidate.sourceBinding.externalId) return null;
+    || detail.sourceBinding?.externalId !== candidate.sourceBinding?.externalId) return null;
   const startDate = dateParts(detail.release.startDate);
   const english = titleFor(detail, ["en"], candidate.aliases[0] || candidate.displayTitle);
   const native = titleFor(detail, ["ja", "native"], null);
   const romaji = titleFor(detail, ["romaji"], english);
   return {
-    id: Number(candidate.sourceBinding.externalId),
+    id: (candidate.sourceBinding?.provider === "ANILIST" ? Number(candidate.sourceBinding.externalId) : candidate.animeId),
     animeId: candidate.animeId,
     ko: titleFor(detail, ["ko"], null),
     src: "moemoa-catalog",
     sourceRank: -1,
     score: 1000,
     media: {
-      id: Number(candidate.sourceBinding.externalId),
+      catalogAnimeId: candidate.animeId,
+      catalogDisplayTitle: candidate.displayTitle,
+      id: (candidate.sourceBinding?.provider === "ANILIST" ? Number(candidate.sourceBinding.externalId) : candidate.animeId),
       title: { english, romaji, native },
       synonyms: candidate.aliases,
       coverImage: { large: detail.cover.publicUrl, extraLarge: detail.cover.publicUrl },

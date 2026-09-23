@@ -54,6 +54,7 @@ export function buildMemoryCardHref({ base = "/", native = false, row } = {}) {
   const catalogAnimeId = String(row?.catalogAnimeId || "").trim();
   const title = String(row?.title || "").trim();
   if (CATALOG_ANIME_ID.test(catalogAnimeId)) params.set("animeId", catalogAnimeId);
+  if (row?.privateTitleId && !CATALOG_ANIME_ID.test(catalogAnimeId)) params.set("privateTitleId", String(row.privateTitleId));
   if (title) params.set("title", title);
   const query = params.toString();
   const href = `${joinBase(base, "memory/new/")}${query ? `?${query}` : ""}`;

@@ -42,7 +42,7 @@ export default function MemoryVisual({
   if (imageReady) {
     return (
       <div className={classes}>
-        <img className="memory-visual__image" src={visual.src} alt={String(visual.alt || "")} />
+        <img className="memory-visual__image" loading="lazy" src={visual.src} alt={String(visual.alt || "")} />
       </div>
     );
   }

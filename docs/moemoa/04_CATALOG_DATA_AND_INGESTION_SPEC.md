@@ -7,6 +7,8 @@
 
 > 2026-08-18: `FULL3998-BATCH-CODE-01`로 100개 이하 순차 batch·resume·progress snapshot 코드 구현이 승인됐다. 사용자가 진술한 AniList 로컬 테스트 저장 허가 metadata를 Source Registry에 기록하되 실제 전체 네트워크 실행과 production 승격은 이번 승인에 포함하지 않는다.
 
+> 2026-09-03: `ANILIST-PROD-01`로 사용자가 AniList Production 저장·표시·배포 승인을 재확인했다. Registry의 권리 상태를 `PERMISSIONED`, 필드 승격을 `FIELD_REVIEW_REQUIRED`로 갱신했다. 권리 승인은 작품 식별 승인이 아니며 중복·모호한 binding은 계속 차단한다.
+
 ## 1. 목적
 
 여러 출처에서 필요한 raw facts를 수집하되, MOEMOA가 자체 내부 ID·스키마·정규화·검증·변경 이력을 운영할 수 있게 한다.
@@ -115,6 +117,16 @@ notes
 - `official_verify`: 공식 사이트의 사실 확인. 소개문·이미지 복사와 분리.
 - `crosscheck_only`: 누락·오류·후보 발견. 프로덕션 값 자동 승격 금지.
 - `blocked`: 자동 접근 또는 재사용 금지·불명확.
+
+### AniLife 공개 페이지의 검토형 사용
+
+- AniLife의 현재 페이지 origin은 `source-registry.json`의 `baseUrl` 단일 설정을 따른다. 상세 페이지 adapter와 연도 발견 단계가 각자 도메인을 고정하지 않는다.
+- 도메인이 바뀌면 `baseUrl`, `originReviewedUrl`, `termsUrl`, `robotsUrl`, `evidenceUrls`, `coverOrigins`와 검토 일자·상태를 함께 갱신한다. HTTPS origin-only 및 동일 origin 계약을 통과하지 못하면 네트워크 요청 전에 실패한다.
+- 과거 `SourceRecord`와 발견 증거는 수집 당시 URL·payload hash를 그대로 유지한다. 새 캡처만 현재 Registry origin과 일치해야 한다.
+- 공개 상세 페이지에서 구조적으로 검증한 식별자·제목·형식·상태·연도·화수는 `FIELD_REVIEW_REQUIRED` claim으로 보존할 수 있다. 이는 자동 게시가 아니라 관리자 검토 후보라는 뜻이다.
+- 사용자는 AniLife 작품 정보와 표지의 영구 저장, 상업적 Production 표시, 재배포, 리사이즈·가공에 제한 없는 허가를 받았다고 확인했다. 공개 약관의 `NO_REUSE_GRANT_FOUND`와 robots의 `UNAVAILABLE_REVIEW_REQUIRED`는 별도 사용자 보유 허가 증빙과 구분해 보존한다.
+- 권리 승인된 표지 claim은 `FIELD_REVIEW_REQUIRED`로 보존한다. 정확한 작품 연결, 허용 origin, MIME·크기·디코드 안전성, 내부 품질 검토를 통과하기 전에는 Production에 게시하지 않는다.
+- `ANILIFE-PROD-01`에 따라 외부 권리 게이트는 충족됐으며 내부 필드·이미지 검토가 남아 있다. 도메인 변경 시 같은 승인 주체의 AniLife 출처인지 확인한 후 권리 범위를 적용한다.
 
 ## 5. 파이프라인 단계
 
@@ -476,6 +488,16 @@ PrivateTitle 생성
 - 이 read model은 production catalog나 `VisualAsset`이 아니다. production build·Git·Vercel·APK에 데이터나 endpoint client가 포함되지 않아야 한다.
 - 실행 방법은 repository root에서 환경 변수를 지정한 뒤 `npm.cmd run dev`이다. 환경 변수가 없거나 workspace 검증에 실패하면 개발 catalog를 비활성화하고 기존 local/PrivateTitle 경로를 유지한다.
 
+### 11.3 AniList 증분 binding과 빈 필드 보강 계약
+
+- `ANILIFE:<contentId>` target의 MOEMOA ID와 target key는 AniList binding 후에도 바꾸지 않는다.
+- 연도 후보와 제목 검색 후보를 합친 뒤, 정규화 제목·연도·형식·표지 지문 거리·차선 후보와의 격차를 함께 기록한다.
+- 현재 공개된 화수와 예정 총화수는 방영 중에 다를 수 있으므로 강한 표지·연도·형식 근거가 있을 때 화수 불일치만으로 identity를 기각하지 않는다. 다만 수집 후 기존 화수를 덮어쓰지 않는다.
+- 하나의 AniList ID가 둘 이상의 증분 target에 자동 승인되거나 기존 `full3998` ID와 겹치면 해당 binding은 `PENDING_REVIEW`로 남긴다.
+- 승인된 binding은 content hash로 보호하고, AniList 응답 ID가 binding ID와 다르면 SourceRecord 저장 전에 거부한다.
+- scalar 필드는 AniLife/reviewed increment에 이미 `VALUE`가 있으면 AniList claim을 생성하지 않고, collection 필드는 provenance를 유지한 채 추가한다.
+- 미바인딩 target은 AniList endpoint를 호출하지 않고 `ANILIST_BINDING_REQUIRED` 검토 상태로 남긴다.
+
 ## 12. 데이터 품질 지표
 
 - 필수 필드 완성률
@@ -505,6 +527,8 @@ PrivateTitle 생성
 - rollback
 
 ## 14. 완료 조건
+
+2026-09-07 후속 계약: 운영 소비자는 MOEMOA anime UUID만으로 작품을 처리할 수 있어야 한다. AniList binding은 선택적 내부 출처 정보이며 사용자용 AniList 이동 버튼을 노출하지 않는다. V2 표지는 승인된 ANILIST/ANILIFE만 허용하고 bytes/hash/path/권리 검증을 유지한다. provider 지원과 작품 식별 검토 완료는 별개다. [결정](decisions/2026-09-07-source-independent-catalog.md).
 
 - Source Registry가 구현되어 승인되지 않은 소스가 실행되지 않는다.
 - 표본 수집이 재실행 가능하고 멱등적이다.

@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-23",
+  "baseHead": "3fb09a76b45e8ad8e3d0cc14fa6f4b5073a091fb",
+  "candidate": "uncommitted local source; Linux synthetic commit is not production identity",
+  "sourceHashes": {
+    "public/sw.js": "ac4864aa01c34aba246a9f8f3295018907505ecd24ebd9f39f14ab8f3e971ca6",
+    "public/register-sw.js": "b11a4683d0865b87f513fa88ee28c0296e1ba377f647ef24d6f34a08a15acfc3",
+    "scripts/catalog-health.mjs": "0b486f9a2f73b01b5d14e43a80d1226795d1f407c1769ccb5ab8901b12dc02c3",
+    "scripts/check-catalog-health-run.mjs": "01340e53f3976177b8eb48df23c400caafe585df7ef8bce496c4a76cbf06c1ac",
+    "scripts/finalize-service-worker.mjs": "a5fcb2bd68e4d45afdbce6e4c497c62eeb0032f0364fae9808f2133dc7e8fc8f",
+    "package.json": "2c4245ca2d634cad39214ff32ce6bc2d1eabe5def3fdc9c8d958e0dca545edc5",
+    "vercel.json": "983d3f2ae3e1cfcd0dfc35ff8de97d5894b0ddd9e7365af3083cd6159cdbab85",
+    ".github/workflows/quality.yml": "b2a6da4e204986477cfe13d40b8d8e07bcc9030338a82f9d0624e0a52fec2d69",
+    ".github/workflows/catalog-health.yml": "f06516cd71af87d33d9af5b55bb8cf1eabf0741bdcdbcfcbaafc36cdba5ed28f",
+    ".github/workflows/catalog-health-watch.yml": "fd16a427373889c29c139f5b5e9b7355006d335d4ec9fc8e7f3acdfb8aff4ae8",
+    "tests/unit/serviceWorkerPolicy.test.mjs": "d94fb56704ac9fd4fef31b70f147e1cb112d689e8e32191a7feb97125bf14584",
+    "tests/unit/catalogHealthFreshness.test.mjs": "b44653990335238924b312357882c03a874e0b0a5dc9ce542769698ec55ebd5f",
+    "tests/service-worker.spec.ts": "581d85f346f83a1e0f57483ae30f7dca3897329e8ce7c50a7d5dd3f34149224a",
+    "tests/catalog-lab/workspace-targets.test.mjs": "f4feef23011bf607cd0b2806fa3eab1fc8e369a659977d8be7aa8ca755894dfb"
+  },
+  "linux": {
+    "runtime": "Node22.23.2 Ubuntu22.04 WSL",
+    "cleanNpmCi": "PASS",
+    "unit": {
+      "pass": 246,
+      "fail": 0
+    },
+    "catalog": {
+      "pass": 253,
+      "fail": 0,
+      "skip": 0
+    },
+    "build": "PASS, 15 routes and postbuild SW version",
+    "browser": {
+      "pass": 15,
+      "fail": 0
+    }
+  },
+  "windows": {
+    "runtime": "Node24.19.0 bundled",
+    "unitPassBeforeLastHealthTest": 245,
+    "swBrowserPass": 1
+  },
+  "liveCatalog": {
+    "readOnly": true,
+    "ok": true,
+    "titleCount": 4292,
+    "sampledCovers": 12
+  },
+  "github": {
+    "legacyBranchProtection": "404 Branch not protected",
+    "applicableRules": [],
+    "remoteWorkflows": [
+      ".github/workflows/astro.yml"
+    ],
+    "newWorkflowExecuted": false
+  },
+  "externalRemaining": [
+    "actual GitHub workflow execution",
+    "required-check production gate",
+    "D03 alert recipient and independent missed-run observation",
+    "D06 production SHA/headers/SW verification"
+  ],
+  "logs": "D:/hong/Web/Anime/.moemoa-w03-2026-09-23/"
+}

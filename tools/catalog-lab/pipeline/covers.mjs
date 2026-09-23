@@ -7,6 +7,7 @@ import { isIP } from 'node:net';
 import { classifyHttpFailure, RETRY_POLICY } from '../lib/http.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
+import { requireValidatedSourceRegistryEntry } from '../contracts/catalogContracts.mjs';
 
 export const COVER_MIME = Object.freeze({
   JPEG: 'image/jpeg',
@@ -35,9 +36,14 @@ const COVER_BYTES = new WeakMap();
 const COVER_POLICIES = new WeakSet();
 const COVER_TRANSPORTS = new WeakMap();
 const POLICIES = Object.freeze({
-  anilist: Object.freeze({ sourceId: 'anilist', origins: Object.freeze(['https://s4.anilist.co']) }),
-  anilife_public: Object.freeze({ sourceId: 'anilife_public', origins: Object.freeze(['https://anilife1.tv']) }),
-  wikidata: Object.freeze({ sourceId: 'wikidata', origins: Object.freeze([]) }),
+  anilist: Object.freeze({
+    sourceId: 'anilist', origins: Object.freeze(['https://s4.anilist.co']),
+    rightsStatus: 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION', distributionStatus: 'PERMISSIONED',
+  }),
+  wikidata: Object.freeze({
+    sourceId: 'wikidata', origins: Object.freeze([]),
+    rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED',
+  }),
 });
 Object.values(POLICIES).forEach((policy) => COVER_POLICIES.add(policy));
 
@@ -202,7 +208,29 @@ function normalizedMime(value) {
   return MIME_DETAILS[mime] ? mime : null;
 }
 
-export function getApprovedCoverSourcePolicy(sourceId) {
+export function getApprovedCoverSourcePolicy(sourceId, { sourceConfig } = {}) {
+  if (sourceConfig !== undefined) {
+    let approved;
+    try {
+      approved = requireValidatedSourceRegistryEntry(sourceConfig, sourceId);
+    } catch {
+      throw typedError('COVER_SOURCE_POLICY_INVALID', 'Cover source has no approved cover-origin policy');
+    }
+    const origins = approved.coverOrigins;
+    if (sourceId !== 'anilife_public' || !Array.isArray(origins) || origins.length < 1) {
+      throw typedError('COVER_SOURCE_POLICY_INVALID', 'Cover source has no approved cover-origin policy');
+    }
+    const policy = Object.freeze({
+      sourceId, origins: Object.freeze([...origins]),
+      rightsStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION',
+      distributionStatus: 'PERMISSIONED',
+    });
+    COVER_POLICIES.add(policy);
+    return policy;
+  }
+  if (sourceId === 'anilife_public') {
+    throw typedError('COVER_SOURCE_POLICY_INVALID', 'AniLife cover policy requires a validated registry entry');
+  }
   const policy = POLICIES[sourceId];
   if (!policy) throw typedError('COVER_SOURCE_POLICY_INVALID', 'Cover source has no approved cover-origin policy');
   return policy;
@@ -705,7 +733,11 @@ function candidateMetadata(candidate, policy) {
     throw typedError('COVER_ORIGIN_FORBIDDEN', 'Cover URL is not an approved HTTPS source origin');
   }
   if (!sourceUrl.startsWith('https://')) throw typedError('COVER_ORIGIN_FORBIDDEN', 'Cover downloads require HTTPS');
-  return Object.freeze({ identity: Object.freeze({ ...candidate.identity }), sourceId: candidate.sourceId, sourceUrl, sourceRecordId: candidate.sourceRecordId, retrievedAt: candidate.retrievedAt });
+  return Object.freeze({
+    identity: Object.freeze({ ...candidate.identity }), sourceId: candidate.sourceId, sourceUrl,
+    sourceRecordId: candidate.sourceRecordId, retrievedAt: candidate.retrievedAt,
+    rightsStatus: policy.rightsStatus, distributionStatus: policy.distributionStatus,
+  });
 }
 
 /** Downloads one already exact-matched candidate with redirect and byte limits enforced before storage. */
@@ -735,7 +767,9 @@ export async function downloadCoverCandidate({ candidate, policy, transport, max
     if (bytes.byteLength > maxBytes) throw typedError('IMAGE_RESPONSE_TOO_LARGE', 'Cover response exceeds the byte limit');
     consumed = true;
     const inspection = inspectImageBytes({ declaredMime, bytes });
-    const record = Object.freeze({ ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED', rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED' });
+    const record = Object.freeze({
+      ...metadata, ...inspection, checksum: checksum(bytes), localRef: null, validationStatus: 'SNIFFED',
+    });
     COVER_RECORDS.add(record);
     COVER_BYTES.set(record, bytes);
     if (transportMetadata.production) PRODUCTION_COVER_RECORDS.add(record);

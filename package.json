@@ -26,15 +26,17 @@
     "android:test": "cd android && gradlew.bat testDebugUnitTest",
     "android:assemble:debug": "cd android && gradlew.bat assembleDebug",
     "android:verify:web-routes": "node scripts/verify-android-static-routes.mjs",
-    "collect:anilife:first-season": "node scripts/collect-anilife-first-season.mjs",
-    "collect:anilife:2010-2027": "node scripts/collect-anilife-seasons.mjs --from=2010 --to=2027",
-    "build:aliases:auto": "node scripts/build-aliases-from-anilife.mjs",
-    "build:aliases:auto:sample": "node scripts/build-aliases-from-anilife.mjs --limit=120",
     "catalog:test": "node tests/catalog-lab/run-tests.mjs",
     "catalog:init": "node tools/catalog-lab/cli.mjs init",
+    "catalog:discover-year": "node tools/catalog-lab/cli.mjs discover-anilife-year",
+    "catalog:approve-new": "node tools/catalog-lab/cli.mjs approve-new-candidates",
+    "catalog:seed-increment": "node tools/catalog-lab/cli.mjs seed-increment",
+    "catalog:match-anilist": "node tools/catalog-lab/cli.mjs match-anilist-increment",
     "catalog:targets": "node tools/catalog-lab/cli.mjs targets",
     "catalog:bind-anilife": "node tools/catalog-lab/cli.mjs bind-anilife",
     "catalog:collect": "node tools/catalog-lab/cli.mjs collect",
+    "catalog:capture-anilife-details": "node tools/catalog-lab/capture/anilife-detail-browser.mjs",
+    "catalog:import-browser-captures": "node tools/catalog-lab/cli.mjs import-browser-captures",
     "catalog:rebuild": "node tools/catalog-lab/cli.mjs rebuild",
     "catalog:validate": "node tools/catalog-lab/cli.mjs validate",
     "catalog:report": "node tools/catalog-lab/cli.mjs report",
@@ -47,7 +49,10 @@
     "supabase:reset": "supabase db reset --local",
     "supabase:test": "supabase test db --local",
     "supabase:lint": "supabase db lint --local --level error",
-    "supabase:verify:user-data": "node tools/supabase-user-data/verify.mjs"
+    "supabase:verify:user-data": "node tools/supabase-user-data/verify.mjs",
+    "prebuild": "node scripts/write-build-info.mjs",
+    "ops:catalog-health": "node --env-file=.env.production scripts/catalog-health.mjs",
+    "postbuild": "node scripts/finalize-service-worker.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
@@ -61,7 +66,8 @@
     "@vercel/analytics": "^2.0.1",
     "astro": "^5.17.1",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "sharp": "0.34.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",

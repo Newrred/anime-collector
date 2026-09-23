@@ -1,13 +1,33 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export const CATALOG_LAB_USER_AGENT = 'MOEMOA-Catalog-Lab/0.1 (personal local test; https://github.com/Newrred/anime-collector)';
+export const CATALOG_LAB_USER_AGENT = 'MOEMOA-Catalog-Lab/0.1 (permissioned catalog processing; https://github.com/Newrred/anime-collector)';
 export const SOURCE_EXECUTION_SCOPES = Object.freeze([
   'TARGET_ROSTER_ONLY',
   'LOCAL_TEST_MAX_100',
   'LOCAL_SAMPLE_MAX_100',
   'LOCAL_TEST_FULL_ROSTER_BATCHED',
 ]);
+
+const ANILIFE_FIELD_PROMOTION = Object.freeze({
+  externalIds: 'FIELD_REVIEW_REQUIRED',
+  titles: 'FIELD_REVIEW_REQUIRED',
+  format: 'FIELD_REVIEW_REQUIRED',
+  status: 'FIELD_REVIEW_REQUIRED',
+  season: 'PROHIBITED',
+  startDate: 'FIELD_REVIEW_REQUIRED',
+  endDate: 'PROHIBITED',
+  episodeCount: 'FIELD_REVIEW_REQUIRED',
+  sourceMaterialType: 'PROHIBITED',
+  officialSiteUrl: 'PROHIBITED',
+  studios: 'PROHIBITED',
+  relations: 'PROHIBITED',
+  sourceGenres: 'PROHIBITED',
+  coreGenres: 'PROHIBITED',
+  characters: 'PROHIBITED',
+  castings: 'PROHIBITED',
+  cover: 'FIELD_REVIEW_REQUIRED',
+});
 
 const VALIDATED_REGISTRY_ENTRIES = new WeakSet();
 const APPROVED_SOURCE_POLICIES = Object.freeze({
@@ -18,14 +38,17 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
     allowedFields: Object.freeze(['anilistId', 'ko', 'aliases']),
   }),
   anilist: Object.freeze({
-    sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_FULL_ROSTER_BATCHED',
-    allowedMethod: 'api', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED',
+    sourceRole: 'direct_import', executionScope: 'LOCAL_TEST_FULL_ROSTER_BATCHED',
+    allowedMethod: 'api', catalogPromotion: 'FIELD_REVIEW_REQUIRED',
+    commercialUseStatus: 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION',
+    persistentStorageStatus: 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION',
+    redistributionStatus: 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION',
     minIntervalMs: 2500, maxIntervalMs: 10000,
     allowedPaths: Object.freeze(['/']),
     allowedFields: Object.freeze(['media', 'relations', 'characters', 'staff', 'coverImage']),
-    permissionBasis: 'USER_ATTESTED_ANILIST_PERMISSION',
-    permissionRecordedAt: '2026-08-17T20:00:00+09:00',
-    permissionScope: 'LOCAL_TEST_FULL_ROSTER_STORAGE',
+    permissionBasis: 'USER_ATTESTED_ANILIST_PRODUCTION_PERMISSION',
+    permissionRecordedAt: '2026-09-03T16:28:23+09:00',
+    permissionScope: 'PRODUCTION_STORAGE_DISPLAY_AND_DEPLOYMENT',
     permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
   }),
   wikidata: Object.freeze({
@@ -40,17 +63,42 @@ const APPROVED_SOURCE_POLICIES = Object.freeze({
   }),
   anilife_public: Object.freeze({
     sourceRole: 'crosscheck_only', executionScope: 'LOCAL_TEST_MAX_100',
-    allowedMethod: 'public_sitemap_and_html', catalogPromotion: 'PROHIBITED', redistributionStatus: 'PROHIBITED', minIntervalMs: 1500,
+    allowedMethod: 'public_sitemap_and_html', catalogPromotion: 'FIELD_REVIEW_REQUIRED',
+    commercialUseStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION',
+    persistentStorageStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION',
+    redistributionStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION', minIntervalMs: 1500,
     allowedPaths: Object.freeze(['/sitemap.xml', '/content/{numericId}']),
-    allowedFields: Object.freeze(['title', 'description', 'year', 'episodeCount', 'coverMetadata']),
+    allowedFields: Object.freeze(['title', 'description', 'year', 'format', 'status', 'episodeCount', 'coverMetadata']),
+    fieldPromotion: ANILIFE_FIELD_PROMOTION,
+    permissionBasis: 'USER_ATTESTED_ANILIFE_REDISTRIBUTION_PERMISSION',
+    permissionRecordedAt: '2026-09-03T14:07:15+09:00',
+    permissionScope: 'UNRESTRICTED_DATA_AND_COVER_PRODUCTION_USE',
+    permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
   }),
 });
-/** Portable promotion-only projection of the authoritative, fully validated source policy. */
-export const SOURCE_PROMOTION_POLICY = Object.freeze(Object.fromEntries(
-  Object.entries(APPROVED_SOURCE_POLICIES).map(([sourceId, policy]) => [
+/** Portable promotion-only projection, including the local reviewed-increment seed. */
+export const SOURCE_PROMOTION_POLICY = Object.freeze({
+  ...Object.fromEntries(Object.entries(APPROVED_SOURCE_POLICIES).map(([sourceId, policy]) => [
     sourceId, policy.catalogPromotion,
-  ]),
-));
+  ])),
+  reviewed_increment: 'PROHIBITED',
+});
+export const SOURCE_DISTRIBUTION_POLICY = Object.freeze({
+  legacy_aliases: 'PROHIBITED',
+  anilist: 'PERMISSIONED',
+  wikidata: 'CC0',
+  anilife_public: 'PERMISSIONED',
+  reviewed_increment: 'PROHIBITED',
+});
+export const SOURCE_FIELD_PROMOTION_POLICY = Object.freeze({
+  anilife_public: ANILIFE_FIELD_PROMOTION,
+});
+
+export function sourcePromotionForField(sourceId, fieldPath) {
+  const sourcePolicy = SOURCE_PROMOTION_POLICY[sourceId];
+  if (!sourcePolicy) return null;
+  return SOURCE_FIELD_PROMOTION_POLICY[sourceId]?.[fieldPath] ?? sourcePolicy;
+}
 const ANILIFE_BLOCKED_PATHS = Object.freeze([
   '/api/', '/archive', '/history', '/settings', '/login', '/notifications',
 ]);
@@ -80,6 +128,48 @@ function matchesEndpointList(actual, expected) {
       && endpoint.minIntervalMs === expected[index].minIntervalMs);
 }
 
+function exactHttpsOrigin(value) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' && !parsed.username && !parsed.password
+      && !parsed.search && !parsed.hash && parsed.pathname === '/' && parsed.origin === value;
+  } catch {
+    return false;
+  }
+}
+
+function exactCalendarDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/u.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function matchesStringRecord(actual, expected) {
+  return actual && typeof actual === 'object' && !Array.isArray(actual)
+    && Object.keys(actual).length === Object.keys(expected).length
+    && Object.entries(expected).every(([key, value]) => actual[key] === value);
+}
+
+function validAniLifeRuntimePolicy(entry) {
+  if (!exactHttpsOrigin(entry.baseUrl)
+    || !Array.isArray(entry.coverOrigins) || entry.coverOrigins.length < 1
+    || new Set(entry.coverOrigins).size !== entry.coverOrigins.length
+    || entry.coverOrigins.some((origin) => !exactHttpsOrigin(origin))
+    || entry.originReviewedUrl !== entry.baseUrl
+    || !exactCalendarDate(entry.originReviewedAt)
+    || !['REVIEWED', 'UNAVAILABLE_REVIEW_REQUIRED'].includes(entry.robotsReviewStatus)
+    || !['REUSE_GRANT_RECORDED', 'NO_REUSE_GRANT_FOUND'].includes(entry.termsReviewStatus)
+    || !matchesStringRecord(entry.fieldPromotion, ANILIFE_FIELD_PROMOTION)) return false;
+  try {
+    return new URL(entry.termsUrl).origin === entry.baseUrl
+      && entry.robotsUrl === `${entry.baseUrl}/robots.txt`
+      && entry.evidenceUrls.includes(`${entry.baseUrl}/sitemap.xml`)
+      && entry.evidenceUrls.includes(`${entry.baseUrl}/robots.txt`);
+  } catch {
+    return false;
+  }
+}
+
 function validateRegistry(registry) {
   if (!Array.isArray(registry) || registry.length !== Object.keys(APPROVED_SOURCE_POLICIES).length) {
     throw registryInvalidError();
@@ -101,9 +191,11 @@ function validateRegistry(registry) {
     }
     const policy = APPROVED_SOURCE_POLICIES[entry.sourceId];
     if (!policy || !SOURCE_EXECUTION_SCOPES.includes(entry.executionScope)
-      || Object.entries(policy).some(([field, value]) => !Array.isArray(value) && entry[field] !== value)
+      || Object.entries(policy).some(([field, value]) => !Array.isArray(value)
+        && (value === null || typeof value !== 'object') && entry[field] !== value)
       || !matchesStringList(entry.allowedPaths, policy.allowedPaths)
       || !matchesStringList(entry.allowedFields, policy.allowedFields)
+      || (policy.fieldPromotion && !matchesStringRecord(entry.fieldPromotion, policy.fieldPromotion))
       || (policy.allowedEndpoints
         ? !matchesEndpointList(entry.allowedEndpoints, policy.allowedEndpoints)
         : 'allowedEndpoints' in entry)) {
@@ -111,7 +203,8 @@ function validateRegistry(registry) {
     }
     if (entry.sourceId === 'anilife_public' && (!Array.isArray(entry.blockedPaths)
       || entry.blockedPaths.length !== ANILIFE_BLOCKED_PATHS.length
-      || entry.blockedPaths.some((path, index) => path !== ANILIFE_BLOCKED_PATHS[index]))) {
+      || entry.blockedPaths.some((path, index) => path !== ANILIFE_BLOCKED_PATHS[index])
+      || !validAniLifeRuntimePolicy(entry))) {
       throw registryInvalidError();
     }
   }
@@ -142,9 +235,19 @@ export async function loadSourceRegistry({ repoRoot }) {
       allowedEndpoints: Object.freeze(entry.allowedEndpoints.map((endpoint) => Object.freeze({ ...endpoint }))),
     } : {}),
     ...(entry.blockedPaths ? { blockedPaths: Object.freeze([...entry.blockedPaths]) } : {}),
+    ...(entry.coverOrigins ? { coverOrigins: Object.freeze([...entry.coverOrigins]) } : {}),
+    ...(entry.fieldPromotion ? { fieldPromotion: Object.freeze({ ...entry.fieldPromotion }) } : {}),
   }));
   validated.forEach((entry) => VALIDATED_REGISTRY_ENTRIES.add(entry));
   return Object.freeze(validated);
+}
+
+/** Returns only a registry entry produced by loadSourceRegistry(). */
+export function requireValidatedSourceRegistryEntry(entry, sourceId) {
+  if (!entry || !VALIDATED_REGISTRY_ENTRIES.has(entry) || entry.sourceId !== sourceId) {
+    throw registryInvalidError();
+  }
+  return entry;
 }
 
 /**

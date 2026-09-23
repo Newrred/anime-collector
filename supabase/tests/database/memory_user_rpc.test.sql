@@ -2,12 +2,50 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(43);
+select plan(51);
 
 insert into auth.users (id)
 values
   ('31111111-1111-4111-8111-111111111111'),
   ('32222222-2222-4222-8222-222222222222');
+
+insert into public.catalog_cover_revisions (
+  catalog_cover_revision_id, catalog_cover_id, catalog_anime_id,
+  availability, rights_basis, permission_verified_at, permission_evidence_ref,
+  source_provider, source_rights_basis, source_release_id,
+  bucket_id, object_path, checksum_sha256, mime_type, byte_size, width, height
+)
+values
+  (
+    'asset:' || repeat('a', 40),
+    'cover:31111111-1503-4503-8503-111111111111',
+    'anime:31111111-1503-4503-8503-111111111111',
+    'READY', 'EXPLICIT_PERMISSION', '2026-09-03 00:00:00+00',
+    'decision:test', 'ANILIST', 'USER_CONFIRMED_PREVIEW_PERMISSION', 'test-release',
+    'catalog-covers-preview',
+    'covers/anime-31111111-1503-4503-8503-111111111111/' || repeat('a', 64) || '.jpg',
+    repeat('a', 64), 'image/jpeg', 1024, 460, 640
+  ),
+  (
+    'asset:' || repeat('b', 40),
+    'cover:31111111-1303-4303-8303-111111111111',
+    'anime:31111111-1303-4303-8303-111111111111',
+    'READY', 'EXPLICIT_PERMISSION', '2026-09-03 00:00:00+00',
+    'decision:test', 'ANILIST', 'USER_CONFIRMED_PREVIEW_PERMISSION', 'test-release',
+    'catalog-covers-preview',
+    'covers/anime-31111111-1303-4303-8303-111111111111/' || repeat('b', 64) || '.jpg',
+    repeat('b', 64), 'image/jpeg', 1024, 460, 640
+  ),
+  (
+    'asset:' || repeat('c', 40),
+    'cover:31111111-1503-4503-8503-111111111111',
+    'anime:31111111-1503-4503-8503-111111111111',
+    'READY', 'EXPLICIT_PERMISSION', '2026-09-03 01:00:00+00',
+    'decision:test-revision', 'ANILIST', 'USER_CONFIRMED_PREVIEW_PERMISSION', 'test-release-2',
+    'catalog-covers-preview',
+    'covers/anime-31111111-1503-4503-8503-111111111111/' || repeat('c', 64) || '.jpg',
+    repeat('c', 64), 'image/jpeg', 1024, 460, 640
+  );
 
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"31111111-1111-4111-8111-111111111111","role":"authenticated"}';
@@ -365,6 +403,141 @@ select lives_ok(
 
 select lives_ok(
   $$
+    select public.apply_memory_card_mutation(
+      '31111111-1500-4500-8500-111111111111',
+      '31111111-aaaa-4aaa-8aaa-111111111111',
+      'MEMORY_CARD',
+      '31111111-1501-4501-8501-111111111111',
+      'UPSERT', 0, repeat('a', 64),
+      jsonb_build_object(
+        'catalogAnimeId', 'anime:31111111-1503-4503-8503-111111111111',
+        'titleSnapshot', 'Cover memory', 'status', 'DRAFT',
+        'note', 'A personal signal', 'watchedAtPrecision', 'UNKNOWN',
+        'emotionTags', jsonb_build_array(), 'visibility', 'PRIVATE',
+        'clientUpdatedAt', now()
+      )
+    )
+  $$,
+  'catalog-cover card starts as a Draft with a personal signal'
+);
+select lives_ok(
+  $$
+    select public.apply_memory_card_mutation(
+      '31111111-1504-4504-8504-111111111111',
+      '31111111-aaaa-4aaa-8aaa-111111111111',
+      'VISUAL_ASSET',
+      '31111111-1505-4505-8505-111111111111',
+      'UPSERT', 0, repeat('b', 64),
+      jsonb_build_object(
+        'cardId', '31111111-1501-4501-8501-111111111111',
+        'assetType', 'CATALOG_COVER', 'state', 'READY',
+        'storageScope', 'CATALOG_MANAGED', 'visibility', 'PRIVATE',
+        'rightsBasis', 'EXPLICIT_PERMISSION', 'isCurrent', true,
+        'catalogCoverRef', jsonb_build_object(
+          'sourceKind', 'CATALOG_COVER',
+          'catalogAnimeId', 'anime:31111111-1503-4503-8503-111111111111',
+          'catalogCoverId', 'cover:31111111-1503-4503-8503-111111111111',
+          'catalogCoverRevisionId', 'asset:' || repeat('a', 40),
+          'rightsBasis', 'EXPLICIT_PERMISSION',
+          'permissionVerifiedAt', '2026-09-03T00:00:00.000Z'
+        ),
+        'clientUpdatedAt', now()
+      )
+    )
+  $$,
+  'catalog-cover visual mutation persists only its normalized reference'
+);
+select lives_ok(
+  $$
+    select public.apply_memory_card_mutation(
+      '31111111-1506-4506-8506-111111111111',
+      '31111111-aaaa-4aaa-8aaa-111111111111',
+      'MEMORY_CARD',
+      '31111111-1501-4501-8501-111111111111',
+      'UPSERT', 1, repeat('c', 64),
+      jsonb_build_object(
+        'catalogAnimeId', 'anime:31111111-1503-4503-8503-111111111111',
+        'titleSnapshot', 'Cover memory', 'status', 'COMPLETE_PRIVATE',
+        'note', 'A personal signal', 'watchedAtPrecision', 'UNKNOWN',
+        'emotionTags', jsonb_build_array(), 'visibility', 'PRIVATE',
+        'clientUpdatedAt', now()
+      )
+    )
+  $$,
+  'catalog-cover card completes after the matching approved reference exists'
+);
+select is(
+  (
+    select catalog_cover_revision_id
+    from public.memory_visual_assets
+    where id = '31111111-1505-4505-8505-111111111111'
+  ),
+  'asset:' || repeat('a', 40),
+  'catalog-cover RPC stores the immutable revision without copying image bytes'
+);
+select lives_ok(
+  $$
+    select public.apply_memory_card_mutation(
+      '31111111-1507-4507-8507-111111111111',
+      '31111111-aaaa-4aaa-8aaa-111111111111',
+      'VISUAL_ASSET',
+      '31111111-1505-4505-8505-111111111111',
+      'UPSERT', 1, repeat('d', 64),
+      jsonb_build_object(
+        'cardId', '31111111-1501-4501-8501-111111111111',
+        'assetType', 'CATALOG_COVER', 'state', 'READY',
+        'storageScope', 'CATALOG_MANAGED', 'visibility', 'PRIVATE',
+        'rightsBasis', 'EXPLICIT_PERMISSION', 'isCurrent', true,
+        'catalogCoverRef', jsonb_build_object(
+          'sourceKind', 'CATALOG_COVER',
+          'catalogAnimeId', 'anime:31111111-1503-4503-8503-111111111111',
+          'catalogCoverId', 'cover:31111111-1503-4503-8503-111111111111',
+          'catalogCoverRevisionId', 'asset:' || repeat('c', 40),
+          'rightsBasis', 'EXPLICIT_PERMISSION',
+          'permissionVerifiedAt', '2026-09-03T01:00:00.000Z'
+        ),
+        'clientUpdatedAt', now()
+      )
+    )
+  $$,
+  'catalog-cover visual may move to a newer immutable revision'
+);
+select is(
+  (select catalog_cover_revision_id from public.memory_visual_assets
+   where id = '31111111-1505-4505-8505-111111111111'),
+  'asset:' || repeat('c', 40),
+  'catalog-cover revision update replaces the normalized reference'
+);
+select lives_ok(
+  $$
+    select public.apply_memory_card_mutation(
+      '31111111-1508-4508-8508-111111111111',
+      '31111111-aaaa-4aaa-8aaa-111111111111',
+      'VISUAL_ASSET',
+      '31111111-1505-4505-8505-111111111111',
+      'UPSERT', 2, repeat('e', 64),
+      jsonb_build_object(
+        'cardId', '31111111-1501-4501-8501-111111111111',
+        'assetType', 'SYSTEM_DESIGN', 'state', 'READY',
+        'storageScope', 'LOCAL_ONLY', 'visibility', 'PRIVATE',
+        'rightsBasis', 'SYSTEM_GENERATED', 'designSpec', jsonb_build_object('version', 1),
+        'isCurrent', true, 'clientUpdatedAt', now()
+      )
+    )
+  $$,
+  'catalog-cover visual may transition to a system design'
+);
+select is(
+  (select count(*)::integer from public.memory_visual_assets
+   where id = '31111111-1505-4505-8505-111111111111'
+     and catalog_cover_id is null and catalog_cover_revision_id is null
+     and catalog_anime_id is null and permission_verified_at is null),
+  1,
+  'leaving catalog-cover mode clears every normalized cover reference'
+);
+
+select lives_ok(
+  $$
     select public.apply_board_mutation(
       '31111111-1200-4200-8200-111111111111',
       '31111111-aaaa-4aaa-8aaa-111111111111',
@@ -482,6 +655,7 @@ select lives_ok(
           'catalogAnimeId', 'anime:31111111-1303-4303-8303-111111111111',
           'titleSnapshot', 'Promoted complete card',
           'status', 'COMPLETE_PRIVATE',
+          'note', 'Promoted cover memory',
           'watchedAtPrecision', 'UNKNOWN',
           'emotionTags', jsonb_build_array(),
           'visibility', 'PRIVATE',
@@ -491,12 +665,19 @@ select lives_ok(
         'visualAssets', jsonb_build_array(jsonb_build_object(
           'id', '31111111-1304-4304-8304-111111111111',
           'cardId', '31111111-1302-4302-8302-111111111111',
-          'assetType', 'SYSTEM_DESIGN',
+          'assetType', 'CATALOG_COVER',
           'state', 'READY',
-          'storageScope', 'LOCAL_ONLY',
+          'storageScope', 'CATALOG_MANAGED',
           'visibility', 'PRIVATE',
-          'rightsBasis', 'SYSTEM_GENERATED',
-          'designSpec', jsonb_build_object('template', 'promotion'),
+          'rightsBasis', 'EXPLICIT_PERMISSION',
+          'catalogCoverRef', jsonb_build_object(
+            'sourceKind', 'CATALOG_COVER',
+            'catalogAnimeId', 'anime:31111111-1303-4303-8303-111111111111',
+            'catalogCoverId', 'cover:31111111-1303-4303-8303-111111111111',
+            'catalogCoverRevisionId', 'asset:' || repeat('b', 40),
+            'rightsBasis', 'EXPLICIT_PERMISSION',
+            'permissionVerifiedAt', '2026-09-03T00:00:00.000Z'
+          ),
           'isCurrent', true,
           'version', 1,
           'clientUpdatedAt', now()

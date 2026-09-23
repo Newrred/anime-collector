@@ -1,0 +1,13 @@
+{
+  "scope": "Document/package structure QA only; NOT application tests, source-code bug reproduction, or production verification.",
+  "status": "PASS",
+  "markdown_files": 4,
+  "execplan_required_sections": 17,
+  "fixed_milestones": 6,
+  "flat_base_work_items": 20,
+  "dependency_graph_acyclic": true,
+  "acceptance_scenarios": 24,
+  "previous_findings_mapped": 25,
+  "fences_tables_utf8_checked": true,
+  "initial_app_work_completed": 0
+}

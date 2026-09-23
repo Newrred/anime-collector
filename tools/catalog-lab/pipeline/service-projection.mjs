@@ -1,10 +1,11 @@
 import { sha256, stableStringify } from '../lib/hash.mjs';
+import { reviewedTitleIdentity, hasRelatedTitleConflict, applyTitleIdentityReview } from './title-identity-review.mjs';
 import {
   SEMANTIC_AUTOMATION_OVERRIDES, SEMANTIC_AUTOMATION_POLICY_VERSION,
 } from '../config/semantic-review-overrides.mjs';
 
 export const SERVICE_PROJECTION_SCHEMA_VERSION = 1;
-export const SERVICE_PROJECTION_POLICY_VERSION = 'SERVICE_PROJECTION_V2_AUTOMATED_REVIEW';
+export const SERVICE_PROJECTION_POLICY_VERSION = 'SERVICE_PROJECTION_V4_ALL_TITLE_IDENTITY_REVIEW';
 
 export const SERVICE_FIELD_TIERS = Object.freeze({
   required: Object.freeze(['externalIds', 'preferredTitle', 'format', 'status', 'cover']),
@@ -142,8 +143,19 @@ function isSuspiciousLegacyTitle(title, canonicalTitles, forcedFallback) {
 function titleProjection(target, canonical) {
   const seedKorean = Array.isArray(target.seedTitles)
     ? target.seedTitles.map(normalizedTitle).filter((title) => title?.locale === 'ko') : [];
-  if (target.seedSource !== 'legacy_aliases' || seedKorean.length !== 1) {
-    throw typedError('SERVICE_PROJECTION_TITLE_BASELINE_INVALID', 'One legacy Korean title is required');
+  const reviewedPageTitle = target.seedSource === 'reviewed_public_page'
+    && reviewedTitleIdentity(target, canonical);
+  if (reviewedPageTitle && seedKorean.length === 0 && reviewedPageTitle.koreanTitlePending
+    && reviewedPageTitle.preferredTitle.locale !== 'ko') {
+    return {
+      preferredTitle: reviewedPageTitle.preferredTitle,
+      searchTitles: canonicalValues(canonical.titles).map(normalizedTitle).filter(Boolean),
+      autoAcceptedTitleAliases: [], quarantinedTitles: [],
+      usedFallback: true, fallbackReasonCode: 'REVIEWED_SPECIFIC_ORIGINAL_TITLE',
+    };
+  }
+  if ((!['legacy_aliases', 'reviewed_increment'].includes(target.seedSource) && !reviewedPageTitle) || seedKorean.length !== 1) {
+    throw typedError('SERVICE_PROJECTION_TITLE_BASELINE_INVALID', 'One reviewed Korean title is required');
   }
   const canonicalTitles = uniqueBy(
     canonicalValues(canonical.titles).map(normalizedTitle).filter(Boolean),
@@ -321,10 +333,26 @@ export function buildServiceProjection(input = {}) {
   const canonical = snapshot(input.canonical);
   const cover = snapshot(input.cover ?? null);
   validateCanonical(target, canonical);
-  const titles = titleProjection(target, canonical);
+  const identityReview = reviewedTitleIdentity(target, canonical);
+  const titles = applyTitleIdentityReview(titleProjection(target, canonical), identityReview);
   const links = officialLinksProjection(canonical);
   const reviewItems = [];
   const qualityWarnings = [];
+  for (const field of ['format', 'status', 'season', 'startDate', 'endDate', 'episodeCount', 'sourceMaterialType']) {
+    if (canonical[field]?.state === 'CONFLICTED') reviewItems.push({
+      field, reasonCode: 'SCALAR_CONFLICT_REQUIRES_EVIDENCE', candidateCount: canonical[field].values.length,
+    });
+  }
+  if (!identityReview && hasRelatedTitleConflict(target, canonical, titles.preferredTitle, titles.searchTitles)) reviewItems.push({
+    field: 'titles', reasonCode: 'TITLE_IDENTITY_REVIEW_REQUIRED', candidateCount: 1,
+  });
+  if (identityReview) qualityWarnings.push({
+    field: 'titles', reasonCode: 'TITLE_BINDING_REVIEW_APPLIED', candidateCount: 1,
+    detailCode: identityReview.reviewHash,
+  });
+  if (identityReview?.koreanTitlePending) reviewItems.push({
+    field: 'preferredTitle', reasonCode: 'KOREAN_TITLE_REVIEW_PENDING', candidateCount: 1,
+  });
   if (!titles.preferredTitle) reviewItems.push({
     field: 'preferredTitle', reasonCode: 'PREFERRED_TITLE_REQUIRED', candidateCount: 0,
   });

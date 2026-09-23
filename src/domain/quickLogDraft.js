@@ -14,3 +14,15 @@ function baseDraft(log, mode) {
 export const createNewQuickLogDraft = (input) => baseDraft(input, "create");
 export const createEditQuickLogDraft = (log) => baseDraft(log, "edit");
 export const isNewQuickLogDraft = (draft) => draft?.mode === "create" && !draft?.logId;
+
+
+export function quickLogFingerprint(draft, ids = [], primary = null, metadata = {}) {
+  if (!draft) return "";
+  return JSON.stringify({
+    fields: [draft.mode, draft.logId, draft.anilistId, draft.eventType, draft.watchedAtPrecision,
+      draft.watchedAtValue, draft.cue || "", draft.note || ""],
+    primary,
+    characters: ids.map((id) => ({ id, affinity: metadata[id]?.affinity || "기억남음",
+      tags: [...(metadata[id]?.reasonTags || [])].sort(), note: metadata[id]?.note || "" })),
+  });
+}

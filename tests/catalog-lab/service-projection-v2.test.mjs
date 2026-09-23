@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { sha256 } from '../../tools/catalog-lab/lib/hash.mjs';
+import { SERVICE_PROJECTION_POLICY_VERSION } from '../../tools/catalog-lab/pipeline/service-projection.mjs';
 import {
   buildServiceProjectionV2,
   validateServiceProjectionV2Bundle,
@@ -56,7 +57,7 @@ function canonical() {
 function serviceV1(canonicalHash) {
   const core = {
     schemaVersion: 1,
-    policyVersion: 'SERVICE_PROJECTION_V2_AUTOMATED_REVIEW',
+    policyVersion: SERVICE_PROJECTION_POLICY_VERSION,
     semanticAutomationPolicyVersion: 'test',
     targetKey: target.targetKey,
     animeId: target.moemoaAnimeId,
@@ -80,6 +81,39 @@ function serviceV1(canonicalHash) {
 const coverAsset = Object.freeze({
   sourceProvider: 'ANILIST', checksum: 'a'.repeat(64), byteSize: 1024,
   width: 460, height: 650, mimeType: 'image/jpeg', extension: 'jpg',
+});
+
+test('old title policy and rehashed stale titles cannot be published as current data', () => {
+  const value = canonical();
+  for (const patch of [{ policyVersion: 'SERVICE_PROJECTION_V2_AUTOMATED_REVIEW' },
+    { preferredTitle: { locale: 'ko', value: '카우보이 비밥 2기' } },
+    { searchTitles: [...serviceV1(value.revision.contentHash).searchTitles, { locale: 'ko', value: '카우보이 비밥 2기' }] }]) {
+    const { projectionHash, ...core } = serviceV1(value.revision.contentHash);
+    Object.assign(core, patch);
+    assert.throws(() => buildServiceProjectionV2({ target, canonical: value, serviceProjection: { ...core, projectionHash: sha256(core) }, coverAsset }),
+      { code: 'SERVICE_PROJECTION_V2_TITLE_PROJECTION_STALE' });
+  }
+});
+
+test('conflicting dates and episode counts remain unknown in both search and detail', () => {
+  const { revision, ...core } = canonical();
+  core.episodeCount = field('CONFLICTED', null, [12, 24]);
+  core.startDate = field('CONFLICTED', null, ['2019-01-01', '2021-01-01']);
+  const value = { ...core, revision: { ...revision, contentHash: sha256(core) } };
+  const bundle = buildServiceProjectionV2({ target, canonical: value, serviceProjection: serviceV1(value.revision.contentHash), coverAsset });
+  assert.equal(bundle.search.episodeCount, null);
+  assert.equal(bundle.search.releaseYear, null);
+  assert.equal(bundle.detail.release.episodeCount, null);
+  assert.equal(bundle.detail.release.startDate, null);
+});
+
+test('unresolved title identity cannot be exported even when old readiness says READY', () => {
+  const value = canonical();
+  const { projectionHash, ...core } = serviceV1(value.revision.contentHash);
+  core.reviewItems = [{ field: 'titles', reasonCode: 'TITLE_IDENTITY_REVIEW_REQUIRED', candidateCount: 1 }];
+  assert.throws(() => buildServiceProjectionV2({ target, canonical: value,
+    serviceProjection: { ...core, projectionHash: sha256(core) }, coverAsset }),
+  { code: 'SERVICE_PROJECTION_V2_IDENTITY_REVIEW_REQUIRED' });
 });
 
 test('preview uploader sends opaque secret keys only through apikey while retaining legacy JWT compatibility', () => {
@@ -137,4 +171,13 @@ test('database rows preserve bounded projections without source or filesystem ev
   assert.equal(rows.asset.bucket_id, 'catalog-covers-preview');
   assert.equal(rows.asset.checksum, 'a'.repeat(64));
   assert.doesNotMatch(JSON.stringify(rows), /localRef|rawPayloadRef|sourceRecordId/u);
+});
+
+
+test('approved AniLife cover provider is retained and unknown cover providers are rejected', () => {
+  const value = canonical();
+  const bundle = buildServiceProjectionV2({ target, canonical: value, serviceProjection: serviceV1(value.revision.contentHash), coverAsset: { ...coverAsset, sourceProvider: 'ANILIFE' } });
+  assert.equal(bundle.asset.sourceProvider, 'ANILIFE');
+  assert.equal(buildCatalogDbRows('test-anilife', bundle).asset.source_provider, 'ANILIFE');
+  assert.throws(() => buildServiceProjectionV2({ target, canonical: value, serviceProjection: serviceV1(value.revision.contentHash), coverAsset: { ...coverAsset, sourceProvider: 'UNKNOWN' } }), { code: 'SERVICE_PROJECTION_V2_COVER_INVALID' });
 });

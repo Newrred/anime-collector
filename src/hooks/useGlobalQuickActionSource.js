@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist.js";
-import { readLibraryListPreferred } from "../repositories/libraryRepo.js";
+import { readTitleLibrary } from "../repositories/titleLibraryRepo.js";
 import { listRecentWatchLogs } from "../repositories/watchLogRepo.js";
 import { ensureLegacyStorageMigrated } from "../storage/legacyMigration.js";
 
@@ -8,8 +8,10 @@ function uniqueIds(values) {
   return Array.from(
     new Set(
       (Array.isArray(values) ? values : [])
-        .map((value) => Number(value))
-        .filter(Number.isFinite)
+        .flatMap((value) => {
+          const id = Number(value);
+          return Number.isSafeInteger(id) && id > 0 ? [id] : [];
+        })
     )
   );
 }
@@ -25,7 +27,7 @@ export function useGlobalQuickActionSource() {
     async function loadSnapshot() {
       await ensureLegacyStorageMigrated().catch(() => {});
       const [preferred, logs] = await Promise.all([
-        readLibraryListPreferred([]).catch(() => []),
+        readTitleLibrary([]).catch(() => []),
         listRecentWatchLogs(20).catch(() => []),
       ]);
       if (!alive) return;

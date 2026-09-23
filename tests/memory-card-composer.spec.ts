@@ -30,7 +30,7 @@ test("Memory routes follow the selected English locale from composer through det
 
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
   await expect(page.getByRole("heading", { name: "Memory Archive" })).toBeVisible();
-  await expect(page.getByText("Revisit the scenes and reflections saved on this device.")).toBeVisible();
+  await expect(page.getByText("Revisit the scenes and reflections saved on this device.")).toHaveCount(0);
   await page.getByRole("link", { name: "Frieren" }).click();
 
   await expect(page.getByLabel("Short reflection")).toHaveValue("A quiet journey worth remembering.");
@@ -118,7 +118,7 @@ test("browser route presents system design as the available visual path without 
   await expect(page.locator("#memory-save-reason")).toContainText("작품 또는 카드 제목을 입력해 주세요.");
   await page.getByLabel("작품 또는 카드 제목").fill("Flow fixture");
   await expect(save).toBeEnabled();
-  await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 Archive에서 바로 다시 볼 수 있어요.");
+  await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 기억 아카이브에서 바로 다시 볼 수 있어요.");
 });
 
 test("native card save opens the packaged Archive document", async ({ page }) => {
@@ -137,7 +137,7 @@ test("native card save opens the packaged Archive document", async ({ page }) =>
 test("empty Archive exposes one page-level create action", async ({ page }) => {
   await page.goto("/archive/");
 
-  await expect(page.getByRole("heading", { name: "Memory Archive" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "기억 아카이브" })).toBeVisible();
   await expect(page.getByText("아직 저장한 카드가 없어요.")).toBeVisible();
   await expect(page.locator('.memory-archive a[href$="memory/new/"]')).toHaveCount(1);
 });
@@ -469,7 +469,7 @@ test("late picker result is discarded after leaving detail and rapid clicks open
     button.click();
     button.click();
   });
-  await page.getByRole("link", { name: "← Memory Archive" }).click();
+  await page.getByRole("link", { name: "← 기억 아카이브" }).click();
 
   expect(await page.evaluate(() => sessionStorage.getItem("picker-call-count"))).toBe("1");
   await expect.poll(() => page.evaluate(() => (
@@ -585,7 +585,8 @@ test("browser can create a deterministic system design card without an image upl
 });
 
 test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle", async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript((coverPreviewUrl) => {
     window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
       search: async () => ({
         remoteStatus: "READY",
@@ -596,15 +597,27 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
           genres: ["Adventure", "Fantasy"],
           sourceBinding: { provider: "ANILIST", externalId: "154587" },
           verificationState: "PROVIDER_CANDIDATE",
+          coverPreviewUrl,
         }],
       }),
     };
-  });
+  }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
-  await page.getByRole("button", { name: "작품 검색" }).click();
+  const titleInput = page.getByLabel("작품 또는 카드 제목");
+  await expect(titleInput).toHaveAttribute("type", "search");
+  await expect(titleInput).toHaveAttribute("inputmode", "search");
+  await expect(titleInput).toHaveAttribute("enterkeyhint", "search");
+  await titleInput.fill("Frieren");
+  await titleInput.press("Enter");
   await expect(page.getByText("온라인 작품 후보")).toBeVisible();
+  const resultPoster = page.locator(".memory-composer__title-result-poster");
+  await expect(resultPoster).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
+  expect(await resultPoster.evaluate((element) => ({
+    width: element.getBoundingClientRect().width,
+    height: element.getBoundingClientRect().height,
+  }))).toEqual({ width: 48, height: 68 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
   await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
@@ -634,7 +647,101 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   expect(stored.cards[0].animeRefId).toBe(stored.animeRefs[0].id);
   expect(stored.cards[0].privateTitleId).toBeNull();
   expect(stored.animeRefs[0].sourceKey).toBe("ANILIST:154587");
+  expect(JSON.stringify(stored.animeRefs)).not.toContain("coverPreviewUrl");
+  expect(JSON.stringify(stored.animeRefs)).not.toContain("data:image");
   expect(stored.privateTitles).toEqual([]);
+});
+
+test("an approved official cover can be selected, saved by reference, and displayed in Archive and detail", async ({ page }) => {
+  const animeId = "anime:11111111-1111-4111-8111-000000154587";
+  const catalogCoverRef = {
+    sourceKind: "CATALOG_COVER",
+    catalogAnimeId: animeId,
+    catalogCoverId: "cover:11111111-1111-4111-8111-000000154587",
+    catalogCoverRevisionId: `asset:${"b".repeat(40)}`,
+    rightsBasis: "EXPLICIT_PERMISSION",
+    permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+  };
+  await page.addInitScript(({ coverPreviewUrl, animeId: id, ref }) => {
+    window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
+      search: async () => ({
+        remoteStatus: "READY",
+        results: [{
+          kind: "ANIME_REF",
+          animeId: id,
+          displayTitle: "장송의 프리렌",
+          aliases: ["Frieren: Beyond Journey's End"],
+          genres: ["Adventure", "Fantasy"],
+          sourceBinding: { provider: "ANILIST", externalId: "154587" },
+          verificationState: "PROVIDER_CANDIDATE",
+          catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
+          readiness: "READY",
+          coverPreviewUrl,
+          catalogCoverRef: ref,
+        }],
+      }),
+      resolveCover: async (candidateRef) => (
+        candidateRef?.catalogCoverRevisionId === ref.catalogCoverRevisionId
+          ? { publicUrl: coverPreviewUrl, width: 460, height: 640, catalogCoverRef: ref }
+          : null
+      ),
+    };
+  }, { coverPreviewUrl: SYNTHETIC_IMAGE_PREVIEW, animeId, ref: catalogCoverRef });
+
+  await page.goto("/memory/new/");
+  await page.getByLabel("작품 또는 카드 제목").fill("프리렌");
+  await page.getByLabel("작품 또는 카드 제목").press("Enter");
+  await page.getByRole("button", { name: "장송의 프리렌 선택" }).click();
+  await page.getByRole("button", { name: "공식 표지를 카드에 사용" }).click();
+
+  await expect(page.getByText("승인된 공식 표지")).toBeVisible();
+  await expect(page.getByRole("button", { name: "카드 저장" })).toBeDisabled();
+  await expect(page.locator("#memory-save-reason")).toContainText("짧은 감상을 입력해 주세요");
+  await page.getByLabel("짧은 감상").fill("여정을 마친 뒤 남은 조용한 감정.");
+  await page.getByRole("button", { name: "카드 저장" }).click();
+
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
+  await expect(page.getByRole("heading", { name: "장송의 프리렌" })).toBeVisible();
+  await expect(page.getByText("공식 표지", { exact: true })).toBeVisible();
+  await expect(page.getByAltText("장송의 프리렌 메모리 카드")).toBeVisible();
+  await expect(page.locator(".memory-preview .memory-visual--contain")).toHaveCount(1);
+
+  const storedAssets = await page.evaluate(async () => {
+    const request = indexedDB.open("moemoa-memory-v1");
+    const database: IDBDatabase = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction("visual_assets", "readonly");
+    const read = transaction.objectStore("visual_assets").getAll();
+    const assets = await new Promise<any[]>((resolve, reject) => {
+      read.onsuccess = () => resolve(read.result);
+      read.onerror = () => reject(read.error);
+    });
+    database.close();
+    return assets;
+  });
+  expect(storedAssets).toHaveLength(1);
+  expect(storedAssets[0]).toMatchObject({
+    imageType: "CATALOG_COVER",
+    storageScope: "CATALOG_MANAGED",
+    localRef: null,
+    catalogCoverRef,
+  });
+  expect(JSON.stringify(storedAssets)).not.toContain("data:image");
+  expect(JSON.stringify(storedAssets)).not.toContain("catalog-covers-preview");
+
+  await page.getByRole("link", { name: "장송의 프리렌" }).click();
+  await expect(page.getByText("승인된 공식 표지", { exact: true })).toBeVisible();
+  await expect(page.getByAltText("장송의 프리렌 메모리 카드")).toBeVisible();
+  await expect(page.locator(".memory-detail__visual .memory-visual--contain")).toHaveCount(1);
+  await expect(page.getByLabel("짧은 감상")).toHaveValue("여정을 마친 뒤 남은 조용한 감정.");
+  await page.goto("/");
+  const homeMemory = page.locator(".home-memory-overview");
+  await expect(homeMemory.getByText("공식 표지", { exact: true })).toBeVisible();
+  await expect(homeMemory.getByAltText("장송의 프리렌 메모리 카드")).toBeVisible();
+  await expect(homeMemory.locator(".memory-visual--contain")).toHaveCount(1);
+  await expect(homeMemory.getByRole("link", { name: "이 작품 보기" })).toHaveAttribute("href", new RegExp(`^/title/\\?animeId=${encodeURIComponent(animeId)}`));
 });
 
 test("catalog detail deep-link restores the exact AnimeRef before saving", async ({ page }) => {

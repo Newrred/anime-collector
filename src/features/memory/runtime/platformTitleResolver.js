@@ -1,4 +1,4 @@
-import aliasSeed from "../../../data/aliases.json";
+import aliasSeed from "../../../data/reviewedAliasSeed.js";
 import { searchAnimeByTitle } from "../../../lib/anilist.js";
 import { catalogSupabase, isCatalogSupabaseConfigured } from "../../catalog/catalogSupabaseClient.js";
 import { createAniListTitleResolver } from "../adapters/catalog/anilistTitleResolver.js";

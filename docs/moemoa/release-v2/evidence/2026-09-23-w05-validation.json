@@ -1,0 +1,98 @@
+{
+  "work": "W05",
+  "verifiedAt": "2026-09-23T02:48:50.435356+00:00",
+  "environment": "Windows / Node24.19.0 / Playwright Chromium isolated synthetic data",
+  "sourceHead": "3fb09a76b45e8ad8e3d0cc14fa6f4b5073a091fb",
+  "workingTreeUncommitted": true,
+  "deployed": false,
+  "databaseMigrations": 0,
+  "tests": {
+    "unitPassed": 269,
+    "browserPassed": 26,
+    "browserSkipped": 0,
+    "buildRoutes": 15,
+    "reactDoctorBefore": 49,
+    "reactDoctorAfter": 49,
+    "reactDoctorErrors": 1,
+    "reactDoctorWarningsBefore": 16,
+    "reactDoctorWarningsAfter": 21,
+    "diffCheck": "PASS"
+  },
+  "sessionBudget": {
+    "pushOperations": 500,
+    "pullPages": 10,
+    "pullPageSize": 200,
+    "deadlineMs": 20000,
+    "fullRestorePerEntitySafetyBound": 5000,
+    "overflowProbe": 5001
+  },
+  "evidenceDirectory": "D:\\hong\\Web\\Anime\\.moemoa-w05-2026-09-23",
+  "notVerified": [
+    "Real A/B/anonymous RPC and Storage authorization",
+    "Real Android and multiple devices",
+    "Production rate/quota/suspension enforcement (W15)",
+    "GitHub remote checks and production deployment"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "dda8625ab897f9ea2bfa2481f42f7ff8c63ff03cc9f732c518315c1acd3a21e6"
+    },
+    {
+      "path": "src/components/data/MemoryAccountPanel.jsx",
+      "sha256": "dfe1a3155f5ba527f93dfe7e164afc206a7f76778a90fe0bf0f5add28553b4cc"
+    },
+    {
+      "path": "src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js",
+      "sha256": "62f76d93da8d8c47ee2c8b9e7ab955f6ba9ce073328d7dc8da7b9bdd0774a6a6"
+    },
+    {
+      "path": "src/features/memory/adapters/indexeddb/memorySyncStore.js",
+      "sha256": "659a98296fe70647e8b340025f462721ec514006bf2ebcd6be2c3ed2ca64491d"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabaseMemoryGateway.js",
+      "sha256": "f2d69bf78e7316f1fdf67a20816e835750b1d2e9dbfbd0ac715830c60a411016"
+    },
+    {
+      "path": "src/features/memory/application/syncMemoryMetadata.js",
+      "sha256": "b341114bb1a6fa28fe1438928e57f9976e74fd4dafce14fe3f85838cb30216fb"
+    },
+    {
+      "path": "src/features/memory/runtime/createMemoryAccountRuntime.js",
+      "sha256": "7d1bc683658d6414246f36fd993e1587c4351e457dc2403b40be91b2fe899643"
+    },
+    {
+      "path": "src/hooks/useMemoryAccountSync.js",
+      "sha256": "68734f5db9c81889857361025ba0a6426143a32c30951a18efd3db28b6b797fb"
+    },
+    {
+      "path": "src/messages/en.js",
+      "sha256": "77116a51f408e92e96f9524fcaf0c4f04752df636016b92035cee8856554af5e"
+    },
+    {
+      "path": "src/messages/ko.js",
+      "sha256": "33603b78f270bbdb810be90f96ba600f876ecbd82b29ecc0b7672e485e171e43"
+    },
+    {
+      "path": "tests/memory-account-sync.spec.ts",
+      "sha256": "c57b243317589e8c3a3bcf1d68729da2ea676e5681482e981bef3f4f12386b3a"
+    },
+    {
+      "path": "tests/release-sync.spec.ts",
+      "sha256": "c65eed9dbc3ad9efcf226ff57950908bf273eb014d76ebf4917ca704fe67f6c1"
+    },
+    {
+      "path": "tests/unit/memoryAccountRuntime.test.mjs",
+      "sha256": "75ceac3e3535301890dc8c5f2da4966e66968d5073a8b5e619d9ea5ba1700e39"
+    },
+    {
+      "path": "tests/unit/memorySyncEngine.test.mjs",
+      "sha256": "0bebf55320cbe8a9acf8ba13bf4c3a904de48132614aa6cd891147ad2aec110e"
+    },
+    {
+      "path": "tests/unit/supabaseMemoryGateway.test.mjs",
+      "sha256": "a659cc3a705d7b4219a5d033e8c054a0749288d4c5bdc5d17dd2ba254d9cff2a"
+    }
+  ]
+}

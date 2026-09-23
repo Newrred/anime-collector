@@ -1,4 +1,5 @@
 import { stableStringify } from "../../../domain/syncHash.js";
+import { normalizeCatalogCoverRef } from "../domain/memoryDomain.js";
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CATALOG_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -9,7 +10,7 @@ const MUTATION_STATES = new Set(["APPLIED", "CONFLICT", "REJECTED"]);
 const CARD_STATES = new Set(["DRAFT", "COMPLETE_PRIVATE", "DELETED"]);
 const ASSET_STATES = new Set(["READY", "DELETE_PENDING", "DELETED"]);
 const PRECISIONS = new Set(["DAY", "MONTH", "YEAR", "UNKNOWN"]);
-const RIGHTS = new Set(["UNKNOWN", "USER_ORIGINAL", "LICENSED", "SYSTEM_GENERATED"]);
+const RIGHTS = new Set(["UNKNOWN", "USER_ORIGINAL", "LICENSED", "SYSTEM_GENERATED", "EXPLICIT_PERMISSION"]);
 
 export class MemorySyncContractError extends Error {
   constructor(code, message) {
@@ -154,14 +155,26 @@ export function toRemoteVisualAsset(bundle) {
     fail("SYNC_DTO_INVALID", "Visual asset bundle is required");
   }
   const { card, asset } = bundle;
-  if (!ASSET_STATES.has(asset.state) || asset.storageScope !== "LOCAL_ONLY" || asset.visibility !== "PRIVATE"
+  const isCatalogCover = asset.imageType === "CATALOG_COVER";
+  const expectedStorageScope = isCatalogCover ? "CATALOG_MANAGED" : "LOCAL_ONLY";
+  if (!ASSET_STATES.has(asset.state) || asset.storageScope !== expectedStorageScope || asset.visibility !== "PRIVATE"
     || !RIGHTS.has(asset.rightsBasis)) fail("SYNC_DTO_INVALID", "Visual asset state is invalid");
-  const assetType = asset.imageType === "SYSTEM_DESIGN" ? "SYSTEM_DESIGN" : "USER_IMAGE";
+  const assetType = isCatalogCover
+    ? "CATALOG_COVER"
+    : asset.imageType === "SYSTEM_DESIGN" ? "SYSTEM_DESIGN" : "USER_IMAGE";
   if (assetType === "SYSTEM_DESIGN") {
     if (!plainObject(asset.designSpec) || jsonByteLength(asset.designSpec) > 32768) {
       fail("SYNC_DTO_INVALID", "System design is invalid");
     }
-  } else if (asset.designSpec != null) fail("SYNC_DTO_INVALID", "User image cannot contain a system design");
+  } else if (asset.designSpec != null) fail("SYNC_DTO_INVALID", "Non-system assets cannot contain a system design");
+  let catalogCoverRef = null;
+  if (isCatalogCover) {
+    try {
+      catalogCoverRef = normalizeCatalogCoverRef(asset.catalogCoverRef);
+    } catch {
+      fail("SYNC_DTO_INVALID", "Catalog cover reference is invalid");
+    }
+  }
   const checksum = asset.checksumSha256 == null ? null : String(asset.checksumSha256).toLowerCase();
   if (checksum && !HASH.test(checksum)) fail("SYNC_DTO_INVALID", "Asset checksum is invalid");
   const dimensions = [asset.width, asset.height];
@@ -180,7 +193,7 @@ export function toRemoteVisualAsset(bundle) {
     cardId: uuid(card.id, "cardId"),
     assetType,
     state: asset.state,
-    storageScope: "LOCAL_ONLY",
+    storageScope: expectedStorageScope,
     visibility: "PRIVATE",
     rightsBasis: asset.rightsBasis,
     checksumSha256: checksum,
@@ -189,6 +202,7 @@ export function toRemoteVisualAsset(bundle) {
     width: asset.width ?? null,
     height: asset.height ?? null,
     designSpec: asset.designSpec == null ? null : structuredClone(asset.designSpec),
+    ...(catalogCoverRef == null ? {} : { catalogCoverRef: structuredClone(catalogCoverRef) }),
     cloudBucket: null,
     cloudObjectPath: null,
     isCurrent: Boolean(asset.isCurrent),

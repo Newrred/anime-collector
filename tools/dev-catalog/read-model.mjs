@@ -9,9 +9,10 @@ import { inspectImageBytes } from '../catalog-lab/pipeline/covers.mjs';
 const MAX_PROJECTION_BYTES = 256 * 1024;
 const MAX_COVER_BYTES = 8 * 1024 * 1024;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-const ANILIST_TARGET = /^ANILIST:([1-9]\d{0,11})$/u;
+const EXTERNAL_TARGET = /^(ANILIST|ANILIFE):([1-9]\d{0,11})$/u;
 const HASH = /^[a-f0-9]{64}$/u;
 const COVER_REF = /^images\/covers\/([a-z0-9-]+)\/([a-f0-9]{64})\.(jpg|png|webp)$/u;
+const PROFILE = /^(?:full3998|sample100|golden|increment-\d{4}-(?:0[1-9]|1[0-2]))$/u;
 const PROJECTION_KEYS = Object.freeze([
   'animeId', 'autoAcceptedTitleAliases', 'canonicalHash', 'fieldTiers', 'officialLinks',
   'policyVersion', 'preferredTitle', 'primaryOfficialSiteUrl', 'projectionHash',
@@ -68,7 +69,7 @@ function validatedManifest(value) {
   const keys = new Set();
   const animeIds = new Set();
   for (const row of value) {
-    const targetMatch = typeof row?.targetKey === 'string' ? ANILIST_TARGET.exec(row.targetKey) : null;
+    const targetMatch = typeof row?.targetKey === 'string' ? EXTERNAL_TARGET.exec(row.targetKey) : null;
     if (!targetMatch || typeof row?.moemoaAnimeId !== 'string' || !ANIME_ID.test(row.moemoaAnimeId)
       || keys.has(row.targetKey) || animeIds.has(row.moemoaAnimeId)) return null;
     keys.add(row.targetKey);
@@ -76,7 +77,8 @@ function validatedManifest(value) {
     targets.push(Object.freeze({
       targetKey: row.targetKey,
       animeId: row.moemoaAnimeId,
-      externalId: targetMatch[1],
+      provider: targetMatch[1],
+      externalId: targetMatch[2],
       fileName: `${toPathKey(row.moemoaAnimeId)}.json`,
     }));
   }
@@ -112,11 +114,12 @@ function validatedProjection(value, target) {
   return Object.freeze({
     candidate: Object.freeze({
       kind: 'ANIME_REF',
+      animeId: target.animeId,
       displayTitle: preferredTitle.value,
       aliases: Object.freeze(aliases),
       genres: Object.freeze([]),
-      sourceBinding: Object.freeze({ provider: 'ANILIST', externalId: target.externalId }),
-      verificationState: 'PROVIDER_CANDIDATE',
+      sourceBinding: Object.freeze({ provider: target.provider, externalId: target.externalId }),
+      verificationState: target.provider === 'ANILIST' ? 'PROVIDER_CANDIDATE' : 'SOURCE_REVIEWED',
       catalogSource: 'LOCAL_TEST_SERVICE_PROJECTION',
       readiness,
     }),
@@ -159,11 +162,16 @@ function validCoverObservation(value, target) {
 export function createDevelopmentCatalogReadModel({
   workspace,
   profile = 'full3998',
+  profiles = null,
   refreshTtlMs = 2_000,
   now = Date.now,
 } = {}) {
-  if (!workspace || typeof workspace.resolve !== 'function' || typeof profile !== 'string'
-    || !/^[a-z0-9]+$/u.test(profile) || !Number.isSafeInteger(refreshTtlMs) || refreshTtlMs < 0
+  const selectedProfiles = profiles === null ? [profile] : profiles;
+  if (!workspace || typeof workspace.resolve !== 'function'
+    || !Array.isArray(selectedProfiles) || selectedProfiles.length < 1 || selectedProfiles.length > 8
+    || selectedProfiles.some((candidate) => typeof candidate !== 'string' || !PROFILE.test(candidate))
+    || new Set(selectedProfiles).size !== selectedProfiles.length
+    || !Number.isSafeInteger(refreshTtlMs) || refreshTtlMs < 0
     || typeof now !== 'function') throw new TypeError('Development catalog reader configuration is invalid');
 
   let targets = null;
@@ -176,11 +184,20 @@ export function createDevelopmentCatalogReadModel({
 
   async function loadTargets() {
     if (targets) return targets;
-    const manifest = await readBoundedJson(workspace, ['manifests', `${profile}.json`], 4 * 1024 * 1024);
-    targets = validatedManifest(manifest?.parsed);
-    if (!targets) throw new Error('Development catalog manifest is unavailable');
+    const manifests = await Promise.all(selectedProfiles.map((selectedProfile) => (
+      readBoundedJson(workspace, ['manifests', `${selectedProfile}.json`], 4 * 1024 * 1024)
+    )));
+    const lists = manifests.map((manifest) => validatedManifest(manifest?.parsed));
+    if (lists.some((list) => !list)) throw new Error('Development catalog manifest is unavailable');
+    targets = Object.freeze(lists.flat());
+    if (new Set(targets.map((target) => target.targetKey)).size !== targets.length
+      || new Set(targets.map((target) => target.animeId)).size !== targets.length) {
+      throw new Error('Development catalog manifests overlap');
+    }
     targetByFile = new Map(targets.map((target) => [target.fileName, target]));
-    targetByExternalId = new Map(targets.map((target) => [target.externalId, target]));
+    targetByExternalId = new Map(targets
+      .filter((target) => target.provider === 'ANILIST')
+      .map((target) => [target.externalId, target]));
     return targets;
   }
 
@@ -232,6 +249,7 @@ export function createDevelopmentCatalogReadModel({
   }
 
   async function readObservation(target) {
+    if (target.provider !== 'ANILIST') return null;
     const artifact = await readBoundedJson(
       workspace, ['covers', `${toPathKey(target.animeId)}.json`], 32 * 1024,
     );
@@ -247,6 +265,7 @@ export function createDevelopmentCatalogReadModel({
       const score = projectionScore(row.searchableTitles, normalizedQuery);
       return score ? [{ row, score }] : [];
     }).sort((left, right) => right.score - left.score
+      || left.row.target.provider.localeCompare(right.row.target.provider)
       || Number(left.row.target.externalId) - Number(right.row.target.externalId))
       .slice(0, safeLimit);
     return Promise.all(matched.map(async ({ row }) => {

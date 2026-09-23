@@ -188,6 +188,62 @@ test('sample100 creates the deterministic approved 100-target manifest and profi
   });
 });
 
+test('year discovery can approve and materialize a source-reviewed increment without AniList ids', async () => {
+  await withWorkspace(async (workspaceRoot) => {
+    const deps = silentDependencies(workspaceRoot);
+    const imports = join(workspaceRoot, 'imports');
+    await mkdir(imports, { recursive: true });
+    await writeFile(join(imports, 'anilife-season-2026.json'), JSON.stringify({
+      schemaVersion: 1,
+      sourceId: 'anilife_public',
+      sourceUrl: 'https://anilife01.tv/season/2026',
+      year: 2026,
+      capturedAt: '2026-09-02T23:45:50.892Z',
+      declaredTotal: 1,
+      pageCount: 1,
+      items: [{
+        contentId: '777777',
+        koTitle: '검증용 신규 작품',
+        format: 'TV',
+        episodeLabel: null,
+        genres: ['판타지'],
+        year: 2026,
+        publicPageUrl: 'https://anilife01.tv/content/777777',
+      }],
+    }), 'utf8');
+    assert.equal(await runCli([
+      'discover-anilife-year', '--year', '2026', '--profile', 'increment-2026-09',
+      '--as-of', '2026-09-03',
+    ], deps), CLI_EXIT.OK);
+    const reviewPath = join(workspaceRoot, 'reviews', 'increment-2026-09.json');
+    const review = JSON.parse(await readFile(reviewPath, 'utf8'));
+    assert.equal(review.rows[0].decision, 'PENDING_REVIEW');
+    assert.equal(await runCli(['targets', '--profile', 'increment-2026-09'], deps), CLI_EXIT.USAGE_OR_SAFETY);
+    assert.equal(await runCli([
+      'approve-new-candidates', '--profile', 'increment-2026-09',
+      '--reviewed-by', 'catalog-reviewer',
+    ], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['targets', '--profile', 'increment-2026-09'], deps), CLI_EXIT.OK);
+    const manifest = JSON.parse(await readFile(
+      join(workspaceRoot, 'manifests', 'increment-2026-09.json'), 'utf8',
+    ));
+    const bindings = JSON.parse(await readFile(join(workspaceRoot, 'bindings', 'anilife.json'), 'utf8'));
+    assert.equal(manifest.length, 1);
+    assert.equal(manifest[0].targetKey, 'ANILIFE:777777');
+    assert.equal(manifest[0].seedSource, 'reviewed_increment');
+    assert.deepEqual(bindings['ANILIFE:777777'], {
+      contentId: '777777', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW',
+    });
+    assert.equal(await runCli(['targets', '--profile', 'increment-2026-09'], deps), CLI_EXIT.OK);
+    assert.equal(await runCli(['seed-increment', '--profile', 'increment-2026-09'], deps), CLI_EXIT.OK);
+    const projection = JSON.parse(await readFile(join(
+      workspaceRoot, 'service-projections', `${toPathKey(manifest[0].moemoaAnimeId)}.json`,
+    ), 'utf8'));
+    assert.equal(projection.preferredTitle.value, '검증용 신규 작품');
+    assert.equal(projection.targetKey, 'ANILIFE:777777');
+  });
+});
+
 test('full3998 CLI creates the exact manifest and delegates safe batch options without network in the test', async () => {
   await withWorkspace(async (workspaceRoot) => {
     const calls = [];

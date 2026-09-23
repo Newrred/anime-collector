@@ -1,3 +1,6 @@
+import { Capacitor } from "@capacitor/core";
+import { buildTitleHubHref } from "../../features/titles/domain/titleNavigation.js";
+import { toPlatformAppHref } from "../../domain/search/memoryCardNavigation.js";
 import { getMessageGroup } from "../../domain/messages.js";
 import { formatEventLabel, formatReasonTagLabel } from "../library/libraryCopy.js";
 
@@ -11,16 +14,16 @@ export default function CharacterInsightSheet({
 }) {
   const copy = getMessageGroup(locale, "characterInsightSheet");
   if (!selectedCharacter) return null;
-  function buildLibraryDetailHref(anilistId) {
+  function buildTitleHref(anilistId) {
     const id = Number(anilistId);
-    if (!Number.isFinite(id)) return `${base}library/`;
-    return `${base}library/?animeId=${encodeURIComponent(String(id))}`;
+    if (!Number.isFinite(id)) return toPlatformAppHref(`${base}titles/`, { native: Capacitor.isNativePlatform() });
+    return buildTitleHubHref({ base, native: Capacitor.isNativePlatform(), anilistId: id });
   }
 
   const topRelatedAnimeId = Number(characterInsight?.relatedAnime?.[0]?.anilistId);
   const insightCtaHref = Number.isFinite(topRelatedAnimeId)
-    ? buildLibraryDetailHref(topRelatedAnimeId)
-    : `${base}library/`;
+    ? buildTitleHref(topRelatedAnimeId)
+    : toPlatformAppHref(`${base}titles/`, { native: Capacitor.isNativePlatform() });
 
   return (
     <div
@@ -111,7 +114,7 @@ export default function CharacterInsightSheet({
                 {characterInsight.relatedAnime.map((row) => (
                   <div key={row.anilistId} className="character-insight-sheet__row">
                     <a
-                      href={buildLibraryDetailHref(row.anilistId)}
+                      href={buildTitleHref(row.anilistId)} data-astro-reload
                       className="small"
                       style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "inherit" }}
                     >
@@ -138,7 +141,7 @@ export default function CharacterInsightSheet({
                     </div>
                     <div className="small" style={{ opacity: 0.94 }}>
                       <a
-                        href={buildLibraryDetailHref(row.anilistId)}
+                        href={buildTitleHref(row.anilistId)} data-astro-reload
                         style={{ color: "inherit" }}
                       >
                         {titleById.get(Number(row.anilistId)) || `#${row.anilistId}`}
@@ -159,7 +162,7 @@ export default function CharacterInsightSheet({
         </section>
 
         <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-          <a href={insightCtaHref} className="btn" style={{ textDecoration: "none" }}>
+          <a href={insightCtaHref} data-astro-reload className="btn" style={{ textDecoration: "none" }}>
             {copy.openLibrary}
           </a>
         </div>

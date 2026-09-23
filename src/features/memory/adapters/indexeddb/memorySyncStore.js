@@ -209,9 +209,12 @@ const toLocalEntity = (entityType, remoteInput, ownerId, existing = null) => {
   if (entityType === "VISUAL_ASSET") return {
     ...shared,
     cardId: remote.cardId,
-    imageType: remote.assetType === "SYSTEM_DESIGN" ? "SYSTEM_DESIGN" : "USER_IMAGE",
+    intakeSource: remote.assetType === "CATALOG_COVER" ? "CATALOG_COVER" : existing?.intakeSource,
+    imageType: remote.assetType === "SYSTEM_DESIGN"
+      ? "SYSTEM_DESIGN"
+      : remote.assetType === "CATALOG_COVER" ? "CATALOG_COVER" : "USER_IMAGE",
     state: remote.state,
-    storageScope: "LOCAL_ONLY",
+    storageScope: remote.assetType === "CATALOG_COVER" ? "CATALOG_MANAGED" : "LOCAL_ONLY",
     visibility: "PRIVATE",
     rightsBasis: remote.rightsBasis,
     localRef: existing?.localRef ?? null,
@@ -221,6 +224,7 @@ const toLocalEntity = (entityType, remoteInput, ownerId, existing = null) => {
     width: remote.width ?? null,
     height: remote.height ?? null,
     designSpec: remote.designSpec ?? null,
+    catalogCoverRef: remote.catalogCoverRef ?? null,
     isCurrent: Boolean(remote.isCurrent),
   };
   if (entityType === "MEMORY_BOARD") return {
@@ -251,6 +255,29 @@ export async function countPendingSyncOperations(database, ownerId) {
   const rows = await requestResult(transaction.objectStore("sync_outbox").getAll());
   await transactionDone(transaction);
   return rows.filter((row) => row.ownerId === validOwnerId && row.state === "PENDING").length;
+}
+
+export async function readAcknowledgedSyncVersions(database, ownerId) {
+  const transaction = database.transaction("sync_outbox", "readonly");
+  const rows = await requestResult(transaction.objectStore("sync_outbox").getAll());
+  await transactionDone(transaction);
+  const versions = new Map();
+  for (const row of rows) if (row.ownerId === ownerId && row.state === "APPLIED") {
+    const key = `${row.entityType}:${row.entityId}`;
+    versions.set(key, Math.max(versions.get(key) || 0, Number(row.appliedVersion || 0)));
+  }
+  return [...versions];
+}
+
+export async function countRejectedSyncOperations(database, ownerId) {
+  const transaction = database.transaction("sync_outbox", "readonly");
+  const rows = await requestResult(transaction.objectStore("sync_outbox").getAll());
+  await transactionDone(transaction);
+  const latest = new Map();
+  for (const row of rows.filter((item) => item.ownerId === ownerId).sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
+    latest.set(`${row.entityType}:${row.entityId}`, row);
+  }
+  return [...latest.values()].filter((row) => row.state === "REJECTED" && row.resultCode !== "TOMBSTONE_WINS").length;
 }
 
 export async function rebaseSyncOperation(database, { ownerId, operationId, baseVersion, requestHash }) {
@@ -315,7 +342,7 @@ export async function commitSyncMutation(database, { ownerId, operation, result,
         },
       });
     }
-    await updateCursorInTransaction(transaction, ownerId, result.syncSeq, now);
+    // A write acknowledgement does not prove earlier remote changes were downloaded.
   } else if (result.status === "CONFLICT") {
     const conflicts = transaction.objectStore("sync_conflicts");
     const id = conflictIdFor(ownerId, operation.entityType, operation.entityId);
@@ -345,6 +372,13 @@ const pendingPayloadFor = (rows, ownerId, entityType, entityId, fallback) => {
     && row.entityId === entityId && row.state === "PENDING")
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
   return clone(pending[0]?.payload ?? fallback);
+};
+
+const closeDeletedConflict = async (store, ownerId, entityType, entityId, now) => {
+  const id = conflictIdFor(ownerId, entityType, entityId);
+  const conflict = await requestResult(store.get(id));
+  if (conflict?.state === "OPEN") store.put({ ...conflict, state: "RESOLVED", resolution: "TOMBSTONE_WINS",
+    localBackup: clone(conflict.localEntity), updatedAt: String(now), resolvedAt: String(now) });
 };
 
 export async function commitPulledChange(database, input) {
@@ -381,6 +415,7 @@ export async function commitPulledChange(database, input) {
       if (card?.ownerId === ownerId) cards.put({ ...card, visualAssetId: remoteEntity.id });
     }
     if (tombstoneWins) {
+      await closeDeletedConflict(transaction.objectStore("sync_conflicts"), ownerId, change.entityType, change.entityId, now);
       for (const row of operations.filter((item) => item.ownerId === ownerId
         && item.entityType === change.entityType && item.entityId === change.entityId && item.state === "PENDING")) {
         outbox.put({ ...row, state: "REJECTED", resultCode: "TOMBSTONE_WINS", updatedAt: String(now) });
@@ -440,7 +475,7 @@ export async function commitConflictResolution(database, { ownerId, conflictId, 
         lastOperationId: operation.operationId,
       },
     });
-    await updateCursorInTransaction(transaction, ownerId, result.syncSeq, now);
+    // A write acknowledgement does not prove earlier remote changes were downloaded.
   }
   conflicts.put({
     ...conflict,
@@ -484,7 +519,7 @@ export async function commitFullResync(database, { ownerId, entities, nextSyncSe
     const local = localByType.get(remote.entityType).get(remote.id) || null;
     const pending = operations.some((operation) => operation.ownerId === ownerId
       && operation.entityType === remote.entityType && operation.entityId === remote.id && operation.state === "PENDING");
-    if (pending || local?.sync?.syncState === "CONFLICT") {
+    if (!remote.deletedAt && (pending || local?.sync?.syncState === "CONFLICT")) {
       conflictCount += 1;
       conflicts.put({
         id: conflictIdFor(ownerId, remote.entityType, remote.id), ownerId,
@@ -495,6 +530,12 @@ export async function commitFullResync(database, { ownerId, entities, nextSyncSe
       });
       if (local) store.put({ ...local, sync: { ...local.sync, syncState: "CONFLICT" } });
     } else {
+      if (remote.deletedAt) {
+        await closeDeletedConflict(conflicts, ownerId, remote.entityType, remote.id, now);
+        for (const operation of operations.filter((row) => row.ownerId === ownerId && row.entityType === remote.entityType && row.entityId === remote.id && row.state === "PENDING")) {
+          transaction.objectStore("sync_outbox").put({ ...operation, state: "REJECTED", resultCode: "TOMBSTONE_WINS", updatedAt: String(now) });
+        }
+      }
       const projected = toLocalEntity(remote.entityType, remote, ownerId, local);
       store.put(projected);
       localByType.get(remote.entityType).set(remote.id, projected);

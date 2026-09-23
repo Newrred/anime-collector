@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { catalogSupabase, isCatalogSupabaseConfigured } from "./catalogSupabaseClient.js";
 import { createSupabaseCatalogRepository } from "./catalogRepository.js";
+import { buildTitleHubHref } from "../titles/domain/titleNavigation.js";
 import "./catalog-detail.css";
 
 const label = (value) => String(value || "정보 없음").replaceAll("_", " ");
@@ -34,12 +35,13 @@ export default function CatalogDetail() {
   }, [animeId]);
 
   async function loadMore() {
-    if (!detail || nextPage > detail.people.pageCount) return;
+    if (!detail || status === "loading-more" || nextPage > detail.people.pageCount) return;
     setStatus("loading-more");
     try {
       const repository = createSupabaseCatalogRepository({ client: catalogSupabase });
       const page = await repository.getPeople(animeId, nextPage);
-      if (page) setPeople((current) => [...current, ...page.entries]);
+      if (!page) throw new Error("PEOPLE_PAGE_MISSING");
+      setPeople((current) => [...current, ...page.entries]);
       setNextPage((current) => current + 1);
       setStatus("ready");
     } catch { setStatus("error"); }
@@ -50,7 +52,8 @@ export default function CatalogDetail() {
     <div className="catalog-detail page-shell page-shell--narrow">
       <a href="/memory/new/">← 카드 작성으로 돌아가기</a>
       <h1>작품 정보를 표시할 수 없어요</h1>
-      <p>{status === "unavailable" ? "Preview 카탈로그 연결이 필요합니다." : "잠시 후 다시 시도해 주세요."}</p>
+      <p>{status === "missing" || !animeId ? "작품을 찾을 수 없어요." : "작품 정보를 불러오지 못했어요."}</p>
+      {status === "error" && <button type="button" className="btn" onClick={() => window.location.reload()}>다시 시도</button>}
     </div>
   );
 
@@ -59,6 +62,10 @@ export default function CatalogDetail() {
     animeId: detail.animeId,
     title: detail.preferredTitle.value,
   })}`;
+  const titleHubHref = buildTitleHubHref({
+    titleRef: { kind: "ANIME", animeId: detail.animeId },
+    title: detail.preferredTitle.value,
+  });
   return (
     <div className="catalog-detail page-shell">
       <header className="catalog-detail__hero surface-card">
@@ -74,7 +81,10 @@ export default function CatalogDetail() {
           <h1>{detail.preferredTitle.value}</h1>
           <p>{detail.titles.filter((row) => row.value !== detail.preferredTitle.value).slice(0, 3).map((row) => row.value).join(" · ")}</p>
         </div>
-        <a className="btn" href={cardHref}>이 작품으로 카드 만들기</a>
+        <div className="catalog-detail__actions">
+          <a className="btn" href={titleHubHref}>작품 허브에서 보기</a>
+          <a className="btn btn--subtle" href={cardHref}>이 작품으로 카드 만들기</a>
+        </div>
       </header>
 
       <section className="catalog-detail__facts surface-card" aria-label="작품 기본 정보">
@@ -90,6 +100,7 @@ export default function CatalogDetail() {
       </section>
 
       <section className="catalog-detail__people surface-card">
+        {status === "error" && <p role="alert">인물 정보를 불러오지 못했어요. 다시 시도해 주세요.</p>}
         <div className="catalog-detail__section-head">
           <div><h2>캐릭터와 성우</h2><p>{detail.people.characterCount}명 · 성우 연결 {detail.people.castingCount}개</p></div>
         </div>

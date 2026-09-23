@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(30);
+select plan(33);
 
 insert into auth.users (id)
 values
@@ -105,6 +105,11 @@ select is(
   (select relrowsecurity from pg_class where oid = 'public.memory_visual_assets'::regclass),
   true,
   'memory_visual_assets has RLS enabled'
+);
+select is(
+  (select relrowsecurity from pg_class where oid = 'public.catalog_cover_revisions'::regclass),
+  true,
+  'catalog_cover_revisions has RLS enabled'
 );
 select is(
   (select relrowsecurity from pg_class where oid = 'public.memory_boards'::regclass),
@@ -364,6 +369,18 @@ select ok(
 select ok(
   has_table_privilege('anon', 'public.catalog_anime_search', 'SELECT'),
   'catalog anonymous read grant remains unchanged'
+);
+select ok(
+  has_table_privilege('anon', 'public.catalog_cover_revisions', 'SELECT'),
+  'approved durable catalog cover revisions remain publicly readable'
+);
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.apply_memory_card_mutation_without_catalog_cover(uuid,uuid,text,uuid,text,bigint,text,jsonb)',
+    'EXECUTE'
+  ),
+  'authenticated cannot bypass the catalog-cover wrapper RPC'
 );
 
 set local role authenticated;

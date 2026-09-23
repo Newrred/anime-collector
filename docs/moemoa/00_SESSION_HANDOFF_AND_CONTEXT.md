@@ -26,11 +26,18 @@ Anime / PrivateTitle
 
 MemoryCard
   N ─ M Board         // BoardCard가 순서와 저장 시각 관리
-  1 ─ 1 VisualAsset   // 사용자 이미지 또는 시스템 디자인 카드
+  1 ─ 1 VisualAsset   // 사용자 이미지, 승인된 catalog cover reference 또는 시스템 디자인
+
+Saved Title + Complete Memory가 있는 Title
+  → TitleAlbumProjection
+  → My Titles Poster View / Memory View
+  → Title Hub
 
 Public reference
   원본 카드와 이미지 파일을 복제하지 않고 참조
 ```
+
+2026-09-03부터 기존 Library와 Memory write model은 독립적으로 유지하되 사용자 읽기 경험은 `작품 / Titles`와 Title Hub에서 통합한다. 최신 결정은 `01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`와 `decisions/2026-09-03-title-hub-dual-view-and-catalog-cover.md`를 따른다.
 
 ## 4. 이번 세션에서 사용자가 확정한 내용
 
@@ -136,3 +143,7 @@ Codex는 이 메모를 현재 사실로 간주하면 안 된다. 실제 브랜�
 5. 이미지가 `LOCAL_ONLY / PRIVATE_CLOUD / PUBLIC` 중 어디에 있는지 사용자가 이해하는가?
 6. 공개 UGC가 신고·삭제·권리 요청에 실제로 대응 가능한가?
 7. 카탈로그가 불완전해도 PrivateTitle로 기록을 계속할 수 있는가?
+
+## 2026-09-07 증분 226건 검토·데이터 배포 완료
+
+현재 운영 카탈로그는 **4,160건**, active release는 `catalog-increment-7888d03d489d590b40f9280a`다. 226건 중 신규 161, 중복 제외 42, 자막 합본 제외 1, 보류 22. 이전 3,999건과 5등분 2기 보존, 전체 DB hash 및 실서비스 12개 검증 통과. 상세 판정/복구/재배포 주의는 [개별 검토 기록](reports/2026-09-07-increment226-individual-review.md)을 먼저 읽는다. 원래 증분 manifest를 직접 재배포하면 교정 전 값/중복이 복원될 수 있으므로 승인 ledger와 bundle을 사용해야 한다.

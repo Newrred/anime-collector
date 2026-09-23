@@ -120,3 +120,7 @@
     border: 1px solid CanvasText;
   }
 }
+
+.memory-archive__filters { margin-bottom: 24px; flex-wrap: wrap; }
+.memory-archive__filters label { display: grid; gap: 8px; max-width: 100%; }
+.memory-archive__filters input,.memory-archive__filters select { min-height: 44px; max-width: 100%; }

@@ -1,4 +1,6 @@
+import { exportMemoryMetadata, restoreMemoryMetadata } from "./memoryBackupStore.js";
 import {
+  assertCatalogCoverPersonalSignal,
   createDefaultSyncEnvelope,
   requireOwnerId,
 } from "../../domain/memoryDomain.js";
@@ -33,6 +35,8 @@ import {
   commitPulledChange,
   commitSyncMutation,
   countPendingSyncOperations,
+  countRejectedSyncOperations,
+  readAcknowledgedSyncVersions,
   getSyncConflict,
   hasPendingEntityOperation,
   listOpenSyncConflicts,
@@ -196,6 +200,14 @@ export class IndexedDbMemoryRepository {
     return listPendingSyncOperations(this.database, ownerId, limit);
   }
 
+  readAcknowledgedSyncVersions(ownerId) {
+    return readAcknowledgedSyncVersions(this.database, ownerId);
+  }
+
+  countRejectedSyncOperations(ownerId) {
+    return countRejectedSyncOperations(this.database, ownerId);
+  }
+
   countPendingSyncOperations(ownerId) {
     return countPendingSyncOperations(this.database, ownerId);
   }
@@ -291,7 +303,7 @@ export class IndexedDbMemoryRepository {
     return clone(animeRef);
   }
 
-  async reserveCreate({ title = null, animeRef = null, card, asset, operation }) {
+  async reserveCreate({ title = null, animeRef = null, card, asset, operation, reusePrivateTitle = false }) {
     await requireOwner(this.database, operation.ownerId);
     const existing = await this.getOperation(operation.ownerId, operation.id);
     if (existing) {
@@ -316,7 +328,13 @@ export class IndexedDbMemoryRepository {
       [titleStore, "memory_cards", "visual_assets", "media_operations"],
       "readwrite",
     );
-    if (title) transaction.objectStore(titleStore).add(normalizePrivateTitle(title));
+    if (title && reusePrivateTitle) {
+      const storedTitle = await requestResult(transaction.objectStore(titleStore).get(title.id));
+      if (!storedTitle || storedTitle.ownerId !== operation.ownerId || storedTitle.deletedAt) {
+        transaction.abort();
+        throw Object.assign(new Error("Private title is unavailable"), { code: "PRIVATE_TITLE_NOT_FOUND" });
+      }
+    } else if (title) transaction.objectStore(titleStore).add(normalizePrivateTitle(title));
     else transaction.objectStore(titleStore).put(normalizeAnimeRef(animeRef));
     transaction.objectStore("memory_cards").add(normalizeCard(card));
     transaction.objectStore("visual_assets").add(normalizeAsset(asset));
@@ -324,7 +342,7 @@ export class IndexedDbMemoryRepository {
     await transactionDone(transaction);
   }
 
-  async completeCreate({ title = null, animeRef = null, card, asset, operation, syncOperations = [] }) {
+  async completeCreate({ title = null, animeRef = null, card, asset, operation, syncOperations = [], reusePrivateTitle = false }) {
     const existing = await this.getOperation(operation.ownerId, operation.id);
     if (!existing || existing.cardId !== card.id || existing.assetId !== asset.id) {
       throw Object.assign(new Error("Create reservation does not match completion"), {
@@ -347,7 +365,7 @@ export class IndexedDbMemoryRepository {
       [...new Set([titleStore, "memory_cards", "visual_assets", "media_operations", ...(syncOperations.length ? ["sync_outbox"] : [])])],
       "readwrite",
     );
-    transaction.objectStore(titleStore).put(
+    if (!reusePrivateTitle) transaction.objectStore(titleStore).put(
       title ? normalizePrivateTitle(withPendingSync(title, syncOperations)) : normalizeAnimeRef(animeRef),
     );
     transaction.objectStore("memory_cards").put(normalizeCard(withPendingSync(card, syncOperations)));
@@ -369,6 +387,17 @@ export class IndexedDbMemoryRepository {
       updatedAt: String(now),
     });
     await transactionDone(transaction);
+  }
+
+  exportMemoryBackup(ownerId, now) { return exportMemoryMetadata(this.database, ownerId, now); }
+
+  restoreMemoryBackup(ownerId, snapshot) { return restoreMemoryMetadata(this.database, ownerId, snapshot); }
+
+  async getPrivateTitle(ownerId, titleId) {
+    const transaction = this.database.transaction("private_titles", "readonly");
+    const title = await requestResult(transaction.objectStore("private_titles").get(titleId));
+    await transactionDone(transaction);
+    return title?.ownerId === ownerId && !title.deletedAt ? clone(title) : null;
   }
 
   async listArchive(ownerId) {
@@ -414,7 +443,7 @@ export class IndexedDbMemoryRepository {
 
   async updateCardMetadata({ ownerId, cardId, changes, now, syncOperations = [] }) {
     const transaction = this.database.transaction(
-      ["memory_cards", ...(syncOperations.length ? ["sync_outbox"] : [])],
+      ["memory_cards", "visual_assets", ...(syncOperations.length ? ["sync_outbox"] : [])],
       "readwrite",
     );
     const cards = transaction.objectStore("memory_cards");
@@ -428,6 +457,8 @@ export class IndexedDbMemoryRepository {
       ...(Object.hasOwn(changes || {}, "note") ? { note: changes.note } : {}),
       updatedAt: String(now),
     };
+    const asset = await requestResult(transaction.objectStore("visual_assets").get(card.visualAssetId));
+    try { assertCatalogCoverPersonalSignal(card, asset); } catch (error) { transaction.abort(); throw error; }
     const stored = withPendingSync(card, syncOperations, now);
     cards.put(stored);
     appendSyncOperationsToTransaction(transaction, syncOperations);

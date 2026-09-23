@@ -1,4 +1,8 @@
+import { useMemoryReturnNavigation } from "../hooks/useMemoryReturnNavigation.js";
 import { useEffect, useMemo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { buildTitleHubHref } from "../features/titles/domain/titleNavigation.js";
+import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
 import { buildHomeResurfacing } from "../domain/homeSelectors";
 import { buildCharacterInsight } from "../domain/characterInsights";
 import { buildYearRecap, listRecapYears } from "../domain/recapSelectors";
@@ -26,7 +30,7 @@ function buildLibraryHref(base, anilistId, focus = "") {
   if (Number.isFinite(id)) params.set("animeId", String(id));
   if (focus) params.set("focus", focus);
   if (!params.toString()) return `${base}library/`;
-  return `${base}library/?${params.toString()}`;
+  return toPlatformAppHref(`${base}library/?${params.toString()}`, { native: Capacitor.isNativePlatform() });
 }
 
 function safeGenres(media) {
@@ -98,7 +102,7 @@ function buildLibraryStatsFromItems({ items, mediaMap, locale, titleById }) {
   };
 }
 
-function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }) {
+function HomeTasteCard({ dashboard, base, compact = false, copy }) {
   const noData = copy.noData || "No data";
   const times = copy.times || "";
   const scoreMax = SCORE_MAX;
@@ -131,14 +135,10 @@ function HomeTasteCard({ dashboard, locale, onOpenAnime, compact = false, copy }
                 {dashboard.rewatchRows.map((row) => (
                   <a
                     key={row.key}
-                    href={`./library/?animeId=${encodeURIComponent(row.id)}`}
+                    href={buildTitleHubHref({ base, native: Capacitor.isNativePlatform(), anilistId: row.id, title: row.title })}
+                    data-astro-reload
                     className="library-rewatch-item"
                     title={`${row.title} · ${row.count}${times}`}
-                    onClick={(event) => {
-                      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-                      event.preventDefault();
-                      onOpenAnime(row.id);
-                    }}
                   >
                     <div className="library-rewatch-list-item">
                       <div className="small library-rewatch-item-title">{row.title}</div>
@@ -204,6 +204,7 @@ export default function Home() {
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+  useMemoryReturnNavigation(base);
   const legacyOnboardingState = deriveOnboardingState({
     itemCount: items.length,
     logCount: logs.length,
@@ -223,7 +224,9 @@ export default function Home() {
       ? copy.heroMetaMissing
       : copy.heroMetaLibrary;
   const heroPrimaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId, "quick-log") : "";
-  const heroSecondaryHref = Number.isFinite(heroAnimeId) ? buildLibraryHref(base, heroAnimeId) : `${base}library/`;
+  const heroSecondaryHref = Number.isFinite(heroAnimeId)
+    ? buildTitleHubHref({ base, native: Capacitor.isNativePlatform(), anilistId: heroAnimeId, title: heroTitle })
+    : toPlatformAppHref(`${base}titles/`, { native: Capacitor.isNativePlatform() });
   const heroCue = String(heroEntry?.cue || "").trim();
   const heroVisual = useMemo(() => {
     if (!Number.isFinite(heroAnimeId)) return "";
@@ -279,13 +282,6 @@ export default function Home() {
 
   const yearRecap = useMemo(() => buildYearRecap({ logs, year: recapYear }), [logs, recapYear]);
 
-  function openLibraryAnimeById(anilistId) {
-    const id = Number(anilistId);
-    if (!Number.isFinite(id)) return;
-    if (typeof window === "undefined") return;
-    window.location.href = `${base}library/?animeId=${encodeURIComponent(id)}`;
-  }
-
   async function onClickInstallPwa() {
     if (typeof window === "undefined") return;
     if (typeof window.__promptPwaInstall !== "function") return;
@@ -324,14 +320,14 @@ export default function Home() {
       />
 
       {memoryArchive.status === "loading" || memoryArchive.status === "error" ? (
-        <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
-      ) : memoryArchive.latest ? (
+        <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} locale={locale} />
+      ) : memoryArchive.latest || legacyOnboardingState.stage === "active" ? (
         <>
-      <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} />
+      <HomeMemoryOverview base={base} copy={memoryCopy} memory={memoryArchive} locale={locale} />
       {legacyOnboardingState.stage === "active" ? (
-        <>
+        <details className="home-legacy-insights"><summary>{locale === "ko" ? "이전 시청 기록의 회고" : "Insights from your watch logs"}</summary>
       <section className="pageHeader">
-        {copy.title ? <h1 className="pageTitle">{copy.title}</h1> : null}
+        {copy.title ? <h2 className="pageTitle">{copy.title}</h2> : null}
         {copy.lead ? <p className="pageLead">{copy.lead}</p> : null}
       </section>
 
@@ -367,7 +363,7 @@ export default function Home() {
                     <a href={heroPrimaryHref} className="btn btn--subtle">
                       {copy.quickRecord}
                     </a>
-                    <a href={heroSecondaryHref} className="btn btn--subtle">
+                    <a href={heroSecondaryHref} className="btn btn--subtle" data-astro-reload>
                       {copy.heroOpen}
                     </a>
                   </>
@@ -376,7 +372,7 @@ export default function Home() {
                     <button type="button" className="btn btn--subtle" onClick={openGlobalQuickAction}>
                       {locale === "en" ? "Add a title" : "작품 추가"}
                     </button>
-                    <a href={heroSecondaryHref} className="btn btn--subtle">
+                    <a href={heroSecondaryHref} className="btn btn--subtle" data-astro-reload>
                       {copy.heroOpen}
                     </a>
                   </>
@@ -410,8 +406,7 @@ export default function Home() {
 
       <HomeTasteCard
         dashboard={tasteDashboard}
-        locale={locale}
-        onOpenAnime={openLibraryAnimeById}
+        base={base}
         copy={tasteCopy}
       />
 
@@ -425,7 +420,7 @@ export default function Home() {
         titleById={titleById}
         onClose={() => setSelectedCharacter(null)}
       />
-        </>
+        </details>
       ) : null}
         </>
       ) : (

@@ -1,11 +1,11 @@
 # MOEMOA 문서 인덱스와 Source of Truth
 
-- 기준일: 2026-08-26
-- 현재 단계: **첫 Private Vertical Slice의 Milestone 4A — Web-first Shared UI Readiness 진행 중**. 3,998개 Service Projection v2·대표 표지의 Supabase 적재와 Web catalog consumer Preview 검증, Milestone 4A-1 자동/Preview 검증은 완료됐다. 사람의 10초 발견성·행동 구분과 전체 viewport/accessibility/visual gate는 아직 남아 있으며, 이 gate 전에는 Android UI 확장이나 Board·sync·Public을 시작하지 않는다.
+- 기준일: 2026-09-07
+- 현재 단계: **Web 기능 사용성 확인·Android 테스트 APK 준비 완료, 실기기 검증 대기**. 대표 표지 Memory domain·Supabase migration, Title Hub·My Titles dual view에 이어 메뉴·검색·한영 문구·기존 주소 호환을 구현했다. Home·화면 간 연결과 첫 Memory 안내를 포함해 사용자 승인으로 https://www.moemoa.xyz 에 배포했다. [운영 배포 보고서](reports/2026-09-07-title-hub-web-release.md)에 검증·복구·다음 배포의 catalog 환경값 주의사항을 기록했다. 사용자의 기능 확인 후 [Android 테스트 APK](reports/2026-09-07-title-hub-android-phase7.md)를 준비했으며 UI 개선과 물리 실기기 확인은 남아 있다. Public·사용자 이미지 cloud는 계속 비활성화한다.
 
 이 파일은 문서를 찾기 위한 인덱스다. 제품 결정을 새로 만들지 않으며, 내용이 충돌할 때는 아래 source hierarchy를 따른다.
 
-빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [통합 Supabase 결정](decisions/2026-08-26-unified-supabase-user-data.md) · [통합 Supabase 설계](../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md) · [첫 Slice 승인 기록](decisions/2026-08-12-first-private-slice-approval.md) · [Web-first UI 결정](decisions/2026-08-16-web-first-shared-ui-readiness.md) · [Web-first UI 설계](../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md) · [로컬 카탈로그 랩 설계](../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md) · [상세 아키텍처](reports/architecture-decision-proposal.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
+빠른 링크: [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md) · [Title Hub 결정](decisions/2026-09-03-title-hub-dual-view-and-catalog-cover.md) · [Title Hub UI 명세](../superpowers/specs/2026-09-03-title-hub-dual-view-ui.md) · [Title Hub ExecPlan](plans/2026-09-03-title-hub-dual-view.md) · [코드 충돌 감사](reports/2026-09-03-title-hub-code-conflict-audit.md) · [통합 Supabase 결정](decisions/2026-08-26-unified-supabase-user-data.md) · [통합 Supabase 설계](../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md) · [첫 Slice ExecPlan](plans/first-private-vertical-slice.md) · [단계 runbook](08_CODEX_PHASE_RUNBOOK.md)
 
 ## 1. 먼저 읽을 것
 
@@ -79,6 +79,9 @@ reports/open-decision-questions.md
 | `09_CHANGE_CONTROL_AND_REPORTING.md` | `CURRENT` | Decision Log, ADR, 변경·테스트 보고 규칙 |
 | `../superpowers/specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 3,998개 target roster 기반 세 출처 로컬 10→100 표본 수집 설계. 전체 수집과 production 발행은 별도 gate |
 | `../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 단일 Supabase Auth·Memory metadata·Board·sync schema/RLS/RPC 계약. 구현은 후속 ExecPlan 승인 필요 |
+| `../superpowers/specs/2026-09-03-title-hub-dual-view-ui.md` | `CURRENT_APPROVED_UI_DIRECTION` | Title Hub, My Titles Poster/Memory View, 대표 표지 Memory 선택의 화면·projection 계약 |
+| `plans/2026-09-03-title-hub-dual-view.md` | `APPROVED_IMPLEMENTATION_GATED` | 문서 동기화와 후속 비파괴 구현 순서·승인 경계 |
+| `reports/2026-09-03-title-hub-code-conflict-audit.md` | `EVIDENCE_SNAPSHOT` | 새 결정과 현재 route/domain/schema/catalog cover 수명주기의 실제 차이 |
 | `plans/2026-08-17-three-source-local-catalog-lab.md` | `DRAFT_EXECPLAN_FOR_REVIEW` | 위 설계를 Task 1~10의 TDD 구현·검증·롤백 단위로 변환. 사용자 실행 방식 선택 전 코드 작업 금지 |
 
 ## 5. 저장소 감사 산출물
@@ -109,6 +112,7 @@ reports/open-decision-questions.md
 | `decisions/2026-08-12-first-private-slice-approval.md` | `CONFIRMED` | Android local-only 첫 slice 범위와 후속 slice 분리 |
 | `decisions/2026-08-16-web-first-shared-ui-readiness.md` | `CONFIRMED` | 첫 slice 내부에서 공용 UI를 Web로 먼저 검증한 뒤 Android에 적용하는 순서 |
 | `decisions/2026-08-26-unified-supabase-user-data.md` | `CONFIRMED` | 단일 Supabase project, Google Auth, Guest 승격, normalized metadata sync, legacy migration 제외 |
+| `decisions/2026-09-03-title-hub-dual-view-and-catalog-cover.md` | `CONFIRMED` | 작품 허브형 통합, My Titles dual view, 사용자 선택 대표 표지 Memory visual, Library 축소 통합 |
 | `adr/0001-capacitor-client-and-local-media-boundary.md` | `ACCEPTED` | Capacitor client와 app-private media의 논리 경계 |
 
 BACKEND-01, AUTH-01, SYNC-01은 2026-08-26 확정됐다. Public 및 user image cloud 관련 결정은 private 사용성·이미지 lifecycle 검증 뒤로 둔다.
@@ -193,13 +197,15 @@ BACKEND-01, AUTH-01, SYNC-01은 2026-08-26 확정됐다. Public 및 user image c
 
 ## 10. 다음 작업
 
-첫 slice와 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog` 순서는 승인됐다. Android native/local 기반과 emulator end-to-end 일부, Supabase catalog consumer, Web의 Memory Card 발견성 진입 동선도 구현·검증됐다. 현재 다음 순서는 아래와 같다.
+기존 local-first Card/Archive, Web-first UI, Supabase catalog/user metadata 구현은 기반으로 유지한다. 2026-09-03 결정 이후 현재 순서는 다음과 같다.
 
-1. `decisions/2026-08-16-web-first-shared-ui-readiness.md`, 현행 UI 설계서, `plans/first-private-vertical-slice.md`를 현재 실행 기준으로 사용한다.
-2. `[완료 — 32a9389]` Home에서 실제 Memory Card/Archive의 최근 카드·개수를 읽고 기존 Library/WatchLog와 별도 영역으로 표시한다.
-3. `[완료 — 0e36162, 79276aa]` legacy JSON backup이 Memory Card/이미지를 포함하지 않음을 명시하고, 작성·Archive·상세의 영어/한국어 본문·상태·오류 전환을 공통 locale에 연결한다.
-4. 승인 viewport와 상태 fixture의 남은 accessibility·visual 자동 검증을 통과시킨다.
-5. 사람 검토로 10초 발견성, Card/Library 행동 구분, 첫 Card 저장→Archive→상세 재열람을 확인해 Web UI gate를 닫는다.
-6. 같은 UI를 Android에 적용해 safe-area·keyboard·back·native media를 실기기에서 검증한다.
-7. export·전체 복구·feature flag·device matrix 등 첫 slice 잔여 항목을 마감한다.
-8. 그 뒤 다음 승인 gate인 Private Board + Web read path로 이동한다.
+1. `[완료 — 문서]` Title Hub·Dual View·대표 표지 Memory 결정을 canonical과 UI 명세에 반영하고 현재 코드 충돌을 감사한다.
+2. catalog cover의 release-independent identity, immutable revision, 권리 metadata, missing/replace lifecycle을 확정한다.
+3. 핵심 불변식만 보호하는 간결한 테스트로 local `CATALOG_COVER` Card vertical slice를 구현한다.
+4. 별도 승인 뒤 Supabase user schema/RPC에 cover reference를 additive migration한다.
+5. 기존 Library adapter와 Memory repository를 합치는 `TitleAlbumProjection` 및 Title Hub를 구현한다.
+6. 동일 projection 위에 My Titles Poster View와 Memory View를 구현한다.
+7. `[완료 — Phase 5]` 메뉴·검색·한영 action copy를 정리하고 기존 route를 alias 또는 safe redirect로 유지한다. 기록 편집은 `focus=edit/quick-log` 호환 경로를 사용한다.
+8. `[완료 — Phase 6]` Home·Memory Detail·Board에서 같은 Title Hub로 이어지는 연결과 첫 Memory 작성 후 일회성 Memory View 안내를 구현·로컬 Web 검증했다.
+9. `[다음]` Web 사람 이해도 gate를 확인한 뒤 Phase 7 Android에 적용한다. packaged URL 자동 검증은 실기기 검증을 대체하지 않는다.
+10. local data 삭제, legacy UI 제거, Public 활성화는 각각 별도 승인 없이는 진행하지 않는다.

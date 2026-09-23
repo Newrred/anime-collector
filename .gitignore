@@ -88,3 +88,6 @@ docs/deploy/VERCEL_SETUP.md
 .vercel/
 .env.local
 .env.*.local
+
+# Generated commit provenance, emitted at build time.
+/public/build-info.json

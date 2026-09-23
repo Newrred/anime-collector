@@ -1,7 +1,8 @@
 import { sha256 } from '../lib/hash.mjs';
+import { buildServiceProjection, SERVICE_PROJECTION_POLICY_VERSION } from './service-projection.mjs';
 
 export const SERVICE_PROJECTION_V2_SCHEMA_VERSION = 2;
-export const SERVICE_PROJECTION_V2_POLICY_VERSION = 'SERVICE_PROJECTION_V2_PREVIEW_COVERS_2026_08_19';
+export const SERVICE_PROJECTION_V2_POLICY_VERSION = 'SERVICE_PROJECTION_V2_OPTIONAL_SOURCE_2026_09_07';
 
 const HASH = /^[a-f0-9]{64}$/u;
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
@@ -40,7 +41,6 @@ function text(value, maximum = 240) {
 
 function scalar(field) {
   if (field?.state === 'VALUE') return field.value ?? null;
-  if (field?.state === 'CONFLICTED' && Array.isArray(field.values)) return field.values[0] ?? null;
   return null;
 }
 
@@ -194,9 +194,9 @@ function coverAssetRow(animeId, cover) {
   const width = safeInteger(cover?.width, 1);
   const height = safeInteger(cover?.height, 1);
   const expectedMime = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[extension];
-  if (!HASH.test(checksum ?? '') || sourceProvider !== 'ANILIST' || mimeType !== expectedMime
+  if (!HASH.test(checksum ?? '') || !['ANILIST', 'ANILIFE'].includes(sourceProvider) || mimeType !== expectedMime
     || byteSize === null || width === null || height === null || width > 10_000 || height > 10_000) {
-    throw typedError('SERVICE_PROJECTION_V2_COVER_INVALID', 'A validated AniList cover descriptor is required');
+    throw typedError('SERVICE_PROJECTION_V2_COVER_INVALID', 'A validated approved-source cover descriptor is required');
   }
   const pathKey = animeId.replace(':', '-');
   const assetId = `asset:${sha256(['COVER_IMAGE', animeId, checksum]).slice(0, 40)}`;
@@ -224,6 +224,17 @@ export function buildServiceProjectionV2(input = {}) {
   const canonical = clone(input.canonical);
   const source = clone(input.serviceProjection);
   validateInputs(target, canonical, source);
+  if (source.reviewItems?.some((row) => row.reasonCode === 'TITLE_IDENTITY_REVIEW_REQUIRED')) {
+    throw typedError('SERVICE_PROJECTION_V2_IDENTITY_REVIEW_REQUIRED', 'Unresolved title identity must be reviewed before export');
+  }
+  const expected = buildServiceProjection({ target, canonical });
+  if (expected.reviewItems.some(row => row.reasonCode === 'TITLE_IDENTITY_REVIEW_REQUIRED')) {
+    throw typedError('SERVICE_PROJECTION_V2_IDENTITY_REVIEW_REQUIRED', 'Current title identity rules require review');
+  }
+  if (source.policyVersion !== SERVICE_PROJECTION_POLICY_VERSION
+    || ['preferredTitle', 'searchTitles', 'autoAcceptedTitleAliases', 'quarantinedTitles'].some(key => sha256(source[key] ?? null) !== sha256(expected[key]))) {
+    throw typedError('SERVICE_PROJECTION_V2_TITLE_PROJECTION_STALE', 'Rebuild titles with the current identity review before export');
+  }
   const pageSize = safeInteger(input.peoplePageSize, 1) ?? 30;
   if (pageSize < 1 || pageSize > 50) {
     throw typedError('SERVICE_PROJECTION_V2_INPUT_INVALID', 'People page size must be between 1 and 50');

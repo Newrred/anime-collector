@@ -1,8 +1,8 @@
-const normalizeSearchText = (value) => String(value || "")
-  .normalize("NFKC")
-  .toLocaleLowerCase("en-US")
-  .replace(/\s+/gu, "")
-  .replace(/[^\p{L}\p{N}]/gu, "");
+import { strictTitleSearchKey as normalizeSearchText, titleSearchMatchRank } from '../../../../domain/search/titleSearchMatch.js';
+
+const cleanDisplayTitle = (value) => String(value || "")
+  .replace(/^\s*[[(（【][^)\]）】]{0,40}(?:고화질|무삭제|무료|다시보기|자막|더빙)[^)\]）】]{0,40}[\])）】]\s*/iu, "")
+  .normalize("NFKC").trim().replace(/\s+/gu, " ");
 
 const normalizeTextList = (values) => {
   const seen = new Set();
@@ -18,7 +18,7 @@ const normalizeTextList = (values) => {
 const candidateFromRow = (row) => {
   const externalId = String(row?.anilistId ?? "").trim();
   const aliases = normalizeTextList(row?.aliases);
-  const displayTitle = String(row?.ko || aliases[0] || "").normalize("NFKC").trim().replace(/\s+/gu, " ");
+  const displayTitle = cleanDisplayTitle(row?.ko || aliases[0]);
   if (!displayTitle || !/^[1-9]\d{0,11}$/.test(externalId)) return null;
   return {
     candidate: {
@@ -48,10 +48,7 @@ export function createLegacyAliasTitleResolver({ rows, limit = 8 }) {
       return candidates.flatMap(({ candidate, searchableTitles }) => {
         let score = 0;
         for (const title of searchableTitles) {
-          const normalizedTitle = normalizeSearchText(title);
-          if (normalizedTitle === normalizedQuery) score = Math.max(score, 3);
-          else if (normalizedTitle.startsWith(normalizedQuery)) score = Math.max(score, 2);
-          else if (normalizedTitle.includes(normalizedQuery)) score = Math.max(score, 1);
+          score = Math.max(score, titleSearchMatchRank(title, query));
         }
         return score ? [{ candidate, score }] : [];
       })

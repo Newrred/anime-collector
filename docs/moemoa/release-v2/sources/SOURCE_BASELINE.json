@@ -1,0 +1,163 @@
+{
+  "package": "MOEMOA_PUBLIC_LAUNCH_PLAN_V2_2026-09-22",
+  "created_date": "2026-09-22",
+  "timezone": "Asia/Seoul",
+  "status": "planning artifact; no current-repository code changes, application tests or production operations performed",
+  "current_user_decision": "first formal launch includes personal records, accounts, public boards, public minihome, follow/revisit and minimum operations; flat adaptive execution requested",
+  "details_status": "implementation defaults; retain existing safe implementations that satisfy contracts; production actions remain separately approval-gated",
+  "source_zip": {
+    "name": "MOEMOA-Pro-Service-Readiness-2026-09-22.zip",
+    "sha256": "380ec8f2dd62e69b31f3bb5dc5b6537feb5d3f191d59dad4909ec4a5b88a1125",
+    "read_entries": [
+      {
+        "entry": "00_START_HERE.md",
+        "sha256": "8eaf73474af14af42fd48726bcab772a900f2ba358872f2b5d7199e72d1e4548"
+      },
+      {
+        "entry": "01_PRO_REVIEW_REQUEST.md",
+        "sha256": "de0a29b2fb70e4df5b8bc01958906a8d13fcba5cefb9ba627f2c6e4a69ed78d3"
+      },
+      {
+        "entry": "05_CURRENT_SOURCE/AGENTS.md",
+        "sha256": "517f6c3f071051657efd73fb2648eb00dab8db4f14fc5d4681ed7f92c698dc45"
+      },
+      {
+        "entry": "05_CURRENT_SOURCE/PLANS.md",
+        "sha256": "0e262bd437e501604337078de1d98b52b2473eb04cd7bba59d945f9483a9849d"
+      }
+    ],
+    "all_source_reaudited": false
+  },
+  "read_prior_documents": [
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/01_RELEASE_ASSESSMENT.md",
+      "sha256": "d36fe49c1bae89b3f4e12e401c6e198e8feeaaf4f762438c54030c085540af4f",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    },
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/03_FINDINGS_AND_ACCEPTANCE.md",
+      "sha256": "167eb864ee3dbb105746e463c80ef5722980091b9335a3ce1cd656a701cb5662",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    },
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/04_MINIMUM_OPERATIONS_AND_LIMITS.md",
+      "sha256": "8a650c5b1d71f8c6a6ad85b0a0d6aeeca78b0400e28478a2c79d1f2308c733e9",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    },
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/05_CATALOG_UPDATE_AND_RECOVERY.md",
+      "sha256": "4a428c8a55b917b41ef24ae8f1108296142f5b2f7bf228f3ee8aec9015b2577b",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    },
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/06_CODEX_EXECUTION_PLAN.md",
+      "sha256": "cdf56f5002404411509939f0a0173d704442b2bb3b84eadf5ed6df797277b8eb",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    },
+    {
+      "path": "MOEMOA_RELEASE_READINESS_2026-09-22/07_RELEASE_QA_AND_DECISION_GATES.md",
+      "sha256": "816c72ebeec92ec721e256ab895ae215d2081a07010d065104d43d4769247619",
+      "role": "prior audit/plan; Public-disabled launch assumption superseded only"
+    }
+  ],
+  "official_references_checked": [
+    {
+      "id": "W1",
+      "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/"
+    },
+    {
+      "id": "W2",
+      "url": "https://supabase.com/docs/guides/storage/serving/downloads"
+    },
+    {
+      "id": "W3",
+      "url": "https://supabase.com/docs/guides/storage/security/access-control"
+    },
+    {
+      "id": "W4",
+      "url": "https://supabase.com/docs/guides/platform/backups"
+    }
+  ],
+  "reference_check_date": "2026-09-22",
+  "access_note": "Some older attachments had an expiry notice. The 2026-09-22 audit files and source ZIP used for this plan were accessible.",
+  "initial_plan": {
+    "milestones": 6,
+    "base_work_items": 20,
+    "acceptance_scenarios": 24,
+    "completed_app_work_items": 0
+  },
+  "dependency_graph": {
+    "W01": [],
+    "W02": [
+      "W01"
+    ],
+    "W03": [
+      "W02"
+    ],
+    "W04": [
+      "W02"
+    ],
+    "W05": [
+      "W03"
+    ],
+    "W06": [
+      "W04",
+      "W05"
+    ],
+    "W07": [
+      "W06"
+    ],
+    "W08": [
+      "W07"
+    ],
+    "W09": [
+      "W08"
+    ],
+    "W10": [
+      "W09"
+    ],
+    "W11": [
+      "W10"
+    ],
+    "W12": [
+      "W07"
+    ],
+    "W13": [
+      "W11",
+      "W12"
+    ],
+    "W14": [
+      "W10",
+      "W11",
+      "W12"
+    ],
+    "W15": [
+      "W05",
+      "W08",
+      "W12"
+    ],
+    "W16": [
+      "W03"
+    ],
+    "W17": [
+      "W06",
+      "W14",
+      "W15",
+      "W16"
+    ],
+    "W18": [
+      "W04",
+      "W10",
+      "W13",
+      "W14",
+      "W15"
+    ],
+    "W19": [
+      "W17",
+      "W18"
+    ],
+    "W20": [
+      "W19"
+    ]
+  }
+}

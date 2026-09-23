@@ -5,15 +5,10 @@ import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
 import {
-  IconArchiveBox,
-  IconArrowRight,
-  IconBoard,
-  IconBookOpen,
   IconDatabase,
   IconGear,
   IconGlobe,
   IconHelp,
-  IconHome,
   IconMenu,
   IconMoon,
   IconSun,
@@ -21,6 +16,7 @@ import {
   IconX,
 } from "./ui/AppIcons.jsx";
 import AuthSheet from "./auth/AuthSheet.jsx";
+import PrimaryNavigationLinks from "./PrimaryNavigationLinks.jsx";
 import TopNavGlobalSearch from "./search/TopNavGlobalSearch.jsx";
 import "./top-nav-readiness.css";
 
@@ -35,6 +31,71 @@ function ActionLabel({ icon, children }) {
 
 function syncToneClass(tone) {
   return `is-${tone || "idle"}`;
+}
+
+function accountToneFor(status, loading, signedIn) {
+  if (status === "INITIALIZATION_FAILED") return "disabled";
+  if (loading) return "pending";
+  return signedIn ? "connected" : "offline-local";
+}
+
+function MenuTriggers({ copy, theme, localeMenuOpen, dataMenuOpen, panelId, accountTone, syncing, onTheme, onLocale, onMenu }) {
+  return (
+    <div className="data-menu-actions">
+      <button
+        type="button"
+        onClick={onTheme}
+        aria-label={theme === "dark" ? copy.switchToLight : copy.switchToDark}
+        title={theme === "dark" ? copy.switchToLight : copy.switchToDark}
+        className="data-menu-trigger data-menu-theme-trigger top-nav__desktop-action"
+      >
+        <span className="data-menu-trigger-label data-menu-theme-icon" aria-hidden>
+          {theme === "dark" ? <IconMoon /> : <IconSun />}
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onLocale}
+        aria-expanded={localeMenuOpen}
+        aria-controls="locale-menu-panel"
+        aria-label={copy.localeMenu}
+        title={copy.localeMenu}
+        className="data-menu-trigger top-nav__desktop-action"
+      >
+        <span className="data-menu-trigger-label data-menu-locale-icon" aria-hidden>
+          <IconGlobe />
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onMenu}
+        aria-expanded={dataMenuOpen}
+        aria-controls={panelId}
+        aria-label={copy.manage}
+        title={copy.manage}
+        className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(accountTone)}${syncing ? " is-syncing" : ""}`}
+      >
+        <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
+          <IconGear />
+        </span>
+        <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
+      </button>
+      <button
+        type="button"
+        onClick={onMenu}
+        aria-expanded={dataMenuOpen}
+        aria-controls={panelId}
+        aria-label={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
+        title={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
+        className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(accountTone)}${syncing ? " is-syncing" : ""}`}
+      >
+        <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
+          {dataMenuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
+        </span>
+        <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
+      </button>
+    </div>
+  );
 }
 
 export default function TopNavDataMenu({
@@ -57,13 +118,7 @@ export default function TopNavDataMenu({
   const auth = useAuthSession(`${base}data/`);
   const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
   const accountCopy = getMessageGroup(locale, "memoryAccount");
-  const accountTone = account.status === "INITIALIZATION_FAILED"
-    ? "disabled"
-    : account.loading
-      ? "pending"
-      : auth.session?.user
-        ? "connected"
-        : "offline-local";
+  const accountTone = accountToneFor(account.status, account.loading, auth.session?.user);
 
   useEffect(() => {
     function onDocDown(e) {
@@ -126,12 +181,12 @@ export default function TopNavDataMenu({
     <>
       <nav
         className="nav top-nav"
-        aria-label="Primary"
+        aria-label={copy.primaryNavigation}
       >
         <a
           href={`${base}`}
           className="top-nav__brand"
-          aria-label="MOEMOA home"
+          aria-label={`MOEMOA ${copy.home}`}
         >
           <img
             src={`${base}MOEMOA.svg`}
@@ -141,43 +196,7 @@ export default function TopNavDataMenu({
             height="41"
           />
         </a>
-        <div className="top-nav__links top-nav__links--routes">
-          <a
-            href={`${base}`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "home" ? " is-active" : ""}`}
-            aria-current={currentRoute === "home" ? "page" : undefined}
-          >
-            {copy.home}
-          </a>
-          <a
-            href={`${base}library/`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "library" ? " is-active" : ""}`}
-            aria-current={currentRoute === "library" ? "page" : undefined}
-          >
-            {copy.library}
-          </a>
-          <a
-            href={`${base}archive/`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "archive" ? " is-active" : ""}`}
-            aria-current={currentRoute === "archive" ? "page" : undefined}
-          >
-            {copy.archive}
-          </a>
-          <a
-            href={`${base}boards/`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "boards" ? " is-active" : ""}`}
-            aria-current={currentRoute === "boards" ? "page" : undefined}
-          >
-            {copy.boards}
-          </a>
-          <a
-            href={`${base}tier/`}
-            className={`top-nav__link top-nav__link--primary${currentRoute === "tier" ? " is-active" : ""}`}
-            aria-current={currentRoute === "tier" ? "page" : undefined}
-          >
-            {copy.tier}
-          </a>
-        </div>
+        <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} />
 
         <a className="btn top-nav__memory-action" href={`${base}memory/new/`} aria-label={copy.createMemory} data-astro-reload>
           <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
@@ -186,76 +205,22 @@ export default function TopNavDataMenu({
         </a>
 
         <div className="top-nav__search-slot">
-          <TopNavGlobalSearch base={base} locale={locale} />
+          <TopNavGlobalSearch base={base} locale={locale} accountScope={`${auth.session?.user?.id || "guest"}:${account.status}`} />
         </div>
 
         <div ref={dataMenuRef} className="top-nav__menu">
-          <div className="data-menu-actions">
-            <button
-              type="button"
-              onClick={handleToggleTheme}
-              aria-label={theme === "dark" ? copy.switchToLight : copy.switchToDark}
-              title={theme === "dark" ? copy.switchToLight : copy.switchToDark}
-              className="data-menu-trigger data-menu-theme-trigger top-nav__desktop-action"
-            >
-              <span className="data-menu-trigger-label data-menu-theme-icon" aria-hidden>
-                {theme === "dark" ? <IconMoon /> : <IconSun />}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                menuReturnFocusRef.current = event.currentTarget;
-                setLocaleMenuOpen((v) => !v);
-                setDataMenuOpen(false);
-              }}
-              aria-expanded={localeMenuOpen}
-              aria-controls="locale-menu-panel"
-              aria-label={copy.localeMenu}
-              title={copy.localeMenu}
-              className="data-menu-trigger top-nav__desktop-action"
-            >
-              <span className="data-menu-trigger-label data-menu-locale-icon" aria-hidden>
-                <IconGlobe />
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                menuReturnFocusRef.current = event.currentTarget;
-                setDataMenuOpen((v) => !v);
-                setLocaleMenuOpen(false);
-              }}
-              aria-expanded={dataMenuOpen}
-              aria-controls={panelId}
-              aria-label={copy.manage}
-              title={copy.manage}
-              className={`data-menu-trigger auth-trigger top-nav__desktop-action ${syncToneClass(accountTone)}${account.loading ? " is-syncing" : ""}`}
-            >
-              <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
-                <IconGear />
-              </span>
-              <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                menuReturnFocusRef.current = event.currentTarget;
-                setDataMenuOpen((v) => !v);
-                setLocaleMenuOpen(false);
-              }}
-              aria-expanded={dataMenuOpen}
-              aria-controls={panelId}
-              aria-label={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
-              title={dataMenuOpen ? copy.closeMobileMenu : copy.openMobileMenu}
-              className={`data-menu-trigger top-nav__mobile-menu-trigger ${syncToneClass(accountTone)}${account.loading ? " is-syncing" : ""}`}
-            >
-              <span className="data-menu-trigger-label auth-trigger__avatar" aria-hidden>
-                {dataMenuOpen ? <IconX size={18} /> : <IconMenu size={18} />}
-              </span>
-              <span className={`sync-dot ${syncToneClass(accountTone)}`} aria-hidden />
-            </button>
-          </div>
+          <MenuTriggers copy={copy} theme={theme} localeMenuOpen={localeMenuOpen} dataMenuOpen={dataMenuOpen}
+            panelId={panelId} accountTone={accountTone} syncing={account.loading} onTheme={handleToggleTheme}
+            onLocale={(event) => {
+              menuReturnFocusRef.current = event.currentTarget;
+              setLocaleMenuOpen((value) => !value);
+              setDataMenuOpen(false);
+            }}
+            onMenu={(event) => {
+              menuReturnFocusRef.current = event.currentTarget;
+              setDataMenuOpen((value) => !value);
+              setLocaleMenuOpen(false);
+            }} />
 
           {localeMenuOpen && (
             <div
@@ -305,53 +270,7 @@ export default function TopNavDataMenu({
                     </span>
                     <div className="data-menu-section-title">{copy.navigationTitle}</div>
                   </div>
-                  <div className="top-nav-mobile-links">
-                    <a
-                      href={`${base}`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "home" ? " is-active" : ""}`}
-                      aria-current={currentRoute === "home" ? "page" : undefined}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconHome size={17} />}>{copy.home}</ActionLabel>
-                      <IconArrowRight size={14} />
-                    </a>
-                    <a
-                      href={`${base}library/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "library" ? " is-active" : ""}`}
-                      aria-current={currentRoute === "library" ? "page" : undefined}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconBookOpen size={17} />}>{copy.library}</ActionLabel>
-                      <IconArrowRight size={14} />
-                    </a>
-                    <a
-                      href={`${base}archive/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "archive" ? " is-active" : ""}`}
-                      aria-current={currentRoute === "archive" ? "page" : undefined}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconArchiveBox size={17} />}>{copy.archive}</ActionLabel>
-                      <IconArrowRight size={14} />
-                    </a>
-                    <a
-                      href={`${base}boards/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "boards" ? " is-active" : ""}`}
-                      aria-current={currentRoute === "boards" ? "page" : undefined}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconBoard size={17} />}>{copy.boards}</ActionLabel>
-                      <IconArrowRight size={14} />
-                    </a>
-                    <a
-                      href={`${base}tier/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "tier" ? " is-active" : ""}`}
-                      aria-current={currentRoute === "tier" ? "page" : undefined}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconTrophy size={17} />}>{copy.tier}</ActionLabel>
-                      <IconArrowRight size={14} />
-                    </a>
-                  </div>
+                  <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} mobile onNavigate={() => setDataMenuOpen(false)} />
                 </section>
 
                 <section className="data-menu-section data-menu-section--account">
@@ -425,12 +344,16 @@ export default function TopNavDataMenu({
                     <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
                   <div className="data-menu-utility-grid">
+                    <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
+                      aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>
+                      <ActionLabel icon={<IconTrophy size={15} />}>{copy.tier}</ActionLabel>
+                    </a>
                     <a
-                      href={`${base}profile/`}
+                      href={`${base}data/`}
                       className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
                       onClick={() => setDataMenuOpen(false)}
                     >
-                      <ActionLabel icon={<IconGear size={15} />}>{copy.profileShort}</ActionLabel>
+                      <ActionLabel icon={<IconGear size={15} />}>{locale === "ko" ? "계정 및 데이터" : "Account and data"}</ActionLabel>
                     </a>
                     <a
                       href={`${base}help/`}

@@ -14,12 +14,13 @@ const NOW = "2026-09-02T01:00:00.000Z";
 
 const session = (userId, email = "user@example.test") => ({ user: { id: userId, email } });
 
-function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_A } = {}) {
+function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_A, serverSequence = 0 } = {}) {
   const calls = [];
   const owners = new Map([[GUEST_A, { id: GUEST_A, kind: "GUEST", createdAt: NOW }]]);
   const deviceStates = new Map();
   let active = owners.get(activeOwnerId) || owners.get(GUEST_A);
   let uuidIndex = 0;
+  let authUserId = USER_A;
   const uuids = [INSTALLATION_ID, DEVICE_A, DEVICE_B, GUEST_B_UUID];
 
   const repository = {
@@ -32,6 +33,7 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
       return structuredClone(active);
     },
     async ensureAccountOwner({ userId }) {
+      authUserId = userId;
       calls.push(["ensureAccountOwner", userId]);
       const owner = { id: `account:${userId}`, kind: "ACCOUNT", userId, createdAt: NOW };
       owners.set(owner.id, owner);
@@ -76,12 +78,12 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
     async ensureUserProfile(input) {
       calls.push(["ensureUserProfile", input]);
       if (failRpc) throw Object.assign(new Error("select private.secret"), { code: "MEMORY_GATEWAY_FAILED" });
-      return { userId: active?.userId || USER_A, ...input, minimumRetainedSyncSeq: 0 };
+      return { userId: authUserId, ...input, minimumRetainedSyncSeq: 0 };
     },
     async registerDevice(input) {
       calls.push(["registerDevice", input]);
       if (failRpc) throw Object.assign(new Error("select private.secret"), { code: "MEMORY_GATEWAY_FAILED" });
-      return { id: input.deviceId, installationId: input.installationId, platform: input.platform, appVersion: input.appVersion, lastSyncSeq: 0 };
+      return { id: input.deviceId, installationId: input.installationId, platform: input.platform, appVersion: input.appVersion, lastSyncSeq: serverSequence };
     },
     async promoteGuest() {
       return { status: "COMPLETED", importedCounts: { privateTitles: 0, cards: 0, visualAssets: 0, boards: 0, boardCards: 0 }, nextSyncSeq: 0 };
@@ -108,6 +110,8 @@ function createHarness({ guestCards = 1, failRpc = false, activeOwnerId = GUEST_
   return {
     runtime: makeRuntime(),
     makeRuntime,
+    gateway,
+    repository,
     calls,
     owners,
     deviceStates,
@@ -203,4 +207,110 @@ test("an authenticated account stays idle until the user explicitly starts sync"
   const synced = await harness.runtime.syncNow();
   assert.equal(synced.syncResultCode, "SYNCED");
   assert.equal(harness.calls.filter(([name]) => name === "pullChanges").length, 1);
+});
+
+
+test('account initialization preserves the durable local pull cursor instead of skipping to server device state', async () => {
+  const h = createHarness({ guestCards: 0, serverSequence: 100 });
+  const ownerId = `account:${USER_A}`;
+  h.deviceStates.set(ownerId, { ownerId, userId: USER_A, installationId: INSTALLATION_ID, deviceId: DEVICE_A, lastSyncSeq: 7, updatedAt: NOW });
+  await h.runtime.initializeAccountSession(session(USER_A));
+  await h.runtime.syncNow();
+  assert.equal(h.deviceStates.get(ownerId).lastSyncSeq, 7);
+  assert.deepEqual(h.calls.find(([name]) => name === 'pullChanges'), ['pullChanges', 7]);
+});
+
+
+const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
+test('a delayed A initialization cannot reactivate A after B or sign-out', async () => {
+  for (const target of ['B', 'OUT']) {
+    const h = createHarness({ guestCards: 0 }); const entered = deferred(); const release = deferred();
+    const register = h.gateway.registerDevice;
+    let count = 0;
+    h.gateway.registerDevice = async data => { if (++count === 1) { entered.resolve(); await release.promise; } return register(data); };
+    const first = h.runtime.initializeAccountSession(session(USER_A)).catch(error => error.code);
+    await entered.promise;
+    const next = target === 'B' ? h.runtime.initializeAccountSession(session(USER_B)) : h.runtime.handleSignedOut();
+    release.resolve();
+    await Promise.all([first, next]);
+    assert.equal(h.getActive().id, target === 'B' ? `account:${USER_B}` : GUEST_A);
+    assert.equal((await h.runtime.getState()).userId || null, target === 'B' ? USER_B : null);
+    assert.equal(h.calls.some(([name, owner]) => name === 'activateOwner' && owner === `account:${USER_A}`), false);
+  }
+});
+
+
+test('late initialization failure cannot replace the newer account state', async () => {
+  const h = createHarness({ guestCards: 0 }); const entered = deferred(); const release = deferred();
+  const register = h.gateway.registerDevice; let first = true;
+  h.gateway.registerDevice = async data => { if (first) { first = false; entered.resolve(); await release.promise; throw new Error('late A failure'); } return register(data); };
+  const old = h.runtime.initializeAccountSession(session(USER_A)).catch(error => error.code);
+  await entered.promise;
+  const current = h.runtime.initializeAccountSession(session(USER_B)); release.resolve();
+  await Promise.all([old, current]);
+  assert.equal((await h.runtime.getState()).userId, USER_B);
+  assert.equal((await h.runtime.getState()).status, 'ACCOUNT_READY');
+});
+
+test('cancelled promotion preview cannot be used to send a promotion', async () => {
+  const h = createHarness(); let sent = 0;
+  h.gateway.promoteGuest = async () => { sent++; throw new Error('unexpected RPC'); };
+  await h.runtime.initializeAccountSession(session(USER_A));
+  await h.runtime.buildPromotionPreview();
+  h.runtime.cancelPromotionPreview();
+  assert.equal(await h.runtime.promote(), null);
+  assert.equal(sent, 0);
+});
+
+test('a preview arriving after cancellation is discarded', async () => {
+  const h = createHarness(); await h.runtime.initializeAccountSession(session(USER_A));
+  const read = h.repository.readOwnerPromotionBundle; const entered = deferred(); const release = deferred();
+  h.repository.readOwnerPromotionBundle = async () => { entered.resolve(); await release.promise; return read(); };
+  const preview = h.runtime.buildPromotionPreview();
+  await entered.promise; h.runtime.cancelPromotionPreview(); release.resolve();
+  await assert.rejects(() => preview, { code: 'PROMOTION_PREVIEW_CANCELLED' });
+  assert.equal(await h.runtime.promote(), null);
+});
+
+test('A to B to A transition invalidates the first A request despite equal user ids', async () => {
+  const h = createHarness({ guestCards: 0 }); const entered = deferred(); const release = deferred();
+  const register = h.gateway.registerDevice; let first = true;
+  h.gateway.registerDevice = async data => { if (first) { first = false; entered.resolve(); await release.promise; } return register(data); };
+  const old = h.runtime.initializeAccountSession(session(USER_A)).catch(error => error.code);
+  await entered.promise;
+  const middle = h.runtime.initializeAccountSession(session(USER_B)).catch(error => error.code);
+  const last = h.runtime.initializeAccountSession(session(USER_A));
+  release.resolve();
+  assert.equal(await old, 'SYNC_OWNER_CHANGED');
+  assert.equal(await middle, 'SYNC_OWNER_CHANGED');
+  assert.equal((await last).userId, USER_A);
+  assert.equal(h.calls.filter(([name, owner]) => name === 'activateOwner' && owner === `account:${USER_A}`).length, 1);
+});
+
+
+test('late sync result cannot place A conflicts or completion state into B', async () => {
+  const h = createHarness({ guestCards: 0 });
+  await h.runtime.initializeAccountSession(session(USER_A));
+  const entered = deferred(); const release = deferred();
+  h.gateway.pullChanges = async ({ afterSeq }) => { entered.resolve(); await release.promise; return { changes: [], nextSyncSeq: afterSeq }; };
+  const sync = h.runtime.syncNow().catch(error => error.code);
+  await entered.promise;
+  const next = h.runtime.initializeAccountSession(session(USER_B)); release.resolve();
+  assert.equal(await sync, 'SYNC_OWNER_CHANGED');
+  await next;
+  const state = await h.runtime.getState();
+  assert.equal(state.userId, USER_B);
+  assert.equal(state.syncResultCode, undefined);
+  assert.equal(state.conflicts, undefined);
+});
+
+test('a late conflict backup read cannot return A private content after switching to B', async () => {
+  const h = createHarness({ guestCards: 0 });
+  await h.runtime.initializeAccountSession(session(USER_A));
+  const entered = deferred(); const release = deferred();
+  h.repository.getSyncConflict = async () => { entered.resolve(); await release.promise; return { localEntity: { note: 'A private' } }; };
+  const backup = h.runtime.exportConflictBackup('synthetic').catch(error => error.code);
+  await entered.promise;
+  await h.runtime.initializeAccountSession(session(USER_B)); release.resolve();
+  assert.equal(await backup, 'SYNC_OWNER_CHANGED');
 });

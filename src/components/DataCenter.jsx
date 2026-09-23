@@ -1,6 +1,7 @@
+import { getPlatformMemoryRuntime } from "../features/memory/runtime/platformMemoryRuntime.js";
 import { useEffect, useMemo, useState } from "react";
 import { isIdbSupported } from "../storage/idb";
-import { readLibraryListPreferred } from "../repositories/libraryRepo";
+import { readTitleLibrary } from "../repositories/titleLibraryRepo.js";
 import { readTierStatePreferred } from "../repositories/tierRepo";
 import { readAllWatchLogsPreferred } from "../repositories/watchLogRepo";
 import { listCharacterPinsPreferred } from "../repositories/characterPinRepo";
@@ -46,11 +47,15 @@ export default function DataCenter() {
   });
 
   async function readLocalOverview() {
-    const [list, tier, logs, pins] = await Promise.all([
-      readLibraryListPreferred([]).catch(() => []),
+    const [list, tier, logs, pins, memoryCounts] = await Promise.all([
+      readTitleLibrary().catch(() => []),
       readTierStatePreferred(null).catch(() => null),
       readAllWatchLogsPreferred().catch(() => []),
       listCharacterPinsPreferred().catch(() => []),
+      getPlatformMemoryRuntime().then(async (runtime) => {
+        const [archive, boards] = await Promise.all([runtime.listArchive(), runtime.listBoards()]);
+        return { memories: archive.length, boards: boards.length };
+      }).catch(() => ({memories: null, boards: null})),
     ]);
     const tierPlaced =
       (Array.isArray(tier?.unranked) ? tier.unranked.length : 0) +
@@ -61,6 +66,7 @@ export default function DataCenter() {
 
     return {
       counts: {
+        ...memoryCounts,
         library: Array.isArray(list) ? list.length : 0,
         tierPlaced,
         watchLogs: Array.isArray(logs) ? logs.length : 0,
@@ -224,6 +230,8 @@ export default function DataCenter() {
         </div>
 
         <div className="metric-grid">
+          <div className="metric-card"><div className="metric-card__label">{locale === "ko" ? "기억" : "Memories"}</div><div className="metric-card__value">{counts.memories ?? "—"}</div></div>
+          <div className="metric-card"><div className="metric-card__label">{locale === "ko" ? "보드" : "Boards"}</div><div className="metric-card__value">{counts.boards ?? "—"}</div></div>
           <div className="metric-card">
             <div className="metric-card__label">{copy.libraryCount}</div>
             <div className="metric-card__value">{counts.library}</div>

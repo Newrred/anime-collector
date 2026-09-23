@@ -112,6 +112,12 @@ export function createMemoryRuntime({
       return titleResolver.search(query);
     },
 
+    resolveCatalogCover(ref) {
+      return typeof titleResolver.resolveCover === "function"
+        ? titleResolver.resolveCover(ref)
+        : Promise.resolve(null);
+    },
+
     async createCard(input) {
       const owner = await initialize();
       return command.execute({
@@ -119,6 +125,21 @@ export function createMemoryRuntime({
         operationId: input.operationId || uuid(),
         ownerId: owner.id,
       });
+    },
+
+    async exportMemoryBackup() {
+      const owner = await initialize();
+      return repository.exportMemoryBackup(owner.id, String(clock.now()));
+    },
+
+    async restoreMemoryBackup(snapshot) {
+      const owner = await initialize();
+      return repository.restoreMemoryBackup(owner.id, snapshot);
+    },
+
+    async getPrivateTitle(titleId) {
+      const owner = await initialize();
+      return repository.getPrivateTitle(owner.id, titleId);
     },
 
     async listArchive() {

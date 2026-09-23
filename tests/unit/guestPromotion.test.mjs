@@ -245,3 +245,23 @@ test("same operation and hash retries idempotently, while changed source hard-fa
   await assert.rejects(() => harness.command.execute(executeInput), { code: "PROMOTION_SOURCE_HASH_MISMATCH" });
   assert.equal(harness.getActiveOwnerId(), GUEST_OWNER);
 });
+
+
+test('changed review hash is rejected before any journal or RPC', async () => {
+  const h = sagaHarness();
+  await assert.rejects(() => h.command.execute({ ...executeInput, expectedSourceHash: '0'.repeat(64) }), { code: 'PROMOTION_SOURCE_HASH_MISMATCH' });
+  assert.equal(h.calls.length, 0);
+});
+
+test('session change after remote promotion preserves the journal without activating the old account', async () => {
+  const h = sagaHarness(); let checks = 0;
+  await assert.rejects(() => h.command.execute({ ...executeInput, assertCurrent: () => {
+    if (++checks === 3) throw Object.assign(new Error('account switched'), { code: 'SYNC_OWNER_CHANGED' });
+  } }), { code: 'SYNC_OWNER_CHANGED' });
+  assert.equal(h.journals.get(OPERATION_ID).status, 'REMOTE_COMPLETED');
+  assert.equal(h.getActiveOwnerId(), GUEST_OWNER);
+  assert.equal(h.calls.filter(([name]) => name === 'local-commit').length, 0);
+  await h.command.recoverPromotion({ accountOwnerId: ACCOUNT_OWNER });
+  assert.equal(h.getActiveOwnerId(), ACCOUNT_OWNER);
+  assert.equal(h.calls.filter(([name]) => name === 'rpc').length, 1);
+});

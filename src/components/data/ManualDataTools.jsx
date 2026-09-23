@@ -1,3 +1,4 @@
+import MemoryBackupTools from "./MemoryBackupTools.jsx";
 import { useRef, useState } from "react";
 import { dedupeByAnilistId, normalizeImportList } from "../../domain/animeState.js";
 import { getMessageGroup } from "../../domain/messages.js";
@@ -234,10 +235,13 @@ export default function ManualDataTools({ locale = "ko", onChanged }) {
   }
 
   return (
+    <>
+    <MemoryBackupTools locale={locale} />
     <section id="manual-tools" className="surface-card manual-tools">
       <div className="pageHeader manual-tools__header">
         <h2 className="sectionTitle">{copy.manualToolsTitle}</h2>
         <p className="sectionLead">{copy.manualToolsLead}</p>
+        <p>{locale === "ko" ? "아래 기존 백업은 서재·티어·시청 기록용입니다. Memory·보드·개인 이미지·외부 ID 없는 저장 작품은 포함하지 않습니다." : "The legacy backup below covers Library, Tier and watch logs. It excludes Memories, Boards, personal images and saved titles without an external ID."}</p>
       </div>
 
       <div className="data-menu-tabs seg-toggle-2" data-active-index={tab === "export" ? "0" : "1"}>
@@ -321,5 +325,6 @@ export default function ManualDataTools({ locale = "ko", onChanged }) {
         }}
       />
     </section>
+    </>
   );
 }

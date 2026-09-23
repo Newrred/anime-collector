@@ -9,6 +9,7 @@ export default function MemoryCardPreview({
   badge = "",
   syncBadge = "",
   visual,
+  visualFit = "cover",
   variant = "grid",
   systemCopy = {},
   missingLabel = "Visual unavailable",
@@ -22,7 +23,12 @@ export default function MemoryCardPreview({
 
   return (
     <article className={`memory-visual-scope memory-preview memory-preview--${previewVariant} ${className}`.trim()}>
-      <MemoryVisual visual={visual} systemCopy={visualSystemCopy} missingLabel={missingLabel} />
+      <MemoryVisual
+        visual={visual}
+        fit={visualFit}
+        systemCopy={visualSystemCopy}
+        missingLabel={missingLabel}
+      />
       <div className="memory-preview__body">
         <div className="memory-preview__meta">
           <span className="memory-preview__badges">

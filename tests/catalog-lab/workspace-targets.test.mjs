@@ -7,6 +7,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  SOURCE_FIELD_PROMOTION_POLICY,
   SOURCE_PROMOTION_POLICY,
   assertSourceEndpoint,
   loadSourceRegistry,
@@ -56,15 +57,16 @@ test('workspace rejects a path inside the git worktree', async () => {
 });
 
 test('workspace rejects case-variant and junction paths into the git worktree', async () => {
-  await assert.rejects(
-    openCatalogWorkspace({ repoRoot: repoRoot.toUpperCase(), workspaceRoot: join(repoRoot, '.cache', 'catalog') }),
-    { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
-  );
-
   const outsideRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-junction-'));
   const junctionRoot = join(outsideRoot, 'into-repository');
   try {
-    await symlink(repoRoot, junctionRoot, 'junction');
+    const caseAlias = process.platform === 'win32' ? repoRoot.toUpperCase() : join(outsideRoot, 'CASE-ALIAS');
+    if (process.platform !== 'win32') await symlink(repoRoot, caseAlias, 'dir');
+    await assert.rejects(
+      openCatalogWorkspace({ repoRoot: caseAlias, workspaceRoot: join(repoRoot, '.cache', 'catalog') }),
+      { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
+    );
+    await symlink(repoRoot, junctionRoot, process.platform === 'win32' ? 'junction' : 'dir');
     await assert.rejects(
       openCatalogWorkspace({ repoRoot, workspaceRoot: junctionRoot }),
       { code: 'CATALOG_WORKSPACE_INSIDE_REPOSITORY' },
@@ -175,13 +177,35 @@ test('registry exposes four approved sources and blocks over-scope execution', a
     permissionScope: anilist.permissionScope,
     permissionEvidenceLocation: anilist.permissionEvidenceLocation,
   }, {
-    permissionBasis: 'USER_ATTESTED_ANILIST_PERMISSION',
-    permissionRecordedAt: '2026-08-17T20:00:00+09:00',
-    permissionScope: 'LOCAL_TEST_FULL_ROSTER_STORAGE',
+    permissionBasis: 'USER_ATTESTED_ANILIST_PRODUCTION_PERMISSION',
+    permissionRecordedAt: '2026-09-03T16:28:23+09:00',
+    permissionScope: 'PRODUCTION_STORAGE_DISPLAY_AND_DEPLOYMENT',
     permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
   });
   assert.deepEqual(registry.find((entry) => entry.sourceId === 'anilife_public').blockedPaths,
     ['/api/', '/archive', '/history', '/settings', '/login', '/notifications']);
+  const anilife = registry.find((entry) => entry.sourceId === 'anilife_public');
+  assert.equal(anilife.baseUrl, 'https://anilife01.tv');
+  assert.equal(anilife.originReviewedUrl, anilife.baseUrl);
+  assert.equal(anilife.robotsReviewStatus, 'UNAVAILABLE_REVIEW_REQUIRED');
+  assert.equal(anilife.termsReviewStatus, 'NO_REUSE_GRANT_FOUND');
+  assert.deepEqual({
+    permissionBasis: anilife.permissionBasis,
+    permissionRecordedAt: anilife.permissionRecordedAt,
+    permissionScope: anilife.permissionScope,
+    permissionEvidenceLocation: anilife.permissionEvidenceLocation,
+  }, {
+    permissionBasis: 'USER_ATTESTED_ANILIFE_REDISTRIBUTION_PERMISSION',
+    permissionRecordedAt: '2026-09-03T14:07:15+09:00',
+    permissionScope: 'UNRESTRICTED_DATA_AND_COVER_PRODUCTION_USE',
+    permissionEvidenceLocation: 'USER_HELD_OUTSIDE_REPOSITORY',
+  });
+  assert.equal(anilife.commercialUseStatus, 'USER_ATTESTED_UNRESTRICTED_PERMISSION');
+  assert.equal(anilife.persistentStorageStatus, 'USER_ATTESTED_UNRESTRICTED_PERMISSION');
+  assert.equal(anilife.redistributionStatus, 'USER_ATTESTED_UNRESTRICTED_PERMISSION');
+  assert.deepEqual(anilife.coverOrigins, ['https://anilife1.tv', 'https://anilife01.tv']);
+  assert.equal(anilife.fieldPromotion.status, 'FIELD_REVIEW_REQUIRED');
+  assert.equal(anilife.fieldPromotion.cover, 'FIELD_REVIEW_REQUIRED');
   const wikidata = registry.find((entry) => entry.sourceId === 'wikidata');
   assert.deepEqual(wikidata.allowedEndpoints, [
     { origin: 'https://query.wikidata.org', path: '/sparql', minIntervalMs: 1000 },
@@ -213,10 +237,15 @@ test('registry exposes four approved sources and blocks over-scope execution', a
 test('registry contract exposes one immutable authoritative promotion projection', () => {
   assert.deepEqual(SOURCE_PROMOTION_POLICY, {
     legacy_aliases: 'PROHIBITED',
-    anilist: 'PROHIBITED',
+    anilist: 'FIELD_REVIEW_REQUIRED',
     wikidata: 'FIELD_REVIEW_REQUIRED',
-    anilife_public: 'PROHIBITED',
+    anilife_public: 'FIELD_REVIEW_REQUIRED',
+    reviewed_increment: 'PROHIBITED',
   });
+  assert.equal(SOURCE_FIELD_PROMOTION_POLICY.anilife_public.status, 'FIELD_REVIEW_REQUIRED');
+  assert.equal(SOURCE_FIELD_PROMOTION_POLICY.anilife_public.episodeCount, 'FIELD_REVIEW_REQUIRED');
+  assert.equal(SOURCE_FIELD_PROMOTION_POLICY.anilife_public.cover, 'FIELD_REVIEW_REQUIRED');
+  assert.equal(Object.isFrozen(SOURCE_FIELD_PROMOTION_POLICY.anilife_public), true);
   assert.equal(Object.isFrozen(SOURCE_PROMOTION_POLICY), true);
   assert.throws(() => { SOURCE_PROMOTION_POLICY.wikidata = 'PROHIBITED'; }, TypeError);
 });
@@ -289,6 +318,55 @@ test('registry rejects Wikidata endpoint policy drift', async () => {
     ));
     registry.find((entry) => entry.sourceId === 'wikidata').allowedEndpoints[0].origin = 'https://example.test';
     await mkdir(dirname(registryFile), { recursive: true });
+    await writeFile(registryFile, JSON.stringify(registry));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('registry accepts AniLife host rotation only when every current-origin policy is updated together', async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'moemoa-catalog-registry-'));
+  const registryFile = join(fixtureRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json');
+  try {
+    const registry = JSON.parse(await readFile(
+      join(repoRoot, 'tools', 'catalog-lab', 'config', 'source-registry.json'), 'utf8',
+    ));
+    const anilife = registry.find((entry) => entry.sourceId === 'anilife_public');
+    anilife.baseUrl = 'https://anilife-next.example';
+    anilife.originReviewedUrl = 'https://anilife-next.example';
+    anilife.originReviewedAt = '2026-09-03';
+    anilife.termsUrl = 'https://anilife-next.example/terms';
+    anilife.robotsUrl = 'https://anilife-next.example/robots.txt';
+    anilife.evidenceUrls = [
+      'https://anilife-next.example/sitemap.xml',
+      'https://anilife-next.example/robots.txt',
+      'https://anilife-next.example/terms',
+    ];
+    anilife.coverOrigins.push('https://anilife-next.example');
+    await mkdir(dirname(registryFile), { recursive: true });
+    await writeFile(registryFile, JSON.stringify(registry));
+    const rotated = await loadSourceRegistry({ repoRoot: fixtureRoot });
+    assert.equal(rotated.find((entry) => entry.sourceId === 'anilife_public').baseUrl,
+      'https://anilife-next.example');
+
+    anilife.robotsUrl = 'https://anilife01.tv/robots.txt';
+    await writeFile(registryFile, JSON.stringify(registry));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+
+    anilife.robotsUrl = 'https://anilife-next.example/robots.txt';
+    anilife.baseUrl = 'https://anilife-next.example/season';
+    await writeFile(registryFile, JSON.stringify(registry));
+    await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
+      code: 'SOURCE_REGISTRY_INVALID',
+    });
+
+    anilife.baseUrl = 'https://anilife-next.example';
+    anilife.originReviewedUrl = 'https://anilife01.tv';
     await writeFile(registryFile, JSON.stringify(registry));
     await assert.rejects(loadSourceRegistry({ repoRoot: fixtureRoot }), {
       code: 'SOURCE_REGISTRY_INVALID',

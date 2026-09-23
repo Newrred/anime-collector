@@ -1,3 +1,5 @@
+import { isLegacySocialAvailable } from "../domain/legacySocialAvailability.js";
+import UnavailableSocialPage from "./profile/UnavailableSocialPage.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
 import { isValidProfileHandle } from "../domain/profileUtils.js";
@@ -20,6 +22,10 @@ import { ProfileAvatar, ProfileMetric, ProfilePeopleList } from "./profile/Profi
 import ShowcaseGrid from "./showcase/ShowcaseGrid.jsx";
 
 export default function PublicProfilePage() {
+  return isLegacySocialAvailable() ? <LegacyPublicProfilePage /> : <UnavailableSocialPage account={false} />;
+}
+
+function LegacyPublicProfilePage() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "profilePage");
   const auth = useAuthSession(

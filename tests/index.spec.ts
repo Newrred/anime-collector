@@ -7,10 +7,10 @@ test("fresh browser uses English shell and primary navigation", async ({ page })
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   const primary = page.locator(".top-nav__links--routes");
   await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
-  await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
-  await expect(primary.getByRole("link", { name: "Archive" })).toBeVisible();
-  await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Create memory card", exact: true }).first()).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Memories" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Add Memory", exact: true }).first()).toBeVisible();
   await expect(primary.getByRole("link", { name: "Minihome" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
@@ -20,9 +20,9 @@ test("mobile menu identifies the current route accessibly", async ({ page }) => 
   await clearAppState(page);
   await page.goto("/library/");
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
-  const current = page.locator(".top-nav-mobile-links").getByRole("link", { name: "Library" });
+  const current = page.locator(".top-nav-mobile-links").getByRole("link", { name: "Titles" });
   await expect(current).toHaveAttribute("aria-current", "page");
-  await expect(page.locator(".top-nav-mobile-links").getByRole("link", { name: "Archive" })).toBeVisible();
+  await expect(page.locator(".top-nav-mobile-links").getByRole("link", { name: "Memories" })).toBeVisible();
 });
 
 test("mobile menu closes on Escape and returns focus to its trigger", async ({ page }) => {
@@ -43,7 +43,7 @@ test("new visitor sees memory card creation as the primary action", async ({ pag
   await installAppState(page, { locale: "en" });
   await page.goto("/");
   const emptyHome = page.locator(".home-empty-state");
-  const createCard = emptyHome.getByRole("link", { name: "Create memory card", exact: true });
+  const createCard = emptyHome.getByRole("link", { name: "Add Memory", exact: true });
   await expect(createCard.first()).toBeVisible();
   await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toHaveCount(1);
   await expect(emptyHome.locator(".memory-visual--system .system-design-preview")).toBeVisible();
@@ -83,7 +83,7 @@ test("saved Memory Card becomes Home's archive source without a legacy Library o
   await expect(memory).toContainText("1 memory card");
   await expect(memory).toContainText("Latest memory card");
   await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
-  await expect(memory.getByRole("link", { name: "Open Archive" })).toBeVisible();
+  await expect(memory.getByRole("link", { name: "View Memories" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "Create another memory" })).toBeVisible();
   await expect(memory.locator(".memory-preview--featured")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Search or add a title" })).toHaveCount(0);
@@ -103,8 +103,8 @@ test("mobile exposes memory card creation without opening the overflow menu", as
   await page.goto("/");
 
   const createCard = page.locator(".top-nav__memory-action:visible");
-  await expect(createCard).toHaveAccessibleName("Create memory card");
-  await expect(createCard).toContainText("Card");
+  await expect(createCard).toHaveAccessibleName("Add Memory");
+  await expect(createCard).toContainText("Memory");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await createCard.click();
   await expect(page).toHaveURL(/\/memory\/new\/?$/u);
@@ -128,7 +128,7 @@ test("visitor without a Memory Card keeps the memory-led empty Home", async ({ p
   });
   await page.goto("/");
   const emptyHome = page.locator(".home-empty-state");
-  await expect(emptyHome.getByRole("link", { name: "Create memory card", exact: true })).toBeVisible();
+  await expect(emptyHome.getByRole("link", { name: "Add Memory", exact: true })).toBeVisible();
   await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toBeVisible();
 });
 
@@ -140,7 +140,7 @@ test("empty Home primary CTA opens the card composer without creating a legacy l
     mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
   });
   await page.goto("/");
-  await page.locator(".home-empty-state").getByRole("link", { name: "Create memory card", exact: true }).click();
+  await page.locator(".home-empty-state").getByRole("link", { name: "Add Memory", exact: true }).click();
   await expect(page).toHaveURL(/\/memory\/new\/?$/u);
   const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
   expect(logs).toEqual([]);

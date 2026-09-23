@@ -1,16 +1,13 @@
+import { Capacitor } from "@capacitor/core";
+import { buildTitleHubHref } from "../../features/titles/domain/titleNavigation.js";
+import { toPlatformAppHref } from "../../domain/search/memoryCardNavigation.js";
 import { getMessageGroup } from "../../domain/messages.js";
 import { formatEventLabel } from "../library/libraryCopy.js";
 
-function buildLibraryDetailHref(base, anilistId) {
+function buildTitleHref(base, anilistId) {
   const id = Number(anilistId);
-  if (!Number.isFinite(id)) return `${base}library/`;
-  return `${base}library/?animeId=${encodeURIComponent(String(id))}`;
-}
-
-function buildQuickLogHref(base, anilistId) {
-  const id = Number(anilistId);
-  if (!Number.isFinite(id)) return `${base}library/`;
-  return `${base}library/?animeId=${encodeURIComponent(String(id))}&focus=quick-log`;
+  if (!Number.isFinite(id)) return toPlatformAppHref(`${base}titles/`, { native: Capacitor.isNativePlatform() });
+  return buildTitleHubHref({ base, native: Capacitor.isNativePlatform(), anilistId: id });
 }
 
 function renderAnimeRow({ rowKey, base, anilistId, href, metaTop, metaBottom = "", mediaMap, titleById }) {
@@ -18,7 +15,7 @@ function renderAnimeRow({ rowKey, base, anilistId, href, metaTop, metaBottom = "
   const title = titleById.get(Number(anilistId)) || `#${anilistId}`;
   const poster = media?.coverImage?.extraLarge || media?.coverImage?.large || media?.coverImage?.medium || "";
   return (
-    <a href={href || buildLibraryDetailHref(base, anilistId)} className="list-card home-resurfacing-list-card" key={rowKey}>
+    <a href={href || buildTitleHref(base, anilistId)} className="list-card home-resurfacing-list-card" key={rowKey} data-astro-reload>
       {poster ? <img src={poster} alt={title} loading="lazy" className="list-card__thumb" /> : <div className="list-card__thumb" aria-hidden />}
       <div className="list-card__body">
         <div className="list-card__eyebrow">{metaTop}</div>
@@ -57,7 +54,7 @@ export default function ResurfacingCards({
                   rowKey: `missing-${row.anilistId}`,
                   base,
                   anilistId: row.anilistId,
-                  href: buildQuickLogHref(base, row.anilistId),
+                  href: buildTitleHref(base, row.anilistId),
                   metaTop: copy.noLogMeta,
                   metaBottom: copy.promptLog,
                   mediaMap,
@@ -83,7 +80,7 @@ export default function ResurfacingCards({
                   rowKey: row.id || `recent-${row.anilistId}-${row.label || ""}`,
                   base,
                   anilistId: row.anilistId,
-                  href: buildLibraryDetailHref(base, row.anilistId),
+                  href: buildTitleHref(base, row.anilistId),
                   metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
                   metaBottom: row.cue || "",
                   mediaMap,
@@ -108,7 +105,7 @@ export default function ResurfacingCards({
                   rowKey: row.id || `thistime-${row.anilistId}-${row.label || ""}`,
                   base,
                   anilistId: row.anilistId,
-                  href: buildLibraryDetailHref(base, row.anilistId),
+                  href: buildTitleHref(base, row.anilistId),
                   metaTop: `${row.label} · ${formatEventLabel(row.eventType, locale)}`,
                   metaBottom: row.cue || "",
                   mediaMap,

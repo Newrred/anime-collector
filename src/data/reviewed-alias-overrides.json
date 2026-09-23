@@ -1,0 +1,766 @@
+[
+  {
+    "anilistId": 1707,
+    "expected": {
+      "ko": "(더빙) 쾌걸 근육맨 2세",
+      "aliases": [
+        "Ultimate Muscle",
+        "Kinnikuman Nisei",
+        "キン肉マンII世"
+      ]
+    },
+    "replacement": {
+      "ko": "(더빙) 쾌걸 근육맨 2세",
+      "aliases": [
+        "(더빙) 쾌걸 근육맨 2세",
+        "Ultimate Muscle",
+        "キン肉マンII世",
+        "Kinnikuman Nisei"
+      ]
+    }
+  },
+  {
+    "anilistId": 5342,
+    "expected": {
+      "ko": "아수라 크라잉 1기",
+      "aliases": [
+        "Asura Cryin'",
+        "アスラクライン",
+        "Asura Cryin' 2"
+      ]
+    },
+    "replacement": {
+      "ko": "아수라 크라잉 1기",
+      "aliases": [
+        "아수라 크라잉 1기",
+        "Asura Cryin'",
+        "アスラクライン"
+      ]
+    }
+  },
+  {
+    "anilistId": 5538,
+    "expected": {
+      "ko": "레터 비",
+      "aliases": [
+        "Tegami Bachi",
+        "Tegami Bachi: Letter Bee",
+        "テガミバチ",
+        "Letter Bee: Light and Blue Night Fantasy",
+        "Tegami Bachi: Hikari to Ao no Gensou Yawa",
+        "テガミバチ 〜光と青の幻想夜話〜"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Letter Bee: Light and Blue Night Fantasy",
+        "テガミバチ 〜光と青の幻想夜話〜",
+        "Tegami Bachi: Hikari to Ao no Gensou Yawa"
+      ]
+    }
+  },
+  {
+    "anilistId": 6987,
+    "expected": {
+      "ko": "아키소라",
+      "aliases": [
+        "Aki-Sora: Yume no Naka",
+        "Aki Sora",
+        "あきそら～夢の中～",
+        "Aki-Sora",
+        "あきそら"
+      ]
+    },
+    "replacement": {
+      "ko": "아키소라",
+      "aliases": [
+        "아키소라",
+        "あきそら",
+        "Aki-Sora",
+        "Aki Sora"
+      ]
+    }
+  },
+  {
+    "anilistId": 7017,
+    "expected": {
+      "ko": "케이온! 스페셜",
+      "aliases": [
+        "K-ON!: Ura-On!",
+        "K-ON! Season 1 Shorts",
+        "うらおん!",
+        "K-ON!!: Ura-On!!",
+        "K-ON! Season 2 Shorts",
+        "うらおん!!"
+      ]
+    },
+    "replacement": {
+      "ko": "케이온! 스페셜",
+      "aliases": [
+        "케이온! 스페셜",
+        "K-ON! Season 1 Shorts",
+        "うらおん!",
+        "K-ON!: Ura-On!"
+      ]
+    }
+  },
+  {
+    "anilistId": 8456,
+    "expected": {
+      "ko": "퀸즈 블레이드: 아름다운 투사들",
+      "aliases": [
+        "Queen's Blade: Beautiful Warriors",
+        "Queen's Blade: Utsukushiki Toushi-tachi",
+        "クイーンズブレイド 美しき闘士たち"
+      ]
+    },
+    "replacement": {
+      "ko": "퀸즈 블레이드: 아름다운 투사들",
+      "aliases": [
+        "퀸즈 블레이드: 아름다운 투사들",
+        "Queen's Blade: Beautiful Warriors",
+        "クイーンズブレイド 美しき闘士たち",
+        "Queen's Blade: Utsukushiki Toushi-tachi"
+      ]
+    }
+  },
+  {
+    "anilistId": 8557,
+    "expected": {
+      "ko": "침략! 오징어 소녀 2기",
+      "aliases": [
+        "Shinryaku!? Ika Musume",
+        "Squid Girl 2",
+        "侵略!?イカ娘",
+        "Squid Girl",
+        "Shinryaku! Ika Musume",
+        "侵略!イカ娘"
+      ]
+    },
+    "replacement": {
+      "ko": "침략! 오징어 소녀",
+      "aliases": [
+        "침략! 오징어 소녀",
+        "Squid Girl",
+        "侵略!イカ娘",
+        "Shinryaku! Ika Musume"
+      ]
+    }
+  },
+  {
+    "anilistId": 10030,
+    "expected": {
+      "ko": "바쿠만 2기",
+      "aliases": [
+        "Bakuman. 2",
+        "バクマン。2"
+      ]
+    },
+    "replacement": {
+      "ko": "바쿠만 2기",
+      "aliases": [
+        "바쿠만 2기",
+        "バクマン。2",
+        "Bakuman. 2"
+      ]
+    }
+  },
+  {
+    "anilistId": 10893,
+    "expected": {
+      "ko": "쿄소기가",
+      "aliases": [
+        "Kyousougiga (TV)",
+        "Kyousougiga",
+        "京騒戯画 (TV)",
+        "京騒戯画"
+      ]
+    },
+    "replacement": {
+      "ko": "쿄소기가",
+      "aliases": [
+        "쿄소기가",
+        "京騒戯画",
+        "Kyousougiga"
+      ]
+    }
+  },
+  {
+    "anilistId": 11783,
+    "expected": {
+      "ko": "DOG DAYS''(3기)",
+      "aliases": [
+        "Dog Days''",
+        "Dog Days Season 3",
+        "ドッグデイズ''",
+        "Dog Days Season 2",
+        "Dog Days'",
+        "ドッグデイズ'"
+      ]
+    },
+    "replacement": {
+      "ko": "DOG DAYS'(2기)",
+      "aliases": [
+        "DOG DAYS'(2기)",
+        "Dog Days Season 2",
+        "ドッグデイズ'",
+        "Dog Days'"
+      ]
+    }
+  },
+  {
+    "anilistId": 14713,
+    "expected": {
+      "ko": "오늘부터 신령님 1기",
+      "aliases": [
+        "Kamisama Hajimemashita",
+        "Kamisama Kiss",
+        "神様はじめました",
+        "Kamisama Hajimemashita◎",
+        "Kamisama Kiss◎",
+        "神様はじめました◎"
+      ]
+    },
+    "replacement": {
+      "ko": "오늘부터 신령님 1기",
+      "aliases": [
+        "오늘부터 신령님 1기",
+        "Kamisama Kiss",
+        "神様はじめました",
+        "Kamisama Hajimemashita"
+      ]
+    }
+  },
+  {
+    "anilistId": 15613,
+    "expected": {
+      "ko": "팔견전 -동방팔견이문-",
+      "aliases": [
+        "Hakkenden: Touhou Hakken Ibun",
+        "Hakkenden: Eight Dogs of the East",
+        "八犬伝 -東方八犬異聞-",
+        "Hakkenden: Touhou Hakken Ibun 2",
+        "八犬伝 -東方八犬異聞- 2"
+      ]
+    },
+    "replacement": {
+      "ko": "팔견전 -동방팔견이문-",
+      "aliases": [
+        "팔견전 -동방팔견이문-",
+        "Hakkenden: Eight Dogs of the East",
+        "八犬伝 -東方八犬異聞-",
+        "Hakkenden: Touhou Hakken Ibun"
+      ]
+    }
+  },
+  {
+    "anilistId": 18897,
+    "expected": {
+      "ko": "니세코이",
+      "aliases": [
+        "Nisekoi",
+        "ニセコイ",
+        "Nisekoi:",
+        "ニセコイ："
+      ]
+    },
+    "replacement": {
+      "ko": "니세코이",
+      "aliases": [
+        "니세코이",
+        "Nisekoi",
+        "ニセコイ"
+      ]
+    }
+  },
+  {
+    "anilistId": 20657,
+    "expected": {
+      "ko": "시원찮은 그녀를 위한 육성방법",
+      "aliases": [
+        "Saenai Heroine no Sodatekata",
+        "Saekano: How to Raise a Boring Girlfriend",
+        "冴えない彼女の育てかた",
+        "Saenai Heroine no Sodatekata ♭",
+        "Saekano: How to Raise a Boring Girlfriend ♭",
+        "冴えない彼女の育てかた ♭"
+      ]
+    },
+    "replacement": {
+      "ko": "시원찮은 그녀를 위한 육성방법",
+      "aliases": [
+        "시원찮은 그녀를 위한 육성방법",
+        "Saekano: How to Raise a Boring Girlfriend",
+        "冴えない彼女の育てかた",
+        "Saenai Heroine no Sodatekata"
+      ]
+    }
+  },
+  {
+    "anilistId": 20693,
+    "expected": {
+      "ko": "아이돌 마스터 신데렐라 걸즈 1~2기",
+      "aliases": [
+        "THE IDOLM@STER Cinderella Girls",
+        "THE IDOLM@STER CINDERELLA GIRLS",
+        "アイドルマスターシンデレラガールズ"
+      ]
+    },
+    "replacement": {
+      "ko": "아이돌 마스터 신데렐라 걸즈",
+      "aliases": [
+        "아이돌 마스터 신데렐라 걸즈",
+        "THE IDOLM@STER CINDERELLA GIRLS",
+        "アイドルマスターシンデレラガールズ",
+        "THE IDOLM@STER Cinderella Girls"
+      ]
+    }
+  },
+  {
+    "anilistId": 20755,
+    "expected": {
+      "ko": "암살교실 2기",
+      "aliases": [
+        "Ansatsu Kyoushitsu 2",
+        "Assassination Classroom 2",
+        "暗殺教室 2",
+        "Assassination Classroom",
+        "Ansatsu Kyoushitsu",
+        "暗殺教室"
+      ]
+    },
+    "replacement": {
+      "ko": "암살교실 1기",
+      "aliases": [
+        "암살교실 1기",
+        "Assassination Classroom",
+        "暗殺教室",
+        "Ansatsu Kyoushitsu"
+      ]
+    }
+  },
+  {
+    "anilistId": 20947,
+    "expected": {
+      "ko": "용의 치과의사",
+      "aliases": [
+        "Ryuu no Haisha",
+        "The Dragon Dentist",
+        "龍の歯医者",
+        "Japan Anima(tor)’s Exhibition",
+        "Nihon Animator Mihonichi",
+        "日本アニメ（ーター）見本市"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Japan Anima(tor)’s Exhibition",
+        "日本アニメ(ーター)見本市",
+        "Nihon Animator Mihonichi",
+        "The Dragon Dentist",
+        "日本アニメ（ーター）見本市"
+      ]
+    }
+  },
+  {
+    "anilistId": 20972,
+    "expected": {
+      "ko": "쇼와 겐로쿠 라쿠고 심중",
+      "aliases": [
+        "Showa Genroku Rakugo Shinju",
+        "Shouwa Genroku Rakugo Shinjuu",
+        "昭和元禄落語心中",
+        "Shouwa Genroku Rakugo Shinjuu: Sukeroku Futatabi-hen",
+        "Descending Stories: Showa Genroku Rakugo Shinju",
+        "昭和元禄落語心中～助六再び篇～"
+      ]
+    },
+    "replacement": {
+      "ko": "쇼와 겐로쿠 라쿠고 심중",
+      "aliases": [
+        "쇼와 겐로쿠 라쿠고 심중",
+        "Showa Genroku Rakugo Shinju",
+        "昭和元禄落語心中",
+        "Shouwa Genroku Rakugo Shinjuu",
+        "Descending Stories: Showa Genroku Rakugo Shinju"
+      ]
+    }
+  },
+  {
+    "anilistId": 21058,
+    "expected": {
+      "ko": "빨강머리 백설공주 1~2기",
+      "aliases": [
+        "Snow White with the Red Hair",
+        "Akagami no Shirayuki-hime",
+        "赤髪の白雪姫"
+      ]
+    },
+    "replacement": {
+      "ko": "빨강머리 백설공주",
+      "aliases": [
+        "빨강머리 백설공주",
+        "Snow White with the Red Hair",
+        "赤髪の白雪姫",
+        "Akagami no Shirayuki-hime"
+      ]
+    }
+  },
+  {
+    "anilistId": 21311,
+    "expected": {
+      "ko": "문호 스트레이독스",
+      "aliases": [
+        "Bungou Stray Dogs",
+        "Bungo Stray Dogs",
+        "文豪ストレイドッグス",
+        "Bungou Stray Dogs 2nd Season",
+        "Bungo Stray Dogs 2",
+        "文豪ストレイドッグス 第2シーズン"
+      ]
+    },
+    "replacement": {
+      "ko": "문호 스트레이독스",
+      "aliases": [
+        "문호 스트레이독스",
+        "Bungo Stray Dogs",
+        "文豪ストレイドッグス",
+        "Bungou Stray Dogs"
+      ]
+    }
+  },
+  {
+    "anilistId": 21341,
+    "expected": {
+      "ko": "아인 1기",
+      "aliases": [
+        "Ajin",
+        "AJIN: Demi-Human",
+        "亜人",
+        "Ajin 2",
+        "AJIN: Demi-Human 2",
+        "亜人 2"
+      ]
+    },
+    "replacement": {
+      "ko": "아인 1기",
+      "aliases": [
+        "아인 1기",
+        "AJIN: Demi-Human",
+        "亜人",
+        "Ajin"
+      ]
+    }
+  },
+  {
+    "anilistId": 21569,
+    "expected": {
+      "ko": "게키돌",
+      "aliases": [
+        "Gekidol",
+        "ゲキドル",
+        "Alice in Deadly School",
+        "アリスインデッドリースクール"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Alice in Deadly School",
+        "アリスインデッドリースクール",
+        "Gekidol",
+        "ゲキドル"
+      ]
+    }
+  },
+  {
+    "anilistId": 21609,
+    "expected": {
+      "ko": "12세 ~작은 가슴의 두근거림~ 2기",
+      "aliases": [
+        "12-sai.: Chiccha na Mune no Tokimeki 2",
+        "12歳。～ちっちゃなムネのトキメキ～ 2",
+        "12-sai.: Chiccha na Mune no Tokimeki",
+        "12歳。～ちっちゃなムネのトキメキ～"
+      ]
+    },
+    "replacement": {
+      "ko": "12세 ~작은 가슴의 두근거림~",
+      "aliases": [
+        "12세 ~작은 가슴의 두근거림~",
+        "12歳。~ちっちゃなムネのトキメキ~",
+        "12-sai.: Chiccha na Mune no Tokimeki",
+        "12歳。～ちっちゃなムネのトキメキ～"
+      ]
+    }
+  },
+  {
+    "anilistId": 21688,
+    "expected": {
+      "ko": "마법사의 신부",
+      "aliases": [
+        "Mahoutsukai no Yome",
+        "The Ancient Magus' Bride",
+        "魔法使いの嫁",
+        "The Ancient Magus' Bride: Those Awaiting a Star",
+        "Mahoutsukai no Yome: Hoshi Matsu Hito",
+        "魔法使いの嫁 星待つひと"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "The Ancient Magus' Bride: Those Awaiting a Star",
+        "魔法使いの嫁 星待つひと",
+        "Mahoutsukai no Yome: Hoshi Matsu Hito",
+        "The Ancient Magus' Bride"
+      ]
+    }
+  },
+  {
+    "anilistId": 98437,
+    "expected": {
+      "ko": "오버로드 2기",
+      "aliases": [
+        "Overlord II",
+        "オーバーロードⅡ",
+        "Overlord III",
+        "オーバーロードⅢ"
+      ]
+    },
+    "replacement": {
+      "ko": "오버로드 2기",
+      "aliases": [
+        "오버로드 2기",
+        "Overlord II",
+        "オーバーロードII",
+        "オーバーロードⅡ"
+      ]
+    }
+  },
+  {
+    "anilistId": 100891,
+    "expected": {
+      "ko": "켄간 아슈라 1기 파트 1",
+      "aliases": [
+        "Kengan Ashura",
+        "KENGAN ASHURA Part I",
+        "ケンガンアシュラ",
+        "Kengan Ashura Part 2",
+        "KENGAN ASHURA Part II",
+        "ケンガンアシュラ Part 2"
+      ]
+    },
+    "replacement": {
+      "ko": "켄간 아슈라 1기 파트 1",
+      "aliases": [
+        "켄간 아슈라 1기 파트 1",
+        "KENGAN ASHURA Part I",
+        "ケンガンアシュラ",
+        "Kengan Ashura"
+      ]
+    }
+  },
+  {
+    "anilistId": 100977,
+    "expected": {
+      "ko": "일하는 세포!!",
+      "aliases": [
+        "Hataraku Saibou!!",
+        "Cells at Work!!",
+        "はたらく細胞!!",
+        "Cells at Work!",
+        "Hataraku Saibou",
+        "はたらく細胞"
+      ]
+    },
+    "replacement": {
+      "ko": "일하는 세포",
+      "aliases": [
+        "일하는 세포",
+        "Cells at Work!",
+        "はたらく細胞",
+        "Hataraku Saibou"
+      ]
+    }
+  },
+  {
+    "anilistId": 101921,
+    "expected": {
+      "ko": "카구야 님은 고백받고 싶어 ~천재들의 연애 두뇌전~",
+      "aliases": [
+        "Kaguya-sama wa Kokurasetai: Tensaitachi no Renai Zunousen",
+        "Kaguya-sama: Love is War",
+        "かぐや様は告らせたい～天才たちの恋愛頭脳戦～",
+        "Kaguya-sama wa Kokurasetai?: Tensaitachi no Renai Zunousen",
+        "Kaguya-sama: Love is War?",
+        "かぐや様は告らせたい？～天才たちの恋愛頭脳戦～"
+      ]
+    },
+    "replacement": {
+      "ko": "카구야 님은 고백받고 싶어 ~천재들의 연애 두뇌전~",
+      "aliases": [
+        "카구야 님은 고백받고 싶어 ~천재들의 연애 두뇌전~",
+        "Kaguya-sama: Love is War",
+        "かぐや様は告らせたい~天才たちの恋愛頭脳戦~",
+        "Kaguya-sama wa Kokurasetai: Tensaitachi no Renai Zunousen",
+        "かぐや様は告らせたい～天才たちの恋愛頭脳戦～"
+      ]
+    }
+  },
+  {
+    "anilistId": 103572,
+    "expected": {
+      "ko": "5등분의 신부 ∬",
+      "aliases": [
+        "Go-toubun no Hanayome ∬",
+        "The Quintessential Quintuplets 2",
+        "五等分の花嫁∬",
+        "The Quintessential Quintuplets",
+        "Go-toubun no Hanayome",
+        "五等分の花嫁"
+      ]
+    },
+    "replacement": {
+      "ko": "5등분의 신부",
+      "aliases": [
+        "5등분의 신부",
+        "The Quintessential Quintuplets",
+        "五等分の花嫁",
+        "Go-toubun no Hanayome"
+      ]
+    }
+  },
+  {
+    "anilistId": 103712,
+    "expected": {
+      "ko": "극장판 미소녀 전사 세일러 문 Eternal",
+      "aliases": [
+        "Bishoujo Senshi Sailor Moon: Eternal - Zenpen",
+        "Pretty Guardian Sailor Moon Eternal The Movie Part 1",
+        "美少女戦士セーラームーンEternal 前編",
+        "Pretty Guardian Sailor Moon Eternal The Movie Part 2",
+        "Bishoujo Senshi Sailor Moon: Eternal - Kouhen",
+        "美少女戦士セーラームーンEternal 後編"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Pretty Guardian Sailor Moon Eternal The Movie Part 2",
+        "美少女戦士セーラームーンEternal 後編",
+        "Bishoujo Senshi Sailor Moon: Eternal - Kouhen"
+      ]
+    }
+  },
+  {
+    "anilistId": 110521,
+    "expected": {
+      "ko": "소녀전선",
+      "aliases": [
+        "Dolls' Frontline",
+        "Girls’ Frontline",
+        "ドールズフロントライン",
+        "Shaonü Qianxian: Renxing Xiaojuchang",
+        "少女前线 人形小剧场"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Shaonü Qianxian: Renxing Xiaojuchang",
+        "少女前线 人形小剧场",
+        "Dolls' Frontline",
+        "Girls’ Frontline",
+        "ドールズフロントライン"
+      ]
+    }
+  },
+  {
+    "anilistId": 118630,
+    "expected": {
+      "ko": "듀얼 마스터즈 킹",
+      "aliases": [
+        "DUEL MASTERS King!",
+        "DUEL MASTERS キング!",
+        "Duel Masters King",
+        "デュエル・マスターズキング"
+      ]
+    },
+    "replacement": {
+      "ko": "듀얼 마스터즈 킹",
+      "aliases": [
+        "듀얼 마스터즈 킹",
+        "デュエル・マスターズキング",
+        "Duel Masters King"
+      ]
+    }
+  },
+  {
+    "anilistId": 122148,
+    "expected": {
+      "ko": "구울 거면 머그컵도 두 번째 가마",
+      "aliases": [
+        "Yakunara Mug Cup Mo: Niban Gama",
+        "Let's Make a Mug Too 2",
+        "やくならマグカップも 二番窯",
+        "Let's Make a Mug Too",
+        "Yakunara Mug Cup Mo",
+        "やくならマグカップも"
+      ]
+    },
+    "replacement": {
+      "ko": "구울 거면 머그컵도",
+      "aliases": [
+        "구울 거면 머그컵도",
+        "Let's Make a Mug Too",
+        "やくならマグカップも",
+        "Yakunara Mug Cup Mo"
+      ]
+    }
+  },
+  {
+    "anilistId": 125367,
+    "expected": {
+      "ko": "카구야 님은 고백받고 싶어 -울트라 로맨틱-",
+      "aliases": [
+        "Kaguya-sama: Love is War -Ultra Romantic-",
+        "Kaguya-sama wa Kokurasetai: Ultra Romantic",
+        "かぐや様は告らせたい-ウルトラロマンティック-"
+      ]
+    },
+    "replacement": {
+      "ko": "카구야 님은 고백받고 싶어 -울트라 로맨틱-",
+      "aliases": [
+        "카구야 님은 고백받고 싶어 -울트라 로맨틱-",
+        "Kaguya-sama: Love is War -Ultra Romantic-",
+        "かぐや様は告らせたい-ウルトラロマンティック-",
+        "Kaguya-sama wa Kokurasetai: Ultra Romantic"
+      ]
+    }
+  },
+  {
+    "anilistId": 146984,
+    "expected": {
+      "ko": "진격의 거인 더 파이널 시즌 파트 3",
+      "aliases": [
+        "Shingeki no Kyojin: The Final Season - Kanketsu-hen Zenpen",
+        "Attack on Titan Final Season THE FINAL CHAPTERS Special 1",
+        "進撃の巨人 The Final Season完結編 前編",
+        "Shingeki no Kyojin: The Final Season - Kanketsu-hen Kouhen",
+        "Attack on Titan Final Season THE FINAL CHAPTERS Special 2",
+        "進撃の巨人 The Final Season完結編 後編"
+      ]
+    },
+    "replacement": {
+      "ko": null,
+      "aliases": [
+        "Attack on Titan Final Season THE FINAL CHAPTERS Special 1",
+        "進撃の巨人 The Final Season完結編 前編",
+        "Shingeki no Kyojin: The Final Season - Kanketsu-hen Zenpen"
+      ]
+    }
+  }
+]

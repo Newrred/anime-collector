@@ -1,4 +1,5 @@
 .memory-preview {
+  position: relative;
   display: grid;
   min-width: 0;
   gap: 14px;
@@ -58,6 +59,13 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+}
+
+.memory-preview__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .memory-preview__link:focus-visible {

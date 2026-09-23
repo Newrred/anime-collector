@@ -12,6 +12,8 @@
 
 > **2026-08-26 identity 보완:** local Guest Owner는 유지하되 Google 로그인 시 `auth.users.id` 기반 account namespace로 명시적·멱등 승격한다. Remote에 별도 AccountLink/Owner compatibility table은 만들지 않는다. 상세 기준은 `../decisions/2026-08-26-unified-supabase-user-data.md`와 `../../superpowers/specs/2026-08-26-unified-supabase-user-data-design.md`를 따른다.
 
+> **2026-09-03 IA·대표 표지 보완:** 이 문서의 local media와 저장 트랜잭션 경계는 유지한다. Library/Memory의 사용자 읽기 경험과 대표 표지 Memory visual 금지 규칙은 `../decisions/2026-09-03-title-hub-dual-view-and-catalog-cover.md` 및 `../../superpowers/specs/2026-09-03-title-hub-dual-view-ui.md`가 대체한다.
+
 ## 1. 결론 요약
 
 첫 구현 단위는 **Android에서 이미지 또는 시스템 디자인을 사용해 로그인 없이 Private Memory Card를 만들고, 재시작 후 Archive에서 다시 확인·수정·삭제·내보내기 할 수 있는 local-only 흐름**으로 제한한다.
@@ -27,7 +29,7 @@
 6. Public 준비 상태 재평가
 ```
 
-기존 runbook의 catalog-first 번호를 그대로 구현 순서로 사용하지 않는다. 첫 카드 저장에는 전체 카탈로그가 필요하지 않으므로, 기존 alias 데이터와 AniList 검색을 **교체 가능한 최소 TitleResolver adapter**로 감싸고 검색 실패 시 `PrivateTitle`로 진행한다. alias 데이터는 `legacy_unverified` 상태를 유지하며, AniList 표지 이미지는 새 Memory Card의 VisualAsset으로 저장하거나 재배포하지 않는다.
+기존 runbook의 catalog-first 번호를 그대로 구현 순서로 사용하지 않는다. 첫 카드 저장에는 전체 카탈로그가 필요하지 않으므로, 기존 alias 데이터와 AniList 검색을 **교체 가능한 최소 TitleResolver adapter**로 감싸고 검색 실패 시 `PrivateTitle`로 진행한다. alias 데이터는 `legacy_unverified` 상태를 유지한다. Raw AniList URL이나 bytes는 Card에 복사하지 않으며, 2026-09-03 이후 승인된 공식 표지만 별도 `CATALOG_COVER` reference 계약으로 사용할 수 있다.
 
 첫 단계의 현재 세부 순서는 다음과 같다.
 
@@ -181,7 +183,7 @@ resolveCandidate(candidateKey) -> AnimeRefDraft
 - resolver chain은 `legacy_unverified aliases read-only 검색 → AniList remote adapter → PrivateTitle` 순서로 동작한다. 로컬 alias 결과와 remote 결과를 같은 검증 등급으로 표시하지 않는다.
 - 현재 AniList 호출은 adapter 내부에서만 허용한다.
 - timeout·rate limit·network failure는 PrivateTitle 진행을 막지 않는다.
-- 새 Card UI는 AniList cover/banner URL을 VisualAsset 또는 카드 표지로 사용하지 않는다.
+- 새 Card UI는 raw AniList cover/banner URL을 사용자 visual로 저장하지 않는다. 승인된 catalog cover는 사용자의 명시적 선택과 개인 기억 신호가 있을 때만 catalog-managed reference로 사용한다.
 - provider 제거 시 adapter와 source binding만 바꾸고 Card schema는 유지한다.
 - `src/data/aliases.json`은 provenance가 없으므로 표시·검색 후보로만 사용하고 verified Anime나 공용 catalog row로 자동 승격하지 않는다.
 
@@ -485,7 +487,7 @@ exports/<exportSessionId>/moemoa-export.zip
 - Android exported activity/receiver는 필요한 intent-filter만 허용하고 임의 command를 실행하지 않는다.
 - source URI와 localRef는 외부 로그·URL·analytics에 노출하지 않는다.
 - 파일 content를 extension만으로 신뢰하지 않는다.
-- AniList cover/banner는 새 Card VisualAsset으로 가져오지 않는다.
+- AniList cover/banner bytes나 raw URL은 새 Card로 가져오지 않는다. 승인된 catalog cover reference는 별도 source/rights/lifecycle invariant를 만족할 때만 허용한다.
 - 사용자 업로드 이미지는 private 기록에는 허용하되 `rightsBasis=UNKNOWN`이면 Public eligibility가 없다.
 - EXIF 제거는 cloud/public derivative 단계에서 필수다. local original은 사용자 보존 의도를 존중하되 GPS/EXIF 보유 사실을 고지하고 export에 포함되는 범위를 명시한다.
 

@@ -131,7 +131,7 @@ export function createDeleteMemoryCardCommand({ repository, localMedia, telemetr
       const completedAt = String(clock.now());
       const completion = buildDeleteCompletion({ card, asset, operation, now: completedAt });
       await repository.completeDelete(completion);
-      telemetry.track("memory_card_deleted", { storageScope: "LOCAL_ONLY" });
+      telemetry.track("memory_card_deleted", { storageScope: bundle.asset.storageScope });
       return structuredClone(completion.result);
     },
   });

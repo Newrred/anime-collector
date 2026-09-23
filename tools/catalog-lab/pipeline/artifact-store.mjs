@@ -111,10 +111,31 @@ export function createCatalogArtifactStore({ workspace }) {
     return Object.freeze({ path, binding: Object.freeze(next[targetKey]) });
   }
 
+  async function readAniListBindings(profile) {
+    await assertCatalogWorkspaceMutation(workspace, []);
+    return readJson(workspace.resolve('bindings', 'anilist', `${toPathKey(profile)}.json`));
+  }
+
+  async function writeAniListBindings(profile, value) {
+    const path = await assertCatalogWorkspaceMutation(
+      workspace, ['bindings', 'anilist', `${toPathKey(profile)}.json`],
+    );
+    await atomicWriteJson(path, snapshot(value));
+    return Object.freeze({ path });
+  }
+
+  async function writeAniListMatchReport(profile, value) {
+    const path = await assertCatalogWorkspaceMutation(
+      workspace, ['reviews', 'anilist-enrichment', `${toPathKey(profile)}.json`],
+    );
+    await atomicWriteJson(path, snapshot(value));
+    return Object.freeze({ path });
+  }
+
   async function readSourceRecord({ sourceId, targetKey, sourceRecordId }) {
     await assertCatalogWorkspaceMutation(workspace, []);
     if (!['anilist', 'wikidata', 'anilife_public'].includes(sourceId)
-      || typeof targetKey !== 'string' || !/^ANILIST:[1-9]\d*$/u.test(targetKey)
+      || typeof targetKey !== 'string' || !/^(?:ANILIST|ANILIFE):[1-9]\d*$/u.test(targetKey)
       || typeof sourceRecordId !== 'string' || !/^[a-f0-9]{64}$/u.test(sourceRecordId)) {
       throw typedError('CATALOG_ARTIFACT_INVALID', 'Source record path segments are invalid');
     }
@@ -240,6 +261,7 @@ export function createCatalogArtifactStore({ workspace }) {
     readIdMap, writeIdMap,
     readManifest, writeManifest,
     readAniLifeBindings, writeAniLifeBinding,
+    readAniListBindings, writeAniListBindings, writeAniListMatchReport,
     readSourceRecord,
     writeNormalized,
     writeCanonical, readCanonical, readCurrent, writeCurrent,

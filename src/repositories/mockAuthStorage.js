@@ -70,6 +70,7 @@ function writeUserScopedValue(key, userId, value) {
 }
 
 export function readMockAuthSession() {
+  if (!import.meta.env.DEV) return null;
   return normalizeSession(readJson(MOCK_AUTH_SESSION_KEY, null));
 }
 

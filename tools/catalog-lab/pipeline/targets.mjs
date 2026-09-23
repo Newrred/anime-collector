@@ -1,8 +1,30 @@
 import { readFile } from 'node:fs/promises';
 
+import {
+  validateIncrementReview, validateIncrementReviewAgainstDiscovery,
+} from '../discovery/anilife-season.mjs';
+
 const goldenTargetsUrl = new URL('../config/golden-targets.json', import.meta.url);
 
 export const TARGET_PROFILE_COUNTS = Object.freeze({ golden: 10, sample100: 100, full3998: 3998 });
+export const MAX_INCREMENT_TARGETS = 500;
+
+const INCREMENT_PROFILE = /^increment-\d{4}-(?:0[1-9]|1[0-2])$/u;
+
+export function isIncrementProfile(profile) {
+  return typeof profile === 'string' && INCREMENT_PROFILE.test(profile);
+}
+
+export function isCatalogProfile(profile) {
+  return Boolean(TARGET_PROFILE_COUNTS[profile]) || isIncrementProfile(profile);
+}
+
+export function expectedTargetCount(profile, manifest) {
+  if (TARGET_PROFILE_COUNTS[profile]) return TARGET_PROFILE_COUNTS[profile];
+  if (!isIncrementProfile(profile) || !Array.isArray(manifest)
+    || manifest.length < 1 || manifest.length > MAX_INCREMENT_TARGETS) return null;
+  return manifest.length;
+}
 
 async function loadGoldenIds() {
   return JSON.parse(await readFile(goldenTargetsUrl, 'utf8'));
@@ -96,6 +118,120 @@ function toTargetRecord(row, { idMapStore, clock, uuid }) {
     targetStatus: 'ACTIVE',
     createdAt: clock.now(),
   });
+}
+
+function incrementTargetKey(row) {
+  return row.anilistId === null ? `ANILIFE:${row.contentId}` : `ANILIST:${row.anilistId}`;
+}
+
+function incrementTarget(row, { idMapStore, uuid }) {
+  const anilistId = row.anilistId === null ? null : String(row.anilistId);
+  const targetKey = incrementTargetKey(row);
+  let moemoaAnimeId = getStoredId(idMapStore, targetKey);
+  if (!moemoaAnimeId) {
+    moemoaAnimeId = `anime:${uuid()}`;
+    storeId(idMapStore, targetKey, moemoaAnimeId);
+  }
+  return Object.freeze({
+    targetKey,
+    moemoaAnimeId,
+    seedSource: 'reviewed_increment',
+    seedExternalIds: Object.freeze([
+      { sourceId: 'anilife_public', value: row.contentId },
+      ...(anilistId ? [{ sourceId: 'anilist', value: anilistId }] : []),
+    ]),
+    seedTitles: Object.freeze([
+      { locale: 'ko', value: row.ko },
+      ...row.aliases.map((value) => ({ locale: 'und', value })),
+    ]),
+    incrementEvidence: Object.freeze({
+      sourceId: 'anilife_public',
+      contentId: row.contentId,
+      sourceHash: row.sourceHash,
+      capturedAt: row.capturedAt,
+      format: row.format,
+      episodeLabel: row.episodeLabel,
+      genres: Object.freeze([...row.genres]),
+      year: row.year,
+      publicPageUrl: row.publicPageUrl,
+      reviewedAt: row.reviewedAt,
+      reviewedBy: row.reviewedBy,
+    }),
+    seedReleaseYear: row.year,
+    seedEpisodeCount: /^([1-9]\d*)화$/u.test(row.episodeLabel ?? '')
+      ? Number(row.episodeLabel.slice(0, -1)) : null,
+    identityState: anilistId ? 'EXACT_ANILIST_ID' : 'SOURCE_REVIEWED',
+    targetStatus: 'ACTIVE',
+    createdAt: row.reviewedAt,
+  });
+}
+
+/** Builds a bounded increment only from rows explicitly approved with an AniList id. */
+export function buildIncrementalTargetManifest({
+  profile, review, discovery, existingRows, idMapStore, uuid,
+}) {
+  const validated = validateIncrementReviewAgainstDiscovery(review, discovery, { profile });
+  if (!Array.isArray(existingRows) || !idMapStore || typeof uuid !== 'function') {
+    const error = new Error('Increment target inputs are invalid');
+    error.code = 'INCREMENT_TARGET_INVALID';
+    throw error;
+  }
+  const existingIds = new Set(existingRows.map((row) => String(row?.anilistId ?? '')));
+  const approved = validated.rows.filter((row) => row.decision === 'APPROVED_NEW')
+    .map((row) => ({
+      ...row, anilistId: row.anilistId === null ? null : String(row.anilistId),
+      sourceHash: validated.sourceHash, capturedAt: validated.capturedAt,
+    }))
+    .sort((left, right) => incrementTargetKey(left).localeCompare(incrementTargetKey(right)));
+  if (approved.length < 1 || approved.length > MAX_INCREMENT_TARGETS
+    || new Set(approved.map(incrementTargetKey)).size !== approved.length
+    || new Set(approved.map((row) => row.contentId)).size !== approved.length
+    || approved.some((row) => row.anilistId !== null && existingIds.has(row.anilistId))) {
+    const error = new Error('Approved increment rows are empty, duplicated, or already present');
+    error.code = 'INCREMENT_TARGET_INVALID';
+    throw error;
+  }
+  return Object.freeze(approved.map((row) => incrementTarget(row, { idMapStore, uuid })));
+}
+
+export function incrementManifestMatchesReview({ profile, review, manifest, idMap }) {
+  try {
+    const validated = validateIncrementReview(review, { profile });
+    const approved = validated.rows.filter((row) => row.decision === 'APPROVED_NEW')
+      .map((row) => ({
+        ...row, anilistId: row.anilistId === null ? null : String(row.anilistId),
+        sourceHash: validated.sourceHash, capturedAt: validated.capturedAt,
+      }))
+      .sort((left, right) => incrementTargetKey(left).localeCompare(incrementTargetKey(right)));
+    if (!Array.isArray(manifest) || approved.length < 1 || approved.length !== manifest.length
+      || approved.length > MAX_INCREMENT_TARGETS || !idMap || typeof idMap !== 'object'
+      || Array.isArray(idMap)) return false;
+    return approved.every((row, index) => {
+      const target = manifest[index];
+      return target?.targetKey === incrementTargetKey(row)
+        && target.moemoaAnimeId === idMap[target.targetKey]
+        && target.seedSource === 'reviewed_increment'
+        && target.identityState === (row.anilistId ? 'EXACT_ANILIST_ID' : 'SOURCE_REVIEWED')
+        && target.targetStatus === 'ACTIVE'
+        && target.createdAt === row.reviewedAt
+        && JSON.stringify(target.seedExternalIds) === JSON.stringify([
+          { sourceId: 'anilife_public', value: row.contentId },
+          ...(row.anilistId ? [{ sourceId: 'anilist', value: row.anilistId }] : []),
+        ])
+        && JSON.stringify(target.seedTitles) === JSON.stringify([
+          { locale: 'ko', value: row.ko },
+          ...row.aliases.map((value) => ({ locale: 'und', value })),
+        ])
+        && JSON.stringify(target.incrementEvidence) === JSON.stringify({
+          sourceId: 'anilife_public', contentId: row.contentId, sourceHash: validated.sourceHash,
+          capturedAt: validated.capturedAt, format: row.format, episodeLabel: row.episodeLabel,
+          genres: row.genres, year: row.year, publicPageUrl: row.publicPageUrl,
+          reviewedAt: row.reviewedAt, reviewedBy: row.reviewedBy,
+        });
+    });
+  } catch {
+    return false;
+  }
 }
 
 /**

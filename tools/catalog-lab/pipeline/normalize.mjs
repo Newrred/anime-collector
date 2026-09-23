@@ -56,12 +56,16 @@ const CORE_GENRE_MAP = Object.freeze({ ...genreConfig.mappings });
 
 const FORMAT_MAP = Object.freeze({
   TV: 'TV', TV_SHORT: 'WEB_SHORT', MOVIE: 'MOVIE', OVA: 'OVA', ONA: 'ONA',
+  TVSeries: 'TV', Movie: 'MOVIE', Special: 'SPECIAL', Web: 'WEB_SHORT',
   SPECIAL: 'SPECIAL', MUSIC: 'MUSIC', WEB: 'WEB_SHORT', WEB_SHORT: 'WEB_SHORT', OTHER: 'OTHER',
 });
 const STATUS_MAP = Object.freeze({
   ANNOUNCED: 'ANNOUNCED', NOT_YET_RELEASED: 'UPCOMING', UPCOMING: 'UPCOMING',
   RELEASING: 'AIRING', AIRING: 'AIRING', FINISHED: 'FINISHED', HIATUS: 'PAUSED',
   PAUSED: 'PAUSED', CANCELLED: 'CANCELLED',
+  완결: 'FINISHED', 방영중: 'AIRING', '방영 중': 'AIRING',
+  방영예정: 'UPCOMING', '방영 예정': 'UPCOMING', 예정: 'UPCOMING',
+  '방영 중단': 'PAUSED', 중단: 'PAUSED', 취소: 'CANCELLED',
 });
 const SOURCE_MATERIAL_MAP = Object.freeze({
   ORIGINAL: 'ORIGINAL', MANGA: 'MANGA', LIGHT_NOVEL: 'LIGHT_NOVEL', NOVEL: 'NOVEL',
@@ -86,9 +90,13 @@ const ANILIST_KEYS = Object.freeze([
   'synonyms', 'title',
 ]);
 const WIKIDATA_KEYS = Object.freeze(['aliases', 'claims', 'externalIds', 'labels', 'sitelinks']);
+const ANILIFE_LEGACY_KEYS = Object.freeze([
+  'alternateName', 'contentId', 'datePublished', 'imageUrl', 'numberOfEpisodes',
+  'publicPageUrl', 'identityEvidence', 'title',
+]);
 const ANILIFE_KEYS = Object.freeze([
-  'alternateName', 'contentId', 'datePublished', 'imageUrl', 'numberOfEpisodes', 'publicPageUrl',
-  'identityEvidence', 'title',
+  'alternateName', 'contentId', 'datePublished', 'format', 'imageUrl', 'numberOfEpisodes',
+  'publicPageUrl', 'identityEvidence', 'status', 'title',
 ]);
 const ANILIFE_IDENTITY_EVIDENCE_KEYS = Object.freeze([
   'candidateCountBasis', 'contentId', 'evidenceHash', 'exactTitleCandidateCount',
@@ -425,10 +433,13 @@ function validateWikidataPayload(record) {
 
 function validateAniLifePayload(record) {
   const payload = record.payload;
-  if (!hasExactKeys(payload, ANILIFE_KEYS) || typeof payload.contentId !== 'string'
+  const hasApprovedShape = hasExactKeys(payload, ANILIFE_KEYS)
+    || hasExactKeys(payload, ANILIFE_LEGACY_KEYS);
+  if (!hasApprovedShape || typeof payload.contentId !== 'string'
     || !/^[1-9]\d*$/.test(payload.contentId) || payload.contentId !== record.sourceEntityId
     || !optionalString(payload.title) || !optionalString(payload.alternateName)
-    || !optionalString(payload.datePublished) || !optionalString(payload.imageUrl)
+    || !optionalString(payload.datePublished) || !optionalString(payload.format)
+    || !optionalString(payload.status) || !optionalString(payload.imageUrl)
     || !optionalString(payload.publicPageUrl) || (payload.numberOfEpisodes !== null
       && payload.numberOfEpisodes !== undefined && safeInteger(payload.numberOfEpisodes) === null)
     || !(payload.identityEvidence === null || isAniLifeIdentityEvidence(payload.identityEvidence, {
@@ -581,7 +592,9 @@ function anilistFields(record) {
       officialSiteUrl: officialLinks, studios, relations, sourceGenres: genreEntries,
       coreGenres: coreEntries, characters, castings,
       cover: coverUrl ? [{ rawValue: payload.coverImage, normalizedValue: {
-        sourceUrl: coverUrl, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED',
+        sourceUrl: coverUrl,
+        rightsStatus: 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION',
+        distributionStatus: 'PERMISSIONED',
       } }] : [],
     },
     releaseYearEvidence,
@@ -652,11 +665,17 @@ function anilifeFields(record) {
       titles: uniqueEntries([
         titleEntry('und', payload.title), titleEntry('ko', payload.alternateName),
       ].filter(Boolean)),
+      format: typeof payload.format === 'string'
+        ? [{ rawValue: payload.format, normalizedValue: enumValue(payload.format, FORMAT_MAP) }] : [],
+      status: typeof payload.status === 'string'
+        ? [{ rawValue: payload.status, normalizedValue: enumValue(payload.status, STATUS_MAP) }] : [],
       startDate: startDate ? [{ rawValue: payload.datePublished, normalizedValue: startDate }] : [],
       episodeCount: safeInteger(payload.numberOfEpisodes) !== null
         ? [{ rawValue: payload.numberOfEpisodes, normalizedValue: payload.numberOfEpisodes }] : [],
       cover: coverUrl ? [{ rawValue: payload.imageUrl, normalizedValue: {
-        sourceUrl: coverUrl, rightsStatus: 'TEST_ONLY_UNKNOWN', distributionStatus: 'PROHIBITED',
+        sourceUrl: coverUrl,
+        rightsStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION',
+        distributionStatus: 'PERMISSIONED',
       } }] : [],
     },
     releaseYearEvidence: [rawYearEvidence(payload.datePublished)].filter(Boolean),
@@ -707,7 +726,11 @@ export function isNormalizedFieldValue(fieldPath, value) {
     && ['MAIN', 'SUPPORTING'].includes(value.roleType) && normalizedName(value.creditedName);
   if (fieldPath === 'cover') return hasExactKeys(value, ['distributionStatus', 'rightsStatus', 'sourceUrl'])
     && normalizedHttpUrl(value.sourceUrl) === value.sourceUrl
-    && value.rightsStatus === 'TEST_ONLY_UNKNOWN' && value.distributionStatus === 'PROHIBITED';
+    && ((value.rightsStatus === 'TEST_ONLY_UNKNOWN' && value.distributionStatus === 'PROHIBITED')
+      || (value.rightsStatus === 'USER_ATTESTED_UNRESTRICTED_PERMISSION'
+        && value.distributionStatus === 'PERMISSIONED')
+      || (value.rightsStatus === 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION'
+        && value.distributionStatus === 'PERMISSIONED'));
   return false;
 }
 
@@ -734,7 +757,9 @@ function finalize(record, normalized, overallState) {
         normalizedValue: structuredClone(entry.normalizedValue), status: entry.status ?? 'VALUE',
       });
     } else {
-      const state = overallState ?? 'SOURCE_NOT_AVAILABLE';
+      // A limited public-page review cannot assert that omitted API fields do not exist.
+      const state = overallState ?? (record.parserVersion === 'anilist-reviewed-public-page-v1'
+        ? 'NOT_FETCHED' : 'SOURCE_NOT_AVAILABLE');
       fieldStates[fieldPath] = state;
       summaries[fieldPath] = isCollection ? [] : null;
       fieldValues.push({ fieldPath, rawValue: null, normalizedValue: null, status: state });

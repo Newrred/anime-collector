@@ -1,15 +1,17 @@
 # Superpowers 설계·계획 문서 상태표
 
-> **문서 상태: `MIXED CURRENT + LEGACY INDEX` — 2026-08-17**
+> **문서 상태: `MIXED CURRENT + LEGACY INDEX` — 2026-09-03**
 > 이 폴더에는 현행 설계서와 legacy Web/PWA 구현 이력이 함께 있다. 신규 MOEMOA 제품 결정·실행 순서는 [`docs/moemoa/README.md`](../moemoa/README.md)와 [`01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`](../moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md)를 따르며, 아래 표에서 현행으로 명시한 문서만 현재 구현 기준으로 사용한다.
 
 ## 분류
 
 | 문서 | 상태 | 사용 범위 |
 | --- | --- | --- |
+| `specs/2026-09-03-title-hub-dual-view-ui.md` | `CURRENT_APPROVED_UI_DIRECTION` | Title Hub, My Titles Poster/Memory View, 명시적 대표 표지 Memory visual의 최신 UI·projection 기준 |
 | `specs/2026-08-26-unified-supabase-user-data-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 단일 Supabase project의 Auth·Memory Card metadata·Board·sync schema/RLS/RPC 계약. 사용자 이미지 cloud backup/Public은 별도 gate이며 구현은 후속 ExecPlan 승인 전 금지 |
 | `specs/2026-08-17-three-source-local-catalog-lab-design.md` | `CURRENT_APPROVED_DESIGN_GATED` | 기존 3,998개 target roster와 AniList·Wikidata·AniLife 공개 페이지를 이용한 로컬 10→100 표본 수집·검증 설계. 전체 수집과 production 발행은 별도 gate |
-| `specs/2026-08-16-web-first-shared-ui-readiness-design.md` | `CURRENT_APPROVED_DESIGN` | 첫 Private Slice 안에서 Web 공용 UI를 먼저 검증하고 Android에 적용하는 UI 범위·품질 gate. 구현 계획 작성 전 사용자 검토 기준 |
+| `specs/2026-08-24-image-first-ui-readiness-design.md` | `IMPLEMENTED_BASELINE_PARTIALLY_SUPERSEDED` | 반응형·접근성·Memory visual baseline은 유지. Library IA와 대표 표지 범위는 2026-09-03 UI 명세가 대체 |
+| `specs/2026-08-16-web-first-shared-ui-readiness-design.md` | `SUPERSEDED_BY_REFINED_UI_SPECS` | Web-first 실행 순서의 결정 이력. 구체 UI는 2026-08-24 baseline과 2026-09-03 Title Hub 명세를 사용 |
 | `plans/2026-08-03-product-readiness.md` | `COMPLETED_LEGACY_PLAN` | 현재 Library/WatchLog 기반 onboarding 구현 이력. 새 Card P0 계획으로 재실행 금지 |
 | `plans/2026-08-03-round-2-data-safety.md` | `COMPLETED_LEGACY_PLAN` | legacy 저장·동기화 데이터 안전 계약과 회귀 참고 |
 | `plans/2026-08-03-round-3-durable-sync.md` | `COMPLETED_LEGACY_PLAN` | legacy snapshot sync 내구성 구현 이력 |

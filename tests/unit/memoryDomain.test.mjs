@@ -110,6 +110,22 @@ test("anime reference rejects unknown providers and unclassified provenance", ()
   );
 });
 
+test("source-reviewed AniLife reference uses the stable internal catalog id", () => {
+  const animeRef = createAnimeRef({
+    id: "anime-ref-anilife",
+    catalogAnimeId: "anime:00000000-0000-4000-8000-000000000703",
+    displayTitle: "완전 신규 작품",
+    sourceBinding: { provider: "ANILIFE", externalId: "703" },
+    verificationState: "SOURCE_REVIEWED",
+    now: "2026-09-03T00:00:00.000Z",
+  });
+  assert.equal(animeRef.catalogAnimeId, "anime:00000000-0000-4000-8000-000000000703");
+  assert.equal(animeRef.sourceKey, "ANILIFE:703");
+  assert.throws(() => createAnimeRef({
+    ...animeRef, id: "missing-catalog-id", catalogAnimeId: null,
+  }), { code: "INVALID_ANIME_SOURCE" });
+});
+
 test("complete private card accepts exactly one same-owner title and a READY local asset", () => {
   const fixture = completeFixture();
   assert.doesNotThrow(() => assertCompletePrivateCard(fixture));
@@ -139,6 +155,53 @@ test("complete private card rejects a cross-owner private title", () => {
   const fixture = completeFixture();
   fixture.title.ownerId = OWNER_B;
   assert.throws(() => assertCompletePrivateCard(fixture), { code: "CROSS_OWNER_REFERENCE" });
+});
+
+test("catalog cover Card requires a durable matching reference and personal signal", () => {
+  const catalogAnimeId = "anime:11111111-1111-4111-8111-000000154587";
+  const fixture = completeFixture();
+  fixture.card.privateTitleId = null;
+  fixture.card.animeRefId = "anime-ref-1";
+  fixture.card.note = "마지막 장면의 여운";
+  fixture.title = null;
+  fixture.animeRef = { id: "anime-ref-1", catalogAnimeId };
+  fixture.asset = {
+    ...fixture.asset,
+    intakeSource: "CATALOG_COVER",
+    imageType: "CATALOG_COVER",
+    storageScope: "CATALOG_MANAGED",
+    rightsBasis: "EXPLICIT_PERMISSION",
+    localRef: null,
+    designSpec: null,
+    catalogCoverRef: {
+      sourceKind: "CATALOG_COVER",
+      catalogAnimeId,
+      catalogCoverId: "cover:11111111-1111-4111-8111-000000154587",
+      catalogCoverRevisionId: `asset:${"a".repeat(40)}`,
+      rightsBasis: "EXPLICIT_PERMISSION",
+      permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+    },
+  };
+
+  assert.doesNotThrow(() => assertCompletePrivateCard(fixture));
+  assert.throws(
+    () => assertCompletePrivateCard({ ...fixture, card: { ...fixture.card, note: null } }),
+    { code: "CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED" },
+  );
+  assert.throws(
+    () => assertCompletePrivateCard({
+      ...fixture,
+      asset: { ...fixture.asset, catalogCoverRef: { ...fixture.asset.catalogCoverRef, permissionVerifiedAt: null } },
+    }),
+    { code: "INVALID_CATALOG_COVER_REFERENCE" },
+  );
+  assert.throws(
+    () => assertCompletePrivateCard({
+      ...fixture,
+      asset: { ...fixture.asset, catalogCoverRef: { ...fixture.asset.catalogCoverRef, rightsBasis: undefined } },
+    }),
+    { code: "INVALID_CATALOG_COVER_REFERENCE" },
+  );
 });
 
 test("system design view model is deterministic for the same versioned spec", () => {

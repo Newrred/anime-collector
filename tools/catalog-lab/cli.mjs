@@ -4,10 +4,21 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { CATALOG_LAB_USER_AGENT, assertSourceExecution, loadSourceRegistry } from './contracts/catalogContracts.mjs';
+import {
+  approveAniLifeNewCandidates, writeAniLifeSeasonDiscovery,
+} from './discovery/anilife-season.mjs';
 import { openCatalogWorkspace } from './lib/workspace.mjs';
+import {
+  applyApprovedAniListBindings, runAniListIncrementMatching,
+} from './enrichment/anilist-increment.mjs';
 import { createCatalogArtifactStore } from './pipeline/artifact-store.mjs';
 import { runCatalogBatches } from './pipeline/batches.mjs';
-import { buildTargetManifest, TARGET_PROFILE_COUNTS } from './pipeline/targets.mjs';
+import { importAniLifeBrowserCaptures } from './pipeline/browser-capture-import.mjs';
+import { materializeIncrementProfile } from './pipeline/increment-seed.mjs';
+import {
+  buildIncrementalTargetManifest, buildTargetManifest, expectedTargetCount,
+  isCatalogProfile, isIncrementProfile,
+} from './pipeline/targets.mjs';
 import { rebuildCatalogProfile, runCatalogPipeline, validateCatalogArtifacts } from './pipeline/runner.mjs';
 import { createAniLifePublicPageAdapter, validateAniLifeBinding } from './sources/anilife-public-page-test.mjs';
 import { createAniListTestAdapter } from './sources/anilist-test.mjs';
@@ -19,7 +30,11 @@ export const CLI_EXIT = Object.freeze({
   OK: 0, QUALITY_GATE_FAILED: 2, SOURCE_PAUSED: 3, USAGE_OR_SAFETY: 64,
 });
 
-const COMMANDS = new Set(['init', 'targets', 'bind-anilife', 'collect', 'rebuild', 'validate', 'report', 'guard']);
+const COMMANDS = new Set([
+  'init', 'discover-anilife-year', 'approve-new-candidates', 'seed-increment',
+  'match-anilist-increment', 'targets', 'bind-anilife', 'collect', 'import-browser-captures', 'rebuild',
+  'validate', 'report', 'guard',
+]);
 const SOURCE_IDS = new Set(['anilist', 'wikidata', 'anilife_public']);
 const DEFAULT_BUILD_ROOTS = Object.freeze(['dist', 'android/app/src', 'test-output', 'test-results', '.vercel/output']);
 const GUARD_SCAN_CHUNK_BYTES = 64 * 1024;
@@ -67,7 +82,7 @@ function onlyOptions(options, allowed) {
 
 function selectedProfile(options) {
   const profile = options['--profile'] ?? 'golden';
-  if (!TARGET_PROFILE_COUNTS[profile]) throw usageError('Catalog profile is invalid');
+  if (!isCatalogProfile(profile)) throw usageError('Catalog profile is invalid');
   return profile;
 }
 
@@ -107,7 +122,7 @@ async function openWorkspace(dependencies, create) {
 async function targetManifest(workspace, profile, dependencies = {}) {
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest(profile);
-  if (!Array.isArray(manifest) || manifest.length !== TARGET_PROFILE_COUNTS[profile]) {
+  if (!expectedTargetCount(profile, manifest) || manifest.length !== expectedTargetCount(profile, manifest)) {
     throw typedError('TARGET_MANIFEST_REQUIRED', 'Approved target manifest is required');
   }
   await assertApprovedTargetManifest({
@@ -116,17 +131,24 @@ async function targetManifest(workspace, profile, dependencies = {}) {
   return { store, manifest };
 }
 
+async function withAniListBindings(store, profile, manifest) {
+  if (!isIncrementProfile(profile)) return manifest;
+  const document = await store.readAniListBindings(profile);
+  return applyApprovedAniListBindings({ profile, targets: manifest, document });
+}
+
 async function assertApprovedTargetManifest({ workspace, profile, manifest, repoRoot }) {
   if (!await hasApprovedTargetManifest({ workspace, profile, manifest, repoRoot })) {
     throw typedError('TARGET_MANIFEST_INVALID', 'Target manifest is not approved');
   }
 }
 
-function defaultAdapters() {
+function defaultAdapters(registry) {
+  const anilifeSource = registry?.find((entry) => entry.sourceId === 'anilife_public');
   return Object.freeze({
     anilist: createAniListTestAdapter(),
     wikidata: createWikidataAdapter({ userAgent: CATALOG_LAB_USER_AGENT }),
-    anilife_public: createAniLifePublicPageAdapter(),
+    anilife_public: createAniLifePublicPageAdapter({ sourceConfig: anilifeSource }),
   });
 }
 
@@ -250,12 +272,98 @@ export async function runCli(argv, dependencies = {}) {
       writeLine(stdout, 'Catalog workspace initialized');
       return CLI_EXIT.OK;
     }
+    if (command === 'discover-anilife-year') {
+      onlyOptions(options, new Set(['--year', '--profile', '--as-of']));
+      if (!/^\d{4}$/u.test(options['--year'] ?? '')) throw usageError('Discovery requires a four-digit --year');
+      const year = Number(options['--year']);
+      if (year < 1900 || year > 2100 || !/^\d{4}-\d{2}-\d{2}$/u.test(options['--as-of'] ?? '')) {
+        throw usageError('Discovery year or --as-of date is invalid');
+      }
+      const profile = options['--profile'] ?? `increment-${year}-${options['--as-of'].slice(5, 7)}`;
+      if (!isIncrementProfile(profile)) throw usageError('Discovery requires an increment profile');
+      const workspace = await openWorkspace(dependencies, false);
+      const repoRoot = dependencies.repoRoot ?? repoFromModule();
+      const registry = await loadSourceRegistry({ repoRoot });
+      const anilifeSource = registry.find((entry) => entry.sourceId === 'anilife_public');
+      const store = createCatalogArtifactStore({ workspace });
+      const [capture, aliases, bindings] = await Promise.all([
+        readFile(workspace.resolve('imports', `anilife-season-${year}.json`), 'utf8').then(JSON.parse),
+        readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8').then(JSON.parse),
+        store.readAniLifeBindings(),
+      ]);
+      const result = await writeAniLifeSeasonDiscovery({
+        workspace, capture, aliases, bindings, profile, asOfDate: options['--as-of'],
+        sourceConfig: anilifeSource,
+      });
+      writeLine(stdout, `Discovery: ${result.diff.candidateCount} candidates; ${result.diff.counts.NEW_CANDIDATE ?? 0} new candidates`);
+      return CLI_EXIT.OK;
+    }
+    if (command === 'approve-new-candidates') {
+      onlyOptions(options, new Set(['--profile', '--reviewed-by']));
+      const profile = selectedProfile(options);
+      if (!isIncrementProfile(profile) || typeof options['--reviewed-by'] !== 'string'
+        || !options['--reviewed-by'].trim()) {
+        throw usageError('Approval requires an increment --profile and --reviewed-by');
+      }
+      const workspace = await openWorkspace(dependencies, false);
+      const result = await approveAniLifeNewCandidates({
+        workspace, profile, reviewedBy: options['--reviewed-by'],
+        clock: dependencies.clock ?? { now: () => new Date().toISOString() },
+      });
+      writeLine(stdout, `Approved: ${result.approvedCount} source-reviewed new candidates`);
+      return CLI_EXIT.OK;
+    }
     if (command === 'targets') {
       onlyOptions(options, new Set(['--profile']));
       const profile = selectedProfile(options);
       const workspace = await openWorkspace(dependencies, false);
       const { manifest } = await targetManifestOrCreate(workspace, profile, dependencies);
       writeLine(stdout, `${profile} targets: ${manifest.length}`);
+      return CLI_EXIT.OK;
+    }
+    if (command === 'seed-increment') {
+      onlyOptions(options, new Set(['--profile']));
+      const profile = selectedProfile(options);
+      if (!isIncrementProfile(profile)) throw usageError('Seed requires an increment profile');
+      const workspace = await openWorkspace(dependencies, false);
+      const { manifest } = await targetManifest(workspace, profile, dependencies);
+      const summary = await materializeIncrementProfile({ workspace, profile, targets: manifest });
+      writeLine(stdout, `Increment seed: ${summary.counts.targets} targets`);
+      return CLI_EXIT.OK;
+    }
+    if (command === 'match-anilist-increment') {
+      onlyOptions(options, new Set(['--profile', '--allow-network']));
+      const profile = selectedProfile(options);
+      if (!isIncrementProfile(profile) || options['--allow-network'] !== true) {
+        throw usageError('AniList matching requires an increment --profile and --allow-network');
+      }
+      const workspace = await openWorkspace(dependencies, false);
+      const { store, manifest } = await targetManifest(workspace, profile, dependencies);
+      const repoRoot = dependencies.repoRoot ?? repoFromModule();
+      const registry = await loadSourceRegistry({ repoRoot });
+      const registryEntry = registry.find((entry) => entry.sourceId === 'anilist');
+      assertSourceExecution(registryEntry, Math.min(100, manifest.length), {
+        profileTargetCount: manifest.length,
+      });
+      const aliases = JSON.parse(await readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8'));
+      const result = await (dependencies.runAniListMatching ?? runAniListIncrementMatching)({
+        workspace,
+        profile,
+        targets: manifest,
+        registryEntry,
+        store,
+        existingAniListIds: aliases.map((row) => row.anilistId),
+        fetchImpl: dependencies.fetchImpl,
+        clock: dependencies.clock ?? { now: () => new Date().toISOString() },
+        ...(dependencies.matchSleep ? { sleep: dependencies.matchSleep } : {}),
+        ...(dependencies.matchRandom ? { random: dependencies.matchRandom } : {}),
+        onProgress: dependencies.matchProgress ?? (async ({ phase, completed, total, candidates }) => {
+          const suffix = total ? `/${total}` : '';
+          writeLine(stdout, `AniList match ${phase}: ${completed}${suffix}${candidates === undefined ? '' : `; candidates ${candidates}`}`);
+        }),
+      });
+      writeLine(stdout,
+        `AniList matching: ${result.report.counts.APPROVED ?? 0} approved; ${result.report.counts.PENDING_REVIEW ?? 0} pending review`);
       return CLI_EXIT.OK;
     }
     if (command === 'bind-anilife') {
@@ -281,8 +389,12 @@ export async function runCli(argv, dependencies = {}) {
       const { store, manifest } = await targetManifest(workspace, profile, dependencies);
       const sources = selectedSources(options['--sources']);
       const registry = await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() });
-      if (profile === 'full3998') {
-        if (options['--refresh'] === true) throw usageError('Full collection refresh is intentionally disabled');
+      const collectionTargets = sources.includes('anilist')
+        ? await withAniListBindings(store, profile, manifest) : manifest;
+      if (profile === 'full3998' || isIncrementProfile(profile)) {
+        if (profile === 'full3998' && options['--refresh'] === true) {
+          throw usageError('Full collection refresh is intentionally disabled');
+        }
         const batchSize = boundedIntegerOption(options['--batch-size'], {
           fallback: 100, minimum: 1, maximum: 100, name: '--batch-size',
         });
@@ -298,9 +410,11 @@ export async function runCli(argv, dependencies = {}) {
           });
         }
         const summary = await (dependencies.runBatches ?? runCatalogBatches)({
-          workspace, profile, targets: manifest, registry,
-          adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(),
-          selectedSources: sources, allowNetwork: true, refresh: false, clock: dependencies.clock,
+          workspace, profile, targets: collectionTargets, registry,
+          adapters: dependencies.adapters ?? defaultAdapters(registry), bindings: await store.readAniLifeBindings(),
+          selectedSources: sources, allowNetwork: true,
+          refresh: isIncrementProfile(profile) && options['--refresh'] === true,
+          clock: dependencies.clock,
           httpFactory: dependencies.httpFactory,
           ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),
           batchSize, pauseMinMs: pauseMinSeconds * 1000, pauseMaxMs: pauseMaxSeconds * 1000,
@@ -318,11 +432,11 @@ export async function runCli(argv, dependencies = {}) {
       }
       if (options['--batch-size'] !== undefined || options['--pause-min-seconds'] !== undefined
         || options['--pause-max-seconds'] !== undefined) {
-        throw usageError('Batch options require the full3998 profile');
+        throw usageError('Batch options require a batched catalog profile');
       }
       const summary = await runCatalogPipeline({
         workspace, profile, targets: manifest, registry,
-        adapters: dependencies.adapters ?? defaultAdapters(), bindings: await store.readAniLifeBindings(), selectedSources: sources,
+        adapters: dependencies.adapters ?? defaultAdapters(registry), bindings: await store.readAniLifeBindings(), selectedSources: sources,
         allowNetwork: true, refresh: options['--refresh'] === true, clock: dependencies.clock,
         httpFactory: dependencies.httpFactory,
         ...(dependencies.coverPipeline ? { coverPipeline: dependencies.coverPipeline } : {}),
@@ -330,13 +444,35 @@ export async function runCli(argv, dependencies = {}) {
       writeLine(stdout, `Collection: ${summary.counts.targets} targets`);
       return hasPausedSources(summary) ? CLI_EXIT.SOURCE_PAUSED : CLI_EXIT.OK;
     }
+    if (command === 'import-browser-captures') {
+      onlyOptions(options, new Set(['--profile']));
+      const profile = selectedProfile(options);
+      if (!isIncrementProfile(profile)) throw usageError('Browser capture import requires an increment profile');
+      const workspace = await openWorkspace(dependencies, false);
+      const { store, manifest } = await targetManifest(workspace, profile, dependencies);
+      const registry = await loadSourceRegistry({ repoRoot: dependencies.repoRoot ?? repoFromModule() });
+      const summary = await (dependencies.importBrowserCaptures ?? importAniLifeBrowserCaptures)({
+        workspace,
+        profile,
+        targets: manifest,
+        registry,
+        bindings: await store.readAniLifeBindings(),
+        ...(dependencies.decodeCover ? { decodeCover: dependencies.decodeCover } : {}),
+        ...(dependencies.coverStorage ? { coverStorage: dependencies.coverStorage } : {}),
+      });
+      writeLine(stdout,
+        `Browser capture import: ${summary.counts.completed}/${summary.counts.targets} completed; ${summary.counts.pendingReview} pending review`);
+      return summary.counts.pendingReview === 0 ? CLI_EXIT.OK : CLI_EXIT.QUALITY_GATE_FAILED;
+    }
     onlyOptions(options, new Set(['--profile']));
     const profile = selectedProfile(options);
     const workspace = await openWorkspace(dependencies, false);
     const { manifest } = await targetManifest(workspace, profile, dependencies);
     if (command === 'rebuild') {
+      const store = createCatalogArtifactStore({ workspace });
+      const rebuildTargets = await withAniListBindings(store, profile, manifest);
       const summary = await rebuildCatalogProfile({
-        workspace, profile, targets: manifest,
+        workspace, profile, targets: rebuildTargets,
         clock: dependencies.clock ?? { now: () => new Date().toISOString() },
       });
       writeLine(stdout, `Offline rebuild: ${summary.counts.targets} targets; network requests: ${summary.networkRequests}`);
@@ -370,13 +506,36 @@ async function targetManifestOrCreate(workspace, profile, dependencies) {
   const repoRoot = dependencies.repoRoot ?? repoFromModule();
   const aliases = JSON.parse(await readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8'));
   const idMap = (await store.readIdMap()) ?? {};
-  const manifest = await buildTargetManifest({
-    profile, rows: aliases, idMapStore: idMap,
-    clock: dependencies.clock ?? { now: () => new Date().toISOString() },
-    uuid: dependencies.uuid ?? (() => crypto.randomUUID()),
-  });
+  const incrementReview = isIncrementProfile(profile)
+    ? JSON.parse(await readFile(workspace.resolve('reviews', `${profile}.json`), 'utf8')) : null;
+  const incrementDiscovery = incrementReview
+    ? JSON.parse(await readFile(workspace.resolve(
+      'discovery', 'anilife', `season-${incrementReview.year}`, `${incrementReview.sourceHash}.json`,
+    ), 'utf8')) : null;
+  const manifest = isIncrementProfile(profile)
+    ? buildIncrementalTargetManifest({
+      profile,
+      review: incrementReview,
+      discovery: incrementDiscovery,
+      existingRows: aliases,
+      idMapStore: idMap,
+      uuid: dependencies.uuid ?? (() => crypto.randomUUID()),
+    })
+    : await buildTargetManifest({
+      profile, rows: aliases, idMapStore: idMap,
+      clock: dependencies.clock ?? { now: () => new Date().toISOString() },
+      uuid: dependencies.uuid ?? (() => crypto.randomUUID()),
+    });
   await store.writeIdMap(idMap);
   await store.writeManifest(profile, manifest);
+  if (isIncrementProfile(profile)) {
+    for (const target of manifest) {
+      await store.writeAniLifeBinding(target.targetKey, {
+        contentId: target.incrementEvidence.contentId,
+        evidence: 'MANUAL_PUBLIC_PAGE_REVIEW',
+      });
+    }
+  }
   await assertApprovedTargetManifest({ workspace, profile, manifest, repoRoot });
   return { store, manifest };
 }

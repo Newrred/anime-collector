@@ -1,7 +1,7 @@
 # 06. 아키텍처와 첫 Vertical Slice 계획
 
 > **문서 상태: `CURRENT CONSTRAINTS / GATED DESIGN`**
-> 공통 도메인/local-first 제약, Astro/React + Capacitor client 방향, 첫 Private Vertical Slice는 승인되어 구현 중이다. 2026-08-16에는 첫 slice 내부 실행 순서를 `Web 공용 UI readiness → Android 적용·실기기 검증`으로 보완했다. 2026-08-26에는 `BACKEND-01`, `AUTH-01`, `SYNC-01`을 단일 Supabase project, Google Auth, explicit Guest promotion, normalized metadata sync로 확정했다. Private image cloud backup과 Public 관련 gate는 계속 미정이다.
+> 공통 도메인/local-first 제약, Astro/React + Capacitor client 방향, 첫 Private Vertical Slice는 승인되어 구현 중이다. 2026-08-16에는 첫 slice 내부 실행 순서를 `Web 공용 UI readiness → Android 적용·실기기 검증`으로 보완했다. 2026-08-26에는 `BACKEND-01`, `AUTH-01`, `SYNC-01`을 단일 Supabase project, Google Auth, explicit Guest promotion, normalized metadata sync로 확정했다. 2026-09-03에는 write model을 유지한 Title Hub read integration, My Titles dual view, 명시적 `CATALOG_COVER` Memory visual을 확정했다. Private image cloud backup과 Public 관련 gate는 계속 미정이다.
 
 확정 근거: `decisions/2026-08-11-foundation-decisions.md`, `adr/0001-capacitor-client-and-local-media-boundary.md`.
 
@@ -116,7 +116,7 @@ Anime(id, ...)
 PrivateTitle(id, ownerId, title, ...)
 Owner(id, kind: GUEST | ACCOUNT, ...)
 MemoryCard(id, ownerId, animeId?, privateTitleId?, visualAssetId?, status, note?, ...)
-VisualAsset(id, ownerId, intakeSource, imageType, storageScope, visibility, rightsBasis, state, localRef?, ...)
+VisualAsset(id, ownerId, sourceKind, imageType, storageScope, visibility, rightsBasis, state, localRef?, catalogCoverRevisionId?, ...)
 Board(id, ownerId, title, visibility, ...)
 BoardCard(boardId, memoryCardId, position, ...)
 DeviceIdentity(id, ownerId, ...)
@@ -126,9 +126,11 @@ SyncOperation(id, entityType, entityId, version, ...)
 
 MemoryCard는 Anime 또는 PrivateTitle 중 정확히 하나에 연결된다.
 
-Draft에서는 `visualAssetId`가 비어 있을 수 있지만 Complete 상태에는 정확히 하나의 VisualAsset이 필요하다. VisualAsset은 업로드 파일뿐 아니라 시스템·텍스트 디자인도 포함하며, `localRef`와 object key 같은 파일 수명주기 필드는 file-backed asset에만 적용한다.
+Draft에서는 `visualAssetId`가 비어 있을 수 있지만 Complete 상태에는 정확히 하나의 VisualAsset이 필요하다. VisualAsset은 업로드 파일, 시스템·텍스트 디자인, 사용자가 명시적으로 선택한 승인된 catalog cover reference를 포함한다. `localRef`와 object key 같은 파일 수명주기 필드는 file-backed asset에만 적용하고, `CATALOG_COVER`는 catalog-managed identity/revision을 참조한다. 표지 기반 Complete Card에는 개인 기억 신호가 최소 하나 필요하다.
 
 `Owner`는 제품 데이터의 소유 경계를 나타내고, `DeviceIdentity`는 기기 식별, `User`는 인증 주체다. local slice부터 설치별 Guest Owner ID와 owner-scoped namespace를 둔다. Remote private row의 owner는 `auth.users.id`이며 Guest row는 remote에 만들지 않는다. 로그인 승격은 entity UUID를 유지하는 idempotent promotion transaction으로 수행하고, 성공 뒤에만 local account namespace로 전환한다. Account 간 자동 병합은 금지한다.
+
+기존 작품 저장 상태와 Memory Card는 물리적으로 합치지 않는다. `LegacyLocalLibraryAdapter + MemoryRepository + CatalogTitleResolver`에서 저장 작품과 Complete Memory 보유 작품의 합집합인 `TitleAlbumProjection`을 파생해 My Titles와 Title Hub에 제공한다.
 
 ## 6. Local-first 저장
 

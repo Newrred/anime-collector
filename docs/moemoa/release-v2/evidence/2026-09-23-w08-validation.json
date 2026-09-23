@@ -1,0 +1,56 @@
+{
+  "work": "W08",
+  "date": "2026-09-23",
+  "status": "BLOCKED_EXTERNAL",
+  "tests": {
+    "postgres14Synthetic": {
+      "publicationAssertions": 45,
+      "imageAssertions": 31,
+      "parallelScenarios": 2
+    },
+    "unit": {
+      "passed": 296,
+      "failed": 0,
+      "newImageTests": 13
+    },
+    "build": "15 routes+postbuild PASS",
+    "serverConfigExcludedFromStaticBrowserBundle": true
+  },
+  "productionApplied": false,
+  "publicEnabled": false,
+  "committed": false,
+  "pushed": false,
+  "realSupabaseStorageVerified": false,
+  "vercelFunctionPackaged": false,
+  "androidOriginalReadImplemented": false,
+  "dependencyChange": "sharp0.34.5 declared direct; no package version changes",
+  "limitations": [
+    "Auth/Storage SQL bootstrap synthetic; pg_cron migration excluded",
+    "HTTP tests use actual Node HTTP and sharp but stub backend",
+    "Native original export and real-device path pending W19",
+    "UI integration W09 pending",
+    "Trusted rights approval workflow W14 pending",
+    "Quota/cleanup/retention operating values D03/D05/W17 pending",
+    "Endpoint and server public/image gates remain off"
+  ],
+  "artifacts": "D:/hong/Web/Anime/.moemoa-w08-2026-09-23",
+  "files": {
+    "CODEX_START_HERE.md": "f45620190ca5fa20b07656db12f2a2aff049da6f66bf7956ba977b5de854ae24",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md": "7f4bb9cddc8e422cd5705cf89da8a524cad61338fb9fb86d0d8e1f295307b417",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md": "4d130b463cae7cc758f33684d48922533f5660ffa3a88441c0cdfaa710743058",
+    "package.json": "a2bcbe31f4b844e26c30a82763a4a286d3ed77231a20999aae04fe0c513087de",
+    "package-lock.json": "4ef5f6c00ab8125a84e4d8dbb3128fd02590567e1ed1f8617c3c3b3357babb16",
+    "supabase/migrations/20260923093000_memory_public_images.sql": "5752d2e0d600f641e4dfe30b59cdaba98868805e02268ae3b10db1803eb72e37",
+    "api/public-image.js": "d2424c5d549e443eb2b345caf2211696e33d1dfd42cc5a391f07c9bb750fc1d4",
+    "src/server/publicImages/processImage.js": "638b5b3b576aef17072de3b4ae3a4f33a2779351a2a889e9e0ca2fe424411429",
+    "src/server/publicImages/handler.js": "560022d762bb8e334791f52b863dbb264a2de9ecdc17a4af6e12efe4ca4927a0",
+    "src/server/publicImages/supabaseImageBackend.js": "4180f7b0216124fc55b772ad07e8f2ff41606c2da31f8eabc89eeea38aec437e",
+    "src/features/memory/application/preparePublicImage.js": "2e0b30a1103a82e1a79ca272284ea952b7d6dca428195d404a01ebd2f71bdec6",
+    "src/features/memory/domain/publicVisual.js": "b6e32d346e14dcc56f1f6c6ef3f2ca1f2d535e4a5d401d49bdd96e1dfd7d9d37",
+    "tests/unit/publicImages.test.mjs": "2cffd24dcf4047d68a24e105301ed4112be40aae43004c9d7dc182294ca6bbe3",
+    "tools/publication-boundary/run-local-postgres.sh": "35c892b575411a5d9fb8ef1f4b5807e7a833086737a934233e4421b04ea26bab",
+    "tools/publication-boundary/image-contract.sql": "2059586935d86bd5679c392b8224cb41701d38b13621e66a096f7b71e45758f3",
+    "tools/publication-boundary/concurrent-image.sql": "511af53583b81387c9862c21a4e6fcacf8b321de71268a224e0ddc8beddc151c",
+    "tools/publication-boundary/cleanup-images.mjs": "d2e4c2f496c745071b480963e80dd18cfad14aa891a438dd3f95bec343625dff"
+  }
+}

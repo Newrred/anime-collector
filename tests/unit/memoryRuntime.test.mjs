@@ -108,6 +108,24 @@ test("runtime exposes title search without initializing an owner or logging the 
   assert.deepEqual(calls, ["프리렌"]);
 });
 
+test("runtime resolves an immutable catalog cover without initializing an owner", async () => {
+  const ref = { catalogCoverRevisionId: `asset:${"a".repeat(40)}` };
+  const resolved = { publicUrl: "https://catalog.example/cover.jpg", catalogCoverRef: ref };
+  const runtime = createMemoryRuntime({
+    repository: { ensureGuestOwner: async () => { throw new Error("cover display must not initialize owner"); } },
+    imageIntake: { available: false },
+    createCommand: { execute: async () => ({}) },
+    titleResolver: {
+      search: async () => ({ results: [], remoteStatus: "READY" }),
+      resolveCover: async (value) => value === ref ? resolved : null,
+    },
+    uuid: () => "11111111-1111-4111-8111-111111111111",
+    clock: { now: () => "2026-08-12T00:00:00.000Z" },
+  });
+
+  assert.equal(await runtime.resolveCatalogCover(ref), resolved);
+});
+
 test("runtime scopes image replacement to the guest owner and assigns an operation id", async () => {
   const calls = [];
   const refreshedBundle = {

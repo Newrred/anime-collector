@@ -8,6 +8,7 @@
 > 승인 기록: `../decisions/2026-08-12-first-private-slice-approval.md`
 > 실행 순서 보완: `../decisions/2026-08-16-web-first-shared-ui-readiness.md`
 > 공용 UI 설계: `../../superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`
+> 2026-09-03 후속 범위: Title Hub·Dual View·대표 표지 Memory visual은 `2026-09-03-title-hub-dual-view.md`가 우선한다. 이 문서의 기존 완료 기록은 당시 구현 증거로 유지한다.
 
 이 문서의 구현 경계는 승인됐고 Android dependency/scaffold/native-local 기반도 이미 구축됐다. 현재는 기능 확장을 잠시 멈추고 공용 Memory UI를 Web 모바일·데스크톱에서 먼저 검증한 뒤 Android에 적용하는 readiness 단계를 선행한다. 이 순서 보완은 Web production 이미지 저장이나 Web 전체 선출시를 추가하지 않는다.
 
@@ -643,7 +644,7 @@ Gradle wrapper 생성 뒤 evidence에 실제 명령을 기록한다. 예상 nati
 #### 권리·개인정보
 
 - source URI/localRef/hash/note/title/search text가 analytics에 없음.
-- AniList cover/banner가 VisualAsset 또는 export file로 포함되지 않음.
+- raw AniList cover/banner URL·bytes가 VisualAsset 또는 export file로 포함되지 않음. 후속 `CATALOG_COVER`는 승인된 catalog reference만 사용.
 - 모든 Card는 PRIVATE, 모든 file asset은 LOCAL_ONLY.
 - `rightsBasis=UNKNOWN`이 Public eligibility를 얻지 않음.
 
@@ -840,6 +841,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 [2026-08-24] 사람 게이트 상태: 18개 화면의 잘림·위계·한/영 의미는 내부 직접 검토와 자동 검증 근거가 있다. 그러나 설명을 받지 않은 별도 테스터는 아직 없으므로 9개 사람 항목 전체 통과를 주장하지 않는다. 독립 행동 항목 1/2/3/6/7/8/9와 Android 적용·물리 실기기 검증이 다음 gate다. push·merge·deploy는 수행하지 않았다.
 [2026-09-02] owner 실사용 점검에서 Home·모바일 메뉴·Composer가 여전히 프로토타입처럼 읽혀 사람 게이트를 통과하지 못했다. 이를 자동 시각 테스트의 실패가 아닌 실제 사용성 근거로 받아들이고, Web-first Task 9 보정 작업을 추가했다.
 [2026-09-02] Task 9 구현 완료: Home의 단일 Create CTA와 보조 검색, navigation-first 모바일 메뉴, required/optional/complete 상태가 보이는 Composer와 명시적 검색/input affordance를 적용했다. 390×844 메뉴는 내부 scroll 없이 맞고, 320×720 Composer 첫 화면에 사용 가능한 visual action이 보인다. persistence·rights·catalog·Library/Card 의미는 변경하지 않았으며 owner 재검토, Android 적용, push/deploy는 아직 수행하지 않았다.
+[2026-09-03] Composer 모바일 제목 검색 보정 완료: search keyboard hint와 초기화 대기 검색, Supabase 대표 표지 preview, 한글 표시명 복구, 기본 작품 우선 순위를 적용했다. Production 설정 smoke에서 `프리렌`은 `장송의 프리렌`을 첫 결과로 반환하고 표지 3장을 정상 decode했다. 카탈로그/DB schema와 Card VisualAsset은 변경하지 않았다.
 ```
 
 ## 16. 발견 사항과 계획 변경
@@ -847,7 +849,7 @@ DB/media/domain 경계 변경, 실제 Web image persistence 추가, 공용 UI �
 ### 작성 시 발견
 
 - 기존 `anime-collector-db`는 owner scope가 없고 localStorage와 원본/mirror 역할이 혼재한다. 새 DB 격리가 rollback 관점에서 안전하다.
-- 현재 AniList API module은 search 결과에 cover/banner URL을 포함한다. 새 TitleResolver는 text/genre 중심으로 projection하고 이 URL을 Memory VisualAsset으로 사용하지 않아야 한다.
+- 현재 AniList API module은 search 결과에 cover/banner URL을 포함한다. raw provider URL은 Memory VisualAsset으로 저장하지 않으며, 후속 `CATALOG_COVER`는 검증된 catalog identity/revision과 권리 metadata를 통해서만 연결한다.
 - `src/data/aliases.json`의 3,998개 row는 provenance가 없으므로 삭제하지 않고 `legacy_unverified` read-only 검색 fallback으로만 사용할 수 있다.
 - 현재 저장소에는 Android project와 Capacitor dependency가 전혀 없다. 따라서 native intake는 구현 milestone이 아니라 먼저 실패 가능한 spike로 검증해야 한다.
 - 기존 runbook의 catalog-first 번호와 Gap 분석의 local-first 권장 순서가 달랐다. 이 계획은 첫 사용자 가치와 미정 backend/auth/sync 회피를 근거로 local-first를 제안한다.

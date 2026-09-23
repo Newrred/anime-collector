@@ -69,13 +69,14 @@ export function createMemoryOperationReconciler({ repository, localMedia, clock,
             const syncOperations = await prepareAccountSyncOperations({
               repository, ownerId, ids, createdAt: now,
               specs: () => [
-                ...(bundle.title ? [{ entityType: "PRIVATE_TITLE", entityId: bundle.title.id, operationType: "UPSERT", baseVersion: bundle.title.sync?.remoteVersion, payload: toRemotePrivateTitle(bundle.title) }] : []),
+                ...(bundle.title && !operation.reusePrivateTitle ? [{ entityType: "PRIVATE_TITLE", entityId: bundle.title.id, operationType: "UPSERT", baseVersion: bundle.title.sync?.remoteVersion, payload: toRemotePrivateTitle(bundle.title) }] : []),
                 { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card: { ...card, status: "DRAFT" }, title: remoteTitle }) },
                 { entityType: "VISUAL_ASSET", entityId: asset.id, operationType: "UPSERT", baseVersion: asset.sync?.remoteVersion, payload: toRemoteVisualAsset({ card, asset }) },
                 { entityType: "MEMORY_CARD", entityId: card.id, operationType: "UPSERT", baseVersion: card.sync?.remoteVersion, payload: toRemoteMemoryCard({ card, title: remoteTitle }) },
               ],
             });
             await repository.completeCreate({
+              reusePrivateTitle: Boolean(operation.reusePrivateTitle),
               title: bundle.title,
               animeRef: bundle.animeRef,
               card,

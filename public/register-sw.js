@@ -46,7 +46,7 @@ if ("serviceWorker" in navigator) {
     location.hostname !== "::1"
   ) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register(swUrl).catch((err) => {
+      navigator.serviceWorker.register(swUrl, { updateViaCache: "none" }).catch((err) => {
         console.error("service worker register failed", err);
       });
     });

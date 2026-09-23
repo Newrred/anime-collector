@@ -1,4 +1,5 @@
 import { sha256, stableStringify } from '../lib/hash.mjs';
+import { SOURCE_DISTRIBUTION_POLICY } from '../contracts/catalogContracts.mjs';
 import { CANONICAL_FIELD_PATHS, COLLECTION_FIELD_PATHS, deepFrozenSnapshot } from './normalize.mjs';
 import { authenticateFieldClaims } from './claims.mjs';
 
@@ -165,6 +166,9 @@ export function buildCanonicalRevision(input) {
   const byField = new Map(CANONICAL_FIELD_PATHS.map((fieldPath) => [fieldPath, []]));
   for (const claim of uniqueClaims) byField.get(claim.fieldPath).push(claim);
   const prohibited = uniqueClaims.some((claim) => claim.catalogPromotion === 'PROHIBITED');
+  const permissioned = uniqueClaims.some((claim) => (
+    SOURCE_DISTRIBUTION_POLICY[claim.sourceId] === 'PERMISSIONED'
+  ));
   const core = {
     id: [...entityIds][0],
     ...Object.fromEntries(CANONICAL_FIELD_PATHS.map((fieldPath) => [
@@ -174,7 +178,7 @@ export function buildCanonicalRevision(input) {
       provenanceFor(fieldPath, byField.get(fieldPath))
     )),
     reviewState: prohibited ? 'TEST_ONLY' : 'PENDING_REVIEW',
-    distributionStatus: prohibited ? 'PROHIBITED' : 'CC0',
+    distributionStatus: prohibited ? 'PROHIBITED' : permissioned ? 'PERMISSIONED' : 'CC0',
   };
   return frozenSnapshot({
     ...core,

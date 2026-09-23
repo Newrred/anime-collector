@@ -61,6 +61,41 @@ test("remote DTOs redact local ownership and private media references", () => {
   assert.equal("ownerId" in assetDto, false);
 });
 
+test("catalog cover sync payload contains only immutable reference metadata, never image bytes", () => {
+  const catalogCoverRef = {
+    sourceKind: "CATALOG_COVER",
+    catalogAnimeId: "anime:77777777-7777-4777-8777-777777777777",
+    catalogCoverId: "cover:77777777-7777-4777-8777-777777777777",
+    catalogCoverRevisionId: `asset:${"b".repeat(40)}`,
+    rightsBasis: "EXPLICIT_PERMISSION",
+    permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+  };
+  const dto = toRemoteVisualAsset({
+    card,
+    asset: {
+      ...asset,
+      imageType: "CATALOG_COVER",
+      intakeSource: "CATALOG_COVER",
+      storageScope: "CATALOG_MANAGED",
+      rightsBasis: "EXPLICIT_PERMISSION",
+      localRef: null,
+      checksumSha256: null,
+      mimeType: null,
+      byteSize: null,
+      width: null,
+      height: null,
+      catalogCoverRef,
+    },
+  });
+
+  assert.equal(dto.assetType, "CATALOG_COVER");
+  assert.equal(dto.storageScope, "CATALOG_MANAGED");
+  assert.deepEqual(dto.catalogCoverRef, catalogCoverRef);
+  assert.equal("localRef" in dto, false);
+  assert.equal("sourceUrl" in dto, false);
+  assert.doesNotMatch(JSON.stringify(dto), /base64|data:image/iu);
+});
+
 test("catalog Card requires an exact catalog id before remote sync", () => {
   const anime = { id: TITLE_ID, catalogAnimeId: null, displayTitle: "Frieren", updatedAt: NOW };
   assert.throws(() => toRemoteMemoryCard({

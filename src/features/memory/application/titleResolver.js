@@ -1,5 +1,7 @@
 const sourceKey = (candidate) => (
-  `${candidate?.sourceBinding?.provider || ""}:${candidate?.sourceBinding?.externalId || ""}`
+  candidate?.sourceBinding?.externalId
+    ? `${candidate.sourceBinding.provider}:${candidate.sourceBinding.externalId}`
+    : candidate?.animeId
 );
 
 const uniqueAliases = (displayTitle, values) => {
@@ -13,16 +15,24 @@ const uniqueAliases = (displayTitle, values) => {
   });
 };
 
-const mergeCandidates = (localResults, remoteResults) => {
+const HAS_HANGUL = /[ㄱ-ㅎㅏ-ㅣ가-힣]/u;
+
+const mergeCandidates = (localResults, remoteResults, query) => {
   if (remoteResults.length === 0) return structuredClone(localResults);
   const localBySource = new Map(localResults.map((candidate) => [sourceKey(candidate), candidate]));
   const merged = new Map();
   for (const remote of remoteResults) {
     const key = sourceKey(remote);
     const local = localBySource.get(key);
+    const preferLocalDisplay = Boolean(
+      local && HAS_HANGUL.test(query) && HAS_HANGUL.test(local.displayTitle),
+    );
+    const displayTitle = preferLocalDisplay ? local.displayTitle : remote.displayTitle;
     merged.set(key, {
       ...structuredClone(remote),
-      aliases: uniqueAliases(remote.displayTitle, [
+      displayTitle,
+      aliases: uniqueAliases(displayTitle, [
+        remote.displayTitle,
         ...(remote.aliases || []),
         ...(local ? [local.displayTitle, ...(local.aliases || [])] : []),
       ]),
@@ -64,9 +74,14 @@ export function createCombinedTitleResolver({ localResolver, remoteResolver, rem
       }
 
       return {
-        results: mergeCandidates(localResults, remoteResults),
+        results: mergeCandidates(localResults, remoteResults, normalizedQuery),
         remoteStatus,
       };
+    },
+    resolveCover(ref) {
+      return typeof remoteResolver.resolveCover === "function"
+        ? remoteResolver.resolveCover(ref)
+        : Promise.resolve(null);
     },
   });
 }

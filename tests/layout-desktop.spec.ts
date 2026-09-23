@@ -8,7 +8,7 @@ const DESKTOP_VIEWPORTS = [
 
 const ROUTES = [
   "/",
-  "/library/",
+  "/library/?focus=edit",
   "/tier/",
   "/profile/",
   "/data/",
@@ -86,7 +86,7 @@ test.describe("Desktop Layout Regression", () => {
 
       const rhythmCases = [
         { route: "/", leadSelector: ".home-empty-state" },
-        { route: "/library/", leadSelector: ".library-panel" },
+        { route: "/library/?focus=edit", leadSelector: ".library-panel" },
         { route: "/data/", leadSelector: ".surface-card" },
       ];
 
@@ -139,7 +139,7 @@ test.describe("Desktop Layout Regression", () => {
         list: [{ anilistId: 1, status: "완료", score: 9, memo: "fixture", addedAt: 1 }],
         watchLogs: [],
       });
-      await page.goto("/library/", { waitUntil: "networkidle" });
+      await page.goto("/library/?focus=edit", { waitUntil: "networkidle" });
       await page.waitForTimeout(350);
 
       const firstCard = page.locator(".library-grid .card").first();

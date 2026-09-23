@@ -1,4 +1,5 @@
-import aliasSeed from "../../data/aliases.json";
+import aliasSeed from "../../data/reviewedAliasSeed.js";
+import { titleSearchMatchRank } from './titleSearchMatch.js';
 import { fetchAnimeCardsByIds, searchAnimeByTitle } from "../../lib/anilist.js";
 import {
   wikidataGetKoTitlesByAniListIds,
@@ -20,8 +21,7 @@ function normalizeText(value) {
   return String(value || "")
     .toLowerCase()
     .normalize("NFKC")
-    .replace(/\s+/g, "")
-    .replace(/[^\p{L}\p{N}]/gu, "");
+    .replace(/\s+/g, "");
 }
 
 function buildAliasEntries(seed) {
@@ -47,11 +47,7 @@ function findAliasMatches(query, aliasEntries, limit = 18) {
   for (const row of aliasEntries) {
     let best = 0;
     for (const name of row.names) {
-      const normalizedName = normalizeText(name);
-      if (!normalizedName) continue;
-      if (normalizedName === normalizedQuery) best = Math.max(best, 420);
-      else if (normalizedName.startsWith(normalizedQuery)) best = Math.max(best, 320);
-      else if (normalizedName.includes(normalizedQuery)) best = Math.max(best, 240);
+      best = Math.max(best, [0, 240, 320, 420][titleSearchMatchRank(name, query)]);
     }
     if (best > 0) hits.push({ id: row.id, ko: row.ko, score: best, sourceRank: 0, src: "alias" });
   }
@@ -77,7 +73,7 @@ export async function searchRemoteCandidates(query, libraryIdSet = new Set()) {
   if (trimmed.length < 2) return [];
 
   const cache = (await loadSearchCacheMap().catch(() => new Map())) || new Map();
-  const catalogKey = `quick:catalog-v2:${normalizeText(trimmed)}`;
+  const catalogKey = `quick:catalog-identity-v4:${normalizeText(trimmed)}`;
   const catalogCached = cache.get(catalogKey);
   if (catalogCached && isFreshSearchCacheEntry(catalogCached, Date.now())) {
     return projectCatalogQuickRows(catalogCached.results, libraryIdSet);
@@ -96,7 +92,7 @@ export async function searchRemoteCandidates(query, libraryIdSet = new Set()) {
     // The established AniList/Wikidata path remains the bounded fallback.
   }
 
-  const key = `quick:${normalizeText(trimmed)}`;
+  const key = `quick:identity-v3:${normalizeText(trimmed)}`;
   const cached = cache.get(key);
 
   if (cached && isFreshSearchCacheEntry(cached, Date.now())) {

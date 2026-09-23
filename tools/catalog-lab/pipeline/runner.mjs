@@ -17,7 +17,9 @@ import { storeSourceEnvelope } from './raw-store.mjs';
 import { createStateStore } from './state-store.mjs';
 import { createCatalogArtifactStore } from './artifact-store.mjs';
 import { buildServiceProjection } from './service-projection.mjs';
-import { TARGET_PROFILE_COUNTS } from './targets.mjs';
+import {
+  MAX_INCREMENT_TARGETS, TARGET_PROFILE_COUNTS, expectedTargetCount, isIncrementProfile,
+} from './targets.mjs';
 
 export const JOB_STATES = Object.freeze([
   'PENDING', 'FETCHED', 'NORMALIZED', 'MATCHED', 'CLAIMS_BUILT',
@@ -115,12 +117,21 @@ function sourceState(stage, extra = {}) {
   return { stage, ...extra };
 }
 
+function targetHasSourceId(target, sourceId) {
+  return target?.seedExternalIds?.some((entry) => entry?.sourceId === sourceId
+    && /^[1-9]\d*$/u.test(String(entry.value ?? ''))) === true;
+}
+
 function ensureInputs({ profile, targets, approvedTargetCount, registry, selectedSources }) {
-  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  const expectedCount = TARGET_PROFILE_COUNTS[profile]
+    ?? (isIncrementProfile(profile) && Number.isInteger(approvedTargetCount)
+      && approvedTargetCount >= 1 && approvedTargetCount <= MAX_INCREMENT_TARGETS
+      ? approvedTargetCount : null);
+  const batchedProfile = profile === 'full3998' || isIncrementProfile(profile);
   if (!expectedCount || !Array.isArray(targets) || approvedTargetCount !== expectedCount
     || targets.length < 1 || targets.length > approvedTargetCount
-    || (profile !== 'full3998' && targets.length !== expectedCount)
-    || (profile === 'full3998' && targets.length > 100)) {
+    || (!batchedProfile && targets.length !== expectedCount)
+    || (batchedProfile && targets.length > 100)) {
     throw typedError('SOURCE_SCOPE_EXCEEDED', 'Catalog runner target count does not match its approved profile');
   }
   if (!Array.isArray(selectedSources) || selectedSources.length === 0
@@ -176,8 +187,9 @@ function coverCandidates({ target, normalizedRecords }) {
 }
 
 /** Uses only exact normalized cover fields and the approved production download/decode/storage chain. */
-export function createDefaultCoverPipeline() {
+export function createDefaultCoverPipeline({ registry } = {}) {
   const transport = createPinnedCoverTransport();
+  const anilifeSource = registry?.find?.((entry) => entry?.sourceId === 'anilife_public');
   return async ({ target, normalizedRecords, workspace, clients }) => {
     const failures = [];
     let candidates;
@@ -189,7 +201,10 @@ export function createDefaultCoverPipeline() {
         const client = clients?.get?.(candidate.sourceId);
         if (!client?.schedule) throw typedError('COVER_SOURCE_NOT_SELECTED', 'Cover source is not selected for this run');
         const download = () => downloadCoverCandidate({
-          candidate, policy: getApprovedCoverSourcePolicy(candidate.sourceId), transport,
+          candidate,
+          policy: getApprovedCoverSourcePolicy(candidate.sourceId, candidate.sourceId === 'anilife_public'
+            && anilifeSource ? { sourceConfig: anilifeSource } : {}),
+          transport,
         });
         const sniffed = await client.schedule(download);
         const decoded = await decodeCoverWithChromium({ record: sniffed });
@@ -226,7 +241,7 @@ function countStages(targetRows) {
 export async function runCatalogPipeline({
   workspace, profile = 'golden', targets, registry, adapters, bindings = {}, selectedSources, allowNetwork,
   refresh = false, clock = { now: () => new Date().toISOString() }, httpFactory = () => createHttpClient(),
-  coverPipeline = createDefaultCoverPipeline(), approvedTargetCount = targets?.length, persistSnapshot = true,
+  coverPipeline, approvedTargetCount = targets?.length, persistSnapshot = true,
 } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
   if (allowNetwork !== true) throw typedError('CATALOG_NETWORK_PERMISSION_REQUIRED', 'Network collection requires explicit permission');
@@ -236,6 +251,7 @@ export async function runCatalogPipeline({
     throw typedError('CATALOG_RUNNER_INPUT_INVALID', 'Catalog runner clock or HTTP factory is invalid');
   }
   const registryById = new Map(registry.map((entry) => [entry.sourceId, entry]));
+  const resolvedCoverPipeline = coverPipeline ?? createDefaultCoverPipeline({ registry });
   const clients = new Map(selectedSources.map((sourceId) => {
     const entry = registryById.get(sourceId);
     return [sourceId, createRateLimitedHttpClient({
@@ -273,6 +289,12 @@ export async function runCatalogPipeline({
       return { sourceRecords, normalizedRecords };
     };
     for (const sourceId of selectedSources) {
+      if (sourceId === 'anilist' && !targetHasSourceId(target, 'anilist')) {
+        const state = sourceState('PENDING_REVIEW', { errorCode: 'ANILIST_BINDING_REQUIRED' });
+        await stateStore.write({ sourceId, targetKey: target.targetKey, state });
+        sources[sourceId] = state;
+        continue;
+      }
       const prior = await stateStore.read({ sourceId, targetKey: target.targetKey });
       if (!refresh && ['COMPLETED', 'CLAIMS_BUILT', 'IMAGE_VALIDATED'].includes(prior?.stage) && prior.sourceRecordId) {
         const record = await store.readSourceRecord({ sourceId, targetKey: target.targetKey, sourceRecordId: prior.sourceRecordId });
@@ -348,7 +370,7 @@ export async function runCatalogPipeline({
     try {
       cover = await store.writeCoverObservation(target);
       if (refresh || !cover?.localRef) {
-        const observation = await runCoverPipeline(coverPipeline, { target, normalizedRecords, workspace, clients });
+        const observation = await runCoverPipeline(resolvedCoverPipeline, { target, normalizedRecords, workspace, clients });
         cover = observation;
         await store.writeCoverObservation(target, observation);
         growth.images += Number(observation?.created === true);
@@ -405,7 +427,7 @@ export async function runCatalogPipeline({
 }
 
 function ensureRebuildInputs({ profile, targets, clock }) {
-  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  const expectedCount = expectedTargetCount(profile, targets);
   if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
     throw typedError('SOURCE_SCOPE_EXCEEDED', 'Rebuild target count does not match its approved profile');
   }
@@ -506,7 +528,7 @@ export async function rebuildCatalogProfile({
 
 export async function validateCatalogArtifacts({ workspace, profile = 'golden', targets } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
-  const expectedCount = TARGET_PROFILE_COUNTS[profile];
+  const expectedCount = expectedTargetCount(profile, targets);
   if (!expectedCount || !Array.isArray(targets) || targets.length !== expectedCount) {
     throw typedError('SOURCE_SCOPE_EXCEEDED', 'Validation target count does not match its approved profile');
   }

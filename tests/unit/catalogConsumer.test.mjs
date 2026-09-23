@@ -32,15 +32,28 @@ const detail = {
   },
   studios: [{ name: "Sunrise", role: "ANIMATION_PRODUCTION" }],
   genres: { core: ["Action", "Sci-Fi"], source: [] },
-  cover: { publicUrl: "https://example.supabase.co/storage/v1/object/public/catalog-covers-preview/cover.jpg", width: 460, height: 640 },
+  cover: {
+    publicUrl: "https://example.supabase.co/storage/v1/object/public/catalog-covers-preview/cover.jpg",
+    width: 460,
+    height: 640,
+    catalogCoverRef: {
+      sourceKind: "CATALOG_COVER",
+      catalogAnimeId: animeId,
+      catalogCoverId: "cover:11111111-1111-4111-8111-000000000001",
+      catalogCoverRevisionId: `asset:${"a".repeat(40)}`,
+      rightsBasis: "EXPLICIT_PERMISSION",
+      permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+    },
+  },
 };
 
-test("detail becomes an exact AnimeRef choice without retaining the cover", () => {
+test("detail becomes an exact AnimeRef choice with an immutable catalog cover reference", () => {
   const choice = detailToTitleChoice(detail);
   assert.equal(choice.animeId, animeId);
   assert.equal(choice.displayTitle, "카우보이 비밥");
   assert.deepEqual(choice.sourceBinding, { provider: "ANILIST", externalId: "1" });
-  assert.doesNotMatch(JSON.stringify(choice), /https?:|cover/iu);
+  assert.equal(choice.coverPreviewUrl, detail.cover.publicUrl);
+  assert.deepEqual(choice.catalogCoverRef, detail.cover.catalogCoverRef);
 });
 
 test("catalog Library search projects bounded detail rows into the existing UI contract", async () => {

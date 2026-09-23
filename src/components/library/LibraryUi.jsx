@@ -34,12 +34,15 @@ function StatBars({ rows, maxCount, emptyText = "데이터 없음" }) {
 }
 
 function SegTabButton({ active, onClick, children, className = "", ...props }) {
+  const stateProps = props.role === "radio"
+    ? { "aria-checked": active }
+    : { "aria-pressed": active };
   return (
     <button
       type="button"
       onClick={onClick}
       className={`library-seg-btn${active ? " is-active" : ""}${className ? ` ${className}` : ""}`}
-      aria-pressed={active}
+      {...stateProps}
       {...props}
     >
       {children}

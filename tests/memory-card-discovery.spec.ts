@@ -86,7 +86,7 @@ async function searchCatalogResult(page: Page, path = "/") {
   const search = page.locator(".quick-action__input:visible");
   await search.fill("Cowboy Bebop");
   const row = page.locator(".quick-action-row").filter({
-    has: page.getByRole("button", { name: "Add to Library" }),
+    has: page.getByRole("button", { name: "Save Title" }),
   });
   await expect(row).toBeVisible();
   return row;
@@ -96,7 +96,7 @@ test("catalog search card action preserves the exact AnimeRef without changing L
   await installCatalogSearchFixture(page);
   const row = await searchCatalogResult(page);
 
-  await row.getByRole("button", { name: "Create memory card" }).click();
+  await row.getByRole("button", { name: "Add Memory" }).click();
 
   await expect(page).toHaveURL(new RegExp(`/memory/new/\\?animeId=${encodeURIComponent(catalogAnimeId)}`));
   await expect(page.getByLabel("Anime or card title")).toHaveValue("카우보이 비밥");
@@ -112,9 +112,10 @@ test("catalog result exposes one explicit Memory action and a separate Library-o
   await expect(row.locator(".quick-action-row__create-action")).toHaveCount(1);
   await expect(row.locator(".quick-action-row__library-action")).toHaveCount(1);
   await expect(row.getByRole("group", { name: "Choose how to use this title" })).toBeVisible();
-  await expect(row.getByRole("button")).toHaveCount(2);
-  await expect(row.getByText("Starts a private card without adding this title to Library.", { exact: true })).toBeVisible();
-  await expect(row.getByText("Adds this title to Library only. No Memory Card is created.", { exact: true })).toBeVisible();
+  await expect(row.getByRole("group", { name: "Choose how to use this title" }).getByRole("button")).toHaveCount(2);
+  await expect(row.locator(".quick-action-row__main")).toHaveCount(1);
+  await expect(row.getByText("Starts a private Memory without saving this title.", { exact: true })).toBeVisible();
+  await expect(row.getByText("Saves this title only. No Memory is created.", { exact: true })).toBeVisible();
 
   const hierarchy = await row.evaluate((element) => {
     const primary = element.querySelector(".quick-action-row__create-action");
@@ -154,7 +155,7 @@ test("native Home actions target packaged index documents instead of clean Web r
   await installCatalogSearchFixture(page);
   await page.goto("/");
 
-  await page.getByRole("link", { name: "Create memory card" }).first().click();
+  await page.getByRole("link", { name: "Add Memory" }).first().click();
 
   await expect(page).toHaveURL(/\/memory\/new\/index\.html$/u);
 });
@@ -166,7 +167,7 @@ test("native search actions preserve the selected title in the packaged composer
   await installCatalogSearchFixture(page);
   const row = await searchCatalogResult(page);
 
-  await row.getByRole("button", { name: "Create memory card" }).click();
+  await row.getByRole("button", { name: "Add Memory" }).click();
 
   await expect(page).toHaveURL(new RegExp(
     `/memory/new/index\\.html\\?animeId=${encodeURIComponent(catalogAnimeId)}`,
@@ -183,17 +184,17 @@ test("native quick add exposes an actionable confirmation inside the mobile sear
   await page.locator(".quick-action__mobile-trigger:visible").click();
   await page.locator(".quick-action__input:visible").fill("Cowboy Bebop");
   const row = page.locator(".quick-action-row").filter({
-    has: page.getByRole("button", { name: "Add to Library" }),
+    has: page.getByRole("button", { name: "Save Title" }),
   });
-  await row.getByRole("button", { name: "Add to Library" }).click();
+  await row.getByRole("button", { name: "Save Title" }).click();
 
   const feedback = page.locator(".quick-action-panel__feedback");
-  await expect(feedback).toContainText("Added to Library.");
-  const openLibrary = feedback.getByRole("button", { name: "Open Library" });
+  await expect(feedback).toContainText("Title saved.");
+  const openLibrary = feedback.getByRole("button", { name: "View title" });
   await expect(openLibrary).toBeVisible();
   await expect(openLibrary).toBeInViewport();
   await openLibrary.click();
-  await expect(page).toHaveURL(/\/library\/index\.html\?animeId=1$/u);
+  await expect(page).toHaveURL(/\/title\/index\.html\?(?:animeId|anilistId)=/u);
 });
 
 test("native account settings button opens the packaged Data document", async ({ page }) => {
@@ -213,13 +214,13 @@ test("native account settings button opens the packaged Data document", async ({
 test("catalog search Library action adds only the Library row and creates no Memory draft", async ({ page }) => {
   await installCatalogSearchFixture(page);
   const row = await searchCatalogResult(page, "/library/");
-  await expect(page.locator(".library-card")).toHaveCount(0);
+  await expect(page.locator(".title-collection__grid > *")).toHaveCount(0);
 
-  await row.getByRole("button", { name: "Add to Library" }).click();
+  await row.getByRole("button", { name: "Save Title" }).click();
 
-  await expect(page).toHaveURL(/\/library\/?$/u);
-  await expect(page.getByRole("status")).toHaveText("Added to Library.");
-  await expect(page.locator(".library-card")).toHaveCount(1);
+  await expect(page).toHaveURL(/\/titles\/?$/u);
+  await expect(page.getByRole("status")).toHaveText("Title saved.");
+  await expect(page.locator(".title-poster-tile, .title-album-card")).toHaveCount(1);
   const library = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"));
   expect(library).toHaveLength(1);
   expect(library[0].anilistId).toBe(1);

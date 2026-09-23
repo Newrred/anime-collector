@@ -5,6 +5,15 @@ import { createMemoryCardCommand } from "../../src/features/memory/application/c
 
 const OWNER_ID = "guest:11111111-1111-4111-8111-111111111111";
 const NOW = "2026-08-12T01:00:00.000Z";
+const CATALOG_ANIME_ID = "anime:11111111-1111-4111-8111-000000154587";
+const CATALOG_COVER_REF = Object.freeze({
+  sourceKind: "CATALOG_COVER",
+  catalogAnimeId: CATALOG_ANIME_ID,
+  catalogCoverId: "cover:11111111-1111-4111-8111-000000154587",
+  catalogCoverRevisionId: `asset:${"a".repeat(40)}`,
+  rightsBasis: "EXPLICIT_PERMISSION",
+  permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+});
 
 class FakeRepository {
   constructor() {
@@ -246,4 +255,73 @@ test("selected catalog candidate creates an AnimeRef card without retaining prov
     },
   ]);
   assert.doesNotMatch(JSON.stringify(calls.events), /Frieren|154587|https?/i);
+});
+
+test("approved catalog cover creates a local private Card without copying image bytes", async () => {
+  const { command, repository, calls } = createHarness();
+  await command.execute({
+    operationId: "operation-1",
+    ownerId: OWNER_ID,
+    titleChoice: {
+      kind: "ANIME_REF",
+      animeId: CATALOG_ANIME_ID,
+      displayTitle: "Frieren: Beyond Journey's End",
+      aliases: ["장송의 프리렌"],
+      genres: ["Fantasy"],
+      sourceBinding: { provider: "ANILIST", externalId: "154587" },
+      verificationState: "PROVIDER_CANDIDATE",
+    },
+    catalogCoverRef: CATALOG_COVER_REF,
+    note: "첫 여행이 끝난 뒤의 정적이 오래 남았다.",
+  });
+
+  const asset = repository.assets.get("asset-1");
+  assert.equal(calls.promote, 0);
+  assert.equal(asset.imageType, "CATALOG_COVER");
+  assert.equal(asset.storageScope, "CATALOG_MANAGED");
+  assert.equal(asset.localRef, null);
+  assert.equal(asset.checksumSha256, null);
+  assert.deepEqual(asset.catalogCoverRef, CATALOG_COVER_REF);
+  assert.equal(repository.cards.get("card-1").status, "COMPLETE_PRIVATE");
+});
+
+test("catalog cover requires a personal signal and matching catalog title before reserve", async () => {
+  const { command, repository, calls } = createHarness();
+  const base = {
+    operationId: "operation-1",
+    ownerId: OWNER_ID,
+    titleChoice: {
+      kind: "ANIME_REF",
+      animeId: CATALOG_ANIME_ID,
+      displayTitle: "Frieren",
+      sourceBinding: { provider: "ANILIST", externalId: "154587" },
+      verificationState: "PROVIDER_CANDIDATE",
+    },
+    catalogCoverRef: CATALOG_COVER_REF,
+  };
+
+  await assert.rejects(() => command.execute(base), {
+    code: "CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED",
+  });
+  await assert.rejects(() => command.execute({
+    ...base,
+    note: "기억",
+    titleChoice: { ...base.titleChoice, animeId: "anime:33333333-3333-4333-8333-333333333333" },
+  }), { code: "CATALOG_COVER_TITLE_MISMATCH" });
+  assert.equal(repository.operations.size, 0);
+  assert.equal(calls.promote, 0);
+});
+
+
+test("explicit private title reuse preserves identity and rejects other owners before writing", async () => {
+  const { command, repository } = createHarness();
+  const title = {id: "existing-title", ownerId: OWNER_ID, displayTitle: "Existing", createdAt: NOW, updatedAt: NOW};
+  repository.getPrivateTitle = async () => structuredClone(title);
+  const result = await command.execute({...input(), titleChoice: {kind: "PRIVATE_TITLE", privateTitleId: title.id, displayTitle: "Ignored rename"}});
+  assert.equal(result.privateTitleId, title.id);
+  assert.equal(repository.titles.get(title.id).displayTitle, "Existing");
+  const second = createHarness();
+  second.repository.getPrivateTitle = async () => ({...title, ownerId: "guest:22222222-2222-4222-8222-222222222222"});
+  await assert.rejects(second.command.execute({...input(), titleChoice: {kind: "PRIVATE_TITLE", privateTitleId: title.id}}), {code: "PRIVATE_TITLE_NOT_FOUND"});
+  assert.equal(second.repository.cards.size, 0);
 });

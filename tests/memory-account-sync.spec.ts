@@ -277,3 +277,27 @@ test("explicit sync exposes local and cloud notes without logging either value",
   expect(callsAfter).toContain("resolve_USE_CLOUD");
   expect(callsAfter).not.toContain("resolve_KEEP_LOCAL");
 });
+
+
+test('sync pause and retry show partial progress instead of false success', async ({ page }) => {
+  await installAccountAdapters(page, { signedIn: true, guestCards: 0 });
+  await page.addInitScript(() => {
+    const adapters = (window as any).__MOEMOA_TEST_MEMORY_ACCOUNT_ADAPTERS__;
+    if (!adapters) return;
+    let requests = 0;
+    adapters.gateway.pullChanges = async () => {
+      requests++;
+      if (requests === 1) await new Promise(resolve => { (window as any).finishSyncRequest = resolve; });
+      return { changes: [], nextSyncSeq: 0, requiresFullResync: false };
+    };
+  });
+  await page.goto('/data/');
+  await page.getByRole('button', { name: 'Sync now', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Pause sync', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Pause sync', exact: true }).click();
+  await page.evaluate(() => (window as any).finishSyncRequest());
+  await expect(page.getByRole('status').filter({ hasText: 'Sync paused.' })).toBeVisible();
+  await expect(page.getByText('Metadata sync is complete.', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sync now', exact: true }).click();
+  await expect(page.getByText('Metadata sync is complete.', { exact: true })).toBeVisible();
+});

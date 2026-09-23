@@ -1,10 +1,9 @@
 import { createHttpClient } from '../lib/http.mjs';
 import { sha256, stableStringify } from '../lib/hash.mjs';
 
-const ANILIFE_ORIGIN = 'https://anilife1.tv';
-const SITEMAP_URL = `${ANILIFE_ORIGIN}/sitemap.xml`;
-const PARSER_VERSION = 'anilife-public-page-test-v2';
+const PARSER_VERSION = 'anilife-public-page-test-v3';
 const MANUAL_REVIEW_EVIDENCE = 'MANUAL_PUBLIC_PAGE_REVIEW';
+const REVIEWED_BROWSER_CAPTURE_METHOD = 'IAB_PUBLIC_RENDERED_PAGE_MINIMAL';
 const IDENTITY_EVIDENCE_VERSION = 'ANILIFE_IDENTITY_EVIDENCE_V1';
 const IDENTITY_RULE = 'EXACT_TITLE_CANDIDATE_COUNT_V1';
 const CANDIDATE_COUNT_BASIS = 'MANUAL_EXACT_TITLE_CANDIDATE_REVIEW';
@@ -14,6 +13,10 @@ const IDENTITY_EVIDENCE_KEYS = Object.freeze([
 ]);
 const ALLOWED_JSON_LD_TYPES = new Set(['TVSeries', 'Movie', 'VideoObject']);
 const MAX_SITEMAP_BYTES = 5 * 1024 * 1024;
+const ANILIFE_STATUS_BADGES = new Set([
+  '완결', '방영중', '방영 중', '방영예정', '방영 예정', '예정', '방영 중단', '중단', '취소',
+]);
+const ANILIFE_FORMAT_BADGES = new Set(['TV', 'Movie', 'OVA', 'ONA', 'Special', 'Web', 'WEB_SHORT']);
 
 function typedError(code, message = code) {
   const error = new Error(message);
@@ -25,7 +28,21 @@ function sourceSchemaDrift() {
   return typedError('SOURCE_SCHEMA_DRIFT', 'AniLife public page does not match the allowed schema');
 }
 
-function assertApprovedPublicUrl(url) {
+function configuredOrigin(sourceConfig) {
+  if (!sourceConfig || typeof sourceConfig !== 'object' || sourceConfig.sourceId !== 'anilife_public') {
+    throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife runtime source configuration is invalid');
+  }
+  try {
+    const parsed = new URL(sourceConfig.baseUrl);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash
+      || parsed.pathname !== '/' || parsed.origin !== sourceConfig.baseUrl) throw new TypeError('invalid origin');
+    return parsed.origin;
+  } catch {
+    throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife runtime source configuration is invalid');
+  }
+}
+
+function assertApprovedPublicUrl(url, origin) {
   let parsed;
   try {
     parsed = new URL(url);
@@ -34,15 +51,15 @@ function assertApprovedPublicUrl(url) {
   }
   const isSitemap = parsed.pathname === '/sitemap.xml';
   const isContent = /^\/content\/[1-9]\d*$/.test(parsed.pathname);
-  if (parsed.origin !== ANILIFE_ORIGIN || parsed.username || parsed.password || parsed.search || parsed.hash
+  if (parsed.origin !== origin || parsed.username || parsed.password || parsed.search || parsed.hash
     || (!isSitemap && !isContent)) {
     throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife URL is not an approved public endpoint');
   }
   return parsed;
 }
 
-function contentPageUrl(contentId) {
-  return assertApprovedPublicUrl(`${ANILIFE_ORIGIN}/content/${contentId}`).href;
+function contentPageUrl(contentId, origin) {
+  return assertApprovedPublicUrl(`${origin}/content/${contentId}`, origin).href;
 }
 
 function isPlainRecord(value) {
@@ -216,7 +233,30 @@ function openGraphValue(html, property) {
   return null;
 }
 
-function projectJsonLd(record, { contentId, publicPageUrl, identityEvidence }) {
+function mediaType(record) {
+  const types = Array.isArray(record['@type']) ? record['@type'] : [record['@type']];
+  return types.find((type) => ALLOWED_JSON_LD_TYPES.has(type)) ?? null;
+}
+
+function workBadgeMetadata(html) {
+  for (const startTag of html.matchAll(/<div\b[^>]*>/gi)) {
+    const attributes = parseAttributes(startTag[0]);
+    if (!String(attributes.class ?? '').split(/\s+/u).includes('tv-work-badges')) continue;
+    const contentStart = startTag.index + startTag[0].length;
+    const contentEnd = html.toLowerCase().indexOf('</div>', contentStart);
+    if (contentEnd < 0) return Object.freeze({ format: null, status: null });
+    const values = [...html.slice(contentStart, contentEnd).matchAll(/<span\b[^>]*>([^<>]*)<\/span\s*>/gi)]
+      .map((match) => textValue(decodeHtmlEntities(match[1])))
+      .filter(Boolean);
+    return Object.freeze({
+      format: values.find((value) => ANILIFE_FORMAT_BADGES.has(value)) ?? null,
+      status: values.find((value) => ANILIFE_STATUS_BADGES.has(value)) ?? null,
+    });
+  }
+  return Object.freeze({ format: null, status: null });
+}
+
+function projectJsonLd(record, { contentId, publicPageUrl, identityEvidence, badges }) {
   return {
     contentId,
     title: textValue(record.name),
@@ -224,15 +264,18 @@ function projectJsonLd(record, { contentId, publicPageUrl, identityEvidence }) {
     datePublished: textValue(record.datePublished),
     numberOfEpisodes: episodeCount(record.numberOfEpisodes),
     imageUrl: imageValue(record.image),
+    format: badges.format ?? mediaType(record),
+    status: badges.status,
     publicPageUrl,
     identityEvidence,
   };
 }
 
 function parseAllowedPayload(html, { contentId, publicPageUrl, identityEvidence }) {
+  const badges = workBadgeMetadata(html);
   const { record, schemaDrift } = parseJsonLd(html);
   if (!schemaDrift && record) return projectJsonLd(record, {
-    contentId, publicPageUrl, identityEvidence,
+    contentId, publicPageUrl, identityEvidence, badges,
   });
   const title = openGraphValue(html, 'og:title');
   const imageUrl = openGraphValue(html, 'og:image');
@@ -241,16 +284,84 @@ function parseAllowedPayload(html, { contentId, publicPageUrl, identityEvidence 
     contentId,
     ...(title ? { title } : {}),
     ...(imageUrl ? { imageUrl } : {}),
+    ...(badges.format ? { format: badges.format } : {}),
+    ...(badges.status ? { status: badges.status } : {}),
     publicPageUrl,
     identityEvidence,
     errorCode: 'SOURCE_SCHEMA_DRIFT',
   });
 }
 
-function sitemapHasContentUrl(xml, publicPageUrl) {
+function parseCapturedJsonLd(rawJsonLd) {
+  if (!Array.isArray(rawJsonLd) || rawJsonLd.length < 1 || rawJsonLd.length > 16
+    || rawJsonLd.some((value) => typeof value !== 'string' || !value.trim())
+    || rawJsonLd.reduce((sum, value) => sum + value.length, 0) > 1024 * 1024) {
+    throw sourceSchemaDrift();
+  }
+  const nodes = [];
+  for (const raw of rawJsonLd) {
+    try {
+      nodes.push(...jsonLdNodes(JSON.parse(raw)));
+    } catch {
+      throw sourceSchemaDrift();
+    }
+  }
+  const record = nodes.find((node) => isAllowedMediaNode(node) && textValue(node.name));
+  if (!record) throw sourceSchemaDrift();
+  return record;
+}
+
+function capturedBadges(values) {
+  if (!Array.isArray(values) || values.length > 16
+    || values.some((value) => typeof value !== 'string' || !value.trim() || value.length > 64)) {
+    throw sourceSchemaDrift();
+  }
+  return Object.freeze({
+    format: values.find((value) => ANILIFE_FORMAT_BADGES.has(value)) ?? null,
+    status: values.find((value) => ANILIFE_STATUS_BADGES.has(value)) ?? null,
+  });
+}
+
+/**
+ * Converts a minimal, operator-reviewed rendered-page capture into the same immutable envelope as
+ * the public HTML adapter. This path is intentionally offline and does not authorize a different
+ * origin, endpoint, identity binding, or field set.
+ */
+export function createAniLifeReviewedCaptureEnvelope({ target, binding, capture, sourceConfig } = {}) {
+  const origin = configuredOrigin(sourceConfig);
+  const safeCapture = snapshotJsonRecord(capture);
+  const { contentId, identityEvidence = null } = validateAniLifeBinding(binding, {
+    targetKey: target?.targetKey,
+  });
+  const publicPageUrl = contentPageUrl(contentId, origin);
+  if (safeCapture.captureMethod !== REVIEWED_BROWSER_CAPTURE_METHOD
+    || safeCapture.contentId !== contentId
+    || safeCapture.pageUrl !== publicPageUrl
+    || !exactIsoTimestamp(safeCapture.capturedAt)) {
+    throw sourceSchemaDrift();
+  }
+  const payload = projectJsonLd(parseCapturedJsonLd(safeCapture.rawJsonLd), {
+    contentId,
+    publicPageUrl,
+    identityEvidence,
+    badges: capturedBadges(safeCapture.badges),
+  });
+  return Object.freeze({
+    sourceId: 'anilife_public',
+    targetKey: target.targetKey,
+    sourceEntityId: contentId,
+    responseStatus: 200,
+    fetchedAt: safeCapture.capturedAt,
+    requestFingerprint: `reviewed-browser-public-content:${contentId}:${sha256(payload)}`,
+    parserVersion: `${PARSER_VERSION}+reviewed-browser-capture-v1`,
+    payload: Object.freeze(payload),
+  });
+}
+
+function sitemapHasContentUrl(xml, publicPageUrl, origin) {
   for (const locator of extractSitemapLocators(xml) ?? []) {
     try {
-      if (assertApprovedPublicUrl(locator).href === publicPageUrl) return true;
+      if (assertApprovedPublicUrl(locator, origin).href === publicPageUrl) return true;
     } catch {
       // Sitemap entries outside the narrow public allowlist are never followed.
     }
@@ -313,8 +424,8 @@ function extractSitemapLocators(xml) {
   return locators.map((locator) => locator.trim());
 }
 
-async function requestApprovedPublicPage(http, url) {
-  assertApprovedPublicUrl(url);
+async function requestApprovedPublicPage(http, url, origin) {
+  assertApprovedPublicUrl(url, origin);
   try {
     return await http.request({ url, kind: 'DATA', init: { redirect: 'error' } });
   } catch (error) {
@@ -369,7 +480,6 @@ export function validateAniLifeBinding(binding, { targetKey } = {}) {
   if (typeof contentId !== 'string' || !/^[1-9]\d*$/.test(contentId)) {
     throw typedError('SOURCE_ENDPOINT_FORBIDDEN', 'AniLife content binding must be a numeric public content id');
   }
-  contentPageUrl(contentId);
   const identityEvidence = validatedIdentityEvidence(ownDataValue(snapshot, 'identityEvidence'), {
     targetKey, contentId,
   });
@@ -405,8 +515,10 @@ function unboundEnvelope({ target, clock }) {
  * bound content page per target. It never performs title discovery, API, archive, playback, or
  * comment requests.
  */
-export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } = {}) {
+export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch, sourceConfig } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
+  const origin = configuredOrigin(sourceConfig);
+  const sitemapUrl = assertApprovedPublicUrl(`${origin}/sitemap.xml`, origin).href;
   const defaultHttp = createHttpClient({ fetchImpl });
 
   return Object.freeze({
@@ -425,11 +537,11 @@ export function createAniLifePublicPageAdapter({ fetchImpl = globalThis.fetch } 
         const { contentId, identityEvidence = null } = validateAniLifeBinding(foundBinding.binding, {
           targetKey: target.targetKey,
         });
-        const publicPageUrl = contentPageUrl(contentId);
-        const sitemapResponse = await requestApprovedPublicPage(http, assertApprovedPublicUrl(SITEMAP_URL).href);
+        const publicPageUrl = contentPageUrl(contentId, origin);
+        const sitemapResponse = await requestApprovedPublicPage(http, sitemapUrl, origin);
         const sitemap = await readSitemapBody(sitemapResponse);
-        if (!sitemapHasContentUrl(sitemap, publicPageUrl)) throw sourceSchemaDrift();
-        const contentResponse = await requestApprovedPublicPage(http, publicPageUrl);
+        if (!sitemapHasContentUrl(sitemap, publicPageUrl, origin)) throw sourceSchemaDrift();
+        const contentResponse = await requestApprovedPublicPage(http, publicPageUrl, origin);
         let html;
         try {
           html = await contentResponse.text();

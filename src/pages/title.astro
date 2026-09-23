@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TitleHub from "../features/titles/components/TitleHub.jsx";
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout>
+  <TitleHub base={base} client:only="react" />
+</BaseLayout>

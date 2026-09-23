@@ -1,3 +1,5 @@
+import { isLegacySocialAvailable } from "../domain/legacySocialAvailability.js";
+import UnavailableSocialPage from "./profile/UnavailableSocialPage.jsx";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { getMessageGroup } from "../domain/messages.js";
 import { buildPublicProfilePath, isValidProfileHandle } from "../domain/profileUtils.js";
@@ -78,6 +80,10 @@ function resolveWidgetLabel(widgetId, locale = "ko") {
 }
 
 export default function ProfileCenter() {
+  return isLegacySocialAvailable() ? <LegacyProfileCenter /> : <UnavailableSocialPage account={true} />;
+}
+
+function LegacyProfileCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}profile/`);
   const copy = getMessageGroup(locale, "profilePage");

@@ -80,6 +80,7 @@ test('development read model projects only safe searchable catalog data and vali
 
     assert.deepEqual(results, [{
       kind: 'ANIME_REF',
+      animeId: target.moemoaAnimeId,
       displayTitle: '장송의 프리렌',
       aliases: ["Frieren: Beyond Journey's End"],
       genres: [],
@@ -134,7 +135,8 @@ function responseHarness() {
 test('development middleware is loopback-only and returns non-disclosing JSON', async () => {
   const reader = {
     search: async () => [{
-      kind: 'ANIME_REF', displayTitle: '장송의 프리렌', aliases: [], genres: [],
+      kind: 'ANIME_REF', animeId: target.moemoaAnimeId,
+      displayTitle: '장송의 프리렌', aliases: [], genres: [],
       sourceBinding: { provider: 'ANILIST', externalId: '154587' },
       verificationState: 'PROVIDER_CANDIDATE', catalogSource: 'LOCAL_TEST_SERVICE_PROJECTION',
       readiness: 'READY', coverPreviewUrl: null,
@@ -154,4 +156,42 @@ test('development middleware is loopback-only and returns non-disclosing JSON', 
   assert.equal(output.headers.get('cache-control'), 'no-store');
   assert.equal(JSON.parse(output.body).results.length, 1);
   assert.doesNotMatch(output.body.toString('utf8'), /rawPayloadRef|localRef|checksum|[A-Z]:\\/iu);
+});
+
+test('development read model exposes source-reviewed AniLife targets without a cover route', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'moemoa-dev-catalog-anilife-'));
+  try {
+    const workspace = await openCatalogWorkspace({ repoRoot, workspaceRoot: root, create: true });
+    const store = createCatalogArtifactStore({ workspace });
+    const anilifeTarget = {
+      ...target,
+      targetKey: 'ANILIFE:703',
+      moemoaAnimeId: 'anime:00000000-0000-4000-8000-000000000703',
+    };
+    const anilifeProjection = projection({
+      targetKey: anilifeTarget.targetKey,
+      animeId: anilifeTarget.moemoaAnimeId,
+      preferredTitle: { locale: 'ko', value: '완전 신규 작품' },
+      searchTitles: [{ locale: 'ko', value: '완전 신규 작품' }],
+    });
+    await store.writeManifest('increment-2026-09', [anilifeTarget]);
+    await store.writeServiceProjection(anilifeTarget, anilifeProjection);
+    const reader = createDevelopmentCatalogReadModel({
+      workspace, profile: 'increment-2026-09', refreshTtlMs: 0,
+    });
+    assert.deepEqual(await reader.search('신규 작품'), [{
+      kind: 'ANIME_REF',
+      animeId: anilifeTarget.moemoaAnimeId,
+      displayTitle: '완전 신규 작품',
+      aliases: [],
+      genres: [],
+      sourceBinding: { provider: 'ANILIFE', externalId: '703' },
+      verificationState: 'SOURCE_REVIEWED',
+      catalogSource: 'LOCAL_TEST_SERVICE_PROJECTION',
+      readiness: 'READY_WITH_GAPS',
+      coverPreviewUrl: null,
+    }]);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

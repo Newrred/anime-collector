@@ -1,5 +1,9 @@
 # Image-first UI Readiness Implementation Plan
 
+> **Status:** `COMPLETED WEB UI BASELINE — PARTIALLY SUPERSEDED 2026-09-03`
+>
+> Tasks 1~10의 구현·검증 이력은 유지한다. 이후 Library/Archive IA와 대표 표지 Memory visual 작업은 `docs/moemoa/plans/2026-09-03-title-hub-dual-view.md` 및 `docs/superpowers/specs/2026-09-03-title-hub-dual-view-ui.md`를 따른다.
+>
 > **For Codex:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Use `superpowers:test-driven-development` for every behavior change, `react-doctor` before the final commit, and `superpowers:verification-before-completion` before claiming completion.
 
 **Goal:** Make MOEMOA's Web-first experience feel like a deliberate, image-led private memory archive while preserving the current local-only Memory Card domain, catalog boundaries, and Android bridge behavior.
@@ -877,6 +881,34 @@ The 2026-09-02 owner walkthrough failed the pending no-explanation human gate ev
 - No Android shell changes in this task; Android consumes the shared UI only after the Web human gate passes.
 - No public UGC, private image upload, production deployment, push, or merge without separate approval.
 
+### Task 10: Mobile title-search semantics, cover previews, and Korean display recovery
+
+**Why this task exists:**
+
+The 2026-09-03 production mobile walkthrough found three connected defects in the Composer title step. The title input exposes no search keyboard semantics, catalog candidates carry only a cover asset ID and therefore render no poster, and a promotional legacy Korean preferred title can cause the clean Korean alias in the same Service Projection to lose display priority to English. These are consumer/UI corrections over the approved Production catalog; they do not change or re-ingest catalog data.
+
+**Files:**
+
+- Modify: `src/features/memory/components/MemoryTitleSelector.jsx`
+- Modify: `src/features/memory/components/memory-card-composer.css`
+- Modify: `src/features/memory/adapters/catalog/supabaseCatalogTitleResolver.js`
+- Modify: focused resolver and Composer E2E tests
+- Update: affected visual baseline and manifest only if the rendered fixture contract changes
+
+**Steps:**
+
+1. Render the title input as a search control with `type=search`, `inputmode=search`, and `enterkeyhint=search`; keep explicit Enter handling and prevent the outer card form from interpreting that action as Save.
+2. Preserve bounded locale metadata long enough to prefer a clean Hangul alias when a Korean promotional preferred title is rejected, while retaining the provider candidate and exact AniList binding.
+3. Resolve active-release `cover_asset_id` values through the existing public `catalog_assets` read model in one bounded query, validate the approved cover path/rights/storage fields, and expose only the resulting HTTPS presentation URL to the result row.
+4. 이 Task 10 범위에서는 compact 2:3 poster를 검색 결과에만 표시하고 Memory Card persistence는 변경하지 않는다.
+5. Verify mobile keyboard attributes/Enter search, `프리렌 → 장송의 프리렌`, poster rendering, fallback when cover lookup fails, persistence exclusion, unit/E2E/build/guard, and direct mobile capture.
+
+**Exclusions and gates:**
+
+- No catalog row rewrite, re-ingestion, RPC/schema migration, or provider change.
+- 이 완료된 Task 10에서는 catalog cover Memory visual을 구현하지 않았다. 해당 기능은 2026-09-03 후속 계획에서 별도 vertical slice로 구현한다.
+- No new analytics payload or logging of the free-text query.
+
 ## 9. Test strategy and acceptance criteria
 
 ### Automated layers
@@ -973,6 +1005,7 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - [x] Task 8A: 18 Golden Screenshots, cross-browser/functional gate, and document sync.
 - [ ] Task 8B: independent no-explanation human acceptance gate (checks 1/2/3/6/7/8/9); Task 9 correction is implemented, but the owner/independent recheck is still required.
 - [x] Task 9: Home, mobile manage menu, and Composer human-gate corrective pass. Direct before/after capture review and automated browser gates are complete; this does not claim the separate human gate.
+- [x] Task 10: mobile search keyboard semantics, catalog cover previews, and Korean display-title recovery. Actual Production-config Supabase smoke confirms the base title first and three decoded covers.
 
 ## 16. Discoveries and plan changes
 
@@ -1012,6 +1045,8 @@ No blocking user decision remains for implementation. Push, merge, deployment, a
 - 2026-08-24: Archive retains the approved 1200px four-column media query. The runtime boundary test uses 1199 and 1201 because Firefox represents a requested 1200px test viewport as 1199.916 visual CSS pixels; the one-pixel upper specimen avoids testing an engine rounding artifact.
 - 2026-09-02: the owner's production walkthrough is accepted as a failed human gate, superseding any implication that automated screenshot parity alone established usability. Direct 390×844 captures measured a 1,035px mobile manage-menu stack and a 1,616px Composer; direct 1440×900 captures showed underscaled content and excessive unused space. Task 9 was added to correct affordance, hierarchy, density, and search guidance without changing product or persistence semantics.
 - 2026-09-02: Task 9 makes Home a deliberate image-first hero with one dominant Create action and a secondary title-search path; the mobile manage menu is navigation-first and its 390×844 panel now fits without internal scrolling (`754px` client/scroll height); Composer exposes the first available visual action within a 320×720 viewport, adds required/optional/complete guidance, explicit field boundaries, and Enter-to-search. Storage, rights, catalog, save, and Library/Card domain behavior are unchanged.
+- 2026-09-03: production mobile reproduction showed the Composer title input has no search input/keyboard hints, title results render no image despite an approved `cover_asset_id`, and AniList 154587 is returned for `프리렌` but displayed in English because the promotional Korean preferred title is rejected before the later clean Hangul alias is considered. Task 10 corrects the consumer/UI path without changing catalog rows or persistence.
+- 2026-09-03: Task 10 first exposed a WebKit-only fast-submit failure: Enter could arrive before the Composer runtime state was ready. Search now awaits the existing runtime directly, uses the input's current value, and routes implicit outer-form submission back to title search. The final three-browser focused case is 3/3, while a clean-port Production build at 390×844 returns `장송의 프리렌` first and decodes all three Supabase covers without horizontal overflow.
 
 Add dated entries here during execution whenever evidence changes scope, sequencing, or an acceptance criterion.
 
@@ -1072,4 +1107,19 @@ Implementation is complete only when this report is evidence-backed, all blockin
 - Human acceptance gate: pending. Direct implementation review is complete, but the owner/independent no-explanation walkthrough must be repeated against the resulting build.
 - Known issues: Android adaptation and physical-device validation remain separate; bundle-size and component-size advisories remain; Composer is clearer but intentionally uses a longer guided mobile page.
 - Recommended next slice: owner visual walkthrough, then either a narrow correction from observed friction or approval to adapt the shared UI to Android.
+- Push/deploy status: not performed.
+
+### Search corrective completion report — 2026-09-03
+
+- Commits: not created; reviewed local working-tree change.
+- Implemented tasks: mobile search keyboard semantics and fast-start handling, bounded active-release cover lookup/result posters, clean Hangul display recovery, and client-side base-title-first ranking.
+- Unit: 194/194 pass, including exact legacy-prefix cleanup, Supabase cover validation, and partial-Hangul ranking.
+- Chromium focused: Composer/mobile layout 25/25 pass.
+- Golden Screenshots: 18/18 unchanged and passing.
+- Firefox/WebKit: the focused mobile Enter/poster/persistence scenario passes 3/3 across Chromium, Firefox, and WebKit. The initial WebKit failure identified and fixed the runtime-readiness race.
+- Build: 13 static pages pass; existing large `useUiPreferences` chunk warning remains.
+- Catalog guard: no leaks.
+- React Doctor: changed scope 92/100, with one chained-iteration advisory in the bounded eight-row resolver and the existing Composer complexity advisory.
+- Production-config smoke: at 390×844, `프리렌` returns `장송의 프리렌` first, followed by season 2 and the special; three Supabase covers decode at 460px natural width, Enter keeps focus on the title input, and no horizontal overflow occurs.
+- Data/persistence: no schema, RPC, catalog-row, release, or Memory DB change. Cover URL remains presentation-only and is absent from persisted AnimeRef.
 - Push/deploy status: not performed.

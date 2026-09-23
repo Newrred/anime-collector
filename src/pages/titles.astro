@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TitleCollectionView from "../features/titles/components/TitleCollectionView.jsx";
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout>
+  <TitleCollectionView base={base} client:only="react" />
+</BaseLayout>

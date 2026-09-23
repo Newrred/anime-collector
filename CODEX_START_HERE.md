@@ -1,9 +1,37 @@
 # CODEX START HERE — MOEMOA
 
-> **현재 저장소 상태 — 2026-08-21**
-> MOEMOA 인수인계 패키지와 기반 결정, Android local image intake, Private Card/Archive 영구 저장, 안전한 이미지 교체 기반이 구현됐다. 3,998개 Service Projection v2와 대표 표지의 Supabase 적재, **Library/Memory 검색의 Supabase catalog 우선 통합, Legacy 후보 격리, 표시 제목 정리, 작품 상세→정확한 AnimeRef 카드 작성**도 Preview 검증을 마쳤다. Web-first Shared UI Readiness의 발견성 구현과 Preview 검증 뒤에는 Library 빠른 추가의 화면·데이터 격리, 세 Memory route의 공통 shell·offline deep-link, Library 상세 modal의 focus 격리를 로컬 branch에서 보강했다. Home은 이제 신규 `moemoa-memory-v1`의 실제 최근 카드와 개수를 읽고 기존 Library/WatchLog와 별도 영역으로 표시한다. Memory 작성·Archive·상세는 영어 기본/한국어 선택을 즉시 반영하며, legacy JSON backup에는 Memory Card와 이미지가 포함되지 않는다는 경계도 화면에 명시한다. Milestone 4A-1 자동/Preview 검증은 통과했지만 사람의 10초 발견성·행동 구분과 전체 accessibility/visual gate는 아직 남아 있다. 2026-08-19 사용자가 확인한 Production catalog 허가는 raw payload·추가 이미지·애니 캡처·팬아트·사용자 이미지·Public UGC로 확대되지 않는다. 다음 큰 순서는 남은 Web UI gate를 닫은 뒤 같은 공용 UI를 Android에 적용하는 것이다.
+> 2026-09-24 새 PC 이전: 사용자 승인으로 개발본을 master에 반영한다. [Windows/Codex 설치 안내](docs/moemoa/operations/2026-09-24-desktop-setup.md). 아래 과거 미커밋 표기는 당시 기록이며 최신 결과는 진행판의 9/24 기록 참조.
+
+> **활성 출시 계획 (2026-09-23):** V2의 계정·공개 보드·공개 미니홈·팔로우·최소 운영 목표를 사용자 승인으로 채택했다. **M2 로컬 진행: W08 선택 이미지 검증·비공개 전달 사본·공개 상태 재확인 경로와 디자인 재현을 구현. DB76/동시성2/unit296/build15 PASS. 실제 Supabase/Storage/Vercel/Android 검증은 미완료 → W06~W08 BLOCKED_EXTERNAL, W03 원격 checks 대기. 다음 W09 미리보기·게시·방문자 UI READY. 완료 W4/20, M1/6 유지. 운영 DB 적용/Public 활성화/배포 없음.** [ExecPlan](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md)과 [단일 진행판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)에서 이어간다. 아래 과거 마감 기록의 Private-only 종료 전제는 새 출시 목표로 대체하며, 당시 구현·검증 기록은 과거 근거로 보존한다.
+
+> **현재 기능 마무리 (2026-09-22):** 추가 기능 개발을 중단하고 모달·카드 이미지 클릭·미저장 이동/취소·보드 작업·오류 복귀를 보완했다. 옛 공개 프로필 경로를 닫고 운영 ID 연속성/일일 health/CI/Git build 추적을 추가했다. 단위 238, 카탈로그 251, 최종 브라우저 18, build 통과. **미커밋·미배포, 예약 자동화 미가동.** 계정별 서버 한도·계정 삭제·Public 관리·실제 OAuth/Android는 출시 전 미완료 게이트다. [감사/수정 결과](docs/moemoa/reports/2026-09-22-service-finishing.md), [운영 절차](docs/moemoa/operations/2026-09-22-minimum-operations.md).
+
+> **최신 로컬 개선 (2026-09-22):** Pro 리뷰 및 홈 재발견 보완에 따라 표지 카드 수정 검증·미평가·개인 작품 후속 기록·자체 카탈로그 시청 편집·범위를 구분한 백업/복원·홈 재발견·보드 이미지·Archive 검색을 구현했다. 단위 236개, build 통과. 브라우저 통합의 한 회귀는 수정 후 해당 suite 통과. 아직 commit/push/운영 배포하지 않았다. 리뷰 전체/출시 게이트 완료는 아님. [상세 결과와 남은 범위](docs/moemoa/reports/2026-09-22-pro-review-improvements.md).
+
+> **배포 원칙 (2026-09-09 사용자 확정):** 앞으로 운영 웹은 검토한 변경을 Git에 commit/push하고 Vercel의 Git 연동 배포와 운영 commit SHA를 확인한다. 별도 명시 승인 없이 로컬 CLI로 운영 배포하지 않는다. [확정 결정](docs/moemoa/decisions/2026-09-09-git-based-production-deployment.md).
+
+> **Pro 제품 상세 검토 자료 (2026-09-09):** 운영 화면 91장, 화면 요소 목록, 20개 검토 흐름, 주요 7개 흐름 및 갤러리 보조 실행 결과, 최신 미커밋 소스를 검토 ZIP으로 준비했다. GitHub가 최신 소스와 동일하다는 의미는 아니다. 로그인·실기기 등 미검증 범위를 분리했다. [작업 기록](docs/moemoa/plans/2026-09-09-pro-review-package.md). 산출물: 상위 workspace `deliverables/MOEMOA-Pro-Review-2026-09-09.zip`.
+
+> **최신 카탈로그 (2026-09-08 누락 배치 복원):** 225개 후보 검토 후 131개 운영 추가, 기존 4,161개 보존 → **4,292개**, active `catalog-add-7e982253b551b92984460a5e`. 방영 전 87개·이미 수록 1개·판단 보류 6개 제외. 신규 131개 전체 표지/익명 검색/상세 검증 완료. [수록 결과와 보류 목록](docs/moemoa/reports/2026-09-08-missing-catalog-batch.md). 다음 전체 재생성에는 `.moemoa-missing-batch-2026-09-08` 보충 target/canonical도 반드시 포함한다.
+
+> **이전 카탈로그 (2026-09-08 니세코이 복원):** 당시 운영 4,160개를 보존하고 니세코이 2기를 독립 추가해 **4,161개**, active `catalog-add-cfd7de57fd596c974547fb15`. 1·2기 분리 검색과 실제 상세 확인. 당시 발견한 우선 후보 24개와 TV 시즌 후보 201개는 위 배치 보고서에서 후속 검토했다. [복원·감사 기록](docs/moemoa/reports/2026-09-08-nisekoi-restoration.md). 다음 전체 재생성은 보고서의 보충 canonical 경로를 포함해야 한다.
+
+> **최신 Web 배포 (2026-09-08 UI 정리):** 중복 필터·반복 안내 축소, 고급 필터/보드 도구 접기를 운영 반영했다. Deployment `dpl_9XFykvvfB6weyT64JByvKg11BJ3r`; 후보 및 운영 각각 16개 기능 검사, 운영 파일 78개 대조 통과. DB 변경 없음. [배포 기록](docs/moemoa/reports/2026-09-08-ui-simplification.md).
+
+> **최신 Web 배포 (2026-09-08):** 기존 표지 갤러리 UI를 `/titles/`에 복원해 운영 반영했다. 장르 검색·태그, 열 크기 저장, Poster/Memory 전환, 모바일 배치를 검증했다. Deployment `dpl_7CswVCMgTNWLU8vzh7A3ULPCeGxm`; 운영 smoke 14개 및 배포 파일 78개 대조 통과. DB 변경 없음. [검증·배포 결과](docs/moemoa/reports/2026-09-08-gallery-production.md).
+
+> **최신 Web 배포 (2026-09-07):** 자체 ID 작품 지원과 AniList 외부 이동 제거를 검토·수정 후 운영 반영했다. Deployment `dpl_9cQZqinSPXfT8uRbfdamz59qtyQY`. 운영 DB는 기존 3,999개 유지, 226개 추가와 provider SQL 적용은 미실행. [검토·배포 결과](docs/moemoa/reports/2026-09-07-source-independent-production.md).
+
+> **현재 저장소 상태 — 2026-09-07**
+> Android local image intake, Private Card/Archive/Board, Supabase catalog와 user metadata sync 기반, Web-first Memory UI가 구현돼 있다. 2026-09-03 사용자는 기존 Library와 Memory write model을 유지하면서 `작품 / Titles`, `Title Hub`, My Titles의 Poster/Memory View로 읽기 경험을 통합하고, 명시적으로 선택한 승인된 대표 표지를 개인 기억 신호가 있는 `CATALOG_COVER` Memory visual로 사용하는 방향을 확정했다. stable cover identity/immutable revision, 개인 기억 신호, bytes 비복제, 공용 표지 비삭제 계약과 additive user schema/RPC migration이 local 및 hosted Supabase에 반영됐다. 카드 작성 화면의 공식 표지 선택, Archive·Memory Detail, Title projection·Title Hub와 신규 `/titles/` Poster/Memory dual view까지 구현됐다. Phase 5 메뉴·검색·한영 문구·기존 주소 호환까지 구현됐다. Phase 6 Home·화면 간 연결·첫 기억 작성 후 Memory View 제안도 로컬 Web 검증을 마쳤다. 2026-09-07 사용자의 배포 승인으로 https://www.moemoa.xyz 운영 Web에 반영하고 실제 저장·검색·320px 화면을 검증했다. 배포·복구와 후속 catalog 환경값은 `docs/moemoa/reports/2026-09-07-title-hub-web-release.md`를 참조한다. 2026-09-07 사용자가 Web 기능을 직접 확인해 큰 문제는 없다고 보고했고, UI 개선은 미완료로 남긴 채 Phase 7 Android 테스트 APK를 생성했다. JS 222·native 31·native URL 모의 검사 6개를 통과했으며 실기기 확인은 대기한다. 결과는 `docs/moemoa/reports/2026-09-07-title-hub-android-phase7.md`를 참조한다. Public·사용자 이미지 cloud는 계속 비활성화한다.
+
+> **최신 카탈로그 상태:** 카탈로그 제목 교정 운영 반영 완료(2026-09-07): 운영 3,998개를 유지한 새 DB 릴리스에 35개 제목·별칭(대표 제목 변경 16개)을 반영하고 웹을 배포했다. 실제 5등분 1기 검색→상세 및 기호 생략 검색 검증 완료. 5등분 2기와 운영 미수록 프리렌 미니 애니는 추가하지 않았다. [운영 반영/복구 보고서](docs/moemoa/reports/2026-09-07-catalog-correction-production.md)를 최신 상태로 따른다.
+
+> **후속 복원 완료:** 5등분 2기 AniList 109261을 독립 ID로 운영 DB에 추가했다. 현재 3,999개, active `catalog-add-81297cd638290f972ca84c28`. 실제 1기·2기 분리 검색 확인. 신규 canonical은 별도 보충 workspace에 있으므로 다음 전체 재생성에 반드시 포함한다. [복원 보고서](docs/moemoa/reports/2026-09-07-quintuplets-season2-restoration.md).
 
 ## 1. 목적
+
+카탈로그 품질 후속 작업(2026-09-07): 4,224개 감사 후 제목 연결 32개를 검토해 16개 표시 제목을 로컬 교정했다. 원본·운영 데이터는 유지하고 앱 alias 소비 경로와 재발 방지 검사를 수정했다. 누락 후보 32개, 한국어 명칭 7개 및 나머지 전수 검토는 미완료이며 AniList 추가 요청이 403으로 중단됐다. 다음 작업은 [교정 보고서](docs/moemoa/reports/2026-09-07-catalog-identity-corrections.md)와 [ExecPlan](docs/moemoa/plans/2026-09-07-catalog-identity-quality.md)을 따른다. 아직 배포하지 않았다.
 
 이 파일은 Codex가 기존 ChatGPT 세션 없이도 MOEMOA의 제품 맥락, 확정 결정, 금지사항, 참조 문서, 작업 순서를 재구성하게 하는 진입점이다.
 
@@ -17,7 +45,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 
 ```text
 작품 검색 또는 개인 작품 생성
-→ 사용자 이미지 또는 서비스 디자인 카드 선택
+→ 사용자 이미지, 승인된 공식 표지 또는 서비스 디자인 선택
 → 선택적 기억 신호 추가
 → Memory Card 저장
 → Archive 자동 축적
@@ -47,7 +75,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 | 작업 종류 | 반드시 읽을 문서 | 보조 문서 |
 | --- | --- | --- |
 | 최초 저장소 감사 | `03_REPOSITORY_AUDIT_PROTOCOL.md` | `01`, 과거 references |
-| 제품 흐름·UI | `01`, `02_PRODUCT_SCOPE_AND_USER_FLOWS.md` | `06` |
+| 제품 흐름·UI | `01`, `02_PRODUCT_SCOPE_AND_USER_FLOWS.md`, `../superpowers/specs/2026-09-03-title-hub-dual-view-ui.md` | `06`, `plans/2026-09-03-title-hub-dual-view.md` |
 | Web/Android 구조 | `01`, `06_ARCHITECTURE_AND_VERTICAL_SLICE_PLAN.md`, `reports/architecture-options.md` | `reports/repository-audit.md`, `reports/open-decision-questions.md`, `07` |
 | 작품 카탈로그·수집 | `01`, `04_CATALOG_DATA_AND_INGESTION_SPEC.md` | Source Registry 템플릿 |
 | 이미지 저장·동기화 | `01`, `05_IMAGE_UGC_POLICY_MODERATION_SPEC.md` | `06`, `07` |
@@ -91,7 +119,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 
 ### Phase 2 — 기술 방향과 ExecPlan
 
-현재 상태: **첫 slice와 Web-first 순서는 승인·진행 중이며, 2026-08-19 Supabase Preview catalog consumer 통합 slice가 구현·검증 중이다.**
+현재 상태: **Title Hub·대표 표지 Memory·My Titles dual view와 Phase 5 메뉴·검색·문구·주소 호환까지 완료됐다. Phase 6 Home·화면 간 연결·첫 Memory 안내까지 로컬 Web 검증을 마쳤으며, 다음은 사람 사용성 확인 후 Phase 7 Android 적용이다.** 검증 결과와 남은 gate는 [Phase 6 보고서](docs/moemoa/reports/2026-09-07-title-cross-surface-phase6.md)를 따른다.
 
 읽기:
 
@@ -117,7 +145,7 @@ Codex는 세션 대화를 추측하거나 이전 요약을 현재 코드 상태�
 - 최소 catalog adapter와 본격 catalog ingestion을 분리하고 Phase 3 이후 실제 실행 순서를 제안한다.
 - 승인되지 않은 범위의 대규모 구현을 시작하지 않는다.
 
-> **Phase 3 이후 순서 주의:** 아래 번호는 audit 이전 runbook의 작업 묶음이지 승인된 실행 순서가 아니다. 승인된 큰 순서는 `local-only Card/Archive → Board/Web → sync → private cloud → 제한 catalog`다. 현재 첫 단계 내부에서는 `Android native/local 기반 유지 → Web에서 공용 Memory UI readiness 검증 → Android 적용·실기기 검증 → 첫 slice 마감` 순서를 따른다.
+> **Phase 3 이후 순서 주의:** 아래 번호는 audit 이전 runbook의 작업 묶음이지 승인된 실행 순서가 아니다. 현재 실행 순서는 `catalog cover identity/revision → CATALOG_COVER vertical slice → Title projection/Title Hub → My Titles dual view → Web gate → Android 적용`이다. Remote migration, local data 삭제, Public은 각각 별도 승인 대상이다.
 
 ### Phase 3 — 카탈로그 기반
 
@@ -206,4 +234,8 @@ Android Share Target 또는 Photo Picker
 prompts/moemoa/01_BOOTSTRAP_REPOSITORY_AUDIT.md
 ```
 
-이 저장소에서는 최초 감사, 기반 세 결정, local-only Card/Archive, Android 영구 media boundary, AnimeRef 저장, 안전한 image replacement와 재시작 cleanup 복구까지 완료됐다. Service Projection v2는 Supabase Preview에 별도 active release로 적재됐고, Web consumer 통합은 `docs/moemoa/plans/2026-08-19-web-catalog-consumer-unification.md`를 따른다. 첫 slice 전체 상태는 `docs/moemoa/plans/first-private-vertical-slice.md`, 테스트 증거는 `docs/moemoa/reports/private-slice-test-evidence.md`, UI 기준은 `docs/superpowers/specs/2026-08-16-web-first-shared-ui-readiness-design.md`를 따른다.
+이 저장소에서는 local-only Card/Archive/Board, Android media boundary, catalog, account metadata sync, Web-first UI 기반까지 구현됐다. 최신 제품 방향은 `docs/moemoa/decisions/2026-09-03-title-hub-dual-view-and-catalog-cover.md`, UI는 `docs/superpowers/specs/2026-09-03-title-hub-dual-view-ui.md`, 실행 gate는 `docs/moemoa/plans/2026-09-03-title-hub-dual-view.md`, 현재 코드 차이는 `docs/moemoa/reports/2026-09-03-title-hub-code-conflict-audit.md`를 따른다.
+
+카탈로그 후속 검토 수정: 게시 시 현재 제목 규칙 재대조, 모든 검색 별칭의 시즌 검사, 일반 기호 생략 검색을 반영했다. 4,224개 재검사에서 추가 4개를 검토 대상으로 보류했다. [후속 개선 보고서](docs/moemoa/reports/2026-09-07-catalog-identity-review-fixes.md)를 먼저 확인한다. 로컬 수정이며 미배포다.
+
+추가 4개 검토 완료: 정상 번호 별칭 3건 유지, 퀸즈 블레이드의 모호한 별칭 1개 격리. 전체 검토 기록 36개/앱 AniList 별칭 35개. 4,224개 재검사에서 현재 제목 감지 미해결 0, 관련 ID 미보유 후보 40, 한국어 대기 7이다. 운영/원본 미변경. 상세: [4개 검토 보고서](docs/moemoa/reports/2026-09-07-catalog-four-title-reviews.md).

@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { atomicWriteJson } from '../lib/atomic-json.mjs';
+import { validateIncrementReviewAgainstDiscovery } from '../discovery/anilife-season.mjs';
 import { toPathKey } from '../lib/path-key.mjs';
 import { assertCatalogWorkspaceMutation } from '../lib/workspace.mjs';
 import { CANONICAL_FIELD_PATHS } from '../pipeline/normalize.mjs';
@@ -11,7 +12,10 @@ import { createCatalogArtifactStore } from '../pipeline/artifact-store.mjs';
 import { inspectImageBytes } from '../pipeline/covers.mjs';
 import { sha256, stableStringify } from '../lib/hash.mjs';
 import { buildServiceProjection } from '../pipeline/service-projection.mjs';
-import { TARGET_PROFILE_COUNTS, targetIdsForProfile } from '../pipeline/targets.mjs';
+import {
+  TARGET_PROFILE_COUNTS, expectedTargetCount, incrementManifestMatchesReview,
+  isCatalogProfile, isIncrementProfile, targetIdsForProfile,
+} from '../pipeline/targets.mjs';
 
 export const QUALITY_SCHEMA_VERSION = 2;
 
@@ -57,6 +61,24 @@ export async function hasApprovedTargetManifest({
       readFile(resolve(repoRoot, 'src', 'data', 'aliases.json'), 'utf8').then(JSON.parse),
       store.readIdMap(),
     ]);
+    if (isIncrementProfile(profile)) {
+      const review = await readJson(workspace.resolve('reviews', `${profile}.json`));
+      const discovery = review ? await readJson(workspace.resolve(
+        'discovery', 'anilife', `season-${review.year}`, `${review.sourceHash}.json`,
+      )) : null;
+      const count = expectedTargetCount(profile, manifest);
+      const existingIds = new Set(aliases.map((row) => String(row?.anilistId ?? '')));
+      validateIncrementReviewAgainstDiscovery(review, discovery, { profile });
+      return Boolean(count && idMap && typeof idMap === 'object' && !Array.isArray(idMap)
+        && new Set(manifest.map((target) => target?.targetKey)).size === count
+        && new Set(manifest.map((target) => target?.moemoaAnimeId)).size === count
+        && manifest.every((target) => {
+          const anilistId = target?.targetKey?.match(/^ANILIST:([1-9]\d*)$/u)?.[1];
+          const anilifeId = target?.targetKey?.match(/^ANILIFE:([1-9]\d*)$/u)?.[1];
+          return Boolean(anilifeId || (anilistId && !existingIds.has(anilistId)));
+        })
+        && incrementManifestMatchesReview({ profile, review, manifest, idMap }));
+    }
     const expectedCount = TARGET_PROFILE_COUNTS[profile];
     const expectedIds = expectedCount ? await targetIdsForProfile({ profile, rows: aliases }) : [];
     if (!expectedCount || !idMap || typeof idMap !== 'object' || Array.isArray(idMap)
@@ -270,10 +292,10 @@ function serviceBlockersFor(targets) {
 /** Projects external profile artifacts into a JSON-safe, raw-data-free quality summary. */
 export async function buildQualityReport({ workspace, profile, repoRoot } = {}) {
   await assertCatalogWorkspaceMutation(workspace, []);
-  const expectedCount = TARGET_PROFILE_COUNTS[profile];
-  if (!expectedCount) throw reportError('TARGET_PROFILE_INVALID', 'Quality report profile is invalid');
   const store = createCatalogArtifactStore({ workspace });
   const manifest = await store.readManifest(profile);
+  const expectedCount = expectedTargetCount(profile, manifest);
+  if (!expectedCount) throw reportError('TARGET_PROFILE_INVALID', 'Quality report profile is invalid');
   const manifestApproved = await hasApprovedTargetManifest({ workspace, profile, manifest, repoRoot });
   const snapshot = await store.readRunSnapshot(profile);
   const rebuildSnapshot = await store.readRebuildSnapshot(profile);
@@ -372,14 +394,14 @@ export async function inspectCatalogArtifacts({ workspace, profile = 'golden', r
 
 /** Renders the sanitized report without paths, raw payloads, or remote diagnostics. */
 export function renderQualityReportMarkdown(report) {
-  if (!report || report.schemaVersion !== QUALITY_SCHEMA_VERSION || !TARGET_PROFILE_COUNTS[report.profile]) {
+  if (!report || report.schemaVersion !== QUALITY_SCHEMA_VERSION || !isCatalogProfile(report.profile)) {
     throw reportError('QUALITY_REPORT_INVALID', 'Quality report is invalid');
   }
-  const title = {
+  const title = ({
     golden: 'Golden',
     sample100: 'Sample 100',
     full3998: 'Full 3,998',
-  }[report.profile];
+  }[report.profile]) ?? `Increment ${report.profile.slice('increment-'.length)}`;
   const lines = [
     `# ${title} Catalog Quality Report`,
     '',

@@ -1,0 +1,41 @@
+{
+  "work": "W07",
+  "date": "2026-09-23",
+  "status": "BLOCKED_EXTERNAL",
+  "implemented": "local server publication foundation; not wired into UI",
+  "tests": {
+    "postgres": "14.24 local synthetic roles; 45 assertions passed",
+    "parallelPrepare": "2 sessions: 1 success, 1 revision conflict",
+    "unit": {
+      "passed": 283,
+      "failed": 0
+    },
+    "build": "15 routes + postbuild PASS"
+  },
+  "realSupabaseVerified": false,
+  "productionApplied": false,
+  "publicEnabled": false,
+  "committed": false,
+  "pushed": false,
+  "limitations": [
+    "Supabase target major17 not tested",
+    "Auth UID/users and Storage bootstrap synthetic",
+    "pg_cron retention migration excluded",
+    "PostgREST response.headers variable verified, HTTP header not verified",
+    "Only catalog cover visual implemented; W08 handles other permitted visuals",
+    "W09 UI, W10 integration/republication, W14 moderation workflows remain"
+  ],
+  "artifacts": "D:/hong/Web/Anime/.moemoa-w07-2026-09-23",
+  "files": {
+    "CODEX_START_HERE.md": "4ea8e56dfb6b5689676e2f0adda51b4cce49a4d7f2669a2cb577ec4da5f3f66a",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md": "103409e2d89d976fa11762b27fa8c9fdee6aa71b855c96bd4cacc19d192af1fe",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md": "8e3a2b7b1183b153a4d66e6a035d513b8b7452a65e3fbfba20ac915c63a6bd4d",
+    "supabase/migrations/20260923090000_memory_publication_boundary.sql": "cad684ba8ab6123b38de41ab6c03a9f0efef5983edc84282364c7db7f09ff589",
+    "src/features/memory/adapters/supabase/SupabasePublicationGateway.js": "f583f1596bf4f0d9c2089c73940387734dfc6d1e731a6b5b8b2a942c7b9299df",
+    "tests/unit/publicationGateway.test.mjs": "2924b90c60f90eff27352c10de1d2aff42a71af0bc0b91a96890f3b2f010899b",
+    "tools/publication-boundary/bootstrap.sql": "3d46762f7080205f0b0e0749b59ab4dec630fab59b126c50e5d30df517c9f3b2",
+    "tools/publication-boundary/contract.sql": "81d8e2c41151bd5e5e18b3906d6272625e89eee7c7b171e75c50575b81aef3bb",
+    "tools/publication-boundary/concurrent-prepare.sql": "77936cabf4261aad4b967786eabc3f0f7c83bf0b61f94e98a6195a3f5e9f5633",
+    "tools/publication-boundary/run-local-postgres.sh": "af0d4eaa0afed7087b6ecaadc08f2bdbe1fabd5afcd3dc9af2e1230490f5c23a"
+  }
+}

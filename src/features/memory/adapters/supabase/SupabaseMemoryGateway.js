@@ -5,12 +5,14 @@ import {
 } from "../../sync/memorySyncContract.js";
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CATALOG_ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CATALOG_COVER_ID = /^cover:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HASH = /^[0-9a-f]{64}$/;
 const MEMORY_TYPES = new Set(["PRIVATE_TITLE", "MEMORY_CARD", "VISUAL_ASSET"]);
 const BOARD_TYPES = new Set(["MEMORY_BOARD", "MEMORY_BOARD_CARD"]);
 const ALL_TYPES = new Set([...MEMORY_TYPES, ...BOARD_TYPES]);
 const ALLOWED_REMOTE_ERRORS = new Set([
-  "AUTH_REQUIRED",
+  "AUTH_REQUIRED", "SYNC_PAUSED", "SYNC_QUOTA_EXCEEDED", "SYNC_RATE_LIMITED",
   "DEVICE_NOT_REGISTERED",
   "DEVICE_PAYLOAD_INVALID",
   "DEVICE_OWNERSHIP_CONFLICT",
@@ -36,7 +38,7 @@ const READ_MODELS = Object.freeze({
   },
   VISUAL_ASSET: {
     table: "memory_visual_assets",
-    columns: ["id", "user_id", "card_id", "asset_type", "state", "storage_scope", "visibility", "rights_basis", "checksum_sha256", "mime_type", "byte_size", "width", "height", "design_spec", "cloud_bucket", "cloud_object_path", "is_current", "version", "created_at", "client_updated_at", "server_updated_at", "deleted_at"],
+    columns: ["id", "user_id", "card_id", "asset_type", "state", "storage_scope", "visibility", "rights_basis", "checksum_sha256", "mime_type", "byte_size", "width", "height", "design_spec", "cloud_bucket", "cloud_object_path", "catalog_cover_id", "catalog_cover_revision_id", "catalog_anime_id", "permission_verified_at", "is_current", "version", "created_at", "client_updated_at", "server_updated_at", "deleted_at"],
   },
   MEMORY_BOARD: {
     table: "memory_boards",
@@ -94,6 +96,8 @@ const timestamp = (value) => {
 };
 
 const sanitizeRemoteError = (error) => {
+  if (Number(error?.status) === 429) return new SupabaseMemoryGatewayError("SYNC_RATE_LIMITED");
+  if ([401, 403].includes(Number(error?.status)) || ["PGRST301", "PGRST302", "PGRST303"].includes(error?.code)) return new SupabaseMemoryGatewayError("AUTH_REQUIRED");
   const message = String(error?.message || "");
   const code = [...ALLOWED_REMOTE_ERRORS].find((candidate) => (
     new RegExp(`(?:^|[^A-Z0-9_])${candidate}(?:$|[^A-Z0-9_])`).test(message)
@@ -201,13 +205,33 @@ const parseEntityRow = (entityType, model, row, userId) => {
     }
   } else if (entityType === "VISUAL_ASSET") {
     const isSystem = row.asset_type === "SYSTEM_DESIGN";
-    if (!["USER_IMAGE", "SYSTEM_DESIGN"].includes(row.asset_type)
+    const isCatalogCover = row.asset_type === "CATALOG_COVER";
+    if (!["USER_IMAGE", "SYSTEM_DESIGN", "CATALOG_COVER"].includes(row.asset_type)
       || !["READY", "DELETE_PENDING", "DELETED"].includes(row.state)
-      || row.storage_scope !== "LOCAL_ONLY" || row.visibility !== "PRIVATE"
+      || row.storage_scope !== (isCatalogCover ? "CATALOG_MANAGED" : "LOCAL_ONLY")
+      || row.visibility !== "PRIVATE"
       || row.cloud_bucket != null || row.cloud_object_path != null || !UUID_V4.test(String(row.card_id))
-      || (isSystem ? !plainObject(row.design_spec) : row.design_spec != null)) {
+      || (isSystem ? !plainObject(row.design_spec) : row.design_spec != null)
+      || (isCatalogCover && (
+        row.rights_basis !== "EXPLICIT_PERMISSION"
+        || !CATALOG_COVER_ID.test(String(row.catalog_cover_id || ""))
+        || !/^asset:[0-9a-f]{40}$/u.test(String(row.catalog_cover_revision_id || ""))
+        || !CATALOG_ANIME_ID.test(String(row.catalog_anime_id || ""))
+        || String(row.catalog_cover_id).slice(6) !== String(row.catalog_anime_id).slice(6)
+        || !Number.isFinite(Date.parse(String(row.permission_verified_at || "")))
+      ))
+      || (!isCatalogCover && [row.catalog_cover_id, row.catalog_cover_revision_id,
+        row.catalog_anime_id, row.permission_verified_at].some((value) => value != null))) {
       fail("SYNC_RESPONSE_INVALID", "Remote visual asset is invalid");
     }
+    mapped.catalogCoverRef = isCatalogCover ? Object.freeze({
+      sourceKind: "CATALOG_COVER",
+      catalogAnimeId: String(row.catalog_anime_id).toLowerCase(),
+      catalogCoverId: String(row.catalog_cover_id).toLowerCase(),
+      catalogCoverRevisionId: String(row.catalog_cover_revision_id).toLowerCase(),
+      rightsBasis: "EXPLICIT_PERMISSION",
+      permissionVerifiedAt: timestamp(row.permission_verified_at),
+    }) : null;
   } else if (entityType === "MEMORY_BOARD") {
     if (typeof row.title !== "string" || row.title.trim().length < 1 || row.title.trim().length > 80
       || typeof row.description !== "string" || row.description.length > 500 || row.visibility !== "PRIVATE") {
@@ -230,14 +254,17 @@ export class SupabaseMemoryGateway {
     this.client = client;
   }
 
-  async rpc(name, parameters, parser) {
+  async rpc(name, parameters, parser, signal) {
     let response;
     try {
-      response = await this.client.rpc(name, parameters);
+      const request = this.client.rpc(name, parameters);
+      response = await (signal && request.abortSignal ? request.abortSignal(signal) : request);
+      if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
     } catch (error) {
+      if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
       throw sanitizeRemoteError(error);
     }
-    if (response?.error) throw sanitizeRemoteError(response.error);
+    if (response?.error) throw sanitizeRemoteError({ ...response.error, status: response.status ?? response.error.status });
     try {
       return parser(response?.data);
     } catch (error) {
@@ -246,16 +273,16 @@ export class SupabaseMemoryGateway {
     }
   }
 
-  ensureUserProfile(input = {}) {
+  ensureUserProfile(input = {}, { signal } = {}) {
     const parameters = {
       p_display_name: input.displayName == null ? null : boundedText(input.displayName, "displayName", { max: 80 }),
       p_locale: boundedText(input.locale || "en", "locale", { max: 16 }),
       p_time_zone: boundedText(input.timeZone || "UTC", "timeZone", { max: 64 }),
     };
-    return this.rpc("ensure_user_profile", parameters, parseProfile);
+    return this.rpc("ensure_user_profile", parameters, parseProfile, signal);
   }
 
-  registerDevice(input = {}) {
+  registerDevice(input = {}, { signal } = {}) {
     const platform = String(input.platform || "");
     if (!["WEB", "ANDROID"].includes(platform)) fail("SYNC_REQUEST_INVALID", "platform is invalid");
     return this.rpc("register_user_device", {
@@ -263,7 +290,7 @@ export class SupabaseMemoryGateway {
       p_installation_id: uuid(input.installationId, "installationId"),
       p_platform: platform,
       p_app_version: boundedText(input.appVersion, "appVersion", { max: 100 }),
-    }, parseDevice);
+    }, parseDevice, signal);
   }
 
   promoteGuest(input = {}) {
@@ -293,14 +320,14 @@ export class SupabaseMemoryGateway {
     }, parsePromotionResult);
   }
 
-  applyCardMutation(input) {
+  applyCardMutation(input, { signal } = {}) {
     const request = validateMutationRequest(input, MEMORY_TYPES);
-    return this.rpc("apply_memory_card_mutation", mutationParameters(request), parseMutationResult);
+    return this.rpc("apply_memory_card_mutation", mutationParameters(request), parseMutationResult, signal);
   }
 
-  applyBoardMutation(input) {
+  applyBoardMutation(input, { signal } = {}) {
     const request = validateMutationRequest(input, BOARD_TYPES);
-    return this.rpc("apply_board_mutation", mutationParameters(request), parseMutationResult);
+    return this.rpc("apply_board_mutation", mutationParameters(request), parseMutationResult, signal);
   }
 
   resolveConflict(input) {
@@ -316,14 +343,14 @@ export class SupabaseMemoryGateway {
     }, parseMutationResult);
   }
 
-  pullChanges({ afterSeq = 0, limit = 200 } = {}) {
+  pullChanges({ afterSeq = 0, limit = 200, signal } = {}) {
     return this.rpc("pull_memory_changes", {
       p_after_seq: safeInteger(afterSeq),
       p_limit: safeInteger(limit, { min: 1, max: 500 }),
-    }, parsePullResult);
+    }, parsePullResult, signal);
   }
 
-  async readEntities({ entityType, entityIds, userId }) {
+  async readEntities({ entityType, entityIds, userId, signal }) {
     const model = READ_MODELS[entityType];
     if (!model || !Array.isArray(entityIds) || entityIds.length < 1 || entityIds.length > 200) {
       fail("SYNC_REQUEST_INVALID", "Entity read request is invalid");
@@ -332,42 +359,58 @@ export class SupabaseMemoryGateway {
     const ids = [...new Set(entityIds.map((id) => uuid(id)))];
     let response;
     try {
-      response = await this.client.from(model.table).select(model.columns.join(",")).in("id", ids);
+      const request = this.client.from(model.table).select(model.columns.join(",")).in("id", ids);
+      response = await (signal && request.abortSignal ? request.abortSignal(signal) : request);
+      if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
     } catch (error) {
+      if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
       throw sanitizeRemoteError(error);
     }
-    if (response?.error) throw sanitizeRemoteError(response.error);
+    if (response?.error) throw sanitizeRemoteError({ ...response.error, status: response.status ?? response.error.status });
     if (!Array.isArray(response?.data) || response.data.length > ids.length) {
       fail("SYNC_RESPONSE_INVALID", "Entity read response is invalid");
     }
     return response.data.map((row) => parseEntityRow(entityType, model, row, validUserId));
   }
 
-  async readAllEntities({ entityType, userId, limit = 5000 }) {
+  async readAllEntities({ entityType, userId, limit = 5000, signal }) {
     const model = READ_MODELS[entityType];
     const validUserId = uuid(userId, "userId");
     const maximum = safeInteger(limit, { min: 1, max: 5000 });
     if (!model) fail("SYNC_REQUEST_INVALID", "Entity read request is invalid");
     const rows = [];
     const pageSize = 200;
-    for (let offset = 0; offset < maximum; offset += pageSize) {
+    let lastId = null;
+    while (rows.length <= maximum) {
+      if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
+      const take = Math.min(pageSize, maximum + 1 - rows.length);
       let response;
       try {
-        response = await this.client
+        let query = this.client
           .from(model.table)
           .select(model.columns.join(","))
           .eq("user_id", validUserId)
-          .order("id", { ascending: true })
-          .range(offset, Math.min(offset + pageSize - 1, maximum - 1));
+          .order("id", { ascending: true });
+        if (lastId) query = query.gt("id", lastId);
+        const request = query.range(0, take - 1);
+        response = await (signal && request.abortSignal ? request.abortSignal(signal) : request);
+        if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
       } catch (error) {
+        if (signal?.aborted) fail("SYNC_ABORTED", "Memory sync was cancelled");
         throw sanitizeRemoteError(error);
       }
-      if (response?.error) throw sanitizeRemoteError(response.error);
-      if (!Array.isArray(response?.data) || response.data.length > pageSize) {
+      if (response?.error) throw sanitizeRemoteError({ ...response.error, status: response.status ?? response.error.status });
+      if (!Array.isArray(response?.data) || response.data.length > take) {
         fail("SYNC_RESPONSE_INVALID", "Entity read response is invalid");
       }
-      rows.push(...response.data.map((row) => parseEntityRow(entityType, model, row, validUserId)));
-      if (response.data.length < pageSize) return rows;
+      const parsed = response.data.map((row) => parseEntityRow(entityType, model, row, validUserId));
+      for (const row of parsed) {
+        if (lastId && row.id <= lastId) fail("SYNC_RESPONSE_INVALID", "Entity page did not advance");
+        lastId = row.id;
+        rows.push(row);
+      }
+      if (rows.length > maximum) break;
+      if (response.data.length < take) return rows;
     }
     fail("SYNC_FULL_RESYNC_LIMIT", "Full Memory resync exceeded its local bound");
   }

@@ -16,11 +16,12 @@ function buildStatusMeta(item) {
 }
 
 export function mapLocalLibraryRow({ item, media, locale = "ko", score = 0 }) {
-  const id = Number(item?.anilistId);
-  if (!Number.isFinite(id)) return null;
+  const id = item?.anilistId ? Number(item.anilistId) : item?.catalogAnimeId;
+  if (!Number.isFinite(id) && !/^anime:[0-9a-f-]{36}$/iu.test(String(id))) return null;
 
   return {
     kind: "library",
+    catalogAnimeId: item?.catalogAnimeId || null,
     id,
     score,
     item,
@@ -44,8 +45,8 @@ export function searchLocalLibrary({
   const scored = [];
 
   for (const item of Array.isArray(items) ? items : []) {
-    const id = Number(item?.anilistId);
-    if (!Number.isFinite(id)) continue;
+    const id = item?.anilistId ? Number(item.anilistId) : item?.catalogAnimeId;
+    if (!Number.isFinite(id) && !/^anime:[0-9a-f-]{36}$/iu.test(String(id))) continue;
 
     const media = mediaMap instanceof Map ? mediaMap.get(id) : null;
     const title = pickDisplayTitle(item, media, locale);

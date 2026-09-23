@@ -1,0 +1,9 @@
+{
+  "sourceFilesUnchanged": 373,
+  "mappedFindings": 25,
+  "execPlanSections": 17,
+  "localLinksValid": 24,
+  "appTests": "NOT_RUN: documentation-only M0",
+  "originalZipChecksums": "PASS (6 files)",
+  "appDbProductionMutations": 0
+}

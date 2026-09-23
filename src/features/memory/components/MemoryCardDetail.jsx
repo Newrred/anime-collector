@@ -1,6 +1,10 @@
+import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
+import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
+import AddMemoryToBoard from "./AddMemoryToBoard.jsx";
 import { useEffect, useReducer, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
+import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import MemoryVisual from "./MemoryVisual.jsx";
@@ -11,6 +15,7 @@ const INITIAL_STATE = Object.freeze({
   runtime: null,
   bundle: null,
   previewDataUrl: null,
+  catalogCover: null,
   note: "",
   status: "loading",
   message: "",
@@ -40,10 +45,13 @@ export default function MemoryCardDetail({ base = "/" }) {
 }
 
 function MemoryCardDetailContent({ base }) {
-  const { copy } = useMemoryRouteUi();
+  const { copy, locale } = useMemoryRouteUi();
   const detailCopy = copy.detail;
+  const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
-  const { runtime, bundle, previewDataUrl, note, status, message, deleteDialogOpen } = state;
+  const { runtime, bundle, previewDataUrl, catalogCover, note, status, message, deleteDialogOpen } = state;
+  const allowLeave = useUnsavedNavigation(Boolean(bundle && note !== (bundle.card.note || "")), locale, { busy: ["saving", "deleting", "replacing"].includes(status) });
+  const saveInFlight = useRef(false);
   const deleteTriggerRef = useRef(null);
   const deleteCancelRef = useRef(null);
   const deleteDialogRef = useRef(null);
@@ -65,11 +73,15 @@ function MemoryCardDetailContent({ base }) {
       const preview = cardBundle.asset.localRef
         ? await activeRuntime.getPreview(cardBundle.asset.localRef).catch(() => null)
         : null;
+      const resolvedCover = cardBundle.asset.catalogCoverRef
+        ? await activeRuntime.resolveCatalogCover(cardBundle.asset.catalogCoverRef).catch(() => null)
+        : null;
       if (!active) return;
       updateState({
         runtime: activeRuntime,
         bundle: cardBundle,
         previewDataUrl: preview,
+        catalogCover: resolvedCover,
         note: cardBundle.card.note || "",
         status: "ready",
       });
@@ -81,7 +93,8 @@ function MemoryCardDetailContent({ base }) {
 
   const save = async (event) => {
     event.preventDefault();
-    if (!runtime || !bundle || status === "saving") return;
+    if (!runtime || !bundle || status !== "ready" || saveInFlight.current) return;
+    saveInFlight.current = true;
     updateState({ status: "saving", message: "" });
     try {
       const card = await runtime.updateCard(bundle.card.id, { note });
@@ -91,11 +104,13 @@ function MemoryCardDetailContent({ base }) {
         message: { scope: "detail", key: "saved" },
         status: "ready",
       });
-    } catch {
+    } catch (error) {
       updateState({
-        message: { scope: "detail", key: "saveFailed" },
+        message: error?.code === "CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED" ? { scope: "error", code: error.code } : { scope: "detail", key: "saveFailed" },
         status: "ready",
       });
+    } finally {
+      saveInFlight.current = false;
     }
   };
 
@@ -140,7 +155,8 @@ function MemoryCardDetailContent({ base }) {
     updateState({ status: "deleting", message: "", deleteDialogOpen: false });
     try {
       await runtime.deleteCard(bundle.card.id);
-      window.location.assign(toPlatformAppHref(`${base}archive/`, {
+      allowLeave();
+      window.location.assign(toPlatformAppHref(returnHref, {
         native: Capacitor.isNativePlatform(),
         origin: window.location.origin,
       }));
@@ -160,6 +176,7 @@ function MemoryCardDetailContent({ base }) {
     updateState(result.bundle ? {
       bundle: result.bundle,
       previewDataUrl: result.previewDataUrl || ticket.previewDataUrl,
+      catalogCover: null,
       message: {
         scope: "detail",
         key: result.cleanupPending ? "imageSavedCleanup" : "imageSaved",
@@ -178,8 +195,9 @@ function MemoryCardDetailContent({ base }) {
     return (
       <div className="memory-detail page-shell page-shell--narrow">
         <section className="surface-card memory-detail__state">
-          <h1>{detailCopy.notFound}</h1>
-          <a className="btn" href={`${base}archive/`} data-astro-reload>{detailCopy.backToArchive}</a>
+          <h1>{status === "error" ? copy.archive.error : detailCopy.notFound}</h1>
+          {status === "error" && <button className="btn" onClick={() => window.location.reload()}>{locale === "ko" ? "다시 시도" : "Try again"}</button>}
+          <a className="btn" href={returnHref} data-astro-reload>{detailCopy.backToArchive}</a>
         </section>
       </div>
     );
@@ -188,9 +206,12 @@ function MemoryCardDetailContent({ base }) {
   return (
     <div className="memory-detail page-shell page-shell--narrow">
       <header className="memory-detail__header">
-        <a href={`${base}archive/`}>{detailCopy.archiveLink}</a>
+        <a href={returnHref}>{returnHref === `${base}archive/` ? detailCopy.archiveLink : (locale === "ko" ? "돌아가기" : "Back")}</a>
         <span className="memory-detail__badges">
           <span className="status-badge">{detailCopy.privacy}</span>
+          {bundle.asset.imageType === "CATALOG_COVER"
+            ? <span className="status-badge">{detailCopy.catalogCover}</span>
+            : null}
           {syncLabel(bundle.card, detailCopy) ? <span className="status-badge">{syncLabel(bundle.card, detailCopy)}</span> : null}
         </span>
       </header>
@@ -205,6 +226,12 @@ function MemoryCardDetailContent({ base }) {
                     src: previewDataUrl,
                     alt: detailCopy.cardAlt(bundle.title.displayTitle),
                   }
+                : catalogCover?.publicUrl
+                  ? {
+                      kind: "IMAGE",
+                      src: catalogCover.publicUrl,
+                      alt: detailCopy.cardAlt(bundle.title.displayTitle),
+                    }
                 : { kind: "MISSING" }}
             fit="contain"
             systemCopy={{
@@ -212,28 +239,33 @@ function MemoryCardDetailContent({ base }) {
               fallbackTitle: bundle.title.displayTitle,
               footer: copy.systemDesign.footer,
             }}
-            missingLabel={!bundle.asset.designSpec && !bundle.asset.localRef
-              ? detailCopy.unavailableOnDevice
-              : detailCopy.missingImage}
+            missingLabel={bundle.asset.imageType === "CATALOG_COVER"
+              ? detailCopy.coverUnavailable
+              : !bundle.asset.designSpec && !bundle.asset.localRef
+                ? detailCopy.unavailableOnDevice
+                : detailCopy.missingImage}
           />
         </div>
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
+          <MemoryTitleLink bundle={bundle} base={base} label={detailCopy.openTitleHub} className="memory-detail__title-link" />
           <MemoryImageReplacement
             runtime={runtime}
-            imageMissing={!bundle.asset.designSpec && !previewDataUrl}
+            imageMissing={!bundle.asset.designSpec && !previewDataUrl && !catalogCover?.publicUrl}
             disabled={status !== "ready"}
             onReplace={replaceImage}
             onBusyChange={(isBusy) => updateState({ status: isBusy ? "replacing" : "ready" })}
             onMessage={(nextMessage) => updateState({ message: nextMessage })}
             copy={copy.replacement}
           />
-          <form onSubmit={save}>
+          <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} />
+            <form onSubmit={save}>
             <label className="memory-detail__field">
               <span>{detailCopy.noteLabel}</span>
               <textarea
                 className="textarea"
                 value={note}
+                disabled={status !== "ready"}
                 maxLength={500}
                 rows={6}
                 onChange={(event) => updateState({ note: event.target.value })}
@@ -246,6 +278,7 @@ function MemoryCardDetailContent({ base }) {
               </p>
             )}
             <div className="memory-detail__actions">
+              {note !== (bundle.card.note || "") && <button className="btn btn--subtle" type="button" disabled={status !== "ready"} onClick={() => updateState({ note: bundle.card.note || "", message: "" })}>{locale === "ko" ? "감상 수정 취소" : "Cancel reflection changes"}</button>}
               <button className="btn" type="submit" disabled={status !== "ready"}>
                 {status === "saving" ? detailCopy.saving : detailCopy.save}
               </button>

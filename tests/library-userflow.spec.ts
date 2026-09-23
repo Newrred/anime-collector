@@ -11,7 +11,7 @@ const quickLogFixture = {
 
 test("closing a Library deep link clears it so reload does not reopen the detail", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1");
+  await page.goto("/library/?animeId=1&focus=edit");
   await expect(page.locator(".modal")).toBeVisible();
 
   await page.locator(".modalCloseBtn").click();
@@ -24,7 +24,7 @@ test("closing a Library deep link clears it so reload does not reopen the detail
 
 test("Library detail keeps keyboard focus inside and returns it to the opened card", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
   const card = page.locator(".library-grid .library-card").first();
   await expect(card).toBeVisible();
   await card.click();
@@ -81,7 +81,7 @@ test("Library separates membership, quick logs, and exact AnimeRef memory cards"
       rightsConfirmed: false,
     });
   });
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
 
   const first = page.locator(".library-card").filter({ hasText: "Fixture Anime" });
   const second = page.locator(".library-card").filter({ hasText: "Second Anime" });
@@ -95,7 +95,7 @@ test("Library separates membership, quick logs, and exact AnimeRef memory cards"
   await page.setViewportSize({ width: 390, height: 844 });
   await first.click();
   const facts = page.getByRole("group", { name: "Record facts" });
-  await expect(facts).toContainText("Library status");
+  await expect(facts).toContainText("Title status");
   await expect(facts).toContainText("Completed");
   await expect(facts).toContainText("Quick logs");
   await expect(facts).toContainText("1");
@@ -117,7 +117,7 @@ test("Library reports unavailable Memory counts instead of silently claiming zer
       return open.call(this, name, ...args);
     };
   });
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
 
   const card = page.locator(".library-card").filter({ hasText: "Fixture Anime" });
   await expect(card).toContainText("Memory cards unavailable");
@@ -278,7 +278,7 @@ test("a failed IndexedDB mirror cannot hide a successful local quick log after r
   await expect(sheet).toBeHidden();
 
   const reloadedPage = await page.context().newPage();
-  await reloadedPage.goto("/library/?animeId=1");
+  await reloadedPage.goto("/library/?animeId=1&focus=edit");
   await expect(reloadedPage.locator(".modal")).toBeVisible();
   await reloadedPage.locator(".modal .library-modal-tab").nth(1).click();
   const rows = reloadedPage.locator(".library-modal-log-card");
@@ -422,7 +422,7 @@ async function addByQuery(
     const input = await openGlobalSearch(page);
     await input.fill(query);
 
-    const addLabel = locale === "KO" ? "기록장에 추가" : "Add to Library";
+    const addLabel = locale === "KO" ? "작품 저장" : "Save Title";
     const remoteRow = page.locator(".quick-action-section").filter({
       has: page.getByRole("button", { name: addLabel }),
     }).last();
@@ -441,7 +441,7 @@ async function addByQuery(
       const rows = JSON.parse(localStorage.getItem("anime:list:v1") || "[]");
       return rows[rows.length - 1]?.anilistId;
     });
-    await page.goto(`/library/?animeId=${addedAnimeId}`);
+    await page.goto(`/library/?animeId=${addedAnimeId}&focus=edit`);
     await expect(page.locator(".modal")).toBeVisible();
     await page.locator(".modalCloseBtn").click();
     await expect(page.locator(".modal")).toBeHidden();
@@ -504,8 +504,8 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
   if (viewport.width > 900) {
     const primary = page.locator(".top-nav__links--routes");
     await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
-    await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
     return;
   }
 
@@ -513,8 +513,8 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
   const mobileMenu = page.locator("#data-menu-panel");
   const primary = mobileMenu.locator(".top-nav-mobile-links");
   await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
-  await expect(primary.getByRole("link", { name: "Library" })).toBeVisible();
-  await expect(primary.getByRole("link", { name: "Tier" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
   await expect(mobileMenu).toBeHidden();
 }
@@ -530,14 +530,15 @@ async function assertLocalMemoryAccountInEnglish(page: Page) {
 }
 
 async function evaluateHomeMemoryBoundary(page: Page): Promise<FlowMetrics> {
+  await expect(page.locator(".home-rediscovery")).toBeAttached();
   return page.evaluate(() => {
-    const createMemory = document.querySelector('.home-empty-state a[href$="memory/new/"]');
+    const createMemory = document.querySelector('.home-memory-overview a[href$="memory/new/"]');
     const createRect = createMemory?.getBoundingClientRect();
 
     return {
-      emptyMemoryState: Boolean(document.querySelector(".home-empty-state")),
+      emptyMemoryState: Boolean(document.querySelector(".home-rediscovery")) && document.querySelectorAll(".home-rediscovery a[href*='memory/card/']").length === 0,
       createMemoryVisible: Boolean(createRect && createRect.width > 0 && createRect.height > 0),
-      legacyResurfacingSections: document.querySelectorAll(".home-resurfacing-grid .home-section-block").length,
+      legacyResurfacingSections: document.querySelectorAll(".home-legacy-insights[open]").length,
       horizontalOverflow: Number(Math.max(document.documentElement.scrollWidth - window.innerWidth, 0).toFixed(2)),
     };
   });
@@ -561,7 +562,7 @@ async function runFlow(
   await installFreshState(page);
   if (mode === "fixture") await installSearchFixtures(page);
 
-  await page.goto("/library/", { waitUntil: "networkidle" });
+  await page.goto("/library/?focus=edit", { waitUntil: "networkidle" });
   await expect(page.locator(".library-page")).toBeVisible();
 
   const viewport = { name: width <= 900 ? "mobile" : "desktop", width, height } as const;
@@ -573,7 +574,7 @@ async function runFlow(
   if (mode === "fixture") {
     expect(cardsBefore, "fresh fixture flow starts with an empty library").toBe(0);
     await assertLocalMemoryAccountInEnglish(page);
-    await page.goto("/library/", { waitUntil: "networkidle" });
+    await page.goto("/library/?focus=edit", { waitUntil: "networkidle" });
     await expect(page.locator(".library-page")).toBeVisible();
   }
 

@@ -17,6 +17,7 @@ const errorCode = (error) => CALLBACK_MESSAGES[error?.code] ? error.code : "PKCE
 
 export default function AuthCallbackClient({ base = "/" }) {
   const [message, setMessage] = useState("Signing you in...");
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -36,6 +37,7 @@ export default function AuthCallbackClient({ base = "/" }) {
         const code = errorCode(error);
         console.error("auth callback failed", { code });
         if (alive) {
+          setFailed(true);
           setMessage(CALLBACK_MESSAGES[code]);
         }
       }
@@ -45,6 +47,7 @@ export default function AuthCallbackClient({ base = "/" }) {
       const code = errorCode(error);
       console.error("auth callback failed", { code });
       if (alive) {
+        setFailed(true);
         setMessage(CALLBACK_MESSAGES[code]);
       }
     });
@@ -54,5 +57,8 @@ export default function AuthCallbackClient({ base = "/" }) {
     };
   }, [base]);
 
-  return <p className="pageLead" id="sync-callback-message">{message}</p>;
+  return <>
+    <p className="pageLead" id="sync-callback-message" role={failed ? "alert" : "status"}>{message}</p>
+    {failed && <a className="btn" href={`${base}data/`}>로그인 화면으로 · Back to sign-in</a>}
+  </>;
 }

@@ -25,5 +25,18 @@
 .memory-boards__cards a, .memory-boards__add li > div { display: grid; gap: 3px; min-width: 0; color: inherit; text-decoration: none; }
 .memory-boards__cards span, .memory-boards__add span { overflow: hidden; color: var(--text-secondary); font-size: .88rem; text-overflow: ellipsis; white-space: nowrap; }
 .memory-boards__card-actions .btn { min-width: 42px; padding-inline: 10px; }
+.memory-boards__tools > summary { cursor: pointer; min-height: 44px; align-content: center; font-weight: 600; }
+.memory-boards__tools[open] > summary { margin-bottom: 14px; }
+.memory-boards input, .memory-boards textarea { padding: 10px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface); color: var(--text-primary); font: inherit; }
 @media (max-width: 760px) { .memory-boards__header, .memory-boards__edit { flex-direction: column; } .memory-boards__layout { grid-template-columns: 1fr; } .memory-boards__header .btn, .memory-boards__edit-actions { width: 100%; } .memory-boards__edit-actions .btn { flex: 1; } }
 @media (max-width: 380px) { .memory-boards__sidebar, .memory-boards__detail { padding: 14px; } .memory-boards__cards li, .memory-boards__add li { align-items: stretch; flex-direction: column; } .memory-boards__card-actions, .memory-boards__add .btn { width: 100%; } .memory-boards__card-actions .btn { flex: 1; } }
+
+.memory-boards__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.memory-boards__cards li { min-width: 0; display: block; }
+.memory-boards__cards .memory-preview { width: 100%; }
+.memory-boards__card-actions { margin-top: 8px; flex-wrap: wrap; }
+
+.memory-boards__cards .system-design-preview__label, .memory-boards__cards .system-design-preview small, .memory-boards__cards .system-design-preview strong { display: none; }
+
+.memory-boards__cards li { padding: 0; border: 0; }
+.memory-boards__cards .memory-preview__link { display: block; }

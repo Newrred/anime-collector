@@ -80,6 +80,7 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
             <span className="btn__label">{account.syncBusy ? copy.syncing : copy.syncNow}</span>
           </button>
         ) : null}
+        {account.syncBusy ? <button type="button" className="btn btn--ghost" onClick={account.pauseSync}>{copy.pauseSync}</button> : null}
         {connected ? (
           <button type="button" className="btn btn--ghost" onClick={auth.signOut} disabled={account.promotionBusy}>
             {copy.signOut}
@@ -88,7 +89,7 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
       </div>
 
       {account.syncResultCode ? <div className="small page-feedback" role="status">{copy.syncResults[account.syncResultCode] || copy.syncResults.ERROR}</div> : null}
-      {account.syncErrorCode ? <div className="small page-feedback" role="alert">{copy.syncFailed}</div> : null}
+      {account.syncErrorCode ? <div className="small page-feedback" role="alert">{copy.syncErrors?.[account.syncErrorCode] || copy.syncFailed}</div> : null}
 
       {preview ? (
         <div className="promotion-preview" aria-labelledby="promotion-preview-title">
@@ -138,7 +139,7 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
               </label>
             </fieldset>
           ))}
-          {account.promotionErrorCode ? <div className="small page-feedback" role="alert">{copy.promotionFailed}</div> : null}
+          {account.promotionErrorCode ? <div className="small page-feedback" role="alert">{copy.promotionErrors?.[account.promotionErrorCode] || copy.promotionFailed}</div> : null}
           <div className="sync-card__actions">
             <button type="button" className="btn btn--ghost" onClick={account.cancelPromotionPreview} disabled={account.promotionBusy}>
               {copy.cancelPromotion}

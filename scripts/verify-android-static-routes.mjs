@@ -12,6 +12,8 @@ export const ANDROID_ROUTE_CONTRACTS = Object.freeze([
   { href: "/boards/", packaged: "/boards/index.html" },
   { href: "/memory/new/?title=Test", packaged: "/memory/new/index.html?title=Test" },
   { href: "/memory/card/?id=card-1", packaged: "/memory/card/index.html?id=card-1" },
+  { href: "/title/?anilistId=1", packaged: "/title/index.html?anilistId=1" },
+  { href: "/titles/", packaged: "/titles/index.html" },
   { href: "/tier/", packaged: "/tier/index.html" },
   { href: "/profile/", packaged: "/profile/index.html" },
   { href: "/data/", packaged: "/data/index.html" },

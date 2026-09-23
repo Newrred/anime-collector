@@ -1,3 +1,4 @@
+import { isLegacySocialAvailable } from "../domain/legacySocialAvailability.js";
 import { supabase } from "../lib/supabaseClient.js";
 import {
   listMockFollowers,
@@ -312,6 +313,7 @@ export async function isFollowingProfile(followerUserId, followedUserId) {
 }
 
 export async function followProfile(followerUserId, followedUserId) {
+  if (!isLegacySocialAvailable()) throw new Error("LEGACY_SOCIAL_UNAVAILABLE");
   if (shouldUseMockProfileStore(followerUserId)) {
     return true;
   }

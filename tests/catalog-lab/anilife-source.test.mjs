@@ -4,6 +4,7 @@ import test from 'node:test';
 
 import { sha256 } from '../../tools/catalog-lab/lib/hash.mjs';
 import {
+  createAniLifeReviewedCaptureEnvelope,
   createAniLifePublicPageAdapter,
   validateAniLifeBinding,
 } from '../../tools/catalog-lab/sources/anilife-public-page-test.mjs';
@@ -19,6 +20,13 @@ const unboundTarget = Object.freeze({
   targetKey: 'ANILIST:121',
   seedExternalIds: Object.freeze([{ sourceId: 'anilist', value: '121' }]),
 });
+const legacySourceConfig = Object.freeze({
+  sourceId: 'anilife_public', baseUrl: 'https://anilife1.tv',
+});
+
+function createAdapter(options = {}) {
+  return createAniLifePublicPageAdapter({ sourceConfig: legacySourceConfig, ...options });
+}
 
 function createFixtureHttp({ sitemap, content, requests }) {
   return {
@@ -47,12 +55,62 @@ function reviewedIdentityEvidence(exactTitleCandidateCount, overrides = {}) {
   return { ...content, evidenceHash: sha256(content) };
 }
 
+test('reviewed browser capture produces the same narrow AniLife source envelope offline', () => {
+  const envelope = createAniLifeReviewedCaptureEnvelope({
+    target,
+    binding: { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' },
+    sourceConfig: legacySourceConfig,
+    capture: {
+      captureMethod: 'IAB_PUBLIC_RENDERED_PAGE_MINIMAL',
+      contentId: '1',
+      pageUrl: 'https://anilife1.tv/content/1',
+      capturedAt: '2026-09-03T00:00:00.000Z',
+      rawJsonLd: [JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TVSeries',
+        name: 'Cowboy Bebop',
+        alternateName: '카우보이 비밥',
+        url: 'https://anilife1.tv/content/1',
+        image: 'https://anilife1.tv/images/anime/1.webp',
+        datePublished: '1998-04-03',
+        numberOfEpisodes: 26,
+      })],
+      badges: ['완결', 'TV'],
+    },
+  });
+
+  assert.equal(envelope.sourceId, 'anilife_public');
+  assert.equal(envelope.sourceEntityId, '1');
+  assert.equal(envelope.responseStatus, 200);
+  assert.match(envelope.parserVersion, /reviewed-browser-capture-v1$/u);
+  assert.equal(envelope.payload.title, 'Cowboy Bebop');
+  assert.equal(envelope.payload.format, 'TV');
+  assert.equal(envelope.payload.status, '완결');
+  assert.equal(envelope.payload.imageUrl, 'https://anilife1.tv/images/anime/1.webp');
+});
+
+test('reviewed browser capture rejects a different public-page identity', () => {
+  assert.throws(() => createAniLifeReviewedCaptureEnvelope({
+    target,
+    binding: { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' },
+    sourceConfig: legacySourceConfig,
+    capture: {
+      captureMethod: 'IAB_PUBLIC_RENDERED_PAGE_MINIMAL',
+      contentId: '1',
+      pageUrl: 'https://anilife1.tv/content/2',
+      capturedAt: '2026-09-03T00:00:00.000Z',
+      rawJsonLd: [JSON.stringify({ '@type': 'TVSeries', name: 'Cowboy Bebop' })],
+      badges: [],
+    },
+  }), { code: 'SOURCE_SCHEMA_DRIFT' });
+});
+
 test('AniLife adapter only fetches manually bound public content pages', async () => {
   const [sitemap, content] = await Promise.all([
     fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
   ]);
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
   const bindings = { 'ANILIST:1': { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' } };
 
@@ -68,6 +126,8 @@ test('AniLife adapter only fetches manually bound public content pages', async (
     datePublished: '1998-04-03',
     numberOfEpisodes: 26,
     imageUrl: 'https://anilife1.tv/images/cowboy-bebop.jpg',
+    format: 'TVSeries',
+    status: null,
     publicPageUrl: 'https://anilife1.tv/content/1',
     identityEvidence: null,
   });
@@ -79,9 +139,45 @@ test('AniLife adapter only fetches manually bound public content pages', async (
   assert.doesNotMatch(JSON.stringify(envelope.payload), /episode.*(?:stream|playback)|comment/i);
 });
 
+test('AniLife adapter uses a reviewed runtime origin and reads only the scoped work badges', async () => {
+  const fixtureHtml = await fixture('anilife-content-1.html');
+  const content = fixtureHtml.replace(
+    '<body>Public catalog page fixture only.</body>',
+    '<body><section class="tv-work-info"><div class="tv-work-badges"><span>완결</span><span>TV</span></div></section></body>',
+  );
+  const sitemap = '<urlset><url><loc>https://anilife01.tv/content/1</loc></url></urlset>';
+  const requests = [];
+  const http = {
+    async request({ url }) {
+      requests.push(url);
+      if (url === 'https://anilife01.tv/sitemap.xml') return new Response(sitemap, { status: 200 });
+      if (url === 'https://anilife01.tv/content/1') return new Response(content, { status: 200 });
+      throw new Error(`Unexpected URL: ${url}`);
+    },
+  };
+  const adapter = createAniLifePublicPageAdapter({
+    sourceConfig: { sourceId: 'anilife_public', baseUrl: 'https://anilife01.tv' },
+  });
+
+  const [envelope] = await collectEnvelopes(adapter, {
+    targets: [target], http, workspace: {}, clock,
+    bindings: { 'ANILIST:1': { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' } },
+  });
+
+  assert.equal(envelope.payload.status, '완결');
+  assert.equal(envelope.payload.format, 'TV');
+  assert.deepEqual(requests, [
+    'https://anilife01.tv/sitemap.xml',
+    'https://anilife01.tv/content/1',
+  ]);
+  assert.throws(() => createAniLifePublicPageAdapter({
+    sourceConfig: { sourceId: 'anilife_public', baseUrl: 'http://anilife01.tv' },
+  }), { code: 'SOURCE_ENDPOINT_FORBIDDEN' });
+});
+
 test('unbound target is marked NOT_FETCHED without sitemap-wide page crawling', async () => {
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = { async request({ url }) { requests.push(url); throw new Error('Unbound target must not request'); } };
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -127,7 +223,7 @@ test('AniLife retains only target-bound hashed uniqueness evidence from the revi
     fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
   ]);
   const requests = [];
-  const [envelope] = await collectEnvelopes(createAniLifePublicPageAdapter(), {
+  const [envelope] = await collectEnvelopes(createAdapter(), {
     targets: [target], http: createFixtureHttp({ sitemap, content, requests }), workspace: {}, clock,
     bindings: { 'ANILIST:1': {
       contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW', identityEvidence,
@@ -137,7 +233,7 @@ test('AniLife retains only target-bound hashed uniqueness evidence from the revi
 });
 
 test('AniLife rejects explicit falsey, inherited, and prototype-backed bindings before requests', async () => {
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const cases = [
     { name: 'explicit null', bindings: { 'ANILIST:1': null } },
     { name: 'explicit false', bindings: { 'ANILIST:1': false } },
@@ -180,7 +276,7 @@ test('AniLife rejects forwarding and trap-throwing binding proxies before reques
   for (const { name, bindings } of cases) {
     const requests = [];
     const http = { async request({ url }) { requests.push(url); throw new Error('Must not request'); } };
-    await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+    await assert.rejects(collectEnvelopes(createAdapter(), {
       targets: [target], http, workspace: {}, clock, bindings,
     }), { code: 'SOURCE_SCHEMA_DRIFT' }, name);
     assert.deepEqual(requests, [], name);
@@ -209,7 +305,7 @@ test('AniLife rejects map and entry getters without invoking them or requesting 
   for (const bindings of [mapGetterBindings, { 'ANILIST:1': entryGetter }]) {
     const requests = [];
     const http = { async request({ url }) { requests.push(url); throw new Error('Must not request'); } };
-    await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+    await assert.rejects(collectEnvelopes(createAdapter(), {
       targets: [target], http, workspace: {}, clock, bindings,
     }), { code: 'SOURCE_SCHEMA_DRIFT' });
     assert.deepEqual(requests, []);
@@ -223,7 +319,7 @@ test('AniLife verifies sitemap membership before fetching a bound content page',
     fixture('anilife-sitemap.xml'), fixture('anilife-content-1.html'),
   ]);
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   await assert.rejects(collectEnvelopes(adapter, {
@@ -241,7 +337,7 @@ test('AniLife accepts CDATA only as direct sitemap locator text', async () => {
     'https://anilife1.tv/content/1', '<![CDATA[https://anilife1.tv/content/1]]>',
   );
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -267,7 +363,7 @@ test('AniLife rejects sitemap lookalikes and does not request content without a 
 
   for (const sitemap of invalidSitemaps) {
     const requests = [];
-    const adapter = createAniLifePublicPageAdapter();
+    const adapter = createAdapter();
     const http = createFixtureHttp({ sitemap, content, requests });
     await assert.rejects(collectEnvelopes(adapter, {
       targets: [target], http, workspace: {}, clock,
@@ -287,7 +383,7 @@ test('AniLife uses redirect error mode and rejects blocked redirects before a fo
   for (const destination of destinations) {
     for (const stage of ['sitemap', 'content']) {
       const requests = [];
-      const adapter = createAniLifePublicPageAdapter();
+      const adapter = createAdapter();
       const http = {
         async request({ url, init }) {
           requests.push({ url, init });
@@ -318,7 +414,7 @@ test('AniLife default HTTP classifies redirect-error failures once without retry
   const sitemap = await fixture('anilife-sitemap.xml');
   for (const stage of ['sitemap', 'content']) {
     const requests = [];
-    const adapter = createAniLifePublicPageAdapter({
+    const adapter = createAdapter({
       fetchImpl: async (url, init) => {
         requests.push({ url, init });
         assert.equal(init.redirect, 'error');
@@ -358,7 +454,7 @@ test('AniLife stops reading an oversized sitemap stream before body text bufferi
     },
   };
 
-  await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+  await assert.rejects(collectEnvelopes(createAdapter(), {
     targets: [target], http, workspace: {}, clock,
     bindings: { 'ANILIST:1': { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' } },
   }), { code: 'SOURCE_SCHEMA_DRIFT' });
@@ -376,7 +472,7 @@ test('AniLife falls back to OpenGraph title and image while classifying malforme
       'content="https://anilife1.tv/images/cowboy-bebop.jpg?x=1&amp;y=2"')
     .replace('"@context": "https://schema.org",', '"@context":');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -402,7 +498,7 @@ test('AniLife decodes numeric HTML entities in OpenGraph fallback', async () => 
       'content="https://anilife1.tv/images/cowboy-bebop.jpg?x=1&#38;y=2"')
     .replace('"@context": "https://schema.org",', '"@context":');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -422,7 +518,7 @@ test('AniLife decodes non-core named HTML entities in OpenGraph fallback', async
     .replace('content="Cowboy Bebop"', 'content="Cowboy&nbsp;Bebop"')
     .replace('"@context": "https://schema.org",', '"@context":');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -441,7 +537,7 @@ test('AniLife omits OpenGraph values with unsupported named entities', async () 
     .replace('content="Cowboy Bebop"', 'content="Cowboy&unsupported;Bebop"')
     .replace('"@context": "https://schema.org",', '"@context":');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -461,7 +557,7 @@ test('AniLife omits digit-bearing unsupported named OpenGraph entities', async (
     .replace('content="Cowboy Bebop"', 'content="Cowboy&frac12;Bebop"')
     .replace('"@context": "https://schema.org",', '"@context":');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -490,7 +586,7 @@ test('AniLife rejects malformed JSON-LD when OpenGraph tags have no usable conte
 
   for (const content of cases) {
     const requests = [];
-    await assert.rejects(collectEnvelopes(createAniLifePublicPageAdapter(), {
+    await assert.rejects(collectEnvelopes(createAdapter(), {
       targets: [target], http: createFixtureHttp({ sitemap, content, requests }), workspace: {}, clock,
       bindings: { 'ANILIST:1': { contentId: '1', evidence: 'MANUAL_PUBLIC_PAGE_REVIEW' } },
     }), { code: 'SOURCE_SCHEMA_DRIFT' });
@@ -503,7 +599,7 @@ test('AniLife treats unsafe episode integers as unavailable rather than rounding
   ]);
   const content = fixtureHtml.replace('"numberOfEpisodes": 26', '"numberOfEpisodes": "9007199254740992"');
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {
@@ -524,7 +620,7 @@ test('AniLife ignores unrelated JSON-LD before the public media record', async (
     </script>
     <script type="application/ld+json">`);
   const requests = [];
-  const adapter = createAniLifePublicPageAdapter();
+  const adapter = createAdapter();
   const http = createFixtureHttp({ sitemap, content, requests });
 
   const [envelope] = await collectEnvelopes(adapter, {

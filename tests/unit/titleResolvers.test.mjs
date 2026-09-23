@@ -38,6 +38,18 @@ test("legacy alias resolver returns local facts as explicitly unverified candida
   }]);
 });
 
+test("legacy alias resolver removes a known promotional prefix from the Korean display title", async () => {
+  const resolver = createLegacyAliasTitleResolver({ rows: [{
+    anilistId: 154587,
+    ko: "(더빙) 장송의 프리렌",
+    aliases: ["Frieren: Beyond Journey's End"],
+  }] });
+
+  const [result] = await resolver.search("프리렌");
+  assert.equal(result.displayTitle, "장송의 프리렌");
+  assert.doesNotMatch(JSON.stringify(result), /더빙/u);
+});
+
 test("AniList resolver projects only title facts and excludes provider artwork and URLs", async () => {
   const resolver = createAniListTitleResolver({
     searchAnime: async (query, limit) => {
@@ -73,7 +85,7 @@ test("AniList resolver projects only title facts and excludes provider artwork a
   assert.doesNotMatch(JSON.stringify(candidate), /https?:|cover|banner/i);
 });
 
-test("combined resolver prefers provider facts for the same id and retains the local Korean alias", async () => {
+test("combined resolver keeps provider facts but uses the exact-bound Korean display for a Hangul query", async () => {
   const localResolver = createLegacyAliasTitleResolver({ rows: legacyRows });
   const remoteResolver = createAniListTitleResolver({
     searchAnime: async () => [{
@@ -90,10 +102,10 @@ test("combined resolver prefers provider facts for the same id and retains the l
   assert.equal(response.remoteStatus, "READY");
   assert.equal(response.results.length, 1);
   assert.equal(response.results[0].verificationState, "PROVIDER_CANDIDATE");
-  assert.equal(response.results[0].displayTitle, "Frieren: Beyond Journey's End");
+  assert.equal(response.results[0].displayTitle, "장송의 프리렌");
   assert.deepEqual(response.results[0].aliases, [
+    "Frieren: Beyond Journey's End",
     "Sousou no Frieren",
-    "장송의 프리렌",
     "葬送のフリーレン",
   ]);
 });
@@ -129,6 +141,7 @@ test("development catalog resolver accepts only the allowlisted local test DTO",
         schemaVersion: 1,
         results: [{
           kind: "ANIME_REF",
+          animeId: "anime:11111111-1111-4111-8111-000000154587",
           displayTitle: "장송의 프리렌",
           aliases: ["Frieren: Beyond Journey's End"],
           genres: [],
@@ -255,6 +268,7 @@ test("Supabase catalog resolver replaces a promotional preferred title with a cl
         search_aliases: [
           { locale: "en", value: "Naruto: Shippuden" },
           { locale: "ja", value: "NARUTO -ナルト- 疾風伝" },
+          { locale: "und", value: "나루토 질풍전" },
         ],
         studios: ["Pierrot"], genres: ["Action"], readiness: "READY_WITH_GAPS",
         cover_asset_id: "asset:placeholder",
@@ -263,6 +277,90 @@ test("Supabase catalog resolver replaces a promotional preferred title with a cl
   });
 
   const [candidate] = await resolver.search("나루토");
-  assert.equal(candidate.displayTitle, "Naruto: Shippuden");
+  assert.equal(candidate.displayTitle, "나루토 질풍전");
   assert.doesNotMatch(JSON.stringify(candidate), /고화질/u);
+});
+
+test("Supabase catalog resolver attaches only a validated active cover preview", async () => {
+  const animeId = "anime:11111111-1111-4111-8111-000000154587";
+  const assetId = `asset:${"b".repeat(40)}`;
+  const coverId = "cover:11111111-1111-4111-8111-000000154587";
+  const permissionVerifiedAt = "2026-09-03T00:00:00.000Z";
+  const objectPath = `covers/anime-11111111-1111-4111-8111-000000154587/${"a".repeat(64)}.jpg`;
+  const resolver = createSupabaseCatalogTitleResolver({
+    client: {
+      rpc: async () => ({ data: [{
+        anime_id: animeId,
+        anilist_id: 154587,
+        preferred_title: "(더빙) 장송의 프리렌",
+        preferred_locale: "ko",
+        search_aliases: [
+          { locale: "en", value: "Frieren: Beyond Journey’s End" },
+          { locale: "und", value: "장송의 프리렌" },
+        ],
+        studios: ["Madhouse"], genres: ["Fantasy"], readiness: "READY",
+        cover_asset_id: assetId,
+      }], error: null }),
+      from: (table) => {
+        assert.equal(table, "catalog_cover_revisions");
+        return {
+          select() { return this; },
+          async in(column, values) {
+            assert.equal(column, "catalog_cover_revision_id");
+            assert.deepEqual(values, [assetId]);
+            return { data: [{
+              catalog_cover_revision_id: assetId, catalog_cover_id: coverId,
+              catalog_anime_id: animeId, availability: "READY",
+              rights_basis: "EXPLICIT_PERMISSION", permission_verified_at: permissionVerifiedAt,
+              bucket_id: "catalog-covers-preview", object_path: objectPath, width: 460, height: 640,
+            }], error: null };
+          },
+        };
+      },
+      storage: {
+        from(bucket) {
+          assert.equal(bucket, "catalog-covers-preview");
+          return { getPublicUrl: (path) => ({ data: { publicUrl: `https://catalog.example/${path}` } }) };
+        },
+      },
+    },
+  });
+
+  const [candidate] = await resolver.search("프리렌");
+  assert.equal(candidate.displayTitle, "장송의 프리렌");
+  assert.equal(candidate.coverPreviewUrl, `https://catalog.example/${objectPath}`);
+  assert.deepEqual(candidate.catalogCoverRef, {
+    sourceKind: "CATALOG_COVER",
+    catalogAnimeId: animeId,
+    catalogCoverId: coverId,
+    catalogCoverRevisionId: assetId,
+    rightsBasis: "EXPLICIT_PERMISSION",
+    permissionVerifiedAt,
+  });
+});
+
+test("Supabase catalog resolver ranks the shorter base title before sequels for a partial Hangul query", async () => {
+  const row = (suffix, title, alias) => ({
+    anime_id: `anime:11111111-1111-4111-8111-${suffix}`,
+    anilist_id: Number(suffix),
+    preferred_title: title,
+    preferred_locale: "ko",
+    search_aliases: [{ locale: "und", value: alias }],
+    studios: ["Madhouse"], genres: ["Fantasy"], readiness: "READY",
+    cover_asset_id: `asset:${suffix}`,
+  });
+  const resolver = createSupabaseCatalogTitleResolver({
+    client: {
+      rpc: async () => ({ data: [
+        row("000000154588", "장송의 프리렌 2기", "Frieren Season 2"),
+        row("000000154587", "(더빙) 장송의 프리렌", "장송의 프리렌"),
+      ], error: null }),
+    },
+  });
+
+  const results = await resolver.search("프리렌");
+  assert.deepEqual(results.map((candidate) => candidate.displayTitle), [
+    "장송의 프리렌",
+    "장송의 프리렌 2기",
+  ]);
 });

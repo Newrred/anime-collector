@@ -1,0 +1,38 @@
+name: Catalog health
+on:
+  schedule:
+    - cron: '17 23 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: catalog-health
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check public catalog continuity, search, and cover sample
+        env:
+          PUBLIC_CATALOG_SUPABASE_URL: ${{ vars.PUBLIC_CATALOG_SUPABASE_URL }}
+          PUBLIC_CATALOG_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_CATALOG_SUPABASE_ANON_KEY }}
+        run: node scripts/catalog-health.mjs > catalog-health.json
+      - name: Preserve success or failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-health-${{ github.run_id }}
+          path: catalog-health.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Result summary
+        if: always()
+        run: |
+          echo '### Catalog health (read-only)' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f catalog-health.json ]; then cat catalog-health.json >> "$GITHUB_STEP_SUMMARY"; fi
+# Read-only; no collection, database activation, issue creation, or user data access.

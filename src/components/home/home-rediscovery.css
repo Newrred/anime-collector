@@ -1,0 +1,10 @@
+.home-rediscovery { display: grid; gap: 32px; width: 100%; }
+.home-rediscovery h2 { font-size: 1.3rem; margin: 0 0 16px; }
+.home-rediscovery__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.home-rediscovery__grid .memory-preview { min-width: 0; }
+@media (max-width: 640px) {
+  .home-rediscovery__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .home-rediscovery__grid .memory-preview__title { font-size: 1rem; }
+}
+
+.home-rediscovery .system-design-preview__label, .home-rediscovery .system-design-preview small, .home-rediscovery .system-design-preview strong { display: none; }

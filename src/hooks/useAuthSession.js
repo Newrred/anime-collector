@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { getAuthSession, onAuthSessionChange, signInWithGoogle, signOutFromCloud } from "../repositories/authRepo.js";
 import { isMemoryAccountSyncEnabled, isSupabaseConfigured } from "../lib/supabaseClient.js";
-
-const isAccountAuthEnabled = isMemoryAccountSyncEnabled && isSupabaseConfigured;
+import { hasMockAuthSession } from "../repositories/mockAuthStorage.js";
 
 export function useAuthSession(nextPath = "/data/") {
+  const isAccountAuthEnabled = (isMemoryAccountSyncEnabled && isSupabaseConfigured)
+    || (import.meta.env.DEV && hasMockAuthSession());
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let alive = true;
+    let sessionRevision = 0;
     if (!isAccountAuthEnabled) {
       setSession(null);
       setLoading(false);
@@ -19,18 +21,19 @@ export function useAuthSession(nextPath = "/data/") {
 
     getAuthSession()
       .then((currentSession) => {
-        if (!alive) return;
+        if (!alive || sessionRevision !== 0) return;
         setSession(currentSession || null);
         setLoading(false);
       })
       .catch((err) => {
-        if (!alive) return;
+        if (!alive || sessionRevision !== 0) return;
         setError(String(err?.message || err || ""));
         setLoading(false);
       });
 
     const unsubscribe = onAuthSessionChange((nextSession) => {
       if (!alive) return;
+      sessionRevision++;
       setSession(nextSession || null);
       setLoading(false);
     });
@@ -39,7 +42,7 @@ export function useAuthSession(nextPath = "/data/") {
       alive = false;
       unsubscribe();
     };
-  }, []);
+  }, [isAccountAuthEnabled]);
 
   async function signIn(path = nextPath) {
     setError("");

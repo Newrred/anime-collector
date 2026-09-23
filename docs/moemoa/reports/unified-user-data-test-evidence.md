@@ -273,3 +273,13 @@ Hosted performance advisor가 composite foreign key 4개에 covering index가 �
 로컬 외부 workspace의 현재 Projection v2 pointer는 역사적으로 기록된 `52487f…f556` release를 가리키지만 hosted active release는 위 `8af2e0…3bb4c`다. 이번 user migration의 회귀 기준은 실제 변경 대상인 hosted BEFORE hash로 고정했다. 두 catalog release 내용의 차이를 임의로 업로드하거나 활성화하지 않는다.
 
 공식 Supabase 계약상 local stack은 실행 중인 Docker-compatible runtime이 필요하다. 이 조건을 충족해 Task 12 Step 2를 완료했다. Step 4는 CLI token 기반 dry-run 대신 연결된 Supabase 커넥터의 read-only migration/schema 조회로 동등한 BEFORE 사실을 검증했다. 이후 사용자의 단계별 승인을 받아 remote migration, Google provider, Production env cutover와 Web OAuth acceptance까지 진행했다. 남은 외부 검증은 profile/device row 독립 재조회와 Android 물리기기 OAuth다.
+
+### CATALOG_COVER additive migration — 2026-09-03
+
+- 사용자가 Supabase `CATALOG_COVER` 비파괴 확장 migration과 RPC 동기화 변경을 명시 승인했다.
+- `20260903141500_catalog_cover_memory_assets.sql`은 immutable cover revision registry, Memory visual의 nullable normalized reference, 기존 mutation/conflict/promotion 구현을 감싸는 RPC entry point를 추가한다. 기존 user asset row를 변환하거나 삭제하지 않는다.
+- fresh local DB reset, pgTAP 112/112, local·hosted schema lint 0, unit 201/201, production build 13 pages를 통과했다.
+- CLI 계정의 project 목록에서 `moemoa-preview (okchpyagfucpzpyrfgol)`을 canonical 기록과 대조한 뒤 link했다. migration list와 dry-run에서 이 migration 한 개만 pending임을 확인하고 해당 파일만 적용했다.
+- 적용 후 local/remote migration 8개가 일치한다. 공개 anon count로 `catalog_cover_revisions` 3,998개와 active `catalog_assets` 3,998개가 일치함을 확인했다.
+- hosted aggregate table stats는 profile 1, device 2, Memory card/visual/board/sync entity 0을 유지했다. anon의 `memory_visual_assets` 직접 SELECT는 `42501`로 거부되어 개인 metadata 권한 경계도 유지된다.
+- production Web code 배포와 UI feature 활성화는 이번 migration 승인 범위에 포함하지 않았으며 수행하지 않았다.

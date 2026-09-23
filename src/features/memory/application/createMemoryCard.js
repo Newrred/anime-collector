@@ -4,6 +4,7 @@ import {
   createAnimeRef,
   createDefaultSyncEnvelope,
   createPrivateTitle,
+  normalizeCatalogCoverRef,
   requireOwnerId,
 } from "../domain/memoryDomain.js";
 import { normalizeSystemDesignSpec } from "../domain/systemDesign.js";
@@ -94,10 +95,11 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const ownerId = requireOwnerId(input.ownerId);
       const hasNativeTicket = Boolean(String(input.intakeTicketId || "").trim());
       const hasSystemDesign = Boolean(input.systemDesignSpec);
-      if (hasNativeTicket === hasSystemDesign) {
+      const hasCatalogCover = Boolean(input.catalogCoverRef);
+      if ([hasNativeTicket, hasSystemDesign, hasCatalogCover].filter(Boolean).length !== 1) {
         applicationError(
           "VISUAL_SOURCE_CONFLICT",
-          "Choose exactly one native image ticket or system design",
+          "Choose exactly one image, catalog cover, or system design",
         );
       }
       const intakeTicketId = hasNativeTicket
@@ -105,6 +107,9 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         : null;
       const designSpec = hasSystemDesign
         ? normalizeSystemDesignSpec(input.systemDesignSpec)
+        : null;
+      const catalogCoverRef = hasCatalogCover
+        ? normalizeCatalogCoverRef(input.catalogCoverRef)
         : null;
       if (hasNativeTicket && input.rightsConfirmed !== true) {
         applicationError(
@@ -115,6 +120,22 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const titleKind = input.titleChoice?.kind;
       if (!new Set(["PRIVATE_TITLE", "ANIME_REF"]).has(titleKind)) {
         applicationError("UNSUPPORTED_TITLE_CHOICE", "Choose a catalog result or a PrivateTitle");
+      }
+      if (hasCatalogCover && (
+        titleKind !== "ANIME_REF"
+        || String(input.titleChoice?.animeId || "").toLowerCase() !== catalogCoverRef.catalogAnimeId
+      )) {
+        applicationError(
+          "CATALOG_COVER_TITLE_MISMATCH",
+          "Catalog cover must match the selected catalog title",
+        );
+      }
+      const note = normalizeNote(input.note);
+      if (hasCatalogCover && !note) {
+        applicationError(
+          "CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED",
+          "Write a personal memory before saving a cover-based Card",
+        );
       }
 
       const existing = await repository.getOperation(ownerId, operationId);
@@ -131,15 +152,23 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const now = String(clock.now());
       const cardId = requiredId(ids.next("card"), "card id");
       const assetId = requiredId(ids.next("asset"), "asset id");
+      const reusePrivateTitle = Boolean(input.titleChoice?.privateTitleId);
       let title = null;
       let animeRef = null;
       if (titleKind === "PRIVATE_TITLE") {
-        title = createPrivateTitle({
-          id: requiredId(ids.next("privateTitle"), "private title id"),
-          ownerId,
-          displayTitle: input.titleChoice.displayTitle,
-          now,
-        });
+        if (input.titleChoice.privateTitleId) {
+          title = await repository.getPrivateTitle(ownerId, String(input.titleChoice.privateTitleId));
+          if (!title || title.ownerId !== ownerId || title.deletedAt) {
+            applicationError("PRIVATE_TITLE_NOT_FOUND", "The selected private title is unavailable");
+          }
+        } else {
+          title = createPrivateTitle({
+            id: requiredId(ids.next("privateTitle"), "private title id"),
+            ownerId,
+            displayTitle: input.titleChoice.displayTitle,
+            now,
+          });
+        }
       } else {
         const proposed = createAnimeRef({
           id: requiredId(ids.next("animeRef"), "anime reference id"),
@@ -177,7 +206,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         privateTitleId,
         visualAssetId: assetId,
         status: "DRAFT",
-        note: normalizeNote(input.note),
+        note,
         watchedAt: null,
         watchedAtPrecision: "UNKNOWN",
         episode: null,
@@ -192,11 +221,11 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       const asset = {
         id: assetId,
         ownerId,
-        intakeSource: hasSystemDesign ? "SYSTEM_DESIGN" : "NATIVE_IMAGE_INTAKE",
-        imageType: hasSystemDesign ? "SYSTEM_DESIGN" : "UNKNOWN",
-        storageScope: "LOCAL_ONLY",
+        intakeSource: hasSystemDesign ? "SYSTEM_DESIGN" : hasCatalogCover ? "CATALOG_COVER" : "NATIVE_IMAGE_INTAKE",
+        imageType: hasSystemDesign ? "SYSTEM_DESIGN" : hasCatalogCover ? "CATALOG_COVER" : "UNKNOWN",
+        storageScope: hasCatalogCover ? "CATALOG_MANAGED" : "LOCAL_ONLY",
         visibility: "PRIVATE",
-        rightsBasis: hasSystemDesign ? "SYSTEM_GENERATED" : "UNKNOWN",
+        rightsBasis: hasSystemDesign ? "SYSTEM_GENERATED" : hasCatalogCover ? "EXPLICIT_PERMISSION" : "UNKNOWN",
         creatorName: null,
         sourceUrl: null,
         licenseType: null,
@@ -212,6 +241,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         width: null,
         height: null,
         designSpec,
+        catalogCoverRef,
         isCurrent: true,
         createdAt: now,
         updatedAt: now,
@@ -224,6 +254,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         assetId,
         cardId,
         kind: "IMPORT",
+        reusePrivateTitle,
         state: "PLANNED",
         attemptCount: 1,
         lastErrorCode: null,
@@ -233,7 +264,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         updatedAt: now,
       };
 
-      await repository.reserveCreate({ title, animeRef, card, asset, operation });
+      await repository.reserveCreate({ title, animeRef, card, asset, operation, reusePrivateTitle });
 
       let media = {};
       if (hasNativeTicket) {
@@ -291,7 +322,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         ids,
         createdAt: completedAt,
         specs: () => [
-          ...(title ? [{
+          ...(title && !reusePrivateTitle ? [{
             entityType: "PRIVATE_TITLE",
             entityId: title.id,
             operationType: "UPSERT",
@@ -322,6 +353,7 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
         ],
       });
       await repository.completeCreate({
+        reusePrivateTitle,
         title,
         animeRef,
         card: completeCard,
@@ -333,8 +365,11 @@ export function createMemoryCardCommand({ repository, localMedia, telemetry, clo
       if (hasSystemDesign) {
         telemetry.track("system_design_selected", { templateId: designSpec.templateId });
       }
+      if (hasCatalogCover) {
+        telemetry.track("catalog_cover_selected", { storageScope: completeAsset.storageScope });
+      }
       telemetry.track(milestoneEvent(completeCountBeforeSave), {
-        storageScope: "LOCAL_ONLY",
+        storageScope: completeAsset.storageScope,
         titleKind,
       });
       return structuredClone(result);

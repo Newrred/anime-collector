@@ -24,8 +24,11 @@ import {
   jpegBytes, nonSquareJpegBytes, pngBytes, truncatedPngBytes, webpBytes, webpVp8xBytes,
 } from './fixtures/cover-valid-images.mjs';
 import { openCatalogWorkspace } from '../../tools/catalog-lab/lib/workspace.mjs';
+import { loadSourceRegistry } from '../../tools/catalog-lab/contracts/catalogContracts.mjs';
 
 const repoRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
+const sourceRegistry = await loadSourceRegistry({ repoRoot });
+const anilifeSourceConfig = sourceRegistry.find((entry) => entry.sourceId === 'anilife_public');
 const animeId = 'anime:11111111-1111-4111-8111-111111111111';
 
 async function withWorkspace(run) {
@@ -172,8 +175,8 @@ test('cover download applies exact URL, redirect, MIME, content-length, and stre
   const result = await downloadCoverCandidate({ candidate: candidate(), policy, transport: transportFor(), maxBytes: 4096 });
   assert.equal(result.mimeType, COVER_MIME.PNG);
   assert.equal(result.validationStatus, 'SNIFFED');
-  assert.equal(result.rightsStatus, 'TEST_ONLY_UNKNOWN');
-  assert.equal(result.distributionStatus, 'PROHIBITED');
+  assert.equal(result.rightsStatus, 'USER_ATTESTED_PRODUCTION_DEPLOYMENT_PERMISSION');
+  assert.equal(result.distributionStatus, 'PERMISSIONED');
 
   await assert.rejects(downloadCoverCandidate({ candidate: candidate({ sourceUrl: 'file:///tmp/cover.png' }), policy, transport: transportFor() }),
     { code: 'IMAGE_URL_INVALID' });
@@ -240,6 +243,32 @@ test('canonical cover selection is deterministic: exact identity, decoded state,
   assert.equal(selected, null);
 });
 
+test('AniLife cover origin policy can rotate and brands downloaded bytes with reviewed permission', async () => {
+  const rotated = getApprovedCoverSourcePolicy('anilife_public', {
+    sourceConfig: anilifeSourceConfig,
+  });
+  assert.deepEqual(rotated.origins, ['https://anilife1.tv', 'https://anilife01.tv']);
+  assert.equal(rotated.rightsStatus, 'USER_ATTESTED_UNRESTRICTED_PERMISSION');
+  assert.equal(rotated.distributionStatus, 'PERMISSIONED');
+  const downloaded = await downloadCoverCandidate({
+    candidate: candidate({
+      sourceId: 'anilife_public', sourceUrl: 'https://anilife1.tv/images/anime/101.webp',
+      identity: { status: 'MATCHED', confidenceClass: 'EXACT_RULE' },
+    }),
+    policy: rotated,
+    transport: transportFor(),
+  });
+  assert.equal(downloaded.rightsStatus, 'USER_ATTESTED_UNRESTRICTED_PERMISSION');
+  assert.equal(downloaded.distributionStatus, 'PERMISSIONED');
+  assert.equal(Object.isFrozen(rotated.origins), true);
+  assert.throws(() => getApprovedCoverSourcePolicy('anilife_public', {
+    sourceConfig: { ...anilifeSourceConfig, coverOrigins: ['http://anilife01.tv'] },
+  }), { code: 'COVER_SOURCE_POLICY_INVALID' });
+  assert.throws(() => getApprovedCoverSourcePolicy('anilist', {
+    sourceConfig: anilifeSourceConfig,
+  }), { code: 'COVER_SOURCE_POLICY_INVALID' });
+});
+
 test('injected cover pipeline requires an approved HTTPS origin and pinned public resolution without production promotion', async () => {
   const policy = getApprovedCoverSourcePolicy('anilist');
   const transport = createPinnedCoverTransport({
@@ -269,7 +298,7 @@ test('both injected transport factories are excluded from production decode, sto
   ];
   for (const transport of injectedTransports) {
     const sniffed = await downloadCoverCandidate({ candidate: candidate(), policy, transport });
-    assert.doesNotMatch(JSON.stringify(sniffed), /production|concrete|transport|trust/iu);
+    assert.doesNotMatch(JSON.stringify(sniffed), /concrete|transport|trust/iu);
     await assert.rejects(decodeCoverWithChromium({ record: sniffed }),
       { code: 'COVER_RECORD_UNTRUSTED' });
     let workspaceAccesses = 0;

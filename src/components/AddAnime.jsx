@@ -1,10 +1,14 @@
+import { addAnimeFromQuickAction } from "../domain/search/quickActionActions.js";
+import { Capacitor } from "@capacitor/core";
+import { buildTitleHubHref } from "../features/titles/domain/titleNavigation.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { searchAnimeByTitle, fetchAnimeByIdsCached } from "../lib/anilist";
 import {
   wikidataSearchKoToAniListExpanded,
   wikidataGetKoTitlesByAniListIds,
 } from "../lib/wikidata";
-import aliasSeed from "../data/aliases.json";
+import aliasSeed from "../data/reviewedAliasSeed.js";
+import { titleSearchMatchRank } from '../domain/search/titleSearchMatch.js';
 import {
   isFreshSearchCacheEntry,
   loadSearchCacheMap,
@@ -28,8 +32,7 @@ function normalizeSearchText(s) {
   return String(s || "")
     .toLowerCase()
     .normalize("NFKC")
-    .replace(/\s+/g, "")
-    .replace(/[^\p{L}\p{N}]/gu, "");
+    .replace(/\s+/g, "");
 }
 
 function buildAliasEntries(seed) {
@@ -57,12 +60,7 @@ function findAliasMatches(query, aliasEntries, limit = 20) {
   for (const row of aliasEntries) {
     let best = 0;
     for (const name of row.names) {
-      const nn = normalizeSearchText(name);
-      if (!nn) continue;
-      if (nn === qn) best = Math.max(best, 400);
-      else if (nn.startsWith(qn)) best = Math.max(best, 280);
-      else if (nn.includes(qn)) best = Math.max(best, 200);
-      else if (qn.startsWith(nn)) best = Math.max(best, 120);
+      best = Math.max(best, [0, 200, 280, 400][titleSearchMatchRank(name, query)]);
     }
     if (best > 0) hits.push({ id: row.id, ko: row.ko, score: best, src: "alias" });
   }
@@ -143,7 +141,7 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
       return;
     }
 
-    const key = `${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
+    const key = `identity-v3:${isHangulQuery(query) ? "ko" : "any"}:${normalizeSearchText(query)}`;
     const cached = cacheRef.current.get(key);
       if (cached) {
       const isFresh = isFreshSearchCacheEntry(cached, Date.now());
@@ -471,7 +469,17 @@ export default function AddAnime({ items, setItems, onAnimeAdded, locale = "ko" 
     return () => document.removeEventListener("mousedown", onDocDown);
   }, []);
 
-  function addAnime(r, statusOverride = addStatus) {
+  async function addAnime(r, statusOverride = addStatus) {
+    if (r.animeId && !Number.isFinite(Number(r.id))) {
+      try {
+        await addAnimeFromQuickAction(r.media, statusOverride);
+      } catch {
+        setLoadingStage("error");
+        return;
+      }
+      window.location.assign(buildTitleHubHref({ native: Capacitor.isNativePlatform(), titleRef: { kind: "ANIME", animeId: r.animeId } }));
+      return;
+    }
     const id = r.id;
     const koTitle = r.ko || inferKoTitleFromMedia(r?.media) || null;
     const initialStatus = normalizeInitialStatus(statusOverride);

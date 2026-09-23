@@ -1,4 +1,4 @@
-import { TARGET_PROFILE_COUNTS } from './targets.mjs';
+import { expectedTargetCount, isIncrementProfile } from './targets.mjs';
 
 const MAX_BATCH_TARGETS = 100;
 
@@ -62,15 +62,15 @@ function assertBatchSummary(summary, batch, profile) {
 }
 
 export function planTargetBatches({ profile, targets, batchSize = MAX_BATCH_TARGETS } = {}) {
-  const expectedCount = TARGET_PROFILE_COUNTS[profile];
-  if (profile !== 'full3998' || expectedCount !== 3998
+  const expectedCount = expectedTargetCount(profile, targets);
+  if ((profile !== 'full3998' && !isIncrementProfile(profile)) || !expectedCount
     || !Array.isArray(targets) || targets.length !== expectedCount
     || !Number.isInteger(batchSize) || batchSize < 1 || batchSize > MAX_BATCH_TARGETS
-    || targets.some((target) => !/^ANILIST:[1-9]\d*$/u.test(target?.targetKey ?? '')
+    || targets.some((target) => !/^(?:ANILIST|ANILIFE):[1-9]\d*$/u.test(target?.targetKey ?? '')
       || typeof target?.moemoaAnimeId !== 'string' || !target.moemoaAnimeId.startsWith('anime:'))
     || new Set(targets.map((target) => target.targetKey)).size !== expectedCount
     || new Set(targets.map((target) => target.moemoaAnimeId)).size !== expectedCount) {
-    throw batchError('Full catalog batch plan is invalid');
+    throw batchError('Catalog batch plan is invalid');
   }
   const totalBatches = Math.ceil(targets.length / batchSize);
   return Object.freeze(Array.from({ length: totalBatches }, (_, index) => Object.freeze({

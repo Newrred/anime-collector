@@ -319,6 +319,10 @@ export async function beginPromotionJournal(database, input) {
   if (accountOwner?.kind !== "ACCOUNT" || accountOwner.userId !== userId || guestOwner?.kind !== "GUEST") {
     fail("PROMOTION_OWNER_NOT_FOUND", "Promotion owners were not found", transaction);
   }
+  const allJournals = await requestResult(promotions.getAll());
+  if (allJournals.some((row) => row.guestOwnerId === guestOwnerId && row.accountOwnerId !== accountOwnerId && row.status !== "COMPLETED")) {
+    fail("PROMOTION_OTHER_ACCOUNT_PENDING", "Finish the previous account promotion first", transaction);
+  }
   const existing = byOperation || byGuest;
   if (existing) {
     if (existing.sourceHash !== sourceHash || existing.accountOwnerId !== accountOwnerId
@@ -451,7 +455,7 @@ export async function commitPromotionToAccount(database, input) {
   });
   meta.put({ key: LEGACY_GUEST_OWNER_META_KEY, value: newGuestOwner.id, updatedAt: timestamp });
   meta.put({ key: ACTIVE_OWNER_META_KEY, value: accountOwnerId, updatedAt: timestamp });
-  deviceStates.put({ ...deviceState, lastSyncSeq: Number(result.nextSyncSeq), updatedAt: timestamp });
+  deviceStates.put({ ...deviceState, lastSyncSeq: Number(deviceState.lastSyncSeq || 0), updatedAt: timestamp });
   promotions.put({
     ...journal,
     status: "COMPLETED",

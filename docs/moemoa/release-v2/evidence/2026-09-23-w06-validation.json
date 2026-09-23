@@ -1,0 +1,102 @@
+{
+  "work": "W06",
+  "status": "BLOCKED_EXTERNAL",
+  "localValidation": "PASS",
+  "verifiedAt": "2026-09-23T04:35:31.008742+00:00",
+  "sourceHead": "3fb09a76b45e8ad8e3d0cc14fa6f4b5073a091fb",
+  "uncommitted": true,
+  "deployed": false,
+  "databaseMigrations": 0,
+  "environment": "Windows Node24.19.0 / Playwright Chromium / real isolated IndexedDB, synthetic Auth and gateway",
+  "tests": {
+    "unitPassed": 278,
+    "browserPassed": 36,
+    "browserSkipped": 0,
+    "buildRoutes": 15,
+    "reactDoctorBefore": 49,
+    "reactDoctorAfter": 49,
+    "reactDoctorErrors": 1,
+    "reactDoctorWarnings": 21,
+    "diffCheck": "PASS"
+  },
+  "externalBlocker": "User confirmed no isolated Supabase project or A/B test accounts. Docker daemon unavailable. No production substitute used.",
+  "evidenceDirectory": "D:\\hong\\Web\\Anime\\.moemoa-w06-2026-09-23",
+  "files": [
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "e38f75eee55583fc02782637e4a68cfcf6d8d8342ec9da4e8fbbe9ec8dbc733e"
+    },
+    {
+      "path": "src/components/data/MemoryAccountPanel.jsx",
+      "sha256": "d94077f4ab2cfdaf0b95ecdf49964520e35900229053d1a9c27f00300e2603a2"
+    },
+    {
+      "path": "src/features/memory/adapters/indexeddb/memoryOwnerStore.js",
+      "sha256": "b0d45f203a3a8a5d3557cb6846aaebdc3d08275c1645a5992a828180ac82d656"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabaseMemoryGateway.js",
+      "sha256": "86cc49f76a2445720c2318c638a52010a504f25dd65c0da285f4f4d6fb9704f5"
+    },
+    {
+      "path": "src/features/memory/application/memoryBackup.js",
+      "sha256": "2a0964e0b93cc459cec1f450290c3f48565d0b28b2ca93ad8572520dac65b63b"
+    },
+    {
+      "path": "src/features/memory/application/promoteGuestMemory.js",
+      "sha256": "a96385f8cff5b48f482383d6dca4625b4d0f4defc36a00ed6556865938cd7877"
+    },
+    {
+      "path": "src/features/memory/components/MemoryRouteShell.jsx",
+      "sha256": "89cfa4712f1bddb95b76e3f0b6f6e0e06267b67d8877c0e964a9c1941520ef4f"
+    },
+    {
+      "path": "src/features/memory/components/useHomeMemoryArchive.js",
+      "sha256": "0135253ca5802ba3a956160accdc33fd07ab5131a80b6beb28bcf215b775d7ab"
+    },
+    {
+      "path": "src/features/memory/runtime/createMemoryAccountRuntime.js",
+      "sha256": "95aa875f6fe30b3249c3d1dd4c669ef5d4dedb9f40e8cea5d7c356b03c9cd2ae"
+    },
+    {
+      "path": "src/hooks/useAuthSession.js",
+      "sha256": "9d80dbb69caac96886eabac0183551401e7b2e678cec8a361627c8305ce73c03"
+    },
+    {
+      "path": "src/hooks/useMemoryAccountSync.js",
+      "sha256": "b189ac2b83e4651e67ec2a5c65c4b6cc0784d9595a1c09b63a3f72d93a2ffd91"
+    },
+    {
+      "path": "src/hooks/useMemoryOwnerBoundary.js",
+      "sha256": "5cea295991053f13f87567b3a7478f3a414b569c88740fdc9fd803d25c0eac7f"
+    },
+    {
+      "path": "src/messages/en.js",
+      "sha256": "a144bab165bfaa891ff835b3802d0e842242fbc5fe9c0f171098e98a30490c1c"
+    },
+    {
+      "path": "src/messages/ko.js",
+      "sha256": "ddabc52babbc65c55719774fa866d4048f19e726fa7f07bf5f8ff169d3bb846b"
+    },
+    {
+      "path": "tests/memory-indexeddb.spec.ts",
+      "sha256": "b17442955c5a87f5e7b4e129d3ad79554a7e68bd8e2570554e4994559c7b70f2"
+    },
+    {
+      "path": "tests/memory-owner-boundary.spec.ts",
+      "sha256": "53d88893cefc29d196ced864b166560b94d9f99ebe6494d13e1a0a0e9c9e74a3"
+    },
+    {
+      "path": "tests/review-improvements.spec.ts",
+      "sha256": "5b2efc1376c2675276a7f4d6bf2985627fcdaffd9269c6adb18b29b6a572923f"
+    },
+    {
+      "path": "tests/unit/guestPromotion.test.mjs",
+      "sha256": "c790ebb656ba22d6bef80360f06c767766de6446fbb2fdbc98aab84475935f4f"
+    },
+    {
+      "path": "tests/unit/memoryAccountRuntime.test.mjs",
+      "sha256": "fc67f51169189030b1bfdce0ff3851578643fda9411f639c71d7de60b56fd6d1"
+    }
+  ]
+}

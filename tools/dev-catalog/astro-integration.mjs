@@ -27,15 +27,23 @@ function endJson(response, statusCode, value) {
 }
 
 function safeCandidate(value) {
+  const animeId = String(value?.animeId ?? '').toLowerCase();
   const externalId = String(value?.sourceBinding?.externalId ?? '');
-  if (value?.kind !== 'ANIME_REF' || value?.sourceBinding?.provider !== 'ANILIST'
-    || !/^[1-9]\d{0,11}$/u.test(externalId)) return null;
+  const provider = value?.sourceBinding?.provider;
+  const expectedVerification = provider === 'ANILIST' ? 'PROVIDER_CANDIDATE'
+    : provider === 'ANILIFE' ? 'SOURCE_REVIEWED' : null;
+  if (value?.kind !== 'ANIME_REF'
+    || !/^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(animeId)
+    || !expectedVerification || value.verificationState !== expectedVerification
+    || !/^[1-9]\d{0,11}$/u.test(externalId)
+    || (provider !== 'ANILIST' && value.coverPreviewUrl !== null)) return null;
   return {
     kind: 'ANIME_REF',
+    animeId,
     displayTitle: value.displayTitle,
     aliases: value.aliases,
     genres: value.genres,
-    sourceBinding: { provider: 'ANILIST', externalId },
+    sourceBinding: { provider, externalId },
     verificationState: value.verificationState,
     catalogSource: value.catalogSource,
     readiness: value.readiness,
@@ -79,6 +87,8 @@ export function createDevelopmentCatalogMiddleware({ reader } = {}) {
 export function createDevelopmentCatalogIntegration({
   repoRoot = process.cwd(),
   workspaceRoot = process.env.MOEMOA_CATALOG_LAB_DIR,
+  profiles = String(process.env.MOEMOA_CATALOG_PROFILES
+    ?? process.env.MOEMOA_CATALOG_PROFILE ?? 'full3998').split(',').map((value) => value.trim()),
 } = {}) {
   return {
     name: 'moemoa-development-catalog',
@@ -90,7 +100,7 @@ export function createDevelopmentCatalogIntegration({
         }
         try {
           const workspace = await openCatalogWorkspace({ repoRoot, workspaceRoot, create: false });
-          const reader = createDevelopmentCatalogReadModel({ workspace });
+          const reader = createDevelopmentCatalogReadModel({ workspace, profiles });
           server.middlewares.use(createDevelopmentCatalogMiddleware({ reader }));
           logger.info('Development catalog is enabled from the external TEST_ONLY workspace.');
         } catch {

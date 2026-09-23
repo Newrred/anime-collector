@@ -1,3 +1,4 @@
+import { useModalInteraction } from "../../hooks/useModalInteraction.js";
 import { Chip } from "./LibraryUi.jsx";
 import { formatEventLabel, formatSeasonTermLabel } from "./libraryCopy.js";
 import { getMessageGroup } from "../../domain/messages.js";
@@ -29,6 +30,7 @@ export default function LibraryQuickLogSheet({
   constants,
 }) {
   const copy = getMessageGroup(locale, "libraryQuickLogSheet");
+  const dialogRef = useModalInteraction({ open: Boolean(open && draft), onClose, busy: saving });
   if (!open || !draft) return null;
 
   function resolveContextHint() {
@@ -54,9 +56,11 @@ export default function LibraryQuickLogSheet({
   const { seasonTermOptions, affinityOptions, reasonTagOptions } = constants;
 
   return (
-    <div onClick={onClose} className="log-sheet-backdrop">
+    <div data-modal-layer onClick={() => { if (!saving) onClose?.(); }} className="log-sheet-backdrop">
       <div
         onClick={(event) => event.stopPropagation()}
+        ref={dialogRef}
+        tabIndex={-1}
         className="log-sheet"
         role="dialog"
         aria-modal="true"
@@ -84,7 +88,7 @@ export default function LibraryQuickLogSheet({
           </div>
         </div>
 
-        <div className="log-sheet__body">
+        <fieldset disabled={saving} style={{ border: 0, margin: 0, minWidth: 0 }} className="log-sheet__body">
           <div className="log-sheet__context-card">
             <div className="small log-sheet__context-title">{copy.contextTitle}</div>
             <div className="small log-sheet__context-text">{contextHint}</div>
@@ -370,11 +374,11 @@ export default function LibraryQuickLogSheet({
               </div>
             </div>
           )}
-        </div>
+        </fieldset>
 
         <div className="log-sheet__footer">
           <button type="button" className="btn" onClick={onClose} disabled={saving}>
-            {copy.keepDefaults}
+            {locale === "ko" ? "취소" : "Cancel"}
           </button>
           <button type="button" className="btn" onClick={onSave} disabled={saving}>
             {saving ? copy.saving : copy.save}

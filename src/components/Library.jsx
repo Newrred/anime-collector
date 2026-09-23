@@ -1,5 +1,6 @@
+import { useMemoryReturnNavigation } from "../hooks/useMemoryReturnNavigation.js";
 import { useEffect, useMemo, useRef, useState } from "react";
-import aliasSeed from "../data/aliases.json";
+import aliasSeed from "../data/reviewedAliasSeed.js";
 import { fetchAnimeByIdsCached, getCachedAnimeMap } from "../lib/anilist";
 import {
   clamp,
@@ -50,6 +51,8 @@ import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { GenresRow } from "./library/LibraryUi.jsx";
 import LibraryFiltersPanel from "./library/LibraryFiltersPanel.jsx";
 import LibraryDetailModal from "./library/LibraryDetailModal.jsx";
+import { useUnsavedNavigation } from "../hooks/useUnsavedNavigation.js";
+import { quickLogFingerprint } from "../domain/quickLogDraft.js";
 import LibraryQuickLogSheet from "./library/LibraryQuickLogSheet.jsx";
 import {
   AFFINITY_OPTIONS,
@@ -351,6 +354,9 @@ export default function Library() {
   const deepLinkHandledRef = useRef(false);
   const pendingQuickLogFocusRef = useRef(false);
   const quickLogSaveInFlightRef = useRef(false);
+  const [quickLogInitial, setQuickLogInitial] = useState("");
+  const quickLogDirty = quickLogOpen && quickLogFingerprint(quickLogDraft, quickLogCharacterIds, quickLogPrimaryCharacterId, quickLogCharacterMeta) !== quickLogInitial;
+  useUnsavedNavigation(quickLogDirty, locale, { busy: quickLogSaving });
   const genreKo = (value) => formatGenreLabel(value, locale);
   const affinityLabel = (value) => formatAffinityLabel(value, locale);
   const reasonTagLabel = (value) => formatReasonTagLabel(value, locale);
@@ -1281,7 +1287,9 @@ export default function Library() {
       };
     }
 
-    setQuickLogDraft({ ...draft, watchedAtPrecision: precision, watchedAtValue: value });
+    const initialDraft = { ...draft, watchedAtPrecision: precision, watchedAtValue: value };
+    setQuickLogInitial(quickLogFingerprint(initialDraft, compactIds, resolvedPrimaryId, nextMeta));
+    setQuickLogDraft(initialDraft);
     setQuickLogSaveError("");
     setQuickLogCharacterIds(compactIds);
     setQuickLogPrimaryCharacterId(resolvedPrimaryId);
@@ -1293,10 +1301,14 @@ export default function Library() {
 
   function closeQuickLogSheet() {
     if (quickLogSaveInFlightRef.current) return;
+    if (quickLogDirty && !window.confirm(locale === "ko"
+      ? "저장하지 않은 시청 기록 변경을 버릴까요?"
+      : "Discard unsaved watch log changes?")) return;
     clearQuickLogSheet();
   }
 
   function clearQuickLogSheet() {
+    setQuickLogInitial("");
     setQuickLogOpen(false);
     setQuickLogDraft(null);
     setQuickLogSaveError("");
@@ -1814,6 +1826,7 @@ export default function Library() {
 
   const rawBase = String(import.meta.env.BASE_URL || "/");
   const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
+  useMemoryReturnNavigation(base);
 
   return (
     <div className="library-page">

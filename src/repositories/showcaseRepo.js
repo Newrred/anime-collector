@@ -1,3 +1,4 @@
+import { isLegacySocialAvailable } from "../domain/legacySocialAvailability.js";
 import { supabase } from "../lib/supabaseClient.js";
 import { readJson, writeJson } from "../storage/localJsonStore.js";
 import {
@@ -121,6 +122,7 @@ export async function readPublicShowcaseSnapshot(userId) {
 }
 
 export async function publishShowcaseSnapshot(userId, snapshot) {
+  if (!isLegacySocialAvailable()) throw new Error("LEGACY_SOCIAL_UNAVAILABLE");
   if (shouldUseMockShowcaseStore(userId)) {
     writeMockPublicShowcaseSnapshot(userId, snapshot);
     return snapshot;

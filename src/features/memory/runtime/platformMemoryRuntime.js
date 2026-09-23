@@ -20,6 +20,10 @@ const selectTitleResolver = () => {
       const { getPlatformTitleResolver } = await import("./platformTitleResolver.js");
       return getPlatformTitleResolver().search(query);
     },
+    resolveCover: async (ref) => {
+      const { getPlatformTitleResolver } = await import("./platformTitleResolver.js");
+      return getPlatformTitleResolver().resolveCover(ref);
+    },
   };
 };
 

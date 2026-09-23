@@ -19,6 +19,7 @@ Before any task:
 - Web is the primary Archive, Board, public page, account, and administration surface.
 - A complete Memory Card requires an anime/title entity plus a visual element.
 - A user image is strongly encouraged, but a service-generated design card must remain available.
+- An approved catalog cover may be a Memory visual only after explicit user selection and at least one personal memory signal; never create that Card from title exposure or Save Title alone.
 - Title-only records are Drafts, not complete Memory Cards.
 - Archive is automatic. Board is optional, supports N:M card membership, and is suggested after three cards.
 - Local-first use is allowed without login. Login is required for cloud backup, Web sync, multi-device use, and public publishing.
@@ -28,6 +29,8 @@ Before any task:
 - Existing `legacy_unverified` data must not be deleted or promoted without an approved migration and verification plan.
 
 ## Work protocol
+
+- Production deployment must use the connected GitHub repository and its production branch (`master`). Commit and push the reviewed code, then verify the resulting Vercel Git deployment and its commit SHA. Do not deploy or promote local/CLI builds as production unless the user explicitly approves an exception for that release. A production deployment is not complete until Git and the deployed source are traceable to the same commit. Database releases must also reference version-controlled migration/ingestion code and a recorded data release ID; never commit credentials or raw private data. User instruction confirmed 2026-09-09.
 
 - Inspect before changing. Never assume the framework, storage model, authentication provider, build commands, or current implementation status.
 - Cite repository evidence with file paths and line ranges in audit and design reports.
@@ -69,6 +72,7 @@ Stop and ask for a decision before proceeding when:
 ## Task-specific references
 
 - Product and user flow: `docs/moemoa/02_PRODUCT_SCOPE_AND_USER_FLOWS.md`
+- Title Hub, My Titles dual view, and catalog-cover Memory UI: `docs/superpowers/specs/2026-09-03-title-hub-dual-view-ui.md`, `docs/moemoa/plans/2026-09-03-title-hub-dual-view.md`
 - Repository audit: `docs/moemoa/03_REPOSITORY_AUDIT_PROTOCOL.md`
 - Catalog and ingestion: `docs/moemoa/04_CATALOG_DATA_AND_INGESTION_SPEC.md`
 - Image/UGC: `docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md`

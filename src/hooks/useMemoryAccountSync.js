@@ -20,10 +20,11 @@ const INITIAL_STATE = Object.freeze({
 export function useMemoryAccountSync({ session, authLoading = false } = {}) {
   const [state, setState] = useState(INITIAL_STATE);
   const [retryToken, setRetryToken] = useState(0);
-  const activeUserId = useRef(session?.user?.id || null);
+  const activeUserId = useRef({ userId: session?.user?.id || null });
+  const previewRequest = useRef(0);
 
   useEffect(() => {
-    activeUserId.current = session?.user?.id || null;
+    activeUserId.current = { userId: session?.user?.id || null };
   }, [session?.user?.id]);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
       promotionBusy: false,
       promotionErrorCode: null,
       syncBusy: false,
+      syncResultCode: null,
       syncErrorCode: null,
       conflicts: [],
     }));
@@ -46,6 +48,7 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     }
     getPlatformMemoryAccountRuntime()
       .then(async (runtime) => {
+        if (!alive) return null;
         if (!runtime.enabled) return runtime.getState();
         if (session?.user?.id) return runtime.initializeAccountSession(session);
         await runtime.handleSignedOut();
@@ -73,22 +76,26 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
 
   const retry = useCallback(() => setRetryToken((value) => value + 1), []);
   const buildPromotionPreview = useCallback(async () => {
+    const request = ++previewRequest.current;
     const userId = activeUserId.current;
     setState((current) => ({ ...current, promotionBusy: true, promotionErrorCode: null }));
     try {
       const runtime = await getPlatformMemoryAccountRuntime();
+      if (activeUserId.current !== userId || request !== previewRequest.current) return null;
       const preview = await runtime.buildPromotionPreview();
-      if (activeUserId.current !== userId) return null;
+      if (activeUserId.current !== userId || request !== previewRequest.current) return null;
       setState((current) => ({ ...current, promotionPreview: preview, promotionBusy: false }));
       return preview;
     } catch (error) {
-      if (activeUserId.current === userId) {
+      if (activeUserId.current === userId && request === previewRequest.current) {
         setState((current) => ({ ...current, promotionBusy: false, promotionErrorCode: error?.code || "PROMOTION_FAILED" }));
       }
       return null;
     }
   }, []);
   const cancelPromotionPreview = useCallback(() => {
+    previewRequest.current++;
+    getPlatformMemoryAccountRuntime().then(runtime => runtime.cancelPromotionPreview?.()).catch(() => {});
     setState((current) => ({ ...current, promotionPreview: null, promotionErrorCode: null }));
   }, []);
   const promote = useCallback(async (titleChoices) => {
@@ -96,6 +103,7 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     setState((current) => ({ ...current, promotionBusy: true, promotionErrorCode: null }));
     try {
       const runtime = await getPlatformMemoryAccountRuntime();
+      if (activeUserId.current !== userId) return null;
       const next = await runtime.promote({ titleChoices });
       if (activeUserId.current !== userId) return null;
       setState((current) => ({ ...current, ...next, promotionPreview: null, promotionBusy: false }));
@@ -109,9 +117,10 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
   }, []);
   const syncNow = useCallback(async () => {
     const userId = activeUserId.current;
-    setState((current) => ({ ...current, syncBusy: true, syncErrorCode: null }));
+    setState((current) => ({ ...current, syncBusy: true, syncResultCode: null, syncErrorCode: null }));
     try {
       const runtime = await getPlatformMemoryAccountRuntime();
+      if (activeUserId.current !== userId) return null;
       const next = await runtime.syncNow();
       if (activeUserId.current !== userId) return null;
       setState((current) => ({ ...current, ...next, syncBusy: false }));
@@ -128,6 +137,7 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     setState((current) => ({ ...current, conflictBusy: true, syncErrorCode: null }));
     try {
       const runtime = await getPlatformMemoryAccountRuntime();
+      if (activeUserId.current !== userId) return null;
       const next = await runtime.resolveConflict({ conflictId, selection });
       if (activeUserId.current !== userId) return null;
       setState((current) => ({ ...current, ...next, conflictBusy: false }));
@@ -140,18 +150,24 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     }
   }, []);
   const exportConflictBackup = useCallback(async (conflictId) => {
+    const userId = activeUserId.current;
     const runtime = await getPlatformMemoryAccountRuntime();
-    return runtime.exportConflictBackup(conflictId);
+    if (activeUserId.current !== userId) return null;
+    const backup = await runtime.exportConflictBackup(conflictId);
+    return activeUserId.current === userId ? backup : null;
   }, []);
 
+  const visibleState = state.userId && (authLoading || state.userId !== session?.user?.id)
+    ? { ...INITIAL_STATE, enabled: state.enabled } : state;
   return Object.freeze({
-    ...state,
-    loading: state.status === "LOADING" || state.status === "INITIALIZING",
+    ...visibleState,
+    loading: visibleState.status === "LOADING" || visibleState.status === "INITIALIZING",
     retry,
     buildPromotionPreview,
     cancelPromotionPreview,
     promote,
     syncNow,
+    pauseSync: async () => (await getPlatformMemoryAccountRuntime()).pauseSync?.(),
     resolveConflict,
     exportConflictBackup,
   });

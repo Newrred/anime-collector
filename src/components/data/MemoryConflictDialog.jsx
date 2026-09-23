@@ -1,3 +1,4 @@
+import { useModalInteraction } from "../../hooks/useModalInteraction.js";
 import { IconDownload, IconUpload, IconX } from "../ui/AppIcons.jsx";
 
 const readValue = (entity, camel, snake = camel) => entity?.[camel] ?? entity?.[snake] ?? null;
@@ -15,10 +16,11 @@ const titleFor = (conflict, fallback) => {
 };
 
 export default function MemoryConflictDialog({ copy, conflict, busy, onClose, onKeepLocal, onUseCloud, onExport }) {
+  const dialogRef = useModalInteraction({ open: Boolean(conflict), onClose, busy });
   if (!conflict) return null;
   return (
-    <div className="modalOverlay conflict-modal" role="presentation">
-      <section className="modalCard conflict-modal__card" role="dialog" aria-modal="true" aria-labelledby="memory-conflict-title">
+    <div className="modalOverlay conflict-modal" data-modal-layer role="presentation" onClick={(event) => { if (event.target === event.currentTarget && !busy) onClose?.(); }}>
+      <section ref={dialogRef} tabIndex={-1} className="modalCard conflict-modal__card" role="dialog" aria-modal="true" aria-labelledby="memory-conflict-title">
         <button type="button" className="closeBtn" onClick={onClose} aria-label={copy.close} disabled={busy}>
           <IconX size={16} />
         </button>

@@ -1,5 +1,8 @@
 import { sha256, stableStringify } from '../lib/hash.mjs';
-import { SOURCE_PROMOTION_POLICY } from '../contracts/catalogContracts.mjs';
+import {
+  SOURCE_PROMOTION_POLICY,
+  sourcePromotionForField,
+} from '../contracts/catalogContracts.mjs';
 import {
   CANONICAL_FIELD_PATHS,
   COLLECTION_FIELD_PATHS,
@@ -24,9 +27,10 @@ const NORMALIZED_META_KEYS = Object.freeze([
 const CLAIM_STATUSES = Object.freeze(['VALUE', 'SOURCE_NOT_AVAILABLE', 'NOT_FETCHED']);
 const PROMOTION_VALUES = Object.freeze([...new Set(Object.values(SOURCE_PROMOTION_POLICY))]);
 const NORMALIZED_SOURCE_IDS = Object.freeze(['anilist', 'wikidata', 'anilife_public']);
-const CLAIM_SOURCE_IDS = Object.freeze(['legacy_aliases', ...NORMALIZED_SOURCE_IDS]);
+const CLAIM_SOURCE_IDS = Object.freeze(['legacy_aliases', 'reviewed_increment', ...NORMALIZED_SOURCE_IDS]);
 const CLAIM_INTEGRITY_VERSION = 'FIELD_CLAIM_CONTENT_V1';
 const LEGACY_SEED_RECORD_VERSION = 'LEGACY_ALIAS_KO_SEED_V1';
+const REVIEWED_INCREMENT_RECORD_VERSION = 'REVIEWED_INCREMENT_KO_SEED_V1';
 
 function typedError(code, message) {
   const error = new Error(message);
@@ -72,14 +76,17 @@ function validIdentityEvidence(record) {
 
 function normalizedSourceBindingValid(record) {
   const targetAniListId = record.targetKey.match(/^ANILIST:([1-9]\d*)$/u)?.[1];
-  if (!targetAniListId) return false;
+  const targetAniLifeId = record.targetKey.match(/^ANILIFE:([1-9]\d*)$/u)?.[1];
+  if (!targetAniListId && !targetAniLifeId) return false;
   const wholeStatuses = new Set(record.fieldValues.map((field) => field.status));
   const wholeAbsence = wholeStatuses.size === 1 && !wholeStatuses.has('VALUE');
   if (record.sourceId === 'anilist') {
-    return !wholeAbsence && record.externalIds.some((value) => value.sourceId === 'anilist'
+    return Boolean(targetAniListId || targetAniLifeId) && !wholeAbsence
+      && record.externalIds.some((value) => value.sourceId === 'anilist'
       && value.value === record.sourceEntityId);
   }
   if (record.sourceId === 'wikidata') {
+    if (!targetAniListId) return false;
     if (wholeAbsence) {
       return wholeStatuses.has('SOURCE_NOT_AVAILABLE')
         && record.sourceEntityId === `P8729:${targetAniListId}`;
@@ -93,6 +100,7 @@ function normalizedSourceBindingValid(record) {
   if (record.sourceId === 'anilife_public') {
     if (wholeAbsence) return wholeStatuses.has('NOT_FETCHED') && record.sourceEntityId === 'UNBOUND';
     return /^[1-9]\d*$/u.test(record.sourceEntityId)
+      && (!targetAniLifeId || record.sourceEntityId === targetAniLifeId)
       && record.externalIds.some((value) => value.sourceId === 'anilife_public'
         && value.value === record.sourceEntityId);
   }
@@ -201,7 +209,7 @@ export function validateFieldClaim(input) {
       || (isExactIsoTimestamp(claim.reviewedAt) && typeof claim.reviewedBy === 'string' && claim.reviewedBy))) {
     throw claimInvalid();
   }
-  const policy = SOURCE_PROMOTION_POLICY[claim.sourceId];
+  const policy = sourcePromotionForField(claim.sourceId, claim.fieldPath);
   if (!CLAIM_SOURCE_IDS.includes(claim.sourceId) || !policy || policy !== claim.catalogPromotion) {
     throw typedError('FIELD_CLAIM_SOURCE_POLICY_INVALID', 'FieldClaim source promotion policy is invalid');
   }
@@ -227,7 +235,7 @@ export function validateFieldClaim(input) {
 
 function createFieldClaim({
   target, fieldPath, rawValue, normalizedValue, sourceId, sourceRecordId,
-  ruleId, confidenceClass, status, retrievedAt,
+  ruleId, confidenceClass, status, retrievedAt, reviewedAt = null, reviewedBy = null,
 }) {
   const claimContent = {
     claimId: sha256([target.moemoaAnimeId, fieldPath, normalizedValue, sourceRecordId]),
@@ -238,13 +246,13 @@ function createFieldClaim({
     normalizedValue: structuredClone(normalizedValue),
     sourceId,
     sourceRecordId,
-    catalogPromotion: SOURCE_PROMOTION_POLICY[sourceId],
+    catalogPromotion: sourcePromotionForField(sourceId, fieldPath),
     ruleId,
     confidenceClass,
     status,
     retrievedAt,
-    reviewedAt: null,
-    reviewedBy: null,
+    reviewedAt,
+    reviewedBy,
   };
   const claim = {
     ...claimContent,
@@ -269,18 +277,42 @@ function canonicalSeedTimestamp(value) {
   }
 }
 
-function legacyKoreanSeedClaim(target) {
-  if (target.seedSource !== 'legacy_aliases') return null;
+function exactAniLifeContentUrl(value, contentId) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' && !parsed.username && !parsed.password
+      && !parsed.search && !parsed.hash && parsed.pathname === `/content/${contentId}`;
+  } catch {
+    return false;
+  }
+}
+
+function koreanSeedClaims(target) {
+  if (!['legacy_aliases', 'reviewed_increment'].includes(target.seedSource)) return [];
+  const isReviewedIncrement = target.seedSource === 'reviewed_increment';
+  const invalidSeed = () => isReviewedIncrement
+    ? typedError('CATALOG_SEED_INVALID', 'Reviewed increment Korean title seed is invalid')
+    : typedError('LEGACY_SEED_INVALID', 'Legacy Korean title seed is invalid');
   const targetAniListId = target.targetKey.match(/^ANILIST:([1-9]\d*)$/u)?.[1];
+  const targetAniLifeId = target.targetKey.match(/^ANILIFE:([1-9]\d*)$/u)?.[1];
   const anilistIds = Array.isArray(target.seedExternalIds)
     ? target.seedExternalIds.filter((entry) => entry?.sourceId === 'anilist') : [];
+  const anilifeIds = Array.isArray(target.seedExternalIds)
+    ? target.seedExternalIds.filter((entry) => entry?.sourceId === 'anilife_public') : [];
   const koreanTitles = Array.isArray(target.seedTitles)
     ? target.seedTitles.filter((entry) => entry?.locale === 'ko') : [];
   const retrievedAt = canonicalSeedTimestamp(target.createdAt);
-  if (!targetAniListId || anilistIds.length !== 1 || String(anilistIds[0]?.value) !== targetAniListId
-    || koreanTitles.length !== 1 || typeof koreanTitles[0]?.value !== 'string'
-    || !retrievedAt) {
-    throw typedError('LEGACY_SEED_INVALID', 'Legacy Korean title seed is invalid');
+  const targetIdentityValid = isReviewedIncrement
+    ? (anilifeIds.length === 1 && /^[1-9]\d*$/u.test(String(anilifeIds[0]?.value ?? ''))
+      && anilistIds.length <= 1
+      && (targetAniLifeId === String(anilifeIds[0].value)
+        || (targetAniListId && anilistIds.length === 1
+          && String(anilistIds[0].value) === targetAniListId)))
+    : (Boolean(targetAniListId) && anilistIds.length === 1
+      && String(anilistIds[0]?.value) === targetAniListId);
+  if (!targetIdentityValid || koreanTitles.length !== 1
+    || typeof koreanTitles[0]?.value !== 'string' || !retrievedAt) {
+    throw invalidSeed();
   }
   const rawKoreanTitle = koreanTitles[0].value;
   const normalizedValue = {
@@ -288,28 +320,93 @@ function legacyKoreanSeedClaim(target) {
     value: rawKoreanTitle.normalize('NFKC').trim().replace(/\s+/gu, ' '),
   };
   if (!isNormalizedFieldValue('titles', normalizedValue)) {
-    throw typedError('LEGACY_SEED_INVALID', 'Legacy Korean title seed is invalid');
+    throw invalidSeed();
   }
-  const rawValue = { anilistId: targetAniListId, ko: rawKoreanTitle };
-  const sourceRecordId = sha256({
+  const rawValue = { anilistId: targetAniListId ?? null, ko: rawKoreanTitle };
+  const incrementEvidence = target.incrementEvidence;
+  if (isReviewedIncrement && (!isPlainRecord(incrementEvidence)
+    || incrementEvidence.sourceId !== 'anilife_public'
+    || !/^[1-9]\d*$/u.test(incrementEvidence.contentId ?? '')
+    || String(anilifeIds[0]?.value) !== incrementEvidence.contentId
+    || !/^[a-f0-9]{64}$/u.test(incrementEvidence.sourceHash ?? '')
+    || !isExactIsoTimestamp(incrementEvidence.capturedAt)
+    || !Number.isInteger(incrementEvidence.year)
+    || incrementEvidence.year < 1900 || incrementEvidence.year > 2100
+    || !exactAniLifeContentUrl(incrementEvidence.publicPageUrl, incrementEvidence.contentId)
+    || ![null, 'TV', 'Movie', 'OVA'].includes(incrementEvidence.format)
+    || (incrementEvidence.episodeLabel !== null
+      && (typeof incrementEvidence.episodeLabel !== 'string' || !incrementEvidence.episodeLabel.trim()))
+    || !Array.isArray(incrementEvidence.genres)
+    || incrementEvidence.genres.some((genre) => typeof genre !== 'string' || !genre.trim())
+    || !isExactIsoTimestamp(incrementEvidence.reviewedAt)
+    || typeof incrementEvidence.reviewedBy !== 'string' || !incrementEvidence.reviewedBy.trim()
+    || incrementEvidence.reviewedAt !== retrievedAt)) {
+    throw typedError('CATALOG_SEED_INVALID', 'Reviewed increment evidence is invalid');
+  }
+  const sourceRecordId = sha256(isReviewedIncrement ? {
+    version: REVIEWED_INCREMENT_RECORD_VERSION,
+    sourceId: 'reviewed_increment',
+    targetKey: target.targetKey,
+    rawValue: { ...rawValue, anilifeContentId: incrementEvidence.contentId },
+    incrementEvidence,
+  } : {
     version: LEGACY_SEED_RECORD_VERSION,
     sourceId: 'legacy_aliases',
     sourcePath: 'src/data/aliases.json',
     targetKey: target.targetKey,
     rawValue,
   });
-  return createFieldClaim({
+  const titleClaim = createFieldClaim({
     target,
     fieldPath: 'titles',
-    rawValue,
+    rawValue: isReviewedIncrement
+      ? { ...rawValue, anilifeContentId: incrementEvidence.contentId } : rawValue,
     normalizedValue,
-    sourceId: 'legacy_aliases',
+    sourceId: target.seedSource,
     sourceRecordId,
-    ruleId: 'LEGACY_ALIAS_ANILIST_ID_V1',
+    ruleId: isReviewedIncrement ? 'REVIEWED_INCREMENT_TITLE_V1' : 'LEGACY_ALIAS_ANILIST_ID_V1',
     confidenceClass: 'EXACT_ID',
     status: 'VALUE',
     retrievedAt,
+    reviewedAt: isReviewedIncrement ? incrementEvidence.reviewedAt : null,
+    reviewedBy: isReviewedIncrement ? incrementEvidence.reviewedBy : null,
   });
+  if (!isReviewedIncrement) return [titleClaim];
+  const reviewed = {
+    target,
+    sourceId: 'reviewed_increment',
+    sourceRecordId,
+    ruleId: 'REVIEWED_INCREMENT_ANILIFE_ID_V1',
+    confidenceClass: 'REVIEWED',
+    status: 'VALUE',
+    retrievedAt,
+    reviewedAt: incrementEvidence.reviewedAt,
+    reviewedBy: incrementEvidence.reviewedBy,
+  };
+  const claims = [titleClaim, createFieldClaim({
+    ...reviewed,
+    fieldPath: 'externalIds',
+    rawValue: { sourceId: 'anilife_public', value: incrementEvidence.contentId },
+    normalizedValue: { sourceId: 'anilife_public', value: incrementEvidence.contentId },
+  })];
+  const format = ({ TV: 'TV', Movie: 'MOVIE', OVA: 'OVA' })[incrementEvidence.format] ?? null;
+  if (format) claims.push(createFieldClaim({
+    ...reviewed, fieldPath: 'format', rawValue: incrementEvidence.format, normalizedValue: format,
+  }));
+  const episodeMatch = incrementEvidence.episodeLabel?.match(/^([1-9]\d*)화$/u);
+  if (episodeMatch && Number.isSafeInteger(Number(episodeMatch[1]))) claims.push(createFieldClaim({
+    ...reviewed,
+    fieldPath: 'episodeCount',
+    rawValue: incrementEvidence.episodeLabel,
+    normalizedValue: Number(episodeMatch[1]),
+  }));
+  for (const genre of [...new Set(incrementEvidence.genres)]) claims.push(createFieldClaim({
+    ...reviewed,
+    fieldPath: 'sourceGenres',
+    rawValue: genre,
+    normalizedValue: genre.normalize('NFKC').trim(),
+  }));
+  return claims;
 }
 
 function addUniqueClaim(claimsById, claim) {
@@ -337,14 +434,22 @@ export function buildFieldClaims(input) {
     return validateNormalizedRecord(record);
   });
   const claimsById = new Map();
-  const seedClaim = legacyKoreanSeedClaim(targetSnapshot);
-  if (seedClaim) addUniqueClaim(claimsById, seedClaim);
+  for (const seedClaim of koreanSeedClaims(targetSnapshot)) addUniqueClaim(claimsById, seedClaim);
   for (const record of records) {
     const identity = resolveIdentity({
       target: targetSnapshot, candidate: record, sourceId: record.sourceId, referenceRecords: records,
     });
     if (identity.status !== 'MATCHED') continue;
     for (const field of record.fieldValues) {
+      const supplementsAniLifeTarget = record.sourceId === 'anilist'
+        && /^ANILIFE:[1-9]\d*$/u.test(targetSnapshot.targetKey);
+      const collectionField = COLLECTION_FIELD_PATHS.includes(field.fieldPath);
+      const existingValue = records.some((other) => other.sourceRecordId !== record.sourceRecordId
+        && other.fieldValues.some((candidate) => candidate.fieldPath === field.fieldPath
+          && candidate.status === 'VALUE'))
+        || [...claimsById.values()].some((claim) => claim.fieldPath === field.fieldPath
+          && claim.status === 'VALUE');
+      if (supplementsAniLifeTarget && !collectionField && existingValue) continue;
       const claim = createFieldClaim({
         target: targetSnapshot,
         fieldPath: field.fieldPath,

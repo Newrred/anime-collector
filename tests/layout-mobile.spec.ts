@@ -138,7 +138,7 @@ test("320px composer exposes the first available visual action in the opening vi
 
 const ROUTES = [
   "/",
-  "/library/",
+  "/library/?focus=edit",
   "/tier/",
   "/profile/",
   "/data/",
@@ -188,7 +188,7 @@ test.describe("Mobile Layout Regression", () => {
         list: [{ anilistId: 1, status: "완료", score: 9, memo: "fixture", addedAt: 1 }],
         watchLogs: [],
       });
-      await page.goto("/library/", { waitUntil: "networkidle" });
+      await page.goto("/library/?focus=edit", { waitUntil: "networkidle" });
       await page.waitForTimeout(400);
 
       const firstCard = page.locator(".library-grid .card").first();

@@ -85,6 +85,43 @@ test('service projection keeps the legacy Korean title and silently quarantines 
   assert.equal(projection.readiness.status, 'READY');
 });
 
+test('public-page editorial labels require a registered identity review', () => {
+  assert.throws(() => buildServiceProjection({target:{...target,seedSource:'reviewed_public_page'},canonical:canonical(),cover:storedCover}), {code:'SERVICE_PROJECTION_TITLE_BASELINE_INVALID'});
+});
+
+test('an original-language seed cannot bypass the public-page review requirement', () => {
+  assert.throws(() => buildServiceProjection({
+    target: { ...target, seedSource: 'reviewed_public_page', seedTitles: [{ locale: 'en', value: 'Kanokon' }] },
+    canonical: canonical(), cover: storedCover,
+  }), { code: 'SERVICE_PROJECTION_TITLE_BASELINE_INVALID' });
+});
+
+test('a new mixed-season seed cannot silently receive READY status', () => {
+  const mixed = { ...target, seedTitles: [{ locale: 'ko', value: '예시 ∬' }, { locale: 'und', value: 'Example ∬' }] };
+  const projection = buildServiceProjection({ target: mixed, cover: storedCover, canonical: canonical({
+    titles: field('VALUE', [{ locale: 'ko', value: '예시 ∬' }, { locale: 'en', value: 'Example' }]),
+    relations: field('VALUE', [{ targetId: 'anilist:2', type: 'SEQUEL', title: 'Example ∫∫', format: 'TV' }]),
+  }) });
+  assert.equal(projection.readiness.status, 'READY_WITH_REVIEW');
+  assert.ok(projection.reviewItems.some((row) => row.reasonCode === 'TITLE_IDENTITY_REVIEW_REQUIRED'));
+});
+
+test('a reviewed target with changed input is rejected instead of reusing the old decision', () => {
+  assert.throws(() => buildServiceProjection({ target: { ...target, targetKey: 'ANILIST:103572' }, canonical: canonical(), cover: storedCover }),
+    { code: 'TITLE_IDENTITY_REVIEW_STALE' });
+});
+
+test('new source Korean aliases are checked even when the seed and preferred title are correct', () => {
+  const clean = { ...target, seedTitles: [{ locale: 'ko', value: '예시 신부' }] };
+  const projection = buildServiceProjection({ target: clean, cover: storedCover, canonical: canonical({
+    titles: field('VALUE', [{ locale: 'ko', value: '예시 신부' }, { locale: 'ko', value: '예시 신부 ∬' }, { locale: 'en', value: 'Example Bride' }]),
+    relations: field('VALUE', [{ targetId: 'anilist:2', type: 'SEQUEL', title: 'Example Bride ∫∫', format: 'TV' }]),
+  }) });
+  assert.equal(projection.preferredTitle.value, '예시 신부');
+  assert.equal(projection.readiness.status, 'READY_WITH_REVIEW');
+  assert.ok(projection.reviewItems.some(row => row.reasonCode === 'TITLE_IDENTITY_REVIEW_REQUIRED'));
+});
+
 test('service projection groups locale variants and auto-selects a primary among distinct official sites', () => {
   const equivalent = canonical({
     officialSiteUrl: field('CONFLICTED', undefined, [

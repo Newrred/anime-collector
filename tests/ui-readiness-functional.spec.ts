@@ -280,8 +280,8 @@ test('Home archive loading and error states never render an empty-archive claim'
       emptyLead: 'Start a private memory.',
       latest: 'Latest memory card',
       count: (count) => `${count} memories`,
-      openArchive: 'Open Archive',
-      createCard: 'Create memory card',
+      openArchive: 'View Memories',
+      createCard: 'Add Memory',
       createAnother: 'Create another memory',
       imageAlt: (title) => `${title} memory card`,
       imageMissing: 'Preview unavailable',
@@ -462,7 +462,7 @@ test('dark and light Memory surfaces meet numerical WCAG text contrast', async (
       const rootStyle = getComputedStyle(document.documentElement);
       return [
         { selector: '.pageTitle', backgroundToken: '--bg-app' },
-        { selector: '.pageLead', backgroundToken: '--bg-app' },
+        { selector: '#memory-save-reason', backgroundToken: '--bg-surface' },
         { selector: '.memory-composer__step-heading', backgroundToken: '--bg-surface' },
         { selector: '.memory-composer__save-gate .btn', backgroundToken: '--bg-surface-2' },
       ].map(({ selector, backgroundToken }) => {

@@ -519,6 +519,11 @@ test("Guest promotion keeps local image refs while atomically moving every owner
       operationId: promotionId, userId, accountOwnerId: account.id, guestOwnerId,
       deviceId, sourceHash: manifest.sourceHash, startedAt: now,
     });
+    const otherUser = '99999999-1111-4111-8111-111111111111';
+    const otherAccount = await repository.ensureAccountOwner({ userId: otherUser, now });
+    let otherPromotionBlocked = false;
+    try { await repository.beginPromotionJournal({ operationId: crypto.randomUUID(), userId: otherUser, accountOwnerId: otherAccount.id, guestOwnerId, deviceId: crypto.randomUUID(), sourceHash: manifest.sourceHash, startedAt: now }); }
+    catch (error) { otherPromotionBlocked = error.code === 'PROMOTION_OTHER_ACCOUNT_PENDING'; }
     const remoteResult = { status: "COMPLETED", importedCounts: manifest.counts, nextSyncSeq: 11 };
     await repository.markPromotionRemoteCompleted({
       operationId: promotionId, sourceHash: manifest.sourceHash, result: remoteResult, now,
@@ -541,6 +546,7 @@ test("Guest promotion keeps local image refs while atomically moving every owner
     repository.close();
     return {
       journalStarted: journal.status,
+      otherPromotionBlocked,
       counts: manifest.counts,
       remoteHasLocalRef: JSON.stringify(manifest.remoteBundle).includes("localRef"),
       allMoved: Object.values(rows).flat().every((row: any) => row.ownerId === account.id),
@@ -553,6 +559,7 @@ test("Guest promotion keeps local image refs while atomically moving every owner
   });
 
   expect(result.journalStarted).toBe("STARTED");
+  expect(result.otherPromotionBlocked).toBe(true);
   expect(result.counts).toEqual({ privateTitles: 1, cards: 2, visualAssets: 2, boards: 1, boardCards: 1 });
   expect(result.remoteHasLocalRef).toBe(false);
   expect(result.allMoved).toBe(true);
@@ -563,7 +570,7 @@ test("Guest promotion keeps local image refs while atomically moving every owner
   expect(result.completedStatus).toBe("COMPLETED");
   expect(result.activeOwnerId).toBe("account:11111111-1111-4111-8111-111111111111");
   expect(result.nextGuestOwnerId).toBe("guest:55555555-5555-4555-8555-555555555555");
-  expect(result.lastSyncSeq).toBe(11);
+  expect(result.lastSyncSeq).toBe(0); // Promotion does not prove earlier remote changes were downloaded.
 });
 
 test("sync conflict keeps the local row until an explicit cloud selection commits with a backup", async ({ page }) => {

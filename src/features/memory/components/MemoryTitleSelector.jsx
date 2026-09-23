@@ -1,7 +1,7 @@
-import { IconSearch } from "../../../components/ui/AppIcons.jsx";
+import { IconImage, IconSearch } from "../../../components/ui/AppIcons.jsx";
 
 const candidateLabel = (candidate, copy) => (
-  candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
+  candidate.kind === "PRIVATE_TITLE" ? copy.existingPrivateTitle : candidate.catalogSource === "SUPABASE_SERVICE_PROJECTION_V2"
     ? copy.catalogCandidate
     : candidate.verificationState === "PROVIDER_CANDIDATE"
     ? copy.providerCandidate
@@ -10,7 +10,6 @@ const candidateLabel = (candidate, copy) => (
 
 export default function MemoryTitleSelector({
   title,
-  runtimeReady,
   titleResults,
   selectedTitleChoice,
   titleSearchStatus,
@@ -40,21 +39,28 @@ export default function MemoryTitleSelector({
           <input
             id="memory-title-input"
             className="input"
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
+            autoComplete="off"
             value={title}
             maxLength={120}
             onChange={onTitleChange}
             onKeyDown={(event) => {
               if (event.key !== "Enter") return;
               event.preventDefault();
-              if (runtimeReady && title.trim().length >= 2 && titleSearchStatus !== "searching") onSearch();
+              const currentTitle = event.currentTarget.value.trim();
+              if (currentTitle.length >= 2 && titleSearchStatus !== "searching") {
+                onSearch(currentTitle);
+              }
             }}
             placeholder={copy.placeholder}
           />
           <button
             type="button"
             className="btn btn--subtle"
-            disabled={!runtimeReady || title.trim().length < 2 || titleSearchStatus === "searching"}
-            onClick={onSearch}
+            disabled={title.trim().length < 2 || titleSearchStatus === "searching"}
+            onClick={() => onSearch(title)}
           >
             <IconSearch size={16} />
             {titleSearchStatus === "searching" ? copy.searching : copy.search}
@@ -84,15 +90,31 @@ export default function MemoryTitleSelector({
       {titleResults.length > 0 && (
         <ul className="memory-composer__title-results" aria-label={copy.resultLabel}>
           {titleResults.map((candidate) => (
-            <li key={`${candidate.sourceBinding.provider}:${candidate.sourceBinding.externalId}`}>
+            <li key={candidate.animeId || `${candidate.sourceBinding?.provider}:${candidate.sourceBinding?.externalId}`}>
               <button
                 type="button"
                 aria-label={copy.select(candidate.displayTitle)}
                 onClick={() => onSelectTitle(candidate)}
               >
-                <span>
-                  <strong>{candidate.displayTitle}</strong>
-                  {candidate.aliases?.[0] && <small>{candidate.aliases[0]}</small>}
+                <span className="memory-composer__title-result-main">
+                  {candidate.coverPreviewUrl ? (
+                    <img
+                      className="memory-composer__title-result-poster"
+                      src={candidate.coverPreviewUrl}
+                      alt=""
+                      width="48"
+                      height="68"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="memory-composer__title-result-placeholder" aria-hidden="true">
+                      <IconImage size={18} />
+                    </span>
+                  )}
+                  <span className="memory-composer__title-result-copy">
+                    <strong>{candidate.displayTitle}</strong>
+                    {candidate.aliases?.[0] && <small>{candidate.aliases[0]}</small>}
+                  </span>
                 </span>
                 <span className="status-badge">{candidateLabel(candidate, copy)}</span>
               </button>

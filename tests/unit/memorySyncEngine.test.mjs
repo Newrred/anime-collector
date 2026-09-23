@@ -35,11 +35,11 @@ function harness({ operations = [], mutationResults = [], pullResult = null, rem
   let cursor = 0;
   let activeOwnerId = OWNER_ID;
   const repository = {
-    async listPendingSyncOperations() { return queue.filter((row) => row.state === "PENDING").map((row) => structuredClone(row)); },
+    async listPendingSyncOperations(_ownerId, limit = 50) { return queue.filter((row) => row.state === "PENDING").slice(0, limit).map((row) => structuredClone(row)); },
     async countPendingSyncOperations() { return queue.filter((row) => row.state === "PENDING").length; },
     async commitSyncMutation({ operation: row, result }) {
       const stored = queue.find((item) => item.id === row.id);
-      if (result.status === "APPLIED") stored.state = "APPLIED";
+      if (result.status === "APPLIED") { stored.state = "APPLIED"; stored.appliedVersion = result.entityVersion; }
       if (result.status === "CONFLICT") {
         stored.state = "CONFLICT";
         conflicts.push({ entityId: row.entityId, localEntity: row.payload, remoteEntity: result.remoteEntity, remoteVersion: result.entityVersion });
@@ -147,7 +147,7 @@ test("remote tombstone wins over a stale pending local upsert", async () => {
 
 test("malformed or mismatched pull payload never reaches the local mutation boundary", async () => {
   const change = { syncSeq: 4, entityType: "MEMORY_CARD", entityId: ENTITY_ID, operationType: "UPSERT", entityVersion: 2, changedAt: NOW };
-  const h = harness({ pullResult: { changes: [change], nextSyncSeq: 4, minimumRetainedSyncSeq: 0, requiresFullResync: false }, remoteRows: [{ entityType: "MEMORY_CARD", id: ENTITY_ID, userId: USER_ID, version: 99 }] });
+  const h = harness({ pullResult: { changes: [change], nextSyncSeq: 4, minimumRetainedSyncSeq: 0, requiresFullResync: false }, remoteRows: [{ entityType: "MEMORY_CARD", id: ENTITY_ID, userId: USER_ID, version: 1 }] });
   await assert.rejects(() => h.sync.pullChanges({ ownerId: OWNER_ID, userId: USER_ID }), { code: "SYNC_RESPONSE_INVALID" });
   assert.equal(h.appliedRemote.length, 0);
 });
@@ -193,4 +193,148 @@ test("explicit conflict resolution keeps local through RPC or backs it up before
   assert.equal(h.calls.at(-1)[1], "KEEP_LOCAL");
   await resolver({ ownerId: OWNER_ID, userId: USER_ID, deviceId: DEVICE_ID, conflictId: "conflict-0", selection: "USE_CLOUD" });
   assert.equal(h.calls.at(-1)[1], "USE_CLOUD");
+});
+
+const input = { ownerId: OWNER_ID, userId: USER_ID, deviceId: DEVICE_ID };
+const uniqueId = (index) => `${String(index).padStart(8, '0')}-1111-4111-8111-111111111111`;
+
+test('51 pending operations drain across pages before SYNCED', async () => {
+  const h = harness({ operations: Array.from({ length: 51 }, (_, i) => operation(uniqueId(i))) });
+  const result = await h.sync.syncNow(input);
+  assert.equal(result.status, 'SYNCED');
+  assert.equal(result.push.applied, 51);
+  assert.equal(result.push.remaining, 0);
+});
+
+test('201 changes continue beyond the first page without reporting early completion', async () => {
+  const h = harness();
+  const changes = Array.from({ length: 201 }, (_, i) => ({ syncSeq: i + 1, entityType: 'MEMORY_CARD', entityId: uniqueId(i), entityVersion: 1, operationType: 'UPSERT' }));
+  h.gateway.pullChanges = async ({ afterSeq, limit }) => {
+    const page = changes.filter(row => row.syncSeq > afterSeq).slice(0, limit);
+    return { changes: page, nextSyncSeq: page.at(-1)?.syncSeq || afterSeq, requiresFullResync: false };
+  };
+  h.gateway.readEntities = async ({ entityIds }) => [{ id: entityIds[0], version: 1 }];
+  const result = await h.sync.syncNow(input);
+  assert.equal(result.status, 'SYNCED');
+  assert.equal(result.pull.applied, 201);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 201);
+});
+
+test('bounded session returns PARTIAL and resumes remaining operations', async () => {
+  const h = harness({ operations: Array.from({ length: 501 }, (_, i) => operation(uniqueId(i), { entityId: uniqueId(i) })) });
+  const first = await h.sync.syncNow(input);
+  assert.equal(first.status, 'PARTIAL');
+  assert.equal(first.push.applied, 500);
+  assert.equal(first.push.remaining, 1);
+  const second = await h.sync.syncNow(input);
+  assert.equal(second.status, 'SYNCED');
+  assert.equal(second.push.applied, 1);
+});
+
+test('continuous incoming pages stop at the budget and keep the committed cursor', async () => {
+  const h = harness(); let pages = 0;
+  h.gateway.pullChanges = async ({ afterSeq }) => {
+    pages++;
+    return { changes: Array.from({ length: 200 }, (_, i) => ({ syncSeq: afterSeq+i+1, entityType: 'MEMORY_CARD', entityId: ENTITY_ID, entityVersion: 1, operationType: 'UPSERT' })), nextSyncSeq: afterSeq+200, requiresFullResync: false };
+  };
+  h.gateway.readEntities = async () => [{ id: ENTITY_ID, version: 1 }];
+  assert.equal((await h.sync.syncNow(input)).status, 'PARTIAL');
+  assert.equal(pages, 10);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 2000);
+});
+
+test('current remote version and concurrent deletion override older change records safely', async () => {
+  const change = { syncSeq: 1, entityType: 'MEMORY_CARD', entityId: ENTITY_ID, entityVersion: 1, operationType: 'UPSERT' };
+  const h = harness({ operations: [operation()], pullResult: { changes: [change], nextSyncSeq: 1 }, remoteRows: [{ id: ENTITY_ID, version: 201, deletedAt: NOW }] });
+  await h.sync.pullChanges(input);
+  assert.equal(h.appliedRemote[0].change.entityVersion, 201);
+  assert.equal(h.appliedRemote[0].tombstoneWins, true);
+  assert.equal(h.appliedRemote[0].createConflict, false);
+});
+
+test('paused sync preserves remaining work and successful retry reuses operation identity', async () => {
+  const h = harness({ operations: [operation()] });
+  const controller = new AbortController(); controller.abort();
+  const first = await h.sync.syncNow({ ...input, signal: controller.signal });
+  assert.equal(first.status, 'PAUSED');
+  assert.equal(h.calls.length, 0);
+  assert.equal((await h.sync.syncNow(input)).status, 'SYNCED');
+  assert.equal(h.calls[0][1].operationId, OPERATION_A);
+});
+
+test('empty queues still respect pause, durable conflicts and rejected changes', async () => {
+  const h = harness();
+  const controller = new AbortController(); controller.abort();
+  assert.equal((await h.sync.syncNow({ ...input, signal: controller.signal })).status, 'PAUSED');
+  h.conflicts.push({ entityId: ENTITY_ID });
+  assert.equal((await h.sync.syncNow(input)).status, 'CONFLICT');
+  h.conflicts.length = 0;
+  h.repository.countRejectedSyncOperations = async () => 1;
+  assert.equal((await h.sync.syncNow(input)).status, 'REJECTED');
+});
+
+test('rate limit remains retryable and does not expose server details', async () => {
+  const h = harness({ operations: [operation()], failMutation: 'SYNC_RATE_LIMITED' });
+  const result = await h.sync.syncNow(input);
+  assert.equal(result.status, 'PAUSED');
+  assert.equal(result.push.lastErrorCode, 'SYNC_RATE_LIMITED');
+  assert.equal(h.queue[0].state, 'PENDING');
+});
+
+
+test('resume rebases a later edit on the durable acknowledgement without replacing its operation id', async () => {
+  const h = harness({ operations: [operation(OPERATION_B)] });
+  h.repository.readAcknowledgedSyncVersions = async () => [[`MEMORY_CARD:${ENTITY_ID}`, 50]];
+  await h.sync.syncNow(input);
+  assert.equal(h.calls[0][1].baseVersion, 50);
+  assert.equal(h.calls[0][1].operationId, OPERATION_B);
+});
+
+test('an uncertain network result retries exactly the same id and request hash', async () => {
+  const h = harness({ operations: [operation()] });
+  const seen = []; let first = true;
+  h.gateway.applyCardMutation = async request => {
+    seen.push(structuredClone(request));
+    if (first) { first = false; throw new Error('lost response after remote commit'); }
+    return { status: 'APPLIED', entityVersion: 1, syncSeq: 50 };
+  };
+  assert.equal((await h.sync.syncNow(input)).status, 'ERROR');
+  assert.equal((await h.sync.syncNow(input)).status, 'SYNCED');
+  assert.deepEqual(seen[0], seen[1]);
+});
+
+test('an incomplete full restore never commits a partial snapshot or advances the cursor', async () => {
+  const h = harness({ pullResult: { changes: [], nextSyncSeq: 80, requiresFullResync: true } });
+  h.gateway.readAllEntities = async ({ entityType }) => {
+    if (entityType === 'MEMORY_CARD') throw Object.assign(new Error('over bound'), { code: 'SYNC_FULL_RESYNC_LIMIT' });
+    return [{ id: ENTITY_ID }];
+  };
+  const result = await h.sync.syncNow(input);
+  assert.equal(result.errorCode, 'SYNC_FULL_RESYNC_LIMIT');
+  assert.equal(h.appliedRemote.length, 0);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 0);
+});
+
+
+test('the same entity changing across a 200-change page boundary converges to its current version', async () => {
+  const h = harness();
+  const changes = Array.from({ length: 201 }, (_, i) => ({ syncSeq: i+1, entityType: 'MEMORY_CARD', entityId: ENTITY_ID, entityVersion: i+1, operationType: 'UPSERT' }));
+  h.gateway.pullChanges = async ({ afterSeq, limit }) => {
+    const page = changes.filter(row => row.syncSeq > afterSeq).slice(0, limit);
+    return { changes: page, nextSyncSeq: page.at(-1)?.syncSeq || afterSeq, requiresFullResync: false };
+  };
+  h.gateway.readEntities = async () => [{ id: ENTITY_ID, version: 201 }];
+  assert.equal((await h.sync.syncNow(input)).status, 'SYNCED');
+  assert.equal(h.appliedRemote.length, 2);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 201);
+});
+
+
+test('unresolved conflict blocks later sync from silently applying over the preserved local version', async () => {
+  const h = harness(); h.conflicts.push({ entityId: ENTITY_ID, localEntity: { note: 'keep local' } });
+  let requested = false;
+  h.gateway.pullChanges = async () => { requested = true; throw new Error('must not pull before review'); };
+  assert.equal((await h.sync.syncNow(input)).status, 'CONFLICT');
+  assert.equal(requested, false);
+  assert.equal(h.appliedRemote.length, 0);
 });

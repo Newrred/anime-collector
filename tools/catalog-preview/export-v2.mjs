@@ -70,7 +70,7 @@ function manifestTargets(value) {
   });
 }
 
-async function loadTargetInputs(workspace, target) {
+export async function loadTargetInputs(workspace, target) {
   const key = toPathKey(target.moemoaAnimeId);
   const current = await readJson(await safePath(workspace, ['current', `${key}.json`]), 16 * 1024);
   if (current?.animeId !== target.moemoaAnimeId || !HASH.test(current?.contentHash ?? '')) {
@@ -86,7 +86,7 @@ async function loadTargetInputs(workspace, target) {
   const extension = /\.([a-z0-9]+)$/u.exec(String(cover?.localRef ?? ''))?.[1];
   const expectedRef = typeof cover?.checksum === 'string' && extension
     ? `images/covers/${key}/${cover.checksum}.${extension}` : '';
-  if (cover?.status !== 'STORED' || cover?.sourceId !== 'anilist' || !HASH.test(cover?.checksum ?? '')
+  if (cover?.status !== 'STORED' || !['anilist', 'anilife_public'].includes(cover?.sourceId) || !HASH.test(cover?.checksum ?? '')
     || cover.localRef !== expectedRef || !['jpg', 'png', 'webp'].includes(extension)) {
     throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Stored AniList cover binding is invalid');
   }
@@ -100,7 +100,7 @@ async function loadTargetInputs(workspace, target) {
     throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Stored AniList cover bytes do not match metadata');
   }
   const coverAsset = {
-    sourceProvider: 'ANILIST', checksum: digest, byteSize: inspected.byteSize,
+    sourceProvider: cover.sourceId === 'anilist' ? 'ANILIST' : 'ANILIFE', checksum: digest, byteSize: inspected.byteSize,
     width: inspected.width, height: inspected.height, mimeType, extension,
   };
   return { key, current, canonical, serviceProjection, coverAsset, coverLocalRef: cover.localRef };
@@ -315,7 +315,8 @@ export async function readValidatedCoverBytes({ workspace, animeId, asset } = {}
   const key = toPathKey(animeId);
   const observation = await readJson(await safePath(workspace, ['covers', `${key}.json`]), 64 * 1024);
   const expectedRef = `images/covers/${key}/${asset.checksum}.${asset.objectPath?.split('.').pop()}`;
-  if (observation?.status !== 'STORED' || observation.sourceId !== 'anilist'
+  if (observation?.status !== 'STORED' || !['anilist', 'anilife_public'].includes(observation.sourceId)
+    || asset.sourceProvider !== (observation.sourceId === 'anilist' ? 'ANILIST' : 'ANILIFE')
     || observation.checksum !== asset.checksum || observation.localRef !== expectedRef) {
     throw typedError('CATALOG_PREVIEW_COVER_INVALID', 'Cover observation differs from release asset');
   }

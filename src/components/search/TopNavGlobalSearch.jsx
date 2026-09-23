@@ -3,10 +3,13 @@ import { Capacitor } from "@capacitor/core";
 import { getMessageGroup } from "../../domain/messages.js";
 import { pushQuickSearchRecent, readQuickAddStatus, readQuickSearchRecent, writeQuickAddStatus } from "../../repositories/quickActionPrefRepo.js";
 import { useGlobalQuickActionSource } from "../../hooks/useGlobalQuickActionSource.js";
+import { useSearchMemories } from "../../hooks/useSearchMemories.js";
+import { searchMemoryOnlyRows, withTitlePresence } from "../../features/titles/application/titleSearchProjection.js";
 import { searchLocalLibrary, mapLocalLibraryRow } from "../../domain/search/libraryLocalSearch.js";
 import { searchRemoteCandidates } from "../../domain/search/quickActionRemote.js";
 import { addAnimeFromQuickAction, openLibraryDeepLink } from "../../domain/search/quickActionActions.js";
 import { buildMemoryCardHref } from "../../domain/search/memoryCardNavigation.js";
+import { buildTitleHubHref } from "../../features/titles/domain/titleNavigation.js";
 import { IconSearch } from "../ui/AppIcons.jsx";
 import QuickActionPanel from "./QuickActionPanel.jsx";
 import GlobalQuickActionSheet from "./GlobalQuickActionSheet.jsx";
@@ -28,7 +31,7 @@ function useMediaQuery(query) {
 
 function buildRecentLibraryRows(items, recentLogs, mediaMap, locale) {
   const itemById = new Map(
-    (Array.isArray(items) ? items : []).map((item) => [Number(item?.anilistId), item])
+    (Array.isArray(items) ? items : []).map((item) => [item?.anilistId ? Number(item.anilistId) : item?.catalogAnimeId, item])
   );
   const rows = [];
   const seen = new Set();
@@ -46,8 +49,8 @@ function buildRecentLibraryRows(items, recentLogs, mediaMap, locale) {
   }
 
   for (const item of Array.isArray(items) ? items : []) {
-    const id = Number(item?.anilistId);
-    if (!Number.isFinite(id) || seen.has(id)) continue;
+    const id = item?.anilistId ? Number(item.anilistId) : item?.catalogAnimeId;
+    if (!id || seen.has(id)) continue;
     seen.add(id);
     const media = mediaMap.get(id) || null;
     const row = mapLocalLibraryRow({ item, media, locale });
@@ -58,7 +61,18 @@ function buildRecentLibraryRows(items, recentLogs, mediaMap, locale) {
   return rows;
 }
 
-export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
+function SearchInput({ inputRef, query, onChange, onFocus, label }) {
+  return (
+    <div className="quick-action__input-wrap">
+      <span className="quick-action__icon" aria-hidden><IconSearch size={18} /></span>
+      <input ref={inputRef} className="quick-action__input" value={query}
+        onChange={(event) => onChange(event.target.value)} onFocus={onFocus}
+        placeholder={label} aria-label={label} />
+    </div>
+  );
+}
+
+export default function TopNavGlobalSearch({ base = "/", locale = "ko", accountScope = "guest" }) {
   const copy = getMessageGroup(locale, "globalQuickAction");
   const { items, recentLogs, mediaMap } = useGlobalQuickActionSource();
   const [query, setQuery] = useState("");
@@ -75,9 +89,13 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   const mobileInputRef = useRef(null);
   const mobileTriggerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 900px)");
+  const memoryRows = useSearchMemories(desktopOpen || mobileOpen, accountScope);
 
   const libraryIdSet = useMemo(
-    () => new Set(items.map((item) => Number(item?.anilistId)).filter(Number.isFinite)),
+    () => new Set(items.flatMap((item) => {
+      const id = item?.anilistId ? Number(item.anilistId) : item?.catalogAnimeId;
+      return id ? [id] : [];
+    })),
     [items]
   );
 
@@ -97,6 +115,12 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
       limit: 6,
     });
   }, [items, mediaMap, query, locale]);
+
+  const localTitleRows = withTitlePresence([
+    ...localRows,
+    ...searchMemoryOnlyRows(memoryRows || [], libraryIdSet, query),
+  ], memoryRows, libraryIdSet).slice(0, 6);
+  const localTitleIds = new Set(localTitleRows.map((row) => row.id));
 
   useEffect(() => {
     const trimmed = String(query || "").trim();
@@ -229,10 +253,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
   }
 
   function handleOpenDetail(animeId) {
-    rememberQuery();
-    setDesktopOpen(false);
-    setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId, focus: "detail", native: Capacitor.isNativePlatform() });
+    const row = [...localRows, ...remoteRows].find((candidate) => candidate.id === animeId);
+    handleOpenTitle(row || { id: animeId });
   }
 
   function handleOpenQuickLog(animeId) {
@@ -240,6 +262,19 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     setDesktopOpen(false);
     setMobileOpen(false);
     openLibraryDeepLink({ base, animeId, focus: "quick-log", native: Capacitor.isNativePlatform() });
+  }
+
+  function handleOpenTitle(row) {
+    rememberQuery();
+    setDesktopOpen(false);
+    setMobileOpen(false);
+    window.location.assign(buildTitleHubHref({
+      base,
+      native: Capacitor.isNativePlatform(),
+      titleRef: row?.catalogAnimeId ? { kind: "ANIME", animeId: row.catalogAnimeId } : row?.titleRef,
+      anilistId: row?.id,
+      title: row?.title,
+    }));
   }
 
   function closeMobileSearch() {
@@ -252,9 +287,9 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
       <QuickActionPanel
         locale={locale}
         query={query}
-        localRows={localRows}
-        remoteRows={remoteRows}
-        recentRows={recentRows}
+        localRows={localTitleRows}
+        remoteRows={withTitlePresence(remoteRows.filter((row) => !localTitleIds.has(row.id)), memoryRows, libraryIdSet)}
+        recentRows={withTitlePresence(recentRows, memoryRows, libraryIdSet)}
         recentQueries={recentQueries}
         loading={loading}
         actionFeedback={actionFeedback}
@@ -269,6 +304,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
           });
         }}
         onOpenDetail={handleOpenDetail}
+        onOpenTitle={handleOpenTitle}
         onOpenQuickLog={handleOpenQuickLog}
         onCreateMemory={handleCreateMemory}
         onAddRemote={handleAddRemote}
@@ -280,23 +316,9 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
     <>
       <div ref={rootRef} className="top-nav__search quick-action">
         <div className="quick-action__desktop">
-          <div className="quick-action__input-wrap">
-            <span className="quick-action__icon" aria-hidden>
-              <IconSearch size={18} />
-            </span>
-            <input
-              ref={desktopInputRef}
-              className="quick-action__input"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setDesktopOpen(true);
-              }}
-              onFocus={() => setDesktopOpen(true)}
-              placeholder={copy.inputPlaceholder}
-              aria-label={copy.inputPlaceholder}
-            />
-          </div>
+          <SearchInput inputRef={desktopInputRef} query={query} label={copy.inputPlaceholder}
+            onChange={(value) => { setQuery(value); setDesktopOpen(true); }}
+            onFocus={() => setDesktopOpen(true)} />
           {desktopOpen ? renderPanel() : null}
         </div>
 
@@ -325,19 +347,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko" }) {
         onClose={closeMobileSearch}
       >
         <div className="quick-action-sheet__search">
-          <div className="quick-action__input-wrap">
-            <span className="quick-action__icon" aria-hidden>
-              <IconSearch size={18} />
-            </span>
-            <input
-              ref={mobileInputRef}
-              className="quick-action__input"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={copy.inputPlaceholder}
-              aria-label={copy.inputPlaceholder}
-            />
-          </div>
+          <SearchInput inputRef={mobileInputRef} query={query} onChange={setQuery} label={copy.inputPlaceholder} />
         </div>
         {renderPanel()}
       </GlobalQuickActionSheet>

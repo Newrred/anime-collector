@@ -138,6 +138,39 @@ test("readEntities uses an allowlisted table and rejects foreign or unknown rows
   );
 });
 
+test("gateway reconstructs an approved catalog cover reference from normalized remote columns", async () => {
+  const animeId = "anime:66666666-6666-4666-8666-666666666666";
+  const permissionVerifiedAt = "2026-09-03T00:00:00+00:00";
+  const row = {
+    id: ENTITY_ID, user_id: USER_ID, card_id: OPERATION_ID,
+    asset_type: "CATALOG_COVER", state: "READY", storage_scope: "CATALOG_MANAGED",
+    visibility: "PRIVATE", rights_basis: "EXPLICIT_PERMISSION", checksum_sha256: null,
+    mime_type: null, byte_size: null, width: null, height: null, design_spec: null,
+    cloud_bucket: null, cloud_object_path: null,
+    catalog_cover_id: "cover:66666666-6666-4666-8666-666666666666",
+    catalog_cover_revision_id: `asset:${"b".repeat(40)}`,
+    catalog_anime_id: animeId, permission_verified_at: permissionVerifiedAt,
+    is_current: true, version: 1, created_at: "2026-09-03T00:00:00.000Z",
+    client_updated_at: "2026-09-03T00:00:00.000Z",
+    server_updated_at: "2026-09-03T00:00:01.000Z", deleted_at: null,
+  };
+  const { client } = createClient({ rows: [row] });
+  const [asset] = await new SupabaseMemoryGateway(client).readEntities({
+    entityType: "VISUAL_ASSET", entityIds: [ENTITY_ID], userId: USER_ID,
+  });
+
+  assert.equal(asset.assetType, "CATALOG_COVER");
+  assert.equal(asset.storageScope, "CATALOG_MANAGED");
+  assert.deepEqual(asset.catalogCoverRef, {
+    sourceKind: "CATALOG_COVER",
+    catalogAnimeId: animeId,
+    catalogCoverId: row.catalog_cover_id,
+    catalogCoverRevisionId: row.catalog_cover_revision_id,
+    rightsBasis: "EXPLICIT_PERMISSION",
+    permissionVerifiedAt,
+  });
+});
+
 test("gateway exposes only allowlisted error codes and never raw Postgres text", async () => {
   const { client } = createClient({
     rpcResult: {
@@ -165,4 +198,50 @@ test("gateway exposes only allowlisted error codes and never raw Postgres text",
       return true;
     },
   );
+});
+
+for (const total of [4999, 5000, 5001]) test(`full restore reads ${total} entities without truncation or exact-bound rejection`, async () => {
+  const rows = Array.from({ length: total }, (_, i) => ({
+    id: `${String(i).padStart(8, '0')}-1111-4111-8111-111111111111`, user_id: USER_ID,
+    display_title: 'Synthetic', normalized_title: 'synthetic', optional_genres: [], version: 1,
+    created_at: '2026-09-23T00:00:00Z', client_updated_at: '2026-09-23T00:00:00Z', server_updated_at: '2026-09-23T00:00:00Z', deleted_at: null,
+  }));
+  let requests = 0;
+  const client = { rpc() {}, from() {
+    let after = ''; const query = {
+      select() { return query; }, eq() { return query; }, order() { return query; }, gt(_column, value) { after = value; return query; },
+      async range(start, end) { requests++; return { data: rows.filter(row => row.id > after).slice(start, end+1) }; },
+    }; return query;
+  } };
+  const restore = () => new SupabaseMemoryGateway(client).readAllEntities({ entityType: 'PRIVATE_TITLE', userId: USER_ID });
+  if (total > 5000) await assert.rejects(restore, { code: 'SYNC_FULL_RESYNC_LIMIT' });
+  else assert.equal((await restore()).length, total);
+  assert.ok(requests <= 26);
+});
+
+test('HTTP rate limit and auth expiry retain distinct safe errors', async () => {
+  for (const [status, code] of [[429, 'SYNC_RATE_LIMITED'], [401, 'AUTH_REQUIRED']]) {
+    const { client } = createClient({ rpcResult: { data: null, error: { message: 'private server detail' }, status } });
+    await assert.rejects(() => new SupabaseMemoryGateway(client).pullChanges(), error => error.code === code && !error.message.includes('private'));
+  }
+});
+
+test('full restore cancellation stops before the next request', async () => {
+  const controller = new AbortController(); controller.abort();
+  const { client, calls } = createClient();
+  await assert.rejects(() => new SupabaseMemoryGateway(client).readAllEntities({ entityType: 'PRIVATE_TITLE', userId: USER_ID, signal: controller.signal }), { code: 'SYNC_ABORTED' });
+  assert.equal(calls.length, 0);
+});
+
+
+test('RPC cancellation is forwarded to the Supabase transport', async () => {
+  const controller = new AbortController(); let observed;
+  const client = { from() {}, rpc() { return { abortSignal(signal) {
+    observed = signal;
+    return new Promise(resolve => signal.addEventListener('abort', () => resolve({ error: { message: 'AbortError' } }), { once: true }));
+  } }; } };
+  const result = new SupabaseMemoryGateway(client).pullChanges({ signal: controller.signal });
+  controller.abort();
+  await assert.rejects(() => result, { code: 'SYNC_ABORTED' });
+  assert.equal(observed, controller.signal);
 });

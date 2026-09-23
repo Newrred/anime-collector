@@ -97,6 +97,12 @@ export function resolveIdentity({ target, candidate, sourceId, referenceRecords 
     return decision('PENDING_REVIEW', 'AMBIGUOUS', 'IDENTITY_SOURCE_UNSUPPORTED_V1');
   }
 
+  const targetAniLifeId = targetExternalId(target, 'anilife_public');
+  if (targetAniLifeId && candidate.sourceEntityId === targetAniLifeId
+    && candidateExternalId(candidate, 'anilife_public') === targetAniLifeId) {
+    return decision('MATCHED', 'EXACT_ID', 'ANILIFE_CONTENT_ID_V1');
+  }
+
   if (absenceOnly(candidate, 'NOT_FETCHED')) {
     return candidate.sourceEntityId === 'UNBOUND'
       ? decision('MATCHED', 'EXACT_RULE', 'ANILIFE_UNBOUND_TARGET_V1')

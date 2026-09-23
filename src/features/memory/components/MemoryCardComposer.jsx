@@ -1,8 +1,10 @@
+import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
+import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import MemoryTitleSelector from "./MemoryTitleSelector.jsx";
 import { useMemoryCardComposer } from "./useMemoryCardComposer.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
-import { IconImage, IconPlus, IconShield } from "../../../components/ui/AppIcons.jsx";
+import { IconImage, IconPlus } from "../../../components/ui/AppIcons.jsx";
 import "./memory-card-composer.css";
 
 const formatBytes = (value) => {
@@ -21,12 +23,14 @@ export default function MemoryCardComposer({ base = "/" }) {
 }
 
 function MemoryCardComposerContent({ base }) {
-  const { copy } = useMemoryRouteUi();
+  const { copy, locale } = useMemoryRouteUi();
   const composerCopy = copy.composer;
+  const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const {
     runtime,
     ticket,
     designSpec,
+    catalogCoverSelection,
     status,
     message,
     title,
@@ -37,67 +41,69 @@ function MemoryCardComposerContent({ base }) {
     note,
     rightsConfirmed,
     busy,
+    dirty,
     canSave,
     displayTitle,
     chooseImage,
     useSystemDesign,
+    useCatalogCover,
     changeTitle,
     searchTitles,
     selectTitle,
     clearSelectedTitle,
     removeImage,
+    removeCatalogCover,
     saveCard,
     changeNote,
     changeRightsConfirmed,
   } = useMemoryCardComposer({ base });
 
+  const allowLeave = useUnsavedNavigation(dirty, locale, { busy: status === "saving" });
   const saveReason = busy
     ? composerCopy.saveBlockedBusy
     : !runtime
       ? composerCopy.saveBlockedBusy
-      : !ticket && !designSpec
+      : !ticket && !designSpec && !catalogCoverSelection
         ? composerCopy.saveBlockedVisual
         : !title.trim()
           ? composerCopy.saveBlockedTitle
-          : ticket && !rightsConfirmed
+          : catalogCoverSelection && !note.trim()
+            ? composerCopy.saveBlockedReflection
+            : ticket && !rightsConfirmed
             ? composerCopy.saveBlockedRights
             : composerCopy.saveHint;
   const statusAnnouncement = status === "saving" ? composerCopy.saving : "";
-  const hasVisual = Boolean(ticket || designSpec);
+  const hasVisual = Boolean(ticket || designSpec || catalogCoverSelection);
   const hasTitle = Boolean(title.trim());
-  const hasRights = Boolean(designSpec || (ticket && rightsConfirmed));
-  const currentProgressIndex = !hasVisual ? 0 : !hasTitle ? 1 : canSave ? 3 : 2;
+  const hasRights = Boolean(designSpec || catalogCoverSelection || (ticket && rightsConfirmed));
+  const catalogCoverAvailable = Boolean(
+    selectedTitleChoice?.coverPreviewUrl && selectedTitleChoice?.catalogCoverRef,
+  );
+  const submitComposer = (event) => {
+    const activeElement = event.currentTarget.ownerDocument.activeElement;
+    if (activeElement?.id === "memory-title-input") {
+      event.preventDefault();
+      searchTitles(activeElement.value);
+      return;
+    }
+    saveCard(event, allowLeave);
+  };
 
   return (
     <div className="memory-composer page-shell page-shell--wide">
       <section className="memory-composer__intro">
         <div className="pageHeader">
-          <p className="memory-composer__eyebrow">{composerCopy.eyebrow}</p>
           <h1 className="pageTitle">{composerCopy.title}</h1>
-          <p className="pageLead">{composerCopy.lead}</p>
+          <a href={returnHref} className="btn btn--subtle">{locale === "ko" ? "취소" : "Cancel"}</a>
         </div>
-        <div className="memory-composer__privacy">
-          <IconShield size={17} />
-          <strong>{composerCopy.privacyTitle}</strong>
-          <span className="memory-composer__privacy-long">{composerCopy.privacyBody}</span>
-          <span className="memory-composer__privacy-short">{composerCopy.privacyBodyShort}</span>
-        </div>
-        <ol className="memory-composer__progress" aria-label={composerCopy.progressLabel}>
-          {[
-            [composerCopy.progressVisual, hasVisual],
-            [composerCopy.progressTitle, hasTitle],
-            [composerCopy.progressReflection, Boolean(note.trim())],
-            [composerCopy.progressSave, status === "saved"],
-          ].map(([label, complete], index) => (
-            <li key={label} className={complete ? "is-complete" : index === currentProgressIndex ? "is-current" : ""}>
-              <span>{complete ? "✓" : index + 1}</span>
-              <strong>{label}</strong>
-            </li>
-          ))}
-        </ol>
+        <details className="memory-composer__storage-help">
+          <summary>{composerCopy.privacyTitle}</summary>
+          <p>{composerCopy.privacyBody}</p>
+        </details>
       </section>
 
-      <form className="memory-composer__form" onSubmit={saveCard}>
+      <form className="memory-composer__form" onSubmit={submitComposer}>
+        <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <div className="memory-composer__workspace">
           <section
             className={`memory-composer__visual-column memory-composer__step-card${hasVisual ? " is-complete" : " is-current"}`}
@@ -108,7 +114,7 @@ function MemoryCardComposerContent({ base }) {
               <div>
                 <p className="memory-composer__step-label">{composerCopy.stepVisual}</p>
                 <h2 id="memory-image-heading">{composerCopy.imageHeading}</h2>
-                <p>{composerCopy.imageHelp}</p>
+                {status !== "browser" && <p>{composerCopy.imageHelp}</p>}
               </div>
               {ticket ? (
                 <span className="status-badge">
@@ -121,7 +127,7 @@ function MemoryCardComposerContent({ base }) {
               )}
             </div>
 
-            {status === "browser" && !designSpec && !ticket ? (
+            {status === "browser" && !designSpec && !ticket && !catalogCoverSelection ? (
               <button type="button" className="btn memory-composer__visual-primary memory-composer__empty-cta" onClick={useSystemDesign}>
                 {composerCopy.useSystemDesign}
               </button>
@@ -141,6 +147,15 @@ function MemoryCardComposerContent({ base }) {
                   src={ticket.previewDataUrl}
                   alt={displayTitle ? composerCopy.cardPreview(displayTitle) : composerCopy.selectedPreview}
                 />
+              </div>
+            ) : catalogCoverSelection ? (
+              <div className="memory-composer__preview-wrap memory-composer__cover-preview-wrap">
+                <img
+                  className="memory-composer__preview memory-composer__cover-preview"
+                  src={catalogCoverSelection.previewUrl}
+                  alt={composerCopy.officialCoverAlt(displayTitle)}
+                />
+                <span className="status-badge memory-composer__cover-badge">{composerCopy.officialCoverBadge}</span>
               </div>
             ) : (
               <div className="memory-composer__empty-image">
@@ -162,7 +177,7 @@ function MemoryCardComposerContent({ base }) {
               </p>
             )}
 
-            {runtime?.imageIntake.available || ticket ? (
+            {runtime?.imageIntake.available || ticket || catalogCoverAvailable || catalogCoverSelection ? (
             <div className="action-row memory-composer__image-actions" role="group" aria-label={composerCopy.visualChoices}>
               {runtime?.imageIntake.available ? (
                 <button
@@ -180,6 +195,21 @@ function MemoryCardComposerContent({ base }) {
                   {composerCopy.removeImage}
                 </button>
               )}
+              {catalogCoverAvailable && !catalogCoverSelection ? (
+                <button
+                  type="button"
+                  className="btn btn--subtle memory-composer__cover-action"
+                  onClick={useCatalogCover}
+                  disabled={!runtime || busy}
+                >
+                  {composerCopy.useOfficialCover}
+                </button>
+              ) : null}
+              {catalogCoverSelection ? (
+                <button type="button" className="btn btn--subtle" onClick={removeCatalogCover} disabled={busy}>
+                  {composerCopy.removeOfficialCover}
+                </button>
+              ) : null}
               <button
                 type="button"
                 className={`btn memory-composer__system-action${runtime?.imageIntake.available ? " btn--subtle" : " memory-composer__visual-primary"}`}
@@ -195,7 +225,6 @@ function MemoryCardComposerContent({ base }) {
           <div className="memory-composer__form-column">
             <MemoryTitleSelector
               title={title}
-              runtimeReady={Boolean(runtime)}
               titleResults={titleResults}
               selectedTitleChoice={selectedTitleChoice}
               titleSearchStatus={titleSearchStatus}
@@ -214,12 +243,15 @@ function MemoryCardComposerContent({ base }) {
             <section className="memory-composer__reflection-step memory-composer__step-card">
               <div className="memory-composer__step-card-head">
                 <p className="memory-composer__step-label">{composerCopy.stepReflection}</p>
-                <span className="memory-composer__requirement is-optional">{composerCopy.optional}</span>
+                <span className={`memory-composer__requirement${catalogCoverSelection ? "" : " is-optional"}`}>
+                  {catalogCoverSelection ? composerCopy.required : composerCopy.optional}
+                </span>
               </div>
-              <label className="memory-composer__field" htmlFor="memory-reflection-input">
-                <span>{composerCopy.noteLabel}</span>
+              <div className="memory-composer__field">
+                <label htmlFor="memory-reflection-input">{composerCopy.noteLabel}</label>
                 <textarea
                   id="memory-reflection-input"
+                  aria-describedby="memory-reflection-count memory-reflection-help"
                   className="textarea"
                   value={note}
                   maxLength={500}
@@ -227,19 +259,18 @@ function MemoryCardComposerContent({ base }) {
                   onChange={changeNote}
                   placeholder={composerCopy.notePlaceholder}
                 />
-                <small>{note.length}/500</small>
-              </label>
+                <small id="memory-reflection-count">{note.length}/500</small>
+                <small id="memory-reflection-help">{catalogCoverSelection ? composerCopy.coverReflectionHelp : ""}</small>
+              </div>
             </section>
 
-            <section className={`memory-composer__rights-step memory-composer__step-card${hasRights ? " is-complete" : ""}`} aria-labelledby="memory-rights-heading">
+            {ticket && <section className={`memory-composer__rights-step memory-composer__step-card${hasRights ? " is-complete" : ""}`} aria-labelledby="memory-rights-heading">
               <div className="memory-composer__step-card-head">
-                <p className="memory-composer__step-label">{composerCopy.stepRights}</p>
                 <span className={`memory-composer__requirement${hasRights ? " is-complete" : ""}`}>
                   {hasRights ? composerCopy.done : composerCopy.required}
                 </span>
               </div>
               <h2 id="memory-rights-heading" className="memory-composer__step-heading">{composerCopy.rightsHeading}</h2>
-              {ticket ? (
                 <label className="memory-composer__rights">
                   <input
                     type="checkbox"
@@ -248,20 +279,10 @@ function MemoryCardComposerContent({ base }) {
                   />
                   <span>{composerCopy.rights}</span>
                 </label>
-              ) : designSpec ? (
-                <p className="memory-composer__rights memory-composer__rights--copy">
-                  {composerCopy.designStorage}
-                </p>
-              ) : (
-                <p className="memory-composer__rights memory-composer__rights--copy">
-                  {composerCopy.rightsPending}
-                </p>
-              )}
-            </section>
+            </section>}
 
             <div className={`memory-composer__save-gate memory-composer__step-card${canSave ? " is-current" : ""}`}>
               <div>
-                <p className="memory-composer__step-label">{composerCopy.stepSave}</p>
                 <button type="submit" className="btn memory-composer__save-button" disabled={!canSave} aria-describedby="memory-save-reason">
                   {status === "saving" ? composerCopy.saving : composerCopy.save}
                 </button>
@@ -274,6 +295,7 @@ function MemoryCardComposerContent({ base }) {
             </p>
           </div>
         </div>
+        </fieldset>
       </form>
     </div>
   );

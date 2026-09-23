@@ -4,6 +4,7 @@
 .catalog-detail__hero h1 { margin: var(--space-2) 0; font-size: clamp(2rem, 5vw, 4rem); }
 .catalog-detail__hero p { color: var(--text-secondary); }
 .catalog-detail__eyebrow { color: var(--accent-strong) !important; font-weight: var(--fw-bold); }
+.catalog-detail__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .catalog-detail__facts dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); margin: 0; }
 .catalog-detail__facts dl div { display: grid; gap: var(--space-1); }
 .catalog-detail__facts dt, .catalog-detail__people small { color: var(--text-tertiary); font-size: var(--type-body-sm-size); }
@@ -18,6 +19,7 @@
 @media (max-width: 720px) {
   .catalog-detail__hero { align-items: stretch; flex-direction: column; }
   .catalog-detail__cover { width: min(48vw, 180px); }
+  .catalog-detail__actions .btn { width: 100%; text-align: center; }
   .catalog-detail__facts dl, .catalog-detail__people ul { grid-template-columns: 1fr; }
   .catalog-detail__people li { align-items: flex-start; flex-direction: column; }
   .catalog-detail__people li > span { text-align: left; }

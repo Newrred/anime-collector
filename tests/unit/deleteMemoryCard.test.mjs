@@ -21,6 +21,7 @@ test("delete tombstones first, deletes private media, then scrubs sensitive meta
       id: "asset-1",
       ownerId: OWNER_ID,
       state: "READY",
+      storageScope: "LOCAL_ONLY",
       localRef: "asset:asset-1",
       checksumSha256: "a".repeat(64),
       creatorName: "private creator",
@@ -97,4 +98,46 @@ test("completed delete operation is idempotent", async () => {
     operationId: "delete-operation-1",
   }), result);
   assert.equal(mediaCalls, 0);
+});
+
+test("deleting a catalog-cover Card never asks local media to delete the shared cover", async () => {
+  const coverRef = {
+    sourceKind: "CATALOG_COVER",
+    catalogAnimeId: "anime:11111111-1111-4111-8111-000000154587",
+    catalogCoverId: "cover:11111111-1111-4111-8111-000000154587",
+    catalogCoverRevisionId: `asset:${"a".repeat(40)}`,
+    rightsBasis: "EXPLICIT_PERMISSION",
+    permissionVerifiedAt: "2026-09-03T00:00:00.000Z",
+  };
+  let bundle = {
+    card: {
+      id: "card-cover", ownerId: OWNER_ID, status: "COMPLETE_PRIVATE", note: "기억",
+      visualAssetId: "asset-cover", privateTitleId: null, animeRefId: "anime-ref-1",
+      deletedAt: null,
+    },
+    title: { id: "anime-ref-1", catalogAnimeId: coverRef.catalogAnimeId, displayTitle: "Frieren" },
+    asset: {
+      id: "asset-cover", ownerId: OWNER_ID, state: "READY", imageType: "CATALOG_COVER",
+      storageScope: "CATALOG_MANAGED", visibility: "PRIVATE", rightsBasis: "EXPLICIT_PERMISSION",
+      localRef: null, catalogCoverRef: coverRef, deletedAt: null,
+    },
+  };
+  let mediaCalls = 0;
+  const command = createDeleteMemoryCardCommand({
+    repository: {
+      getOperation: async () => null,
+      getCardBundle: async () => structuredClone(bundle),
+      planDelete: async ({ card, asset }) => { bundle = { ...bundle, card, asset }; },
+      completeDelete: async ({ card, asset }) => { bundle = { ...bundle, card, asset }; },
+      listCardBoardMemberships: async () => [],
+    },
+    localMedia: { deleteAsset: async () => { mediaCalls += 1; } },
+    telemetry: { track: () => {} },
+    clock: { now: () => "2026-09-03T03:00:00.000Z" },
+  });
+
+  await command.execute({ ownerId: OWNER_ID, cardId: "card-cover", operationId: "delete-cover" });
+  assert.equal(mediaCalls, 0);
+  assert.deepEqual(bundle.asset.catalogCoverRef, coverRef);
+  assert.equal(bundle.asset.state, "DELETED");
 });

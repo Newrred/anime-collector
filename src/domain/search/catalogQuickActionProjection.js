@@ -9,12 +9,12 @@ function buildSubtitle(media) {
 
 export function projectCatalogQuickRows(results, libraryIdSet = new Set()) {
   return (Array.isArray(results) ? results : [])
-    .filter((row) => !libraryIdSet.has(Number(row?.id)))
+    .filter((row) => !libraryIdSet.has(Number(row?.id)) && !libraryIdSet.has(row?.animeId))
     .slice(0, 8)
     .flatMap((row) => {
-      const id = Number(row?.id);
+      const id = row?.animeId && !Number.isFinite(Number(row?.id)) ? row.animeId : Number(row?.id);
       const media = row?.media;
-      if (!Number.isFinite(id) || !media) return [];
+      if ((!Number.isFinite(id) && !/^anime:[0-9a-f-]{36}$/iu.test(String(id))) || !media) return [];
       const title = String(
         row?.ko || media?.title?.english || media?.title?.romaji || media?.title?.native || ""
       ).trim();

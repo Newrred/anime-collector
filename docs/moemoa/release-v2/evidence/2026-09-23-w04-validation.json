@@ -1,0 +1,132 @@
+{
+  "work": "W04",
+  "verifiedAt": "2026-09-23T02:31:26.801239+00:00",
+  "environment": "Windows / bundled Node 24.19.0 / Playwright Chromium synthetic profiles",
+  "sourceHead": "3fb09a76b45e8ad8e3d0cc14fa6f4b5073a091fb",
+  "dirtyWorkingTree": true,
+  "deployed": false,
+  "databaseMigrations": 0,
+  "tests": {
+    "unit": {
+      "passed": 249,
+      "failed": 0
+    },
+    "integration": {
+      "passed": 34,
+      "skipped": 2,
+      "skipReason": "production live Library flows intentionally disabled"
+    },
+    "editingFinal": {
+      "passed": 10,
+      "failed": 0,
+      "overlapWithIntegration": 9
+    },
+    "build": {
+      "passed": true,
+      "routes": 15
+    },
+    "reactDoctor": {
+      "before": 49,
+      "after": 49,
+      "existingErrors": 1,
+      "warningsBefore": 14,
+      "warningsAfter": 16
+    },
+    "visual": {
+      "widths": [
+        390,
+        1440
+      ],
+      "overflow": false,
+      "screenshotsInspected": true
+    },
+    "diffCheck": "PASS"
+  },
+  "artifacts": "D:\\hong\\Web\\Anime\\.moemoa-w04-2026-09-23",
+  "limits": [
+    "Real Android hardware not exercised; native adapter simulated in Chromium",
+    "Remote checks, production deployment and real OAuth remain external gates"
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "ea8238c33ba7f8f4ae0889be8c615e968a048d9d75b55cc8d785adb0e97fd9a6"
+    },
+    {
+      "path": "src/components/Home.jsx",
+      "sha256": "861e65c89f14d1ea0d2259d0e7aeff6a8344b44ba1c1ea7dcf945476a972ffea"
+    },
+    {
+      "path": "src/components/Library.jsx",
+      "sha256": "6c2140a7acff53d9e14e4bf1467bdf888ea9479770d75a4e3405d48ea8df72ed"
+    },
+    {
+      "path": "src/components/library/LibraryQuickLogSheet.jsx",
+      "sha256": "952f06187c3be73f7910b5fb5df580895a8fe7099c8e9446a633b562b44d84b3"
+    },
+    {
+      "path": "src/domain/quickLogDraft.js",
+      "sha256": "72a1aa60249383d5c6d049462d1ac0e64b2b5fd863b4b1faf0c8d1758346c6bc"
+    },
+    {
+      "path": "src/domain/search/memoryReturnNavigation.js",
+      "sha256": "b971f34b3aafe6caaea553b6a5b455b16e5909bfa69e9c7d95f991d574c9ecf2"
+    },
+    {
+      "path": "src/features/memory/components/ArchiveView.jsx",
+      "sha256": "bada791752247f5ec89704ee87e96e4e670f57f9187c96eb10ba313195ab3009"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "63b0c677f5f68d45a6dab2bb7156f19196e6563d59f6b348afafc3e1d4f3763b"
+    },
+    {
+      "path": "src/features/memory/components/MemoryCardComposer.jsx",
+      "sha256": "e60572d842831f5226a046c84eabf68f2dcb51382d977e1e1241d3c02ded7870"
+    },
+    {
+      "path": "src/features/memory/components/MemoryCardDetail.jsx",
+      "sha256": "d163c7fb566b29a0d8796d122f4b70d85cf39e7b50b8211f5918e487b3d504b6"
+    },
+    {
+      "path": "src/features/memory/components/MemoryRouteShell.jsx",
+      "sha256": "f5689b376e31be2d9ace987e2fd2ac9cbc87c49778303a05000f0594e1ca820e"
+    },
+    {
+      "path": "src/features/memory/components/useMemoryCardComposer.js",
+      "sha256": "140a962935e695a70dbd6524732ef698ea2cbddc4a695b3ea53a56f13c524255"
+    },
+    {
+      "path": "src/hooks/useMemoryReturnNavigation.js",
+      "sha256": "414f93f56dabb63867873ff4aa8092ee4fa4ac73d355f1864729dee75afcc74f"
+    },
+    {
+      "path": "src/hooks/useUnsavedNavigation.js",
+      "sha256": "86b984e7cf3164fd8bc8afb89e002b8f7140e609b457dba6feb358d1d302f221"
+    },
+    {
+      "path": "tests/library-userflow.spec.ts",
+      "sha256": "c24d0caedf4926193175ccbfd3db59d6588bee9165aa3438c4459fe9ffd05878"
+    },
+    {
+      "path": "tests/memory-board.spec.ts",
+      "sha256": "0a4b62ee9d2e8221f579478e9f2e4f1d5c23842827670b40f226d9c630261501"
+    },
+    {
+      "path": "tests/release-editing.spec.ts",
+      "sha256": "8edd1bf82245209d316862a6a8e85e7f6dea02795a5e527ec5f5acd31ccbd980"
+    },
+    {
+      "path": "tests/service-finishing.spec.ts",
+      "sha256": "04c7b94acb3672b74f57f766530ef562bebaf1a59029c878f8d9e1544485ba6d"
+    },
+    {
+      "path": "tests/title-cross-surface.spec.ts",
+      "sha256": "8a87edcaa372ac8aa99873c70c1bf2e4480b2bf6ec99810cb4b96d3cdbb1a3bf"
+    },
+    {
+      "path": "tests/unit/memoryReturnNavigation.test.mjs",
+      "sha256": "523b74cd2aa223e618c09b276adf6ba66761e447d42daffa641f460921363417"
+    }
+  ]
+}

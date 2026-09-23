@@ -66,6 +66,15 @@ test('full3998 plan creates forty deterministic non-overlapping batches', () => 
   });
 });
 
+test('reviewed increment plan uses the same bounded deterministic batches', () => {
+  const roster = targets(226);
+  const batches = planTargetBatches({
+    profile: 'increment-2026-09', targets: roster, batchSize: 100,
+  });
+  assert.deepEqual(batches.map((batch) => batch.targets.length), [100, 100, 26]);
+  assert.deepEqual(batches.flatMap((batch) => batch.targets), roster);
+});
+
 test('batch coordinator persists aggregate progress and pauses only after batches that performed work', async () => {
   const roster = targets();
   const snapshots = [];
@@ -179,4 +188,23 @@ test('full3998 quality report has an unambiguous profile heading', () => {
     targets: [],
   };
   assert.match(renderQualityReportMarkdown(report), /^# Full 3,998 Catalog Quality Report$/mu);
+});
+
+test('increment quality report has an unambiguous profile heading', () => {
+  const report = {
+    schemaVersion: QUALITY_SCHEMA_VERSION,
+    profile: 'increment-2026-09',
+    gate: { passed: false, blockers: [] },
+    serviceGate: { passed: false },
+    targetCount: 0,
+    canonicalCount: 0,
+    coverStoredCount: 0,
+    serviceReadinessCounts: {},
+    serviceTotals: {
+      targetsWithReview: 0, targetsWithWarnings: 0, autoAcceptedTitleAliases: 0,
+      quarantinedTitles: 0, officialLinkAutoSelections: 0, automaticTitleFallbacks: 0,
+    },
+    targets: [],
+  };
+  assert.match(renderQualityReportMarkdown(report), /^# Increment 2026-09 Catalog Quality Report$/mu);
 });

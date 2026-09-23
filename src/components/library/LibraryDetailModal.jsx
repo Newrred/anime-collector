@@ -3,6 +3,8 @@ import { GenresRow, LibraryRecordFacts } from "./LibraryUi.jsx";
 import { formatStatusLabel, formatEventLabel } from "./libraryCopy.js";
 import { getMessageGroup } from "../../domain/messages.js";
 import { IconPlus, IconTrash, IconX } from "../ui/AppIcons.jsx";
+import { Capacitor } from "@capacitor/core";
+import { buildTitleHubHref } from "../../features/titles/domain/titleNavigation.js";
 
 export default function LibraryDetailModal({
   locale = "ko",
@@ -108,6 +110,12 @@ export default function LibraryDetailModal({
   }
 
   if (!open || !selected) return null;
+  const titleHubHref = buildTitleHubHref({
+    base: import.meta.env.BASE_URL,
+    native: Capacitor.isNativePlatform(),
+    anilistId: selectedId,
+    title: selectedTitle,
+  });
 
   return (
     <div
@@ -137,11 +145,9 @@ export default function LibraryDetailModal({
               alt={selectedTitle}
             />
             <div className="library-modal-cover-actions">
-              {selectedMedia?.siteUrl && (
-                <a className="btn" href={selectedMedia.siteUrl} target="_blank" rel="noreferrer">
-                  {copy.openAniList}
-                </a>
-              )}
+              <a className="btn" href={titleHubHref} data-astro-reload>
+                {copy.openTitleHub}
+              </a>
               <button className="removeBtn" onClick={() => onRemoveAnime(selectedId)}>
                 <span className="btn__icon"><IconTrash size={14} /></span>
                 <span className="btn__label">{copy.delete}</span>
@@ -469,11 +475,6 @@ export default function LibraryDetailModal({
                                     <IconPlus size={16} />
                                   </button>
                                 ) : null}
-                                {row.siteUrl && (
-                                  <a className="btn" href={row.siteUrl} target="_blank" rel="noreferrer">
-                                    AniList
-                                  </a>
-                                )}
                               </div>
                             </div>
                           </div>

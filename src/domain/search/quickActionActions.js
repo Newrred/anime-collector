@@ -1,3 +1,4 @@
+import { readTitleLibrary, writeTitleLibrary } from "../../repositories/titleLibraryRepo.js";
 import { deriveKoTitleFromMedia } from "../animeTitles.js";
 import { LIBRARY_EVENT, LIBRARY_STATUS } from "../../components/library/libraryCopy.js";
 import { readLibraryListPreferred, writeLibraryListDurable } from "../../repositories/libraryRepo.js";
@@ -33,6 +34,18 @@ function dispatchQuickActionEvent(name) {
 }
 
 export async function addAnimeFromQuickAction(media, statusValue, repositories = {}) {
+  const catalogAnimeId = /^anime:[0-9a-f-]{36}$/iu.test(String(media?.catalogAnimeId || "")) ? media.catalogAnimeId : null;
+  if (catalogAnimeId && !Number.isFinite(Number(media?.id))) {
+    const read = repositories.readLibraryListPreferred || readTitleLibrary;
+    const write = repositories.writeLibraryListDurable || writeTitleLibrary;
+    const list = await read([]);
+    const existing = list.find((row) => row.catalogAnimeId === catalogAnimeId);
+    if (existing) return { item: existing, alreadyExists: true, initialLog: null };
+    const item = { catalogAnimeId, anilistId: null, koTitle: media?.catalogDisplayTitle || deriveKoTitleFromMedia(media) || media?.title?.english, status: normalizeStatusValue(statusValue), score: null, addedAt: Date.now() };
+    await write([...list, item]);
+    dispatchQuickActionEvent("moemoa:library-updated");
+    return { item, alreadyExists: false, initialLog: null };
+  }
   const id = Number(media?.id);
   if (!Number.isFinite(id)) throw new Error("Invalid media id");
 

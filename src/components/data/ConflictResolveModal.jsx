@@ -1,3 +1,4 @@
+import { useModalInteraction } from "../../hooks/useModalInteraction.js";
 import { formatRelativeAgo } from "../../domain/uiText";
 import { IconDownload, IconUpload, IconX } from "../ui/AppIcons.jsx";
 
@@ -12,12 +13,13 @@ export default function ConflictResolveModal({
   onUseCloud,
   onExportBackup,
 }) {
+  const dialogRef = useModalInteraction({ open, onClose, busy: syncing });
   if (!open) return null;
 
   return (
-    <div className="modalOverlay conflict-modal">
-      <div className="modalCard conflict-modal__card">
-        <button type="button" className="closeBtn" onClick={onClose} aria-label={copy.close}>
+    <div className="modalOverlay conflict-modal" data-modal-layer role="presentation" onClick={(event) => { if (event.target === event.currentTarget && !syncing) onClose?.(); }}>
+      <div ref={dialogRef} tabIndex={-1} className="modalCard conflict-modal__card" role="dialog" aria-modal="true" aria-label={copy.title}>
+        <button type="button" className="closeBtn" onClick={onClose} aria-label={copy.close} disabled={syncing}>
           <IconX size={16} />
         </button>
         <div className="pageHeader">

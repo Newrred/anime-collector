@@ -100,13 +100,13 @@ function sourceRecord(sourceId, inputPayload, overrides = {}) {
     anilife_public: {
       contentId: '101', title: null, alternateName: null, datePublished: null,
       numberOfEpisodes: null, imageUrl: null, publicPageUrl: 'https://anilife1.tv/content/101',
-      identityEvidence: null,
+      format: null, status: null, identityEvidence: null,
     },
   };
   const isAbsence = inputPayload?.fieldState === 'NOT_FETCHED'
     || inputPayload?.errorCode === 'SOURCE_NOT_AVAILABLE';
   const defaults = structuredClone(successDefaults[sourceId] ?? {});
-  const payload = isAbsence ? structuredClone(inputPayload) : {
+  const payload = isAbsence || overrides.exactPayload ? structuredClone(inputPayload) : {
     ...defaults,
     ...structuredClone(inputPayload),
     ...(sourceId === 'wikidata' ? {
@@ -251,6 +251,39 @@ test('normalization keeps null distinct from zero and carries source omission st
   assert.equal(notFetched.episodeCount, null);
   assert.equal(notFetched.fieldStates.episodeCount, 'NOT_FETCHED');
   assert.equal(notFetched.fieldValues.every((row) => row.status === 'NOT_FETCHED'), true);
+});
+
+test('AniLife normalization maps public facts and keeps its permissioned cover review-gated', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', datePublished: '1998', numberOfEpisodes: 26,
+    imageUrl: 'https://anilife1.tv/images/cowboy-bebop.jpg', format: 'TV', status: '완결',
+  }));
+
+  assert.equal(normalized.format, 'TV');
+  assert.equal(normalized.status, 'FINISHED');
+  const claims = buildFieldClaims({ target, normalizedRecords: [normalized] });
+  assert.equal(claims.find((claim) => claim.fieldPath === 'status').catalogPromotion, 'FIELD_REVIEW_REQUIRED');
+  assert.equal(claims.find((claim) => claim.fieldPath === 'episodeCount').catalogPromotion, 'FIELD_REVIEW_REQUIRED');
+  assert.deepEqual(normalized.cover, {
+    sourceUrl: 'https://anilife1.tv/images/cowboy-bebop.jpg',
+    rightsStatus: 'USER_ATTESTED_UNRESTRICTED_PERMISSION',
+    distributionStatus: 'PERMISSIONED',
+  });
+  assert.equal(claims.find((claim) => claim.fieldPath === 'cover').catalogPromotion, 'FIELD_REVIEW_REQUIRED');
+});
+
+test('AniLife normalization keeps legacy stored payloads readable after adding status and format', () => {
+  const normalized = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '101', title: 'Cowboy Bebop', alternateName: null, datePublished: '1998',
+    numberOfEpisodes: 26, imageUrl: null,
+    publicPageUrl: 'https://anilife1.tv/content/101', identityEvidence: null,
+  }, { exactPayload: true, parserVersion: 'anilife-public-test-v2' }));
+
+  assert.equal(normalized.format, null);
+  assert.equal(normalized.status, null);
+  assert.equal(normalized.episodeCount, 26);
+  assert.equal(normalized.fieldStates.format, 'SOURCE_NOT_AVAILABLE');
+  assert.equal(normalized.fieldStates.status, 'SOURCE_NOT_AVAILABLE');
 });
 
 test('missing enums stay unavailable while present unrecognized enums map to UNKNOWN', () => {
@@ -474,7 +507,9 @@ test('AniLife adapter raw-store evidence controls episode-only identity end to e
     ]);
     const targetWithoutYear = { ...target, releaseYear: null };
     async function collectStored(binding) {
-      const adapter = createAniLifePublicPageAdapter();
+      const adapter = createAniLifePublicPageAdapter({
+        sourceConfig: { sourceId: 'anilife_public', baseUrl: 'https://anilife1.tv' },
+      });
       const http = {
         async request({ url }) {
           if (url.endsWith('/sitemap.xml')) return new Response(sitemap, { status: 200 });
@@ -557,10 +592,61 @@ test('every claim carries source promotion policy and prohibited sources cannot 
     externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' }, aliases: {}, claims: {}, sitelinks: {},
   }));
   const claims = buildFieldClaims({ target, normalizedRecords: [anilist, anilife, wikidata] });
-  assert.equal(claims.filter((claim) => ['anilist', 'anilife_public'].includes(claim.sourceId))
-    .every((claim) => claim.catalogPromotion === 'PROHIBITED'), true);
+  assert.equal(claims.filter((claim) => claim.sourceId === 'anilist')
+    .every((claim) => claim.catalogPromotion === 'FIELD_REVIEW_REQUIRED'), true);
+  assert.equal(claims.filter((claim) => claim.sourceId === 'anilife_public'
+    && ['externalIds', 'titles', 'format', 'status', 'startDate', 'episodeCount'].includes(claim.fieldPath))
+    .every((claim) => claim.catalogPromotion === 'FIELD_REVIEW_REQUIRED'), true);
+  assert.equal(claims.find((claim) => claim.sourceId === 'anilife_public'
+    && claim.fieldPath === 'cover').catalogPromotion, 'FIELD_REVIEW_REQUIRED');
   assert.equal(claims.filter((claim) => claim.sourceId === 'wikidata')
     .every((claim) => claim.catalogPromotion === 'FIELD_REVIEW_REQUIRED'), true);
+});
+
+test('AniList enriches an AniLife increment target without replacing populated scalar fields', () => {
+  const incrementTarget = Object.freeze({
+    targetKey: 'ANILIFE:1036',
+    moemoaAnimeId: 'anime:33333333-3333-4333-8333-333333333333',
+    seedSource: 'reviewed_increment',
+    seedExternalIds: Object.freeze([
+      { sourceId: 'anilife_public', value: '1036' },
+      { sourceId: 'anilist', value: '201817' },
+    ]),
+    seedTitles: Object.freeze([{ locale: 'ko', value: '테스트 작품' }]),
+    seedReleaseYear: 2026,
+    createdAt: '2026-09-03T00:00:00.000Z',
+    incrementEvidence: Object.freeze({
+      sourceId: 'anilife_public', contentId: '1036', sourceHash: 'b'.repeat(64),
+      capturedAt: '2026-09-02T00:00:00.000Z', year: 2026,
+      publicPageUrl: 'https://anilife1.tv/content/1036', format: 'TV',
+      episodeLabel: '12화', genres: [], reviewedAt: '2026-09-03T00:00:00.000Z',
+      reviewedBy: 'catalog-reviewer',
+    }),
+  });
+  const anilife = normalizeSourceRecord(sourceRecord('anilife_public', {
+    contentId: '1036', title: '테스트 작품', alternateName: '테스트 작품',
+    datePublished: '2026-04-01', format: 'TVSeries', status: '방영중',
+    numberOfEpisodes: 12, imageUrl: 'https://anilife1.tv/images/anime/1036.webp',
+    publicPageUrl: 'https://anilife1.tv/content/1036', identityEvidence: null,
+  }, { targetKey: 'ANILIFE:1036', sourceEntityId: '1036' }));
+  const anilist = normalizeSourceRecord(sourceRecord('anilist', {
+    id: 201817, title: { romaji: 'Test Work', english: null, native: 'テスト作品' },
+    format: 'MOVIE', status: 'FINISHED', episodes: 1, source: 'MANGA',
+    startDate: { year: 2026, month: 4, day: 2 }, genres: ['Action'],
+    coverImage: { extraLarge: 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx201817.jpg' },
+    studios: { nodes: [{ id: 99, name: 'Studio Test', isAnimationStudio: true }] },
+  }, { targetKey: 'ANILIFE:1036', sourceEntityId: '201817' }));
+  const claims = buildFieldClaims({
+    target: incrementTarget, normalizedRecords: [anilife, anilist],
+  });
+  const anilistClaims = claims.filter((claim) => claim.sourceId === 'anilist');
+  assert.equal(anilistClaims.some((claim) => claim.fieldPath === 'sourceMaterialType'), true);
+  assert.equal(anilistClaims.some((claim) => claim.fieldPath === 'studios'), true);
+  assert.equal(anilistClaims.some((claim) => claim.fieldPath === 'sourceGenres'), true);
+  assert.equal(anilistClaims.some((claim) => claim.fieldPath === 'titles'), true);
+  assert.equal(anilistClaims.some((claim) => (
+    ['format', 'status', 'startDate', 'episodeCount', 'cover'].includes(claim.fieldPath)
+  )), false);
 });
 
 test('legacy Korean seed title becomes the canonical baseline without promoting legacy aliases', () => {
@@ -811,7 +897,7 @@ test('canonical rights derive from authoritative claim policy and reject policy 
   assert.equal(anilistClaims.every((claim) => (
     claim.catalogPromotion === SOURCE_PROMOTION_POLICY.anilist
   )), true);
-  assert.equal(authenticatedCanonical(anilistClaims).distributionStatus, 'PROHIBITED');
+  assert.equal(authenticatedCanonical(anilistClaims).distributionStatus, 'PERMISSIONED');
 
   const wikidata = normalizeSourceRecord(sourceRecord('wikidata', {
     externalIds: { anilist: '1' }, labels: { en: 'Cowboy Bebop' },
@@ -869,7 +955,7 @@ test('canonical rights authenticate exact claim versions against trusted SourceR
     fieldClaims: [...claims].reverse(),
   };
   const canonical = buildCanonicalRevision(request);
-  assert.equal(canonical.distributionStatus, 'PROHIBITED');
+  assert.equal(canonical.distributionStatus, 'PERMISSIONED');
   for (const provenance of canonical.fieldProvenance) {
     assert.deepEqual(provenance.claimVersions, provenance.claims.map((claim) => ({
       claimId: claim.claimId, contentHash: claim.contentHash,

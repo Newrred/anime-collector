@@ -145,7 +145,7 @@ test("Library preserves an IndexedDB-only collection through startup hydration",
     list: [{ anilistId: 777, status: "completed", score: 8, memo: "IDB only", addedAt: 1 }],
   });
 
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
   await expect.poll(async () => (await readIdbState(page)).library).toHaveLength(1);
   const state = await readIdbState(page);
   expect(state.library[0]).toMatchObject({ anilistId: 777, memo: "IDB only" });
@@ -191,7 +191,7 @@ test("interrupted migration merges partial IDB with complete local Library and T
     localTier: completeTier,
   });
 
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
   await expect.poll(() =>
     page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]")),
   ).toHaveLength(2);
@@ -300,7 +300,7 @@ test("migration marker stays unset when the merged local mirror cannot be writte
     };
   });
 
-  await page.goto("/library/");
+  await page.goto("/library/?focus=edit");
   await expect.poll(async () => (await readIdbState(page)).library).toHaveLength(2);
   expect((await readIdbState(page)).migration).toBeNull();
 });
@@ -317,7 +317,7 @@ test("an IndexedDB-only watch-log migration restores the complete local source",
     ],
   });
 
-  await page.goto("/library/?animeId=777");
+  await page.goto("/library/?animeId=777&focus=edit");
   await expect(page.locator(".modal")).toBeVisible();
   await page.locator(".modal .library-modal-tab").nth(1).click();
   await expect(page.locator(".library-modal-log-card")).toHaveCount(1);

@@ -1,3 +1,4 @@
+import { assertCatalogCoverPersonalSignal } from "../domain/memoryDomain.js";
 import { MemoryApplicationError } from "./createMemoryCard.js";
 import { toRemoteMemoryCard } from "../sync/memorySyncContract.js";
 import { prepareAccountSyncOperations } from "./prepareAccountSyncOperations.js";
@@ -26,6 +27,7 @@ export function createUpdateMemoryCardCommand({ repository, telemetry, clock, id
       if (normalizedNote === bundle.card.note) return structuredClone(bundle.card);
       const now = String(clock.now());
       const candidate = { ...bundle.card, note: normalizedNote, updatedAt: now };
+      assertCatalogCoverPersonalSignal(candidate, bundle.asset);
       const syncOperations = await prepareAccountSyncOperations({
         repository,
         ownerId,

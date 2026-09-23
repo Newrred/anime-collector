@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   searchCache: "anime:searchCache:v1",
   quickAddStatus: "anime:quickAddStatus:v1",
   quickSearchRecent: "anime:quickSearchRecent:v1",
+  titleCollectionView: "moemoa:titles:view:v1",
   characterPins: "anime:characterPins:v1",
   syncDeviceId: "sync.deviceId",
   syncLastSyncedAt: "sync.lastSyncedAt",

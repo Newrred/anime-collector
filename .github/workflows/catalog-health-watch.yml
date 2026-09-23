@@ -1,0 +1,32 @@
+name: Catalog health freshness
+on:
+  schedule:
+    - cron: '43 5,11,17,23 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Detect missing, failed, or stale health run
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/check-catalog-health-run.mjs > catalog-health-freshness.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalog-health-freshness-${{ github.run_id }}
+          path: catalog-health-freshness.json
+          retention-days: 30
+      - name: Result summary
+        if: always()
+        run: cat catalog-health-freshness.json >> "$GITHUB_STEP_SUMMARY"
+# Same scheduler: this does not prove delivery if all GitHub schedules stop.
+# D03 requires a real recipient and independent observation before launch.

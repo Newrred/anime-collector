@@ -1,10 +1,12 @@
 # MOEMOA Image-first Web UI Readiness Design
 
-> **Status:** `CURRENT_APPROVED_DIRECTION — REFINED SPEC FOR REVIEW — IMPLEMENTATION NOT STARTED`
+> **Status:** `PARTIALLY_SUPERSEDED — IMPLEMENTED WEB UI BASELINE`
 >
 > **Approved:** 2026-08-24
 >
 > **Scope:** 첫 Private Vertical Slice의 Web UI Readiness Gate. Home, 공통 navigation/search, Memory Card 작성, Archive, Memory Card 상세, Library와 Memory 행동 구분의 시각·사용성 개선과 자동 검증 기준.
+>
+> **2026-09-03 갱신:** 이 문서의 반응형·접근성·Memory visual 위계 기준은 유지한다. Library/Archive의 사용자 IA, 공식 표지 사용 범위, 사용자-facing 명칭은 [`2026-09-03-title-hub-dual-view-ui.md`](2026-09-03-title-hub-dual-view-ui.md)가 대체한다.
 
 ## 1. 목적
 
@@ -12,7 +14,7 @@ MOEMOA의 현재 기능 경계와 local-only 저장 모델을 유지하면서, �
 
 ```text
 애니 작품을 찾는다
-→ 장면 또는 시스템 디자인을 선택한다
+→ 내 이미지, 승인된 공식 표지 또는 시스템 디자인을 선택한다
 → 짧은 기억을 남긴다
 → Memory Card를 저장한다
 → Home과 Archive에서 다시 본다
@@ -48,9 +50,9 @@ MOEMOA의 현재 기능 경계와 local-only 저장 모델을 유지하면서, �
 - Android는 이미지 수집과 빠른 작성의 주력 클라이언트이며, Web은 Archive와 향후 Board의 주력 화면이다.
 - Web과 Android는 같은 React UI와 domain contract를 사용한다.
 - Web UI Gate가 닫히기 전 Android UI 확장을 시작하지 않는다.
-- Library, WatchLog, Tier는 legacy 경계를 유지한다. Memory Card나 Board로 자동 승격하지 않는다.
+- Library, WatchLog, Tier의 write model은 Memory Card나 Board로 자동 승격하지 않는다. 사용자 읽기 경험은 Title Hub projection으로 통합한다.
 - 일반 Web에서 사용자 이미지를 서버에 업로드하거나 영구 저장하지 않는다.
-- Production catalog 대표 표지는 검색·상세 presentation asset이며 사용자 Memory Card의 VisualAsset으로 복사하지 않는다.
+- Production catalog 대표 표지는 작품 anchor로 표시하며, 사용자가 명시적으로 선택하고 개인 기억 신호를 남기면 bytes 복제 없이 `CATALOG_COVER` Memory visual reference로 사용할 수 있다.
 - Public UGC, sync, private cloud, Board 구현은 이번 범위에 포함하지 않는다.
 - 영어 기본과 한국어 선택을 모두 지원하며 상태에는 번역 문자열 대신 message key 또는 error code를 보존한다.
 
@@ -503,7 +505,7 @@ fixture는 production 코드의 hidden bypass를 만들지 않는다. 기존 DEV
 - DB schema와 IndexedDB store version을 변경하지 않는다.
 - 사용자 이미지 bytes, note, 검색어를 analytics나 일반 log에 추가하지 않는다.
 - Web production image upload를 추가하지 않는다.
-- catalog 표지를 Memory VisualAsset으로 저장하지 않는다.
+- catalog 표지는 카드마다 bytes를 저장하지 않는다. 2026-09-03 이후 표지 기반 Memory는 승인된 catalog reference만 저장한다.
 - system design example은 deterministic local rendering만 사용한다.
 - screenshot fixture에는 실제 사용자 데이터, secret, absolute path, raw catalog payload를 포함하지 않는다.
 - Public visibility와 sharing control을 추가하지 않는다.
