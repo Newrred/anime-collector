@@ -1,0 +1,261 @@
+{
+  "work": "W10",
+  "status": "BLOCKED_EXTERNAL",
+  "date": "2026-09-24",
+  "head": "0330a5401e0112f2e36886a6826812219e7aed89",
+  "sourceState": "W09 and W10 uncommitted; source hashes below identify tested tree",
+  "environment": {
+    "npm": "11.17.0",
+    "sqlAuth": "Synthetic auth.uid and Storage, real PostgreSQL roles",
+    "os": "Windows PowerShell + WSL Ubuntu24.04",
+    "postgres": "16.15",
+    "browser": "Real local Chromium/IndexedDB, synthetic RPC/Auth/Storage responses",
+    "node": "24.19.0"
+  },
+  "tests": {
+    "remoteCI": "NOT RUN for uncommitted changes",
+    "browser": {
+      "pass": 25,
+      "fail": 0
+    },
+    "productionBundleTestHookScan": "no matches",
+    "diffCheck": "PASS",
+    "supabaseAdvisors": "NO RESULT: temporary cluster / Windows WSL connection and TLS failure",
+    "build": {
+      "pages": 16,
+      "postbuild": "PASS"
+    },
+    "androidStaticDistRoutes": 16,
+    "reactDoctor": {
+      "errors": 21,
+      "overall": "NOT PASS",
+      "version": "0.9.14",
+      "newW10Errors": 0,
+      "score": 39,
+      "warnings": 126,
+      "newW10Warnings": 1
+    },
+    "visual": {
+      "pass": 2,
+      "screenshotsInspected": true,
+      "fail": 0
+    },
+    "unit": {
+      "pass": 310,
+      "fail": 0
+    },
+    "sql": {
+      "concurrentScenarios": 6,
+      "fail": 0,
+      "assertions": 88
+    }
+  },
+  "exclusions": [
+    "Hosted Supabase A/B/anon Auth REST and Storage",
+    "Deployed CDN/API and Android device",
+    "DB/Storage restore rehearsal and current fence replay",
+    "Production DB, Public flags, deployment, commit and push"
+  ],
+  "rollout": "Server W07/W08/W10 migrations and real-environment verification precede account client deployment. Account deletion fails closed without retire RPC; Guest offline deletion preserved.",
+  "rollback": "Disable public reads/writes, preserve deletion/revocation fences, restore validated client only; never reopen restored DB before replaying current fences.",
+  "sources": [
+    {
+      "path": ".gitattributes",
+      "sha256": "41fa0a0bf15eb11a7dff48133442f25fc4489f2c37b38566b44e95028e428510"
+    },
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "dcaf1d08163c16f76e9e0a42891bd983335107e8d925a0fd12b3233f9198f014"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "sha256": "060fcffd59acbc837d6afcec0000a6ba70294499fbfb6af6fa14d5823f0d5006"
+    },
+    {
+      "path": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+      "sha256": "037d7b9be9d266b2d93bf838cf305e63b62bc43bb2bb1d2f0dd951a84308a037"
+    },
+    {
+      "path": "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+      "sha256": "6ed2a5f3c5623e70a7be52c858b5feeda5e4b33590f301db351952a4a3a447d7"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-24-w09-validation.json",
+      "sha256": "63b4ee702a5401088cc9f257a3774960aae36568e6daad649540028e7f389e6a"
+    },
+    {
+      "path": "scripts/verify-android-static-routes.mjs",
+      "sha256": "dd6794dedb34915f414cda36f9aa0e273fc5a5e9286c88ab8d829289676feaeb"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+      "sha256": "13d26d53562354262163ca5da6ac1ed5fc95a0c1728d751d63d2ab790212bc3a"
+    },
+    {
+      "path": "src/features/memory/application/createPublicationController.js",
+      "sha256": "0ade9b0c30b130c79cc87d8a055a5d61b3861ba76e02620fee157787835bf7eb"
+    },
+    {
+      "path": "src/features/memory/application/deleteMemoryCard.js",
+      "sha256": "38e0be693484ef98bbc946325562f194d6f800e8e142bcea6e60928143c6f172"
+    },
+    {
+      "path": "src/features/memory/application/retirePublicationBeforeDelete.js",
+      "sha256": "e3ae03ea3586e2f79c5f35f4d3fa5c07e0cf5374484a5d15bd6b671312faf520"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "b097ed223be514aad35b59872abfd9b2bc1807af1d6f1a31c0316e0df0e06254"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "8e12e3c23e0f1868c4e55cc58d6669a85b152aa430e6eca7f4b476d60278eaef"
+    },
+    {
+      "path": "src/features/memory/components/MemoryCardDetail.jsx",
+      "sha256": "06b407c16e74eb8712af9157b3d89bafbca1a7d8104c396e547a34ae57150b92"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicationPanel.jsx",
+      "sha256": "624ea686f02da38237c1577b0b2de90f368219aa4aae563c35ce44674d028597"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicCardControl.jsx",
+      "sha256": "01945f1203548bc94f7afee4ad6d1e7f0d5b3a8a90abf694a28f667a96d67827"
+    },
+    {
+      "path": "src/features/memory/components/publicationCopy.js",
+      "sha256": "ce163548271cc6561ff42e6e71b577076f964e1859e4dc41334d184fb1346791"
+    },
+    {
+      "path": "src/features/memory/components/PublicBoardSnapshot.jsx",
+      "sha256": "a94b685e61942434163a4274b16c9ba71abf6611931406fe6ed0ac2932186a21"
+    },
+    {
+      "path": "src/features/memory/components/PublicMemoryBoard.jsx",
+      "sha256": "5a3f6aee6915fda04d6ee2fb26f2ef0d5e885bd6b37cc527ec52cb28b2b70284"
+    },
+    {
+      "path": "src/features/memory/domain/publicationView.js",
+      "sha256": "8718e7ed0066de68310b8d345ef499754fe4e4af06598cbb5e76a900d9624109"
+    },
+    {
+      "path": "src/features/memory/runtime/createMemoryRuntime.js",
+      "sha256": "685036e9d69817e526ae6ec905a5641094e53c0874aa08b2ed62da9f56404959"
+    },
+    {
+      "path": "src/features/memory/runtime/platformMemoryRuntime.js",
+      "sha256": "467fb6a2e96befbf8f09971881b698029790493b96faf4e4dd7522fba58ff4c6"
+    },
+    {
+      "path": "src/features/memory/runtime/platformPublication.js",
+      "sha256": "5561f9ee921f6454cf871d363e3f2ccb04e08f2dad03f0a4ee192eaa3bb4afe0"
+    },
+    {
+      "path": "src/messages/en.js",
+      "sha256": "b25fa190877afe42bc044559faa04e314906c20f2b7aa7691d1a88489a204fc7"
+    },
+    {
+      "path": "src/messages/ko.js",
+      "sha256": "143ad9622ee687628cbcc7d97423e83df9e80ebade3354058fda100bc120b68e"
+    },
+    {
+      "path": "src/pages/public/board.astro",
+      "sha256": "ec1fbc30959bad38972d4c363a637620744cbae100f3f023f352a7b5345a9fcb"
+    },
+    {
+      "path": "supabase/migrations/20260923182210_memory_publication_source_status.sql",
+      "sha256": "822587d324aa5ff8106360179ef089234f7f0984460d5dfc50cf2eed8bbe808c"
+    },
+    {
+      "path": "tests/publication-ui.spec.ts",
+      "sha256": "7e39f45cced0bae9ab873604f182ef6e5cc7c546e6b387cde9268fb9bc02b915"
+    },
+    {
+      "path": "tests/unit/deleteMemoryCard.test.mjs",
+      "sha256": "da51316aebbf7658d36f10e7bb06b4aa9966d8d00974c0433973f763a0cebaae"
+    },
+    {
+      "path": "tests/unit/nativeAppNavigation.test.mjs",
+      "sha256": "76ef057736da78f1edb005689757704ebdf94ae36d3ecdb384772264a74adc10"
+    },
+    {
+      "path": "tests/unit/publicationController.test.mjs",
+      "sha256": "a6ad5763c2bf24983ecfff737d71109e259e6d324cde6d803ebbe177f5d8254b"
+    },
+    {
+      "path": "tests/unit/publicationGateway.test.mjs",
+      "sha256": "63508191ed48100711d3b99edb76b7f760e01de97592e8dfa34e3408ce940459"
+    },
+    {
+      "path": "tests/unit/retirePublicationBeforeDelete.test.mjs",
+      "sha256": "2653313818de1a6f61d63b85765d9363552ab317ac66ea3038752572dcb51fc7"
+    },
+    {
+      "path": "tools/publication-boundary/contract.sql",
+      "sha256": "12d6110e005185811883261d644ebb1a55cbf5676209186606157217f277aee5"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-publish.sql",
+      "sha256": "8f61c03dfb1bb36bfc272f7f5889b35026ab63894eb1aaed450d4b886b0602d7"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-retire.sql",
+      "sha256": "9648638c4170ab4afb3e2d55fafaa7b4d8c9e38f8742aa95eb820e5651040fb1"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-setup.sql",
+      "sha256": "0e55da346a999aed7c427682c8a1262b4c04039f32840f867460befcf812e7d6"
+    },
+    {
+      "path": "tools/publication-boundary/run-local-postgres.sh",
+      "sha256": "e00fe914e4675285783e4b06dd60c47f623bba42479cd08976673e3c32fac36a"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".cache/w10-unit-final.log",
+      "sha256": "14de199773e3fbbc9df03c9810a72aaaf50e15d3bb6a99f7f9096e58a0d97415"
+    },
+    {
+      "path": ".cache/w10-browser-final.log",
+      "sha256": "06f50e7b465584e9bb3cbf703b46383b77ae7a4c278b6fed70109015628af5c5"
+    },
+    {
+      "path": ".cache/w10-sql-final.log",
+      "sha256": "0da5890fac4ce644ee3597e55de787c02dac84c99f345cb6050a1a115b686da9"
+    },
+    {
+      "path": ".cache/w10-build-final.log",
+      "sha256": "8b77f7451e873ba567394a6cb9124787d6e2da161db71e4ae4cb31d0f7b640c7"
+    },
+    {
+      "path": ".cache/w10-react-doctor-final.log",
+      "sha256": "37359f0c2abaab8d4964e58d636aaa4c4f105290c7655f53d66f7e2946c932b6"
+    },
+    {
+      "path": ".cache/w10-routes.log",
+      "sha256": "ebe551efa681bb0cfe4aed87b71d079441b324a8dc0267ae072510397b23a26b"
+    },
+    {
+      "path": ".cache/w10-visual.log",
+      "sha256": "efe97093c35de16fa38d98997ca5c80808ae186425d78e9d6ae8c0849e8d01d2"
+    },
+    {
+      "path": ".cache/w10-advisors-final.log",
+      "sha256": "766a393196212cf8e5eff0291c78acd02d2832edc4f76f9fd1f3c1a56c051968"
+    },
+    {
+      "path": ".cache/w10-diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/w10-public-update.png",
+      "sha256": "86defb2ed632d178cc763baaf597d06ddd7c79b2274b7161df56946496a9b6e6"
+    },
+    {
+      "path": ".cache/w10-card-withdrawal.png",
+      "sha256": "468e6236626710649e22ce843d6911d9a8a1075ee86abd63bcb769ddee5e2af1"
+    }
+  ]
+}

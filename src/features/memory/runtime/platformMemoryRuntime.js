@@ -33,6 +33,16 @@ export function getPlatformMemoryRuntime() {
       repository,
       imageIntake: selectImageIntake(),
       titleResolver: selectTitleResolver(),
+      beforeDelete: async (input) => {
+        if (!input.ownerId.startsWith("account:")) return;
+        const { retirePublicationBeforeDelete } = await import("../application/retirePublicationBeforeDelete.js");
+        const { getPublicationServices } = await import("./platformPublication.js");
+        const service = getPublicationServices();
+        await retirePublicationBeforeDelete({ ...input, gateway: service.gateway, getSession: service.getSession });
+        if ((await repository.getActiveOwner())?.id !== input.ownerId) {
+          throw Object.assign(new Error("AUTH_REQUIRED"), { code: "AUTH_REQUIRED" });
+        }
+      },
       uuid: () => globalThis.crypto.randomUUID(),
       clock: { now: () => new Date().toISOString() },
       telemetry: {

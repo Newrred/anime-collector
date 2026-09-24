@@ -50,6 +50,7 @@ test("delete tombstones first, deletes private media, then scrubs sensitive meta
   };
   const command = createDeleteMemoryCardCommand({
     repository,
+    beforeDelete: async () => { sequence.push("remote-withdrawal"); },
     localMedia: {
       deleteAsset: async ({ localRef }) => {
         sequence.push("file-delete");
@@ -70,7 +71,7 @@ test("delete tombstones first, deletes private media, then scrubs sensitive meta
   });
 
   assert.deepEqual(result, { operationId: "delete-operation-1", cardId: "card-1", deleted: true });
-  assert.deepEqual(sequence.slice(0, 3), ["tombstone", "file-delete", "scrub"]);
+  assert.deepEqual(sequence.slice(0, 4), ["remote-withdrawal", "tombstone", "file-delete", "scrub"]);
   assert.equal(current.card.note, null);
   assert.equal(current.card.sceneCue, null);
   assert.equal(current.asset.state, "DELETED");
@@ -78,7 +79,7 @@ test("delete tombstones first, deletes private media, then scrubs sensitive meta
   assert.equal(current.asset.checksumSha256, null);
   assert.equal(current.asset.sourceUrl, null);
   assert.equal(operations.get("delete-operation-1").state, "COMPLETED");
-  assert.deepEqual(sequence[3], ["memory_card_deleted", { storageScope: "LOCAL_ONLY" }]);
+  assert.deepEqual(sequence[4], ["memory_card_deleted", { storageScope: "LOCAL_ONLY" }]);
 });
 test("completed delete operation is idempotent", async () => {
   let mediaCalls = 0;

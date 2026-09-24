@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-24T15:39:33.426Z",
+  "project": "nmgkhknponvzcwliajyk",
+  "dbConnection": {
+    "tls": true,
+    "serverVersion": "17.6",
+    "database": "postgres",
+    "verified": true
+  },
+  "serverSecretKeyVerified": true,
+  "storageFixture": {
+    "bucket": "memory-public-derivatives",
+    "object": "d01-probe.webp",
+    "bytes": 60,
+    "sha256": "6b0c95fe2dd56befe9e0b5991c9b16d1831c4c80b870c7b3294047499cb21a8e",
+    "backupMatchesExpected": true,
+    "secondDownloadMatches": true,
+    "decodedWidth": 16,
+    "decodedHeight": 16,
+    "localCopy": ".cache/hosted-recovery/d01-probe.webp"
+  },
+  "limitations": [
+    "Storage local copy verified; not a hosted restore",
+    "Hosted full DB dump/restore pending PostgreSQL17 tooling",
+    "No CDN or enabled public image pipeline test",
+    "Android excluded"
+  ],
+  "productionChanges": false
+}

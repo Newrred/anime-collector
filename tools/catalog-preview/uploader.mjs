@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   readReleaseDbRows,
   readReleaseManifest,
@@ -83,6 +84,35 @@ async function upsert(config, table, rows, conflict, fetchImpl) {
   });
 }
 
+async function readRows(config, path, fetchImpl) {
+  try {
+    const response = await fetchImpl(`${config.url}/rest/v1/${path}`, {
+      headers: headers(config), signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error();
+    const rows = await response.json();
+    if (!Array.isArray(rows) || rows.length > 1) throw new Error();
+    return rows;
+  } catch { throw typedError('CATALOG_PREVIEW_STATE_FAILED', 'Cannot verify release state'); }
+}
+
+export async function prepareCatalogUpload(config, release, fetchImpl) {
+  const [active] = await readRows(config, 'catalog_active_release?select=release_id&singleton=eq.true', fetchImpl);
+  // Never reset an existing ACTIVE/RETIRED release to STAGING on a resumed upload.
+  await request(config, '/rest/v1/catalog_releases?on_conflict=id', {
+    body: [{ id: release.releaseId, profile: release.profile, schema_version: release.schemaVersion,
+      policy_version: release.policyVersion, release_hash: release.releaseHash,
+      target_count: release.targetCount, people_page_count: release.peoplePageCount, status: 'STAGING' }],
+    prefer: 'resolution=ignore-duplicates,return=minimal', fetchImpl,
+  });
+  const [remote] = await readRows(config, `catalog_releases?select=release_hash,target_count,people_page_count,status&id=eq.${encodeURIComponent(release.releaseId)}`, fetchImpl);
+  if (!remote || remote.release_hash !== release.releaseHash || remote.target_count !== release.targetCount
+    || remote.people_page_count !== release.peoplePageCount || !['STAGING','ACTIVE','RETIRED'].includes(remote.status)) {
+    throw typedError('CATALOG_PREVIEW_RELEASE_CONFLICT', 'Immutable release differs from candidate');
+  }
+  return { expectedActiveReleaseId: active?.release_id ?? null, status: remote.status };
+}
+
 async function readRemoteHashes(config, table, select, releaseId, fetchImpl) {
   const rows = [];
   for (let offset = 0; offset < 10_000; offset += 1_000) {
@@ -130,7 +160,7 @@ async function completedRemoteEntries(config, release, fetchImpl) {
   )));
 }
 
-async function uploadCover(config, asset, bytes, fetchImpl) {
+export async function uploadCover(config, asset, bytes, fetchImpl) {
   const path = `/storage/v1/object/${asset.bucket_id}/${asset.object_path.split('/').map(encodeURIComponent).join('/')}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60_000);
@@ -152,9 +182,22 @@ async function uploadCover(config, asset, bytes, fetchImpl) {
   } finally { clearTimeout(timeout); }
   if (response.ok) return;
   if (response.status === 400 || response.status === 409) {
-    const existing = await fetchImpl(`${config.url}/storage/v1/object/public/${asset.bucket_id}/${asset.object_path
-      .split('/').map(encodeURIComponent).join('/')}`, { method: 'HEAD' });
-    if (existing.ok && Number(existing.headers.get('content-length')) === asset.byte_size) return;
+    try {
+      const existing = await fetchImpl(`${config.url}/storage/v1/object/public/${asset.bucket_id}/${asset.object_path
+        .split('/').map(encodeURIComponent).join('/')}`, { signal: AbortSignal.timeout(30_000), cache: 'no-store' });
+      if (existing.ok && existing.body) {
+        const reader = existing.body.getReader(), hash = createHash('sha256');
+        let size = 0;
+        for (;;) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          size += chunk.value.byteLength;
+          if (size > asset.byte_size) { await reader.cancel(); break; }
+          hash.update(chunk.value);
+        }
+        if (size === asset.byte_size && hash.digest('hex') === asset.checksum) return;
+      } else await existing.body?.cancel();
+    } catch { /* Fail closed with a bounded error; never expose a response body. */ }
   }
   throw typedError('CATALOG_PREVIEW_COVER_UPLOAD_FAILED', `Preview cover upload was rejected (${response.status})`);
 }
@@ -187,19 +230,13 @@ export async function uploadCatalogPreview({
     throw typedError('CATALOG_PREVIEW_UPLOAD_CONFIG_INVALID', 'Uploader configuration is invalid');
   }
   const config = previewConfig(env);
-  await upsert(config, 'catalog_releases', [{
-    id: release.releaseId,
-    profile: release.profile,
-    schema_version: release.schemaVersion,
-    policy_version: release.policyVersion,
-    release_hash: release.releaseHash,
-    target_count: release.targetCount,
-    people_page_count: release.peoplePageCount,
-    status: 'STAGING',
-  }], 'id', fetchImpl);
+  const state = await prepareCatalogUpload(config, release, fetchImpl);
 
   const completed = await completedRemoteEntries(config, release, fetchImpl);
   const pendingEntries = release.entries.filter((entry) => !completed.has(entry.animeId));
+  if (state.status !== 'STAGING' && pendingEntries.length) {
+    throw typedError('CATALOG_PREVIEW_RELEASE_CONFLICT', 'Published release requires a new candidate, not an overwrite');
+  }
   const existingPeople = release.entries.filter((entry) => completed.has(entry.animeId))
     .reduce((sum, entry) => sum + entry.peopleHashes.length, 0);
   const counts = {
@@ -237,8 +274,9 @@ export async function uploadCatalogPreview({
     counts.people += people.length;
     onProgress(Object.freeze({ completed: Math.min(completed.size + index + slice.length, release.entries.length), total: release.entries.length }));
   }
-  await request(config, '/rest/v1/rpc/activate_catalog_release', {
-    body: { requested_release_id: release.releaseId, requested_release_hash: release.releaseHash },
+  await request(config, '/rest/v1/rpc/activate_catalog_release_checked', {
+    body: { requested_release_id: release.releaseId, requested_release_hash: release.releaseHash,
+      expected_active_release_id: state.expectedActiveReleaseId },
     fetchImpl,
   });
   return Object.freeze({

@@ -10,9 +10,10 @@ import { publicImageUrl,publicDesignStyle } from "../../src/features/memory/doma
 const ID="11111111-1111-4111-8111-111111111111", PUB="22222222-2222-4222-8222-222222222222";
 const source=await sharp({create:{width:20,height:30,channels:3,background:"#ab3290"}}).png().toBuffer();
 function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false}={}) {
-  const objects=new Map(); const state={ready:false,published:false,revoked:false,failed:false,reservations:0};
+  const objects=new Map(); const state={ready:false,published:false,revoked:false,failed:false,reservations:0,attempts:0,deliveries:0,reads:0,limitAttempt:false,limitDelivery:false};
   const reference=(variant)=>({path:`${ID}/${variant}.webp`,hash:imageHash(objects.get(`${ID}/${variant}.webp`))});
   const user={async rpc(name,args) {
+    if(name==="authorize_memory_image_attempt") { state.attempts++; if(state.limitAttempt) throw new PublicImageError("RATE_LIMITED",429); return null; }
     if(name==="reserve_memory_public_asset") {
       state.reservations++;
       if(state.ready) return {id:ID,state:"READY"};
@@ -24,6 +25,7 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
   const backend={
     async user(token) { if(token!=="test-token") throw new PublicImageError("AUTH_REQUIRED",401); return user; },
     async rpc(name,args) {
+      if(name==="authorize_memory_image_delivery") { state.deliveries++; if(state.limitDelivery) throw new PublicImageError("RATE_LIMITED",429); return null; }
       if(name==="complete_memory_public_asset") { state.ready=true; if(ambiguousComplete) throw new Error("lost response"); return null; }
       if(name==="fail_memory_public_asset") { if(!state.ready) state.failed=true; return null; }
       if(name==="resolve_memory_public_image") return state.ready && state.published && !state.revoked && args.p_publication_id===PUB && args.p_asset_id===ID ? reference(args.p_variant) : null;
@@ -32,7 +34,7 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
       throw new Error("unknown service RPC");
     },
     async put(path,bytes) { if(failThumb && path.endsWith("thumb.webp")) throw new Error("storage secret detail"); objects.set(path,Buffer.from(bytes)); },
-    async get(path) { if(revokeDuringRead) state.revoked=true; return objects.get(path); },
+    async get(path) { state.reads++; if(revokeDuringRead) state.revoked=true; return objects.get(path); },
     async remove(paths) { for(const path of paths) objects.delete(path); },
   };
   const handler=createPublicImageHandler({enabled,createBackend:()=>backend,allowedOrigins:["https://example.test"]});
@@ -47,6 +49,20 @@ const headers={"Content-Type":"application/octet-stream",Authorization:"Bearer t
  "X-Moemoa-Version":"1","X-Moemoa-Operation":PUB,"X-Moemoa-Consent":"TEST_ONLY"};
 const post=(base,bytes=source,extra={})=>fetch(`${base}/api/public-image`,{method:"POST",headers:{...headers,...extra},body:bytes});
 const getUrl=(base,variant="thumb")=>base+publicImageUrl(PUB,ID,variant);
+
+test("image budgets stop conversion and Storage reads while completed upload replay remains safe",async()=>{
+  const h=harness(); await withServer(h,async base=>{
+    h.state.limitAttempt=true;
+    let res=await post(base); assert.equal(res.status,429); assert.deepEqual(await res.json(),{error:"RATE_LIMITED"});
+    assert.equal(h.objects.size,0);
+    h.state.limitAttempt=false; res=await post(base); assert.equal(res.status,200);
+    const attempts=h.state.attempts; h.state.limitAttempt=true;
+    assert.equal((await post(base)).status,200); assert.equal(h.state.attempts,attempts);
+    h.state.published=true; h.state.limitDelivery=true;
+    res=await fetch(getUrl(base)); assert.equal(res.status,429); assert.equal(h.state.reads,0);
+    h.state.limitDelivery=false; assert.equal((await fetch(getUrl(base))).status,200); assert.equal(h.state.reads,1);
+  });
+});
 
 test("image decode generates bounded, rotated WebP derivatives with private metadata removed",async()=>{
   const original=await sharp({create:{width:60,height:100,channels:3,background:"red"}})

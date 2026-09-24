@@ -78,14 +78,13 @@ test("saved Memory Card becomes Home's archive source without a legacy Library o
 
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");
-  const memory = page.getByRole("region", { name: "Memory Archive" });
+  const memory = page.getByRole("region", { name: "Return to your memories" });
   await expect(memory).toBeVisible();
-  await expect(memory).toContainText("1 memory card");
-  await expect(memory).toContainText("Latest memory card");
+  await expect(memory.getByRole("region", { name: "Recent memories" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "View Memories" })).toBeVisible();
-  await expect(memory.getByRole("link", { name: "Create another memory" })).toBeVisible();
-  await expect(memory.locator(".memory-preview--featured")).toHaveCount(1);
+  await expect(memory.getByRole("link", { name: "Add Memory", exact: true })).toBeVisible();
+  await expect(memory.locator(".memory-preview")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Search or add a title" })).toHaveCount(0);
   await expect(page.getByText("Add your first anime", { exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -107,7 +106,7 @@ test("mobile exposes memory card creation without opening the overflow menu", as
   await expect(createCard).toContainText("Memory");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await createCard.click();
-  await expect(page).toHaveURL(/\/memory\/new\/?$/u);
+  await expect(page).toHaveURL(url => url.pathname === '/memory/new/' && url.searchParams.get('returnTo') === '/');
 });
 
 test("unconfigured cloud stays local-only and never claims a cloud backup", async ({ page }) => {
@@ -141,7 +140,7 @@ test("empty Home primary CTA opens the card composer without creating a legacy l
   });
   await page.goto("/");
   await page.locator(".home-empty-state").getByRole("link", { name: "Add Memory", exact: true }).click();
-  await expect(page).toHaveURL(/\/memory\/new\/?$/u);
+  await expect(page).toHaveURL(url => url.pathname === '/memory/new/' && url.searchParams.get('returnTo') === '/');
   const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
   expect(logs).toEqual([]);
 });

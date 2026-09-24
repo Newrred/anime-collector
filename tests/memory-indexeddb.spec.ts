@@ -1,5 +1,39 @@
 import { expect, test } from "@playwright/test";
 
+test("remote visual arriving before its card remains readable and repairs older missing links", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const { IndexedDbMemoryRepository } = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const { writeDeviceSyncState, commitPulledChange } = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const repository = await IndexedDbMemoryRepository.open();
+    const now = "2026-09-24T00:00:00.000Z";
+    const userId = "11111111-1111-4111-8111-111111111111";
+    const identity = await repository.ensureInstallationIdentity({ uuid: crypto.randomUUID(), now });
+    const owner = await repository.ensureAccountOwner({ userId, now });
+    await writeDeviceSyncState(repository.database, { ownerId: owner.id, userId, installationId: identity.installationId, deviceId: crypto.randomUUID(), lastSyncSeq: 0, updatedAt: now });
+    const shared = { createdAt: now, clientUpdatedAt: now, serverUpdatedAt: now, version: 1, deletedAt: null };
+    const rows = [
+      { ...shared, entityType: "PRIVATE_TITLE", id: "title-order", displayTitle: "Restore test", normalizedTitle: "restore test" },
+      { ...shared, entityType: "VISUAL_ASSET", id: "asset-order", cardId: "card-order", assetType: "SYSTEM_DESIGN", state: "READY", isCurrent: true, designSpec: { templateId: "test" } },
+      { ...shared, entityType: "MEMORY_CARD", id: "card-order", privateTitleId: "title-order", status: "COMPLETE_PRIVATE", titleSnapshot: "Restore test" },
+    ];
+    for (const [index, row] of rows.entries()) await commitPulledChange(repository.database, {
+      ownerId: owner.id, remoteEntity: row, change: { entityType: row.entityType, entityId: row.id, entityVersion: 1 }, nextSyncSeq: index + 1, now,
+    });
+    const first = await repository.getCardBundle(owner.id, "card-order");
+    const tx = repository.database.transaction("memory_cards", "readwrite");
+    tx.objectStore("memory_cards").put({ ...first.card, visualAssetId: null });
+    await new Promise<void>((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); });
+    const repaired = await repository.getCardBundle(owner.id, "card-order");
+    await repository.updateCardMetadata({ ownerId: owner.id, cardId: "card-order", changes: { note: "Updated after repair" }, now });
+    const updated = await repository.getCardBundle(owner.id, "card-order");
+    const archive = await repository.listArchive(owner.id);
+    repository.close();
+    return { first: first.card.visualAssetId, repaired: repaired.card.visualAssetId, note: updated.card.note, count: archive.length };
+  });
+  expect(result).toEqual({ first: "asset-order", repaired: "asset-order", note: "Updated after repair", count: 1 });
+});
+
 test("account card completion and outbox append are atomic and remote-safe", async ({ page }) => {
   await page.goto("/favicon.svg");
   const result = await page.evaluate(async () => {

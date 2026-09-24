@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-25",
+  "environment": "WSL PostgreSQL 16, isolated Unix socket, synthetic auth/storage",
+  "sqlPassNotices": 236,
+  "imageUnitTestsPassed": 14,
+  "staleRecovery": "Old dump exposes the synthetic card as negative control; closed flags suppress it; two latest-fence journal replays keep it hidden even when local reads are enabled; flags closed afterwards.",
+  "sourceFiles": {
+    "tools/publication-boundary/restore-roundtrip.sh": "AFF7EF6100597377ABE754BE6C9729BAD0D87921162E317786FA5A8861BBB39B",
+    "tools/publication-boundary/resource-contract.sql": "76932A69C23D96B001475685486CB7F53C0E3F282A2F05CDFC15DDFC19E5031A"
+  },
+  "logs": {
+    ".cache/d01-stale-restore.log": "97254B941AAEED108584BE31C8E177CB64FD721D4365CB9862D5C2084B79B397",
+    ".cache/d01-images.log": "9BAA1083858548DFEA9B23A3D483A481956114BDE13F3436035B2B25A462DA25"
+  },
+  "artifacts": "/tmp/moemoa-publication-test.LSOuuq",
+  "limitations": ["No hosted dump/restore", "Image RPC and Storage backend mocked", "No CDN/deployment verification", "Android excluded"],
+  "productionChanges": false
+}

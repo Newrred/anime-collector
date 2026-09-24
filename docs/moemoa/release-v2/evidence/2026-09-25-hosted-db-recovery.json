@@ -1,0 +1,45 @@
+{
+  "project": "nmgkhknponvzcwliajyk",
+  "date": "2026-09-25",
+  "backup": {
+    "format": "pg_dump custom full database",
+    "bytes": 708697,
+    "sha256": "d6af268a6b839a2f9782c04cf7b7775921a7be35aad4c971e8e137f61f8507c5",
+    "toolVersion": "17.11",
+    "sourceVersion": "17.6"
+  },
+  "restore": {
+    "target": "isolated local PostgreSQL17.11 Unix socket only",
+    "schemas": [
+      "public",
+      "private",
+      "auth",
+      "storage",
+      "supabase_migrations"
+    ],
+    "tableCount": 72,
+    "rowCountsAndDigestsMatched": true,
+    "mismatchTables": [],
+    "sourceStableDuringComparison": true,
+    "unstableTables": [],
+    "rlsFlagsMatched": true,
+    "policiesMatched": true,
+    "clientTableGrantsMatched": true,
+    "remotePublicClosed": true,
+    "restoredPublicClosed": true,
+    "cardStatusCounts": "COMPLETE_PRIVATE|1\nDELETED|1",
+    "authUserCount": 2,
+    "storageObjectCount": 1
+  },
+  "limitations": [
+    "Not a Supabase Auth/Storage/Realtime service restore",
+    "Platform cron/vault/realtime schemas not restored locally",
+    "Original ownership mapped to local postgres; client table ACL and RLS compared",
+    "Storage bytes separately backed up, not contained in pg_dump",
+    "Not a production backup, PITR, RPO or RTO certification",
+    "Android excluded"
+  ],
+  "remoteWrites": false,
+  "localServerStopped": true,
+  "artifacts": "/var/lib/postgresql/moemoa-hosted-recovery-20260925"
+}

@@ -243,6 +243,7 @@ const koMessages = {
       deleteCancel: "취소",
       deleteConfirmAction: "카드 삭제 확인",
       deleteFailed: "카드를 완전히 삭제하지 못했어요. 앱을 다시 열어 복구를 시도해 주세요.",
+      deleteWithdrawalFailed: "공개 철회를 확인하지 못해 원본을 삭제하지 않았습니다. 연결과 로그인 상태를 확인한 뒤 삭제를 다시 시도해 주세요.",
       imageSaved: "새 이미지를 이 기기에 저장했어요.",
       imageSavedCleanup: "새 이미지를 이 기기에 저장했어요. 이전 이미지 정리는 앱을 다시 열 때 마무리합니다.",
       imageSavedRefresh: "새 이미지는 저장됐어요. 화면을 다시 열면 변경된 카드를 확인할 수 있어요.",
@@ -445,7 +446,7 @@ const koMessages = {
         kind: "update",
         date: "2026-03-15",
         title: "미니홈 기능이 추가되었어요!",
-        body: "내 기록에서 특히 나다운 카드만 골라 공개 미니홈으로 정리할 수 있습니다. 프로필 문구와 공개 링크 관리도 함께 추가되었어요.",
+        body: "공개 기능이 활성화되면 직접 선택해 게시한 보드를 미니홈에 전시할 수 있어요. 비공개 기록은 자동으로 추가되지 않습니다. 공개 공유는 아직 일반 제공 전입니다.",
       },
       {
         kind: "notice",

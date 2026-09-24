@@ -15,6 +15,7 @@ import { openLibraryDeepLink } from "../../src/domain/search/quickActionActions.
 test("Android static route manifest includes Archive, Board, and private Card shells", () => {
   assert.equal(ANDROID_STATIC_ROUTES.includes("archive/index.html"), true);
   assert.equal(ANDROID_STATIC_ROUTES.includes("boards/index.html"), true);
+  assert.equal(ANDROID_STATIC_ROUTES.includes("public/board/index.html"), true);
   assert.equal(ANDROID_STATIC_ROUTES.includes("memory/new/index.html"), true);
   assert.equal(ANDROID_STATIC_ROUTES.includes("memory/card/index.html"), true);
 });
@@ -40,7 +41,7 @@ test("packaged route verification requires My Titles even when every older shell
     await mkdir(path.dirname(file), { recursive: true });
     await writeFile(file, "ok");
   }
-  assert.equal((await verifyPackagedAndroidRoutes(root)).routeCount, 15);
+  assert.equal((await verifyPackagedAndroidRoutes(root)).routeCount, 18);
   await unlink(path.join(publicRoot, "titles/index.html"));
   await assert.rejects(() => verifyPackagedAndroidRoutes(root), { code: "ENOENT" });
 });

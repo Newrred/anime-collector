@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-import { sanitizedChildEnvironment } from "./lib/isolatedE2eServer.mjs";
+import { sanitizedChildEnvironment, waitForLoopbackUrl } from "./lib/isolatedE2eServer.mjs";
 
 const configuredBaseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:4321";
 const parsedBaseUrl = new URL(configuredBaseUrl);
@@ -21,7 +21,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function serverIsReady() {
   try {
-    const response = await fetch(baseUrl);
+    const response = await fetch(baseUrl, { signal: AbortSignal.timeout(1000), redirect: 'error' });
+    await response.body?.cancel();
     return response.ok;
   } catch {
     return false;
@@ -29,14 +30,7 @@ async function serverIsReady() {
 }
 
 async function waitForServer(server) {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    if (await serverIsReady()) return;
-    if (server.exitCode !== null) {
-      throw new Error(`Astro test server exited early with code ${server.exitCode}.`);
-    }
-    await sleep(250);
-  }
-  throw new Error(`Astro test server did not become ready at ${baseUrl}.`);
+  await waitForLoopbackUrl(baseUrl, server, { attempts: 120, intervalMs: 250, requestTimeoutMs: 1000 });
 }
 
 async function stopServer(server) {

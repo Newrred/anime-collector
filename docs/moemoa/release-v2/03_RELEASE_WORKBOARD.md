@@ -9,30 +9,132 @@
 | 계획 | `MOEMOA_PUBLIC_LAUNCH_PLAN_V2_2026-09-22` |
 | 출시 목표 | 개인 기록 + 계정 + 공개 보드 + 공개 미니홈 + 팔로우 + 최소 운영 |
 | 제품 대상 | 기존 Web+Android 유지. 실제 첫 배포 채널/동시성은 D02에 기록 |
-| 현재 milestone | **M1 진행 중** |
-| 현재 release 상태 | **LOCAL_VERIFIED — W03 로컬 검증 통과, 원격/운영 게이트 미완료** |
-| 현재 본 작업 | W06 로컬 계정 격리·승격·복원 검증 PASS / 실제 권한 환경 D01 대기 |
-| 다음 작업 | **W09 READY: 보드 미리보기·게시·방문자 화면 연결. W06~W08 실제 환경 gate 유지** |
-| 작업 repository/branch | `Newrred/anime-collector` / `master` |
-| 작업 HEAD / dirty 상태 | `3fb09a76b45e8ad8e3d0cc14fa6f4b5073a091fb` / 작업 전 status 266항목; 기존 변경 보존 |
-| 운영 SHA / 후보 SHA | 운영 미확인(build-info 404) / 후보 미고정; HEAD를 dirty 후보 버전으로 사용하지 않음 |
-| 테스트 DB/Storage/계정 | D01 대기 |
+| 현재 milestone | **M5 로컬 후보 점검까지 실행 — M1~M5 외부 게이트 유지** |
+| 현재 release 상태 | **BLOCKED_EXTERNAL — W16~W20 로컬 구현/검증/후보 점검 실행, 정식 출시 미완료** |
+| 현재 본 작업 | 테스트 환경 준비·기본 격리·DB 복원 증거 확보. 다음은 W07~W15 공개 사용자 흐름의 실제 서버 통합 검증 |
+| 다음 작업 | **격리 환경에서 게시→익명 열람→미니홈/팔로우→신고·차단→철회 흐름을 마감. 이미 통과한 DB 연결·기본 격리·복원은 변경/실패 근거 없이 반복하지 않음** |
+| 작업 repository/branch | `Newrred/anime-collector` / `review/pro-interim-2026-09-25` (Pro 중간 검토용) |
+| 작업 HEAD / dirty 상태 | 기준0330a54에서 누적 W09~W20 및 실제 환경 검증을 검토 브랜치 커밋으로 인계. 정확한 검토 SHA는 이 문서를 포함한 Git 커밋으로 식별 |
+| 운영 SHA / 후보 SHA | 읽기 전용 재확인 `0330a54`, source=vercel-git, **workingTreeDirty=true 원인 미확인** / 새 후보 미커밋; HEAD를 변경 후보 버전으로 사용하지 않음 |
+| 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`) 준비됨. 실제 A/B 로그인·기록 왕복·직접 REST/비공개 Storage33 PASS, 서버 연결·Storage 사본·전체 dump/5schema72테이블 로컬 복원 PASS. 공개 사용자 흐름/API/CDN 통합 검증 잔여. 환경·키 미제공 차단은 해소; Android는 이번 실행 제외 |
 | 완료 milestone | **1/6 — M0만** |
 | 기본 작업 완료 | **4/20 — W01/W02/W04/W05** |
 | 추가 필수 작업 | 0개 — 새 발견은 이 숫자로 별도 추적 |
 | release blocker | W03 외부 검증, W06~W20 및 D01~D06 미해소 |
-| 마지막 실제 작업 기록 | 2026-09-23 W06 / evidence/2026-09-23-w06-validation.json |
+| 마지막 실제 작업 기록 | 2026-09-25 hosted DB 백업·격리 복원 / evidence/2026-09-25-hosted-db-recovery.json |
 
 ## 고정 milestone 현황
+
+### 2026-09-25 Pro 중간 검토 Git 인계
+
+- 사용자 요청: Git 최신화·링크·검토 문서 정리. 운영 자동 배포를 유발하는 master 대신 `review/pro-interim-2026-09-25` 브랜치를 만들었다. 새 계획을 만들지 않고 [검토 안내](../reports/2026-09-25-pro-interim-review.md)에 읽기 순서/소스 지도/검증 범위/출시 잔여/Pro 질문을 모았으며 시작 문서의 진입 링크를 갱신했다.
+- 현재 소스 재검사: `npm run test:unit`320/320 PASS, `npm run build`18 pages/postbuild PASS. 전체 브라우저/SQL/원격 CI를 이번 인계에서 재실행했다고 하지 않는다. 과거 테스트는 해당 evidence의 당시 소스 범위로 구분했다.
+- stage120개 파일에 대해 로컬 실제 server key/DB URL/password 일치, secret key/접속문자열/private key/non-anon JWT 패턴 검사 발견0. staged diff check PASS. env·DB dump·로그·개인 이미지 미포함. 기존 Android 관련 소스 변경은 누적 개발본 보존을 위해 포함하지만 Android 추가 구현/검증은 하지 않았다.
+- 이번 변경은 검토용 commit/push만 허용하며 운영 DB/migration/Public/master merge/운영 배포는 수행하지 않는다. 브랜치 push 뒤 원격 SHA를 대조한다. 원격 Actions 실행은 별도 확인 없이는 PASS로 표시하지 않는다.
+
+### 2026-09-25 출시 잔여 범위 재정렬
+
+- 사용자 질문에 따라 Pro V2 실행 패키지·문서 검증·W목록·최신 증거를 대조했다. 문서 구조/25개 기존 지적 매핑 완료와 기능의 출시 완료는 구분한다. 4/20은 엄격한 작업 종료 판정이며 구현20%라는 의미가 아니다. 과거 W행의 환경 없음/미검증 설명은 당시 이력이며 위 최신 상태와 후속 증거를 우선한다.
+- 최근 작업이 테스트 인프라에 집중됐다. 이미 확보한 연결·A/B 기본 격리·백업 복원은 새 변경/실패가 없으면 반복하지 않는다. 테스트 DB 자체를 추가 개선하는 작업을 새 출시 선행조건으로 늘리지 않는다.
+- 남은 순서: (1) 실제 공개 보드/이미지/미니홈/팔로우·신고/차단/철회 통합 검증 및 발견 결함 수정, (2) 기존 원장 D03~D05의 최소 운영값·담당/정책·보존/비용/경보와 자료 인계 확정, (3) 최신 후보 회귀·보안 검토·Git/CI·빌드 provenance 및 운영 migration/rollback 준비, (4) 정확한 후보 D06 승인 후 Git 연동 배포·운영 smoke. Android는 사용자 지시대로 이번 실행에서 제외하며 영구 platform 축소/자동 통과로 해석하지 않는다.
+
+### 2026-09-25 D05 hosted 테스트 DB 백업 → 격리 PostgreSQL17 복원
+
+- 사용자 `ㄱㄱ`에 따라 기존 ExecPlan에 hosted 복원 범위를 먼저 추가했다. 기존 시작/확정 결정/QA/변경 통제/복구 인수인계와 local harness·restore script를 기준으로 진행했다. 공식 [PostgreSQL Ubuntu 도구](https://www.postgresql.org/download/linux/ubuntu/)와 [Supabase 백업·복원](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore)을 확인했다.
+- 공식 서명 apt 저장소에서 PostgreSQL17.11 server/client 및 libpq 패키지를 다운로드·추출해 WSL `/opt/moemoa-pg17`에 격리했다. 기존 PostgreSQL16/시스템 apt sources/앱 dependency/lockfile은 변경하지 않았다. 새 DB는 Unix socket 전용, TCP listener 없음, 완료 후 중지했다.
+- 원격은 테스트 ref `nmgkhknponvzcwliajyk`/Session pooler5432 guard 및 `default_transaction_read_only=on`으로 고정했다. 전체 custom pg_dump PASS: **708,697bytes**, SHA256 `d6af268a6b839a2f9782c04cf7b7775921a7be35aad4c971e8e137f61f8507c5`, source17.6/tool17.11. 실제 dump는 WSL `/var/lib/postgresql/moemoa-hosted-recovery-20260925/hosted.dump`에 mode600, 상위 folder700으로 보관. 테스트 Auth 데이터가 포함되므로 Git/일반 로그에 복사하지 않는다.
+- 격리 DB 복원 PASS: `public/private/auth/storage/supabase_migrations` **72개 테이블**의 건수·전체 행 digest가 원격과 일치. UTC 및 C 정렬을 고정하고 비교 전후 원격 데이터 불변 확인. 원문과 개별 digest는 출력하지 않았다. RLS enabled/forced, policy 정의, anon/authenticated/service_role 테이블 권한도 원본과 일치. 두 계정, COMPLETE_PRIVATE1/DELETED1, Storage metadata1 보존; 원격·복원본 Public flags 모두 closed.
+- 첫 로컬 복원은 schema 필터가 CREATE SCHEMA 항목을 포함하지 않아 실패했다. local 스키마를 먼저 준비한 후 전체 선택 schema 복원은 exit0. 첫 행 비교는 UTC/JST 표현 차이로16테이블 불일치였으며 시간대/정렬을 정규화한 최종72개 비교는 모두 일치했다. 데이터 수정으로 결과를 맞추지 않았다.
+- 한계: 전체 dump 확보와 **선택5schema 복원**을 구분한다. Supabase cron/vault/realtime 플랫폼 객체·Auth HTTP/Storage service·외부 OAuth 설정은 로컬에 재구성하지 않았다. 원래 DB owner는 local postgres로 매핑했다. Storage bytes는 앞선 별도60bytes 사본이며 DB dump에 포함된다고 하지 않는다. 운영 백업/PITR/보존·RPO/RTO·배포/CDN 검증은 여전히 남는다.
+- 변경: ExecPlan/이 원장/[복구 결과 JSON](evidence/2026-09-25-hosted-db-recovery.json), ignored 진단 scripts 및 WSL 격리 도구/사본. 앱 코드·원격 데이터·schema migration·공개 활성화·Android·commit/push/deploy 변경 없음. rollback은 local DB 중지와 도구 사용 중단이며 원격 자료를 되돌릴 작업은 없다. D05 부분 증거 추가이며 모든 W 완료/출시 승인으로 승격하지 않는다.
+
+### 2026-09-25 서버 연결·Storage 사본 확인
+
+- 사용자 입력 완료 후 `.env.moemoatest.server.local`의 값은 출력하지 않고 존재·대상 ref·포트·형식만 검사했다. `moemoa-test` ref 일치, Session pooler5432, secret key 형식 확인. env 및 `.cache` 사본은 gitignored다.
+- 실제 psql 연결 PASS: TLS require, PostgreSQL17.6/postgres 응답. 첫 inline Python 호출은 WSL 실행 구성 문제로 결과가 없어 성공으로 세지 않았고, 파일 기반 probe로 실제 연결 성공을 확인했다. 비밀번호는 프로세스 인자나 일반 로그로 출력하지 않았다.
+- 실제 서버 키로 private bucket의 기존 합성 `d01-probe.webp` 다운로드 PASS. 로컬 백업 사본60bytes와 재다운로드 SHA256이 기존 기준과 모두 일치하며 sharp 실제 decode16x16 PASS. Storage 복원/공개 이미지 전달/CDN 성공을 뜻하지 않는다.
+- 읽은 기준: AGENTS/시작 문서/확정 결정/PLANS/QA/변경 통제/기존 ExecPlan·복구 인수인계 및 Supabase·verify-before-claiming skill. 변경은 ExecPlan/이 원장/[결과 JSON](evidence/2026-09-25-server-connection.json)과 ignored 진단 파일/합성 사본뿐이다. 제품 코드·DB migration·운영/Public/배포 변경 없음, rollback은 진단 실행 중단이다.
+- 다음: hosted DB17에 맞는 dump 도구와 격리 복원 준비. 현 WSL에는 PostgreSQL16 도구만 있으므로 hosted 전체 dump/restore는 아직 실행하지 않았다. D01/D05 전체 완료 아님. Android 제외 유지. 키 재입력은 필요 없다.
+
+### 2026-09-25 D05 오래된 백업 복원 및 이미지 처리 로컬 재검증
+
+- Android 제외 지시 유지. ExecPlan D01 후속을 먼저 추가하고 restore-roundtrip/resource-contract 및 이미지 handler/backend/검사를 읽었다. Supabase 공식 백업 문서에서 DB 백업에 Storage 파일 bytes가 포함되지 않는 점을 확인했다: https://supabase.com/docs/guides/platform/backups .
+- 기존 최신 pg_dump→별도 DB pg_restore 검사에 오래된 백업 시나리오를 추가했다. 실제 로컬 PostgreSQL16에서 별도 recovery DB의 합성 게시물1개 노출 확인→dump→카드 retire→최신 fence CSV 추출→stale DB로 restore→삭제 전 노출이 재현되는 대조군 확인→공개 gate 닫기→최신 fence 중복2회 병합→reads만 열어도 카드0개→다시 닫기를 검증했다. hosted/운영 서버에는 적용하지 않았다.
+- 발견/수정: resource-contract의 전날 fixture가 서버 timezone current_date-1을 사용해 JST 자정~UTC 자정 사이에 UTC 오늘로 남는 테스트 오류. 제품 budget은 UTC를 사용하므로 fixture도 `(now() at time zone 'UTC')::date-1`로 수정했다. 제품 quota 동작/schema는 바꾸지 않았다.
+- 최종 전체 SQL harness PASS, 추가 stale 복원 검증 PASS. `.cache/d01-stale-restore.log`, WSL artifact `/tmp/moemoa-publication-test.LSOuuq`에 실제 dump/restore/journal 사본. 서버 격리는 Unix socket + listen_addresses=''이며 합성 데이터만 있다. `node --test tests/unit/publicImages.test.mjs` 14/14 PASS: 실제 sharp 바이트 변환/metadata 제거/실제 loopback HTTP, backend RPC/Storage는 모의이므로 hosted 이미지 처리 성공으로 세지 않는다.
+- 변경 파일: restore-roundtrip.sh, resource-contract.sql, ExecPlan/진행판. rollback은 추가 리허설만 되돌리며 운영 원본/삭제 이력에 영향 없다. 테스트 DB schema/운영/Public/의존성/배포 변경 없음.
+- 실제 hosted 전체 DB dump 및 서버 전용 이미지 backend 연결은 로컬 DB URL·service key가 없어 대기. 값은 읽거나 노출하지 않았고 존재하는 env의 해당 키 유무만 확인했다. 무시되는 `.env.moemoatest.server.local`에 빈 입력란을 준비했다. 필요한 값은 moemoa-test Session pooler DB URL과 서버 전용 service_role/secret key이며 운영 값 사용 금지. 아직 공개 이미지 활성화나 D05 완료 판정은 하지 않는다.
+
+### 2026-09-25 D01 실제 API·Storage 검사 — Android 제외
+
+- 사용자 범위: 나머지 진행, Android 제외. 기존 ExecPlan D01에 실행 계획을 추가하고 Supabase/검증 skill과 실제 source/migration을 확인했다. 공식 changelog 및 Storage access-control 문서 확인. 대상 test ref 고정, 운영/정책/공개 권한 변경 없음.
+- 방법: 무시되는 `.cache` loopback HTML/JS에서 기존 실제 Google A/B 세션으로 정상 Supabase client를 사용했다. 토큰은 메모리에서 API Authorization에만 사용하고 화면/로그/파일에 내보내지 않았다. 익명 검사는 publishable key만 사용했다. MCP SET ROLE 우회/권한 확대 없음.
+- 실제 결과 **33/33 PASS**: A12/B12/anon9. 본인 카드 조회200, 상대 UUID 조회200/빈 배열, 무필터 조회도 본인1개만, 상대 직접 PATCH403·직접 INSERT403(anon401), 실제 private 스키마 접근406. 실제 JWT/HTTP 검증으로 이전 앱 UI 격리 근거를 보강한다. 모든 RPC 조합의 완전한 공격 감사는 아니다.
+- Storage: 직접 생성한 단색16x16 WebP60 bytes를 관리자 대시보드로 test private bucket에 업로드하고 미리보기 색상 렌더를 확인했다. SQL로 파일 실존·크기·MIME 확인. A/B/anon 모두 목록빈배열·서명 URL 발급거부·public/authenticated 다운로드거부·업로드 및 덮어쓰기거부(HTTP400/body statusCode403). 누락 파일의404를 접근차단으로 잘못 판단하지 않도록 fixture 존재 확인 후 최종 재검사했다. 최초 schema 검사 이름 오류를 실제 private 스키마로 정정하고 최종33회 모두 재검사했다.
+- 무결성: 실패한 쓰기 뒤 저장소 파일1개/60bytes, A카드DELETED/version4·B카드COMPLETE_PRIVATE/version2 유지. 개인 사용자 이미지/운영 데이터 사용 없음. 재검증용 합성 fixture는 비공개에 보존한다. source/결과/파일 해시는 [실제 HTTP 검증 증거](evidence/2026-09-25-hosted-api-storage.json)에 기록.
+- Security Advisor ERROR0. INFO18(private RLS/no policies), WARN anon definer2/authenticated definer35 및 leaked-password protection1. 의도된 RPC 진입점 경고는 기존 설계와 연결되지만 전부 무해 판정하지 않는다. [RPC 경고 설명](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), [비밀번호 보호 설명](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Google 로그인 경로 검사와 이메일/비밀번호 보안 설정 검사는 별개다.
+- reads/writes/images/minihomes=false, policy UNAPPROVED 재확인. 공개 이미지 변환·게시·철회 전달/CDN·실제 백업복구는 미검증으로 유지. Android는 이번 작업 대상 제외이지 출시 gate 자동 통과가 아니다.
+- 변경: ExecPlan/진행판/증거 JSON, 임시 진단 도구만. 앱 제품 코드/DB schema/의존성/commit/push/deploy 없음. 진단 HTML은 완료 후 제거하고 탭을 닫는다. rollback은 테스트 실행 중단이며 운영 원본 변경 없음. D01 전체 완료/모든 W 완료로 승격하지 않는다.
+
+### 2026-09-24 D01 두 실제 Google 계정 격리 및 삭제 검증
+
+- 사용자가 승인한 B Google 계정의 직접 인증 완료 후 앱에서 B 이메일 및 동기화 성공을 확인했다. hosted 집계는 auth.users=2, Google identities=2, user_devices=3. 비밀번호/토큰을 읽거나 저장하지 않았다.
+- A 합성 카드 `4bbeab73-58ee-4458-b9d0-a1c0d7b06b34`는 B 로그인·동기화 후 보이지 않았고 직접 상세 URL도 Card not found. B에서 합성 SYSTEM_DESIGN 카드 `4b44bc17-e417-4ea8-96ba-588cd392e5c7`를 작성·동기화했다. DB에서 cards=2/distinct owners=2 확인. A로 동기화 후 B 상세 URL 역시 Card not found. 이는 실제 OAuth/앱 동기화/로컬 owner 경계 증거이며 공격자가 임의 REST 필터를 만드는 검사는 아니다.
+- 추가 hosted 역할 검사 시 관리 MCP 연결이 SET ROLE authenticated를 거부했다. 권한을 확대하거나 우회하지 않았으며 해당 검사 PASS로 세지 않는다. 실제 사용자 JWT의 공격 REST/Storage 검증은 잔여다.
+- A 합성 카드의 앱 삭제·동기화 성공: hosted status DELETED, tombstone=true, version4. B 카드는 COMPLETE_PRIVATE/tombstone=false/version2로 보존. 삭제한 데이터는 이번 테스트에서 생성한 합성 카드이며 실제 사용자 기록/이미지는 대상이 아니다.
+- B→A 재로그인에서 계정 선택 화면과 정상 callback 복귀 확인. 복원 origin은 재로그인 직후 이미 Memory 0개여서, 뒤의 재동기화는 삭제 카드 비부활 검사로 한정한다(캐시된 카드 제거 전파 증거로 과장하지 않음).
+- 재동기화 완료 후 실제 Archive의 No cards saved yet를 확인했다. A 삭제 카드가 복원되지 않았고 B 카드도 A 목록에 유입되지 않았다.
+- 앱 코드 추가 수정/운영 migration/배포/Public 활성화 없음. D01은 부분 검증이며 실제 공격 REST·Storage/Android·기존 사본 삭제 전파 및 D02~D06은 남아 있다.
+
+### 2026-09-24 D01 실제 기록 복원 오류 수정 및 왕복 검증
+
+- 기준: AGENTS/기존 시작·확정 결정·아키텍처·QA 문서 및 ExecPlan D01 상세. 실제 테스트만 승인된 범위이며 prod schema/배포/Public 변경 없음.
+- 실제 흐름: 테스트 앱 127.0.0.1에서 합성 SYSTEM_DESIGN 카드 생성→Sync now→hosted memory_cards 1개 확인. 정확한 localhost callback을 추가하고 별도 origin의 빈 저장소(0개)에서 같은 Google 계정 로그인→동기화했다. 개인 사진/운영 자료는 사용하지 않았다.
+- 발견: sync_changes가 PRIVATE_TITLE seq1, CARD seq2, VISUAL seq3, CARD seq4인 경우 pull의 최신 엔티티 압축으로 visual이 card보다 먼저 저장됐다. 카드의 visualAssetId가 null로 남아 Archive에서 IndexedDB DataError가 발생했다. 동기화 성공 문구만으로 복원 성공이라 판단하지 않았다.
+- 수정: memorySyncStore가 카드 수신 시 기존 owner_state 인덱스의 같은 owner/current visual을 연결한다. IndexedDbMemoryRepository는 과거 누락 연결을 조회 transaction에서 복구해 읽기와 후속 수정 모두 가능하게 한다. owner 경계와 원본 bytes 유지, DB 버전/schema 변경 없음. 임시 진단 로그는 제거했다.
+- 실제 검증: 복원 측 Archive 1개·동일 card UUID `4bbeab73-58ee-4458-b9d0-a1c0d7b06b34`·합성 제목/감상/시스템 디자인 확인. 복원 측 감상 수정→hosted version3/update_matches=true→원래 origin Sync now→변경 감상 표시까지 확인했다. 서로 다른 실제 기기가 아니라 같은 PC의 origin별 별도 저장소임을 구분한다.
+- 자동 검증: IndexedDB Chromium 8/8(신규 순서 역전/과거 연결 복구/후속 수정), account/owner Chromium 9/9, 동기화 계약·엔진·runtime unit37/37 PASS. 최초 인덱스 선택 실수는 테스트 실패로 확인 후 기존 owner_state 사용으로 수정했다. 계정 합성 테스트를 hosted 모드에서 실행한 첫 시도는 fixture 실패(1 pass/1 fail); 합성 전용 별도 4322 서버에서 최종9 PASS. 운영 통과 근거로 사용하지 않는다.
+- 웹 Google 로그인은 이전 계정 자동 선택을 피하도록 select_account prompt만 추가했다. 실제 Google 계정 선택 화면 확인. 사용자가 승인한 B 계정 로그인은 비밀번호 화면까지 준비했으며 직접 인증 대기. B/anon 실 JWT·REST 공격 검증 및 삭제 전파는 아직 완료 아님.
+- 변경 파일: 위 adapter 2개, authRepo, memory-indexeddb.spec.ts, ExecPlan/진행판. rollback은 이 수정만 되돌리고 원본·서버 기록은 보존. 마이그레이션/의존성/commit/push 없음. 남은 D01 및 D02~D06 gate 유지.
+
+### 2026-09-24 D01 실제 Google 로그인 첫 계정 검증
+
+- 사용자가 생성·활성화한 테스트 Google OAuth client를 사용. 본서버 Google client 수정 없음. 테스트 Auth settings HTTP 응답 googleEnabled=true 확인.
+- 테스트 Supabase Site URL을 `http://127.0.0.1:4321`, 허용 redirect를 정확히 `http://127.0.0.1:4321/auth/callback/`로 설정하고 저장된 UI 확인. 와일드카드/운영 callback 추가 없음.
+- Windows npm 인자 전달 과정에서 `npm run dev -- --mode moemoatest ...`의 옵션이 유실됨을 발견. 해당 프로세스를 중단하고 `node node_modules/astro/astro.js dev --mode moemoatest --host 127.0.0.1 --port 4321`로 시작. 앞으로 이 PC에서는 이 직접 명령 사용.
+- 실제 테스트 앱 `/data/`의 Continue with Google → callback → `/data/` 복귀 → Signed in 확인. Sync now 실행 후 Metadata sync is complete 확인. 빈 계정 동기화이며 기록의 업로드/복원 검증은 아님.
+- 대상 test ref에 읽기 전용 집계 SQL로 auth.users=1, Google identities=1, user_profiles=1, user_devices=1 확인. 비밀번호/토큰/원본 개인 데이터는 증거에 기록하지 않음.
+- D01은 부분 진전: 두 번째 실제 Google 사용자, A/B 데이터 격리, 기록 생성·수정·삭제·재동기화, 실제 Storage/Android 검증은 여전히 대기. 공개 기능과 운영 DB 변경 없음. 테스트 앱은 다음 검증을 위해 loopback 4321에서 실행 중.
+
+### 2026-09-24 D01 테스트 DB 초기화 실제 결과
+
+- Supabase 플러그인 연결 후 `moemoa-test` ref/조직/ACTIVE_HEALTHY 및 public tables=0, migration history=0을 확인하고 저장소 migration 17개를 이 테스트 프로젝트에만 적용했다. 이전 ExecPlan D01 상세 범위이며 운영 project 쓰기 없음.
+- 11번째 적용에서 MCP의 초 단위 version 중복으로 transaction 실패. history와 public asset table/bucket 미존재로 rollback을 확인한 뒤 순차 재실행하여 17개 완료. MCP 생성 version은 원본 파일 timestamp와 다르므로 [bootstrap 증거](evidence/2026-09-24-hosted-test-bootstrap.json)의 원본 이름·SHA256·remote version 매핑을 유지한다. 이후 CLI db push 전 이력을 정렬해야 하며 자동 재적용하지 않는다.
+- 실제 SQL 검사: public 테이블18개, RLS 미설정0, anon/authenticated private schema USAGE=false, 공개 읽기/쓰기/이미지/미니홈/팔로우/신고 모두 false, policy UNAPPROVED, Auth 사용자0. catalog bucket은 승인 표지용 public(empty), memory derivatives bucket은 private. 기존 migration의 30일 tombstone 정리 cron이 테스트에 생성됨.
+- 실제 HTTP 검사5개 통과: 빈 catalog read200, 비회원 memory_cards 조회401, 닫힌 보드/미니홈 RPC 각각200/null, Auth settings200·Google=false. `.cache/check-hosted-test.mjs`와 `.cache/hosted-test-http-results.json`은 로컬 검사 자료다. 실제 로그인·A/B 격리·Storage 파일 전달 검증을 대체하지 않는다.
+- Security advisor: ERROR0, INFO18(private tables deny-by-default RLS), WARN37(anon2/authenticated35 SECURITY DEFINER callable) 확인. 기존 의도된 제한 RPC이지만 이번 결과를 보안 감사 전체 통과라고 선언하지 않는다. 실제 역할별 인가 검증은 잔여. [익명 RPC 점검](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [인증 RPC 점검](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+- 로컬 `.env.moemoatest.local` 생성: account/catalog 모두 테스트 URL + publishable key 사용, account sync on, Public UI flags off. git ignore 확인. 사용 명령 `npm run dev -- --mode moemoatest`; 기존 운영 env/link/배포를 덮어쓰지 않음. 아직 이 설정의 앱 실행 검증은 하지 않음.
+- 변경: 진행판/증거/무시되는 테스트 env·HTTP 검사 파일. 의존성 추가 없음. migrations 원문 변경 없음. rollback은 테스트 앱 중단 및 closed flags 유지; hosted reset/drop/운영 데이터 복제 없음. 잔여: Google OAuth client 설정·허용 callback·A/B 실계정·빈 테스트 카탈로그의 합성 fixture·Storage/Android 검증. D01 및 출시 gate 유지.
+
+### 2026-09-24 Supabase 조직 이전 및 테스트 프로젝트 생성
+
+- 사용자 승인: 기존 MOEMOA 본서버를 새 계정의 MOEMOA 조직으로 이전하고 같은 조직에 테스트 서버를 분리. 기존 `tteumsae` 유지. 실제 이전 버튼 실행 직전 승인 및 사용자 직접 DB 비밀번호 설정·생성 완료.
+- 확인한 자료: AGENTS, CODEX_START_HERE, 확정 결정, PLANS, V2 ExecPlan/진행판, 아키텍처/변경 보고 규칙, Supabase 공식 project-transfer/billing/access-control 문서, 실제 대시보드와 운영 웹.
+- 운영 project `okchpyagfucpzpyrfgol` (`moemoa-preview`)를 Newrred 조직에서 MOEMOA 조직 `jdomtzpoqpyfinazdnpi`로 이전 완료. ID·Singapore 리전 유지, 새 계정 Owner/기존 계정 Developer 확인. 기존 조직에는 `tteumsae`만 남음. 복사본이 아니므로 삭제할 이전 MOEMOA 프로젝트는 없음.
+- 실제 검증: `https://www.moemoa.xyz/`에서 프리렌 검색→작품 상세의 28화/스튜디오/장르 표시→표지 naturalWidth=460, complete=true, 원본 host `okchpyagfucpzpyrfgol.supabase.co` 확인. HTTP 200만으로 DB 연결 완료를 주장하지 않음. 로그인·계정 sync·쓰기/삭제는 미검증.
+- 테스트 project `nmgkhknponvzcwliajyk` (`moemoa-test`) 생성 확인: Healthy, NANO, Singapore, No migrations, No repository connected. 생성 양식에서 Data API on, Automatically expose new tables off 확인. 비밀번호는 사용자 직접 생성·제출; 수집/기록하지 않음.
+- 변경 파일: 이 진행판과 기존 ExecPlan의 D01 후속 계획만 갱신. 앱 환경값·운영 DB schema·Public flags·Git 배포 변경 없음. 생산 데이터 복제/삭제 없음.
+- 연결 차단: 로컬 `supabase projects list --output json`은 Access token not provided로 실패. Supabase 플러그인 설치/연결 안내를 제공했으나 아직 연결 확인 전. 테스트 DB schema 적용은 실행하지 않음.
+- 후속/복구: 아래 ExecPlan D01 상세에 따라 테스트 project ref를 명시하고 migrations/권한/Auth/Storage 검증. 운영 재이전은 기존 계정의 현재 Developer 권한으로 불가하므로 새 조직 Owner의 명시 승인과 접근 확인이 필요. D01 및 출시 gate 유지. 이전 증거 JSON의 문서 hash는 당시 snapshot이며 이 기록 이후 최신 문서 hash로 간주하지 않음.
 
 | 단계 | 사용자에게 보이는 완료 결과 | 상태 | 남은 완료 조건 | 증거 |
 |---|---|---|---|---|
 | M0 | 현재 위치·범위·다음 작업이 명확함 | DONE | 없음; 미검증 항목은 담당 W로 연결 | 아래 기준점·25개 매핑·결정 로그 |
 | M1 | 기록·계정·복원을 신뢰할 수 있음 | DOING | W03 원격 gate + W06 계정/복원 실검증 | W03 로컬 246 unit/253 catalog/15 E2E/build |
 | M2 | 선택 보드를 타인이 보고 철회할 수 있음 | DOING | W07~W10 계약 | 없음 |
-| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | TODO | W11~W13 계약 | 없음 |
-| M4 | 운영자가 조치·제한·갱신·복구함 | TODO | W14~W17 계약 | 없음 |
-| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | TODO | W18~W20 및 승인/운영 확인 | 없음 |
+| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | DOING | W11~W13 실제 환경/OAuth/기기 계약 | W11~W13 로컬 증거 |
+| M4 | 운영자가 조치·제한·갱신·복구함 | DOING | W14~W15 실제 환경/정책 + W16~W17 계약 | W14~W15 로컬 증거 |
+| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | DOING | W18~W20 실제 역할·기기·후보 CI/승인/운영 | 로컬 전체 검사·APK·후보 guard; RC_VERIFIED 아님 |
 
 한 M의 일부 W가 완료되어도 M전체를 DONE으로 바꾸지 않는다. 다음 단계의 독립 작업을 먼저 끝내도 현재 막힌 계약을 숨기지 않는다. M5는 `RC_VERIFIED → READY_FOR_DEPLOY → LIVE_VERIFIED`를 구분한다.
 
@@ -50,24 +152,24 @@
 |---|---|---|---|---|---|---|
 | W01 | M0 | 현재 소스·환경·노출 기능 기준점 | C01,C11 | 없음 | DONE | M0 완료 로그·기준점 참조 |
 | W02 | M0 | 출시 결정 반영·이전 지적 정리 | C01–C12 | W01 | DONE | M0 완료 로그·기준점 참조 |
-| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 로컬 검증 PASS; 실제 Actions/필수 check/경보 수신 및 운영 추적은 미완료(D03,D06) |
+| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 기존0330a54 Actions quality/최근 health·freshness 성공 확인. 새 후보 checks/보호 규칙·경보 수신 및 운영 dirty 표시 원인 D03/D06 대기 |
 | W04 | M1 | 기존 기록의 취소·저장·복귀 마감 | C01,C11 | W02 | DONE | 제목/보드 dirty·QuickLog 닫기·저장 실패/경합·출발점/필터/스크롤 복귀 검증; 종료 기록 참조 |
 | W05 | M1 | 계정 동기화 완료·재개 계약 | C02 | W03 로컬 검증 | DONE | 로컬 sync 계약 구현·unit269/browser26/build PASS; 실제 A/B·기기 및 서버 한도는 W06/W15/W19 |
 | W06 | M1 | 계정 격리·승격·지원 백업 실검증 | C01,C02,C10 | W04, W05 | BLOCKED_EXTERNAL | 로컬 unit278/browser36/build PASS; 사용자 확인: 격리 Supabase/A·B 계정 없음. 실제 REST/RPC/Storage 격리 미검증 |
 | W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | BLOCKED_EXTERNAL | 공개 서버 기반 로컬 PostgreSQL 계약45+동시성1 PASS; 실제 Supabase/PostgREST/Storage는 D01 미준비 |
 | W08 | M2 | 선택한 이미지의 공개 준비·전달 | C04 | W07 로컬 검증 | BLOCKED_EXTERNAL | 이미지 준비·전달 로컬 SQL31/HTTP·변환13 PASS. 실제 Storage/Vercel/Android는 미검증 |
-| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | READY | W07~W08 기반을 기존 UI에 연결; 실제 공개 검증 D01 유지 |
-| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 | TODO | 미실행 |
-| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 | TODO | 미실행 |
-| W12 | M3 | 팔로우·해제·내 목록 | C07 | W07 | TODO | 미실행 |
-| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 | TODO | 미실행 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 | TODO | 미실행 |
-| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12 | TODO | 미실행 |
-| W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 | TODO | 미실행 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 | TODO | 미실행 |
-| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 | TODO | 미실행 |
-| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 | TODO | 미실행 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | TODO | 미실행 |
+| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | BLOCKED_EXTERNAL | 선택→서버 DTO→게시→익명 방문→보드 철회 UI, unit306/Chromium11/build16 PASS; 실제 Auth/Storage/Vercel/Android는 D01 등 유지 |
+| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | BLOCKED_EXTERNAL | unit310/Chromium25/build16/SQL88+동시성6 PASS; D01/D05 실제 전달·복원 검증 대기 |
+| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | BLOCKED_EXTERNAL | unit315/Chromium18/build18/SQL 미니홈27 PASS; D01 실제 Auth/Storage/Android 게이트 유지 |
+| W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | BLOCKED_EXTERNAL | unit315/Chromium20/build18/SQL 관계22+동시성1 PASS. 실제 Supabase/OAuth/Android는 D01/W19 |
+| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | BLOCKED_EXTERNAL | unit317/Chromium29/build18/Android dist routes18 PASS, 실제 OAuth/Android D01/W19 대기; 아래 결과 참조 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | BLOCKED_EXTERNAL | unit317/Chromium24/build18/SQL 신고·조치34+동시성2 PASS. 실제 담당자/통지/보존/Storage D01/D04/D05 대기 |
+| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | BLOCKED_EXTERNAL | unit318/SQL218(새35+경합3) PASS; 실제 예산·ingress/WAF/경보 D03, 삭제 fence/ledger 보존 D05, hosted 역할 D01 대기 |
+| W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog256 PASS/Windows skip2; SQL 전환14+경합1. 실제 canonical/Storage 후보·게시/복구 D01/D05/D06 대기 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | BLOCKED_EXTERNAL | 현재 합성 DB dump/restore·안전 이력 대조/닫힌 복구2 PASS; 실제 파일 사본·최신 철회 journal·담당자/정책 D04/D05 대기 |
+| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | BLOCKED_EXTERNAL | 18 route/action 지도, unit320/Chromium174 PASS·3 명시 skip. 실제 기기/사람 검증 및 출시 gate 유지 |
+| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | BLOCKED_EXTERNAL | SDK36 준비·native31 PASS·최신 debug APK/packaged18경로 PASS. 실제 연결 기기0·Google/hosted A/B 없음 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | BLOCKED_EXTERNAL | build18·증거 hash/설정/rollback 인계, candidate guard의 거부 확인. 새 후보 commit/CI·D01~D06·운영 dirty 표시 원인 미해소 |
 
 ### 작업 수의 변화와 진행률
 
@@ -76,16 +178,74 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-ID / M: W09 / M2 — READY (2026-09-23)
-사용자 결과: 보드에서 선택 공개 미리보기→게시→방문자 읽기를 연결.
-선행: W07~W08 로컬 DB76/동시성2/unit296/build15 PASS. 실제 Supabase/Storage/Vercel는 D01 없어 BLOCKED_EXTERNAL.
-범위: C03/C04의 선택 화면·실제 DTO와 동일한 preview·실패/취소·방문자 표지/디자인/이미지 전달. 기존 갤러리/Board 컴포넌트 재사용.
-제한: 운영 Public flag/DB/배포 활성화 없음. 사용자 이미지 권리 self-claim으로 서버 승인 대체 금지. Android 원본 읽기 adapter 연결 및 실단말 검증은 W19에서 별도 증거 필요.
+ID / M: W20 / M5 — BLOCKED_EXTERNAL (2026-09-24)
+사용자 결과: 가능한 로컬 작업과 검증을 W20 점검까지 연결하고, 출시 미완료 조건을 정확히 인계한다.
+완료 근거: unit320/catalog256+skip2/Chromium174+skip3/SQL235/build18/native31/packaged routes18, debug APK.
+다음 입력: 격리 hosted 환경과 실제 계정·기기, D03~D05 예산/정책/사본, 정확한 후보 D06 승인.
+추가 확인: 운영 build-info의 workingTreeDirty=true 원인. source SHA 일치만으로 clean release를 주장하지 않는다.
+제한: 운영 자료·DB·배포·Public 변경 없음. 미커밋 로컬 자료이며 모든 W DONE/RC_VERIFIED 아님.
 ```
 
 완료한 상세 기록은 같은 파일의 완료 로그에 짧게 남기고 긴 테스트 출력은 기존 artifacts 디렉터리의 파일을 참조한다. 이 카드를 '단계 속 단계'로 세분화하지 않는다.
 
 ## 검증 기록 방식
+
+### 2026-09-24 W16~W20 연속 실행 기록
+
+- 사용자 승인/범위: W 단계 종료까지 멈추지 않고 진행하라는 지시에 따라 단계별 확인 요청 없이 로컬 작업을 연결했다. 운영/Public 활성화나 D01~D06을 임의 승인한 뜻으로 해석하지 않았다. 기존 W09~W15 변경을 보존했다.
+- 읽은 기준/계획: AGENTS/PLANS·시작 문서·확정 결정, V2 C10~C12/Q01~Q24, catalog/QA 운영 명세, 기존 최소 운영/DB activation/preview uploader, 복구·브라우저/native 검사 및 이전 React Doctor 진단. ExecPlan의 W16~W20 상세와 발견 기록에 파일 지도·검증·rollback을 먼저 기록했다.
+- W16 구현: `20260924121214_catalog_release_transitions.sql`의 checked activation은 predecessor 비교·전역 직렬화·빈/불완전/잘못 연결된 후보 거부·같은 성공 재시도·RETIRED 복구를 제공한다. 기존 2인자 RPC 호환은 유지하되 신규 uploader는 checked RPC를 사용한다. 재개 upload는 ACTIVE를 STAGING으로 덮어쓰지 않고 같은 ID의 hash/건수 충돌을 거부한다. 기존 표지 객체 충돌 시 길이뿐 아니라 bounded GET의 SHA256을 검증한다. 신규 수집/원격 upload 없음.
+- W16 검증: catalog **256 PASS, 2 Windows symlink skip**, SQL catalog **14 assertion+동시성1 PASS**. A→B→A, 같은 요청 재시도, 후보 실패 시 ACTIVE 유지, 익명/일반 계정 거부, season ID 분리·immutable cover revision/모든 release 행 보존, 경쟁 게시 충돌을 확인했다. HTTP 응답 모형으로 ACTIVE/RETIRED 재개 보존·hash/건수 실패·기존 표지의 동일 길이 손상/초과를 검사했다. 실제 Storage bytes/catalog 전체 후보는 D01/D05/D06 미검증이다.
+- W17 검증/운영: 현재 합성 PostgreSQL을 pg_dump→별도 DB pg_restore하고 Memory/Board 관계·cover revision·delete fence·public card control·제재/신고/감사 행을 비공개 hash 비교했다. 복원된 설정의 Public 읽기/쓰기를 닫는 검사까지 **2 PASS**, 전체 SQL **235 PASS**. 이는 현재 snapshot 리허설이며 오래된 백업 뒤 철회나 Storage 파일 본문 복원을 입증하지 않는다. 기존 Help 연락처만 확인했고 실제 책임자/응답시간/정책을 새로 확정하지 않았다. 일반 공개 전 상태·명시 보드 선택을 도움말에 반영했다.
+- W18 소스/검사: [18개 route/action 지도와 정적 진단 분류](../reports/2026-09-24-release-surface-audit.md). Library 캐릭터 선택 updater의 다른 state 변경과 null 대표 처리, 모달/이탈 ref의 render 중 갱신을 수정했다. 과거 UI/주소/권리 단계/시청 기록 영역 기대를 현재 계약으로 정정했다. image picker의 실제 pending 이탈 차단과 취소 실패 정리 재시도를 검증한다. Playwright가 Node suite를 수집하지 않도록 설정했고 서버 준비 요청에 제한 시간을 적용했다. unit **320 PASS**. 전체 브라우저 최종 결과는 아래 evidence에 남긴다.
+- W18 최종 결과: Chromium 전체 **174 PASS / 3 SKIP / 실패0**, `.cache/w18-browser-confirmed.log`. skip은 외부 AniList/Wikidata live 시나리오2개와 별도 isolated runner 전용1개다. 첫 전체 실행165 PASS/8 FAIL/3 SKIP, 수정 후173 PASS/1 FAIL/3 SKIP, 남은 storage-hydration 기대 수정 후 해당 suite8 PASS 및 전체174 PASS 순서다. 중간 실패를 삭제하거나 최종 성공으로 바꿔 기록하지 않았다. 도움말320px/작성1440px 캡처를 직접 열어 확인했다. React Doctor는 재실행 점수를 만들지 않고 기존 진단의 소스를 분류했다.
+- W19 최종 결과: 기존 JDK21에 Android platform36/build-tools36 설치, 연결된 `adb devices`는 0대. 웹 build/postbuild **18 pages PASS**, Capacitor sync 후 **실제 packaged 경로18 PASS**, `gradlew testDebugUnitTest assembleDebug` **성공/native31 failures0**. 마지막 APK는 `android/app/build/outputs/apk/debug/app-debug.apk`이며 local/dirty build-info를 포함하는 테스트용이다. 새 UI 수정 이후 다시 웹 빌드·패키징·APK를 만들었다. 자동 생성 assets/Gradle output은 android/.gitignore로 제외했다. 실제 사진/공유/키보드/OAuth/기기 검증 아님.
+- W20 최종 결과: `check-release-candidate.mjs`의 잘못된 SHA·dirty tree·실패/미설명 skip·변조/누락 증거·외부 gate 거부 단위검사를 추가했다. [후보 점검 JSON](evidence/2026-09-24-w20-candidate.json)은 로컬 PASS를 아직 commit에 결속하지 않아 sourceCommit=null, D01~D06 PENDING, catalog hash=null로 기록하며 실행 결과 ready=false/exit2를 확인했다. 로컬 guard는 GitHub/Vercel 보호 설정을 대신하지 않는다. client bundle 제한 패턴 scan/diff 검사 PASS. 후보·설정·로그·APK 및 source hash는 [연속 검증 증거](evidence/2026-09-24-w16-w20-validation.json)에 기록한다.
+- 읽기 전용 원격 확인: [기존0330a54 Service quality](https://github.com/Newrred/anime-collector/actions/runs/35886372539) 성공, [최근 catalog health](https://github.com/Newrred/anime-collector/actions/runs/35942737379)와 freshness 성공/최근11.1시간 확인. 운영 build-info commit=0330a54/source=vercel-git이나 **workingTreeDirty=true**다. 원인을 확인할 Vercel 빌드 내역 없이 정상 생성물/소스 변조 중 하나로 단정하지 않는다. 이번 소스의 원격 CI/배포 증거가 아니며 운영 설정은 수정하지 않았다.
+- 보안/관측/rollback: migration은 격리 DB에만 적용, source/Storage/동의/철회/제재 이력 삭제0, private 로그 추가0, 앱 의존성 변경0. SQL 전환 장애는 이전 catalog를 checked RPC로 복구하며 표지 revision/자료를 삭제하지 않는다. 코드 rollback도 안전 이력을 역삭제하지 않는다. [복구·후보 운영 인계](../operations/2026-09-24-recovery-and-release-handoff.md) 참조.
+- 남은 게이트: 실계정/기기/Storage/CDN, 실제 bytes/canonical 사본과 최신 철회 journal, 수치 예산/WAF/경보, 정책/담당자, 깨끗한 후보 SHA와 CI/승인 배포. 테스트용 모델을 실환경 성공으로 올리지 않는다. W16/W17/W19는 BLOCKED_EXTERNAL이며 운영 적용 없음.
+
+### 2026-09-24 W15 로컬 실행 결과
+
+- 읽은 기준: AGENTS·시작 문서·확정 결정·V2 C09·ExecPlan, 기존 sync/publication/image/moderation SQL·gateway·이미지 HTTP·SQL harness, 과거 `docs/deploy/supabase-social.sql`/`supabase-showcase.sql`. 구현 전 ExecPlan W15 상세와 발견 사항을 기록했다.
+- 계획/가정: 승인되지 않은 상품 숫자를 정하지 않고 disabled 정책을 추가했다. 성공한 저장 변경량과 이미지 변환/전달 예약을 계수한다. 실패한 모든 ingress 요청의 rate limiter가 아니며, 정상 삭제를 차단하지 않는다. 삭제 fence/retained ledger 보존·압축 및 WAF·비용 경보는 D03/D05 미완료다.
+- 소스 변경: additive migration의 private 정책/사용량/만료 override와 실제 행 trigger, 자기 사용량/운영 집계 RPC, 이미지 handler의 변환 전/Storage 읽기 전 RPC와 안전한 429 매핑, HTTP·SQL 권한/동시성 검사. 알려진 legacy social/showcase 직접 권한을 존재할 때만 회수하고 행을 보존한다. 진행 중 공개 쓰기와 사건 제재를 계정 잠금으로 직렬화한다.
+- DB/복구: `20260924115258_memory_resource_controls.sql`은 격리 PostgreSQL에만 적용했다. 운영 절차의 `enabled=false,paused=false`로 예산을 해제할 수 있다. 삭제 fence·자료·동의·신고/감사 이력과 legacy 행은 삭제하지 않는다. 새 이미지 서버는 새 RPC migration과 같은 후보로 배포해야 한다. 신규 의존성 없음.
+- 검증: Node24.19.0/npm11.17.0 unit **318 PASS**. 실제 로컬 Chromium + 합성 Auth/RPC로 publication/release-sync/account-sync/service-worker **30 PASS**. PG16.15 실제 역할·합성 Auth/Storage schema SQL **218 PASS**(새 자원 계약35, 별도 연결 동시성3 포함). 예산초과 시 저장 rollback, replay, 삭제/철회 예외, override 만료, 다른 계정/익명/서비스 경계, UTC 전환, 일일·용량 경쟁 및 제재와 진행 중 게시 경쟁을 확인했다. HTTP 검사에서 초과한 이미지 시도는 변환/쓰기 전에, 전달은 Storage 읽기 전에 막힌다.
+- 빌드/실패 기록: `npm run build` **18 pages PASS**, `verifyAndroidStaticRoutes()` **dist 경로18 PASS**, client bundle 제한 패턴 scan와 `git diff --check` PASS. 기본 Android route 명령은 패키징 assets가 없어 실패했으며 APK/실기기 통과로 바꾸지 않았다. 브라우저 초기 실행은 서버 readiness 실패2회 및 첫 화면 5초 로딩 실패1회였다. 직접 시작한 개발 서버가 준비된 뒤 동일 30개 suite를 변경 없이 재실행해 통과했다. 초기 환경 시간초과 원인을 완전히 해소했다고 주장하지 않는다. 개발 서버를 종료한 뒤 최종 build를 실행했다. 기존 정적 분석 미해결은 이번에 재검사/해소하지 않았다.
+- 보안/관측: 일반 사용자의 정책 변경·타인 usage 조회·직접 테이블 우회와 익명 집계 접근을 막는다. 집계에 private 본문/검색어/원본 bytes를 추가하지 않는다. image 전달 bytes는 최대 2MiB 예약량이며 실제 청구량이 아니다. 익명 페이지/catalog 요청 빈도·기존 표지 전달, 삭제 fence/retained ledger 성장은 별도 운영 통제가 필요하다. 운영 원격 객체/미등록 RPC 감사, 실제 한도/경보 담당자, Google·Storage·Android는 미검증이다.
+- 상태/다음: OWNER_APPROVED는 로컬 작업 진행에 한정. W15 **BLOCKED_EXTERNAL**, W16 로컬 후보·복구 루프 **READY**. 미커밋·미배포·Public 비활성 유지. [운영 절차](../operations/2026-09-24-resource-controls.md), [source/artifact SHA256 증거](evidence/2026-09-24-w15-validation.json) 참조.
+
+### 2026-09-24 W14 로컬 실행 결과
+
+- 읽은 기준/소스: AGENTS·시작 문서·확정 결정·V2 C08/C09·ExecPlan, 이미지 UGC 정책, publication/minihome/relationship/image SQL, bootstrap·기존 역할 검사, owner/visitor/gateway/runtime/auth/unsaved-navigation UI. `verify-before-claiming` 기준으로 로컬 DB/브라우저 증거와 실제 운영 미검증을 분리했다.
+- 계획/가정: ExecPlan W14 상세를 구현 전에 추가했다. 별도 관리자 대시보드 대신 인증된 운영자용 queue/review/audit RPC와 [운영 절차](../operations/2026-09-24-public-moderation.md)를 제공한다. 실제 담당자·외부 지원 채널·보존 기간/한도는 임의 확정하지 않았다. 차단과 신고는 독립이며 제한된 계정도 자기 철회·신고·이의제기가 가능하다.
+- IMPLEMENTED YES: `MemorySafety.jsx`의 신고 양식·접수 확인·내 알림·이의제기를 public board/home와 내 미니홈에 연결했다. 중복 submit 잠금, payload 변경 전까지 operation 유지, 세션 재확인/계정 remount/취소/20초 요청 제한, 실패 시 입력 유지, 미저장 이탈 보호를 적용했다. 원문 서버 오류는 표시하지 않는다. 운영 알림은 공개 대상 링크·조치·소유자용 사유만 전달한다.
+- DB/보안: `20260923213901_memory_moderation.sql`은 server-only moderator allowlist, private reports/notices/audit/target version/case sanctions를 추가한다. 일반 계정·익명·metadata로 승격 불가. 신고 flag 기본 off, 일일 한도 기본 0; 사용자 잠금으로 병렬 한도 초과 방지. 사건/대상 revision으로 다른 운영자·다른 사건·이의제기와 충돌하는 변경 거부. HIDE/RESTORE는 공개 동의와 private 원본을 바꾸지 않는다. 사건별 계정 제한은 기존 flag와 독립이며 다른 사건 해제에 영향받지 않는다. 신고자 계정 삭제는 익명화한 사건/감사를 남겨 계정 삭제 자체를 막지 않는다.
+- AUTO_TESTED PASS: `npm run test:unit` **317**, `node scripts/run-e2e.mjs tests/publication-ui.spec.ts tests/memory-board.spec.ts tests/service-worker.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1` **24**. 실제 로컬 Chromium + 합성 Auth/RPC로 신고 취소·취소 거절·실패 재시도 operation 유지·접수·인앱 알림·이의제기·로그아웃 격리 및 기존 공유/관계/보드/SW 회귀를 확인했다. 320px 알림 캡처를 열어 확인했다.
+- SQL PASS: PostgreSQL16.15 합성 Auth/Storage 역할 harness 전체 **180 PASS**, 신규 moderation **34 + 실제 두 연결의 동시성 2**. 일반/익명 권한, 직접 테이블/자기 승격 차단, 계정 격리, 신고 중복·한도, 가림/동의 유지 복원/철회 후 재공개 금지, 소유자 이의제기·오래된 revision 거부, 다른 사건 sanction 유지, 실제 publication RPC 및 이미지 준비 완료 차단, 감사, 신고자 삭제를 확인했다. `npm run build`/postbuild **18페이지**, Android dist route **18개**, diff/bundle 검사 PASS. 증거: `evidence/2026-09-24-w14-validation.json`, `.cache/w14-*`.
+- 데이터/권리/관찰/롤백: 새 이미지 업로드·분석 이벤트·private 원본 읽기 없음. 신고 설명은 명시 입력한 내용만 private 사건에 보관하며 알림에 신고자 신원을 전달하지 않는다. 롤백은 reports flag off/client 복원; 안전 가림·제재·감사 자료를 역삭제하지 않는다. API 호출/이미지 전달 실환경·retention 배치는 수행하지 않았다. 보존/익명화 상세 정책은 D05에 남는다.
+- REAL_ENV_VERIFIED BLOCKED: 실제 Supabase/PostgREST/Google A·B·운영자, Storage/CDN 전달 차단, Android APK/기기, 실제 운영 담당자/지원 채널·보존/정책 미확인. 원격 계정 권한을 부여하거나 운영 DB를 적용하지 않았다. 기존 정적 분석 미해결도 이번에 해소했다고 하지 않는다. OWNER_APPROVED: 로컬 진행 승인만 적용; 미커밋·미배포·Public 비활성 유지. W14는 외부 게이트 대기, 다음 W15 READY.
+
+### 2026-09-24 W13 로컬 실행 결과
+
+- 기준/읽은 파일: AGENTS·시작 문서·확정 결정·V2 C06/C07/C11와 ExecPlan, 기존 owner/visitor·관계 UI, authRepo·webOAuth/nativeOAuth·AuthCallbackClient·BaseLayout, native navigation/route manifest와 기존 검사. ExecPlan W13 상세에 범위/검증/롤백을 먼저 기록했다.
+- 가정/발견: 공유는 공개 UUID와 명시 경로만 포함한다. Android에서 외부에 전달하는 주소는 기존 운영 웹 `https://www.moemoa.xyz`이며 앱 내부 방문은 packaged index.html을 사용한다. 검증된 App Links 자동 앱 실행을 새로 제공한다는 뜻은 아니다. 초기 소스에는 복사 버튼·로그인 실패 후 원래 페이지 복귀가 없었고 native OAuth가 directory URL로 이동했다.
+- IMPLEMENTED YES: `publicShareLink.js`와 `PublicLinkCopy.jsx`를 공개 보드/미니홈 owner 및 visitor에 연결했다. clipboard 성공 안내와 실패 시 선택 가능한 44px 입력칸을 제공하며 private query/hash는 복제하지 않는다. owner 방문 링크는 앱 내부 이동으로 통일했다. `AuthCallbackClient.jsx`는 원래 안전한 페이지 복귀·다시 로그인, callback 주소에서 provider 정보 제거, 실제 session 없는 교환 결과 거부를 처리한다. `webOAuth.js`는 외부 host·credentials·callback 재진입·토큰 포함/과도한 next를 거부한다. `nativeOAuth.js`는 로그인 완료 시 packaged 경로로 이동한다.
+- 검증: unit **317 PASS**, 새 share-link/공격 next 계약 및 기존 native cold/warm callback 경로 검사 포함. Chromium 실제 로컬 UI + 합성 Auth/RPC로 보드/미니홈 복사, clipboard 거부, 취소·교환 실패·시작 실패 복구, 성공 교환 1회와 자동 팔로우 없음, 기존 관계·보드·SW·서비스 마감 회귀를 실행했다. provider 교환 성공/실패는 테스트에서 Supabase client 모듈 응답을 대체했으며 실제 Google 계정 인증으로 간주하지 않는다. 320px 직접 복사 화면을 캡처해 열어 확인했다. 최종 실행 수/빌드/해시는 `evidence/2026-09-24-w13-validation.json`과 `.cache/w13-*`에 기록한다.
+- 데이터/롤백: DB migration·의존성·환경값 변경 없음. W13 client 변경을 복원하면 되며 관계/공개 상태/원본 데이터는 건드리지 않는다. 보안/개인정보/관찰: 링크에 공개 ID만 포함하고 callback 토큰/오류·provider 원문을 사용자 메시지/새 분석 이벤트로 전송하지 않는다. 기존 bounded 오류 코드 로깅만 유지한다. 공개 이미지 자동 업로드 없음.
+- REAL_ENV_VERIFIED BLOCKED: 실제 Google/Supabase PKCE, Android APK/실기기 및 외부 링크의 기기별 동작은 D01/W19. 기존 정적 분석 미해결과 운영/CI 검증은 이번에 해소했다고 하지 않는다. OWNER_APPROVED: 로컬 다음 단계 승인만 적용; commit/push/배포/운영 Public 활성화 없음. W13은 외부 검증 대기이며 다음 W14는 신고·운영자 조치 로컬 구현, 실제 운영 담당자/정책/통지 채널은 D04에 남긴다.
+
+### 2026-09-24 W12 로컬 실행 결과
+
+- 읽은 기준/소스: `AGENTS.md`, `CODEX_START_HERE.md`, 확정 결정, `PLANS.md`, V2 ExecPlan/C07/진행판, W11 미니홈 SQL·gateway/runtime·owner/visitor, `useAuthSession`, `webOAuth`, `authRepo`, legacy profileRepo/social gate, 기존 SQL 및 브라우저 harness. `verify-before-claiming` 기준으로 실제 검사와 외부 미검증을 분리했다.
+- 가정/계획: 승인된 C07과 ExecPlan의 W12 실행 상세. 전체 공개 관계 그래프·뉴스피드·DM은 범위 밖이다. 로그인은 기존 안전한 내부 next 주소 처리에 연결하며 자동 팔로우하지 않는다. 실제 OAuth 제공자 복귀는 W13/D01/W19에서 확인한다.
+- IMPLEMENTED YES: `MemoryRelationships.jsx`를 `PublicMinihome.jsx`와 `MemoryMinihome.jsx`에 연결했다. 공개 홈에서 팔로우·해제, 내 목록 재방문·페이지 추가, 차단 목록·해제, 재시도, 계정별 remount/AbortSignal/세션 검사와 20초 제한. 비공개·제한 대상은 사유와 닉네임을 숨기고 해제할 수 있다. 삭제 계정 관계는 FK cascade로 제거된다. 차단해도 익명 공개 열람은 가능하며 해제 후 자동 복구하지 않음을 안내한다.
+- DB/롤백: additive `20260923192300_memory_relationships.sql`, RLS private table + authenticated 전용 get/set/list RPC. auth.uid만 소유자를 결정하며 public home UUID 외 계정 ID/사유는 반환하지 않는다. 새 follows flag는 기본 off, 쓰기 제한과 공개 reader를 재사용한다. 팔로우와 반대 방향 차단은 정렬된 사용자 쌍의 트랜잭션 잠금으로 직렬화한다. 중단 중에도 해제/차단 RPC는 가능하다. 롤백은 flag off 및 클라이언트 복원; 관계/차단 기록·private 원본을 파괴하지 않는다. 운영 DB 적용 없음.
+- AUTO_TESTED PASS: Node24.19.0/npm11.17.0에서 `npm run test:unit` **315개**, `node scripts/run-e2e.mjs tests/publication-ui.spec.ts tests/memory-board.spec.ts tests/service-worker.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1` **20개**. 실제 로컬 Chromium + 합성 Auth/RPC로 팔로우→내 목록→재방문→차단→해제, 로그아웃 시 목록 제거, 비회원 관계 요청/자동 팔로우 없음, 기존 공개/보드/SW 회귀를 확인했다. 320px 캡처를 열어 가로 넘침 없는 빈 목록을 확인했다. 첫 회귀 실행은 기존 RPC mock이 새 목록 응답을 제공하지 않아 실패했으며, mock 계약 추가 후 최종 전체 통과했다.
+- SQL PASS: WSL PostgreSQL16.15 합성 역할 harness 전체 **144개 PASS**, 그중 신규 관계 **22개 + 동시성 1개**. 중복·본인 금지·직접 table/익명 권한 거부·B/A 목록 격리·차단 양방향 제거·차단 해제 무복구·불가 대상 해제·kill switch 중 해제·실제 두 연결의 block/follow 경합을 확인했다. `npm run build`/postbuild **18페이지 PASS**. 증거: `evidence/2026-09-24-w12-validation.json`, `.cache/w12-*` 로그/캡처.
+- 보안/개인정보/권리/관찰: 팔로우는 private 자료 권한을 부여하지 않고 새 이미지 업로드나 분석 이벤트를 추가하지 않는다. 관계 RPC는 no-store이며 응답 오류의 원문을 UI에 노출하지 않는다. 기존 legacy `user_follows`는 재사용·재개하지 않았다. 원격 legacy schema/REST 권한 감사는 D01/W15에서 별도로 필요하다.
+- REAL_ENV_VERIFIED BLOCKED: 원격 Supabase/PostgREST/A·B 계정, 실제 OAuth, Storage, Android APK/기기 미검증. 기존 정적 분석 미해결은 이번에 재실행·해소한 것으로 간주하지 않는다. 요청별 quota/차단 남용 제한은 W15/D03, 신고 통로와 관리자 조치는 W14/D04의 출시 필수 게이트다. OWNER_APPROVED: 로컬 다음 단계 진행 승인만 적용. commit/push/배포/Public 활성화 없음. W12는 외부 게이트 대기, 다음 로컬 W13 READY.
 
 각 완료 W에는 `IMPLEMENTED / AUTO_TESTED / REAL_ENV_VERIFIED / OWNER_APPROVED`의 값과 근거를 남긴다. 필요한 검증만 요구하되 필수 실제 권한/기기/배포 검증은 생략하지 않는다.
 
@@ -184,36 +344,37 @@ NA 이유:
 
 | Q | 자동 검증 | 필요한 실제 환경 검증 | 증거/commit/담당 | 미해결 |
 |---|---|---|---|---|
-| Q01 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q02 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q03 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q04 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q05 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q06 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q07 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q08 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q09 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q10 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q11 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q12 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q13 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q14 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q15 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q16 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q17 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q18 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q19 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q20 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q21 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q22 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q23 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
-| Q24 | NOT_RUN | NOT_RUN | 없음 | 아직 검증 전 |
+| Q01 | LOCAL PASS | Web 로컬 실행 | title-hub/cross-surface/composer/unit | Android 실제 intake 미검증 |
+| Q02 | LOCAL PASS | Web 로컬 실행 | release-editing/service-finishing | 실제 Android Back 별도 |
+| Q03 | LOCAL PASS | 합성 계정·실제 IndexedDB | memory-account-sync/owner-boundary/release-editing | hosted 계정 전환 |
+| Q04 | LOCAL PASS | Web 로컬 실행 | index/title-navigation/release-editing/publication-ui | 실제 Android 링크 |
+| Q05 | MOCK PASS | BLOCKED_EXTERNAL | publication-ui/account-sync/OAuth unit | 실제 Google A/B·만료 |
+| Q06 | LOCAL PASS | 실제 IndexedDB·합성 remote | release-sync/unit | hosted 대용량 sync |
+| Q07 | LOCAL ROLE PASS | BLOCKED_EXTERNAL | SQL235·HTTP unit | hosted REST/Auth/Storage 직접 경계 |
+| Q08 | LOCAL PASS | 합성 RPC+로컬 UI/SQL | publication-ui/SQL | hosted 새 세션/기기 |
+| Q09 | LOCAL PARTIAL | BLOCKED_EXTERNAL | HTTP image unit/SQL/publication-ui | 실제 다른 기기·Storage bytes |
+| Q10 | LOCAL PASS | 합성 HTTP·실제 decoder/SQL | image unit/resource-contract | hosted 파일/정리·Android |
+| Q11 | LOCAL PASS | 실제 DB 병렬 연결·합성 UI RPC | publication-ui/SQL races | hosted 세션 경쟁 |
+| Q12 | LOCAL PASS | 실제 SQL·합성 UI RPC | mini-home/publication contracts | hosted 다기기 철회 |
+| Q13 | LOCAL PARTIAL | BLOCKED_EXTERNAL | HTTP resolver/SW/SQL | 실제 CDN·전달/캐시 지연 |
+| Q14 | LOCAL PARTIAL | BLOCKED_EXTERNAL | lifecycle/restore SQL·sync tests | 오래된 backup 뒤 최신 철회 journal |
+| Q15 | LOCAL PASS | 합성 Auth/RPC+로컬 UI | publication-ui/minihome SQL | hosted 대표/정렬 |
+| Q16 | LOCAL PASS | 실제 역할 SQL·합성 UI RPC | relationships/publication-ui | 실계정 방문/팔로우 |
+| Q17 | LOCAL PASS | 실제 역할 SQL | relationship/moderation 계약 | hosted 계정 삭제·Storage |
+| Q18 | LOCAL PARTIAL | BLOCKED_EXTERNAL | moderation SQL/notice+appeal UI | 실제 운영자 처리/정책/통지 |
+| Q19 | LOCAL PARTIAL | BLOCKED_EXTERNAL | resource SQL 동시성/override·HTTP429 | 실제 WAF/예산/경보 |
+| Q20 | LOCAL PARTIAL | BLOCKED_EXTERNAL | JSON 복원 브라우저·현재 DB dump/restore | Storage bytes/canonical·최신 철회/RPO |
+| Q21 | LOCAL PARTIAL | BLOCKED_EXTERNAL | catalog256·전환/복구 SQL14+경합1 | 실제 후보 승인/bytes/원격 health |
+| Q22 | LOCAL PARTIAL | 기존 SHA만 확인 | health unit·0330a54 Actions/운영 build-info | 새 후보 CI/배포 보호·실제 경보 수신 |
+| Q23 | LOCAL PASS | 로컬 실제 SW 업그레이드/저장소 | service-worker/index | 운영 후보 update/rollback·기기 |
+| Q24 | LOCAL PARTIAL | 18 route 지도/Chromium·스크린샷 | surface audit/브라우저 로그 | 실제 Android·스크린리더·사람 이해 검증 |
 
 ## route/action coverage 증거 위치
 
-- 현재 노출 route inventory: 위 기준점 15개 경로 + evidence sourceHashes의 src/pages 목록.
-- 역할·flag·상태별 action→handler/API→결과·취소·실패·복귀 지도: 미작성.
-- UI/접근성/실기기 evidence: 미작성.
+- 현재 route inventory: 현재 `src/pages` 18개 경로. 위 15개 기준점은 과거 기록이다.
+- 역할·flag·상태별 action→handler/API→결과·취소·실패·복귀 지도: [W18 surface audit](../reports/2026-09-24-release-surface-audit.md).
+- UI evidence: W18 Chromium 로그, `.cache/w18-help-320.png`, `.cache/w18-composer-1440.png` 직접 열어 확인. 200% 검사는 320 CSS-pixel reflow 대리 검사이며 실제 OS/browser zoom 모든 조합이나 실기기 검증이 아니다.
+- 위 LOCAL/MOCK는 실계정·실기기 PASS가 아니다. 근거는 연속 실행 evidence 및 각 test source에 연결하며 이전 HEAD를 미커밋 후보 SHA로 사용하지 않는다.
 - 동일 action의 동적 인스턴스는 공통 계약 테스트를 재사용. raw inventory가 필요하면 evidence JSON/CSV로 보관하되 새 단계표로 만들지 않음.
 
 ## 완료 로그
@@ -433,3 +594,53 @@ NA 이유:
 - 새 PC 안내: docs/moemoa/operations/2026-09-24-desktop-setup.md. 외부 catalog canonical/로컬 사용자 자료는 이번 Git 이전 대상이 아니다.
 
 - 최종 Linux Chromium46/46 PASS(동일 기존 scroll hook 유지, 실제 scroll 상한을 고려한 fixture 검증). Vercel 프로젝트 env 조회는403으로 확인 불가. 운영 catalog 연결 손상을 피하기 위해 기존 .env.production의 공개 URL/anon key 두 항목은 추적을 유지하기로 수정했다. privileged 값이 없음을 확인했으며 새 비밀값은 추가하지 않는다. 앞선 추적 해제 기록은 이 결정으로 대체한다. GitHub health는 repository vars 방식 유지.
+
+### 2026-09-24 · W09 종료 기록 — BLOCKED_EXTERNAL (공개 UI 로컬 검증 통과)
+
+- 기준: AGENTS/CODEX_START_HERE/확정 결정/PLANS, 제품·이미지·구조·QA·변경통제 명세, V2 ExecPlan/C03·C04/진행판, Title Hub UI 규칙을 확인했다. 기존 W07 gateway·SQL, W08 이미지 endpoint/helper·SQL, Board/visual/owner/auth/runtime·SW·테스트를 실제 코드로 대조했다. 계획은 01의 W09 실행 상세에 구현 전에 추가했다. 시작 HEAD `0330a54`, 작업 전 clean.
+- IMPLEMENTED YES: `MemoryBoardView.jsx`의 기존 갤러리에 `MemoryPublicationPanel.jsx`를 추가했다. 공개 제목/설명은 빈 값으로 시작하고 카드·6개 선택 필드는 기본 미선택. 같은 작품 카드는 기존 visual·감상·날짜와 순번으로 구분한다. 서버에는 선택한 ID/필드와 사용자가 입력한 공개 제목/설명만 전달한다. 계정 owner·Board/카드/관계/asset의 동기화 확인 없이 준비/게시하지 않는다.
+- 공개 흐름: `createPublicationController.js`가 현재 revision 조회→prepare DTO→명시 동의→publish를 직렬화한다. prepare 취소·계정 전환·unmount 뒤 응답은 버리고 다음 prepare에서 서버 revision을 재조회한다. 게시 응답 유실은 동일 operation/hash/revision으로 재시도하며 검토 후 source 변경·정책/서버 충돌 시 preview를 폐기한다. 요청 제한시간20초. 게시/철회 요청을 보낸 뒤 취소 성공으로 표시하지 않는다. 보드 철회는 다른 공개 위치가 남을 수 있음을 안내하고 원본을 유지한다.
+- 방문자: `/public/board/?id=<publication UUID>`는 계정/IndexedDB에 의존하지 않는 익명 RPC reader를 사용한다. `publicationView.js`가 허용된 DTO 필드만 복사하고 `PublicBoardSnapshot.jsx` 하나를 preview/visitor에서 공유한다. approved cover revision·기존 디자인 token·서버 이미지 URL을 사용하며 private localRef/원본 ID/seed를 방문자 렌더러에 전달하지 않는다. 실제 이미지 로드 실패는 표시하고 게시를 막는다. 비공개/철회는 unavailable, 네트워크 실패는 retry 가능한 오류로 구분한다. 페이지 재방문·탭 복귀 때 재조회하고 메모리 Blob URL은 cleanup한다.
+- 이미지: 사용자 파일은 선택 카드에서 원본 파일을 다시 제공하고 별도 업로드 동의한 때만 기존 W08 helper로 전송한다. 서버 checksum/권리 승인/한도를 우회하지 않고 self-claim으로 승인하지 않는다. 인증 preview는 no-store Blob, visitor는 publication/asset/variant URL이다. 취소는 업로드 완료 사본의 즉시 삭제를 보장하지 않으며 기존 비공개 staging 정리 계약을 따른다. native 원본 자동 읽기는 연결하지 않았다(W19).
+- flags/환경: `PUBLIC_MEMORY_PUBLICATION_V1=1`일 때만 새 UI/reader가 준비되며 기본 off. writer에는 기존 account sync와 Auth 설정이 필요하다. `PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION`은 이미지 준비 동의를 위한 공개 정책 revision이며 서버 설정과 같아야 한다. 없으면 업로드를 막고 서버가 최종 판정한다. 운영/로컬 env 파일에는 이 값을 설정하지 않았다. 합성 브라우저 adapter는 DEV에서만 사용하며 최종 dist에서 해당 식별자 부재를 확인했다.
+- AUTO_TESTED PASS: Node24.19.0/npm11.17.0, `npm run test:unit` 306/306(신규 controller/DTO10). `node scripts/run-e2e.mjs tests/publication-ui.spec.ts tests/memory-board.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1` 11/11(신규8+기존Board3). 실제 로컬 Chromium/IndexedDB에서 선택→게시→새 비로그인 context→철회, 취소 후 늦은 응답, 동일 게시 재시도, stale 재검토/재동의, 세션 전환, 동의 전 업로드0, 실제 파일 bytes/인증 preview/방문자 이미지 decode, 이미지 실패/재시도, 320px/한영을 검증했다. 320px full-page capture를 직접 확인했다. Auth/게시 RPC/Storage 응답은 명시한 합성이므로 실제 서버 권한 증거는 아니다.
+- AUTO_TESTED PASS: `npm run build` 16 pages+postbuild. 새 public route를 Android static manifest에 추가하고 `verifyAndroidStaticRoutes()`로 dist16개와 기존 native composer 연결을 확인했다. 새 주소의 index.html 매핑은 단위 검사에서 검증했다. APK assets는 생성하지 않았으므로 packaged 경로 검사/실기기는 미검증. dist에서 W09 mock adapter 및 privileged server 설정 문자열 미포함, git diff --check PASS. package/lock/env/SQL 변경0. 기존 quality CI의 Chromium 실행 목록에도 신규 publication-ui 검사를 추가했으며 원격 실행은 아직 하지 않았다.
+- 검사 중 수정: 최초 신규 브라우저 fixture의 메뉴 문구 불일치를 실제 Board 도구 selector로 수정. public route 추가에 따른 기존 manifest 기대값15→16을 갱신했다. build와 브라우저 서버를 동시에 돌린 실행에서 기존 Composer가 빈 화면으로 timeout한 1건은 원인 확정하지 않았으며, 서로 분리한 최종11개 재실행은 PASS. 오래된 미설치 npx 경로 대신 실제 설치된 React Doctor0.9.14 경로로 실행했다.
+- React Doctor0.9.14: 전체39/100, errors21/warnings125로 전체 PASS 아님. 신규 파일 error0. 남은 신규 warning6 중 controller/selection UI 복잡도1은 유지보수 항목, async 상태/Blob revoke2는 AbortSignal 확인·effect cleanup의 revoke 루프를 소스/브라우저 테스트로 확인한 정적 탐지 한계, readiness callback3은 실제 이미지 로드가 게시 버튼을 제어하기 위한 의도적 상태 전달(경고 3종)이다. 규칙 억제/설정 변경 없음. 전체 error 경로는 변경하지 않은 기존 코드·SQL·package다. schema RLS는 후속 security migration에 존재하고 image-contract의 넓은 정책은 restrictive policy 우회 방지 시험용이다. dependency advisory와 기존 React 오류는 W18 검토에 남기며 이번 작업에서 업그레이드하거나 전체 안전을 주장하지 않는다. 이전 도구 점수49와 버전/규칙이 달라 직접 회귀 비교하지 않는다.
+- REAL_ENV_VERIFIED BLOCKED: 실제 Supabase17/Auth UID/PostgREST/Storage/서버 policy·권리 승인/원격 Vercel headers·CDN·Android 미검증. DB/Storage 테스트 환경 D01 미제공, 새 PC psql 없음, Docker engine 비실행. SQL 변경이 없어 기존 W07/W08 SQL 계약은 재실행하지 않았다. 정책/보존/운영값 D03~D06 및 W19 gate 유지.
+- 보안/개인정보/관찰: Public 기본 off 유지. 사용자 입력을 React text로 렌더하고 upstream 오류 원문은 화면/로그로 내보내지 않는다. 신규 analytics/개인 note·파일 로그 없음. 테스트는 합성 계정/파일만 사용했다. 선택하지 않은 사용자 사진 업로드·운영 DB 접근·migration·Public 활성화·commit/push/배포0.
+- rollback: 이번 W09 파일·Board 진입점·static route manifest·관련 tests/docs만 이전 Git 기준으로 복원. 서버/원본/철회 이력 변경이 없으므로 DB 복구 불필요. package/lock 변경 없음.
+- 증거: [W09 검증·파일 hash](evidence/2026-09-24-w09-validation.json), `E:/web/anime/.cache/w09-{unit-final,browser-final,build-final,react-doctor-final}.log`, `.cache/w09-preview-320.png`.
+- 선택/변경: W10 선행은 W09 전체→W09 로컬 검증으로 한정. 실제 환경 gate를 지우지 않으며 W09는 DONE에 세지 않는다. 완료 M1/6, W4/20, 추가 필수0 유지. 다음 W10 READY. 현재 M2 잔여는 C05 통합과 실제 사용자/이미지/철회 검증이다.
+
+### 2026-09-24 · W10 종료 기록 — BLOCKED_EXTERNAL (로컬 갱신·철회·삭제·동시성 검증 통과)
+
+- 기준/계획: AGENTS/CODEX_START_HERE/확정 결정/PLANS, 기존 제품·이미지·구조·QA·변경통제 명세, V2 ExecPlan/C05와 진행판을 따랐다. W07/W08 SQL·gateway·이미지 전달, W09 controller/panel/visitor, private 삭제 command/runtime/detail, IndexedDB sync·SW·기존 테스트를 읽었다. 구현 전에 기존 ExecPlan W10 범위를 갱신했다. W09 미커밋 변경을 보존했으며 HEAD는 `0330a54` 그대로다.
+- IMPLEMENTED YES: 공개본의 source version을 server-private column에 보존하고 owner RPC에 `hasPublished/sourceChanged`만 추가했다. 공개본과 다른 원본/미확인 버전은 재검토를 안내한다. 갱신 미리보기 중 기존 공개본·주소를 유지하며 취소/실패로 자동 교체하지 않는다. 새 동의 후에만 갱신한다. 보드 선택 목록과 카드 상세에 모든 위치의 공개 중지와 영향 설명을 연결했다. 원본은 보존하며 기존 영구 revoke를 일반 재게시로 해제하지 않는다.
+- 발견/수정: (1) 기존 로컬 삭제는 서버 sync 전 공개본을 남길 수 있었다. `deleteMemoryCard` 이전에 플랫폼 adapter가 서버 retire 확인을 요구하고, 실패 시 로컬 bytes/metadata 삭제 없이 KO/EN 재시도 안내를 보인다. (2) 로컬 remoteVersion=0도 서버 응답 유실 상태일 수 있어 모든 계정 카드에 owner-scoped 삭제 fence를 기록한다. 늦은 최초 sync/복원에도 reader/prepare가 접근을 거부한다. Guest 오프라인 삭제는 유지한다. (3) global revoke 뒤 과거 publish operation 재시도가 PUBLISHED를 반환하던 경로는 공개 가능성 재검사로 거부한다.
+- migration: CLI2.101.0 `migration new`로 생성한 `20260923182210_memory_publication_source_status.sql`. published_sources column, 내부 source capture trigger, owner status RPC, replay 검증, RLS가 켜진 private 삭제 fence, authenticated retire RPC, 기존 visual builder/reader를 재사용하는 fence wrapper다. 기존 원본/공용 표지/이미지 bytes 삭제나 production 의존성 변경 없음. Supabase changelog와 [공식 함수 권한 문서](https://supabase.com/docs/guides/database/functions)를 확인했고 private helper·테이블 접근을 명시 회수했다. 운영 적용 0건.
+- AUTO_TESTED PASS: Node24.19.0/npm11.17.0에서 `npm run test:unit` **310/310**. `node scripts/run-e2e.mjs tests/publication-ui.spec.ts tests/memory-board.spec.ts tests/release-editing.spec.ts tests/service-worker.spec.ts tests/release-sync.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1` **25/25**. 정확한 갱신/새 동의/취소/기존 버전 유지/전체 철회/원본 보존/실패 후 재시도 삭제/페이지 복귀 재검증, 기존 Board·편집·sync·SW 회귀 포함. source/userimage endpoint는 합성 RPC이며 실제 Chromium/IndexedDB를 사용했다. 새 두 흐름을 화면 증거용 재실행 **2/2** 후 screenshot을 열어 확인했다.
+- SQL PASS: WSL Ubuntu24.04 PostgreSQL16.15를 설치하고 비특권 postgres 사용자·일회성 unix-socket 전용 DB에서 `PG_BIN=/usr/lib/postgresql/16/bin bash tools/publication-boundary/run-local-postgres.sh` 실행. 기존57(기본51+retire6)+이미지31 = **88 assertions**, 동시성 **6건**(prepare/quota 기존2 + publish와 global/retire/delete/board 경합4) 통과. 원본 복원 후에도 읽기 거부, 다른 owner의 fence 격리, 비회원 RPC 거부 확인. 합성 auth.uid/Storage이므로 실제 Supabase 증거 아님. GitHub quality에 같은 SQL job을 추가했으나 원격 CI는 아직 실행/확인하지 않았다. Windows 재설치 시 shell CRLF 실패를 막도록 해당 script eol=lf를 지정했다.
+- build PASS: `npm run build` **16 pages + postbuild**, dist Android route 함수 **16**. production bundle에 DEV publication hook/서비스 비밀키 이름이 없음. Android 패키지/실기기 검증 아님. 최종 `git diff --check` 검사 및 변경 source/log SHA256은 evidence 참조.
+- 정적 검토/실패 기록: React Doctor0.9.14 **39/100, errors21/warnings126**으로 전체 PASS 아님. W10 신규 파일/SQL의 error0, 기존 detail complexity warning1 추가. 기존 package advisory 표시, Library/Backup/hooks/showcase 오류, separate RLS migration·의도적 테스트 정책 진단은 W18에서 실제 영향 판단. 신규 오류를 숨기도록 rule을 끄지 않았다. 초기 삭제 브라우저 검사는 합성 owner의 device_sync_state 누락으로 실패하여 실제 repository device 등록 fixture를 보완한 뒤 전체 통과했다. Supabase advisors는 임시 DB 수명/Windows→WSL 연결과 TLS 요구로 실행 실패하여 결과 없음; D01 실제 환경에서 재실행한다.
+- 보안/운영 영향: 신규 응답은 익명 DTO를 넓히지 않고 private source manifest도 client에 보내지 않는다. retire는 Auth UID의 namespace에만 영향을 주며 flags off/게시 제한 상태에도 철회를 허용한다. 실제 관리/한도/중단/비용 gate는 그대로다. W15는 신규 retire 요청과 fence 용량도 제한해야 한다. 로그에 private 본문/원본 경로·credential을 추가하지 않았다. 이미 내려받은 사본 회수는 보장하지 않는다.
+- rollout/rollback: W07/W08/W10 서버 migration과 실제 검증을 **계정 클라이언트 배포 전에** 마쳐야 한다. RPC가 없거나 오프라인이면 계정 삭제는 원본을 보존하며 중단한다. 서버 철회 후 로컬 삭제 실패는 철회를 되돌리지 않고 재시도한다. rollback은 public reads/writes를 잠그고 client만 검증된 이전 버전으로 복구한다. 삭제 fence/기존 revoke 이력은 삭제하거나 이전 DB로 덮어쓰지 않는다. DB 복원은 최신 fence 재적용 후 검증까지 공개 금지(D05).
+- REAL_ENV_VERIFIED BLOCKED: 실제 A/B/anon Auth·REST/Storage, deployed API/CDN/Android, DB+Storage 복원·최신 fence 재적용·Public 중단과 관측은 D01/D05/W19에 남는다. 미니홈·향후 공개 카드 경로도 W11/W19에서 같은 reader fence를 반드시 사용한다. 운영 Public/DB/배포/commit/push 수행 없음. OWNER_APPROVED: 로컬 W10 진행 승인, 운영 D06 미승인.
+- 증거: [W10 source/log hash와 검증 범위](evidence/2026-09-24-w10-validation.json), `.cache/w10-{unit-final,browser-final,sql-final,build-final,react-doctor-final,routes,visual}.log`, `.cache/w10-public-update.png`, `.cache/w10-card-withdrawal.png`. W09 evidence는 당시 파일 hash의 역사 기록이며 현재 소스는 W10 evidence를 사용한다.
+- 진행: 완료 M1/6·W4/20 유지, 추가 필수0. M2 잔여는 실제 권한·이미지 전달·철회/복원 검증. W10을 DONE에 세지 않으며 W11은 로컬 선행만 충족한 READY로 이동했다. 다음 W11 공개 미니홈 선택 전시.
+
+### 2026-09-24 · W11 종료 기록 — BLOCKED_EXTERNAL (미니홈 로컬 구현·검증 통과)
+
+- 읽은 기준/계획: AGENTS, CODEX_START_HERE, 확정 결정 PUBLIC-LAUNCH-V2-01, PLANS, 기존 제품/이미지/구조/QA/변경통제 문맥, V2 C05/C06·ExecPlan·진행판을 확인했다. legacy showcaseRepo/Profile 경로, W09/W10 publication controller/gateway/DTO/renderer/owner runtime, server SQL·이미지 전달·SW·Android route contract와 테스트를 대조했다. 기존 ExecPlan에 W11 실행 상세를 구현 전에 추가했다. W09/W10 미커밋 소스를 그대로 보존했다.
+- IMPLEMENTED YES: Board 화면의 `내 공개 미니홈` → `/minihome/` 편집 → 공개 닉네임/선택 소개 → 이미 공개한 보드 전체 또는 보드별 대표 기억 → 수동 순서 → 서버 DTO 미리보기 → 이미지 준비/명시 동의 → 게시 → `/public/home/?id=<public UUID>` 새 방문자 화면까지 연결했다. 새 사용자에게 보드 먼저 공개 안내, 비로그인에게 계정 경로, 방문자에게 현재 전시 없음/열람 불가/연결 오류를 구분한다. 한국어·영어 지원. 공개 이름은 Auth 이메일/계정 이름에서 자동 복사하지 않는다.
+- 선택 모델: 첫 구현은 보드의 **공개 표현을 참조**한다. 최대10개 전시, 보드마다 전체 또는 대표 카드1개를 고르며 owner 후보는20개씩 cursor로 추가 조회한다(상품 quota가 아닌 bounded UI/RPC 한계). 공개 보드 갱신은 해당 전시에 반영됨을 명시한다. 보드 철회·카드 전체 중지·삭제·관리 차단은 기존 reader/fence를 통해 즉시 다음 요청에서 제외한다. 미니홈만 비공개로 전환하면 별도 공개 보드는 유지한다. 독립 카드 재게시/새 이미지 사본/legacy private 취향 위젯을 생성하지 않는다. 이름을 바꿔도 같은 public UUID를 유지하고 account UID·연락처·private 수량은 visitor DTO에 없다.
+- 서버/migration: CLI로 생성한 `20260923183940_memory_minihomes.sql`: 기본 off `minihomes_enabled`, private RLS table, owner-only get/list/prepare/publish/revoke와 anon read, private DTO builder. Auth UID 소유권·서버 writes/policy/계정 제한·revision/hash/operation 검증. prepare만으로 공개되지 않으며 prepare/update 중 이전 공개본을 유지한다. 보드가 검토 이후 바뀌면 publish를 거부하고 새 동의를 요구한다. revoke는 쓰기 중단/계정 게시 제한에도 가능하고, 과거 성공 operation 재시도는 현재 private 상태를 반환한다. owner/visitor 모두 no-store. public image URL에는 기존 publication ID를 전달해 W08 권한/bytes 경계를 재사용한다.
+- 클라이언트/파일: `createMinihomeController.js`, `minihomeView.js`, `MemoryMinihome/MinihomeSnapshot/PublicMinihome.jsx`, `minihomeCopy.js`, 두 Astro route, `SupabasePublicationGateway.js/platformPublication.js`, Board 진입점/CSS/route manifest/tests를 수정했다. controller가 중복 클릭을 직렬화하고 취소/unmount/계정 변경 후 응답을 폐기한다. 모호한 publish 실패는 같은 operation으로 재시도하며 stale consent는 폐기한다. 편집 재진입 시 복구된 서버 초안을 자동 선택·동의하지 않는다. 사용자 문자열은 React text로 렌더한다.
+- AUTO_TESTED PASS: Node24.19.0/npm11.17.0 `npm run test:unit` **315/315**(W11 신규5). `node scripts/run-e2e.mjs tests/publication-ui.spec.ts tests/memory-board.spec.ts tests/service-worker.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1` **18/18**(publication14=기존10+미니홈4, Board3, SW1). 대표 선택→미리보기→미동의 차단→새 익명 context 방문→연결 오류/재시도→미니홈 비공개→보드 유지, 취소·stale consent·로그아웃 늦은 응답·빈 상태, 명시 순서, 320px KO 편집/EN visitor, 기본 flag off/guest 편집 차단을 검증했다. 실제 로컬 Chromium/IndexedDB이며 RPC/Auth는 합성이다. screenshot 두 장을 열어 확인했다.
+- SQL PASS: WSL Ubuntu24.04 PostgreSQL16.15에서 전체 local publication harness 성공. W11 **27 assertions**(마지막 temp table count24 + rollback 격리 시나리오3), 기존88와 기존 동시성6 = **121 PASS notices**. A/B 소유권, anon 권한, DTO 동일성, 기본 off, 미게시 preview, policy/소스 변경 후 재동의, 동일 operation 멱등, revoke/과거 요청, 원본 retirement/보드 철회/계정 숨김/kill switch 전파를 확인했다. W11 전용 동시 연결 경합은 별도 추가하지 않았고 기존 publication 동시성6을 회귀 실행했다. 합성 auth.uid/Storage이며 실제 Supabase 실험은 아님.
+- build/검토: `npm run build` **18 pages+postbuild PASS**, dist Android static route18 PASS, production bundle DEV adapter/서비스 비밀키 이름 scan no matches, `git diff --check` PASS. 원격 CI는 미커밋 변경이므로 실행하지 않았다. React Doctor0.9.14 **39/100, errors21/warnings131**: 기존 errors21 유지, W11 신규 error0/warning5(편집 복잡도, 이미지 준비 callback3, async state 경고1). async 응답은 AbortSignal과 effect cleanup으로 차단, readiness callback은 모든 실제 이미지 로드 완료를 게시 조건으로 전달한다. 경고를 숨기지 않았다. 초기 대표 select의 label 식별/이벤트 값 취급을 보완하고 최종 전체 브라우저 검사가 통과했다.
+- 보안/설정: client `PUBLIC_MEMORY_PUBLICATION_V1=1`과 **`PUBLIC_MEMORY_MINIHOME_V1=1`**, server minihomes_enabled/reads/writes/policy 게이트가 모두 필요하다. 실제 env/DB/운영 flag를 변경하지 않았다. 공개 DTO 외 private 데이터 자동 전시·추가 사진 업로드·analytics/log payload 추가 없음. 의존성/lock 변경 없음. 새 RPC 호출 한도/비용·신고·복원/전달 지연 gate는 W14/W15/W17/W19 및 D01/D03/D05에 유지한다. 보드가 살아있는 동안 해당 보드 이미지 URL은 미니홈 비공개 후에도 유효할 수 있음을 안내하는 모델이다.
+- rollout/rollback: 운영 적용0. W07~W11 migrations·실환경 검증을 먼저 마치고 client flag를 승인된 후보에만 설정한다. rollback은 minihomes_enabled=false로 reader/게시 중단 후 client 복원, 기존 게시·철회/삭제 fence 보존. 공유 원본·catalog·private DB/Storage 삭제 없음. 실제 DB 복원으로 과거 공개 상태가 부활하지 않는 운영 리허설은 D05/W17 잔여.
+- REAL_ENV_VERIFIED BLOCKED: 실제 Supabase A/B/anon JWT·REST/Storage·배포 API/CDN, 미니홈 사용자 이미지 전송, Android 실기기·App Link, 실제 moderation/복원 미검증. 로컬 pass를 이 gate의 완료로 바꾸지 않았다. OWNER_APPROVED: 사용자 W11 로컬 진행 승인, 운영 D06 미승인. commit/push/deploy 없음.
+- 증거: [W11 검증/source·artifact SHA256](evidence/2026-09-24-w11-validation.json), `.cache/w11-{unit-final,browser-final,sql-final,build-final,routes,react-doctor-final,diff-check}.log`, `.cache/w11-home-320.png`, `.cache/w11-editor-320-ko.png`. W09/W10 evidence는 당시 소스의 역사 기록이다.
+- 진행: 완료 M1/6, 기본 W4/20, 추가 필수0 유지. M3 로컬 W11 결과를 확보했으나 실환경·W12/W13 남음. 다음 W12 팔로우·해제·내 목록은 W07/W11 **로컬** 선행 충족으로 READY이며 외부 게이트를 지우지 않는다.

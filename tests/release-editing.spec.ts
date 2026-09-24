@@ -5,6 +5,23 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ui:locale:v1', JSON.stringify('en')));
 });
 
+test('quick log character selection keeps one valid primary through deselection', async ({ page }) => {
+  await installAppState(page, { locale:'en', list:[{anilistId:1,status:'completed',score:9,addedAt:1}],
+    mediaById:{'1':{id:1,title:{english:'Fixture Anime'},genres:[],characters:{edges:[
+      {role:'MAIN',node:{id:101,name:{full:'Fixture One'}}},
+      {role:'MAIN',node:{id:102,name:{full:'Fixture Two'}}},
+    ]}}} });
+  await page.goto('/library/?animeId=1&focus=quick-log');
+  const sheet=page.locator('.log-sheet');
+  await sheet.locator('.log-sheet__character-toggle').filter({hasText:'Fixture One'}).click();
+  await sheet.locator('.log-sheet__character-toggle').filter({hasText:'Fixture Two'}).click();
+  await expect(sheet.locator('.log-sheet__character-picker .log-sheet__character-primary.is-active')).toHaveCount(1);
+  await expect(sheet.locator('.log-sheet__character-option').filter({hasText:'Fixture One'}).locator('.log-sheet__character-primary')).toHaveClass(/is-active/);
+  await sheet.locator('.log-sheet__character-toggle').filter({hasText:'Fixture One'}).click();
+  await expect(sheet.locator('.log-sheet__character-meta-card')).toHaveCount(1);
+  await expect(sheet.locator('.log-sheet__character-option').filter({hasText:'Fixture Two'}).locator('.log-sheet__character-primary')).toHaveClass(/is-active/);
+});
+
 test('title-only editing is protected, while unchanged prefill and reverted text are clean', async ({ page }) => {
   await page.goto('/memory/new/?title=Prefilled');
   await expect(page.getByLabel('Anime or card title')).toHaveValue('Prefilled');

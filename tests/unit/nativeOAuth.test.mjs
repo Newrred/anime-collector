@@ -61,7 +61,7 @@ test("cold and warm callbacks exchange each code once and navigate within the ap
   await listeners.get("appUrlOpen")({ url: "com.newrred.moemoa://auth/callback?code=cold" });
   await listeners.get("appUrlOpen")({ url: "com.newrred.moemoa://auth/callback?code=warm" });
   assert.deepEqual(exchanges, ["cold", "warm"]);
-  assert.deepEqual(navigations, ["/boards/", "/data/"]);
+  assert.deepEqual(navigations, ["/boards/index.html", "/data/index.html"]);
   await installed.remove();
   assert.equal(removed, true);
 });

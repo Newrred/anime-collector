@@ -43,6 +43,7 @@ export function createPublicImageHandler({ enabled=false, createBackend, allowed
         if(reservation.state === "READY") { res.setHeader("Content-Type","application/json"); res.end(JSON.stringify({id:reservation.id,state:"READY"})); return; }
         const paths=pathsFor(reservation.prefix);
         try {
+          await user.rpc("authorize_memory_image_attempt",{});
           const bytes=await inputBytes(req);
           if(imageHash(bytes)!==reservation.sourceHash) throw new PublicImageError("SOURCE_IMAGE_MISMATCH");
           const output=await transform(bytes);
@@ -77,6 +78,8 @@ export function createPublicImageHandler({ enabled=false, createBackend, allowed
       const reference=await resolve();
       if(!reference) throw new PublicImageError("NOT_FOUND",404);
       if(!SAFE_PATH.test(reference.path)) throw new PublicImageError("IMAGE_SERVICE_FAILED",503);
+      // Reserve the maximum permitted response size before touching Storage.
+      await backend.rpc("authorize_memory_image_delivery",{p_bytes:OUTPUT_LIMIT});
       const bytes=await backend.get(reference.path);
       if(bytes.length>OUTPUT_LIMIT || imageHash(bytes)!==reference.hash) throw new PublicImageError("IMAGE_SERVICE_FAILED",503);
       const latest=await resolve();

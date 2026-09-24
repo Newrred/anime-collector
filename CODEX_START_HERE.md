@@ -1,8 +1,10 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-09-25 Pro 중간 검토:** 최신 개발본은 검토 브랜치 `review/pro-interim-2026-09-25`로 인계한다. [중간 검토 안내](docs/moemoa/reports/2026-09-25-pro-interim-review.md)에서 읽기 순서·증거·출시 잔여를 확인한다. 아래 날짜별 미커밋/환경 미제공 표기는 당시 이력이다. 최신 테스트 계정·서버 키 준비 및72테이블 복원 검증은 완료했으며, 실제 공개 흐름 마감과 운영 결정·후보 승인은 남아 있다. 운영 배포 완료 보고가 아니다.
+
 > 2026-09-24 새 PC 이전: 사용자 승인으로 개발본을 master에 반영한다. [Windows/Codex 설치 안내](docs/moemoa/operations/2026-09-24-desktop-setup.md). 아래 과거 미커밋 표기는 당시 기록이며 최신 결과는 진행판의 9/24 기록 참조.
 
-> **활성 출시 계획 (2026-09-23):** V2의 계정·공개 보드·공개 미니홈·팔로우·최소 운영 목표를 사용자 승인으로 채택했다. **M2 로컬 진행: W08 선택 이미지 검증·비공개 전달 사본·공개 상태 재확인 경로와 디자인 재현을 구현. DB76/동시성2/unit296/build15 PASS. 실제 Supabase/Storage/Vercel/Android 검증은 미완료 → W06~W08 BLOCKED_EXTERNAL, W03 원격 checks 대기. 다음 W09 미리보기·게시·방문자 UI READY. 완료 W4/20, M1/6 유지. 운영 DB 적용/Public 활성화/배포 없음.** [ExecPlan](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md)과 [단일 진행판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)에서 이어간다. 아래 과거 마감 기록의 Private-only 종료 전제는 새 출시 목표로 대체하며, 당시 구현·검증 기록은 과거 근거로 보존한다.
+> **활성 출시 계획 (2026-09-24):** V2의 계정·공개 보드·공개 미니홈·팔로우·최소 운영 목표를 사용자 승인으로 채택했다. **W16~W20의 가능한 로컬 구현/검증/후보 점검까지 연속 실행했다. unit320·catalog256·Chromium174·SQL235·native31, 웹/테스트 APK 빌드 통과(선택 검사 skip 별도 기록). 실제 계정·기기·정책·예산·복구 사본·정확한 후보 승인 D01~D06이 남아 정식 출시/모든 W 완료는 아니다.** 운영 SHA는0330a54지만 build-info의 workingTreeDirty=true 원인도 확인이 필요하다. 미커밋·운영 적용 없음. [단일 진행판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)과 [ExecPlan](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md)을 따른다. 아래 Private-only 마감과 이전 상태는 과거 근거로 보존한다.
 
 > **현재 기능 마무리 (2026-09-22):** 추가 기능 개발을 중단하고 모달·카드 이미지 클릭·미저장 이동/취소·보드 작업·오류 복귀를 보완했다. 옛 공개 프로필 경로를 닫고 운영 ID 연속성/일일 health/CI/Git build 추적을 추가했다. 단위 238, 카탈로그 251, 최종 브라우저 18, build 통과. **미커밋·미배포, 예약 자동화 미가동.** 계정별 서버 한도·계정 삭제·Public 관리·실제 OAuth/Android는 출시 전 미완료 게이트다. [감사/수정 결과](docs/moemoa/reports/2026-09-22-service-finishing.md), [운영 절차](docs/moemoa/operations/2026-09-22-minimum-operations.md).
 

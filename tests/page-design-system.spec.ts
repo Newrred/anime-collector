@@ -193,7 +193,9 @@ test.describe("Page Design System Consistency", () => {
         expect(metrics.docOverflow, `${viewport.name} ${routeConfig.route} document overflow`).toBeLessThanOrEqual(0.5);
         expect(metrics.bodyOverflow, `${viewport.name} ${routeConfig.route} body overflow`).toBeLessThanOrEqual(0.5);
         expect(metrics.cardCount, `${viewport.name} ${routeConfig.route} visible surface cards`).toBeGreaterThan(0);
-        expect(metrics.minRadius, `${viewport.name} ${routeConfig.route} min card radius`).toBeGreaterThanOrEqual(routeConfig.minRadius ?? 8);
+        // Composer uses compact 12px desktop cards and 16px cards at the mobile breakpoint.
+        const minRadius = routeConfig.route === '/memory/new/' && viewport.name === 'desktop' ? 12 : routeConfig.minRadius ?? 8;
+        expect(metrics.minRadius, `${viewport.name} ${routeConfig.route} min card radius`).toBeGreaterThanOrEqual(minRadius);
         expect(metrics.maxRadius, `${viewport.name} ${routeConfig.route} max card radius`).toBeLessThanOrEqual(routeConfig.maxRadius ?? 12.5);
         expect(metrics.minPadding, `${viewport.name} ${routeConfig.route} min card padding`).toBeGreaterThanOrEqual(routeConfig.minPadding ?? 12);
         expect(metrics.maxPadding, `${viewport.name} ${routeConfig.route} max card padding`).toBeLessThanOrEqual(routeConfig.maxPadding ?? 24.5);

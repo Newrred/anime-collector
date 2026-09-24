@@ -4,10 +4,10 @@ import { PublicImageError } from "./processImage.js";
 export const IMAGE_BUCKET = "memory-public-derivatives";
 const SAFE = new Set(["AUTH_REQUIRED","PUBLICATION_DISABLED","PUBLIC_IMAGE_DISABLED","CONSENT_MISMATCH",
   "PUBLICATION_RESTRICTED","PUBLIC_VISUAL_NOT_READY","IMAGE_RIGHTS_REQUIRED","OPERATION_MISMATCH",
-  "ASSET_OPERATION_UNAVAILABLE","IMAGE_QUOTA_EXCEEDED","ASSET_IN_USE","NOT_FOUND"]);
+  "ASSET_OPERATION_UNAVAILABLE","IMAGE_QUOTA_EXCEEDED","ASSET_IN_USE","NOT_FOUND","RATE_LIMITED"]);
 export async function rpc(client, name, args) {
   const { data, error } = await client.rpc(name, args);
-  if (error) throw new PublicImageError(SAFE.has(error.message) ? error.message : "IMAGE_SERVICE_FAILED", 409);
+  if (error) throw new PublicImageError(SAFE.has(error.message) ? error.message : "IMAGE_SERVICE_FAILED", error.message === "RATE_LIMITED" ? 429 : 409);
   return data;
 }
 

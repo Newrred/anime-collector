@@ -1,4 +1,5 @@
 import { resolveWebOAuthNext } from "./webOAuth.js";
+import { toPlatformAppHref } from "../../domain/search/memoryCardNavigation.js";
 
 export const NATIVE_AUTH_CALLBACK = "com.newrred.moemoa://auth/callback";
 const MAX_CODE_LENGTH = 4096;
@@ -68,7 +69,7 @@ export async function installNativeOAuthCallback({
       await browser?.close?.().catch(() => {});
       const pendingNext = nextConsumed ? "" : consumeNext();
       nextConsumed = true;
-      navigate(resolveWebOAuthNext({ pendingNext, origin, base }));
+      navigate(toPlatformAppHref(resolveWebOAuthNext({ pendingNext, origin, base }), { native: true, origin }));
     } catch {
       report({ code: "PKCE_EXCHANGE_FAILED" });
     }

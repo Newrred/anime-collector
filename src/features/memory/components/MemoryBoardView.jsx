@@ -1,6 +1,8 @@
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MemoryCardPreview from "./MemoryCardPreview.jsx";
+import MemoryPublicationPanel from "./MemoryPublicationPanel.jsx";
+import { minihomeUiEnabled } from "../runtime/platformPublication.js";
 import { loadMemoryVisual } from "../application/loadMemoryVisual.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
@@ -116,6 +118,7 @@ function MemoryBoardContent({ base }) {
       <header className="memory-boards__header">
         <div className="pageHeader">
           <h1 className="pageTitle">{boardCopy.title}</h1>
+          {minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
         </div>
         <a className="btn btn--subtle" href={`${base}archive/`}>{boardCopy.archiveLink}</a>
       </header>
@@ -248,6 +251,7 @@ function MemoryBoardContent({ base }) {
                   )}
                 </section>
 
+                <MemoryPublicationPanel detail={detail} runtime={runtime} locale={locale} base={base} disabled={busy || editing} />
                 <details className="memory-boards__tools">
                   <summary>{boardCopy.addTitle}</summary>
                   <div className="memory-boards__add">

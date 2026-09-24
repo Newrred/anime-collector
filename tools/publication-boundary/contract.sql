@@ -73,6 +73,8 @@ select pg_temp.fails($q$select public.publish_memory_publication(current_setting
 select set_config('test.preview',public.prepare_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001',1,current_setting('test.selection')::jsonb)::text,false);
 select pg_temp.ok(public.publish_memory_publication(current_setting('test.id')::uuid,2,current_setting('test.preview')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000001')->>'state'='PUBLISHED','reviewed snapshot publishes');
 select pg_temp.ok(public.publish_memory_publication(current_setting('test.id')::uuid,2,current_setting('test.preview')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000001')->>'revision'='3','retry does not increment version');
+select pg_temp.ok(public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001')->>'sourceChanged'='false','published source versions match immediately after publish');
+select pg_temp.ok(not (public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001') ? 'published_sources'),'owner status does not expose source manifest');
 set role anon;
 select set_config('request.jwt.claim.sub','',false);
 select pg_temp.ok(public.read_memory_publication(current_setting('test.id')::uuid)-'id'=current_setting('test.preview')::jsonb->'snapshot','anon visitor payload matches exact reviewed snapshot');
@@ -89,12 +91,15 @@ set role authenticated;
 select set_config('test.preview2',public.prepare_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000002',0,current_setting('test.selection')::jsonb)::text,false);
 select public.publish_memory_publication((current_setting('test.preview2')::jsonb->>'id')::uuid,1,current_setting('test.preview2')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000002');
 select set_config('test.refresh',public.prepare_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001',3,current_setting('test.selection')::jsonb)::text,false);
+select pg_temp.ok(public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001')->>'sourceChanged'='true','private edit requires public review after reload');
+select pg_temp.ok(public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001')->>'hasPublished'='true','preparing update retains published status');
 select pg_temp.ok(public.read_memory_publication(current_setting('test.id')::uuid)->'cards'->0->>'title'='Chosen title 1','preparing update preserves previous public snapshot');
 select pg_temp.fails($q$select public.prepare_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001',3,current_setting('test.selection')::jsonb)$q$,'PUBLICATION_CONFLICT','stale parallel prepare cannot replace preview');
 reset role;
 update private.memory_publication_settings set writes_enabled=false;
 set role authenticated;
 select public.revoke_memory_publication(current_setting('test.id')::uuid,4);
+select pg_temp.ok(public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001')->>'hasPublished'='false','withdrawal removes published status');
 select pg_temp.ok(public.read_memory_publication(current_setting('test.id')::uuid) is null,'board revoke works with writes disabled');
 select pg_temp.ok(public.read_memory_publication((current_setting('test.preview2')::jsonb->>'id')::uuid) is not null,'revoking one board preserves other explicit publication');
 reset role;
@@ -103,6 +108,7 @@ set role authenticated;
 select pg_temp.fails($q$select public.publish_memory_publication(current_setting('test.id')::uuid,4,current_setting('test.refresh')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000004')$q$,'PUBLICATION_CONFLICT','late prepared success cannot revive revoked board');
 select pg_temp.ok(public.publish_memory_publication(current_setting('test.id')::uuid,2,current_setting('test.preview')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000001')->>'state'='REVOKED','old successful operation replay reports current revoked state');
 select public.revoke_memory_card_publications('cccccccc-cccc-4ccc-8ccc-000000000001');
+select pg_temp.fails($q$select public.publish_memory_publication((current_setting('test.preview2')::jsonb->>'id')::uuid,1,current_setting('test.preview2')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000002')$q$,'PUBLICATION_RESTRICTED','replay after global withdrawal must not report live publication success');
 select pg_temp.ok(jsonb_array_length(public.read_memory_publication((current_setting('test.preview2')::jsonb->>'id')::uuid)->'cards')=0,'global card revoke removes card from remaining board');
 select pg_temp.fails($q$select public.prepare_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001',5,current_setting('test.selection')::jsonb)$q$,'PUBLICATION_RESTRICTED','new board preparation cannot bypass globally revoked card');
 reset role;
@@ -176,3 +182,34 @@ set role anon;
 select pg_temp.ok(public.read_memory_publication(current_setting('test.id')::uuid) is null,'read kill switch blocks existing publication');
 reset role;
 select count(*) as passed_assertions from assertions;
+
+-- Retire-before-sync: no source row is needed to prevent a delayed insert/replay.
+begin;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+set local role authenticated;
+select public.retire_memory_card_publications('cccccccc-cccc-4ccc-8ccc-000000000099');
+select public.retire_memory_card_publications('cccccccc-cccc-4ccc-8ccc-000000000099');
+select pg_temp.fails('select * from private.memory_publication_delete_fences','permission denied','client cannot read/delete withdrawal fences');
+reset role;
+select pg_temp.ok((select count(*)=1 from private.memory_publication_delete_fences where card_id='cccccccc-cccc-4ccc-8ccc-000000000099'),'retire unknown source creates one durable fence');
+insert into public.memory_cards(id,user_id,catalog_anime_id,title_snapshot,status,client_updated_at)
+values('cccccccc-cccc-4ccc-8ccc-000000000099','11111111-1111-4111-8111-111111111111',
+  'anime:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Late source','COMPLETE_PRIVATE',now());
+insert into private.memory_public_cards(id,user_id,card_id)
+values('cccccccc-cccc-4ccc-8ccc-000000000098','11111111-1111-4111-8111-111111111111','cccccccc-cccc-4ccc-8ccc-000000000099');
+select pg_temp.ok(not private.memory_public_card_readable('11111111-1111-4111-8111-111111111111',
+  '{"id":"cccccccc-cccc-4ccc-8ccc-000000000098","visual":{"type":"SYSTEM_DESIGN","rendererVersion":1}}'),'late source and restored public row remain unreadable');
+select pg_temp.fails($q$select private.build_memory_publication('11111111-1111-4111-8111-111111111111','bbbbbbbb-bbbb-4bbb-8bbb-000000000001',
+  '{"title":"Late","description":"","cards":[{"cardId":"cccccccc-cccc-4ccc-8ccc-000000000099","fields":[]}]}')$q$,
+  'PUBLICATION_RESTRICTED','late synced source cannot prepare public content');
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+set local role authenticated;
+select public.retire_memory_card_publications('cccccccc-cccc-4ccc-8ccc-000000000002');
+reset role;
+select pg_temp.ok(not exists(select 1 from private.memory_publication_delete_fences
+  where user_id='11111111-1111-4111-8111-111111111111' and card_id='cccccccc-cccc-4ccc-8ccc-000000000002'),'B cannot retire A namespace');
+set local role anon;
+select pg_temp.fails($q$select public.retire_memory_card_publications('cccccccc-cccc-4ccc-8ccc-000000000002')$q$,'permission denied','anonymous cannot retire a card');
+reset role;
+select count(*) as total_with_retirement_assertions from assertions;
+rollback;

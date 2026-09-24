@@ -1519,8 +1519,9 @@ export default function Library() {
   function toggleQuickLogCharacter(characterId) {
     const id = Number(characterId);
     if (!Number.isFinite(id)) return;
-    setQuickLogCharacterIds((prev) => {
-      const arr = Array.isArray(prev) ? prev : [];
+    {
+      // This is one discrete click: keep updates to other state outside a replayable updater.
+      const arr = Array.isArray(quickLogCharacterIds) ? quickLogCharacterIds : [];
       const exists = arr.includes(id);
       if (exists) {
         setQuickLogCharacterMeta((metaPrev) => {
@@ -1534,19 +1535,20 @@ export default function Library() {
           if (Number.isFinite(cur) && cur !== id && nextIds.includes(cur)) return cur;
           return nextIds.length ? nextIds[0] : null;
         });
-        return nextIds;
+        setQuickLogCharacterIds(nextIds);
+        return;
       }
-      if (arr.length >= 3) return arr;
+      if (arr.length >= 3) return;
       setQuickLogCharacterMeta((metaPrev) => ({
         ...metaPrev,
         [id]: metaPrev?.[id] || { affinity: "기억남음", reasonTags: [], note: "" },
       }));
       const nextIds = [...arr, id];
       setQuickLogPrimaryCharacterId((prevPrimary) =>
-        Number.isFinite(Number(prevPrimary)) ? Number(prevPrimary) : id
+        prevPrimary != null && arr.includes(Number(prevPrimary)) ? Number(prevPrimary) : id
       );
-      return nextIds;
-    });
+      setQuickLogCharacterIds(nextIds);
+    }
   }
 
   function setQuickLogPrimaryCharacter(characterId) {

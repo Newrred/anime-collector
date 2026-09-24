@@ -243,6 +243,7 @@ const enMessages = {
       deleteCancel: "Cancel",
       deleteConfirmAction: "Confirm card deletion",
       deleteFailed: "The card could not be fully deleted. Reopen the app to try recovery.",
+      deleteWithdrawalFailed: "Public withdrawal could not be confirmed. Your original was not deleted. Check your connection and sign-in, then retry deletion.",
       imageSaved: "The new image was saved on this device.",
       imageSavedCleanup: "The new image was saved on this device. Cleanup of the previous image will finish when the app reopens.",
       imageSavedRefresh: "The new image was saved. Reopen this screen to see the updated card.",
@@ -465,7 +466,7 @@ const enMessages = {
       },
       {
         title: "Minihome",
-        body: "Minihome lets you turn your records into cards and publish them as a public Minihome. Set it up your way and share it.",
+        body: "When public sharing is enabled, your Minihome can display Boards you explicitly select and publish. Private records are not added automatically. Public sharing is not yet generally available.",
       },
     ],
     tipsTitle: "About",

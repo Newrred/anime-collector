@@ -1,0 +1,187 @@
+{
+  "task": "W09",
+  "date": "2026-09-24",
+  "baseline": "0330a5401e0112f2e36886a6826812219e7aed89",
+  "candidate": "uncommitted",
+  "runtime": {
+    "node": "24.19.0",
+    "os": "Windows",
+    "npm": "11.17.0"
+  },
+  "status": {
+    "AUTO_TESTED": "PASS (unit, Chromium, build, dist routes); static analysis not clean",
+    "IMPLEMENTED": "YES",
+    "OWNER_APPROVED": "local implementation only",
+    "REAL_ENV_VERIFIED": "BLOCKED_EXTERNAL"
+  },
+  "results": {
+    "generatedStaticRoutes": 16,
+    "build": {
+      "postbuild": "PASS",
+      "pages": 16
+    },
+    "sql": "NOT_RUN: unchanged migrations, local PostgreSQL absent",
+    "reactDoctor": {
+      "version": "0.9.14",
+      "warnings": 125,
+      "newWarnings": [
+        {
+          "filePath": "src/features/memory/components/MemoryPublicationPanel.jsx",
+          "rule": "no-high-complexity-react-function",
+          "severity": "warning",
+          "line": 50
+        },
+        {
+          "filePath": "src/features/memory/components/PublicBoardSnapshot.jsx",
+          "rule": "no-create-object-url-without-revoke",
+          "severity": "warning",
+          "line": 29
+        },
+        {
+          "filePath": "src/features/memory/components/PublicBoardSnapshot.jsx",
+          "rule": "no-pass-data-to-parent",
+          "severity": "warning",
+          "line": 41
+        },
+        {
+          "filePath": "src/features/memory/components/PublicBoardSnapshot.jsx",
+          "rule": "no-pass-live-state-to-parent",
+          "severity": "warning",
+          "line": 41
+        },
+        {
+          "filePath": "src/features/memory/components/PublicBoardSnapshot.jsx",
+          "rule": "no-prop-callback-in-effect",
+          "severity": "warning",
+          "line": 41
+        },
+        {
+          "filePath": "src/features/memory/components/PublicMemoryBoard.jsx",
+          "rule": "no-set-state-after-await-in-effect",
+          "severity": "warning",
+          "line": 14
+        }
+      ],
+      "errors": 21,
+      "score": 39,
+      "newFileErrors": 0
+    },
+    "unit": {
+      "fail": 0,
+      "pass": 306
+    },
+    "packagedAndroid": "NOT_RUN: assets missing",
+    "productionBundle": "No W09 DEV adapter identifier or privileged server settings",
+    "chromium": {
+      "backend": "synthetic Auth/RPC/Storage, real local browser/IndexedDB/image bytes",
+      "existingBoard": 3,
+      "newPublication": 8,
+      "fail": 0,
+      "pass": 11
+    }
+  },
+  "productionChanges": {
+    "db": false,
+    "deploy": false,
+    "push": false,
+    "dependencies": false,
+    "flags": false
+  },
+  "artifacts": [
+    {
+      "path": ".cache/w09-unit-final.log",
+      "sha256": "ecae3802a0fba3789f3212d4ca6b5197c36af2a752749f14eb0b2885d53dde39"
+    },
+    {
+      "path": ".cache/w09-browser-final.log",
+      "sha256": "66f6bee2231e74287410483dd2b67b827ad2627c72dfe1184b100afbd5d86b2d"
+    },
+    {
+      "path": ".cache/w09-build-final.log",
+      "sha256": "de01d924c0e52e4d34ab1efdaaee8c3774b13d03e9c1d7f2291f80c078fb96b5"
+    },
+    {
+      "path": ".cache/w09-react-doctor-final.log",
+      "sha256": "704f1aec44cf7602312da16c3695d44bcfe831777e49474b8a07c527ff5b6b45"
+    },
+    {
+      "path": ".cache/w09-preview-320.png",
+      "sha256": "20220770b83b6d7f1f05e2bb81801bd23846c3faaa3625815001d4464c5ad86e"
+    }
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "28fe7b25f2ff4c70a93a5adf27f8447865c3be00b0478e95d6831ce0f7e53864"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "sha256": "9df044f4ba292333d9034f796001a97fbb146392b36de69ca9f48e0a4f34c1cd"
+    },
+    {
+      "path": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+      "sha256": "e179c00a9fc2aa3ea72eb086966bbaabb86be2c0bc852cc6604a425fd2d9d2ee"
+    },
+    {
+      "path": "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+      "sha256": "3ac46438fba4765d60a9e6f341f490634d5df77737d30e83e72cd0ea80b64994"
+    },
+    {
+      "path": "scripts/verify-android-static-routes.mjs",
+      "sha256": "dd6794dedb34915f414cda36f9aa0e273fc5a5e9286c88ab8d829289676feaeb"
+    },
+    {
+      "path": "src/features/memory/application/createPublicationController.js",
+      "sha256": "42f6228a90b76854f4c74382d092c5c3e8f3321a97605b669675ed4d889394ee"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "b097ed223be514aad35b59872abfd9b2bc1807af1d6f1a31c0316e0df0e06254"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "8e12e3c23e0f1868c4e55cc58d6669a85b152aa430e6eca7f4b476d60278eaef"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicationPanel.jsx",
+      "sha256": "46a709f9dd51376310fe4b226392feb37fe2ca2fea0e5a0816c0f596c2beccfd"
+    },
+    {
+      "path": "src/features/memory/components/publicationCopy.js",
+      "sha256": "0e421c710bcca9242503fe44991271cd1089d0e9b5132a767d8d5fa3ca5d3a39"
+    },
+    {
+      "path": "src/features/memory/components/PublicBoardSnapshot.jsx",
+      "sha256": "a94b685e61942434163a4274b16c9ba71abf6611931406fe6ed0ac2932186a21"
+    },
+    {
+      "path": "src/features/memory/components/PublicMemoryBoard.jsx",
+      "sha256": "5a3f6aee6915fda04d6ee2fb26f2ef0d5e885bd6b37cc527ec52cb28b2b70284"
+    },
+    {
+      "path": "src/features/memory/domain/publicationView.js",
+      "sha256": "8718e7ed0066de68310b8d345ef499754fe4e4af06598cbb5e76a900d9624109"
+    },
+    {
+      "path": "src/features/memory/runtime/platformPublication.js",
+      "sha256": "806564b2c7641bc5a8a4dcc818fc954eca275bda34422a0153f340ae3fe9a8fa"
+    },
+    {
+      "path": "src/pages/public/board.astro",
+      "sha256": "ec1fbc30959bad38972d4c363a637620744cbae100f3f023f352a7b5345a9fcb"
+    },
+    {
+      "path": "tests/publication-ui.spec.ts",
+      "sha256": "d6ed62403b4cb72472b2ccc171dac86c6bf92200a064608ba73f561a8859406e"
+    },
+    {
+      "path": "tests/unit/nativeAppNavigation.test.mjs",
+      "sha256": "76ef057736da78f1edb005689757704ebdf94ae36d3ecdb384772264a74adc10"
+    },
+    {
+      "path": "tests/unit/publicationController.test.mjs",
+      "sha256": "d1dfe5df35cb518bdc75c662c03daf66f5ad958fcd69cf7c86d983e8383e4137"
+    }
+  ],
+  "next": "W10 READY; W09 remains BLOCKED_EXTERNAL"
+}

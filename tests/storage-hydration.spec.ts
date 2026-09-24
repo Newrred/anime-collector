@@ -378,8 +378,10 @@ test("Home initial entry preserves an IDB-only watch log without presenting it a
   });
 
   await page.goto("/");
-  await expect(page.locator(".home-empty-state")).toBeVisible();
-  await expect(page.locator(".home-focus-card__cue")).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Return to your memories' })).toBeVisible();
+  await expect(page.locator('.home-memory-overview .memory-preview')).toHaveCount(0);
+  // Watch-log insights may exist in their separate collapsed section, never in the Memory collection.
+  await expect(page.locator(".home-memory-overview .home-focus-card__cue")).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");
     return rows.map((row) => row.cue);

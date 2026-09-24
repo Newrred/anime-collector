@@ -157,7 +157,7 @@ test("native Home actions target packaged index documents instead of clean Web r
 
   await page.getByRole("link", { name: "Add Memory" }).first().click();
 
-  await expect(page).toHaveURL(/\/memory\/new\/index\.html$/u);
+  await expect(page).toHaveURL(url => url.pathname === '/memory/new/index.html' && url.searchParams.get('returnTo') === '/');
 });
 
 test("native search actions preserve the selected title in the packaged composer route", async ({ page }) => {

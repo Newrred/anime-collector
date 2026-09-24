@@ -85,19 +85,19 @@ test("320px header keeps primary controls separate and at least 44px", async ({ 
   );
 });
 
-test("320px composer follows visual, title, reflection, rights, and save order", async ({ page }) => {
+test("320px system-design composer follows visual, title, reflection, and save order without an image-rights prompt", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });
   await page.goto("/memory/new/");
   await page.getByRole("button", { name: "Use system design" }).click();
   await page.getByLabel("Anime or card title").fill("Mobile flow");
+  await expect(page.locator('.memory-composer__rights-step')).toHaveCount(0);
 
   const geometry = await page.evaluate(() => {
     const selectors = [
       ".memory-composer__visual-column",
       ".memory-composer__title-search",
       ".memory-composer__reflection-step",
-      ".memory-composer__rights-step",
       ".memory-composer__save-gate",
     ];
     const rows = selectors.map((selector) => {

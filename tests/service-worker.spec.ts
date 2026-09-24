@@ -41,6 +41,7 @@ test('worker upgrade preserves local data, isolates caches, and refreshes sensit
     expect(await read('/build-info.json')).toBe('first');
     expect(await read('/api/account')).toBe('first');
     expect(await read('/public/image')).toBe('first');
+    expect(await read('/public/home/?id=fixture')).toBe('first');
     expect(await read('/_astro/app.hash.js')).toBe('asset-first');
     assetStatus = 500;
     await read('/_astro/failure.hash.js');
@@ -49,6 +50,8 @@ test('worker upgrade preserves local data, isolates caches, and refreshes sensit
     expect(await read('/build-info.json')).toBe('second');
     expect(await read('/api/account')).toBe('second');
     expect(await read('/public/image')).toBe('second');
+    expect(await read('/public/home/?id=fixture')).toBe('second');
+    expect(await page.evaluate(async () => Boolean(await caches.match('/public/home/?id=fixture')))).toBe(false);
     expect(await page.evaluate(async () => Boolean(await caches.match('/api/account')))).toBe(false);
     await page.evaluate(async () => (await navigator.serviceWorker.getRegistration())!.update());
     await expect.poll(() => page.evaluate(() => caches.has('moemoa-static-first'))).toBe(false);

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 const stack = [];
 let savedOverflow = "";
@@ -11,7 +11,7 @@ const focusable = (node) => [...node.querySelectorAll(
 export function useModalInteraction({ open, onClose, busy = false }) {
   const ref = useRef(null);
   const options = useRef({ onClose, busy });
-  options.current = { onClose, busy };
+  useLayoutEffect(() => { options.current = { onClose, busy }; }, [onClose, busy]);
   useEffect(() => {
     if (!open || !ref.current) return undefined;
     const node = ref.current;

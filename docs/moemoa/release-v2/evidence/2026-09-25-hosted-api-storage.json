@@ -1,0 +1,852 @@
+{
+  "date": "2026-09-25",
+  "project": "nmgkhknponvzcwliajyk",
+  "method": "Actual browser Google sessions; application diagnostic JS using normal Supabase client. No token export. Anonymous uses publishable key only.",
+  "results": [
+    {
+      "role": "A",
+      "passed": 12,
+      "total": 12,
+      "results": [
+        {
+          "name": "own card readable",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "foreign card hidden",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "unfiltered cards owner scoped",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "direct foreign update denied",
+          "status": 403,
+          "pass": true
+        },
+        {
+          "name": "direct insert denied",
+          "status": 403,
+          "pass": true
+        },
+        {
+          "name": "private schema inaccessible",
+          "status": 406,
+          "pass": true
+        },
+        {
+          "name": "private bucket listing hidden",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "private fixture signed URL denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture public download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture authenticated download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage upload denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage overwrite denied",
+          "status": 400,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "role": "B",
+      "passed": 12,
+      "total": 12,
+      "results": [
+        {
+          "name": "own card readable",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "foreign card hidden",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "unfiltered cards owner scoped",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "direct foreign update denied",
+          "status": 403,
+          "pass": true
+        },
+        {
+          "name": "direct insert denied",
+          "status": 403,
+          "pass": true
+        },
+        {
+          "name": "private schema inaccessible",
+          "status": 406,
+          "pass": true
+        },
+        {
+          "name": "private bucket listing hidden",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "private fixture signed URL denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture public download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture authenticated download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage upload denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage overwrite denied",
+          "status": 400,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "role": "ANON",
+      "passed": 9,
+      "total": 9,
+      "results": [
+        {
+          "name": "anonymous private rows denied",
+          "status": 401,
+          "pass": true
+        },
+        {
+          "name": "direct insert denied",
+          "status": 401,
+          "pass": true
+        },
+        {
+          "name": "private schema inaccessible",
+          "status": 406,
+          "pass": true
+        },
+        {
+          "name": "private bucket listing hidden",
+          "status": 200,
+          "pass": true
+        },
+        {
+          "name": "private fixture signed URL denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture public download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "private fixture authenticated download denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage upload denied",
+          "status": 400,
+          "pass": true
+        },
+        {
+          "name": "client storage overwrite denied",
+          "status": 400,
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "fixture": {
+    "bucket": "memory-public-derivatives",
+    "path": "d01-probe.webp",
+    "bytes": 60,
+    "sha256": "6B0C95FE2DD56BEFE9E0B5991C9B16D1831C4C80B870C7B3294047499CB21A8E",
+    "adminPreviewVerified": true,
+    "afterDeniedWritesObjectCount": 1
+  },
+  "probeSha256": "67E3D178746ADEC441F66AAE070649CA9176B53480D9301F6097D2B3EA999630",
+  "closedFlags": {
+    "reads": false,
+    "writes": false,
+    "images": false,
+    "minihomes": false,
+    "policy": "UNAPPROVED"
+  },
+  "advisors": {
+    "lints": [
+      {
+        "name": "rls_enabled_no_policy",
+        "title": "RLS Enabled No Policy",
+        "level": "INFO",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+        "count": 18,
+        "findings": [
+          {
+            "detail": "Table \\`private.memory_account_sanctions\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_account_sanctions",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_minihomes\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_minihomes",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_moderation_audit\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_moderation_audit",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_moderation_notices\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_moderation_notices",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_moderation_targets\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_moderation_targets",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_moderators\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_moderators",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_public_assets\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_public_assets",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_public_cards\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_public_cards",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_public_image_rights\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_public_image_rights",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_publication_accounts\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_publication_accounts",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_publication_delete_fences\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_publication_delete_fences",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_publication_settings\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_publication_settings",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_publications\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_publications",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_relationships\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_relationships",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_reports\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_reports",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_resource_overrides\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_resource_overrides",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_resource_policies\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_resource_policies",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Table \\`private.memory_resource_usage\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "memory_resource_usage",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          }
+        ]
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "title": "Public Can Execute SECURITY DEFINER Function",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+        "count": 2,
+        "findings": [
+          {
+            "detail": "Function `public.read_memory_minihome(p_id uuid)` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/read_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "read_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.read_memory_publication(p_id uuid)` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/read_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "read_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          }
+        ]
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+        "count": 35,
+        "findings": [
+          {
+            "detail": "Function `public.appeal_memory_notice(p_id uuid, p_text text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/appeal_memory_notice`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "appeal_memory_notice",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid, p_text text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.apply_board_mutation(p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_operation_type text, p_base_version bigint, p_request_hash text, p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/apply_board_mutation`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "apply_board_mutation",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_operation_type text, p_base_version bigint, p_request_hash text, p_payload jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.apply_memory_card_mutation(p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_operation_type text, p_base_version bigint, p_request_hash text, p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/apply_memory_card_mutation`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "apply_memory_card_mutation",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_operation_type text, p_base_version bigint, p_request_hash text, p_payload jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.authorize_memory_image_attempt()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/authorize_memory_image_attempt`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "authorize_memory_image_attempt",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.cancel_memory_public_asset(p_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/cancel_memory_public_asset`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "cancel_memory_public_asset",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.ensure_user_profile(p_display_name text, p_locale text, p_time_zone text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/ensure_user_profile`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "ensure_user_profile",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_display_name text, p_locale text, p_time_zone text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.get_memory_minihome()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/get_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "get_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.get_memory_publication(p_board_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/get_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "get_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_board_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.get_memory_relationship(p_home_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/get_memory_relationship`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "get_memory_relationship",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_home_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.get_memory_resource_usage()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/get_memory_resource_usage`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "get_memory_resource_usage",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.inspect_memory_resource_costs()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/inspect_memory_resource_costs`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "inspect_memory_resource_costs",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.list_memory_minihome_boards(p_after uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/list_memory_minihome_boards`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "list_memory_minihome_boards",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_after uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.list_memory_moderation(p_after uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/list_memory_moderation`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "list_memory_moderation",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_after uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.list_memory_relationships(p_blocked boolean, p_after uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/list_memory_relationships`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "list_memory_relationships",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_blocked boolean, p_after uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.list_memory_safety(p_after uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/list_memory_safety`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "list_memory_safety",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_after uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.prepare_memory_minihome(p_expected_revision bigint, p_selection jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/prepare_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "prepare_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_expected_revision bigint, p_selection jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.prepare_memory_publication(p_board_id uuid, p_expected_revision bigint, p_selection jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/prepare_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "prepare_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_board_id uuid, p_expected_revision bigint, p_selection jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.promote_guest_memory(p_operation_id uuid, p_device_id uuid, p_guest_owner_id text, p_source_hash text, p_bundle jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/promote_guest_memory`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "promote_guest_memory",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_operation_id uuid, p_device_id uuid, p_guest_owner_id text, p_source_hash text, p_bundle jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.publish_memory_minihome(p_expected_revision bigint, p_review_hash text, p_policy_revision text, p_operation_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/publish_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "publish_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_expected_revision bigint, p_review_hash text, p_policy_revision text, p_operation_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.publish_memory_publication(p_id uuid, p_expected_revision bigint, p_review_hash text, p_policy_revision text, p_operation_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/publish_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "publish_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid, p_expected_revision bigint, p_review_hash text, p_policy_revision text, p_operation_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.pull_memory_changes(p_after_seq bigint, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/pull_memory_changes`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "pull_memory_changes",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_after_seq bigint, p_limit integer",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.read_memory_minihome(p_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/read_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "read_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.read_memory_moderation_audit(p_case uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/read_memory_moderation_audit`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "read_memory_moderation_audit",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_case uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.read_memory_publication(p_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/read_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "read_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.register_user_device(p_device_id uuid, p_installation_id uuid, p_platform text, p_app_version text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/register_user_device`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "register_user_device",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_device_id uuid, p_installation_id uuid, p_platform text, p_app_version text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.reserve_memory_public_asset(p_asset_id uuid, p_source_version bigint, p_operation_id uuid, p_policy_revision text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/reserve_memory_public_asset`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "reserve_memory_public_asset",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_asset_id uuid, p_source_version bigint, p_operation_id uuid, p_policy_revision text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.resolve_memory_conflict(p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_base_version bigint, p_request_hash text, p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/resolve_memory_conflict`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "resolve_memory_conflict",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_operation_id uuid, p_device_id uuid, p_entity_type text, p_entity_id uuid, p_base_version bigint, p_request_hash text, p_payload jsonb",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.resolve_memory_image_preview(p_asset_id uuid, p_variant text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/resolve_memory_image_preview`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "resolve_memory_image_preview",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_asset_id uuid, p_variant text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.retire_memory_card_publications(p_card_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/retire_memory_card_publications`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "retire_memory_card_publications",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_card_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.review_memory_report(p_id uuid, p_revision bigint, p_target_revision bigint, p_action text, p_reason text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/review_memory_report`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "review_memory_report",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid, p_revision bigint, p_target_revision bigint, p_action text, p_reason text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.revoke_memory_card_publications(p_card_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/revoke_memory_card_publications`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "revoke_memory_card_publications",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_card_id uuid",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.revoke_memory_minihome(p_expected_revision bigint)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/revoke_memory_minihome`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "revoke_memory_minihome",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_expected_revision bigint",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.revoke_memory_publication(p_id uuid, p_expected_revision bigint)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/revoke_memory_publication`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "revoke_memory_publication",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_id uuid, p_expected_revision bigint",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.set_memory_relationship(p_home_id uuid, p_action text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/set_memory_relationship`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "set_memory_relationship",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_home_id uuid, p_action text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          },
+          {
+            "detail": "Function `public.submit_memory_report(p_kind text, p_target uuid, p_category text, p_operation uuid, p_note text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/submit_memory_report`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+            "metadata": {
+              "name": "submit_memory_report",
+              "schema": "public",
+              "language": "plpgsql",
+              "arguments": "p_kind text, p_target uuid, p_category text, p_operation uuid, p_note text",
+              "security_definer": true
+            },
+            "observed_at": "2026-09-24T15:09:56.410Z"
+          }
+        ]
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "title": "Leaked Password Protection Disabled",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Leaked password protection is currently disabled.",
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+        "count": 1,
+        "findings": [
+          {
+            "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+            "metadata": {
+              "type": "auth",
+              "entity": "Auth"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "No exhaustive RPC attack audit",
+    "No enabled public image transformation/delivery or deployed CDN verification",
+    "No backup disaster-recovery rehearsal",
+    "Android excluded by user"
+  ],
+  "mutations": "Only synthetic private fixture upload. Denied direct card writes left A version4/deleted and B version2/active unchanged."
+}

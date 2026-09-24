@@ -417,7 +417,7 @@ export class IndexedDbMemoryRepository {
   async getCardBundle(ownerId, cardId) {
     const transaction = this.database.transaction(
       ["memory_cards", "private_titles", "anime_refs", "visual_assets"],
-      "readonly",
+      "readwrite",
     );
     const stores = {
       cards: transaction.objectStore("memory_cards"),
@@ -433,12 +433,20 @@ export class IndexedDbMemoryRepository {
     const title = card.privateTitleId
       ? await requestResult(stores.titles.get(card.privateTitleId))
       : await requestResult(stores.anime.get(card.animeRefId));
-    const asset = await requestResult(stores.assets.get(card.visualAssetId));
+    // Recover an older pulled card whose visual arrived before the card itself.
+    const asset = card.visualAssetId
+      ? await requestResult(stores.assets.get(card.visualAssetId))
+      : (await requestResult(stores.assets.index("owner_state").getAll([ownerId, "READY"])))
+        .find((item) => item.cardId === card.id && item.isCurrent && !item.deletedAt);
+    if (!card.visualAssetId && asset && title && (!title.ownerId || title.ownerId === ownerId)) {
+      card.visualAssetId = asset.id;
+      stores.cards.put(card);
+    }
     await transactionDone(transaction);
     if (!title || !asset || asset.ownerId !== ownerId || (title.ownerId && title.ownerId !== ownerId)) {
       return null;
     }
-    return clone({ card, title, asset });
+    return clone({ card: { ...card, visualAssetId: asset.id }, title, asset });
   }
 
   async updateCardMetadata({ ownerId, cardId, changes, now, syncOperations = [] }) {

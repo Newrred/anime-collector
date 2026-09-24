@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 export function useUnsavedNavigation(dirty, locale = "ko", { busy = false } = {}) {
   const state = useRef({ dirty, locale, busy });
-  state.current = { dirty, locale, busy };
+  useLayoutEffect(() => { state.current = { dirty, locale, busy }; }, [dirty, locale, busy]);
   const leaving = useRef(false);
   useEffect(() => {
     if (!dirty && !busy) return undefined;

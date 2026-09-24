@@ -30,6 +30,8 @@ const webServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER
  */
 export default defineConfig({
   testDir: './tests',
+  // Node's unit/catalog suites have their own runners; do not execute them while collecting browser tests.
+  testMatch: ['**/*.spec.ts', '**/*.setup.ts'],
   testIgnore: process.env.MOEMOA_VISUAL_TEST === '1' ? [] : ['**/visual/**'],
   /* Run tests in files in parallel */
   fullyParallel: true,

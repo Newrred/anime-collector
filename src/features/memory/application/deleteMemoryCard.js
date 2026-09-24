@@ -44,7 +44,7 @@ export function buildDeleteCompletion({ card, asset, operation, now }) {
   };
 }
 
-export function createDeleteMemoryCardCommand({ repository, localMedia, telemetry, clock, ids }) {
+export function createDeleteMemoryCardCommand({ repository, localMedia, telemetry, clock, ids, beforeDelete = async () => {} }) {
   return Object.freeze({
     async execute({ ownerId, cardId, operationId }) {
       const existing = await repository.getOperation(ownerId, operationId);
@@ -66,6 +66,11 @@ export function createDeleteMemoryCardCommand({ repository, localMedia, telemetr
         throw new MemoryApplicationError("CARD_NOT_FOUND", "Private Card was not found");
       }
 
+      try {
+        await beforeDelete({ ownerId, card: bundle.card });
+      } catch {
+        throw new MemoryApplicationError("PUBLICATION_WITHDRAWAL_UNCONFIRMED", "Public withdrawal could not be confirmed; original preserved");
+      }
       const now = String(clock.now());
       const card = { ...bundle.card, status: "DELETED", deletedAt: now, updatedAt: now };
       const asset = { ...bundle.asset, state: "DELETE_PENDING", deletedAt: now, updatedAt: now };

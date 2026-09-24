@@ -23,7 +23,7 @@ export async function prepareSelectedPublicImage({ sourceAssetId,sourceVersion,o
   } catch { fail(signal?.aborted ? "REQUEST_ABORTED" : "IMAGE_REQUEST_FAILED"); }
   const result=await response.json().catch(()=>null);
   if(!response.ok) {
-    const allowed=new Set(["AUTH_REQUIRED","PUBLIC_IMAGE_DISABLED","IMAGE_RIGHTS_REQUIRED","IMAGE_QUOTA_EXCEEDED","PUBLIC_VISUAL_NOT_READY",
+    const allowed=new Set(["AUTH_REQUIRED","PUBLIC_IMAGE_DISABLED","PUBLICATION_DISABLED","RATE_LIMITED","IMAGE_RIGHTS_REQUIRED","IMAGE_QUOTA_EXCEEDED","PUBLIC_VISUAL_NOT_READY",
       "SOURCE_IMAGE_MISMATCH","IMAGE_SIZE_LIMIT","IMAGE_FORMAT_UNSUPPORTED","IMAGE_DECODE_FAILED","ASSET_OPERATION_UNAVAILABLE","PUBLICATION_RESTRICTED","CONSENT_MISMATCH"]);
     fail(allowed.has(result?.error) ? result.error : "IMAGE_REQUEST_FAILED");
   }

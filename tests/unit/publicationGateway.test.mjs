@@ -45,7 +45,9 @@ test("publication revocation and owner recovery are separate RPCs and forward ca
   await gateway.get("board");
   await gateway.revoke({ id: "public", expectedRevision: 2 }, { signal });
   await gateway.revokeCard("card");
-  assert.deepEqual(calls.map(x => x.name), ["get_memory_publication", "revoke_memory_publication", "revoke_memory_card_publications"]);
+  await gateway.retireCard("card", { signal });
+  assert.deepEqual(calls.map(x => x.name), ["get_memory_publication", "revoke_memory_publication", "revoke_memory_card_publications", "retire_memory_card_publications"]);
+  assert.equal(calls[3].signal, signal);
   assert.deepEqual(calls[1].args, { p_id: "public", p_expected_revision: 2 });
   assert.equal(calls[1].signal, signal);
 });

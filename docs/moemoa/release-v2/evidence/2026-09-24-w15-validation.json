@@ -1,0 +1,376 @@
+{
+  "work": "W15",
+  "date": "2026-09-24",
+  "status": "BLOCKED_EXTERNAL",
+  "head": "0330a5401e0112f2e36886a6826812219e7aed89",
+  "sourceState": "W09-W15 uncommitted; hashes identify tested local tree",
+  "environment": {
+    "npm": "11.17.0",
+    "node": "24.19.0",
+    "production": "not modified",
+    "browser": "local Chromium, synthetic Auth/RPC",
+    "postgres": "16.15 WSL isolated; actual roles, synthetic Auth/Storage"
+  },
+  "tests": {
+    "androidDistRoutes": 18,
+    "androidPackagedRoutes": "NOT VERIFIED: assets missing; default command failed",
+    "sqlTotalPassNotices": 218,
+    "unit": 318,
+    "newConcurrentTests": 3,
+    "newResourceAssertions": 35,
+    "browser": 30,
+    "diffCheck": "PASS",
+    "buildPages": 18,
+    "bundleScan": "PASS: limited identifier pattern scan"
+  },
+  "limitations": [
+    "D01 hosted Supabase/PostgREST/Storage and legacy remote grants unverified",
+    "D03 actual limits, WAF ingress controls, billing alerts not approved/configured",
+    "D05 delete-fence and retained-ledger retention/compaction unresolved",
+    "Android APK/device and real OAuth unverified",
+    "Initial server readiness failed twice and cold UI timed out once; unchanged full suite later passed against ready server",
+    "Prior static analysis findings not rerun or resolved",
+    "Committed-work quotas are not failed-request ingress rate limits; new policies disabled by default"
+  ],
+  "migration": "20260924115258_memory_resource_controls.sql applied only to isolated PostgreSQL",
+  "sources": [
+    {
+      "path": ".gitattributes",
+      "sha256": "41fa0a0bf15eb11a7dff48133442f25fc4489f2c37b38566b44e95028e428510"
+    },
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "dcaf1d08163c16f76e9e0a42891bd983335107e8d925a0fd12b3233f9198f014"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "sha256": "370e54e3aa71679040173823883b3ff9b1f26a3731be2824c0e28b956aceb92a"
+    },
+    {
+      "path": "docs/moemoa/operations/2026-09-24-public-moderation.md",
+      "sha256": "5a2519141f4d29797b178075c41e7b2d4bf868e94d913d0b799deea997266a6c"
+    },
+    {
+      "path": "docs/moemoa/operations/2026-09-24-resource-controls.md",
+      "sha256": "ce42da9aa66ffce718e49e2e7e8326935ee73844fcfa9d0160b398d1c8b2e18a"
+    },
+    {
+      "path": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+      "sha256": "5ef04184f782c745fbf508a0b6ab6ec718eaf906073a228b73430dc62a79b5f1"
+    },
+    {
+      "path": "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+      "sha256": "d721253135db04a83d7f7496e8419799442b334d8d841681abc77b5c23f7027e"
+    },
+    {
+      "path": "scripts/verify-android-static-routes.mjs",
+      "sha256": "35cafcbc720208a55374468c51e6a49799b5080e6d119994b9a4c8c44e883def"
+    },
+    {
+      "path": "src/components/auth/AuthCallbackClient.jsx",
+      "sha256": "9989bf4f6e1abbf4601f681ff702d4a048e3dc99fb1a82b13ef56d17a984eba8"
+    },
+    {
+      "path": "src/features/auth/nativeOAuth.js",
+      "sha256": "0cc358d9df42269808d2f5b491938288aed2fa75c44d7b86a9cdbfc363fa1406"
+    },
+    {
+      "path": "src/features/auth/webOAuth.js",
+      "sha256": "cbf9810989ea9f95e5d5d62857997c83864bc351d0e5b4c23f648cc112ddc7c3"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+      "sha256": "89bdd6293cbf9eb5bcfb92b3ce9ad94be0ac1d73babe7ead69c39a2ca412c506"
+    },
+    {
+      "path": "src/features/memory/application/createMinihomeController.js",
+      "sha256": "2942b7e7578b6c4e5db651cd53a96ec12f0ffb499661228fff6d856628c45a95"
+    },
+    {
+      "path": "src/features/memory/application/createPublicationController.js",
+      "sha256": "0ade9b0c30b130c79cc87d8a055a5d61b3861ba76e02620fee157787835bf7eb"
+    },
+    {
+      "path": "src/features/memory/application/deleteMemoryCard.js",
+      "sha256": "38e0be693484ef98bbc946325562f194d6f800e8e142bcea6e60928143c6f172"
+    },
+    {
+      "path": "src/features/memory/application/preparePublicImage.js",
+      "sha256": "72300d57d2c84ffd1aee7a3838b01e498856a29963b716fd1cc374431a6e59dc"
+    },
+    {
+      "path": "src/features/memory/application/retirePublicationBeforeDelete.js",
+      "sha256": "e3ae03ea3586e2f79c5f35f4d3fa5c07e0cf5374484a5d15bd6b671312faf520"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "3be92195f78ee02dfb63547627e2443976a528a8168235bf7c98da5aed491ead"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "cb755d4ee42dd7b9619cfd0ca4ad7dd296d3342234187cf5877d482c7c4f53b0"
+    },
+    {
+      "path": "src/features/memory/components/MemoryCardDetail.jsx",
+      "sha256": "06b407c16e74eb8712af9157b3d89bafbca1a7d8104c396e547a34ae57150b92"
+    },
+    {
+      "path": "src/features/memory/components/MemoryMinihome.jsx",
+      "sha256": "f0bbfdd9697e5b5a1ecc2121f4ab9640ec4449aea5dede0f1deb9bebe0d2cfe2"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicationPanel.jsx",
+      "sha256": "48272f4f27d8299f23f97eeb31b6a3d83eb941aeeeede365ef3ecc1a3b45ecf0"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicCardControl.jsx",
+      "sha256": "01945f1203548bc94f7afee4ad6d1e7f0d5b3a8a90abf694a28f667a96d67827"
+    },
+    {
+      "path": "src/features/memory/components/MemoryRelationships.jsx",
+      "sha256": "a3ccaf4e342a85d8c14495782d63229aaf0418ffeef7e0894889baba22f27fb8"
+    },
+    {
+      "path": "src/features/memory/components/MemorySafety.jsx",
+      "sha256": "c83e6acc25452f75fd6c728515e91bbf78e11434ee9fd1ef090b641739eb9b2c"
+    },
+    {
+      "path": "src/features/memory/components/minihomeCopy.js",
+      "sha256": "964e7615c0a62f803222281cd132952e540b0a25525f783a8754e4f4f01d0f77"
+    },
+    {
+      "path": "src/features/memory/components/MinihomeSnapshot.jsx",
+      "sha256": "dd34124449012a3ca21345507a9a556ecc125dba795b8e43bb6ed9e3efc86295"
+    },
+    {
+      "path": "src/features/memory/components/publicationCopy.js",
+      "sha256": "ce163548271cc6561ff42e6e71b577076f964e1859e4dc41334d184fb1346791"
+    },
+    {
+      "path": "src/features/memory/components/PublicBoardSnapshot.jsx",
+      "sha256": "a94b685e61942434163a4274b16c9ba71abf6611931406fe6ed0ac2932186a21"
+    },
+    {
+      "path": "src/features/memory/components/PublicLinkCopy.jsx",
+      "sha256": "222479777896c7f261fbd8c31cad3e9cd82ebfad1627eabe8744a09a033f5369"
+    },
+    {
+      "path": "src/features/memory/components/PublicMemoryBoard.jsx",
+      "sha256": "07bff60c1f994f414fb7848aaf78bd26fb4a9cbe3ee99b47a68d7f941b5535b2"
+    },
+    {
+      "path": "src/features/memory/components/PublicMinihome.jsx",
+      "sha256": "703e432aac28ed6b947e1b346abf23a87032b58245e7f99bdc3ad6f867076f77"
+    },
+    {
+      "path": "src/features/memory/domain/minihomeView.js",
+      "sha256": "224cf47570cff83d67545055a576dcad59e03a51b6f683af80a8281ddf520a05"
+    },
+    {
+      "path": "src/features/memory/domain/publicationView.js",
+      "sha256": "8718e7ed0066de68310b8d345ef499754fe4e4af06598cbb5e76a900d9624109"
+    },
+    {
+      "path": "src/features/memory/domain/publicShareLink.js",
+      "sha256": "28e2ada658d8aab29d0dd0722aad50854b3b5280aae8b63c503d5fe370ac6871"
+    },
+    {
+      "path": "src/features/memory/runtime/createMemoryRuntime.js",
+      "sha256": "685036e9d69817e526ae6ec905a5641094e53c0874aa08b2ed62da9f56404959"
+    },
+    {
+      "path": "src/features/memory/runtime/platformMemoryRuntime.js",
+      "sha256": "467fb6a2e96befbf8f09971881b698029790493b96faf4e4dd7522fba58ff4c6"
+    },
+    {
+      "path": "src/features/memory/runtime/platformPublication.js",
+      "sha256": "cfde95c8bb8091b988257606b3ed1c56eca84bab8a56c446d9a0cbbf9b98994f"
+    },
+    {
+      "path": "src/messages/en.js",
+      "sha256": "b25fa190877afe42bc044559faa04e314906c20f2b7aa7691d1a88489a204fc7"
+    },
+    {
+      "path": "src/messages/ko.js",
+      "sha256": "143ad9622ee687628cbcc7d97423e83df9e80ebade3354058fda100bc120b68e"
+    },
+    {
+      "path": "src/pages/minihome.astro",
+      "sha256": "3139d43c580fb84e520f15f38efe8be7607f549ccd4cfaba3ca84cc03a250202"
+    },
+    {
+      "path": "src/pages/public/board.astro",
+      "sha256": "ec1fbc30959bad38972d4c363a637620744cbae100f3f023f352a7b5345a9fcb"
+    },
+    {
+      "path": "src/pages/public/home.astro",
+      "sha256": "bb14a90be7714aec991b289b6e10a095a9d02f71d91ce149af63aefa3a664811"
+    },
+    {
+      "path": "src/server/publicImages/handler.js",
+      "sha256": "c5744cc0d9c68e9eaf74e012bee0bf44d5c4d6e756c76a685bb44774414e6f07"
+    },
+    {
+      "path": "src/server/publicImages/supabaseImageBackend.js",
+      "sha256": "c647e6265905b22ee5edcc73efa1a3422b5db3fce870d3eae48bd8fbd13a6af5"
+    },
+    {
+      "path": "supabase/migrations/20260923182210_memory_publication_source_status.sql",
+      "sha256": "822587d324aa5ff8106360179ef089234f7f0984460d5dfc50cf2eed8bbe808c"
+    },
+    {
+      "path": "supabase/migrations/20260923183940_memory_minihomes.sql",
+      "sha256": "57a63e576a61b0c96ca0353446a6c576399381d9eedde2ab1e92cb5cfb801916"
+    },
+    {
+      "path": "supabase/migrations/20260923192300_memory_relationships.sql",
+      "sha256": "128e38c080b1d774993ed235aa7ef1f081d72a1cad31dc65b4514cbd9723b6fb"
+    },
+    {
+      "path": "supabase/migrations/20260923213901_memory_moderation.sql",
+      "sha256": "11d4b4847288552d437f03ffa553a153373259201c284c3db444ff1331f5ef3a"
+    },
+    {
+      "path": "supabase/migrations/20260924115258_memory_resource_controls.sql",
+      "sha256": "de911ab7771e31b3a41ba7466c1b9a7acac472d2f5891c9a833af263dcbed282"
+    },
+    {
+      "path": "tests/publication-ui.spec.ts",
+      "sha256": "9adbe6724fe5844d36f418f325f38f37a65c13e8a42956d232999794d7d7a6b4"
+    },
+    {
+      "path": "tests/service-worker.spec.ts",
+      "sha256": "7ec759aeb6b25de069e76bb1503401edaecca9beb327c0af20e30a77f3658a08"
+    },
+    {
+      "path": "tests/unit/deleteMemoryCard.test.mjs",
+      "sha256": "da51316aebbf7658d36f10e7bb06b4aa9966d8d00974c0433973f763a0cebaae"
+    },
+    {
+      "path": "tests/unit/minihome.test.mjs",
+      "sha256": "e26d06fb160356bf3f85ce6b2649b5a10c636c2a90c3ec49915b090fe139e85a"
+    },
+    {
+      "path": "tests/unit/nativeAppNavigation.test.mjs",
+      "sha256": "368a96d830f391696b105e142cff231277e312fd8908942e79c72469a9814b60"
+    },
+    {
+      "path": "tests/unit/nativeOAuth.test.mjs",
+      "sha256": "8c037ea985849e86694672dbbb34acf9d0a038b41ce56cb50232e357a7488f99"
+    },
+    {
+      "path": "tests/unit/publicationController.test.mjs",
+      "sha256": "a6ad5763c2bf24983ecfff737d71109e259e6d324cde6d803ebbe177f5d8254b"
+    },
+    {
+      "path": "tests/unit/publicationGateway.test.mjs",
+      "sha256": "63508191ed48100711d3b99edb76b7f760e01de97592e8dfa34e3408ce940459"
+    },
+    {
+      "path": "tests/unit/publicImages.test.mjs",
+      "sha256": "0d85a3e14559f11d78219d2d4ca1307366aa1853b684845971df11374effdde0"
+    },
+    {
+      "path": "tests/unit/publicShareLink.test.mjs",
+      "sha256": "c6a3ddfc563c8311565ac1dc11bea8fe03cd04b9789fe5792331f204c4122807"
+    },
+    {
+      "path": "tests/unit/retirePublicationBeforeDelete.test.mjs",
+      "sha256": "2653313818de1a6f61d63b85765d9363552ab317ac66ea3038752572dcb51fc7"
+    },
+    {
+      "path": "tests/unit/webOAuth.test.mjs",
+      "sha256": "3c732a49349552c342123279fe3f8418ed8795a32c5ecb8dbe86c192d63f4e59"
+    },
+    {
+      "path": "tools/publication-boundary/contract.sql",
+      "sha256": "12d6110e005185811883261d644ebb1a55cbf5676209186606157217f277aee5"
+    },
+    {
+      "path": "tools/publication-boundary/legacy-resource-fixture.sql",
+      "sha256": "454bbc9ed81e4c998b15b11a2525c954d5b08f8ddb549d83109748c82c18bd80"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-publish.sql",
+      "sha256": "8f61c03dfb1bb36bfc272f7f5889b35026ab63894eb1aaed450d4b886b0602d7"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-retire.sql",
+      "sha256": "9648638c4170ab4afb3e2d55fafaa7b4d8c9e38f8742aa95eb820e5651040fb1"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-setup.sql",
+      "sha256": "0e55da346a999aed7c427682c8a1262b4c04039f32840f867460befcf812e7d6"
+    },
+    {
+      "path": "tools/publication-boundary/minihome-contract.sql",
+      "sha256": "9bc40714fceaff788f19b0865542a62951cfc66b349ecc2b169d2c8544b5f90e"
+    },
+    {
+      "path": "tools/publication-boundary/moderation-contract.sql",
+      "sha256": "3cee4da5d7e0f64e537b28d7182febf619b9712b285047958c00212b7e91caa9"
+    },
+    {
+      "path": "tools/publication-boundary/moderation-races.sh",
+      "sha256": "253e1bc4a29693b698e0a2b7db92acd55ca95afc9345450d205b05eb8cac88dd"
+    },
+    {
+      "path": "tools/publication-boundary/relationship-race.sql",
+      "sha256": "0f1142f3ac71e068070267c76e3823413b13ad8b87235045ee772e3d8151ab11"
+    },
+    {
+      "path": "tools/publication-boundary/relationships-contract.sql",
+      "sha256": "a025981ee9b32f13ae584fbe8f4217a2d029b86969de06a44731f0430c4b5f54"
+    },
+    {
+      "path": "tools/publication-boundary/resource-contract.sql",
+      "sha256": "7294b1f6e95233f8240865e3d636eadc3f847fa3564a6f7f710257b17a69383a"
+    },
+    {
+      "path": "tools/publication-boundary/resource-races.sh",
+      "sha256": "d39ab694ff1b16e8291fe7d59bdd0c4524929910a3844d6ec234ee3e83cbba6a"
+    },
+    {
+      "path": "tools/publication-boundary/resource-sanction.sql",
+      "sha256": "a84292d9ed70523c18949ab19ca603ccf59a933b67532d14d0adafbf886d43e2"
+    },
+    {
+      "path": "tools/publication-boundary/run-local-postgres.sh",
+      "sha256": "62574c033ce57a950ea510cf4d24874d8d615b56d93a52ee07f06255a4cc1005"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".cache/w15-unit.log",
+      "sha256": "6234c494d65ca41df2e2c85a4cc1b7faf5e21e5810198fdfd4ccd9a4171a2776"
+    },
+    {
+      "path": ".cache/w15-browser-final.log",
+      "sha256": "4060bbab6fc15b0d81fe34c2f972d9bbfea770b5576a8f8ec81ce64d944349a9"
+    },
+    {
+      "path": ".cache/w15-sql-final.log",
+      "sha256": "2e428a42527c17f81def67fe22fee735e4cb60e15caed9558f8297568160fdeb"
+    },
+    {
+      "path": ".cache/w15-build.log",
+      "sha256": "8a87819a52c9e95488ca8c3000f984077c552c73b5b27b5694113ed2d5db24fb"
+    },
+    {
+      "path": ".cache/w15-routes.log",
+      "sha256": "8c2479c9db9b2e750bd556d48b5b58a0e360927f80854ccb7e1311bf12a66e2f"
+    },
+    {
+      "path": ".cache/w15-routes-dist.log",
+      "sha256": "190a38277935d3f9c415e0d410f02a79808cdf7fdf4a7959adfea9c8d78abba7"
+    },
+    {
+      "path": ".cache/w15-bundle-scan.log",
+      "sha256": "a7cf45163c039fefbc24dc70ea4d5ba90c94d5db2b6291e3a79afed0d2bcd2d4"
+    },
+    {
+      "path": ".cache/w15-diff-check.log",
+      "sha256": "ee4bc79961364ae265ee53e312f4c8fe044207d12be6b0a5d12e7e37852a4066"
+    }
+  ]
+}

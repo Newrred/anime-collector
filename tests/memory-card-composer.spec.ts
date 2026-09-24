@@ -420,7 +420,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
   await expect(page.getByRole("button", { name: "카드 삭제" })).toBeVisible();
 });
 
-test("late picker result is discarded after leaving detail and rapid clicks open only one picker", async ({ page }) => {
+test("pending picker blocks leaving detail and rapid clicks open only one picker, with durable cancel cleanup", async ({ page }) => {
   await page.addInitScript((previewDataUrl) => {
     const ticket = (ticketId: string) => ({
       ticketId,
@@ -438,7 +438,7 @@ test("late picker result is discarded after leaving detail and rapid clicks open
       pick: async () => {
         const count = Number(sessionStorage.getItem("picker-call-count") || "0") + 1;
         sessionStorage.setItem("picker-call-count", String(count));
-        await new Promise((resolve) => setTimeout(resolve, 120));
+        await new Promise<void>((resolve) => { (window as any).__resolveReplacementPicker = resolve; });
         return { ticket: ticket("ticket-late"), cancelled: false };
       },
       discard: async (ticketId: string) => {
@@ -469,7 +469,10 @@ test("late picker result is discarded after leaving detail and rapid clicks open
     button.click();
     button.click();
   });
-  await page.getByRole("link", { name: "← 기억 아카이브" }).click();
+  await page.getByRole("link", { name: "돌아가기", exact: true }).click();
+  await expect(page).toHaveURL(/\/memory\/card\//);
+  await page.evaluate(() => (window as any).__resolveReplacementPicker());
+  await page.getByRole('region', { name:'카드 이미지 관리' }).getByRole('button', { name:'취소', exact:true }).click();
 
   expect(await page.evaluate(() => sessionStorage.getItem("picker-call-count"))).toBe("1");
   await expect.poll(() => page.evaluate(() => (

@@ -1,0 +1,8 @@
+# Recreated from the reviewed web build and installed Capacitor packages.
+app/src/main/assets/
+app/src/main/res/xml/config.xml
+capacitor-cordova-android-plugins/
+.gradle/
+build/
+app/build/
+local.properties

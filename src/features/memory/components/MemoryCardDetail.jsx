@@ -7,6 +7,7 @@ import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.j
 import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
+import MemoryPublicCardControl from "./MemoryPublicCardControl.jsx";
 import MemoryVisual from "./MemoryVisual.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
@@ -160,9 +161,9 @@ function MemoryCardDetailContent({ base }) {
         native: Capacitor.isNativePlatform(),
         origin: window.location.origin,
       }));
-    } catch {
+    } catch (error) {
       updateState({
-        message: { scope: "detail", key: "deleteFailed" },
+        message: { scope: "detail", key: error?.code === "PUBLICATION_WITHDRAWAL_UNCONFIRMED" ? "deleteWithdrawalFailed" : "deleteFailed" },
         status: "ready",
       });
     }
@@ -259,6 +260,7 @@ function MemoryCardDetailContent({ base }) {
             copy={copy.replacement}
           />
           <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} />
+          <MemoryPublicCardControl card={bundle.card} locale={locale} disabled={status !== "ready"} />
             <form onSubmit={save}>
             <label className="memory-detail__field">
               <span>{detailCopy.noteLabel}</span>
@@ -316,6 +318,9 @@ function MemoryCardDetailContent({ base }) {
           >
             <h2 id="memory-delete-dialog-title">{detailCopy.deleteDialogTitle}</h2>
             <p id="memory-delete-dialog-description">{detailCopy.deleteConfirm}</p>
+            {bundle.card.ownerId?.startsWith("account:") && <p>{locale === "ko"
+              ? "계정 기억은 먼저 서버에서 모든 공개 위치의 접근을 철회합니다. 연결이나 로그인을 확인할 수 없으면 삭제하지 않습니다. 철회 후 기기 삭제에 실패해도 공개 중지는 유지됩니다."
+              : "Account memories are withdrawn from every public display before deletion. Deletion requires a connection and sign-in. If local deletion then fails, sharing stays stopped."}</p>}
             <div className="memory-detail__dialog-actions">
               <button ref={deleteCancelRef} className="btn btn--subtle" type="button" onClick={closeDeleteDialog}>
                 {detailCopy.deleteCancel}

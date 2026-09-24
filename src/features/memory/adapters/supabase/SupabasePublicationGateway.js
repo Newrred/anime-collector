@@ -3,6 +3,7 @@ const SAFE_ERRORS = new Set([
   "AUTH_REQUIRED", "PUBLICATION_DISABLED", "PUBLICATION_RESTRICTED", "INVALID_SELECTION",
   "DUPLICATE_CARD", "NOT_FOUND", "PUBLIC_VISUAL_NOT_READY", "PUBLICATION_CONFLICT",
   "INVALID_OPERATION", "OPERATION_MISMATCH", "CONSENT_MISMATCH", "PREVIEW_CHANGED",
+  "RATE_LIMITED", "MODERATOR_REQUIRED",
 ]);
 
 export class PublicationGatewayError extends Error {
@@ -62,7 +63,29 @@ export class SupabasePublicationGateway {
     return this.request("revoke_memory_card_publications", { p_card_id: cardId }, options);
   }
 
+  retireCard(cardId, options) {
+    return this.request("retire_memory_card_publications", { p_card_id: cardId }, options);
+  }
+
   read(id, options) {
     return this.request("read_memory_publication", { p_id: id }, options);
   }
+
+  getHome(options) { return this.request("get_memory_minihome", {}, options); }
+  listHomeBoards(after, options) { return this.request("list_memory_minihome_boards", { p_after: after }, options); }
+  prepareHome(revision, selection, options) {
+    return this.request("prepare_memory_minihome", { p_expected_revision: revision, p_selection: selection }, options);
+  }
+  publishHome({ revision, reviewHash, policyRevision, operationId }, options) {
+    return this.request("publish_memory_minihome", { p_expected_revision: revision, p_review_hash: reviewHash,
+      p_policy_revision: policyRevision, p_operation_id: operationId }, options);
+  }
+  revokeHome(revision, options) { return this.request("revoke_memory_minihome", { p_expected_revision: revision }, options); }
+  readHome(id, options) { return this.request("read_memory_minihome", { p_id: id }, options); }
+  relationship(id, options) { return this.request("get_memory_relationship", { p_home_id: id }, options); }
+  setRelationship(id, action, options) { return this.request("set_memory_relationship", { p_home_id: id, p_action: action }, options); }
+  relationships(blocked = false, after = null, options) { return this.request("list_memory_relationships", { p_blocked: blocked, p_after: after }, options); }
+  report({ kind, target, category, operation, note }, options) { return this.request("submit_memory_report", { p_kind: kind, p_target: target, p_category: category, p_operation: operation, p_note: note }, options); }
+  safety(after = null, options) { return this.request("list_memory_safety", { p_after: after }, options); }
+  appeal(id, text, options) { return this.request("appeal_memory_notice", { p_id: id, p_text: text }, options); }
 }

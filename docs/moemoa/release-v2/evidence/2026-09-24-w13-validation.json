@@ -1,0 +1,307 @@
+{
+  "date": "2026-09-24",
+  "sources": [
+    {
+      "path": ".gitattributes",
+      "sha256": "41fa0a0bf15eb11a7dff48133442f25fc4489f2c37b38566b44e95028e428510"
+    },
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "dcaf1d08163c16f76e9e0a42891bd983335107e8d925a0fd12b3233f9198f014"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "sha256": "2838dba03ef133dd33a2d00c4f64c9c1ee77d7aa94f8545143db35426e66a274"
+    },
+    {
+      "path": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+      "sha256": "00ab5fe5d904d4701a241d11090241637c089fe6f3801c34ee72e03c807821ea"
+    },
+    {
+      "path": "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+      "sha256": "bc3e972abd65e772b1394813558aa6a35617bba465679771c00dd3d887bf85af"
+    },
+    {
+      "path": "scripts/verify-android-static-routes.mjs",
+      "sha256": "35cafcbc720208a55374468c51e6a49799b5080e6d119994b9a4c8c44e883def"
+    },
+    {
+      "path": "src/components/auth/AuthCallbackClient.jsx",
+      "sha256": "9989bf4f6e1abbf4601f681ff702d4a048e3dc99fb1a82b13ef56d17a984eba8"
+    },
+    {
+      "path": "src/features/auth/nativeOAuth.js",
+      "sha256": "0cc358d9df42269808d2f5b491938288aed2fa75c44d7b86a9cdbfc363fa1406"
+    },
+    {
+      "path": "src/features/auth/webOAuth.js",
+      "sha256": "cbf9810989ea9f95e5d5d62857997c83864bc351d0e5b4c23f648cc112ddc7c3"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+      "sha256": "ec14c16fcb0a5a9e56efa0e020034319459422a9b47e0633b820fd364ba1a676"
+    },
+    {
+      "path": "src/features/memory/application/createMinihomeController.js",
+      "sha256": "2942b7e7578b6c4e5db651cd53a96ec12f0ffb499661228fff6d856628c45a95"
+    },
+    {
+      "path": "src/features/memory/application/createPublicationController.js",
+      "sha256": "0ade9b0c30b130c79cc87d8a055a5d61b3861ba76e02620fee157787835bf7eb"
+    },
+    {
+      "path": "src/features/memory/application/deleteMemoryCard.js",
+      "sha256": "38e0be693484ef98bbc946325562f194d6f800e8e142bcea6e60928143c6f172"
+    },
+    {
+      "path": "src/features/memory/application/retirePublicationBeforeDelete.js",
+      "sha256": "e3ae03ea3586e2f79c5f35f4d3fa5c07e0cf5374484a5d15bd6b671312faf520"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "ceda1b495bed38a75f987a4293f1cc2073e91cf8c98ee9a9e9859f8b48bfd266"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "cb755d4ee42dd7b9619cfd0ca4ad7dd296d3342234187cf5877d482c7c4f53b0"
+    },
+    {
+      "path": "src/features/memory/components/MemoryCardDetail.jsx",
+      "sha256": "06b407c16e74eb8712af9157b3d89bafbca1a7d8104c396e547a34ae57150b92"
+    },
+    {
+      "path": "src/features/memory/components/MemoryMinihome.jsx",
+      "sha256": "77ec58276a75dd67a5eb352ce536e1562b0d883e2673549ea0da104d4722b6ff"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicationPanel.jsx",
+      "sha256": "48272f4f27d8299f23f97eeb31b6a3d83eb941aeeeede365ef3ecc1a3b45ecf0"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicCardControl.jsx",
+      "sha256": "01945f1203548bc94f7afee4ad6d1e7f0d5b3a8a90abf694a28f667a96d67827"
+    },
+    {
+      "path": "src/features/memory/components/MemoryRelationships.jsx",
+      "sha256": "a3ccaf4e342a85d8c14495782d63229aaf0418ffeef7e0894889baba22f27fb8"
+    },
+    {
+      "path": "src/features/memory/components/minihomeCopy.js",
+      "sha256": "964e7615c0a62f803222281cd132952e540b0a25525f783a8754e4f4f01d0f77"
+    },
+    {
+      "path": "src/features/memory/components/MinihomeSnapshot.jsx",
+      "sha256": "dd34124449012a3ca21345507a9a556ecc125dba795b8e43bb6ed9e3efc86295"
+    },
+    {
+      "path": "src/features/memory/components/publicationCopy.js",
+      "sha256": "ce163548271cc6561ff42e6e71b577076f964e1859e4dc41334d184fb1346791"
+    },
+    {
+      "path": "src/features/memory/components/PublicBoardSnapshot.jsx",
+      "sha256": "a94b685e61942434163a4274b16c9ba71abf6611931406fe6ed0ac2932186a21"
+    },
+    {
+      "path": "src/features/memory/components/PublicLinkCopy.jsx",
+      "sha256": "222479777896c7f261fbd8c31cad3e9cd82ebfad1627eabe8744a09a033f5369"
+    },
+    {
+      "path": "src/features/memory/components/PublicMemoryBoard.jsx",
+      "sha256": "cbe28a536ed62276ec8ff3fb419d54f22322f176e183c0f90915734912123146"
+    },
+    {
+      "path": "src/features/memory/components/PublicMinihome.jsx",
+      "sha256": "a6805a9887b1a90da1d61973d2b4c88844e8dd9dca39a9c9d31999ab847f9461"
+    },
+    {
+      "path": "src/features/memory/domain/minihomeView.js",
+      "sha256": "224cf47570cff83d67545055a576dcad59e03a51b6f683af80a8281ddf520a05"
+    },
+    {
+      "path": "src/features/memory/domain/publicationView.js",
+      "sha256": "8718e7ed0066de68310b8d345ef499754fe4e4af06598cbb5e76a900d9624109"
+    },
+    {
+      "path": "src/features/memory/domain/publicShareLink.js",
+      "sha256": "28e2ada658d8aab29d0dd0722aad50854b3b5280aae8b63c503d5fe370ac6871"
+    },
+    {
+      "path": "src/features/memory/runtime/createMemoryRuntime.js",
+      "sha256": "685036e9d69817e526ae6ec905a5641094e53c0874aa08b2ed62da9f56404959"
+    },
+    {
+      "path": "src/features/memory/runtime/platformMemoryRuntime.js",
+      "sha256": "467fb6a2e96befbf8f09971881b698029790493b96faf4e4dd7522fba58ff4c6"
+    },
+    {
+      "path": "src/features/memory/runtime/platformPublication.js",
+      "sha256": "244909ee230509311119d05d1ae93d97f9885aac964c96d2d849d40654e91f37"
+    },
+    {
+      "path": "src/messages/en.js",
+      "sha256": "b25fa190877afe42bc044559faa04e314906c20f2b7aa7691d1a88489a204fc7"
+    },
+    {
+      "path": "src/messages/ko.js",
+      "sha256": "143ad9622ee687628cbcc7d97423e83df9e80ebade3354058fda100bc120b68e"
+    },
+    {
+      "path": "src/pages/minihome.astro",
+      "sha256": "3139d43c580fb84e520f15f38efe8be7607f549ccd4cfaba3ca84cc03a250202"
+    },
+    {
+      "path": "src/pages/public/board.astro",
+      "sha256": "ec1fbc30959bad38972d4c363a637620744cbae100f3f023f352a7b5345a9fcb"
+    },
+    {
+      "path": "src/pages/public/home.astro",
+      "sha256": "bb14a90be7714aec991b289b6e10a095a9d02f71d91ce149af63aefa3a664811"
+    },
+    {
+      "path": "supabase/migrations/20260923182210_memory_publication_source_status.sql",
+      "sha256": "822587d324aa5ff8106360179ef089234f7f0984460d5dfc50cf2eed8bbe808c"
+    },
+    {
+      "path": "supabase/migrations/20260923183940_memory_minihomes.sql",
+      "sha256": "57a63e576a61b0c96ca0353446a6c576399381d9eedde2ab1e92cb5cfb801916"
+    },
+    {
+      "path": "supabase/migrations/20260923192300_memory_relationships.sql",
+      "sha256": "128e38c080b1d774993ed235aa7ef1f081d72a1cad31dc65b4514cbd9723b6fb"
+    },
+    {
+      "path": "tests/publication-ui.spec.ts",
+      "sha256": "2ba9663f1542203454a78a4043a5795a89cc7b9946d4914718ba1196018dd5d9"
+    },
+    {
+      "path": "tests/service-worker.spec.ts",
+      "sha256": "7ec759aeb6b25de069e76bb1503401edaecca9beb327c0af20e30a77f3658a08"
+    },
+    {
+      "path": "tests/unit/deleteMemoryCard.test.mjs",
+      "sha256": "da51316aebbf7658d36f10e7bb06b4aa9966d8d00974c0433973f763a0cebaae"
+    },
+    {
+      "path": "tests/unit/minihome.test.mjs",
+      "sha256": "e26d06fb160356bf3f85ce6b2649b5a10c636c2a90c3ec49915b090fe139e85a"
+    },
+    {
+      "path": "tests/unit/nativeAppNavigation.test.mjs",
+      "sha256": "368a96d830f391696b105e142cff231277e312fd8908942e79c72469a9814b60"
+    },
+    {
+      "path": "tests/unit/nativeOAuth.test.mjs",
+      "sha256": "8c037ea985849e86694672dbbb34acf9d0a038b41ce56cb50232e357a7488f99"
+    },
+    {
+      "path": "tests/unit/publicationController.test.mjs",
+      "sha256": "a6ad5763c2bf24983ecfff737d71109e259e6d324cde6d803ebbe177f5d8254b"
+    },
+    {
+      "path": "tests/unit/publicationGateway.test.mjs",
+      "sha256": "63508191ed48100711d3b99edb76b7f760e01de97592e8dfa34e3408ce940459"
+    },
+    {
+      "path": "tests/unit/publicShareLink.test.mjs",
+      "sha256": "c6a3ddfc563c8311565ac1dc11bea8fe03cd04b9789fe5792331f204c4122807"
+    },
+    {
+      "path": "tests/unit/retirePublicationBeforeDelete.test.mjs",
+      "sha256": "2653313818de1a6f61d63b85765d9363552ab317ac66ea3038752572dcb51fc7"
+    },
+    {
+      "path": "tests/unit/webOAuth.test.mjs",
+      "sha256": "3c732a49349552c342123279fe3f8418ed8795a32c5ecb8dbe86c192d63f4e59"
+    },
+    {
+      "path": "tools/publication-boundary/contract.sql",
+      "sha256": "12d6110e005185811883261d644ebb1a55cbf5676209186606157217f277aee5"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-publish.sql",
+      "sha256": "8f61c03dfb1bb36bfc272f7f5889b35026ab63894eb1aaed450d4b886b0602d7"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-retire.sql",
+      "sha256": "9648638c4170ab4afb3e2d55fafaa7b4d8c9e38f8742aa95eb820e5651040fb1"
+    },
+    {
+      "path": "tools/publication-boundary/lifecycle-setup.sql",
+      "sha256": "0e55da346a999aed7c427682c8a1262b4c04039f32840f867460befcf812e7d6"
+    },
+    {
+      "path": "tools/publication-boundary/minihome-contract.sql",
+      "sha256": "9bc40714fceaff788f19b0865542a62951cfc66b349ecc2b169d2c8544b5f90e"
+    },
+    {
+      "path": "tools/publication-boundary/relationship-race.sql",
+      "sha256": "0f1142f3ac71e068070267c76e3823413b13ad8b87235045ee772e3d8151ab11"
+    },
+    {
+      "path": "tools/publication-boundary/relationships-contract.sql",
+      "sha256": "a025981ee9b32f13ae584fbe8f4217a2d029b86969de06a44731f0430c4b5f54"
+    },
+    {
+      "path": "tools/publication-boundary/run-local-postgres.sh",
+      "sha256": "1720f990f28e9450487a0d22f2462bf01a186f42abb9546951a4b60f969a99dd"
+    }
+  ],
+  "tests": {
+    "diffCheck": "PASS",
+    "androidDistRoutes": 18,
+    "native": "Unit cold/warm callback and static route checks only",
+    "screenshot": "320px manual-copy fallback opened and visually inspected",
+    "unit": 317,
+    "bundleScan": "PASS",
+    "browser": 29,
+    "newBrowserTests": 3,
+    "buildPages": 18
+  },
+  "sourceState": "W09-W13 uncommitted; hashes identify tested local tree",
+  "artifacts": [
+    {
+      "path": ".cache/w13-unit-final.log",
+      "sha256": "af98838898bf2d4b202849cbe6bba3d71cbfe3267be5d5d5618064fc178dd559"
+    },
+    {
+      "path": ".cache/w13-browser-final.log",
+      "sha256": "dd767c11c1287761426e160f00c144c632e388225132884584ef4e95bf512ca5"
+    },
+    {
+      "path": ".cache/w13-build.log",
+      "sha256": "1f4d7b6f5871d64763a580713406442fb41d65bd255f3843187b72e77a8afec1"
+    },
+    {
+      "path": ".cache/w13-routes.log",
+      "sha256": "190a38277935d3f9c415e0d410f02a79808cdf7fdf4a7959adfea9c8d78abba7"
+    },
+    {
+      "path": ".cache/w13-diff-check.log",
+      "sha256": "51403763508a72262c8c50079bf7939f5672c944cdc364c3e2b35379ca2716e0"
+    },
+    {
+      "path": ".cache/w13-bundle-scan.log",
+      "sha256": "ab268f930fdd1d42673469703262e25891843617a1fc653493ef7e7d3965db8a"
+    },
+    {
+      "path": ".cache/w13-share-320.png",
+      "sha256": "8ec3dfc521e84950257d65534e122f750b364ba41ac05af17a96234df31f27fd"
+    }
+  ],
+  "unverified": [
+    "Real Google/Supabase PKCE",
+    "Android packaged app/device and incoming public links",
+    "Existing static-analysis findings not rerun",
+    "Hosted environment and release gates"
+  ],
+  "database": "No migration changes in W13; SQL suite not rerun",
+  "environment": {
+    "npm": "11.17.0",
+    "browser": "Actual Chromium; synthetic Auth/RPC and callback client exchange",
+    "production": "Not accessed or modified",
+    "node": "24.19.0"
+  },
+  "status": "BLOCKED_EXTERNAL",
+  "work": "W13",
+  "head": "0330a5401e0112f2e36886a6826812219e7aed89"
+}

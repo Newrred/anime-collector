@@ -23,7 +23,9 @@ select p.proname, pg_get_function_identity_arguments(p.oid) as arguments,
   has_function_privilege('service_role', p.oid, 'EXECUTE') as service_execute
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public' and p.proname in
-  ('activate_catalog_release', 'apply_memory_card_mutation', 'apply_board_mutation', 'promote_guest_memory', 'pull_memory_changes');
+  ('activate_catalog_release', 'activate_catalog_release_checked', 'apply_memory_card_mutation',
+   'apply_board_mutation', 'promote_guest_memory', 'pull_memory_changes',
+   'get_memory_resource_usage', 'inspect_memory_resource_costs', 'authorize_memory_image_delivery');
 
 -- Legacy social tables should not be assumed to exist or to be launch-ready.
 select to_regclass('public.user_follows') as legacy_follows,

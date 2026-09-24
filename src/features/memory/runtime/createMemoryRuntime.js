@@ -23,6 +23,7 @@ export function createMemoryRuntime({
   reconciler,
   titleResolver = { search: async () => ({ results: [], remoteStatus: "UNAVAILABLE" }) },
   ticketCleanup,
+  beforeDelete,
 }) {
   if (!repository || !imageIntake || !uuid || !clock) {
     throw new TypeError("Memory runtime dependencies are required");
@@ -38,6 +39,7 @@ export function createMemoryRuntime({
   const syncIds = { next: () => uuid() };
   const updateCommand = createUpdateMemoryCardCommand({ repository, telemetry, clock, ids: syncIds });
   const deleteCommand = createDeleteMemoryCardCommand({
+    beforeDelete,
     repository,
     localMedia: imageIntake,
     telemetry,

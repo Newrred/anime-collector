@@ -386,6 +386,7 @@ export async function commitPulledChange(database, input) {
   const storeName = ENTITY_STORES[change.entityType];
   const names = [storeName, "sync_outbox", "sync_conflicts", "device_sync_state"];
   if (change.entityType === "VISUAL_ASSET") names.push("memory_cards");
+  if (change.entityType === "MEMORY_CARD") names.push("visual_assets");
   const transaction = database.transaction([...new Set(names)], "readwrite");
   const entities = transaction.objectStore(storeName);
   const existing = await requestResult(entities.get(change.entityId));
@@ -408,7 +409,14 @@ export async function commitPulledChange(database, input) {
     });
     if (existing?.ownerId === ownerId) entities.put({ ...existing, sync: { ...existing.sync, syncState: "CONFLICT" } });
   } else {
-    entities.put(toLocalEntity(change.entityType, remoteEntity, ownerId, existing));
+    const projected = toLocalEntity(change.entityType, remoteEntity, ownerId, existing);
+    // A compacted change page can deliver the current visual before its card.
+    if (change.entityType === "MEMORY_CARD" && !projected.visualAssetId) {
+      const assets = await requestResult(transaction.objectStore("visual_assets").index("owner_state").getAll([ownerId, "READY"]));
+      const current = assets.find((asset) => asset.cardId === change.entityId && asset.isCurrent && !asset.deletedAt);
+      if (current) projected.visualAssetId = current.id;
+    }
+    entities.put(projected);
     if (change.entityType === "VISUAL_ASSET" && remoteEntity.isCurrent) {
       const cards = transaction.objectStore("memory_cards");
       const card = await requestResult(cards.get(remoteEntity.cardId));

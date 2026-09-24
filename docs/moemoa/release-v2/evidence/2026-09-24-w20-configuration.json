@@ -1,0 +1,37 @@
+{
+  "status": "LOCAL_UNCOMMITTED_NOT_DEPLOYABLE",
+  "productionModified": false,
+  "publicEnabled": false,
+  "catalogBaselineId": "catalog-add-7e982253b551b92984460a5e",
+  "catalogCandidateHash": null,
+  "clientFlags": {
+    "PUBLIC_MEMORY_PUBLICATION_V1": "default closed; production value not changed",
+    "PUBLIC_MEMORY_MINIHOME_V1": "default closed; production value not changed",
+    "PUBLIC_MEMORY_FOLLOWS_V1": "default closed; production value not changed",
+    "PUBLIC_MEMORY_MODERATION_V1": "default closed; production value not changed",
+    "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "operator approval required"
+  },
+  "serverConfiguration": {
+    "publicationReadsWritesImagesMinihomesFollowsReports": "migration defaults closed; hosted state unverified",
+    "resourcePolicies": "new policies disabled; numeric limits not approved",
+    "imageApi": "MOEMOA_PUBLIC_IMAGE_API_ENABLED and allowed origins require deployment configuration",
+    "privilegedCredentials": "not included"
+  },
+  "additiveMigrationsSinceBase": [
+    "20260923182210_memory_publication_source_status.sql",
+    "20260923183940_memory_minihomes.sql",
+    "20260923192300_memory_relationships.sql",
+    "20260923213901_memory_moderation.sql",
+    "20260924115258_memory_resource_controls.sql",
+    "20260924121214_catalog_release_transitions.sql"
+  ],
+  "rollbackProcedure": "docs/moemoa/operations/2026-09-24-recovery-and-release-handoff.md",
+  "externalGates": {
+    "D01": "isolated hosted Supabase, Google A/B and moderator, Storage/CDN evidence",
+    "D02": "Android device and first distribution channel",
+    "D03": "approved budgets, ingress controls and real alert recipient",
+    "D04": "policy/operator identity, rights/age scope and support responsibilities",
+    "D05": "latest withdrawal journal, bytes/canonical backups, retention and recovery targets",
+    "D06": "exact clean commit, catalog/schema/flags, required CI and production approval"
+  }
+}

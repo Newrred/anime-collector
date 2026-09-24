@@ -28,11 +28,13 @@ export function resolveWebOAuthNext({ rawNext = "", pendingNext = "", origin, ba
   const appBase = normalizeBase(base);
   const fallback = `${appBase}data/`;
   const candidate = String(rawNext || pendingNext || "").trim();
-  if (!candidate || candidate.startsWith("//")) return fallback;
+  if (!candidate || candidate.length > 2048 || candidate.startsWith("//") || /[\\\u0000-\u001f]/u.test(candidate)) return fallback;
 
   try {
     const resolved = new URL(candidate, safeOrigin);
-    if (resolved.origin !== safeOrigin.origin) return fallback;
+    if (resolved.origin !== safeOrigin.origin || resolved.username || resolved.password) return fallback;
+    const path = decodeURIComponent(resolved.pathname);
+    if (path.startsWith(`${appBase}auth/callback`) || /(?:access_token|refresh_token|code|error_description)=/i.test(decodeURIComponent(resolved.search + resolved.hash))) return fallback;
     const insideBase = appBase === "/"
       || resolved.pathname === appBase.slice(0, -1)
       || resolved.pathname.startsWith(appBase);
@@ -46,7 +48,7 @@ export function resolveWebOAuthNext({ rawNext = "", pendingNext = "", origin, ba
 export function parseWebOAuthCallback({ search = "", hash = "", origin, base = "/", pendingNext = "" }) {
   const query = new URLSearchParams(String(search || "").replace(/^\?/, ""));
   const fragment = new URLSearchParams(String(hash || "").replace(/^#/, ""));
-  if (fragment.has("access_token") || fragment.has("refresh_token")) {
+  if (fragment.has("access_token") || fragment.has("refresh_token") || query.has("access_token") || query.has("refresh_token")) {
     fail("IMPLICIT_TOKEN_REJECTED");
   }
   if (query.has("error") || query.has("error_description")

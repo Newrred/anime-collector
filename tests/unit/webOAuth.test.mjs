@@ -28,6 +28,7 @@ test("Web callback accepts one bounded PKCE code and a same-app next path", () =
 });
 
 test("Web callback rejects implicit access and refresh token fragments", () => {
+  assert.throws(() => parseWebOAuthCallback({ search: "?code=x&access_token=secret", origin: "https://example.test" }), { code: "IMPLICIT_TOKEN_REJECTED" });
   assert.throws(() => parseWebOAuthCallback({
     search: "",
     hash: "#access_token=secret-access&refresh_token=secret-refresh",

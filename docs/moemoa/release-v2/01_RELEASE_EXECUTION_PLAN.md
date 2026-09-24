@@ -353,13 +353,97 @@ Public bucket, 서명 URL, CDN/PWA 캐시는 서로 다른 접근·철회 성질
 
 ## 16. 발견 사항과 계획 변경
 
+### D01 실제 테스트 프로젝트 연결 (2026-09-24)
+
+2026-09-25 후속: 기존 로컬 pg_dump/pg_restore 리허설에 stale snapshot과 최신 삭제 fence journal 재적용 시나리오를 추가한다. 별도 복구 DB에서만 합성 공개본을 준비하고, 백업→삭제 철회→오래된 사본 복원→closed gate→최신 fence 병합→reader 차단을 검증한다. hosted 프로젝트 reset/공개 활성화 및 운영 자료 복제는 하지 않는다. 서버 전체 백업 접근과 Storage bytes 사본은 별도 외부 요건이며 로컬 리허설로 대체 완료하지 않는다.
+
+2026-09-25: 사용자 지시로 Android 검증은 이번 실행에서 제외한다. 기존 실 Google 세션을 이용하는 loopback 전용/무시되는 `.cache` 진단 페이지에서 A/B/anon REST 행 조회·직접 쓰기 차단·Storage 접근을 검사한다. 토큰은 클라이언트 메모리 안에서만 사용하고 화면/로그/파일로 내보내지 않는다. 테스트 ref를 고정하고 개인 자료 대신 기존 합성 카드와 작은 합성 파일만 사용한다. 실제 존재하는 비공개 Storage fixture의 관리자 확인/바이트 확인과 client 접근 거부를 구분한다. 공개 flags나 RLS를 완화하지 않는다. 결과는 단일 진행판에 기록하고 임시 진단 페이지는 검증 후 제거한다.
+
+복원 실검증에서 새 origin의 동기화 완료 후 Archive 로드 오류를 재현했다. 원본을 보존한 채 IndexedDB 복원 관계와 조회 경계를 진단하고, 원인에 맞는 최소 수정 및 회귀 검사를 추가한다. 실제 hosted 카드 재열람으로 확인하며 운영/DB schema 변경은 하지 않는다.
+
+A/B 검증의 두 번째 Google 계정 사용을 승인받았다. 웹 로그인에서 이전 Google 세션이 자동 재선택되어 계정 전환이 어려우므로 provider의 select_account prompt를 지정한다. 기존 PKCE/redirect/권한 범위는 유지하며 실제 계정 선택 화면과 복귀를 검증한다.
+
+사용자가 MOEMOA 운영 project를 새 조직으로 이전하고 같은 조직의 별도 테스트 project 생성을 승인했다. 운영은 `okchpyagfucpzpyrfgol`, 테스트는 `nmgkhknponvzcwliajyk`, 조직은 `jdomtzpoqpyfinazdnpi`다. 실제 이전/생성 결과는 단일 진행판에 기록한다.
+
+다음 순서: (1) 인증된 관리 연결 확보 및 테스트 ref 대조, (2) 기존 migration 목록과 fresh hosted 적용 전제 검토, (3) 테스트에만 schema 적용 및 migration 이력 기록, (4) anon/owner 권한·기본 closed flags·Storage 경계 확인, (5) 테스트 전용 로컬 환경 구성 및 A/B 계정/OAuth 검사. 현재 운영용 link/env를 테스트로 덮어쓰지 않고 명시적인 대상 분리를 사용한다. 테스트 생성 시 자동 테이블 공개를 껐으므로 migration의 명시 GRANT가 실제 PostgREST 동작에 충분한지 확인한다.
+
+대상은 비어 있는 테스트 환경이며 운영 데이터/사용자/이미지는 복제하지 않는다. 운영 schema·배포·Public 활성화는 이번 승인에 포함하지 않는다. 작업 실패 시 테스트 실행을 중단하고 partial migration 이력을 확인하며, 무조건 reset/drop하지 않는다. 새 dependency 없이 기존 CLI 또는 연결된 Supabase 도구를 우선 사용하고 비밀번호/토큰을 대화나 Git에 기록하지 않는다. 실제 schema/Auth/Storage 검증 전 D01을 완료로 바꾸지 않는다.
+
 변경은 03의 '선택/변경 기록'에 `기존 수단 → 새 수단 / 근거 / 변하지 않는 수용 조건 / 영향 W / 승인 필요 여부`를 쓴다.
 
 작은 상세가 필요하면 동일 W의 작업 기록에 변경 파일·migration·테스트·rollback을 적는다. 기존 계획에 없는 새 기능을 '기술 선행'으로 위장하지 않는다.
 
 기존 감사의 U/S는 02 추적표로 보존한다. 신규 Public 작업은 C03~C08을 기준으로 검증한다. 예전 지적을 25개 새 작업으로 복제해 같은 수정을 두 번 관리하지 않는다.
 
+### W10 실행 상세 (2026-09-24)
+
+C05를 기존 publication 경계에 연결한다. 공개본의 원본 버전 정보를 서버 내부에 보존해 소유자에게 갱신 필요 상태를 제공하고, 갱신은 새 미리보기와 동의를 요구한다. 모든 위치의 카드 철회를 기존 RPC에 연결한다. 계정 원본 삭제는 원격 철회가 확인된 뒤 로컬 삭제를 진행하며, 실패 시 원본을 보존하고 재시도를 안내한다. Guest 로컬 삭제는 유지한다. 이전 요청/여러 보드/삭제 복원/관리 제한은 PostgreSQL 계약과 브라우저 회귀로 검증한다. 신규 public 요청 no-store와 기존 이미지 전달의 전후 권한 검사를 재사용한다.
+
+파일 지도: publication controller/panel/copy, private delete command/platform adapter/detail, additive publication status migration, tools/publication-boundary 및 unit/Chromium tests. 검증 환경은 새 PC의 격리 PostgreSQL과 합성 계정, 실제 로컬 Chromium이다. 실제 Supabase/Auth/Storage/Android 및 복원 운영 절차는 D01/D05에 남긴다. 운영 DB/배포/flags/의존성 변경은 범위 밖이다. rollback은 클라이언트 변경을 되돌리되 철회 fence와 이력은 보존하고 Public을 열지 않는다. 결과·잔여 위험은 단일 진행판에 기록한다.
+
+W10 보완 결과: 로컬 remoteVersion=0은 서버 미존재 증거가 아니므로 모든 계정 카드 삭제에 서버 retire RPC를 요구한다. source FK 없는 owner별 삭제 fence가 늦은 최초 sync/복원에도 공개 read/prepare를 차단한다. Guest 삭제는 오프라인 유지, 계정 삭제는 서버 확인 실패 시 원본 보존과 재시도 안내. 공개본 source status는 owner-only이며 익명 DTO에 원본 버전·ID를 추가하지 않는다. 신규 RPC의 호출/이력 용량 제한은 W15에 포함하고, 서버 migration 선적용 없이 클라이언트를 출시하지 않는다. 공개 읽기·쓰기를 잠근 채 fence를 보존하는 rollback을 사용한다.
+
+### W11 실행 상세 (2026-09-24)
+
+이미 공개한 보드 전체 또는 그 안의 대표 기억을 명시 선택·정렬하여 닉네임/소개와 전시한다. 기존 legacy showcase의 private 취향 위젯은 재사용하지 않는다. 공개 publication의 allowlist DTO와 현재 철회 판정을 재사용하며, 보드 철회 시 해당 보드에서 가져온 미니홈 전시도 제거됨을 안내한다. 별도 공개 원본을 자동 생성하지 않는다. 서버 preview/hash/revision → 재동의 publish → 안정 UUID 방문 주소를 제공한다. 미니홈 비공개는 보드 공개에 영향을 주지 않는다. 서버 기본 off와 기존 publication kill switch/계정 제한을 따른다.
+
+파일 지도: additive mini-home RPC/내부 table migration, memory domain/gateway/controller, owner editor와 anonymous visitor route, 기존 Board 화면 진입점, SQL/unit/Chromium 및 route manifest. 원본·이미지 업로드·팔로우·운영 활성화는 제외한다. 검증은 합성 역할 PostgreSQL 및 실제 로컬 브라우저로 선택/미리보기/게시/철회/계정 격리/오류/원본 삭제 전파를 확인한다. 실제 Auth/Storage/CDN/Android는 D01/W19. rollback은 mini-home flag off, 클라이언트 복원, 서버 공개 상태·삭제 fence 유지. 새 production 의존성 없음. 결과는 단일 진행판에 기록한다.
+
+### W12 실행 상세 (2026-09-24)
+
+C07에 따라 공개 미니홈의 팔로우/해제, 본인 관계 목록과 재방문, 차단/해제를 연결한다. legacy user_follows는 재개하지 않고 private 전용 관계 테이블과 인증 RPC를 추가한다. 사용자 ID는 auth.uid에서만 취하며 외부에는 미니홈 UUID만 반환한다. 동일 쌍의 변경은 트랜잭션 잠금으로 직렬화하고 차단 시 양방향 팔로우를 제거한다. 비공개/제한 대상은 이유 없는 사용 불가 항목으로 표시하며 해제는 가능하다. 비회원은 기존 안전한 OAuth 복귀 경로로 로그인하고 자동 팔로우하지 않는다. 차단은 익명 공개 열람을 막는다고 안내하지 않는다.
+
+파일 지도: 관계 migration, publication gateway/runtime, 미니홈 관계 UI 및 내 목록, SQL/브라우저 검사. 기본 off flag를 추가하고 운영 DB·공개 활성화·뉴스피드·DM은 제외한다. SQL 역할 검사와 로컬 브라우저, unit/build로 검증하며 실제 OAuth/Supabase/Android는 D01/W19에 남긴다. quota는 W15/D03, 신고는 W14에 연결할 출시 게이트다. 롤백은 관계 flag off 및 UI 복원이며 관계/차단 이력과 private 원본은 삭제하지 않는다. 새 의존성 없음. 실행 결과는 단일 진행판에 기록한다.
+
+### W13 실행 상세 (2026-09-24)
+
+공개 보드/미니홈에 안정 UUID 기반 주소 복사를 제공하고, 복사 실패 시 선택 가능한 주소로 복구한다. 공유 주소는 현재 query/hash를 복제하지 않으며 Android localhost 대신 기존 운영 웹 origin을 사용한다. 로그인 취소/실패 시 검증된 원래 내부 주소로 돌아가고 재시도할 수 있게 한다. callback 토큰/오류는 주소창에서 제거하며 외부 주소·callback 재진입·토큰이 포함된 next를 거부한다. Android OAuth 완료 경로는 packaged index.html로 변환한다. 자동 팔로우/게시 없음.
+
+파일 지도: public link domain/공용 복사 UI, owner/visitor 연결, web/native OAuth 및 callback UI, unit/Chromium 검사. DB·의존성·운영 설정 변경 없음. 검증: 복사 성공/권한 거부·취소/실패 복귀·공격 next·native cold/warm 경로 단위 검사, 기존 브라우저 회귀와 빌드. 실제 OAuth 제공자/Android 기기는 D01/W19에 유지한다. 롤백은 W13 client 변경 복원이며 원본/관계/공개 상태를 변경하지 않는다. 결과는 단일 진행판에 기록한다.
+
+### W14 실행 상세 (2026-09-24)
+
+C08의 공개 대상 신고→접수 확인→인증된 운영자 검토/임시 가림/복원→소유자 인앱 통지→이의제기→재검토/감사 흐름을 구현한다. 신고는 public board/home UUID와 고정 분류·선택 설명만 받으며 차단 관계와 무관하게 접근한다. 서버 전용 moderator allowlist, private 사건/통지/감사 테이블 및 좁은 RPC를 사용한다. 일반 client metadata나 공개 테이블 쓰기로 운영자 권한을 얻을 수 없다. 기존 hidden/read/image 경계를 재사용하며 복원은 공개 동의/철회 상태를 변경하지 않는다. 사건 revision으로 관리자 경합을 거절한다.
+
+파일 지도: additive moderation migration, gateway/runtime, 공개 신고 양식과 미니홈의 내 접수/조치 알림·이의제기, 합성 PostgreSQL 역할/동시성 검사·실제 Chromium. 운영자는 로컬에서 검증한 queue/review RPC와 저장소 운영 절차를 사용하며 별도 광범위 관리자 대시보드는 만들지 않는다. 신고 flag 기본 off, 일일 신고 한도 기본 0(격리 테스트만 설정), 동일 사용자/대상/분류 중복 접수는 기존 사건 반환. 실제 한도·담당자·지원 채널·보존 기간은 D03~D05, 운영 DB/배포/Public 활성화는 제외한다. 계정 전체 제재는 기존 write_blocked/hidden 범위로 유지하고 세분화는 W15에서 검증한다. 롤백은 신고 flag off 및 client 복원; 안전 가림·신고/감사/통지 기록을 파괴하지 않는다. 새 의존성 없음.
+
+W14 구현 중 발견/조정: 계정 제한은 기존 write_blocked flag를 덮어쓰면 다른 사건의 제한까지 해제할 위험이 있어 사건별 sanction을 추가했다. 기존 writer 경계와 이미지 완료 trigger에서 이를 검사하며, 한 사건의 해제는 다른 사건/기존 flag를 유지한다. 진행 중 동일 신고는 합치되 종결 후 새 사건을 받을 수 있게 했고 operation 재시도는 기존 접수로 고정했다. 운영 절차는 `docs/moemoa/operations/2026-09-24-public-moderation.md`에 기록한다.
+
+### W15 실행 상세 (2026-09-24)
+
+C09에 따라 서버 저장 변경량/용량·공개 이미지 비용을 제어한다. private 정책/사용량/만료 override, 계정별 잠금과 실제 테이블 trigger로 동기화/private 자료·게시 준비/게시·팔로우 생성의 우회를 막는다. 기존 operation replay는 새 변경을 소비하지 않는다. 삭제/철회/차단/지원/이의제기는 성장 quota에서 제외한다. 이미지 POST 변환 시도와 서비스 전용 GET 전달 비용은 별도 RPC로 계수하며 Storage 직통은 기존 private 권한을 유지한다. 모든 새 숫자는 미승인 상태의 비활성 정책으로 추가하고 격리 검사만 작은 수치로 설정한다.
+
+파일 지도: additive quota migration·이미지 HTTP 경계/오류 매핑·SQL 실제 역할/병렬 검사·HTTP/unit/browser 회귀·운영 계측 절차. 성공한 저장 변경량 quota와 실패 포함 ingress rate 제한을 혼동하지 않는다. 공개 페이지/catalog의 bounded 응답·서버 kill switch를 확인하며 호스팅 WAF/요금 경보·실제 트래픽 예산은 D03 외부 게이트다. 삭제 fence는 나중에 도착할 sync로 재공개되는 것을 막으므로 임의 삭제/하드 cap으로 정상 삭제를 막지 않는다; 크기 계측과 D05 보존/압축 설계가 필요하다. 운영 DB/배포/설정 변경, 새 의존성 없음. 롤백은 새 정책 비활성화이며 사용량/삭제 fence/공개 동의를 파괴하지 않는다.
+
+W15 발견/조정: `docs/deploy/supabase-social.sql`과 `supabase-showcase.sql`의 과거 직접 권한을 확인했다. 테이블이 있을 때만 legacy follows/showcase의 client 권한을 회수하고, user_profiles는 기존 own-select 경계로 제한한다. 행 삭제/자동 변환은 하지 않는다. 격리 harness에 과거 권한 fixture를 넣어 차단과 데이터 보존을 검증한다. 운영에 해당 객체가 존재하는지는 D01 원격 감사가 필요하다. 사건 제한과 이미 진행 중인 공개 쓰기는 계정별 공유/배타 잠금과 저장 시 재검사로 직렬화한다.
+
+W15 결과/인계: unit318·Chromium30·SQL218·build18·dist route18 통과. 초기 개발 서버/첫 화면 timeout과 Android packaged assets 부재를 진행판에 별도 기록했다. `docs/moemoa/operations/2026-09-24-resource-controls.md`에 단위·설정/회복·안전 삭제·남은 ingress/보존 경계를 남긴다. D01/D03/D05 미해소로 W15는 BLOCKED_EXTERNAL이며 다음 독립 로컬 작업은 W16이다. 배포·운영 설정 변경 없음.
+
+### W16~W20 연속 실행 상세 (2026-09-24 사용자 승인)
+
+사용자는 W 단계 종료까지 중단 없이 진행하도록 지시했다. 기존 dirty W09~W15를 보존하며 단계별 확인 질문 없이 가능한 구현/검증/인계를 수행한다. D01~D06의 실제 계정·기기·정책·정확한 후보 운영 승인까지 임의로 충족시키는 지시는 아니다. 외부 의존 항목을 기록하면서 독립 로컬 작업을 계속한다.
+
+W16: 기존 preview exporter/uploader와 catalog activation RPC를 점검했다. activation은 STAGING만 허용하고 전역 직렬화/expected-active 비교가 없어 재시도·복구·동시 전환 계약이 부족하다. additive migration으로 검증된 상태의 재시도/RETIRED 복구와 전환 잠금·선행 release 비교를 제공하고, 격리 SQL에서 불완전 후보·직접 권한·A→B→A·동시성·cover revision 보존을 검사한다. 기존 공개 함수 signature 호환을 보존하며 원격 upload/수집은 실행하지 않는다. uploader의 immutable release 재개가 ACTIVE를 STAGING으로 되돌리지 않도록 검토한다.
+
+W17: 저장소 복구/지원 도구와 사용자 안내를 점검하고 로컬 백업 복원/공개 철회 보존 검사를 수행한다. 정책 주체·연락처·보존 일수는 꾸며 넣지 않는다. 복구 절차/실제 확인 목록을 운영 인계에 묶는다.
+
+W18: 실제 route와 주요 action을 목록화하고 unit/catalog/Chromium 전체 대상 검사 및 빌드를 수행한다. 실패는 재현·분석하고 의미를 약화하지 않는 수정만 한다. 구형 공개 프로필 등 이전 기대는 현행 권한 모델과 구분한다.
+
+W19: 로컬 Android SDK/JDK/기기 가용성을 확인하고 가능한 패키징/검사까지 수행한다. 실제 계정·격리 프로젝트·기기가 없으면 해당 Q를 BLOCKED_EXTERNAL로 기록한다. W20: 검증 결과·source hashes·migration/catalog/flags·잔여 gate·rollback을 후보 인계로 묶되, 미검증 후보를 RC_VERIFIED/배포 완료로 표시하지 않는다. 모든 소스 변경은 기존 기능 회귀 검사, 문서 변경은 diff 확인을 수행한다. 신규 운영 의존성·운영 배포·자료 삭제는 제외하고 rollback은 코드 복원/flags off와 안전 이력 보존을 따른다.
+
+연속 실행 발견: 카탈로그 기존 객체 재시도는 Content-Length만 비교해 같은 크기의 손상을 놓쳤다. bounded GET의 SHA256/길이 확인으로 바꾸고 손상/초과 검사를 추가했다. 기존 릴리스 업로드는 ignore-duplicates로 상태를 보존하고 predecessor를 checked RPC로 전달한다. 현재 DB snapshot의 pg_dump→별도 DB 복원과 안전 이력 비교를 harness에 추가했으며 stale backup의 최신 철회 journal은 외부 gate로 남긴다. Android SDK36/build-tools36을 기존 JDK21 환경에 준비하고 Capacitor packaging·native 검사·APK를 실행한다(앱 의존성 변경 없음). W20 `scripts/check-release-candidate.mjs`는 commit/clean tree·필수 검사 artifact hash·D01~D06·catalog/config 증거의 누락/변조를 거부하는 로컬 gate다. 호스팅 보호 규칙이나 운영 승인 자체를 대신하지 않는다.
+
+W18 발견: 이전 UI 기대/주소/이미지 선택 중 이탈 계약이 현재 구현과 달랐고 Playwright가 Node 테스트까지 수집했다. 실제 UI 계약에 맞춰 회귀 검사를 수정하고 Node suite를 수집 대상에서 제외한다. Library의 다른 state를 변경하는 updater/대표 선택 null 처리, 이벤트용 ref의 render 중 변경은 직접 수정한다. 세부 분류와 action 지도는 `reports/2026-09-24-release-surface-audit.md`에 남긴다.
+
+연속 실행 결과: unit320/catalog256(skip2)/Chromium174(skip3)/SQL235/build18/native31/실제 packaged route18 PASS, 최신 local debug APK 생성. candidate guard는 미커밋·미확인 gate를 ready=false로 거부한다. 원격은 기존0330a54 quality/최근 health 성공과 Git 배포 SHA를 읽기 전용 확인했으나 운영 workingTreeDirty=true 원인은 확인하지 못했다. W16~W20은 해당 외부 조건을 남긴 BLOCKED_EXTERNAL로 인계한다. 필요한 실제 계정/기기·정책/예산/사본·후보 승인 없이는 정식 완료할 수 없으며 운영 DB·배포·Public은 변경하지 않았다. 상세 evidence/실패와 재검증 순서는 단일 진행판을 따른다.
+
+2026-09-25 서버 자격증명 입력 후 검증: gitignored 테스트 env에서만 값을 읽고 target ref를 고정한다. psql로 실제 TLS 연결 및 버전을 확인하고 service key로 기존 합성 private Storage fixture를 내려받아 로컬 사본·재다운로드 SHA256·이미지 decode를 대조한다. 비밀값/개인 데이터는 결과에 기록하지 않는다. 이 읽기 전용 단계는 hosted DB 전체 복원이나 CDN 검증을 대신하지 않는다. 원격 PostgreSQL17에 맞는 dump 도구 준비와 격리 복원은 후속이며, 운영/Public/Android 변경은 제외한다.
+
 ## 17. 최종 완료·출시·종료 보고
+
+2026-09-25 Pro 중간 검토 인계: 사용자 요청으로 누적 개발본과 최신 검증 증거를 검토 브랜치 `review/pro-interim-2026-09-25`에 commit/push한다. master 운영 배포와 DB/Public 활성화는 수행하지 않는다. 기존 진행 원장을 유지하고 중간 검토 안내 하나에 읽기 순서·소스 지도·검증 수준·출시 잔여·검토 질문을 모은다. 추적 대상 비밀값/덤프/개인 파일 검사와 현재 unit/build를 확인한다. 과거 검사 결과는 당시 소스 증거로 표시한다.
+
+2026-09-25 hosted 복구 실행: 사용자 계속 진행 승인에 따라 공식 PostgreSQL apt의17 바이너리를 격리 도구 폴더에 준비한다. 테스트 Session pooler만 허용하는 guard로 전체 logical dump를 생성하고 원격에 write하지 않는다. 로컬 Unix socket 전용17 DB에 복원하며 Supabase 전용 extension/플랫폼 서비스 의존성은 별도로 분류한다. public/private 앱 테이블·삭제 fence·정책·권한·Auth/Storage metadata의 비교 범위를 명시하고, 제외한 플랫폼 객체를 전체 서비스 복구 성공으로 세지 않는다. 백업에 포함될 수 있는 테스트 계정 정보는 Gitignored 사본에만 저장하며 stdout에는 집계/성공 여부만 남긴다. Storage bytes는 기존 별도 사본을 사용한다. 실패 시 local DB를 중지하고 dump를 보존하며 hosted DB는 덮어쓰지 않는다.
 
 ### 17.1 READY_FOR_DEPLOY
 
@@ -383,3 +467,5 @@ D06 승인 후 검증된 Git 배포로 반영하고, 운영 도메인에서 정�
 W07 실행 상세(2026-09-23): 단일 진행판의 W07 실행 범위를 따른다. 공개 snapshot/서버 권한/철회 기반의 additive SQL과 합성 PostgreSQL 역할 검증을 먼저 수행하고, 이미지 전달 W08·방문자 UI W09·통합 철회 W10은 별도 완료 조건으로 유지한다. 실제 Supabase가 없는 D01 게이트는 보존한다.
 
 W08 실행 상세(2026-09-23): 단일 진행판 W08 실행 범위 참조. 기존 Vercel의 이미지 전달 endpoint+Supabase 권한/Storage로 범위를 제한하며 sharp0.34.5를 명시 의존성으로 고정한다. D01/D03/D05/D06과 W09 UI/W19 실기기 게이트 유지.
+
+W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설명·서버 DTO 미리보기·게시·주소·보드 철회를 연결하고 `/public/board/` 방문자 화면은 익명 reader만 사용한다. 기본 off인 `PUBLIC_MEMORY_PUBLICATION_V1` 아래 구현하며 기존 갤러리/원본/DB 스키마는 유지한다. 세션·요청 세대 검사와 AbortController, 동일 게시 operation 재시도, 검토 변경 시 재동의, 실제 이미지 로드 실패 시 게시 차단을 검증한다. 사용자 이미지는 원본 파일을 명시 재선택하고 서버 checksum/권리 판정을 사용한다. 업로드 동의 revision은 서버와 일치하는 배포 설정 `PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION`으로 제공하며 미설정 시 업로드를 열지 않는다. 이는 정책 승인 자체를 대체하지 않는다. 파일 지도: memory/application publication controller, runtime platformPublication, components 공개 선택/공용 DTO renderer/방문자, public route, unit 및 Chromium 계약 검사. 의존성·migration·운영 설정 변경 없음. 검증: unit/build, 합성 RPC와 실제 로컬 브라우저의 선택→미리보기→게시→새 context 방문→철회 및 취소/실패/계정전환/320px. 실제 Supabase/Storage/Vercel/Android는 D01 등 외부 게이트로 유지한다. rollback은 W09 신규 파일과 Board 진입점만 복원하며 서버 이력·private 원본은 건드리지 않는다. 결과와 증거는 단일 진행판에 기록한다.
