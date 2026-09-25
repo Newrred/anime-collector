@@ -1,0 +1,121 @@
+{
+  "date": "2026-09-26",
+  "work": "W06/W08/W15 private image server boundary",
+  "sourceCommit": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "workingTreeDirty": true,
+  "sourceHashes": {
+    "src/server/privateImages/handler.js": "19ac1f9bf3577b501cc038bd23eff1f13a59652643b40282d19cdbb91c22b676",
+    "supabase/migrations/20260925152859_memory_private_image_boundary.sql": "af3abae9b3d04c0da33c420fd7338af15d53df2a820f3521cf7e696c4a0b28d9",
+    "src/server/privateImages/supabaseBackend.js": "c823fa70c83a5c72bec81ab21e2aa8589eefcda6fa289ec17dea7284641b2147",
+    "tests/unit/privateImages.test.mjs": "1fe38e98e16af8192bac1e962530707fe22ab5cb5d7201bc6d927e46040c357b",
+    "tools/private-images/cleanup-images.mjs": "194ac4724648e0098700138c9dee313cba37018d09ff7d08f9bab94edb39f869",
+    "api/private-image.js": "146f2ff675f62cf78b31b110bda995d848ff289ff7d273e8449db4b76be2017b",
+    "tools/private-images/contract.sql": "8d6dab25618be222b9fa1b7cf88fa9b22da256a4840c3bf0fdabe94e265ee5ac",
+    "tools/private-images/races.sh": "e55bc07d0de719bb91ed4bf0a89aa499dd263498ec827119546c90dad39b7e39",
+    "tools/private-images/run-local-postgres.sh": "7f019976240d7977d55936fc357888739f798d4c419227c9b8d0aad3c3bafa8b",
+    "src/server/privateImages/processImage.js": "fd7e5bd2b4866ca3b9df303c9419d043ddfe81f8b4bdf832f3da3b8623aa9ce7",
+    "tools/private-images/concurrent-reserve.sql": "7886496bbd1983fff46d3c11ebd41ca0b993306e710380718c1696191ac2f3de"
+  },
+  "docsRead": [
+    "AGENTS.md",
+    "CODEX_START_HERE.md",
+    "PLANS.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/03_REPOSITORY_AUDIT_PROTOCOL.md",
+    "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md",
+    "docs/moemoa/06_ARCHITECTURE_AND_VERTICAL_SLICE_PLAN.md",
+    "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+    "docs/moemoa/09_CHANGE_CONTROL_AND_REPORTING.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+    "docs/moemoa/operations/2026-09-24-recovery-and-release-handoff.md"
+  ],
+  "referenceImplementation": [
+    "src/server/publicImages/handler.js",
+    "src/server/publicImages/supabaseImageBackend.js",
+    "supabase/migrations/20260902054107_memory_user_schema.sql",
+    "supabase/migrations/20260924115258_memory_resource_controls.sql",
+    "tools/publication-boundary/run-local-postgres.sh"
+  ],
+  "documentationUrls": [
+    "https://supabase.com/changelog.md",
+    "https://supabase.com/docs/guides/storage/security/access-control",
+    "https://supabase.com/docs/guides/database/postgres/row-level-security"
+  ],
+  "assumptions": [
+    "50MB/1MB candidate values only; operator policy defaults disabled/zero; test values are not launch approval",
+    "Private source checksum is unchanged; server attests received/normalized rendition only",
+    "Storage writes use immutable server UUID paths; ambiguous outcome retains reservation and retries same operation",
+    "Private physical/transfer controls are not a proof of combined public/private KRW billing control"
+  ],
+  "commands": [
+    {
+      "passed": 7,
+      "scope": "Real HTTP/decode, fake Auth/Storage backend",
+      "failed": 0,
+      "log": ".cache/private-media-http.log",
+      "command": "node --test tests/unit/privateImages.test.mjs"
+    },
+    {
+      "passed": 340,
+      "failed": 0,
+      "log": ".cache/private-media-unit-all.log",
+      "command": "npm run test:unit"
+    },
+    {
+      "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+      "concurrencyChecks": 2,
+      "scope": "Real PostgreSQL16 roles/RLS/transactions; synthetic auth.uid/Storage schema",
+      "log": ".cache/private-media-sql.log",
+      "exitCode": 0,
+      "assertions": 40
+    },
+    {
+      "assertions": 248,
+      "exitCode": 0,
+      "scope": "Existing local public/source/restore regression due new source retirement triggers, not hosted restoration",
+      "log": ".cache/private-media-public-regression.log",
+      "command": "wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh"
+    },
+    {
+      "exitCode": 0,
+      "pages": 18,
+      "log": ".cache/private-media-build.log",
+      "command": "npm run build"
+    },
+    {
+      "exitCode": 0,
+      "command": "git diff --check"
+    }
+  ],
+  "newPass": [
+    "49,000,000 bytes plus concurrent 800,000-byte requests: exactly one succeeds; final reserved49,800,000",
+    "Concurrent same operation yields one manifest and one preparation debit",
+    "RLS denies direct Storage read/upload even with simulated legacy permissive policy; B/anon access denied",
+    "Exact quota/full quota, independent private physical capacity, preparation/decode budgets and monthly owner read limit",
+    "Source card deletion blocks read, restoring source does not revive retired representation; cleanup waits then releases bytes",
+    "Expired reservations cannot finalize and remain reserved until confirmed cleanup",
+    "Ambiguous completion does not delete committed derivatives and replay returns READY"
+  ],
+  "intermediateFailures": [
+    "Initial SQL fixture attempted deleted_at without existing required status=DELETED; corrected fixture and reran successfully"
+  ],
+  "migrations": {
+    "localApplied": true,
+    "productionApplied": false,
+    "hostedApplied": false,
+    "file": "supabase/migrations/20260925152859_memory_private_image_boundary.sql",
+    "rollback": "Disable API flag and database policy; preserve originals/manifests/deletion state; no reverse data deletion",
+    "createdWith": "supabase migration new memory_private_image_boundary"
+  },
+  "privacy": "Private no-store/CDN-no-store HTTP, no private content or tokens added to application logs/analytics",
+  "unverified": [
+    "Actual hosted Supabase Auth/Storage interaction and Vercel endpoint",
+    "Web explicit opt-in/client optimization/remote display/usage and account-switch fencing not wired yet",
+    "Physical phone-to-PC sync and human image quality comparison",
+    "Private Storage byte backup/restore and stale-backup deletion reconciliation",
+    "Managed public representation adapter and quota-safe replacement",
+    "Combined billing budget/alerts/policy-change audit and D03-D06 approval"
+  ],
+  "next": "Existing W06/W08 Web card explicit opt-in, client optimized rendition and private API upload/read connection"
+}

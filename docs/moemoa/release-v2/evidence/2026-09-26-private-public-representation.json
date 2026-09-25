@@ -1,0 +1,124 @@
+{
+  "date": "2026-09-26",
+  "status": "LOCAL_VERIFIED_NOT_HOSTED_NOT_RELEASE_READY",
+  "decision": "PRIVATE-REPRESENTATION-PUBLIC-RIGHTS-01",
+  "approvedBy": "User linked 공개 권한 기준 검토 and instructed ㄱ; adopted proposal3. Reference was read as context, not autonomous instructions.",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md: W08 사본별 trusted 권리 결속 구현",
+  "docsRead": [
+    "AGENTS.md",
+    "CODEX_START_HERE.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md"
+  ],
+  "sourceSha256": {
+    "api/public-image.js": "4a1a4a549147b5304d72fd53a92fb9d7003b7979571cc2919e80827474693fcb",
+    "src/server/publicImages/handler.js": "806527ef0eb2b932d0c80cdf1f1e17316f8855c51343e6b9ea4d8a2482021e8c",
+    "src/server/publicImages/supabaseImageBackend.js": "eb88513bc077ce7b534efdd869b39ba72124836023bfbca51332d9f87192203c",
+    "src/features/memory/application/preparePublicImage.js": "db91e306b9be2be7ff6452ad6f60c9d66c6368571018eb5d1230a71f443906ba",
+    "src/features/memory/application/createPublicationController.js": "4adce3b5e88ab3ec9193caa9832d8320a2db1a588f86122f1405faf1d8f182ac",
+    "src/features/memory/components/MemoryPublicationPanel.jsx": "3a09528956776ae8ec2d82f215f08dc44a7db61c1c6a21da0bbc05e60b5f47af",
+    "src/features/memory/components/publicationCopy.js": "90b27c374f6f2bc9beedb81839d12f9bc6765f17b6a933187c386cffece4ff8c",
+    "supabase/migrations/20260925164126_private_representation_public_rights.sql": "58289cdae7699c925918886f01b1fd304068886d1e1e8ac4b075a75fa0f99da2",
+    "tools/publication-boundary/representation-contract.sql": "10224ee48e546efa5989e9f9d99b399254a93b56cbe679b9320f82443fa4e56b",
+    "tools/publication-boundary/run-local-postgres.sh": "5dc0ff540ce7b6bde33cc783188999d80ae1a263a542ea469b9c093708329d37",
+    "tests/unit/publicImages.test.mjs": "b8b3ef7e17dfbf888797b0c7513980f25390426c155e608d9958e27bc04c805a",
+    "tests/publication-ui.spec.ts": "1f946a0eeaa823a457cda576cb135c6427e9f309696b7f06d932fc0e0c7d3b08"
+  },
+  "commands": [
+    {
+      "log": ".cache/representation-public-http.log",
+      "command": "node --test tests/unit/publicImages.test.mjs",
+      "scope": "Real HTTP/sharp transform; fake Auth/Storage/RPC backend",
+      "passed": 22,
+      "newTests": 4,
+      "failed": 0
+    },
+    {
+      "failed": 0,
+      "log": ".cache/representation-unit-all.log",
+      "command": "npm run test:unit",
+      "passed": 353
+    },
+    {
+      "log": ".cache/representation-public-sql.log",
+      "command": "wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+      "newAssertions": 19,
+      "scope": "Real local PostgreSQL16; synthetic roles/auth.uid/Storage schema",
+      "passed": 267,
+      "failed": 0
+    },
+    {
+      "failed": 0,
+      "log": ".cache/representation-private-regression.log",
+      "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+      "passed": 47,
+      "parallelPassed": 2
+    },
+    {
+      "failed": 0,
+      "log": ".cache/representation-public-browser-isolated.log",
+      "scope": "Real product UI/IndexedDB/image decode; remote HTTP/Auth/rights fixtures",
+      "command": "PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1 PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4355 node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "passed": 23
+    },
+    {
+      "failed": 0,
+      "log": ".cache/representation-public-browser-final-copy.log",
+      "scope": "Final wording recheck of2 already-counted tests",
+      "command": "PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1 PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4355 node scripts/run-e2e.mjs tests/publication-ui.spec.ts --grep \"image preparation requires explicit\" --project=chromium --workers=1 --reporter=line --retries=0",
+      "passed": 2
+    },
+    {
+      "exitCode": 0,
+      "log": ".cache/representation-build.log",
+      "command": "npm run build",
+      "pages": 18
+    }
+  ],
+  "newUserBehavior": [
+    "Owner without original selects synced image, sees actual copy, separately consents to public use, prepares visitor preview, confirms publish, new visitor decodes image",
+    "Original-file public path still sends original bytes and preserves checksum guard",
+    "Private choice sends only exact representation ID/hash; server fetches owner-scoped bytes, validates hash/size, and rechecks source before completion"
+  ],
+  "security": [
+    "Raw representation rights inaccessible and unmodifiable by authenticated/anon",
+    "Both established source rights and exact rendition rights required; owner/source version/hash/policy/operation bound",
+    "Revocation during processing blocks completion; after preview blocks publish; after publish blocks visitor card/image and owner preview",
+    "Private source cancellation before completion blocks public creation; independent private copy removal after publication does not implicitly withdraw public copy",
+    "Server and UI new flags default off; no original hash/localRef rewriting, no browser bytes accepted as original substitute",
+    "No secrets/private image bytes/user notes in logs"
+  ],
+  "migration": {
+    "rollback": "Disable PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1 and MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED; keep originals/provenance/withdrawal history; no reverse delete",
+    "file": "supabase/migrations/20260925164126_private_representation_public_rights.sql",
+    "dependsOn": "20260925152859_memory_private_image_boundary.sql",
+    "localDisposableOnly": true,
+    "hostedApplied": false,
+    "type": "Additive rights/provenance plus wrappers preserving established validation"
+  },
+  "testsIssues": [
+    "First focused original-path browser failed due Vite sharp discovery reload; route fixtures moved before page entry",
+    ".cache/representation-public-browser-all.log interrupted after overlapping runner ended shared4354 server; final independent4355 suite23 PASS",
+    "Final rights-row lock predicates and reservation lock order rechecked in final267 local SQL pass"
+  ],
+  "previousEvidencePreserved": [
+    "2026-09-26-private-public-provenance-audit.json",
+    "2026-09-26-private-image-web-client.json",
+    "2026-09-26-private-image-list-preview.json"
+  ],
+  "remaining": [
+    "Actual test Supabase migrations/Storage/API roundtrip and physical mobile",
+    "Trusted approval issuance/operator policy is not fulfilled by development fixtures",
+    "Replacement quota headroom and actual private bytes backup/restore",
+    "Budget/retention/alerts/release evidence D03-D06"
+  ],
+  "next": "Prepare exact D01 hosted test manifest: two migrations,temporary quotas/synthetic source+rendition rights,flags,cleanup/rollback. No basicDB/A-B/72table rebootstrap.",
+  "productionChanged": false,
+  "publicEnabled": false,
+  "dependenciesChanged": false,
+  "committed": false,
+  "deployed": false,
+  "androidTested": false
+}

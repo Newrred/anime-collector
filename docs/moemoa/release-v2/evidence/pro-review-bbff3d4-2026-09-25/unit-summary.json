@@ -1,0 +1,23 @@
+{
+  "source": "MOEMOA-Pro-Review-bbff3d4.zip",
+  "scope": "independent current-response Node unit tests; not hosted/browser/build",
+  "command": "node --test --test-concurrency=2 tests/unit/*.test.mjs",
+  "node": "22.16.0",
+  "passed": 276,
+  "filesFailedBeforeTests": [
+    "tests/unit/catalogConsumer.test.mjs",
+    "tests/unit/catalogRepository.test.mjs",
+    "tests/unit/nativeAppNavigation.test.mjs",
+    "tests/unit/publicImages.test.mjs",
+    "tests/unit/quickActionActions.test.mjs",
+    "tests/unit/sourceIndependentCatalog.test.mjs",
+    "tests/unit/syncAccountMeta.test.mjs",
+    "tests/unit/syncMutationSafety.test.mjs",
+    "tests/unit/watchLogSource.test.mjs"
+  ],
+  "failureClass": "ERR_MODULE_NOT_FOUND: @supabase/supabase-js or sharp unavailable in this runtime",
+  "executedAssertionFailures": 0,
+  "reportedExitCode": 1,
+  "fullSuitePassed": false,
+  "rawLogSha256": "91c3239a36f76ffe7ad50e8f285d8e653af054f4f82876a0a6dceae37d37802c"
+}

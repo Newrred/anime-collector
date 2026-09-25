@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19 product UI withdrawal; hosted moemoa-test DB/Storage with local product image handler, not production/CDN",
+  "head": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "humanAssistance": "User dismissed first native confirm and accepted second; CUA native dialog control timed out. Product UI initiated and completed withdrawal; no diagnostic RPC substituted.",
+  "before": {
+    "time": "2026-09-24T20:41:35.663Z",
+    "board": {
+      "status": 200,
+      "visible": true,
+      "entries": null
+    },
+    "home": {
+      "status": 200,
+      "visible": true,
+      "entries": 1
+    },
+    "image": {
+      "status": 200,
+      "bytes": 60,
+      "cacheControl": "no-store, max-age=0"
+    }
+  },
+  "afterCancel": {
+    "time": "2026-09-24T20:44:11.003Z",
+    "board": {
+      "status": 200,
+      "visible": true,
+      "entries": null
+    },
+    "home": {
+      "status": 200,
+      "visible": true,
+      "entries": 1
+    },
+    "image": {
+      "status": 200,
+      "bytes": 60,
+      "cacheControl": "no-store, max-age=0"
+    }
+  },
+  "afterWithdraw": {
+    "time": "2026-09-24T20:45:28.739Z",
+    "board": {
+      "status": 200,
+      "visible": false,
+      "entries": null
+    },
+    "home": {
+      "status": 200,
+      "visible": true,
+      "entries": 0
+    },
+    "image": {
+      "status": 404,
+      "bytes": 21,
+      "cacheControl": "no-store, max-age=0"
+    }
+  },
+  "ui": [
+    "This Board has been withdrawn.",
+    "This Board is unavailable.",
+    "No memories are currently on display."
+  ],
+  "cleanup": {
+    "allPublicFlags": false,
+    "quotas": 0,
+    "policy": "UNAPPROVED",
+    "moderators": 0,
+    "activeRights": 0,
+    "publication": "REVOKED",
+    "homePublished": false,
+    "derivative": "DELETED",
+    "reservedBytes": 0,
+    "sourceChecksumPreserved": true,
+    "auditCount": 5,
+    "frontendFlags": false,
+    "proxyStopped": true
+  },
+  "commands": [
+    "node .cache/w19-http.mjs after-cancel",
+    "node .cache/w19-http.mjs after-withdraw",
+    "node .cache/test-query.mjs .cache/w19-cleanup.sql",
+    "node .cache/w19-image-cleanup.mjs",
+    "node .cache/test-query.mjs .cache/test-public-restore.sql",
+    "node .cache/test-query.mjs .cache/w19-check.sql"
+  ],
+  "previousPassNotRerun": {
+    "unit": 328,
+    "syntheticBrowser": 21,
+    "localSqlMarkers": 248,
+    "build": "PASS"
+  },
+  "limitations": [
+    "Session expiry/login return and exact RC delivery environment remain",
+    "Android excluded; D02 final Web-only approval separate",
+    "No production changes, migrations, commit, push or deployment this followup"
+  ]
+}

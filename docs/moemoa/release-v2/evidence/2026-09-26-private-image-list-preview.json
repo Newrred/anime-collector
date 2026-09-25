@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06/W08 private thumbnails in Archive and Board",
+  "status": "LOCAL_VERIFIED_NOT_HOSTED_NOT_RELEASE_READY",
+  "docsRead": [
+    "CODEX_START_HERE.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md"
+  ],
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md: 2026-09-26 W06/W08 Archive·Board private 썸네일",
+  "sourceSha256": {
+    "src/features/memory/application/createPrivateImageTransfer.js": "25527eea75da5b3ee7fb5793269f19d9d1d414dc50f3fe1037011f567ed40326",
+    "src/features/memory/components/PrivateMemoryCardPreview.jsx": "eca47e22594c0e4e742ecb72a156ad95be2e1f638eb88a11b61687038befa666",
+    "src/features/memory/components/MemoryCardPreview.jsx": "a0ba7feaf4383b219562e9e1c5aedce8e3592bd4c6de14fc71ab4e777fbfa592",
+    "src/features/memory/components/ArchiveView.jsx": "062d549827908f1457584c3c554a33536a2fa01ea8ada1f8e01dd2aa914dde18",
+    "src/features/memory/components/MemoryBoardView.jsx": "959d8aad93b4afbb72077a05f2d12a5d04b8af7579dae08286f5b83cf36ac471",
+    "tests/unit/privateImageTransfer.test.mjs": "3485fff529ff628f74c678ab3b46f2ff4f3e3c42589ff837f68a824b47a4f39e",
+    "tests/private-image-sync.spec.ts": "ed2f63e49ea9ffa47391242dea11b78b504e80e637db5311c5b3c0a3c98ecb92"
+  },
+  "referenceFiles": [
+    "src/features/memory/application/loadMemoryVisual.js",
+    "src/features/memory/runtime/createMemoryRuntime.js",
+    "src/features/memory/runtime/platformPrivateImages.js",
+    "src/features/memory/application/preparePublicImage.js",
+    "src/features/memory/runtime/platformPublication.js"
+  ],
+  "commands": [
+    {
+      "failed": 0,
+      "command": "npm run test:unit",
+      "passed": 348,
+      "log": ".cache/private-list-unit.log"
+    },
+    {
+      "failed": 0,
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4352 node scripts/run-e2e.mjs tests/private-image-sync.spec.ts tests/memory-board.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "passed": 6,
+      "log": ".cache/private-list-browser.log"
+    },
+    {
+      "failed": 0,
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=0 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=0 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4353 node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/memory-owner-boundary.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "passed": 19,
+      "log": ".cache/private-list-off-regression.log"
+    },
+    {
+      "command": "npm run build",
+      "log": ".cache/private-list-build.log",
+      "exitCode": 0,
+      "pages": 18
+    }
+  ],
+  "newlyVerified": [
+    "Actual Archive and Board render authenticated thumb variant when original bytes absent; detail still uses main",
+    "Read matches thumbnailHash/thumbnailBytes and120KB limit; corrupt thumbnail does not fall back to main",
+    "390px Archive has no horizontal overflow",
+    "12-card archive reads only initial viewport; expanded viewport cannot exceed4 concurrent thumbnail reads",
+    "Account A to B switch removes A visuals and cancels queued reads; no uploads from list views"
+  ],
+  "proxyBoundary": "Browser UI/canvas/IndexedDB and bytes are real; Auth, metadata sync and HTTP responses are mocks. Additional12-card fixture uses synthetic synced metadata.",
+  "previousPassNotRerun": [
+    "Private local PG47+parallel2",
+    "Public local SQL248"
+  ],
+  "assumptions": [
+    "Existing private feature flag remains default off",
+    "50MB/1MB remain candidate values, not operational approval",
+    "No main fallback for unavailable/corrupt thumbnail; existing missing visual stays visible"
+  ],
+  "securityPrivacy": "Fresh session/owner/source checks through existing transfer controller; no permanent image cache; viewport loading,4 concurrent reads,abort on unmount,objectURL revoke. No public rights or consent change. No private bytes/tokens in logs.",
+  "migrations": "None this iteration; earlier private migration still not applied hosted",
+  "rollback": "Turn PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 off; preserve originals/journal",
+  "unresolved": [
+    "Hosted API/Auth/Storage roundtrip and physical mobile",
+    "Private representation to public preparation adapter preserving original checksum and explicit rights/preview consent",
+    "Replacement quota headroom,private bytes backup/restore,combined budget/operational evidence",
+    "Home/Title read surfaces not included in this Archive/Board verification"
+  ],
+  "next": "Existing W08 private-to-public representation preparation adapter",
+  "externalGates": [
+    "D01 exact hosted private test scope",
+    "Physical mobile verification",
+    "D03-D05 operational values/evidence",
+    "D06 exact release candidate approval"
+  ],
+  "productionChanged": false,
+  "publicEnabled": false,
+  "deployed": false,
+  "dependenciesChanged": false,
+  "androidTested": false
+}

@@ -1,0 +1,89 @@
+{
+  "date": "2026-09-26",
+  "status": "READY_FOR_SMOKE_DEPLOY_NOT_FULL_RELEASE",
+  "authorization": "User requested deployment for phone and friend smoke testing",
+  "previousProductionCommit": "0330a5401e0112f2e36886a6826812219e7aed89",
+  "scope": "Web local image intake, existing account/metadata/Archive/Board; no hosted image/public activation",
+  "newProductionMigrationsApplied": [],
+  "rollback": "Git revert code/config changes and push master through Vercel Git integration; preserve DB and local data",
+  "flags": {
+    "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1": "1",
+    "PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1": "0",
+    "PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1": "0",
+    "PUBLIC_MEMORY_PUBLICATION_V1": "0",
+    "PUBLIC_MEMORY_MINIHOME_V1": "0",
+    "PUBLIC_MEMORY_FOLLOWS_V1": "0",
+    "PUBLIC_MEMORY_MODERATION_V1": "0"
+  },
+  "secretScan": {
+    "files": 102,
+    "findings": 0,
+    "scope": "Staged changed files; allows existing public anon JWT, no private credentials found"
+  },
+  "checks": [
+    {
+      "path": ".cache/deploy-unit.log",
+      "command": "npm run test:unit",
+      "result": {
+        "passed": 353
+      },
+      "sha256": "5dd5a89650f76100b8ef459ba753ee3a466d2398c9ac711317aecc6137d8808d"
+    },
+    {
+      "path": ".cache/deploy-catalog.log",
+      "command": "npm run catalog:test",
+      "result": {
+        "passed": 256,
+        "skipped": 2,
+        "skipReason": "Windows symlink cases"
+      },
+      "sha256": "1cddfcb4e06a86028714e894c2e91698ede0d6e884a56fc8e2943cf85340c9dc"
+    },
+    {
+      "path": ".cache/deploy-browser.log",
+      "command": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4357 node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "result": {
+        "passed": 78,
+        "skipped": 1,
+        "skipReason": "private source flag off"
+      },
+      "sha256": "efc0f78345af50f64d39d950048ae07e525cc3deb14685398f949a5cbb67b43c"
+    },
+    {
+      "path": ".cache/deploy-intake-browser-final.log",
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4358 node scripts/run-e2e.mjs tests/web-image-intake.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "result": {
+        "passed": 11
+      },
+      "sha256": "e044e56f7faba94dc03ddd25de90dc7498040e46b149e42c3798a3007738df47"
+    },
+    {
+      "path": ".cache/deploy-public-sql.log",
+      "command": "wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+      "result": {
+        "passed": 267,
+        "scope": "local disposable PostgreSQL"
+      },
+      "sha256": "f999b73e142cda4b2224eb45fe25742b69d90ba82055a729e02e020febe4df0e"
+    },
+    {
+      "path": ".cache/deploy-build.log",
+      "command": "npm run build",
+      "result": {
+        "passed": true,
+        "pages": 18
+      },
+      "sha256": "46f422b635109b0ce385406e364285ff5658a27b7903fe5bdec221a894292f98"
+    }
+  ],
+  "testIssue": "Initial flag-on mobile first-action test measured system-design button after image picker became available; now checks actual first enabled action without loosening viewport geometry. Re-run passed.",
+  "remaining": [
+    "Hosted private Storage and representation rights flow",
+    "Physical phones and actual tester feedback",
+    "D03-D05 operational evidence",
+    "Full Public launch candidate approval"
+  ],
+  "deployment": {
+    "status": "PENDING"
+  }
+}

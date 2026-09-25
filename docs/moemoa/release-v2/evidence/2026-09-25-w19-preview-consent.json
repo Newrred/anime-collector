@@ -1,0 +1,84 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q11 hosted consent boundary, actual A JWT through temporary local RPC buttons; anonymous apikey-only snapshot reads",
+  "source": "supabase/migrations/20260923182210_memory_publication_source_status.sql",
+  "steps": [
+    {
+      "action": "baseline published",
+      "anonymousHash": "90475b8faac13b0bc3d7579ba1c228c779d16afc00fa667deec738a082f016db"
+    },
+    {
+      "action": "prepare reviewed update",
+      "revision": 9,
+      "firstCardTitle": "Q15 representative synthetic 1"
+    },
+    {
+      "action": "synthetic source title/version changed",
+      "versionBefore": 1,
+      "versionAfter": 2
+    },
+    {
+      "action": "publish retained revision/hash/policy/operation",
+      "error": "PREVIEW_CHANGED"
+    },
+    {
+      "action": "anonymous read after rejection",
+      "hash": "90475b8faac13b0bc3d7579ba1c228c779d16afc00fa667deec738a082f016db"
+    },
+    {
+      "action": "fresh prepare",
+      "revision": 10,
+      "firstCardTitle": "Q11 changed AFTER preview"
+    },
+    {
+      "action": "publish superseded review9",
+      "error": "PUBLICATION_CONFLICT"
+    },
+    {
+      "action": "anonymous read after second rejection",
+      "hash": "90475b8faac13b0bc3d7579ba1c228c779d16afc00fa667deec738a082f016db"
+    },
+    {
+      "action": "publish fresh review10",
+      "state": "PUBLISHED",
+      "revision": 11
+    },
+    {
+      "action": "anonymous read after explicit fresh publish",
+      "hash": "fc7943783b5926e9e8bc6a6a3fad45c9ae9a2cfe7622e4214c5ae5c6eae8acc1",
+      "title": "Q11 fresh reviewed update",
+      "firstCardTitle": "Q11 changed AFTER preview"
+    }
+  ],
+  "cleanup": {
+    "publication": "REVOKED",
+    "revision": 12,
+    "sourceTitleRestored": true,
+    "sourceVersion": 3,
+    "allServerPublicFlags": false,
+    "policy": "UNAPPROVED",
+    "quotas": 0,
+    "moderators": 0,
+    "activeRights": 0,
+    "homePrivate": true,
+    "auditCount": 8,
+    "temporaryFilesRemoved": true,
+    "serverStopped": true
+  },
+  "commands": [
+    "node .cache/test-query.mjs .cache/q11-fixture-inspect.sql",
+    "node .cache/test-query.mjs .cache/q11-enable.sql",
+    "node .cache/test-query.mjs .cache/q11-mutate.sql",
+    "node .cache/test-query.mjs .cache/q11-cleanup.sql",
+    "node .cache/test-query.mjs .cache/test-public-restore.sql"
+  ],
+  "helperSha256": "89572d534d11b485db55ff01d3fa90da8337911eb57a313791528d09d799599b",
+  "limitations": [
+    "Actual hosted RPC/anonymous HTTP; not product checkbox UI E2E",
+    "Sequential competing revisions; simultaneous requests not run",
+    "Asset rights/policy change combinations not run"
+  ],
+  "productCodeChanges": 0,
+  "migrations": 0,
+  "productionChanged": false
+}

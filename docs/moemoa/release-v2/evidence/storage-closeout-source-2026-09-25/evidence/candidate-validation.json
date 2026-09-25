@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    "budget.fixedMonthlyEstimateKrw: unresolved; not unlimited",
+    "free.privateReadBytesPerMonth: unresolved; not unlimited",
+    "free.publicReadBytesPerMonth: unresolved; not unlimited",
+    "globalLimits.physicalImageBytesMax: unresolved; not unlimited",
+    "globalLimits.monthlyOriginEgressBytesMax: unresolved; not unlimited",
+    "globalLimits.monthlyPublicDeliveryBytesMax: unresolved; not unlimited",
+    "globalLimits.enrolledAccountCapacityMax: unresolved; not unlimited",
+    "retention.deletedObjectPurgeWithinHours: unresolved; not unlimited",
+    "retention.backupRetentionDays: unresolved; not unlimited",
+    "retention.metadataRpoHours: unresolved; not unlimited",
+    "retention.recoveryRtoHours: unresolved; not unlimited",
+    "retention.publicRevocationMaxSeconds: unresolved; not unlimited",
+    "approvalEvidence.approvedBy: unresolved; not unlimited",
+    "approvalEvidence.approvedAt: unresolved; not unlimited",
+    "approvalEvidence.decisionLogRef: unresolved; not unlimited",
+    "approvalEvidence.freeImageQualityEvidenceRef: unresolved; not unlimited",
+    "approvalEvidence.normalUsageMeasurementRef: unresolved; not unlimited",
+    "approvalEvidence.billingBaselineEvidenceRef: unresolved; not unlimited",
+    "approvalEvidence.alertDeliveryEvidenceRef: unresolved; not unlimited",
+    "approvalEvidence.privateSyncDeviceEvidenceRef: unresolved; not unlimited",
+    "approvalEvidence.policyAndSupportEvidenceRef: unresolved; not unlimited",
+    "approvalEvidence.backupAndRevocationEvidenceRef: unresolved; not unlimited",
+    "This check validates configuration shape/consistency only. Evidence references are NOT verified. It is NOT a release or deployment approval."
+  ],
+  "variableBudgetKrw": null
+}

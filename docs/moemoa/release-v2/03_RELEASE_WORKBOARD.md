@@ -7,23 +7,188 @@
 | 항목 | 값 |
 |---|---|
 | 계획 | `MOEMOA_PUBLIC_LAUNCH_PLAN_V2_2026-09-22` |
-| 출시 목표 | 개인 기록 + 계정 + 공개 보드 + 공개 미니홈 + 팔로우 + 최소 운영 |
-| 제품 대상 | 기존 Web+Android 유지. 실제 첫 배포 채널/동시성은 D02에 기록 |
-| 현재 milestone | **M5 로컬 후보 점검까지 실행 — M1~M5 외부 게이트 유지** |
-| 현재 release 상태 | **BLOCKED_EXTERNAL — W16~W20 로컬 구현/검증/후보 점검 실행, 정식 출시 미완료** |
-| 현재 본 작업 | 테스트 환경 준비·기본 격리·DB 복원 증거 확보. 다음은 W07~W15 공개 사용자 흐름의 실제 서버 통합 검증 |
-| 다음 작업 | **격리 환경에서 게시→익명 열람→미니홈/팔로우→신고·차단→철회 흐름을 마감. 이미 통과한 DB 연결·기본 격리·복원은 변경/실패 근거 없이 반복하지 않음** |
+| 출시 목표 | 개인 기록 + 계정 + 무료 비공개 최적화 이미지 연동 + 공개 보드 + 공개 미니홈 + 팔로우 + 최소 운영 |
+| 제품 대상 | 제품 Web+Android 유지. 첫 출시 후보 WEB_ONLY 확정, Android는 Web 개선 후 후속 출시(D02) |
+| 현재 milestone | **M1/W06·M2/W08 private 최적화 연동 구현 — 기존 M5/W19 공개 근거 보존, M1~M5 전체 종료·승인 미완료** |
+| 현재 release 상태 | **NOT_RELEASE_READY — 새 private 이미지 연동 구현·실기기 검증, 후보 환경 및 운영/후보 승인 잔여** |
+| 현재 본 작업 | **W20 간이 테스트용 Web Git 배포 진행(사용자 승인). W06/W08 private·public 서버 검증은 미완료로 유지** |
+| 다음 작업 | **W06/W08/D01: private→public 실제 테스트에 적용할 migration·한도·합성 사본 권리·원복 범위를 확정하고 hosted 검증 준비** |
 | 작업 repository/branch | `Newrred/anime-collector` / `review/pro-interim-2026-09-25` (Pro 중간 검토용) |
-| 작업 HEAD / dirty 상태 | 기준0330a54에서 누적 W09~W20 및 실제 환경 검증을 검토 브랜치 커밋으로 인계. 정확한 검토 SHA는 이 문서를 포함한 Git 커밋으로 식별 |
-| 운영 SHA / 후보 SHA | 읽기 전용 재확인 `0330a54`, source=vercel-git, **workingTreeDirty=true 원인 미확인** / 새 후보 미커밋; HEAD를 변경 후보 버전으로 사용하지 않음 |
-| 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`) 준비됨. 실제 A/B 로그인·기록 왕복·직접 REST/비공개 Storage33 PASS, 서버 연결·Storage 사본·전체 dump/5schema72테이블 로컬 복원 PASS. 공개 사용자 흐름/API/CDN 통합 검증 잔여. 환경·키 미제공 차단은 해소; Android는 이번 실행 제외 |
+| 작업 HEAD / dirty 상태 | **bbff3d4 이후 구현을 간이 테스트 배포 후보로 선별 커밋 중. 정확한 배포 SHA/검증은 아래 새 기록 및 evidence/2026-09-26-web-smoke-deployment.json 참조** |
+| 운영 SHA / 후보 SHA | **이번 작업 시작 시 GitHub master와 Vercel 운영 모두0330a54 재확인. 간이 테스트 배포를 진행하며 정식 Public RC 승인과 구분** |
+| 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`). 과거 A/B·REST/Storage33·5schema72table 복원 유지. 이번 실제 공개 retry/게시·익명 bytes·home/follow/report/block·moderator/owner RPC 철회 PASS; 제품 UI 취소/철회 및 익명·home·이미지 차단 PASS. 후보CDN 등 잔여. test flags/역할 원복 완료. Android 이번 실행 제외 |
 | 완료 milestone | **1/6 — M0만** |
 | 기본 작업 완료 | **4/20 — W01/W02/W04/W05** |
-| 추가 필수 작업 | 0개 — 새 발견은 이 숫자로 별도 추적 |
-| release blocker | W03 외부 검증, W06~W20 및 D01~D06 미해소 |
-| 마지막 실제 작업 기록 | 2026-09-25 hosted DB 백업·격리 복원 / evidence/2026-09-25-hosted-db-recovery.json |
+| 추가 필수 작업 | **0개 유지 — R0925-B01/U01/O01은 기존 W08/W13/W14에 흡수; 새 W 또는 하위 계획을 생성한 것이 아님** |
+| release blocker | W06/W08 private 이미지 연동·W15 서버 정책/비용, W19 실기기/후보 전달 환경, W03/RC 검증, D03~D06. D02 Web-only 승인. D01 과거 test 공개 승인은 확보·원복했으며 새로운 원격 변경은 정확한 범위로 구분 |
+| 마지막 실제 작업 기록 | 2026-09-26 private→public: unit353·공개Chromium23(문구 최종2 재검사)·public PG267·private PG47+병렬2·build18 PASS / evidence/2026-09-26-private-public-representation.json |
+
+현재 표는 9/25 검토 적용 후 실제 실행·원복 결과까지 반영했다. 아래 날짜별 실행 로그는 당시 사실로 보존한다. 과거의 “없음/미제공/미커밋” 문구를 현재 지시로 다시 실행하지 않는다. 최종 DONE 수는 새 실제 증거 없이 올리지 않는다.
 
 ## 고정 milestone 현황
+### 2026-09-26 W20 간이 테스트용 배포 승인
+- 사용자 요청으로 현재 Web 코드를 Git master에 배포해 폰·지인에게 링크로 테스트한다. `WEB-SMOKE-DEPLOY-01`, 기존 ExecPlan에 범위 반영. 정식 release 상태/미완료 W를 PASS로 바꾸지 않는다.
+- `.env.production`: Web 로컬 이미지 입력1; private image sync/public publication·minihome·follow·moderation UI 및 private→public source0. 서버 API는 기존 default-off 유지, 운영 DB migration0. 새 private/source-rights migration은 소스에만 포함.
+- 이번 재실행: unit353, catalog256/skip2(Windows symlink), 핵심 Chromium+mobile78/skip1(private source flagoff), public PostgreSQL267, build18 PASS. flag-on intake+mobile은 별도 검사. 기존 모바일 테스트의 첫 action 가정을 local-image flag에 맞춰 검사하며 화면 크기/좌표 assertion을 완화하지 않는다.
+- 로컬 handoff ZIP/deliverables는 보존하되 Git에서 제외. 캐시·자격증명·raw 사용자 데이터 업로드 없음. 최종 Git/SHA/실 URL 검증은 배포 증거에 기록한다.
+
+### 2026-09-26 W08 사본별 공개 권리 결속 승인·로컬 구현
+
+- 사용자 승인: 연결한 “공개 권한 기준 검토”의③을 진행하도록 승인. 최상위 Decision Log `PRIVATE-REPRESENTATION-PUBLIC-RIGHTS-01` 반영. 아래 같은 날짜의 결정 대기 기록은 당시 이력이며 현재 차단이 아니다. 원격 적용/실제 권리 승인/운영 Public 승인으로 확대하지 않는다.
+- 구현: additive `20260925164126_private_representation_public_rights.sql`의 trusted 사본 권리 테이블 및 public asset 입력 사본 ID/hash. 기존 원본 checksum/source rights/권한/quota/미리보기 동의 유지, 일반사용자 사본 승인 쓰기 금지. 새 RPC가 owner·sourceVersion·사본ID/hash·policy·operation을 결속하고 complete·preview/build·publish/read가 철회를 확인한다. 정상 공개 이후 private copy만 제거한 것은 공개 철회와 구분한다.
+- UI/HTTP: 사용자가 연동한 사본을 선택해 실제 bytes를 본 뒤 별도 공개 사용에 동의. ID/hash만 전송하면 서버가 owner 전용 private Storage에서 읽고 bytes/hash를 검사한다. 원본 업로드 경로는 기존 원본 hash 비교를 유지. `PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1` 및 `MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED` 기본off. 원본/사본별 operation 구분, READY/불명 응답 및 실패 정리 계약 유지.
+- 이번 PASS: 전체unit353(공개 이미지HTTP22 포함), public SQL267(기존248+신규19), private SQL47+병렬2, Chromium 공개회귀23, build18. 정확한 명령/최종 문구 검사/제한은 [이번 증거](evidence/2026-09-26-private-public-representation.json). 정상 private 사본·변조bytes·처리중 취소·미승인/타계정/익명·policy/hash 불일치·권리철회 중 complete/preview/publish/read 거부 검증. 원본 없는 제품 UI의 사본 선택→명시 동의→공개preview→게시→새 방문자 실제 이미지 decode는 HTTP/Auth 모형이며 hosted 성공 아님.
+- 검사 이슈: 첫 개발서버 sharp 의존성 재최적화 reload로 원본 UI 검사 실패; API route fixture를 화면 진입 전 등록했다. 후속 두 실행의 서버 공유 종료 충돌은 중단하고4355 독립서버 전체23 PASS. 실패를 제품 성공 근거로 사용하지 않으며 로그에 남겼다.
+- 잔여: 실제 test Supabase 적용·private/public Storage 통합·실휴대폰, 작은 교체 quota/사본 복구/예산·운영 역할 근거, D06 정확한 후보. 새 migration 두 개 모두 hosted 미적용, 운영/배포/유료 변경0. 새 기능을 닫아 rollback하고 원본/권리·철회 이력을 보존한다.
+
+### 2026-09-26 W08 private→public 입력 신뢰 검토
+
+- 실제 private processor의 정상 최적화 사본과 관계없는 다른 합성 이미지 사본을 기존 공개 HTTP handler로 각각 전송했다. 두 경우 모두 원본 sourceHash 불일치로 거부, 공개 READY0/객체0/확정 실패 예약 해제. 신규 회귀 포함 publicImages unit18 PASS. **현재 공개 우회가 확인된 것이 아니라, 단순 adapter 연결로 기존 안전장치를 제거하면 안 된다는 구현 차단을 재현했다.**
+- 근거: `src/server/privateImages/processImage.js`는 수신 rendition만 attest, `src/server/publicImages/handler.js`는 원본 checksum 강제, `private.memory_public_image_rights`는 user/asset/sourceVersion의 신뢰된 권리 근거를 사용. private main을 원본으로 위장하거나 source_hash를 새 값으로 덮는 접근은 제외.
+- 구체 검토안(아직 승인 전): 기존 원본 경로·checksum 유지 + 공개할 정확한 private representation ID/mainHash별 trusted 권리 근거 추가, owner/version/operation/policy 결속과 publish/read까지 철회 재검사. private 저장 자체나 브라우저 자기 선언으로 승인하지 않음. D04의 승인 모델 확장이므로 AGENTS.md의 제품결정 변경 승인 조건에 따라 사용자 결정 필요. D06 운영 활성/배포와 별개.
+- 이번 변경은 회귀검사·기존 ExecPlan/작업판뿐이며 제품 코드/DB/원격/공개 설정 변경0. hosted·실휴대폰 검증 미수행. 다음1개는 위 승인 범위 결정 후 같은 W08에서 구현. 근거: [검증 기록](evidence/2026-09-26-private-public-provenance-audit.json).
+### 2026-09-26 W06/W08 Archive·Board private 썸네일
+
+- 기존 ArchiveView/MemoryBoardView의 로컬 visual이 MISSING일 때만 private wrapper에서 인증된 thumb를 읽는다. 서버 manifest의 별도 thumbnail bytes/hash(최대120KB)를 검증한다. viewport 근처만 요청하고 동시에4개까지 읽으며 영구 캐시/자동 업로드 없이 unmount·계정변경 시 abort 및 object URL revoke. 기존 카드 DOM·로컬 디자인/표지 경로 보존.
+- 이번 PASS: 실제 Chromium에서 로컬 원본이 없는 Archive·Board 썸네일 및 detail main 표시, 기존 same-operation 재시도/원본 보존,390px Archive 넘침 없음.12카드 중 첫 viewport만 읽고 확대 후 최대4개의 thumb 요청, A→B 전환 시 대기8건 취소/이전 A 이미지 미노출. 신규 thumbnail hash/120KB 거부 unit 포함 전체348, private browser3+기존 Board3, build18 통과. 별도 기본off 회귀 결과는 [이번 증거](evidence/2026-09-26-private-image-list-preview.json)에 기록.
+- 범위: 실제 브라우저/UI/IndexedDB/이미지 bytes 처리, Auth/metadata sync/HTTP는 모형. hosted·실휴대폰 PASS 아님. DB/의존성/운영/배포 변경0. 이전 private PG47+병렬2·public248은 과거 PASS로 유지하며 이번에는 DB 변경 근거가 없어 재실행하지 않았다.
+- 잔여/다음1개: 기존 W08 공개 representation adapter. `prepareSelectedPublicImage`는 현재 원본만 허용하고 서버 원본hash를 검사하므로 private thumb/main을 원본으로 위장해 보내지 않는다. 실제 hosted/실휴대폰·복구/교체 quota·합산 예산·D03~D06은 계속 남는다. 기능 flag off로 복구 가능하며 원본/전송 journal/과거 검증 이력은 삭제하지 않는다.
+
+### 2026-09-26 W06/W08 private Web 명시 연동 로컬 검증
+
+- 카드 상세에서 명시 동의한 사본만 최적화/전송한다. 1600px·최대3회 인코딩·품질 하한, owner/asset/version별 IndexedDB 전송본·operation 보관, 응답 유실 뒤 reload 재시도에도 같은 bytes/ID. 원본 bytes/hash/localRef는 유지한다. 인증된 read의 hash/bytes 검증 후 임시 object URL 표시, 계정 전환·unmount에서 abort/revoke.
+- 신규 PASS: 실제 Chromium file picker·큰 합성 PNG·canvas·IndexedDB·제품 화면으로 동의 전POST0, 실패/reload/같은 요청 retry, 원본hash 유지, 로컬 bytes 없는 detail에서 원격 사본 표시, 390px 가로 넘침 없음, 지연 이미지 응답 중 A→B 전환 후 A 이미지/제목 미노출. 별도 journal 경합/owner key·삭제 검사. **Auth/metadata sync/HTTP 응답은 모형이며 실제 hosted/실휴대폰 PASS 아님.**
+- DB 보완: 기존 로컬 카드 삭제 fence를 private read/retire에 연결해 metadata tombstone 전 접근 차단. 공개철회는 private 사본 유지. 취소가 reservation보다 먼저 도착해도 owner+operation fence로 늦은 저장 차단(알려진 예약 취소는 계속 허용; 미예약 fence는 계정당1000행 기술적 상한). 신규 migration은 아직 어느 hosted 환경에도 적용하지 않았다.
+- 발견/수정: local imageType은 rights 분류 UNKNOWN이고 서버 asset_type USER_IMAGE와 다르므로 기존 도메인 값을 바꾸지 않고 판별 연결을 수정했다. 첫 취소 SQL fixture는 B 세션이 남아 A 요청 검증에 실패했으며 A로 명시한 뒤 통과. 과거 PASS를 덮지 않고 [이번 명령·파일·제한](evidence/2026-09-26-private-image-web-client.json)에 분리했다.
+- 현재 검증: unit347, Chromium 신규2 + Web intake3 + 기존 composer/owner19, private PG47+실제 병렬2, 기존 public SQL248, build18. 운영/remote 변경·배포·유료변경0. 새 의존성0. 기존 W06/W08/W15 DOING 유지.
+- 실제 잔여: Archive/Board 원격 표시·공개 representation 연결, hosted private API/Storage 왕복·실휴대폰, 작은 교체의 quota 여유, private bytes 복구, 합산 비용/정책·운영 승인. 코드 잔여를 외부 차단으로 표시하지 않는다. 실제 외부 확인은 D01의 새 private test 적용 범위, D03~D05 운영값/실기기 및 D06 정확한 후보 승인이다.
+
+### 2026-09-26 W06/W08/W15 private 서버 경계 로컬 검증
+
+- 실제 변경: `api/private-image.js`, `src/server/privateImages/` 및 `20260925152859_memory_private_image_boundary.sql`. 원본 checksum/LOCAL_ONLY metadata는 유지하며 private owner/asset/version/수신hash/확정 사본hash·bytes/operation을 별도 manifest에 보관. default-off API·미승인/한도0 정책, source·계정 삭제 시 열람 차단/유예 정리·실제 삭제 후 quota 해제. [명령·source hash·제한](evidence/2026-09-26-private-image-server-boundary.json).
+- 이번 PASS: HTTP/실제 decode7, 전체unit340, 실제 local PostgreSQL 역할/경계40 및 병렬2, 기존 공개 SQL248, Web build18. 49MB+800KB 동시2건에서1건만 허용/49.8MB. 동일operation 중복 예약·준비 차감0, B/anon 및 permissive 기존 Storage 정책 우회 차단, 과거동의/관측만료/전송제한·삭제/취소·응답유실·정리 예약 보존. 첫 SQL fixture의 삭제 status 누락은 고친 뒤 통과.
+- 검증 범위: HTTP Auth/Storage backend는 모형, DB는 disposable local PostgreSQL/합성 auth.uid·Storage 테이블이다. hosted Auth/Storage나 실제 기기 성공을 뜻하지 않음. 신규 운영/테스트 원격 적용0, 앱 화면 수정0, 배포/유료변경0. 기존 공개 회귀는 새 삭제 trigger 영향 확인을 위한 것이며 기초 hosted72table 복원을 다시 실행하지 않았다.
+- 잔여: client 최적화·명시 선택/계정 전환 방어·원격 표시/사용량 UI, hosted private 연결 및 실휴대폰, 사본 bytes 복구, 공개 representation 연결·교체시 quota 처리, 합산 원화비용/경보·정책 변경 감사. 외부 차단으로 뭉뚱그리지 않고 구현 잔여로 유지. 현재 CODE_COMPLETE_FOR_WEB_RC 아님. 다음 Web 카드→private API 연결.
+
+### 2026-09-26 W06/W08 무료 private 연동의 Web 로컬 입력
+
+- 승인 첨부의 13개 hash 대조 및 FREE-PRIVATE-IMAGE-SYNC-01 결정/기존 ExecPlan 반영. 추가 운영비5만원·무료50MB/1MB 후보 구분. 단일진행판과 과거 공개/복원 근거 보존.
+- Web adapter의 실제 파일선택·decode 전 byte/pixel/format 제한, 원본 bytes/hash 보관과 preview, 같은 operation의 원자적 ticket 승격/재시도·삭제를 연결. 기본 flag off. 기존 metadata DB와 Android/public 포트 보존, 새 local media DB만 additive 생성. 새 선택 시 local-use 동의를 초기화하고 취소 때 design 선택을 유지.
+- [이번 명령/파일hash/결과](evidence/2026-09-26-web-local-image-intake.json): 단위4·Chromium3(실제 file input/IndexedDB)·전체unit333·기존 composer18·build18페이지 PASS. 시작 timeout/누락된 테스트 확인버튼/Fetch 금지 port로 인한 중간 실패를 포함해 기록. 포트 범위를 지정한 테스트 harness 수정은 제품 변경과 구분. 합성 PNG만 사용, 업로드 요청0.
+- W06/W08 미완료: private remote manifest/reservation·client 최적화·서버 검증/quota·동기화 및 owner격리/삭제/복구·사용량 UI, 실물 휴대폰↔PC. 이들은 외부 차단이 아니라 남은 구현이다. 실제 기기와 D03~D05 운영값/근거·D06 후보 승인은 별도. 신규 migration/운영 변경/배포/유료변경0. 새 source 미커밋. 다음 서버 정책 기반 private representation 저장·읽기 경계.
+
+### 2026-09-25 D02 Web-only 확정 / W20 후보 검사 보완
+
+- 사용자 첫 Web-only 후보 확정. 최상위 Decision Log RELEASE-CHANNEL-WEB-FIRST-01 및 [승인 근거](evidence/2026-09-25-d02-web-only.json) 기록. Android는 후속 출시, 제품 범위/코드 보존. 새 계획판 없음.
+- 후보 guard: WEB_ONLY+Android NOT_APPLICABLE일 때 같은 HEAD/0건/사유/VERIFIED D02 동일 유효 evidence 요구. 승인누락·변조·다른 채널·다른 Web 검사 N/A·D06미승인 모두 거부. 기존 후보 기본값 Web+Android 유지. [변경/명령/검증](evidence/2026-09-25-w20-web-only-validation.json): 전용3PASS, 전체unit329PASS/0fail, Web build18페이지PASS. 이번 서버/DB/제품 UI 변경없음.
+- 과거 후보 보존, [최신 초안](evidence/2026-09-25-w20-web-draft-candidate.json)에 승인과 새 unit/build 근거 연결. guard 실제 ready=false/14blockers: source 미고정/dirty·검사 HEAD 결속 부재(승인된 Android 제외도 HEAD 미결속)·D01 최종환경 잔여·D03~D06·catalog hash. D02 승인 항목은 통과. 과거 catalog/browser/SQL 근거는 날짜 그대로, 최신 재검사로 주장하지 않음.
+- 운영비 상한/초기 규모·운영자/지원 및 경보 담당·보존/복구 목표 D03~D05 사용자 입력 요청. 이는 기존 게이트의 실제 미확정 값이며 테스트 계정/키 재요청 아님. 공개 전달 최종 후보/실제 만료·지원환경 잔여 유지. 다음 운영값 반영과 최종 후보 결속. master merge/push/배포/Public 변경0. git diff --check PASS.
+
+### 2026-09-25 W19/Q11·Q19 필수 경계 연속 검증 — 이번 실행 PASS
+
+- 기존 ExecPlan/계약·image/resource migration 및 기존 helper를 확인. 기존 A/합성 WebP checksum을 대조 후 실제 SDK+local 제품 image handler→hosted Storage로 READY. 한도1에서 두 번째 준비 IMAGE_QUOTA_EXCEEDED. preview13 후 권리 철회→게시 PUBLIC_VISUAL_NOT_READY/anon null/이미지404. 같은 합성 권리 복구·새preview14·게시15→이미지200/60bytes. 게시 후 권리 철회→공개 cards0/같은URL404. owner철회16. [전체 증거](evidence/2026-09-25-w19-rights-quota.json).
+- 이어 실제 image 준비2건 동시 시작→READY1/IMAGE_QUOTA_EXCEEDED1, DB active1/reserved118. owner취소 후 지정 파생본2개 DELETED/예약0. 모든 flagsfalse/quota0/policy UNAPPROVED/rights0/moderator0/home private/감사8 보존. 원본 변경/새 migration/운영 변경0. 임시 파일/서버/탭 정리.
+- 최신 product UI Chromium **22PASS/0fail**(1.2m). hosted DB authenticated 역할+transaction A claim 검사에서 일일한도/유효override/만료/정지 통과, 성공2회만 차감 후 전체 ROLLBACK. 첫 준비는 closed gate 오류로 rollback, 두 번째는 같은 transaction 내부 test gate 포함 후 통과. 실제 JWT/HTTP429와 구분. [명령·경계](evidence/2026-09-25-w19-current-regression.json). 과거 PASS를 이번 PASS로 바꾸지 않음.
+- 새 제품 결함 없음. 기존 W19 미완료는 최종 후보 환경/실제 만료·지원환경, Q19 실제429/경보 인수 및 D03 등. D02 최종 Web-only 여부를 사용자에게 요청(이번 Android 제외는 유지). 다음 D02 결정에 따라 기존 W20 후보 검사 확정; 운영 배포·Public 승인은 D06로 유지. git diff --check PASS.
+
+### 2026-09-25 W19/Q11 policy 변경 — 이번 실행 PASS
+
+- 기존 계약/진행판/publish 함수와 ExecPlan을 대조하고 기존 계획에 좁은 검증 범위를 추가했다. 합성 디자인2개와 실제 A SDK RPC 재사용. baseline 공개→review20(TEST_ONLY_20260925)→서버 policy V2 변경→이전 동의 게시 CONSENT_MISMATCH. 익명 전체 JSON hash 90475b8f… 불변. 새 preview21/V2→게시 revision22 성공, 익명 새 제목 및 hash823810b3… 확인. [명령·전체 hash·제한](evidence/2026-09-25-w19-policy-consent.json).
+- cleanup: REVOKED/revision23, 원본 title/version3 보존, all flagsfalse/quota0/policy UNAPPROVED/moderator0/rights0/감사8/home private. 임시 파일·탭·서버 제거. 제품 코드/새 migration/운영 변경0, 기존 자동검사 PASS 재사용 주장 없음. git diff --check PASS.
+- 임시 진단 버튼의 실제 API 검증이며 제품 체크박스 E2E 아님. 다음 이미지 권리 승인 철회 경계. W19/Q11 전체 종료 및 D02~D06 승인 아님. Android 제외 유지.
+
+
+### 2026-09-25 W19/Q11 실제 동시 게시 — 이번 실행 PASS
+
+- 기존 계약/QA/ExecPlan/source-status publish 함수와 합성 fixture를 확인하고 기존 계획에 범위를 추가했다. 실제 A 세션 SDK RPC를 임시 진단 버튼에서 Promise.all로 시작했다. 같은 operation 두 요청은 review13→둘 다 revision14, owner14/재전송14. 다른 operation 두 요청은 review15→하나 revision16/하나 PUBLICATION_CONFLICT, owner16/재전송16. 각 경우 입력 hash가 다른 같은 operation은 OPERATION_MISMATCH. 익명 공개 제목/디자인 카드2개 일치. 두 요청의 client 실행 구간은 겹침; 서버 내부 스케줄 강제나 부하 시험/제품 double-click UI 증거는 아니다.
+- [실행 명령·타이밍·익명 hash](evidence/2026-09-25-w19-concurrent-publish.json). 제품 코드/새 migration/운영 변경0. 과거 PASS와 분리. npm 인자 전달 누락은 검사 전 서버 종료 후 Astro 직접 실행으로 수정했다.
+- 종료 보드 REVOKED/revision17, 원본 title/version3 보존, flags 모두false/quota0/policy UNAPPROVED/권한0/rights0/감사8. 임시 파일 제거·서버 종료. diff check PASS. Q11 전체 종료 아님; 다음 미리보기 이후 policy 변경 거부. 기존 D02~D06·Android 제외 유지.
+
+
+### 2026-09-25 W19/Q11 hosted 미리보기·동의 경계 — 이번 실행 PASS
+
+- AGENTS/시작·확정 결정, 기존 Q11/ExecPlan, source-status migration의 publish 검사를 대조. 참조 대화는 배경 자료이며 실제 오류명/계약은 코드로 확인했다. 기존 ExecPlan에 범위 추가, B 보드/합성 디자인2개 재사용. 임시 버튼은 실제 A JWT의 기존 RPC이며 제품 체크박스 UI E2E 아님.
+- baseline 공개→review9→합성 원본 title/version1→2 변경→같은 review/operation 게시 PREVIEW_CHANGED. 익명 JSON hash **90475b8f…** 그대로. 새 review10 생성 뒤 구 review9 게시 PUBLICATION_CONFLICT, 익명 hash 다시 동일. 최신 review10 게시만 성공/revision11, 익명 hash **fc794378…** 및 변경 제목 일치. [전체 hash·명령·범위](evidence/2026-09-25-w19-preview-consent.json). 변경 내용이 이전 동의로 공개되지 않았음을 실제 hosted에서 확인.
+- cleanup: 보드 REVOKED/revision12, 합성 제목 원복/version3(버전 되감기 없음), all public flags false/quota0/policy UNAPPROVED/roles0/rights0. 원본·감사8 보존. 임시 JS/HTML 제거/서버·탭 종료. 제품코드/새 migration/운영 변경0, 과거 자동검사 재실행 아님. diff check PASS.
+- Q11 전체 종료 아님: 실제 동시 요청·권리/policy 변경 조합 잔여. 다음 실제 동시 게시; D02~D06/정확한 후보·지원환경/Android 제외 유지.
+
+
+### 2026-09-25 W19/Q15 재개 — 제품 home 비공개/보드 유지 PASS
+
+- 기존 pending 증거와 ExecPlan에 따라 재개. 초기 UI는 결과 불확실, DB는 home published/revision17이어서 이전 철회 성공으로 간주하지 않았다. 제품 재조회 후 비공개 확인창을 다시 열고 사용자가 확인 클릭을 보조했다. reads/home을 켠 상태(writes off)에서 owner private 메시지, 방문자 home unavailable, anon HTTP home null/별도 board2 유지, DB home private/revision18 확인. [완료 증거](evidence/2026-09-25-w19-representative-private.json).
+- 실행: q15-resume-check.sql/read-enable.sql, q15-multi-read.mjs after, q15-multi-cleanup.sql, test-public-restore.sql. 이후 home private/보드 B REVOKED, 모든 server flags false/quota0/policy UNAPPROVED/role0/rights0. 기존 감사8·합성 private 원본 보존. client flags off/서버 종료/임시 탭 닫음. 제품 코드/새 migration/운영 변경0. diff check PASS; 과거 자동검사 재실행 아님.
+- Q15 해당 잔여 완료. 전체 W19/D02~D06·최종 후보 전달환경은 미완료 유지. 다음 Q11 hosted 미리보기 뒤 변경 거부 검증. 대기 로그는 당시 이력으로 보존한다.
+
+
+### 2026-09-25 W19/Q15 다중 대표 확인 — 비공개 확인창 대기
+
+- 기존 ExecPlan/현재 Q15·SQL visual 계약을 대조했다. 같은 B test 보드에 합성 SYSTEM_DESIGN 카드2개를 fixture로 준비(제품 작성 UI 증거 아님). 첫 design 필수값 누락은 PUBLIC_VISUAL_NOT_READY로 transaction rollback, 명세대로 보완한 두 번째 준비 성공. 제품 owner UI에서 두 번째 카드만 선택·미리보기·게시. 실제 방문자 화면 및 apikey만 사용하는 anon HTTP에서 board2/home1(두 번째 카드만) 확인. [현재 실행 증거](evidence/2026-09-25-w19-representative-private.json). 제품소스/migration/운영 변경0.
+- 제품 Make public home private 클릭으로 native confirm이 열렸으나 도구 click timeout/getJsDialog undefined. 사용자 확인 클릭 요청 대기이며 UI 비공개 PASS 아님. 대기 중 서버 public flags 전체false/quota0/policy UNAPPROVED/권한0으로 닫았다. home/B board의 published snapshot은 비교용으로 남아 있지만 reader는 닫힘. 프런트/서버와 확인창은 재개를 위해 유지.
+- 재개: 확인 클릭 후 test reads/home만 일시 활성해 home null + B board2 확인해야 한다. flag-off 자체의 null을 철회 PASS로 세지 않는다. 이후 .cache/q15-multi-cleanup.sql 및 기존 restore로 정리/client flags off/서버 종료. 기본 DB/A-B/복원 반복 없음.
+
+
+### 2026-09-25 W20 현재 후보·Q/D 대조 — 출시 미승인
+
+- 기존 지침/결정/진행판/후보·설정 JSON/check-release-candidate 및 전용검사를 읽고 기존 ExecPlan에 범위 추가. 과거 null 후보 파일/실행 로그는 변경하지 않았다. 최신 W19 증거5개를 hash로 참조하고 현재 요약·W14/Q04/Q07/Q08/Q12/Q13/Q17/D01의 오래된 미검증 문구만 보정했다.
+- 실제 명령: `node scripts/check-release-candidate.mjs docs/moemoa/release-v2/evidence/2026-09-24-w20-candidate.json` → ready=false/exit2/15 blockers. `node --test tests/unit/releaseCandidate.test.mjs` → 2PASS/0fail. [결과·현재 증거 참조](evidence/2026-09-25-w20-gap-audit.json). CHECK_INCOMPLETE는 이번 테스트 실패가 아니라 해당 후보 SHA에 결속된 근거 부재다. 과거 후보 D01 PENDING도 현재 키/권한 부재라는 뜻이 아니다.
+- 실제 잔여: hosted 만료/거절·다중카드/전체철회·동시성/한도/최종 전달환경; 정확한 clean 후보와 해당 CI/checks, migration/source-remote 매핑/catalog hash/config/rollback 결속. D02 최종 채널, D03 예산/한도/경보, D04 주체/정책/지원 담당, D05 운영 사본/journal/보존·복구 목표, 마지막 D06 정확한 후보 승인.
+- guard 발견: android가 필수 목록에 고정돼 있다. D02 Web-only 확정 시 기존 W20에서 승인 근거를 검사하는 N/A 경로가 필요하며 지금 가짜 PASS/임의 제외를 넣지 않는다. 현재 실행 Android 제외 유지.
+- 문서·감사 증거만 변경, 제품/DB/환경/원격/commit/push/배포 변경0. 과거 unit/build/SQL 종합 PASS를 이번에 재실행한 것처럼 쓰지 않는다. 완료수 유지. 다음 W19/Q15 좁은 실제 잔여를 마감하며 D02~D05 결정은 기존 표로 병행한다.
+
+
+### 2026-09-25 W19/Q18 이의·공개 쓰기 제한/해제 — 이번 실제 실행 PASS
+
+- 지침/확정 결정/현재 진행판과 public-moderation 운영 절차, MemorySafety/SQL을 확인하고 기존 ExecPlan에 범위 추가. 승인된 A moderator만 임시 부여, 기존 사건 재사용. 임시 로컬 버튼은 실제 A JWT로 기존 운영 RPC를 호출하며 제품 운영콘솔 검증으로 포장하지 않는다. reads/images/home/follows/reports off 유지, writes와 TEST_ONLY policy만 일시 활성. 처음 UNAPPROVED로 PUBLICATION_DISABLED였으므로 policy를 맞춘 뒤 비교했다.
+- 제한 조치 revision6 → 동일 prepare probe PUBLICATION_RESTRICTED. 실제 owner 제품 알림에서 이의 제출/Appeal received, 사건 APPEALED/revision7. 이전 revision6 검토는 PUBLICATION_CONFLICT. 제한 중 이미 private인 home의 revoke RPC 성공. 최신 사건 재조회 후 RELEASE_ACCOUNT/revision8, 제품 해제 알림 확인. 동일 empty-card probe는 INVALID_SELECTION으로 바뀌어 제한 판정 통과를 확인했으며 정상 재게시 성공으로 주장하지 않는다.
+- 원복 후 moderator0, active sanctions0, 모든public flags false/quota0/policy UNAPPROVED/rights0/home private/board REVOKED. 실제 같은 JWT의 queue 조회 MODERATOR_REQUIRED. 감사5→8(RESTRICT_ACCOUNT/APPEAL/RELEASE_ACCOUNT), appeal1 보존. 임시 HTML/JS 제거·client flags off·서버/탭 종료. 새 migration/제품 소스/운영 변경0. [실행 명령·범위·증거](evidence/2026-09-25-w19-appeal-restriction.json). 과거 자동검사는 이번 재실행 아님.
+- W19 전체 DONE 아님. 승인 A가 운영자이자 소유자인 test, 실제 별도 담당자/지원채널/정책·SLA는 D04. 다음 W20 기존 후보검사/Q/D 잔여 대조. D02~D06 및 Android 제외 유지.
+
+
+### 2026-09-25 W19/Q15 실제 미니홈 편집 — 이번 실행 PASS
+
+- 기존 지침·결정/진행판/C11·C12·MemoryMinihome 편집 코드와 기존 SQL 계약을 확인하고 ExecPlan에 범위 추가. 합성 A 보드는 실제 제품 UI로 게시, B는 같은 합성 카드의 별도 private Board fixture 및 기존 owner RPC로 준비했다. fixture 준비를 사용자 UI PASS로 세지 않는다. 첫 준비는 게시 후 비워진 selection 때문에 INVALID_SELECTION으로 transaction rollback; 두 번째 명시 selection 성공.
+- 실제 owner UI에서 A 대표 카드 선택/B 전체 보드 선택, 아래로 이동해 B,A 게시. 익명 화면 순서와 실제 이미지2개(16px) 확인. 소개 수정 및 위로 이동해 A,B 미리보기 동안 anon은 이전 소개/B,A 유지; 재동의·게시 후 새 소개/A,B 반영. 태그 모양 소개는 문자로 표시되고 해당 script DOM0. DB published_selection의 A.cardId/B 전체 선택 대조. [명령·증거·한계](evidence/2026-09-25-w19-minihome-edit.json). 보드당1카드이므로 다중 카드 제외를 새 PASS로 주장하지 않는다.
+- cleanup은 기존 owner RPC로 home private/두 보드 REVOKED, 합성 derivative DELETED/예약0·원본 checksum 보존. test flags 전부false/quota0/policy UNAPPROVED/moderator0/rights0/감사5. B private fixture는 재사용 가능하게 보존. frontend flags off/proxy 종료/임시 탭 닫음. 제품코드·새 migration·운영·배포 변경0. 과거 자동검사 결과는 재실행하지 않음.
+- W19 VERIFY와 완료수 유지. 다음 실제 이의/계정 제한 검증(Q18), hosted 만료·후보 전달 환경 및 D02~D06 잔여. Android 제외 유지.
+
+
+### 2026-09-25 W19/Q05 만료·복귀 — 이번 로컬 실행 PASS
+
+- 문서/소스: AGENTS, CODEX_START_HERE, 최상위 결정, PLANS, QA07/변경관리09, V2 진행판/C11·C12/기존 ExecPlan, webOAuth/authRepo/AuthCallbackClient/useAuthSession/MemoryRelationships 및 기존 callback 검사를 대조했다. 기존 ExecPlan에 범위를 추가하고 새 진행판 없이 진행.
+- 새 검증: tests/publication-ui.spec.ts에 설치된 실제 Supabase SDK를 사용하는 만료 session 회귀1개 추가. SDK를 가짜 객체로 대체하지 않고 Auth HTTP만 합성한다. 만료 저장세션→refresh400 1회→세션 제거→로그인 요구→PKCE challenge/verifier→교환1회→원래 home 복귀, 자동 팔로우0, return context 소비, console 토큰/코드 marker0 PASS. 기존 거절/교환실패2개와 함께 Chromium **3/3, 4.6초**. [정확한 명령·hash·범위](evidence/2026-09-25-w19-auth-return.json).
+- 실제 Google/hosted 만료 성공으로 승격하지 않는다. 과거 unit328/SQL248/build는 이번 재실행 아님. 새 제품 결함 발견0, 제품 소스 변경0, 새 DB migration0, remote flags/역할/권리 변경0. 테스트·문서만 되돌릴 수 있으며 원본/비밀값/로그 수집 정책 변경 없음.
+- 남은 W19: hosted 만료 재인증, 실제 대표 정렬/이의·계정제재, 정확한 후보 전달환경. 다음 Q15 실제 미니홈 편집. D02~D06/Android 제외/운영 무변경 유지.
+
+
+### 2026-09-25 W19 제품 UI 철회 후속 — 이번 실행 PASS
+
+- 기존 ExecPlan §17의 합성 fixture만 재사용. 제품 화면 재게시→미니홈 전시→익명 실제 이미지16x16 확인 후 철회 확인창 취소 시 board/home/이미지200 유지. 다음 확인창 수락 후 소유자 철회 완료, 익명 보드 unavailable, home 전시1→0, 직접 이미지200→404/no-store를 **공개 flags가 켜진 상태에서** 확인했다. native confirm은 도구가 인식하지 못해 사용자가 취소/확인 클릭을 보조했다. RPC 대체가 아니다.
+- [실행 증거](evidence/2026-09-25-w19-withdrawal-ui.json)에 실제 HTTP 결과/명령/범위 기록. 이번 제품 코드·migration 변경0. 과거 unit328/browser21/SQL248/build PASS는 재실행하지 않았으며 이번 PASS와 구분한다.
+- 정리: 기존 owner RPC로 남은 home 비공개, 합성 derivative 취소→서비스 정리로 DELETED/예약0. 원본 checksum 보존. test public flags false/quota0/policy UNAPPROVED, moderator0/active rights0, 감사5 보존. frontend flags off·임시 proxy 종료·검증 탭 닫음. 운영·Git push·배포 없음.
+- W19는 VERIFY 유지: 만료/로그인 복귀, 대표 정렬/이의·계정정지, 정확한 후보 전달 환경 잔여. D02~D06과 Android 제외 유지. 새 계획판이나 완료 수 증가 없음.
+
+
+### 2026-09-25 검토 적용 및 실제 공개 흐름 — 이번 실행 증거
+
+- 기준: AGENTS/CODEX_START_HERE/최상위 결정/PLANS 및 기존 V2 00~03·이미지/QA/변경관리, 현재 HEAD bbff3d4와 clean diff를 먼저 비교했다. ZIP의 과거 검토 patch18hunk를 문맥 일치로 반영하고 제공 review/unit/retry 원본은 evidence에 보존했다. 새 계획·작업판 없음.
+- 코드: W08 owner 상태 조회·service 실패 정리 확인 후만 새 operation; READY/불명 완료는 같은 ID. 취소된 늦은 재시도 응답도 현재 ID를 지우지 않음. W13 별도 공개 author RPC는 home ID/닉네임만 반환하며 기존 home→board reader 순환 호출을 피함.
+- 새 hosted 발견/수정: USER_IMAGE DTO designSpec:null이 JSONB null로 저장되어 source_metadata_check(23514)가 실패. hydration trigger의 null 정규화만 추가했고 실패한 동일 pending operation이 SYNCED로 회복했다. 일반 object 거부는 유지. 기본 DB 연결·A/B 격리·hosted72table 복원은 반복하지 않았다.
+- 이번 로컬 PASS: npm run test:unit **328**, publication-ui Chromium **21**(합성 RPC, 최종 stale recovery guard 이전), PostgreSQL16 계약 **248 PASS markers**, npm run build PASS. targeted image/controller33 PASS 이후 늦은 recovery guard1건 추가는 전체328에 포함. 최초 retry 회귀 실패, 기본 PG14 경로 부재, CRLF patch check 실패도 숨기지 않으며 실제 최종 명령/hash는 [증거 JSON](evidence/2026-09-25-review-apply-public-flow.json)에 기록.
+- 이번 실제 UI PASS: A 선택 게시→새 익명 origin의 WebP16x16/60bytes decode→공개 mini home→B 공유보드 author link/팔로우/목록 재방문→신고접수→차단/해제·팔로우 미복원, A 조치 통지. 잘못된 원본 실패 operation은 DELETED/예약0, 같은 화면 정상 retry는 새 ID/READY118bytes, 원본 checksum 유지.
+- 실제 RPC PASS: A 실토큰·임시 moderator로 공개 home HIDE→익명 null/author 링크 null→RESTORE→owner board/home revoke→이미지404→RESTORE해도 owner 철회 비부활, 감사5건. 기존 익명 제품 화면도 refetch 시 unavailable. 운영자/마지막 owner 철회는 임시 버튼→기존 RPC이며 제품 운영 콘솔·철회 확인창 E2E로 포장하지 않는다. native confirm 자동화가 일시 중단됐고 사용자 확인 요청 후 해제되어 차단 검증은 완료됐다.
+- 환경/마이그레이션: 테스트 ref에만 source 20260924193626→remote20260924194322, 20260924194059→20260924194325, 20260924195510→20260924195621. source SHA256은 JSON. 자동 db push/reset 없음. 운영 DB/master/push/deploy/유료 변경 없음.
+- 원복: 모든 public flags=false, quota0, policy UNAPPROVED, moderator0, active rights0, board REVOKED/home private, 관계 false/false. 합성 공개 사본full/thumb는 취소→service claim→Storage remove→complete로 정리해 두 operation 모두 DELETED/예약0. 원본/신고/감사/권리 철회 이력 보존. 임시 HTML 제거·4321/4325 API proxy 중단·frontend flags off. schema rollback은 호출 코드 이전본 복원, 이력/원본 삭제 없는 방식; 세 additive migration은 테스트에 유지.
+- 보안/제한: service secret/token은 로그/Git/브라우저 결과로 추출하지 않음. Supabase advisor는 private RLS/no-policy 및 의도한 공개/인증 SECURITY DEFINER 경고, leaked password protection disabled를 남김. [advisor 설명](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [password 설정](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). 정책/권리 확대·완전 보안 통과 선언 없음.
+- D03~D05: 위 측정값은 작은 합성 입력만의 결과. 운영 정상규모/월예산/경보 수신·대응자(D03), 법적주체/정책/연령/지원주소·권리/신고/삭제 담당(D04), 운영 canonical/이미지 사본·최신 철회 journal 보존/복구목표·복구담당(D05)만 미확정. 기존72table 복원 증거는 과거 근거로 유지. Android 실행 제외는 D02 최종 Web-only RC 승인과 구분.
+
+### 2026-09-25 Pro 검토 반영 — 문서만, 실행·승인 아님
+
+- 근거: [출시 잔여 검토서](evidence/pro-review-bbff3d4-2026-09-25/review.md), [이미지 재시도 모형 재현](evidence/pro-review-bbff3d4-2026-09-25/upload-retry-result.json), [외부 검토 환경 unit 결과](evidence/pro-review-bbff3d4-2026-09-25/unit-summary.json). 이 증거의 “이번 실행”은 각각의 원래 검토 시점이지 이 문서를 반영한 세션이 아니다.
+- M0~M5/W01~W20/C01~C12/Q01~Q24/D01~D06 유지. 별도 진행판 없음. 기본 DONE W01/W02/W04/W05, M0 종료 수를 이 문서 변경으로 늘리지 않는다.
+- 다음 실제 수정은 W08의 확정 실패/불확실한 완료를 구분한 이미지 재시도. W13의 공유 보드→공개 작성자 미니홈 경로를 확인하며 실제 공개 통합 검증으로 복귀한다.
+- 테스트 기본 환경·A/B·키·기초 격리·72 table 복원은 확보 근거가 있다. 공개 활성화 승인/실제 이미지 전달·철회 성공까지 확보한 것으로 해석하지 않는다.
+- Android는 이번 실행 제외이며 D02의 최종 후보 채널 승인과 구분한다. 운영 Public·DB·master·배포 변경은 이 문서 반영의 승인 대상이 아니다.
+- D03~D05의 측정/정책/담당/경보/사본만 병행 수집하고, 정확한 RC의 Git/CI/migration/catalog/flags 및 D06을 마지막에 닫는다. 새 기능·범용 관리자/DR·기본 테스트 인프라 재구축은 범위 밖이다.
 
 ### 2026-09-25 Pro 중간 검토 Git 인계
 
@@ -130,11 +295,11 @@
 | 단계 | 사용자에게 보이는 완료 결과 | 상태 | 남은 완료 조건 | 증거 |
 |---|---|---|---|---|
 | M0 | 현재 위치·범위·다음 작업이 명확함 | DONE | 없음; 미검증 항목은 담당 W로 연결 | 아래 기준점·25개 매핑·결정 로그 |
-| M1 | 기록·계정·복원을 신뢰할 수 있음 | DOING | W03 원격 gate + W06 계정/복원 실검증 | W03 로컬 246 unit/253 catalog/15 E2E/build |
-| M2 | 선택 보드를 타인이 보고 철회할 수 있음 | DOING | W07~W10 계약 | 없음 |
-| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | DOING | W11~W13 실제 환경/OAuth/기기 계약 | W11~W13 로컬 증거 |
-| M4 | 운영자가 조치·제한·갱신·복구함 | DOING | W14~W15 실제 환경/정책 + W16~W17 계약 | W14~W15 로컬 증거 |
-| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | DOING | W18~W20 실제 역할·기기·후보 CI/승인/운영 | 로컬 전체 검사·APK·후보 guard; RC_VERIFIED 아님 |
+| M1 | 기록·계정·복원을 신뢰할 수 있음 | DOING | W03 최신 후보/보호 검증, W06의 승격·기존 캐시 삭제 전파·지원 복원 등 실제 잔여 | 로컬 기록/sync 종료 + 실제 OAuth A/B·별도 origin 왕복·API33·선택 DB 복원 근거; 전체 계약 완료 아님 |
+| M2 | 선택 보드를 타인이 보고 철회할 수 있음 | DOING | 후보 전달환경/다기기 조건 | W08 retry/hosted 게시·익명 이미지 및 owner RPC 철회 PASS; 전체 C/Q 완료 아님 |
+| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | DOING | W13 보드→작성자 연결 및 실제 A/B 게시/팔로우/재방문 | W11~W13 로컬 근거; 기본 OAuth는 확보, 공개 관계 흐름은 별도 |
+| M4 | 운영자가 조치·제한·갱신·복구함 | DOING | D03~D05 실제 정책/경보/담당/사본·승인 경로·카탈로그 게시/복구 | 로컬 운영 계약·실제 test DB 복원·합성 Storage 사본; 운영 서비스 전체 복구 아님 |
+| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | DOING | W18/W19 공개 한 바퀴·지원 Web 검사·동일 RC CI·D02/D06·배포/운영 확인 | unit320/build18 인계 근거 및 과거 종합 검사; 현재 RC_VERIFIED 아님 |
 
 한 M의 일부 W가 완료되어도 M전체를 DONE으로 바꾸지 않는다. 다음 단계의 독립 작업을 먼저 끝내도 현재 막힌 계약을 숨기지 않는다. M5는 `RC_VERIFIED → READY_FOR_DEPLOY → LIVE_VERIFIED`를 구분한다.
 
@@ -152,24 +317,24 @@
 |---|---|---|---|---|---|---|
 | W01 | M0 | 현재 소스·환경·노출 기능 기준점 | C01,C11 | 없음 | DONE | M0 완료 로그·기준점 참조 |
 | W02 | M0 | 출시 결정 반영·이전 지적 정리 | C01–C12 | W01 | DONE | M0 완료 로그·기준점 참조 |
-| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 기존0330a54 Actions quality/최근 health·freshness 성공 확인. 새 후보 checks/보호 규칙·경보 수신 및 운영 dirty 표시 원인 D03/D06 대기 |
+| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 기존 CI/health·로컬 SW 증거 유지. 최신 정확한 RC의 checks/보호·실제 경보·운영 dirty 원인만 잔여(D03/D06). 검토 브랜치 push를 PASS로 간주하지 않음 |
 | W04 | M1 | 기존 기록의 취소·저장·복귀 마감 | C01,C11 | W02 | DONE | 제목/보드 dirty·QuickLog 닫기·저장 실패/경합·출발점/필터/스크롤 복귀 검증; 종료 기록 참조 |
 | W05 | M1 | 계정 동기화 완료·재개 계약 | C02 | W03 로컬 검증 | DONE | 로컬 sync 계약 구현·unit269/browser26/build PASS; 실제 A/B·기기 및 서버 한도는 W06/W15/W19 |
-| W06 | M1 | 계정 격리·승격·지원 백업 실검증 | C01,C02,C10 | W04, W05 | BLOCKED_EXTERNAL | 로컬 unit278/browser36/build PASS; 사용자 확인: 격리 Supabase/A·B 계정 없음. 실제 REST/RPC/Storage 격리 미검증 |
-| W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | BLOCKED_EXTERNAL | 공개 서버 기반 로컬 PostgreSQL 계약45+동시성1 PASS; 실제 Supabase/PostgREST/Storage는 D01 미준비 |
-| W08 | M2 | 선택한 이미지의 공개 준비·전달 | C04 | W07 로컬 검증 | BLOCKED_EXTERNAL | 이미지 준비·전달 로컬 SQL31/HTTP·변환13 PASS. 실제 Storage/Vercel/Android는 미검증 |
-| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | BLOCKED_EXTERNAL | 선택→서버 DTO→게시→익명 방문→보드 철회 UI, unit306/Chromium11/build16 PASS; 실제 Auth/Storage/Vercel/Android는 D01 등 유지 |
-| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | BLOCKED_EXTERNAL | unit310/Chromium25/build16/SQL88+동시성6 PASS; D01/D05 실제 전달·복원 검증 대기 |
-| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | BLOCKED_EXTERNAL | unit315/Chromium18/build18/SQL 미니홈27 PASS; D01 실제 Auth/Storage/Android 게이트 유지 |
-| W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | BLOCKED_EXTERNAL | unit315/Chromium20/build18/SQL 관계22+동시성1 PASS. 실제 Supabase/OAuth/Android는 D01/W19 |
-| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | BLOCKED_EXTERNAL | unit317/Chromium29/build18/Android dist routes18 PASS, 실제 OAuth/Android D01/W19 대기; 아래 결과 참조 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | BLOCKED_EXTERNAL | unit317/Chromium24/build18/SQL 신고·조치34+동시성2 PASS. 실제 담당자/통지/보존/Storage D01/D04/D05 대기 |
-| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | BLOCKED_EXTERNAL | unit318/SQL218(새35+경합3) PASS; 실제 예산·ingress/WAF/경보 D03, 삭제 fence/ledger 보존 D05, hosted 역할 D01 대기 |
-| W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog256 PASS/Windows skip2; SQL 전환14+경합1. 실제 canonical/Storage 후보·게시/복구 D01/D05/D06 대기 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | BLOCKED_EXTERNAL | 현재 합성 DB dump/restore·안전 이력 대조/닫힌 복구2 PASS; 실제 파일 사본·최신 철회 journal·담당자/정책 D04/D05 대기 |
-| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | BLOCKED_EXTERNAL | 18 route/action 지도, unit320/Chromium174 PASS·3 명시 skip. 실제 기기/사람 검증 및 출시 gate 유지 |
-| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | BLOCKED_EXTERNAL | SDK36 준비·native31 PASS·최신 debug APK/packaged18경로 PASS. 실제 연결 기기0·Google/hosted A/B 없음 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | BLOCKED_EXTERNAL | build18·증거 hash/설정/rollback 인계, candidate guard의 거부 확인. 새 후보 commit/CI·D01~D06·운영 dirty 표시 원인 미해소 |
+| W06 | M1 | 계정 격리·승격·private 이미지 연동 | C01,C02,C10 | W04, W05 | DOING | 무료 private 최적화 사본·실휴대폰↔PC 연동 추가, 로컬 파일 유입3검사, private 서버 및 Web 상세 client 신규2/회귀19·unit347·PG47+병렬2 PASS. Archive/Board thumb 로컬 검증 추가. hosted/실기기·공개 연결 미완료. 실제 A/B OAuth·별도 origin 왕복·기초 REST/Storage33 확보. 승격/만료/기존 캐시 삭제 전파/지원 백업의 미실행 조건만 검증. 계정·키 없음 표시는 폐기. 72 table 복원은 일부 근거이며 기기/공개 전체 성공 아님 |
+| W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | VERIFY | hosted 실제 A 게시·익명 읽기 및 소유자 RPC 철회 PASS. 운영 Public은 off. 전체 역할·갱신/기존 캐시/기기 조합은 W19 잔여 |
+| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 원본hash 보존 private 서버 및 Web 상세 명시 전송/원격 표시·재시도 로컬 검증. Archive/Board remote thumb 및 사본별 trusted 권리 결속 공개 준비 로컬 통과. 실제 hosted/실휴대폰·운영 근거 미완료. R0925-B01 수정: 실제 같은 화면 wrong source→예약0 정리→정상 준비 PASS. hosted Storage+실제 handler 익명16x16/60bytes, 철회404. 모호한 READY/취소·중복은 로컬 검증. 운영 CDN·정책/보존·실제 fault injection 잔여 |
+| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 실제 UI 선택/preview/게시 및 작성자 저장소 없는 새 origin 이미지 decode PASS. image intake fixture는 합성 adapter로 준비; Web 가져오기/Android PASS 아님. 확인창·전달 후보 환경 잔여 |
+| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
+| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 실제 UI 보드 선택/닉네임/미니홈 게시 및 익명 읽기, 실제 owner RPC 철회 PASS. 대표 선택/정렬/소개·확인창 전체 조합 잔여 |
+| W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
+| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | B 실제 신고·차단/해제, A 실제 JWT HIDE/RESTORE·제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부·감사8건 PASS. 운영 조치는 진단 버튼→기존 RPC. 정책/담당·별도 운영 역할 D04/D05 잔여 |
+| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | private 계정/물리량·예약/변환·준비·월 전송 한도 및 병렬 검사 로컬 PASS. 합산 원화 예산/정책 감사는 구현 잔여. 기존 서버 자원/한도 로컬 SQL 근거 유지. 실제 정상 부하·우회/429·정지 검사는 승인된 test에서 진행 가능. 운영 수치·예산·경보 수신 D03 및 보존 D05 잔여 |
+| W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | BLOCKED_EXTERNAL | hosted dump→선택5schema72table 로컬 복원, 합성60bytes 사본·stale fence 대조 확보. 실제 운영 이미지/canonical 사본·최신 철회 journal·보존·복구 목표·담당 D04/D05 잔여 |
+| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 18 route/action·기존 Chromium 증거 재사용. W08/W13 변경과 활성 Public 화면의 성공/실패/취소/권한/복귀, 지원 Web·사람 검증만 영향 범위 확인. Android 자동 선행조건 금지 |
+| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 만료/복귀/후보 endpoint 조합 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | BLOCKED_EXTERNAL | bbff3d4 검토 커밋은 RC 아님. 과거 null 후보는 거부용 원본 보존. 최신 후보/CI/provenance/migration 매핑/catalog·설정·rollback·D02/D06 잔여. 앱 배포나 모든 gate 승인 없음 |
 
 ### 작업 수의 변화와 진행률
 
@@ -178,15 +343,17 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-ID / M: W20 / M5 — BLOCKED_EXTERNAL (2026-09-24)
-사용자 결과: 가능한 로컬 작업과 검증을 W20 점검까지 연결하고, 출시 미완료 조건을 정확히 인계한다.
-완료 근거: unit320/catalog256+skip2/Chromium174+skip3/SQL235/build18/native31/packaged routes18, debug APK.
-다음 입력: 격리 hosted 환경과 실제 계정·기기, D03~D05 예산/정책/사본, 정확한 후보 D06 승인.
-추가 확인: 운영 build-info의 workingTreeDirty=true 원인. source SHA 일치만으로 clean release를 주장하지 않는다.
-제한: 운영 자료·DB·배포·Public 변경 없음. 미커밋 로컬 자료이며 모든 W DONE/RC_VERIFIED 아님.
+ID / M: W06/W08 / M1·M2 — DOING (승인된 무료 private image sync 추가)
+이미 동작: metadata sync·공개 동의/권리/hash/철회, hosted 공개 흐름은 과거 검증 보존.
+이번 변경: default-off private HTTP·owner manifest·서버 정책/예약·전송 한도·source 삭제/정리. Web 로컬 입력은 전회 근거 보존.
+이번 새 PASS: HTTP/이미지7·전체unit340·local PG40+병렬2·기존 public SQL248·build18. 원격 미적용/제품 UI 새 PASS 없음.
+미완료: client 최적화/명시 선택·원격 표시·계정 전환 방어·hosted private 연결/복구·사용량 표시·실휴대폰↔PC 연동. CODE_COMPLETE_FOR_WEB_RC 아님.
+다음 1개: Web 카드 화면에서 명시 선택한 사본의 최적화·private API 전송/표시 연결.
+D01: 테스트 승인은 확보, 종료 flags/역할/권리 원복. 이미 받은 권한/키 재요청 금지.
+D02: 첫 Web-only 후보 확정. D03~D06 운영값/담당·정책/보존·정확한 후보 승인 잔여. Android 후속 출시.
 ```
 
-완료한 상세 기록은 같은 파일의 완료 로그에 짧게 남기고 긴 테스트 출력은 기존 artifacts 디렉터리의 파일을 참조한다. 이 카드를 '단계 속 단계'로 세분화하지 않는다.
+이 카드는 적용 시 현재 코드·증거에 맞춰 갱신한다. 이미 W08이 해결돼 있다면 중복 수정하지 않고 관련 실제 검증으로 이동한다. 긴 출력은 기존 evidence를 참조하고 진행판을 또 만들지 않는다.
 
 ## 검증 기록 방식
 
@@ -298,7 +465,9 @@ NA 이유:
 
 | 발견 ID | 근거/실패하는 계약 | 분류 | 최소 조치·수용 기준 | W/D 연결 | 해결 후 복귀 | 상태 |
 |---|---|---|---|---|---|---|
-| — | 아직 없음 | — | — | — | — | — |
+| R0925-B01 | [모형 재현](evidence/pro-review-bbff3d4-2026-09-25/upload-retry-result.json): 확정 실패 후 같은 operation 거절 / C04,Q10 | 현재 W에 흡수 | 실패/불확실 완료 분리, 같은 화면 회복·중복/원본/예약량 검증 | W08,W09 | W09/W19 실제 공개 검증 | FIXED — 로컬 재현 후 수정, hosted 같은 화면 재시도·예약/원본 보존 PASS |
+| R0925-U01 | [검토서](evidence/pro-review-bbff3d4-2026-09-25/review.md) §5: 공유 보드→공개 작성자 연결 부재 / C06,C07,Q04,Q16 | 현재 W에 흡수 | 안전한 공개 home 링크; 없음/가림/철회 시 생략; 자동 follow 금지 | W13 | W19 공개 재방문 검증 | FIXED — SQL/DTO/UI 및 hosted 보드→home→follow/revisit PASS |
+| R0925-O01 | 같은 검토서 §5: private.memory_public_image_rights의 승인 경로 필요 / C04,C08 | 외부차단 D | 기존 asset/version별 승인·철회 경로를 실제 담당·test 권한에 연결; 검사 제거 금지 | D04,W08,W14 | W09/Q09 공개 이미지 전달 | TEST VERIFIED / 운영 D04 잔여 — 합성1자산 버전 승인/철회, 실제 담당 정책 미확정 |
 
 허용 분류: `현재 W에 흡수 / 필수 형제 W / 외부차단 D / PARKING`.
 차단 요청은 필요한 권한·파일·결정의 정확한 범위와, 그것 없이 완료할 수 없는 테스트를 적는다. 보안 문제를 재현하기 위해 운영에 위해를 주지 않는다.
@@ -307,11 +476,11 @@ NA 이유:
 
 | ID | 필요한 결정 | 상태 | 현재 기본안/대기 중 행동 | 마지막 필요 시점 | 실제 승인/증거 |
 |---|---|---|---|---|---|
-| D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | NOT_READY (9/23 사용자 확인) | 로컬/모형 검증 가능, 실제 환경 PASS 금지 | W06/W08 실환경 검증 전 | 없음 |
-| D02 | Web+Android 첫 배포 채널/동시성·실기기 담당 | UNCONFIRMED | 기존 제품 대상 보존, 자동 platform 제외 금지 | M5 승인 전 | 없음 |
-| D03 | 예산·정상 규모·quota·경보 수신자 | UNCONFIRMED | 측정과 설정 가능한 통제 구현, 수치 영구확정 금지 | W15 정책 활성화 전 | 없음 |
-| D04 | 운영주체/정책/권리·연령 범위/지원·신고·삭제 담당 | UNCONFIRMED | 승인된 종류만 격리 개발, 임의 정책·연락처 금지 | W14/W17 운영 인수 전 | 없음 |
-| D05 | 공개 철회 지연·보존/복구 목표·사본 | UNCONFIRMED | 신규 요청의 최신 상태 확인/no-store 우선, 긴 캐시 별도 승인 | W08 전달 구조 및 W17 복원 전 | 없음 |
+| D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / PUBLIC_FLOW_PARTIAL_VERIFIED | 테스트 한정 임시 활성/합성 권리/A 운영자 사용자 승인 확보. 실제 공개 흐름 실행 후 flags/한도/정책/역할 원복; 키·기초 환경 재요청 금지 | hosted 만료·후보 전달환경의 남은 조합만; 다중카드/동시성/정책·권리 및 image quota 실제 증거 확보 | [이번 실행 증거](evidence/2026-09-25-review-apply-public-flow.json); 운영 Public 승인 아님 |
+| D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
+| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / TEST_MEASURED | FREE-PRIVATE-IMAGE-SYNC-01: MOEMOA 추가 운영비 월50,000원 목표(기존 Vercel 기본료·도메인·홍보 제외, 초과료/세금/백업 포함). 50MB/1MB는 후보. 실제 공급자 청구·사용량·전송/전역 한도·비상 차단/경보 미완료. 과거 $25 입력은 이력 보존 | 유료/공급자 변경 미승인 | 최상위 Decision Log 및 evidence/storage-closeout-source-2026-09-25/ |
+| D04 | 운영주체/정책/권리·연령/지원 | INPUT_PARTIAL / TEST_ROLE_VERIFIED | 개인 운영 sinong, 공개 지원 godburgundy@gmail.com. 본인 신고·삭제 대응 하루2~3회. 한국·동남아 우선(국가 미특정). 연령/공개 이미지 범위는 추천 요청·미승인. 사본별 trusted 공개 권리 결속 방식9/26 승인·로컬 검증. 실제 담당/권리 근거·private 안내·연령/이미지 정책 잔여 | 운영 정책 확정 전 | evidence/2026-09-25-operations-inputs.json |
+| D05 | 공개 철회 지연·보존/복구 목표·사본 | PROPOSAL_PENDING / PARTIAL_VERIFIED | 72table/합성 복원 과거 증거 유지. 매일 암호화 사본·7일 보관·RPO24h/RTO48h는 제안만. 새 private 사본/manifest·운영 Storage/canonical/철회 journal·자동 백업 위치·실제 복구 검증 필요 | 백업 약속 승인 전 | evidence/2026-09-25-operations-inputs.json |
 | D06 | SHA·DB/catalog·flags의 운영 적용 | NOT_REQUESTED | candidate만 검증, 배포·실Public 활성화 금지 | W20 운영 반영 전 | 없음 |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
@@ -344,30 +513,30 @@ NA 이유:
 
 | Q | 자동 검증 | 필요한 실제 환경 검증 | 증거/commit/담당 | 미해결 |
 |---|---|---|---|---|
-| Q01 | LOCAL PASS | Web 로컬 실행 | title-hub/cross-surface/composer/unit | Android 실제 intake 미검증 |
-| Q02 | LOCAL PASS | Web 로컬 실행 | release-editing/service-finishing | 실제 Android Back 별도 |
-| Q03 | LOCAL PASS | 합성 계정·실제 IndexedDB | memory-account-sync/owner-boundary/release-editing | hosted 계정 전환 |
-| Q04 | LOCAL PASS | Web 로컬 실행 | index/title-navigation/release-editing/publication-ui | 실제 Android 링크 |
-| Q05 | MOCK PASS | BLOCKED_EXTERNAL | publication-ui/account-sync/OAuth unit | 실제 Google A/B·만료 |
-| Q06 | LOCAL PASS | 실제 IndexedDB·합성 remote | release-sync/unit | hosted 대용량 sync |
-| Q07 | LOCAL ROLE PASS | BLOCKED_EXTERNAL | SQL235·HTTP unit | hosted REST/Auth/Storage 직접 경계 |
-| Q08 | LOCAL PASS | 합성 RPC+로컬 UI/SQL | publication-ui/SQL | hosted 새 세션/기기 |
-| Q09 | LOCAL PARTIAL | BLOCKED_EXTERNAL | HTTP image unit/SQL/publication-ui | 실제 다른 기기·Storage bytes |
-| Q10 | LOCAL PASS | 합성 HTTP·실제 decoder/SQL | image unit/resource-contract | hosted 파일/정리·Android |
-| Q11 | LOCAL PASS | 실제 DB 병렬 연결·합성 UI RPC | publication-ui/SQL races | hosted 세션 경쟁 |
-| Q12 | LOCAL PASS | 실제 SQL·합성 UI RPC | mini-home/publication contracts | hosted 다기기 철회 |
-| Q13 | LOCAL PARTIAL | BLOCKED_EXTERNAL | HTTP resolver/SW/SQL | 실제 CDN·전달/캐시 지연 |
-| Q14 | LOCAL PARTIAL | BLOCKED_EXTERNAL | lifecycle/restore SQL·sync tests | 오래된 backup 뒤 최신 철회 journal |
-| Q15 | LOCAL PASS | 합성 Auth/RPC+로컬 UI | publication-ui/minihome SQL | hosted 대표/정렬 |
-| Q16 | LOCAL PASS | 실제 역할 SQL·합성 UI RPC | relationships/publication-ui | 실계정 방문/팔로우 |
-| Q17 | LOCAL PASS | 실제 역할 SQL | relationship/moderation 계약 | hosted 계정 삭제·Storage |
-| Q18 | LOCAL PARTIAL | BLOCKED_EXTERNAL | moderation SQL/notice+appeal UI | 실제 운영자 처리/정책/통지 |
-| Q19 | LOCAL PARTIAL | BLOCKED_EXTERNAL | resource SQL 동시성/override·HTTP429 | 실제 WAF/예산/경보 |
-| Q20 | LOCAL PARTIAL | BLOCKED_EXTERNAL | JSON 복원 브라우저·현재 DB dump/restore | Storage bytes/canonical·최신 철회/RPO |
-| Q21 | LOCAL PARTIAL | BLOCKED_EXTERNAL | catalog256·전환/복구 SQL14+경합1 | 실제 후보 승인/bytes/원격 health |
-| Q22 | LOCAL PARTIAL | 기존 SHA만 확인 | health unit·0330a54 Actions/운영 build-info | 새 후보 CI/배포 보호·실제 경보 수신 |
-| Q23 | LOCAL PASS | 로컬 실제 SW 업그레이드/저장소 | service-worker/index | 운영 후보 update/rollback·기기 |
-| Q24 | LOCAL PARTIAL | 18 route 지도/Chromium·스크린샷 | surface audit/브라우저 로그 | 실제 Android·스크린리더·사람 이해 검증 |
+| Q01 | LOCAL PASS + 실제 일부 / PRIVATE SYNC 미완료 | Web/동일 계정 별도 origin의 합성 카드 복원·수정 | 기존 tests + 9/24 실제 기록 왕복 로그 | 동일 RC의 해당 기능 회귀; Android 이번 실행 제외, D02 후보 구분 |
+| Q02 | LOCAL PASS | Web 기존 편집 흐름 | release-editing/service-finishing | 지원 Web의 미실행 입력/키보드 조건; Android 이번 실행 제외 |
+| Q03 | LOCAL PASS + 실제 일부 | 실제 A/B 분리·기록 왕복 | memory-account-sync/owner-boundary + 9/24 최신 로그 | 지연/중복/전환의 실제 미실행 조합과 최신 영향 회귀 |
+| Q04 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 보드→작성자 home→B 팔로우/내목록 재방문 | public-flow JSON, auth-return JSON | 실제 만료/거절 후 공개 복귀·최종 후보 경로 |
+| Q05 | LOCAL PASS + 실제 일부 | 과거 Google A/B 성공. 9/25 실제 SDK+합성 Auth 만료 refresh 거절→PKCE 복귀·자동 follow0 | w19-auth-return JSON, Chromium3 PASS. 실제 계정 만료와 구분 | hosted 만료/거절 및 승격 preview·취소의 해당 미실행 조건. A/B 없음 아님 |
+| Q06 | LOCAL PASS + 실제 일부 | 소량 기록 복원·수정·삭제 비부활 | release-sync + 실제 왕복 로그 | hosted 큰 배치·page/cursor·기존 캐시 삭제 전파 등 미실행 경계 |
+| Q07 | LOCAL ROLE PASS + HOSTED BASIC PASS | 실제 JWT HTTP/Storage A12/B12/anon9 | evidence/2026-09-25-hosted-api-storage.json | 실제 public 일부와 moderator 회수 거부 검증. 나머지 RPC/공격 조합은 잔여 |
+| Q08 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 합성1카드 명시 선택·미동의 기본 필드 제외 게시 | public-flow JSON + 기존 publication-ui/SQL | private 다수 중 미선택 자료 전체 비노출의 hosted 비교 |
+| Q09 | HOSTED PARTIAL PASS | 실제 Storage+loopback 제품 handler, 새 익명 origin | 9/25 public-flow JSON: WebP16x16/60bytes·no-store·철회404 | 후보 Vercel/CDN·복수 위치/기기 (제품 UI 철회는 w19-withdrawal-ui JSON PASS) |
+| Q10 | LOCAL PASS / HOSTED PARTIAL PASS / PRIVATE SYNC 미완료 | 과거 공개 wrong-source 복구 보존. 신규 private HTTP7/PG40+병렬2에서 용량·해시·응답유실/만료·삭제 정산 검증 | 2026-09-26-private-image-server-boundary.json 및 과거 public-flow JSON | 실제 private hosted/client 연결·교체/복구·후보 전달 환경 |
+| Q11 | LOCAL PASS / HOSTED PARTIAL PASS | 원본 title/version 변경 후 PREVIEW_CHANGED; 새 prepare 후 구 revision CONFLICT; 실패 전후 anon hash 동일; 최신 검토만 게시 성공; 동시 동일 operation revision1회/서로 다른 operation 하나 충돌; policy 변경 CONSENT_MISMATCH/새 동의 성공; 이미지 권리 철회 게시거부/이미지404 | w19-preview-consent / w19-concurrent-publish / w19-policy-consent / w19-rights-quota JSON + 기존 SQL races | 최종 후보 결속·진단 RPC와 제품 UI 조합 구분 |
+| Q12 | LOCAL PASS / HOSTED PARTIAL PASS | 보드 철회→home 전시0, 동일 카드 보드2개 전시·정리·원본 보존 | withdrawal-ui/minihome-edit JSON | 다중 공개 위치 중 하나/전체 철회의 hosted 경계 비교 |
+| Q13 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 Storage+local handler 직접 URL200→404/no-store, 익명 UI unavailable | withdrawal-ui/public-flow JSON | 정확한 후보 CDN/SW·기존 캐시·철회 지연 |
+| Q14 | LOCAL PASS / HOSTED 일부 | stale local 복원+최신 fence2회, hosted 삭제 비부활 일부 | local-stale-recovery JSON + 실제 삭제 로그 | 운영 최신 journal 사본/복원 인계, 실제 관리 차단·기존 캐시 삭제 전파 |
+| Q15 | LOCAL PASS / HOSTED PARTIAL PASS | 대표 선택 저장·B,A→A,B 정렬·소개 재게시·익명 이미지2개 decode PASS | w19-minihome-edit JSON | 대표 제외·제품 home 비공개/보드2 유지 PASS; 최종 후보 지원 Web/기기 조합 잔여 |
+| Q16 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 A/B 보드→작성자→팔로우→목록 재방문 | public-flow JSON + author DTO/SQL/UI 회귀 | 만료/로그인 거절·공개 복귀/다기기 조합 |
+| Q17 | LOCAL PASS / HOSTED PARTIAL PASS | B 신고·차단/해제, A moderator live HIDE/RESTORE·통지/감사 | public-flow JSON; owner 철회 뒤 RESTORE로 부활하지 않음 | 이의·공개 쓰기 제한/해제는 Q18 PASS. 삭제/기기 조합 및 운영 담당 인수 잔여 |
+| Q18 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 JWT 운영 RPC 제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부 | w19-appeal-restriction JSON | 운영자=owner인 승인 A 테스트; 실제 별도 담당자/지원채널·정책/SLA D04 |
+| Q19 | LOCAL PASS / HOSTED PARTIAL | 실제 handler 병렬 image 준비 성공1/QUOTA1, DB active1/정리0. hosted rollback-only daily/override만료/정지 PASS | w19-rights-quota / w19-current-regression JSON + W15 기존 evidence | 실제 HTTP429·경보 수신/담당 및 D03 운영 수치·예산·후보 결속 |
+| Q20 | PARTIAL_VERIFIED | hosted dump→선택5schema72table 로컬 복원·합성60bytes 사본 | hosted-db-recovery/server-connection/local-stale-recovery JSON | 운영 공개 이미지/canonical 실제 사본·최신 journal·지원 JSON 잔여·RPO/RTO; 플랫폼 전체 복원 아님 |
+| Q21 | LOCAL PARTIAL | catalog256·전환/rollback SQL | W16 validation JSON | 실제 canonical/bytes 후보 검증·승인 게시→복구/health |
+| Q22 | LOCAL PARTIAL | 기존 운영 SHA 관찰만 | 기존 CI/health + 0330a54 제공 기록 | 최신 RC checks/배포 보호·dirty 원인·실제 경보. 이번 재조회 아님 |
+| Q23 | LOCAL PASS | 로컬 실제 SW·저장소 | service-worker/index | 최종 운영 후보 업데이트/롤백과 공개 캐시 경계 |
+| Q24 | LOCAL PARTIAL | 18 route 지도·과거 Chromium/캡처 | surface audit/당시 browser log | 실휴대폰 Web→PC private 이미지 연동/품질 및 최신 공개/수정 경로의 지원 Web·스크린리더·사람 이해. Android 이번 실행 제외; 최종 후보 D02 |
 
 ## route/action coverage 증거 위치
 

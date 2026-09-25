@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "policyRevision": "2026-09-25-free-private-sync-candidate-1",
+  "approvalState": "CANDIDATE",
+  "units": {
+    "storage": "DECIMAL_BYTES",
+    "money": "KRW",
+    "accountUsagePeriod": "UTC_CALENDAR_MONTH",
+    "providerBillingPeriod": "PROVIDER_INVOICE"
+  },
+  "releaseScope": {
+    "desktopWeb": true,
+    "mobileWeb": true,
+    "nativeAndroid": false,
+    "privateOptimizedImageSync": true,
+    "publicBoards": true,
+    "publicMinihome": true,
+    "follow": true,
+    "originalCloudBackup": false,
+    "billing": false,
+    "ads": false,
+    "enabledPlanIds": [
+      "FREE"
+    ]
+  },
+  "budget": {
+    "monthlyIncrementalCeilingKrw": 50000,
+    "domainExcluded": true,
+    "existingSharedVercelBaseExcluded": true,
+    "moemoaVercelOverageIncluded": true,
+    "taxAndFxFeesIncluded": true,
+    "assumedAdvertisingIncomeKrw": 0,
+    "assumedSubscriptionIncomeKrw": 0,
+    "fixedMonthlyEstimateKrw": null,
+    "safetyReserveKrw": 5000,
+    "warnFractionOfVariableBudget": 0.7,
+    "throttleFractionOfVariableBudget": 0.9,
+    "stopFractionOfVariableBudget": 1.0,
+    "maxUsageObservationAgeHours": 24,
+    "marketingSpendExcluded": true
+  },
+  "free": {
+    "privateImageQuotaBytes": 50000000,
+    "mainMaxBytes": 1000000,
+    "thumbnailMaxBytes": 120000,
+    "sourceSelectionMaxBytes": 20000000,
+    "sourceSelectionMaxPixels": 24000000,
+    "targetLongEdgePx": 1600,
+    "thumbnailLongEdgePx": 400,
+    "acceptedSourceMimeTypes": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "preferredOutputMimeType": "image/webp",
+    "fallbackOutputMimeType": "image/jpeg",
+    "allowAnimation": false,
+    "allowSvg": false,
+    "clientEncodeAttemptLimit": 3,
+    "clientEncodeQualityFloor": 0.65,
+    "uploadMaxInFlightPerAccount": 1,
+    "newImagePreparationsPerDay": 10,
+    "managedAssetCountSafetyMax": 1000,
+    "uploadReservationTtlSeconds": 1800,
+    "transportBodyMaxBytes": 1500000,
+    "privateReadBytesPerMonth": null,
+    "publicReadBytesPerMonth": null,
+    "countBoardReferencesAsCopies": false,
+    "countCatalogCoverInUserImageQuota": false,
+    "autoDeleteOnQuotaExceeded": false
+  },
+  "globalLimits": {
+    "physicalImageBytesMax": null,
+    "monthlyOriginEgressBytesMax": null,
+    "monthlyPublicDeliveryBytesMax": null,
+    "enrolledAccountCapacityMax": null
+  },
+  "retention": {
+    "inactiveFreeAccountAutoPurge": false,
+    "deletedObjectPurgeWithinHours": null,
+    "backupRetentionDays": null,
+    "metadataRpoHours": null,
+    "recoveryRtoHours": null,
+    "publicRevocationMaxSeconds": null
+  },
+  "controls": {
+    "policySource": "SERVER_ACTIVE_REVISION",
+    "rejectUnapprovedPolicyForNewRemoteImageWrites": true,
+    "allowPrivateDataInAnalytics": false,
+    "trustClientPlanOrByteCount": false,
+    "privateBucketPublic": false,
+    "automaticPaidUpgrade": false,
+    "automaticPlanChange": false,
+    "manualResumeAfterBudgetPause": true
+  },
+  "approvalEvidence": {
+    "approvedBy": null,
+    "approvedAt": null,
+    "decisionLogRef": null,
+    "freeImageQualityEvidenceRef": null,
+    "normalUsageMeasurementRef": null,
+    "billingBaselineEvidenceRef": null,
+    "alertDeliveryEvidenceRef": null,
+    "privateSyncDeviceEvidenceRef": null,
+    "policyAndSupportEvidenceRef": null,
+    "backupAndRevocationEvidenceRef": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "evidenceLevel": "ORIGINAL_CONTROLLER_WITH_MODELED_RESERVATION_AND_UPLOAD_FAILURE",
+  "networkRequests": 0,
+  "productionChanges": 0,
+  "scenarios": [
+    {
+      "attempt": 1,
+      "phase": "error",
+      "error": "SOURCE_IMAGE_MISMATCH"
+    },
+    {
+      "attempt": 2,
+      "phase": "error",
+      "error": "ASSET_OPERATION_UNAVAILABLE"
+    },
+    {
+      "attempt": 3,
+      "phase": "error",
+      "error": "ASSET_OPERATION_UNAVAILABLE"
+    }
+  ],
+  "sameOperationOnAllAttempts": true,
+  "interpretation": "A known failed image preparation cannot be retried in this controller, even after cancel and choosing the correct original. Reopening the editor creates a new controller and can allocate another ID; it is not a permanent account failure."
+}

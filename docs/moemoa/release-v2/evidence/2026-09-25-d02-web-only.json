@@ -1,0 +1,11 @@
+{
+  "decision": "RELEASE-CHANNEL-WEB-FIRST-01",
+  "gate": "D02",
+  "status": "VERIFIED",
+  "releaseChannel": "WEB_ONLY",
+  "approvedBy": "User",
+  "date": "2026-09-25",
+  "quote": "첫 출시 후보는 web-only로 확정하고. 남은 마무리 작업 및 검증 이어가자",
+  "android": "Follow-up release; NOT_APPLICABLE for first Web candidate, never fabricated PASS",
+  "productionDeploymentApproved": false
+}

@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q05 Chromium, actual installed Supabase SDK; synthetic Auth HTTP and public RPC, no real Google login/session expiry claim",
+  "command": "node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line --grep 'expired SDK|cancelled sign-in|callback exchanges'",
+  "result": {
+    "passed": 3,
+    "failed": 0,
+    "durationSeconds": 4.6
+  },
+  "newPass": [
+    "Expired persisted session refresh rejected exactly once",
+    "SDK removes expired session; product asks to sign in",
+    "Real SDK produces PKCE challenge and verifier; synthetic exchange succeeds once",
+    "Original public home restored with Follow still requiring explicit action",
+    "No automatic set_memory_relationship call",
+    "Pending return path consumed; synthetic token/code markers absent from console"
+  ],
+  "existingScenariosRerun": [
+    "Provider cancellation scrubs history and permits original-page return",
+    "Callback success and failed exchange/retry safe UI"
+  ],
+  "files": {
+    "tests/publication-ui.spec.ts": "76f9691a7f04418436c8395dee00db7a89eba8b204daea119763106409f4c0eb",
+    ".cache/w19-auth-browser-final.log": "3fb8f47562ecd4f39899c3f8e3899693c310bacb2d05a8529720cd019d41a6b0"
+  },
+  "productionCodeChanged": false,
+  "remoteStateChanged": false,
+  "migrations": 0,
+  "remaining": [
+    "Hosted invalidated/expired session with actual Google reauthentication",
+    "Representative home ordering, appeal/account sanctions",
+    "Exact RC endpoint/CDN/device matrix and D02-D06"
+  ],
+  "references": [
+    "https://supabase.com/docs/guides/auth/sessions",
+    "https://supabase.com/changelog.md"
+  ]
+}

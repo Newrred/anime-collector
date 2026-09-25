@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:moemoa:free-image-policy:v1",
+  "title": "MOEMOA FREE Web launch policy — candidate configuration only",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyRevision",
+    "approvalState",
+    "units",
+    "releaseScope",
+    "budget",
+    "free",
+    "globalLimits",
+    "retention",
+    "controls",
+    "approvalEvidence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "const": 1
+    },
+    "policyRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "approvalState": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "APPROVED_FOR_CONFIG_REVIEW"
+      ]
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage",
+        "money",
+        "accountUsagePeriod",
+        "providerBillingPeriod"
+      ],
+      "properties": {
+        "storage": {
+          "type": "string",
+          "const": "DECIMAL_BYTES"
+        },
+        "money": {
+          "type": "string",
+          "const": "KRW"
+        },
+        "accountUsagePeriod": {
+          "type": "string",
+          "const": "UTC_CALENDAR_MONTH"
+        },
+        "providerBillingPeriod": {
+          "type": "string",
+          "const": "PROVIDER_INVOICE"
+        }
+      }
+    },
+    "releaseScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "desktopWeb",
+        "mobileWeb",
+        "nativeAndroid",
+        "privateOptimizedImageSync",
+        "publicBoards",
+        "publicMinihome",
+        "follow",
+        "originalCloudBackup",
+        "billing",
+        "ads",
+        "enabledPlanIds"
+      ],
+      "properties": {
+        "desktopWeb": {
+          "type": "boolean",
+          "const": true
+        },
+        "mobileWeb": {
+          "type": "boolean",
+          "const": true
+        },
+        "nativeAndroid": {
+          "type": "boolean",
+          "const": false
+        },
+        "privateOptimizedImageSync": {
+          "type": "boolean",
+          "const": true
+        },
+        "publicBoards": {
+          "type": "boolean",
+          "const": true
+        },
+        "publicMinihome": {
+          "type": "boolean",
+          "const": true
+        },
+        "follow": {
+          "type": "boolean",
+          "const": true
+        },
+        "originalCloudBackup": {
+          "type": "boolean",
+          "const": false
+        },
+        "billing": {
+          "type": "boolean",
+          "const": false
+        },
+        "ads": {
+          "type": "boolean",
+          "const": false
+        },
+        "enabledPlanIds": {
+          "type": "array",
+          "const": [
+            "FREE"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "monthlyIncrementalCeilingKrw",
+        "domainExcluded",
+        "existingSharedVercelBaseExcluded",
+        "moemoaVercelOverageIncluded",
+        "taxAndFxFeesIncluded",
+        "assumedAdvertisingIncomeKrw",
+        "assumedSubscriptionIncomeKrw",
+        "fixedMonthlyEstimateKrw",
+        "safetyReserveKrw",
+        "warnFractionOfVariableBudget",
+        "throttleFractionOfVariableBudget",
+        "stopFractionOfVariableBudget",
+        "maxUsageObservationAgeHours",
+        "marketingSpendExcluded"
+      ],
+      "properties": {
+        "monthlyIncrementalCeilingKrw": {
+          "type": "integer",
+          "minimum": 1,
+          "const": 50000
+        },
+        "domainExcluded": {
+          "type": "boolean",
+          "const": true
+        },
+        "existingSharedVercelBaseExcluded": {
+          "type": "boolean",
+          "const": true
+        },
+        "moemoaVercelOverageIncluded": {
+          "type": "boolean",
+          "const": true
+        },
+        "taxAndFxFeesIncluded": {
+          "type": "boolean",
+          "const": true
+        },
+        "assumedAdvertisingIncomeKrw": {
+          "type": "integer",
+          "minimum": 0,
+          "const": 0
+        },
+        "assumedSubscriptionIncomeKrw": {
+          "type": "integer",
+          "minimum": 0,
+          "const": 0
+        },
+        "fixedMonthlyEstimateKrw": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "safetyReserveKrw": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warnFractionOfVariableBudget": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "throttleFractionOfVariableBudget": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stopFractionOfVariableBudget": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxUsageObservationAgeHours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "marketingSpendExcluded": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "free": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "privateImageQuotaBytes",
+        "mainMaxBytes",
+        "thumbnailMaxBytes",
+        "sourceSelectionMaxBytes",
+        "sourceSelectionMaxPixels",
+        "targetLongEdgePx",
+        "thumbnailLongEdgePx",
+        "acceptedSourceMimeTypes",
+        "preferredOutputMimeType",
+        "fallbackOutputMimeType",
+        "allowAnimation",
+        "allowSvg",
+        "clientEncodeAttemptLimit",
+        "clientEncodeQualityFloor",
+        "uploadMaxInFlightPerAccount",
+        "newImagePreparationsPerDay",
+        "managedAssetCountSafetyMax",
+        "uploadReservationTtlSeconds",
+        "transportBodyMaxBytes",
+        "privateReadBytesPerMonth",
+        "publicReadBytesPerMonth",
+        "countBoardReferencesAsCopies",
+        "countCatalogCoverInUserImageQuota",
+        "autoDeleteOnQuotaExceeded"
+      ],
+      "properties": {
+        "privateImageQuotaBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mainMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "thumbnailMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceSelectionMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceSelectionMaxPixels": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetLongEdgePx": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "thumbnailLongEdgePx": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "acceptedSourceMimeTypes": {
+          "type": "array",
+          "const": [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "preferredOutputMimeType": {
+          "type": "string",
+          "const": "image/webp"
+        },
+        "fallbackOutputMimeType": {
+          "type": "string",
+          "const": "image/jpeg"
+        },
+        "allowAnimation": {
+          "type": "boolean",
+          "const": false
+        },
+        "allowSvg": {
+          "type": "boolean",
+          "const": false
+        },
+        "clientEncodeAttemptLimit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "clientEncodeQualityFloor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "uploadMaxInFlightPerAccount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "newImagePreparationsPerDay": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "managedAssetCountSafetyMax": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "uploadReservationTtlSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transportBodyMaxBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "privateReadBytesPerMonth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "publicReadBytesPerMonth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "countBoardReferencesAsCopies": {
+          "type": "boolean",
+          "const": false
+        },
+        "countCatalogCoverInUserImageQuota": {
+          "type": "boolean",
+          "const": false
+        },
+        "autoDeleteOnQuotaExceeded": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "globalLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "physicalImageBytesMax",
+        "monthlyOriginEgressBytesMax",
+        "monthlyPublicDeliveryBytesMax",
+        "enrolledAccountCapacityMax"
+      ],
+      "properties": {
+        "physicalImageBytesMax": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "monthlyOriginEgressBytesMax": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "monthlyPublicDeliveryBytesMax": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "enrolledAccountCapacityMax": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inactiveFreeAccountAutoPurge",
+        "deletedObjectPurgeWithinHours",
+        "backupRetentionDays",
+        "metadataRpoHours",
+        "recoveryRtoHours",
+        "publicRevocationMaxSeconds"
+      ],
+      "properties": {
+        "inactiveFreeAccountAutoPurge": {
+          "type": "boolean",
+          "const": false
+        },
+        "deletedObjectPurgeWithinHours": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "backupRetentionDays": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "metadataRpoHours": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "recoveryRtoHours": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "publicRevocationMaxSeconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policySource",
+        "rejectUnapprovedPolicyForNewRemoteImageWrites",
+        "allowPrivateDataInAnalytics",
+        "trustClientPlanOrByteCount",
+        "privateBucketPublic",
+        "automaticPaidUpgrade",
+        "automaticPlanChange",
+        "manualResumeAfterBudgetPause"
+      ],
+      "properties": {
+        "policySource": {
+          "type": "string",
+          "const": "SERVER_ACTIVE_REVISION"
+        },
+        "rejectUnapprovedPolicyForNewRemoteImageWrites": {
+          "type": "boolean",
+          "const": true
+        },
+        "allowPrivateDataInAnalytics": {
+          "type": "boolean",
+          "const": false
+        },
+        "trustClientPlanOrByteCount": {
+          "type": "boolean",
+          "const": false
+        },
+        "privateBucketPublic": {
+          "type": "boolean",
+          "const": false
+        },
+        "automaticPaidUpgrade": {
+          "type": "boolean",
+          "const": false
+        },
+        "automaticPlanChange": {
+          "type": "boolean",
+          "const": false
+        },
+        "manualResumeAfterBudgetPause": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "approvalEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvedBy",
+        "approvedAt",
+        "decisionLogRef",
+        "freeImageQualityEvidenceRef",
+        "normalUsageMeasurementRef",
+        "billingBaselineEvidenceRef",
+        "alertDeliveryEvidenceRef",
+        "privateSyncDeviceEvidenceRef",
+        "policyAndSupportEvidenceRef",
+        "backupAndRevocationEvidenceRef"
+      ],
+      "properties": {
+        "approvedBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "approvedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "decisionLogRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "freeImageQualityEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "normalUsageMeasurementRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "billingBaselineEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "alertDeliveryEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "privateSyncDeviceEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "policyAndSupportEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "backupAndRevocationEvidenceRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06/W08 Web explicit private optimized-copy client; W15 cancellation/source fence",
+  "status": "LOCAL_VERIFIED_NOT_HOSTED_NOT_RELEASE_READY",
+  "head": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "dirty": true,
+  "execPlan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-09-26-w06w08-web-명시-연동-및-원격-표시",
+  "docsRead": [
+    "AGENTS.md",
+    "CODEX_START_HERE.md",
+    "PLANS.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md",
+    "docs/moemoa/06_ARCHITECTURE_AND_VERTICAL_SLICE_PLAN.md",
+    "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+    "docs/moemoa/operations/2026-09-24-recovery-and-release-handoff.md"
+  ],
+  "referenceImplementation": [
+    "src/hooks/useAuthSession.js",
+    "src/features/memory/runtime/createMemoryRuntime.js",
+    "src/features/memory/runtime/platformMemoryRuntime.js",
+    "src/features/memory/sync/memorySyncContract.js",
+    "src/features/memory/application/createMemoryCard.js",
+    "tests/memory-owner-boundary.spec.ts",
+    "tests/web-image-intake.spec.ts"
+  ],
+  "sourceSha256": {
+    "src/features/memory/application/createPrivateImageTransfer.js": "7545c29354cdb033b96ecff6ab0ffda1957cb6cb3f5da68fc68d65293573f499",
+    "src/features/memory/application/optimizePrivateImage.js": "17bb8daeb1f0ba762b62a07cddd8b0a6cc16e92367a8d0e19af8f40ea405bf72",
+    "src/features/memory/adapters/indexeddb/privateImageJournal.js": "3816d851681bd916ba76545991beb7d49c7ceec552026e39d8fed9c7ceb85225",
+    "src/features/memory/adapters/platform/webImageIntake.js": "bcb2f9cf5ff5ae106e9d401167d1d5afad66bd549ad25d5df0b792a51d11e55b",
+    "src/features/memory/runtime/platformPrivateImages.js": "c3e8ef7605253859ce182836195234912c4fe475d9ad42f3039beac97ee77140",
+    "src/features/memory/components/MemoryPrivateImageSync.jsx": "d00103b6c6b87d560ce1a6af771983646f7c190a8741ecf9b73fe6b33f2336d7",
+    "src/features/memory/components/MemoryCardDetail.jsx": "c656e15cf968a959b13a1a3e4f4ba227ceb6d9daa17f9744d12363f6c254f0f2",
+    "supabase/migrations/20260925152859_memory_private_image_boundary.sql": "77e32f6d7fb148b13428f015af8ac1f24b4c7593eb4d5dbfc527e7e7f396e036",
+    "tools/private-images/contract.sql": "701646b25c912cb83ad0594d85d2e2159924d47da51fcd27129c0b8cdd8cc1d2",
+    "tests/unit/privateImageTransfer.test.mjs": "d8a10b0a6cabb68d7796c7d917488f0b09e4012cf7a013b9cdbdb988c9ca3c81",
+    "tests/private-image-sync.spec.ts": "7c4d6c2444c1a16e651fd0857fa92f0fa504d3fa408ed90071e92fcfa8e84519"
+  },
+  "commands": [
+    {
+      "passed": 7,
+      "scope": "Controller with fake dependencies; optimizer with fake canvas",
+      "failed": 0,
+      "command": "node --test tests/unit/privateImageTransfer.test.mjs"
+    },
+    {
+      "passed": 347,
+      "failed": 0,
+      "log": ".cache/private-media-client-unit.log",
+      "command": "npm run test:unit"
+    },
+    {
+      "passed": 5,
+      "failed": 0,
+      "log": ".cache/private-media-client-browser.log",
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4352 node scripts/run-e2e.mjs tests/private-image-sync.spec.ts tests/web-image-intake.spec.ts --project=chromium --workers=1 --reporter=line --retries=0"
+    },
+    {
+      "passed": 2,
+      "scope": "Final added slow image response/account-switch check; same 2 tests, not 2 extra unique tests",
+      "failed": 0,
+      "log": ".cache/private-media-client-browser-final.log",
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4352 node scripts/run-e2e.mjs tests/private-image-sync.spec.ts --project=chromium --workers=1 --reporter=line --retries=0"
+    },
+    {
+      "passed": 19,
+      "failed": 0,
+      "log": ".cache/private-media-client-regression.log",
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=0 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=0 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4353 node scripts/run-e2e.mjs tests/memory-owner-boundary.spec.ts tests/memory-card-composer.spec.ts --project=chromium --workers=1 --reporter=line --retries=0"
+    },
+    {
+      "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+      "passed": 47,
+      "scope": "Real local PostgreSQL16; synthetic auth.uid and Storage tables",
+      "failed": 0,
+      "parallelPassed": 2,
+      "log": ".cache/private-media-client-sql.log"
+    },
+    {
+      "passed": 248,
+      "scope": "Existing local public trigger regression, not repeated hosted infrastructure restore",
+      "failed": 0,
+      "log": ".cache/private-media-client-public-sql.log",
+      "command": "wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh"
+    },
+    {
+      "log": ".cache/private-media-client-build.log",
+      "pages": 18,
+      "exitCode": 0,
+      "command": "npm run build"
+    },
+    {
+      "notes": "Existing CRLF normalization warnings only",
+      "exitCode": 0,
+      "command": "git diff --check"
+    }
+  ],
+  "newlyVerified": [
+    "Explicit consent before POST; actual >1MB synthetic PNG chooser/canvas/IndexedDB; transport <=1MB and1600px",
+    "Lost response and reload retry retain exact Blob and operation; original actual SHA and stored checksum preserved",
+    "Owner detail with no local image bytes displays verified remote WebP;390px no horizontal overflow",
+    "Switch A to B during delayed image fetch unmounts A detail and exposes no A image/title",
+    "Atomic journal putIfAbsent, mismatched removal guard and owner separation",
+    "Owner-safe manifest projection; public withdrawal preserves private copy; local deletion fence denies reads before metadata tombstone",
+    "Cancel before reservation permanently fences delayed operation; expired/preparing/deleting bytes remain charged until confirmed cleanup"
+  ],
+  "failuresResolved": [
+    "Initial browser imageType USER_IMAGE comparison did not match local UNKNOWN rights classification; fixed predicate without reclassifying rights",
+    "Cancellation SQL fixture initially retained B session; corrected explicit A actor; final47+2 passed"
+  ],
+  "assumptions": [
+    "50MB/1MB are candidate test values only; remote policy stays unapproved/off/zero",
+    "Browser Auth/metadata sync/HTTP responses mocked; image picker, canvas, IndexedDB and app UI are real",
+    "No dependency installation; no paid change; Android excluded"
+  ],
+  "migrations": {
+    "changes": "Safe READY projection, source delete fence, private owner+operation cancellation fence with1000 unreserved-operation rows per account; existing reservations always cancellable",
+    "hostedApplied": false,
+    "file": "supabase/migrations/20260925152859_memory_private_image_boundary.sql",
+    "localOnly": true
+  },
+  "rollback": "PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 off by default; keep original media and pending operation journal; no reverse data deletion",
+  "security": "Fresh identity/source checks across async boundaries; verified read bytes; abort and revoke object URLs on owner change; no raw private data or credentials in logs; no rights/public contract relaxation",
+  "priorEvidencePreserved": [
+    "2026-09-26-private-image-server-boundary.json",
+    "2026-09-26-web-local-image-intake.json"
+  ],
+  "unverified": [
+    "Hosted private API/Auth/Storage and physical phone/PC roundtrip",
+    "Remote previews in Archive/Board and public representation adapter",
+    "Source replacement quota headroom; backup/restore of actual private bytes",
+    "Real-image visual quality/mobile memory and format compatibility",
+    "Combined public/private KRW budget and operational policy/alerts; exact release candidate"
+  ],
+  "next": "W06/W08: connect remote-only private copies to Archive/Board display",
+  "productionChanged": false,
+  "publicFlagsChanged": false,
+  "deployed": false,
+  "committed": false
+}

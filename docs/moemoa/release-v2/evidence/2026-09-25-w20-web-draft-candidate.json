@@ -1,0 +1,131 @@
+{
+  "configurationEvidence": {
+    "path": "docs/moemoa/release-v2/evidence/2026-09-24-w20-configuration.json",
+    "sha256": "06fa7b7a476ba9370007f46c380da3b840145ae91ab940d9f8a997f088d3f1c6"
+  },
+  "catalogRelease": {
+    "id": "catalog-add-7e982253b551b92984460a5e",
+    "hash": null
+  },
+  "gates": {
+    "D05": {
+      "status": "PENDING",
+      "evidence": null,
+      "verifiedBy": null
+    },
+    "D06": {
+      "status": "PENDING",
+      "evidence": null,
+      "verifiedBy": null
+    },
+    "D04": {
+      "status": "PENDING",
+      "evidence": null,
+      "verifiedBy": null
+    },
+    "D01": {
+      "status": "PENDING",
+      "evidence": null,
+      "verifiedBy": null
+    },
+    "D03": {
+      "status": "PENDING",
+      "evidence": null,
+      "verifiedBy": null
+    },
+    "D02": {
+      "status": "VERIFIED",
+      "verifiedBy": "User 2026-09-25",
+      "evidence": {
+        "path": "docs/moemoa/release-v2/evidence/2026-09-25-d02-web-only.json",
+        "sha256": "d30e6fafde4f5fe84f6661b2a9a19e99895a4cd3efa66681c57e2927b30960b4"
+      }
+    }
+  },
+  "sourceCommit": null,
+  "sourceState": "DRAFT: current uncommitted source; old automated evidence retained with its original date, not rebound to HEAD",
+  "checks": {
+    "catalog": {
+      "failed": 0,
+      "evidence": {
+        "path": ".cache/w16-catalog-final.log",
+        "sha256": "fe4f2a582ccec3280b4c267f8a648f9edd126b87f458dfabaa771b91090a778a"
+      },
+      "skipReason": "Windows file symlink tests unavailable",
+      "sourceCommit": null,
+      "skipped": 2,
+      "status": "PASS",
+      "passed": 256
+    },
+    "browser": {
+      "failed": 0,
+      "evidence": {
+        "path": ".cache/w18-browser-confirmed.log",
+        "sha256": "5b218e61d960ee6a773ff4351437f207111d0e66a63a51c88000bd4e750bab52"
+      },
+      "skipReason": "Two live external-network cases and one isolated-runner-only case intentionally not run",
+      "sourceCommit": null,
+      "skipped": 3,
+      "status": "PASS",
+      "passed": 174
+    },
+    "sql": {
+      "failed": 0,
+      "evidence": {
+        "path": ".cache/w17-sql-final.log",
+        "sha256": "c67b8b7f5553152fcf3a216eb78c1af31c98ec990e6475e53751a4a4ff006237"
+      },
+      "skipReason": "",
+      "sourceCommit": null,
+      "skipped": 0,
+      "status": "PASS",
+      "passed": 235
+    },
+    "unit": {
+      "status": "PASS",
+      "sourceCommit": null,
+      "passed": 329,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": {
+        "path": ".cache/web-only-unit.log",
+        "sha256": "ee552d203999686366f018c13a035b2feff4b63f329ac86f32ff0e5ace472b1e"
+      }
+    },
+    "android": {
+      "status": "NOT_APPLICABLE",
+      "sourceCommit": null,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "skipReason": "Approved first release is Web-only; Android follows after Web refinement",
+      "evidence": {
+        "path": "docs/moemoa/release-v2/evidence/2026-09-25-d02-web-only.json",
+        "sha256": "d30e6fafde4f5fe84f6661b2a9a19e99895a4cd3efa66681c57e2927b30960b4"
+      }
+    },
+    "build": {
+      "status": "PASS",
+      "sourceCommit": null,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": {
+        "path": ".cache/web-only-build.log",
+        "sha256": "01fd9006e6b66b834aecbc760462d9dcdb1c9f7c3680c5ff60c650527feea418"
+      }
+    }
+  },
+  "baseCommit": "0330a5401e0112f2e36886a6826812219e7aed89",
+  "releaseChannel": "WEB_ONLY",
+  "currentSupplementalEvidence": [
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-current-regression.json",
+      "sha256": "0d7a1d74791741e0857817b4bd200b5bb7432efce459db24825f5a8b27fa6dad"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-rights-quota.json",
+      "sha256": "e0b86dd6e0985cd562cf4136283428cb8b46c5c03d903c174dc18b07586dae6a"
+    }
+  ]
+}

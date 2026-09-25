@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: candidate is well-formed but not launch approved
+ok 1 - candidate is well-formed but not launch approved
+  ---
+  duration_ms: 10.747974
+  type: 'test'
+  ...
+# Subtest: unapproved null values block release configuration review
+ok 2 - unapproved null values block release configuration review
+  ---
+  duration_ms: 5.31092
+  type: 'test'
+  ...
+# Subtest: no billing
+ok 3 - no billing
+  ---
+  duration_ms: 5.707622
+  type: 'test'
+  ...
+# Subtest: no ads
+ok 4 - no ads
+  ---
+  duration_ms: 4.025951
+  type: 'test'
+  ...
+# Subtest: no original cloud product
+ok 5 - no original cloud product
+  ---
+  duration_ms: 3.537611
+  type: 'test'
+  ...
+# Subtest: private sync cannot be removed
+ok 6 - private sync cannot be removed
+  ---
+  duration_ms: 4.238105
+  type: 'test'
+  ...
+# Subtest: native scope cannot be silently expanded
+ok 7 - native scope cannot be silently expanded
+  ---
+  duration_ms: 8.093314
+  type: 'test'
+  ...
+# Subtest: 50000 budget cannot silently grow
+ok 8 - 50000 budget cannot silently grow
+  ---
+  duration_ms: 3.565121
+  type: 'test'
+  ...
+# Subtest: new shared Vercel overage counts
+ok 9 - new shared Vercel overage counts
+  ---
+  duration_ms: 2.74426
+  type: 'test'
+  ...
+# Subtest: public private bucket is forbidden
+ok 10 - public private bucket is forbidden
+  ---
+  duration_ms: 2.184409
+  type: 'test'
+  ...
+# Subtest: unknown setting is rejected
+ok 11 - unknown setting is rejected
+  ---
+  duration_ms: 2.411893
+  type: 'test'
+  ...
+# Subtest: negative quota
+ok 12 - negative quota
+  ---
+  duration_ms: 5.072369
+  type: 'test'
+  ...
+# Subtest: string is not a byte count
+ok 13 - string is not a byte count
+  ---
+  duration_ms: 1.607128
+  type: 'test'
+  ...
+# Subtest: thumbnail included in transport bound
+ok 14 - thumbnail included in transport bound
+  ---
+  duration_ms: 1.927356
+  type: 'test'
+  ...
+# Subtest: provider body cap cannot be ignored
+ok 15 - provider body cap cannot be ignored
+  ---
+  duration_ms: 4.828027
+  type: 'test'
+  ...
+# Subtest: budget forecast thresholds are ordered
+ok 16 - budget forecast thresholds are ordered
+  ---
+  duration_ms: 6.829253
+  type: 'test'
+  ...
+# Subtest: fixed costs plus reserve exceed budget
+ok 17 - fixed costs plus reserve exceed budget
+  ---
+  duration_ms: 3.174116
+  type: 'test'
+  ...
+# Subtest: zero monthly limit is not unlimited
+ok 18 - zero monthly limit is not unlimited
+  ---
+  duration_ms: 3.789792
+  type: 'test'
+  ...
+# Subtest: cannot double-count Board references
+ok 19 - cannot double-count Board references
+  ---
+  duration_ms: 6.674754
+  type: 'test'
+  ...
+# Subtest: cannot auto-delete over quota
+ok 20 - cannot auto-delete over quota
+  ---
+  duration_ms: 5.261484
+  type: 'test'
+  ...
+# Subtest: client plan is not authoritative
+ok 21 - client plan is not authoritative
+  ---
+  duration_ms: 1.623517
+  type: 'test'
+  ...
+# Subtest: paid plan cannot be added secretly
+ok 22 - paid plan cannot be added secretly
+  ---
+  duration_ms: 1.775307
+  type: 'test'
+  ...
+# Subtest: numbers may be tuned without changing scope
+ok 23 - numbers may be tuned without changing scope
+  ---
+  duration_ms: 2.522097
+  type: 'test'
+  ...
+# Subtest: filled SYNTHETIC fixture checks shape only, not evidence truth
+ok 24 - filled SYNTHETIC fixture checks shape only, not evidence truth
+  ---
+  duration_ms: 2.994874
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 375.117471

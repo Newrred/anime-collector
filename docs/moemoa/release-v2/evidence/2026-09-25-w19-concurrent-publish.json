@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q11 hosted concurrent publish RPC, actual existing A browser session, synthetic SYSTEM_DESIGN only",
+  "project": "nmgkhknponvzcwliajyk",
+  "publicationId": "2d0d82c5-fb22-487b-a9d6-efd870ee7e3c",
+  "sameOperation": {"preparedRevision":13,"responseRevisions":[14,14],"ownerRevision":14,"replayRevision":14,"changedHashReplay":"OPERATION_MISMATCH","requestWindowsMs":[[7719,7828.7],[7719.1,7834.8]],"anonymousTitle":"Q11 same operation","anonymousCards":2,"anonymousHash":"ad4877b18899d3ef53d9a89c9df9b992fe7d6e158a99b29763e285a81e91361a"},
+  "distinctOperations": {"preparedRevision":15,"results":["PUBLISHED revision16","PUBLICATION_CONFLICT"],"ownerRevision":16,"replayRevision":16,"changedHashReplay":"OPERATION_MISMATCH","requestWindowsMs":[[18630.7,18738.7],[18630.7,18862]],"anonymousTitle":"Q11 distinct operations","anonymousCards":2,"anonymousHash":"b48e2a182a9cde4ea1bdf27698cf86438f22587aaeb128201b3ab06e328dcbed"},
+  "cleanup": {"state":"REVOKED","revision":17,"sourceTitleUnchanged":true,"sourceVersion":3,"allPublicFlags":false,"quota":0,"policy":"UNAPPROVED","moderators":0,"activeRights":0,"auditCount":8,"homePublished":false,"temporaryFilesRemoved":true,"serverStopped":true},
+  "commands": ["node .cache/test-query.mjs .cache/q11-fixture-inspect.sql","node .cache/test-query.mjs .cache/q11-enable.sql","node node_modules/astro/astro.js dev --host 127.0.0.1 --port 4321 --mode moemoatest","CUA Same operation / Distinct operations buttons","node .cache/test-query.mjs .cache/q11-cleanup.sql","node .cache/test-query.mjs .cache/test-public-restore.sql","git diff --check"],
+  "setupCorrection":"npm run argument forwarding dropped flags; stopped before browser tests and started Astro directly with verified test mode and URL guard",
+  "limitations":["Overlapping client request windows, not forced server transaction scheduling or load test","Temporary diagnostic buttons call actual SDK RPC; not product double-click UI test","No product source or schema changes, no production changes","Prior unit/build/SQL PASS not rerun this turn","Asset rights/policy transitions remain separate"],
+  "result":"PASS for bounded concurrency/idempotency cases"
+}

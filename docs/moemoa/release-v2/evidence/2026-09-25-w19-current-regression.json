@@ -1,0 +1,6 @@
+{
+ "date":"2026-09-25","scope":"W19 current publication UI and W15/Q19 hosted rollback-only resource checks",
+ "browser":{"command":"node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line","passed":22,"failed":0,"secondsApprox":72,"log":".cache/w19-current-publication-ui.log","boundary":"Actual Chromium product UI using mocked gateways/Auth fixtures; distinct from real hosted image tests"},
+ "resource":{"command":"node .cache/test-query.mjs .cache/q19-rollback-check.sql","log":".cache/q19-rollback-check.log","checks":["First image attempt charged","Next attempt RATE_LIMITED","Unexpired override permits one additional charge","Expired override RATE_LIMITED","Paused scope PUBLICATION_DISABLED","Only two successful charges"],"cleanup":"Whole transaction ROLLBACK; IMAGE_ATTEMPT enabled=false/paused=false afterward","boundary":"Hosted database authenticated role and A claim set inside SQL transaction; not real JWT/HTTP429","setupCorrection":"First run hit closed publication gate and rolled back; second set test gates only within rolled-back transaction"},
+ "result":"PASS within stated boundaries; D02-D06 and final candidate environment remain"
+}

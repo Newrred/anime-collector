@@ -1,0 +1,46 @@
+{
+  "asOf": "2026-09-25",
+  "archive": "MOEMOA_Pro_LongTerm_Review_2026-09-25.zip",
+  "archiveSha256": "1f5082f927241b5676a8104e8c57233c99b524d3218a05895de5f51c0087240f",
+  "sourceMode": "latest supplied selected snapshot; not a live repository audit",
+  "selectedInputs": [
+    {
+      "path": "00_READ_ME_KO.md",
+      "sha256": "174c650f592d26ef19a1d23731fe0dff3a4367278427e6b5ff8fd14de759f0e0",
+      "bytes": 14686
+    },
+    {
+      "path": "repository/AGENTS.md",
+      "sha256": "1d8be24cfa75faad94991770592f71891be653a56c8680b0ebdde07c87a2b664",
+      "bytes": 5896
+    },
+    {
+      "path": "repository/docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md",
+      "sha256": "bc1f9153e4de67f62805d60d074c1b3f12583fe3f637d9a745e116c805525c1f",
+      "bytes": 34449
+    },
+    {
+      "path": "repository/docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+      "sha256": "0945fef16335be2d44edf3cc5f50047c939efc8c6eb065b2ad83f61c64980f2c",
+      "bytes": 172181
+    },
+    {
+      "path": "repository/src/server/publicImages/handler.js",
+      "sha256": "ae93012b4dc7b637ab61545a287a4c9d2df87f8d0b7ebd5fc151365a607f4390",
+      "bytes": 8636
+    }
+  ],
+  "conversationOverrides": [
+    "KRW50000 monthly incremental operating budget; excludes existing shared Vercel base, domain, promotional ad spending",
+    "Free private optimized image sync across desktop and mobile web is part of first release",
+    "50MB account image space and 1MB main representation are launch candidates, not deployed settings",
+    "Paid high-volume storage and future ads-free light offer are deferred; no price approval"
+  ],
+  "notPerformed": [
+    "No app source changes",
+    "No production setting/DB/billing/deployment changes",
+    "No app regression rerun",
+    "No provider invoice read"
+  ],
+  "expiredFilesNote": "Some older attachments were flagged expired; necessary latest snapshot and prior evidence files were available. No claim of re-reading unavailable files."
+}

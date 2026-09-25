@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q15 multi-card representative and product home private transition",
+  "before": {
+    "time": "2026-09-24T21:27:03.890Z",
+    "boardCards": [
+      "Q15 representative synthetic 1",
+      "Q15 representative synthetic 2"
+    ],
+    "homeCards": [
+      "Q15 representative synthetic 2"
+    ]
+  },
+  "representative": "PASS: actual owner UI selects second card, preview and visitor show only second card; anonymous RPC board2/home1",
+  "homePrivate": "PASS: product native confirm accepted by user; owner private message, visitor home unavailable, anonymous home null while board retains both cards",
+  "fixture": "Two synthetic SYSTEM_DESIGN cards prepared via test-only SQL and existing owner publication RPC, not claimed as UI creation",
+  "initialFailure": "Incomplete design fixture rejected PUBLIC_VISUAL_NOT_READY; transaction rolled back. Required paletteId/patternSeed/genreTokens supplied; second attempt succeeded.",
+  "productionChanged": false,
+  "productCodeChanged": false,
+  "migrations": 0,
+  "standby": {
+    "allServerPublicFlags": false,
+    "policy": "UNAPPROVED",
+    "quotas": 0,
+    "moderators": 0,
+    "activeRights": 0,
+    "homePublishedSnapshot": true,
+    "boardBPublishedSnapshot": true,
+    "note": "External readers are disabled while waiting for native confirm. After user click, re-enable test reads/home only for comparison; then revoke board/home and close frontend flags/server. Do not interpret flag-off null as UI withdrawal evidence.",
+    "serverSession": 92017,
+    "tabs": [
+      15,
+      16,
+      17
+    ]
+  },
+  "after": {
+    "time": "2026-09-25T04:13:24.837Z",
+    "boardCards": [
+      "Q15 representative synthetic 1",
+      "Q15 representative synthetic 2"
+    ],
+    "homeCards": null
+  },
+  "resume": {
+    "initialStatus": "Home still published revision17; owner displayed unconfirmed result. Retry loaded current state; no prior success assumed.",
+    "humanAssistance": "User clicked confirm after reopening the native dialog",
+    "verificationFlags": {
+      "reads": true,
+      "minihomes": true,
+      "writes": false
+    },
+    "homeRevisionAfterUI": 18
+  },
+  "cleanup": {
+    "homePrivate": true,
+    "boardB": "REVOKED",
+    "allServerPublicFlags": false,
+    "quotas": 0,
+    "policy": "UNAPPROVED",
+    "moderators": 0,
+    "activeRights": 0,
+    "auditCount": 8,
+    "frontendFlags": false,
+    "serverStopped": true,
+    "tabsClosed": true,
+    "syntheticPrivateOriginals": "preserved"
+  },
+  "commands": [
+    "node .cache/test-query.mjs .cache/q15-resume-check.sql",
+    "node .cache/test-query.mjs .cache/q15-read-enable.sql",
+    "node .cache/q15-multi-read.mjs after",
+    "node .cache/test-query.mjs .cache/q15-multi-cleanup.sql",
+    "node .cache/test-query.mjs .cache/test-public-restore.sql"
+  ]
+}

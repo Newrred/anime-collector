@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-25",
+  "changed": [
+    "scripts/check-release-candidate.mjs",
+    "tests/unit/releaseCandidate.test.mjs"
+  ],
+  "commands": [
+    {
+      "command": "node --test tests/unit/releaseCandidate.test.mjs",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "command": "npm run test:unit",
+      "passed": 329,
+      "failed": 0,
+      "evidence": {
+        "path": ".cache/web-only-unit.log",
+        "sha256": "ee552d203999686366f018c13a035b2feff4b63f329ac86f32ff0e5ace472b1e"
+      }
+    },
+    {
+      "command": "npm run build",
+      "pages": 18,
+      "result": "PASS",
+      "evidence": {
+        "path": ".cache/web-only-build.log",
+        "sha256": "01fd9006e6b66b834aecbc760462d9dcdb1c9f7c3680c5ff60c650527feea418"
+      }
+    }
+  ],
+  "limits": [
+    "Local dirty source not final candidate SHA",
+    "No DB migration/production flags/push/deployment",
+    "D03-D06 remain; actual candidate CDN/CI checks not complete"
+  ],
+  "approval": {
+    "path": "docs/moemoa/release-v2/evidence/2026-09-25-d02-web-only.json",
+    "sha256": "d30e6fafde4f5fe84f6661b2a9a19e99895a4cd3efa66681c57e2927b30960b4"
+  }
+}

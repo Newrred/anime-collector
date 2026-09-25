@@ -1,0 +1,19 @@
+{
+  "asOf": "2026-09-25",
+  "scope": "documentation, candidate policy, local policy checker only",
+  "node": "v22.16.0",
+  "candidateStructuralValidation": "PASS",
+  "independentDraft202012SchemaValidation": "PASS",
+  "validatorTests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "releasePreview": {
+    "expectedExitCode": 1,
+    "actualResult": "BLOCKED_AS_DESIGNED",
+    "unapprovedCandidate": true
+  },
+  "appTestsRun": false,
+  "releaseApproved": false,
+  "productionChanged": false
+}

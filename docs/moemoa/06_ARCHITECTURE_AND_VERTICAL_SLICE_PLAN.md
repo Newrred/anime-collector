@@ -7,6 +7,8 @@
 
 ## 1. 아키텍처 원칙
 
+2026-09-25 범위 갱신: `FREE-PRIVATE-IMAGE-SYNC-01`은 첫 Web-only 후보의 private 최적화 사본 연동을 승인했다. platform image port와 local-first metadata 저장은 유지하고 Web media adapter를 추가한다. owner별 private manifest/서버 정책·quota는 기존 backend 경계에 연결하며 원본 hash 및 공개 전달 계약과 분리한다. 과거의 private 이미지 미정 표기는 원본 전체 백업 및 당시 상태이며 최적화 연동의 현재 작업을 막는 지시가 아니다.
+
 - 하나의 도메인 모델과 백엔드.
 - Web과 Android의 역할은 다르지만 데이터 의미는 동일.
 - 기존 안정화 코드와 기술 스택을 최대한 재사용.

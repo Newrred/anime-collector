@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-26",
+  "status": "DECISION_REQUIRED_NOT_IMPLEMENTED",
+  "scope": "W08/D04 private rendition public-source trust boundary",
+  "command": "node --test tests/unit/publicImages.test.mjs",
+  "passed": 18,
+  "failed": 0,
+  "log": ".cache/private-public-provenance-audit.log",
+  "testSha256": "e629dd8c7d4937f83ce581601cd0181f69f27e76b000c74087b1c811caa7c6ef",
+  "actual": "Real sharp private rendition and unrelated rendition both rejected by actual HTTP public handler with SOURCE_IMAGE_MISMATCH; READY false,objects0,confirmed reservation release",
+  "proxy": "Fake Auth/Storage/public reservation backend; no hosted claim",
+  "proposal": "Keep original checksum/path and current original upload. Add trusted rights approval bound to exact private representation ID/mainHash with owner/source version/operation/policy and revocation checks through publication/read.",
+  "reasonForDecision": "Existing source-original approval contract must not be silently extended to unproven client renditions; AGENTS requires explicit approval for established product decision changes",
+  "filesChanged": [
+    "tests/unit/publicImages.test.mjs",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"
+  ],
+  "docsRead": [
+    "CODEX_START_HERE.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"
+  ],
+  "referenceFiles": [
+    "src/server/privateImages/processImage.js",
+    "src/server/publicImages/handler.js",
+    "supabase/migrations/20260923093000_memory_public_images.sql",
+    "src/features/memory/application/createPublicationController.js",
+    "src/features/memory/application/preparePublicImage.js"
+  ],
+  "migration": "None",
+  "rollback": "No runtime change; original hash guard preserved",
+  "productionChanged": false,
+  "security": "No new public path enabled. Test confirms existing denial, not a current exposure.",
+  "remaining": [
+    "Approval model decision",
+    "Implementation with operation provenance/rights revocation",
+    "Hosted and physical-device verification",
+    "D03-D06 operational/release gates"
+  ]
+}

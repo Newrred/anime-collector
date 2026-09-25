@@ -5,6 +5,10 @@
 
 ## 1. 목적
 
+2026-09-25 보완: `FREE-PRIVATE-IMAGE-SYNC-01`에 따라 첫 Web-only 출시에는 명시적으로 선택한 무료 비공개 **최적화 사본** 연동을 포함한다. 기기 원본의 localRef/checksum은 보존하고 서버 representation의 hash/version/bytes를 별도로 관리한다. 원본 전체 백업과 과거 사진 자동 업로드는 포함하지 않는다. private 저장은 public 권리 승인·preview 동의의 대체가 아니다. 세부 구현/검증 상태는 기존 release-v2 W06/W08/W15 및 C02/C04/C09를 따른다.
+
+2026-09-26 승인 보완: `PRIVATE-REPRESENTATION-PUBLIC-RIGHTS-01`은 원본 없는 기기의 공개 입력을 정확한 private representation ID/hash/sourceVersion별 trusted 권리 근거가 있는 사본으로 확장한다. 기존 원본 hash 및 source 권리 gate는 유지한다. 사본 권리 근거는 일반사용자의 checkbox/metadata로 생성하지 않으며, 공개 준비·완료·preview·게시·열람에서 일치와 철회를 확인한다. 비공개 저장 동의·공개 이미지 사용 동의·최종 게시 동의는 별개다. 운영 권리 레코드의 실제 담당/근거 및 활성화는 D04/D06에 남는다.
+
 Pinterest처럼 시각적 수집과 공유의 자유도를 제공하되, 모든 이미지가 동일한 저장·공개·권리 상태를 갖는다고 가정하지 않는다.
 
 정책 문서와 실제 시스템은 함께 구현한다.

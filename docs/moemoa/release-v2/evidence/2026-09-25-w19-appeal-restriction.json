@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q18 real moemoa-test JWT+RPC and owner product safety inbox",
+  "method": {
+    "ownerAppeal": "Actual MemorySafety product UI",
+    "moderator": "Temporary local test buttons invoking existing RPC with actual A JWT; not production moderator console",
+    "probe": "Same invalid empty-card prepare payload before/after release; proves restriction boundary, not successful republication"
+  },
+  "newPass": [
+    {
+      "action": "RESTRICT_ACCOUNT",
+      "caseRevision": 6,
+      "targetRevision": 6
+    },
+    {
+      "action": "prepare while restricted",
+      "error": "PUBLICATION_RESTRICTED"
+    },
+    {
+      "action": "product appeal",
+      "ui": "Appeal received.",
+      "caseRevision": 7
+    },
+    {
+      "action": "stale review",
+      "error": "PUBLICATION_CONFLICT"
+    },
+    {
+      "action": "revoke already private home while restricted",
+      "published": false,
+      "revision": 15
+    },
+    {
+      "action": "RELEASE_ACCOUNT",
+      "caseRevision": 8,
+      "targetRevision": 7
+    },
+    {
+      "action": "same prepare after release",
+      "error": "INVALID_SELECTION"
+    },
+    {
+      "action": "product release notice",
+      "ui": "This case's write restriction released"
+    },
+    {
+      "action": "role removed; same JWT queue read",
+      "error": "MODERATOR_REQUIRED"
+    }
+  ],
+  "cleanup": {
+    "publicFlags": false,
+    "quotas": 0,
+    "policy": "UNAPPROVED",
+    "moderators": 0,
+    "activeRights": 0,
+    "activeCaseSanctions": 0,
+    "homePrivate": true,
+    "boardRevoked": true,
+    "auditCount": 8,
+    "appeals": 1,
+    "auditNewActions": [
+      "RESTRICT_ACCOUNT",
+      "APPEAL",
+      "RELEASE_ACCOUNT"
+    ],
+    "temporaryFilesRemoved": true,
+    "frontendFlags": false,
+    "serverStopped": true
+  },
+  "commands": [
+    "node .cache/test-query.mjs .cache/q18-enable.sql",
+    "node .cache/test-query.mjs .cache/q18-policy.sql",
+    "node .cache/test-query.mjs .cache/test-public-restore.sql",
+    "node .cache/test-query.mjs .cache/q18-check.sql"
+  ],
+  "helperSha256": "aca32a37996bf8c2f473a744f40bb314b1ceb0c1dbbe715bf88dd49f4038f221",
+  "initialCorrections": [
+    "Root HTML was404; moved to temporary public path",
+    "Initial probe PUBLICATION_DISABLED due to UNAPPROVED policy; test-only policy set before actual restriction comparison"
+  ],
+  "limitations": [
+    "No successful new publication or private backup test in this run",
+    "Moderator and owner use same explicitly approved A test account",
+    "No external support channel or production staff/SLA validation"
+  ],
+  "productCodeChanges": 0,
+  "migrations": 0,
+  "productionChanges": 0
+}

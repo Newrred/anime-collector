@@ -7,6 +7,13 @@
 
 ## 1. 목적과 사용자 결과
 
+### 2026-09-26 간이 테스트용 Git 배포 실행 범위
+- 사용자 요청: “배포 하고 이어가줘 폰이나 다른사람들한테 배포 링크로 간이 테스트좀 해보게”. 현재 변경을 검증해 master에 반영하고 Vercel Git 배포 및 moemoa.xyz의 동일 SHA를 확인한다. 정식 Public 출시/D03~D06 전체 PASS와 구분한다.
+- 제공: 기존 계정·작품·개인 기록·Archive/Board 및 Web 로컬 이미지 선택. 이미지는 선택한 브라우저에만 보관하며 서버 자동 업로드하지 않는다. private 동기화 및 public 게시/사본 입력은 닫힌 상태로 배포한다.
+- 변경: 기존 코드/증거를 선별 커밋, 추적 중인 .env.production에 비밀 없는 간이 테스트 flags를 명시. DB migration 파일은 추적하되 운영 적용하지 않는다. deliverables와 로컬 자격증명/로그는 커밋하지 않는다.
+- 검증: 현재 unit/catalog/핵심 Chromium·모바일 layout, intake flag-on 회귀, production build; 커밋 전 비밀 스캔; GitHub CI와 Vercel READY/SHA/build-info, 실 URL의 기록 작성·재방문·모바일 폭 확인. 기존 통과와 이번 실행을 분리한다.
+- 복구: 문제 발생 시 해당 코드 커밋을 Git revert하여 master Git 재배포. 운영 DB 변경 없음. 사용자 로컬 이미지·기록 삭제 없음. 공개/연동 미완료 조건은 기존 W06/W08/D01에 유지한다.
+
 첫 정식 출시를 다음 한 흐름으로 정의한다.
 
 **기억 작성 → 공개할 기록을 직접 선택 → 보드 공개 → 미니홈 전시 → 비로그인 방문자 열람 → 다른 계정의 팔로우 → 팔로우 목록에서 재방문 → 공개 철회·신고·관리자 조치.**
@@ -49,7 +56,9 @@ M0에서 새 결정을 기존 canonical Decision Log에 좁게 반영한다. 전
 
 과거 자료는 개인 작품 연속 기록·메타데이터 백업·Board 갤러리·Archive 검색·Home 재발견 등의 개선도 기록한다. 이미 동작하는 것을 다시 만드는 티켓으로 바꾸지 않는다.
 
-이번 계획 작성 시에는 앱 코드를 실행하거나 실 계정·DB·배포를 검사하지 않았다. 모든 W작업의 초기 상태는 TODO다.
+위 설명은 2026-09-22 계획 작성 당시의 기준이다. 당시 초기값 TODO를 현 상태로 재적용하지 않는다. 최신 기준은 `2026-09-25-pro-interim-review.md`와 03의 현재 표·증거다. M0 및 W01/W02/W04/W05의 종료 기록을 보존하고, 나머지는 구현·자동 검사·실제 검사·승인을 구분한다. 4/20은 엄격한 종료 수이지 구현률 20%가 아니다.
+
+이번 검토 반영으로 새로운 제품 실행 증거는 생기지 않는다. 정확한 current HEAD와 bbff3d4 이후 변경을 먼저 확인하며, 현재 작업 상태는 03 한 곳에서만 갱신한다.
 
 ## 4. 범위: 포함과 제외
 
@@ -67,6 +76,8 @@ M0에서 새 결정을 기존 canonical Decision Log에 좁게 반영한다. 전
 | UX | 모든 노출 화면/행동의 목록화, 닫기·취소·저장·복귀·실패·권한·빈 상태의 일관된 결과 |
 
 Web + Android라는 기존 제품 대상을 임의로 축소하지 않는다. Android의 첫 배포 채널·동시 출시 여부는 현재 승인 상태를 M0에서 확인하고 D02에 기록한다. 결정 전에도 공통 도메인과 양 플랫폼 회귀를 보호한다. 실기기 검증이 어렵다고 자동으로 Android를 완료 또는 제외 처리하지 않는다. iOS 신규 앱 개발은 추가하지 않는다.
+
+**2026-09-25 실행 범위 보완:** 최신 인계서에 기록된 사용자의 Android 이번 실행 제외를 따른다. Android 추가 구현·실기기 준비를 이번 본 작업의 자동 선행조건으로 만들지 않는다. 기존 소스·데이터·공통 도메인은 보존한다. 최종 Web-only 후보에 대한 명시 승인이 D02에 기록된 경우에만 C12의 플랫폼별 해당 없음 처리를 사용할 수 있다. 이번 실행 제외만으로 Android 검증을 통과시키거나 제품의 영구 지원 범위를 바꾸지 않는다.
 
 ### 제외 — 첫 출시의 선행 조건으로 만들지 말 것
 
@@ -228,6 +239,14 @@ M0에서 다음 지도에 실제 경로·현재 구현 상태를 03으로 연결
 기존 40개 QA는 유지하되 Q31의 '항상 Public 불가' 등 이전 출시 전제는 02의 새 기대에 맞춘다. 기존 테스트가 새 목표와 충돌하는 경우 의미를 교체하고, 실제 결함을 숨기기 위해 mock 한도·권한·snapshot을 완화하지 않는다.
 
 기능 전체의 '평균 사용자 만족'을 자동 테스트 성공으로 주장하지 않는다. 사람 검토에서는 본인이 어떤 자료를 공개했고 무엇을 취소/삭제했는지 정확히 설명할 수 있는지 확인한다.
+
+### 9.1 9월 25일 증거 재사용과 재검증 경계
+
+제공된 unit320/build18, 당시 종합 검사, 실제 A/B OAuth·별도 origin 왕복, 실제 API/Storage33, 선택5schema72table 복원은 **각 실행 당시의 범위**로 재사용한다. 다른 origin은 다른 물리 기기 검증이 아니며, private bucket 차단은 공개 이미지의 성공 전달이 아니다. Supabase 플랫폼 전체·운영 PITR·실제 CDN을 복원/검증한 것으로 확대하지 않는다.
+
+변경·실패·잘못된 대상·증거 손상·검증 대상 불일치가 없다면 기본 DB 연결/기초 격리/같은 복원을 무한 반복하지 않는다. W19의 실제 공개 한 바퀴는 그 기존 증거가 대신하지 못하므로 실행한다. 최종 후보의 필수 checks는 후보 SHA와 연결하고, 수정 후 영향 범위는 다시 검사한다.
+
+최종 D02가 Web-only 출시를 승인하면 해당 후보의 Android 실행 항목은 `N/A + 승인/사유/범위 근거`로 표시할 수 있다. 승인 부재·증거 부재를 PASS 또는 N/A로 대체하지 않는다. 현재 `check-release-candidate.mjs`의 android 고정 필수는 W20에서 이 승인과 대조해 필요한 최소 범위만 조정한다.
 
 ## 10. 보안·개인정보·권리 영향
 
@@ -441,6 +460,16 @@ W18 발견: 이전 UI 기대/주소/이미지 선택 중 이탈 계약이 현재
 
 ## 17. 최종 완료·출시·종료 보고
 
+2026-09-25 W19 후속: 기존 합성 카드/보드를 재사용하고 승인된 test 공개/이미지/home 설정만 임시 활성화한다. 제품 화면에서 재게시 후 철회 확인창의 취소→공개 유지, 확인→보드/미니홈/직접 이미지 거부를 검사한다. 확인창 제어 불가 시 UI PASS로 대체하지 않고 해당 차단을 기록한다. 종료 시 test flags/권리·사본 원복; moderator/follow/report 재검사나 운영 변경은 필요 없다.
+
+2026-09-25 W08 실제 전제 결함: 합성 사용자 이미지의 정상 metadata 동기화가 23514/source_metadata_check로 실패했다. JS DTO의 designSpec:null이 SQL JSONB null로 저장되어 SQL NULL 제약과 충돌한다. 기존 hydration trigger에 JSON null→SQL NULL 정규화만 추가하여 신규/수정/Guest 승격의 payload hash·operation을 보존한다. SYSTEM_DESIGN의 필수 객체 제약과 다른 type의 객체 거부는 유지한다. 로컬 SQL 재현 후 동일 실패 operation의 hosted 재시도로 확인한다. 기존 W08에 흡수하며 새 계획/인프라 재검증은 만들지 않는다.
+
+2026-09-25 D01 사용자 명시 승인 확보: moemoa-test(nmgkhknponvzcwliajyk)에 한해 공개 기능 임시 활성화, 합성 이미지의 자산/버전별 권리 승인, A의 테스트 운영자 역할을 허용했다. 이미지10개/40MiB·신고일일10 한도, 종료 후 flags/한도/정책/역할 원복 조건이다. 실행 전 baseline은 모든 public flags=false, asset_limit/asset_bytes_limit/report_daily_limit=0, policy_revision=UNAPPROVED, moderators/rights=0이다. 테스트용 TEST_ONLY_20260925 정책으로 정상 앱 로그인·게시·익명 bytes·미니홈·B 팔로우/신고/차단·운영자 조치·철회를 검증한다. 운영 정책 승인이나 D06 승인이 아니다. 실제 계정 토큰은 브라우저 밖으로 추출하지 않는다.
+
+2026-09-25 W13 R0925-U01: 현행 board reader/DTO/UI에 공개 작성자 연결이 없음을 확인했다. 기존 board/home reader를 그대로 호출해 현재 공개 가능성을 확인한 뒤 공개 home UUID·nickname 두 필드만 반환하는 별도 read RPC를 추가한다. 기존 미니홈 builder가 board reader를 호출하므로 board DTO에 home 전체를 중첩하지 않아 순환 호출을 피한다. 방문자 UI는 이 검증된 링크만 표시하고 작성자 panel에는 공개 미니홈 연결 의미를 안내한다. 공개 취소/hidden/없는 home은 null, private UID/이메일 노출 없음. 기존 W13/Q04/Q16 안에서 SQL·DTO/UI 회귀를 수행한다.
+
+2026-09-25 W08 R0925-B01 실행 상세: HEAD bbff3d4/clean 및 최신 증거 대조 후 제공 문서 patch의18개 hunk를 문맥 일치로 반영했다(줄바꿈만 정규화). 기존 operation 실패/완료 불명 구분을 위해 owner 전용 상태 조회와 service 전용 실패 객체 정리 claim을 additive migration으로 추가한다. PREPARING/READY/참조 중 객체는 재시도 정리 대상에서 제외하고, 실제 Storage 제거+DELETED/예약량0 확인 뒤에만 client가 새 operation을 발급한다. 완료 응답 유실은 같은 operation READY를 재사용한다. 사용자별 기존 권리/정책/버전/한도는 그대로 유지한다. 로컬 HTTP/controller/SQL 회귀로 재현→수정 검증하며 원격 migration은 테스트 승인 범위 확인 뒤에만 적용한다. rollback은 새 호출 코드 복원이며 기존 원본/READY/삭제 이력은 삭제하지 않는다. D01 활성 설정/테스트 운영자/합성 권리 승인은 후속 사용자 응답으로 확보했고, 실행 후 원복했다. 이번 결과는 03의 최신 로그와 evidence JSON 참조.
+
 2026-09-25 Pro 중간 검토 인계: 사용자 요청으로 누적 개발본과 최신 검증 증거를 검토 브랜치 `review/pro-interim-2026-09-25`에 commit/push한다. master 운영 배포와 DB/Public 활성화는 수행하지 않는다. 기존 진행 원장을 유지하고 중간 검토 안내 하나에 읽기 순서·소스 지도·검증 수준·출시 잔여·검토 질문을 모은다. 추적 대상 비밀값/덤프/개인 파일 검사와 현재 unit/build를 확인한다. 과거 검사 결과는 당시 소스 증거로 표시한다.
 
 2026-09-25 hosted 복구 실행: 사용자 계속 진행 승인에 따라 공식 PostgreSQL apt의17 바이너리를 격리 도구 폴더에 준비한다. 테스트 Session pooler만 허용하는 guard로 전체 logical dump를 생성하고 원격에 write하지 않는다. 로컬 Unix socket 전용17 DB에 복원하며 Supabase 전용 extension/플랫폼 서비스 의존성은 별도로 분류한다. public/private 앱 테이블·삭제 fence·정책·권한·Auth/Storage metadata의 비교 범위를 명시하고, 제외한 플랫폼 객체를 전체 서비스 복구 성공으로 세지 않는다. 백업에 포함될 수 있는 테스트 계정 정보는 Gitignored 사본에만 저장하며 stdout에는 집계/성공 여부만 남긴다. Storage bytes는 기존 별도 사본을 사용한다. 실패 시 local DB를 중지하고 dump를 보존하며 hosted DB는 덮어쓰지 않는다.
@@ -469,3 +498,115 @@ W07 실행 상세(2026-09-23): 단일 진행판의 W07 실행 범위를 따른�
 W08 실행 상세(2026-09-23): 단일 진행판 W08 실행 범위 참조. 기존 Vercel의 이미지 전달 endpoint+Supabase 권한/Storage로 범위를 제한하며 sharp0.34.5를 명시 의존성으로 고정한다. D01/D03/D05/D06과 W09 UI/W19 실기기 게이트 유지.
 
 W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설명·서버 DTO 미리보기·게시·주소·보드 철회를 연결하고 `/public/board/` 방문자 화면은 익명 reader만 사용한다. 기본 off인 `PUBLIC_MEMORY_PUBLICATION_V1` 아래 구현하며 기존 갤러리/원본/DB 스키마는 유지한다. 세션·요청 세대 검사와 AbortController, 동일 게시 operation 재시도, 검토 변경 시 재동의, 실제 이미지 로드 실패 시 게시 차단을 검증한다. 사용자 이미지는 원본 파일을 명시 재선택하고 서버 checksum/권리 판정을 사용한다. 업로드 동의 revision은 서버와 일치하는 배포 설정 `PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION`으로 제공하며 미설정 시 업로드를 열지 않는다. 이는 정책 승인 자체를 대체하지 않는다. 파일 지도: memory/application publication controller, runtime platformPublication, components 공개 선택/공용 DTO renderer/방문자, public route, unit 및 Chromium 계약 검사. 의존성·migration·운영 설정 변경 없음. 검증: unit/build, 합성 RPC와 실제 로컬 브라우저의 선택→미리보기→게시→새 context 방문→철회 및 취소/실패/계정전환/320px. 실제 Supabase/Storage/Vercel/Android는 D01 등 외부 게이트로 유지한다. rollback은 W09 신규 파일과 Board 진입점만 복원하며 서버 이력·private 원본은 건드리지 않는다. 결과와 증거는 단일 진행판에 기록한다.
+
+## 기존 W에 적용하는 2026-09-25 보완 — 새 단계 아님
+
+- **W08 / C04 / Q10:** 원본 불일치로 실패한 공개 이미지 준비가 같은 controller에서 `ASSET_OPERATION_UNAVAILABLE`로 반복될 수 있다. 기존 검토의 모형 재현을 현재 코드에서 확인한 뒤, 확정 실패는 정리된 새 시도로 회복하고 완료 여부가 불확실한 요청은 같은 작업 상태를 확인한다. 매 클릭마다 새 operation ID를 발급하거나 READY 객체를 삭제하는 우회 금지. W09/Q09 실제 전달로 복귀한다.
+- **W13 / C06,C07,C11 / Q04,Q15,Q16:** 공유 보드에서 공개된 작성자 미니홈으로 연결하고 팔로우·내 목록 재방문을 검증한다. 공개된 home 식별자만 사용하며 Auth UID·이메일·private profile은 DTO에 추가하지 않는다. 없거나 철회/가림된 홈은 안전하게 생략한다. 새로운 검색·피드는 제외한다.
+- **D01/W07~W15/W19:** 기존 테스트 환경으로 선택 게시→익명 실제 bytes 열람→미니홈→팔로우/재방문→신고/차단/조치→철회를 검증한다. 테스트 Public/정책/운영자 권한 승인과 실제 가용성을 별도로 확인한다. 운영 Public은 건드리지 않는다.
+- **D04/W08/W14:** `memory_public_image_rights`의 자산/버전별 신뢰된 승인과 policy revision의 실제 처리 경로를 인계한다. 현재 SQL 요구를 사용자 checkbox로 우회하지 않는다. 허가된 표지 승인을 다시 묻거나 전체 이미지를 일괄 허용하지 않는다.
+- **D03~D05/W14~W17:** 비용·한도·경보, 정책·담당, 사본·보존·최신 철회 journal의 실제 미확정 항목만 모은다. 기존 도구를 재사용하고 범용 관리자·DR 프로젝트로 확대하지 않는다.
+- **W03/W20:** 과거 `sourceCommit:null` 후보를 PASS로 덮어쓰지 않는다. 정확한 후보·실제 CI·DB migration 매핑·catalog hash·client/server flags·정책·이미지 endpoint·복구 근거를 묶어 D06 승인을 받는다. 검토 브랜치 push는 quality 통과나 운영 배포가 아니다.
+
+세부 진행과 차단은 03에서만 관리한다. 문서 반영 자체는 별도 W21이 아니며 새 발견 세 건도 기존 W에 흡수한다. 현재 수용 조건이 통과하면 다음 W로 돌아가고, 이미 완료된 M0나 테스트 인프라 구축으로 되돌아가지 않는다.
+
+2026-09-25 W19/Q05 만료·복귀 후속: 기존 callback 성공/거절 검사를 재사용하고, 설치된 Supabase SDK의 만료 session 갱신 거절→로그인 요구→PKCE 재시도→원래 공개 home 복귀를 격리 Chromium에서 보완한다. Auth HTTP만 합성하여 외부 계정/세션을 폐기하지 않는다. 서버 설정·공개 flag·원본 변경0. 실제 hosted 만료/Google 재인증 및 후보 endpoint 증거와 구분하며, 실패가 드러난 제품 코드만 최소 수정한다. 신규 계획판 없이 W19/Q05 증거를 갱신한다.
+
+2026-09-25 W19/Q15 후속: 기존 합성 카드로 테스트 보드 두 개만 공개하여 미니홈의 대표 카드 선택·전시 순서·소개 변경을 owner 제품 UI와 새 익명 방문자에서 대조한다. 테스트 전용 reads/writes/images/home만 승인 범위로 임시 활성화하고 종료 시 home/board 철회·derivative 정리·flags/권리 원복한다. 운영/Android/새 migration 없음. UI 검증과 fixture 준비 RPC는 분리 기록한다.
+
+2026-09-25 W19/Q18: 기존 테스트 사건을 재사용, 승인된 A moderator만 임시 복원. reads/images/home/follows/reports는 off 유지하고 writes만 켜 제한 판정이 flag off에 가리지 않게 한다. 실제 A JWT의 기존 moderation RPC로 제한→owner 제품 알림/이의→stale 재검토 거부→새 queue 재검토→해제를 검증한다. 제품 운영콘솔 대신 임시 로컬 버튼임을 명시한다. 종료 시 해당 사건 제한 해제/모더레이터 삭제/writes·client flags 원복, 감사·원본 보존. 운영/Android/migration 변경 없음.
+
+2026-09-25 W20 현재 증거 대조: 과거 null 후보 파일은 원본 유지하고 현재 HEAD/dirty 상태에서 기존 candidate guard와 전용 단위검사를 실행한다. W19 최신 증거를 Q04/Q07/Q08/Q12/Q13/Q17/W14 및 D01 현재 요약에만 반영한다. 미검증 세부 조건을 PASS로 넓히지 않는다. Android hard-coded 필수 검사는 D02 확정 전 임의 N/A로 바꾸지 않고 Web-only 승인 후의 기존 W20 보완으로 기록. 새 계획·후보 승인·원격 변경·commit/push 없음.
+
+2026-09-25 W19/Q15 다중 카드/비공개 후속: 기존 B 테스트 보드에 합성 SYSTEM_DESIGN 카드2개를 준비하여 기존 owner RPC로만 게시한다(fixture 준비≠UI PASS). 제품 미니홈에서 한 카드만 대표 선택·게시 후 익명 DTO/화면에서 다른 카드 제외를 확인한다. 제품 비공개 확인 후 home reader null/보드2카드 유지 확인. native confirm 도구 제한 시 사용자 클릭 보조를 명시한다. 테스트 reads/writes/home·정책만 일시 활성, images/rights/moderator 변경0; 종료 두 공개본 철회/flags 원복. 원본과 감사 보존, 새 계획/제품코드/운영 변경 없음.
+
+2026-09-25 W19/Q11 hosted 동의 경계: 기존 B 보드와 합성 SYSTEM_DESIGN 카드2개 재사용. 실제 A JWT/기존 RPC로 baseline 게시→새 prepare→합성 원본 제목/version 변경→같은 revision/hash/policy/operation publish의 PREVIEW_CHANGED 및 익명 snapshot 유지 확인. 새 prepare 뒤 구 revision 게시 거부, 최신 검토 게시 성공도 비교한다. 임시 로컬 버튼은 진단 RPC이며 제품 화면 E2E로 포장하지 않는다. 승인된 test reads/writes/policy만 활성; images/rights/roles 변경0. 종료 원본 제목 복원(version 단조 증가), 게시 철회·flags off·임시 파일/서버 제거. 운영/migration/Android 변경 없음.
+
+### 2026-09-25 W19/Q11 실제 동시 게시 검증
+기존 합성 B 보드/디자인 카드2개와 실제 A 로그인 RPC를 재사용한다. 같은 review/operation 두 요청은 같은 결과와 revision 1회 증가, 서로 다른 operation 두 요청은 하나 성공/하나 충돌을 기대한다. Promise.all로 요청을 함께 시작하고 최종 owner/익명 공개본을 비교한다(서버 내부 정확한 동시 시작을 강제하는 부하 시험은 아님). 재전송·operation 다른 입력 거부도 확인한다. test reads/writes만 임시 활성하고 종료 시 보드 철회/설정 원복/임시 파일 및 서버 제거. 제품·schema·운영 변경 없음. 기존 승인 범위, Android 제외 및 D02~D06 유지.
+
+결과: 같은 operation 동시2건 revision14 동일/1회 증가, 서로 다른 operation은 revision16 성공1·CONFLICT1, 재전송 불변/변경 hash OPERATION_MISMATCH. 익명 공개본 일치. 보드 철회revision17/설정 원복/원본version3 보존. evidence/2026-09-25-w19-concurrent-publish.json. 제품 코드·migration 변경 없음. 다음 policy 변경 경계.
+
+### 2026-09-25 W19/Q11 policy 변경 경계
+기존 합성 B 보드와 실제 A SDK RPC 재사용. baseline 게시 및 구 policy 미리보기 뒤 test policy만 V2로 변경한다. 구 동의 게시 CONSENT_MISMATCH와 기존 익명 snapshot 불변, 새 policy 미리보기/동의 게시 성공을 확인한다. private 원본 변경/이미지 업로드/새 migration/운영 변경 없음. 종료 보드 철회 및 flags/quota/policy 원복. 기존 테스트 승인 범위이며 Android 제외/D02~D06 유지.
+
+결과: review20 구 policy는 CONSENT_MISMATCH/익명 hash 불변, 새 review21 V2는 게시revision22/새 익명 내용 확인. 종료철회23·flags/policy 원복·원본version3 보존. evidence/2026-09-25-w19-policy-consent.json. 다음 이미지 권리 철회 경계.
+
+### 2026-09-25 W19 실제 이미지 권리 경계 연속 검증
+기존 승인된 합성 16x16 원본/보드 A만 사용. 실제 이미지 handler 준비→미리보기→권리 철회→게시 거부/익명 비공개, 승인 복원 후 새 미리보기 게시→실제 bytes200→권리 철회→bytes404를 확인한다. 준비 한도도 기존 Q19에서 승인된 asset_limit=1로 일시 낮춰 두 번째 준비 거부를 확인한다(병렬 한도 전체 증거 아님). 권리 재승인은 같은 합성 fixture에만 적용. 종료 owner 철회/asset취소 및 지정 파생본 삭제, 모든 flags/quota/policy 원복. 원본/감사 보존; 제품/운영/schema 변경 없음. 두 접근 실패 시 차단 기록 후 독립 작업.
+
+후속 Q19: 권리 검증 파생본 정리 후 같은 합성 원본의 서로 다른 operation 준비2건을 동시에 시작한다. asset_limit1에서 성공1/QUOTA1 및 예약1 확인, owner취소·지정 파생본 삭제 후 예약0 원복. 기존 승인 한도 이하, 서버 내부 타이밍 강제 부하시험 아님.
+
+독립 Q19 후속: hosted DB의 IMAGE_ATTEMPT 정책/override 만료/정지는 단일 transaction 안에서만 임시 설정하고 authenticated 역할·A claim으로 기존 authorize RPC를 호출한다. 정상1회/초과거부/유효override허용/만료거부/정지거부를 assertion 후 전체 rollback. 실제 JWT/HTTP429 증거와 구분, 외부 알림 미전송.
+
+완료: 이미지 권리 철회 후 게시거부/실제bytes404, 병렬quota 성공1/거절1·정리0, 현재 Chromium22PASS, hosted rollback-only resource daily/override만료/정지 PASS. 증거 w19-rights-quota / w19-current-regression JSON. 전부 원복·제품 변경없음. D02 최종 Web-only 질문 대기 및 D03~D06 잔여 유지.
+
+### 2026-09-25 D02 확정 / W20 Web-only 후보 검사
+사용자 첫 Web-only 후보 승인에 따라 최상위 결정·D02를 갱신한다. releaseChannel WEB_ONLY에서만 Android NOT_APPLICABLE을 허용하고 동일 HEAD/0건/사유/VERIFIED D02의 유효한 동일 근거를 요구한다. 기본 기존 후보는 Web+Android 검사 유지, 잘못된 채널·누락/변조 승인·다른 필수검사의 N/A·D06미승인은 계속 차단한다. 과거 후보 파일 보존. 단위검사로 허용/거부 경계를 검증하고 최신 전체 unit/build를 순서대로 실행한다. 제품/DB/운영/의존성 변경없음, rollback은 guard/docs의 이번 변경만 되돌림.
+
+완료: D02 Web-only 확인근거/Decision Log 및 guard 보완. 전용3·전체unit329·build18 PASS. 최신 초안 guard ready=false/14blockers(HEAD·최종환경·운영 게이트 등), D02 gate 자체 통과. evidence/2026-09-25-w20-web-only-validation.json. D03~D05 입력 요청, D06 별도승인 유지.
+
+### 2026-09-25 D03~D05 운영 입력 및 비용 검토
+사용자 제공 확정: 월 운영비 1만원 이내 희망, 전체 공개/규모 미정, 개인운영 sinong, 공개 지원 godburgundy@gmail.com, 본인이 신고·장애·비용 확인 하루2~3회, 한국 및 동남아 우선. 비용을 위한 공급자 변경은 질문이며 이전 승인 아님. 연령/이미지/백업은 추천 요청으로 미승인 유지. 공식 Supabase/Vercel/Google Cloud 가격·백업 문서 대조 후 기존 D03~D05에만 반영. 제품/운영 설정 및 외부 이메일 전송 없음.
+
+### 2026-09-25 W06/W08 FREE private image sync 반영
+- 기준: 승인 FREE-PRIVATE-IMAGE-SYNC-01, 첨부 closeout 13개 hash 검증. 현재 Web createPlatformImageIntake는 unavailableAdapter이며 일반 파일선택/파일보관이 없음. 기존 card create/promote/getPreview/delete 포트와 IndexedDB metadata는 재사용. 현재 public handler의 원본hash 검사는 유지.
+- 범위/순서: 먼저 Web 실제 file picker→원본 로컬 보존/preview→기억 저장·새로고침 복구의 기존 포트 연결. feature flag로 개발 경로를 격리하고 cloud 완료로 표시하지 않는다. 다음 owner-scoped private representation manifest/원자 reservation·최적화/서버검증·동기화·삭제를 같은 W에 연결한다. 숫자 후보를 frontend-only 서비스 정책으로 사용하지 않는다.
+- 현재 변경지도: adapters/platform Web intake, 전용 IndexedDB media 저장소, platform selector, 최소 hook 취소/rights 처리, 단위 및 실제 브라우저 파일입력 회귀. 기존 Android/public 포트 유지. 라이브 업로드/DB migration 없음.
+- 검증: 실제 input file→preview→저장→재조회. 취소/잘못된 MIME/크기/픽셀·실패 시 기존 ticket보존·동일 operation재시도 검증. 실제 PC/휴대폰 원격동기화는 이 로컬경로로 PASS 처리하지 않음.
+- 복구: 새 flag off 기본값; 기존 metadata schema 변경없음, 별도 additive local media DB. 원본 외부파일 수정없음. 기존 tracked diff/reset 금지.
+- 종료선: 로컬 유입은 독립 하위검증일 뿐 W06/W08 전체 DONE 아님. cloud 동기화/50MB서버quota/private access/실휴대폰은 필수 잔여.
+
+2026-09-26 로컬 입력 결과: 실제 file chooser→저장/reload/원본hash 보존→삭제, 실패·취소/동의 초기화, real IndexedDB 승격 replay/충돌 Chromium3 PASS. 단위4/전체333/기존 composer18/build18 PASS. 첫 startup timeout과 테스트 확인버튼 누락·Fetch 차단 port 실패는 evidence/2026-09-26-web-local-image-intake.json에 보존. 기존 image HTTP test harness에서 임의 OS 포트 대신20000~49999 범위와 충돌 재시도를 사용해 안정화했다. 신규 서버 DB/공개 플래그 변경 없음. W06/W08의 remote 구현은 미완료이며 로컬 성공으로 CODE_COMPLETE_FOR_WEB_RC를 주장하지 않는다.
+
+### 2026-09-26 W06/W08/W15 private 서버 저장·읽기 경계
+- 목적/범위: 기존 Node API와 Supabase adapter 방식을 따라 `api/private-image.js`에서 인증된 사본의 저장/읽기/취소를 연결한다. 계정 원본 metadata의 LOCAL_ONLY/checksum/cloud 필드는 덮지 않는다. 새 private manifest는 owner/asset/source version/수신hash/확정main·thumb hash·bytes/pipeline/operation/state를 별도 보관한다.
+- 정책/권한: 기존 private 운영 정책 영역에 revision·승인·관측 만료·계정/전역 bytes·준비/전송 한도를 추가한다. 기본 disabled/한도0, 미승인/미정은 remote 쓰기 거부. private bucket은 direct anon/authenticated 접근을 restrictive RLS로 막고 검증된 HTTP 요청만 전달한다. 정책·완료·정리 RPC는 service-only, 사용자 RPC는 auth.uid와 기존 source owner를 검사한다.
+- 일관성: DB 잠금 아래 실제 서버 산출 main+thumb bytes를 예약하며 동일 operation/body는 멱등, 다른 body는 거부. PREPARING/READY/DELETING 모두 물리 용량 점유. 불명 완료에서 파일/예약을 지우지 않는다. source 변경/카드·계정 삭제는 read 즉시 차단/삭제 fence; 파일 제거 후에만 용량 해제. 공개철회는 private 사본 유지.
+- 변경지도: additive migration(명령으로 생성), `src/server/privateImages` handler/processor/backend, API entry, 전용 HTTP unit 및 실제 로컬 PostgreSQL 역할·경합 검사. private media의 UI/클라이언트 최적화·PC/실휴대폰 연결은 이어지는 기존 W의 잔여로 구분한다.
+- 검증: auth/owner·anon/B 거절, 가짜 MIME/animation·decode·size, server byte/hash/원본 불변, 응답유실 및 동시 replay, quota 경계/병렬·준비 만료, delete→read 차단→cleanup 정산, 정책 미승인/만료/정지. 로컬 DB에만 migration 적용; hosted/실휴대폰 PASS 아님. 기존 unit/build 영향 검사.
+- 보안/관측/복구: URL·로그에 파일명/원문/bytes/token을 남기지 않음, no-store/private/no CDN/SW 캐시. default-off API 및 DB 설정으로 rollback, 원본/manifest/fence 역삭제 없음. 운영 DB/Public/유료/배포 승인은 여전히 D06.
+
+결과: private handler/backend/검증된 main·thumb processor 및 additive manifest/정책/전송·준비·변환 meter, source/계정 삭제 retire, 지연 cleanup 도구 연결. service 전용 reserve/complete/cleanup와 owner 검사 RPC, restrictive Storage RLS. **이번 로컬 unit340(신규HTTP/이미지7 포함), PostgreSQL40+실제 병렬2, 기존 public SQL248, build18 PASS**. 49MB+동시800KB×2→성공1/한도거부1/49.8MB, 같은operation 병렬→행/준비 차감1. SQL fixture의 card tombstone 상태 누락1회 수정 후 통과. evidence/2026-09-26-private-image-server-boundary.json. HTTP suite의 Auth/Storage backend는 모형, SQL은 실제 PostgreSQL 역할/권한/경합 검사이며 hosted Supabase 실사용 성공으로 확대하지 않는다.
+
+현재 미완료: Web 명시 연동 선택·client 최적화/원본보존·계정 전환 방어와 원격 이미지 표시/사용량 UI, 실제 test Supabase migration/Storage 연결, 실물 휴대폰↔PC, private bytes 복구, 공개 선택 representation adapter, 동일/작은 교체의 quota 여유와 전체 원화 예산·정책 감사. 다음 1개는 **기존 Web 카드 화면에서 명시 선택한 사본만 최적화해 이 API에 연결하는 흐름**이다. 원격 활성/정책 값/최종 후보는 D01/D03~D06에서 정확한 범위로 관리한다.
+
+### 2026-09-26 W06/W08 Web 명시 연동 및 원격 표시
+- 기존 detail/owner boundary/auth session/asset remoteVersion 포트를 재사용. 새 UI flag 기본 off. 계정 metadata SYNCED인 USER_IMAGE만 명시 동의 후 전송하며 방문/새로고침으로 사진을 자동 업로드하지 않는다. Guest·metadata pending은 연동 선행 안내만 표시한다.
+- 원본 bytes/hash 대조 후 bounded decode·1600px/최대3회·품질 하한. 전송용 Blob과 operation/policy를 owner+asset+remoteVersion key의 별도 IndexedDB에 원자 저장한다. 응답 유실·새로고침 재시도는 같은 Blob/operation. 취소된 요청은 완료 여부 미확인으로 유지; 서버 취소 확인 전 journal 제거 금지.
+- 단계마다 session UID/active owner/현재 asset version을 대조하고 계정 변경·unmount는 abort. 늦은 응답은 화면/다른 계정에 반영하지 않는다. private image는 no-store 인증 fetch→hash/bytes 검증→일시 object URL로 표시하며 unmount/replacement에서 revoke. 서버 policy의 owner-safe READY manifest·pending operation 및 사용량 projection을 확장(미적용 migration에 좁은 변경).
+- 파일: 기존 card detail + private panel, client optimizer/controller/journal, runtime 서비스 연결, server policy projection, unit 및 실제 Chromium 앱 검사. 실제 이미지 최적화/IndexedDB/UI와 모형 HTTP 응답의 범위를 분리. 새 remote migration/원격 업로드/실기기 검증은 이번 자동검사로 주장하지 않는다.
+- 검증/복구: 명시 동의 전 POST0, 큰 합성 원본 보존/전송사본, 성공/read/reload·응답유실 재시도·취소/계정전환·원격만 있는 카드 표시, 기존 detail/owner regression/build. 기능flag off로 복구하고 기존원본/metadata/journal을 지우지 않는다.
+
+2026-09-26 Web client 결과: private panel/controller/optimizer/journal/runtime와 detail 연결. 실제 로컬 imageType은 rights 분류 UNKNOWN이므로 서버 USER_IMAGE와 혼동한 초기 조건을 수정했다. 원본 없는 detail에서도 사본 read/hash 검증 후 표시. 단위347(신규7), 실제 Chromium 신규2(큰 파일·실제 canvas/IndexedDB/응답 유실/reload/same bytes+operation/390px/늦은 A 이미지 응답 중 B 전환), Web intake3, 기존 composer/owner19, private SQL47+병렬2, 기존 public SQL248, build18 통과. Auth/HTTP/metadata sync는 브라우저 모형이며 hosted 성공 아님.
+
+추가 발견/최소 수정: 카드의 로컬 삭제 RPC가 만드는 기존 delete fence를 private source/retire trigger에 연결해 metadata tombstone 이전 read를 차단했다. 일반 공개 철회는 private copy를 유지한다. 취소가 예약보다 먼저 도착하는 역순 요청은 owner+operation cancellation fence로 차단. 미예약 fence만 계정당1000행으로 제한, 기존 예약 취소는 제한을 적용하지 않으며 계정 삭제 시 fence cascade. 미적용 migration 안에서 수정했고 서버 기본 정책은 off/미승인/한도0 그대로다. 서버 취소 성공 뒤 policy 일시정지가 생겨도 성공한 취소를 불명 완료로 바꾸지 않는다.
+
+현재 잔여/다음: W06/W08 DOING 유지. 다음 1개는 원본 없는 기기의 Archive/Board 원격 사본 표시. 공개 representation adapter·hosted private 왕복·실휴대폰·작은 교체 여유·복구/합산 원화 예산은 계속 남는다. 50MB/1MB는 synthetic test 후보값, 운영 수치 승인 아님. rollback은 PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 off(기본값); 별도 IndexedDB는 보존하고 원본/기존 이력은 역삭제하지 않는다. 원격 적용/배포/paid 변경0. 명령과 검증 범위: evidence/2026-09-26-private-image-web-client.json.
+
+### 2026-09-26 W06/W08 Archive·Board private 썸네일
+- 현재 ArchiveView/MemoryBoardView는 local getPreview만 사용한다. 기존 MemoryCardPreview를 감싸는 private 전용 wrapper에서 local visual MISSING이고 account/SYNCED/개발 flag 조건을 충족할 때만 read한다. Public preview에는 이 wrapper를 연결하지 않는다.
+- 목록은 큰 사본 대신 기존 서버 thumb variant를 사용하고 READY manifest의 thumbnail bytes/hash(최대120KB)를 대조한다. viewport 근처에서만 요청, 최대4개 동시 처리, owner/session/version 재검사, unmount/계정변경 시 abort 및 object URL revoke. 업로드와 영구 캐시 없음.
+- 검증: 실제 Chromium의 원본 없는 Archive/Board 썸네일, 기존 detail main 표시/재시도, 계정전환 지연응답 차단, HTTP GET만 사용 및 thumb variant, corrupt bytes/기본 flag off 회귀, unit/build. Auth/HTTP는 모형으로 명시하고 hosted·실휴대폰 성공으로 확대하지 않는다.
+- 롤백: 기존 private flag off. DB/의존성/원본/권리계약 변경 없음. 다음 기존 W08 공개 representation adapter가 남는다.
+
+2026-09-26 목록 연결 결과: Archive/Board의 기존 visual이 MISSING인 계정/SYNCED 이미지에만 PrivateMemoryCardPreview를 연결. 기존 MemoryCardPreview article ref를 재사용해 DOM/layout 유지. controller read에 thumb variant와 thumbnail hash/120KB validation 추가. 실제 Chromium 원본 없는 Archive/Board·390px/12카드 lazy+동시4건·계정전환 대기 취소 및 기존detail/retry/Board 동작6개 통과, 전체unit348, build18. 기본off 회귀는 evidence/2026-09-26-private-image-list-preview.json 참조. DB 변경 없어 이전 PG 검사 재실행 없음. 다음은 원본 hash·권리·공개미리보기 동의를 보존하는 private→public representation 연결. 현재 원본전용 공개 준비 경로를 그대로 사본 bytes로 우회하지 않는다.
+
+### 2026-09-26 W08 private→public 입력 신뢰 검토
+- 현재 공개 handler는 reserve의 원본 sourceHash와 실제 수신 bytes hash를 비교한다. private processor는 최적화 사본 bytes만 검증하며 원본 파생 관계를 증명하지 않는다. 기존 원본 권리 승인만으로 private main을 공개 input으로 대체하면 임의 private bytes에 승인을 전용할 수 있다.
+- 먼저 실제 private processor 산출을 공개 handler에 보내 기존 거부를 재현하고 다른 입력도 유효한 private 사본으로 처리되는지 검증한다. 승인된 기존 공개 contract를 완화하지 않는다.
+- 검토안(미승인): 원본 checksum/localRef는 유지하고 공개할 정확한 private representation ID/mainHash에 별도 trusted rights evidence를 결속한다. owner/sourceVersion/representation/hash/policy를 operation에 고정하고 reserve/complete/preview/publish/read에서 권리 철회를 재검사한다. 브라우저 자체 선언과 private 저장 완료는 승인으로 사용하지 않는다. 기존 원본 경로 유지, 별도 개발 flag 기본off.
+- 이 방식은 현재 원본 기반 권리 승인 모델을 확장하므로 AGENTS.md의 기존 제품결정 변경 승인 규칙에 따라 사용자 결정을 받는다. 승인 전 원격 변경/공개 우회 구현 없음. 새 진행판 없음.
+
+### 2026-09-26 W08 사본별 trusted 권리 결속 구현
+- 위 검토안 사용자 승인(PRIVATE-REPRESENTATION-PUBLIC-RIGHTS-01). additive migration으로 사본별 trusted 권리 근거와 public asset의 입력 사본 ID/hash를 보관. 일반사용자/anon write 금지. 기존 source rights와 policy/계정/카드/version gate 유지.
+- 서버는 명시적 private source 요청에서만 인증된 사용자 RPC로 사본 ID/hash를 고정·예약하고 private Storage를 직접 읽어 bytes/hash를 검사한다. 원본 업로드의 checksum 비교는 그대로. 완료 시 권리/사본 상태 재검사; 이후 공개 snapshot/preview/read도 사본 권리 철회를 재검사. 정상 공개 후 단순 private copy 삭제는 public 권리 철회와 구분한다.
+- UI는 사용자가 서버 사본 사용을 명시 선택하고 별도 공개 동의를 해야 준비한다. private 정책 조회는 GET만, 원본 파일 경로 그대로. operation별 입력 타입/사본 고정, 기존 실패 확인 후 재시도/불명 완료 보존.
+- 검증: local PG의 owner/B/anon·원본 및 사본 권리 gate·사본/hash/version/policy 불일치·완료/공개 후 철회, real HTTP private bytes 검증·원본 guard회귀, client 동의·request contract 및 기존 browser/build. hosted/실휴대폰은 미검증으로 보존.
+- 복구: 새 client/server feature flags 기본off, additive schema 보존. 사본/원본/권리 이력 역삭제 없이 비활성화. 운영 변경 없음.
+
+2026-09-26 구현 결과: 승인된 사본 입력을 새 client/server default-off flags로 격리했다. 기존 public reservation/complete/visual/readable/preview 함수는 private 내부 원본을 보존한 wrapper로 확장하고 owner/source/사본ID/hash/policy/operation과 trusted 사본 권리 근거를 확인한다. original sourceHash는 그대로 유지한다. public reserve의 기존 owner/source 잠금 후 사본/권리 행을 재검사·잠금하여 기다리는 동안의 취소/철회를 반영한다. complete는 잠금 뒤 정확한 권리 조건 재검사. 공개 이후 private copy만 삭제하는 행위는 public 권리 철회와 구분한다.
+
+검증: unit353(HTTP22 포함), local public SQL267(신규19), private SQL47+병렬2, 전체 공개UI Chromium23 및 최종 동의 문구 2개 재검사 PASS, Web build18. 서버/클라이언트 가짜 데이터승인을 실제 hosted 성공으로 간주하지 않는다. UI 첫 실패의 dev sharp dependency reload를 route등록 순서로 해결, 중복서버 실행 충돌은 중단하고 독립4355에서23 PASS. 원격 적용/운영/의존성/paid 변경0.
+
+다음1개: 기존 W06/W08/D01의 private→public hosted 테스트 적용 manifest(두 신규 migration, 임시 한도/합성 source 및 사본 권리, feature flags,cleanup/원복)를 고정한다. 추가 사용자 계정/기초 DB 재구축은 요구하지 않는다. 실휴대폰·교체 quota·복구·운영 예산/D03~D06은 계속 남는다. 상세 source hashes/명령: evidence/2026-09-26-private-public-representation.json.

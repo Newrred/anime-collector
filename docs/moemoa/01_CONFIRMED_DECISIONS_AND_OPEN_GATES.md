@@ -500,3 +500,38 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - migration impact: 이번 결정 자체는 없음. 실제 DB 적용/운영 Public/배포/파괴적 변경은 정확한 후보와 별도 승인 대상.
 - approved by/date: 사용자, 2026-09-23, V2 범위 확인 후 작업 시작 지시.
 - review date/trigger: 범위·권리·비용·플랫폼 변경 또는 M5 출시 후보 승인. 외부 값은 진행판 D01~D06에서 관리.
+
+## Decision Log — RELEASE-CHANNEL-WEB-FIRST-01 (2026-09-25)
+
+- status: CONFIRMED.
+- context: 공통 Web/Android 기반은 유지하되 첫 출시 후보 채널을 명확히 정할 필요.
+- options: Web+Android 동시 출시 / Web 먼저 출시 후 개선해 Android 출시.
+- chosen option: 첫 출시 후보 Web-only. Android는 후속 출시.
+- reason: 사용자가 Web을 먼저 마무리·출시하고 다듬은 뒤 Android 앱을 출시하는 순서를 확정.
+- consequences: 첫 후보에서 Android 검사는 승인 근거를 연결한 NOT_APPLICABLE로 기록하며 PASS로 채우지 않는다. Web 검사 및 D03~D06은 그대로 필요. 기존 Android 코드·데이터 모델·후속 실기기 게이트 보존.
+- files/modules affected: 기존 release-v2 D02/W20, scripts/check-release-candidate.mjs, 해당 단위검사.
+- migration impact: 없음. 운영 migration/Public/배포 승인이 아니다.
+- approved by/date: 사용자, 2026-09-25, “첫 출시 후보는 web-only로 확정하고. 남은 마무리 작업 및 검증 이어가자”.
+- review date/trigger: 첫 Web 후보 D06 승인 또는 후속 Android 출시 준비.
+
+## Decision Log — FREE-PRIVATE-IMAGE-SYNC-01 (2026-09-25)
+- status: CONFIRMED — 사용자 첨부 차이 설명 후 “ㅇㅋ” 승인.
+- chosen option: 첫 Web 출시의 무료 PC/모바일 Web 비공개 최적화 이미지 연동을 추가한다. 원본 전체 백업/결제/광고/Android 네이티브는 후속.
+- budget: MOEMOA 추가 운영비 월50,000원 목표. 기존 Vercel 기본료·도메인·홍보비 제외; MOEMOA 초과료·세금·백업 포함. 이전 DB25달러 단독 계획과 충돌하는 부분을 대체.
+- candidates: 무료 총50,000,000bytes, 큰 최적화 사본 최대1,000,000bytes. 품질/측정/D03 최종 운영값 승인 전 후보 유지. 썸네일/전송/전역한도 등은 첨부 후보 또는 미정이며 확정 서비스 약속 아님.
+- consequences: 이미지 비공개 연동을 위해 공개를 요구하지 않음. 원본 hash·localRef 보존, 서버 representation 별도hash/version. 과거 사진 자동업로드 금지, 명시적 저장 범위 선택. private/public 역할·삭제/동의 경계 보존.
+- affected: 기존 W06/W08/W15/W17/W19/W20, C02/C04/C09/C10/C11/C12. 단일진행판 유지.
+- migration/approval: 로컬 구현·검사 승인. 운영migration/유료변경/Public/배포/원본삭제 포괄승인 아님. D06 유지.
+- review trigger: 품질/비용 검증, D03~D05 운영값, 최종 Web RC.
+
+## Decision Log — PRIVATE-REPRESENTATION-PUBLIC-RIGHTS-01 (2026-09-26)
+- status: CONFIRMED. 사용자가 공개 권한 기준 검토 대화를 연결하고 진행 승인.
+- decision: 기존 원본 공개 입력/hash 검사를 유지하면서 정확한 private representation ID/hash/sourceVersion에 trusted rights evidence를 결속한 공개 준비 경로를 추가한다. 비공개 동기화 동의, 공개 이미지 사용 동의, 최종 preview 게시 동의는 분리한다.
+- constraints: 브라우저 자기 선언/비공개 저장은 trusted 승인 근거가 아니다. 기존 source 권리 gate도 유지하며 사본 근거가 추가로 일치해야 한다. 캡처/타인 팬아트 gate 완화 없음. 원본 checksum/localRef 수정 없음.
+- scope: 기존 W08/D04 구현·로컬 검증 승인. 실제 권리 레코드 승인·원격 migration·운영 Public·배포는 별도 D01/D04/D06. UI에는 DB 식별자/해시를 노출하지 않는다.
+
+## Decision Log — WEB-SMOKE-DEPLOY-01 (2026-09-26)
+- status: CONFIRMED — 사용자가 현재 작업을 배포해 폰·다른 사람에게 링크로 간이 테스트하도록 요청.
+- scope: 검증한 Web 코드를 master에 commit/push하고 Vercel Git 운영 배포를 확인한다. 기존 계정·기록과 Web 로컬 이미지 선택을 제공하며 원본 bytes는 해당 브라우저에 보관한다.
+- limits: 정식 출시 전체 승인과 구분. private 이미지 동기화·Public UI/API 활성화, 운영 DB migration, 유료 변경은 이번 간이 배포에 포함하지 않는다. Android 제외. D01/D03~D06 정식 출시 잔여 유지.
+- rollback: 코드 commit revert 후 Git 연동 재배포. 사용자 기록·원본·기존 DB 삭제 없음.

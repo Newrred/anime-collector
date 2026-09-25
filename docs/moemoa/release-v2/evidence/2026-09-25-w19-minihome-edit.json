@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-25",
+  "scope": "W19/Q15 real owner UI and anonymous origin against moemoa-test DB/Storage and local product handler",
+  "newPass": [
+    "Owner selects representative card for A and whole board for B",
+    "Move down publishes B,A; Move up publishes A,B",
+    "Anonymous visitor retains old introduction and B,A during new preview",
+    "Explicit consent/republication updates introduction and order to A,B",
+    "Literal script-shaped introduction renders as text; injected script count0",
+    "Two real images decode at16px",
+    "Stored published_selection contains A.cardId and B without cardId"
+  ],
+  "fixture": {
+    "boardA": "027cd01b-f763-493d-963c-306f70b0d28a",
+    "boardB": "622d42b4-bb3e-4443-bd9e-494ee8a91134",
+    "publicationB": "2d0d82c5-fb22-487b-a9d6-efd870ee7e3c",
+    "derivative": "6899897c-d997-43ad-a152-ed7a9bcba5a5",
+    "preparation": "A publication product UI; B synthetic board/membership SQL then existing owner prepare/publish RPC. B setup is not a product UI test.",
+    "failure": "Initial B fixture used cleared selection and transaction rolled back INVALID_SELECTION. Explicit synthetic selection succeeded on second attempt."
+  },
+  "cleanup": {
+    "homePrivate": true,
+    "bothBoardsRevoked": true,
+    "allPublicFlags": false,
+    "quotas": 0,
+    "policy": "UNAPPROVED",
+    "moderators": 0,
+    "activeRights": 0,
+    "derivativeState": "DELETED",
+    "reservedBytes": 0,
+    "sourceChecksumPreserved": true,
+    "auditCount": 5,
+    "privateSyntheticBoardB": "retained as reusable private fixture",
+    "proxyStopped": true,
+    "frontendFlags": false
+  },
+  "commands": [
+    "node .cache/test-query.mjs .cache/w19-enable.sql",
+    "node .cache/test-query.mjs .cache/q15-fixture.sql",
+    "node .cache/test-query.mjs .cache/q15-cleanup.sql",
+    "node .cache/q15-image-cleanup.mjs",
+    "node .cache/test-query.mjs .cache/test-public-restore.sql",
+    "node .cache/test-query.mjs .cache/q15-check.sql"
+  ],
+  "limitations": [
+    "Each board contains one card; selecting representative persisted but multi-card exclusion not newly proven",
+    "Home private cleanup used RPC, not product native confirm",
+    "Local origin is not final Vercel/CDN or separate physical device"
+  ],
+  "productionChanges": 0,
+  "migrations": 0,
+  "productCodeChanges": 0
+}

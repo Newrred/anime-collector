@@ -15,6 +15,18 @@
 
 ## 복구 대상별 절차와 한계
 
+### 2026-09-26 private 최적화 사본 서버 경계 — 로컬 검증 단계
+
+`20260925152859_memory_private_image_boundary.sql`은 원본 metadata를 바꾸지 않는 additive manifest/정책/meter/private bucket 변경이다. **현재 원격 미적용, 운영 활성 승인 아님.** `MOEMOA_PRIVATE_IMAGE_API_ENABLED` 기본 false, 허용 origin은 `MOEMOA_PRIVATE_IMAGE_ALLOWED_ORIGINS`에 명시한다. 기존 서버 전용 Supabase 환경값을 사용하며 service key는 브라우저에 보내지 않는다.
+
+DB 정책은 승인/활성 false, 계정·private 물리량·준비/변환 횟수·월 전송 한도0에서 시작한다. 신선한 관측(24h 이내)과 revision이 필요하다. 50MB/1MB는 아직 후보이며 테스트 수치를 운영값으로 복사하지 않는다. 기존 Public/metadata 자원 정책은 보존한다. **서비스 전체 원화 비용/공개와 private의 합산 예산·알림 수신·정책 변경 감사/승인 도구는 W15/D03 잔여**다.
+
+예약은 main+thumb의 서버 측정값을 포함한다. 동일 operation 응답 유실은 같은 operation/bytes로 재시도하며 파일을 먼저 지우지 않는다. 명시 취소·원본 삭제·교체·계정 삭제는 즉시 읽기를 막는다. PREPARING 만료는30분, 정리는 진행 중 writer deadline 이후60초 유예를 둔다. 이 수치는 현재 구현의 보수적 내부 유예이며 운영 삭제/보존 약속의 승인값이 아니다. 직접 bucket 읽기/쓰기는 RLS로 막혀 있으며 인증된 API에서만 전송 한도를 적용한다.
+
+승인된 환경에서만 서버 환경값을 주입하고 `node tools/private-images/cleanup-images.mjs --apply --project=<승인된 프로젝트 ID>`를 실행한다. 도구는 대상 URL 일치와 명시 실행을 요구하며 파일 삭제 성공 후에만 DB 용량을 해제한다. 자동 예약 작업은 아직 설정하지 않았다. 실패 항목의 행/원본을 수동 삭제하지 않는다. rollback은 API flag off/DB enabled=false이며 manifest·DELETING/DELETED 이력을 역삭제하지 않는다.
+
+복구 사본에는 **새 private bytes와 manifest/state, 최신 source·계정 삭제 journal**이 함께 필요하다. 복원 직후 API를 닫고 최신 삭제를 대조한다. 이번 로컬 DB 계약·기존 공개 회귀는 실제 private Storage 파일 백업/복구 또는 실제 휴대폰 연동 증거가 아니다.
+
 | 대상 | 복원·검증 | 남은 외부 확인 |
 |---|---|---|
 | 로컬 Memory/Board JSON | 로그아웃한 빈 보관함에 preview 후 복원, 새 로컬 ID·관계·소유권·공식 표지/디자인 확인 | 실제 사용자 백업은 동의 후 별도; 개인 사진 bytes 미포함 |
@@ -44,3 +56,17 @@ Public 신고/조치는 [신고 운영 절차](2026-09-24-public-moderation.md),
 - 코드 복구는 검토한 이전 코드로 revert commit/push한다. 데이터와 철회/제재 이력은 역삭제하지 않는다. 담당자는 배포 후 2/24/72시간 장애·철회·비용·health 실행 여부를 점검한다. 이 문서만으로 예약 작업이나 알림이 만들어지지 않는다.
 
 2026-09-24 읽기 전용 관찰: 운영 build-info는 commit0330a54/source=vercel-git이지만 workingTreeDirty=true다. 현재 source SHA 일치와 깨끗한 배포 소스 검증은 별개이며, 다음 후보 전 Vercel 빌드의 실제 dirty 원인을 확인해야 한다. 정상 생성물일 것이라고 가정해 표시를 false로 덮어쓰지 않는다.
+
+## 2026-09-26 private Web client 개발 인계
+
+`PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1`은 카드 상세의 명시 사본 연동 개발 flag이며 기본 off다. Web 파일입력 개발 flag와 함께 격리 환경에서 검증했다. 실제 카드 원본은 기존 local media store에 유지하고, 진행 중인 최적화 Blob/operation은 owner+asset+version key의 `moemoa-private-image-operations-v1`에 별도 보관한다. 응답 불명에서는 이 저장소를 임의로 지우거나 operation을 새로 만들지 않는다. 서버 취소 확인/READY 확인 뒤에만 해당 journal을 정리한다. 롤백은 flag off이며 기존 원본과 journal을 삭제하지 않는다.
+
+신규 private migration은 미적용 상태다. 새 delete fence 연동 및 미예약 취소 fence는 로컬 PG에서 검증했다. 실제 테스트/운영 적용과 private bytes 복구는 별도 잔여다. 검증 명령·파일 hashes와 proxy 한계는 [이번 증거](../release-v2/evidence/2026-09-26-private-image-web-client.json), 진행 상태는 기존 단일 작업판을 따른다.
+
+### 2026-09-26 private 사본 공개 준비 인계
+
+새 client flag `PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1=1`과 서버 flag `MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED=true`는 모두 기본off다. 사본 선택 UI에는 기존 private image UI flag도 필요하다. `20260925164126_private_representation_public_rights.sql`은 이전 private migration 위에 적용하는 additive 변경이며 두 파일 모두 hosted 미적용이다.
+
+private 저장 완료는 공개 허가가 아니다. 테스트/운영 담당자는 기존 source 권리 승인과 별도로 정확한 representation ID/hash/sourceVersion/policy를 가진 `private.memory_representation_public_rights`의 실제 권리 근거를 확인해야 한다. 일반사용자에게 이 테이블 write 권한을 주지 않는다. 공개 준비/완료/미리보기/게시/방문자 열람에서 철회를 검사한다. 사본만 삭제한 경우에는 독립적인 공개 사본이 계속 존재할 수 있으므로 공개 중단은 기존 철회/권리 철회 경로를 사용한다.
+
+복구는 두 새 flags를 끄고 이력/원본/public provenance를 보존한다. 원본 hash 검사 제거 또는 브라우저가 보낸 사본 bytes를 원본으로 취급하는 우회를 사용하지 않는다. 정확한 hosted 테스트 범위 승인/기기/운영 후보는 기존 D01~D06에서 관리한다.

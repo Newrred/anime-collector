@@ -1,0 +1,74 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06/W08 Web local image intake only",
+  "sourceCommit": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "workingTreeDirty": true,
+  "decision": "FREE-PRIVATE-IMAGE-SYNC-01",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "sourceHashes": {
+    "tests/web-image-intake.spec.ts": "e274779eb5d47b6aacad10ef7a8d2230a3bee3e70eca298318e916ae6365d35a",
+    "src/features/memory/adapters/platform/nativeImageIntake.js": "90cfa2738de67d104ad958b73ca6518bcece3244eb91187ce53eb25ca9ce5611",
+    "tests/unit/publicImages.test.mjs": "5115775f70d1b37dec20b59c1ec2691a6d5dbc8b702c54f88b895e26939abbf0",
+    "src/features/memory/components/useMemoryCardComposer.js": "dbfc95b01dcf62f5e9e25f80c9b50cb05dc9a6d45009d0eab6492e2c66cebbf4",
+    "src/features/memory/adapters/platform/webImageIntake.js": "f093f4f39be921777e45f63f90cf520e700f4a6de4a83f8cf3276a8eb9527744",
+    "tests/unit/webImageIntake.test.mjs": "4a1c17aedfe60a77966f36dea5df407e076e73f11f10e5d3d9514c2962b4eb06"
+  },
+  "commands": [
+    {
+      "failed": 0,
+      "passed": 4,
+      "command": "node --test tests/unit/webImageIntake.test.mjs"
+    },
+    {
+      "failed": 0,
+      "passed": 3,
+      "command": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:4348 PLAYWRIGHT_EXTERNAL_SERVER=1 node node_modules/playwright/cli.js test tests/web-image-intake.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "log": ".cache/web-intake-e2e-final.log"
+    },
+    {
+      "failed": 0,
+      "passed": 333,
+      "command": "npm run test:unit",
+      "log": ".cache/web-intake-unit-final.log"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": ".cache/web-intake-build.log",
+      "pages": 18
+    },
+    {
+      "failed": 0,
+      "passed": 18,
+      "command": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4350 node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "log": ".cache/web-intake-composer-regression.log"
+    },
+    {
+      "exitCode": 0,
+      "command": "git diff --check"
+    }
+  ],
+  "newPass": [
+    "Real Chromium file chooser with synthetic PNG, decode, private local card save, reload preview, exact original bytes/hash retained, card delete removes asset",
+    "Invalid input and picker cancel preserve prior image; newly chosen image resets local-use consent",
+    "Real IndexedDB concurrent same-operation promotion/replay returns same result; changed operation rejected without overwriting",
+    "No observed storage/public-image/private-image POST in local save test"
+  ],
+  "priorAttempts": [
+    "First E2E runner startup readiness timeout before tests; dedicated Astro server allowed tests to run",
+    "First UI run 1 PASS/1 FAIL: test omitted application Confirm card deletion button; corrected test then final3 PASS",
+    "First unit run331 PASS/2 FAIL: OS allocated Fetch-blocked ephemeral ports; initial lower-port retry workaround exhausted then explicit safe-range binding with EADDRINUSE retry fixed harness; final333 PASS"
+  ],
+  "unchanged": [
+    "No hosted/production DB changes, cloud image uploads, public flags, deployment or paid changes",
+    "No original file edits or metadata database migration; separate additive local media IndexedDB",
+    "No private image content in analytics/logging added"
+  ],
+  "notVerified": [
+    "Private optimized remote storage/sync/owner manifest/quota and deletion propagation: not implemented in this slice",
+    "Physical phone browser, Safari/Firefox, quality/cost measurement and final policy values",
+    "This is not CODE_COMPLETE_FOR_WEB_RC or release ready"
+  ],
+  "rollback": "PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 default off; retain media DB and original data",
+  "next": "W06/W08 server-policy-controlled private representation owner/reservation/storage/read flow"
+}

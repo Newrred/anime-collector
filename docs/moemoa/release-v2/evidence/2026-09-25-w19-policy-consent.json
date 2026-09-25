@@ -1,0 +1,19 @@
+{
+  "date":"2026-09-25",
+  "scope":"W19/Q11 actual hosted policy change; temporary diagnostic UI calling existing SDK RPC with A session; not product checkbox E2E",
+  "project":"nmgkhknponvzcwliajyk",
+  "publicationId":"2d0d82c5-fb22-487b-a9d6-efd870ee7e3c",
+  "baselineAnonymousHash":"90475b8faac13b0bc3d7579ba1c228c779d16afc00fa667deec738a082f016db",
+  "oldPreview":{"revision":20,"policyRevision":"TEST_ONLY_20260925"},
+  "changedServerPolicy":"TEST_ONLY_20260925_V2",
+  "oldConsentPublish":"CONSENT_MISMATCH",
+  "anonymousAfterRejection":{"hash":"90475b8faac13b0bc3d7579ba1c228c779d16afc00fa667deec738a082f016db","title":"Q11 baseline","cards":2},
+  "freshPreview":{"revision":21,"policyRevision":"TEST_ONLY_20260925_V2"},
+  "freshPublish":{"state":"PUBLISHED","revision":22},
+  "anonymousAfterFreshPublish":{"hash":"823810b37b74fde0c777205f3ca79adf4f57acd8153026589a0bfc6a0c52f894","title":"Q11 fresh reviewed update","cards":2},
+  "cleanup":{"state":"REVOKED","revision":23,"sourceVersion":3,"sourceTitlePreserved":true,"allPublicFlags":false,"quota":0,"policy":"UNAPPROVED","moderators":0,"activeRights":0,"auditCount":8,"homePublished":false,"temporaryFilesRemoved":true,"serverStopped":true},
+  "commands":["node .cache/test-query.mjs .cache/q11-enable.sql","node node_modules/astro/astro.js dev --host 127.0.0.1 --port 4321 --mode moemoatest","CUA baseline/prepare/publish/read/fresh preview/publish/read","node .cache/test-query.mjs .cache/q11-policy-change.sql","node .cache/test-query.mjs .cache/q11-cleanup.sql","node .cache/test-query.mjs .cache/test-public-restore.sql","git diff --check"],
+  "result":"PASS for stale policy consent rejection and fresh policy recovery",
+  "changes":"Existing ExecPlan/workboard/start summary and this evidence only; no product changes/migrations/production changes",
+  "remaining":"Image rights withdrawal after preview; product UI and final candidate environment coverage distinct. Prior automatic tests not rerun. D02-D06 remain. Android excluded."
+}

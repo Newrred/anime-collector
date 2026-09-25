@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-25",
+  "baseCommit": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "workingTree": true,
+  "project": "nmgkhknponvzcwliajyk",
+  "productionChanged": false,
+  "android": "EXCLUDED_THIS_EXECUTION",
+  "authorization": "User explicitly approved test-only public flags, synthetic rights and temporary A moderator; image 10/40MiB and reports 10/day; restore afterwards.",
+  "pastEvidence": {
+    "providedReview": "pro-review-bbff3d4-2026-09-25/",
+    "notCurrentPass": true
+  },
+  "tests": [
+    {
+      "command": "node --test tests/unit/publicationController.test.mjs tests/unit/publicImages.test.mjs",
+      "result": "33 PASS before final stale-recovery guard",
+      "logSha256": "df39605dd901902581768b991f93c5caaae6db404a395ae593a44088bab28b13"
+    },
+    {
+      "command": "npm run test:unit",
+      "result": "328 PASS",
+      "logSha256": "9b6ac4ac8968cf1e5f5ceb7d9fad8ffecfb14b17a94c2e9cd35239325f667583"
+    },
+    {
+      "command": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4322 node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line --max-failures=1",
+      "result": "21 PASS; synthetic RPC; before final stale-recovery guard",
+      "logSha256": "b0b55ee5db59648d148dfcedf942918ef65079e17e52678f4fd4b957b0e0cf66"
+    },
+    {
+      "command": "wsl -u postgres env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+      "result": "248 PASS markers; isolated PostgreSQL16 and synthetic Auth/Storage",
+      "logSha256": "429dcf4518c713efb8d6d4ea979e729b5f24fb3687d18a42ea899bf0e7d2ba0a"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS",
+      "logSha256": "62759334f371ac9dbf3f55b212e3ee5ab8f14dc298012155940f7e3d8d29e00c"
+    }
+  ],
+  "newHostedUiPass": [
+    "A normal Google login",
+    "selected Board publish with synthetic user image",
+    "wrong source rejection then same-editor successful upload retry",
+    "fresh anonymous origin displays decoded 16x16 image",
+    "published author home linked from shared board",
+    "B follow and following-list revisit",
+    "B report receipt",
+    "B block then unblock; following remains false",
+    "A receives moderation notices",
+    "existing anonymous page refetch becomes unavailable after withdrawal"
+  ],
+  "newHostedRpcPass": [
+    "published home visible to anonymous",
+    "moderator HIDE removes active home",
+    "hidden author link omitted",
+    "RESTORE restores active home",
+    "A authenticated owner withdrawal removes board and home",
+    "withdrawn image bytes denied with 404 before flags disabled",
+    "moderator RESTORE does not resurrect owner withdrawal",
+    "moderator audit recorded"
+  ],
+  "fixture": {
+    "card": "d4c26515-b34a-4590-a03d-7a2fc3dd844d",
+    "asset": "4b264699-90f4-416a-9e67-f159b8120e2d",
+    "publication": "260b21c0-c27a-44c5-8567-aa7d63d05d34",
+    "home": "4006eb40-ec5a-47fc-8a5b-ec2b78e60daa",
+    "report": "2e4c7e47-3173-45c8-b355-4a94dd1c18a7",
+    "sourceSha256": "6b0c95fe2dd56befe9e0b5991c9b16d1831c4c80b870c7b3294047499cb21a8e",
+    "sourcePreserved": true,
+    "intake": "Existing application create command with synthetic media adapter, then actual metadata sync; NOT Web upload UI or Android intake PASS."
+  },
+  "retry": {
+    "failedOperation": "40c0fab2-fe6b-4808-85f5-ae49622dff4b",
+    "failedState": "DELETED",
+    "failedReservedBytes": 0,
+    "successfulOperation": "356738f8-905a-4ba7-bd64-9c1966905ef7",
+    "successfulReservedBytes": 118,
+    "originalIntact": true
+  },
+  "actualImage": {
+    "status": 200,
+    "bytes": 60,
+    "sha256": "898066254d610d3e2f9002c34eea298a66903875fbb9cac0ae6086523dee7a14",
+    "cacheControl": "no-store, max-age=0",
+    "cdnCacheControl": "no-store",
+    "image": {
+      "format": "webp",
+      "width": 16,
+      "height": 16
+    }
+  },
+  "withdrawalImage": {
+    "status": 404,
+    "cacheControl": "no-store, max-age=0",
+    "body": {
+      "error": "NOT_FOUND"
+    }
+  },
+  "migrations": [
+    {
+      "file": "20260924193626_memory_image_retry_recovery.sql",
+      "remoteVersion": "20260924194322",
+      "sha256": "910c1953b550357d5907e1665bd4f4ff73cb883c2cf0f68097594756defb8927"
+    },
+    {
+      "file": "20260924194059_memory_public_board_author.sql",
+      "remoteVersion": "20260924194325",
+      "sha256": "cd296a5e531d50a648b8def8d8bfc9cf0ea4a9c459de493322332f8fc6497ffe"
+    },
+    {
+      "file": "20260924195510_memory_visual_json_null.sql",
+      "remoteVersion": "20260924195621",
+      "sha256": "ae84e1973229a7901142cb948c6f3336706317f9b95037ca7ddf7829526904a6"
+    }
+  ],
+  "newFailureFixed": {
+    "rpc": "apply_memory_card_mutation",
+    "code": "23514",
+    "constraint": "memory_visual_assets_source_metadata_check",
+    "cause": "JSON null designSpec versus SQL NULL",
+    "result": "Same pending operation synchronized after trigger normalization; object rejection preserved."
+  },
+  "restore": {
+    "allPublicFlags": false,
+    "assetLimit": 0,
+    "assetBytesLimit": 0,
+    "reportDailyLimit": 0,
+    "policyRevision": "UNAPPROVED",
+    "moderators": 0,
+    "activeRights": 0,
+    "board": "REVOKED",
+    "homePublished": false,
+    "following": false,
+    "blocked": false,
+    "auditRowsRetained": 5,
+    "derivatives": "targeted synthetic full/thumb removed through claim/remove/complete",
+    "sourcePreserved": true,
+    "temporaryHtmlRemoved": true,
+    "proxyStopped": true,
+    "clientFlagsOff": true,
+    "finalAttemptStates": [
+      "DELETED",
+      "DELETED"
+    ],
+    "finalReservedBytes": [
+      0,
+      0
+    ]
+  },
+  "limitations": [
+    "Operator HIDE/RESTORE and final owner revoke verified through temporary browser buttons calling real authenticated RPCs, not a product moderation console or final confirmation-modal test.",
+    "Loopback actual image handler + hosted Supabase Storage; no production Vercel/CDN propagation claim.",
+    "Ambiguous READY response and quota/cancellation races verified locally, not by fault injection into hosted service.",
+    "No new baseline A/B isolation or hosted 72-table recovery repetition.",
+    "D02 final Web-only RC, D03 budget/alert ownership, D04 operational policy/contacts, D05 production recovery/retention, D06 exact candidate approval remain."
+  ],
+  "sourceHashes": {
+    "docs/moemoa/release-v2/00_CODEX_START_HERE.md": "8cec3f48cf31a7abbe64f7a1ca7b184c2f2d62bd94a3bc3bb6a8ca2b414b3087",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md": "4c69a8cf0a7ec93c14f2d8fc86bb14006c857c1cb37553f1f2326ca9a7428f1e",
+    "docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md": "bc1f9153e4de67f62805d60d074c1b3f12583fe3f637d9a745e116c805525c1f",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md": "cca0e944d37d8e512caf8738aa704298f18c3fef6f55894adfddf7aa7a4d7950",
+    "src/features/memory/adapters/supabase/SupabasePublicationGateway.js": "4945ba9463500c75bf77709bb753550e6b8545eaa79ef52dc359a2c86b264b4f",
+    "src/features/memory/application/createPublicationController.js": "58f023472e24767f751c651a7bac800f16c29c084f4c22c9c8bad845caeeba35",
+    "src/features/memory/application/preparePublicImage.js": "a43da7ac9b102a3489e3b130be746ee7e9de2d009c7ef335446d1f849cd45faf",
+    "src/features/memory/components/MemoryPublicationPanel.jsx": "3ebfc0a1f293ed48366e99fcf699a8fc3f28e8ee9584029c8ec3b8c72eb45e9a",
+    "src/features/memory/components/PublicMemoryBoard.jsx": "091a8608411f12535f24fb2262bcabf181ded490e9ded50a928c621b497d3df7",
+    "src/features/memory/domain/publicationView.js": "2d4de5244851913c77d0002535b5b819172d688b8a92037f45f8861197a032b8",
+    "src/server/publicImages/handler.js": "ae93012b4dc7b637ab61545a287a4c9d2df87f8d0b7ebd5fc151365a607f4390",
+    "tests/publication-ui.spec.ts": "972bcf117450c969ee26ef9ea35bb793687f38cf77dae13a4e77e0fb330038c1",
+    "tests/unit/publicImages.test.mjs": "660990d58bb6be57d987e2af1dcb4aeaca05669a32fd433954cb296cba173d4a",
+    "tests/unit/publicationController.test.mjs": "37b5ede3d2b4514d2e26d6cafa8b1030ea587d38d869065d2930fc5aa4a3635e",
+    "tools/publication-boundary/image-contract.sql": "81221997be492d296d2d406091095eab337670e49c5bada387317130db9ec5b5",
+    "tools/publication-boundary/minihome-contract.sql": "4369839a1c6f803b34fee3829ec7c8aae65bf4936f0e24c77b0197b784b54f6b"
+  }
+}

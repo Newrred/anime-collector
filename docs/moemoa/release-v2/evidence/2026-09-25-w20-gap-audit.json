@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-25",
+  "type": "W20 gap audit, not a new release candidate or progress board",
+  "head": "bbff3d41a642ee6fbc8ac5b68ad92a3268edb410",
+  "dirty": true,
+  "commands": [
+    {
+      "command": "node scripts/check-release-candidate.mjs docs/moemoa/release-v2/evidence/2026-09-24-w20-candidate.json",
+      "exitCode": 2,
+      "result": {
+        "ready": false,
+        "blockers": [
+          "SOURCE_COMMIT_MISMATCH",
+          "SOURCE_NOT_CLEAN",
+          "CHECK_unit_INCOMPLETE",
+          "CHECK_catalog_INCOMPLETE",
+          "CHECK_browser_INCOMPLETE",
+          "CHECK_sql_INCOMPLETE",
+          "CHECK_build_INCOMPLETE",
+          "CHECK_android_INCOMPLETE",
+          "GATE_D01_PENDING",
+          "GATE_D02_PENDING",
+          "GATE_D03_PENDING",
+          "GATE_D04_PENDING",
+          "GATE_D05_PENDING",
+          "GATE_D06_PENDING",
+          "CATALOG_VERSION_MISSING"
+        ]
+      }
+    },
+    {
+      "command": "node --test tests/unit/releaseCandidate.test.mjs",
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0
+    }
+  ],
+  "interpretation": "Old null candidate is preserved. Incomplete checks mean absent current-commit evidence, not observed test failures. D01 PENDING is historical candidate input, not missing test credentials.",
+  "evidence": [
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-review-apply-public-flow.json",
+      "sha256": "6eb248c4d2696013f67e0d14b920b71eb07d9a41db68ee18fa12098a548405e8"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-withdrawal-ui.json",
+      "sha256": "7fe94d7542327e1c28b90c4e53b4e266cb4f8229d717db677f0db6aef0f633a0"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-auth-return.json",
+      "sha256": "43815e178de1b881960c7fed905e6613f02e057329dd22b0a5c2417b882fb8fd"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-minihome-edit.json",
+      "sha256": "c2ac4888b5e819db5f23a7ee5c50c7d26e24c91da30c75cfa9ca282b29d8ac58"
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-09-25-w19-appeal-restriction.json",
+      "sha256": "9afd3e6550ff3920e338df5c32ff948464c48214139c2466f8b25d840c71851c"
+    }
+  ],
+  "remaining": {
+    "implementationAndVerification": [
+      "Hosted expiry/refusal and multi-card representative exclusion/home private confirm",
+      "Hosted concurrency/quota boundaries not yet covered",
+      "Exact candidate endpoint/CDN/SW and supported browser/device acceptance",
+      "Clean candidate source with current checks/CI and migration/catalog/config/rollback provenance"
+    ],
+    "ownerDecisions": {
+      "D02": "Final Web-only release scope; current Android execution exclusion stays",
+      "D03": "Monthly budget, expected scale, quotas, alert recipient/operator",
+      "D04": "Operating identity, policy/age/rights scope, support contact and responsible operator",
+      "D05": "Production bytes/canonical/latest withdrawal journal copies, retention, recovery target/operator",
+      "D06": "Exact candidate approval only after evidence is assembled"
+    }
+  },
+  "guardLimit": "android is hard-coded required. If D02 approves Web-only, update existing W20 guard to evidence-backed N/A; do not fake PASS or use execution exclusion as approval.",
+  "productCodeChanges": 0,
+  "remoteChanges": 0
+}

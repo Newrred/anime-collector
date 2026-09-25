@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-25",
+  "userProvided": {
+    "monthlyBudgetTargetKRW": 10000,
+    "budgetIsPreferenceNotGuaranteedCap": true,
+    "launchAccess": "Public registration, unknown scale",
+    "operatorType": "Individual",
+    "displayName": "sinong",
+    "supportEmail": "godburgundy@gmail.com",
+    "incidentModerationCostOwner": "User",
+    "checksPerDay": "2-3",
+    "priorityRegions": [
+      "South Korea",
+      "Southeast Asia (specific countries not yet selected)"
+    ]
+  },
+  "notApproved": [
+    "Cloud provider migration",
+    "Paid plan changes",
+    "Production Public/flags or deployment",
+    "Age policy",
+    "Public image types",
+    "Backup retention/RPO/RTO"
+  ],
+  "proposals": {
+    "hosting": "Retain existing architecture first; verify actual subscriptions/usage and Vercel non-commercial eligibility. No guaranteed 10000 KRW under unbounded public traffic.",
+    "age": "Initially 18+ as product scope proposal, not country-specific legal compliance assurance",
+    "images": "System-generated visuals first; user-original public images only with explicit verified rights gate and small global allowance. Anime screenshots/third-party fanart remain gated. Catalog cover exposure needs separate public-use permission.",
+    "backup": "Daily encrypted DB plus required Storage/canonical/withdrawal-journal copies; 7-day rolling retention; target RPO24h/RTO48h, conditional on automated destination and restore verification"
+  },
+  "officialSources": [
+    "https://supabase.com/pricing",
+    "https://supabase.com/docs/guides/platform/backups",
+    "https://vercel.com/docs/plans/hobby",
+    "https://cloud.google.com/run/pricing",
+    "https://docs.cloud.google.com/billing/docs/how-to/budgets"
+  ],
+  "verification": "Documentation/pricing review only. Current account plan/charges/usage not observed. No code/runtime change.",
+  "budgetClarification": {
+    "databaseAndStorageMonthlyUSD": 25,
+    "webHosting": "Existing Vercel payment reported by user; exact plan/invoice unverified",
+    "approvedPlanChange": false,
+    "vercelTeam": "newrreds-projects",
+    "sameTeamProjects": [
+      "anime-collector",
+      "blind-relay-prototype-client",
+      "tteumsae-backend",
+      "tteumsae-apk"
+    ],
+    "verification": "Connected Vercel list_teams/list_projects confirmed membership; billing UI requires login, current paid plan not confirmed"
+  }
+}
