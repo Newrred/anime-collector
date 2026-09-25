@@ -13,6 +13,15 @@
 - 변경: 기존 코드/증거를 선별 커밋, 추적 중인 .env.production에 비밀 없는 간이 테스트 flags를 명시. DB migration 파일은 추적하되 운영 적용하지 않는다. deliverables와 로컬 자격증명/로그는 커밋하지 않는다.
 - 검증: 현재 unit/catalog/핵심 Chromium·모바일 layout, intake flag-on 회귀, production build; 커밋 전 비밀 스캔; GitHub CI와 Vercel READY/SHA/build-info, 실 URL의 기록 작성·재방문·모바일 폭 확인. 기존 통과와 이번 실행을 분리한다.
 - 복구: 문제 발생 시 해당 코드 커밋을 Git revert하여 master Git 재배포. 운영 DB 변경 없음. 사용자 로컬 이미지·기록 삭제 없음. 공개/연동 미완료 조건은 기존 W06/W08/D01에 유지한다.
+- 배포 관찰: 29ca80d Git 배포 READY, 실제390px에서 합성 로컬 이미지 저장/Archive 재방문/detail decode 확인. cloud build-info workingTreeDirty=true가 기존과 같이 남아 installCommand를 npm ci로 고정하고 build log에 파일 경로만 기록해 원인을 확인한다. 비밀 값/파일 내용은 로그에 출력하지 않는다.
+
+### W06/W08/D01 다음 hosted 검사 범위 — 실행 전 고정안
+- 대상은 기존 moemoa-test(nmgkhknponvzcwliajyk)만. 운영 moemoa.xyz 배포 설정과 분리된 test 실행 환경을 사용한다. 추가 계정/기초격리/72table 복원을 반복하지 않는다.
+- 적용 후보: 20260925152859_memory_private_image_boundary.sql → 20260925164126_private_representation_public_rights.sql. 기존 retry/author/visual-null 세 migration은 이미 test 적용된 근거와 migration history를 대조해 중복 적용하지 않는다. 실제 적용 시 source SHA와 별도 test data release ID를 기록한다.
+- 임시 정책 제안: revision TEST_ONLY_PRIVATE_REP_20260926, quota50,000,000bytes/main1,000,000/thumb120,000, 총 test 물리량40MiB·10assets, owner 준비/변환 각20회/일·업로드 동시1, owner 읽기40MiB/global80MiB. 숫자는 합성 검사 한도이며 운영 가격·서비스 약속이 아니다. 승인된 A/B 및 합성 이미지에만 사용한다.
+- 검사: A 명시 private opt-in→실제 Storage 저장→원본 없는 새 Web 세션 표시; 미승인 사본 공개 거부→정확 source와 representation trusted 근거 부여→별도 public 동의→게시→새 익명 열람. B/변조/철회/불명 완료는 실제 owner/bytes/hash/operation/quota 변화를 비교한다.
+- 정리: public 게시 철회·읽기 차단→합성 private media 취소/지연 cleanup→실제 bytes 제거 후 용량 정산→원래 test flags/정책/역할 복원. 이력·원본 checksum·권리철회 fence를 역삭제하지 않는다. 권한 부족이나 서로 다른 두 시도에서 진전 없음이면 정확한 차단만 남긴다.
+- 이번 간이 배포는 위 원격 적용/정책/권리 쓰기를 실행하지 않았다. D01에서 실제 변경 범위와 승인을 확정한 뒤 실행한다.
 
 첫 정식 출시를 다음 한 흐름으로 정의한다.
 

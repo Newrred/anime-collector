@@ -11,11 +11,11 @@
 | 제품 대상 | 제품 Web+Android 유지. 첫 출시 후보 WEB_ONLY 확정, Android는 Web 개선 후 후속 출시(D02) |
 | 현재 milestone | **M1/W06·M2/W08 private 최적화 연동 구현 — 기존 M5/W19 공개 근거 보존, M1~M5 전체 종료·승인 미완료** |
 | 현재 release 상태 | **NOT_RELEASE_READY — 새 private 이미지 연동 구현·실기기 검증, 후보 환경 및 운영/후보 승인 잔여** |
-| 현재 본 작업 | **W20 간이 테스트용 Web Git 배포 진행(사용자 승인). W06/W08 private·public 서버 검증은 미완료로 유지** |
+| 현재 본 작업 | **W20 간이 Web 배포29ca80d READY·390px 실제 저장/재방문 확인. 배포 출처 및 CI 최종 확인 중. W06/W08 hosted 잔여 유지** |
 | 다음 작업 | **W06/W08/D01: private→public 실제 테스트에 적용할 migration·한도·합성 사본 권리·원복 범위를 확정하고 hosted 검증 준비** |
-| 작업 repository/branch | `Newrred/anime-collector` / `review/pro-interim-2026-09-25` (Pro 중간 검토용) |
-| 작업 HEAD / dirty 상태 | **bbff3d4 이후 구현을 간이 테스트 배포 후보로 선별 커밋 중. 정확한 배포 SHA/검증은 아래 새 기록 및 evidence/2026-09-26-web-smoke-deployment.json 참조** |
-| 운영 SHA / 후보 SHA | **이번 작업 시작 시 GitHub master와 Vercel 운영 모두0330a54 재확인. 간이 테스트 배포를 진행하며 정식 Public RC 승인과 구분** |
+| 작업 repository/branch | `Newrred/anime-collector` / `master` (사용자 승인 간이 Web 배포) |
+| 작업 HEAD / dirty 상태 | **bbff3d4 이후 구현을 e834ccf(문서)·7196406(DB 소스)·29ca80d(Web)로 선별 커밋·master push 완료. 후속 배포 출처 기록 변경은 진행 중** |
+| 운영 SHA / 후보 SHA | **29ca80d / dpl_EsqsL4hSRxL5fzSJswhAzrhrvcQZ / source git / READY 확인. 이후 추적성 보완은 배포 증거 참조. 정식 Public RC와 구분** |
 | 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`). 과거 A/B·REST/Storage33·5schema72table 복원 유지. 이번 실제 공개 retry/게시·익명 bytes·home/follow/report/block·moderator/owner RPC 철회 PASS; 제품 UI 취소/철회 및 익명·home·이미지 차단 PASS. 후보CDN 등 잔여. test flags/역할 원복 완료. Android 이번 실행 제외 |
 | 완료 milestone | **1/6 — M0만** |
 | 기본 작업 완료 | **4/20 — W01/W02/W04/W05** |
@@ -31,6 +31,7 @@
 - `.env.production`: Web 로컬 이미지 입력1; private image sync/public publication·minihome·follow·moderation UI 및 private→public source0. 서버 API는 기존 default-off 유지, 운영 DB migration0. 새 private/source-rights migration은 소스에만 포함.
 - 이번 재실행: unit353, catalog256/skip2(Windows symlink), 핵심 Chromium+mobile78/skip1(private source flagoff), public PostgreSQL267, build18 PASS. flag-on intake+mobile은 별도 검사. 기존 모바일 테스트의 첫 action 가정을 local-image flag에 맞춰 검사하며 화면 크기/좌표 assertion을 완화하지 않는다.
 - 로컬 handoff ZIP/deliverables는 보존하되 Git에서 제외. 캐시·자격증명·raw 사용자 데이터 업로드 없음. 최종 Git/SHA/실 URL 검증은 배포 증거에 기록한다.
+- 결과: flag-on intake/mobile11 PASS, 실제 www.moemoa.xyz390px에서 합성 이미지 선택·동의·카드 저장·Archive reload·detail decode PASS, 관찰한 console오류0. 서버 private/public image API503 DISABLED/no-store 확인. 실제 Google 로그인/실물 휴대폰은 이번 재검사 아님. 다음 hosted 검사 범위를 기존 ExecPlan에 구체화했다.
 
 ### 2026-09-26 W08 사본별 공개 권리 결속 승인·로컬 구현
 

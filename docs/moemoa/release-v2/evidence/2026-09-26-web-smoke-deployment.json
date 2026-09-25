@@ -1,6 +1,6 @@
 {
   "date": "2026-09-26",
-  "status": "READY_FOR_SMOKE_DEPLOY_NOT_FULL_RELEASE",
+  "status": "DEPLOYED_SMOKE_VERIFIED_FULL_RELEASE_PENDING",
   "authorization": "User requested deployment for phone and friend smoke testing",
   "previousProductionCommit": "0330a5401e0112f2e36886a6826812219e7aed89",
   "scope": "Web local image intake, existing account/metadata/Archive/Board; no hosted image/public activation",
@@ -84,6 +84,22 @@
     "Full Public launch candidate approval"
   ],
   "deployment": {
-    "status": "PENDING"
+    "status": "READY",
+    "commit": "29ca80d280ddae1ef0b253539c04dea622cfe461",
+    "id": "dpl_EsqsL4hSRxL5fzSJswhAzrhrvcQZ",
+    "source": "git",
+    "branch": "master",
+    "url": "https://www.moemoa.xyz",
+    "workingTreeDirty": true,
+    "ciRun": "https://github.com/Newrred/anime-collector/actions/runs/36172485048",
+    "ciStatus": "in_progress",
+    "liveChecks": [
+      "390px actual hosted page image picker and local synthetic image consent/save",
+      "Archive reload retains card; detail image decoded from local data URL",
+      "390px detail no horizontal overflow; observed page console error0",
+      "Data page shows Google sign-in entry; OAuth not rerun",
+      "private-image/public-image APIs return503 DISABLED with no-store"
+    ],
+    "followup": "Use npm ci for locked cloud installation and log dirty file paths to investigate existing cloud workingTreeDirty; do not hide dirty state"
   }
 }
