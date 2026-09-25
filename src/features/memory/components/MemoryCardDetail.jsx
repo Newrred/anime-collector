@@ -1,13 +1,15 @@
 import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import AddMemoryToBoard from "./AddMemoryToBoard.jsx";
-import { useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
 import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import MemoryPublicCardControl from "./MemoryPublicCardControl.jsx";
+import MemoryPrivateImageSync from "./MemoryPrivateImageSync.jsx";
+import { isPrivateUserImage, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
 import MemoryVisual from "./MemoryVisual.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
@@ -16,6 +18,7 @@ const INITIAL_STATE = Object.freeze({
   runtime: null,
   bundle: null,
   previewDataUrl: null,
+  remotePreviewDataUrl: null,
   catalogCover: null,
   note: "",
   status: "loading",
@@ -50,8 +53,10 @@ function MemoryCardDetailContent({ base }) {
   const detailCopy = copy.detail;
   const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
-  const { runtime, bundle, previewDataUrl, catalogCover, note, status, message, deleteDialogOpen } = state;
-  const allowLeave = useUnsavedNavigation(Boolean(bundle && note !== (bundle.card.note || "")), locale, { busy: ["saving", "deleting", "replacing"].includes(status) });
+  const { runtime, bundle, previewDataUrl, remotePreviewDataUrl, catalogCover, note, status, message, deleteDialogOpen } = state;
+  const onPrivatePreview = useCallback(value => updateState({ remotePreviewDataUrl: value }), []);
+  const onPrivateBusy = useCallback(value => updateState({ status: value ? 'private-sync' : 'ready' }), []);
+  const allowLeave = useUnsavedNavigation(Boolean(bundle && note !== (bundle.card.note || "")), locale, { busy: ["saving", "deleting", "replacing", "private-sync"].includes(status) });
   const saveInFlight = useRef(false);
   const deleteTriggerRef = useRef(null);
   const deleteCancelRef = useRef(null);
@@ -177,6 +182,7 @@ function MemoryCardDetailContent({ base }) {
     updateState(result.bundle ? {
       bundle: result.bundle,
       previewDataUrl: result.previewDataUrl || ticket.previewDataUrl,
+      remotePreviewDataUrl: null,
       catalogCover: null,
       message: {
         scope: "detail",
@@ -209,7 +215,7 @@ function MemoryCardDetailContent({ base }) {
       <header className="memory-detail__header">
         <a href={returnHref}>{returnHref === `${base}archive/` ? detailCopy.archiveLink : (locale === "ko" ? "돌아가기" : "Back")}</a>
         <span className="memory-detail__badges">
-          <span className="status-badge">{detailCopy.privacy}</span>
+          <span className="status-badge">{privateImageUiEnabled() && isPrivateUserImage(bundle.asset) ? (locale === 'ko' ? '비공개' : 'Private') : detailCopy.privacy}</span>
           {bundle.asset.imageType === "CATALOG_COVER"
             ? <span className="status-badge">{detailCopy.catalogCover}</span>
             : null}
@@ -221,10 +227,10 @@ function MemoryCardDetailContent({ base }) {
           <MemoryVisual
             visual={bundle.asset.designSpec
               ? { kind: "SYSTEM_DESIGN", designSpec: bundle.asset.designSpec }
-              : previewDataUrl
+              : (previewDataUrl || remotePreviewDataUrl)
                 ? {
                     kind: "IMAGE",
-                    src: previewDataUrl,
+                    src: remotePreviewDataUrl || previewDataUrl,
                     alt: detailCopy.cardAlt(bundle.title.displayTitle),
                   }
                 : catalogCover?.publicUrl
@@ -252,7 +258,7 @@ function MemoryCardDetailContent({ base }) {
           <MemoryTitleLink bundle={bundle} base={base} label={detailCopy.openTitleHub} className="memory-detail__title-link" />
           <MemoryImageReplacement
             runtime={runtime}
-            imageMissing={!bundle.asset.designSpec && !previewDataUrl && !catalogCover?.publicUrl}
+            imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
             disabled={status !== "ready"}
             onReplace={replaceImage}
             onBusyChange={(isBusy) => updateState({ status: isBusy ? "replacing" : "ready" })}
@@ -261,6 +267,8 @@ function MemoryCardDetailContent({ base }) {
           />
           <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} />
           <MemoryPublicCardControl card={bundle.card} locale={locale} disabled={status !== "ready"} />
+          <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
+            hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
             <form onSubmit={save}>
             <label className="memory-detail__field">
               <span>{detailCopy.noteLabel}</span>

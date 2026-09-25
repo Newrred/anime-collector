@@ -70,6 +70,9 @@ export class SupabasePublicationGateway {
   read(id, options) {
     return this.request("read_memory_publication", { p_id: id }, options);
   }
+  readAuthor(id, options) {
+    return this.request("read_memory_publication_author", { p_id: id }, options);
+  }
 
   getHome(options) { return this.request("get_memory_minihome", {}, options); }
   listHomeBoards(after, options) { return this.request("list_memory_minihome_boards", { p_after: after }, options); }

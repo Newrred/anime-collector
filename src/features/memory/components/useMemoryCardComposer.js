@@ -146,13 +146,13 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
     try {
       const result = await runtime.imageIntake.pick();
       if (result.cancelled || !result.ticket) {
-        updateState({ status: ticket || catalogCoverSelection ? "ready" : "empty" });
+        updateState({ status: ticket || catalogCoverSelection || designSpec ? "ready" : "empty" });
         return;
       }
       if (ticket && ticket.ticketId !== result.ticket.ticketId) {
         await runtime.imageIntake.discard(ticket.ticketId);
       }
-      updateState({ ticket: result.ticket, designSpec: null, catalogCoverSelection: null, status: "ready" });
+      updateState({ ticket: result.ticket, designSpec: null, catalogCoverSelection: null, rightsConfirmed: false, status: "ready" });
     } catch (error) {
       updateState({ status: "error", message: errorCode(error?.code) });
     }

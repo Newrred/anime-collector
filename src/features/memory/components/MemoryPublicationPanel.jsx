@@ -9,20 +9,47 @@ import PublicLinkCopy from "./PublicLinkCopy.jsx";
 import MemoryVisual from "./MemoryVisual.jsx";
 import { publicationCopy, publicationError } from "./publicationCopy.js";
 import "./memory-publication.css";
+import { getPlatformMemoryRuntime } from '../runtime/platformMemoryRuntime.js';
+import { privateImageTransfer, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
 
 function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
   const [file, setFile] = useState(null);
   const [consented, setConsented] = useState(false);
+  const [privateChoice, setPrivateChoice] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState(false);
+  const canChoosePrivate = privateImageUiEnabled() && import.meta.env.PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1 === '1';
+  const activeRequest = useRef(null), objectUrl = useRef(null);
+  useEffect(() => () => { activeRequest.current?.abort(); activeRequest.current = null; if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); }, [cardId]);
+  const choosePrivate = async () => {
+    activeRequest.current?.abort(); const abort = new AbortController(); activeRequest.current = abort;
+    setLoading(true); setError(false); setConsented(false); setPrivateChoice(null); setFile(null);
+    const timer = setTimeout(() => abort.abort(), 30000);
+    try {
+      const runtime = await getPlatformMemoryRuntime(), bundle = await runtime.getCard(cardId);
+      const transfer = privateImageTransfer(runtime, bundle), policy = await transfer.policy(abort.signal);
+      if (!policy.representation) throw new Error('missing');
+      const blob = await transfer.read(abort.signal), latest = await transfer.policy(abort.signal);
+      if (latest.representation?.id !== policy.representation.id || latest.representation.mainHash !== policy.representation.mainHash) throw new Error('changed');
+      if (abort.signal.aborted || activeRequest.current !== abort) return;
+      if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+      objectUrl.current = URL.createObjectURL(blob);
+      setPrivateChoice({ id: policy.representation.id, hash: policy.representation.mainHash, src: objectUrl.current });
+    } catch { if (activeRequest.current === abort) setError(true); }
+    finally { clearTimeout(timer); if (activeRequest.current === abort) { setLoading(false); activeRequest.current = null; } }
+  };
   return <div className="memory-publication__image-preparation">
-    <p>{copy.imageHelp}</p>
+    <p>{canChoosePrivate ? copy.privateImageHelp : copy.imageHelp}</p>
     {!policyRevision ? <p>{copy.imagePolicyMissing}</p> : <>
       <p>{copy.policy}: {policyRevision}</p>
-      <label>{copy.file}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy}
-        onChange={(event) => { setFile(event.target.files?.[0] || null); setConsented(false); }} /></label>
-      <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || !file}
-        onChange={(event) => setConsented(event.target.checked)} />{copy.imageConsent}</label>
-      <button type="button" className="btn btn--subtle" disabled={busy || !file || !consented}
-        onClick={() => controller.upload({ cardId, file, consented })}>{copy.upload}</button>
+      <label>{copy.file}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || loading}
+        onChange={(event) => { setFile(event.target.files?.[0] || null); setPrivateChoice(null); setConsented(false); if (objectUrl.current) { URL.revokeObjectURL(objectUrl.current); objectUrl.current = null; } }} /></label>
+      {canChoosePrivate && <button type="button" className="btn btn--subtle" disabled={busy || loading} onClick={choosePrivate}>{copy.choosePrivate}</button>}
+      {loading && <p role="status">{copy.loading}</p>}
+      {error && <p role="alert">{copy.privateUnavailable}</p>}
+      {privateChoice && <MemoryVisual visual={{ kind: 'IMAGE', src: privateChoice.src, alt: copy.privatePreview }} />}
+      <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || loading || (!file && !privateChoice)}
+        onChange={(event) => setConsented(event.target.checked)} />{privateChoice ? copy.privateConsent : copy.imageConsent}</label>
+      <button type="button" className="btn btn--subtle" disabled={busy || loading || (!file && !privateChoice) || !consented}
+        onClick={() => controller.upload({ cardId, file, privateRepresentation: privateChoice && {id:privateChoice.id,hash:privateChoice.hash}, consented })}>{copy.upload}</button>
     </>}
   </div>;
 }
@@ -91,6 +118,7 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
         <label>{copy.publicTitle}<input value={title} maxLength={80} required onChange={(event) => { controller.cancel(); setTitle(event.target.value); }} /></label>
         <label>{copy.description}<textarea value={description} maxLength={500} rows={3} onChange={(event) => { controller.cancel(); setDescription(event.target.value); }} /></label>
         <p>{copy.included}</p>
+        <p>{locale === "ko" ? "공개 미니홈이 있으면 방문자가 이 보드에서 미니홈으로 이동할 수 있습니다." : "If you have a public home, visitors can open it from this board."}</p>
         <ol className="memory-publication__selection">{detail.items.map(({ bundle, visual }, index) => {
           const id = bundle.card.id, selected = id in selection;
           const image = !["SYSTEM_DESIGN", "CATALOG_COVER"].includes(bundle.asset.imageType);

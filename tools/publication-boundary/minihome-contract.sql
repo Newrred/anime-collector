@@ -26,6 +26,7 @@ select pg_temp.ok(public.publish_memory_minihome(1,current_setting('test.homepre
 select pg_temp.ok(public.publish_memory_minihome(1,current_setting('test.homepreview')::jsonb->>'reviewHash','TEST_ONLY','dddddddd-dddd-4ddd-8ddd-000000000077')->>'revision'='2','same operation retry is idempotent');
 select pg_temp.fails($q$select public.publish_memory_minihome(1,current_setting('test.homepreview')::jsonb->>'reviewHash','WRONG','dddddddd-dddd-4ddd-8ddd-000000000077')$q$,'OPERATION_MISMATCH','same operation cannot change consent policy');
 set role anon;
+select pg_temp.ok(public.read_memory_publication_author(current_setting('test.board')::uuid)=jsonb_build_object('id',current_setting('test.home')::uuid,'nickname',public.read_memory_minihome(current_setting('test.home')::uuid)->>'nickname'),'board author exports only public home ID and nickname');
 select pg_temp.ok(public.read_memory_minihome(current_setting('test.home')::uuid)-'id'=current_setting('test.homepreview')::jsonb->'snapshot','anonymous display equals reviewed DTO');
 select pg_temp.fails('select public.get_memory_minihome()','permission denied','anonymous owner read denied');
 select pg_temp.fails('select public.list_memory_minihome_boards()','permission denied','anonymous choices denied');
@@ -76,6 +77,7 @@ reset role;
 update private.memory_publication_accounts set hidden=true where user_id='11111111-1111-4111-8111-111111111111';
 set role anon;
 select pg_temp.ok(public.read_memory_minihome(current_setting('test.home')::uuid) is null,'hidden account closes mini-home');
+select pg_temp.ok(public.read_memory_publication_author(current_setting('test.board')::uuid) is null,'hidden author link omitted');
 reset role;
 update private.memory_publication_settings set minihomes_enabled=false;
 set role anon;

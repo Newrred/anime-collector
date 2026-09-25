@@ -9,10 +9,21 @@ const GATES = ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'];
 // Local evidence integrity check only; it does not configure branch protection or deploy.
 export async function checkReleaseCandidate(candidate, { head, dirty, verifyEvidence }) {
   const blockers = [];
+  const channel = candidate?.releaseChannel ?? 'WEB_AND_ANDROID';
+  if (!['WEB_ONLY', 'WEB_AND_ANDROID'].includes(channel)) blockers.push('RELEASE_CHANNEL_INVALID');
   if (!/^[a-f0-9]{40}$/.test(candidate?.sourceCommit ?? '') || candidate.sourceCommit !== head) blockers.push('SOURCE_COMMIT_MISMATCH');
   if (dirty) blockers.push('SOURCE_NOT_CLEAN');
   for (const id of CHECKS) {
     const check = candidate?.checks?.[id];
+    if (id === 'android' && check?.status === 'NOT_APPLICABLE') {
+      const gate = candidate?.gates?.D02;
+      const approved = channel === 'WEB_ONLY' && gate?.status === 'VERIFIED' && gate.verifiedBy?.trim()
+        && check.sourceCommit === head && check.passed === 0 && check.failed === 0 && check.skipped === 0
+        && check.skipReason?.trim() && check.evidence?.path === gate.evidence?.path
+        && check.evidence?.sha256 === gate.evidence?.sha256 && await verifyEvidence(gate.evidence);
+      if (!approved) blockers.push('CHECK_android_EXCLUSION_INVALID');
+      continue;
+    }
     if (check?.status !== 'PASS' || check.sourceCommit !== head || check.failed !== 0 || !(check.passed > 0)
       || !Number.isSafeInteger(check.passed) || !Number.isSafeInteger(check.skipped) || check.skipped < 0
       || (check.skipped > 0 && !check.skipReason?.trim())) blockers.push(`CHECK_${id}_INCOMPLETE`);

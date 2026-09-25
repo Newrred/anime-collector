@@ -1,16 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createPublicationController } from "../../src/features/memory/application/createPublicationController.js";
-import { publicationSnapshot, publicationReview } from "../../src/features/memory/domain/publicationView.js";
+import { publicationSnapshot, publicationReview, publicationAuthor } from "../../src/features/memory/domain/publicationView.js";
 
 const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const error = (code) => Object.assign(new Error(code), { code });
 const sync = () => ({ syncState: "SYNCED", remoteVersion: 1 });
+test("board author DTO only retains public home ID and nickname", () => {
+  assert.deepEqual(publicationAuthor({id:id(9),nickname:"Public author",userId:id(1),email:"private@example.test"}),{id:id(9),nickname:"Public author"});
+  assert.equal(publicationAuthor(null),null);
+  assert.throws(()=>publicationAuthor({id:"bad",nickname:"Hidden"}));
+});
 const selection = { title: "Public title", description: "", cards: [{ cardId: id(2), fields: ["note"] }] };
 const snapshot = () => ({ schemaVersion: 1, title: "Public title", description: "", cards: [{ id: id(4), title: "Memory",
   note: "Selected note", visual: { type: "SYSTEM_DESIGN", rendererVersion: 1, patternToken: "aabbccdd" } }] });
 const review = () => ({ id: id(3), revision: 1, policyRevision: "test-policy", reviewHash: "a".repeat(64), snapshot: snapshot() });
-function harness(overrides = {}) {
+function harness(overrides = {}, options = {}) {
   const calls = [];
   let session = { user: { id: id(1) }, access_token: "test-only" };
   const detail = { board: { id: id(5), ownerId: `account:${id(1)}`, sync: sync() }, items: [{ membership: { sync: sync() },
@@ -22,7 +27,7 @@ function harness(overrides = {}) {
     ...overrides,
   };
   const controller = createPublicationController({ boardId: id(5), ownerId: `account:${id(1)}`, gateway,
-    getSession: async () => session, getBoard: async () => structuredClone(detail), uuid: () => id(7) });
+    getSession: async () => session, getBoard: async () => structuredClone(detail), uuid: () => id(7), ...options });
   return { controller, gateway, detail, calls, session: (value) => { session = value; } };
 }
 test("public DTO renderer drops private extras and rejects unusable or duplicate visuals", () => {
@@ -146,4 +151,77 @@ test("global withdrawal invalidates pending review even when the result is ambig
   h.gateway.revokeCard = async () => {};
   await h.controller.revokeCard(id(2));
   assert.equal(h.controller.getSnapshot().phase, "cardRevoked");
+});
+
+test("confirmed failed image attempts recover in the same editor, including after cancel", async () => {
+  for (const cancel of [false, true]) {
+    const operations = new Map(); let count = 10;
+    const controller = createPublicationController({ boardId: id(5), ownerId: `account:${id(1)}`, policyRevision: "TEST_ONLY",
+      gateway: {}, uuid: () => id(++count), getSession: async () => ({ user: { id: id(1) }, access_token: "test" }),
+      getBoard: async () => ({ board: { ownerId: `account:${id(1)}` }, items: [{ bundle: { card: { id: id(2) }, asset: { id: id(6), sync: sync() } } }] }),
+      prepareImage: async ({ operationId, readOriginal }) => {
+        if (operations.has(operationId)) throw error("ASSET_OPERATION_UNAVAILABLE");
+        operations.set(operationId, "PREPARING");
+        if ((await readOriginal()).size === 1) { operations.set(operationId, "DELETED"); throw Object.assign(error("SOURCE_IMAGE_MISMATCH"), { retryable: true }); }
+        operations.set(operationId, "READY");
+      },
+    });
+    await controller.upload({ cardId: id(2), file: new Blob(["x"]), consented: true });
+    assert.equal(controller.getSnapshot().error, "SOURCE_IMAGE_MISMATCH");
+    if (cancel) controller.cancel();
+    await controller.upload({ cardId: id(2), file: new Blob(["correct"]), consented: true });
+    assert.equal(controller.getSnapshot().phase, "imageReady");
+    assert.deepEqual([...operations.values()], ["DELETED", "READY"]);
+  }
+});
+
+test("ambiguous image result and quota rejection retain operation; double clicks do not upload twice", async () => {
+  let finish, sequence=10; const calls=[];
+  const h=harness({}, {policyRevision:"TEST_ONLY",uuid:()=>id(++sequence),prepareImage:async input=>{
+    calls.push(input.operationId);
+    if(calls.length===1) await new Promise((resolve,reject)=>{finish=()=>reject(error("IMAGE_SERVICE_FAILED"));});
+    if(calls.length===2) throw error("IMAGE_QUOTA_EXCEEDED");
+  }});
+  const input={cardId:id(2),file:new Blob(["synthetic"]),consented:true};
+  const first=h.controller.upload(input);
+  await h.controller.upload(input);
+  while(!finish) await new Promise(resolve=>setImmediate(resolve));
+  finish(); await first;
+  await h.controller.upload(input);
+  await h.controller.upload(input);
+  assert.equal(calls.length,3); assert.equal(new Set(calls).size,1);
+  assert.equal(h.controller.getSnapshot().phase,"imageReady");
+});
+
+test("late image responses cannot succeed after cancellation, account switch, or source version change", async () => {
+  for(const change of ["cancel","account","version"]) {
+    let finish;
+    const h=harness({}, {policyRevision:"TEST_ONLY",prepareImage:()=>new Promise(resolve=>{finish=resolve;})});
+    const pending=h.controller.upload({cardId:id(2),file:new Blob(["synthetic"]),consented:true});
+    while(!finish) await new Promise(resolve=>setImmediate(resolve));
+    if(change==="cancel") h.controller.cancel();
+    if(change==="account") h.session({user:{id:id(9)}});
+    if(change==="version") h.detail.items[0].bundle.asset.sync.remoteVersion++;
+    finish(); await pending;
+    assert.notEqual(h.controller.getSnapshot().phase,"imageReady");
+    assert.equal(h.controller.getSnapshot().error,change==="cancel"?null:change==="account"?"AUTH_REQUIRED":"PREVIEW_CHANGED");
+  }
+});
+
+test("cancelled recovery response cannot erase the next active image operation", async () => {
+  let rejectRecovery, sequence=10; const operations=[];
+  const h=harness({}, {policyRevision:"TEST_ONLY",uuid:()=>id(++sequence),prepareImage:async input=>{
+    operations.push(input.operationId);
+    if(operations.length===1) throw Object.assign(error("ASSET_OPERATION_FAILED"),{retryable:true});
+    if(operations.length===2) await new Promise((resolve,reject)=>{rejectRecovery=reject;});
+  }});
+  const input={cardId:id(2),file:new Blob(["synthetic"]),consented:true};
+  const old=h.controller.upload(input);
+  while(!rejectRecovery) await new Promise(resolve=>setImmediate(resolve));
+  h.controller.cancel(); await h.controller.upload(input);
+  rejectRecovery(Object.assign(error("IMAGE_STORAGE_FAILED"),{retryable:true})); await old;
+  await h.controller.upload(input);
+  assert.notEqual(operations[0],operations[1]);
+  assert.equal(operations[1],operations[2]); assert.equal(operations[2],operations[3]);
+  assert.equal(h.controller.getSnapshot().phase,"imageReady");
 });

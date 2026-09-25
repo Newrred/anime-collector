@@ -6,17 +6,33 @@ import { processPublicImage,imageHash,PublicImageError,INPUT_LIMIT } from "../..
 import { createPublicImageHandler,cleanupPublicImages } from "../../src/server/publicImages/handler.js";
 import { prepareSelectedPublicImage } from "../../src/features/memory/application/preparePublicImage.js";
 import { publicImageUrl,publicDesignStyle } from "../../src/features/memory/domain/publicVisual.js";
+import { processPrivateImage } from '../../src/server/privateImages/processImage.js';
 
 const ID="11111111-1111-4111-8111-111111111111", PUB="22222222-2222-4222-8222-222222222222";
 const source=await sharp({create:{width:20,height:30,channels:3,background:"#ab3290"}}).png().toBuffer();
-function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false}={}) {
+function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false,recoverable=false,privateInput=null,privateSourcesEnabled=false}={}) {
   const objects=new Map(); const state={ready:false,published:false,revoked:false,failed:false,reservations:0,attempts:0,deliveries:0,reads:0,limitAttempt:false,limitDelivery:false};
   const reference=(variant)=>({path:`${ID}/${variant}.webp`,hash:imageHash(objects.get(`${ID}/${variant}.webp`))});
   const user={async rpc(name,args) {
+    if(name==='reserve_memory_public_asset_from_private') {
+      if(state.rightsDenied) throw new PublicImageError('IMAGE_RIGHTS_REQUIRED',409);
+      state.privateBinding={privateRepresentationId:args.p_representation_id,representationHash:args.p_representation_hash};
+      return {...await user.rpc('reserve_memory_public_asset',args),...state.privateBinding};
+    }
+    if(name==='read_memory_private_image') {
+      if(state.privateRetired) throw new PublicImageError('PUBLIC_VISUAL_NOT_READY',409);
+      return {id:PUB,hash:imageHash(privateInput),bytes:privateInput.length};
+    }
+    if(name==="get_memory_public_asset_operation" && recoverable) return {id:ID,state:state.ready?"READY":state.deleted?"DELETED":state.failed?"FAILED":"PREPARING",reservationReleased:state.deleted===true};
     if(name==="authorize_memory_image_attempt") { state.attempts++; if(state.limitAttempt) throw new PublicImageError("RATE_LIMITED",429); return null; }
     if(name==="reserve_memory_public_asset") {
       state.reservations++;
-      if(state.ready) return {id:ID,state:"READY"};
+      if(state.ready) return {id:ID,state:"READY",...state.privateBinding};
+      if(recoverable) {
+        if(state.operation===args.p_operation_id) throw new PublicImageError("ASSET_OPERATION_UNAVAILABLE",409);
+        if(state.operation && !state.deleted) throw new PublicImageError("IMAGE_QUOTA_EXCEEDED",409);
+        state.operation=args.p_operation_id; state.deleted=false; state.failed=false;
+      }
       return {id:ID,prefix:ID,state:"PREPARING",sourceHash:imageHash(source)};
     }
     if(name==="resolve_memory_image_preview") return state.ready ? reference(args.p_variant) : null;
@@ -28,20 +44,35 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
       if(name==="authorize_memory_image_delivery") { state.deliveries++; if(state.limitDelivery) throw new PublicImageError("RATE_LIMITED",429); return null; }
       if(name==="complete_memory_public_asset") { state.ready=true; if(ambiguousComplete) throw new Error("lost response"); return null; }
       if(name==="fail_memory_public_asset") { if(!state.ready) state.failed=true; return null; }
+      if(name==="claim_memory_failed_image_cleanup" && recoverable) return !state.ready && state.failed ? {id:ID,prefix:ID} : null;
       if(name==="resolve_memory_public_image") return state.ready && state.published && !state.revoked && args.p_publication_id===PUB && args.p_asset_id===ID ? reference(args.p_variant) : null;
       if(name==="claim_memory_image_cleanup") return state.failed ? [{id:ID,prefix:ID}] : [];
-      if(name==="complete_memory_image_cleanup") {state.failed=false; return null;}
+      if(name==="complete_memory_image_cleanup") {state.failed=false; state.deleted=true; return null;}
       throw new Error("unknown service RPC");
     },
     async put(path,bytes) { if(failThumb && path.endsWith("thumb.webp")) throw new Error("storage secret detail"); objects.set(path,Buffer.from(bytes)); },
     async get(path) { state.reads++; if(revokeDuringRead) state.revoked=true; return objects.get(path); },
-    async remove(paths) { for(const path of paths) objects.delete(path); },
+    async getPrivate(path) { assert.equal(path,`${PUB}/main.webp`); state.privateReads=(state.privateReads||0)+1; if(state.retireAfterDownload) state.privateRetired=true; return state.corrupt ? Buffer.from('wrong bytes') : privateInput; },
+    async remove(paths) { if(state.cleanupUnavailable) throw new Error("storage unavailable"); for(const path of paths) objects.delete(path); },
   };
-  const handler=createPublicImageHandler({enabled,createBackend:()=>backend,allowedOrigins:["https://example.test"]});
+  const handler=createPublicImageHandler({enabled,privateSourcesEnabled,createBackend:()=>backend,allowedOrigins:["https://example.test"]});
   return {backend,handler,state,objects};
 }
 async function withServer(h,fn) {
-  const server=createServer(h.handler); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+  const server=createServer(h.handler);
+  // Windows can allocate ephemeral ports in Fetch's blocked range (e.g. 6665–6669).
+  // Keep the handler unchanged; bind above all Fetch-restricted ports instead.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await new Promise((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(20000 + Math.floor(Math.random() * 30000), '127.0.0.1', () => { server.removeListener('error', reject); resolve(); });
+      });
+      break;
+    } catch (error) {
+      if (error.code !== 'EADDRINUSE' || attempt >= 15) throw error;
+    }
+  }
   try { await fn(`http://127.0.0.1:${server.address().port}`); }
   finally { await new Promise(r=>server.close(r)); }
 }
@@ -49,6 +80,97 @@ const headers={"Content-Type":"application/octet-stream",Authorization:"Bearer t
  "X-Moemoa-Version":"1","X-Moemoa-Operation":PUB,"X-Moemoa-Consent":"TEST_ONLY"};
 const post=(base,bytes=source,extra={})=>fetch(`${base}/api/public-image`,{method:"POST",headers:{...headers,...extra},body:bytes});
 const getUrl=(base,variant="thumb")=>base+publicImageUrl(PUB,ID,variant);
+
+test('private rendition integrity does not substitute for the approved public original checksum', async () => {
+  const policy = { mainMaxBytes: 1_000_000, thumbnailMaxBytes: 120_000 };
+  const rendition = await processPrivateImage(source, policy);
+  assert.notEqual(rendition.mainHash, imageHash(source));
+  const other = await sharp({ create: { width: 20, height: 30, channels: 3, background: '#10ff20' } }).png().toBuffer();
+  const unrelated = await processPrivateImage(other, policy);
+  assert.notEqual(unrelated.mainHash, rendition.mainHash);
+  // Both are valid private images. Neither carries proof of derivation from the approved original.
+  for (const bytes of [rendition.main, unrelated.main]) {
+    const h = harness({ recoverable: true });
+    await withServer(h, async base => {
+      const response = await post(base, bytes);
+      assert.equal(response.status, 400);
+      assert.deepEqual(await response.json(), { error: 'SOURCE_IMAGE_MISMATCH', retryable: true });
+      assert.equal(h.state.ready, false); assert.equal(h.objects.size, 0);
+      assert.equal(h.state.deleted, true);
+    });
+  }
+});
+
+test('explicit private source uses server bytes bound to rendition and never overwrites original checksum', async () => {
+  const input = await processPrivateImage(source,{mainMaxBytes:1_000_000,thumbnailMaxBytes:120_000});
+  const h=harness({privateInput:input.main,privateSourcesEnabled:true});
+  const extra={'X-Moemoa-Private-Representation':PUB,'X-Moemoa-Representation-Hash':input.mainHash};
+  await withServer(h,async base=>{
+    assert.equal((await post(base,Buffer.alloc(0),extra)).status,200);
+    assert.equal(h.objects.size,2); assert.equal(h.state.privateReads,1);
+    assert.equal((await post(base,Buffer.alloc(0),extra)).status,200);
+    assert.equal(h.state.privateReads,1);
+    assert.equal((await post(base)).status,409); // Cannot replay a private operation as an original.
+  });
+});
+
+test('private public-source feature defaults off and rights denial prevents private Storage reads', async()=>{
+  const input=await processPrivateImage(source,{mainMaxBytes:1_000_000,thumbnailMaxBytes:120_000});
+  const extra={'X-Moemoa-Private-Representation':PUB,'X-Moemoa-Representation-Hash':input.mainHash};
+  for(const enabled of [false,true]) {
+    const h=harness({privateInput:input.main,privateSourcesEnabled:enabled}); h.state.rightsDenied=true;
+    await withServer(h,async base=>{ assert.equal((await post(base,Buffer.alloc(0),extra)).status,409); assert.equal(h.state.privateReads,undefined); assert.equal(h.objects.size,0); });
+  }
+});
+
+test('private bytes corruption or source retirement during download cannot produce a public image',async()=>{
+  const input=await processPrivateImage(source,{mainMaxBytes:1_000_000,thumbnailMaxBytes:120_000});
+  for(const flag of ['corrupt','retireAfterDownload']) {
+    const h=harness({privateInput:input.main,privateSourcesEnabled:true,recoverable:true}); h.state[flag]=true;
+    await withServer(h,async base=>{
+      const response=await post(base,Buffer.alloc(0),{'X-Moemoa-Private-Representation':PUB,'X-Moemoa-Representation-Hash':input.mainHash});
+      assert.equal(response.ok,false); assert.equal(h.objects.size,0); assert.equal(h.state.ready,false); assert.equal(h.state.deleted,true);
+    });
+  }
+});
+
+test('private-source client requires separate public consent and sends ID/hash only, never substituted bytes',async()=>{
+  const seen=[]; const args={sourceAssetId:ID,sourceVersion:1,operationId:PUB,accessToken:'token',policyRevision:'TEST_ONLY',
+    privateRepresentation:{id:PUB,hash:'a'.repeat(64)},readOriginal:()=>assert.fail('must not read original'),
+    fetchImpl:async(url,init)=>{ seen.push(init); return Response.json({id:ID,state:'READY'}); }};
+  await assert.rejects(prepareSelectedPublicImage(args),{code:'IMAGE_CONSENT_REQUIRED'});
+  await prepareSelectedPublicImage({...args,consented:true});
+  assert.equal(seen.length,1); assert.equal(seen[0].body,undefined);
+  assert.equal(seen[0].headers['X-Moemoa-Private-Representation'],PUB);
+  assert.equal(seen[0].headers['X-Moemoa-Representation-Hash'],'a'.repeat(64));
+});
+
+test("confirmed source failure releases reservation before allowing a new operation",async()=>{
+  const h=harness({recoverable:true}); await withServer(h,async base=>{
+    const bad=await post(base,Buffer.from("wrong source"));
+    assert.deepEqual(await bad.json(),{error:"SOURCE_IMAGE_MISMATCH",retryable:true});
+    assert.equal(h.state.deleted,true); assert.equal(h.objects.size,0);
+    const correct=await post(base,source,{"X-Moemoa-Operation":ID});
+    assert.equal(correct.status,200); assert.equal(h.objects.size,2);
+  });
+});
+test("cleanup failure stays ambiguous; replay reconciles terminal failure without transforming again",async()=>{
+  const h=harness({recoverable:true,failThumb:true}); h.state.cleanupUnavailable=true;
+  await withServer(h,async base=>{
+    assert.equal((await (await post(base)).json()).retryable,undefined);
+    assert.equal(h.state.deleted, false); assert.equal(h.objects.size,1);
+    h.state.cleanupUnavailable=false;
+    assert.deepEqual(await (await post(base)).json(),{error:"ASSET_OPERATION_FAILED",retryable:true});
+    assert.equal(h.state.attempts,1); assert.equal(h.objects.size,0); assert.equal(h.state.deleted,true);
+  });
+});
+test("READY committed before response loss is never cleaned or advertised as safe to replace",async()=>{
+  const h=harness({recoverable:true,ambiguousComplete:true});await withServer(h,async base=>{
+    const first=await post(base); assert.equal((await first.json()).retryable,undefined);
+    assert.equal(h.objects.size,2);assert.equal(h.state.ready,true);
+    assert.equal((await post(base)).status,200);assert.equal(h.state.attempts,1);assert.equal(h.objects.size,2);
+  });
+});
 
 test("image budgets stop conversion and Storage reads while completed upload replay remains safe",async()=>{
   const h=harness(); await withServer(h,async base=>{

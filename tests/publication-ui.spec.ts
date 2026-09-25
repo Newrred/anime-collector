@@ -1,11 +1,27 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import sharp from "sharp";
+import { createHash } from 'node:crypto';
 
 const USER = "11111111-1111-4111-8111-111111111111";
 const PUBLICATION = "22222222-2222-4222-8222-222222222222";
 const PUBLIC_CARD = "33333333-3333-4333-8333-333333333333";
 const IMAGE = "44444444-4444-4444-8444-444444444444";
 const HASH = "a".repeat(64);
+
+test("shared board opens the public author home and omits withdrawn author links", async ({ page, context }) => {
+  const mock=mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page); await choose(page); await publishSelected(page);
+  const home="55555555-5555-4555-8555-555555555555";let visible=true;
+  await context.route("**/__publication-test/rpc/read_memory_publication_author",route=>route.fulfill({json:{data:visible?{id:home,nickname:"Public author",email:"never-render@example.test"}:null,error:null}}));
+  await context.route("**/__publication-test/rpc/read_memory_minihome",route=>route.fulfill({json:{data:{id:home,nickname:"Public author",bio:"",entries:[]},error:null}}));
+  await page.goto(`/public/board/?id=${PUBLICATION}`);
+  await expect(page.getByRole("link",{name:"Visit Public author's public home"})).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("never-render@example.test");
+  await page.getByRole("link",{name:"Visit Public author's public home"}).click();
+  await expect(page).toHaveURL(new RegExp(`public/home/\\?id=${home}`));
+  await expect(page.getByRole("heading",{name:"Public author",exact:true})).toBeVisible();
+  visible=false;await page.goto(`/public/board/?id=${PUBLICATION}`);
+  await expect(page.getByRole("link",{name:"Visit Public author's public home"})).toHaveCount(0);
+});
 
 test("report retry retains receipt operation and owner can read notice and appeal", async ({ page, context }) => {
   await adapters(context); const backend = mockPublication(); await backend.attach(context); await seedOwner(page);
@@ -80,6 +96,62 @@ test("cancelled sign-in scrubs provider data and returns to the original public 
   await page.goto("/auth/callback/?error=access_denied&next=https%3A%2F%2Fevil.test");
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.getByRole("link", { name: /Return to page/ })).toHaveCount(0);
+});
+
+test("expired SDK session rejects refresh and reauth returns home without automatic follow", async ({ page, context }) => {
+  const consoleMessages: string[] = [];
+  page.on("console", message => consoleMessages.push(message.text()));
+  await adapters(context);
+  const backend = mockPublication(); await backend.attach(context);
+  const home = "55555555-5555-4555-8555-555555555555";
+  const target = `/public/home/?id=${home}`;
+  const authOrigin = "https://w19-auth.example.test";
+  const storageKey = "sb-w19-auth-auth-token";
+  const user = { id: USER, aud: "authenticated", role: "authenticated", email: "synthetic@example.test", app_metadata: {}, user_metadata: {}, created_at: "2026-01-01T00:00:00Z" };
+  const jwt = (exp: number) => [Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url"), Buffer.from(JSON.stringify({ sub: USER, exp, aud: "authenticated", role: "authenticated" })).toString("base64url"), "synthetic-signature"].join(".");
+  await context.route("**/src/lib/supabaseClient.js*", async route => {
+    const response = await route.fetch(); let body = await response.text();
+    expect(body).toContain("const url = env.PUBLIC_SUPABASE_URL;");
+    body = body.replace("const url = env.PUBLIC_SUPABASE_URL;", `const url = '${authOrigin}';`)
+      .replace("const anonKey = env.PUBLIC_SUPABASE_ANON_KEY;", "const anonKey = 'synthetic-publishable-key';")
+      .replace('env.PUBLIC_MEMORY_ACCOUNT_SYNC_V1 === "1"', "true");
+    await route.fulfill({ response, body });
+  });
+  await context.addInitScript(({ storageKey, token, user }) => {
+    if (sessionStorage.getItem("w19.seeded")) return;
+    sessionStorage.setItem("w19.seeded", "1");
+    localStorage.setItem(storageKey, JSON.stringify({ access_token: token, refresh_token: "synthetic-expired-refresh", expires_at: 1, expires_in: 1, token_type: "bearer", user }));
+  }, { storageKey, token: jwt(1), user });
+  let refreshes = 0, exchanges = 0;
+  await context.route(`${authOrigin}/**`, async route => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/auth/v1/token" && url.searchParams.get("grant_type") === "refresh_token") {
+      refreshes++;
+      await route.fulfill({ status: 400, json: { code: "refresh_token_not_found", message: "Synthetic session expired" } });
+    } else if (url.pathname === "/auth/v1/authorize") {
+      expect(url.searchParams.get("code_challenge")).toBeTruthy();
+      expect(url.searchParams.get("code_challenge_method")).toBe("s256");
+      const callback = new URL(url.searchParams.get("redirect_to")!); callback.searchParams.set("code", "synthetic-reauth-code");
+      await route.fulfill({ status: 302, headers: { location: callback.href }, body: "" });
+    } else if (url.pathname === "/auth/v1/token" && url.searchParams.get("grant_type") === "pkce") {
+      exchanges++; expect(route.request().postDataJSON().code_verifier).toBeTruthy();
+      await route.fulfill({ json: { access_token: jwt(Math.floor(Date.now() / 1000) + 3600), refresh_token: "synthetic-new-refresh", expires_in: 3600, token_type: "bearer", user } });
+    } else { throw new Error(`Unexpected synthetic Auth path: ${url.pathname}`); }
+  });
+  await context.route("**/__publication-test/rpc/read_memory_minihome", route => route.fulfill({ json: { data: { id: home, nickname: "Synthetic author", bio: "", entries: [] }, error: null } }));
+  await context.route("**/__publication-test/rpc/get_memory_relationship", route => route.fulfill({ json: { data: { self: false, following: false, blocked: false }, error: null } }));
+  await page.goto(target);
+  await expect(page.getByRole("button", { name: "Sign in to follow", exact: true })).toBeVisible();
+  expect(refreshes).toBe(1);
+  expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
+  await page.getByRole("button", { name: "Sign in to follow", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Follow", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(new URL(target, page.url()).href);
+  expect(exchanges).toBe(1);
+  expect(backend.calls.filter(c => c.name === "set_memory_relationship")).toEqual([]);
+  expect(await page.evaluate(() => localStorage.getItem("auth.redirect.next"))).toBeNull();
+  expect(consoleMessages.join("\n")).not.toMatch(/synthetic-expired-refresh|synthetic-new-refresh|synthetic-reauth-code|synthetic-signature/);
+  await expect(page.locator("body")).not.toContainText("synthetic-expired-refresh");
 });
 
 test("callback exchanges once, returns to home without following, and recovers from exchange failure", async ({ page, context }) => {
@@ -564,7 +636,8 @@ test("failed preview image blocks posting; retry loads actual cover bytes", asyn
   await expect(page.getByRole("button", { name: "Publish this version" })).toBeEnabled();
 });
 
-test("image preparation requires explicit original-file consent and authenticated derivative preview", async ({ page, context, browser }) => {
+for (const usePrivate of [false, true]) test(`image preparation requires explicit ${usePrivate ? 'private-copy' : 'original-file'} consent and authenticated derivative preview`, async ({ page, context, browser }) => {
+  test.skip(usePrivate && process.env.PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1 !== '1', 'Explicit private-source UI flag required');
   const mock = mockPublication(); mock.control.image = true;
   await adapters(context); await mock.attach(context); await seedOwner(page);
   await page.evaluate(async () => {
@@ -576,13 +649,20 @@ test("image preparation requires explicit original-file consent and authenticate
     const { IndexedDbMemoryRepository } = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
     const repository = await IndexedDbMemoryRepository.open();
     const tx = repository.database.transaction("visual_assets", "readwrite");
-    tx.objectStore("visual_assets").put({ ...asset, designSpec: null, imageType: "USER_ORIGINAL", localRef: null });
+    tx.objectStore("visual_assets").put({ ...asset, designSpec: null, imageType: "USER_ORIGINAL", localRef: null, checksumSha256: 'b'.repeat(64) });
     await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject; });
   });
-  await page.reload(); await page.getByRole("button", { name: "Share selected memories" }).click(); await choose(page);
   const png = await sharp({ create: { width: 24, height: 30, channels: 3, background: "#cc7799" } }).png().toBuffer();
   const webp = await sharp(png).webp().toBuffer();
   const uploads: any[] = [], reads: any[] = [];
+  const privateHash = createHash('sha256').update(webp).digest('hex');
+  await context.route('**/api/private-image**', async route => {
+    expect(route.request().method()).toBe('GET');
+    expect(route.request().headers().authorization).toBe('Bearer local-test-token');
+    if (route.request().url().includes('policy=1')) return route.fulfill({ json: { revision: 'PRIVATE_TEST', quotaBytes: 50_000_000, usedBytes: webp.length * 2, mainMaxBytes: 1_000_000, transportBodyMaxBytes: 1_500_000,
+      representation: { id: IMAGE, state: 'READY', sourceVersion: 1, mainHash: privateHash, mainBytes: webp.length, thumbnailHash: privateHash, thumbnailBytes: webp.length } } });
+    return route.fulfill({ contentType: 'image/webp', body: webp });
+  });
   await context.route("**/api/public-image?*", async (route) => {
     reads.push(route.request().headers());
     expect(route.request().headers().authorization).toBe("Bearer local-test-token");
@@ -592,13 +672,21 @@ test("image preparation requires explicit original-file consent and authenticate
     uploads.push(route.request());
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ id: IMAGE, state: "READY" }) });
   });
-  await page.getByLabel("Select the original image file").setInputFiles({ name: "original.png", mimeType: "image/png", buffer: png });
+  await page.reload(); await page.getByRole("button", { name: "Share selected memories" }).click(); await choose(page);
+  if (usePrivate) {
+    await page.getByRole('button', { name: 'Choose my synced image copy', exact: true }).click();
+    await expect(page.getByRole('img', { name: 'Selected private image copy', exact: true })).toBeVisible();
+  } else await page.getByLabel("Select the original image file").setInputFiles({ name: "original.png", mimeType: "image/png", buffer: png });
   await expect(page.getByRole("button", { name: "Prepare selected image" })).toBeDisabled();
   expect(uploads).toHaveLength(0);
-  await page.getByLabel("I agree to upload this selected image", { exact: false }).check();
+  await page.getByLabel(usePrivate ? 'I agree to use this selected image' : "I agree to upload this selected image", { exact: false }).check();
   await page.getByRole("button", { name: "Prepare selected image" }).click();
   await expect(page.getByText("The selected image copy is ready.", { exact: false })).toBeVisible();
-  expect(uploads).toHaveLength(1); expect(uploads[0].postDataBuffer()).toEqual(png);
+  expect(uploads).toHaveLength(1); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
+  if (usePrivate) {
+    expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);
+    expect(uploads[0].headers()['x-moemoa-representation-hash']).toBe(privateHash);
+  }
   expect(uploads[0].headers()["x-moemoa-consent"]).toBe("local-test-policy");
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();

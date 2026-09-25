@@ -22,6 +22,11 @@ update private.memory_publication_settings set reads_enabled=true,writes_enabled
 update public.memory_visual_assets set asset_type='USER_IMAGE',storage_scope='LOCAL_ONLY',rights_basis='UNKNOWN',checksum_sha256=repeat('b',64)
  where card_id='cccccccc-cccc-4ccc-8ccc-000000000002';
 select set_config('test.source',(select id::text from public.memory_visual_assets where card_id='cccccccc-cccc-4ccc-8ccc-000000000002'),false);
+begin;
+update public.memory_visual_assets set design_spec='null'::jsonb where id=current_setting('test.source')::uuid;
+select pg_temp.ok((select design_spec is null from public.memory_visual_assets where id=current_setting('test.source')::uuid),'JSON null image design metadata normalizes to SQL NULL');
+select pg_temp.fails($q$update public.memory_visual_assets set design_spec='{}'::jsonb where id=current_setting('test.source')::uuid$q$,'memory_visual_assets_source_metadata_check','user image still rejects actual design object');
+rollback;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
 set role authenticated;
 select pg_temp.fails($q$select public.reserve_memory_public_asset(current_setting('test.source')::uuid,1,'eeeeeeee-eeee-4eee-8eee-000000000001','TEST_ONLY')$q$,'IMAGE_RIGHTS_REQUIRED','rights self-claim cannot authorize public image');
@@ -113,3 +118,31 @@ select pg_temp.fails($q$insert into storage.objects(bucket_id,name) values('memo
 reset role;
 select pg_temp.ok((select not public from storage.buckets where id='memory-public-derivatives'),'derivative bucket is private');
 select count(*) as passed_image_assertions from assertions;
+
+-- Retry recovery is additive; keep earlier test state intact for the remaining harness.
+begin;
+insert into private.memory_public_assets(id,user_id,card_id,source_asset_id,source_version,source_hash,operation_id,policy_revision)
+select '99999999-9999-4999-8999-000000000001',user_id,card_id,id,version,checksum_sha256,
+ '99999999-9999-4999-8999-000000000002','TEST_ONLY' from public.memory_visual_assets where id=current_setting('test.source')::uuid;
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+select pg_temp.ok(public.get_memory_public_asset_operation(current_setting('test.source')::uuid,1,'99999999-9999-4999-8999-000000000002')->>'state'='PREPARING','owner can reconcile own operation');
+select pg_temp.fails($q$select public.claim_memory_failed_image_cleanup('99999999-9999-4999-8999-000000000001')$q$,'permission denied','client cannot claim cleanup');
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
+select pg_temp.ok(public.get_memory_public_asset_operation(current_setting('test.source')::uuid,1,'99999999-9999-4999-8999-000000000002') is null,'B cannot inspect A operation');
+set role anon;
+select pg_temp.fails($q$select public.get_memory_public_asset_operation(null,1,null)$q$,'permission denied','anonymous cannot inspect operations');
+set role service_role;
+select pg_temp.ok(public.claim_memory_failed_image_cleanup('99999999-9999-4999-8999-000000000001') is null,'cleanup cannot claim in-flight operation');
+select public.fail_memory_public_asset('99999999-9999-4999-8999-000000000001');
+select pg_temp.ok(public.claim_memory_failed_image_cleanup('99999999-9999-4999-8999-000000000001')->>'id'='99999999-9999-4999-8999-000000000001','failed attempt is claimable');
+select public.complete_memory_image_cleanup('99999999-9999-4999-8999-000000000001');
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+select pg_temp.ok((public.get_memory_public_asset_operation(current_setting('test.source')::uuid,1,'99999999-9999-4999-8999-000000000002')->>'reservationReleased')::boolean,'deleted reservation is confirmed released');
+reset role;
+update private.memory_public_assets set state='READY' where id='99999999-9999-4999-8999-000000000001';
+set role service_role;
+select pg_temp.ok(public.claim_memory_failed_image_cleanup('99999999-9999-4999-8999-000000000001') is null,'READY operation is never claimed for retry cleanup');
+reset role;
+rollback;

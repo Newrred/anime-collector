@@ -27,3 +27,23 @@ test('missing candidate and unexplained skipped checks never pass',async()=>{
   const c=candidate();c.checks.catalog.skipped=2;c.checks.catalog.skipReason='Optional unavailable browser environment; tracked separately';
   assert.equal((await checkReleaseCandidate(c,environment)).ready,true);
 });
+
+test('Web-only Android exclusion requires matching D02 evidence and preserves every other gate', async()=>{
+  const web=()=>{const c=candidate();c.releaseChannel='WEB_ONLY';c.checks.android={status:'NOT_APPLICABLE',sourceCommit:head,passed:0,failed:0,skipped:0,skipReason:'User approved Web first; Android follow-up',evidence};return c;};
+  assert.equal((await checkReleaseCandidate(web(),environment)).ready,true);
+  for(const field of ['channel','unknown','approval','approver','evidence','differentEvidence','source','counts','reason','webCheck','deployGate']){
+    const c=web();
+    if(field==='channel') delete c.releaseChannel;
+    if(field==='unknown') c.releaseChannel='ANY';
+    if(field==='approval') c.gates.D02.status='PENDING';
+    if(field==='approver') c.gates.D02.verifiedBy='';
+    if(field==='evidence') {c.gates.D02.evidence={...evidence,sha256:'b'.repeat(64)};c.checks.android.evidence=c.gates.D02.evidence;}
+    if(field==='differentEvidence') c.checks.android.evidence={...evidence,path:'other.log'};
+    if(field==='source') c.checks.android.sourceCommit='b'.repeat(40);
+    if(field==='counts') c.checks.android.failed=1;
+    if(field==='reason') c.checks.android.skipReason='';
+    if(field==='webCheck') c.checks.browser.status='NOT_APPLICABLE';
+    if(field==='deployGate') c.gates.D06.status='PENDING';
+    assert.equal((await checkReleaseCandidate(c,environment)).ready,false,field);
+  }
+});

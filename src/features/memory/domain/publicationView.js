@@ -2,6 +2,11 @@ import { publicDesignStyle } from "./publicVisual.js";
 
 export const PUBLIC_FIELDS = Object.freeze(["note", "watchedAt", "episode", "sceneCue", "emotionTags", "rewatchIntent"]);
 export const isPublicationId = (value) => /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value || "");
+export function publicationAuthor(value) {
+  if (value == null) return null;
+  if (!isPublicationId(value.id) || typeof value.nickname !== "string" || !value.nickname.trim() || value.nickname.length > 60) fail();
+  return { id: value.id, nickname: value.nickname };
+}
 const fail = () => { throw Object.assign(new Error("PUBLICATION_RESPONSE_INVALID"), { code: "PUBLICATION_RESPONSE_INVALID" }); };
 const text = (value, limit) => typeof value === "string" && value.length <= limit ? value : fail();
 

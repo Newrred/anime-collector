@@ -1,4 +1,7 @@
 const en = {
+  privateImageHelp: 'Choose the original file or a copy synced to your account. Public use must be approved separately; private sync does not publish your image.',
+  privateConsent: 'I agree to use this selected image in a public copy under the current policy.',
+  choosePrivate: 'Choose my synced image copy', privatePreview: 'Selected private image copy', privateUnavailable: 'The synced copy could not be loaded. Check image sync and try again.',
   update: "Review and update public content", changed: "Private sources have changed or need checking. Review the selected content before updating the public version.",
   revokeCard: "Stop sharing this memory everywhere", revokeCardConfirm: "Stop sharing this memory in every public Board and display? The private original stays. This action cannot be undone by publishing it again.",
   cardRevoked: "Sharing of this memory has stopped everywhere. The private original is unchanged.",
@@ -20,6 +23,9 @@ const en = {
   details: { note: "Reflection", watchedAt: "Watched date", episode: "Episode", sceneCue: "Scene", emotionTags: "Emotions", rewatchIntent: "Rewatch intent" },
 };
 const ko = {
+  privateImageHelp: '원본 파일이나 내 계정에 연동한 사본을 선택하세요. 공개 사용 승인은 별도로 확인하며, 비공개 연동만으로 이미지가 공개되지는 않습니다.',
+  privateConsent: '현재 정책에 따라 이 이미지를 공개용 사본에 사용하는 데 동의합니다.',
+  choosePrivate: '내 계정에 연동한 이미지 선택', privatePreview: '선택한 비공개 이미지 사본', privateUnavailable: '연동한 사본을 불러오지 못했습니다. 이미지 연동 상태를 확인해 주세요.',
   update: "공개 내용 검토·갱신", changed: "비공개 원본이 변경되었거나 확인이 필요합니다. 공개본을 갱신하려면 선택한 내용을 다시 검토하세요.",
   revokeCard: "이 기억 모든 곳에서 공개 중지", revokeCardConfirm: "모든 공개 보드와 전시 위치에서 이 기억의 공개를 중지할까요? 비공개 원본은 유지됩니다. 다시 게시해도 이 중지는 해제되지 않습니다.",
   cardRevoked: "이 기억의 공개를 모든 곳에서 중지했습니다. 비공개 원본은 유지됩니다.",

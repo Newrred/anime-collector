@@ -133,7 +133,7 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       await check();
       emit({ phase: "cardRevoked" });
     }),
-    upload: ({ cardId, file, consented }) => run("uploading", async ({ signal, check }) => {
+    upload: ({ cardId, file, privateRepresentation, consented }) => run("uploading", async ({ signal, check }) => {
       if (!consented || !policyRevision || policyRevision === "UNAPPROVED") fail("IMAGE_CONSENT_REQUIRED");
       const detail = await getBoard(boardId);
       const item = detail?.items.find((entry) => entry.bundle.card.id === cardId);
@@ -141,11 +141,30 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       const asset = item.bundle.asset;
       const session = await auth();
       await check();
-      const key = `${asset.id}:${asset.sync.remoteVersion}`;
+      const key = `${asset.id}:${asset.sync.remoteVersion}:${privateRepresentation?.id || 'original'}:${privateRepresentation?.hash || ''}`;
       if (!imageOperations.has(key)) imageOperations.set(key, uuid());
-      await prepareImage({ sourceAssetId: asset.id, sourceVersion: asset.sync.remoteVersion, operationId: imageOperations.get(key),
-        accessToken: session.access_token, policyRevision, consented, readOriginal: () => file, signal });
+      const upload = () => prepareImage({ sourceAssetId: asset.id, sourceVersion: asset.sync.remoteVersion, operationId: imageOperations.get(key),
+        accessToken: session.access_token, policyRevision, consented, readOriginal: () => file, privateRepresentation, signal });
+      try { await upload(); }
+      catch (error) {
+        if (error?.retryable !== true) throw error;
+        await check();
+        imageOperations.delete(key);
+        // Recover a previous terminal attempt once; never loop on a new processing failure.
+        if (error.code !== "ASSET_OPERATION_FAILED") throw error;
+        await check();
+        imageOperations.set(key, uuid());
+        try { await upload(); }
+        catch (retryError) {
+          if (retryError?.retryable === true) { await check(); imageOperations.delete(key); }
+          throw retryError;
+        }
+      }
       await check();
+      const latest = await getBoard(boardId);
+      const latestAsset = latest?.items.find((entry) => entry.bundle.card.id === cardId)?.bundle.asset;
+      if (latest?.board.ownerId !== ownerId || latestAsset?.id !== asset.id || !synced(latestAsset)
+        || latestAsset.sync.remoteVersion !== asset.sync.remoteVersion) fail("PREVIEW_CHANGED");
       emit({ review: null, phase: "imageReady" });
     }),
     cancel() {

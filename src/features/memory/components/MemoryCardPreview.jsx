@@ -14,6 +14,7 @@ export default function MemoryCardPreview({
   systemCopy = {},
   missingLabel = "Visual unavailable",
   className = "",
+  elementRef,
 }) {
   const previewVariant = variant === "featured" ? "featured" : "grid";
   const displayTitle = String(title || "").trim();
@@ -22,7 +23,7 @@ export default function MemoryCardPreview({
     : systemCopy;
 
   return (
-    <article className={`memory-visual-scope memory-preview memory-preview--${previewVariant} ${className}`.trim()}>
+    <article ref={elementRef} className={`memory-visual-scope memory-preview memory-preview--${previewVariant} ${className}`.trim()}>
       <MemoryVisual
         visual={visual}
         fit={visualFit}

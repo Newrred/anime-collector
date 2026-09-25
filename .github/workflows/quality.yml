@@ -34,6 +34,11 @@ jobs:
       - run: npm run catalog:test
       - run: npm run build
       - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
+      - name: Verify Web image intake and phone layout
+        run: node scripts/run-e2e.mjs tests/web-image-intake.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1 --reporter=line
+        env:
+          PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1: '1'
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4358
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

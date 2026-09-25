@@ -91,3 +91,6 @@ docs/deploy/VERCEL_SETUP.md
 
 # Generated commit provenance, emitted at build time.
 /public/build-info.json
+
+# Generated handoff bundles; canonical docs and evidence are tracked separately.
+/deliverables/

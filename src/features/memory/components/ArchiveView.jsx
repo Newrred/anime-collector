@@ -1,7 +1,7 @@
 import { filterArchive } from "../application/archiveSearch.js";
 import { useEffect, useState } from "react";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
-import MemoryCardPreview from "./MemoryCardPreview.jsx";
+import PrivateMemoryCardPreview from "./PrivateMemoryCardPreview.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import FirstMemoryViewSuggestion from "../../titles/components/FirstMemoryViewSuggestion.jsx";
 import { consumeFirstMemoryViewSuggestion } from "../../titles/application/firstMemoryViewSuggestion.js";
@@ -47,6 +47,7 @@ function ArchiveContent({ base }) {
   const { locale, copy } = useMemoryRouteUi();
   const archiveCopy = copy.archive;
   const [items, setItems] = useState([]);
+  const [runtime, setRuntime] = useState(null);
   const [query, setQuery] = useState(() => new URLSearchParams(globalThis.location?.search || "").get("q") || "");
   const [sort, setSort] = useState(() => new URLSearchParams(globalThis.location?.search || "").get("sort") || "created");
   const updateFilter = (nextQuery, nextSort) => {
@@ -75,6 +76,7 @@ function ArchiveContent({ base }) {
           : null,
       })));
       if (!active) return;
+      setRuntime(runtime);
       setItems(withPreviews);
       setShowViewSuggestion(consumeFirstMemoryViewSuggestion(archive));
       setStatus("ready");
@@ -130,7 +132,8 @@ function ArchiveContent({ base }) {
       {items.length > 0 && (
         <section className="memory-archive__grid" aria-label={archiveCopy.listLabel}>
           {filtered.map(({ card, title, asset, previewDataUrl, catalogCover }) => (
-            <MemoryCardPreview
+            <PrivateMemoryCardPreview
+              runtime={runtime} bundle={{ card, title, asset }}
               key={card.id}
               className="surface-card memory-archive__card"
               href={`${base}memory/card/?id=${encodeURIComponent(card.id)}`}

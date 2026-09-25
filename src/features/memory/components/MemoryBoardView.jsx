@@ -1,6 +1,6 @@
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import MemoryCardPreview from "./MemoryCardPreview.jsx";
+import PrivateMemoryCardPreview from "./PrivateMemoryCardPreview.jsx";
 import MemoryPublicationPanel from "./MemoryPublicationPanel.jsx";
 import { minihomeUiEnabled } from "../runtime/platformPublication.js";
 import { loadMemoryVisual } from "../application/loadMemoryVisual.js";
@@ -225,7 +225,7 @@ function MemoryBoardContent({ base }) {
                         const afterNext = detail.items[index + 2]?.membership.positionKey || null;
                         return (
                           <li key={membership.id}>
-                            <MemoryCardPreview href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}
+                            <PrivateMemoryCardPreview runtime={runtime} bundle={bundle} href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}
                               title={bundle.title.displayTitle} cue={bundle.card.note || boardCopy.noReflection}
                               visual={item.visual} syncBadge={syncLabel(bundle.card)}
                               visualFit={bundle.asset.imageType === "CATALOG_COVER" ? "contain" : "cover"}

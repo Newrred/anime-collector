@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import { createCapacitorImageIntake } from "./capacitorImageIntake.js";
+import { createWebImageIntake } from "./webImageIntake.js";
 
 const unavailableAdapter = Object.freeze({
   available: false,
@@ -16,6 +17,7 @@ const unavailableAdapter = Object.freeze({
 });
 
 export function createPlatformImageIntake() {
-  if (!Capacitor.isNativePlatform()) return unavailableAdapter;
+  if (!Capacitor.isNativePlatform()) return import.meta.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 === '1'
+    ? createWebImageIntake() : unavailableAdapter;
   return createCapacitorImageIntake(registerPlugin("ImageIntake"));
 }

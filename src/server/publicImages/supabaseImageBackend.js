@@ -26,12 +26,13 @@ export function createSupabaseImageBackend(env = process.env) {
       if (!token) throw new PublicImageError("AUTH_REQUIRED",401);
       const client = createClient(url,anon,{ ...options,global:{ ...options.global,headers:{ Authorization:`Bearer ${token}` } } });
       const { data,error } = await client.auth.getUser(token);
-      if (error || !data.user) throw new PublicImageError("AUTH_REQUIRED",401);
+      if (error || !data.user || data.user.is_anonymous) throw new PublicImageError("AUTH_REQUIRED",401);
       return { rpc:(name,args)=>rpc(client,name,args) };
     },
     rpc:(name,args)=>rpc(service,name,args),
     async put(path,bytes) { const { error }=await bucket.upload(path,bytes,{contentType:"image/webp",upsert:false,cacheControl:"0"}); if(error) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); },
     async get(path) { const {data,error}=await bucket.download(path); if(error || !data) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); return Buffer.from(await data.arrayBuffer()); },
+    async getPrivate(path) { const {data,error}=await service.storage.from('memory-private-representations').download(path); if(error || !data) throw new PublicImageError('IMAGE_STORAGE_FAILED',503); return Buffer.from(await data.arrayBuffer()); },
     async remove(paths) { const {error}=await bucket.remove(paths); if(error) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); },
   };
 }

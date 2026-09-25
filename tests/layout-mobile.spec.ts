@@ -125,8 +125,10 @@ test("320px composer exposes the first available visual action in the opening vi
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });
   await page.goto("/memory/new/");
 
-  const cta = page.getByRole("button", { name: "Use system design" });
+  const cta = page.getByRole("button", { name: process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 === "1"
+    ? "Choose image" : "Use system design", exact: true });
   await expect(cta).toBeVisible();
+  await expect(cta).toBeEnabled();
   const geometry = await cta.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     return { top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight };

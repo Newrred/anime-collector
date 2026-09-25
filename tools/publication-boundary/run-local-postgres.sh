@@ -30,6 +30,7 @@ if wait "$b"; then success=$((success+1)); else grep -q PUBLICATION_CONFLICT "$w
 [[ "$("${psql[@]}" -Atc "select revision from private.memory_publications where board_id='bbbbbbbb-bbbb-4bbb-8bbb-000000000001'")" == 8 ]]
 echo "PASS: two simultaneous prepares produce one winner and one revision conflict"
 "${psql[@]}" -f "$root/tools/publication-boundary/image-contract.sql"
+"${psql[@]}" -f "$root/tools/publication-boundary/representation-contract.sql"
 "${psql[@]}" -c "update private.memory_public_assets set state='DELETED',reserved_bytes=0 where state='DELETING'" >/dev/null
 "${psql[@]}" -v operation=ffffffff-ffff-4fff-8fff-000000000001 -f "$root/tools/publication-boundary/concurrent-image.sql" > "$work/image-a.log" 2>&1 &
 a=$!
