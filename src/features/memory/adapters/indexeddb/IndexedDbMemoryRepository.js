@@ -1,6 +1,7 @@
 import { exportMemoryMetadata, restoreMemoryMetadata } from "./memoryBackupStore.js";
 import {
   assertCatalogCoverPersonalSignal,
+  createAnimeRef,
   createDefaultSyncEnvelope,
   requireOwnerId,
 } from "../../domain/memoryDomain.js";
@@ -430,9 +431,32 @@ export class IndexedDbMemoryRepository {
       await transactionDone(transaction);
       return null;
     }
-    const title = card.privateTitleId
+    let title = card.privateTitleId
       ? await requestResult(stores.titles.get(card.privateTitleId))
-      : await requestResult(stores.anime.get(card.animeRefId));
+      : card.animeRefId ? await requestResult(stores.anime.get(card.animeRefId)) : null;
+    // A newly synced device has a catalog identity and saved title snapshot,
+    // but no device-local AnimeRef. Rebuild only that private reference, without
+    // inventing external provenance or changing the shared catalog.
+    if (!card.privateTitleId && !title && card.catalogAnimeId) {
+      try {
+        title = { ...createAnimeRef({
+          id: `synced:${ownerId}:${card.id}`,
+          catalogAnimeId: card.catalogAnimeId,
+          displayTitle: card.titleSnapshot,
+          sourceBinding: null,
+          verificationState: "PROVIDER_CANDIDATE",
+          now: card.updatedAt,
+        }), ownerId };
+      } catch (error) {
+        if (error?.name !== "MemoryDomainError") throw error;
+        title = null;
+      }
+      if (title) {
+        stores.anime.put(title);
+        card.animeRefId = title.id;
+        stores.cards.put(card);
+      }
+    }
     // Recover an older pulled card whose visual arrived before the card itself.
     const asset = card.visualAssetId
       ? await requestResult(stores.assets.get(card.visualAssetId))

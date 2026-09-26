@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 identity HTTP handler with actual local persistent store",
+  "status": "LOCAL_HTTP_DB_PASS_NOT_LIVE_IDENTITY_VERIFICATION",
+  "command": "wsl.exe -u postgres -e env IDENTITY_TEST_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/identity/run-local-postgres.sh",
+  "log": ".cache/identity-http-store.log",
+  "exitCode": 0,
+  "passNotices": 24,
+  "newHttpDatabaseChecks": 3,
+  "verified": "Actual loopback HTTP issue/complete calls through production handler, identity core and store adapter persist RECORDED:1 in disposable PostgreSQL. Replay returns409 without duplicate transition. Actual session row deletion during synthetic provider lookup makes completion return401 and preserves PENDING:0.",
+  "files": ["tools/identity/http-store-integration.mjs","tools/identity/core-store-integration.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "limits": "authenticate callback and provider are synthetic; Auth schema is a minimal fixture, RPC transport psql. No real JWT/JWKS, Google OAuth, identity provider or public API deployment. Guardian relationship/consent and adult viewing permission remain incomplete.",
+  "migrationAndRollback": "No production code changes in this step. No remote migrations, flags, dependencies or deployment. HTTP server and disposable DB stopped at completion.",
+  "priorEvidence": "Earlier unit381 and browser/publication checks were not rerun; this run covers identity SQL/core/HTTP integration only.",
+  "remaining": ["Verified provider integration and operator contract/cost", "Guardian relationship and consent workflow", "Country-specific eligibility policy", "Persistent recovery after lost HTTP success response", "D01 test migration approval, physical devices and D03-D06 gates"],
+  "next": "Implement owner/session-bound request status recovery so a lost successful response can be resolved without another provider verification or duplicate evidence."
+}

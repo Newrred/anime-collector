@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 real application gateway against migrated local PostgreSQL",
+  "status": "LOCAL_GATEWAY_DB_PASS_NOT_HOSTED_E2E",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin CONTENT_GATEWAY_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "log": ".cache/content-gateway-integration.log",
+  "exitCode": 0,
+  "passNotices": 380,
+  "newGatewayScenarios": 5,
+  "implementation": "Production SupabasePublicationGateway imported directly. Only RPC transport replaced with disposable PostgreSQL psql; SQL functions produce all review DTOs, revisions, state transitions and errors.",
+  "verified": ["Pending home queue", "Exact review package and reread", "Classification named arguments, closed case and pending queue removal", "Stale review error mapping", "Non-moderator error mapping"],
+  "files": ["tools/publication-boundary/content-gateway-integration.mjs", "tools/publication-boundary/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "productionCodeChanged": false,
+  "privacyAndRollback": "Synthetic local fixture only. No token, remote URL, private user data, remote migration or deployment. Local PostgreSQL stopped by runner.",
+  "limits": "Not Google OAuth, PostgREST transport, hosted Auth/Storage, UI with live DB, or physical phones. Earlier mocked UI checks remain separate.",
+  "next": "Connect the existing browser review flow to real local DB responses and verify one complete operator classification action; hosted application remains separately gated."
+}

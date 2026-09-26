@@ -1,0 +1,20 @@
+{
+ "date":"2026-09-27",
+ "work":"W08 public eligibility scope and wait expiry",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-publication-candidate.sql","tools/identity/eligibility-publication-contract.sql","tools/identity/eligibility-publication-races.sh","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "finding":"Shared require_publication_writer also serves follow. Narrowed new PUBLIC_PUBLISH guard to six actual preparation/publication RPCs; original writer remains intact.",
+ "implementation":"Exact function signatures preserved by local wrapper installer; originals moved private and revoked; guard before and after original call in same transaction so expiration after lock wait rolls back changes.",
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit 0; 107 PASS messages = previous 103 + 4 checks",
+ "log":".cache/eligibility-publication-races.log",
+ "verified":["Revoked public eligibility permits block","Revoked public eligibility permits unfollow","Original internal writer remains independent of PUBLIC_PUBLISH","Actual publish waits on home row lock past expiry; transaction rejects and leaves published selection/operation unchanged"],
+ "testCorrection":"Internal helper check initially ran as authenticated and correctly hit private schema ACL. Moved internal assertion to database owner; product ACL unchanged.",
+ "notVerified":["Live following of readable home under new guard","All six RPC expiry races separately","Public asset completion eligibility","Public visibility after owner revocation","MATURE_VIEW","Hosted Auth/provider/UI"],
+ "securityPrivacy":"No real private data or credentials. Existing moderation/flags retained, private originals inaccessible to clients/service role.",
+ "newUserBehaviorPass":"Local RPC only",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Disposable database stopped, optional local adapter only",
+ "next":"Complete public asset finalization eligibility coverage before public-read/adult-view integration"
+}

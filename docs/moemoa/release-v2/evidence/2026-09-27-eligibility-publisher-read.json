@@ -1,0 +1,20 @@
+{
+ "date":"2026-09-27",
+ "work":"C02/W08 existing-public-content publisher revocation gap",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "contract":"C02 requires publisher eligibility withdrawal to affect existing public body/image reads, not only new publication calls.",
+ "filesChanged":["tools/identity/eligibility-viewer-candidate.sql","tools/identity/eligibility-publisher-read-contract.sql","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "finding":"Local prototype previously checked viewer MATURE_VIEW and new PUBLIC_PUBLISH operations but left existing GENERAL board/home readable after owner revocation.",
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "before":"exit3; FAIL publisher revocation hides existing GENERAL board and home; .cache/eligibility-publisher-before.log",
+ "after":"exit0; 141 PASS messages = previous136 plus five new checks; .cache/eligibility-publisher-after.log",
+ "implementation":"Local board/home readers additionally require current owner PUBLIC_PUBLISH evidence, policy and expiry. Existing service image resolution calls the same reader. No destructive changes or automatic revocation of stored snapshots.",
+ "verified":["Owner revocation hides existing GENERAL board and home from anon","Existing image placement resolver returns null","Published snapshot, READY image and reserved bytes retained","Expired publisher grant denies reading","Current publisher grant restores visibility without rewriting snapshot"],
+ "testLimits":"Actual disposable PostgreSQL with synthetic grants/reviews/accounts. Browser and remote behavior not newly tested this turn. Previously verified image HTTP recheck and viewer checks reran in the same suite.",
+ "securityPrivacy":"No real private data or credentials; source images and usage records preserved; no operational grants issued",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Local SQL prototype only; disposable DB stopped",
+ "remaining":"Mutation/promotion expiry after waits; real eligibility issuer/revoker and country/guardian contract; pre-signup guardian flow; hosted tests and exact release candidate",
+ "next":"Reproduce and close mutation/promotion expiration during blocking waits while preserving completed-operation replay"
+}

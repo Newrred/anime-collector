@@ -5,6 +5,14 @@ import sharp from 'sharp';
 import { createPrivateImageHandler, cleanupPrivateImages } from '../../src/server/privateImages/handler.js';
 import { PrivateImageError, processPrivateImage, hash } from '../../src/server/privateImages/processImage.js';
 import { pngBytes, webpVp8xBytes } from '../catalog-lab/fixtures/cover-valid-images.mjs';
+import { privateRpc } from '../../src/server/privateImages/supabaseBackend.js';
+
+test('private RPC preserves bounded eligibility failures and sanitizes unknown errors',async()=>{
+  for(const [code,status] of [['ELIGIBILITY_REQUIRED',403],['ELIGIBILITY_EXPIRED',403],['ELIGIBILITY_POLICY_CHANGED',409],['ELIGIBILITY_POLICY_UNAVAILABLE',503]]) {
+    await assert.rejects(privateRpc({rpc:async()=>({error:{message:code}})},'test',{}),{code,status});
+  }
+  await assert.rejects(privateRpc({rpc:async()=>({error:{message:'private secret detail'}})},'test',{}),{code:'PRIVATE_IMAGE_SERVICE_FAILED'});
+});
 
 const A='11111111-1111-4111-8111-111111111111', ASSET='aaaaaaaa-aaaa-4aaa-8aaa-000000000001', OP='ffffffff-ffff-4fff-8fff-000000000001', ID='eeeeeeee-eeee-4eee-8eee-000000000001';
 const policy={revision:'TEST_ONLY',mainMaxBytes:1000000,thumbnailMaxBytes:120000};
@@ -61,6 +69,22 @@ async function withServer(h,fn){
   try {await fn(`http://127.0.0.1:${server.address().port}`);} finally {await new Promise(resolve=>server.close(resolve));}
 }
 const post=(base,bytes=source,extra={})=>fetch(base+'/api/private-image',{method:'POST',headers:{...headers,...extra},body:bytes});
+
+test('private HTTP completion eligibility failure preserves prepared objects until explicit cancel',async()=>{
+  const h=harness(),rpc=h.backend.rpc;
+  h.backend.rpc=async(name,args)=>name==='complete_memory_private_image'
+    ?privateRpc({rpc:async()=>({error:{message:'ELIGIBILITY_EXPIRED'}})},name,args):rpc(name,args);
+  await withServer(h,async base=>{
+    const response=await post(base);
+    assert.equal(response.status,403);
+    assert.deepEqual(await response.json(),{error:'ELIGIBILITY_EXPIRED'});
+    assert.match(response.headers.get('cache-control'),/(?:^|,\s*)no-store(?:,|$)/);
+    assert.equal(h.state.record.state,'PREPARING');assert.equal(h.objects.size,2);assert.equal(h.state.removals,0);
+    const cancelled=await fetch(base+'/api/private-image',{method:'DELETE',headers});
+    assert.equal(cancelled.status,200);assert.equal(h.state.record.state,'DELETING');
+    assert.equal(h.state.removals,0);assert.equal(h.objects.size,2);
+  });
+});
 
 test('private processor validates pixels/animation/magic and hashes real stripped bytes',async()=>{
   const bytes=await sharp({create:{width:100,height:200,channels:4,background:'#f880'}}).png().withExif({IFD0:{Artist:'synthetic-private-fixture'}}).toBuffer();

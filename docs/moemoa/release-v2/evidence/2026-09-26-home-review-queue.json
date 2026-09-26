@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 initial minihome classification and pending queue pagination",
+  "status": "LOCAL_SQL_PASS_NOT_RELEASE_READY",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "log": ".cache/content-home-queue.log",
+  "exitCode": 0,
+  "passNotices": 369,
+  "newAssertions": 15,
+  "verified": [
+    "Unclassified home enters queue, starts at revision zero and reuses the exact review case",
+    "Exact classification closes case and removes current home from pending queue",
+    "Changed bio returns home to queue; further change refuses stale classification",
+    "Withdrawn home denies review content and leaves pending queue",
+    "Twenty-five synthetic homes paginate twenty plus five, correct cursor, no duplicates or omissions, empty page after final target",
+    "Invalid target kind rejected"
+  ],
+  "changedFiles": ["tools/publication-boundary/content-home-queue-contract.sql", "tools/publication-boundary/content-home-contract.sql", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "implementationChanged": false,
+  "migrationAndRollback": "No formal migration or hosted changes. Fixtures run in rollback savepoints within the existing disposable local database runner; runner stops local PostgreSQL afterward.",
+  "privacy": "Synthetic accounts and metadata only, no private user content or credentials included.",
+  "priorPass": "Previous unit368, browser29/skip1 and build19 were not rerun because only SQL test fixtures and records changed.",
+  "limitations": "Local PostgreSQL role simulation, not hosted Auth/Storage integration or actual phone behavior. Adult eligibility and guardian consent still incomplete.",
+  "next": "Review candidate SQL for migration readiness and unresolved publication/policy-change concurrency before preparing a formal migration."
+}

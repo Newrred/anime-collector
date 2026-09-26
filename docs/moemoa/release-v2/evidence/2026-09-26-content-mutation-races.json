@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-26",
+  "scope": "W08/W14 stale content classification during concurrent mutations",
+  "status": "LOCAL_DB_RACE_PASS_NOT_RELEASE_READY",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "log": ".cache/content-mutation-races.log",
+  "exitCode": 0,
+  "passNotices": 372,
+  "newRaceScenarios": 3,
+  "verified": "Two actual PostgreSQL sessions; writer row lock is observed via pg_stat_activity/PgSleep before classification starts. Snapshot mutation rejects old hash with PUBLICATION_CONFLICT; withdrawal rejects with NOT_FOUND; policy mutation rejects old policy with CONTENT_POLICY_CHANGED. All preserve classification revision1 and exactly one prior audit row.",
+  "limitations": "Synthetic direct row mutations, not publish/revoke UI or RPC end-to-end. Mutation-first ordering only; not every possible lock ordering. Existing hosted PASS not rerun.",
+  "files": ["tools/publication-boundary/content-mutation-races.sh", "tools/publication-boundary/content-review-races.sh", "tools/publication-boundary/content-review-race.sql", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "implementationChanged": false,
+  "migrationAndRollback": "No formal migration, remote schema, settings or deployment changed. Synthetic commits occur only inside the disposable local cluster stopped by the runner.",
+  "privacy": "No user image bytes, credentials or private notes used.",
+  "remaining": ["Formal migration readiness and rollback review", "Hosted integrated classification", "Adult eligibility and guardian consent", "Country policies, physical devices and D03-D06"],
+  "next": "Prepare the reviewed classification schema as a version-controlled migration, preserving the disabled launch state; do not apply remotely without the applicable gate."
+}

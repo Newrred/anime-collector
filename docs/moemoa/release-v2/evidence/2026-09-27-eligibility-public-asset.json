@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-27",
+  "work": "W08 public asset finalization eligibility",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "filesChanged": ["tools/identity/eligibility-publication-candidate.sql", "tools/identity/eligibility-public-asset-contract.sql", "tools/private-images/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "implementation": "Service completion derives actor from stored asset owner, checks PUBLIC_PUBLISH before and after original completion in the same transaction. Private-source reservation joins seven wrapped authenticated entrypoints. Unguarded originals remain private and inaccessible to service/client roles.",
+  "command": "wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+  "result": "exit 0; 113 PASS messages; previous 107 plus six new public asset assertions",
+  "log": ".cache/eligibility-public-asset.log",
+  "verified": ["Revoked stored owner's eligibility denies completion", "Denied completion keeps PREPARING and reserved 4194304 bytes", "Revoked owner can cancel without premature quota release", "Valid eligibility cannot replace revoked image rights", "Service cannot call unguarded original", "Eligible completion reaches READY and settles 200 measured bytes"],
+  "testCorrection": "Initial test expected IMAGE_RIGHTS_REQUIRED; existing original rejects revoked rights as PUBLICATION_RESTRICTED. Corrected assertion only, preserved rights implementation.",
+  "newUserBehaviorPass": "Six synthetic local SQL assertions, no hosted user behavior PASS",
+  "notVerified": ["Real public Storage bytes and browser", "Public asset completion lock races", "Private-source reservation full path under new guard", "Existing public visibility after owner revocation", "MATURE_VIEW and real age/guardian provider", "Hosted integration"],
+  "securityPrivacy": "Synthetic fixtures only. No credentials, real private images, rights approvals or age evidence issued. Existing source/rights/quota checks retained.",
+  "remoteChanges": 0,
+  "formalMigrations": 0,
+  "rollback": "Local prototype only; disposable PostgreSQL stopped by runner",
+  "next": "Audit authenticated viewer propagation for adult public reads; keep MATURE closed until applicable gates pass"
+}

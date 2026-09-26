@@ -3,8 +3,10 @@ import { useAuthSession } from '../../../hooks/useAuthSession.js';
 import { isPrivateUserImage, privateImageTransfer, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
 
 const message = (code, ko) => {
+  if (['ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code)) return ko ? '계정의 이용 자격 확인이 필요해 새 이미지 전송을 진행할 수 없습니다. 원본과 대기 중인 요청은 유지됩니다.' : 'Your account eligibility needs verification before a new image transfer. Your original and pending request are kept.';
+  if (['ELIGIBILITY_POLICY_CHANGED','ELIGIBILITY_POLICY_UNAVAILABLE'].includes(code)) return ko ? '이용 자격 확인 기준이 변경됐거나 준비되지 않아 전송할 수 없습니다. 원본과 대기 중인 요청은 유지됩니다.' : 'Eligibility requirements have changed or are unavailable. Your original and pending request are kept.';
   if (code === 'NOT_FOUND') return ko ? '아직 이 이미지의 서버 사본이 없습니다. 먼저 카드 정보를 동기화해 주세요.' : 'No server copy is available. Sync the card information first.';
-  if (/QUOTA|CAPACITY/.test(code || '')) return ko ? '저장 공간 또는 서비스 한도에 도달했습니다. 원본은 이 기기에 그대로 있습니다.' : 'Storage or service capacity has been reached. Your local original is unchanged.';
+  if (/QUOTA|CAPACITY/.test(code || '')) return ko ? '저장 공간 또는 서비스 한도에 도달했습니다. 최근 이미지를 교체·삭제했다면 이전 사본 정리가 남아 있을 수 있습니다. 잠시 후 같은 요청으로 다시 시도해 주세요. 원본은 이 기기에 그대로 있습니다.' : 'Storage or service capacity has been reached. If you recently replaced or deleted an image, its previous copy may still be awaiting cleanup. Retry the same request later. Your local original is unchanged.';
   if (/DISABLED|PAUSED|POLICY_STALE/.test(code || '')) return ko ? '현재 이미지 연동을 사용할 수 없습니다. 원본은 유지됩니다.' : 'Image sync is currently unavailable. Your original is unchanged.';
   if (code === 'AUTH_REQUIRED') return ko ? '계정이 변경되었거나 로그인이 필요합니다.' : 'The account changed or sign-in is required.';
   if (/IMAGE_SIZE_LIMIT|IMAGE_TOO_LARGE|IMAGE_TOO_COMPLEX/.test(code || '')) return ko ? '안전한 크기의 사본을 만들지 못했습니다. 더 작은 이미지를 선택해 주세요.' : 'A bounded copy could not be created. Choose a smaller image.';

@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-27",
+  "work": "W06/C02 eligibility guard integration into existing mutation RPC",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "filesChanged": ["tools/identity/eligibility-mutation-candidate.sql", "tools/identity/eligibility-mutation-contract.sql", "tools/private-images/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "sourceInspected": ["supabase/migrations/20260902054119_memory_user_functions.sql", "supabase/migrations/20260903141500_catalog_cover_memory_assets.sql", "supabase/tests/database/memory_user_rpc.test.sql", "tools/private-images/run-local-postgres.sh"],
+  "command": "wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+  "result": "exit 0, 64 PASS messages (49 existing private-image checks, 15 new eligibility mutation checks)",
+  "log": ".cache/eligibility-mutation.log",
+  "initialFailure": "Test queried nonexistent public.private_titles; corrected to actual public.memory_private_titles. Product mutation code did not fail.",
+  "verified": ["Actual authenticated public RPC creates private title and DRAFT memory card", "Revoked eligibility rejects new writes", "Exact completed replay returns same receipt", "Changed replay hash remains rejected", "Owner DELETE succeeds after revocation", "Actual tombstones and version increments", "Denied writes/retries add no title operations", "Renamed implementation cannot be called by client", "DELETE and replay exemptions preserve cross-account rejection"],
+  "scope": "Disposable PostgreSQL loaded from repository migrations; local optional wrapper around existing private mutation; synthetic auth.uid and evidence fixtures",
+  "newUserBehaviorPass": "Local RPC behavior only, no browser or hosted user test",
+  "notVerified": ["Complete visual card and Board flows with eligibility", "Guest promotion and conflict resolution with eligibility", "Actual mutation two-session eligibility race (previous race used a probe)", "Storage upload/finalization eligibility", "Recovery UI", "Hosted Auth/provider/guardian consent"],
+  "securityPrivacy": "Original owner/device/hash/version/tombstone validation retained; private implementation ACL revoked; no real private data or provider credentials",
+  "formalMigrations": 0,
+  "remoteChanges": 0,
+  "rollback": "Optional integration is confined to disposable runner; cluster stopped on exit",
+  "next": "Verify actual mutation and eligibility revocation race plus Board/promotion paths before preparing a formal migration"
+}

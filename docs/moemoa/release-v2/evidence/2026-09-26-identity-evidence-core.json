@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 server identity-request binding core, not an enabled authentication feature",
+  "status": "LOCAL_CORE_UNIT_PASS_ADAPTERS_UNIMPLEMENTED",
+  "files": ["src/server/identity/completeIdentityEvidence.js", "tests/unit/identityEvidence.test.mjs", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "targeted": { "command": "node --test tests/unit/identityEvidence.test.mjs", "log": ".cache/identity-evidence-test.log", "exitCode": 0, "passed": 6 },
+  "regression": { "command": "npm run test:unit", "log": ".cache/identity-evidence-unit.log", "exitCode": 0, "passed": 375 },
+  "verified": "Fake provider/store: account/purpose/expiry validation before provider lookup; exact provider request/channel match; provider exception sanitization; no raw personal facts or access grant in receipt; expiry/policy/logout while awaiting provider; duplicate and concurrent completion contract.",
+  "limitations": "Atomicity is only demonstrated by a test adapter, not persistent DB implementation. No request issuance, DB adapter, provider integration, HTTP route, country evaluator or access grant. Guardian identity is not legal guardian relationship or consent. Adult identity is not adult access authorization.",
+  "security": "No CI/DI, names, phone numbers, DOB or provider raw payload persisted/returned by the core. Only authenticated server session and server-issued stored request may be passed by future adapters.",
+  "migrationAndRollback": "No migration, production dependency, remote setting, deployment or paid service change. Revert isolated core/tests to undo.",
+  "remaining": ["Persistent atomic request store and server issuance", "Verified provider and country policy", "Guardian relationship, consent and withdrawal", "Actual eligibility enforcement across cloud/public readers", "D01 test schema approval and D03-D06 gates"],
+  "next": "Implement and test the persistent request store atomically in the isolated local DB; keep the separate pending classification migration approval unchanged."
+}

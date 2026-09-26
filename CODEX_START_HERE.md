@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-09-27 Pro 재검토 인계:** 사용자 요청으로 구현을 일시정지하고 현재 변경 전체를 기본 브랜치 `master`의 검토용 커밋으로 보존한다. [최신 인계 문서](docs/moemoa/reports/2026-09-27-pro-release-progress-review.md)에서 실제 진도·미완료·검증 한계·검토 질문을 먼저 읽는다. 이 커밋은 출시 승인이나 운영 반영이 아니다. 아래 날짜별 상태는 과거 이력이며 현재 상태는 release-v2 단일 진행판을 따른다.
+
 > **2026-09-26 간이 Web 배포:** 사용자가 폰·지인 테스트용 Git 배포를 승인했다. 기존 계정·기록 및 브라우저 로컬 이미지 선택만 제공하고 private 이미지 연동/Public은 닫는다. 정식 출시 완료 아님. 최신 배포 SHA/검증은 [단일 진행판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)과 해당 배포 증거를 따른다. 아래 미배포 표기는 당시 이력이다.
 
 > **2026-09-26 현재 범위:** 사용자 승인 `FREE-PRIVATE-IMAGE-SYNC-01`에 따라 첫 Web-only 출시에 무료 비공개 최적화 이미지 연동을 포함한다. 기존 W06/W08/W15에서 이어간다. Web 파일 선택·원본 로컬 저장 경로는 default-off 개발 flag로 연결했으며 원격 이미지 연동은 아직 미완료다. MOEMOA 추가 운영비 월50,000원 목표, 50MB/1MB는 승인 전 후보. 아래 원본 백업 제외 이력과 새 최적화 사본 연동을 구분하고 [단일 진행판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)의 현재 카드를 따른다.

@@ -1,1 +1,3 @@
 tools/publication-boundary/*.sh text eol=lf
+tools/private-images/*.sh text eol=lf
+tools/identity/*.sh text eol=lf

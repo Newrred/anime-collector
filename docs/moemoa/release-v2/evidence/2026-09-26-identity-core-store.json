@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 server identity core and actual local request store integration",
+  "status": "LOCAL_CORE_DATABASE_PASS_NOT_PROVIDER_AUTH",
+  "database": { "command": "wsl.exe -u postgres -e env IDENTITY_TEST_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/identity/run-local-postgres.sh", "log": ".cache/identity-core-store.log", "exitCode": 0, "passNotices": 21, "newChecks": 6 },
+  "unit": { "command": "npm run test:unit", "log": ".cache/identity-core-store-unit.log", "exitCode": 0, "passed": 376, "newTests": 1 },
+  "verified": "Service-only getters deny browser roles. Real issue/get/complete RPC arguments and DTOs match JS core/store adapter. Different session of same user denied before provider lookup, exact request completes RECORDED:1, replay denied, policy change during provider lookup leaves request pending. Core independently validates session UUID and same-session binding.",
+  "files": ["src/server/identity/completeIdentityEvidence.js", "src/server/identity/supabaseIdentityStore.js", "tests/unit/identityEvidence.test.mjs", "tools/identity/request-store-candidate.sql", "tools/identity/request-store-contract.sql", "tools/identity/core-store-integration.mjs", "tools/identity/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "limitations": "Provider is synthetic, Auth session table is a minimal fixture and RPC transport is local psql. No HTTP entry, actual token verification, provider contract, guardian relationship, consent, adult access or policy evaluation. No claim of hosted Supabase/PostgREST pass.",
+  "migrationAndRollback": "Candidate outside formal migrations; disposable DB stopped after runner. No remote schema, settings, paid service, dependency or deployment changes. Remove local modules/prototype to revert.",
+  "privacy": "Raw identity facts never returned by the server core or stored in request ledger. Service client must remain server-only; future HTTP adapter must derive identity/session from verified tokens.",
+  "next": "Implement the authenticated server entry with explicit token verification, bounded requests and default-disabled configuration before connecting a provider."
+}

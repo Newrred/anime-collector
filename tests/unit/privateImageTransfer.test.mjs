@@ -26,6 +26,21 @@ async function fixture() {
   return { state, original, copy, options, ready, controller: () => createPrivateImageTransfer(options) };
 }
 
+test('eligibility rejection preserves operation and bytes, then GET recovers completed result', async () => {
+  const f=await fixture(), originalFetch=f.options.fetchImpl;
+  f.options.fetchImpl=async(url,init)=>init.method==='POST'?Response.json({error:'ELIGIBILITY_REQUIRED'},{status:403}):originalFetch(url,init);
+  await assert.rejects(f.controller().upload({consented:true}),{code:'ELIGIBILITY_REQUIRED'});
+  assert.equal(f.state.records.size,1);
+  const pending=[...f.state.records.values()][0];
+  assert.equal(pending.operationId,'stable-operation');
+  assert.equal(await blobHash(f.original),await blobHash(new Blob([pngBytes])));
+  assert.equal(pending.blob,f.copy);
+  f.state.ready=true;
+  f.options.fetchImpl=async(url,init)=>{assert.notEqual(init.method,'POST','recovery must use read only');return originalFetch(url,init);};
+  assert.deepEqual(await f.controller().upload({consented:true}),f.ready);
+  assert.equal(f.state.records.size,0);
+});
+
 test('private transfer requires explicit consent and matching original before upload', async () => {
   const f = await fixture();
   await assert.rejects(f.controller().upload({ consented: false }), { code: 'IMAGE_CONSENT_REQUIRED' });

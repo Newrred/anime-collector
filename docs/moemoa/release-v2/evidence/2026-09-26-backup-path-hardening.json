@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-26",
+  "work": "existing W17",
+  "baseCommit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "status": "LOCAL_IMPLEMENTED_AND_TESTED_NOT_DEPLOYED",
+  "bug": "Creation accepted a file named objects together with objects/main.webp, producing an archive whose paths cannot both be restored.",
+  "reproduction": {"command":"node --test tests/unit/encryptedBackup.test.mjs","log":".cache/backup-path-collision-before.log","result":"FAIL Missing expected rejection"},
+  "fix": "Validate case-insensitive full-name uniqueness and every parent path before create/restore staging. Reject old authenticated manifests with these collisions too.",
+  "files": ["tools/private-images/encrypted-backup.mjs","tests/unit/encryptedBackup.test.mjs"],
+  "verification": [
+    {"command":"npm run test:unit","passed":361,"failed":0,"log":".cache/backup-hardening-unit.log"},
+    {"command":"node tools/private-images/recovery-rehearsal.mjs","exitCode":0,"localRecoveryChecks":17,"existingSqlAndConcurrencyChecks":49,"log":".cache/backup-hardening-recovery.log"}
+  ],
+  "coverage": ["Both input orders and case-insensitive parent collision","Non-adjacent sorted prefix collision","Authenticated older colliding manifest rejected before output","No partial output, source bytes unchanged","Valid DB dump, deletion journal and WebP siblings restore with correct bytes/hash/decode"],
+  "notVerified": ["External cloud backup","Scheduled capture and journal freshness","Hosted disaster recovery","Phone hardware","New age/guardian/adult access controls"],
+  "productionOrRemoteChanges":0,
+  "rollback":"Revert local tool validation only; original files and existing backups untouched."
+}

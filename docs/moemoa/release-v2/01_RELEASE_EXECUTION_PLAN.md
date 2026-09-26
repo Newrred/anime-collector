@@ -1,5 +1,89 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+2026-09-27 후속 사용자 요청: 구현 중단은 유지하되 전체 작업/문서를 master에 커밋해 Pro 검토 자료로 보존한다. 검토 인계 보고서와 현재 요약을 갱신하며 ignored 비밀값/로컬 DB/캐시/사용자 원본은 제외한다. identity shell LF 속성만 보완하여 새 checkout의 검사 스크립트 줄바꿈을 유지한다. 커밋 자체는 배포/운영 DB/Public 승인 아님.
+
+**2026-09-27 사용자 요청으로 실행 일시정지.** 이번 mutation/promotion 대기만료 결함을 재현·보완하고143 PASS(exit0)로 마감했다. evidence/2026-09-27-eligibility-mutation-expiry.json. 최초 post-fix 후속 fixture 상태 오류는 이전 REVOKED 상태 복원으로 교정했다. 기존 완료 replay/삭제 검사도 통과. 새 구현은 시작하지 않으며 03의 기존 계획 대비 검토/현재 작업 카드를 갱신했다. 출시 완료가 아니며 사용자 재개 전 자동 다음 작업 금지.
+
+2026-09-27 C02/W06 저장·승격 대기만료 범위: 현재 guard가 기존 write 전에만 실행되어 이후 잠금 대기 중 만료가 누락될 수 있다. 폐기DB에서 private_titles 테이블을 다른 세션이 잠근 상태로 실제 신규 mutation/promotion을 실행하고 만료 후 결과·실데이터·operation/promotion ledger를 확인한다. 필요한 경우 최초 신규 여부를 저장해 함수 전후 같은 transaction에서 자격을 검사하며 기존 완료 replay/삭제 경로는 그대로 유지한다. 운영0.
+
+2026-09-27 C02/W08 게시자 철회 결과: 기존 공개가 계속 읽히는 실패 exit3 재현 후 local reader의 owner PUBLIC_PUBLISH 현재 증거 검사 추가. 신규5 포함141 PASS(exit0), 익명 본문/미니홈/이미지 차단·snapshot/READY/quota보존·유효 grant 복구 확인. evidence/2026-09-27-eligibility-publisher-read.json. 02의 현재 자격 대조표에 구현/미구현을 분리했다. 다음은 mutation/promotion 잠금 대기 중 만료와 기존 replay 보존. 실제 자격 발급·보호자 관계/가입 전 동의·국가정책·hosted는 별도 잔여. 운영0.
+
+2026-09-27 C02/W08 게시자 철회 감사: C02 기존 계약29행은 게시자 자격 철회가 기존 공개 본문/이미지에도 적용되어야 한다. 현재 local viewer helper는 방문자만 검사해 이를 놓쳤다. 기존 데이터 삭제 없이 공개 reader에서 소유자 PUBLIC_PUBLISH 현재증거/정책/만료 조건을 요구하고, GENERAL 익명 보드·미니홈·서비스 이미지 해석도 철회 후 거부하는 failing regression부터 실행한다. 정식 migration 전 local 보완이며 운영0.
+
+2026-09-27 W08/W13 성인 이미지 HTTP/SQL 결과: 실제 public handler/adapter→폐기PostgreSQL resolver 연결 신규5 포함136 PASS(exit0). 정상WebP hash/length, 익명SQL거부·Storage0, Storage 중 실제자격철회/세션삭제→두번째SQL거부/404/bytes0, 실제전송budget3*2097152보존 확인. evidence/2026-09-27-eligibility-viewer-http.json. Auth/Storage/분류·연령증거는 합성fixture, 실제업체/hosted PASS 아님. 다음은 local 자격 구현 전체를 기존 C/W 계약과 대조해 formal migration 후보 전 누락을 정리한다. 운영/정식migration0.
+
+2026-09-27 W08/W13 성인 이미지 HTTP/SQL 통합 범위: 기존 public handler→verified-session adapter→service RPC를 실제 폐기 PostgreSQL로 연결한다. Auth는 합성 claims/user, Storage는 합성 WebP Buffer임을 명시한다. 정상bytes/hash, 익명거부, 다운로드 사이 DB자격철회/세션삭제→재검사404·이미지미반환, 실제 배달 quota 유지 확인. 원격0.
+
+2026-09-27 W08/W13 viewer 브라우저 결과: Chromium4 PASS(28.4s). 보드/미니홈 각각 실제 WebP decode24px, 표시 후 로그아웃→snapshot/img 제거·BlobURL해제, 이미지 응답 보류 중 계정변경→이전내용 제거·늦은이미지미표시. pageerror/overlay0. evidence/2026-09-27-eligibility-viewer-browser.json. 실제 React/runtime이며 Auth/RPC/Storage는 합성 adapter; hosted/실기기 PASS 아님. 다음은 성인 이미지 실제 HTTP→폐기PostgreSQL 결합 및 Storage 중 철회 실검사. 원격/제품코드 추가수정0.
+
+2026-09-27 W08/W13 viewer 브라우저 범위: 설치된 Playwright Chromium으로 보드/미니홈 각각 이미지 decode 후 로그아웃→snapshot 제거/URL 해제, 이미지 지연 중 A→B 전환→늦은 이미지 미표시를 실행한다. backend/auth는 DEV 합성 adapter임을 명시하며 hosted 인증 PASS와 구분한다. agent-browser 실행파일 미설치여서 기존 Playwright 사용, 새 의존성 설치0.
+
+2026-09-27 W08/W13 client viewer 결과: default-off 인증 metadata reader/이미지 blob fetch 연결, 조회 전후 세션 비교·async 구독 등록 gap 재확인·계정 변경 시 부모 snapshot 비우기/abort/기존 blob cleanup 연결. 순수 adapter 신규3 tests와 build19페이지 PASS. evidence/2026-09-27-eligibility-viewer-client.json. React 코드 점검은 했으나 실제 화면 제거/이미지 URL 해제/로그아웃 브라우저 동작은 아직 미검증이다. 다음은 보드·미니홈 실제 브라우저 계정전환/로그아웃 및 지연응답 폐기 검증. 원격0.
+
+2026-09-27 W08/W13 client viewer 범위: default-off PUBLIC_MEMORY_AUTHENTICATED_VIEWER_V1 아래 reader와 이미지 fetch를 현재 로그인 계정에 연결한다. 조회 전후 세션 비교와 세션 변경 구독으로 보드/미니홈 상태를 비우고 진행 중 요청을 중단한다. Blob URL은 기존 effect cleanup에서 해제한다. 익명/default-off 경로 유지, 순수 adapter 단위검증 및 build 후 실제 브라우저 검증은 별도 기록한다.
+
+2026-09-27 W08/W13 성인 이미지 서버 결과: verified claims/getUser에서 user/session/expiry 추출, service-only SQL에서 현재 세션 확인 및 임시 context 설정/복원. default-off API flag 아래 Storage 전후 인증과 visibility 재검사. 로컬 HTTP 신규2·SQL 신규6 포함131 PASS, 전체unit391·build19페이지 PASS. evidence/2026-09-27-eligibility-viewer-image.json. HTTP는 Auth/RPC/Storage 합성이고 SQL은 별도 실제 폐기 DB 검증이며 통합 hosted PASS로 합산하지 않는다. 다음은 client 인증 reader/이미지 연결 및 로그아웃·계정전환 시 폐기, 이어 통합검증. 운영/정식migration0.
+
+2026-09-27 W08/W13 성인 이미지 서버 연결 범위: 기존 signed-session 검증을 재사용하여 서버에서만 user/session/token expiry를 추출하고 service-only resolver에 전달한다. SQL은 현재 세션 확인 후 transaction-local viewer context로 기존 resolver를 호출하며 전후 context 복원한다. 이미지 API의 default-off viewer flag 아래 Authorization 요청만 연결하고 Storage 전후 인증/DB 검사를 반복한다. 익명 일반 경로와 원본 hash/용량/no-store는 보존한다. 로컬 fixture와 HTTP unit 검증, 운영0.
+
+2026-09-27 W08/W13 성인 metadata 로컬 결과: board/home reader의 exact review와 기존 숨김/철회 검사를 보존한 MATURE_VIEW+현재 세션 조건 추가. 신규12 포함125 PASS(exit0), GENERAL 익명 유지·로그인 단독 거부·기본off·정상 nested home·철회/만료/정책변경/삭제세션/다른사용자세션/차단/오래된review 거부 확인. evidence/2026-09-27-eligibility-viewer.json. 아래 범위 중 이미지 resolver는 저장소 좌표를 사용자 RPC에 노출하지 않도록 기존 service-only ACL을 유지했으며 아직 viewer 전달 미연결이다. 다음은 검증된 서버 세션→이미지 service resolver→Storage 후 재검사 연결, 이후 client 세션변경 폐기. JWT/Auth/분류는 합성fixture, 성인인증 실제 PASS 아님. 원격/정식migration0.
+
+2026-09-27 W08/W13 성인 reader 로컬 연결 범위: 정식 migration 밖 prototype에서 exact content review를 보존하며 GENERAL 또는 현재 MATURE_VIEW 증거+유효 auth session으로만 읽도록 한다. JWT subject/session/expiry/anonymous, DB session 종료와 증거 철회를 검사한다. 이미지 전용 authenticated resolver도 동일 reader를 사용하며 서비스 경로에 임의 viewer ID를 받지 않는다. 합성 DB fixture만 실행하고 실제 인증·국가 정책 승인이나 성인 활성화로 간주하지 않는다. 이후 HTTP/client 연결 및 계정 전환 폐기 검증이 남는다.
+
+2026-09-27 W08/W13 방문자 감사 결과: 공개 metadata는 익명 client, img URL은 token 미전달, 서버 resolver는 service-only임을 현행 코드로 확인했다. 성인 접근은 인증 reader+이미지 fetch+세션변경 폐기+서버 자격 검사를 함께 연결해야 한다. 추가로 공개 자격 오류가 일반 실패로 소거되는 unit 실패를 재현하고 3개 전달 지점 수정, 관련36 tests PASS(신규2). evidence/2026-09-27-public-viewer-boundary.json. 전체 unit/build/hosted/화면 PASS는 추가하지 않았다. 다음은 default-off 로컬 인증 방문자 수직 연결, 실제 인증업체·국가정책과 원격 적용은 별도 게이트.
+
+2026-09-27 W08/W13 방문자 경로 감사 및 오류 전달: 공개 reader는 별도 익명 client, 공개 이미지 img URL과 service-only resolver에는 viewer 전달이 없다. 따라서 MATURE 허용 SQL만 바꾸지 않고 인증된 reader/이미지 fetch/session 변경 폐기/서버 자격 검사 연결을 하나의 잔여로 유지한다. 이번에는 기존 공개 자격 guard의 오류가 server RPC→이미지 준비 및 publication gateway에서 소거되는 누락을 failing unit으로 확인 후 네 가지 bounded code만 보존한다. 성인 공개 활성화/원격 적용은 하지 않는다.
+
+2026-09-27 W08 public asset 완료 결과: 저장된 소유자 PUBLIC_PUBLISH 전후 검사와 private 사본 예약 wrapper를 추가했다. 로컬 PostgreSQL/HTTP 묶음 exit0, 기존107+신규6=113 PASS. 철회 후 완료 거부·예약 보존·취소 허용·별도 이미지 권리 유지·service 우회 거부·유효 완료의 실제 byte 정산 확인. 초기 테스트의 권리 오류 기대값을 현행 PUBLICATION_RESTRICTED로 교정했다(제품 권리 검사 변경 없음). evidence/2026-09-27-eligibility-public-asset.json. 공개 Storage/화면/hosted 및 개별 완료 경합은 미검증. 다음은 성인 열람의 인증된 방문자 전달 경로 검토이며 원격/정식 migration0.
+
+2026-09-27 W08 public asset 완료 범위: service-role complete는 auth.uid가 아니라 저장된 asset.user_id의 PUBLIC_PUBLISH를 전후 검사한다. private 사본 예약의 외부 RPC도 최종 대기 후 검사를 받도록 기존 wrapper 목록에 포함한다. 실제 reserve→철회→complete거부/취소보존 및 재승인→권리철회거부/유효완료를 합성 로컬 SQL로 검증한다. 국가/권리 승인 생성 API는 만들지 않고 fixture 승인만 사용하며 원격0.
+
+2026-09-27 W08 public 범위/경합 결과: guard를 shared writer에서 실제6RPC로 좁혀 follow의 기존 검사를 보존했다. 차단/팔로우해제/내부writer 및 실제 publish 잠금대기 만료 rollback 신규4 포함107 PASS. evidence/2026-09-27-eligibility-publication-races.json. 내부helper ACL 검사역할을 owner로 교정했으며 제품권한은 유지. 전체6RPC 개별경합/실제follow·public asset완료·MATURE/hosted는 미검증이다. 다음은 public asset complete의자격검사이며 운영0/정식migration0.
+
+2026-09-27 W08 writer 경계 보완: 공통 writer가 follow에도 사용되므로 PUBLIC_PUBLISH가 follow 자격을 임의로 바꾸지 않도록 local guard를 prepare/publish 보드·미니홈, public asset 예약·이미지 준비 6개 RPC로 좁힌다. 함수 전후 동일 transaction 재검사로 잠금 대기 만료 시 쓰기 rollback을 확인한다. 신고/차단/철회는 기존 경로 유지, 운영0.
+
+2026-09-27 W08/W13 PUBLIC_PUBLISH 결과: local 공통 writer guard와 실제 합성 보드/미니홈 RPC 검사 추가, 신규7 포함103 PASS. 권리와 moderation review 조건을 우회하지 않으며 review는 fixture 주입임을 명시했다. 초기 fixture 오류 세 가지(빈 entries, SYSTEM_GENERATED, 디자인 spec 필수키)를 보완 후 통과. evidence/2026-09-27-eligibility-publication.json. 기존 공개 읽기/성인 접근/게시 중 잠금대기 만료와 전체 호출 영향은 별도 잔여. 다음은 writer 호출 전체 및 lock-wait expiry 검증이다. 정식migration/원격0.
+
+2026-09-27 W08/W13 공개 자격 로컬 범위: 기존 require_publication_writer를 보존한 wrapper에서 PUBLIC_PUBLISH를 별도로 요구한다. 공유 저장소의 CLOUD_WRITE/MATURE_VIEW를 대체 자격으로 사용하지 않는다. 미니홈 실제 prepare/publish→자격철회→prepare 거부/revoke 허용을 local RPC로 검증한다. 일반/성인 공개 읽기 정책 연결은 별도이며 지금 MATURE를 열지 않는다. 신규 schema는 prototype만, 원격0.
+
+2026-09-27 W06/W08 SQL-HTTP 결과: 실제 loopbackHTTP→앱handler/processor→privateRpc→PostgreSQL 함수 연결로 신규4 포함96 PASS. 합성 PNG 실제 인코딩/bytes-size, 중간철회403과 예약보존, 취소/정리, 완료응답socket강제파기 후 GET상태/bytes복구를 확인했다. evidence/2026-09-27-eligibility-image-http.json. Auth합성/Storage Map이며 hosted·화면·실기기 검증 아님. 다음은 공개 게시/성인읽기 경계에 자격 증거를 연결할 현행 경로 검토다. 원격/정식migration0.
+
+2026-09-27 W06/W08 SQL-HTTP 실행 범위: 기존 private-image HTTP handler/processor/privateRpc와 실제 폐기 PostgreSQL을 psql adapter로 연결한다. Auth는 합성, Storage는 메모리 Map임을 표시한다. 실제 PNG→WebP 업로드 중 자격철회→403/manifest PREPARING/bytes 유지→명시취소→cleanup, 성공 완료 후 응답 유실→GET READY/실제 bytes 복구를 검증한다. 운영/원격0, 제품 Auth/Storage 통합 PASS가 아니다.
+
+2026-09-27 W06/W08 image 경합 결과: media lock 대기 중 만료가 완료를 허용하는 실패를 재현 후 authorize/reserve/complete에서 lock 획득 직후 guard 재확인을 추가했다. 실제 complete의 철회 먼저/완료 먼저/대기 중 만료3종 신규 포함92 PASS, bytes/quota 유지. evidence/2026-09-27-eligibility-image-races.json. 실행 중단 후 동일 session58644 종료0 확인으로 결과를 회수했다. 별도 reserve/authorize 경합·SQL-HTTP·Storage는 미검증이며 다음 작업은 기존 HTTP handler와 실제 로컬 SQL 연결이다. 정식migration/원격0.
+
+2026-09-27 W06/W08 image 경합 실행 범위: 폐기 DB의 실제 complete RPC와 자격 철회를 두 세션에서 양방향 실행한다. 별도로 media lock 대기 중 만료 시 stale guard가 완료를 허용하는지 재현하고 필요하면 기존 guard→media lock 순서를 유지하며 실제 작업 직전에 만료를 재확인한다. 합성 fixture만, 원격/정식migration0. HTTP/Storage 검증과 구분한다.
+
+2026-09-27 W06/W08 HTTP 결과: 자격 오류 allowlist 누락을 failing regression으로 확인 후 server/controller에 4종 코드와 상태 전달 추가. JSX 안내는 컴파일만 확인. 신규3 포함unit387·build19페이지 PASS. evidence/2026-09-27-eligibility-http.json. 실제 HTTP+합성backend 사본 보존 및 모의fetch GET복구 검증이며 DB/Storage 연결·화면은 별도다. 다음은 이미지 완료/철회 DB 동시성 및 실제SQL-HTTP 통합. 원격0/DB변경0.
+
+2026-09-27 W06/W08 HTTP 자격 오류 실행 범위: 기존 private RPC 오류 allowlist와 전송 controller allowlist에 자격 필요/만료/정책변경/정책미준비를 구분한다. 현재는 일반 실패로 소거될 것으로 예상되므로 회귀를 먼저 실행한다. 실제 loopback HTTP에서는 준비중 완료거부 후 사본 자동삭제0, 전송 controller에서는 journal/원본 보존과 GET 상태 복구를 확인한다. UI는 이유 안내만 추가하고 존재하지 않는 인증 화면으로 안내하지 않는다. 원격/의존성/DB 변경0.
+
+2026-09-27 W06/W08 image 결과: authorize/reserve/complete에 local 자격 wrapper를 추가하고 기존 get/read/cancel/cleanup 유지. 신규14 포함89 PASS, 중간 철회 실패·quota 보존·유예/정산·READY 상태 회수 확인. evidence/2026-09-27-eligibility-image.json. Storage bytes/HTTP·동시성 검증은 별도이며 원격/정식migration0. 다음은 실제 이미지 완료 RPC와 철회 경합, HTTP 오류와 완료 상태 복구 연결 검증이다.
+
+2026-09-27 W06/W08 image 자격 연결 범위: local-only wrapper를 authorize/reserve/complete에 적용해 실제 owner의 CLOUD_WRITE를 검사한다. complete는 서버 manifest owner를 사용한다. 기존 get/read/cancel/cleanup은 유지하여 완료 상태 조회·회수·삭제 정산을 검증한다. 철회 후 새로운 POST는 차단되며 완료응답 유실은 기존 GET policy/manifest로 확인한다. raw Storage/HTTP 업로드 검증으로 확대하지 않고 폐기 DB RPC로 재현·검증한다. 원격/정식migration0.
+
+2026-09-27 W06 Board/승격 결과: 철회 상태에서 빈 guest 승격이 성공하는 local guard 누락을 재현(exit3)하고 승격 진입점에 보완했다. 기존 source hash/device/replay 검사는 원본 함수가 유지한다. 새11 포함75 PASS, 실제 RPC mutation과 철회 양방향 경합의 title/operation ledger까지 확인. evidence/2026-09-27-eligibility-promotion-races.json. 승격 자체 경합·완성 visual카드·Storage·hosted는 미검증이다. 다음은 private image 예약/완료에 local 자격 guard를 연결하고 취소/삭제 정산을 유지하는 검증이다. 정식migration/운영 변경0.
+
+2026-09-27 W06 Board/승격 후속 범위: promote_guest_memory는 공통 mutation 호출 없이 직접 insert하므로 기존 로컬 guard를 우회할 수 있다. 먼저 철회 상태에서 빈 승격 신규 요청을 재현하고 public 승격 wrapper에 동일 transaction guard를 연결한다. 이미 기록된 같은 사용자/guest 승격은 기존 hash/device/replay 검사로 돌려보낸다. Board RPC와 실제 두 세션 저장/철회도 합성 로컬 DB에서 검증하며 원격 적용하지 않는다.
+
+2026-09-27 W06 mutation 결과: optional 로컬 wrapper와 public RPC 합성 계약 추가, 15신규+49기존=64 PASS. 개인 작품/DRAFT card UPSERT·철회 후 새 쓰기 거부·동일 replay·삭제/tombstone·hash/다른계정 거부 확인. 초기 검사 테이블명 오류를 수정했으며 기존 제품 구현 결함으로 분류하지 않는다. evidence/2026-09-27-eligibility-mutation.json. 완성 visual card·Board/승격·실제 mutation 동시성·Storage는 별도 잔여다. 다음은 해당 실제 mutation 경합과 Board/승격을 로컬 검증한다. 원격/정식 migration0.
+
+2026-09-27 W06 mutation 연결 실행 범위: 기존 private-image 폐기 DB runner의 선택 옵션으로 자격 prototype과 공통 private.apply_memory_mutation wrapper를 적용한다. 원래 함수는 이름 변경 후 그대로 재사용하고 DELETE/확정 replay는 기존 검사를 통과하도록 보존한다. 합성 새 계정의 실제 public RPC로 허용 쓰기→철회→새 쓰기 거부/기존 replay/DELETE/다른 계정/변조 hash를 확인한다. 정식 migration·운영 연결은 하지 않으며 기록 회수/UI·Storage까지 완료로 확대하지 않는다.
+
+2026-09-27 W06 자격 prototype 결과: tools/identity의 private 정책/증거/guard와 계약·경합 검사를 추가했다. 신규13+기존25=38 PASS, 정책 기본off·다른계정/목적·철회/만료·클라이언트/서비스 직접 grant 거부, 철회 먼저/쓰기 먼저 양방향 실제 두 세션 순서 확인. evidence/2026-09-27-eligibility-local.json. 합성 쓰기 probe이며 실제 mutation/Storage/동의 철회 UI 연결은 미검증. 다음은 기존 mutation에 로컬 연결하여 UPSERT 거부와 DELETE/replay 보존을 검증한다. 국가/공급자 grant 생성이나 운영 스키마 변경은 하지 않았다.
+
+2026-09-27 W06 로컬 자격 저장소 실행 범위: `tools/identity`의 폐기 PostgreSQL runner에 private 자격 정책/증거 prototype과 transaction 내 guard를 추가한다. 정책 기본off, grant 발급 API 없음, 개인정보 원문 없음. 합성 DB owner fixture로만 증거를 넣고 정책/목적/만료/철회·클라이언트 권한·두 세션 경합을 검사한다. 실제 mutation/Storage 연결·국가 정책·공급자 권한 부여는 후속이며 이 단계 PASS와 구분한다. 정식 migration/원격 변경 없음, 폐기 DB 종료로 복구한다.
+
+2026-09-27 W06 이용 자격 적용 지점 결과: 실제 mutation/promotion wrapper와 계정 초기화, private image 예약/완료/회수 경로를 조사해 C02에 매핑했다. 완료 replay와 새 쓰기, DELETE/철회/회수와 UPSERT, service-role 작업의 실제 owner를 구분해야 한다. 아직 국가 정책이나 권한 상태를 배포하지 않았으며 코드/DB 변경0·새 runtime PASS0. 기존 384 unit은 과거 실행이다. 다음 로컬 작업은 서버 소유 증거 상태 및 철회와 쓰기 원자성 계약이며 외부 공급자의 VERIFIED를 성인/보호자 자격으로 바로 승격하지 않는다.
+
+2026-09-27 W06 가입 경계 감사 결과: OAuth 시작→callback 교환→계정 runtime 초기화 경로와 identity prototype의 기존 user/session 필수 조건을 대조했다. 가입 전 아동 동의는 미구현이고 GUARDIAN_IDENTITY를 해당 완료 근거로 사용할 수 없다. C02에 신규 생성 hook 및 주체/일회성 동의 결속 계약을 추가했다. 공식 hook 안내는 기술 수단의 근거이며 국가별 동의 충족 판정이 아니다. 소스 검색·읽기/문서 diff 검증만 수행, 신규 runtime PASS0. 다음은 이미 로그인한 사용자의 자격 철회 시 신규 쓰기와 데이터 회수/삭제를 분리할 기존 서버 지점 감사다. 실제 국가별 보관/연령 기준이나 원격 Auth 설정은 변경하지 않는다.
+
+2026-09-27 W06 서명 검증 결과: 실제 SDK/WebCrypto가 ES256 위조·변조·만료를 차단하고 사용자 조회 불일치/익명/거부도 인증 실패로 처리했다. 제품 수정 불필요, 신규 회귀1 및 전체 unit384 PASS. evidence/2026-09-27-identity-signed-session.json에 범위·미검증을 기록했다. 다음은 가입 전 동의와 기존 Google OAuth 시작 경계 검토이며 실제 공급자·국가별 정책을 임의 확정하지 않는다.
+
+2026-09-27 W06 실행 범위: 설치된 Supabase Auth SDK의 실제 getClaims/getUser와 로컬 HTTP JWKS fixture를 연결한다. 일회용 ES256 키로 정상·위조·만료 토큰 및 사용자 조회 불일치를 검증한다. 외부 Auth는 합성이므로 실제 Google 로그인/hosted 세션 취소 PASS와 구분한다. 신규 의존성·원격 변경 없이 tests/unit에 회귀를 추가하고 전체 unit을 실행한다. 기존 서버 구현은 재현된 실패가 있을 때만 수정한다.
+
+2026-09-26 W06/D03/D04 공급자 준비 결과: 기존 계획 안에서 공식 PortOne 요금·채널·V2 본인인증 안내를 대조하고 `../operations/2026-09-26-identity-provider-inquiry.md`에 발송 가능한 문의 초안을 작성했다. 본인인증 단독 OPI 요금 면제와 인증 제공사 비용을 구분하며, 개인 계약/해외 현지 인증/보호자 관계 기능은 미확정으로 남긴다. 외부 발송·계약·API 연결·유료 변경 없음. 문서 링크/공백 검사만 수행하며 새 사용자 행동 PASS로 계산하지 않는다. 다음은 기존 W06 실제 인증 세션 검증 공백을 로컬에서 확인하는 작업이다.
+
 작성일: 2026-09-22 · 상태: **실행 지침 / 구현 상태는 03 진행판에서 관리**
 
 > 목표는 고정하고, 구현 순서와 수단은 근거에 따라 바꾼다.
@@ -16,12 +100,14 @@
 - 배포 관찰: 29ca80d Git 배포 READY, 실제390px에서 합성 로컬 이미지 저장/Archive 재방문/detail decode 확인. cloud build-info workingTreeDirty=true가 기존과 같이 남아 installCommand를 npm ci로 고정하고 build log에 파일 경로만 기록해 원인을 확인한다. 비밀 값/파일 내용은 로그에 출력하지 않는다.
 
 ### W06/W08/D01 다음 hosted 검사 범위 — 실행 전 고정안
+- 2026-09-26 실행: 사용자가 위 다음 작업 설명 후 “작업 이어서 진행”을 지시. 기존 test-only 합성 이미지/계정 승인과 함께 이 고정 범위의 테스트 실행으로 해석한다. 운영 적용/일반 사용자 권리 승인이 아니다. 적용 전 관련 함수/설정만 사본 저장, transaction 내 두 migration 및 history 기록, API 실증 후 정책/권리 원복. 실제 Google 로그인과 실물 휴대폰은 별도 근거 없으면 PASS로 만들지 않는다.
 - 대상은 기존 moemoa-test(nmgkhknponvzcwliajyk)만. 운영 moemoa.xyz 배포 설정과 분리된 test 실행 환경을 사용한다. 추가 계정/기초격리/72table 복원을 반복하지 않는다.
 - 적용 후보: 20260925152859_memory_private_image_boundary.sql → 20260925164126_private_representation_public_rights.sql. 기존 retry/author/visual-null 세 migration은 이미 test 적용된 근거와 migration history를 대조해 중복 적용하지 않는다. 실제 적용 시 source SHA와 별도 test data release ID를 기록한다.
 - 임시 정책 제안: revision TEST_ONLY_PRIVATE_REP_20260926, quota50,000,000bytes/main1,000,000/thumb120,000, 총 test 물리량40MiB·10assets, owner 준비/변환 각20회/일·업로드 동시1, owner 읽기40MiB/global80MiB. 숫자는 합성 검사 한도이며 운영 가격·서비스 약속이 아니다. 승인된 A/B 및 합성 이미지에만 사용한다.
 - 검사: A 명시 private opt-in→실제 Storage 저장→원본 없는 새 Web 세션 표시; 미승인 사본 공개 거부→정확 source와 representation trusted 근거 부여→별도 public 동의→게시→새 익명 열람. B/변조/철회/불명 완료는 실제 owner/bytes/hash/operation/quota 변화를 비교한다.
 - 정리: public 게시 철회·읽기 차단→합성 private media 취소/지연 cleanup→실제 bytes 제거 후 용량 정산→원래 test flags/정책/역할 복원. 이력·원본 checksum·권리철회 fence를 역삭제하지 않는다. 권한 부족이나 서로 다른 두 시도에서 진전 없음이면 정확한 차단만 남긴다.
 - 이번 간이 배포는 위 원격 적용/정책/권리 쓰기를 실행하지 않았다. D01에서 실제 변경 범위와 승인을 확정한 뒤 실행한다.
+- 후속 실행 결과(2026-09-26): 사용자의 이어서 진행 지시로 test-only 두 migration 적용, 실제 private HTTP/Auth/RPC/Storage15항목 PASS. admin test sessions으로 검증하며 OAuth/제품 두 기기 UI 성공과 구분. Public은 전 과정off, 권리 승인 추가0. 기존 삭제상태 제약 때문에 초기 fixture 정리1실패가 있었고, 정책 원복→올바른 tombstone→지연 cleanup 후 실제객체0/용량0/RLS·ACL 등4항목 PASS로 복구했다. 상세 evidence/2026-09-26-private-image-hosted-roundtrip.json. 다음은 실제 UI 두 세션과 합성 trusted rights 양성 Public 경로; 실물폰은 별도 확인.
 
 첫 정식 출시를 다음 한 흐름으로 정의한다.
 
@@ -619,3 +705,129 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 검증: unit353(HTTP22 포함), local public SQL267(신규19), private SQL47+병렬2, 전체 공개UI Chromium23 및 최종 동의 문구 2개 재검사 PASS, Web build18. 서버/클라이언트 가짜 데이터승인을 실제 hosted 성공으로 간주하지 않는다. UI 첫 실패의 dev sharp dependency reload를 route등록 순서로 해결, 중복서버 실행 충돌은 중단하고 독립4355에서23 PASS. 원격 적용/운영/의존성/paid 변경0.
 
 다음1개: 기존 W06/W08/D01의 private→public hosted 테스트 적용 manifest(두 신규 migration, 임시 한도/합성 source 및 사본 권리, feature flags,cleanup/원복)를 고정한다. 추가 사용자 계정/기초 DB 재구축은 요구하지 않는다. 실휴대폰·교체 quota·복구·운영 예산/D03~D06은 계속 남는다. 상세 source hashes/명령: evidence/2026-09-26-private-public-representation.json.
+
+### 2026-09-26 W06/W08 실제 두 Web 세션 검증 착수
+- 사용자 계속 진행 승인에 따라 기존 moemoa-test만 사용한다. 이미 적용·검증된 migration/기본격리/복원은 반복하지 않는다.
+- 서로 다른 loopback origin의 실제 제품 UI와 실제 Auth/RPC/Storage를 연결한다. 기존 A 계정의 한시적 테스트 로그인은 서버 내 admin.generateLink/verifyOtp로 얻으며 비밀키·토큰은 기록하지 않는다. Google OAuth 및 실물 기기 검증과 구분한다.
+- 합성 이미지의 UI 저장→명시적 metadata 동기화→private 사본 동의/전송→로컬 원본 없는 두 번째 세션 열람을 확인한다. 정책은 이전 값 전체 보관/복구, 생성 fixture만 tombstone/정리하고 사용한 세션만 로그아웃한다. 운영 변경0.
+- 실제 실패가 발견되면 최소 수정/관련 회귀로 먼저 마감하며, 공개 positive 검증은 그 뒤 기존 W08에서 진행한다. 결과와 미실행 항목을 분리 기록한다.
+- 실제 두 세션 이미지 왕복 PASS 뒤 모바일390px에서 상단 nav만 root clientWidth보다6px 넘침을 발견했다. container의100dvw가 세로 스크롤바 폭까지 포함하고 nav의 음수 margin이 더해지는 원인이다. 기존 W06/Web QA에 흡수해 container 폭을 부모의 사용 가능 폭 기준으로 최소 수정하고, 동일 실화면·기존 모바일 layout suite/build로 확인한다. 공개 양성 검증은 이 마감 뒤 이어간다.
+
+결과: 실제 UI 두 origin/hosted private 이미지 왕복10관찰 PASS, CSS 가로 넘침 최소 수정 후 실제380/380px·mobile8/build18PASS. 정책 정확한 복원·신규 fixture tombstone/사본 물리삭제1·objects0/quota0·생성 session2개 정리 완료. 이전 HTTP/모형 UI 근거와 구분. 명령·중간 selector timeout/Windows watcher 경고·미검증은 evidence/2026-09-26-private-image-hosted-ui.json. 신규 migration/운영 변경/배포0. 다음은 기존 W08 hosted trusted 사본 공개 양성 경로.
+
+### 2026-09-26 W08 hosted 합성 private→public 양성 경로
+- 기존 사용자 test-only 합성 이미지/권리 승인과 후속 진행 지시 범위로 moemoa-test만 사용. source/사본의 정확한 hash를 새 synthetic fixture에 결속하고 기존 source 권리와 사본 권리를 모두 기록한다. production/기존 사용자 레코드 변경0.
+- 실제 A Auth session과 private/public HTTP handler→hosted RPC/Storage로 사본 저장/공개 준비/같은operation 회복/preview/publish/anonymous decode/철회를 실행한다. 사본 자체 삭제와 공개 권리 철회를 구분하며 원본 checksum/예약을 대조한다. 이번 HTTP+SDK 검증은 제품 공개 UI/Google OAuth/실기기 PASS로 확대하지 않는다.
+- Public reads/writes/images만 임시 활성화(10개/40MiB), private 정책도 기존 test 한도 사용. 모든 원설정 사본을 보존하고 finally에서 원복·권리revoked·새fixture tombstone·세션 scope local 로그아웃, 원래 cleanup fence 뒤 실제 물리삭제/quota 해제 확인. 새 migration/새 계획판 없음.
+
+실행 결과: 실제 hosted HTTP/SDK 18PASS, cleanup3PASS. source/정확한 사본 권리 승인 후 READY·동일operation·원본hash·preview·게시·익명decode 통과. private취소는 Public 유지, 공개권리철회는cards0/이미지404, owner철회는공개본null. 원래fence 존중 후 Storage객체0/두quota0·권리revoked/정책원복/로컬세션로그아웃. 새 product/migration/production 변경0. 근거 evidence/2026-09-26-private-public-hosted.json. 다음 기존 W06/W08/W15 한도 근처 작은 이미지 교체와 예약/정리 검증; 운영 후보/실기기 등 미완료 유지.
+
+### 2026-09-26 W06/W08/W15 작은 교체 quota 재현
+- 기존 test-only 승인 범위에서 실제 private HTTP/Storage 합성 사본2개를 사용한다. 큰 사본+작은 사본 합계보다1byte 작은 테스트 quota로 경계를 재현하며 운영50MB 후보 자체는 변경하지 않는다.
+- metadata 교체로 옛 asset is_current=false/새 asset 생성, 옛read 차단·DELETING의bytes 유지·새예약 거부를 확인한다. 실제 cleanup fence 경과/물리삭제 후 동일 operation 재시도 성공·새사본bytes만 과금·원본hash 보존을 검증한다. 즉시 작은 교체 UX의 한계와 저장 안전성 통과를 분리한다.
+- private 정책 전값 보관/finally복원, 합성card tombstone·사본 물리정리·테스트session만 logout. 기본 DB/A-B/공개 왕복 재검사/운영/새 migration 없음. 두 번 실패로 무의미한 재시도는 하지 않는다.
+
+결과: 작은교체 hosted10PASS. 920+170>1089로 새예약 거부/기존DELETING 과금유지, 원래fence 후 물리삭제→같은operation 성공/새170만과금/원본hash보존. 최종객체0/용량0/정책원복. 즉시작은교체 및 자동정리 UX는 미완료다. repository에 private 자동정리 hookup이 없고 generic quota문구만 있으므로 기존 W08/W15 구현 잔여로 흡수. 다음 bounded 정리와 대기안내 연결, 운영 스케줄 활성은 D06 범위로 구분. evidence/2026-09-26-private-replacement-quota.json.
+
+### 2026-09-26 W08/W15 자동 정리 실행 경로와 용량 안내
+- 기존 cleanupPrivateImages의 지연 fence/물리삭제 후 complete를 재사용한다. 신규 secret-authenticated HTTP 정리 endpoint 기본off·GET만·대상project명 일치·no-store·집계 결과만 응답. 기본50개 상한/20초backend timeout, 실패는503으로 관측. 원본/READY를 삭제하는 새 경로 없음.
+- GitHub 예약 workflow는 명시 ENABLED 변수true인 경우만 승인된 endpoint 호출, 동시실행 직렬화·timeout·redirect불허. 운영변수/secret등록·push/스케줄 활성은 하지 않는다. 비밀값은 요청header로만 전달한다.
+- UI quota문구에 교체/삭제 직후 정리대기 가능성과 같은요청 재시도 안내를 추가. 서버가 확인하지 않은 pending 상태/완료시각을 확정하지 않는다. 정확한 pending 수치projection은 추가DB변경 없이 이번에 만들지 않는다.
+- 검증: endpoint 기본off/키누락·오류/올바른키/부분실패/집계정보만 반환, 실제 기존 cleanup 상태 규칙회귀·client operation보존·관련UI/build. 운영scheduler 활성/실제유료범위는 D06 별도. rollback은 cleanupenabled off 및 기존코드revert, DB이력보존.
+
+결과: src/server/privateImages/cleanupHandler.js, api/private-image-cleanup.js, .github/workflows/private-image-cleanup.yml, src/features/memory/components/MemoryPrivateImageSync.jsx, tests/unit/privateCleanup.test.mjs, tests/private-image-sync.spec.ts 구현. unit356/Chromium4/build18/YAML/diff PASS. hosted 빈queue401/200 검증. 실제 예약/nonempty endpoint는 미검증, 과거 cleanup물리삭제와 구분. 새migration/원격활성/배포0. 운영기동 시 API MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED=true, _PROJECT=승인ref, _SECRET=별도32자이상 및 기존serverenv; GitHub vars동명ENABLED=true·_ORIGIN=승인https origin, secret동명_SECRET가 필요하다. 현재 등록/활성하지 않았으며 원복은 두 ENABLED off. 주기15분은 후보설정·실제실행지연/비용/알림확인 D03/D06 잔여. 공식인증 참고 https://vercel.com/docs/cron-jobs/manage-cron-jobs . 다음 새endpoint의 합성대기열정리/재시도 실검증. evidence/2026-09-26-private-cleanup-integration.json.
+
+### 2026-09-26 W08/W15 nonempty cleanup endpoint 실검증
+- 기존 승인 test-only 합성 교체 fixture를 새 ID로 재사용하되 물리삭제 직접 호출을 새 API의 HTTP GET으로 교체한다. 먼저 기존 live private 사본0을 확인해 다른 자료 정리 금지. endpoint 실제 project binding/secret/default-off 설정을 loopback process내에만 설정한다.
+- wrong secret401·fence전 deleted0/파일2·fence후 deleted1/파일0/용량해제·같은operation 재시도·중복cleanup deleted0 검증. 실제 scheduler 실행/제품UI/운영 배포로 확대하지 않는다. 기존fence 기다림, 정책원복·새fixture정리·세션logout 보존.
+
+결과: 실제 API export/hosted nonempty queue 16PASS. 유예전0/후1/중복0·wrongsecret401·원본/용량/같은operation 복구 통과. 최종사본객체0/용량0/정책원복. 증거 evidence/2026-09-26-private-cleanup-hosted.json. 실제 GitHub예약·운영활성은 하지 않음, 기존unit/UI/build 재실행하지 않음. 다음 private 사본bytes/manifest 복구·최신삭제fence 기존 W06/W17/D05.
+
+### 2026-09-26 W06/W17 private 사본 복구 로컬 리허설
+- 기존 disposable PostgreSQL runner에 합성 WebP main/thumb 파일의 물리적 백업·복원 검사를 추가한다. 새 진행판/운영 migration/원격 연결은 만들지 않는다.
+- 오래된 DB+파일 사본을 별도 격리 DB/디렉터리에 복원하고 모든 공개/비공개 읽기 설정을 닫는다. 백업 뒤 card 삭제 fence 및 알려진 operation 취소를 각각 발생시켜 최신 fence와 representation의 DELETING/DELETED 상태를 재적용한다. 알려진 operation 취소는 cancelled 테이블에 추가되지 않으므로 그 테이블만 백업하면 안 된다.
+- 최신 삭제정보 적용 전 부활하는 negative control과 적용 후 재조회 거부, 살아 있는 사본의 manifest/bytes/hash/이미지 decode, 중복 재적용과 quota 보존을 검증한다. 파일 복원은 유효 READY/source만 허용하고 불일치 hash/누락 파일은 실패시킨다.
+- 변경 지도: tools/private-images의 합성 fixture 생성/복구 SQL·shell 및 기존 runner, release-v2 요약/증거. 테스트 파일은 합성 이미지뿐이며 운영용 백업 도구로 취급하지 않는다. 운영 사본 암호화·외부 보관·삭제 journal 수집 지속성·보존/RPO/RTO는 D05 미완료로 유지한다.
+- 롤백은 추가 리허설 파일 및 runner 호출만 revert. 기존 제품/DB계약은 변경하지 않는다. 실제 hosted 복구/운영 재개/실기기 PASS로 확대하지 않는다.
+
+결과: tools/private-images/recovery-rehearsal.mjs/.sh, recovery-assert.sql 및 기존 runner에 opt-in 로컬복구 리허설 추가. 새15PASS+기존47/병렬2PASS. 전체manifest(operation/owner/version 포함) 일치·물리 main/thumb복원/hash/bytes/decode·취소state/card fence 최신재적용·중복replay·손상/누락거부·설정off 통과. 첫 실행은 Windows CRLF로 shell 실패해 .gitattributes에 private-images/*.sh LF 추가 후 재실행 성공. 운영 도구/암호화/외부 사본/journal 지속성/hosted Storage 복구는 미완료. 증거 evidence/2026-09-26-private-recovery-local.json. 다음1개는 W17 암호화 사본 및 최신삭제journal 수집 도구 로컬 보완.
+
+### 2026-09-26 내일 Web 출시 목표 — 기존 W 연속 마감 (아래 일정 조정 결정 전 이력)
+- 사용자 9/27 이내 출시 목표/계획 종료까지 연속 진행 지시. 신규 단계/진행판 없이 W17 백업 잔여→W08/W13/W19 최종 제품 흐름→W15 운영 수치/경보→W20 정확한 후보를 진행한다. 실기기와 사용자 정책 결정은 필요한 범위만 요청하며 독립 작업을 계속한다.
+- W17 구현: Node 내장 AES-256-GCM으로 파일별 streaming 암호화, 암호화 manifest, project/release 결속, 손상/키오류/경로탈출/기존출력 덮어쓰기 거부. 복원은 새 격리 폴더에만 수행하고 DB/Public을 활성화하지 않는다. 입력은 운영자가 고른 DB dump/Storage 사본/최신 journal이며 자동 사용자 이미지 수집은 하지 않는다.
+- 기존 private 사본 리허설에 최신 삭제정보 export(SQL snapshot), 암호화 사본 왕복/변조검사를 연결한다. 최신 삭제journal은 card/asset 상태·존재계정·취소·사본상태를 포함하되 개인 메모/제목/이미지바이트를 일반로그에 남기지 않는다. 외부 사본/키보관·자동주기/RPO는 미확정 그대로다.
+- 변경지도: tools/private-images 백업 module/CLI/journal SQL, tests/unit backup 회귀, 기존 리허설 연결, release-v2 현재 요약/카드/증거. 신규 의존성/운영 migration 없음. 롤백은 도구 revert이며 원본과 기존 사본은 삭제하지 않는다.
+- 검증: 정상 파일 및 큰 streaming 입력 왕복, 잘못된 키/바이트변조/manifest변조/project불일치/경로탈출/중복출력 실패, 실제 로컬 SQL journal+합성 WebP 복원. 운영 백업 가동/실기기/후보 승인과 분리한다.
+
+### W06/W08 출시 차단 발견 — 새 기기의 카탈로그 카드 제목 참조
+- 실제 hosted→빈 브라우저 sync 이후 Boards 로딩 실패를 관찰. remote MEMORY_CARD는 catalogAnimeId/titleSnapshot을 받지만 animeRefId는 null로 투영되고 getCardBundle이 IndexedDB.get(null)을 호출한다. 이전 개인작품 기반 왕복 검사는 이 경계를 다루지 못했다.
+- 먼저 실제 IndexedDB 회귀로 재현한다. 기존 getCardBundle에서 로컬 제목 참조가 없는 정상 카탈로그 카드의 snapshot 참조를 owner/card 단위로 복원하고, PROVIDER_CANDIDATE 출처를 유지한다. 기존 verified/legacy 카탈로그/원본/remote version은 수정하지 않는다. 잘못된 참조는 null 반환해 전체 목록 오류를 막는다.
+- 파일: IndexedDbMemoryRepository.js, tests/memory-indexeddb.spec.ts, 현재 진행판/증거. schema·운영 변경 없음. hosted 제품UI로 같은 보드를 다시 열고 private 사본→공개 준비/게시/익명 decode/철회를 이어서 검증한다. 롤백은 해당 client 수정 revert, 생성된 private local snapshot 참조는 역삭제하지 않는다.
+
+### 2026-09-26 사용자 승인 범위 확대·출시 일정 조정
+- AGE12-ADULT-AREA-01: 첫 Web-only 출시에 12세 이용 및 성인 전용 영역을 포함하고 기한을 조정한다. 기존 진행판만 유지하며 날짜를 임의 확정하지 않는다.
+- 기존 W06은 보호자 동의와 인증 상태/철회, W08은 분류된 이미지의 전달 경계, W14는 분류·신고·재검토·이의, W15는 인증 비용/남용 방어, W19는 미성년/미인증/성인/만료/철회/직접 URL·캐시 우회 검사, W20은 새 계약을 반영한 정확한 RC를 맡는다. 구현 전 실제 코드·스키마의 적용 지점을 조사하고 이 계획의 변경 지도/검증/롤백을 구체화한다.
+- D04에서 국가·허용 이미지/검토 전 노출·법정대리인 확인/성인 자격 기준을 확정하고 D03에서 공급자 자격·비용을 검토한다. 현행 권리 게이트를 해제하거나 운영 Public을 열지 않는다. 서버 경계는 기본 거부 원칙으로 설계하고 민감한 인증 원문을 일반 로그에 남기지 않는다.
+- 진행 중인 일반 합성 이미지 공개 UI 검증과 테스트 설정 원복을 먼저 마감한다. 해당 PASS를 새 연령 계약 통과로 확대하지 않는다. 외부 인증 공급자 계약·유료 변경·실 개인정보 검증은 로컬 모형 검사와 구분한다.
+
+조사 근거: createMemoryCard.js:233 및 replaceMemoryCardImage.js:102는 contentRating을 UNSPECIFIED로 만든다. publicImages/handler.js:109~114는 owner preview와 익명 공개 조회를 나누며 공개 resolve는 service backend로 실행한다. 따라서 나중에 auth.uid 검사만 SQL에 붙이면 전달 요청자의 자격이 전달되지 않는다. 기존 read_memory_publication, 미니홈/작성자 조회, 이미지 resolve와 인증된 전달 경로를 함께 검토해야 한다. 아직 변경·성인 접근 구현 완료 아님. 공급자 후보의 공식 안내(https://blog.portone.io/authorization-payment-2/, https://www.niceid.co.kr/prod_list.nc)를 확인했으나 개인 운영자 계약 자격·실 견적·해외 지원은 확정하지 않았다.
+
+일반 공개 UI 마감: 실제 사본 선택·준비·미리보기·게시와 새 익명96×64 이미지 표시 확인. 철회 native confirm 도구 timeout/getJsDialog undefined로 이번 UI 철회 PASS 보류. test helper의 실제 owner RPC로 철회하고 원설정 전체복원/합성 tombstone/권리철회/시험 세션 scope local logout 수행. 원래 cleanup fence 이후 scoped 정리로 private/public DELETED·Storage객체0·quota0 확인. 운영 변경0.
+
+### W17 암호화 백업 복원 가능성 보완
+- 국가/인증 공급자 결정 대기 중 독립 작업. encrypted-backup.mjs의 개별 safeName/동일 이름 검사만으로는 `objects`와 `objects/main.webp` 같은 파일/디렉터리 충돌을 거부하지 못할 가능성이 있다. 먼저 생성 거부 회귀를 실행해 확인한다.
+- 실제 결함이면 생성과 복원 manifest 검증에서 대소문자를 구분하지 않는 조상 경로 충돌을 거부한다. 순서와 플랫폼에 관계없이 동일하게 처리하고, 원본 및 출력에 변화 없이 실패해야 한다. 정상 형제 파일은 기존 streaming 왕복으로 검증한다.
+- 파일: 기존 encrypted-backup.mjs와 encryptedBackup.test.mjs, 기존 증거/현재 W17 요약. DB/외부 백업/새 의존성 없음. 롤백은 도구 수정 revert, 원본은 건드리지 않는다.
+
+결과: 수정 전 실제 회귀에서 Missing expected rejection으로 결함 재현. 공통 checkNames가 생성/복원 양쪽에서 모든 조상 경로를 검사한다. 순서·대소문자 충돌과 인증된 옛 manifest의 충돌도 BACKUP_INVALID로 거부하며 출력/임시잔여 없음·원본 보존. 최종 전체 unit361PASS, 실제 로컬 DB dump/journal/합성 WebP 암호화 왕복을 포함한 복구17+기존49=66PASS. 외부 사본/운영 스케줄 PASS 아님. evidence/2026-09-26-backup-path-hardening.json.
+
+### W06/W08/W14 연령 경계의 현재 적용 지점 조사
+- W06 유실 복구 결과: POST status로 같은 user/session/purpose의 대기/만료/정책교체/기록완료만 반환. 실제 완료 직후 응답 socket 파기→클라이언트 실패→재조회 성공/provider 재호출0/DB RECORDED:1 유지. 로컬HTTP/DB25 PASS·전체unit383 PASS. evidence/2026-09-26-identity-status-recovery.json. Auth/provider합성, 완료이력은 성인/보호자 자격이 아니다. 다음은 공급자 연결 준비도와 국가/동의 평가에 필요한 증거 계약 검토이며 공개route/remote0.
+- W06 응답 유실 복구 범위: identity handler에 POST status action을 추가한다. 기존 service-only load로 같은 user/session/purpose의 요청만 조회하고 provider 재호출 없이 기록완료/대기/만료/정책교체 상태만 반환한다. 기록완료는 신원 증거의 과거 처리 결과이며 현재 성인 접근/보호자 동의 허가가 아니다. 실제 HTTP 응답 socket을 완료 직후 끊고 재조회로 RECORDED를 확인·provider 호출/DB revision 추가0 검증한다. 원격 적용0.
+- W06 HTTP/DB 결과: 실제 loopback 발급→core→DB RECORDED:1/최소응답, 완료 replay409/중복0, provider 조회 중 실제 session 삭제→401/PENDING:0 확인. 신규3 포함24 PASS/exit0. evidence/2026-09-26-identity-http-store.json. Auth/provider는합성·전송psql, 실제 인증/JWKS/hosted PASS 아님. 다음은 성공 응답 유실 후 동일 owner/session의 상태 재조회로 재인증 없이 복구하는 경계다. provider 계약/국가 정책/보호자 관계는 외부 및 구현 잔여로 유지.
+- W06 HTTP/DB 연결 범위: 기존 core/store integration의 폐기 DB에 loopback HTTP handler를 연결한다. 발급→완료→DB RECORDED:1과 replay거절, 합성 provider조회 중 실제 session행 삭제→완료401 및 PENDING보존을 확인한다. 인증 helper는 별도 모의 단위 근거이고 이번 authenticate는 합성 세션을 주입하므로 실제 OAuth/JWT 검증이라 하지 않는다. 중단된 직전 턴은 파일 읽기만 했으며 새 실행 프로세스/수정 없음 확인.
+- W06 HTTP 결과: default-off handler factory+getClaims/getUser 검증 helper 구현. loopback HTTP 신규5PASS, 전체unit381PASS. method/origin/Bearer/1KiB·정확한 필드·owner주입 거부/최소receipt/완료·재시도/오류비식별 검증. Auth 응답은 모의이므로 실제 JWT암호검증/Google OAuth PASS가 아니다. evidence/2026-09-26-identity-http-boundary.json. 공개api경로/업체/원격변경0. 다음은 HTTP와 로컬 실제 SQL store를 연결한 발급/완료 및 세션 철회 검사다.
+- W06 서버 진입점 범위: default-off HTTP handler factory와 Supabase getClaims+getUser 기반 세션 검증 helper를 구현한다. POST/정확한 origin/Bearer/1KiB JSON·필드 whitelist를 적용하며 user/session은 본문에서 받지 않는다. 발급은 최소 request DTO만 반환, 완료는 기존 core로 전달한다. 기존 deps만 사용하고 loopback 실제 HTTP로 검증하되 Auth/provider/store는 합성이다. 업체·정식 자격 migration 미완성이므로 `api/` 공개 경로는 아직 만들지 않는다.
+- W06 core/store 통합 결과: service-only조회 RPC와 Supabase store adapter를 실제 폐기 DB에 연결, 기존15+getter권한2+core연결4=21 PASS. 다른 동일 사용자 session 차단/core session UUID검사 추가, 전체unit376 PASS. evidence/2026-09-26-identity-core-store.json. 공급자/Auth fixture·psql 전송만 사용, hosted/HTTP/보호자 관계/성인 접근 PASS 아님. 다음은 verified token에서 user/session을 얻는 default-off 서버 진입점과 요청 크기·허용 origin 경계다. 원격/정식migration0, 분류 migration 승인대기 유지.
+- W06 실제 core/store 연결: service-only request 조회/정책 조회 RPC와 서버 Supabase store adapter를 추가하고 Node core를 실제 폐기 DB에 연결한다. load에서 user/session/purpose 일치를 검사하고 core도 같은 sessionId를 확인해 공급자 호출 전에 막는다. 발급→조회→합성 provider 검증→DB 기록과 교차 세션/정책 변경/replay를 통합 검증한다. provider/Auth는 여전히 합성, 정식 migration/remote HTTP는 연결하지 않는다.
+- W06 DB 저장소 결과: private 정책/요청 ledger·service-only발급/완료 prototype, defaultoff·owner/session·purpose·expiry·정책·한도·클라이언트 거부 및 실제2세션 완료 경쟁 포함15 PASS/exit0. evidence/2026-09-26-identity-request-store.json. 최소 auth.sessions fixture 사용으로 실제 Supabase Auth검증 아님. 기존 JS core/업체/HTTP와 미연결, 원격0/정식migration0. 다음은 core와 이 실제 로컬 DB를 adapter로 연결하는 완료 흐름 검증이다. 저장 증거를 성인 접근/보호자 관계/동의로 변환하지 않는다.
+- W06 DB 요청 저장소 범위: 별도 폐기 PostgreSQL에서 private 정책/요청 ledger와 service-role 전용 발급/완료 함수를 prototype로 시험한다. 정책 기본off/한도0, 서버 UUID 발급, 세션 owner 결속, 정책→session→요청 잠금과 clock_timestamp 만료 확인, 예상 전체 DTO 일치, PENDING→RECORDED 단일 전이를 검증한다. Supabase auth.sessions는 로컬 최소 fixture로 모델링하며 실제 Auth 서비스 검증 아님. 권한 부여/개인정보 원문 저장/정식 migration/원격 적용은 하지 않는다. 운영 로그아웃은 JWT 존재만으로 판정하지 않는 공식 session 지침을 따른다: https://supabase.com/docs/guides/auth/sessions .
+- W06 요청 결속 core 결과: completeIdentityEvidence와 신규 단위6 추가, 전체unit375 PASS/exit0. 계정/용도/만료/정책·provider request/channel 불일치/민감 오류 제거/처리 중 취소/중복 완료 계약 검증. evidence/2026-09-26-identity-evidence-core.json. fake store의 원자성만 검사했으며 실제 DB 원자성·업체/HTTP 연결·자격 부여 구현 없음. 다음은 폐기 로컬 DB에서 서버 발급 요청/원자 저장소 구현이다. 이미 대기 중인 분류 migration 승인 범위에 새 자격 DB 작업을 자동 추가하지 않는다.
+- W06 서버 요청 결속 구현 범위: 공급자 독립 `completeIdentityEvidence`를 추가한다. 인증된 세션 user와 서버 발급 request의 owner/purpose/provider/channel/policy/만료가 일치한 뒤에만 공급자 조회를 호출하고, 조회 이후 서버 저장소가 요청·정책·세션을 재검사해 원자적으로 증거를 기록하도록 계약을 둔다. ADULT_IDENTITY/GUARDIAN_IDENTITY는 신원 증거 용도일 뿐 성인 접근/보호자 관계/서비스 동의가 아니다. HTTP route·DB adapter·업체 SDK·자동 권한 부여는 이번 범위 밖이며 local fake adapters로 시간 경계·교차 계정·purpose·결과 ID·조회 도중 만료/정책 변경·중복 완료를 검증한다. 실제 운영 연결 완료로 표시하지 않는다.
+- W06 보호자/자격 조사 결과: authRepo/require_memory_user/profile·device·mutation·pull·promotion과 이미지 backend를 확인했다. 현재 신원 로그인만 있고 연령/보호자 증거 없음. 공통 helper 일괄 차단 대신 cloud 신규 작성/승격과 기존 정보 회수의 용도 분리를 C02에 기록했다. 공급자 인증완료는 보호자 관계가 아니며 일부 foreigner 필드는 자기 입력이라는 PortOne 공식 근거를 확인, 개인 단독 계약/PH·TH 지원/관계확인/비용은 외부 미확인으로 유지한다. 코드/DB/네트워크 설정 변경0, 신규 실행 PASS0. 다음 로컬 작업은 W06 서버 자격 상태와 검증 요청의 계정·용도 결속 계약 구현 준비. D01승인대기와 독립.
+- W03 결과: write-build-info에 checkoutCommit 일치 강제 및 공개 vercel.json 원본/빌드본 hash·semanticMatch 추가. 임시 실제 Git 저장소 통합1test(서식/값 변경·SHA 불일치/누락 포함)PASS, build19페이지 PASS. 로컬 config는 semanticMatch=true이나 과거 운영 dirty 원인 해결로 확대하지 않는다. evidence/2026-09-26-build-provenance.json. 운영변경0/D01승인대기. 다음 독립 작업은 연령/보호자 구현 계약의 현행 적용점 검토다.
+- 독립 W03 배포 출처 보완: D01 승인을 기다리는 동안 운영 get_deployment로06d2e38/master/source git/READY를 재확인했다. 빌드 로그 connector는 Tool not found로 실패하여 vercel.json 실제 변경 내용은 아직 미확인이다. write-build-info에서 환경 SHA와 checkout HEAD 일치를 강제하고 vercel.json의 Git/빌드본 SHA256 및 JSON 의미 일치 여부만 기록한다(내용/환경값 출력 금지). 임시 Git 저장소에서 clean/서식만 변경/실제 설정 변경/잘못된 SHA를 검사한다. 과거 dirty 상태를 새 검사로 PASS 처리하지 않으며 원격 배포0.
+- 실제 browser/DB 결과: Chromium `/moderation/`에서 실제 DB bio 표시→MATURE 선택→명시 확인→저장·DB MATURE:2 확인→새로고침 목록 제외2개 추가, 전체382 PASS notice/exit0. evidence/2026-09-26-content-review-db-browser.json. Auth 합성·RPC psql 전송이며 hosted OAuth/PostgREST/성인 열람 PASS 아님. 전용 browser/dev 서버/폐기 DB 정리. 다음은 D01의 정확한 신규 test migration 적용 범위 승인 확보다. 과거 public/role 임시 승인으로 새 schema 변경을 자동 포함하지 않는다.
+- 브라우저/DB 통합 범위: 기존 gateway 통합 hook에 선택적 Chromium 흐름을 추가한다. 실제 Astro 운영자 화면의 테스트 RPC 요청을 같은 폐기 DB 함수로 전달하고, 미니홈 MATURE 선택→명시 확인→저장→DB revision/rating 확인→새로고침 시 대기 목록 제외를 확인한다. Auth는 합성 세션, 원격 네트워크는 차단하며 종료 시 전용 브라우저/dev 서버를 정리한다. 성인 이용자 열람 허용 검증은 아니다.
+- gateway/DB 결과: 실제 SupabasePublicationGateway import와 psql RPC 전송 adapter로 미니홈 목록/open/re-read/분류 저장/큐 제외·stale/일반 계정 오류 매핑5개 통과. 기존375 포함380 PASS notice/exit0. evidence/2026-09-26-content-gateway-integration.json. 반환 DTO는 실제 DB 함수 생성이며 OAuth/PostgREST/브라우저와 live DB 연결/hosted 검증 아님. 제품 코드 수정 불필요. 다음은 기존 운영 화면을 실제 로컬 DB 응답에 연결하는1개 분류 흐름 확인이다.
+- 앱 gateway/DB 통합 범위: 기존 폐기 DB runner 끝에서 선택적 Node hook으로 실제 SupabasePublicationGateway를 실행한다. RPC 전송만 로컬 psql adapter로 연결하고 반환 DTO/오류는 실제 정식 migration 함수가 생성한다. 미니홈 큐→open→저장→큐 제외, stale 저장, 일반 계정 거부를 검증한다. 이 단계는 OAuth/PostgREST/화면 검증이 아니며 기존 모의 browser PASS와 합쳐 hosted PASS로 표시하지 않는다.
+- 정식 파일 결과: CLI 생성 migration에 검증 DDL을 옮기고 candidate는 psql include로 축소. 최종 publication375 PASS/exit0, 전체 migration 순차 적용 private49 PASS/exit0. UNCONFIGURED와 기존 미분류 보드 차단, 긴급 flags 중지와 audit 보존 검증. evidence/2026-09-26-content-review-migration.json. pg_cron은 기존 local harness 제외, hosted advisors/원격 적용0. 다음은 실제 DB 응답과 운영자 HTTP/UI의 통합 및 정확한 hosted 시험 적용 범위 준비다. 원격 apply 승인을 문서 준비로 대체하지 않는다.
+- 정식 migration 적용/복구 조건: `20260926140122_memory_content_review.sql`은 content policy를 UNCONFIGURED로 생성하여 이미 게시된 미분류 보드도 숨긴다. test/운영 적용 전 대상 프로젝트·DB 사본·현재 flags·정책 및 적용 SHA를 기록하고 승인을 대조한다. 적용 자체가 정책 승인/분류 일괄 승인/성인 영역 활성화가 아니다. 장애 시 승인된 대상에 `tools/publication-boundary/close-content-review.sql`로 reads/writes/images/minihomes를 닫고 검토/통지/감사 원장을 보존한다. 앱을 이전 버전으로 되돌려도 DB 조회 gate를 제거하지 않는다. 재개는 수정·검증된 migration과 정확한 flags/정책 별도 승인 후에만 한다. destructive down migration은 제공하지 않는다. 공개 중지 및 audit 보존을 폐기 DB에서 검증한다.
+- 정식 파일 준비 범위: 설치된 Supabase CLI `migration new memory_content_review`로 생성한20260926140122 파일에 검증된 candidate DDL을 단일 원본으로 옮긴다. 기존 candidate는 해당 migration을 읽는 로컬 psql adapter로 남긴다. publication runner는 변경 전 baseline을 먼저 실행하고 각 rollback 계약 및 마지막 upgrade/race 단계에서 정식 파일을 적용한다. 별도 private runner는 모든 migration을 순서대로 적용해 신규 설치 호환성을 검사한다. rollback은 분류 자료를 삭제하거나 옛 무분류 조회로 되돌리지 않고 공개 관련 flags를 닫는 운영 중지 절차로 준비한다. 원격 apply/정책 설정/공개 활성화 없음.
+- 동시성 결과: 두 실제 세션에서 snapshot 변경·철회·정책 변경 선행 잠금을 관측하고 stale 분류 요청을 제출, 각각 PUBLICATION_CONFLICT/NOT_FOUND/CONTENT_POLICY_CHANGED 거절 및 revision1/audit1 보존. 신규3 race 포함372 PASS notice/exit0. 제품 SQL 수정 없음. evidence/2026-09-26-content-mutation-races.json. 직접 합성 행 변경/변경 선행 순서의 DB 경계 검사이며 실제 publish UI/RPC 전체 순서를 증명하지 않는다. 다음은 default-closed를 유지한 정식 migration 파일 준비와 rollback 검토; 원격 적용은 해당 gate 없이 하지 않는다.
+- 동시성 추가 범위: 폐기 로컬 DB의 두 실제 세션에서 정책/게시 snapshot 변경/철회가 먼저 잠금을 잡은 뒤 옛 hash·policy 검토를 제출한다. PgSleep 관측으로 겹침을 확인하고 옛 분류/audit revision이 증가하지 않는지 검사한다. 이는 실제 게시 UI/RPC 검증과 구분하는 DB 행 경계 실험이며 실패가 있을 때만 제품 SQL을 수정한다.
+- 미니홈 큐 결과: content-home-queue-contract.sql을 기존 home transaction에 연결했다. 신규15 포함 전체369 PASS notice/exit0, 최초 검토/재사용/분류 제외/내용 변경 충돌/철회와25개 페이지 경계 통과. 기존 구현 수정 불필요. 합성 fixture savepoint rollback, DB runner 종료 정지, 원격0. evidence/2026-09-26-home-review-queue.json. 다음은 정식 migration 준비 전 게시/정책 변경과 검토의 동시성 및 candidate 적용 준비도 검토다. 이전 unit/browser/build는 이번 재실행하지 않았다.
+- 이번 검증 범위: 기존 미니홈 fixture에서 최초 검토→동일 사건 재사용→분류 후 큐 제외→소개 변경/철회 후 옛 승인 거절을 확인한다. 별도 rollback savepoint의 합성 미니홈 25개로 20개 페이지·cursor·중복/누락·끝 페이지를 검증한다. 제품 SQL은 실패가 재현될 때만 최소 수정하며 원격 환경은 건드리지 않는다.
+- 최초 검토/UI 결과: 보드·미니홈 대기 목록과 기존 이의 목록을 `/moderation/`에 연결했다. 이미지 로드 완료·분류 선택·명시 확인 후 exact case/content revision/hash/policy로 저장하며 실패/세션 변경은 저장을 막는다. 신규 SQL10 포함354 PASS notice, 전체 unit368 PASS, Chromium publication-ui29 PASS/기능 설정에 따른1 skip(신규4 포함), build19페이지. 첫 browser 실패는 select label 연결을 명시해 수정했고 최종 targeted/full 통과. evidence/2026-09-26-content-review-workspace.json. SQL은 폐기 로컬 DB, 브라우저는 실제 앱+mock Auth/RPC이므로 hosted/실기기 근거로 확대하지 않는다. 다음은 최초 미니홈 큐/페이지 경계 SQL 검증. 정식 migration/원격 적용0, 성인 자격·보호자 동의·국가별 조건 미완료.
+- 최초 검토 경로: board/home별 cursor 목록에서 published snapshot/selection hash와 현재 분류·policy를 대조해 미검토/변경분만 반환한다. 운영자가 열 때만 대상 row 잠금 하에 hash/policy별 사건을 재사용/생성한다. 기존 get/review image/이의 해결 경로를 초기 contentRevision0에도 연결하고 최초 사건은 RECEIVED 상태에서 정확한 hash/policy를 검증해 처리한다. 목록 조회는 쓰기/자동승인이 아니다. 같은 열기 재시도·정책 변경·stale 공개본·완료 후 큐 제외를 로컬 검사한 뒤 화면에 연결한다.
+- 검토 이미지 결과: default-off `MOEMOA_CONTENT_REVIEW_IMAGE_ENABLED`와 기존 handler review GET 경로/인증된 사용자 resolver 추가. 사건/hash/policy/content revision/asset 소속을 검사하며 Storage 전후 재확인·quota/hash/no-store 재사용. 신규SQL8 포함344 PASS notice, 실제 loopback HTTP+모의backend 신규6 포함28PASS, 구현 수정 후 전체unit366PASS(마지막 추가 검사 전; 마지막 검사는28회차 포함). 다운로드 도중 운영자 권한 제거/철회 시 bytes 미전달 확인. evidence/2026-09-26-moderator-image-preview.json. 운영 env/원격 migration0. 다음은 최초 미검토 대상 큐와 운영자 검토 화면을 이 조회/전달 경로로 연결하는 W14 작업. 현재 경로는 이미 사건에 연결된 분류 검토용이며 최초 게시를 자동 승인하지 않는다.
+- 운영자 이미지 전달 범위: 기존 public-image handler에 default-off moderationPreviewsEnabled 경로를 추가한다. Bearer 검증 후 사용자 RPC로 사건/hash/정책/분류 revision과 해당 published USER_IMAGE 소속을 확인하고 full/thumb 사본만 조회한다. 서비스 권한으로 moderator 판정을 대체하지 않는다. 기존 전송 quota/hash/no-store와 Storage 전후 resolve를 재사용해 다운로드 도중 권한 해제·철회·정책 변경 시 bytes를 반환하지 않는다. SQL resolver 권한/버전/소속과 실제 HTTP handler+모의 backend 전송을 각각 검증한다. 운영 env flag/DB 변경0.
+- 운영 조회 결과: 기존 큐에 CONTENT/REPORT 구분, moderator-only 현재 공개 선택/hash/policy/사건·분류 revision 조회 추가. 일반/B/anon 및 철회본 거부. 테스트 추가 중 reviewed_by FK가 계정 삭제를 막는 실제 실패 재현; 현재 분류는 대상 삭제 cascade, 검토자는 기존 감사 방식의 UUID 기록으로 수정했다. 합성 계정 삭제/분류 제거/감사 보존까지 통과. 신규9 포함336 PASS notice/exit0, evidence/2026-09-26-moderator-review-package.json. 운영자 UI/이미지 검토 경로는 아직 없으며 다음 기존 W14 작업이다. SQL 원격 적용/실제 계정 삭제 없음.
+- 운영자 조회 보완 범위: 기존 운영 UI는 없고 RPC/절차만 존재함을 확인했다. 우선 list_memory_moderation의 항목에 REPORT/CONTENT 구분을 추가하고 사건에 결속된 get_memory_content_review를 제공한다. 현재 공개된 선택만 반환하고 source private notes/localRef/owner ID는 제외한다. 철회·삭제·현재 읽을 수 없는 원본 카드가 있으면 조회를 거부한다. policy/hash/분류 revision/사건 revision을 같은 응답으로 묶어 후속 화면이 그대로 제출하게 한다. 호출자 role·사건 종류·철회와 private 데이터 비포함을 로컬 SQL로 검증한다. 실제 운영자 이미지 preview/화면은 다음 구현이며 이 조회만으로 검토 UI 완료 처리하지 않는다.
+- 통지/이의 결과: content audit trigger가 기존 사건/소유자 알림/감사를 원자 생성하고 기존 safety inbox/appeal RPC에 연결. 전용 재검토 RPC는 사건·분류 revision 및 policy/hash를 확인하고 새 분류/통지와 옛 사건 종료를 원자 처리한다. 일반 RESTORE는 분류 사건에 CONTENT_REVIEW_REQUIRED. 신규SQL17 포함327 PASS notice/exit0, Chromium 실제앱+mock Auth/RPC 분류3종 알림→이의→로그아웃 제거3PASS, build18페이지 통과. evidence/2026-09-26-content-notice-local.json. 실제 hosted 왕복/운영자 검토 화면/성인 자격/실기기 PASS 아님. 다음은 운영자 분류·이의 검토 화면에 필요한 정확한 공개본 조회와 사건 구분 연결.
+- 통지/이의 로컬 범위: 성공한 content audit에 기존 memory_reports 사건과 memory_moderation_notices를 원자 결속한다. 기존 list_memory_safety/appeal_memory_notice를 재사용하고 분류 사건에 일반 RESTORE를 적용해 잘못 해결된 것으로 표시하지 않도록 guard한다. 별도 resolve_memory_content_appeal은 사건 revision·현재 분류 revision·snapshot/policy 검증 뒤 재분류/통지/사건 종료를 한 transaction으로 처리한다. 소유자/B/익명 격리·중복 이의·stale 해결·실제 재분류를 로컬 SQL로 검증한다. 안전함 UI에는 분류 action의 한영 이름을 추가한다. 원격 적용/메시지 전송0, 실제 UI 검증은 별도다.
+- 정책/감사 후속 결과: current policy를 명시 인자로 검증하고 승인 행에 결속, 정책 교체 시 보드/미니홈 기존 승인 무효화. 성공 변경만 원문 없는 감사 행에 원자 기록, 운영자 직접 삭제 거부. 실제 두 세션에서 첫 승인 잠금 보유를 관찰 후 같은 revision 요청을 실행해 1승인/1충돌/감사1 확인. 신규10 포함 전체310 PASS notice/exit0. 첫 동시성 실행은 앞선 철회로 snapshot이 없어 fixture lookup 실패했으며 전용 합성 payload로 보완했다. 최종 레이스만 폐기 로컬 cluster에 commit, 이후 정지. evidence/2026-09-26-content-policy-local.json. 실제 게시/정책 변경과 동시 검토, 검토 UI·통지/이의, 인증 공급자 및 hosted 검증은 미완료다.
+- 다음 로컬 구현: 분류 RPC에 검토한 policy revision을 필수 인자로 추가하고 singleton 설정과 비교/공유잠금 후 게시본 잠금을 취한다. 보드/미니홈 조회는 현재 정책과 분류 정책이 일치할 때만 계속한다. 성공한 변경의 target/hash/rating/revision/actor/policy만 private 감사에 같은 transaction으로 기록하며 원문 내용은 저장하지 않는다. stale/거절은 성공 이력으로 남기지 않는다. 정책 교체/누락·감사 직접 변조 거부와 두 실제 세션의 같은 revision 경쟁을 검사한다. prototype만 적용, 최종 동시성 실험은 폐기되는 local cluster에서만 commit하며 종료 후 정지한다.
+- 후속 결과: 미니홈 published_selection hash/운영자 분류를 독립 wrapper로 연결했다. 미니홈 신규14 + 이미지 resolver 신규7 + 이전 분류12 재실행, 전체300 PASS notice/exit0. 미니홈 negative control은 합성 retirement를 transaction 안에서 되돌려 실제 표시 가능한 보드가 있는지 먼저 확인했다. 서비스 role의 기존 full/thumb resolver도 분류 전 null→GENERAL 실제 path→MATURE null을 검증했다. 정식 migration/HTTP bytes 검증이 아니며 prototype DDL은 rollback했다. evidence/2026-09-26-content-surfaces-local.json. 다음은 분류 정책 버전·감사/이의·동시 수정 경계 보완, 이후 인증된 성인 접근 연결. 성인 기능을 영구 차단으로 대체하지 않는다.
+- 후속 범위: 미니홈은 published_selection의 nickname/bio를 독립적으로 읽으므로 보드 분류만으로 해당 문구를 보호하지 못한다. 같은 로컬 candidate에 미니홈 선택 전체 hash에 결속한 별도 운영자 분류와 read_memory_minihome 경계를 추가한다. 기존 build_memory_minihome은 보드 reader를 재사용하므로 대표/보드 내용은 각 보드의 분류까지 만족해야 한다. 원 함수 권한 회수·author 경로·변경 후 무효화를 기존 미니홈 fixture 뒤 transaction rollback 검사로 검증한다. 새 정식 migration/운영 적용 없음.
+- 로컬 실험 결과: content-review-candidate.sql + content-review-contract.sql을 기존 publication runner의 동일 psql 세션에 연결했다. 기존 unclassified 공개 negative control 포함 신규12검사, 전체279 PASS notice/exit0. 정확한 snapshot hash/review revision, 운영자 권한, 원 reader 직접 접근 차단, 제목 변경 무효화, 기존 kill switch 확인. 전체 실험 transaction rollback 후 기존 검사 계속 통과. PostgreSQL14 기본 경로 실패는 설치된16 PG_BIN 명시로 해결했다. 아직 정식 migration/성인 인증/검토 UI/감사·이의/미니홈 metadata/직접 이미지 전체검증 아님. evidence/2026-09-26-content-review-local.json. 다음은 분류 감사·재검토와 미니홈/이미지 경로의 우회 검증이며 인증 공급자 미정과 독립적으로 진행한다.
+- 로컬 SQL 실험 범위: tools/publication-boundary/content-review-candidate.sql에서 게시 snapshot 전체 hash에 결속한 운영자 분류와 기존 read_memory_publication 호출 경계를 시험한다. 기존 함수는 private으로 옮겨 직접 호출 권한을 회수하고 wrapper가 검토 일치 뒤 호출한다. GENERAL만 익명 전달하며 성인 자격 연결 전 MATURE는 닫는다. 이는 성인 기능 완료를 대체하지 않는 중간 구현이다. 별도 contract를 기존 로컬 runner에서 transaction rollback으로 검증하고 이후 정식 migration으로 정리한다. 기존 권리/철회 함수는 보존한다. 운영/원격 적용0, rollback은 실험 transaction 전체 rollback이다.
+- C04를 분류 상태×방문자 자격의 전달 계약으로 구체화했다. 기존 분류 UNSPECIFIED를 승인으로 승격하지 않으며 image hash/version 결속·검토 대기 차단·Storage 전후 재확인·metadata/직접 URL을 포함한다. 다음 구현은 기존 publication SQL의 readable 판정과 검토 RPC에 trusted 분류를 연결하는 로컬 수직 흐름이다. 인증 공급자는 아직 미정이므로 실제 성인 인증 PASS/활성화는 별도다. 원격 migration0, 과거 PASS 보존.
+- 공식 자료 조사: 태국 MDES 제공 PDPA 비공식 영문 번역 제20조는 미성년자의 단독 행위 가능 여부에 따른 친권자 동의와 10세 미만 규정을 구분한다(https://www.mdes.go.th/law/detail/3577-Personal-Data-Protection-Act-B-E--2562--2019-). 따라서 한국의 14세 기준을 태국에 복제하지 않는다. 필리핀 NPC Advisory 2024-03의 최종 서명본 존재는 확인했으나 본문 재조회가 2회 403/오류로 실패해 세부 동의 기준 확정 근거로 사용하지 않는다. 초안으로 대체하지 않고 다른 독립 작업으로 이동한다. 이러한 조회는 MOEMOA의 국가별 법률 검토 완료가 아니다.
+- 콘텐츠 결정 갱신: ADULT-CONTENT-SCOPE-01에 따라 비노골적인 성인 취향 일러스트부터 포함한다. 분류 미확정/재검토 상태를 성인 자격 확인만으로 노출시키지 않는다. W14의 기존 검토·조치 경로와 W08의 공개 snapshot/이미지 전달을 대상으로 세부 계약을 정리한다. 사용자 결정 완료와 해당 기능 구현 완료를 구분한다.
+- 지역 결정 갱신: 사용자 “국가는 그렇게 확정하자” 승인으로 한국·필리핀·태국 확정(RELEASE-REGIONS-01). 기존 D04 안에서 국가별 동의·인증·콘텐츠 제공 조건을 대조한다. 필리핀 NPC의 최종 서명된 Advisory 2024-03, 태국 MDES의 PDPA 제20조 번역을 조사하고 초안과 확정 문서를 구분한다. 국가 코드 또는 단순 나이 비교를 법적 적격성의 대체로 구현하지 않는다. 국가 선정은 운영 공개/유료 계약 승인이 아니다.
+- authRepo.js:44~77의 공통 Google OAuth 시작은 현재 연령/보호자 동의 없이 진행한다. 가입 후 체크박스를 추가하는 것만으로 가입 전 개인정보 동의를 충족했다고 판단하지 않는다. 실제 공급자/적용 국가 결정 뒤 가입 전 절차와 서버 가입 제한을 함께 설계해야 한다.
+- platformPublication.js:14~20은 세션 저장이 꺼진 별도 익명 reader이고 PublicBoardSnapshot.jsx:30은 공개 이미지 URL을 img src로 직접 사용한다. 따라서 기존 계정 로그인을 성인 인증으로 간주하거나 SQL auth.uid 검사만 추가하는 것은 불충분하다.
+- handler.js:109~127의 실제 전달은 preview만 user RPC, 일반 공개는 service RPC이며 Storage 읽기 전후 resolve를 재확인한다. 이 재확인과 no-store를 유지하면서 검증된 요청자 세션을 전달해야 한다. storage 경로/토큰을 URL이나 공개 DTO에 넣는 방식은 사용하지 않는다.
+- read_memory_publication의 card 필터와 이를 재사용하는 미니홈·작성자/관계 읽기를 함께 검증해야 한다. 성인 카드뿐 아니라 title/description/대표 이미지·집계의 노출 정책도 D04에서 확정해야 한다. 기존 일반 UGC 동작은 아직 새 연령 정책을 구현하지 않는다.
+- 공급자 조사: PortOne의 현행 V2 문서는 브라우저 완료 후 서버 API에서 VERIFIED 결과를 조회하도록 설명한다(https://developers.portone.io/opi/ko/extra/identity-verification/readme-v2). 사용자/일회용 요청 결속·만료/재사용·guardian 관계/동의는 MOEMOA에서 별도로 검증할 항목이다. 2024년 공급자 블로그의 단가를 현재 견적으로 확정하지 않는다. 공급자 계약/키/유료 변경 없음.

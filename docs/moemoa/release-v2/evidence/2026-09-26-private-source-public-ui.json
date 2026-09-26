@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-26",
+  "target": "moemoa-test nmgkhknponvzcwliajyk only",
+  "baseCommit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "fixture": {"card":"06dfb1a4-315b-4671-9c62-f27c7a1424dd","board":"c7198abd-c302-4e90-9dc8-34573b4b66be","publication":"34fc8eea-8a69-4b2f-a430-c70b37afaa1c","publicAsset":"ba893645-ebb5-4281-a2fb-5983e184dd08"},
+  "setup": "Synthetic metadata seeded via SQL plus sync_changes, actual approved A test session and real hosted RPC/Storage. Owner origin4381, fresh anonymous origin4382, Astro4384. No local original on owner browser. Not Google OAuth, phone hardware, or UI image intake.",
+  "newUiPass": [
+    "Synced catalog card resolves in Boards after local title reference repair.",
+    "Choose synced private copy, explicit image consent, prepare selected image returns ready.",
+    "Visitor preview displays title and actual decoded96x64 image under TEST_ONLY_PRIVATE_SOURCE_UI_20260926.",
+    "Separate reviewed-version consent then Publish this version displays published status and visitor link.",
+    "Fresh anonymous page displays same title and actual public image naturalWidth96/naturalHeight64."
+  ],
+  "notPassed": ["UI withdrawal confirmation: browser click timed out and getJsDialog returned undefined. User interaction requested, but cleanup proceeded via owner RPC to close test exposure; this is not UI withdrawal PASS.","New age/guardian/adult contracts, phone devices, deployed CDN and Google OAuth not tested."],
+  "cleanup": {
+    "commands": ["POST http://127.0.0.1:4381/__finish", "node .cache/test-query.mjs .cache/private-source-ui-retire.sql", "node .cache/private-source-ui-cleanup.mjs"],
+    "method": "Existing owner revoke RPC, exact policy restore, synthetic tombstones and rights revoke, session-local logout. Targeted public cancel in SQL owner context is cleanup, not Auth proof. Waited existing private cleanup fence then targeted Storage remove and complete RPCs.",
+    "publicationState": "REVOKED",
+    "privateAndPublicState": "DELETED",
+    "storageObjects": 0,
+    "privateBytes": 0,
+    "publicReservedBytes": 0,
+    "activeRights": 0,
+    "settingsRestoredExactly": true,
+    "evidence": ".cache/private-source-ui-cleanup-result.json"
+  },
+  "productionMigrationPaidDeploymentChanges": 0,
+  "pastEvidence": "Previous UI withdrawal/HTTP/SDK success remains historical evidence; not rerun by the incomplete UI confirm step here."
+}

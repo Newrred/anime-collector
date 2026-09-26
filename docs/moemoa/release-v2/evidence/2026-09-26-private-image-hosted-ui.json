@@ -1,0 +1,142 @@
+{
+  "date": "2026-09-26T10:49:30.840Z",
+  "head": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "target": "nmgkhknponvzcwliajyk",
+  "productionChanged": false,
+  "scope": "Actual product UI in two isolated loopback origins; real hosted Auth/RPC/Postgres/Storage. Login bootstrapped with approved A admin magiclink/verifyOtp, not Google OAuth. No mock metadata or seeded image bytes in second origin. Not two physical devices.",
+  "fixture": {
+    "card": "206c20ba-8395-4724-a480-a94bfef6821b",
+    "asset": "88967fad-73f6-4180-841f-a314d571d00e",
+    "board": "52ddee84-9e37-46ad-96cf-7feb9b64bde0",
+    "privateTitle": "4b88bf89-3b67-4093-ade2-a649475bb1b1",
+    "representation": "d65ef0f5-146c-4957-aeae-2f68934e77c6",
+    "originalHash": "dbb43979cc3cb61db0b5f5f7cf84f1d4259747be3e6e241fbfd7925c84e67157",
+    "mainHash": "441a4202734ac80ef1034ab61b6e49775d1a920ae6c6e4177f1a21a10275733d",
+    "mainBytes": 92,
+    "thumbBytes": 96
+  },
+  "checks": [
+    {
+      "name": "Product file chooser -> synthetic 96x64 image -> private-use confirmation -> COMPLETE_PRIVATE card saved",
+      "pass": true
+    },
+    {
+      "name": "Real Sync now -> metadata synced; hosted asset sourceVersion 1, private representation count 0 before opt-in",
+      "pass": true
+    },
+    {
+      "name": "Private sync button disabled before consent; explicit consent -> actual HTTP upload -> Private copy synced",
+      "pass": true
+    },
+    {
+      "name": "UI board create/add -> actual metadata sync with same card",
+      "pass": true
+    },
+    {
+      "name": "Second origin begins with zero Memories/Boards; login A and Sync now only, no file picker or image seed",
+      "pass": true
+    },
+    {
+      "name": "Second origin Archive thumb is blob image, decoded 96x64",
+      "pass": true
+    },
+    {
+      "name": "Second origin detail main is blob image, decoded 96x64; Private copy synced",
+      "pass": true
+    },
+    {
+      "name": "Second origin Board after reload at 390px displays decoded 96x64 remote thumb",
+      "pass": true
+    },
+    {
+      "name": "Original asset checksum preserved; one READY representation with 92-byte main and 96-byte thumb",
+      "pass": true
+    },
+    {
+      "name": "Mobile header overflow reproduced before CSS fix (scroll386/client380), fixed on actual same page (scroll380/client380/navRight380)",
+      "pass": true
+    }
+  ],
+  "changes": [
+    {
+      "file": "src/styles/global.css",
+      "reason": "Use available parent width instead of viewport units so vertical scrollbar space does not cause negative-margin navigation overflow.",
+      "sha256": "74829d89da7da942afd061bd2ee0e65faeef2b3606694bc955ea50da465c39c6"
+    }
+  ],
+  "commands": [
+    {
+      "command": "node .cache/private-ui-server.mjs",
+      "result": "Two real UI origins and actual private handler; server-only admin bootstrap, no secret logging."
+    },
+    {
+      "command": "node .cache/private-ui-policy.mjs enable / restore",
+      "result": "Test-only private opt-in with bounded limits; exact original policy restored."
+    },
+    {
+      "command": "cua_repl product UI filechooser/save/sync/Archive/detail/Board/reload + read-only DOM image geometry",
+      "result": "10 listed observations PASS"
+    },
+    {
+      "command": "npm run test:e2e:mobile-layout",
+      "result": "8 passed, exit 0; post-test dev watcher EBUSY on playwright-report/index.html recorded separately."
+    },
+    {
+      "command": "npm run build",
+      "result": "18 pages, exit 0"
+    },
+    {
+      "command": "node .cache/private-ui-cleanup.mjs",
+      "result": "Cleanup pass; objects0, bytes0, synthetic fixtures tombstoned, test sessions0."
+    }
+  ],
+  "cleanup": {
+    "cleanup": {
+      "deleted": 1,
+      "failed": 0
+    },
+    "state": {
+      "state": "DELETED",
+      "policy": {
+        "id": true,
+        "paused": false,
+        "enabled": false,
+        "approved": false,
+        "revision": "UNAPPROVED",
+        "main_bytes": 1000000,
+        "observed_at": null,
+        "quota_bytes": 0,
+        "thumb_bytes": 120000,
+        "physical_bytes": 0,
+        "asset_count_max": 0,
+        "preparations_per_day": 0,
+        "read_bytes_per_month": 0,
+        "upload_max_in_flight": 1,
+        "decode_attempts_per_day": 0,
+        "global_read_bytes_per_month": 0
+      },
+      "objects": 0,
+      "liveBytes": 0,
+      "cardDeleted": true,
+      "boardDeleted": true,
+      "testSessions": 0,
+      "titleDeleted": true,
+      "publicEnabled": false
+    },
+    "pass": true
+  },
+  "notes": [
+    "First Archive image lookup used an incorrect exact alt suffix and timed out; actual DOM showed title-only alt and successful decode. No product failure.",
+    "Windows dev watcher EBUSY occurred after all 8 tests passed while HTML report was written. Dev servers stopped; build subsequently passed.",
+    "Ctrl-C terminated Windows harness before async logout. Only the two identified node test sessions were removed by exact session IDs/user ID; existing sessions untouched. Existing access tokens are not claimed immediately revoked; test private policy is disabled and sessions cannot refresh."
+  ],
+  "notVerified": [
+    "Physical phone/browser matrix",
+    "Google OAuth in this run",
+    "Private representation with trusted rights -> hosted public positive path",
+    "Replacement quota headroom and private bytes recovery",
+    "D03-D06 final release approval"
+  ],
+  "next": "W08 hosted trusted synthetic private representation -> public positive path",
+  "priorEvidence": "2026-09-26-private-image-hosted-roundtrip.json (previous run; not rerun)"
+}

@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 authenticated identity HTTP handler factory and session helper",
+  "status": "LOCAL_HTTP_PASS_NOT_PUBLIC_ROUTE_OR_LIVE_AUTH",
+  "targeted": {"command":"node --test tests/unit/identityHttp.test.mjs","log":".cache/identity-http-final.log","exitCode":0,"passed":5},
+  "regression": {"command":"npm run test:unit","log":".cache/identity-http-unit-final.log","exitCode":0,"passed":381},
+  "files": ["src/server/identity/handler.js","src/server/identity/authenticateIdentitySession.js","tests/unit/identityHttp.test.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "verified": "Real loopback HTTP with synthetic backend: default closed, method/origin/Bearer/JSON size and exact-field validation, client owner injection rejection, minimal issuance response, existing core completion and duplicate rejection, no-store and sanitized failures. Mock Auth contract checks verified claims/live-user match, session UUID, token expiry, anonymous denial and signature-error rejection.",
+  "security": "Uses Supabase getClaims and getUser, never unsigned local JWT decode or editable user_metadata adult claims. Request body cannot set user/session/provider/policy. All responses no-store. Raw identity facts absent from receipts.",
+  "reference": "https://supabase.com/docs/reference/javascript/auth-getclaims",
+  "limits": "getClaims/getUser mocked in these tests; no actual signature/JWKS/Google OAuth verification claimed. No api/ public route, configured provider or production backend factory. Persistent SQL tested in earlier separate runs, not this HTTP test. Guardian relationship/consent and adult authorization remain unimplemented.",
+  "migrationAndRollback": "No schema, remote setting, dependency, paid service or deployment change. Remove local handler/helper/tests to revert.",
+  "next": "Connect this HTTP handler to the local real SQL store, retaining synthetic Auth/provider, and verify request issuance/completion and stale-session rejection."
+}

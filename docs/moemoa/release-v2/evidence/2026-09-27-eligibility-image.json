@@ -1,0 +1,19 @@
+{
+ "date":"2026-09-27",
+ "work":"W06/W08 private image eligibility local integration",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-image-candidate.sql","tools/identity/eligibility-image-contract.sql","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit 0; 89 PASS messages = previous 75 + 14 image eligibility assertions",
+ "log":".cache/eligibility-image.log",
+ "verified":["Revoked decode authorization and service reservation denied","Denied reservation creates no quota row","Revocation between reserve and complete prevents READY","Pending reservation and quota retained after failure","Revoked cancellation idempotent","Cleanup grace preserved","Service cannot bypass renamed completion","Cleanup manifest finalizes and counted quota released","Eligible completion succeeds","Completed receipt and owner read resolver survive later revocation","Revoked owner retires READY representation"],
+ "scope":"Actual local SQL RPCs on disposable PostgreSQL with synthetic auth and media metadata. Grace timestamp advanced by fixture; no real Storage bytes deleted or served.",
+ "assumptions":"Service reservation uses authenticated owner's id; completion derives owner from stored manifest. Eligibility guard locks before existing media operations. Whole HTTP retry UX not yet connected.",
+ "notVerified":["HTTP and Storage integration with eligibility errors","Actual image bytes recovery/deletion","Concurrent image completion and revocation","Policy replacement and expiry during lock waits","Country policies and guardian consent","Hosted provider or UI"],
+ "newUserBehaviorPass":"None hosted; local RPC boundary only",
+ "securityPrivacy":"No real user data; original source/version/hash/quota/cancel paths retained; unguarded renamed entrypoints revoked from clients and service role",
+ "formalMigrations":0,
+ "remoteChanges":0,
+ "rollback":"Optional local runner only; disposable cluster stopped",
+ "next":"Verify image completion/revocation lock races and then HTTP error/recovery behavior before formal migration"
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-27",
+  "work": "W08/W13 authenticated viewer boundary audit and public eligibility errors",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "audit": [
+    {"file":"src/features/memory/runtime/platformPublication.js","lines":"17-31","finding":"Separate nonpersistent public reader client; writer uses signed-in client. Public metadata does not inherit writer session."},
+    {"file":"src/features/memory/components/PublicBoardSnapshot.jsx","lines":"25-30,54-55","finding":"Published images use ordinary img URL, unlike authenticated owner preview blob fetch."},
+    {"file":"src/server/publicImages/handler.js","lines":"119-137","finding":"Public image resolution uses service RPC without visitor context, before and after Storage download."},
+    {"file":"supabase/migrations/20260926140122_memory_content_review.sql","lines":"94-105,151-162","finding":"Board/home readers require exact GENERAL review. MATURE remains denied."},
+    {"file":"supabase/migrations/20260923093000_memory_public_images.sql","lines":"237-255,280-282","finding":"Public image resolver is service-only and calls publication reader. Granting authenticated access or changing only rating predicate would not complete viewer binding."}
+  ],
+  "filesChanged": ["src/server/publicImages/supabaseImageBackend.js","src/features/memory/application/preparePublicImage.js","src/features/memory/adapters/supabase/SupabasePublicationGateway.js","tests/unit/publicEligibilityErrors.test.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "implementation":"Preserve four bounded eligibility errors through public RPC, publication gateway and image preparation; map required/expired to 403, policy changed to 409 and unavailable to 503. Unknown messages remain sanitized. No viewer access enabled.",
+  "reproduction":"node --test tests/unit/publicEligibilityErrors.test.mjs: exit1, eligibility error became IMAGE_SERVICE_FAILED before fix",
+  "command":"node --test tests/unit/publicEligibilityErrors.test.mjs tests/unit/publicImages.test.mjs tests/unit/publicationGateway.test.mjs",
+  "environment":"Node24.19.0 via .cache/activate.ps1",
+  "result":"exit0; 36 tests passed, including two new tests",
+  "log":".cache/public-eligibility-errors.log",
+  "verified":"Bounded errors and status preserved, unknown error sanitized, explicit original and operation unchanged, no retry claim synthesized. Mock RPC/fetch; existing related HTTP tests included.",
+  "notVerified":["Authenticated mature reader","Browser eligibility messages","Hosted Supabase auth/Storage","Real age or guardian verification","Full suite/build not rerun this turn"],
+  "remoteChanges":0,
+  "migrations":0,
+  "rollback":"Revert this turn's bounded error mappings; no data changes",
+  "externalGates":"D01 separate test classification migration approval; D04 provider/country/guardian policy; D06 exact release candidate",
+  "next":"Implement a local authenticated viewer metadata and image vertical slice with session-switch invalidation, using synthetic MATURE_VIEW evidence and keeping runtime activation disabled"
+}

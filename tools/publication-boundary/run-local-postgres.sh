@@ -11,6 +11,9 @@ trap cleanup EXIT
 psql=("$pg_bin/psql" -h "$work" -p 55437 -U "$(id -un)" -d postgres -X -v ON_ERROR_STOP=1)
 "${psql[@]}" -f "$root/tools/publication-boundary/bootstrap.sql" >/dev/null
 for migration in "$root"/supabase/migrations/*.sql; do
+  # Test the pre-classification baseline first. The exact migration is applied
+  # by the content contracts and committed at the final upgrade/race stage.
+  if [[ "$(basename "$migration")" == '20260926140122_memory_content_review.sql' ]]; then continue; fi
   # pg_cron is a Supabase/platform extension. Retention is outside this isolated test.
   if [[ "$(basename "$migration")" == '20260902055512_memory_user_retention.sql' ]]; then continue; fi
   if [[ "$(basename "$migration")" == '20260924115258_memory_resource_controls.sql' ]]; then
@@ -18,7 +21,7 @@ for migration in "$root"/supabase/migrations/*.sql; do
   fi
   "${psql[@]}" -f "$migration" >/dev/null
 done
-"${psql[@]}" -f "$root/tools/publication-boundary/contract.sql"
+"${psql[@]}" -f "$root/tools/publication-boundary/contract.sql" -f "$root/tools/publication-boundary/content-review-contract.sql"
 "${psql[@]}" -f "$root/tools/publication-boundary/concurrent-prepare.sql" > "$work/concurrent-a.log" 2>&1 &
 a=$!
 "${psql[@]}" -f "$root/tools/publication-boundary/concurrent-prepare.sql" > "$work/concurrent-b.log" 2>&1 &
@@ -68,7 +71,7 @@ for action in global retire delete board; do
   [[ "$("${psql[@]}" -qAtc "set role anon; select coalesce(jsonb_array_length(public.read_memory_publication('$public_id')->'cards'),0)")" == 0 ]]
   echo "PASS: concurrent publish / $action leaves no anonymous card after withdrawal (including source restore)"
 done
-"${psql[@]}" -f "$root/tools/publication-boundary/minihome-contract.sql"
+"${psql[@]}" -f "$root/tools/publication-boundary/minihome-contract.sql" -f "$root/tools/publication-boundary/content-home-contract.sql"
 "${psql[@]}" -f "$root/tools/publication-boundary/relationships-contract.sql"
 "${psql[@]}" -c "update private.memory_publication_settings set follows_enabled=true,writes_enabled=true" >/dev/null
 home_a=$("${psql[@]}" -Atc "select id from private.memory_minihomes where user_id='11111111-1111-4111-8111-111111111111'")
@@ -94,4 +97,8 @@ source "$root/tools/publication-boundary/resource-races.sh"
 source "$root/tools/publication-boundary/catalog-races.sh"
 source "$root/tools/publication-boundary/restore-roundtrip.sh"
 "${psql[@]}" -f "$root/tools/operations/status.sql" > "$work/operator-status.log"
+source "$root/tools/publication-boundary/content-review-races.sh"
+if [[ -n "${CONTENT_GATEWAY_NODE:-}" ]]; then
+  "$CONTENT_GATEWAY_NODE" "$(wslpath -w "$root/tools/publication-boundary/content-gateway-integration.mjs")" "$work" "$pg_bin/psql" "${CONTENT_GATEWAY_BROWSER:-}"
+fi
 echo "PostgreSQL publication contract PASS; local artifacts: $work"

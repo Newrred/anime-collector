@@ -8,6 +8,89 @@ const PUBLIC_CARD = "33333333-3333-4333-8333-333333333333";
 const IMAGE = "44444444-4444-4444-8444-444444444444";
 const HASH = "a".repeat(64);
 
+for (const mode of ['board', 'home', 'appeals']) {
+  test(`moderation workspace reviews ${mode} with exact package`, async ({ page, context }) => {
+    await adapters(context); const backend=mockPublication(); await backend.attach(context); await seedOwner(page);
+    const kind=mode==='home'?'home':'board', caseId='99999999-9999-4999-8999-999999999999';
+    let submitted: any=null;
+    const review={id:caseId,target:PUBLICATION,kind,status:mode==='appeals'?'APPEALED':'RECEIVED',caseRevision:mode==='appeals'?1:0,
+      contentRevision:mode==='appeals'?2:0,reviewHash:HASH,policyRevision:'TEST_ONLY_CONTENT',
+      snapshot:kind==='home'?{nickname:'Review home',bio:'Public introduction',entries:[]}:
+      {schemaVersion:1,title:'Review board',description:'Selected description',cards:[{id:PUBLIC_CARD,title:'Review card',visual:{type:'SYSTEM_DESIGN',rendererVersion:1,patternToken:'cc4499ff'}}]}};
+    await context.route(/\/(list_memory_pending_content|open_memory_content_review|list_memory_moderation|get_memory_content_review|resolve_memory_content_appeal)$/,async route=>{
+      const name=route.request().url(); let data: any=review;
+      if(name.endsWith('list_memory_pending_content')) data={items:[{id:PUBLICATION,kind,label:kind==='home'?'Review home':'Review board'}],next:null};
+      if(name.endsWith('list_memory_moderation')) data={items:[{id:caseId,reviewType:'CONTENT',status:'APPEALED'}],next:null};
+      if(name.endsWith('resolve_memory_content_appeal')) { submitted=route.request().postDataJSON(); data={id:caseId,status:'CLOSED',contentRevision:review.contentRevision+1}; }
+      await route.fulfill({json:{data,error:null}});
+    });
+    await page.goto('/moderation/');
+    if(mode!=='board') await page.getByRole('button',{name:mode==='home'?'Homes':'Appeals',exact:true}).click();
+    await page.getByRole('button',{name:mode==='appeals'?'Review appeal':kind==='home'?'Review home':'Review board',exact:true}).click();
+    await page.getByLabel('Content classification',{exact:true}).selectOption('GENERAL');
+    const save=page.getByRole('button',{name:'Save review decision',exact:true}); await expect(save).toBeDisabled();
+    await page.getByLabel('I reviewed the displayed content and selected classification.',{exact:true}).check();
+    await expect(save).toBeEnabled(); await save.click();
+    await expect(page.getByText('Review decision saved.',{exact:true})).toBeVisible();
+    expect(submitted).toEqual({p_case:caseId,p_case_revision:review.caseRevision,p_content_revision:review.contentRevision,p_hash:HASH,p_rating:'GENERAL',p_policy:'TEST_ONLY_CONTENT'});
+    await page.evaluate(async()=>{ const {writeMockAuthSession}=await import('/src/repositories/mockAuthStorage.js');writeMockAuthSession(null); });
+    await expect(page.getByText('Review decision saved.',{exact:true})).toHaveCount(0);
+  });
+}
+test('moderation workspace blocks failed image and clears confirmation after stale decision',async({page,context})=>{
+  await adapters(context); const backend=mockPublication(); await backend.attach(context); await seedOwner(page);
+  const caseId='99999999-9999-4999-8999-999999999999'; let imageReady=false, submissions=0;
+  const bytes=await sharp({create:{width:24,height:24,channels:3,background:'#559966'}}).webp().toBuffer();
+  const review={id:caseId,target:PUBLICATION,kind:'board',status:'RECEIVED',caseRevision:0,contentRevision:0,reviewHash:HASH,policyRevision:'TEST_ONLY_CONTENT',
+    snapshot:{schemaVersion:1,title:'Review image board',description:'',cards:[{id:PUBLIC_CARD,title:'Review image',visual:{type:'USER_IMAGE',assetId:IMAGE}}]}};
+  await context.route(/\/(list_memory_pending_content|open_memory_content_review|resolve_memory_content_appeal)$/,async route=>{
+    const name=route.request().url();let data:any=review,error:any=null;
+    if(name.endsWith('list_memory_pending_content'))data={items:[{id:PUBLICATION,kind:'board',label:'Review image board'}],next:null};
+    if(name.endsWith('resolve_memory_content_appeal')) {submissions++;data=null;error={message:'PUBLICATION_CONFLICT'};}
+    await route.fulfill({json:{data,error}});
+  });
+  await context.route('**/api/public-image?review=*',async route=>{
+    expect(route.request().headers()['authorization']).toBeTruthy();
+    expect(route.request().headers()['x-moemoa-review-revision']).toBe('0');
+    await route.fulfill(imageReady?{status:200,contentType:'image/webp',body:bytes}:{status:404,json:{error:'NOT_FOUND'}});
+  });
+  await page.goto('/moderation/');await page.getByRole('button',{name:'Review image board',exact:true}).click();
+  await page.getByLabel('Content classification',{exact:true}).selectOption('GENERAL');
+  const consent=page.getByLabel('I reviewed the displayed content and selected classification.',{exact:true});await consent.check();
+  const save=page.getByRole('button',{name:'Save review decision',exact:true});await expect(save).toBeDisabled();
+  await expect(page.getByText('Visual unavailable',{exact:true})).toBeVisible();
+  imageReady=true;await page.getByRole('button',{name:'Try again',exact:true}).click();
+  await expect(save).toBeEnabled();await save.click();
+  await expect(page.getByRole('alert')).toContainText('Could not complete review');
+  await expect(consent).not.toBeChecked();await expect(save).toBeDisabled();expect(submissions).toBe(1);
+});
+
+for (const [action, label] of [
+  ['CONTENT_GENERAL', 'Classified as general content'],
+  ['CONTENT_MATURE', 'Classified as adult-only content'],
+  ['CONTENT_BLOCKED', 'Outside the current public content policy'],
+]) {
+  test(`classification notice ${action} opens existing appeal flow`, async ({ page, context }) => {
+    await adapters(context); const backend = mockPublication(); await backend.attach(context); await seedOwner(page);
+    const notice = '77777777-7777-4777-8777-777777777777';
+    let appealed = false; let submitted: any = null;
+    await context.route(/\/(list_memory_safety|appeal_memory_notice)$/, async route => {
+      if (route.request().url().endsWith('appeal_memory_notice')) {
+        submitted = route.request().postDataJSON(); appealed = true;
+        await route.fulfill({ json: { data: { id: notice, appealed: true }, error: null } });
+      } else await route.fulfill({ json: { data: { items: [{ id: notice, type: 'NOTICE', targetKind: 'board', targetId: PUBLICATION, action, reason: 'Classification review result.', appealed }], next: null }, error: null } });
+    });
+    await page.goto('/minihome/#safety');
+    await expect(page.getByText(label, { exact: true })).toBeVisible();
+    await page.getByLabel('Appeal reason', { exact: true }).fill('Please reconsider this classification.');
+    await page.getByRole('button', { name: 'Submit appeal', exact: true }).click();
+    await expect(page.getByText('Appeal received.', { exact: true })).toBeVisible();
+    expect(submitted).toEqual({ p_id: notice, p_text: 'Please reconsider this classification.' });
+    await page.evaluate(async () => { const { writeMockAuthSession } = await import('/src/repositories/mockAuthStorage.js'); writeMockAuthSession(null); });
+    await expect(page.getByText(label, { exact: true })).toHaveCount(0);
+  });
+}
+
 test("shared board opens the public author home and omits withdrawn author links", async ({ page, context }) => {
   const mock=mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page); await choose(page); await publishSelected(page);
   const home="55555555-5555-4555-8555-555555555555";let visible=true;

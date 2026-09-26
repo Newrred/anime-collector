@@ -1,0 +1,18 @@
+{
+ "date":"2026-09-27",
+ "work":"W06/W08 real HTTP and local SQL private image eligibility",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-image-http.mjs","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit 0; 96 PASS messages = previous 92 + 4 HTTP/SQL scenarios",
+ "log":".cache/eligibility-image-http.log",
+ "verified":["Existing HTTP handler and processor convert actual synthetic PNG buffers, then actual SQL eligibility revocation during thumb put yields 403 and PREPARING","Manifest bytes equal actual encoded buffers; original unchanged","HTTP DELETE followed by SQL-backed cleanup removes buffers and marks DELETED after fixture advances grace","Destroying successful POST response causes fetch failure; database READY and hash-checked GET recover after eligibility revocation without extra puts"],
+ "scope":"Real loopback HTTP, actual app handler/processor/privateRpc and PostgreSQL SQL functions through psql adapter. Auth is synthetic, Storage is in-memory Map, grace advanced by fixture.",
+ "newUserBehaviorPass":"Local HTTP behavior verified; hosted/browser/physical-device behavior not verified",
+ "notVerified":["Real Supabase Storage/Auth","Provider and guardian consent","Country policies","Browser rendering of eligibility messages","Full release gates"],
+ "securityPrivacy":"Synthetic PNG and account fixture only; SQL errors whitelisted; temporary socket path validated; no remote credentials",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"HTTP server closed in finally and disposable PostgreSQL stopped by runner",
+ "next":"Review public publication and image-read eligibility integration; private-only guard does not enforce adult/public eligibility"
+}

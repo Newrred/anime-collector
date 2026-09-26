@@ -1,6 +1,6 @@
 {
   "date": "2026-09-26",
-  "status": "DEPLOYED_SMOKE_VERIFIED_FULL_RELEASE_PENDING",
+  "status": "SMOKE_DEPLOY_LIVE_VERIFIED_CI_PASS_FULL_RELEASE_PENDING",
   "authorization": "User requested deployment for phone and friend smoke testing",
   "previousProductionCommit": "0330a5401e0112f2e36886a6826812219e7aed89",
   "scope": "Web local image intake, existing account/metadata/Archive/Board; no hosted image/public activation",
@@ -85,21 +85,47 @@
   ],
   "deployment": {
     "status": "READY",
-    "commit": "29ca80d280ddae1ef0b253539c04dea622cfe461",
-    "id": "dpl_EsqsL4hSRxL5fzSJswhAzrhrvcQZ",
+    "commit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+    "id": "dpl_9djJYMHQyxhxVYePuRcT7cYoGX3x",
     "source": "git",
     "branch": "master",
     "url": "https://www.moemoa.xyz",
     "workingTreeDirty": true,
-    "ciRun": "https://github.com/Newrred/anime-collector/actions/runs/36172485048",
-    "ciStatus": "in_progress",
+    "ciRun": "https://github.com/Newrred/anime-collector/actions/runs/36172975885",
+    "ciStatus": "success",
     "liveChecks": [
       "390px actual hosted page image picker and local synthetic image consent/save",
       "Archive reload retains card; detail image decoded from local data URL",
       "390px detail no horizontal overflow; observed page console error0",
       "Data page shows Google sign-in entry; OAuth not rerun",
-      "private-image/public-image APIs return503 DISABLED with no-store"
+      "private-image/public-image APIs return503 DISABLED with no-store",
+      "Hosted Board create -> add synthetic Archive card -> reload retains1 card"
     ],
-    "followup": "Use npm ci for locked cloud installation and log dirty file paths to investigate existing cloud workingTreeDirty; do not hide dirty state"
+    "followup": "npm ci is used by Vercel; build log reports only M vercel.json. Dirty state preserved, configuration diff not retrieved; application source paths were not reported dirty. Earlier CI was cancelled by superseding push."
+  },
+  "report": {
+    "documentsRead": [
+      "AGENTS.md",
+      "CODEX_START_HERE.md",
+      "PLANS.md",
+      "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+      "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+      "docs/moemoa/08_CODEX_PHASE_RUNBOOK.md",
+      "docs/moemoa/09_CHANGE_CONTROL_AND_REPORTING.md",
+      "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+      "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"
+    ],
+    "plan": "Existing release-v2/01_RELEASE_EXECUTION_PLAN.md W20 smoke-deployment section; no new plan tree",
+    "configurationChanges": [
+      ".env.production: local Web intake enabled, unfinished public/private features closed",
+      ".github/workflows/quality.yml: intake-on and mobile regression",
+      ".gitignore: exclude generated handoff bundles",
+      "vercel.json: locked npm ci install",
+      "scripts/write-build-info.mjs: dirty path diagnostics without file contents"
+    ],
+    "assumption": "User-authorized limited smoke deployment, not final Public launch",
+    "privacy": "Synthetic local guest record only; no production database migration, hosted user image upload, rights approval or paid change",
+    "observability": "Live browser observed no console errors; error-level runtime query returned no logs; not a claim about all production activity",
+    "rollback": "Revert relevant commits via Git and push master. Do not delete DB or local user records."
   }
 }

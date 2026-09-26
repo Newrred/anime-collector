@@ -1,0 +1,185 @@
+{
+  "date": "2026-09-26",
+  "status": "HOSTED_PRIVATE_HTTP_PASS_CLEANUP_VERIFIED_PRODUCT_UI_AND_PUBLIC_POSITIVE_PENDING",
+  "sourceCommit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "target": "nmgkhknponvzcwliajyk",
+  "dataReleaseId": "test-private-rep-20260926-06d2e38",
+  "authorization": "User requested continuing the announced test-server work; prior test-only synthetic image/A-B authorization preserved. No production/public rollout approval inferred.",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md W06/W08/D01",
+  "migrations": [
+    {
+      "file": "supabase/migrations/20260925152859_memory_private_image_boundary.sql",
+      "sha256": "6a3add8c7b67d3402b81d39541fa5269d24634f7f343d467ab0afaa1712c6aa4"
+    },
+    {
+      "file": "supabase/migrations/20260925164126_private_representation_public_rights.sql",
+      "sha256": "a36c84cf5d7ca165758be291a40b7a3a2bcd16b8f0eb423fb93a7e94a1e3cafb"
+    }
+  ],
+  "preMigrationBackup": ".cache/private-hosted-pre-migration-backup.txt",
+  "migrationHistory": "Two exact version-controlled migrations applied transactionally and recorded. Existing prior three test migrations have different historical version timestamps and were not reapplied.",
+  "scope": {
+    "real": [
+      "Supabase Auth access tokens and getUser",
+      "Hosted Postgres RPC and RLS",
+      "Hosted private Storage upload/download/delete",
+      "Actual application HTTP handler and sharp image processor"
+    ],
+    "auth": "Administrative generateLink/verifyOtp test sessions for the two already-approved accounts, no email sent. Google OAuth was not exercised.",
+    "notVerified": [
+      "Full product UI on a fresh authenticated device",
+      "Physical phone",
+      "Approved private-to-public positive publication",
+      "CDN/Vercel private-image runtime",
+      "Whole private image backup/restore",
+      "Final launch operational gates"
+    ]
+  },
+  "observations": [
+    {
+      "name": "new policy remains closed before opt-in",
+      "pass": true
+    },
+    {
+      "name": "stale or absent private consent rejected",
+      "pass": true
+    },
+    {
+      "name": "real HTTP Auth RPC Storage upload completes READY",
+      "pass": true,
+      "status": 200,
+      "mainBytes": 92,
+      "thumbBytes": 96
+    },
+    {
+      "name": "same operation returns same representation",
+      "pass": true
+    },
+    {
+      "name": "fresh HTTP reader without local original gets verified decoded main",
+      "pass": true,
+      "bytes": 92
+    },
+    {
+      "name": "private response forbids browser/CDN caching",
+      "pass": true
+    },
+    {
+      "name": "real thumb bytes match manifest",
+      "pass": true
+    },
+    {
+      "name": "B cannot read new private image",
+      "pass": true
+    },
+    {
+      "name": "anonymous cannot read private HTTP image",
+      "pass": true
+    },
+    {
+      "name": "owner cannot bypass API with direct Storage download",
+      "pass": true
+    },
+    {
+      "name": "owner cannot mint direct signed URL",
+      "pass": true
+    },
+    {
+      "name": "private storage alone cannot grant public image rights",
+      "pass": true,
+      "error": "IMAGE_RIGHTS_REQUIRED"
+    },
+    {
+      "name": "original checksum and single quota reservation preserved",
+      "pass": true
+    },
+    {
+      "name": "owner retirement succeeds",
+      "pass": true
+    },
+    {
+      "name": "retirement immediately blocks read before cleanup",
+      "pass": true
+    }
+  ],
+  "cleanup": [
+    {
+      "name": "test policy exactly restored",
+      "pass": true
+    },
+    {
+      "name": "physical objects removed and quota released",
+      "pass": true
+    },
+    {
+      "name": "Public remains disabled",
+      "pass": true
+    },
+    {
+      "name": "hosted new table RLS bucket privacy and finalizer ACL intact",
+      "pass": true
+    }
+  ],
+  "counts": {
+    "scenarioPassed": 15,
+    "cleanupAndSecurityPassed": 4,
+    "initialHarnessFailures": 1
+  },
+  "testIssue": "Initial synthetic card cleanup set deleted_at without status=DELETED and was rejected by the existing consistency constraint. Separate recovery restored policy first, used valid tombstone, respected the delayed cleanup fence, then verified actual object removal and quota release. No product change required; failed first script result preserved.",
+  "finalState": {
+    "privatePolicyExactlyRestored": true,
+    "publicEnabled": false,
+    "newBucketPublic": false,
+    "fixtureCardDeleted": true,
+    "fixtureRepresentationState": "DELETED",
+    "fixtureObjects": 0,
+    "fixtureLiveBytes": 0,
+    "cleanup": {
+      "deleted": 1,
+      "failed": 0
+    }
+  },
+  "productionChanges": 0,
+  "commands": [
+    {
+      "command": "node .cache/private-hosted-apply.mjs",
+      "result": "Two test migrations committed; source/rollback settings backup saved"
+    },
+    {
+      "command": "node .cache/private-hosted-roundtrip.mjs",
+      "result": "15 scenarios PASS; original cleanup helper failed on tombstone constraint"
+    },
+    {
+      "command": "node .cache/private-hosted-recover.mjs",
+      "result": "Original private policy restored; cleanup initially waiting for fence"
+    },
+    {
+      "command": "node .cache/private-hosted-finalize.mjs",
+      "result": "Cleanup1/failed0;4 final checks PASS"
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "path": ".cache/private-hosted-apply.log",
+      "sha256": "8821698dfbed4735671755474bec08aca93201eaa6cd3a3271e49816b090a332"
+    },
+    {
+      "path": ".cache/private-hosted-roundtrip.log",
+      "sha256": "b1088f6449f22be5790e646e9fa7f0498668476e5358d8d8b60491638a97603a"
+    },
+    {
+      "path": ".cache/private-hosted-roundtrip-result.json",
+      "sha256": "c4a7087f7f65ca4317437042f76c22853e1d204278968515e4313bdb5048783c"
+    },
+    {
+      "path": ".cache/private-hosted-cleanup-result.json",
+      "sha256": "baba5068e5e4873f6b953abb15402a530dbbc13be13d858e6bfdb62999dd5aab"
+    }
+  ],
+  "security": "No service credentials/session tokens/private image bytes logged or committed. Direct Storage download and signed URL bypass denied even for owner. New private tables RLS verified. Existing source checksum preserved; private storage does not confer public rights.",
+  "references": [
+    "https://supabase.com/docs/guides/storage/security/access-control",
+    "https://supabase.com/docs/reference/javascript/auth-admin-generatelink"
+  ],
+  "next": "Real authenticated product UI on two isolated Web sessions, then bounded synthetic trusted-representation public positive flow; physical phone remains user-assisted."
+}

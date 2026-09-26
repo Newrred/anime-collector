@@ -1,0 +1,196 @@
+{
+  "date": "2026-09-26T10:53:33.340Z",
+  "target": "nmgkhknponvzcwliajyk",
+  "fixture": {
+    "card": "16690ca4-9836-4024-8de8-7df64750547b",
+    "asset": "70dfcde1-388f-4a7b-9c3b-457ff66644a8",
+    "board": "0c8fa47c-7b02-4e68-846f-0e81ad4e1de5",
+    "membership": "ba753b10-e742-4b34-8f51-aed9946c8722",
+    "privateOperation": "1c95651f-d8f6-4df4-add0-9f27443d8856",
+    "publicOperation": "254b249e-abc1-4235-95c8-b9a8beb8b993",
+    "originalHash": "bded76b40a78e907d18a5170e84d362c1492166c9a4df9f048f9a234fefd6897",
+    "representation": "4858fd6b-a806-468c-b2c9-8a30512b23a3",
+    "representationHash": "893e7afbd0a2210da4fe59e1345ccae5dc6e587ee2bf4a719958baf9412f5521",
+    "publicAsset": "269922b3-620d-4adf-8b56-29eae832d80c",
+    "publication": "a7221d22-1d70-4e41-a9f7-d62713225c74"
+  },
+  "checks": [
+    {
+      "name": "both test policies initially closed",
+      "pass": true
+    },
+    {
+      "name": "actual private HTTP upload READY",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "private storage without trusted approval cannot publish",
+      "pass": true,
+      "status": 409,
+      "error": "IMAGE_RIGHTS_REQUIRED"
+    },
+    {
+      "name": "trusted exact representation creates public READY via server Storage read",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "same public operation returns same READY asset",
+      "pass": true
+    },
+    {
+      "name": "original hash preserved and public quota reservation not duplicated",
+      "pass": true,
+      "count": 1,
+      "repHash": "893e7afbd0a2210da4fe59e1345ccae5dc6e587ee2bf4a719958baf9412f5521",
+      "sourceHash": "bded76b40a78e907d18a5170e84d362c1492166c9a4df9f048f9a234fefd6897",
+      "publicSourceHash": "bded76b40a78e907d18a5170e84d362c1492166c9a4df9f048f9a234fefd6897"
+    },
+    {
+      "name": "owner preview delivers decoded public derivative",
+      "pass": true,
+      "bytes": 90
+    },
+    {
+      "name": "review-bound publication succeeds",
+      "pass": true,
+      "revision": 2
+    },
+    {
+      "name": "anonymous snapshot contains exactly selected synthetic card",
+      "pass": true
+    },
+    {
+      "name": "anonymous real public image bytes decode without owner token",
+      "pass": true,
+      "bytes": 90,
+      "hash": "e8b534f9884303efe6f7c11d016c2bffb07ab2d6553f2f9f6d311a543e60bef7"
+    },
+    {
+      "name": "public response uses no-store",
+      "pass": true
+    },
+    {
+      "name": "private copy retirement confirmed",
+      "pass": true
+    },
+    {
+      "name": "retired private copy no longer readable",
+      "pass": true
+    },
+    {
+      "name": "private-only retirement leaves separately approved public image readable",
+      "pass": true
+    },
+    {
+      "name": "representation rights revocation removes visitor card",
+      "pass": true
+    },
+    {
+      "name": "rights revocation blocks actual public image URL",
+      "pass": true
+    },
+    {
+      "name": "owner withdrawal removes entire anonymous publication",
+      "pass": true
+    },
+    {
+      "name": "private and public settings restored exactly",
+      "pass": true
+    }
+  ],
+  "scope": "Actual HTTP handlers with real hosted Auth/RPC/Postgres/Storage; anonymous SDK/HTTP reads, not product browser UI or Google OAuth.",
+  "cleanup": {
+    "date": "2026-09-26T10:55:22.562Z",
+    "state": {
+      "objects": 0,
+      "settings": {
+        "public": {
+          "singleton": true,
+          "asset_limit": 0,
+          "reads_enabled": false,
+          "images_enabled": false,
+          "writes_enabled": false,
+          "follows_enabled": false,
+          "policy_revision": "UNAPPROVED",
+          "reports_enabled": false,
+          "asset_bytes_limit": 0,
+          "minihomes_enabled": false,
+          "report_daily_limit": 0
+        },
+        "private": {
+          "id": true,
+          "paused": false,
+          "enabled": false,
+          "approved": false,
+          "revision": "UNAPPROVED",
+          "main_bytes": 1000000,
+          "observed_at": null,
+          "quota_bytes": 0,
+          "thumb_bytes": 120000,
+          "physical_bytes": 0,
+          "asset_count_max": 0,
+          "preparations_per_day": 0,
+          "read_bytes_per_month": 0,
+          "upload_max_in_flight": 1,
+          "decode_attempts_per_day": 0,
+          "global_read_bytes_per_month": 0
+        }
+      },
+      "cardDeleted": true,
+      "publicState": "DELETED",
+      "activeRights": 0,
+      "boardDeleted": true,
+      "privateBytes": 0,
+      "privateState": "DELETED",
+      "publicReserved": 0
+    },
+    "checks": [
+      {
+        "name": "private and public objects physically removed and quota released",
+        "pass": true
+      },
+      {
+        "name": "new synthetic fixtures tombstoned and both rights revoked",
+        "pass": true
+      },
+      {
+        "name": "all test policies restored exactly",
+        "pass": true
+      }
+    ]
+  },
+  "head": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "productionChanged": false,
+  "newMigrations": [],
+  "productCodeChangedThisRun": [],
+  "commands": [
+    {
+      "command": "node .cache/private-public-hosted.mjs",
+      "exit": 0,
+      "result": "18 checks passed"
+    },
+    {
+      "command": "node .cache/private-public-hosted-cleanup.mjs",
+      "result": "First call honored cleanup fence with 17.78 seconds remaining, no forced deletion. Second call exit0, 3 cleanup checks passed."
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "security": "Approved synthetic source and exact representation only; both trusted rights rows now revoked. Settings exactly restored, no production flags/DB/deployment/paid changes. Original hash and audit records preserved. Test auth session signed out with local scope; no secrets in evidence.",
+  "notVerified": [
+    "Physical phone or current Google OAuth",
+    "Private-source publishing product UI against hosted backend in this run",
+    "Replacement quota headroom",
+    "Private object bytes backup/recovery",
+    "Final production CDN/candidate/operations approval"
+  ],
+  "priorEvidence": [
+    "2026-09-26-private-image-hosted-ui.json (earlier run)",
+    "2026-09-26-private-public-representation.json (earlier local checks)"
+  ],
+  "next": "W06/W08/W15: verify smaller-image replacement near quota limit and old-copy cleanup/reservation behavior"
+}

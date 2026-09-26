@@ -27,6 +27,10 @@ export default function PublicBoardSnapshot({ snapshot, publicationId, services,
           const blob = await services.previewImage(card.visual.assetId, request.signal);
           if (!alive) return null;
           src = URL.createObjectURL(blob); urls.push(src);
+        } else if(services.readImage) {
+          const blob=await services.readImage(publicationId,card.visual.assetId,request.signal);
+          if(!alive) return null;
+          src=URL.createObjectURL(blob); urls.push(src);
         } else src = publicImageUrl(publicationId, card.visual.assetId, "full");
         return { status: "loading", src };
       })().then((visual) => {

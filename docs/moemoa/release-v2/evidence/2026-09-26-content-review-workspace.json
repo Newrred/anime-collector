@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-26",
+  "scope": "W08/W14 initial content queue and operator browser classification",
+  "status": "LOCAL_PASS_NOT_RELEASE_READY",
+  "sql": {
+    "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+    "log": ".cache/content-initial-local.log",
+    "exitCode": 0,
+    "passNotices": 354,
+    "newAssertions": 10,
+    "scope": "Disposable PostgreSQL: initial board queue, revision zero, case reuse, exact resolution, policy change and stale review refusal, ordinary-account denial. Home initial queue and pagination are not independently covered by these new assertions."
+  },
+  "browser": {
+    "command": "npx playwright test tests/publication-ui.spec.ts --project=chromium --no-deps --workers=4 --reporter=line",
+    "environment": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4386",
+    "log": ".cache/content-workspace-regression.log",
+    "exitCode": 0,
+    "passed": 29,
+    "skipped": 1,
+    "skipReason": "Private-source publication requires PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1=1; disabled in this run.",
+    "newTests": 4,
+    "scope": "Actual local Chromium app with mocked Auth/RPC/image responses: board, home and appeal review; exact decision payload; logout removes content; image failure prevents save; retry enables review; stale decision clears confirmation. Not hosted integration or physical devices.",
+    "initialFailure": "New select-label lookup timed out; explicit label/htmlFor association added. Final targeted 4 tests and full file passed."
+  },
+  "unit": { "command": "npm run test:unit", "log": ".cache/content-workspace-unit.log", "exitCode": 0, "passed": 368 },
+  "build": { "command": "npm run build", "log": ".cache/content-workspace-build-final.log", "exitCode": 0, "pages": 19 },
+  "files": [
+    "tools/publication-boundary/content-review-candidate.sql",
+    "tools/publication-boundary/content-initial-contract.sql",
+    "src/features/memory/components/MemoryContentReview.jsx",
+    "src/pages/moderation.astro",
+    "src/features/memory/components/MemorySafety.jsx",
+    "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+    "src/features/memory/runtime/platformPublication.js",
+    "src/server/publicImages/handler.js",
+    "tests/publication-ui.spec.ts",
+    "tests/unit/publicImages.test.mjs"
+  ],
+  "security": "UI default-off; server requires moderator and exact case/content revision, hash and policy. Protected image requests use bearer headers and no-store. No private image auto-upload or analytics content added.",
+  "migrationAndRollback": "Prototype only, outside formal migrations. Local disposable DB only; no remote schema, flags or deployment changed. Revert candidate/UI additions to remove this local work.",
+  "priorEvidence": "Earlier hosted public-flow PASS remains separate; no hosted PASS added here.",
+  "remaining": ["Home initial-queue and pagination SQL checks", "Formal migration and hosted integration", "Guardian consent, verified adult eligibility and country-specific policy", "Physical devices and D03-D06 release gates"],
+  "next": "Verify initial home queue and cursor pagination against the local SQL prototype."
+}

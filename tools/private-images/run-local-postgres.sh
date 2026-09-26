@@ -19,4 +19,30 @@ for migration in "$root"/supabase/migrations/*.sql; do
 done
 "${psql[@]}" -f "$root/tools/private-images/contract.sql"
 source "$root/tools/private-images/races.sh"
+if [[ "${ELIGIBILITY_MUTATION_TEST:-0}" == 1 ]]; then
+  "${psql[@]}" -f "$root/tools/identity/eligibility-candidate.sql" >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-mutation-candidate.sql" >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-mutation-contract.sql"
+  source "$root/tools/identity/eligibility-mutation-races.sh"
+  source "$root/tools/identity/eligibility-mutation-expiry.sh"
+  "${psql[@]}" -f "$root/tools/identity/eligibility-image-candidate.sql" >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-image-contract.sql"
+  source "$root/tools/identity/eligibility-image-races.sh"
+  "${psql[@]}" -f "$root/tools/identity/eligibility-publication-candidate.sql" >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-publication-contract.sql"
+  source "$root/tools/identity/eligibility-publication-races.sh"
+  "${psql[@]}" -f "$root/tools/identity/eligibility-public-asset-contract.sql"
+  "${psql[@]}" -c 'create table auth.sessions(id uuid primary key,user_id uuid not null references auth.users(id),not_after timestamptz)' >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-viewer-candidate.sql" >/dev/null
+  "${psql[@]}" -f "$root/tools/identity/eligibility-viewer-contract.sql"
+  "${psql[@]}" -f "$root/tools/identity/eligibility-viewer-image-contract.sql"
+  "${psql[@]}" -f "$root/tools/identity/eligibility-publisher-read-contract.sql"
+  if [[ -n "${ELIGIBILITY_HTTP_NODE:-}" ]]; then
+    "$ELIGIBILITY_HTTP_NODE" "$(wslpath -w "$root/tools/identity/eligibility-viewer-http.mjs")" "$work" "$pg_bin/psql"
+    "$ELIGIBILITY_HTTP_NODE" "$(wslpath -w "$root/tools/identity/eligibility-image-http.mjs")" "$work" "$pg_bin/psql"
+  fi
+fi
+if [[ -n "${PRIVATE_RECOVERY_FIXTURES:-}" ]]; then
+  source "$root/tools/private-images/recovery-rehearsal.sh"
+fi
 echo "Private media PostgreSQL contract PASS; local artifacts: $work"

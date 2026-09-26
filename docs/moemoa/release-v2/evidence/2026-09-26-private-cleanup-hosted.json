@@ -1,0 +1,166 @@
+{
+  "date": "2026-09-26T11:34:18.507Z",
+  "fixture": {
+    "card": "1db86a50-46fe-477c-8511-2df533fe17fa",
+    "oldAsset": "73b84b7a-602d-43cc-9896-67a211ca5442",
+    "newAsset": "b8bcba1c-1838-42cb-8d63-b62ed9e86ee0",
+    "oldOperation": "7b548597-7157-46ef-8a8a-04c3dd535c0d",
+    "newOperation": "21ae1ac6-4904-4dc2-8f20-7f5e0cf68722",
+    "oldHash": "7f79b606fd9907dedba2caccc31fc1b0f2cdc5ec2314019c535afc63727a5345",
+    "newHash": "3f03151995a7b8d7296e628c4897e1d5ba3483a0fa96871c86a9e1ab6511ca9d",
+    "oldRepresentation": "c9f94483-79a0-4a53-8c8d-c2dce0cc20c8",
+    "newRepresentation": "4a22aafb-b383-4700-bf7c-bfa2afdf7ade"
+  },
+  "checks": [
+    {
+      "name": "isolated test has no live private images before execution",
+      "pass": true
+    },
+    {
+      "name": "replacement is smaller and combined bytes exceed quota by exactly one",
+      "pass": true,
+      "oldSize": 920,
+      "newSize": 170,
+      "quota": 1089
+    },
+    {
+      "name": "old image stored through real HTTP",
+      "pass": true
+    },
+    {
+      "name": "metadata replacement immediately blocks old private read",
+      "pass": true
+    },
+    {
+      "name": "smaller replacement is quota-blocked until old objects removed",
+      "pass": true,
+      "status": 429,
+      "error": "PRIVATE_IMAGE_QUOTA_EXCEEDED"
+    },
+    {
+      "name": "rejection preserves old storage charge and creates no new reservation",
+      "pass": true,
+      "charged": 920,
+      "oldState": "DELETING",
+      "remaining": 86.667766,
+      "oldObjects": 2,
+      "newReservations": 0
+    },
+    {
+      "name": "real cleanup endpoint rejects incorrect secret",
+      "pass": true
+    },
+    {
+      "name": "cleanup endpoint honors fence and deletes no pending writer",
+      "pass": true
+    },
+    {
+      "name": "early cleanup keeps both old objects and charged bytes",
+      "pass": true
+    },
+    {
+      "name": "authenticated cleanup endpoint physically deletes one expired-fence copy",
+      "pass": true,
+      "deleted": 1,
+      "failed": 0
+    },
+    {
+      "name": "repeated cleanup does not duplicate deletion",
+      "pass": true
+    },
+    {
+      "name": "same operation succeeds after physical cleanup without raising quota",
+      "pass": true
+    },
+    {
+      "name": "successful retry remains idempotent",
+      "pass": true
+    },
+    {
+      "name": "replacement real image decodes correctly",
+      "pass": true
+    },
+    {
+      "name": "only smaller representation charged and both original hashes preserved",
+      "pass": true,
+      "charged": 170,
+      "newHash": "3f03151995a7b8d7296e628c4897e1d5ba3483a0fa96871c86a9e1ab6511ca9d",
+      "oldHash": "7f79b606fd9907dedba2caccc31fc1b0f2cdc5ec2314019c535afc63727a5345",
+      "oldObjects": 0,
+      "newReservations": 1
+    },
+    {
+      "name": "test policy restored exactly",
+      "pass": true
+    }
+  ],
+  "measurement": {
+    "oldSize": 920,
+    "newSize": 170,
+    "quota": 1089
+  },
+  "cleanup": {
+    "state": {
+      "policy": {
+        "id": true,
+        "paused": false,
+        "enabled": false,
+        "approved": false,
+        "revision": "UNAPPROVED",
+        "main_bytes": 1000000,
+        "observed_at": null,
+        "quota_bytes": 0,
+        "thumb_bytes": 120000,
+        "physical_bytes": 0,
+        "asset_count_max": 0,
+        "preparations_per_day": 0,
+        "read_bytes_per_month": 0,
+        "upload_max_in_flight": 1,
+        "decode_attempts_per_day": 0,
+        "global_read_bytes_per_month": 0
+      },
+      "objects": 0,
+      "liveBytes": 0,
+      "cardDeleted": true,
+      "publicEnabled": false
+    },
+    "pass": true
+  },
+  "target": "nmgkhknponvzcwliajyk",
+  "head": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "scope": "Actual api/private-image-cleanup.js default export served on loopback with real hosted Auth/Postgres/Storage. Correct project binding and fresh process-only secret; actual nonempty deletion queue. Metadata fixture changes via SQL, not browser UI or scheduled GitHub execution.",
+  "commands": [
+    {
+      "command": "node .cache/build-cleanup-endpoint-test.mjs",
+      "result": "Reused prior quota fixture under new IDs, replaced manual deletion with actual API HTTP calls."
+    },
+    {
+      "command": "node .cache/cleanup-endpoint.mjs",
+      "result": "16 checks passed; exit0"
+    },
+    {
+      "command": "node .cache/cleanup-endpoint-finalize.mjs",
+      "result": "Original fence honored for final synthetic replacement cleanup; objects0/bytes0/policy exact restore."
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "limitations": [
+    "No production deployment or remote secret/flag changes.",
+    "Scheduled GitHub dispatch and alert delivery remain unverified/disabled.",
+    "Original and replacement source hashes preserved in metadata; not physical phone UI validation.",
+    "Private bytes backup/restore remains next implementation and verification."
+  ],
+  "priorPassNotRerun": [
+    "unit356",
+    "Chromium4",
+    "build18",
+    "basic A/B/72-table restore"
+  ],
+  "productCodeChangedThisRun": [],
+  "newMigrations": [],
+  "productionChanged": false,
+  "next": "W06/W17/D05 private representation bytes+manifest backup/restore, applying latest deletion fences"
+}

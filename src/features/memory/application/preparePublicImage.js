@@ -28,6 +28,7 @@ export async function prepareSelectedPublicImage({ sourceAssetId,sourceVersion,o
   const result=await response.json().catch(()=>null);
   if(!response.ok) {
     const allowed=new Set(["AUTH_REQUIRED","PUBLIC_IMAGE_DISABLED","PUBLICATION_DISABLED","RATE_LIMITED","IMAGE_RIGHTS_REQUIRED","IMAGE_QUOTA_EXCEEDED","PUBLIC_VISUAL_NOT_READY",
+      "ELIGIBILITY_REQUIRED","ELIGIBILITY_EXPIRED","ELIGIBILITY_POLICY_CHANGED","ELIGIBILITY_POLICY_UNAVAILABLE",
       "SOURCE_IMAGE_MISMATCH","IMAGE_SIZE_LIMIT","IMAGE_FORMAT_UNSUPPORTED","IMAGE_DECODE_FAILED","ASSET_OPERATION_UNAVAILABLE","ASSET_OPERATION_FAILED","PUBLICATION_RESTRICTED","CONSENT_MISMATCH"]);
     const error=new PublicImagePreparationError(allowed.has(result?.error) ? result.error : "IMAGE_REQUEST_FAILED");
     error.retryable=result?.retryable===true;

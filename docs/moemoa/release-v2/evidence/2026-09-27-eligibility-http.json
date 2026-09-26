@@ -1,0 +1,15 @@
+{
+ "date":"2026-09-27",
+ "work":"W06/W08 eligibility HTTP errors and transfer recovery",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["src/server/privateImages/supabaseBackend.js","src/features/memory/application/createPrivateImageTransfer.js","src/features/memory/components/MemoryPrivateImageSync.jsx","tests/unit/privateImages.test.mjs","tests/unit/privateImageTransfer.test.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "reproduced":"RPC and controller discarded eligibility codes as generic failures. New tests failed before allowlist fix. Later test-only Cache-Control exact-string expectation corrected to recognize existing stricter private/no-store/max-age=0.",
+ "commands":[{"command":"npm run test:unit","result":"387 PASS, 0 fail, 0 skip","log":".cache/eligibility-http-unit.log"},{"command":"npm run build","result":"exit 0, 19 pages built, postbuild complete","log":".cache/eligibility-http-build.log"}],
+ "newChecks":["Four bounded eligibility codes retain code and appropriate HTTP status; unknown detail sanitized","Real loopback HTTP completion failure preserves two prepared image objects and sends 403 with no-store; explicit cancellation retains objects for cleanup","Controller retains original, blob, operation journal on eligibility failure; completed manifest GET recovers receipt without another POST"],
+ "limits":"HTTP uses synthetic backend and in-memory object store; controller fetch mocked. JSX Korean/English messages compiled, not visually verified. No hosted behavior PASS.",
+ "securityPrivacy":"No new personal data, API secrets, grants or bypasses. Existing unknown-error sanitization and owner context maintained.",
+ "remoteChanges":0,
+ "migrations":0,
+ "rollback":"Revert the three focused source changes if needed; no schema or data rollback",
+ "next":"Verify private image complete/revoke concurrency in disposable DB; connect actual SQL to HTTP for eligibility handling"
+}

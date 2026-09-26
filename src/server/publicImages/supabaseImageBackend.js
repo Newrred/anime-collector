@@ -1,14 +1,33 @@
 import { createClient } from "@supabase/supabase-js";
 import { PublicImageError } from "./processImage.js";
+import { authenticateVerifiedSession } from '../identity/authenticateIdentitySession.js';
 
 export const IMAGE_BUCKET = "memory-public-derivatives";
 const SAFE = new Set(["AUTH_REQUIRED","PUBLICATION_DISABLED","PUBLIC_IMAGE_DISABLED","CONSENT_MISMATCH",
+  "ELIGIBILITY_REQUIRED","ELIGIBILITY_EXPIRED","ELIGIBILITY_POLICY_CHANGED","ELIGIBILITY_POLICY_UNAVAILABLE",
   "PUBLICATION_RESTRICTED","PUBLIC_VISUAL_NOT_READY","IMAGE_RIGHTS_REQUIRED","OPERATION_MISMATCH",
-  "ASSET_OPERATION_UNAVAILABLE","IMAGE_QUOTA_EXCEEDED","ASSET_IN_USE","NOT_FOUND","RATE_LIMITED"]);
+  "ASSET_OPERATION_UNAVAILABLE","IMAGE_QUOTA_EXCEEDED","ASSET_IN_USE","NOT_FOUND","RATE_LIMITED",
+  "MODERATOR_REQUIRED","CONTENT_POLICY_CHANGED","PUBLICATION_CONFLICT"]);
 export async function rpc(client, name, args) {
   const { data, error } = await client.rpc(name, args);
-  if (error) throw new PublicImageError(SAFE.has(error.message) ? error.message : "IMAGE_SERVICE_FAILED", error.message === "RATE_LIMITED" ? 429 : 409);
+  if (error) {
+    const code=SAFE.has(error.message) ? error.message : "IMAGE_SERVICE_FAILED";
+    const status=code==='RATE_LIMITED' ? 429
+      : ['MODERATOR_REQUIRED','ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code) ? 403
+      : code==='ELIGIBILITY_POLICY_UNAVAILABLE' ? 503 : 409;
+    throw new PublicImageError(code,status);
+  }
   return data;
+}
+
+export async function resolveViewerImage(service, token, args) {
+  let viewer;
+  try { viewer=await authenticateVerifiedSession(service.auth,token); }
+  catch { throw new PublicImageError('AUTH_REQUIRED',401); }
+  return rpc(service,'resolve_memory_viewer_image',{
+    p_publication_id:args.p_publication_id,p_asset_id:args.p_asset_id,p_variant:args.p_variant,
+    p_viewer:viewer.userId,p_session:viewer.sessionId,p_expires:viewer.expiresAtSeconds,
+  });
 }
 
 export function createSupabaseImageBackend(env = process.env) {
@@ -22,6 +41,7 @@ export function createSupabaseImageBackend(env = process.env) {
   const service = createClient(url,key,options);
   const bucket = service.storage.from(IMAGE_BUCKET);
   return {
+    viewerImage:(token,args)=>resolveViewerImage(service,token,args),
     async user(token) {
       if (!token) throw new PublicImageError("AUTH_REQUIRED",401);
       const client = createClient(url,anon,{ ...options,global:{ ...options.global,headers:{ Authorization:`Bearer ${token}` } } });

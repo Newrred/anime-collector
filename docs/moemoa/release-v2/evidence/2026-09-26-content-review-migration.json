@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-26",
+  "scope": "W08/W14 versioned content classification migration and emergency closure",
+  "status": "LOCAL_MIGRATION_VERIFIED_NOT_APPLIED_REMOTELY",
+  "migration": "supabase/migrations/20260926140122_memory_content_review.sql",
+  "sha256": "fbffdeb940bd8f40aa92a06131e749d0aac057099cfd45b5b86e18495fcaa6b4",
+  "creation": "Installed Supabase CLI 2.115.0: npx --no-install supabase migration new --help, then migration new memory_content_review. No CLI upgrade.",
+  "canonicalSource": "Candidate DDL moved to generated migration; content-review-candidate.sql now only includes this canonical file for local psql contracts.",
+  "publication": {
+    "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+    "log": ".cache/content-migration-publication-final.log",
+    "exitCode": 0,
+    "passNotices": 375,
+    "newAssertions": 3,
+    "scope": "Pre-migration baseline followed by exact migration in rollback upgrade contracts and committed disposable race stage. Policy defaults UNCONFIGURED; previously readable unclassified board becomes unavailable; emergency closure disables public flags without deleting audit."
+  },
+  "freshInstallPrivate": {
+    "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+    "log": ".cache/content-migration-private.log",
+    "exitCode": 0,
+    "passNotices": 49,
+    "scope": "All migrations including content classification applied in order; platform pg_cron retention migration excluded by established local harness. Private image contract47 and two real concurrent reservation races."
+  },
+  "rollback": "tools/publication-boundary/close-content-review.sql closes reads/writes/images/minihomes while preserving schema, reviews, notices and audits. No destructive downgrade or restoration of unclassified public readers.",
+  "changedFiles": ["supabase/migrations/20260926140122_memory_content_review.sql", "tools/publication-boundary/content-review-candidate.sql", "tools/publication-boundary/run-local-postgres.sh", "tools/publication-boundary/content-review-contract.sql", "tools/publication-boundary/content-review-races.sh", "tools/publication-boundary/close-content-review.sql", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "productionOrHostedChanges": false,
+  "limits": "Not hosted integration, physical devices, guardian consent or verified adult eligibility. UNCONFIGURED intentionally prevents public exposure; never auto-approve old content to restore visibility. Hosted advisors not run. Existing browser/unit/build PASS not rerun for SQL/file relocation.",
+  "next": "Validate authenticated moderation integration against the complete local migration with real database RPC responses, then prepare the exact hosted test application scope."
+}

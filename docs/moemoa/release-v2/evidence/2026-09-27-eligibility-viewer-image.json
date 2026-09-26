@@ -1,0 +1,24 @@
+{
+ "date":"2026-09-27",
+ "work":"W08/W13 verified server viewer image boundary",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["src/server/identity/authenticateIdentitySession.js","src/server/publicImages/supabaseImageBackend.js","src/server/publicImages/handler.js","api/public-image.js","tests/unit/publicViewerImage.test.mjs","tools/identity/eligibility-viewer-candidate.sql","tools/identity/eligibility-viewer-image-contract.sql","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "implementation":"Reuse signed-claims/live-user validation to derive viewer user/session/token expiry. Service-only SQL resolver validates current session and temporarily binds viewer context for existing image visibility resolver, then restores context. Default-off MOEMOA_PUBLIC_IMAGE_VIEWER_ENABLED selects verified Authorization flow; resolution repeats after Storage, including auth verification. Anonymous path retained. Response no-store and Vary Authorization.",
+ "commands":[
+  {"command":"node --test tests/unit/publicViewerImage.test.mjs tests/unit/publicImages.test.mjs tests/unit/identitySignedSession.test.mjs tests/unit/identityHttp.test.mjs","result":"39 passed; exit0; two new HTTP/adapter tests","log":".cache/public-viewer-http.log"},
+  {"command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh","result":"131 PASS messages; previous125 plus six SQL checks; exit0","log":".cache/eligibility-viewer-image.log"},
+  {"command":"npm run test:unit","result":"391 passed; exit0","log":".cache/viewer-unit.log"},
+  {"command":"npm run build","result":"19 pages; exit0","log":".cache/viewer-build.log"},
+  {"command":"git diff --check -- src/server/identity/authenticateIdentitySession.js src/server/publicImages/handler.js src/server/publicImages/supabaseImageBackend.js api/public-image.js","result":"exit0; CRLF notices only"}
+ ],
+ "verified":["HTTP delivers unchanged bytes with two verified viewer resolutions","Simulated revocation during Storage suppresses bytes","Rejected auth stops Storage read","Malformed Authorization and viewer query injection denied","No authorization falls back to existing public resolver","Client arguments cannot replace verified identity","Actual SQL service context reads MATURE image reference","Actual SQL no-context/expired/revoked denies","Actual SQL authenticated role cannot call service viewer function","Actual SQL context restored on same connection"],
+ "testLimits":"HTTP uses synthetic Auth/RPC/Storage. SQL uses actual disposable PostgreSQL with synthetic auth.sessions/claims/evidence and direct reviewed snapshot fixture. Real SDK signature regression also ran, with local JWKS and synthetic user endpoint. No connected HTTP-to-SQL mature image flow yet.",
+ "notVerified":["Actual hosted Auth/provider/Storage","Client authenticated reader and account-switch cleanup","Mature HTTP to real local SQL integration","Real country/guardian policy"],
+ "newUserBehaviorPass":"Local HTTP/SQL scope only, no hosted or browser PASS",
+ "securityPrivacy":"No token in URL, logs or stored evidence; no public RPC accepts user-controlled viewer context; no image path exposure to browser. Flags remain off; no age evidence issued.",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Revert viewer flag wiring and helper additions; optional SQL prototype only, disposable DB stopped",
+ "externalGates":"D01 test classification migration approval, D04 provider/country/guardian policy, D06 exact release candidate",
+ "next":"Connect authenticated client metadata/image reader and invalidate in-flight content on logout/account switch, then verify the integrated flow"
+}

@@ -1,0 +1,25 @@
+create function pg_temp.ok(value boolean,label text) returns void language plpgsql as $$begin if value is distinct from true then raise exception 'FAIL: %',label;end if;raise notice 'PASS: %',label;end $$;
+select set_config('test.owner.board',(select id::text from private.memory_publications where board_id='55555555-5555-4555-8555-555555555550'),false);
+select set_config('test.owner.home',(select id::text from private.memory_minihomes where user_id='77777777-7777-4777-8777-777777777777'),false);
+select set_config('test.owner.asset',(select id::text from private.memory_public_assets where operation_id='44444444-4444-4444-8444-444444444442'),false);
+update private.memory_content_reviews set rating='GENERAL' where publication_id=current_setting('test.owner.board')::uuid;
+update private.memory_home_content_reviews set rating='GENERAL' where home_id=current_setting('test.owner.home')::uuid;
+update private.memory_eligibility_evidence set state='REVOKED' where user_id='77777777-7777-4777-8777-777777777777' and purpose='PUBLIC_PUBLISH';
+set role anon;
+select pg_temp.ok(public.read_memory_publication(current_setting('test.owner.board')::uuid) is null and public.read_memory_minihome(current_setting('test.owner.home')::uuid) is null,'publisher revocation hides existing GENERAL board and home');
+reset role;
+set role service_role;
+select pg_temp.ok(public.resolve_memory_public_image(current_setting('test.owner.board')::uuid,current_setting('test.owner.asset')::uuid,'full') is null,'publisher revocation closes existing image placement');
+reset role;
+select pg_temp.ok((select published_snapshot is not null from private.memory_publications where id=current_setting('test.owner.board')::uuid) and (select state='READY' and reserved_bytes=200 from private.memory_public_assets where id=current_setting('test.owner.asset')::uuid),'publisher revocation preserves snapshots image and quota');
+update private.memory_eligibility_evidence set state='GRANTED',expires_at=clock_timestamp()-interval '1 second' where user_id='77777777-7777-4777-8777-777777777777' and purpose='PUBLIC_PUBLISH';
+set role anon;
+select pg_temp.ok(public.read_memory_publication(current_setting('test.owner.board')::uuid) is null,'expired publisher grant closes existing board');
+reset role;
+update private.memory_eligibility_evidence set expires_at=clock_timestamp()+interval '1 hour' where user_id='77777777-7777-4777-8777-777777777777' and purpose='PUBLIC_PUBLISH';
+set role anon;
+select pg_temp.ok(public.read_memory_publication(current_setting('test.owner.board')::uuid) is not null and public.read_memory_minihome(current_setting('test.owner.home')::uuid) is not null,'current publisher grant restores visibility without changing snapshot');
+reset role;
+-- Restore the separate MATURE fixtures for the subsequent HTTP integration.
+update private.memory_content_reviews set rating='MATURE' where publication_id=current_setting('test.owner.board')::uuid;
+update private.memory_home_content_reviews set rating='MATURE' where home_id=current_setting('test.owner.home')::uuid;

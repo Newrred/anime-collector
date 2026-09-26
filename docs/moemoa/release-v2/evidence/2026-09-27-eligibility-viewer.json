@@ -1,0 +1,20 @@
+{
+ "date":"2026-09-27",
+ "work":"W08/W13 local mature metadata reader eligibility",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-viewer-candidate.sql","tools/identity/eligibility-viewer-contract.sql","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "implementation":"Local board/home reader prototype preserves exact content hash and policy review, GENERAL access and original visibility checks. MATURE additionally requires verified-claim context bound to auth.uid and a current database session plus current MATURE_VIEW evidence. No grant issuance or formal migration. Existing service-only image resolver ACL unchanged.",
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit0; 125 PASS messages = previous 113 plus 12 new viewer checks",
+ "log":".cache/eligibility-viewer.log",
+ "verified":["GENERAL remains readable anonymously","Anonymous denied MATURE board/home","Login alone grants no mature access","Policy default-off overrides synthetic evidence","Eligible viewer reads board and nested home","Revocation closes both metadata surfaces","Expired evidence denied","Policy revision mismatch denied","Deleted session rejects unexpired token context","Another user's session rejected","BLOCKED content never overridden","Stale content review hash never overridden"],
+ "fixtureLimits":"auth.sessions is a minimal local table. JWT claim context and MATURE evidence are synthetic DB-owner fixtures, not a real verified JWT or age/provider result. Content classification fixtures bypass the moderation workflow solely for boundary testing.",
+ "notVerified":["Real Auth token to viewer metadata route","Image delivery with verified viewer context","Token expiry and session not_after cases individually","Country and guardian policy","Browser login/logout/account-switch clearing","Hosted deployment"],
+ "newUserBehaviorPass":"12 local SQL checks only; no hosted user flow PASS",
+ "securityPrivacy":"No user-supplied viewer id added to public RPCs. No image coordinates exposed to authenticated client. Default MATURE policy remains disabled outside test fixture. No private images/credentials used.",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Optional local prototype only; disposable DB stopped by runner",
+ "externalGates":"D01 test classification migration approval; D04 real identity provider and country/guardian policy; D06 exact candidate approval",
+ "next":"Connect verified server session to service-only image resolution, preserving no-store and authorization recheck after Storage; then authenticated reader and account-switch invalidation"
+}

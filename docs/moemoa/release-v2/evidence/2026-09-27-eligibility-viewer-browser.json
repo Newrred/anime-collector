@@ -1,0 +1,19 @@
+{
+ "date":"2026-09-27",
+ "work":"W08/W13 browser viewer account boundaries",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tests/public-viewer.spec.ts","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "command":"PLAYWRIGHT_BASE_URL=http://127.0.0.1:4391 npx playwright test tests/public-viewer.spec.ts --project=chromium --no-deps --workers=1 --reporter=line",
+ "result":"4 passed (28.4s)",
+ "log":".cache/viewer-browser.log",
+ "verified":["Board authenticated image decodes at actual 24px width","Board logout removes rendered content and revokes Blob URL","Board account switch while image response held removes snapshot and suppresses late image","Minihome nested authenticated image decodes at actual 24px width","Minihome logout removes rendered content and revokes Blob URL","Minihome account switch while image response held suppresses late image","All four cases have no pageerror or Vite error overlay"],
+ "testLimits":"Actual Chromium/React/runtime components with DEV synthetic RPC adapter, mock-auth events, and intercepted real WebP response. Not real Supabase Auth/provider, database or Storage. No mobile device verification.",
+ "newUserBehaviorPass":"Four rendered browser behavior cases; separate from prior unit/SQL PASS",
+ "tools":"agent-browser executable unavailable; existing installed Playwright used without dependency installation",
+ "securityPrivacy":"Only synthetic account ids/image. Checked Authorization header rather than token URL. No remote writes or public activation.",
+ "remoteChanges":0,
+ "migrations":0,
+ "rollback":"Tests/documentation only this turn",
+ "remaining":"Integrated HTTP-to-SQL mature image flow, metadata request-delay races, real Auth/provider, country/guardian policy and D01/D04/D06 gates",
+ "next":"Connect mature-image HTTP integration test to real disposable PostgreSQL with existing signed-session boundary and verify revocation between resolutions"
+}

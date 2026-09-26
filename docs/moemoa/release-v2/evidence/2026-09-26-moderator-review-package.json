@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 moderator-only current classification review package and account deletion compatibility",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "exitCode": 0,
+  "log": ".cache/content-review-package-final.log",
+  "passNotices": 336,
+  "newAssertions": 9,
+  "verified": [
+    "Moderator queue distinguishes classification cases from ordinary reports",
+    "Current case/content revision, snapshot hash and policy are returned together",
+    "Ordinary account and anonymous cannot read moderator package",
+    "Package excludes owner ID and local image reference in tested fixture",
+    "Withdrawn publication cannot be recovered through review package",
+    "Account deletion removes current classification and preserves decision audit"
+  ],
+  "reproducedBug": {
+    "beforeLog": ".cache/content-review-delete-before.log",
+    "beforeExitCode": 1,
+    "error": "memory_content_reviews_reviewed_by_fkey prevented deletion from auth.users",
+    "fix": "Current review follows target deletion via ON DELETE CASCADE; reviewer UUID is an audit identifier rather than a blocking auth.users foreign key. Applied consistently to board and home review tables. Deletion regression directly exercises board classification."
+  },
+  "changedImplementation": [
+    "tools/publication-boundary/content-review-candidate.sql",
+    "tools/publication-boundary/content-notice-contract.sql"
+  ],
+  "productionChanges": false,
+  "cleanup": "Rollback contracts and disposable local cluster only; no real accounts deleted.",
+  "notVerified": [
+    "Operator browser screen and protected image preview delivery",
+    "Home review-package behavior through actual browser",
+    "Adult verification and guardian consent",
+    "Formal migration and hosted integration"
+  ],
+  "status": "LOCAL_SQL_PASS_NOT_RELEASE_READY"
+}

@@ -1,0 +1,19 @@
+{
+ "date":"2026-09-27",
+ "work":"W08/W13 PUBLIC_PUBLISH local writer guard",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-publication-candidate.sql","tools/identity/eligibility-publication-contract.sql","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit 0; 103 PASS messages = previous 96 + 7 publication eligibility assertions",
+ "log":".cache/eligibility-publication.log",
+ "verified":["PUBLIC_PUBLISH policy defaults off","CLOUD_WRITE alone cannot prepare public home","Revocation after home preview prevents publication","Eligible owner publishes prepared home","Revoked owner cannot prepare replacement","Revoked owner can withdraw home","Actual published_selection becomes null"],
+ "fixtureCorrections":["Home requires at least one readable board; replaced empty entries with actual synthetic board prepare/publish","SYSTEM_DESIGN requires SYSTEM_GENERATED rights basis","Design spec needs paletteId, patternSeed and genreTokens; supplied full synthetic spec"],
+ "scope":"Local SQL public writer guard delegates to unchanged flags/sanctions. Real synthetic design board used for home; GENERAL review injected as fixture, not a moderation workflow test.",
+ "notVerified":["Hosted Auth/UI","Publication lock-wait expiry and concurrency","Every writer caller","Existing public visibility after owner eligibility revocation","MATURE_VIEW integration","Provider/guardian/country rules"],
+ "newUserBehaviorPass":"Local RPC only",
+ "securityPrivacy":"Rights and content review gates preserved; MATURE remains denied. No real account or image data.",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Optional candidate only; disposable cluster stopped",
+ "next":"Verify publication lock-wait expiry and all writer/withdrawal callers before formalizing public eligibility migration"
+}

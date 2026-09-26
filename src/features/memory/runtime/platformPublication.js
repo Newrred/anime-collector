@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { SupabasePublicationGateway } from "../adapters/supabase/SupabasePublicationGateway.js";
+import { createPublicationViewer } from '../application/createPublicationViewer.js';
 import { CATALOG_COVER_COLUMNS, toCatalogCoverDisplay } from "../../catalog/catalogCoverReference.js";
 
 const env = import.meta.env || {};
@@ -8,6 +9,7 @@ export const publicationUiEnabled = () => env.PUBLIC_MEMORY_PUBLICATION_V1 === "
 export const minihomeUiEnabled = () => publicationUiEnabled() && (env.PUBLIC_MEMORY_MINIHOME_V1 === "1" || Boolean(testAdapters()));
 export const followsUiEnabled = () => minihomeUiEnabled() && (env.PUBLIC_MEMORY_FOLLOWS_V1 === "1" || Boolean(testAdapters()));
 export const safetyUiEnabled = () => publicationUiEnabled() && (env.PUBLIC_MEMORY_MODERATION_V1 === "1" || Boolean(testAdapters()));
+export const contentReviewUiEnabled = () => safetyUiEnabled() && (env.PUBLIC_MEMORY_CONTENT_REVIEW_V1 === '1' || Boolean(testAdapters()));
 let services;
 export function getPublicationServices() {
   if (services) return services;
@@ -26,7 +28,7 @@ export function getPublicationServices() {
     enabled: publicationUiEnabled() && Boolean(client),
     policyRevision: test?.policyRevision || env.PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION || "",
     reader: client ? new SupabasePublicationGateway(client) : null,
-    gateway: Object.fromEntries(["get", "prepare", "publish", "revoke", "revokeCard", "retireCard", "getHome", "listHomeBoards", "prepareHome", "publishHome", "revokeHome", "relationship", "setRelationship", "relationships", "report", "safety", "appeal"].map((method) => [method,
+    gateway: Object.fromEntries(["get", "prepare", "publish", "revoke", "revokeCard", "retireCard", "getHome", "listHomeBoards", "prepareHome", "publishHome", "revokeHome", "relationship", "setRelationship", "relationships", "report", "safety", "appeal", "pendingContent", "openContentReview", "contentReview", "moderationCases", "resolveContentReview"].map((method) => [method,
       async (...args) => (await getWriter())[method](...args)])),
     async getSession() {
       const { getAuthSession } = await import("../../../repositories/authRepo.js");
@@ -52,6 +54,29 @@ export function getPublicationServices() {
       if (!blob.size || blob.size > 2 * 1024 * 1024) throw new Error("PUBLIC_VISUAL_NOT_READY");
       return blob;
     },
+    async contentReviewImage(review, assetId, signal) {
+      const session = await services.getSession();
+      if (!session?.access_token) throw new Error('AUTH_REQUIRED');
+      const response = await fetch(`/api/public-image?review=${encodeURIComponent(review.id)}&asset=${encodeURIComponent(assetId)}&variant=full`, {
+        signal, cache: 'no-store', headers: { Authorization: `Bearer ${session.access_token}`,
+          'X-Moemoa-Review-Hash': review.reviewHash, 'X-Moemoa-Review-Policy': review.policyRevision,
+          'X-Moemoa-Review-Revision': String(review.contentRevision) },
+      });
+      if (!response.ok || response.headers.get('content-type')?.split(';')[0] !== 'image/webp') throw new Error('PUBLIC_VISUAL_NOT_READY');
+      const blob = await response.blob();
+      if (!blob.size || blob.size > 2 * 1024 * 1024 || (await services.getSession())?.user?.id !== session.user.id) throw new Error('PUBLIC_VISUAL_NOT_READY');
+      return blob;
+    },
   };
+  if(env.PUBLIC_MEMORY_AUTHENTICATED_VIEWER_V1==='1' || test?.authenticatedViewers) {
+    const viewer=createPublicationViewer({getSession:()=>services.getSession(),getGateway:getWriter,anonymousReader:services.reader,
+      subscribeSession:async callback=>{
+        const {onAuthSessionChange}=await import('../../../repositories/authRepo.js');
+        return onAuthSessionChange(callback);
+      }});
+    services.reader=viewer.reader;
+    services.readImage=viewer.readImage;
+    services.subscribeViewer=viewer.subscribeViewer;
+  }
   return services;
 }

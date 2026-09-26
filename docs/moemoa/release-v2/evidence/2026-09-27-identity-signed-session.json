@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-27",
+  "work": "W06 authenticated identity request session",
+  "scope": "Installed Supabase SDK, actual ES256 signatures and loopback HTTP JWKS; synthetic Auth user endpoint",
+  "filesRead": ["CODEX_START_HERE.md", "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "src/server/identity/authenticateIdentitySession.js", "node_modules/@supabase/auth-js/src/GoTrueClient.ts", "tests/unit/identityHttp.test.mjs"],
+  "filesChanged": ["tests/unit/identitySignedSession.test.mjs", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "commands": [
+    {"command": "node --test tests/unit/identitySignedSession.test.mjs", "result": "1 passed, 0 failed"},
+    {"command": "npm run test:unit", "result": "384 passed, 0 failed, 0 skipped", "log": ".cache/identity-signed-unit.log"}
+  ],
+  "newEvidence": ["Valid ES256 JWT accepted", "Different signing key with trusted kid rejected", "Payload session_id tampering rejected", "Expired signed JWT rejected", "User lookup subject mismatch rejected", "Anonymous user rejected", "User lookup rejection blocks previously valid token despite cached JWKS"],
+  "productionCodeChanged": false,
+  "newUserBehaviorPass": "None: server boundary verified locally; no actual user/provider flow executed",
+  "notVerified": ["Hosted Google login", "Hosted JWKS and signing-key rotation", "Actual identity provider", "Guardian relationship and consent", "Country-specific adult eligibility", "HS256 server verification fallback"],
+  "privacy": "Ephemeral synthetic keys and UUIDs; no real tokens, user data or secrets read or logged",
+  "migrations": 0,
+  "remoteChanges": 0,
+  "rollback": "Remove test and this evidence only; no data rollback required",
+  "externalBlockers": ["Identity provider contract and country coverage unknown", "Separate test classification migration approval pending"],
+  "next": "Review existing W06 signup entry and pre-auth consent boundary against the confirmed minimum-age scope"
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-27",
+  "work": "W06/C02 Board, guest promotion and actual mutation concurrency",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "filesChanged": ["tools/identity/eligibility-mutation-candidate.sql", "tools/identity/eligibility-mutation-contract.sql", "tools/identity/eligibility-mutation-races.sh", "tools/private-images/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "reproduced": "Local mutation guard did not cover guest promotion, which inserts directly. Revoked empty promotion unexpectedly succeeded: pre-fix runner exit 3.",
+  "fix": "Guard new guest promotion in the same transaction, retain original implementation and hash/device/replay checks, revoke client access to renamed implementation",
+  "command": "wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+  "result": "exit 0; 75 PASS messages = prior 64 + 9 Board/promotion checks + 2 actual mutation races",
+  "logs": [".cache/eligibility-promotion-before.log", ".cache/eligibility-promotion.log"],
+  "newChecks": ["Revoked empty promotion rejected", "Eligible promotion imports title", "Eligible Board write", "Completed promotion recoverable after revocation", "Promotion source hash mismatch rejected", "Unguarded promotion access denied", "Revoked Board update rejected", "Revoked owner Board DELETE accepted", "Single promotion ledger after retries", "Revocation-first real RPC creates neither title nor operation row", "Write-first real RPC commits title and operation before revocation completes"],
+  "scope": "Disposable PostgreSQL and synthetic authenticated RPC calls. Existing schema loaded from repository; eligibility adapter remains local prototype.",
+  "notVerified": ["Hosted Auth/provider", "Browser eligibility UX", "Guardian or adult eligibility issuance", "Country rules", "Complete visual Card promotion", "Promotion-specific concurrency", "Storage eligibility", "Eligibility policy replacement races"],
+  "newUserBehaviorPass": "Local RPC behavior only; no hosted user behavior",
+  "securityPrivacy": "No real user data; existing ownership/hash/device checks retained; no service role bypass to renamed promotion",
+  "formalMigrations": 0,
+  "remoteChanges": 0,
+  "rollback": "Disposable cluster stopped; optional runner only, no production rollback required",
+  "next": "Connect eligibility checks to private image reservation/finalization locally, preserving cancellation and quota recovery"
+}

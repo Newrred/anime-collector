@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-26",
+  "scope": "W03 build provenance while D01 remote migration approval is pending",
+  "status": "LOCAL_HARDENING_PASS_HISTORICAL_DIRTY_CAUSE_UNRESOLVED",
+  "liveRead": { "deployment": "dpl_9djJYMHQyxhxVYePuRcT7cYoGX3x", "source": "git", "branch": "master", "sha": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60", "state": "READY", "tool": "vercel_get_deployment", "buildLogFailure": "vercel_get_deployment_build_logs returned Tool not found after supplying the verified team ID. No remote configuration contents retrieved." },
+  "files": ["scripts/write-build-info.mjs", "tests/unit/buildProvenance.test.mjs", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "change": "Require environment commit to equal actual checkout HEAD. Record tracked/current public vercel.json SHA256 and canonical JSON semanticMatch without outputting its contents; retain workingTreeDirty unchanged.",
+  "test": { "command": "node --test tests/unit/buildProvenance.test.mjs", "log": ".cache/build-provenance-test.log", "exitCode": 0, "passed": 1, "coverage": "Isolated real Git repo: clean checkout, reordered/formatted JSON retains dirty but semantic match, changed config produces mismatch without value disclosure, wrong SHA rejected, missing production Git SHA rejected." },
+  "build": { "command": "npm run build", "log": ".cache/build-provenance-build.log", "exitCode": 0, "pages": 19 },
+  "currentLocal": "Dirty local worktree retained. Config byte hashes differ due to representation, semanticMatch true. This does not explain or clear the previous Vercel build's dirty state.",
+  "migrationAndRollback": "No DB or deployment changes. Revert the script/tests to undo local diagnostics; no data mutation.",
+  "security": "No env values or config contents added to public metadata/logs. Hashes cover only existing public deployment configuration.",
+  "remaining": ["Historical Vercel config diff unavailable", "Next exact Git deployment must show new metadata", "D01 test migration approval pending", "Guardian consent, adult eligibility and D03-D06 release gates"],
+  "next": "Continue independent age/guardian implementation review while the exact test migration request remains pending."
+}

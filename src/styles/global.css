@@ -358,16 +358,10 @@ img {
 }
 
 .container {
-  width: min(calc(100dvw - (var(--page-pad) * 2)), var(--page-max));
+  width: min(calc(100% - (var(--page-pad) * 2)), var(--page-max));
   max-width: 100%;
   margin-inline: auto;
   padding: 0;
-}
-
-@supports not (width: 100dvw) {
-  .container {
-    width: min(calc(100vw - (var(--page-pad) * 2)), var(--page-max));
-  }
 }
 
 .page-wrap {

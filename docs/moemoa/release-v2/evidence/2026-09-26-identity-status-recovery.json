@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 lost identity completion response recovery",
+  "status": "LOCAL_HTTP_DB_RECOVERY_PASS_NOT_LIVE_AUTH",
+  "databaseHttp": {"command":"wsl.exe -u postgres -e env IDENTITY_TEST_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/identity/run-local-postgres.sh","log":".cache/identity-status-db.log","exitCode":0,"passed":25,"newChecks":1},
+  "unit": {"command":"npm run test:unit","log":".cache/identity-status-unit.log","exitCode":0,"passed":383,"newTests":2},
+  "verified": "Actual HTTP socket destroyed after DB completion, client observes failure, status requery returns historical IDENTITY_EVIDENCE_RECORDED with unchanged provider lookup count and DB RECORDED:1. Unit HTTP checks pending/expired/superseded/recorded distinctions and owner/session/purpose rejection.",
+  "files": ["src/server/identity/handler.js","tools/identity/http-store-integration.mjs","tests/unit/identityHttp.test.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "security": "Status uses same service-side owner/session/purpose lookup, returns minimal fields and no-store, invokes no provider. RECORDED reports a past evidence operation, never adult permission or guardian consent, even if policy changed later.",
+  "limits": "Synthetic authenticate/provider, local minimal auth.sessions and psql RPC transport. No actual OAuth/provider contract/country evaluation/guardian relationship/public deployment. No claim of hosted PASS.",
+  "migrationAndRollback": "No new schema, remote flags, dependency or deployment. Existing local store getters reused. Revert status branch and tests to remove this local feature; persistent records unchanged.",
+  "next": "Review provider integration readiness and required identity facts against the existing country/guardian/adult contracts before enabling any public route."
+}

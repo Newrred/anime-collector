@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-26",
+  "scope": "W08/W14 local content review for home metadata and public image resolver",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "exitCode": 0,
+  "log": ".cache/content-surfaces-local.log",
+  "clusterArtifacts": "/tmp/moemoa-publication-test.3kppRo",
+  "passNotices": 300,
+  "newHomeAssertions": 14,
+  "newImageAssertions": 7,
+  "previousContentAssertionsRerun": 12,
+  "verified": [
+    "Original home reader exposes unclassified nickname and a readable board as negative controls",
+    "Unreviewed home metadata and original-reader bypass are blocked",
+    "Home owner cannot self-approve and stale/mismatched moderation requests fail",
+    "Exact GENERAL home nickname is readable but embedded unreviewed board is omitted",
+    "Bio mutation invalidates classification",
+    "MATURE home is closed pending adult eligibility implementation",
+    "GENERAL board remains independently readable but author nickname is hidden until home GENERAL review",
+    "Existing service-role image resolver denies unreviewed full and thumbnail images",
+    "GENERAL review permits both variants; reclassification closes both prior paths",
+    "Service role cannot call original reader to bypass classification"
+  ],
+  "fixtureNotes": "Home negative control restores only synthetic retired fixtures inside the rollback transaction so the embedded-board test does not pass merely because the board was already empty.",
+  "rollback": "Candidate DDL and fixture changes rolled back; original regression suite continued and disposable cluster stopped on EXIT.",
+  "notVerified": [
+    "Actual image HTTP bytes/Storage delivery under the new policy",
+    "Adult identity, guardian consent, country eligibility and providers",
+    "Review UI, immutable policy-version binding, moderation audit/appeal and simultaneous review/publish",
+    "Hosted migration and physical phone behavior"
+  ],
+  "productionChanges": false,
+  "status": "LOCAL_PROTOTYPE_PASS_NOT_RELEASE_READY"
+}

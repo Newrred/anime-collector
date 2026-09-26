@@ -1,5 +1,36 @@
 import { expect, test } from "@playwright/test";
 
+test("fresh device resolves pulled catalog card snapshots without promoting provenance", async ({ page }) => {
+  await page.goto("/favicon.svg");
+  const result = await page.evaluate(async () => {
+    const { IndexedDbMemoryRepository } = await import("/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js");
+    const { commitPulledChange, writeDeviceSyncState } = await import("/src/features/memory/adapters/indexeddb/memorySyncStore.js");
+    const repository = await IndexedDbMemoryRepository.open();
+    const now = "2026-09-26T00:00:00Z", userId = "11111111-1111-4111-8111-111111111111";
+    const owner = await repository.ensureAccountOwner({ userId, now });
+    const identity = await repository.ensureInstallationIdentity({ uuid: crypto.randomUUID(), now });
+    await writeDeviceSyncState(repository.database, { ownerId: owner.id, userId, installationId: identity.installationId, deviceId: crypto.randomUUID(), lastSyncSeq: 0, updatedAt: now });
+    const shared = { createdAt: now, clientUpdatedAt: now, serverUpdatedAt: now, version: 1, deletedAt: null };
+    const rows = [
+      { ...shared, entityType: "MEMORY_CARD", id: "catalog-pulled-card", catalogAnimeId: "anime:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", privateTitleId: null, status: "COMPLETE_PRIVATE", titleSnapshot: "Saved catalog snapshot" },
+      { ...shared, entityType: "VISUAL_ASSET", id: "catalog-pulled-visual", cardId: "catalog-pulled-card", assetType: "USER_IMAGE", state: "READY", isCurrent: true, checksumSha256: "a".repeat(64) },
+    ];
+    for (const [index, row] of rows.entries()) await commitPulledChange(repository.database, {
+      ownerId: owner.id, remoteEntity: row, change: { entityType: row.entityType, entityId: row.id, entityVersion: 1 }, nextSyncSeq: index + 1, now,
+    });
+    const first = await repository.getCardBundle(owner.id, "catalog-pulled-card");
+    const again = await repository.getCardBundle(owner.id, "catalog-pulled-card");
+    const archive = await repository.listArchive(owner.id);
+    const foreign = await repository.getCardBundle("account:22222222-2222-4222-8222-222222222222", "catalog-pulled-card");
+    repository.close();
+    return { title: first?.title.displayTitle, catalog: first?.title.catalogAnimeId, provenance: first?.title.verificationState,
+      stable: first?.card.animeRefId === again?.card.animeRefId, version: first?.card.sync.remoteVersion,
+      localRef: first?.asset.localRef, hash: first?.asset.checksumSha256, count: archive.length, foreign };
+  });
+  expect(result).toEqual({ title: "Saved catalog snapshot", catalog: "anime:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    provenance: "PROVIDER_CANDIDATE", stable: true, version: 1, localRef: null, hash: "a".repeat(64), count: 1, foreign: null });
+});
+
 test("remote visual arriving before its card remains readable and repairs older missing links", async ({ page }) => {
   await page.goto("/favicon.svg");
   const result = await page.evaluate(async () => {

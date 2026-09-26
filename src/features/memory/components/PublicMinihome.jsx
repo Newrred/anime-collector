@@ -14,12 +14,19 @@ export default function PublicMinihome({ base = "/" }) {
   const id = new URLSearchParams(globalThis.location?.search).get("id");
   useEffect(() => {
     const request = new AbortController();
+    let unsubscribeViewer;
     const timeout = setTimeout(() => { request.abort(); setState({ status: "failed", snapshot: null }); }, 20000);
     const read = async () => {
       setState({ status: "loading", snapshot: null });
       if (!minihomeUiEnabled() || !services.enabled) { setState({ status: "disabled", snapshot: null }); return; }
       if (!isPublicationId(id)) { setState({ status: "unavailable", snapshot: null }); return; }
       try {
+        if(services.subscribeViewer) {
+          unsubscribeViewer=await services.subscribeViewer(()=>{
+            request.abort();setState({status:'loading',snapshot:null});setRetry(n=>n+1);
+          });
+          if(request.signal.aborted) {unsubscribeViewer?.();return;}
+        }
         const result = await services.reader.readHome(id, { signal: request.signal });
         if (request.signal.aborted) return;
         if (result && result.id !== id) throw new Error("INVALID_RESPONSE");
@@ -29,7 +36,7 @@ export default function PublicMinihome({ base = "/" }) {
     read().finally(() => clearTimeout(timeout));
     const recheck = () => { if (document.visibilityState === "visible") setRetry((n) => n + 1); };
     window.addEventListener("pageshow", recheck); document.addEventListener("visibilitychange", recheck);
-    return () => { clearTimeout(timeout); request.abort(); window.removeEventListener("pageshow", recheck); document.removeEventListener("visibilitychange", recheck); };
+    return () => { clearTimeout(timeout); request.abort(); unsubscribeViewer?.(); window.removeEventListener("pageshow", recheck); document.removeEventListener("visibilitychange", recheck); };
   }, [id, retry, services]);
   return <main className="public-memory-board page-shell page-shell--narrow"><a href={base}>MOEMOA</a><h1>{copy.visitor}</h1>
     {state.status === "ready" ? <MinihomeSnapshot key={retry} snapshot={state.snapshot} services={services} locale={locale} base={base} /> : <p role={state.status === "failed" ? "alert" : "status"}>{copy[state.status]}</p>}

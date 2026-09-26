@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 local content-policy binding, minimal decision audit, overlapping reviewer requests",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "exitCode": 0,
+  "log": ".cache/content-policy-local.log",
+  "passNotices": 310,
+  "newAssertionsAndRace": 10,
+  "previousContentAssertionsRerun": 33,
+  "verified": [
+    "Classification explicitly binds the moderator-supplied current policy revision",
+    "Old and missing policy revisions are rejected rather than inferred",
+    "Policy changes invalidate existing GENERAL board and home approvals",
+    "Explicit re-review under current policy restores general board read",
+    "Successful decisions atomically record target/hash/rating/revision/actor/policy without raw content",
+    "Rejected decisions do not create success audit entries",
+    "Authenticated moderator cannot directly erase audit rows",
+    "Two overlapping transactions reviewing revision zero produce one winner, one PUBLICATION_CONFLICT, and one audit record"
+  ],
+  "raceMethod": "First transaction holds its successful review before commit using pg_sleep; runner observes that live wait before issuing second transaction. Final row GENERAL:1 and audit count 1 are asserted.",
+  "initialFailure": "Earlier lifecycle tests had withdrawn all published snapshots, so initial concurrency fixture lookup found none. Final run used a new synthetic payload on an existing local fixture; this race is not a publication-behavior test.",
+  "cleanup": "Contracts rollback. Final concurrency prototype commits only to the disposable local cluster, which runner stops on EXIT. No hosted/production changes.",
+  "artifactLimitation": "Runner reported /tmp/moemoa-publication-test.lcFVtl; individual WSL temp race logs were no longer accessible in a later invocation. The retained Windows log and runner exit/assertions provide this run's evidence.",
+  "notVerified": [
+    "Guardian consent and adult identity provider",
+    "Review UI and owner notice/appeal lifecycle",
+    "Concurrent publication or policy change during review",
+    "Hosted Auth/PostgREST/Storage and physical devices",
+    "Production migration, deployment and public activation"
+  ],
+  "status": "LOCAL_PROTOTYPE_PASS_NOT_RELEASE_READY"
+}

@@ -1,0 +1,20 @@
+{
+ "date":"2026-09-27",
+ "work":"W06/W08 actual private-image completion concurrency",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-image-candidate.sql","tools/identity/eligibility-image-races.sh","tools/private-images/run-local-postgres.sh","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "reproduced":"Pre-fix local completion accepted expired eligibility after waiting on media advisory lock; runner exit 1. Actual completion and revocation ordering passed before fix.",
+ "fix":"Keep policy/evidence-before-media lock ordering and recheck eligibility immediately after acquiring media lock for authorize, reserve and complete wrappers.",
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "result":"exit 0; 92 PASS messages = prior 89 + 3 real image concurrency cases",
+ "logs":[".cache/eligibility-image-races-before.log",".cache/eligibility-image-races.log"],
+ "verified":["Revocation first prevents READY, reservation remains PREPARING","Completion first commits READY before revocation returns","Expiry while waiting for actual media advisory lock rejects completion and preserves PREPARING","Each race retains 1000 counted bytes"],
+ "scope":"Real PostgreSQL concurrent sessions and existing completion RPC on synthetic media manifests. pg_stat_activity verified sleep/lock waits. No actual Storage bytes uploaded or served.",
+ "notVerified":["Reserve/authorize expiry races independently","Actual SQL plus HTTP integration","Hosted Auth/provider and guardian consent","Physical devices","Policy replacement concurrency"],
+ "newUserBehaviorPass":"Local RPC races only; no hosted or browser behavior",
+ "securityPrivacy":"No real personal data or secrets. Existing source, policy, ownership and quota checks retained.",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Disposable database stopped by runner; candidate SQL remains outside production migrations",
+ "next":"Connect existing private-image HTTP handler to local SQL with eligibility and verify error/receipt recovery"
+}

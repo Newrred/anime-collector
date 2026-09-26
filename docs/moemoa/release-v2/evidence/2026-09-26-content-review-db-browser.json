@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 actual browser operator classification with real local DB responses",
+  "status": "LOCAL_BROWSER_DB_PASS_NOT_HOSTED_OR_ADULT_ACCESS",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin CONTENT_GATEWAY_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe CONTENT_GATEWAY_BROWSER=1 bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "log": ".cache/content-review-db-browser.log",
+  "exitCode": 0,
+  "passNotices": 382,
+  "newBrowserChecks": 2,
+  "verified": "Actual Astro /moderation/ and Chromium: open pending synthetic home, display actual DB bio, choose MATURE, require explicit confirmation, save through app gateway and real SQL function, assert stored MATURE:2, refresh and observe target removed from pending queue.",
+  "transport": "Browser request intercepted only to forward RPC to actual local PostgreSQL; Auth session synthetic. External browser network blocked. No hosted OAuth/PostgREST verification.",
+  "artifact": ".cache/content-review-db-browser.png",
+  "files": ["tools/publication-boundary/content-review-browser.mjs", "tools/publication-boundary/content-gateway-integration.mjs", "tools/publication-boundary/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "cleanup": "Dedicated Chromium and Astro server closed; no listener remained on4387. Disposable PostgreSQL runner stopped. No remote changes.",
+  "limits": "MATURE classification is not adult viewing authorization. Guardian consent, adult verification, country policy, hosted integration and physical phones remain incomplete. No new production change or deployment.",
+  "next": "Obtain exact D01 approval for applying migration20260926140122 to moemoa-test and a bounded classification integration test; retain D06 production gate."
+}

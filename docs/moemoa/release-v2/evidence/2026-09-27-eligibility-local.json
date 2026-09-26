@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-27",
+  "work": "W06/C02 eligibility transaction prototype",
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+  "filesChanged": ["tools/identity/eligibility-candidate.sql", "tools/identity/eligibility-contract.sql", "tools/identity/eligibility-races.sh", "tools/identity/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "command": "wsl.exe -u postgres -e env IDENTITY_TEST_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/identity/run-local-postgres.sh",
+  "result": "exit 0; 38 PASS messages: 25 existing identity checks and 13 new eligibility checks",
+  "log": ".cache/eligibility-local.log",
+  "newChecks": ["default-off policy", "identity receipt alone gives no eligibility", "live exact evidence", "different account", "different purpose", "revocation", "expiry", "policy change", "client evidence read denied", "client grant denied", "service direct grant denied", "revocation-first real two-session race writes zero probe rows", "write-first commits before revocation returns; later guard denied"],
+  "security": "Private RLS tables; no client/service direct access, no grant issuer API; internal guard locks policy then evidence until transaction ends. Guard is additional authorization, not authentication or ownership validation.",
+  "privacy": "Synthetic UUID references only; no names, DOB, identity documents, tokens or provider data",
+  "assumptions": "Production issuers, renewal/revocation transactions and protected writes must follow the same lock ordering; not yet implemented or verified",
+  "notVerified": ["Actual card or Storage operations", "Account recovery/delete after eligibility revocation", "Live provider or guardian consent", "Country policies", "Hosted schema and Auth"],
+  "newUserBehaviorPass": "None; synthetic DB transaction boundary only",
+  "remoteChanges": 0,
+  "formalMigrations": 0,
+  "rollback": "Runner stopped its disposable database; prototype remains outside production migrations",
+  "next": "Connect the local guard to an actual existing mutation transaction and verify revoked UPSERT rejection while preserving DELETE and replay"
+}

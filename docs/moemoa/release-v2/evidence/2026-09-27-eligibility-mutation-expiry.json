@@ -1,0 +1,17 @@
+{
+ "date":"2026-09-27",
+ "work":"C02/W06 mutation and guest promotion wait expiry closeout",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["tools/identity/eligibility-mutation-candidate.sql","tools/identity/eligibility-mutation-expiry.sh","tools/private-images/run-local-postgres.sh"],
+ "command":"wsl.exe -u postgres -e env ELIGIBILITY_MUTATION_TEST=1 ELIGIBILITY_HTTP_NODE=/mnt/e/web/anime/.cache/toolchain/node.exe bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+ "before":"exit1; actual mutation committed after eligibility expired while waiting for separate transaction table lock; .cache/eligibility-mutation-expiry-before.log",
+ "implementation":"Remember whether operation is a new guarded write before calling original implementation, recheck eligibility afterward in the same transaction. New mutation/promotion rolls back if expired; existing completed replay and deletion paths remain exempt from the new write guard.",
+ "after":"exit0; 143 PASS messages, previous141 plus two real lock-wait scenarios; .cache/eligibility-mutation-expiry-after.log",
+ "verified":["Actual new mutation waits on table lock, expires, rejects and leaves title/operation ledger absent","Actual new guest promotion waits on table lock, expires, rejects and leaves title/promotion ledger absent","Existing completed mutation/promotion replay and delete contracts reran successfully"],
+ "testCorrection":"First post-fix run reached later image fixture and failed because new test left CLOUD_WRITE GRANTED. Restored previous REVOKED fixture state; product image guard unchanged. Final full runner exit0.",
+ "limits":"Synthetic local PostgreSQL fixtures; no hosted Auth/provider/Storage/physical phone check",
+ "remoteChanges":0,
+ "formalMigrations":0,
+ "rollback":"Optional local prototype only; disposable DB stopped",
+ "next":"User requested pause after this work and progress review. No new implementation authorized to run until resume."
+}

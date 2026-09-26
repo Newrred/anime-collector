@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-26",
+  "baseCommit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "status": "LOCAL_CHANGES_NOT_DEPLOYED",
+  "newEvidence": {
+    "unit": {"command": "npm run test:unit", "passed": 359, "failed": 0, "log": ".cache/release-age-decision-unit.log"},
+    "build": {"command": "npm run build", "pages": 18, "exitCode": 0, "log": ".cache/release-age-decision-build.log"},
+    "encryptedRecovery": {"command": "node tools/private-images/recovery-rehearsal.mjs", "scope": "disposable local PostgreSQL and synthetic WebP files", "recoveryChecks": 17, "existingPrivateSqlAndConcurrencyChecks": 49, "totalPassLines": 66, "log": ".cache/private-encrypted-recovery.log"},
+    "catalogRepair": {
+      "reproduction": "Fresh hosted catalog card metadata sync had no animeRefId; getCardBundle called IndexedDB.get(null), throwing DataError and breaking Boards.",
+      "change": "Resolve missing local title reference from owner/card-scoped catalogAnimeId/titleSnapshot, retain PROVIDER_CANDIDATE provenance and original asset metadata.",
+      "source": "src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js",
+      "test": "tests/memory-indexeddb.spec.ts",
+      "runner": "node scripts/run-e2e.mjs tests/memory-indexeddb.spec.ts --project=chromium --workers=1 --reporter=line --retries=0",
+      "passed": 9,
+      "log": ".cache/catalog-sync-fixed.log",
+      "runtime": "Same actual hosted-synced fixture opened in product Boards after repair; private image decoded 96x64. Synthetic fixture metadata was seeded via SQL and sync_changes; this is not a UI intake test."
+    }
+  },
+  "backupFiles": [
+    "tools/private-images/encrypted-backup.mjs",
+    "tools/private-images/backup-cli.mjs",
+    "tools/private-images/capture-recovery-journal.sql",
+    "tools/private-images/BACKUP_USAGE.md",
+    "tests/unit/encryptedBackup.test.mjs",
+    "tools/private-images/recovery-rehearsal.mjs",
+    "tools/private-images/recovery-rehearsal.sh"
+  ],
+  "limits": [
+    "No production migration, paid change, commit, push, or deployment in this work.",
+    "Encrypted roundtrip is local; external backup destination, separate durable key custody, scheduled collection, fresh deletion journal continuity and hosted recovery remain unverified.",
+    "Phone hardware, Google OAuth and new age/guardian/adult access contracts are not covered by these checks.",
+    "Actual public UI publish and anonymous image decode plus subsequent server withdrawal and cleanup are recorded separately in 2026-09-26-private-source-public-ui.json. UI confirm withdrawal remains unverified."
+  ],
+  "rollback": "Revert added local tools/client change; preserve original images, remote metadata and existing deletion history. No new dependencies or schema changes."
+}

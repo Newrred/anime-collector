@@ -10,7 +10,7 @@ import { processPrivateImage } from '../../src/server/privateImages/processImage
 
 const ID="11111111-1111-4111-8111-111111111111", PUB="22222222-2222-4222-8222-222222222222";
 const source=await sharp({create:{width:20,height:30,channels:3,background:"#ab3290"}}).png().toBuffer();
-function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false,recoverable=false,privateInput=null,privateSourcesEnabled=false}={}) {
+function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false,recoverable=false,privateInput=null,privateSourcesEnabled=false,moderationPreviewsEnabled=false}={}) {
   const objects=new Map(); const state={ready:false,published:false,revoked:false,failed:false,reservations:0,attempts:0,deliveries:0,reads:0,limitAttempt:false,limitDelivery:false};
   const reference=(variant)=>({path:`${ID}/${variant}.webp`,hash:imageHash(objects.get(`${ID}/${variant}.webp`))});
   const user={async rpc(name,args) {
@@ -35,6 +35,12 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
       }
       return {id:ID,prefix:ID,state:"PREPARING",sourceHash:imageHash(source)};
     }
+    if(name==='resolve_memory_content_review_image') {
+      if(!state.moderator) throw new PublicImageError('MODERATOR_REQUIRED',403);
+      state.reviewResolves=(state.reviewResolves||0)+1;
+      return state.ready && !state.revoked && args.p_case===PUB && args.p_asset_id===ID && args.p_review_hash==='a'.repeat(64)
+        && args.p_policy==='TEST_ONLY_CONTENT' && args.p_content_revision===(state.reviewRevision??1) ? reference(args.p_variant) : null;
+    }
     if(name==="resolve_memory_image_preview") return state.ready ? reference(args.p_variant) : null;
     throw new Error("unknown user RPC");
   }};
@@ -55,7 +61,7 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
     async getPrivate(path) { assert.equal(path,`${PUB}/main.webp`); state.privateReads=(state.privateReads||0)+1; if(state.retireAfterDownload) state.privateRetired=true; return state.corrupt ? Buffer.from('wrong bytes') : privateInput; },
     async remove(paths) { if(state.cleanupUnavailable) throw new Error("storage unavailable"); for(const path of paths) objects.delete(path); },
   };
-  const handler=createPublicImageHandler({enabled,privateSourcesEnabled,createBackend:()=>backend,allowedOrigins:["https://example.test"]});
+  const handler=createPublicImageHandler({enabled,privateSourcesEnabled,moderationPreviewsEnabled,createBackend:()=>backend,allowedOrigins:["https://example.test"]});
   return {backend,handler,state,objects};
 }
 async function withServer(h,fn) {
@@ -80,6 +86,77 @@ const headers={"Content-Type":"application/octet-stream",Authorization:"Bearer t
  "X-Moemoa-Version":"1","X-Moemoa-Operation":PUB,"X-Moemoa-Consent":"TEST_ONLY"};
 const post=(base,bytes=source,extra={})=>fetch(`${base}/api/public-image`,{method:"POST",headers:{...headers,...extra},body:bytes});
 const getUrl=(base,variant="thumb")=>base+publicImageUrl(PUB,ID,variant);
+
+const reviewHeaders={Authorization:'Bearer test-token','X-Moemoa-Review-Hash':'a'.repeat(64),
+  'X-Moemoa-Review-Policy':'TEST_ONLY_CONTENT','X-Moemoa-Review-Revision':'1'};
+const reviewUrl=base=>`${base}/api/public-image?review=${PUB}&asset=${ID}&variant=full`;
+test('moderation image preview defaults off and requires an authenticated moderator',async()=>{
+  for(const [enabled,auth,moderator,status] of [[false,true,true,503],[true,false,true,401],[true,true,false,403]]) {
+    const h=harness({moderationPreviewsEnabled:enabled}); h.state.moderator=moderator;
+    await withServer(h,async base=>{
+      const requestHeaders={...reviewHeaders}; if(!auth) delete requestHeaders.Authorization;
+      assert.equal((await fetch(reviewUrl(base),{headers:requestHeaders})).status,status);
+      assert.equal(h.state.reads,0); assert.equal(h.state.deliveries,0);
+    });
+  }
+});
+test('moderator preview delivers verified image bytes without publishing and rechecks authorization',async()=>{
+  const h=harness({moderationPreviewsEnabled:true}); h.state.moderator=true;
+  await withServer(h,async base=>{
+    assert.equal((await post(base)).status,200); assert.equal(h.state.published,false);
+    const response=await fetch(reviewUrl(base),{headers:reviewHeaders});
+    assert.equal(response.status,200); assert.match(response.headers.get('cache-control'),/no-store/);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),h.objects.get(`${ID}/full.webp`));
+    assert.equal(h.state.reviewResolves,2); assert.equal(h.state.deliveries,1);
+  });
+});
+test('moderator preview stale review and mixed public/preview routes do not read Storage',async()=>{
+  const h=harness({moderationPreviewsEnabled:true}); h.state.moderator=true;
+  await withServer(h,async base=>{
+    await post(base);
+    for(const changed of [{'X-Moemoa-Review-Revision':'2'},{'X-Moemoa-Review-Policy':'OLD'}])
+      assert.equal((await fetch(reviewUrl(base),{headers:{...reviewHeaders,...changed}})).status,404);
+    for(const suffix of [`&publication=${PUB}`,'&preview=1'])
+      assert.equal((await fetch(reviewUrl(base)+suffix,{headers:reviewHeaders})).status,400);
+    assert.equal(h.state.reads,0);
+  });
+});
+test('moderator preview withdrawal during Storage read suppresses bytes',async()=>{
+  const h=harness({moderationPreviewsEnabled:true,revokeDuringRead:true}); h.state.moderator=true;
+  await withServer(h,async base=>{
+    await post(base); const response=await fetch(reviewUrl(base),{headers:reviewHeaders});
+    assert.equal(response.status,404); assert.deepEqual(await response.json(),{error:'NOT_FOUND'});
+    assert.equal(h.state.reviewResolves,2); assert.equal(h.state.reads,1);
+  });
+});
+test('moderator preview respects shared image delivery quota',async()=>{
+  const h=harness({moderationPreviewsEnabled:true}); h.state.moderator=true; h.state.limitDelivery=true;
+  await withServer(h,async base=>{
+    await post(base); assert.equal((await fetch(reviewUrl(base),{headers:reviewHeaders})).status,429);
+    assert.equal(h.state.reads,0);
+  });
+});
+test('moderator removal during image download prevents byte delivery',async()=>{
+  const h=harness({moderationPreviewsEnabled:true}); h.state.moderator=true;
+  const read=h.backend.get;
+  h.backend.get=async path=>{ const bytes=await read(path); h.state.moderator=false; return bytes; };
+  await withServer(h,async base=>{
+    await post(base); const response=await fetch(reviewUrl(base),{headers:reviewHeaders});
+    assert.equal(response.status,403); assert.deepEqual(await response.json(),{error:'MODERATOR_REQUIRED'});
+    assert.equal(h.state.reads,1);
+  });
+});
+test('initial moderator review accepts revision zero but not an empty revision header',async()=>{
+  const h=harness({moderationPreviewsEnabled:true}); h.state.moderator=true; h.state.reviewRevision=0;
+  await withServer(h,async base=>{
+    await post(base);
+    assert.equal((await fetch(reviewUrl(base),{headers:{...reviewHeaders,'X-Moemoa-Review-Revision':''}})).status,400);
+    assert.equal(h.state.reads,0);
+    const response=await fetch(reviewUrl(base),{headers:{...reviewHeaders,'X-Moemoa-Review-Revision':'0'}});
+    assert.equal(response.status,200); assert.equal(h.state.reviewResolves,2);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),h.objects.get(`${ID}/full.webp`));
+  });
+});
 
 test('private rendition integrity does not substitute for the approved public original checksum', async () => {
   const policy = { mainMaxBytes: 1_000_000, thumbnailMaxBytes: 120_000 };

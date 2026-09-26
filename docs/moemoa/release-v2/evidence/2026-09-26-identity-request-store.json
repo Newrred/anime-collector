@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-26",
+  "scope": "W06 persistent identity-request ledger prototype",
+  "status": "LOCAL_POSTGRES_PASS_NOT_HOSTED_AUTH_OR_ELIGIBILITY",
+  "command": "wsl.exe -u postgres -e bash /mnt/e/web/anime/tools/identity/run-local-postgres.sh",
+  "log": ".cache/identity-store-sql-final.log",
+  "exitCode": 0,
+  "passed": 15,
+  "verified": ["Default-disabled policy", "Client denied trusted issue/complete and direct ledger read", "Account/session binding", "Pending request retry reuses server-issued ID", "Purpose and complete expected-state binding", "Single recorded transition and replay rejection", "Policy change, expired request and logout rejection", "Cross-purpose rolling request quota", "Two actual database sessions yield one completion and one rejected stale request"],
+  "files": ["tools/identity/request-store-candidate.sql", "tools/identity/request-store-contract.sql", "tools/identity/complete-race.sql", "tools/identity/run-local-postgres.sh", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "security": "Private tables have RLS and direct access revoked. Public RPC execution is service-role only, not authenticated client. No personal facts or access grant stored. Future HTTP adapter must authenticate JWT and derive owner/session from verified claims; service parameters must never come directly from client metadata.",
+  "sessionReference": "https://supabase.com/docs/guides/auth/sessions",
+  "limitations": "Minimal local auth.sessions fixture, not live Auth schema/Google OAuth. Request store not yet connected to JS identity core or provider. No adult eligibility, guardian relationship, guardian consent or data-use permission is granted.",
+  "migrationAndRollback": "Prototype outside supabase/migrations; disposable PostgreSQL cluster stopped after tests. No remote schema, flags, user data, dependencies or deployment changed. Separate from pending classification migration approval.",
+  "priorTests": "Previous unit375 and other SQL/UI counts not rerun in this step.",
+  "next": "Wire the server identity core to the real local request-store adapter and verify end-to-end request completion without granting access."
+}

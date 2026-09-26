@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-26T11:26:29.444Z",
+  "head": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "files": [
+    {
+      "path": "src/server/privateImages/cleanupHandler.js",
+      "sha256": "6bedbe4d9a47c10bbd76d2cee62fe97b231493a22ea91f370969bac750806159"
+    },
+    {
+      "path": "api/private-image-cleanup.js",
+      "sha256": "2f23e5c916219baf87f5d4f4832fc041bf0ae04e70f7a437b5a6c02d7ebc52d4"
+    },
+    {
+      "path": ".github/workflows/private-image-cleanup.yml",
+      "sha256": "306d2906f3d7267f8265f4a17b4bec2ef76c09d8393b04f67963828561378331"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPrivateImageSync.jsx",
+      "sha256": "3a025345c0726870604d559eb8d96e811b14c84d6ed1e2121afc28b42fa7b9f5"
+    },
+    {
+      "path": "tests/unit/privateCleanup.test.mjs",
+      "sha256": "539ad230f688124c76aee27a130cb60603e5d5c6c273358c9dc8c1a21d1a6e84"
+    },
+    {
+      "path": "tests/private-image-sync.spec.ts",
+      "sha256": "17d00179155bdbc95b3b38ed4dc52d89ea796c2631494459075bfad73d9b9bfd"
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run test:unit",
+      "result": "356 passed / 0 failed"
+    },
+    {
+      "command": "npm run build",
+      "result": "18 pages / exit0"
+    },
+    {
+      "command": "node scripts/run-e2e.mjs tests/private-image-sync.spec.ts --project=chromium --workers=1",
+      "result": "4 passed / exit0; private/image intake flags enabled; real UI/IndexedDB/canvas, mocked Auth/metadata/HTTP"
+    },
+    {
+      "command": "node .cache/cleanup-hosted-probe.mjs",
+      "result": {
+        "denied": 401,
+        "allowed": 200,
+        "body": {
+          "deleted": 0,
+          "failed": 0
+        },
+        "pass": true,
+        "scope": "Real HTTP secret validation and real hosted empty cleanup queue; no scheduled invocation or nonempty deletion claimed."
+      }
+    },
+    {
+      "command": "js-yaml.load(private-image-cleanup.yml)",
+      "result": "parsed; gated job verified, not GitHub execution"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "initialFailure": "npm argument forwarding dropped project/workers; Chromium4 passed but unavailable Firefox/WebKit launches8 failed. Corrected direct runner invocation passed Chromium4; other engines remain unverified.",
+  "security": "Default-off cleanup API, GET-only, >=32-character secret timing-safe comparison, project URL binding, no-store/count-only result. Reuses existing claim/fence/removal/finalize contract. Partial failures return503 for scheduler failure visibility. Scheduled workflow has explicit enable guard, serialized runs, redirect:error and timeout. No remote secrets/vars changed.",
+  "limitations": [
+    "Workflow is uncommitted/unpushed and disabled; no actual scheduled invocation verified.",
+    "Hosted probe used empty queue, not fresh nonempty cleanup through new endpoint. Existing physical deletion validation is prior evidence.",
+    "Quota UI explains possible pending cleanup; no exact pending count or deadline is claimed.",
+    "15-minute workflow interval is candidate configuration; GitHub delays/availability and D03 running budget remain release checks."
+  ],
+  "newMigrations": [],
+  "productionChanged": false,
+  "next": "W08/W15: test nonempty delayed cleanup through new authenticated endpoint and unchanged-operation retry; then W06/W17 private bytes restore"
+}

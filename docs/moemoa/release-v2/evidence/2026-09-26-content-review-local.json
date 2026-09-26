@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-26",
+  "scope": "W08/W14 local PostgreSQL content-review prototype, not a production migration or adult eligibility implementation",
+  "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+  "exitCode": 0,
+  "log": ".cache/content-review-local.log",
+  "clusterArtifacts": "/tmp/moemoa-publication-test.tmc9PV",
+  "passNotices": 279,
+  "newContentReviewAssertions": 12,
+  "negativeControl": "Existing read_memory_publication returns an unclassified board before prototype application.",
+  "verified": [
+    "Unreviewed board returns null including metadata",
+    "Anonymous direct review-table read denied",
+    "Ordinary owner cannot approve classification",
+    "Mismatched snapshot hash rejected",
+    "Moderator can approve exact published snapshot",
+    "Stale review revision rejected",
+    "Reviewed GENERAL board readable through existing SQL function",
+    "Changed title invalidates previous snapshot review",
+    "MATURE remains closed while eligibility is not implemented",
+    "Original reader cannot be called anonymously to bypass wrapper",
+    "Existing read kill switch still applies after GENERAL review"
+  ],
+  "rollback": "Candidate DDL and fixture mutations run inside a transaction that is rolled back before existing regressions continue; disposable cluster is stopped by runner EXIT trap.",
+  "notVerified": [
+    "Hosted Supabase Auth/PostgREST/Storage",
+    "Adult identity provider and guardian consent",
+    "Country-specific eligibility and legal content classification",
+    "Review UI, audit/appeal lifecycle and simultaneous review/publish",
+    "Home/author metadata and all direct image delivery paths under the new classification contract"
+  ],
+  "productionChanges": false,
+  "initialEnvironmentFailure": "Default PostgreSQL 14 path was unavailable; rerun used the installed PostgreSQL 16 through the existing PG_BIN override.",
+  "status": "LOCAL_PROTOTYPE_PASS_NOT_RELEASE_READY"
+}

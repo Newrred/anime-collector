@@ -15,6 +15,52 @@
 
 ## C02. 계정·승격·동기화·원본 보호
 
+### 2026-09-27 현재 자격 구현 대조 — 아래 감사 이력과 구분
+
+| 기존 계약 | 현재 근거와 적용 후보 잔여 |
+| --- | --- |
+| 신원 확인 완료와 이용 자격 분리 | `src/server/identity/completeIdentityEvidence.js`, `tools/identity/request-store-candidate.sql`은 RECORDED 이력만 만든다. 실제 공급자·국가 판정·보호자 관계·동의에서 자격을 발급/철회하는 운영 경로는 아직 없다. |
+| 개인 신규 쓰기·승격/이미지 | `tools/identity/eligibility-mutation-candidate.sql`, `eligibility-image-candidate.sql` 로컬 guard와 기존 replay/회수/취소 보존 검증. mutation/promotion 대기 중 만료 후 커밋 실패를 재현·보완했고 실제 두 세션 잠금대기 rollback 신규2 포함143 PASS. 원격 적용은 별도다. |
+| 신규 공개와 기존 공개 읽기 | `eligibility-publication-candidate.sql`은 게시 전후 검사, `eligibility-viewer-candidate.sql`은 읽기 검사. 게시자 PUBLIC_PUBLISH 철회 후 기존 GENERAL 읽기가 남는 실패를 재현·보완했다. 신규5 포함141 로컬 PASS이며 원격 적용 아님. |
+| 성인 열람 | `eligibility-viewer-candidate.sql`의 현재 세션+MATURE_VIEW, 서버 image resolver, client viewer adapter와 브라우저4/HTTP-SQL5 근거가 있다. 실제 업체/hosted 검증이나 국가 정책 승인 아님. |
+| 가입 전 보호자 동의 | 아래 가입 전 동의 계약은 여전히 미구현. 기존 로그인 이후 identity 요청을 가입 전 동의로 대체하지 않는다. |
+| 적용 범위 | identity/eligibility SQL은 `tools/identity/`의 로컬 prototype이다. 정식 migration·운영 활성화 완료로 표시하지 않으며 기존 D01/D04/D06을 유지한다. |
+
+### 이용 자격 철회 적용 지점 — 2026-09-27 소스 감사 (미구현)
+
+| 기존 지점 | 자격 경계 연결 시 보존할 계약 |
+|---|---|
+| `private.require_memory_user`, memory_user_functions.sql:15 | 로그인/소유자 확인을 유지한다. 모든 호출에 이용 자격을 일괄 강제해 회수·삭제까지 차단하지 않는다. |
+| `private.apply_memory_mutation`, memory_user_functions.sql:297 | UPSERT/RESOLVE_CONFLICT와 DELETE를 구분한다. operation replay는 이미 확정된 결과 조회이며 새 쓰기가 아니다. 기존 owner/hash/revision/tombstone·중복 방어를 유지한다. |
+| catalog_cover_memory_assets.sql:298/329/359의 mutation/conflict/promotion wrapper | wrapper만 검사하고 내부 경로를 놓치지 않도록 실제 공통 mutation·승격 transaction에서 자격과 쓰기를 결속한다. 이미 완료된 승격 조회와 새로운 승격을 구분한다. |
+| `pull_memory_changes`, memory_user_functions.sql:920 | 기존 기록 회수를 신규 업로드 허가와 분리한다. 타인 자료 접근 허용은 아니며 기존 소유자 경계는 유지한다. |
+| `createMemoryAccountRuntime.js:161`의 profile 생성·device 등록 후 초기화 | 회수 경로가 새 profile/device 쓰기에 종속돼 있음을 고려한다. 신규 쓰기만 막는 DB 수정으로 기존 계정 초기화 전체를 실패시키지 않도록 제한 상태의 복귀 동작까지 검증한다. |
+| private image handler의 authorize→reserve→Storage put→complete | 최초 요청 때의 자격 검사만으로 끝내지 않는다. service-role 예약·완료에서도 실제 owner의 최신 증거를 확인하고 철회와 완료가 경합하면 준비 사본을 READY로 승격하지 않는다. 불명 완료의 파일 삭제·quota 임의 해제 금지. |
+| `read_memory_private_image` / `cancel_memory_private_image` / cleanup | 소유자 회수·취소·실제 삭제 후 정산 경로를 새 업로드 차단과 분리한다. 실제 보존 기간과 회수 조건은 D04 결정 필요. |
+| prepare/publish 보드·미니홈 / revoke 보드·미니홈 | 공개 신규 쓰기 자격과 철회 동작을 분리한다. 이미 공개된 내용에 대한 자격 철회 효과는 익명 본문·이미지 읽기에도 연결해야 하며 publish RPC 검사만으로 완료하지 않는다. |
+
+위 SQL 이름은 `supabase/migrations/20260902054119_memory_user_functions.sql`, `20260903141500_catalog_cover_memory_assets.sql`, `20260925152859_memory_private_image_boundary.sql` 기준이다. 원격 최신 정의나 실제 동의 철회 동작을 검증한 표가 아니다. 현재 identity RECORDED는 신원 확인 요청의 완료 이력이며 이용 자격/보호자 동의 자체가 아니므로 이를 권한으로 사용하지 않는다. 다음 구현 전 서버 소유 증거 상태·정책 버전·용도별 허가와 철회의 transaction 계약을 기존 W06에서 구체화한다.
+
+### 가입 전 동의 연결 — 2026-09-27 소스 감사
+
+- 현재 Web 로그인은 `src/repositories/authRepo.js:72`에서 Google OAuth를 직접 시작하고 `src/components/auth/AuthCallbackClient.jsx:43`에서 code를 교환한다. `src/hooks/useMemoryAccountSync.js:59`는 세션이 있으면 계정 runtime을 초기화한다. 화면의 동의 체크만 추가하거나 callback 뒤에 검사를 넣는 것으로 계정 생성 전 동의를 구현했다고 판단하지 않는다.
+- 현재 identity prototype은 `tools/identity/request-store-candidate.sql:11`의 auth.users FK와 38행의 기존 auth.sessions 확인을 요구한다. 따라서 GUARDIAN_IDENTITY는 로그인한 보호자 자신의 신원 확인에만 재사용할 수 있고 **가입 전 아동의 동의 증거 발급 경로는 아직 없다**. 이 한계를 없애려 auth.users/session 결속을 느슨하게 하지 않는다.
+- Supabase의 [Before User Created hook](https://supabase.com/docs/guides/auth/auth-hooks/before-user-created-hook)은 신규 사용자 생성 전 거부를 제공한다. 문서의 hook 입력은 user 및 요청 metadata이며 브라우저의 사전 동의 상태가 자동으로 안전하게 전달된다는 계약은 없다. 현재 repository에는 이 hook의 설정/구현이 없다. hosted 설정의 부재는 이번에 확인하지 않았다.
+- 기존 W06에서 가입 전 절차를 연결할 때 검증할 최소 조건: 서버가 발급한 짧은 수명의 가입 요청, 동의 대상과 검증된 가입 주체의 결속, 정책 버전·목적·만료·철회, 다른 브라우저/계정으로 증거 바꿔치기 거부, 중복 callback/동시 가입의 단일 소비, 실패 후 명확한 재시도. user_metadata·URL 파라미터·이메일 문자열·로컬 체크 상태만으로 허용하지 않는다. 결속에 필요한 식별자와 보관 기간은 D04/공급자 확인 후 정한다.
+- hook만으로 기존 계정의 이용 자격 갱신·동의 철회·동기화 접근이 해결되지는 않는다. 가입 허용과 기존 사용자의 동작별 서버 자격 검사는 분리한다. 현재 로컬 인증 요청 검사의 PASS는 이 가입 계약의 PASS가 아니다. 기능 연결 전까지 기존 운영 가입·기록을 자동 차단하거나 삭제하지 않는다.
+
+### 연령/보호자 적용 경계 조사 — 2026-09-26 (구현·법률 검토 완료 아님)
+
+- 현재 `authRepo.js`의 Google OAuth/getAuthSession은 로그인 확인만 수행한다. `private.require_memory_user()`는 auth.uid 존재만 검사하며 profile/device/card/board/conflict/pull/promotion에서 공통 사용한다. 아직 국가·이용자 연령·보호자 동의 증거가 없다. 공통 helper에 모든 동작을 일괄 거절하는 변경은 적용하지 않는다.
+- W06의 다음 구현은 로그인 상태와 서비스 이용 자격 상태를 분리한다. 서버 소유의 이용 자격 조회는 `확인 필요 / 보호자 동의 필요 / 허용 / 만료·철회`를 다루되 상태 전환은 검증된 증거에만 결속한다. OAuth 생성 전/후 중 어느 지점에서 어느 개인정보를 수집할지는 D04 국가별 근거 확정이 필요하며 가입 후 팝업만으로 사전 동의가 해결됐다고 표시하지 않는다.
+- Guest→cloud 승격과 신규 cloud 저장·이미지 업로드는 서버 자격 확인 대상이다. 기존 기록 회수/삭제·보호자 동의 철회는 새 업로드 허가와 분리하여 검토한다. 실제 허용 동작별 정책은 국가별 보존/삭제 근거와 함께 정하고 기존 데이터의 자동 삭제·잠금은 하지 않는다.
+- 보호자 자신의 신원 확인, 해당 아동에 대한 법정대리 권한의 근거, 서비스·처리 목적별 동의와 정책 버전/철회는 별개다. 단순 성인 인증 완료나 임의 성인 계정 연결은 보호자 관계 증명이 아니다. 미성년자의 계정·성인의 계정·검증 요청·동의 대상 목적을 서버에서 결속하고 다른 계정의 완료 ID 재사용을 거절한다.
+- 성인 영역 자격은 C04의 별도 조건이다. 공급자의 완료 결과는 서버에서 조회하며 요청 소유자·일회성 결속·제공자/채널·정책·유효기간/철회를 확인한다. 원문 CI/DI·신분증·이름/전화번호·생년월일을 일반 로그/URL/분석에 추가하지 않는다. 필요한 저장 항목/기간은 D04 승인 전 미확정이다.
+- PortOne 공식 V2 문서는 서버의 인증 결과 조회와 VERIFIED 상태를 설명하지만 법정대리 관계 확인을 제공한다고 확인한 근거는 없다. 일부 인증 수단의 외국인 여부는 자기 입력값이므로 국가 정책 선택 근거로 단독 사용하지 않는다. [공식 연동 문서](https://developers.portone.io/opi/ko/extra/identity-verification/readme-v2). 일반 신청 절차는 사업자등록증 사본을 요구하므로 현재 개인 운영자의 본인인증 단독 계약 가능 여부·견적을 별도로 확인해야 한다. [신청 안내](https://developers.portone.io/opi/ko/console/guide/reg?v=v1). 이는 개인 계약 불가능 또는 PH/TH 지원 가능이라는 확정 판정이 아니다.
+- D03/D04 외부 잔여: 개인 운영자 계약 가능 여부/최소 비용, KR·PH·TH별 실제 지원, 보호자 관계 및 동의 수단, 대상 국가 판정과 보존/만료 기준. 공급자 선택·유료 계약·민감정보 수집을 이번 조사로 승인하지 않는다. 다음 로컬 구현은 공급자 결과를 수용하는 서버 자격 계약과 용도별 연결 지점을 기존 W06 안에 준비하는 것이다.
+
+2026-09-26 승인 보완(AGE12-ADULT-AREA-01): 첫 Web-only 후보는 12세 이용 및 성인 전용 영역을 포함하며 출시 일정을 조정한다. C02의 보호자 동의·철회 및 서버 인증 상태, C04의 콘텐츠 분류별 이미지 전달, C05/C07/C08의 재분류·신고·이의, C09의 인증 비용/남용 방어, C12의 미성년/미인증/성인·만료·철회와 직접 URL/썸네일/공유/캐시 접근 거부를 기존 W/Q에 추가 검증해야 한다. 공급자·국가별 적용·세부 허용 기준은 D03/D04 미완료이며 현재 일반 공개 PASS는 이 계약을 검증하지 않는다. 자기신고만으로 성인 접근을 허용하거나 기존 이미지 권리 gate를 해제하지 않는다.
+
 2026-09-25 승인 보완(FREE-PRIVATE-IMAGE-SYNC-01): 무료 PC/휴대폰 Web 비공개 최적화 사본 연동은 첫 출시 필수다. 사용자가 선택한 사본만 연동하며 과거 사진 자동 업로드는 금지한다. 원본 localRef/checksum은 보존하고 서버 manifest의 representation hash/version/bytes를 별도로 검증한다. 로컬 저장·metadata 동기화만으로 이미지 연동 완료를 표시하지 않는다. 실제 별도 휴대폰↔PC 열람, A/B/anon 격리, 응답 유실/재시도/삭제·복구를 기존 Q01/Q03/Q05~Q07/Q10/Q14/Q24에 연결한다.
 
 C04 공개 경계는 그대로다: private 저장은 공개 동의가 아니며 public 준비/권리/source hash/미리보기/철회를 우회하지 않는다. C09는 서버 정책 하나로 main+thumb 예약·정산, 전송·전역 비용 한도, 중복/동시 요청과 정책 만료를 검증한다. 50MB/1MB는 후보이고 미정 값은 무제한이 아니다. C10 복구에는 private 사본 bytes와 manifest·최신 삭제 fence를 포함한다. C11/C12에서는 실제 파일 입력·로컬/원격 상태·무료 공간 표시와 물리적 모바일 Web 검증을 구분한다. Android APK는 D02의 첫 Web 후보 범위 밖이다.
@@ -59,6 +105,24 @@ Public writer는 서버에서 owner와 기대 버전, 동의 대상 hash/revisio
 필수는 안정적인 공유 URL과 방문자 읽기다. 공동편집, 인기순, 새로운 공개 등급 체계, 좋아요/댓글은 필요 없다.
 
 ## C04. 공개 이미지의 전달·철회·비용
+
+### 2026-09-26 확정 범위에 따른 분류·접근 계약 (W08/W14/W19, 구현 대기)
+
+RELEASE-REGIONS-01의 한국·필리핀·태국, ADULT-CONTENT-SCOPE-01의 비노골적인 성인 취향 일러스트부터를 따른다. 아래는 새 진행판이 아니라 기존 공개 계약의 보완이다. 연령 제한과 이미지 권리 검사는 서로 대체하지 않는다.
+
+| 콘텐츠 상태 | 방문자에게 제공할 조건 |
+|---|---|
+| 일반 공개로 검토됨 | 기존 권리·게시 동의·철회·제재 조건을 모두 만족 |
+| 비노골적 성인 일러스트로 검토됨 | 위 조건 + 해당 국가의 성인 영역 제공 정책 활성 + 서버가 확인한 유효한 성인 자격 |
+| 미분류·분류 검토 중·분류 근거가 현재 이미지와 불일치 | 공개 전달 불가. 작성자의 비공개 원본 보존 |
+| 현재 범위를 넘는 이미지 또는 차단됨 | 공개 전달 불가. 기존 신고·조치·이의 경로 사용 |
+
+- 업로더의 분류 선택은 검토 요청값이다. 승인된 분류를 사용자가 metadata 동기화로 생성하거나 덮어쓸 수 없어야 한다. 검토 근거는 정확한 이미지 hash/representation/sourceVersion 및 정책 버전에 결속한다. 교체된 이미지에 옛 분류를 재사용하지 않는다.
+- 검토 대기 상태는 일반 공개로 취급하지 않는다. 서비스 디자인/승인된 catalog cover도 임의 일반 등급으로 추정하지 않고 해당 자산 revision의 검토 근거 또는 검증된 생성 규칙을 사용한다. 기존 권리 승인 데이터를 콘텐츠 분류 승인으로 자동 변환하지 않는다.
+- 성인 요청자의 자격은 서버 검증 결과·사용자·국가 정책·만료/철회에 결속한다. Google 로그인, client의 생년월일/국가/checkbox, 보호자 동의만으로 성인 자격을 만들지 않는다. 국가 자기신고만으로 제한이 느슨한 정책을 고르게 하지 않는다. 구체 공급자·국가 판정 방식은 D04 잔여다.
+- 전달 전에 확인하고 Storage 읽기 후 다시 확인한다. 변경·만료·철회·재분류 시 이미 발급된 공유 URL도 새 요청에서 거절한다. 인증 자료·토큰을 이미지 URL/분석/일반 로그에 넣지 않는다. no-store 유지.
+- 보드 제목/설명·대표 이미지·미니홈·작성자/팔로우 재방문·집계·이미지 full/thumb·직접 URL을 같은 자격 경계로 검사한다. 카드 이미지 하나만 가리는 것으로 완료하지 않는다. 혼합 보드는 비적격 방문자에게 성인 항목을 암시하는 metadata까지 노출하지 않도록 게시 preview에 방문자별 결과를 명시한다.
+- Q11은 이미지 교체/분류 변경 뒤 옛 preview 동의 거부, Q15는 미니홈 대표/소개 노출, 기존 공개·보안 Q는 익명/미성년/미인증/검증성인/만료/철회·국가 불일치 및 전달 도중 재분류를 검증한다. 합성 fixture만 사용하며 이 계약 추가는 실제 검증 PASS가 아니다.
 
 ### 지원 경계
 

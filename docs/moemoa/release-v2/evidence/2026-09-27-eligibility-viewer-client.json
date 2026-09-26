@@ -1,0 +1,16 @@
+{
+ "date":"2026-09-27",
+ "work":"W08/W13 authenticated client reader and session invalidation",
+ "plan":"docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+ "filesChanged":["src/features/memory/application/createPublicationViewer.js","src/features/memory/runtime/platformPublication.js","src/features/memory/components/PublicMemoryBoard.jsx","src/features/memory/components/PublicMinihome.jsx","src/features/memory/components/PublicBoardSnapshot.jsx","tests/unit/publicationViewer.test.mjs","docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md","docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+ "implementation":"Default-off PUBLIC_MEMORY_AUTHENTICATED_VIEWER_V1 chooses current signed-in gateway for metadata and bearer-header blob fetch for images. Compare session before/after reads. Subscribe before reading, abort and clear parent snapshot on auth change. Existing image effect revokes object URLs on unmount. Subscription checks current session again after async registration to close registration gap.",
+ "commands":[{"command":"node --test tests/unit/publicationViewer.test.mjs","result":"3 passed; exit0"},{"command":"npm run test:unit","result":"394 passed; exit0","log":".cache/viewer-client-unit.log"},{"command":"npm run build","result":"19 pages; exit0","log":".cache/viewer-client-build.log"}],
+ "verified":["Anonymous vs authenticated routing","Changed-account metadata result rejected","Image uses header token, not URL","Logout or cancellation discards late blob","Subscription registration race triggers invalidation","Duplicate session ignored and unsubscribe provided"],
+ "review":"React review: dependency arrays include services/id/retry; late async subscription cleaned up after abort; auth callbacks do not await Supabase APIs; existing blob URL cleanup retained. Source review is not rendered UI proof.",
+ "notVerified":["Rendered board/home removal on logout/account switch","Blob URL revocation in actual browser","Real Supabase account change","Integrated mature HTTP/SQL/Storage path"],
+ "securityPrivacy":"No persistent token or image storage added. Auth token only in request Authorization. Server decides eligibility. Flags remain default-off.",
+ "remoteChanges":0,
+ "migrations":0,
+ "rollback":"Disable new client flag; previous anonymous rendering remains the default",
+ "next":"Browser validation of both board and minihome: decoded authenticated image, account switch during pending request, logout after displayed content, and late response suppression"
+}

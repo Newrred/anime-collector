@@ -3,7 +3,8 @@ const SAFE_ERRORS = new Set([
   "AUTH_REQUIRED", "PUBLICATION_DISABLED", "PUBLICATION_RESTRICTED", "INVALID_SELECTION",
   "DUPLICATE_CARD", "NOT_FOUND", "PUBLIC_VISUAL_NOT_READY", "PUBLICATION_CONFLICT",
   "INVALID_OPERATION", "OPERATION_MISMATCH", "CONSENT_MISMATCH", "PREVIEW_CHANGED",
-  "RATE_LIMITED", "MODERATOR_REQUIRED",
+  "RATE_LIMITED", "MODERATOR_REQUIRED", "CONTENT_POLICY_CHANGED", "CONTENT_REVIEW_REQUIRED",
+  "ELIGIBILITY_REQUIRED", "ELIGIBILITY_EXPIRED", "ELIGIBILITY_POLICY_CHANGED", "ELIGIBILITY_POLICY_UNAVAILABLE",
 ]);
 
 export class PublicationGatewayError extends Error {
@@ -91,4 +92,12 @@ export class SupabasePublicationGateway {
   report({ kind, target, category, operation, note }, options) { return this.request("submit_memory_report", { p_kind: kind, p_target: target, p_category: category, p_operation: operation, p_note: note }, options); }
   safety(after = null, options) { return this.request("list_memory_safety", { p_after: after }, options); }
   appeal(id, text, options) { return this.request("appeal_memory_notice", { p_id: id, p_text: text }, options); }
+  pendingContent(kind, after = null, options) { return this.request('list_memory_pending_content', { p_kind: kind, p_after: after }, options); }
+  openContentReview(kind, id, options) { return this.request('open_memory_content_review', { p_kind: kind, p_id: id }, options); }
+  contentReview(id, options) { return this.request('get_memory_content_review', { p_case: id }, options); }
+  moderationCases(after = null, options) { return this.request('list_memory_moderation', { p_after: after }, options); }
+  resolveContentReview(review, rating, options) {
+    return this.request('resolve_memory_content_appeal', { p_case: review.id, p_case_revision: review.caseRevision,
+      p_content_revision: review.contentRevision, p_hash: review.reviewHash, p_rating: rating, p_policy: review.policyRevision }, options);
+  }
 }

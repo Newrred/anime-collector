@@ -42,7 +42,8 @@ async function originalHashes(page: Page) {
   });
 }
 
-test('actual Web picker/optimizer/journal preserve original through ambiguous HTTP retry and remote-only reload', async ({ page }) => {
+for (const failure of ['ambiguous', 'quota']) {
+test(`actual Web picker/optimizer/journal preserve original through ${failure} retry and remote-only reload`, async ({ page }) => {
   test.setTimeout(90000);
   await account(page);
   const pixels = Buffer.alloc(1800 * 1000 * 3); let seed = 19;
@@ -56,7 +57,9 @@ test('actual Web picker/optimizer/journal preserve original through ambiguous HT
     expect(req.headers().authorization).toBe('Bearer mock-access-token');
     if (req.method() === 'POST') {
       const bytes = req.postDataBuffer()!; posts.push({ bytes, operation: req.headers()['x-moemoa-operation'] });
-      if (posts.length === 1) return route.abort('failed'); // Unknown completion; mocked network, not hosted Storage.
+      if (posts.length === 1) return failure === 'quota'
+        ? route.fulfill({ status: 429, json: { error: 'PRIVATE_IMAGE_QUOTA_EXCEEDED' } })
+        : route.abort('failed'); // Mocked HTTP, not hosted Storage.
       remote = await sharp(bytes).webp({ quality: 85 }).toBuffer();
       thumb = await sharp(bytes).resize({ width: 400 }).webp({ quality: 75 }).toBuffer();
       representation = { state: 'READY', sourceVersion: 1, mainBytes: remote.length, mainHash: hash(remote), thumbnailBytes: thumb.length, thumbnailHash: hash(thumb) };
@@ -92,7 +95,7 @@ test('actual Web picker/optimizer/journal preserve original through ambiguous HT
   await expect(panel.getByRole('button', { name: 'Sync private copy', exact: true })).toBeDisabled();
   await panel.getByRole('checkbox').check();
   await panel.getByRole('button', { name: 'Sync private copy', exact: true }).click();
-  await expect(panel.getByRole('alert')).toContainText('Completion could not be confirmed');
+  await expect(panel.getByRole('alert')).toContainText(failure === 'quota' ? 'previous copy may still be awaiting cleanup' : 'Completion could not be confirmed');
   await page.reload();
   await expect(panel.getByRole('button', { name: 'Retry same request', exact: true })).toBeDisabled();
   await panel.getByRole('checkbox').check();
@@ -147,6 +150,8 @@ test('actual Web picker/optimizer/journal preserve original through ambiguous HT
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Private sync test', exact: true })).toHaveCount(0);
 });
+
+}
 
 test('IndexedDB journal atomically retains one retry and isolates owner keys', async ({ page }) => {
   await page.goto('/favicon.svg');

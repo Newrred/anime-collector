@@ -1,0 +1,142 @@
+{
+  "date": "2026-09-26T10:59:47.143Z",
+  "fixture": {
+    "card": "19b205e7-2c2e-4c71-a3ea-4411931633b1",
+    "oldAsset": "09aecb3b-33bb-45d8-bbd4-a80e478839ca",
+    "newAsset": "dfc1007f-0e2c-4124-8a46-cd4b22b9a9bd",
+    "oldOperation": "06b63fa0-c789-407e-8dff-65cf174c0049",
+    "newOperation": "69e4affa-56fd-4017-b3e0-4847dd477d2c",
+    "oldHash": "7f79b606fd9907dedba2caccc31fc1b0f2cdc5ec2314019c535afc63727a5345",
+    "newHash": "3f03151995a7b8d7296e628c4897e1d5ba3483a0fa96871c86a9e1ab6511ca9d",
+    "oldRepresentation": "2e70ff0e-992b-4aa0-a909-7d31d7a55ac7",
+    "newRepresentation": "e81f59f0-4096-49cc-ac07-3d56236b5a9c"
+  },
+  "checks": [
+    {
+      "name": "replacement is smaller and combined bytes exceed quota by exactly one",
+      "pass": true,
+      "oldSize": 920,
+      "newSize": 170,
+      "quota": 1089
+    },
+    {
+      "name": "old image stored through real HTTP",
+      "pass": true
+    },
+    {
+      "name": "metadata replacement immediately blocks old private read",
+      "pass": true
+    },
+    {
+      "name": "smaller replacement is quota-blocked until old objects removed",
+      "pass": true,
+      "status": 429,
+      "error": "PRIVATE_IMAGE_QUOTA_EXCEEDED"
+    },
+    {
+      "name": "rejection preserves old storage charge and creates no new reservation",
+      "pass": true,
+      "charged": 920,
+      "oldState": "DELETING",
+      "remaining": 86.90208,
+      "oldObjects": 2,
+      "newReservations": 0
+    },
+    {
+      "name": "same operation succeeds after physical cleanup without raising quota",
+      "pass": true
+    },
+    {
+      "name": "successful retry remains idempotent",
+      "pass": true
+    },
+    {
+      "name": "replacement real image decodes correctly",
+      "pass": true
+    },
+    {
+      "name": "only smaller representation charged and both original hashes preserved",
+      "pass": true,
+      "charged": 170,
+      "newHash": "3f03151995a7b8d7296e628c4897e1d5ba3483a0fa96871c86a9e1ab6511ca9d",
+      "oldHash": "7f79b606fd9907dedba2caccc31fc1b0f2cdc5ec2314019c535afc63727a5345",
+      "oldObjects": 0,
+      "newReservations": 1
+    },
+    {
+      "name": "test policy restored exactly",
+      "pass": true
+    }
+  ],
+  "measurement": {
+    "oldSize": 920,
+    "newSize": 170,
+    "quota": 1089
+  },
+  "cleanup": {
+    "state": {
+      "policy": {
+        "id": true,
+        "paused": false,
+        "enabled": false,
+        "approved": false,
+        "revision": "UNAPPROVED",
+        "main_bytes": 1000000,
+        "observed_at": null,
+        "quota_bytes": 0,
+        "thumb_bytes": 120000,
+        "physical_bytes": 0,
+        "asset_count_max": 0,
+        "preparations_per_day": 0,
+        "read_bytes_per_month": 0,
+        "upload_max_in_flight": 1,
+        "decode_attempts_per_day": 0,
+        "global_read_bytes_per_month": 0
+      },
+      "objects": 0,
+      "liveBytes": 0,
+      "cardDeleted": true,
+      "publicEnabled": false
+    },
+    "pass": true
+  },
+  "target": "nmgkhknponvzcwliajyk",
+  "head": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+  "scope": "Actual private HTTP/Auth/Storage and actual Postgres replacement trigger. Synthetic metadata replacement via SQL, not product UI. Reduced test quota represents the arithmetic boundary, not production capacity/load.",
+  "commands": [
+    {
+      "command": "node .cache/private-replacement.mjs",
+      "exit": 0,
+      "result": "10 checks including expected quota rejection and later same-operation success"
+    },
+    {
+      "command": "node .cache/private-replacement-cleanup.mjs",
+      "exit": 0,
+      "result": "Existing cleanup fence honored; exact policy restore, objects0/bytes0, synthetic card tombstone"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "finding": {
+    "safety": "Old DELETING bytes remain charged until actual removal; no new reservation on quota rejection. Same operation succeeds after cleanup; new bytes only, original hashes unchanged.",
+    "unresolved": "Immediate smaller replacement near quota is not supported. Current repository offers an explicit operator cleanup CLI, with no scheduled private cleanup hookup found in api/.github/vercel.json. Client shows generic quota exhaustion rather than pending-cleanup reason.",
+    "next": "Existing W08/W15: bounded automatic cleanup integration and pending-cleanup user feedback; preserve physical quota and cancellation fences."
+  },
+  "productionChanged": false,
+  "productCodeChangedThisRun": [],
+  "newMigrations": [],
+  "priorPassNotRerun": [
+    "private/public hosted flow",
+    "two-session product UI",
+    "local SQL concurrency",
+    "mobile layout/build"
+  ],
+  "notVerified": [
+    "Automatic scheduled cleanup",
+    "End-user recovery UI after quota rejection",
+    "Production 50MB quota or pricing approval",
+    "Physical phones and private bytes restore"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 classification notices and appeal resolution, local SQL and mocked-API browser separately",
+  "sql": {
+    "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+    "exitCode": 0,
+    "log": ".cache/content-notice-local.log",
+    "passNotices": 327,
+    "newAssertions": 17,
+    "verified": [
+      "Successful classification creates linked case, owner notice and audit in the same transaction",
+      "Owner sees result in existing safety inbox; B cannot see or appeal it; anonymous denied",
+      "Owner appeal and retry reach existing moderator queue with one appeal audit",
+      "Ordinary account cannot resolve appeal",
+      "Generic RESTORE refuses classification cases",
+      "Stale case/content revision cannot resolve appeal",
+      "Current reclassification closes original case, changes real SQL reader, preserves original audit and emits new result notice",
+      "Completed appeal cannot be replayed to replace classification"
+    ]
+  },
+  "browser": {
+    "command": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4386 npx playwright test tests/publication-ui.spec.ts --project=chromium --no-deps --grep 'classification notice' --reporter=line",
+    "exitCode": 0,
+    "passed": 3,
+    "log": ".cache/content-notice-browser.log",
+    "verified": "English GENERAL/MATURE/BLOCKED notice labels, submit appeal with correct notice ID/text, confirmation and logout removal",
+    "limitation": "Actual Chromium application with mocked Auth/RPC responses; not browser-to-hosted database integration or physical phone verification"
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "pages": 18,
+    "log": ".cache/content-notice-build.log"
+  },
+  "productionChanges": false,
+  "cleanup": "SQL candidate contracts rollback; final race commits only in disposable local cluster stopped by runner. No real user notifications or remote changes.",
+  "remaining": [
+    "Operator classification/appeal review UI and reviewable content retrieval",
+    "Adult verification, guardian consent and country rules",
+    "Formal migration and hosted integration",
+    "Concurrent publish/policy/appeal change verification",
+    "Physical devices and D03-D06 release gates"
+  ],
+  "status": "LOCAL_SQL_AND_MOCKED_BROWSER_PASS_NOT_RELEASE_READY"
+}

@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-26",
+  "scope": "W14 moderator image preview SQL resolver and existing HTTP delivery handler",
+  "sql": {
+    "command": "wsl.exe -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+    "exitCode": 0,
+    "log": ".cache/content-review-image-sql.log",
+    "passNotices": 344,
+    "newAssertions": 8,
+    "verified": "Moderator exact case/hash/policy/content revision and member asset resolve full/thumb; stale binding, unrelated asset, ordinary account and anonymous denied."
+  },
+  "http": {
+    "command": "node --test tests/unit/publicImages.test.mjs",
+    "exitCode": 0,
+    "log": ".cache/content-review-image-http-final.log",
+    "passed": 28,
+    "newTests": 6,
+    "verified": "Real loopback HTTP handler and generated WebP bytes, mocked backend: default-off/auth/moderator checks, exact bytes and no-store, stale/mixed routes denied before Storage, withdrawal or moderator removal during download suppresses bytes, shared delivery quota enforced."
+  },
+  "unitRegression": {
+    "command": "npm run test:unit",
+    "exitCode": 0,
+    "log": ".cache/content-review-image-unit.log",
+    "passed": 366,
+    "timing": "Run after all implementation edits and first five new HTTP tests; last moderator-removal test added afterward and passed in the final 28-test targeted run."
+  },
+  "flag": "MOEMOA_CONTENT_REVIEW_IMAGE_ENABLED defaults false; no environment changed",
+  "implementation": [
+    "tools/publication-boundary/content-review-candidate.sql",
+    "src/server/publicImages/handler.js",
+    "src/server/publicImages/supabaseImageBackend.js",
+    "api/public-image.js"
+  ],
+  "productionChanges": false,
+  "remaining": [
+    "Operator browser review screen and first-review queue",
+    "Formal migration and hosted Auth/Storage/HTTP integration",
+    "Adult eligibility, guardian consent and country policy",
+    "Physical devices and D03-D06 release approval"
+  ],
+  "status": "LOCAL_SQL_AND_HTTP_PASS_NOT_RELEASE_READY"
+}

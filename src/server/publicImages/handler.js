@@ -27,13 +27,13 @@ async function inputBytes(req) {
   return Buffer.concat(chunks);
 }
 
-export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=false, createBackend, allowedOrigins=[], transform=processPublicImage }) {
+export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=false, moderationPreviewsEnabled=false, authenticatedViewersEnabled=false, createBackend, allowedOrigins=[], transform=processPublicImage }) {
   return async (req,res) => {
     res.setHeader("Cache-Control","no-store, max-age=0");
     res.setHeader("CDN-Cache-Control","no-store");
     res.setHeader("Vercel-CDN-Cache-Control","no-store");
     res.setHeader("X-Content-Type-Options","nosniff");
-    res.setHeader("Vary","Origin");
+    res.setHeader("Vary","Origin, Authorization");
     try {
       if(!enabled) throw new PublicImageError("PUBLIC_IMAGE_DISABLED",503);
       const origin=req.headers.origin;
@@ -41,7 +41,7 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
       if(origin) res.setHeader("Access-Control-Allow-Origin",origin);
       if(req.method === "OPTIONS") {
         res.setHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers","Authorization, Content-Type, X-Moemoa-Asset, X-Moemoa-Version, X-Moemoa-Operation, X-Moemoa-Consent, X-Moemoa-Private-Representation, X-Moemoa-Representation-Hash");
+        res.setHeader("Access-Control-Allow-Headers","Authorization, Content-Type, X-Moemoa-Asset, X-Moemoa-Version, X-Moemoa-Operation, X-Moemoa-Consent, X-Moemoa-Private-Representation, X-Moemoa-Representation-Hash, X-Moemoa-Review-Hash, X-Moemoa-Review-Policy, X-Moemoa-Review-Revision");
         res.statusCode=204; res.end(); return;
       }
       if(!["GET","POST"].includes(req.method)) throw new PublicImageError("METHOD_NOT_ALLOWED",405);
@@ -99,19 +99,34 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
       }
       const query=new URL(req.url,"https://local.invalid").searchParams;
       for(const key of query.keys()) {
-        if(!["asset","variant","publication","preview"].includes(key) || query.getAll(key).length!==1) throw new PublicImageError("INVALID_REQUEST");
+        if(!["asset","variant","publication","preview","review"].includes(key) || query.getAll(key).length!==1) throw new PublicImageError("INVALID_REQUEST");
       }
       if(query.has("preview") && query.get("preview")!=="1") throw new PublicImageError("INVALID_REQUEST");
       if(query.has("preview") && query.has("publication")) throw new PublicImageError("INVALID_REQUEST");
+      if(query.has("review") && (query.has("preview") || query.has("publication"))) throw new PublicImageError("INVALID_REQUEST");
       const asset=requiredId(query.get("asset")), variant=query.get("variant") || "thumb";
       if(!["full","thumb"].includes(variant)) throw new PublicImageError("INVALID_REQUEST");
       let resolve;
-      if(query.get("preview") === "1") {
+      if(query.has('review')) {
+        if(!moderationPreviewsEnabled) throw new PublicImageError('PUBLIC_IMAGE_DISABLED',503);
+        const review=requiredId(query.get('review')), hash=req.headers['x-moemoa-review-hash'], policy=req.headers['x-moemoa-review-policy'];
+        const revision=Number(req.headers['x-moemoa-review-revision']);
+        if(typeof hash!=='string' || !/^[a-f0-9]{64}$/.test(hash) || typeof policy!=='string' || !policy.length || policy.length>120
+          || typeof req.headers['x-moemoa-review-revision']!=='string' || !/^(0|[1-9][0-9]*)$/.test(req.headers['x-moemoa-review-revision'])
+          || !Number.isSafeInteger(revision) || revision<0) throw new PublicImageError('INVALID_REQUEST');
+        const user=await backend.user(tokenOf(req));
+        resolve=()=>user.rpc('resolve_memory_content_review_image',{p_case:review,p_review_hash:hash,p_policy:policy,p_content_revision:revision,p_asset_id:asset,p_variant:variant});
+      } else if(query.get("preview") === "1") {
         const user=await backend.user(tokenOf(req));
         resolve=()=>user.rpc("resolve_memory_image_preview",{p_asset_id:asset,p_variant:variant});
       } else {
         const publication=requiredId(query.get("publication"));
-        resolve=()=>backend.rpc("resolve_memory_public_image",{p_publication_id:publication,p_asset_id:asset,p_variant:variant});
+        const args={p_publication_id:publication,p_asset_id:asset,p_variant:variant};
+        if(authenticatedViewersEnabled && req.headers.authorization!==undefined) {
+          const token=tokenOf(req);
+          if(!token || token.length>8192) throw new PublicImageError('AUTH_REQUIRED',401);
+          resolve=()=>backend.viewerImage(token,args);
+        } else resolve=()=>backend.rpc("resolve_memory_public_image",args);
       }
       const reference=await resolve();
       if(!reference) throw new PublicImageError("NOT_FOUND",404);

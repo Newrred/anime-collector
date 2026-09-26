@@ -3,13 +3,16 @@ import { PrivateImageError, hash } from './processImage.js';
 
 export const PRIVATE_BUCKET = 'memory-private-representations';
 const safeCodes = new Set(['AUTH_REQUIRED','NOT_FOUND','INVALID_REQUEST','OPERATION_MISMATCH','IMAGE_SIZE_LIMIT',
+  'ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED','ELIGIBILITY_POLICY_CHANGED','ELIGIBILITY_POLICY_UNAVAILABLE',
   'PRIVATE_IMAGE_DISABLED','PRIVATE_IMAGE_PAUSED','PRIVATE_IMAGE_POLICY_STALE','PRIVATE_IMAGE_RETIRED','PRIVATE_IMAGE_CONFLICT',
   'PRIVATE_IMAGE_QUOTA_EXCEEDED','PRIVATE_IMAGE_CAPACITY_EXCEEDED','PRIVATE_IMAGE_RATE_LIMITED']);
 export async function privateRpc(client, name, args) {
   const { data, error } = await client.rpc(name, args);
   if (error) {
     const code = safeCodes.has(error.message) ? error.message : 'PRIVATE_IMAGE_SERVICE_FAILED';
-    const status = code === 'NOT_FOUND' ? 404 : code === 'AUTH_REQUIRED' ? 401 : /EXCEEDED|LIMITED/.test(code) ? 429 : 409;
+    const status = code === 'NOT_FOUND' ? 404 : code === 'AUTH_REQUIRED' ? 401
+      : ['ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code) ? 403
+      : code === 'ELIGIBILITY_POLICY_UNAVAILABLE' ? 503 : /EXCEEDED|LIMITED/.test(code) ? 429 : 409;
     throw new PrivateImageError(code, status);
   }
   return data;
