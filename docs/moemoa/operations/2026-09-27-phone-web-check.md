@@ -1,6 +1,11 @@
 # 휴대폰 Web 확인 — 테스트 서버 전용
 
-기존 W19의 실제 기기 확인 절차다. Android 앱·정식 출시 검사가 아니다. iPhone Safari와 Android Chrome에서 각각 수행한다. 링크는 배포 확인 후 이 문서에 기록한다.
+기존 W19의 실제 기기 확인 절차다. Android 앱·정식 출시 검사가 아니다. iPhone Safari와 Android Chrome에서 각각 수행한다.
+
+- 테스트 주소: https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app/data/
+- 배포 보호가 표시되면 Codex가 제공한 한시적 공유 링크로 먼저 접속한다. 운영 `moemoa.xyz`와 데이터가 분리된 테스트 서버다.
+- 이미지: https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app/test-assets/phone-test.png
+- 범위: `codex/phone-test` Preview 전용, `moemoa-test` 프로젝트. 이미지10개/40MiB·신고 일일10건의 시험 한도다. 24시간 뒤 업로드 정책이 만료되면 반복하지 말고 알려준다.
 
 ## 확인 순서 (기기당 약 5~10분)
 
