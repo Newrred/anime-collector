@@ -66,7 +66,8 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       || !["PRIVATE", "PREPARING", "PUBLISHED", "REVOKED"].includes(value.state))) fail("PUBLICATION_RESPONSE_INVALID");
     return value ? { id: value.id, revision: value.revision, state: value.state, hidden: Boolean(value.hidden),
       hasPublished: value.hasPublished === true || value.state === "PUBLISHED",
-      sourceChanged: value.sourceChanged !== false } : null;
+      sourceChanged: value.sourceChanged !== false,
+      ...(typeof value.visible === 'boolean' ? { visible: value.visible } : {}) } : null;
   };
   return {
     getSnapshot: () => state,
@@ -133,7 +134,7 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       await check();
       emit({ phase: "cardRevoked" });
     }),
-    upload: ({ cardId, file, privateRepresentation, consented }) => run("uploading", async ({ signal, check }) => {
+    upload: ({ cardId, file, privateRepresentation, consented, rightsBasis }) => run("uploading", async ({ signal, check }) => {
       if (!consented || !policyRevision || policyRevision === "UNAPPROVED") fail("IMAGE_CONSENT_REQUIRED");
       const detail = await getBoard(boardId);
       const item = detail?.items.find((entry) => entry.bundle.card.id === cardId);
@@ -144,7 +145,7 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       const key = `${asset.id}:${asset.sync.remoteVersion}:${privateRepresentation?.id || 'original'}:${privateRepresentation?.hash || ''}`;
       if (!imageOperations.has(key)) imageOperations.set(key, uuid());
       const upload = () => prepareImage({ sourceAssetId: asset.id, sourceVersion: asset.sync.remoteVersion, operationId: imageOperations.get(key),
-        accessToken: session.access_token, policyRevision, consented, readOriginal: () => file, privateRepresentation, signal });
+        accessToken: session.access_token, policyRevision, consented, rightsBasis, readOriginal: () => file, privateRepresentation, signal });
       try { await upload(); }
       catch (error) {
         if (error?.retryable !== true) throw error;

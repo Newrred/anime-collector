@@ -13,7 +13,8 @@ export function minihomeSnapshot(value) {
 export function minihomeStatus(value) {
   if (value == null) return null;
   if (!isPublicationId(value.id) || !Number.isSafeInteger(value.revision) || value.revision < 0 || typeof value.published !== "boolean") fail();
-  return { id: value.id, revision: value.revision, published: value.published, hidden: value.hidden === true };
+  return { id: value.id, revision: value.revision, published: value.published, hidden: value.hidden === true,
+    ...(typeof value.visible === 'boolean' ? { visible: value.visible } : {}) };
 }
 export function minihomeReview(value) {
   const status = minihomeStatus({ ...value, published: false });

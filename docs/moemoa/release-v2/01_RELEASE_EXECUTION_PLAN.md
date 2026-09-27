@@ -1,5 +1,67 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 현재 실행 범위 — 2026-09-27 일반 공개·사후 검토로 축소
+
+`GENERAL-PUBLIC-POSTMODERATION-01` 사용자 확정에 따라 첫 Web-only 후보에서 성인 인증과 성인 이미지 공개를 보류한다. 일반 이미지는 간단한 공개 확인·미리보기 동의 후 게시하고 신고·관리자 사후 검토로 처리한다. 비공개 업로드에 공개 동의를 요구하지 않는다. 기존 identity/eligibility prototype과 과거 검증은 보존하되 성인 공급자 문의·계약·추가 guard/경합 검사를 이번 출시 필수 작업에서 제외한다. 최소12세·KR/PH/TH는 변경하지 않았으며 아동 개인정보/보호자 동의는 D04의 별도 미완료 조건이다.
+
+이번 작업은 결정·현재 요약·C/W/D 계약을 동일 기준으로 정리하고 현행 코드와 차이를 확인한다. 후속 구현은 기존 W08/W09/W11/W14에 흡수한다: 공개 확인과 정확한 snapshot/policy 결속을 유지하면서 일반 공개의 일괄 사전심사만 사후 검토로 바꾼다. 이미 MATURE/BLOCKED/숨김/철회된 대상은 새 제목·정책·이미지 교체만으로 재노출하지 않는다. 관리자 조치·이의·감사·kill switch, 원본/operationId/quota와 캡처·타인 팬아트의 별도 권리 조건을 보존한다. 체크를 관리자 검토 완료나 제3자 권리 확보로 기록하지 않는다.
+
+검증 종료선: 일반 게시→새 익명 본문/이미지/미니홈 열람→관리자 차단→동일 URL 및 재게시 우회 거부의 한 흐름과 옛 preview 거부를 현행 코드에서 검증한다. 새 사전심사/성인 시스템을 만들지 않는다. DB 변경 시 기존 migration을 덮어쓰지 않고 추가 migration으로 준비하며 기본값은 운영 공개 활성화가 아니다. 로컬 rollback은 해당 변경 되돌림·폐기 DB 종료, 원격 적용/정확한 정책·후보 승인은 D01/D06에 남긴다. 이번 문서 변경은 구현·hosted PASS·배포 완료가 아니다.
+
+### 2026-09-27 실행 — 일반 게시 동의와 사후 차단 수직 변경
+
+- 소스 근거: `20260926140122_memory_content_review.sql:94–105,150–162`의 GENERAL 선검토 reader, `publicationCopy.js`/`minihomeCopy.js`의 기존 미리보기 동의와 공개 controller. 기존 신고 없는 검토 큐·관리자 분류/이의는 재사용한다.
+- 변경 지도/흐름: CLI로 추가 migration 생성 → 기본 UNCONFIGURED인 일반 공개 정책 revision → 기존 publish RPC가 검증한 정확한 snapshot/hash/정책에 서버 소유 동의 기록 → reader에서 해당 동의와 기존 권리/철회/숨김 검사 → 관리자 MATURE/BLOCKED는 hash/정책 변경과 무관하게 해당 게시 대상 차단. 양쪽 publish의 원래 RPC를 private으로 이동하고 ACL을 닫아 우회를 막는다. 동의 없는 과거 게시물은 자동 승격하지 않는다.
+- UI: 보드/미니홈 최종 확인에 일반 공개 제한·권리·사후 검토 안내를 넣고 성인 분류 결과는 ‘공개 불가’로 표시한다. 비공개 업로드 화면/원본·quota·trusted 권리 근거는 변경하지 않는다.
+- 테스트: 기존 disposable PostgreSQL runner에 제한 실행 옵션을 추가해 실제 이미지 예약/준비·게시 fixture에서 신규 계약을 실행한다. 정책 기본off/옛 동의 미승격/정상게시/익명 본문·이미지·home/신고 없는 검토/차단 뒤 편집·재게시/철회·kill switch/ACL·원본·quota 보존을 확인한다. 새 Auth/provider 개발,72table 복원,운영 연결은 제외. UI는 기존 publication Playwright 검증, unit/build를 적용 범위에 맞춰 실행한다.
+- 위험/복구: 새 정책 revision은 명시적으로 설정하기 전 비활성. 기존 검토 이력은 그대로 유지하고 새 동의 테이블은 비공개·RLS/ACL로 차단한다. 정책을 UNCONFIGURED로 되돌리면 기존 사전검토 경로로 복귀, 긴급중지는 기존 reads/writes/images/minihomes flags 사용. 감사·사본 삭제 없음. 로컬 폐기 DB 종료로 원복하며 원격 migration/정책/배포는 정확한 후보 승인 후 수행한다.
+- 이번 종료선: 새 일반 공개 경계의 실제 로컬 SQL·UI 검증 근거와 남은 hosted/rights·실기기/D04/D06을 분리해 기존03에 기록한다. 캡처/타인 팬아트 등 권리 범위를 늘리거나 기존 trusted 권리를 자동 생성하지 않는다.
+
+실행 결과: 추가 migration `20260927042334_memory_general_postmoderation.sql`과 보드/미니홈 확인·노출 상태 안내를 구현했다. 별도 동의 테이블 대신 기존 private 게시/미니홈 row의 서버 전용 hash/정책 컬럼으로 좁혔다. 오래된 operation replay는 새 동의를 생성하지 않는다. 실제 로컬 SQL 신규33, 새 schema private49, unit394, build19, Chromium30 PASS/설정에 따른 private-source1 skip. 브라우저 첫 실행은 서버 준비 시간 초과로 검사 전 중단, build 후 재실행 종료0. [증거](evidence/2026-09-27-general-postmoderation-local.json). 원격/운영0. 일반 이미지의 기존 trusted 권리 근거 요구는 남아 있으므로 전체 ‘체크만으로 신규 이미지 공개’ 완료로 표시하지 않는다. 다음1개는 기존 W08의 일반 이미지 권리 확인 경로 마감이다.
+
+### 2026-09-27 W08 실행 — 본인 창작 이미지의 공개 확인
+
+- 현재 단순 확인 결정의 구현: 사용자가 본인 창작물임을 명시적으로 선택한 경우만 `SELF_DECLARED` 근거를 저장하고 기존 `TRUSTED` 승인과 구분한다. 캡처·타인 팬아트/기타 권리 근거는 기존 별도 승인 경로에 남긴다. 자동 유형 변경·관리자 GENERAL 생성 없음.
+- 추가 migration에서 기존 private 권리 row에 근거 종류·확인 정책·원본 hash를 결속한다. 원본/최적화 사본의 예약과 확인 저장을 한 transaction으로 처리해 실패 시 함께 rollback한다. 현재 소유자/버전/hash·사본 ID/hash·정책·철회와 quota/operationId를 보존한다. 기존 trusted 기록/철회는 자기 확인으로 덮어쓰지 않는다.
+- UI에서 본인 창작/별도 승인 이미지 선택과 공개 확인 후 기존 업로드 API로 전달한다. 원본 bytes는 명시적 요청 안에서만 읽으며 사본 경로는 기존 로그인·Storage 검사를 재사용한다. 서버의 일반 공개 정책이 UNCONFIGURED면 새 확인 경로도 닫힌다.
+- 검증: 폐기 PostgreSQL에서 무승인 본인 이미지 예약→준비→preview/게시/익명 열람, B/옛 hash/정책/철회/실패 rollback과 사본 결속을 확인한다. HTTP 실제 처리+합성 backend, 실제 React 화면+모의 RPC는 별도로 기록한다. 기존 unit/build, 관련 브라우저 검증만 실행한다.
+- 복구/종료선: 정책 UNCONFIGURED는 자기 확인으로 만든 사본도 비노출로 만든다. 기존 trusted/원본/사본 데이터 보존. 원격 migration·flags·배포/유료 변경 없음. 로컬 결과를 기존 W08/C04와 증거에 남기고 hosted/출시 PASS와 구분한다.
+
+실행 결과: `20260927044435_memory_self_declared_image_rights.sql`과 원본/사본 UI→HTTP→새 예약 RPC 연결을 구현했다. 공개 확인 종류는 SELF_DECLARED이며 approved_at null, 기존 TRUSTED/철회 보존. 로컬 SQL29 검사·HTTP 신규3 포함unit397·build19·fresh private49 PASS. 브라우저 전체29 PASS/2 FAIL에서 접근성 이름/시험 flag를 수정하고 대상2 PASS. 실제 원본·사본 준비/선택 변경 시 재확인/preview/게시/새 방문자 이미지 decode를 synthetic adapter로 확인했다. [근거](evidence/2026-09-27-self-declared-image-rights-local.json). 원격/배포0, 다음은 기존 D01/W08 정확한 hosted 시험 후보 준비다.
+
+### 2026-09-27 D01/W08 — 확인된 hosted 시험 후보 (적용 승인 대기)
+
+실행 승인: 사용자 “적용 및 진행”(2026-09-27)으로 아래 정확한3개 및 테스트 한 바퀴 승인. 적용 전 hash/대상/flags 재확인 후 순차 적용하고, 합성 fixture ID와 변경 전 설정을 ignored cache에 기록해 실패 시에도 원복한다. 운영/유료/Git 배포는 범위 밖이다. 현재 실행 결과는 이 섹션과03에 추가하며 아래 준비 시점의 승인 대기 표시는 이력이다.
+
+- 이번 읽기 전용 확인: `moemoa-test` / `nmgkhknponvzcwliajyk`, ACTIVE_HEALTHY. 적용 이력22개, 로컬25개 중 아래3개 미적용. 공개/비공개 이미지 기능 off, Public/Private bucket 비공개. 공개 보드/미니홈·운영자·활성 권리·미정리 공개 사본 모두0. 기존 A/B·기본 연결·복원은 재검증하지 않았다.
+- 적용 후보 순서와 SHA256:
+  1. `20260926140122_memory_content_review.sql` — `fbffdeb940bd8f40aa92a06131e749d0aac057099cfd45b5b86e18495fcaa6b4`
+  2. `20260927042334_memory_general_postmoderation.sql` — `dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2`
+  3. `20260927044435_memory_self_declared_image_rights.sql` — `bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1`
+- 후보 식별: `test-general-public-20260927-01`, base4ead72b+미커밋 diff. 운영 RC/Git 배포 후보 아님. 적용 직전 hash와 대상 project 재확인. DB에는 각 파일 이력을 남기며 첫 단계부터 완료 전까지 기능 off를 유지한다. 중간 실패 시 이후 적용/활성화를 멈추고 실제 적용 이력만 기록한다.
+- 승인 범위: 위3개 additive DB 변경을 moemoa-test에만 적용. 기존 사용자 승인된 A/B·합성 이미지·A 임시 운영자·시험 후 원복 범위를 사용한다. 새 성인/보호자 prototype, 운영 DB, Git push/배포, 유료 변경은 포함하지 않는다. 새 migration 범위는 기존 D01의 NEW_MIGRATION_APPROVAL_PENDING에 해당하므로 명시 확인 후 수행한다.
+- 시험 설정: 새 `TEST_ONLY_GENERAL_20260927_01`로 publication/content/general 정책을 맞춘다. Public reads/writes/images/minihomes/follows/reports만 시험 중 활성화하고10개/40MiB·신고10건/일 상한. 사본 시험에만 private 이미지를 기존 승인 범위(50,000,000bytes 논리/40MiB 물리,main1,000,000bytes/thumb120,000bytes,10개,준비/디코드20회/일,read40MiB/global80MiB,동시업로드1)로 임시 활성화한다. 실행 직전 실제 설정을 비밀값 없는 snapshot으로 보존한다.
+- 실제 행동 종료선: 합성 원본/최적화 사본2개를 명시 확인→준비→동일operation 복구→preview/게시→새 익명 실제 이미지 decode→미니홈→B 팔로우/재방문→신고/차단→A 사후 MATURE/BLOCKED 조치와 direct URL 거부→철회. 옛 동의/권리철회 거부는 이번 후보에 관련된 경우만 확인한다. HTTP/실제SQL와 브라우저·실휴대폰의 증거는 분리한다. 완성하지 못한 행동은 미검증으로 남긴다.
+- 원복: 실패/성공 모두 기존 전역 flags를 먼저 닫고 fixture ID별 게시·미니홈 철회, 생성한 권리만 철회, 생성한 Storage 객체만 기존 cleanup RPC로 정리하여 해당 reservation0 확인. 새로 추가한 A 운영자 권한만 제거한다. 기존 public/private 설정 snapshot 복원, 새 content/general 정책 UNCONFIGURED. schema는 additive 적용 상태로 남기며 데이터/감사/legacy를 삭제하는 down migration은 하지 않는다. 정리 실패는 숨기지 않고 flags off와 남은 fixture ID/bytes를 기록한다.
+- 보안 점검: 원격 advisors는 INFO23(RLS/no policy), WARN3(익명 read RPC), WARN42(로그인 RPC), WARN1(유출 비밀번호 보호 off)을 보고. 실제 private client table grants0, 노출 definer의 search_path 누락0, 익명3개는 공개 reader임을 확인했다. 알림 전체를 취약점0 또는 전부 결함으로 바꾸지 않는다. 비밀번호 보호의 현재 Auth 방식 적용성/플랜은 별도 미확인으로 보존. [공식 linter 설명](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable).
+- 이번 실행 결과: 원격 읽기/설정·DDL 부재·ACL·advisors 확인과3개 파일 hash 대조. 새 사용자 행동 PASS0, remote writes0. [후보 및 근거](evidence/2026-09-27-general-hosted-preflight.json). 다음1개는 이 정확한 테스트 DB 변경 승인 후 시험 실행.
+
+실행 결과(사용자 적용 승인 후): 후보3개를 원격 test migration `20260927053858/20260927053904/20260927053914`로 순차 적용하고 총25개 이력을 확인했다. 현재 소스 handler+실제 hosted Auth/RPC/Storage로 원본·사본/미니홈/B팔로우·신고/차단/A사후조치/철회28검사 PASS, 물리삭제/용량0·권리/fixture·임시권한/기존home·설정복원4검사 PASS. `.cache/general-hosted-run.mjs` 및 cleanup 실행 모두 exit0. 실제 bytes86/88,96×64,차단404 확인. 추가 제품수정0. 정책은UNCONFIGURED/flags off, schema/감사만 test에 유지. 원격 ACL: private client grants0, 새 RPC anon불가·인증사용자허용, 옛publisher 직접실행불가. advisors INFO27/WARN54는 private tables4/인증RPC8 추가를 반영하며 비밀번호 보호off 알림도 유지. [전체 증거](evidence/2026-09-27-general-public-hosted.json). 제품브라우저/Google OAuth/실폰/CDN PASS 아님. 다음은 기존 W08/W09 제품 Web UI와 최신 test backend 조합 검증이다.
+
+### 2026-09-27 W08/W09 — 최신 제품 UI와 실제 test backend
+
+사용자 “진행 ㄱ”으로 승인된 test 범위를 계속한다. 기존 test 계정·정책 임시 활성/원복을 재사용하고 새 migration/운영/유료 변경은 하지 않는다. 설치된 Playwright와 별도 loopback Astro+현행 이미지 HTTP handler로 실제 화면을 실행한다(전용 agent-browser 명령 미설치). Auth는 실제 test 세션을 주입하되 OAuth 로그인 자체 PASS로 세지 않고, RPC/Storage 응답을 mock하지 않는다. 합성 카드/보드만 준비해 사용자 UI의 원본/사본 선택·확인·준비·preview·게시·새 익명 이미지 decode·철회를 검증한다. 좁은 viewport는 CSS 검증일 뿐 실휴대폰으로 기록하지 않는다. 실패는 최대2개 다른 시도 뒤 정확한 차단을 기록하며, 항상 flags/임시권한/생성fixture/Storage를 복구한다. 기존 readback 검증을 반복 확장하지 않고 제품 UI 조합의 빈칸을 닫는다. 현재 계약을 만족하는 코드는 재작성하지 않는다.
+
+9/27 제품 Web UI+실제 test backend 검증13항목 및 정리4항목 PASS. 원본/동기화 사본 명시선택·권리확인·준비→preview동의→게시→새 익명2이미지 decode→철회,390px 가로넘침없음. 첫2회는 fixture 동기화 목록 누락으로 보드 미표시; 테스트 생성기 수정 후 통과. 정리도구가 유예시간 동안20초 요청제한을 소진해503 두 번 발생, 각각 재시도 후 원복 확인; 별도 모형 재현과 도구수정으로 기록하며 서버장애로 단정하지 않는다. 제품 추가수정/신규migration/운영변경0. [이번 증거](evidence/2026-09-27-general-public-hosted-ui.json). 실폰/OAuth/CDN 및 이 실행의 미니홈/관계/운영자 전체UI는 미검증.
+
+### 이전 재개 범위 (공급자 문의를 다음 작업으로 삼던 당시 기록)
+
+### 2026-09-27 W19 — 휴대폰 테스트 링크 준비
+
+사용자 “ㅇㅋ 준비해줘”에 따라 기존 W08/W09 제품UI PASS 후보를 휴대폰에서 여는 비운영 테스트 링크로 준비한다. 별도 계획/진행판은 만들지 않는다. Vercel 기존 anime-collector 프로젝트의 비운영 브랜치/Preview 환경에만 moemoa-test 연결·공개/비공개 test flags와 정확한 callback origin을 설정한다. 운영 master/도메인/DB/유료플랜은 변경하지 않는다. 로컬 검증된 변경을 테스트 브랜치 커밋으로 결속하고 비밀값을 제외해 push, Preview 배포 SHA와 실제 build/API를 확인한다. 테스트 DB는 기존 승인된 합성 이미지10개/40MiB·신고10건 한도를 유지한다. 본인 창작 테스트 파일과 짧은 로그인→이미지 저장/sync→게시→익명열람→철회 절차를 제공하고 실기기 결과는 사용자 확인 전 미검증으로 남긴다. 테스트 종료 시 test flags/한시 역할/허용 callback을 원복하고 생성한 합성 자료만 정리한다. 인증 설정/배포 도구가 막히면 정확한 제한과 준비된 산출물만 보고한다. 새 schema migration/권리 자동승인/개인 원본 업로드/성인 인증 개발 없음.
+
+사용자 “진행해줘”로 문서 반영과 승인된 독립 마감을 재개한다. identity/eligibility prototype 추가 확장은 동결한다. 이번 종료선은 기존 00/01/02/03·최상위 gates의 상태 불일치를 정리하고 D03/D04 기존 공급자 문의를 실제 승인 가능한 상태로 제시하는 것이다. W09/W11의 게시됨/노출 상태 불일치는 현행 소스 검토만 하고, 심사 운영정책이 필요한 변경은 임의 확정하지 않는다. 추가 race/기초 DB·A/B·복원 재실행, 새 계획/진행판, 운영 변경 없음. 아래 일시정지/다음작업 문장은 당시 이력이며 현재 실행 지시는 03 현재 작업 카드만 따른다.
+
 2026-09-27 후속 사용자 요청: 구현 중단은 유지하되 전체 작업/문서를 master에 커밋해 Pro 검토 자료로 보존한다. 검토 인계 보고서와 현재 요약을 갱신하며 ignored 비밀값/로컬 DB/캐시/사용자 원본은 제외한다. identity shell LF 속성만 보완하여 새 checkout의 검사 스크립트 줄바꿈을 유지한다. 커밋 자체는 배포/운영 DB/Public 승인 아님.
 
 **2026-09-27 사용자 요청으로 실행 일시정지.** 이번 mutation/promotion 대기만료 결함을 재현·보완하고143 PASS(exit0)로 마감했다. evidence/2026-09-27-eligibility-mutation-expiry.json. 최초 post-fix 후속 fixture 상태 오류는 이전 REVOKED 상태 복원으로 교정했다. 기존 완료 replay/삭제 검사도 통과. 새 구현은 시작하지 않으며 03의 기존 계획 대비 검토/현재 작업 카드를 갱신했다. 출시 완료가 아니며 사용자 재개 전 자동 다음 작업 금지.

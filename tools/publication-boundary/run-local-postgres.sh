@@ -14,6 +14,8 @@ for migration in "$root"/supabase/migrations/*.sql; do
   # Test the pre-classification baseline first. The exact migration is applied
   # by the content contracts and committed at the final upgrade/race stage.
   if [[ "$(basename "$migration")" == '20260926140122_memory_content_review.sql' ]]; then continue; fi
+  if [[ "$(basename "$migration")" == '20260927042334_memory_general_postmoderation.sql' ]]; then continue; fi
+  if [[ "$(basename "$migration")" == '20260927044435_memory_self_declared_image_rights.sql' ]]; then continue; fi
   # pg_cron is a Supabase/platform extension. Retention is outside this isolated test.
   if [[ "$(basename "$migration")" == '20260902055512_memory_user_retention.sql' ]]; then continue; fi
   if [[ "$(basename "$migration")" == '20260924115258_memory_resource_controls.sql' ]]; then
@@ -32,7 +34,11 @@ if wait "$b"; then success=$((success+1)); else grep -q PUBLICATION_CONFLICT "$w
 [[ "$success" == 1 ]]
 [[ "$("${psql[@]}" -Atc "select revision from private.memory_publications where board_id='bbbbbbbb-bbbb-4bbb-8bbb-000000000001'")" == 8 ]]
 echo "PASS: two simultaneous prepares produce one winner and one revision conflict"
-"${psql[@]}" -f "$root/tools/publication-boundary/image-contract.sql"
+"${psql[@]}" -v general_postmoderation=true -f "$root/tools/publication-boundary/image-contract.sql"
+if [[ "${POSTMODERATION_ONLY:-0}" == 1 ]]; then
+  echo "PostgreSQL general postmoderation contract PASS; local artifacts: $work"
+  exit 0
+fi
 "${psql[@]}" -f "$root/tools/publication-boundary/representation-contract.sql"
 "${psql[@]}" -c "update private.memory_public_assets set state='DELETED',reserved_bytes=0 where state='DELETING'" >/dev/null
 "${psql[@]}" -v operation=ffffffff-ffff-4fff-8fff-000000000001 -f "$root/tools/publication-boundary/concurrent-image.sql" > "$work/image-a.log" 2>&1 &

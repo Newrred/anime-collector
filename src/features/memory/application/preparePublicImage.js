@@ -5,9 +5,10 @@ const fail=(code)=>{ throw new PublicImagePreparationError(code); };
 
 // Caller supplies the explicitly selected original. Never use a preview or substitute a cover.
 export async function prepareSelectedPublicImage({ sourceAssetId,sourceVersion,operationId,accessToken,policyRevision,
-  consented=false,readOriginal,privateRepresentation,signal,fetchImpl=globalThis.fetch }) {
+  consented=false,rightsBasis,readOriginal,privateRepresentation,signal,fetchImpl=globalThis.fetch }) {
   if(!consented || !policyRevision) fail("IMAGE_CONSENT_REQUIRED");
   if(!accessToken) fail("AUTH_REQUIRED");
+  if(rightsBasis !== undefined && !['USER_ORIGINAL','EXISTING_APPROVAL'].includes(rightsBasis)) fail('IMAGE_CONSENT_REQUIRED');
   if(signal?.aborted) fail("REQUEST_ABORTED");
   if(privateRepresentation && (!/^[a-f0-9-]{36}$/i.test(privateRepresentation.id || '') || !/^[a-f0-9]{64}$/.test(privateRepresentation.hash || ''))) fail('PUBLIC_VISUAL_NOT_READY');
   if(!privateRepresentation && typeof readOriginal!=="function") fail("ORIGINAL_IMAGE_UNAVAILABLE");
@@ -23,6 +24,7 @@ export async function prepareSelectedPublicImage({ sourceAssetId,sourceVersion,o
     response=await fetchImpl("/api/public-image",{method:"POST",signal,cache:"no-store",
       headers:{"Content-Type":"application/octet-stream",Authorization:`Bearer ${accessToken}`,
         "X-Moemoa-Asset":sourceAssetId,"X-Moemoa-Version":String(sourceVersion),"X-Moemoa-Operation":operationId,"X-Moemoa-Consent":policyRevision,
+        ...(rightsBasis==='USER_ORIGINAL' ? {'X-Moemoa-Rights':'USER_ORIGINAL'} : {}),
         ...(privateRepresentation ? {'X-Moemoa-Private-Representation':privateRepresentation.id,'X-Moemoa-Representation-Hash':privateRepresentation.hash} : {})},body:privateRepresentation ? undefined : original});
   } catch { fail(signal?.aborted ? "REQUEST_ABORTED" : "IMAGE_REQUEST_FAILED"); }
   const result=await response.json().catch(()=>null);

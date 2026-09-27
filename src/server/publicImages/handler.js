@@ -41,7 +41,7 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
       if(origin) res.setHeader("Access-Control-Allow-Origin",origin);
       if(req.method === "OPTIONS") {
         res.setHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers","Authorization, Content-Type, X-Moemoa-Asset, X-Moemoa-Version, X-Moemoa-Operation, X-Moemoa-Consent, X-Moemoa-Private-Representation, X-Moemoa-Representation-Hash, X-Moemoa-Review-Hash, X-Moemoa-Review-Policy, X-Moemoa-Review-Revision");
+        res.setHeader("Access-Control-Allow-Headers","Authorization, Content-Type, X-Moemoa-Asset, X-Moemoa-Version, X-Moemoa-Operation, X-Moemoa-Consent, X-Moemoa-Rights, X-Moemoa-Private-Representation, X-Moemoa-Representation-Hash, X-Moemoa-Review-Hash, X-Moemoa-Review-Policy, X-Moemoa-Review-Revision");
         res.statusCode=204; res.end(); return;
       }
       if(!["GET","POST"].includes(req.method)) throw new PublicImageError("METHOD_NOT_ALLOWED",405);
@@ -56,9 +56,15 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
         const privateId=req.headers['x-moemoa-private-representation'], privateHash=req.headers['x-moemoa-representation-hash'];
         const fromPrivate=privateId!==undefined || privateHash!==undefined;
         if(fromPrivate && (!privateSourcesEnabled || !UUID.test(privateId || '') || !/^[a-f0-9]{64}$/.test(privateHash || ''))) throw new PublicImageError('PUBLIC_VISUAL_NOT_READY',409);
+        const rights=req.headers['x-moemoa-rights'];
+        if(rights!==undefined && rights!=='USER_ORIGINAL') throw new PublicImageError('IMAGE_RIGHTS_REQUIRED',409);
+        // Hash the explicitly uploaded file before storing a declaration. Wrong bytes cannot grant rights.
+        const declaredBytes=rights==='USER_ORIGINAL' ? await inputBytes(req) : null;
+        if(fromPrivate && declaredBytes?.length) throw new PublicImageError('INVALID_BINARY_BODY');
         let reservation;
-        try { reservation=await user.rpc(fromPrivate ? 'reserve_memory_public_asset_from_private' : "reserve_memory_public_asset",{...attempt,p_policy_revision:consent,
-          ...(fromPrivate ? {p_representation_id:privateId,p_representation_hash:privateHash} : {})}); }
+        try { reservation=await user.rpc(rights==='USER_ORIGINAL' ? 'reserve_memory_declared_public_asset' : fromPrivate ? 'reserve_memory_public_asset_from_private' : "reserve_memory_public_asset",{...attempt,p_policy_revision:consent,
+          ...(rights==='USER_ORIGINAL' ? {p_source_hash:fromPrivate ? null : imageHash(declaredBytes),p_representation_id:fromPrivate ? privateId : null,p_representation_hash:fromPrivate ? privateHash : null}
+            : fromPrivate ? {p_representation_id:privateId,p_representation_hash:privateHash} : {})}); }
         catch(error) {
           if(error?.code === "ASSET_OPERATION_UNAVAILABLE" && await releaseFailedAttempt(backend,user,attempt).catch(()=>false)) {
             throw Object.assign(new PublicImageError("ASSET_OPERATION_FAILED",409),{retryable:true});
@@ -70,7 +76,7 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
         const paths=pathsFor(reservation.prefix);
         try {
           await user.rpc("authorize_memory_image_attempt",{});
-          let bytes=await inputBytes(req);
+          let bytes=declaredBytes ?? await inputBytes(req);
           if(fromPrivate) {
             if(bytes.length) throw new PublicImageError('INVALID_BINARY_BODY');
             const resolve=charge=>user.rpc('read_memory_private_image',{p_asset:asset,p_version:version,p_variant:'main',p_charge:charge});

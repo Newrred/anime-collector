@@ -67,7 +67,7 @@ test('moderation workspace blocks failed image and clears confirmation after sta
 
 for (const [action, label] of [
   ['CONTENT_GENERAL', 'Classified as general content'],
-  ['CONTENT_MATURE', 'Classified as adult-only content'],
+  ['CONTENT_MATURE', 'Adult content cannot be shared publicly'],
   ['CONTENT_BLOCKED', 'Outside the current public content policy'],
 ]) {
   test(`classification notice ${action} opens existing appeal flow`, async ({ page, context }) => {
@@ -335,7 +335,7 @@ function mockPublication() {
   const HOME = "55555555-5555-4555-8555-555555555555";
   let state = "PRIVATE", revision = 0, snapshot: any = null, published: any = null;
   const calls: any[] = [];
-  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false };
+  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false, visible: true };
   const attach = async (context: BrowserContext) => {
     await context.route("**/__publication-test/rpc/*", async (route) => {
       const name = new URL(route.request().url()).pathname.split("/").at(-1);
@@ -344,7 +344,7 @@ function mockPublication() {
       if (name === "list_memory_safety") data = { items: [], next: null };
       if (name === "list_memory_relationships") data = { items: [], next: null };
       if (name === "get_memory_relationship") data = { self: true, following: false, blocked: false };
-      if (name === "get_memory_minihome") data = homeRevision ? { id: HOME, revision: homeRevision, published: Boolean(homePublished) } : null;
+      if (name === "get_memory_minihome") data = homeRevision ? { id: HOME, revision: homeRevision, published: Boolean(homePublished), visible: control.visible } : null;
       if (name === "list_memory_minihome_boards") data = { boards: published?.cards.length ? [{ id: PUBLICATION, ...published }, ...(control.secondBoard ? [{ id: IMAGE, ...published, title: "Second public Board" }] : [])] : [], next: null };
       if (name === "prepare_memory_minihome") {
         home = args.p_selection; homeRevision++;
@@ -362,7 +362,7 @@ function mockPublication() {
         if (control.readError) error = { message: "network failure" };
         else data = homePublished ? { id: HOME, ...homePublished, entries: published?.cards.length ? homePublished.entries : [] } : null;
       }
-      if (name === "get_memory_publication") data = revision ? { id: PUBLICATION, revision, state, hasPublished: Boolean(published), sourceChanged: control.sourceChanged } : null;
+      if (name === "get_memory_publication") data = revision ? { id: PUBLICATION, revision, state, hasPublished: Boolean(published), sourceChanged: control.sourceChanged, visible: control.visible } : null;
       if (name === "prepare_memory_publication") {
         if (args.p_expected_revision !== revision) error = { message: "PUBLICATION_CONFLICT" };
         else {
@@ -556,6 +556,32 @@ test("mini-home UI defaults closed and guest cannot open the editor", async ({ p
   await page.goto("/minihome/"); await expect(page.getByText("Sign in to choose your public home.", { exact: false })).toBeVisible();
   await expect(page.getByLabel("Public nickname", { exact: true })).toHaveCount(0);
   expect(mock.calls.filter((c) => c.name === "get_memory_minihome")).toHaveLength(0);
+});
+
+test("owner sees unavailable instead of a visitor link after board or home moderation", async ({ page, context }) => {
+  const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page); await choose(page); await publishSelected(page);
+  const boardUrl = page.url();
+  mock.control.visible = false;
+  await page.reload(); await page.getByRole('button', { name: 'Share selected memories' }).click();
+  await expect(page.getByText('This published version is currently unavailable to visitors.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open visitor page', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Copy public link', exact: true })).toHaveCount(0);
+  mock.control.visible = true;
+  await page.getByRole('link', { name: 'My public home', exact: true }).click();
+  await page.getByLabel('Public nickname', { exact: true }).fill('General home');
+  await page.getByLabel('Display this Board', { exact: true }).check();
+  await page.getByRole('button', { name: 'Preview public home', exact: true }).click();
+  const consent = page.getByLabel('I reviewed this public home', { exact: false });
+  await expect(consent).toHaveCount(1);
+  await expect(page.getByText('It contains no adult, illegal or rights-infringing content.', { exact: false })).toBeVisible();
+  await consent.check(); await page.getByRole('button', { name: 'Publish public home', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Open public home', exact: true })).toBeVisible();
+  mock.control.visible = false; await page.reload();
+  await expect(page.getByText('This published home is currently unavailable to visitors.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open public home', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Copy public link', exact: true })).toHaveCount(0);
+  await page.screenshot({ path: '.cache/general-postmoderation-owner-status.png', fullPage: true });
+  expect(boardUrl).toContain('/boards/');
 });
 
 test("public update needs fresh review, cancelled update keeps previous snapshot, global stop keeps private original", async ({ page, context }) => {
@@ -761,8 +787,15 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
     await expect(page.getByRole('img', { name: 'Selected private image copy', exact: true })).toBeVisible();
   } else await page.getByLabel("Select the original image file").setInputFiles({ name: "original.png", mimeType: "image/png", buffer: png });
   await expect(page.getByRole("button", { name: "Prepare selected image" })).toBeDisabled();
+  await page.getByLabel('Image rights', {exact:true}).selectOption('USER_ORIGINAL');
+  await expect(page.getByText('Anime screenshots and other people’s fanart', {exact:false})).toBeVisible();
   expect(uploads).toHaveLength(0);
   await page.getByLabel(usePrivate ? 'I agree to use this selected image' : "I agree to upload this selected image", { exact: false }).check();
+  await page.getByLabel('Image rights', {exact:true}).selectOption('EXISTING_APPROVAL');
+  await expect(page.getByRole('button', {name:'Prepare selected image'})).toBeDisabled();
+  await page.getByLabel('Image rights', {exact:true}).selectOption('USER_ORIGINAL');
+  await page.getByLabel(usePrivate ? 'I agree to use this selected image' : "I agree to upload this selected image", { exact: false }).check();
+  await page.screenshot({path:`.cache/self-declared-rights-${usePrivate ? 'private' : 'original'}.png`});
   await page.getByRole("button", { name: "Prepare selected image" }).click();
   await expect(page.getByText("The selected image copy is ready.", { exact: false })).toBeVisible();
   expect(uploads).toHaveLength(1); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
@@ -771,6 +804,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
     expect(uploads[0].headers()['x-moemoa-representation-hash']).toBe(privateHash);
   }
   expect(uploads[0].headers()["x-moemoa-consent"]).toBe("local-test-policy");
+  expect(uploads[0].headers()['x-moemoa-rights']).toBe('USER_ORIGINAL');
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();
   await expect(page.getByRole("button", { name: "Publish this version" })).toBeEnabled();

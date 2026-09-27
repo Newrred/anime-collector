@@ -43,7 +43,7 @@ function Decision({ review, ko, busy, onSave }) {
         <label htmlFor={ratingId}>{ko ? '공개 분류' : 'Content classification'}</label><select id={ratingId} value={rating} onChange={e => { setRating(e.target.value); setConfirmed(false); }}>
           <option value="">{ko ? '분류 선택' : 'Choose classification'}</option>
           <option value="GENERAL">{ko ? '일반 공개' : 'General content'}</option>
-          <option value="MATURE">{ko ? '성인 전용' : 'Adult-only content'}</option>
+          <option value="MATURE">{ko ? '성인용 — 공개 불가' : 'Adult content — public sharing unavailable'}</option>
           <option value="BLOCKED">{ko ? '공개 허용 범위 밖' : 'Outside public policy'}</option>
         </select>
         <label><input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)} />{ko ? '표시된 내용과 선택한 분류를 확인했습니다.' : 'I reviewed the displayed content and selected classification.'}</label>

@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-27",
+  "candidate": "test-general-public-20260927-01",
+  "status": "READ_ONLY_PREFLIGHT_COMPLETE_NEW_MIGRATION_APPROVAL_PENDING",
+  "project": {"id":"nmgkhknponvzcwliajyk","name":"moemoa-test","status":"ACTIVE_HEALTHY","postgres":"17.6.1.166"},
+  "baseCommit": "4ead72b10ae384145c7da9261b7eb15c2a034fa7",
+  "workingTreeDirty": true,
+  "appliedMigrationCount": 22,
+  "localMigrationCount": 25,
+  "pending": [
+    {"path":"supabase/migrations/20260926140122_memory_content_review.sql","sha256":"fbffdeb940bd8f40aa92a06131e749d0aac057099cfd45b5b86e18495fcaa6b4"},
+    {"path":"supabase/migrations/20260927042334_memory_general_postmoderation.sql","sha256":"dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2"},
+    {"path":"supabase/migrations/20260927044435_memory_self_declared_image_rights.sql","sha256":"bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1"}
+  ],
+  "publicBefore": {"singleton":true,"asset_limit":0,"reads_enabled":false,"images_enabled":false,"writes_enabled":false,"follows_enabled":false,"policy_revision":"UNAPPROVED","reports_enabled":false,"asset_bytes_limit":0,"minihomes_enabled":false,"report_daily_limit":0},
+  "privateBefore": {"id":true,"paused":false,"enabled":false,"approved":false,"revision":"UNAPPROVED","main_bytes":1000000,"observed_at":null,"quota_bytes":0,"thumb_bytes":120000,"physical_bytes":0,"asset_count_max":0,"preparations_per_day":0,"read_bytes_per_month":0,"upload_max_in_flight":1,"decode_attempts_per_day":0,"global_read_bytes_per_month":0},
+  "beforeCounts": {"publishedBoards":0,"publishedHomes":0,"moderators":0,"activeSourceRights":0,"activeRepresentationRights":0,"undeletedPublicDerivatives":0},
+  "ddlAbsent": ["private.memory_content_reviews","private.memory_home_content_reviews","memory_publication_settings.content_policy_revision","memory_publication_settings.general_publication_policy_revision","public.reserve_memory_declared_public_asset(uuid,bigint,uuid,text,text,uuid,text)"],
+  "buckets": [{"id":"memory-public-derivatives","public":false},{"id":"memory-private-representations","public":false}],
+  "acl": {"privateClientGrants":0,"clientWritablePrivateTables":[],"executableDefinersWithoutPinnedSearchPath":[],"anonymousDefiners":["read_memory_minihome","read_memory_publication","read_memory_publication_author"]},
+  "advisors": [
+    {"name":"rls_enabled_no_policy","level":"INFO","count":23,"interpretation":"Private internal tables deny direct client grants; no policies is compatible with RPC-only access","url":"https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"},
+    {"name":"anon_security_definer_function_executable","level":"WARN","count":3,"interpretation":"Matches the three intended public readers; not a complete security audit","url":"https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable"},
+    {"name":"authenticated_security_definer_function_executable","level":"WARN","count":42,"interpretation":"Existing explicit RPC boundary; search_path checked, every body not re-audited this turn","url":"https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"},
+    {"name":"auth_leaked_password_protection","level":"WARN","count":1,"interpretation":"Current Auth-provider applicability/plan not checked; unchanged","url":"https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"}
+  ],
+  "commands": ["supabase_list_projects", "supabase_get_project(nmgkhknponvzcwliajyk)", "supabase_list_migrations(nmgkhknponvzcwliajyk)", "supabase_execute_sql: SELECT settings, candidate object existence, aggregate fixture counts, storage visibility and ACL metadata only", "supabase_get_advisors(type=security)", "Get-FileHash <three candidate SQL files> -Algorithm SHA256", "git diff --check"],
+  "toolNotes": ["list_projects listed only another organization, but direct known test-project read calls succeeded; no login request was needed", "Multi-statement SQL returned only the final rowset, so settings and DDL checks were retrieved with a single JSON SELECT", "An initial home-table existence probe used the wrong name; corrected to private.memory_home_content_reviews and confirmed absent"],
+  "executionPlan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md: 2026-09-27 D01/W08 hosted candidate section",
+  "testPolicy": "TEST_ONLY_GENERAL_20260927_01",
+  "testLimits": {"publicImages":10,"publicBytes":41943040,"dailyReports":10,"syntheticImagesPlanned":2},
+  "approvalNeeded": "Only the exact three new test DB migrations need scope confirmation under existing D01 NEW_MIGRATION_APPROVAL_PENDING; test-only A/B, synthetic images and temporary A moderator/flags have earlier user authorization. No production or paid changes.",
+  "rollback": "Close flags first; withdraw only generated fixtures, revoke their declarations, cleanup their Storage through existing RPCs, remove newly added moderator role, restore captured settings and UNCONFIGURED new policies. Additive schema and audit remain; no destructive down migration.",
+  "pastEvidence": ["2026-09-27-general-postmoderation-local.json","2026-09-27-self-declared-image-rights-local.json","2026-09-26-private-public-hosted.json"],
+  "newUserBehaviorPass": 0,
+  "remoteWrites": 0,
+  "productionTouched": false,
+  "nextOne": "Apply the exact approved test-only candidate and execute the bounded real public-image flow, then restore settings."
+}

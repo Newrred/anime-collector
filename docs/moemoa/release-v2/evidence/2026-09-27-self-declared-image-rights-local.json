@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-27",
+  "decision": "GENERAL-PUBLIC-POSTMODERATION-01",
+  "work": ["W08", "C04", "Q08", "Q11"],
+  "baseCommit": "4ead72b10ae384145c7da9261b7eb15c2a034fa7",
+  "status": "LOCAL_VERIFIED_HOSTED_PENDING",
+  "read": ["AGENTS.md", "CODEX_START_HERE.md", "PLANS.md", "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md", "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md", "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md", "docs/moemoa/09_CHANGE_CONTROL_AND_REPORTING.md", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md", "supabase/migrations/20260923093000_memory_public_images.sql:12-94", "supabase/migrations/20260925164126_private_representation_public_rights.sql:1-133", "src/server/publicImages/handler.js", "src/features/memory/application/createPublicationController.js:137-172"],
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md: W08 own-creation declaration section, updated before code",
+  "assumptions": ["Simple confirmation authorizes an explicit own-creation declaration, not fabricated trusted approval", "Third-party screenshots and fanart retain separate rights gates", "Private upload needs no public declaration", "Policy is intentionally UNCONFIGURED until exact environment approval"],
+  "migration": {
+    "path": "supabase/migrations/20260927044435_memory_self_declared_image_rights.sql",
+    "sha256": "bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1",
+    "createdWith": "supabase migration new memory_self_declared_image_rights (installed 2.115.0, help read first)",
+    "requires": ["20260926140122_memory_content_review.sql", "20260927042334_memory_general_postmoderation.sql"],
+    "remoteApplied": false,
+    "rollback": "Set general_publication_policy_revision=UNCONFIGURED to close self-declared derivatives; existing global read/write/image kill switches remain. Preserve rows and originals. Revert UI/API code if required. Disposable tests shut down their DB; no hosted rollback claimed."
+  },
+  "changed": {
+    "database": ["supabase/migrations/20260927044435_memory_self_declared_image_rights.sql"],
+    "application": ["src/features/memory/application/createPublicationController.js", "src/features/memory/application/preparePublicImage.js", "src/server/publicImages/handler.js", "src/server/publicImages/supabaseImageBackend.js"],
+    "ui": ["src/features/memory/components/MemoryPublicationPanel.jsx", "src/features/memory/components/publicationCopy.js", "src/features/memory/components/memory-publication.css"],
+    "tests": ["tests/unit/publicImages.test.mjs", "tests/publication-ui.spec.ts", "tools/publication-boundary/self-declared-rights-contract.sql", "tools/publication-boundary/image-contract.sql", "tools/publication-boundary/run-local-postgres.sh"],
+    "documents": ["docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md", "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md", "docs/moemoa/release-v2/00_CODEX_START_HERE.md", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"]
+  },
+  "verification": [
+    {"command": "wsl -d Ubuntu -u postgres -- env PG_BIN=/usr/lib/postgresql/16/bin POSTMODERATION_ONLY=1 bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh", "exitCode": 0, "newAssertions": 29, "countNote": "28 retained assertion rows plus one trusted-evidence assertion executed inside a rolled-back savepoint; 29 PASS notices. Prior general-postmoderation 33 and baseline regressions are separate.", "scope": "Real PostgreSQL role/RPC/migration checks, synthetic Auth and Storage metadata. Own original publish/anonymous resolver; private rendition prepare/preview; wrong hash/B/policy/default-off/revocation denied; atomic failure rollback; trusted evidence and source preservation; quota/operation preservation.", "log": ".cache/self-declared-rights-sql.log"},
+    {"command": "wsl -d Ubuntu -u postgres -- env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh", "exitCode": 0, "passed": 49, "scope": "Fresh formal schema plus existing private image contracts/races, no identity prototype options", "log": ".cache/self-declared-fresh-schema-final.log"},
+    {"command": "node --test tests/unit/publicImages.test.mjs tests/unit/publicationController.test.mjs", "exitCode": 0, "passed": 49, "log": ".cache/self-declared-rights-unit.log"},
+    {"command": "npm run test:unit", "node": "24.19.0", "exitCode": 0, "passed": 397, "newTests": 3, "scope": "Includes real loopback HTTP and image processing with synthetic backend, plus client consent header tests; not hosted integration", "log": ".cache/self-declared-all-unit.log"},
+    {"command": "npm run build", "exitCode": 0, "pages": 19, "log": ".cache/self-declared-build-final.log"},
+    {"command": "$env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:4394'; $env:PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1='1'; $env:PUBLIC_MEMORY_PRIVATE_IMAGES_V1='1'; node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line", "passed": 29, "failed": 2, "testProcessExitCode": 1, "reason": "Own-source select lacked an unambiguous accessible name; private-copy test was enabled with the wrong private UI flag. Shell log-tail exit code is not the Playwright exit code.", "log": ".cache/self-declared-browser.log"},
+    {"command": "$env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:4396'; $env:PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1='1'; $env:PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1='1'; node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --grep 'image preparation requires' --reporter=line", "exitCode": 0, "passed": 2, "scope": "After accessible-name fix and correct flags, actual React original/private-copy flows with synthetic Auth/RPC/Storage. Rights choice resets consent; no upload before confirmation; exact own-creation header; preview/publish/new visitor image decode. Final CSS uses existing 44px field styling.", "log": ".cache/self-declared-browser-final.log", "screenshots": [".cache/self-declared-rights-original.png", ".cache/self-declared-rights-private.png"]},
+    {"command": "git diff --check", "exitCode": 0}
+  ],
+  "securityPrivacyRights": "RLS private tables retain denied client writes. Only authenticated owned source can create SELF_DECLARED with approved_at null; no moderator GENERAL generated. Original hash or exact private ID/hash is required, current policy pinned, revoked evidence cannot be reactivated. Existing trusted approvals are not overwritten. No new raw image/note/credential logging or dependencies; existing upload rate/quota, operation recovery, report/moderation/withdrawal remain.",
+  "limitations": ["Self-declaration cannot detect a dishonest rights claim or classify image content automatically", "Hosted Auth/PostgREST/Storage/CDN combined with new migrations not run", "No actual phone verification", "Hosted Supabase advisors not run; local role/ACL assertions passed", "Private optimized copy SQL path verified through prepare/complete/owner preview; its final public UI uses a mock backend", "No claim that all W08 or release gates are complete"],
+  "pastPass": "Earlier hosted private and trusted-public tests remain prior evidence. They are not PASS for this new declaration/policy candidate.",
+  "externalGates": ["D01 exact new test migration/configuration candidate", "D04 age12 guardian/country/privacy and third-party rights policy", "D03 costs/alerts", "D05 actual external backup", "D06 exact production approval"],
+  "nextOne": "Prepare the exact hosted test candidate inside existing D01/W08, first comparing current test migrations and settings read-only.",
+  "remoteChanges": 0,
+  "commitPushDeploy": false
+}

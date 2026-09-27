@@ -11,7 +11,7 @@
 .memory-publication__selection > li > div { min-width: 0; }
 .memory-minihome .memory-publication__selection > li { grid-template-columns: minmax(0, 1fr); }
 .memory-minihome select { width: 100%; max-width: 100%; min-width: 0; }
-.memory-minihome input:not([type=checkbox]), .memory-minihome textarea, .memory-minihome select {
+.memory-minihome input:not([type=checkbox]), .memory-minihome textarea, .memory-minihome select, .memory-publication__image-preparation select {
   box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px;
   border: 1px solid var(--border-subtle); border-radius: 8px;
   background: var(--bg-surface); color: inherit; font: inherit;

@@ -14,6 +14,11 @@ function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDur
   const objects=new Map(); const state={ready:false,published:false,revoked:false,failed:false,reservations:0,attempts:0,deliveries:0,reads:0,limitAttempt:false,limitDelivery:false};
   const reference=(variant)=>({path:`${ID}/${variant}.webp`,hash:imageHash(objects.get(`${ID}/${variant}.webp`))});
   const user={async rpc(name,args) {
+    if(name==='reserve_memory_declared_public_asset') {
+      state.declaration=args;
+      if(!args.p_representation_id && args.p_source_hash!==imageHash(source)) throw new PublicImageError('SOURCE_IMAGE_MISMATCH',409);
+      return user.rpc(args.p_representation_id ? 'reserve_memory_public_asset_from_private' : 'reserve_memory_public_asset',args);
+    }
     if(name==='reserve_memory_public_asset_from_private') {
       if(state.rightsDenied) throw new PublicImageError('IMAGE_RIGHTS_REQUIRED',409);
       state.privateBinding={privateRepresentationId:args.p_representation_id,representationHash:args.p_representation_hash};
@@ -86,6 +91,37 @@ const headers={"Content-Type":"application/octet-stream",Authorization:"Bearer t
  "X-Moemoa-Version":"1","X-Moemoa-Operation":PUB,"X-Moemoa-Consent":"TEST_ONLY"};
 const post=(base,bytes=source,extra={})=>fetch(`${base}/api/public-image`,{method:"POST",headers:{...headers,...extra},body:bytes});
 const getUrl=(base,variant="thumb")=>base+publicImageUrl(PUB,ID,variant);
+
+test('explicit own creation passes exact uploaded hash; unsupported rights never reserve',async()=>{
+  const h=harness(); await withServer(h,async base=>{
+    const unknown=await post(base,source,{'X-Moemoa-Rights':'ANIME_SCREENSHOT'});
+    assert.equal(unknown.status,409); assert.equal(h.state.reservations,0);
+    const wrong=await post(base,Buffer.from('different image'),{'X-Moemoa-Rights':'USER_ORIGINAL'});
+    assert.equal((await wrong.json()).error,'SOURCE_IMAGE_MISMATCH'); assert.equal(h.state.reservations,0);
+    const response=await post(base,source,{'X-Moemoa-Rights':'USER_ORIGINAL'});
+    assert.equal(response.status,200); assert.equal(h.state.declaration.p_source_hash,imageHash(source));
+    assert.equal(h.state.declaration.p_representation_id,null); assert.equal(h.state.ready,true);
+  });
+});
+test('explicit private-copy declaration binds rendition without sending original bytes',async()=>{
+  const privateInput=await sharp(source).webp().toBuffer();
+  const h=harness({privateInput,privateSourcesEnabled:true}); await withServer(h,async base=>{
+    const response=await post(base,undefined,{'X-Moemoa-Rights':'USER_ORIGINAL','X-Moemoa-Private-Representation':PUB,'X-Moemoa-Representation-Hash':imageHash(privateInput)});
+    // post's default body is intentionally rejected for the private-copy route.
+    assert.equal((await response.json()).error,'INVALID_BINARY_BODY');
+    const valid=await post(base,Buffer.alloc(0),{'X-Moemoa-Rights':'USER_ORIGINAL','X-Moemoa-Private-Representation':PUB,'X-Moemoa-Representation-Hash':imageHash(privateInput)});
+    assert.equal(valid.status,200); assert.equal(h.state.declaration.p_source_hash,null);
+    assert.equal(h.state.declaration.p_representation_hash,imageHash(privateInput)); assert.equal(h.state.ready,true);
+  });
+});
+test('client only sends own-creation declaration after explicit image consent',async()=>{
+  const requests=[];
+  const args={sourceAssetId:ID,sourceVersion:1,operationId:PUB,accessToken:'test-token',policyRevision:'TEST_ONLY',
+    rightsBasis:'USER_ORIGINAL',readOriginal:()=>new Blob([source]),fetchImpl:async(url,options)=>{requests.push(options); return {ok:true,json:async()=>({id:ID,state:'READY'})};}};
+  await assert.rejects(prepareSelectedPublicImage(args),{code:'IMAGE_CONSENT_REQUIRED'}); assert.equal(requests.length,0);
+  await prepareSelectedPublicImage({...args,consented:true}); assert.equal(requests[0].headers['X-Moemoa-Rights'],'USER_ORIGINAL');
+  await prepareSelectedPublicImage({...args,consented:true,rightsBasis:'EXISTING_APPROVAL'}); assert.equal(requests[1].headers['X-Moemoa-Rights'],undefined);
+});
 
 const reviewHeaders={Authorization:'Bearer test-token','X-Moemoa-Review-Hash':'a'.repeat(64),
   'X-Moemoa-Review-Policy':'TEST_ONLY_CONTENT','X-Moemoa-Review-Revision':'1'};

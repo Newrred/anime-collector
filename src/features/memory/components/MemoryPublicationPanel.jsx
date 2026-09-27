@@ -15,6 +15,7 @@ import { privateImageTransfer, privateImageUiEnabled } from '../runtime/platform
 function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
   const [file, setFile] = useState(null);
   const [consented, setConsented] = useState(false);
+  const [rightsBasis, setRightsBasis] = useState('');
   const [privateChoice, setPrivateChoice] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState(false);
   const canChoosePrivate = privateImageUiEnabled() && import.meta.env.PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1 === '1';
   const activeRequest = useRef(null), objectUrl = useRef(null);
@@ -46,10 +47,14 @@ function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
       {loading && <p role="status">{copy.loading}</p>}
       {error && <p role="alert">{copy.privateUnavailable}</p>}
       {privateChoice && <MemoryVisual visual={{ kind: 'IMAGE', src: privateChoice.src, alt: copy.privatePreview }} />}
+      <label>{copy.rightsLabel}<select aria-label={copy.rightsLabel} value={rightsBasis} disabled={busy || loading} onChange={(event) => { setRightsBasis(event.target.value); setConsented(false); }}>
+        <option value="">{copy.rightsChoose}</option><option value="USER_ORIGINAL">{copy.rightsOriginal}</option><option value="EXISTING_APPROVAL">{copy.rightsApproved}</option>
+      </select></label>
+      {rightsBasis === 'USER_ORIGINAL' && <p>{copy.ownCreationHelp}</p>}
       <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || loading || (!file && !privateChoice)}
         onChange={(event) => setConsented(event.target.checked)} />{privateChoice ? copy.privateConsent : copy.imageConsent}</label>
-      <button type="button" className="btn btn--subtle" disabled={busy || loading || (!file && !privateChoice) || !consented}
-        onClick={() => controller.upload({ cardId, file, privateRepresentation: privateChoice && {id:privateChoice.id,hash:privateChoice.hash}, consented })}>{copy.upload}</button>
+      <button type="button" className="btn btn--subtle" disabled={busy || loading || (!file && !privateChoice) || !consented || !rightsBasis}
+        onClick={() => controller.upload({ cardId, file, privateRepresentation: privateChoice && {id:privateChoice.id,hash:privateChoice.hash}, consented, rightsBasis })}>{copy.upload}</button>
     </>}
   </div>;
 }
@@ -103,7 +108,8 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
     {state.phase === "imageReady" && <p role="status">{copy.imageReady}</p>}
     {state.phase === "cardRevoked" && <p role="status">{copy.cardRevoked}</p>}
     {publication?.hidden && <p role="status">{publicationError("PUBLICATION_RESTRICTED", locale)}</p>}
-    {publication?.hasPublished && !publication.hidden && <div role="status"><p>{copy.published}</p>
+    {publication?.hasPublished && !publication.hidden && publication.visible === false && <p role="status">{copy.notVisible}</p>}
+    {publication?.hasPublished && !publication.hidden && publication.visible !== false && <div role="status"><p>{copy.published}</p>
       {publication.sourceChanged && <p>{copy.changed}</p>}
       <a href={publicationLink(publication.id, base)} data-astro-reload>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
     {publication?.state === "REVOKED" && <p role="status">{copy.revoked}</p>}

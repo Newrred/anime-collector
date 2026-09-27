@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-27",
+  "decision": "GENERAL-PUBLIC-POSTMODERATION-01",
+  "work": ["W08", "W09", "W11", "W14", "W19"],
+  "baseCommit": "4ead72b10ae384145c7da9261b7eb15c2a034fa7",
+  "workingTreeDirty": true,
+  "status": "LOCAL_PARTIAL_VERIFIED_NOT_HOSTED_OR_RELEASE_READY",
+  "migration": {
+    "path": "supabase/migrations/20260927042334_memory_general_postmoderation.sql",
+    "sha256": "dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2",
+    "createdWith": "node_modules/.bin/supabase.cmd migration new memory_general_postmoderation",
+    "remoteApplied": false,
+    "default": "general_publication_policy_revision=UNCONFIGURED; existing public flags unchanged",
+    "rollback": "Keep public closed or reset general_publication_policy_revision to UNCONFIGURED to restore exact GENERAL pre-review reads. Preserve new consent fields, audit, assets and quota. Both disposable clusters stopped through runner EXIT traps."
+  },
+  "documentsRead": ["AGENTS.md", "CODEX_START_HERE.md", "PLANS.md", "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md", "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md", "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md", "docs/moemoa/09_CHANGE_CONTROL_AND_REPORTING.md", "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md", "docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md", "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"],
+  "sourceEvidence": [
+    "supabase/migrations/20260926140122_memory_content_review.sql:94-105,150-162,271-325: old pre-review readers and reusable moderator queue",
+    "supabase/migrations/20260923182210_memory_publication_source_status.sql:18-42: owner publication status",
+    "src/features/memory/application/createPublicationController.js:64-70: preserve server visibility",
+    "src/features/memory/components/MemoryPublicationPanel.jsx:105-111 and MemoryMinihome.jsx:38-40: availability UI",
+    "src/features/memory/components/publicationCopy.js and minihomeCopy.js: general-only consent",
+    "src/features/memory/components/MemoryContentReview.jsx and MemorySafety.jsx: mature content is unavailable, not an adult verification offer"
+  ],
+  "runs": [
+    {
+      "command": "wsl -d Ubuntu -u postgres -- env PG_BIN=/usr/lib/postgresql/16/bin POSTMODERATION_ONLY=1 bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+      "exitCode": 0,
+      "newAssertions": 33,
+      "scope": "Real disposable PostgreSQL RPCs and roles, synthetic auth/rights/derivative metadata. Runs baseline publication/image regressions plus general postmoderation without backup restore or identity tests.",
+      "log": ".cache/general-postmoderation-sql.log",
+      "newVerified": ["default inactive and no retroactive old-operation consent", "exact preview and policy required", "consented board/home visible without administrator GENERAL review", "full/thumb resolver follows visibility", "unreported content stays in moderator queue", "MATURE/BLOCKED hide metadata, embedded board and image resolutions", "owner visibility status false after classification", "same target title edit and republish cannot bypass negative review", "negative review remains effective with old hash/policy", "moderator GENERAL re-review restores eligibility", "kill switch, policy mismatch, rights revocation and owner withdrawal remain effective", "original metadata, operation and quota unchanged", "owner cannot forge consent or invoke private publisher"]
+    },
+    {
+      "command": "wsl -d Ubuntu -u postgres -- env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/private-images/run-local-postgres.sh",
+      "exitCode": 0,
+      "assertions": 49,
+      "scope": "All formal migrations in a fresh disposable DB, 47 private-media checks and 2 concurrent reservation checks. No identity prototype flags or hosted restore.",
+      "log": ".cache/general-postmoderation-fresh-schema.log"
+    },
+    {
+      "command": "npm run test:unit (Node 24.19.0 from .cache/activate.ps1)",
+      "exitCode": 0,
+      "passed": 394,
+      "log": ".cache/general-postmoderation-unit.log"
+    },
+    {
+      "command": "npm run build (Node 24.19.0)",
+      "exitCode": 0,
+      "pages": 19,
+      "log": ".cache/general-postmoderation-build.log"
+    },
+    {
+      "command": "$env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:4393'; node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --workers=1 --reporter=line",
+      "exitCode": 0,
+      "passed": 30,
+      "skipped": 1,
+      "skipReason": "Private-copy preparation requires PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1=1; not enabled in this run.",
+      "scope": "Actual React/browser and synthetic Auth/RPC/Storage adapters. New case verifies unavailable owner status with no visit/copy link for both board and home. Existing public consent, review, moderation inbox, retry and withdrawal cases run as regression.",
+      "firstAttempt": "Development server readiness deadline exceeded before tests. Build succeeded; restarted run passed. No product test failure suppressed.",
+      "log": ".cache/general-postmoderation-browser.log",
+      "screenshotInspected": ".cache/general-postmoderation-owner-status.png"
+    }
+  ],
+  "securityPrivacyRights": "Server-only consent hashes/policy stored on existing private RLS tables; authenticated owner APIs only; old private entry points revoked. No new private image uploads, raw data logging, adult eligibility or fake GENERAL/rights grants. Existing trusted source/representation rights remain required.",
+  "notVerified": ["hosted Auth/PostgREST/Storage plus new migration", "actual image bytes through new policy on Vercel/CDN", "real mobile devices", "general image rights self-confirmation replacing existing trusted approval", "cross-publication duplicate-image moderation as a global content fingerprint ban", "hosted Supabase advisors", "production readiness"],
+  "externalGates": ["D01 exact test migration/configuration candidate", "D04 rights and age12 guardian/country policy", "D03 costs/alerts", "D05 external backup", "D06 exact production release approval"],
+  "nextOne": "W08: finish the ordinary-image rights confirmation path without manufacturing trusted approvals or weakening separate screenshot/third-party fanart gates; then prepare the exact hosted general-publication test candidate.",
+  "remoteChanges": 0,
+  "productionDeployment": false,
+  "commitOrPush": false
+}

@@ -1,6 +1,45 @@
 # MOEMOA · 단일 출시 작업판
 
-**2026-09-27 Pro 인계 커밋:** 현재 전체 변경과 문서를 기본 브랜치 master에 보존하는 사용자 요청. [최신 검토 안내](../reports/2026-09-27-pro-release-progress-review.md). 아래 미커밋/120경로 표시는 커밋 전 감사 시점 이력이며, 최신 소스는 이 인계 문서를 포함한 커밋이다. 출시/운영 승인이 아니며 구현 일시정지는 유지한다.
+## 현재 요약 — 일반 공개·사후 검토로 범위 축소 (2026-09-27)
+
+- 범위: Web-only·무료 최적화 이미지 연동·일반 이미지 공개·신고/관리자 사후 검토. 성인 인증·성인 이미지 공개는 보류(`GENERAL-PUBLIC-POSTMODERATION-01`). 기존12세 목표·KR/PH/TH·새 날짜 미정 유지.
+- 활성 작업: 사용자 승인 후 moemoa-test에 후보3개 적용, 실제 HTTP/Auth/RPC/Storage 공개 한 바퀴28검사+정리4검사 PASS 및 설정/권한/사본 원복 완료. 최신 제품 UI13+정리4도 PASS. 실휴대폰용 정확한 test 배포후보 준비로 이동. 성인 인증/Android 추가 구현 제외.
+- 기준: local master/원격 검토 브랜치4ead72b, 원격master06d2e38. 운영 사이트는 이번 미조회.
+- 충분한 근거: 과거 일반 공개/두 origin private, 최신 unit394/build19·viewer4·SQL143. 숫자 합산 금지.
+- 실제 잔여: 새 후보의 실휴대폰/OAuth/CDN 및 전체 제품UI 조합,12세 목표의 보호자/국가별 개인정보 조건·별도 이미지 권리 조건, 외부 백업/경보·최종RC. 성인 공급자 계약은 차단 목록에서 제외.
+- 다음1개: 실휴대폰 검증에 쓸 정확한 Web-only test 배포후보를 준비한다. 이번 loopback 제품UI PASS를 실폰/Google OAuth/운영CDN PASS로 확대하지 않는다.
+- 현재 실행 지시는 아래 작업 카드 하나. 접힌 이력의 ‘다음 작업’은 자동 실행하지 않는다.
+
+### 이번 검토 결과와 한계
+
+- 9/27 제품 Web UI+실제 test backend 검증13항목 및 정리4항목 PASS. 원본/동기화 사본 명시선택·권리확인·준비→preview동의→게시→새 익명2이미지 decode→철회,390px 가로넘침없음. 첫2회는 fixture 동기화 목록 누락으로 보드 미표시; 테스트 생성기 수정 후 통과. 정리도구가 유예시간 동안20초 요청제한을 소진해503 두 번 발생, 각각 재시도 후 원복 확인; 별도 모형 재현과 도구수정으로 기록하며 서버장애로 단정하지 않는다. 제품 추가수정/신규migration/운영변경0. [이번 증거](evidence/2026-09-27-general-public-hosted-ui.json). 실폰/OAuth/CDN 및 이 실행의 미니홈/관계/운영자 전체UI는 미검증.
+
+- **실제 test 적용/검증 완료:** 사용자 “적용 및 진행” 승인으로 후보3개를 순차 적용(원격 migration 버전 `20260927053858/20260927053904/20260927053914`, 적용 총25개). 원본·최적화 사본의 별도 관리자 승인 없는 명시 확인 준비→같은operation READY→preview→옛 hash 거부→새 동의 게시→새 익명 실제96×64 이미지86/88bytes→미니홈→B팔로우/재방문·신고/차단→A MATURE 분류/direct URL404·재게시거부→신고HIDE/감사→철회28검사 PASS. 파일물리삭제/예약0·권리철회/합성카드정리·임시운영자제거/기존home복원·설정동일복원4검사 PASS. [실행 증거](evidence/2026-09-27-general-public-hosted.json). 실제 backend이며 HTTP는 loopback, 제품UI/실폰/Google OAuth/VercelCDN 미검증. 코드 추가수정0·운영/commit/push0. 아래 승인 대기/원격쓰기0는 사전 준비 이력이다.
+
+- **D01 읽기 전용 대조:** moemoa-test ACTIVE_HEALTHY, 적용22/로컬25개. content-review/general-postmoderation/self-declared-rights3개 미적용을 이력과 실제 schema로 확인했다. 공개·private 기능off, 공개 보드/미니홈·운영자·활성 권리·미정리 공개 사본0, 양쪽 bucket 비공개. private client grants0·노출 definer search_path 누락0. advisors INFO23/WARN46은 기존 RPC 경계/비밀번호 보호 알림이며 전부 해결됐다는 판정 아님. [후보/hash/실행·원복 근거](evidence/2026-09-27-general-hosted-preflight.json), 기존 ExecPlan에 정확한 범위 작성. 신규 사용자 행동PASS0·원격쓰기0. 기본 연결/A·B/72table 복원 재검증0.
+
+- **W08 최신 후속:** `20260927044435_memory_self_declared_image_rights.sql`과 UI/HTTP 연결. 본인 창작은 `SELF_DECLARED`로 원본 hash/사본 ID/hash/정책에 결속하고 trusted 승인·철회는 보존한다. 새 로컬 SQL29 검사(집계표28+savepoint rollback 내 trusted 보존1), HTTP 신규3 포함unit397·build19·새 schema private49 PASS. 브라우저 첫 전체 실행29 PASS/2 FAIL(선택란 접근성 이름 및 테스트 flag 설정), 이름 보완/정확한 flag 후 원본·사본 대상2 PASS. Auth/RPC/Storage 합성이며 hosted PASS 아님. [이번 근거](evidence/2026-09-27-self-declared-image-rights-local.json). 원격/commit/push/배포0. 아래 ‘trusted 권리 경로 남음’은 직전 변경 당시 기록이다.
+
+- **최신 실행 결과:** 추가 migration `20260927042334_memory_general_postmoderation.sql`, 서버 소유 snapshot/정책 동의·옛 operation 미승격, 일반 게시/익명 읽기·MATURE/BLOCKED 사후 차단·작성자 visible 상태를 구현했다. 보드/home 확인 문구와 실제 노출 중지 안내도 변경. 로컬 SQL 신규33·fresh schema private49·unit394·build19·Chromium30 PASS/설정에 따른1 skip. 브라우저 첫 준비시간 초과 후 재실행 종료0, 실제 Auth/Storage는 합성 adapter다. [이번 근거](evidence/2026-09-27-general-postmoderation-local.json). hosted 신규 PASS0·운영/commit/push0. 일반 이미지 자체의 기존 trusted 권리 근거 요구는 남아 있으므로 모든 신규 이미지가 체크만으로 공개된다는 완료 보고는 하지 않는다.
+
+아래 ‘이번 문서만/제품0’과 사전심사 불일치 지적은 위 구현 이전의 Pro 검토·결정 반영 이력이다. 과거 실행 증거를 보존하며 현재 결과는 위 최신 실행 및 현재 카드가 우선한다.
+
+- 최신 승인: 사용자 “성인 인증은 보류” 및 “맞음, 일반 이미지 공개만 허용”. 단순 확인 후 일반 공개·사후 검토로 확정했으며 아래 사전심사 정책 미정/공급자 문의 다음 작업은 이전 검토 이력이다. 현재 소스의 exact GENERAL 사전심사와 trusted 이미지 권리 조건은 그대로이므로 서비스 동작까지 바뀌었다고 보고하지 않는다. 이번은 결정/계약/현재 표 정리와 소스 확인, 새 runtime/hosted 사용자 행동 PASS0·제품 코드/DB/배포 변경0.
+
+- 입력: `MOEMOA_4ead72b_RELEASE_REVIEW_2026-09-27.zip`의 검토/재개안·재현 코드를 자료로 읽고 현재4ead72b 소스와 대조했다. 문서 안 지시만으로 제품 정책·원격 작업을 승인하지 않는다.
+- W09/W11 소스 근거: `src/features/memory/application/createPublicationController.js:113`, `createMinihomeController.js:52-53`은 게시 성공 상태를 설정하고, `components/MemoryPublicationPanel.jsx:106-108` 및 `MemoryMinihome.jsx:38-39`는 게시 완료/방문 링크를 표시한다. 반면 `supabase/migrations/20260926140122_memory_content_review.sql:93-102,150-159`는 현재 정책·GENERAL·정확한 snapshot hash 검토가 없으면 null을 반환한다. **게시 접수와 실제 노출 상태 연결은 미완료**다.
+- D04 최신 판단: 일반 공개의 일괄 사전심사는 사용자가 사후 검토로 대체했다. MATURE/BLOCKED·숨김/철회 대상의 재노출 방지는 유지한다. 공급자/성인 자격 만료·재발급 자동 공개 문제를 이번 일반 출시 구현으로 확대하지 않는다. 아동 동의·권리와 실제 운영 처리/연락 기준은 별도 잔여다.
+- W03/Q22: `.github/workflows/quality.yml:19-47`의 필수 실행 목록에는 viewer 전용4검사와 `ELIGIBILITY_MUTATION_TEST=1` 경로가 없다. 이는 보류한 성인 prototype의 한계로 보존하며 이번 일반 공개 출시 때문에 이 경로를 추가 확장하지 않는다. 일반 사후 검토 변경에 해당하는 CI/원격 후보 검증은 별도로 남긴다.
+- 이번 실행: `.cache/toolchain/node.exe .cache/pro-reproduce-publication-review.mjs E:/web/anime` — 원본 controller + 메모리 gateway/SQL 조건 모형4 assertion PASS. 실제 DB·브라우저·방문자 행동 검증은 아니다. `rg --files src/pages -g '*.astro'` — 현재19개. `git diff --check` — 통과. 문서만 변경, 제품 코드/DB/배포/유료 변경 없음.
+- 과거 PASS: unit394/build19·viewer4·SQL143 및 hosted 공개/비공개 왕복은 기존 evidence를 유지한다. 이번 실제 사용자 행동 신규 PASS는0. [기존 공급자 문의](../operations/2026-09-26-identity-provider-inquiry.md)는 미발송·보류, 현재 다음 작업이 아니다.
+
+- 9/27 범위 축소 반영 검사: 결정/진입 문서·기존 ExecPlan/C계약·현재 W/D/Q·UGC 명세·미발송 문의 초안을 갱신했다. `git diff --check` 통과(줄바꿈 자동 변환 안내만 있음). 기존 M/W/C/Q/D 번호와 과거 실행 근거 보존. 앱 테스트/실제 사용자 행동은 새로 실행하지 않았으며 문서 통과를 출시 PASS로 세지 않는다. 운영 DB/flags·commit/push·배포·문의 발송0.
+
+
+<details>
+<summary>2026-09-27 중단·커밋 전 감사 이력 (현재 실행 지시 아님)</summary>
+
+**2026-09-27 Pro 인계 커밋:** 당시 전체 변경과 문서를 기본 브랜치 master에 보존한 사용자 요청. [검토 안내](../reports/2026-09-27-pro-release-progress-review.md). 아래 미커밋/120경로 표시는 커밋 전 감사 시점 이력이다. 이후 사용자 재개 및 현재 범위는 위 요약을 따른다.
 
 ## 2026-09-27 사용자 요청 진행 검토 및 일시정지
 
@@ -23,7 +62,13 @@
 
 **로컬/Git 확인:** HEAD06d2e38d79d38c66753f0ec25a21b615bdc5fa60, 현재 git status120개 경로 변경(이번 작업만의 파일 수 아님). 이후 구현은 미커밋·미배포다. 운영 동일SHA/READY는 과거 배포 근거이며 이번 검토에서 운영을 다시 조회하지 않았다. 별도 새 계획/진행판 없음.
 
+
+</details>
+
 문서 역할: **진행 상태의 유일한 원장**. 2026-09-23 M0 기준점 확인 완료. 앱 기능 구현 완료와 문서 이관을 구분한다.
+
+<details>
+<summary>2026-09-26~27 실행 기록 (과거 다음 작업은 이력)</summary>
 
 ## 2026-09-26 최신 승인 — 12세 이용·성인 영역 및 일정 조정
 
@@ -90,6 +135,9 @@
 - 합성 파일만 사용, 원격 연결/운영 migration/배포0. Public/private 복구 설정은 최종off, 미정산 삭제 용량 임의해제0. 과거 hosted/제품UI/빌드 PASS는 이번 재실행 아님. [실행 증거](evidence/2026-09-26-private-recovery-local.json).
 - W17 DOING, D05 PARTIAL 유지: 지속적인 최신 journal 수집·암호화 외부보관·보존/RPO/RTO·hosted Storage/실복구 잔여. 다음1개는 기존 W17 운영 백업 도구의 로컬 보완.
 
+
+</details>
+
 ## 현재 위치
 
 | 항목 | 값 |
@@ -97,13 +145,13 @@
 | 계획 | `MOEMOA_PUBLIC_LAUNCH_PLAN_V2_2026-09-22` |
 | 출시 목표 | 개인 기록 + 계정 + 무료 비공개 최적화 이미지 연동 + 공개 보드/미니홈·팔로우 + 최소 운영 + 12세 이용·성인 영역. 출시 일정 조정 승인, 새 날짜 미확정 |
 | 제품 대상 | 제품 Web+Android 유지. 첫 출시 후보 WEB_ONLY 확정, Android는 Web 개선 후 후속 출시(D02) |
-| 현재 milestone | **실행 PAUSED — M1/W06·M2/W08·M3/W13 새 자격 경계 로컬 검증 마감, 기존 공개 근거 보존. M1~M5 미완료** |
-| 현재 release 상태 | **NOT_RELEASE_READY — private 연동·실기기·운영/후보 승인 및 새 보호자 동의/성인 인증/콘텐츠 접근 경계 미완료** |
-| 현재 본 작업 | **사용자 요청으로 현재 검증까지만 마감·진행 검토 완료. 새 구현 중단. 실제 인증/보호자·가입 전 동의, hosted 새 경계 및 운영 게이트 미완료** |
-| 다음 작업 | **사용자 재개 대기. 자동 다음 구현 없음** |
+| 현재 milestone | **W08/W09/W11/W14 일반 공개·사후 검토 마감. 성인 인증 prototype 보존·동결. M1~M5 미완료** |
+| 현재 release 상태 | **NOT_RELEASE_READY — private 연동 과거 hosted 근거 확보. 사후 검토 변경·보호자 동의·최신 후보 실기기/운영 승인 잔여. 성인 인증은 이번 출시 제외** |
+| 현재 본 작업 | **새 동의 기반 일반 공개·사후 차단 로컬 구현/검증. 신규 일반 이미지의 별도 권리 확인 흐름 및 hosted 미완료** |
+| 다음 작업 | **W08 일반 이미지 권리 확인 경로 마감 후 정확한 hosted 시험 후보 준비** |
 | 작업 repository/branch | `Newrred/anime-collector` / `master` (사용자 승인 간이 Web 배포) |
-| 작업 HEAD / dirty 상태 | **master HEAD06d2e38 운영배포 완료. 이후 CSS·private cleanup API/workflow·quota 안내·회귀검사·문서는 로컬 미커밋·미배포** |
-| 운영 SHA / 후보 SHA | **06d2e38 / dpl_9djJYMHQyxhxVYePuRcT7cYoGX3x / source git / READY, moemoa.xyz build-info 동일 SHA. 빌드 dirty 경로는 vercel.json 하나이며 값 변경 내용은 미조회. 정식 Public RC와 구분** |
+| 작업 HEAD / dirty 상태 | **4ead72b 검토 checkpoint: local master 및 origin/review/pro-progress-2026-09-27. 이번 문서 반영은 미커밋. 원격 master는 06d2e38(9/27 조회)** |
+| 운영 SHA / 후보 SHA | **운영06d2e38/READY는 과거 배포 증거. 이번 운영사이트 재조회 없음. 검토4ead72b는 not RC, 후보 미확정** |
 | 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`). 과거 A/B·REST/Storage·복원/공개왕복 근거 유지. 새로운 합성 private-source 공개본 서버 철회·시험 세션 로그아웃·사본2종 DELETED/객체0·quota0/권리revoked·정책 정확 원복 확인. 이번 UI 철회는 도구 제한으로 미검증. Android 제외 |
 | 완료 milestone | **1/6 — M0만** |
 | 기본 작업 완료 | **4/20 — W01/W02/W04/W05** |
@@ -440,9 +488,9 @@
 | M0 | 현재 위치·범위·다음 작업이 명확함 | DONE | 없음; 미검증 항목은 담당 W로 연결 | 아래 기준점·25개 매핑·결정 로그 |
 | M1 | 기록·계정·복원을 신뢰할 수 있음 | DOING | W03 최신 후보/보호 검증, W06의 승격·기존 캐시 삭제 전파·지원 복원 등 실제 잔여 | 로컬 기록/sync 종료 + 실제 OAuth A/B·별도 origin 왕복·API33·선택 DB 복원 근거; 전체 계약 완료 아님 |
 | M2 | 선택 보드를 타인이 보고 철회할 수 있음 | DOING | 후보 전달환경/다기기 조건 | W08 retry/hosted 게시·익명 이미지 및 owner RPC 철회 PASS; 전체 C/Q 완료 아님 |
-| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | DOING | W13 보드→작성자 연결 및 실제 A/B 게시/팔로우/재방문 | W11~W13 로컬 근거; 기본 OAuth는 확보, 공개 관계 흐름은 별도 |
+| M3 | 미니홈에서 소개하고 팔로우해 재방문함 | DOING | 새 분류·자격/동의가 포함된 최신 후보, 심사대기 안내 및 지원 기기 | 과거 hosted 보드→작성자→B 팔로우/재방문과 대표 선택/철회 근거 확보. 새 정책 통합 PASS 아님 |
 | M4 | 운영자가 조치·제한·갱신·복구함 | DOING | D03~D05 실제 정책/경보/담당/사본·승인 경로·카탈로그 게시/복구 | 로컬 운영 계약·실제 test DB 복원·합성 Storage 사본; 운영 서비스 전체 복구 아님 |
-| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | DOING | W18/W19 공개 한 바퀴·지원 Web 검사·동일 RC CI·D02/D06·배포/운영 확인 | unit320/build18 인계 근거 및 과거 종합 검사; 현재 RC_VERIFIED 아님 |
+| M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | DOING | 새 정책을 포함한 동일 RC·지원 Web/실기기·CI·D06 배포/운영 확인 | D02 Web-only 확정. 과거 공개 왕복 및 최신 로컬 unit394/build19·viewer4·SQL143은 서로 다른 범위;4ead72b는 RC_VERIFIED 아님 |
 
 한 M의 일부 W가 완료되어도 M전체를 DONE으로 바꾸지 않는다. 다음 단계의 독립 작업을 먼저 끝내도 현재 막힌 계약을 숨기지 않는다. M5는 `RC_VERIFIED → READY_FOR_DEPLOY → LIVE_VERIFIED`를 구분한다.
 
@@ -460,24 +508,24 @@
 |---|---|---|---|---|---|---|
 | W01 | M0 | 현재 소스·환경·노출 기능 기준점 | C01,C11 | 없음 | DONE | M0 완료 로그·기준점 참조 |
 | W02 | M0 | 출시 결정 반영·이전 지적 정리 | C01–C12 | W01 | DONE | M0 완료 로그·기준점 참조 |
-| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 기존 CI/health·로컬 SW 증거 유지. 최신 정확한 RC의 checks/보호·실제 경보·운영 dirty 원인만 잔여(D03/D06). 검토 브랜치 push를 PASS로 간주하지 않음 |
+| W03 | M1 | CI·health·빌드/SW 검증 기반 | C10 | W02 | BLOCKED_EXTERNAL | 06d2e38 간이 Git배포/CI/provenance 근거 확보.4ead72b는 검토 checkpoint. 일반 공개 후보의 변경 경계 required CI·보호·실제 경보 잔여(D03/D06). 성인 viewer/eligibility 통합은 이번 후보 제외, 과거0330a54 dirty 문제와 현재 상태 구분 |
 | W04 | M1 | 기존 기록의 취소·저장·복귀 마감 | C01,C11 | W02 | DONE | 제목/보드 dirty·QuickLog 닫기·저장 실패/경합·출발점/필터/스크롤 복귀 검증; 종료 기록 참조 |
 | W05 | M1 | 계정 동기화 완료·재개 계약 | C02 | W03 로컬 검증 | DONE | 로컬 sync 계약 구현·unit269/browser26/build PASS; 실제 A/B·기기 및 서버 한도는 W06/W15/W19 |
 | W06 | M1 | 계정 격리·승격·private 이미지 연동 | C01,C02,C10 | W04, W05 | DOING | 실제 private HTTP/Auth/Storage 및 원본 없는 두 제품 UI origin Archive/detail/Board 왕복 PASS. 기존 로컬 재시도/계정격리 근거 보존. 실휴대폰↔PC·교체 quota·private bytes 복구·최종 환경 만료/지원 조합 잔여. 기본 A/B·키·72table 복원 반복 금지 |
 | W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | VERIFY | hosted 실제 A 게시·익명 읽기 및 소유자 RPC 철회 PASS. 운영 Public은 off. 전체 역할·갱신/기존 캐시/기기 조합은 W19 잔여 |
-| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 원본hash 유지·사본별 trusted 권리 결속, 실제 hosted 공개 준비/동일operation/owner preview/게시/익명96×64·90bytes/권리철회404 PASS. private 사본만 삭제하면 별도 승인된 Public 유지. 이번 HTTP/SDK와 이전 UI 검증 구분. 실제 공개 UI의 private-source 최종 조합·실휴대폰·교체 quota/복구·운영 후보/CDN/정책 잔여 |
-| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 실제 UI 선택/preview/게시 및 작성자 저장소 없는 새 origin 이미지 decode PASS. image intake fixture는 합성 adapter로 준비; Web 가져오기/Android PASS 아님. 확인창·전달 후보 환경 잔여 |
+| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
+| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
 | W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
-| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 실제 UI 보드 선택/닉네임/미니홈 게시 및 익명 읽기, 실제 owner RPC 철회 PASS. 대표 선택/정렬/소개·확인창 전체 조합 잔여 |
+| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
 | W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | B 실제 신고·차단/해제, A 실제 JWT HIDE/RESTORE·제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부·감사8건 PASS. 운영 조치는 진단 버튼→기존 RPC. 정책/담당·별도 운영 역할 D04/D05 잔여 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | private 계정/물리량·예약/변환·준비·월 전송 한도 및 병렬 검사 로컬 PASS. 작은교체 실제 quota 거부/수동정리 후 동일operation 복구 PASS. 자동 private 정리 API/기본off workflow·대기 가능성 UI 구현/검증. nonempty endpoint실제 검증완료. 실제 스케줄 기동·합산 예산/정책 감사 잔여. 기존 서버 자원/한도 로컬 SQL 근거 유지. 실제 정상 부하·우회/429·정지 검사는 승인된 test에서 진행 가능. 운영 수치·예산·경보 수신 D03 및 보존 D05 잔여 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 기존 hosted5schema72table·합성공개60bytes 복원 근거 유지. private 사본bytes/manifest 로컬 복원15PASS: 정상 파일 decode·최신card fence/취소state 재적용·삭제본 제외. hosted Storage 복구 및 운영 암호화/journal 수집은 잔여. 실제 운영 사본위치/보존·복구목표·담당 승인 D04/D05는 별도 외부게이트 |
-| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 18 route/action·기존 Chromium 증거 재사용. W08/W13 변경과 활성 Public 화면의 성공/실패/취소/권한/복귀, 지원 Web·사람 검증만 영향 범위 확인. Android 자동 선행조건 금지 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 과거 hosted72table 및 로컬 private15검사 이후 암호화 복구17/path-hardening 근거까지 확보(Q20과 동일). 외부 Storage/canonical 사본·키보관·지속 journal·운영 복구목표/실복구 D05 잔여. 기본 복원 재구축 금지 |
+| W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 현재 Astro route19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 만료/복귀/후보 endpoint 조합 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | BLOCKED_EXTERNAL | bbff3d4 검토 커밋은 RC 아님. 과거 null 후보는 거부용 원본 보존. 최신 후보/CI/provenance/migration 매핑/catalog·설정·rollback·D02/D06 잔여. 앱 배포나 모든 gate 승인 없음 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | BLOCKED_EXTERNAL | 0330a54/bbff3d4는 과거,06d2e38은 간이 운영배포 근거,4ead72b는 최신 원격 검토 checkpoint·not RC. 동일 후보 CI/DB/catalog/policy/flags/rollback 및 D06 승인 미완료. 과거 거부용 null 후보 보존 |
 
 ### 작업 수의 변화와 진행률
 
@@ -486,14 +534,15 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-ID / M: W06/W08/W13 / M1·M2·M3 — 실행 PAUSED, W 종료 아님
-이미 동작: 기본 기록/private 이미지·공개 한 바퀴의 과거 hosted 근거 보존.
-최근 변경: identity/용도별 자격 local prototype, 게시/기존 공개 읽기/성인 reader·이미지·client 계정전환 경계.
-이번 새 PASS: 저장·승격 대기 만료 rollback2 포함SQL/HTTP143. 직전unit394/build19·viewer browser4와 범위 구분.
-미완료: 실제 인증업체·국가정책·보호자 관계/가입 전 동의·자격발급/철회 운영경로, 새경계 hosted, 실휴대폰, 운영 백업/경보 및 정확한 RC.
-다음 1개: 사용자 재개 대기. 새 구현 자동 진행 금지.
-D01: 테스트 승인은 확보, 종료 flags/역할/권리 원복. 이미 받은 권한/키 재요청 금지.
-D02: 첫 Web-only 후보 확정. D03~D06 운영값/담당·정책/보존·정확한 후보 승인 잔여. Android 후속 출시.
+ID / M: W08/W09/W11/W14 일반 공개·사후 검토
+이번에 닫을 행동: 확인·preview 동의 후 일반 게시→새 익명 열람→관리자 사후 차단.
+충분한 기존 증거: private 두 origin·일반 공개 한 바퀴·로컬 unit394/build19/viewer4/SQL143. 새 인증 hosted PASS 아님.
+이번 변경: 기존3개test migration을 사용하는 제품UI13+정리4 PASS 추가. 첫2회 fixture 실패 및 정리503 재시도 이력 보존. 제품 추가수정0. flags/정책/사본 원복, DB 구조는 test에 유지, 운영0.
+구현 잔여: 실기기/OAuth/CDN 및 전체 제품UI 조합. 자기 확인은 이미지 자동 분류/진짜 저작권 검증이 아니다. 캡처·타인 팬아트 별도 gate. 과거 local/unit/모의UI와 이번 actual backend PASS를 구분한다.
+진짜 외부 잔여: 12세 목표 보호자/국가 조건·별도 이미지 권리 운영, 외부 백업·키/경보 및 최종RC. 성인 공급자 계약은 제외.
+다음 행동1개: 실휴대폰용 정확한 Web-only test 배포후보 준비(운영D06 별도).
+새 연령 구현: prototype 보존·동결. 이번 후보에 성인 인증/업체/추가guard·반복race를 통합하지 않는다.
+D02 Web-only 유지, Android 후속. D01 test migration 승인/적용/원복 완료. D06 정확한 운영 후보 승인은 별도.
 ```
 
 이 카드는 적용 시 현재 코드·증거에 맞춰 갱신한다. 이미 W08이 해결돼 있다면 중복 수정하지 않고 관련 실제 검증으로 이동한다. 긴 출력은 기존 evidence를 참조하고 진행판을 또 만들지 않는다.
@@ -619,10 +668,10 @@ NA 이유:
 
 | ID | 필요한 결정 | 상태 | 현재 기본안/대기 중 행동 | 마지막 필요 시점 | 실제 승인/증거 |
 |---|---|---|---|---|---|
-| D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / PUBLIC_FLOW_PARTIAL_VERIFIED | 테스트 한정 임시 활성/합성 권리/A 운영자 사용자 승인 확보. 실제 공개 흐름 실행 후 flags/한도/정책/역할 원복; 키·기초 환경 재요청 금지 | hosted 만료·후보 전달환경의 남은 조합만; 다중카드/동시성/정책·권리 및 image quota 실제 증거 확보 | [이번 실행 증거](evidence/2026-09-25-review-apply-public-flow.json); 운영 Public 승인 아님 |
+| D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_CANDIDATE_APPLIED_RESTORED | 기본 A/B·키·기존 공개 검증 및 원복 증거 확보. 재요청 금지 | 사용자 승인 후 test-general-public-20260927-01의 SQL3개 적용/실제backend28+정리4 PASS. flags off·정책/기존home복원·운영자0·생성객체/예약0 확인. 제품UI/실폰은 별도 잔여 | general-public-hosted JSON / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
-| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / TEST_MEASURED | 월50,000원 추가 운영비 목표 유지,50MB/1MB 후보. 테스트 필요 시 가동 방향9/26 승인. 실제 Pro 결제/일시중지 없음. 새 성인/보호자 인증 공급자 자격·비용, 전송/전역 한도·경보 잔여 | 유료/공급자 변경 미승인 | 최상위 TEST-ON-DEMAND-01 및 기존 비용 증거 |
-| D04 | 운영주체/정책/권리·연령/지원 | SCOPE_CONFIRMED / POLICY_IMPLEMENTATION_PENDING | 개인 sinong / godburgundy@gmail.com / 하루2~3회. 12세 이용·성인 영역 포함 및 일정 조정9/26 승인. 국가 한국·필리핀·태국 확정, 성인 영역 초기 범위는 비노골적인 성인 취향 일러스트. 보호자 동의·성인 본인확인·국가별 기준·허용표/검토 전 노출·이미지 권리 근거 잔여. 기존 신고/역할 PASS는 새 연령 경계 PASS 아님 | 정책·인증 구현/실검증 전 | 최상위 AGE12-ADULT-AREA-01 / RELEASE-REGIONS-01 / ADULT-CONTENT-SCOPE-01 |
+| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / TEST_MEASURED | 월50,000원 추가 운영비 목표 유지,50MB/1MB 후보. 테스트 필요 시 가동 방향9/26 승인. 실제 Pro 결제/일시중지 없음. 성인 인증 비용/계약은 이번 후보 제외. 전송/전역 한도·경보 및 별도 아동 동의 운영비가 있다면 실제 금액 확인 | 유료/공급자 변경 미승인 | TEST-ON-DEMAND-01 / GENERAL-PUBLIC-POSTMODERATION-01 및 기존 비용 증거 |
+| D04 | 운영주체/정책/권리·연령/지원 | SCOPE_CONFIRMED / POLICY_IMPLEMENTATION_PENDING | 개인 sinong / godburgundy@gmail.com / 하루2~3회.9/27 성인 인증·성인 공개 보류, 일반 이미지의 간단한 확인 후 게시·신고/관리자 사후 검토 확정.12세 목표·한국/필리핀/태국 유지. 보호자/국가별 개인정보·별도 이미지 권리 근거·실제 사후 조치 운영 잔여 | 정책 구현/실검증 전. 성인 공급자 문의 미발송·보류 | GENERAL-PUBLIC-POSTMODERATION-01 / RELEASE-REGIONS-01 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | PROPOSAL_PENDING / PARTIAL_VERIFIED | 기존72table/합성 복원 근거 보존. 매일·7일보관·RPO24h/RTO48h 제안 유지. Google 계열5TB 보유, Drive/One 대 Cloud Storage 확인 대기. 최신 journal 지속수집·암호화 외부보관·실복구 필요 | 서비스/키보관·백업 약속 승인 전 | 기존 복구 증거 및 TEST-ON-DEMAND-01 |
 | D06 | SHA·DB/catalog·flags의 운영 적용 | NOT_REQUESTED | candidate만 검증, 배포·실Public 활성화 금지 | W20 운영 반영 전 | 없음 |
 
@@ -656,7 +705,7 @@ NA 이유:
 
 | Q | 자동 검증 | 필요한 실제 환경 검증 | 증거/commit/담당 | 미해결 |
 |---|---|---|---|---|
-| Q01 | LOCAL PASS + 실제 일부 / PRIVATE SYNC 미완료 | Web/동일 계정 별도 origin의 합성 카드 복원·수정 | 기존 tests + 9/24 실제 기록 왕복 로그 | 동일 RC의 해당 기능 회귀; Android 이번 실행 제외, D02 후보 구분 |
+| Q01 | LOCAL PASS / HOSTED PARTIAL PASS | private 이미지 실제 두 origin 복원·수정·Archive/detail/Board 왕복 근거 확보 | 9/26 private-image-hosted-ui 및 기존 tests | 실휴대폰↔PC·최신 후보·새 자격/동의 미검증. Android 첫 후보 제외 |
 | Q02 | LOCAL PASS | Web 기존 편집 흐름 | release-editing/service-finishing | 지원 Web의 미실행 입력/키보드 조건; Android 이번 실행 제외 |
 | Q03 | LOCAL PASS + 실제 일부 | 실제 A/B 분리·기록 왕복 | memory-account-sync/owner-boundary + 9/24 최신 로그 | 지연/중복/전환의 실제 미실행 조합과 최신 영향 회귀 |
 | Q04 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 보드→작성자 home→B 팔로우/내목록 재방문 | public-flow JSON, auth-return JSON | 실제 만료/거절 후 공개 복귀·최종 후보 경로 |
@@ -677,9 +726,9 @@ NA 이유:
 | Q19 | LOCAL PASS / HOSTED PARTIAL | 실제 handler 병렬 image 준비 성공1/QUOTA1, DB active1/정리0. hosted rollback-only daily/override만료/정지 PASS | w19-rights-quota / w19-current-regression JSON + W15 기존 evidence | 실제 HTTP429·경보 수신/담당 및 D03 운영 수치·예산·후보 결속 |
 | Q20 | PARTIAL_VERIFIED | 과거 hosted5schema72table 복원 보존. 로컬 private main/thumb·최신삭제정보 재적용 및 DB dump/journal/WebP 암호화 격리 복원17PASS, 백업 경로충돌 생성/복원 거부 검증 | 기존 복구 JSON + 9/26 encrypted-backup-and-catalog-repair / backup-path-hardening JSON | 운영 Storage/canonical 외부 사본·지속 journal·키보관·RPO/RTO·실복구 잔여. 플랫폼 전체 복원 아님 |
 | Q21 | LOCAL PARTIAL | catalog256·전환/rollback SQL | W16 validation JSON | 실제 canonical/bytes 후보 검증·승인 게시→복구/health |
-| Q22 | LOCAL PARTIAL | 기존 운영 SHA 관찰만 | 기존 CI/health + 0330a54 제공 기록 | 최신 RC checks/배포 보호·dirty 원인·실제 경보. 이번 재조회 아님 |
+| Q22 | LOCAL PARTIAL / PAST_DEPLOYMENT_EVIDENCE | 0330a54 관찰은 과거.06d2e38 간이 Git배포/CI/provenance 제공 근거,4ead72b 검토 checkpoint | 9/26 build-provenance/web-smoke-deployment JSON. 이번 live운영 재조회 없음 | 일반 공개 RC 변경 경계의 required CI·보호·실제 경보. 성인 viewer/eligibility 통합 제외, 과거 검증을 새 정책 PASS로 확대 금지 |
 | Q23 | LOCAL PASS | 로컬 실제 SW·저장소 | service-worker/index | 최종 운영 후보 업데이트/롤백과 공개 캐시 경계 |
-| Q24 | LOCAL PARTIAL | 18 route 지도·과거 Chromium/캡처 | surface audit/당시 browser log | 실휴대폰 Web→PC private 이미지 연동/품질 및 최신 공개/수정 경로의 지원 Web·스크린리더·사람 이해. Android 이번 실행 제외; 최종 후보 D02 |
+| Q24 | LOCAL PARTIAL | 현재 Astro route19(모더레이션 포함), 과거18 route·viewer Chromium4는 각각 별도 범위 | src/pages inventory / 기존 surface·browser evidence | 실제 휴대폰↔PC, 최신후보 지원Web·접근성·사람 이해, 일반 공개 확인/사후 차단 안내. build19를 UX19 PASS로 세지 않음 |
 
 ## route/action coverage 증거 위치
 

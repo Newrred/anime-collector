@@ -1,0 +1,303 @@
+{
+  "date": "2026-09-27T05:42:26.837Z",
+  "candidate": "test-general-public-20260927-01",
+  "status": "HOSTED_HTTP_RPC_STORAGE_PASS_RESTORED_UI_DEVICE_PENDING",
+  "approval": "User: 적용 및 진행, 2026-09-27",
+  "target": "nmgkhknponvzcwliajyk",
+  "baseCommit": "4ead72b10ae384145c7da9261b7eb15c2a034fa7",
+  "workingTreeDirty": true,
+  "migrations": [
+    {
+      "path": "supabase/migrations/20260926140122_memory_content_review.sql",
+      "sha256": "fbffdeb940bd8f40aa92a06131e749d0aac057099cfd45b5b86e18495fcaa6b4"
+    },
+    {
+      "path": "supabase/migrations/20260927042334_memory_general_postmoderation.sql",
+      "sha256": "dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2"
+    },
+    {
+      "path": "supabase/migrations/20260927044435_memory_self_declared_image_rights.sql",
+      "sha256": "bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1"
+    }
+  ],
+  "remoteMigrationVersions": [
+    "20260927053858",
+    "20260927053904",
+    "20260927053914"
+  ],
+  "fixture": {
+    "board": "d409b844-532c-4d0d-a303-6d489553d997",
+    "cards": [
+      {
+        "card": "fe45391d-5c23-466c-9cec-0a4dbb63bf2a",
+        "asset": "f8c80091-0483-4340-9abd-1280788d8229",
+        "membership": "d9e908bb-c961-4180-a7ba-57caca9fca9b",
+        "operation": "b4f6d22e-99ad-4734-a5a0-68fc1b026b2b",
+        "privateOperation": "735fa6c0-889e-4c9a-81b2-4d16fa981dc8",
+        "originalHash": "adae8350ce830be6f37a58ef998ad6fdca870bf960d0517996e3159a10e29920",
+        "publicAsset": "197f3414-be16-4e48-86a9-5f39fb794b80"
+      },
+      {
+        "card": "468e586d-fe3a-443e-8643-c6571d4d4c9d",
+        "asset": "e3be33ad-9dfd-42b1-9ecf-c70b80a3057a",
+        "membership": "0fab6c7d-3109-41e5-bc7e-c0479cbb320a",
+        "operation": "7f66b1db-7ff8-4299-9f65-44841c1cdb63",
+        "privateOperation": "a702bac1-568d-40b5-a2ae-5319b6b92518",
+        "originalHash": "01748a3cec0741f3a670002c5217cc807791b6c2fe75726b9a9e4a20e93f1f2f",
+        "representation": "f9061856-1951-47ae-bc22-d5f15e947e5a",
+        "representationHash": "91f5ca6effb25935d33d14eaae345034e09f5c8ea1949a0f2be29a25f9b4286f",
+        "publicAsset": "1abb927f-06bb-473e-8dd2-6a9364c206b9"
+      }
+    ],
+    "publication": "aa29e140-7a90-4155-87ba-4a34391fa45b",
+    "home": "4006eb40-ec5a-47fc-8a5b-ec2b78e60daa",
+    "report": "24016be4-b176-4245-be75-fc512bc0dab8",
+    "contentCase": "3bd0eeca-6a2e-49e0-a96f-baaa6da133fe"
+  },
+  "scope": "Actual hosted Auth/PostgREST/Postgres/Storage via product HTTP handlers and SDK. Local HTTP origin; not deployed browser UI, Google OAuth, CDN or physical phone.",
+  "checks": [
+    {
+      "name": "test policies initially closed and owner home unpublished",
+      "pass": true
+    },
+    {
+      "name": "image 0: no declaration cannot prepare public image",
+      "pass": true,
+      "status": 409
+    },
+    {
+      "name": "image 0: explicit declaration prepares actual public derivative",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "image 0: same operation recovers READY without duplicate",
+      "pass": true
+    },
+    {
+      "name": "image 0: owner preview decodes",
+      "pass": true
+    },
+    {
+      "name": "real private optimized upload READY",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "image 1: no declaration cannot prepare public image",
+      "pass": true,
+      "status": 409
+    },
+    {
+      "name": "image 1: explicit declaration prepares actual public derivative",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "image 1: same operation recovers READY without duplicate",
+      "pass": true
+    },
+    {
+      "name": "image 1: owner preview decodes",
+      "pass": true
+    },
+    {
+      "name": "two self-declarations, no fabricated moderator approval, no duplicate assets",
+      "pass": true
+    },
+    {
+      "name": "wrong preview consent rejected",
+      "pass": true
+    },
+    {
+      "name": "new exact consent publishes visibly without pre-review",
+      "pass": true
+    },
+    {
+      "name": "fresh anonymous client reads only two selected synthetic cards",
+      "pass": true
+    },
+    {
+      "name": "image 0: anonymous actual Storage bytes decode with no-store",
+      "pass": true,
+      "bytes": 86,
+      "hash": "84e9118376eb872a14bf498d9cc2c57cb48d91cefd64f0e7ca755ebb818b46e8"
+    },
+    {
+      "name": "image 1: anonymous actual Storage bytes decode with no-store",
+      "pass": true,
+      "bytes": 88,
+      "hash": "1b40deba148b3a2a2c3f7b4e392d7a9591e937eb7a65edb77616ba57174e9f40"
+    },
+    {
+      "name": "anonymous home embeds the new board",
+      "pass": true
+    },
+    {
+      "name": "B follows and revisits published home",
+      "pass": true
+    },
+    {
+      "name": "B submits safety report",
+      "pass": true
+    },
+    {
+      "name": "B block cancels follow",
+      "pass": true
+    },
+    {
+      "name": "unreported-content moderation queue includes general board",
+      "pass": true
+    },
+    {
+      "name": "moderator mature classification closes board and home entry",
+      "pass": true
+    },
+    {
+      "name": "image 0: moderation blocks direct actual image URL",
+      "pass": true
+    },
+    {
+      "name": "image 1: moderation blocks direct actual image URL",
+      "pass": true
+    },
+    {
+      "name": "republishing cannot bypass negative moderation",
+      "pass": true
+    },
+    {
+      "name": "reported target hidden with audit",
+      "pass": true
+    },
+    {
+      "name": "owner withdrawal remains available after moderation",
+      "pass": true
+    },
+    {
+      "name": "settings restored exactly",
+      "pass": true
+    }
+  ],
+  "cleanup": {
+    "date": "2026-09-27T05:44:20.378Z",
+    "target": "nmgkhknponvzcwliajyk",
+    "checks": [
+      {
+        "name": "physical test objects removed and public quota released",
+        "pass": true
+      },
+      {
+        "name": "generated image rights revoked and synthetic cards retired",
+        "pass": true
+      },
+      {
+        "name": "temporary moderator removed and prior home restored",
+        "pass": true
+      },
+      {
+        "name": "all policy settings restored exactly",
+        "pass": true
+      }
+    ],
+    "state": {
+      "rights": 0,
+      "objects": 0,
+      "reserved": 0,
+      "settings": {
+        "public": {
+          "singleton": true,
+          "asset_limit": 0,
+          "reads_enabled": false,
+          "images_enabled": false,
+          "writes_enabled": false,
+          "follows_enabled": false,
+          "policy_revision": "UNAPPROVED",
+          "reports_enabled": false,
+          "asset_bytes_limit": 0,
+          "minihomes_enabled": false,
+          "report_daily_limit": 0,
+          "content_policy_revision": "UNCONFIGURED",
+          "general_publication_policy_revision": "UNCONFIGURED"
+        },
+        "private": {
+          "id": true,
+          "paused": false,
+          "enabled": false,
+          "approved": false,
+          "revision": "UNAPPROVED",
+          "main_bytes": 1000000,
+          "observed_at": null,
+          "quota_bytes": 0,
+          "thumb_bytes": 120000,
+          "physical_bytes": 0,
+          "asset_count_max": 0,
+          "preparations_per_day": 0,
+          "read_bytes_per_month": 0,
+          "upload_max_in_flight": 1,
+          "decode_attempts_per_day": 0,
+          "global_read_bytes_per_month": 0
+        }
+      },
+      "moderators": 0,
+      "deletedCards": 2,
+      "homeRestored": true,
+      "publicRemaining": 0,
+      "privateRemaining": 0
+    }
+  },
+  "commands": [
+    "supabase_apply_migration: exact three hash-verified SQL files on nmgkhknponvzcwliajyk",
+    "node --check .cache/general-hosted-run.mjs",
+    "node .cache/general-hosted-run.mjs (exit 0, 28 checks)",
+    "node --check .cache/general-hosted-cleanup.mjs",
+    "node .cache/general-hosted-cleanup.mjs (exit 0, 4 checks)",
+    "supabase_list_migrations: 25 including all three new files",
+    "supabase_get_advisors security after DDL",
+    "supabase_execute_sql: final flags/policy/ACL",
+    "git diff --check"
+  ],
+  "helperHashes": {
+    "cleanup": "ab0b8ae3b8f969202874f35837320fde1924938ff6bd5cc4e7b7a108cba64e0e",
+    "run": "f37b64b5a96a498776c0ddf9340b50390f99b7d486a41379bc8ba7ae2e88766a"
+  },
+  "acl": {
+    "newRpcAnon": false,
+    "allFlagsClosed": true,
+    "generalPolicy": "UNCONFIGURED",
+    "privateClientGrants": 0,
+    "oldPublisherClient": false,
+    "newRpcAuthenticated": true,
+    "contentPolicy": "UNCONFIGURED"
+  },
+  "advisors": {
+    "leakedPasswordProtectionWarn": 1,
+    "interpretation": "Four added private tables and eight explicit authenticated RPCs explain count increases. No client table grants or anonymous declaration access. Linter warnings are recorded, not dismissed as a full security PASS.",
+    "anonDefinerWarn": 3,
+    "rlsNoPolicyInfo": 27,
+    "urls": [
+      "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+    ],
+    "authenticatedDefinerWarn": 50
+  },
+  "preserved": [
+    "Production unchanged",
+    "Existing trusted evidence unchanged",
+    "Private original checksums retained",
+    "Audit/report history retained",
+    "Prior home and policy settings restored",
+    "Existing relationships restored from before snapshot"
+  ],
+  "notVerified": [
+    "Actual product browser UI with new hosted schema",
+    "Physical phone or cross-device UI",
+    "Google OAuth interactive login; tests used generated test-session links without sending emails",
+    "Vercel deployed HTTP/CDN",
+    "All remaining W08/D03-D06 launch gates"
+  ],
+  "pastPass": "Previous local SQL29, unit397 and mocked-browser checks are prior evidence, not new results this turn",
+  "nextOne": "Run the latest product Web UI against the approved test schema, followed by real-phone confirmation; keep Android excluded",
+  "productionChanges": 0,
+  "commitPushDeploy": false
+}

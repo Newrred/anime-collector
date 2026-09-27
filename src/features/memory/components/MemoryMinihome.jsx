@@ -35,8 +35,9 @@ function Editor({ userId, locale, base }) {
     <p>{copy.intro}</p>
     {state.busy && <p role="status">{copy.loading}</p>}
     {state.error && <p role="alert">{state.error === "INVALID_SELECTION" ? copy.invalid : publicationError(state.error, locale)} <button className="btn btn--subtle" disabled={state.busy} onClick={() => controller.load()}>{copy.retry}</button></p>}
-    {state.home?.published && <p role="status">{copy.published} <a data-astro-reload href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
-    {state.home?.published && <PublicLinkCopy key={state.home.id} kind="home" id={state.home.id} locale={locale} base={base} />}
+    {state.home?.published && (state.home.hidden || state.home.visible === false) && <p role="status">{copy.notVisible}</p>}
+    {state.home?.published && !state.home.hidden && state.home.visible !== false && <p role="status">{copy.published} <a data-astro-reload href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
+    {state.home?.published && !state.home.hidden && state.home.visible !== false && <PublicLinkCopy key={state.home.id} kind="home" id={state.home.id} locale={locale} base={base} />}
     {state.phase === "revoked" && <p role="status">{copy.revoked}</p>}
     {state.home && <button className="btn btn--subtle" disabled={state.busy} onClick={() => { if (confirm(copy.confirm)) controller.revoke(); }}>{copy.withdraw}</button>}
     {state.review ? <Review key={state.review.reviewHash} review={state.review} controller={controller} services={services} locale={locale} busy={state.busy} base={base} /> : <form onSubmit={(e) => { e.preventDefault(); controller.prepare({ nickname, bio, entries }); }}>

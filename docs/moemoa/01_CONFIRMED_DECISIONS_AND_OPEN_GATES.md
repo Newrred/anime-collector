@@ -458,6 +458,8 @@ AniList ID는 선택적 내부 확인 정보이며 사용자용 외부 이동을
 
 ## Decision Log — AGE12-ADULT-AREA-01 (2026-09-26)
 
+> 2026-09-27 `GENERAL-PUBLIC-POSTMODERATION-01`이 이 결정의 **첫 출시 성인 영역 포함·성인 인증 요구**를 대체한다. 아래는 당시 승인 이력이다. 12세 이용 목표·보호자 동의 잔여·국가·일정 미정은 유지한다.
+
 - status: CONFIRMED_PRODUCT_SCOPE / IMPLEMENTATION_AND_POLICY_PENDING.
 - approved by: 사용자 “12세·성인 영역까지 포함하고 출시 일정 조정”. 첫 Web-only 후보는 만12세부터의 이용 및 성인 전용 영역을 포함하도록 목표를 변경한다. 9/27 출시 기한보다 필요한 준비·검증을 우선하며 새 출시일은 미확정이다. Android 후속 원칙 유지.
 - moderation intent: 사용자는 폭넓은 이미지 허용과 신고·운영자 주기 검토/차단을 원한다. 이는 불법 콘텐츠 허용, 캡처·타인 팬아트 권리 gate 자동 통과, 미분류 이미지 즉시 공개의 승인이 아니다. 구체 허용표와 검토 전 노출 기준은 D04 미완료다.
@@ -484,6 +486,8 @@ AniList ID는 선택적 내부 확인 정보이며 사용자용 외부 이동을
 
 ## Decision Log — ADULT-CONTENT-SCOPE-01 (2026-09-26 사용자 확정)
 
+> 2026-09-27 `GENERAL-PUBLIC-POSTMODERATION-01`에 따라 첫 출시에서는 보류한다. 아래 범위는 향후 재검토 자료이며 현재 공개 허용이 아니다.
+
 - 사용자 선택: **“비노골적인 성인 취향 일러스트부터”**. 첫 Web-only 성인 영역의 콘텐츠 목표 범위를 이 선택으로 좁힌다. 노골적인 성행위 묘사 또는 누드까지 허용한 것으로 확대하지 않는다. 이전 “일단 전부 허용” 의향보다 이 구체 결정이 우선한다.
 - 성인 영역은 검증된 성인 자격과 국가별 제공 조건을 충족한 이용자에게만 제공하는 목표를 유지한다. 단순 나이 체크·로그인만으로 자격을 인정하지 않는다. 한국·필리핀·태국 대상과 12세부터의 일반 이용 목표도 유지한다.
 - 세부 경계(노출 수준·성적 맥락·연령이 모호한 캐릭터·분류 보류·재검토/이의)는 D04의 구체 허용표로 정리해야 한다. 이 문구 자체가 국가별 적법성 확인 또는 캡처/타인 팬아트 권리 승인이 아니다.
@@ -495,22 +499,22 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 
 | ID | 미정 항목 | 필요한 제안 |
 | --- | --- | --- |
-| IMAGE-SYNC-01 | Private 이미지 백업 | 수동 동의, 용량·포맷·보관·삭제 기준 |
+| IMAGE-SYNC-01 | 최적화 사본 연동 확정 / 원본 백업 별도 | FREE-PRIVATE-IMAGE-SYNC-01에 따라 무료 최적화 사본 연동은 첫 Web 범위. 원본 백업 상품은 후속·미확정. 최종 용량/보관·삭제·복구 운영값은 D03/D05 잔여 |
 | TITLE-STATE-SYNC-01 | 작품 저장 상태·평점·WatchLog remote sync | 신규 normalized entity, 승격·충돌·삭제·Web/Android 정합성 |
-| AGE-01 | 12세 이용·성인 영역 목표 승인, 적용 정책 미완료 | 보호자 동의·국가별 성인 인증·콘텐츠 분류/접근제한의 구현·검증 |
+| AGE-01 | 12세 이용 목표 유지 / 성인 인증·성인 공개 보류 | 보호자 동의·국가별 아동 개인정보 조건은 별도 미완료. 이번 후보는 일반 공개·사후 검토이며 성인 공급자 계약/검증을 필수 작업에서 제외 |
 | MODERATION-01 | 사전 심사 대 사후 심사 | 초기 베타 권장안과 운영량 추정 |
 | SOURCE-01 | 출처별 사용 등급 | 직접 적재, 공식 검증, 대조 전용, 금지 |
 | TAG-01 | MOEMOA 태그 체계 | core genre, catalog tag, memory tag 분리 |
 | STORAGE-01 | 이미지 제한 | 포맷, 크기, 해상도, 파생본, 무료 용량 |
 | PRIVACY-01 | 운영 주체·리전·보관 | 법적 주체, 데이터 위치, 수탁자, 삭제 기간 |
 | BETA-01 | 베타 규모와 성공 기준 | 활성화, D7, 품질, UGC 처리 기준 |
-| DEPLOY-01 | Web canonical production | Vercel/GitHub Pages 중 origin, OAuth, PWA scope 통일 |
+| DEPLOY-01 | Git 기반 Vercel 배포 확정 / 후보 검증 잔여 | 2026-09-09 Git 운영배포 결정과 WEB-SMOKE-DEPLOY-01을 따른다. Vercel/Pages 재선택 항목 아님. 동일 후보 origin/OAuth/PWA·rollback 검증과 D06 승인 잔여 |
 | IMAGE-PUBLIC-01 | 유형별 Public rollout | 콘텐츠 유형, 저장 상태, 권리 증빙, moderation gate의 AND 조건 |
 | GROWTH-01 | 첫 유료 유입 시점 | organic/private beta 이후 집행 조건 |
-| GROWTH-02 | 첫 검증 국가 범위 | 필리핀 단일 또는 싱가포르 교차 검증 범위 |
+| GROWTH-02 | KR/PH/TH 확정 / 국가별 방법 잔여 | RELEASE-REGIONS-01: 한국·필리핀·태국. 과거 PH/SG 제안은 대체됨. 국가별 인증·동의·콘텐츠·언어 운영 방법 D04 잔여 |
 | GROWTH-03 | 광고 최적화 이벤트 | 클릭·가입보다 첫 Complete Card 저장 중심 여부 |
 
-`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 확정 섹션에 반영됐다. `IMAGE-SYNC-01`, `TITLE-STATE-SYNC-01`, `DEPLOY-01`, `IMAGE-PUBLIC-01`, `GROWTH-01~03` 등 이 표에 남은 항목은 여전히 미정이며, 등록 자체가 결정을 확정하지 않는다. 세부 옵션과 잠정 권장안은 `reports/open-decision-questions.md`를 따른다.
+`TECH-01`, `STORAGE-LOCAL-01`은 2026-08-11, `BACKEND-01`, `AUTH-01`, `SYNC-01`과 수정된 `LEGACY-01`은 2026-08-26 사용자 승인으로 확정 섹션에 반영됐다. IMAGE-SYNC-01/DEPLOY-01/GROWTH-02는 위와 같이 최신 결정으로 확정된 범위와 남은 운영 조건을 분리한다. 그 외 미정 항목은 등록 자체로 확정하지 않는다. `reports/open-decision-questions.md`의 과거 옵션보다 최신 Decision Log가 우선한다.
 
 ## 6. 결정 변경 규칙
 
@@ -568,3 +572,19 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - scope: 검증한 Web 코드를 master에 commit/push하고 Vercel Git 운영 배포를 확인한다. 기존 계정·기록과 Web 로컬 이미지 선택을 제공하며 원본 bytes는 해당 브라우저에 보관한다.
 - limits: 정식 출시 전체 승인과 구분. private 이미지 동기화·Public UI/API 활성화, 운영 DB migration, 유료 변경은 이번 간이 배포에 포함하지 않는다. Android 제외. D01/D03~D06 정식 출시 잔여 유지.
 - rollback: 코드 commit revert 후 Git 연동 재배포. 사용자 기록·원본·기존 DB 삭제 없음.
+
+## Decision Log — GENERAL-PUBLIC-POSTMODERATION-01 (2026-09-27)
+
+- status: CONFIRMED_PRODUCT_SCOPE / IMPLEMENTATION_PENDING.
+- context: 개인 운영자가 감당할 첫 출시 범위를 단순화하고 성인 인증 도입·계약으로 이어진 범위 확대를 중단한다.
+- options: 성인 영역/인증까지 첫 출시 / 일반 공개만 제공하고 성인 영역·인증 보류.
+- chosen option: 후자. 사용자가 명시적으로 선택한 비공개 업로드에는 공개용 권리 확인·공개 동의를 요구하지 않는다. 공개는 성인용·불법·권리침해 콘텐츠 금지와 게시 권한을 간단히 확인하고, 정확한 미리보기에 동의한 일반 콘텐츠를 게시한다. 관리자의 모든 게시물 사전승인을 필수로 삼지 않고 기존 신고·차단·관리자 사후 검토/삭제·이의·감사로 관리한다.
+- reason: 일반 이미지 공유를 우선 완성하고 한 명의 운영자가 현재 확인 가능한 범위로 시작한다. 성인 인증은 방문자 자격 확인이며 이미지 자동 분류를 대체하지 않는다. 자동 분류·검토 보조는 운영량 증가 시 별도 검토하고 지금 도입하지 않는다.
+- supersedes: AGE12-ADULT-AREA-01의 첫 출시 성인 영역/인증 부분, ADULT-CONTENT-SCOPE-01의 첫 출시 적용, release-v2 C04의 모든 일반 이미지에 대한 사전 분류 필수 조건. 과거 소스·실행 로그·검증 근거는 삭제하거나 PASS로 재해석하지 않는다.
+- preserved: Web-only, KR/PH/TH, 기존12세 목표 및 별도 보호자 동의 잔여, owner/RLS·명시적 업로드·용량 제한·원본/사본 구분·reviewHash/정책 결속·철회/차단·kill switch. 비공개라는 이유로 불법 콘텐츠 허용을 뜻하지 않는다. 체크는 법적 면책이나 관리자의 검토 완료 증거가 아니며 캡처·타인 팬아트 별도 권리 gate도 자동 통과시키지 않는다.
+- implementation gap: 현재 정식 후보의 content review SQL은 정확한 GENERAL 사전 검토 없이는 조회 null, 공개 이미지 준비에는 별도 trusted 권리 근거가 필요하다. 따라서 문구만 바꾸어 일반 이미지가 즉시 게시된다고 보고하지 않는다. 기존 W08/W09/W11/W14에서 간단한 확인의 증거/이미지 결속과 사후 차단을 함께 정리한다. 일반 자기 확인을 모든 이미지의 trusted 승인 레코드로 위조하지 않는다.
+- files/modules affected: 기존 release-v2 00/01/02/03, 이미지 UGC 명세, 공개 확인·게시/조회·운영 검토 경로. 새 계획 트리/진행판 없음.
+- 구현 구체화(2026-09-27): 본인 창작임을 명시 선택한 일반 이미지는 정확한 원본 hash/버전 및 선택한 사본 ID/hash에 `SELF_DECLARED`를 결속한다. 기존 `TRUSTED`와 분리하며 승인시각/관리자 GENERAL을 생성하지 않는다. 이는 위 단순 공개 확인 결정의 적용이고 모든 이미지의 별도 trusted 승인을 요구했던 과거 구현을 이 범위에서 대체한다. 캡처·타인 팬아트 및 외부 허락 근거의 별도 gate, 철회/소유자/정책 검사는 유지한다. 로컬 구현·검증 결과는 단일03/evidence를 따르며 원격 활성 승인은 아니다.
+- migration impact: 이 결정 반영은 문서만 변경. 후속 DB 후보는 추가 migration 및 로컬 검증으로 준비하고 운영/public flags 변경·유료 계약·배포는 D06의 정확한 승인 전 실행하지 않는다.
+- approved by/date: 사용자, 2026-09-27, “성인 인증은 보류”와 후속 “맞음, 일반 이미지 공개만 허용”.
+- review date/trigger: 사후 검토 흐름 검증, D04 보호자/권리·운영 정책 마감, D06 Web 후보 또는 향후 성인 영역 재도입.

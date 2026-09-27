@@ -1,0 +1,279 @@
+{
+  "date": "2026-09-27T06:09:41.029Z",
+  "target": "nmgkhknponvzcwliajyk",
+  "scope": "Actual product React UI in Chromium with real hosted Auth/RPC/Storage. Local proxy for current image handlers; auth session injected, not Google OAuth. 390px viewport is not a physical phone.",
+  "baseCommit": "4ead72b10ae384145c7da9261b7eb15c2a034fa7",
+  "workingTreeDirty": true,
+  "documentsRead": [
+    "AGENTS.md",
+    "CODEX_START_HERE.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/05_IMAGE_UGC_POLICY_MODERATION_SPEC.md",
+    "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+    "docs/moemoa/release-v2/00_CODEX_START_HERE.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+    "docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"
+  ],
+  "plan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-09-27-w08w09--최신-제품-ui와-실제-test-backend",
+  "commands": [
+    {
+      "command": "node .cache/general-ui-run.mjs",
+      "exit": 0,
+      "checks": 13
+    },
+    {
+      "command": "node .cache/general-ui-cleanup.mjs",
+      "exit": 0,
+      "checks": 4
+    },
+    {
+      "command": "node --check .cache/general-ui-run.mjs",
+      "exit": 0
+    },
+    {
+      "command": "node .cache/check-cleanup-lifetime.mjs",
+      "exit": 0,
+      "scope": "Mock transport regression of backend lifetime; no network"
+    },
+    {
+      "command": "node --check .cache/general-ui-cleanup.mjs",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "currentRun": {
+    "date": "2026-09-27T06:05:27.829Z",
+    "target": "nmgkhknponvzcwliajyk",
+    "candidate": "test-general-public-20260927-01",
+    "fixture": {
+      "board": "e6999fbe-0eb0-48cb-941b-250dc48a1eb0",
+      "cards": [
+        {
+          "card": "ef5d9eb8-0f7e-4aa9-ba93-e36e6e0a962c",
+          "asset": "746dcaa9-f263-45c8-87bb-b9274adc36e3",
+          "membership": "4928f4ea-d0d8-43c1-a7c0-ff3b0753b5ef",
+          "operation": "8919e7ea-ad6d-4ad2-a280-85f9aca4ac91",
+          "privateOperation": "369a05c2-5bce-4d0f-bcf3-8d7c04597e94",
+          "originalHash": "adae8350ce830be6f37a58ef998ad6fdca870bf960d0517996e3159a10e29920",
+          "publicAsset": "1c8227d1-8c73-4fcd-afee-4d06ff5b3c3d"
+        },
+        {
+          "card": "fb15a295-f8bb-4c67-973b-fb32f42ffc66",
+          "asset": "abd94b71-9512-4b4a-82de-13d6461b688d",
+          "membership": "f93591da-5ebf-4f9c-964b-96181efd7672",
+          "operation": "c19d4fd7-6b33-4a98-9758-0806b65b0c55",
+          "privateOperation": "916ba904-ec22-461a-a351-aa79c96c1599",
+          "originalHash": "01748a3cec0741f3a670002c5217cc807791b6c2fe75726b9a9e4a20e93f1f2f",
+          "representation": "e80100b2-7fa4-4f80-ab22-2ba9161eb923",
+          "representationHash": "91f5ca6effb25935d33d14eaae345034e09f5c8ea1949a0f2be29a25f9b4286f",
+          "publicAsset": "fe480634-8670-46e0-b4b7-a3d338d5bef5"
+        }
+      ],
+      "publication": "0ad2d2e7-2370-4374-94ad-bd06a1878518"
+    },
+    "checks": [
+      {
+        "name": "test policies initially closed and owner home unpublished",
+        "pass": true
+      },
+      {
+        "name": "fixture change feed includes all seven seeded entities",
+        "pass": true
+      },
+      {
+        "name": "setup: actual private rendition ready",
+        "pass": true
+      },
+      {
+        "name": "UI metadata sync completes before opening seeded board",
+        "pass": true
+      },
+      {
+        "name": "UI image 0: explicit selection and declaration prepares hosted bytes",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "name": "UI image 1: explicit selection and declaration prepares hosted bytes",
+        "pass": true,
+        "status": 200
+      },
+      {
+        "name": "UI publishes exact preview and displays visitor link",
+        "pass": true
+      },
+      {
+        "name": "fresh anonymous browser decodes both hosted public images",
+        "pass": true
+      },
+      {
+        "name": "390px visitor layout has no horizontal overflow",
+        "pass": true
+      },
+      {
+        "name": "390px owner public panel has no horizontal overflow",
+        "pass": true
+      },
+      {
+        "name": "UI withdrawal closes the refreshed anonymous page",
+        "pass": true
+      },
+      {
+        "name": "owner page has no uncaught JavaScript exceptions",
+        "pass": true,
+        "errors": []
+      },
+      {
+        "name": "settings restored exactly",
+        "pass": true
+      }
+    ],
+    "scope": "Actual product React UI in Chromium with real hosted Auth/RPC/Storage. Local proxy for current image handlers; auth session injected, not Google OAuth. 390px viewport is not a physical phone."
+  },
+  "cleanup": {
+    "date": "2026-09-27T06:08:39.159Z",
+    "checks": [
+      {
+        "name": "physical test objects removed and public quota released",
+        "pass": true
+      },
+      {
+        "name": "generated image rights revoked and synthetic cards retired",
+        "pass": true
+      },
+      {
+        "name": "temporary moderator removed and prior home restored",
+        "pass": true
+      },
+      {
+        "name": "all policy settings restored exactly",
+        "pass": true
+      }
+    ],
+    "objects": 0,
+    "reserved": 0,
+    "publicRemaining": 0,
+    "privateRemaining": 0,
+    "rights": 0,
+    "moderators": 0,
+    "homeRestored": true
+  },
+  "initialAttempts": [
+    {
+      "attempt": 1,
+      "failure": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Share selected memories', exact: true })\u001b[22m\n",
+      "checks": [
+        {
+          "name": "test policies initially closed and owner home unpublished",
+          "pass": true
+        },
+        {
+          "name": "setup: actual private rendition ready",
+          "pass": true
+        },
+        {
+          "name": "settings restored exactly",
+          "pass": true
+        }
+      ],
+      "cleanupChecks": [
+        {
+          "name": "physical test objects removed and public quota released",
+          "pass": true
+        },
+        {
+          "name": "generated image rights revoked and synthetic cards retired",
+          "pass": true
+        },
+        {
+          "name": "temporary moderator removed and prior home restored",
+          "pass": true
+        },
+        {
+          "name": "all policy settings restored exactly",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "failure": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Share selected memories', exact: true })\u001b[22m\n",
+      "checks": [
+        {
+          "name": "test policies initially closed and owner home unpublished",
+          "pass": true
+        },
+        {
+          "name": "setup: actual private rendition ready",
+          "pass": true
+        },
+        {
+          "name": "UI metadata sync completes before opening seeded board",
+          "pass": true
+        },
+        {
+          "name": "settings restored exactly",
+          "pass": true
+        }
+      ],
+      "cleanupChecks": [
+        {
+          "name": "physical test objects removed and public quota released",
+          "pass": true
+        },
+        {
+          "name": "generated image rights revoked and synthetic cards retired",
+          "pass": true
+        },
+        {
+          "name": "temporary moderator removed and prior home restored",
+          "pass": true
+        },
+        {
+          "name": "all policy settings restored exactly",
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "diagnosis": "Initial two UI attempts could not find seeded Board: direct SQL fixture creation omitted public.sync_changes. Waiting for completed UI sync alone did not resolve it. Stopped blind UI retries, inspected pull_memory_changes and apply operation SQL; corrected the independent fixture writer to register all seven entities and verified the feed count before resuming. No product sync defect established. Final UI uses actual sync/RPC/Storage; fixture creation is synthetic SQL, not an intake-creation PASS.",
+  "cleanupIncident": "Cleanup returned PRIVATE_IMAGE_STORAGE_FAILED/503 on the initial call for attempt2 and final run; each bounded retry succeeded. The harness instantiated private backend with a 20-second AbortSignal before waiting the 60-second deletion grace. A separate mock-transport reproduction confirmed that expired lifetime maps to this error and a fresh backend succeeds; cleanup generator now instantiates the backend after waiting. This is not evidence of a hosted Storage outage.",
+  "visualReview": {
+    "visitor390": "Opened actual Chromium full-page screenshot: both synthetic images and titles render within 390px; no horizontal overflow assertion passed.",
+    "owner": "Opened preview-region capture: both images, exact consent and enabled publish visible. Sticky global header appears inside long element screenshot; this is not a pixel-perfect layout approval.",
+    "artifact": "evidence/2026-09-27-general-ui-anonymous-390.png"
+  },
+  "changes": "No additional product source, dependency or migration changes this turn. Ignored test harness corrected; existing 00/01/02/03 summaries and evidence updated.",
+  "rollback": "Withdraw synthetic Board, cancel generated assets, remove generated Storage bytes after grace, revoke synthetic rights, soft-delete fixtures and append deletion change feed. Settings exactly restored; home and moderator state preserved. Prior applied schema and audit retained. Production untouched.",
+  "securityPrivacyRights": "Real A test session injected in browser memory; secrets/keys/tokens/image bytes excluded from tracked evidence. Only synthetic generated images used. SELF_DECLARED does not establish actual copyright approval. Screenshot/fanart separate gate preserved. No telemetry change.",
+  "priorPass": "Previous hosted HTTP/SDK 28 + cleanup 4 and local unit397/build19 retained in earlier evidence; not rerun or summed with this run.",
+  "notVerified": [
+    "Physical Android/iPhone browser",
+    "Google OAuth redirect/login",
+    "Vercel deployed functions/CDN",
+    "Full minihome/follow/moderation product UI in this run",
+    "Actual third-party rights",
+    "Production launch"
+  ],
+  "externalGates": [
+    "Physical devices/user interaction",
+    "D04 guardian/country and separate image-rights operational rules",
+    "D05 external backup/key/alerts",
+    "D06 exact clean candidate approval and Git deployment"
+  ],
+  "nextOne": "Prepare the exact Web-only test deployment candidate for physical phone checks; preserve separate D06 production approval.",
+  "sourceHashes": {
+    ".cache/general-ui-run.mjs": "b43edfe8374754b3e126c72325829c347e2371394c66faeebc85723988503074",
+    ".cache/general-ui-flow.mjs": "f45488831f47ade20c8e40dbc58351cb1ce52c9b1f1fbdd3f7151d175a060368",
+    ".cache/general-ui-cleanup.mjs": "814f32daca8249e4f034df49042815a26b06968d0a59dc96649c1a76346fee90",
+    "src/features/memory/components/MemoryPublicationPanel.jsx": "4740e2811bda5c3ab0a5f95d7f05644709438bdbbf59b5fd8e32f37a1f80ff3c",
+    "src/features/memory/application/preparePublicImage.js": "827ab59707f752b7279ea8f87598deb1a51f87a20e4fb8dd75dd88e20793aeb2",
+    "src/server/publicImages/handler.js": "2c1360189666638426299f75e3eec1f7ce42c31720bcdfc90853b7acabe9df93",
+    "src/server/publicImages/supabaseImageBackend.js": "de7ac0c9865607bec73e477cc3c3da5ceea8fb84b8600f9e154e4d1098efe00d"
+  },
+  "sourceHashNote": "Hashes recorded after correcting the ignored cleanup generator. Final hosted cleanup PASS used the previous helper with a fresh-process retry. The corrected post-grace construction has syntax and isolated mock verification, not another grace-period hosted run."
+}

@@ -74,6 +74,10 @@ select pg_temp.fails($q$select public.resolve_memory_image_preview(null,'full')$
 set role service_role;
 select pg_temp.ok(public.resolve_memory_public_image((current_setting('test.preview')::jsonb->>'id')::uuid,(current_setting('test.reservation')::jsonb->>'id')::uuid,'thumb')->>'path' like '%/thumb.webp','trusted reader resolves thumbnail after current state check');
 \ir content-image-contract.sql
+\if :{?general_postmoderation}
+\ir general-postmoderation-contract.sql
+\ir self-declared-rights-contract.sql
+\endif
 reset role;
 update private.memory_public_assets set expires_at=now()-interval '1 day';
 set role service_role;
