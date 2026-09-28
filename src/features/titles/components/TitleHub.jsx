@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { buildMemoryCardHref } from "../../../domain/search/memoryCardNavigation.js";
-import MemoryCardPreview from "../../memory/components/MemoryCardPreview.jsx";
+import PrivateMemoryCardPreview from "../../memory/components/PrivateMemoryCardPreview.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "../../memory/components/MemoryRouteShell.jsx";
 import { createTitleHubService } from "../application/titleHubService.js";
 import { parseTitleHubRequest } from "../domain/titleNavigation.js";
@@ -71,14 +71,14 @@ function TitleMemoryGallery({ album, base, copy, locale }) {
       {album.memoryCount ? (
         <div className="title-hub__memory-grid">
           {album.memories.map((memory) => (
-            <MemoryCardPreview
+            <PrivateMemoryCardPreview bundle={memory} locale={locale}
               key={memory.card.id}
               className="surface-card title-hub__memory"
               href={`${base}memory/card/?id=${encodeURIComponent(memory.card.id)}`}
               title={memory.title.displayTitle}
               cue={memory.card.note || ""}
               dateLabel={dateLabel(memory.card.updatedAt, locale)}
-              badge={copy.memorySource[memory.sourceKind] || ""}
+              badge={memory.sourceKind === "MISSING" ? "" : copy.memorySource[memory.sourceKind] || ""}
               visual={memory.visual}
               visualFit="contain"
               missingLabel={copy.memorySource.MISSING}

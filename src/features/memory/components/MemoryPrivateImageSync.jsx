@@ -34,9 +34,9 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
     setState({ status: 'checking', busy: false, policy: null, error: null, pending: false });
     const timer = setTimeout(() => { abort.abort(); if (active) setState(s => ({ ...s, status: 'failed', error: 'PRIVATE_IMAGE_REQUEST_FAILED' })); }, 30000);
     (async () => {
-      const policy = await transfer.policy(abort.signal), pending = await transfer.pending(abort.signal);
-      let blob;
-      if (!hasLocalPreview && policy.representation) blob = await transfer.read(abort.signal);
+      const [{ policy, blob }, pending] = await Promise.all([
+        transfer.readWithPolicy(abort.signal, { includeBlob: !hasLocalPreview }), transfer.pending(abort.signal),
+      ]);
       if (!active || abort.signal.aborted) return;
       if (blob) showBlob(blob);
       setState(s => ({ ...s, policy, pending, status: policy.representation ? 'ready' : 'local' }));

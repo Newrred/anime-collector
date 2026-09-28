@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuthSession } from '../../../hooks/useAuthSession.js';
 import { isPrivateUserImage, privateImageTransfer, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
+import { getPlatformMemoryRuntime } from '../runtime/platformMemoryRuntime.js';
 import MemoryCardPreview from './MemoryCardPreview.jsx';
 
 // No shared byte cache. Bound concurrent list reads without retaining another account's images.
@@ -25,11 +26,12 @@ function queuedRead(read, signal) {
   });
 }
 
-export default function PrivateMemoryCardPreview({ runtime, bundle, ...props }) {
+export default function PrivateMemoryCardPreview({ runtime, bundle, locale = "en", ...props }) {
   const { user } = useAuthSession();
   const element = useRef(null), [remote, setRemote] = useState(null);
+  const [failedKey, setFailedKey] = useState(null);
   const owner = bundle?.card.ownerId, asset = bundle?.asset;
-  const eligible = privateImageUiEnabled() && runtime && props.visual?.kind === 'MISSING' && isPrivateUserImage(asset)
+  const eligible = privateImageUiEnabled() && props.visual?.kind === 'MISSING' && isPrivateUserImage(asset)
     && owner === `account:${user?.id}` && asset.sync?.syncState === 'SYNCED' && asset.sync.remoteVersion > 0;
   const key = `${owner}:${bundle?.card.id}:${asset?.id}:${asset?.sync?.remoteVersion}:${user?.id}`;
   useEffect(() => {
@@ -40,11 +42,12 @@ export default function PrivateMemoryCardPreview({ runtime, bundle, ...props }) 
       if (started) return; started = true;
       queuedRead(async () => {
         timer = setTimeout(() => abort.abort(), 30000);
-        return privateImageTransfer(runtime, bundle).read(abort.signal, 'thumb');
+        const activeRuntime = runtime || await getPlatformMemoryRuntime();
+        return privateImageTransfer(activeRuntime, bundle).read(abort.signal, 'thumb');
       }, abort.signal).then(blob => {
         if (!active || abort.signal.aborted || !blob) return;
         objectUrl = URL.createObjectURL(blob); setRemote({ key, url: objectUrl });
-      }).catch(() => { /* Existing unavailable visual remains; never publish/upload as a fallback. */ })
+      }).catch(() => { if (active) setFailedKey(key); })
         .finally(() => clearTimeout(timer));
     };
     const observer = typeof IntersectionObserver === 'function' ? new IntersectionObserver(entries => {
@@ -54,5 +57,9 @@ export default function PrivateMemoryCardPreview({ runtime, bundle, ...props }) 
     return () => { active = false; observer?.disconnect(); abort.abort(); clearTimeout(timer); if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [eligible, key, runtime]);
   const visual = eligible && remote?.key === key ? { kind: 'IMAGE', src: remote.url, alt: props.title } : props.visual;
-  return <MemoryCardPreview {...props} visual={visual} elementRef={element} />;
+  const missingLabel = eligible && remote?.key !== key
+    ? failedKey === key ? (locale === 'ko' ? '사진을 불러오지 못했어요' : 'Could not load photo')
+      : (locale === 'ko' ? '사진 불러오는 중…' : 'Loading photo…')
+    : props.missingLabel;
+  return <MemoryCardPreview {...props} visual={visual} missingLabel={missingLabel} elementRef={element} />;
 }

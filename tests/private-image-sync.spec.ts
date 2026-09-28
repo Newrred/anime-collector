@@ -120,6 +120,7 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('photo-sync-mobile.png'), fullPage: true });
   const detailUrl = page.url();
+  const titleHref = await page.locator('.memory-detail__title-link').getAttribute('href');
   const boardId = await page.evaluate(async () => {
     const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
     const runtime = await getPlatformMemoryRuntime(), cardId = new URLSearchParams(location.search).get('id');
@@ -133,6 +134,12 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await page.goto(`/boards/?id=${boardId}`);
   await expect(page.locator('.memory-preview img[src^="blob:"]')).toBeVisible();
   expect(reads.at(-1)).toContain('variant=thumb'); expect(posts.length).toBe(2);
+  await page.goto('/');
+  await expect(page.locator('.home-rediscovery img[src^="blob:"]').first()).toBeVisible();
+  expect(posts.length).toBe(2);
+  await page.goto(titleHref!);
+  await expect(page.locator('.title-hub__memory img[src^="blob:"]')).toBeVisible();
+  expect(posts.length).toBe(2);
   await page.goto(detailUrl);
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
   let release;

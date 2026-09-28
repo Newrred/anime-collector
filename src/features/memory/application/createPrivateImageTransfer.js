@@ -45,6 +45,20 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     if (result.representation) manifest(result.representation);
     return result;
   }
+  async function readRepresentation(current, signal, variant) {
+    if (!current.representation) fail('NOT_FOUND');
+    const expected = manifest(current.representation);
+    const expectedBytes = variant === 'thumb' ? expected.thumbnailBytes : expected.mainBytes;
+    const expectedHash = variant === 'thumb' ? expected.thumbnailHash : expected.mainHash;
+    const limit = variant === 'thumb' ? 120_000 : 1_000_000;
+    if (!Number.isSafeInteger(expectedBytes) || expectedBytes < 1 || expectedBytes > limit || !SHA.test(expectedHash || '')) fail('PRIVATE_IMAGE_REQUEST_FAILED');
+    const response = await request(variant === 'thumb' ? `${url}&variant=thumb` : url, {}, signal);
+    if (response.headers.get('content-type')?.split(';')[0] !== 'image/webp') fail('PRIVATE_IMAGE_REQUEST_FAILED');
+    const blob = await response.blob();
+    if (blob.size !== expectedBytes || blob.size > limit || await blobHash(blob) !== expectedHash) fail('PRIVATE_IMAGE_REQUEST_FAILED');
+    await context(signal);
+    return blob;
+  }
   return {
     policy,
     async pending(signal) { await context(signal); const value = await journal.get(key); await context(signal); return Boolean(value); },
@@ -82,19 +96,12 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     },
     async read(signal, variant = 'main') {
       if (!['main', 'thumb'].includes(variant)) fail('PRIVATE_IMAGE_REQUEST_FAILED');
+      return readRepresentation(await policy(signal), signal, variant);
+    },
+    async readWithPolicy(signal, { includeBlob = true } = {}) {
       const current = await policy(signal);
-      if (!current.representation) fail('NOT_FOUND');
-      const expected = manifest(current.representation);
-      const expectedBytes = variant === 'thumb' ? expected.thumbnailBytes : expected.mainBytes;
-      const expectedHash = variant === 'thumb' ? expected.thumbnailHash : expected.mainHash;
-      const limit = variant === 'thumb' ? 120_000 : 1_000_000;
-      if (!Number.isSafeInteger(expectedBytes) || expectedBytes < 1 || expectedBytes > limit || !SHA.test(expectedHash || '')) fail('PRIVATE_IMAGE_REQUEST_FAILED');
-      const response = await request(variant === 'thumb' ? `${url}&variant=thumb` : url, {}, signal);
-      if (response.headers.get('content-type')?.split(';')[0] !== 'image/webp') fail('PRIVATE_IMAGE_REQUEST_FAILED');
-      const blob = await response.blob();
-      if (blob.size !== expectedBytes || blob.size > limit || await blobHash(blob) !== expectedHash) fail('PRIVATE_IMAGE_REQUEST_FAILED');
-      await context(signal);
-      return blob;
+      const blob = includeBlob && current.representation ? await readRepresentation(current, signal, 'main') : null;
+      return { policy: current, blob };
     },
     async cancel(signal) {
       await context(signal);

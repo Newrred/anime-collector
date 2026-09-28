@@ -225,7 +225,7 @@ function MemoryBoardContent({ base }) {
                         const afterNext = detail.items[index + 2]?.membership.positionKey || null;
                         return (
                           <li key={membership.id}>
-                            <PrivateMemoryCardPreview runtime={runtime} bundle={bundle} href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}
+                            <PrivateMemoryCardPreview locale={locale} runtime={runtime} bundle={bundle} href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}
                               title={bundle.title.displayTitle} cue={bundle.card.note || boardCopy.noReflection}
                               visual={item.visual} syncBadge={syncLabel(bundle.card)}
                               visualFit={bundle.asset.imageType === "CATALOG_COVER" ? "contain" : "cover"}

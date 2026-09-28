@@ -132,7 +132,7 @@ function ArchiveContent({ base }) {
       {items.length > 0 && (
         <section className="memory-archive__grid" aria-label={archiveCopy.listLabel}>
           {filtered.map(({ card, title, asset, previewDataUrl, catalogCover }) => (
-            <PrivateMemoryCardPreview
+            <PrivateMemoryCardPreview locale={locale}
               runtime={runtime} bundle={{ card, title, asset }}
               key={card.id}
               className="surface-card memory-archive__card"

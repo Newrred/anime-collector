@@ -926,4 +926,14 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 
 - 결과: Chromium 계정8+사진4=12 PASS, unit400 PASS, build19 PASS, React Doctor74/100(점수 유지, 경고18). 390px 모바일 스크린샷 확인: 사진 상태/접힌 저장 정보 표시 및 가로 넘침 없음. 중지 시 중복 오류 대신 중지 상태를 유지하는 회귀도 통과.
 - 제한: Windows WebKit 사진 검사4건은 계정 확인 실패/IndexedDB MEDIA_STORAGE_FAILED/카드 미표시로 실패. 실제 iPhone Safari 검증 성공으로 간주하지 않는다. 원인은 미확정이며 배포 전 별도 확인 필요. Git push/배포/서버 변경 없음.
-`n- 후속 요청: 사용자가 실제 iPhone 테스트를 이어가기 위해 테스트 배포를 명시 요청. 위 WebKit 검증 제한을 유지한 채 codex/phone-test Git push로 preview만 배포하고 SHA를 확인한다. master/운영 설정 변경 없음.
+
+- 후속 요청: 사용자가 실제 iPhone 테스트를 이어가기 위해 테스트 배포를 명시 요청. 위 WebKit 검증 제한을 유지한 채 codex/phone-test Git push로 preview만 배포하고 SHA를 확인한다. master/운영 설정 변경 없음.
+
+### 2026-09-28 W19 — 카드 목록 원격 사진 연결
+- 증상: 사용자는 카드 상세에서만 사진이 보이고 재방문마다 기다린다고 보고. 실제 로그인 PC에서 작품 목록은 MISSING, 보관함 첫 사진은 로딩 후 표시됨을 확인. 홈/작품은 MemoryCardPreview만 사용해 원격 썸네일 조회가 빠져 있음. 상세는 policy 뒤 read 내부에서 policy를 중복 호출함.
+- 변경: 홈/작품도 기존 소유자 검증·동시4개·viewport 지연 조회 wrapper 사용. wrapper는 runtime 미전달 시 플랫폼 runtime을 조회하며 로딩/실패를 구분. 상세 최초 policy+이미지 조회를 단일 API로 묶어 중복 policy 제거.
+- 보존: no-store, 공개/영구 캐시 없음, 계정·버전·해시 확인/abort 유지. DB 변경 없음. 재방문 다운로드 자체는 유지하므로 캐시 개선 완료라고 주장하지 않음.
+- 검증: 원격만 남은 합성 카드로 홈/작품/보관함/보드/상세 이미지 검사, policy 호출 횟수/계정 변경 단위 검사, unit/build/React Doctor. 실패 시 소스만 되돌림. 배포는 Git preview 경로만 사용.
+
+- 검증 결과: unit401 PASS, Chromium private-image-sync4 PASS(두 실패/재시도 시나리오 각각 홈·작품까지 추가), build19 PASS. 첫 dev 서버 준비 시간 초과 후 재실행 통과. React Doctor72/100·20warnings: 신규 검사 대상 TitleIdentity/MemoryBoardView 기존 복잡도2건이 추가 집계되었으며 HEAD와 함수 비교로 변경 없음(보드는 locale prop만 추가)을 확인. 새 제어 흐름 경고 없음. WebKit 기존 검증 제한 유지.
+- 제한: 캐시는 추가하지 않아 전체 페이지 재방문 시 재다운로드는 유지. 목록 누락/로딩 상태 및 상세 중복 조회 수정만 테스트 브랜치에 배포한다. 영구 다운로드 캐시는 별도 설계·계정 전환/로그아웃/삭제 처리 검증이 필요하다.

@@ -122,3 +122,20 @@ test('thumbnail read uses thumbnail hash and bound, and refuses corrupt thumbnai
   await assert.rejects(f.controller().read(undefined, 'thumb'), { code: 'PRIVATE_IMAGE_REQUEST_FAILED' });
   assert.equal(reads.length, 2);
 });
+
+
+test('detail preview reads one policy and checks ownership again before returning bytes', async () => {
+  const f = await fixture(); f.state.ready = true;
+  const fetch = f.options.fetchImpl; const calls = [];
+  f.options.fetchImpl = async (url, init) => { calls.push(url); return fetch(url, init); };
+  const result = await f.controller().readWithPolicy();
+  assert.equal(result.blob.size, f.copy.size);
+  assert.equal(calls.filter(url => url.includes('policy=1')).length, 1);
+  assert.equal(calls.length, 2);
+  f.options.fetchImpl = async (url, init) => {
+    const response = await fetch(url, init);
+    if (!url.includes('policy=1')) f.state.user = 'B';
+    return response;
+  };
+  await assert.rejects(f.controller().readWithPolicy(), { code: 'AUTH_REQUIRED' });
+});

@@ -1,4 +1,4 @@
-import MemoryCardPreview from "../../features/memory/components/MemoryCardPreview.jsx";
+import PrivateMemoryCardPreview from "../../features/memory/components/PrivateMemoryCardPreview.jsx";
 import MemoryTitleLink from "../../features/titles/components/MemoryTitleLink.jsx";
 import "./home-rediscovery.css";
 
@@ -15,7 +15,7 @@ export default function HomeRediscovery({ groups, base, locale }) {
     {sections.map(([key, heading]) => groups[key]?.length ? <section key={key} aria-labelledby={`rediscovery-${key}`}>
       <h2 id={`rediscovery-${key}`}>{heading}</h2>
       <div className="home-rediscovery__grid">
-        {groups[key].map((bundle) => <div key={bundle.card.id}><MemoryCardPreview
+        {groups[key].map((bundle) => <div key={bundle.card.id}><PrivateMemoryCardPreview bundle={bundle} locale={locale}
           href={`${base}memory/card/?id=${encodeURIComponent(bundle.card.id)}`}
           title={bundle.title.displayTitle} cue={bundle.card.note || ""} visual={bundle.visual}
           badge={bundle.asset.imageType === "CATALOG_COVER" ? (ko ? "공식 표지" : "Official cover") : ""}
