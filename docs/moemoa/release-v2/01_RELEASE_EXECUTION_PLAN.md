@@ -952,3 +952,10 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - 검증: unit/build 및 실제 로그인된 테스트 페이지 반복 측정. 요청 내용을 바꾸거나 권한 검사를 생략하지 않음. DB 변경 없음. 결과 후 원인·측정 범위·후속 변경을 구분해 보고. 진단 옵션 제거로 복구 가능.
 
 - 계측 변경 검증: unit407 PASS, build19 PASS. 일반 응답 의미/권한 변경 없이 preview에서 실제 시간 측정 진행.
+
+### 2026-09-28 W19 — 사진 권한 확인 왕복 지연 개선
+- 목적: 뒤로가기 사진 대기를 줄이되 서버 권한·정책 확인과 명시적 업로드를 유지한다.
+- 확인: Vercel Functions 설정은 iad1(미국 동부), moemoa-test Primary Database는 ap-southeast-1(싱가포르). policy HTTP 843~1444ms, 캐시2~4ms. 실제 대시보드와 기존 코드/계측을 교차 확인했다.
+- 변경 지도/순서: 먼저 vercel.json regions=[sin1]을 preview 브랜치에만 반영하고 Git 배포 SHA 및 실제 반복 지연을 확인한다. 전역 대시보드 설정/운영 master는 변경하지 않는다. 효과 확인 후 필요하면 웹 읽기 화면 전환의 강제 문서 재시작을 줄이며 Android/미저장 이탈 보호는 보존한다.
+- 검증: JSON 구성 및 기존 unit/build, 로그인된 실제 preview의 동일 사진 policy/cache 시간 비교. 최종 UI 변경 시 해당 브라우저 회귀와 React Doctor를 실행한다. 단일 PC 표본을 iPhone 성능 보증으로 보고하지 않는다.
+- 데이터/보안/복구: DB migration·데이터 이동·공개권한 변경 없음. 서버 getUser와 정책 RPC 및 캐시 해시/소유자 확인 유지. regions 변경 revert 후 Git 배포로 복구. 운영 반영 전 운영 DB 지역을 별도로 확인해야 한다.
