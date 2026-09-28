@@ -904,3 +904,15 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - 완료 조건: 제목 초점이 유지된 저장 클릭은 Archive로 이동하고 카드가 남으며, 제목 Enter는 검색만 수행한다.
 - 검증 결과: 수정 전 초점 유지 저장 회귀1 FAIL(Archive 미이동), 수정 후 Chromium/WebKit6 PASS. unit397 및 build19 PASS. React Doctor74 유지(변경 범위에 composer가 포함되어 기존 대형 component 경고 추가). 실제 iPhone 재확인 대기.
 - 반영: 동일 codex/phone-test Preview에 Git push하여 기존 테스트 주소를 갱신한다. master/운영/DB 변경 없음.
+
+### 2026-09-28 W06 — 휴대폰 동기화 실패 진단
+
+- 목적: 사용자에게 원인 없는 실패만 보이는 동기화 오류를 안전한 분류로 유지하고 테스트 서버 실제 상태를 확인한다.
+- 근거: SupabaseMemoryGateway의 미분류 서버 오류와 syncMemoryMetadata SAFE_ERRORS에서 장치 오류 등이 MEMORY_GATEWAY_FAILED로 합쳐지고 UI는 일반 연결 안내만 보여 준다. 이 PC의 관리 도구/테스트 비밀 환경 파일은 없으며 other-pc SSH 연결 시간 초과. 현재 사용자 실패의 원인은 미확정.
+- 변경 지도: gateway에서 DB/RPC schema 누락 코드를 안전한 서버 설정 오류로 분류, sync 계층의 기존 장치 오류 유지, ko/en 설명 보완, gateway/engine 회귀 검사. 원문 서버 오류·개인 기록·SQL·토큰은 표시/로그하지 않는다.
+- 검증: 오류 분류→sync 반환과 대기 작업/커서 보존 및 알 수 없는 오류 비노출 단위 검사, build. 연결 확보 시 test 서버만 읽기 진단 후 필요한 변경을 확정한다.
+- 제외/복구: 원격 권한·정책·DB 변경, 운영 배포, 데이터 삭제 없음. UI/분류 변경은 Git 되돌림으로 복구하며 현재 pending 작업은 유지한다. 실제 동기화 정상화는 아직 완료가 아니다.
+- 실제 서버 읽기 진단(2026-09-28): moemoa-test healthy, private image approved/enabled·not stale, SYNC_* paused=false. 최근 카드5/이미지3 mutation APPLIED. sync_changes seq41/44의 최신 DELETE와 visual_asset READY/version1/deleted_at null 불일치. 부모 카드 DELETED·합성 테스트 제목 true, 생성2026-09-27T06:05:28.981273Z/삭제이벤트06:05:58.866403Z로 전일 hosted UI fixture 실행 시점과 일치.
+- 수리 계획: 테스트 프로젝트에서 해당 seq41/44로 식별되는 이미지만 잠금·정확한2건/부모삭제/기존상태 검증 후 state DELETED/is_current false/deleted_at 부모시각으로 소프트 삭제 상태 정합. version+1 및 새 DELETE 동기화 이벤트 추가, 원본/Storage/기존 로그 삭제 없음. 단일 transaction에서 예상 조건 불일치 시 전부 rollback. 정상 기록과 정책은 수정하지 않는다. 적용 전 SQL을 저장하고 적용 후 불일치0건·작업2건을 확인한다.
+- 복구 실행 결과: moemoa-test에서 예상2건 조건 통과 및 transaction 성공. 후속 SQL repaired_assets=2, matching_latest_deletes=2, remaining_invalid_deletes=0. 사용자가 동일 링크에서 ‘동기화 완료됨’ 확인. 실제 원인은 전일 합성 테스트 정리의 삭제 이벤트/자산 상태 불일치였다.
+- 검증: 동일 불일치 시 SYNC_RESPONSE_INVALID로 중단하고 정합 tombstone/후속 이벤트 뒤 SYNCED가 되는 회귀 추가. unit400 PASS, build19 PASS. 로컬 오류 안내 변경은 별도이며 서버 복구와 사용자 성공은 기존 ea89506 배포에서 확인했다. 테스트 중 공유 링크를 다시 바꾸지 않도록 이번 소스/문서 커밋은 로컬 보존하고 push하지 않는다.

@@ -98,6 +98,9 @@ const timestamp = (value) => {
 const sanitizeRemoteError = (error) => {
   if (Number(error?.status) === 429) return new SupabaseMemoryGatewayError("SYNC_RATE_LIMITED");
   if ([401, 403].includes(Number(error?.status)) || ["PGRST301", "PGRST302", "PGRST303"].includes(error?.code)) return new SupabaseMemoryGatewayError("AUTH_REQUIRED");
+  if (["PGRST202", "PGRST204", "PGRST205", "42883", "42703", "42P01"].includes(error?.code)) {
+    return new SupabaseMemoryGatewayError("SYNC_SERVER_SCHEMA_UNAVAILABLE");
+  }
   const message = String(error?.message || "");
   const code = [...ALLOWED_REMOTE_ERRORS].find((candidate) => (
     new RegExp(`(?:^|[^A-Z0-9_])${candidate}(?:$|[^A-Z0-9_])`).test(message)

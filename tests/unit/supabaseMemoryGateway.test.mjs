@@ -245,3 +245,17 @@ test('RPC cancellation is forwarded to the Supabase transport', async () => {
   await assert.rejects(() => result, { code: 'SYNC_ABORTED' });
   assert.equal(observed, controller.signal);
 });
+
+test('missing server schema is classified without exposing database details', async () => {
+  for (const code of ['PGRST202', 'PGRST204', 'PGRST205', '42883', '42703', '42P01']) {
+    const { client } = createClient({ rpcResult: { data: null, error: { code, message: 'private SQL and note', details: 'secret' } } });
+    await assert.rejects(() => new SupabaseMemoryGateway(client).pullChanges(), error => {
+      assert.equal(error.code, 'SYNC_SERVER_SCHEMA_UNAVAILABLE');
+      assert.equal(error.message.includes('private'), false);
+      assert.equal('details' in error, false);
+      return true;
+    });
+  }
+  const { client } = createClient({ rpcResult: { data: null, error: { code: 'UNRECOGNIZED_PRIVATE', message: 'secret' } } });
+  await assert.rejects(() => new SupabaseMemoryGateway(client).pullChanges(), { code: 'MEMORY_GATEWAY_FAILED' });
+});

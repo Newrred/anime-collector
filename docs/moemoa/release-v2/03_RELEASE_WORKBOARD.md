@@ -1,5 +1,13 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-09-28 동기화 조사 — 테스트 정리 불일치 복구 / 사용자 재확인 대기
+
+- 사용자 iPhone/Safari 카드 저장 성공 확인. 이후 동기화 실패 제보. 이것을 이미지 정책 24시간 만료나 운영 flag 때문으로 단정하지 않는다.
+- 이 PC에 Supabase/Vercel 관리 connector와 테스트 자격 파일 없음. Vercel CLI API403, other-pc SSH 시간 초과, Supabase 대시보드 로그인 화면 확인. 다른 PC는 필수가 아니며 이 PC에서 기존 관리 계정 로그인으로 후속 진단 가능.
+- 로컬 보완: DB/RPC schema 누락의 안전한 오류 분류, sync 계층에서 기존 장치/요청 충돌 코드 유지, ko/en 원인별 안내. 서버 원문/개인 기록은 노출하지 않는다. unit399 PASS. 실제 서버 동기화 정상화·운영 배포는 미완료다.
+- 후속: 사용자가 Supabase에 직접 로그인해 관리 연결 확보. 테스트 서버 이미지 정책 미만료/동기화 pause=false 확인. 전일 hosted UI 테스트 정리의 seq41/44 DELETE 이벤트와 합성 이미지 READY/deleted_at null이 불일치(부모 카드 이미 DELETED). 최근 계정에도 해당 이벤트가 있어 앱의 엄격한 pull 검사 중단 조건에 해당한다.
+- `tools/private-images/repair-phone-test-tombstones-20260928.sql`로 해당2건만 삭제 메타데이터 정합·version2·후속 DELETE 이벤트 추가. 기존 기록/Storage/정책 삭제·수정 없음. 실제 조회 결과 repaired_assets2/matching_latest_deletes2/remaining_invalid_deletes0. 기존 링크 재시도 요청. 오류 안내 변경은 아직 로컬이며 이 서버 복구에는 새 배포가 필요하지 않다.
+
 ## 2026-09-28 휴대폰 테스트 수정 — Safari 카드 저장
 
 - iPhone/Safari 저장 무반응 제보를 조사했다. 제목 초점이 유지되는 클릭을 재현하니 명시적 저장도 검색으로 잘못 분기하여 Archive 이동 검사가 실패했다.
@@ -1011,3 +1019,4 @@ NA 이유:
 - REAL_ENV_VERIFIED BLOCKED: 실제 Supabase A/B/anon JWT·REST/Storage·배포 API/CDN, 미니홈 사용자 이미지 전송, Android 실기기·App Link, 실제 moderation/복원 미검증. 로컬 pass를 이 gate의 완료로 바꾸지 않았다. OWNER_APPROVED: 사용자 W11 로컬 진행 승인, 운영 D06 미승인. commit/push/deploy 없음.
 - 증거: [W11 검증/source·artifact SHA256](evidence/2026-09-24-w11-validation.json), `.cache/w11-{unit-final,browser-final,sql-final,build-final,routes,react-doctor-final,diff-check}.log`, `.cache/w11-home-320.png`, `.cache/w11-editor-320-ko.png`. W09/W10 evidence는 당시 소스의 역사 기록이다.
 - 진행: 완료 M1/6, 기본 W4/20, 추가 필수0 유지. M3 로컬 W11 결과를 확보했으나 실환경·W12/W13 남음. 다음 W12 팔로우·해제·내 목록은 W07/W11 **로컬** 선행 충족으로 READY이며 외부 게이트를 지우지 않는다.
+- 사용자 최종 확인: 같은 테스트 링크에서 ‘동기화 완료됨’. 관련 회귀 포함 unit400 PASS/build19 PASS. 이번 오류 안내·수리 SQL·기록은 로컬 커밋 보존, Preview 재배포/push 없음. 동기화 복구 완료이며 이미지 사본 전송/공개·철회 실기기 검증은 별도다.

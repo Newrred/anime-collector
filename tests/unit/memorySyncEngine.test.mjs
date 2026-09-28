@@ -338,3 +338,31 @@ test('unresolved conflict blocks later sync from silently applying over the pres
   assert.equal(requested, false);
   assert.equal(h.appliedRemote.length, 0);
 });
+
+test('actionable sync failures keep pending writes and the durable cursor intact', async () => {
+  for (const code of ['SYNC_SERVER_SCHEMA_UNAVAILABLE', 'DEVICE_NOT_REGISTERED', 'DEVICE_PAYLOAD_INVALID', 'DEVICE_OWNERSHIP_CONFLICT', 'OPERATION_ID_CONFLICT', 'OPERATION_HASH_MISMATCH', 'FOREIGN_OWNER_REFERENCE']) {
+    const h = harness({ operations: [operation()], failMutation: code });
+    const result = await h.sync.syncNow(input);
+    assert.equal(result.push.lastErrorCode, code);
+    assert.equal(result.status, 'ERROR');
+    assert.equal(h.queue[0].state, 'PENDING');
+    assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 0);
+    assert.equal(h.appliedRemote.length, 0);
+  }
+  const h = harness({ operations: [operation()], failMutation: 'PRIVATE_UNKNOWN_ERROR' });
+  assert.equal((await h.sync.syncNow(input)).push.lastErrorCode, 'MEMORY_GATEWAY_FAILED');
+});
+
+test('inconsistent fixture deletion fails closed until a matching tombstone is restored', async () => {
+  const change = { syncSeq: 41, entityType: 'VISUAL_ASSET', entityId: ENTITY_ID, entityVersion: 1, operationType: 'DELETE' };
+  const h = harness({ pullResult: { changes: [change], nextSyncSeq: 41, requiresFullResync: false }, remoteRows: [{ id: ENTITY_ID, version: 1, state: 'READY', deletedAt: null }] });
+  const failed = await h.sync.syncNow(input);
+  assert.equal(failed.errorCode, 'SYNC_RESPONSE_INVALID');
+  assert.equal(h.appliedRemote.length, 0);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 0);
+  h.gateway.pullChanges = async () => ({ changes: [change, { ...change, syncSeq: 60, entityVersion: 2 }], nextSyncSeq: 60, requiresFullResync: false });
+  h.gateway.readEntities = async () => [{ id: ENTITY_ID, version: 2, state: 'DELETED', deletedAt: NOW }];
+  assert.equal((await h.sync.syncNow(input)).status, 'SYNCED');
+  assert.equal(h.appliedRemote.length, 1);
+  assert.equal((await h.repository.readDeviceSyncState()).lastSyncSeq, 60);
+});
