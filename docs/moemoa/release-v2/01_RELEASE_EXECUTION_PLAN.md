@@ -937,3 +937,11 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 
 - 검증 결과: unit401 PASS, Chromium private-image-sync4 PASS(두 실패/재시도 시나리오 각각 홈·작품까지 추가), build19 PASS. 첫 dev 서버 준비 시간 초과 후 재실행 통과. React Doctor72/100·20warnings: 신규 검사 대상 TitleIdentity/MemoryBoardView 기존 복잡도2건이 추가 집계되었으며 HEAD와 함수 비교로 변경 없음(보드는 locale prop만 추가)을 확인. 새 제어 흐름 경고 없음. WebKit 기존 검증 제한 유지.
 - 제한: 캐시는 추가하지 않아 전체 페이지 재방문 시 재다운로드는 유지. 목록 누락/로딩 상태 및 상세 중복 조회 수정만 테스트 브랜치에 배포한다. 영구 다운로드 캐시는 별도 설계·계정 전환/로그아웃/삭제 처리 검증이 필요하다.
+
+### 2026-09-28 W19 — 뒤로가기 사진 재다운로드 방지
+- 사용자 요청으로 비공개 사진의 탭 내 재사용을 추가한다. 이전 no-cache 구현 제한을 개선하되 HTTP/CDN/SW no-store 및 서버 권한/정책 확인은 유지한다.
+- 계획: sessionStorage에 검증된 사본만 제한 저장(최대 약2백만 문자,20분). 계정·자산·버전·종류·정책 revision·해시를 키로 사용. 매번 현재 정책과 소유자를 확인한 후 동일 bytes를 재사용하므로 서버 철회/삭제 시 캐시로 우회하지 않는다. 계정변경/로그아웃 시 삭제, 변경된 이미지 키는 재사용 안 함. 저장 실패 시 일반 다운로드로 정상 진행.
+- 검증: 뒤로가기/앞으로가기/새 문서 로드 시 binary GET 증가 없음, 여전히 policy 조회, cache손상/만료/한도/계정전환/다운로드 중 로그아웃 검증. unit/build/기존 브라우저 검사. DB/공개권한 변경0. 브라우저 복원 기능에 따라 탭 저장소가 복원될 수 있어 TTL/권한 확인을 항상 적용. 캐시 삭제/코드 revert로 복구.
+
+- 결과: unit405 PASS, Chromium12 PASS(실제 history back/forward 뒤 binary GET0 증가, 재시도/원본 보존/계정 전환 포함), build19 PASS, React Doctor72/100·20warnings으로 직전과 동일. 캐시는 매번 서버 policy 성공 및 bytes/hash/현재 소유자 재확인 후만 사용. 서버 차단 응답 시 캐시 사본 반환하지 않는 단위 검사 통과.
+- 반영 파일: privateImageReadCache.js(탭 캐시), createPrivateImageTransfer.js(재검증 후 재사용), platformPrivateImages.js(연결), authRepo.js(계정/로그아웃 삭제), 관련 unit/e2e. 정책 확인 왕복은 남고 20분 만료/용량 초과/저장 차단 시 재다운로드 가능. 실기기 Safari 동작 확인은 사용자 테스트로 이어간다. 테스트 브랜치 Git 배포, DB 및 운영 변경 없음.

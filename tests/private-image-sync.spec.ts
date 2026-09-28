@@ -142,6 +142,16 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   expect(posts.length).toBe(2);
   await page.goto(detailUrl);
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
+  const downloadedBeforeBack = reads.length;
+  await page.goBack();
+  await expect(page.locator('.title-hub__memory img[src^="blob:"]')).toBeVisible();
+  await page.goForward();
+  await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
+  expect(reads.length).toBe(downloadedBeforeBack);
+  // Force a cold read to retain the existing in-flight account-switch regression.
+  await page.evaluate(async () => {
+    (await import('/src/features/memory/adapters/platform/privateImageReadCache.js')).privateImageReadCache.clear();
+  });
   let release;
   const held = new Promise<void>(resolve => { release = resolve; }); let waiting = false;
   await page.route('**/api/private-image**', async route => {

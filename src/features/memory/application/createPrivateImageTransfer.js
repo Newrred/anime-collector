@@ -6,7 +6,7 @@ const safeErrors = new Set(['AUTH_REQUIRED','NOT_FOUND','PRIVATE_IMAGE_DISABLED'
   'PRIVATE_IMAGE_RETIRED','PRIVATE_IMAGE_CONFLICT','PRIVATE_IMAGE_QUOTA_EXCEEDED','PRIVATE_IMAGE_CAPACITY_EXCEEDED',
   'PRIVATE_IMAGE_RATE_LIMITED','IMAGE_SIZE_LIMIT','OPERATION_MISMATCH']);
 
-export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, getSession, getOwner, getAsset, readOriginal, journal,
+export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, getSession, getOwner, getAsset, readOriginal, journal, cache = null,
   optimize = optimizePrivateImage, fetchImpl = globalThis.fetch, uuid = () => globalThis.crypto.randomUUID() }) {
   const key = `${ownerId}:${assetId}:${sourceVersion}`;
   const url = `/api/private-image?asset=${encodeURIComponent(assetId)}&version=${sourceVersion}`;
@@ -52,10 +52,18 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     const expectedHash = variant === 'thumb' ? expected.thumbnailHash : expected.mainHash;
     const limit = variant === 'thumb' ? 120_000 : 1_000_000;
     if (!Number.isSafeInteger(expectedBytes) || expectedBytes < 1 || expectedBytes > limit || !SHA.test(expectedHash || '')) fail('PRIVATE_IMAGE_REQUEST_FAILED');
+    const cacheKey = JSON.stringify([assetId, sourceVersion, variant, current.revision, expectedHash]);
+    const cached = cache?.get(ownerId, cacheKey);
+    if (cached && cached.size === expectedBytes && await blobHash(cached) === expectedHash) {
+      await context(signal);
+      return cached;
+    }
     const response = await request(variant === 'thumb' ? `${url}&variant=thumb` : url, {}, signal);
     if (response.headers.get('content-type')?.split(';')[0] !== 'image/webp') fail('PRIVATE_IMAGE_REQUEST_FAILED');
     const blob = await response.blob();
     if (blob.size !== expectedBytes || blob.size > limit || await blobHash(blob) !== expectedHash) fail('PRIVATE_IMAGE_REQUEST_FAILED');
+    await context(signal);
+    await cache?.put(ownerId, cacheKey, blob);
     await context(signal);
     return blob;
   }

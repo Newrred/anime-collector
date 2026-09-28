@@ -139,3 +139,16 @@ test('detail preview reads one policy and checks ownership again before returnin
   };
   await assert.rejects(f.controller().readWithPolicy(), { code: 'AUTH_REQUIRED' });
 });
+
+
+test('cached bytes skip download but never bypass current server policy or hash checks', async () => {
+  const f = await fixture(); f.state.ready = true;
+  let cached = null, images = 0, policies = 0; const fetch = f.options.fetchImpl;
+  f.options.cache = { get: () => cached, put: async (_owner, _key, blob) => { cached = blob; } };
+  f.options.fetchImpl = async (url, init) => { if (url.includes('policy=1')) policies++; else images++; return fetch(url, init); };
+  await f.controller().read(); await f.controller().read();
+  assert.equal(images, 1); assert.equal(policies, 2);
+  cached = new Blob(['corrupt']); await f.controller().read(); assert.equal(images, 2);
+  f.options.fetchImpl = async () => Response.json({ error: 'PRIVATE_IMAGE_PAUSED' }, { status: 403 });
+  await assert.rejects(f.controller().read(), { code: 'PRIVATE_IMAGE_PAUSED' });
+});

@@ -1,3 +1,4 @@
+import { privateImageReadCache } from '../features/memory/adapters/platform/privateImageReadCache.js';
 import { supabase } from "../lib/supabaseClient.js";
 import {
   MOCK_AUTH_EVENT,
@@ -77,6 +78,7 @@ export async function signInWithGoogle(next = "/data/") {
 }
 
 export async function signOutFromCloud() {
+  privateImageReadCache.clear();
   if (readMockAuthSession()) {
     clearMockAuthSession();
     return;
@@ -86,18 +88,23 @@ export async function signOutFromCloud() {
   if (error) throw error;
 }
 
+function rememberSession(session) {
+  privateImageReadCache.setOwner(session?.user?.id ? `account:${session.user.id}` : null);
+  return session;
+}
+
 export async function getAuthSession() {
   const mockSession = readMockAuthSession();
-  if (mockSession) return mockSession;
-  if (!supabase) return null;
+  if (mockSession) return rememberSession(mockSession);
+  if (!supabase) return rememberSession(null);
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
-  return data?.session || null;
+  return rememberSession(data?.session || null);
 }
 
 export function onAuthSessionChange(callback) {
   function onMockAuthChange() {
-    callback(readMockAuthSession());
+    callback(rememberSession(readMockAuthSession()));
   }
 
   if (typeof window !== "undefined") {
@@ -107,7 +114,7 @@ export function onAuthSessionChange(callback) {
   let unsubscribeSupabase = () => {};
   if (supabase) {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      callback(session || null);
+      callback(rememberSession(session || null));
     });
     unsubscribeSupabase = () => data.subscription.unsubscribe();
   }
@@ -124,5 +131,5 @@ export async function exchangeCodeForSession(code) {
   if (!supabase) throw new Error("Supabase env missing");
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) throw error;
-  return data?.session || null;
+  return rememberSession(data?.session || null);
 }
