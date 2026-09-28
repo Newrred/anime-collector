@@ -959,3 +959,6 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - 변경 지도/순서: 먼저 vercel.json regions=[sin1]을 preview 브랜치에만 반영하고 Git 배포 SHA 및 실제 반복 지연을 확인한다. 전역 대시보드 설정/운영 master는 변경하지 않는다. 효과 확인 후 필요하면 웹 읽기 화면 전환의 강제 문서 재시작을 줄이며 Android/미저장 이탈 보호는 보존한다.
 - 검증: JSON 구성 및 기존 unit/build, 로그인된 실제 preview의 동일 사진 policy/cache 시간 비교. 최종 UI 변경 시 해당 브라우저 회귀와 React Doctor를 실행한다. 단일 PC 표본을 iPhone 성능 보증으로 보고하지 않는다.
 - 데이터/보안/복구: DB migration·데이터 이동·공개권한 변경 없음. 서버 getUser와 정책 RPC 및 캐시 해시/소유자 확인 유지. regions 변경 revert 후 Git 배포로 복구. 운영 반영 전 운영 DB 지역을 별도로 확인해야 한다.
+- 발견: 지역 변경 직전 2026-09-28 07:05:37 UTC에 테스트 사용량 관측24시간이 만료됨. 읽기 SQL에서 stale=true, paused=false, 실제/예약38,464bytes(한도41,943,040), 월 읽기534,668bytes(한도83,886,080)를 확인. 기존 test revision/한도/활성 상태 및 실제 사용량 조건을 검증하는 refresh-phone-test-observation-20260928.sql로 관측시각만 갱신한다. 권한·한도·만료 규칙 변경 없음. 이 일일 관측은 자동화되어 있지 않아 재만료 가능하며 운영 전 별도 마감 필요.
+- 결과: 관측 갱신 성공07:11:52 UTC. preview6d7e784 Ready/build-info 일치 및 sin1 실행 확인. unit407/build19 PASS. 실제 PC 반복3회 policy214~244ms(이전843~1444), 뒤로가기 사진 준비1810→574ms, 캐시hit·추가binary GET0. 상세/작품 목록 실제 사진 로드 완료 확인.
+- 계획 조정: 지역 변경만으로 반복 권한 대기가 크게 감소하여 이번 패치는 여기까지 한정. 웹 전체 전환 제거는 미저장 이탈/history 보호 회귀 범위가 커 별도 작업으로 남긴다. 최초 콜드 다운로드와 화면 준비, 실기기 Safari, 관측 자동화는 미완료. 상세 표본/한계는 reports/2026-09-28-private-photo-latency.md.
