@@ -1,5 +1,11 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-09-28 휴대폰 테스트 수정 — Safari 카드 저장
+
+- iPhone/Safari 저장 무반응 제보를 조사했다. 제목 초점이 유지되는 클릭을 재현하니 명시적 저장도 검색으로 잘못 분기하여 Archive 이동 검사가 실패했다.
+- 실제 submitter가 저장 버튼이면 저장하도록 수정했다. 제목 Enter 검색은 유지한다. Chromium/WebKit 저장·검색·언어/상세 흐름 6 PASS, unit397 PASS, build19 PASS. React Doctor 74→74(변경 파일 포함에 따른 기존 대형 component 경고 1개 추가).
+- `codex/phone-test` Git Preview에 반영할 수정이다. 실제 iPhone 재확인은 대기하며 서버 정책 만료/이미지 동기화 검증과 구분한다. 운영 master·DB·권리 정책 변경 없음.
+
 ## 현재 요약 — 일반 공개·사후 검토로 범위 축소 (2026-09-27)
 
 - 범위: Web-only·무료 최적화 이미지 연동·일반 이미지 공개·신고/관리자 사후 검토. 성인 인증·성인 이미지 공개는 보류(`GENERAL-PUBLIC-POSTMODERATION-01`). 기존12세 목표·KR/PH/TH·새 날짜 미정 유지.

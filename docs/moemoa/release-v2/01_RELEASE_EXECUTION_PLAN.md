@@ -893,3 +893,14 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - handler.js:109~127의 실제 전달은 preview만 user RPC, 일반 공개는 service RPC이며 Storage 읽기 전후 resolve를 재확인한다. 이 재확인과 no-store를 유지하면서 검증된 요청자 세션을 전달해야 한다. storage 경로/토큰을 URL이나 공개 DTO에 넣는 방식은 사용하지 않는다.
 - read_memory_publication의 card 필터와 이를 재사용하는 미니홈·작성자/관계 읽기를 함께 검증해야 한다. 성인 카드뿐 아니라 title/description/대표 이미지·집계의 노출 정책도 D04에서 확정해야 한다. 기존 일반 UGC 동작은 아직 새 연령 정책을 구현하지 않는다.
 - 공급자 조사: PortOne의 현행 V2 문서는 브라우저 완료 후 서버 API에서 VERIFIED 결과를 조회하도록 설명한다(https://developers.portone.io/opi/ko/extra/identity-verification/readme-v2). 사용자/일회용 요청 결속·만료/재사용·guardian 관계/동의는 MOEMOA에서 별도로 검증할 항목이다. 2024년 공급자 블로그의 단가를 현재 견적으로 확정하지 않는다. 공급자 계약/키/유료 변경 없음.
+
+### 2026-09-28 W19 — Safari 카드 저장 무반응 조사
+
+- 사용자 재현: iPhone/Safari에서 사진·제목·권리 확인 후 카드 저장을 눌러도 반응 없음. PC Chromium 합성 이미지 저장은 통과.
+- 근거: MemoryCardComposer.submitComposer가 submitter 대신 activeElement만 검사하여 제목에 초점이 남으면 저장 클릭도 검색으로 전환한다.
+- 범위/변경 지도: 기존 composer의 명시적 저장과 제목 Enter 검색 구분, memory-card-composer.spec.ts에 초점 유지 클릭 회귀 검사 추가. 먼저 기존 코드 실패를 확인한다.
+- 검증: Chromium 및 WebKit의 해당 회귀와 기존 제목 Enter/저장 검사, React Doctor, build. 실제 iPhone 재확인은 별도.
+- 데이터/권리/운영: DB·서버 정책·이미지 전송·동의 변경 없음. 자동 업로드나 운영 배포 없음. 롤백은 해당 UI 조건 및 회귀 변경 되돌림.
+- 완료 조건: 제목 초점이 유지된 저장 클릭은 Archive로 이동하고 카드가 남으며, 제목 Enter는 검색만 수행한다.
+- 검증 결과: 수정 전 초점 유지 저장 회귀1 FAIL(Archive 미이동), 수정 후 Chromium/WebKit6 PASS. unit397 및 build19 PASS. React Doctor74 유지(변경 범위에 composer가 포함되어 기존 대형 component 경고 추가). 실제 iPhone 재확인 대기.
+- 반영: 동일 codex/phone-test Preview에 Git push하여 기존 테스트 주소를 갱신한다. master/운영/DB 변경 없음.

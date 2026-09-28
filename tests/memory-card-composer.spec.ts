@@ -15,6 +15,21 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("explicit save keeps working when the title retains focus on Safari", async ({ page }) => {
+  await page.goto("/memory/new/");
+  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  const title = page.getByLabel("작품 또는 카드 제목");
+  await title.fill("Safari focus regression");
+  const save = page.getByRole("button", { name: "카드 저장", exact: true });
+  await expect(save).toBeEnabled();
+  // Reproduce browsers that do not move focus to a clicked button.
+  await save.evaluate(button => button.addEventListener("mousedown", event => event.preventDefault()));
+  await expect(title).toBeFocused();
+  await save.click();
+  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
+  await expect(page.getByRole("link", { name: "Safari focus regression", exact: true })).toBeVisible();
+});
+
 test("Memory routes follow the selected English locale from composer through detail", async ({ page }) => {
   await page.goto("/memory/new/");
   await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();

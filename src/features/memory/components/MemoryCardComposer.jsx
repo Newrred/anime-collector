@@ -81,7 +81,10 @@ function MemoryCardComposerContent({ base }) {
   );
   const submitComposer = (event) => {
     const activeElement = event.currentTarget.ownerDocument.activeElement;
-    if (activeElement?.id === "memory-title-input") {
+    // Safari may leave focus in the title when the save button is tapped.
+    // Only an implicit title submission should fall back to searching.
+    const explicitSave = event.nativeEvent.submitter?.name === "save-memory";
+    if (!explicitSave && activeElement?.id === "memory-title-input") {
       event.preventDefault();
       searchTitles(activeElement.value);
       return;
@@ -283,7 +286,7 @@ function MemoryCardComposerContent({ base }) {
 
             <div className={`memory-composer__save-gate memory-composer__step-card${canSave ? " is-current" : ""}`}>
               <div>
-                <button type="submit" className="btn memory-composer__save-button" disabled={!canSave} aria-describedby="memory-save-reason">
+                <button type="submit" name="save-memory" className="btn memory-composer__save-button" disabled={!canSave} aria-describedby="memory-save-reason">
                   {status === "saving" ? composerCopy.saving : composerCopy.save}
                 </button>
               </div>
