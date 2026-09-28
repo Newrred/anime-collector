@@ -184,15 +184,15 @@ async function installAccountAdapters(page: Page, options: { signedIn?: boolean;
 test("Data Center shows local-only Memory state without legacy cloud calls", async ({ page }) => {
   await installAccountAdapters(page);
   await page.goto("/data/");
-  await expect(page.getByRole("heading", { name: "Memory account" })).toBeVisible();
-  await expect(page.getByText("Local only", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Account & sync" })).toBeVisible();
+  await expect(page.getByText("Saved on this device", { exact: true }).first()).toBeVisible();
   expect(await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__)).toEqual([]);
 });
 
 test("signed-in Memory account reports promotion available", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 2 });
   await page.goto("/data/");
-  await expect(page.getByText("Signed in — promotion available", { exact: true })).toBeVisible();
+  await expect(page.getByText("Device records available", { exact: true })).toBeVisible();
   await expect(page.getByText("2 private Memory Cards are ready for review.")).toBeVisible();
   const calls = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
   expect(calls).toEqual(["ensure_user_profile", "register_user_device"]);
@@ -204,14 +204,14 @@ test("signed-in Memory account reports promotion available", async ({ page }) =>
 test("signed-in Memory account distinguishes an empty Guest namespace", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 0 });
   await page.goto("/data/");
-  await expect(page.getByText("Signed in — no Guest data", { exact: true })).toBeVisible();
-  await expect(page.getByText("Metadata sync has not started yet.")).toBeVisible();
+  await expect(page.getByText("Account connected", { exact: true })).toBeVisible();
+  await expect(page.getByText("Choose Sync records to get the latest changes.")).toBeVisible();
 });
 
 test("restoring an existing Auth session does not misread loading as sign-out", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 0, activeAccount: true });
   await page.goto("/data/");
-  await expect(page.getByText("Signed in — no Guest data", { exact: true })).toBeVisible();
+  await expect(page.getByText("Account connected", { exact: true })).toBeVisible();
   const calls = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
   expect(calls).toEqual(["ensure_user_profile", "register_user_device"]);
   expect(calls).not.toContain("rotate_guest_owner");
@@ -220,8 +220,8 @@ test("restoring an existing Auth session does not misread loading as sign-out", 
 test("account initialization failure stays retryable and hides raw database errors", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 1, fail: true });
   await page.goto("/data/");
-  await expect(page.getByText("Account initialization failed — retry", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Retry account setup" })).toBeVisible();
+  await expect(page.getByText("Could not connect your account", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Reconnect account" })).toBeVisible();
   await expect(page.getByText("select private.secret")).toHaveCount(0);
 });
 
@@ -229,9 +229,9 @@ test("promotion preview is explicit, cancellable, and moves metadata only after 
   await page.setViewportSize({ width: 320, height: 720 });
   await installAccountAdapters(page, { signedIn: true, guestCards: 2 });
   await page.goto("/data/");
-  await page.getByRole("button", { name: "Review Guest records" }).click();
-  await expect(page.getByRole("heading", { name: "Move Guest records to this account" })).toBeVisible();
-  await expect(page.getByText("Original image files stay only on this device.", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Import records from this device" }).click();
+  await expect(page.getByRole("heading", { name: "Import records to your account" })).toBeVisible();
+  await expect(page.getByText("Photos are still on this device.", { exact: false })).toBeVisible();
   await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
   const previewReflow = await page.evaluate(() => {
     const panel = document.querySelector<HTMLElement>("[data-memory-account-status]");
@@ -248,10 +248,10 @@ test("promotion preview is explicit, cancellable, and moves metadata only after 
     "ensure_user_profile", "register_user_device",
   ]);
 
-  await page.getByRole("button", { name: "Review Guest records" }).click();
+  await page.getByRole("button", { name: "Import records from this device" }).click();
   await page.getByLabel("Use exact catalog match: Naruto").check();
   await page.getByRole("button", { name: "Move records" }).click();
-  await expect(page.getByText("Signed in — no Guest data", { exact: true })).toBeVisible();
+  await expect(page.getByText("Account connected", { exact: true })).toBeVisible();
   const calls = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
   expect(calls).toEqual([
     "ensure_user_profile", "register_user_device", "resolve_promotion_title", "promote_guest_memory",
@@ -261,7 +261,7 @@ test("promotion preview is explicit, cancellable, and moves metadata only after 
 test("explicit sync exposes local and cloud notes without logging either value", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 0, conflict: true });
   await page.goto("/data/");
-  await page.getByRole("button", { name: "Sync now" }).click();
+  await page.getByRole("button", { name: "Sync records" }).click();
   await expect(page.getByRole("heading", { name: "Review Memory conflict" })).toBeVisible();
   await expect(page.getByText("Local private note", { exact: true })).toBeVisible();
   await expect(page.getByText("Cloud private note", { exact: true })).toBeVisible();
@@ -292,12 +292,12 @@ test('sync pause and retry show partial progress instead of false success', asyn
     };
   });
   await page.goto('/data/');
-  await page.getByRole('button', { name: 'Sync now', exact: true }).click();
+  await page.getByRole('button', { name: 'Sync records', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Pause sync', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Pause sync', exact: true }).click();
   await page.evaluate(() => (window as any).finishSyncRequest());
   await expect(page.getByRole('status').filter({ hasText: 'Sync paused.' })).toBeVisible();
-  await expect(page.getByText('Metadata sync is complete.', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Sync now', exact: true }).click();
-  await expect(page.getByText('Metadata sync is complete.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Records synced. Sync each photo from its card.', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sync records', exact: true }).click();
+  await expect(page.getByText('Records synced. Sync each photo from its card.', { exact: true })).toBeVisible();
 });

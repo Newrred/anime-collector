@@ -52,7 +52,7 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
       </div>
 
       <div className="list-stack">
-        <div className="small">{leadFor(copy, account)}</div>
+        {!account.syncResultCode && <div className="small">{leadFor(copy, account)}</div>}
         {connected ? <div className="small">{auth.user?.email || copy.connectedAccount}</div> : null}
       </div>
 
@@ -88,8 +88,8 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
         ) : null}
       </div>
 
-      {account.syncResultCode ? <div className="small page-feedback" role="status">{copy.syncResults[account.syncResultCode] || copy.syncResults.ERROR}</div> : null}
-      {account.syncErrorCode ? <div className="small page-feedback" role="alert">{copy.syncErrors?.[account.syncErrorCode] || copy.syncFailed}</div> : null}
+      {account.syncResultCode && (!account.syncErrorCode || account.syncResultCode === "PAUSED") ? <div className="small page-feedback" role="status">{copy.syncResults[account.syncResultCode] || copy.syncResults.ERROR}</div> : null}
+      {account.syncErrorCode && account.syncResultCode !== "PAUSED" ? <div className="small page-feedback" role="alert">{copy.syncErrors?.[account.syncErrorCode] || copy.syncFailed}</div> : null}
 
       {preview ? (
         <div className="promotion-preview" aria-labelledby="promotion-preview-title">

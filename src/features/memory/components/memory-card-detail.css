@@ -192,3 +192,33 @@
     background: Canvas;
   }
 }
+
+.memory-photo-sync {
+  padding: 16px;
+  border: 1px solid rgba(185, 151, 255, 0.2);
+  border-radius: 14px;
+}
+
+.memory-photo-sync p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.memory-photo-sync > .btn {
+  justify-self: start;
+  max-width: 100%;
+}
+
+.memory-photo-sync__details {
+  color: var(--text-muted, #a79ebd);
+  font-size: 0.875rem;
+}
+
+.memory-photo-sync__details summary {
+  cursor: pointer;
+  padding-block: 6px;
+}
+
+.memory-photo-sync__details .btn {
+  margin-top: 8px;
+}

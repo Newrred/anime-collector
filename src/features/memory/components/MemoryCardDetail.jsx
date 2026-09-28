@@ -256,6 +256,8 @@ function MemoryCardDetailContent({ base }) {
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
           <MemoryTitleLink bundle={bundle} base={base} label={detailCopy.openTitleHub} className="memory-detail__title-link" />
+          <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
+            hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
           <MemoryImageReplacement
             runtime={runtime}
             imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
@@ -267,8 +269,7 @@ function MemoryCardDetailContent({ base }) {
           />
           <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} />
           <MemoryPublicCardControl card={bundle.card} locale={locale} disabled={status !== "ready"} />
-          <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
-            hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
+
             <form onSubmit={save}>
             <label className="memory-detail__field">
               <span>{detailCopy.noteLabel}</span>

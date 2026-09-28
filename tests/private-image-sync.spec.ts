@@ -43,7 +43,7 @@ async function originalHashes(page: Page) {
 }
 
 for (const failure of ['ambiguous', 'quota']) {
-test(`actual Web picker/optimizer/journal preserve original through ${failure} retry and remote-only reload`, async ({ page }) => {
+test(`actual Web picker/optimizer/journal preserve original through ${failure} retry and remote-only reload`, async ({ page }, testInfo) => {
   test.setTimeout(90000);
   await account(page);
   const pixels = Buffer.alloc(1800 * 1000 * 3); let seed = 19;
@@ -89,18 +89,19 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
     }); repo.close();
   });
   await page.getByRole('link', { name: 'Private sync test', exact: true }).click();
-  const panel = page.getByRole('region', { name: 'Private image sync', exact: true });
-  await expect(panel.getByText('Private copy not synced', { exact: true })).toBeVisible();
+  const panel = page.getByRole('region', { name: 'Photo sync', exact: true });
+  await expect(panel.getByText('This photo is only on this device', { exact: true })).toBeVisible();
   expect(posts.length).toBe(0);
-  await expect(panel.getByRole('button', { name: 'Sync private copy', exact: true })).toBeDisabled();
-  await panel.getByRole('checkbox').check();
-  await panel.getByRole('button', { name: 'Sync private copy', exact: true }).click();
-  await expect(panel.getByRole('alert')).toContainText(failure === 'quota' ? 'previous copy may still be awaiting cleanup' : 'Completion could not be confirmed');
+  await page.screenshot({ path: testInfo.outputPath('photo-sync-before.png'), fullPage: true });
+  await expect(panel.getByRole('button', { name: 'Sync photo', exact: true })).toBeEnabled();
+  await expect(panel.getByText('Sync photo saves a smaller copy to your account. Only you can see it.')).toBeVisible();
+  await panel.getByRole('button', { name: 'Sync photo', exact: true }).click();
+  await expect(panel.getByRole('alert')).toContainText(failure === 'quota' ? 'Photo storage is at its limit' : 'Photo sync did not finish');
   await page.reload();
-  await expect(panel.getByRole('button', { name: 'Retry same request', exact: true })).toBeDisabled();
-  await panel.getByRole('checkbox').check();
-  await panel.getByRole('button', { name: 'Retry same request', exact: true }).click();
-  await expect(panel.getByText('Private copy synced', { exact: true })).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Retry photo sync', exact: true })).toBeEnabled();
+  expect(posts.length).toBe(1);
+  await panel.getByRole('button', { name: 'Retry photo sync', exact: true }).click();
+  await expect(panel.getByText('Available on your other devices', { exact: true })).toBeVisible();
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
   expect(posts.length).toBe(2); expect(posts[1].operation).toBe(posts[0].operation);
   expect(posts[1].bytes.equals(posts[0].bytes)).toBe(true); expect(posts[0].bytes.length).toBeLessThanOrEqual(1_000_000);
@@ -114,8 +115,10 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
   expect(posts.length).toBe(2);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(panel.getByRole('button', { name: 'View server copy' })).toBeVisible();
+  await expect(panel.getByText('Available on your other devices', { exact: true })).toBeVisible();
+  await expect(panel.getByText('Photo storage:', { exact: false })).not.toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('photo-sync-mobile.png'), fullPage: true });
   const detailUrl = page.url();
   const boardId = await page.evaluate(async () => {
     const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
