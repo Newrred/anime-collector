@@ -38,7 +38,9 @@ export function createPrivateImageHandler({ enabled = false, allowedOrigins = []
         res.statusCode = 204; res.end(); return;
       }
       if (!['GET','POST','DELETE'].includes(req.method)) throw new PrivateImageError('METHOD_NOT_ALLOWED', 405);
+      const authStarted = performance.now();
       const backend = createBackend(), user = await backend.user(bearer(req));
+      const authMs = performance.now() - authStarted;
       if (req.method === 'DELETE') {
         await user.rpc('cancel_memory_private_image', { p_operation: id(req.headers['x-moemoa-operation']) });
         json(res, { state: 'DELETING' }); return;
@@ -68,7 +70,10 @@ export function createPrivateImageHandler({ enabled = false, allowedOrigins = []
       if (!Number.isSafeInteger(version) || version < 1 || !['main','thumb'].includes(variant)) throw new PrivateImageError('INVALID_REQUEST');
       if (query.has('policy')) {
         if (query.get('policy') !== '1') throw new PrivateImageError('INVALID_REQUEST');
-        json(res, await user.rpc('get_memory_private_image_policy', { p_asset: asset, p_version: version })); return;
+        const policyStarted = performance.now();
+        const current = await user.rpc('get_memory_private_image_policy', { p_asset: asset, p_version: version });
+        res.setHeader('Server-Timing', `auth;dur=${authMs.toFixed(1)}, policy;dur=${(performance.now() - policyStarted).toFixed(1)}`);
+        json(res, current); return;
       }
       const resolve = charge => user.rpc('read_memory_private_image', { p_asset: asset, p_version: version, p_variant: variant, p_charge: charge });
       const reference = await resolve(true), filePaths = paths(reference.id);

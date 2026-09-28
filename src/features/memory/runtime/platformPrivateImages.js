@@ -9,6 +9,8 @@ export const isPrivateUserImage = asset => Boolean(asset && !['SYSTEM_DESIGN', '
 export function privateImageTransfer(runtime, bundle) {
   return createPrivateImageTransfer({
     cache: privateImageReadCache,
+    onTiming: new URLSearchParams(globalThis.location?.search).get('photoTiming') === '1'
+      ? value => console.info('MOEMOA_PHOTO_TIMING', JSON.stringify({ ...value, sinceNavigationMs: Math.round(performance.now()) })) : undefined,
     ownerId: bundle.card.ownerId, assetId: bundle.asset.id, sourceVersion: bundle.asset.sync.remoteVersion,
     getSession: getAuthSession, getOwner: () => runtime.initialize(),
     getAsset: async () => (await runtime.getCard(bundle.card.id))?.asset,

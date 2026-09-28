@@ -152,3 +152,11 @@ test('cached bytes skip download but never bypass current server policy or hash 
   f.options.fetchImpl = async () => Response.json({ error: 'PRIVATE_IMAGE_PAUSED' }, { status: 403 });
   await assert.rejects(f.controller().read(), { code: 'PRIVATE_IMAGE_PAUSED' });
 });
+
+test('opt-in photo timings contain durations and stages only', async () => {
+  const f = await fixture(); f.state.ready = true;
+  const timings = []; f.options.onTiming = value => timings.push(value);
+  await f.controller().readWithPolicy();
+  assert.deepEqual(timings.map(value => value.phase), ['policy-request', 'cache', 'image-request', 'photo-ready']);
+  for (const value of timings) assert.ok(Object.keys(value).every(key => ['phase', 'localMs', 'networkMs', 'server', 'hit', 'ms'].includes(key)));
+});

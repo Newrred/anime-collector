@@ -945,3 +945,10 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 
 - 결과: unit405 PASS, Chromium12 PASS(실제 history back/forward 뒤 binary GET0 증가, 재시도/원본 보존/계정 전환 포함), build19 PASS, React Doctor72/100·20warnings으로 직전과 동일. 캐시는 매번 서버 policy 성공 및 bytes/hash/현재 소유자 재확인 후만 사용. 서버 차단 응답 시 캐시 사본 반환하지 않는 단위 검사 통과.
 - 반영 파일: privateImageReadCache.js(탭 캐시), createPrivateImageTransfer.js(재검증 후 재사용), platformPrivateImages.js(연결), authRepo.js(계정/로그아웃 삭제), 관련 unit/e2e. 정책 확인 왕복은 남고 20분 만료/용량 초과/저장 차단 시 재다운로드 가능. 실기기 Safari 동작 확인은 사용자 테스트로 이어간다. 테스트 브랜치 Git 배포, DB 및 운영 변경 없음.
+
+### 2026-09-28 W19 — 사진 표시 지연 계측
+- 요청: 권한 확인 때문이라는 이전 설명을 실측으로 검증. 캐시가 있어도 매번 policy HTTP 응답을 기다리는 코드를 확인했으나 실제 시간은 미측정이었다.
+- 변경: 서버 policy 응답에 auth/policy 처리 시간 Server-Timing, 명시적 photoTiming=1 페이지에서만 로컬 context/네트워크/cache/총 사진 조회 시간 console 출력. URL/계정/카드ID/내용/토큰/이미지 bytes를 기록하지 않는다. 일반 페이지는 추가 로깅 없음.
+- 검증: unit/build 및 실제 로그인된 테스트 페이지 반복 측정. 요청 내용을 바꾸거나 권한 검사를 생략하지 않음. DB 변경 없음. 결과 후 원인·측정 범위·후속 변경을 구분해 보고. 진단 옵션 제거로 복구 가능.
+
+- 계측 변경 검증: unit407 PASS, build19 PASS. 일반 응답 의미/권한 변경 없이 preview에서 실제 시간 측정 진행.

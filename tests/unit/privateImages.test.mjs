@@ -150,3 +150,11 @@ test('private API is disabled by default without contacting backend',async()=>{
   const h={handler:createPrivateImageHandler({createBackend:()=>assert.fail('disabled must not contact backend')})};
   await withServer(h,async base=>assert.equal((await post(base)).status,503));
 });
+
+test('policy timing separates auth and RPC without identifiers', async () => {
+  await withServer(harness(), async base => {
+    const response = await fetch(base + url + '&policy=1', { headers });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('server-timing'), /^auth;dur=[0-9.]+, policy;dur=[0-9.]+$/);
+  });
+});

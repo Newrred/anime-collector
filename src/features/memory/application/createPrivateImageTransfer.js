@@ -6,7 +6,7 @@ const safeErrors = new Set(['AUTH_REQUIRED','NOT_FOUND','PRIVATE_IMAGE_DISABLED'
   'PRIVATE_IMAGE_RETIRED','PRIVATE_IMAGE_CONFLICT','PRIVATE_IMAGE_QUOTA_EXCEEDED','PRIVATE_IMAGE_CAPACITY_EXCEEDED',
   'PRIVATE_IMAGE_RATE_LIMITED','IMAGE_SIZE_LIMIT','OPERATION_MISMATCH']);
 
-export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, getSession, getOwner, getAsset, readOriginal, journal, cache = null,
+export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, getSession, getOwner, getAsset, readOriginal, journal, cache = null, onTiming = () => {},
   optimize = optimizePrivateImage, fetchImpl = globalThis.fetch, uuid = () => globalThis.crypto.randomUUID() }) {
   const key = `${ownerId}:${assetId}:${sourceVersion}`;
   const url = `/api/private-image?asset=${encodeURIComponent(assetId)}&version=${sourceVersion}`;
@@ -19,11 +19,18 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     return { session, asset };
   }
   async function request(target, init, signal) {
+    const started = performance.now();
     const { session } = await context(signal);
+    const fetchStarted = performance.now();
     let response;
     try { response = await fetchImpl(target, { ...init, signal, cache: 'no-store', headers: { ...init?.headers, Authorization: `Bearer ${session.access_token}` } }); }
     catch { fail(signal?.aborted ? 'REQUEST_ABORTED' : 'PRIVATE_IMAGE_REQUEST_FAILED'); }
+    const received = performance.now();
     await context(signal);
+    const server = {};
+    for (const match of (response.headers.get('server-timing') || '').matchAll(/(auth|policy);dur=([0-9.]+)/g)) server[match[1]] = Number(match[2]);
+    onTiming({ phase: target.includes('policy=1') ? 'policy-request' : 'image-request',
+      localMs: Math.round(fetchStarted - started + performance.now() - received), networkMs: Math.round(received - fetchStarted), server });
     if (!response.ok) {
       const result = await response.json().catch(() => null);
       fail(safeErrors.has(result?.error) ? result.error : 'PRIVATE_IMAGE_REQUEST_FAILED');
@@ -53,11 +60,14 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     const limit = variant === 'thumb' ? 120_000 : 1_000_000;
     if (!Number.isSafeInteger(expectedBytes) || expectedBytes < 1 || expectedBytes > limit || !SHA.test(expectedHash || '')) fail('PRIVATE_IMAGE_REQUEST_FAILED');
     const cacheKey = JSON.stringify([assetId, sourceVersion, variant, current.revision, expectedHash]);
+    const cacheStarted = performance.now();
     const cached = cache?.get(ownerId, cacheKey);
     if (cached && cached.size === expectedBytes && await blobHash(cached) === expectedHash) {
       await context(signal);
+      onTiming({ phase: 'cache', hit: true, ms: Math.round(performance.now() - cacheStarted) });
       return cached;
     }
+    onTiming({ phase: 'cache', hit: false, ms: Math.round(performance.now() - cacheStarted) });
     const response = await request(variant === 'thumb' ? `${url}&variant=thumb` : url, {}, signal);
     if (response.headers.get('content-type')?.split(';')[0] !== 'image/webp') fail('PRIVATE_IMAGE_REQUEST_FAILED');
     const blob = await response.blob();
@@ -104,11 +114,16 @@ export function createPrivateImageTransfer({ ownerId, assetId, sourceVersion, ge
     },
     async read(signal, variant = 'main') {
       if (!['main', 'thumb'].includes(variant)) fail('PRIVATE_IMAGE_REQUEST_FAILED');
-      return readRepresentation(await policy(signal), signal, variant);
+      const started = performance.now();
+      const blob = await readRepresentation(await policy(signal), signal, variant);
+      onTiming({ phase: 'photo-ready', ms: Math.round(performance.now() - started) });
+      return blob;
     },
     async readWithPolicy(signal, { includeBlob = true } = {}) {
+      const started = performance.now();
       const current = await policy(signal);
       const blob = includeBlob && current.representation ? await readRepresentation(current, signal, 'main') : null;
+      onTiming({ phase: 'photo-ready', ms: Math.round(performance.now() - started) });
       return { policy: current, blob };
     },
     async cancel(signal) {
