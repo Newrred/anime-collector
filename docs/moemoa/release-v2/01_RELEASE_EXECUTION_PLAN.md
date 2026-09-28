@@ -962,3 +962,10 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - 발견: 지역 변경 직전 2026-09-28 07:05:37 UTC에 테스트 사용량 관측24시간이 만료됨. 읽기 SQL에서 stale=true, paused=false, 실제/예약38,464bytes(한도41,943,040), 월 읽기534,668bytes(한도83,886,080)를 확인. 기존 test revision/한도/활성 상태 및 실제 사용량 조건을 검증하는 refresh-phone-test-observation-20260928.sql로 관측시각만 갱신한다. 권한·한도·만료 규칙 변경 없음. 이 일일 관측은 자동화되어 있지 않아 재만료 가능하며 운영 전 별도 마감 필요.
 - 결과: 관측 갱신 성공07:11:52 UTC. preview6d7e784 Ready/build-info 일치 및 sin1 실행 확인. unit407/build19 PASS. 실제 PC 반복3회 policy214~244ms(이전843~1444), 뒤로가기 사진 준비1810→574ms, 캐시hit·추가binary GET0. 상세/작품 목록 실제 사진 로드 완료 확인.
 - 계획 조정: 지역 변경만으로 반복 권한 대기가 크게 감소하여 이번 패치는 여기까지 한정. 웹 전체 전환 제거는 미저장 이탈/history 보호 회귀 범위가 커 별도 작업으로 남긴다. 최초 콜드 다운로드와 화면 준비, 실기기 Safari, 관측 자동화는 미완료. 상세 표본/한계는 reports/2026-09-28-private-photo-latency.md.
+
+### 2026-09-28 W19 — 작품 모음 Memory View 사진 연결
+- 사용자 요청: /titles/ Memory View의 동기화 사진 누락 수정. 실제 화면과 TitleAlbumCard/titleCollectionService에서 로컬 미리보기만 사용함을 확인.
+- 변경: 기존 PrivateMemoryCardPreview에 시각 요소만 렌더링하는 슬롯을 제공해 TitleAlbumCard의 기존 링크/그리드 안에서 동일 권한 확인·썸네일 캐시·viewport 지연 조회·전체 동시4개 제한을 재사용. locale 전달. 갤러리/Poster 디자인과 데이터는 보존.
+- 검증: 원본 로컬 제거 후 /titles/ 사진 표시, 재방문 binary 다운로드 증가 없음, 로그아웃/계정 변경 후 사진 제거를 기존 private-image-sync e2e에 추가. unit/build, 관련 Chromium 및 React Doctor. Git preview 배포 후 실제 로그인 화면 확인.
+- 보안/복구: DB migration/공개/자동 업로드/권한 변경 없음. 사진URL cleanup 및 소유자 검증 유지. 이 UI 커밋 revert로 복구.
+- 결과: unit407 PASS, Chromium8 PASS(원격 사진/재방문 캐시/계정 전환 및 기존 태그·열 조절·두 보기·320px 포함), build19 PASS. React Doctor72/100·20warnings으로 기존과 동일. codex/phone-test Git preview에 반영하며 실제 /titles/ 확인을 이어간다. 실기기 Safari는 별도 확인.

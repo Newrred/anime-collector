@@ -1,6 +1,7 @@
 import { buildMemoryCardHref } from "../../../domain/search/memoryCardNavigation.js";
 import { GenresRow } from "../../../components/library/LibraryUi.jsx";
 import MemoryVisual from "../../memory/components/MemoryVisual.jsx";
+import PrivateMemoryCardPreview from "../../memory/components/PrivateMemoryCardPreview.jsx";
 import TitleCover from "./TitleCover.jsx";
 
 const stateText = (album, copy) => [
@@ -9,7 +10,7 @@ const stateText = (album, copy) => [
   copy.memoryCount(album.memoryCount),
 ].filter(Boolean).join(" · ");
 
-export default function TitleAlbumCard({ album, href, base, native, copy, titleKey, formatGenre, onPickGenre }) {
+export default function TitleAlbumCard({ album, href, base, native, copy, locale, titleKey, formatGenre, onPickGenre }) {
   const extra = Math.max(0, album.memoryCount - album.previewMemories.length);
   const composerHref = buildMemoryCardHref({
     base, native, row: { catalogAnimeId: album.titleRef.animeId, privateTitleId: album.titleRef.privateTitleId, title: album.displayTitle },
@@ -34,19 +35,23 @@ export default function TitleAlbumCard({ album, href, base, native, copy, titleK
       {album.previewMemories.length ? (
         <div className="title-album-card__previews" style={{ gridTemplateColumns: `repeat(${Math.min(3, album.previewMemories.length)}, minmax(0, 1fr))` }} aria-label={copy.memoryCount(album.memoryCount)}>
           {album.previewMemories.map((memory, index) => (
-            <a className="title-album-card__preview" key={memory.card.id} href={`${base}memory/card/?id=${encodeURIComponent(memory.card.id)}`} aria-label={`${album.displayTitle} · ${memory.card.note || copy.latestCue}`} data-astro-reload>
-              <MemoryVisual
-                visual={memory.visual}
-                fit={memory.sourceKind === "CATALOG_COVER" ? "contain" : "cover"}
-                systemCopy={{
-                  fallbackTitle: album.displayTitle,
-                  label: copy.systemDesignLabel,
-                  footer: copy.systemDesignFooter,
-                }}
-                missingLabel={copy.missingMemory}
-              />
-              {index === album.previewMemories.length - 1 && extra > 0 ? <span className="title-album-card__extra">+{extra}</span> : null}
-            </a>
+            <PrivateMemoryCardPreview key={memory.card.id} bundle={memory} locale={locale} visual={memory.visual} title={album.displayTitle} missingLabel={copy.missingMemory}>
+              {({ visual, missingLabel, elementRef }) => (
+                <a ref={elementRef} className="title-album-card__preview" href={`${base}memory/card/?id=${encodeURIComponent(memory.card.id)}`} aria-label={`${album.displayTitle} · ${memory.card.note || copy.latestCue}`} data-astro-reload>
+                  <MemoryVisual
+                    visual={visual}
+                    fit={memory.sourceKind === "CATALOG_COVER" ? "contain" : "cover"}
+                    systemCopy={{
+                      fallbackTitle: album.displayTitle,
+                      label: copy.systemDesignLabel,
+                      footer: copy.systemDesignFooter,
+                    }}
+                    missingLabel={missingLabel}
+                  />
+                  {index === album.previewMemories.length - 1 && extra > 0 ? <span className="title-album-card__extra">+{extra}</span> : null}
+                </a>
+              )}
+            </PrivateMemoryCardPreview>
           ))}
         </div>
       ) : (

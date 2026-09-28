@@ -140,6 +140,23 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await page.goto(titleHref!);
   await expect(page.locator('.title-hub__memory img[src^="blob:"]')).toBeVisible();
   expect(posts.length).toBe(2);
+  await page.goto('/titles/');
+  await page.getByRole('radio', { name: 'Memory View', exact: true }).check();
+  await expect(page.locator('.title-album-card__preview img[src^="blob:"]')).toBeVisible();
+  const collectionReads = reads.length;
+  await page.reload();
+  await expect(page.locator('.title-album-card__preview img[src^="blob:"]')).toBeVisible();
+  expect(reads.length).toBe(collectionReads);
+  expect(posts.length).toBe(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.evaluate(async () => {
+    const { writeMockAuthSession } = await import('/src/repositories/mockAuthStorage.js');
+    writeMockAuthSession({ user: { id: '22222222-2222-4222-8222-222222222222' } });
+  });
+  await expect(page.locator('.title-album-card__preview img')).toHaveCount(0);
+  // A full navigation restores mock account A and the existing history regression.
+  await page.goto(titleHref!);
+  await expect(page.locator('.title-hub__memory img[src^="blob:"]')).toBeVisible();
   await page.goto(detailUrl);
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
   const downloadedBeforeBack = reads.length;

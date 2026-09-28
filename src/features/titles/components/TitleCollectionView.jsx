@@ -226,6 +226,7 @@ function TitleCollectionContent({ base }) {
                   base={base}
                   native={native}
                   copy={copy}
+                  locale={locale}
                   titleKey={album.key}
                   formatGenre={(genre) => formatGenreLabel(genre, locale)}
                   onPickGenre={pickGenreFromTag}

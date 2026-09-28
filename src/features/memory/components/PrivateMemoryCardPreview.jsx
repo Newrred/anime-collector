@@ -4,7 +4,7 @@ import { isPrivateUserImage, privateImageTransfer, privateImageUiEnabled } from 
 import { getPlatformMemoryRuntime } from '../runtime/platformMemoryRuntime.js';
 import MemoryCardPreview from './MemoryCardPreview.jsx';
 
-// No shared byte cache. Bound concurrent list reads without retaining another account's images.
+// All list surfaces share this queue; transfer validates ownership before cache reuse.
 const waiting = [];
 let running = 0;
 function drain() {
@@ -26,7 +26,7 @@ function queuedRead(read, signal) {
   });
 }
 
-export default function PrivateMemoryCardPreview({ runtime, bundle, locale = "en", ...props }) {
+export default function PrivateMemoryCardPreview({ runtime, bundle, locale = "en", children, ...props }) {
   const { user } = useAuthSession();
   const element = useRef(null), [remote, setRemote] = useState(null);
   const [failedKey, setFailedKey] = useState(null);
@@ -61,5 +61,6 @@ export default function PrivateMemoryCardPreview({ runtime, bundle, locale = "en
     ? failedKey === key ? (locale === 'ko' ? '사진을 불러오지 못했어요' : 'Could not load photo')
       : (locale === 'ko' ? '사진 불러오는 중…' : 'Loading photo…')
     : props.missingLabel;
+  if (children) return children({ visual, missingLabel, elementRef: element });
   return <MemoryCardPreview {...props} visual={visual} missingLabel={missingLabel} elementRef={element} />;
 }
