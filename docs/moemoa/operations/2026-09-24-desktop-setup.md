@@ -1,5 +1,7 @@
 # Windows + Codex 새 PC 시작
 
+> 현재는 `codex/phone-test`로 재개한다. 아래 master/W09 안내는9/24 당시 이력이다. [9/29 최신 이전 안내](2026-09-29-desktop-handoff.md)를 따른다.
+
 사용자 승인: 별도 브랜치 없이 GitHub master로 개발본 이전(2026-09-24).
 
 1. Git for Windows, Node.js 24.19.0, Codex 설치.
