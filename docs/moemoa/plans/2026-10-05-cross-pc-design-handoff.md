@@ -1,0 +1,87 @@
+# 디자인 작업의 다른 PC 재개 ExecPlan
+
+## 1. 목적과 사용자 결과
+
+사용자가 현재 작업과 기록을 Git에 업데이트해 다른 PC에서 바로 이어가도록 요청했다. 최신 `codex/phone-test` 개발 체크포인트를 원격에 보존하고, PC 바깥에 있던 필름 시안을 저장소 안에서 실행할 수 있게 한다.
+
+## 2. 관련 확정 결정
+
+SHELF-ROW-PREVIEW-01, NO-HERO-UI-01, FILM-ARCHIVE-DIRECTION-01 유지. 이 요청은 개발 브랜치 commit/push 승인이지 master 병합·운영 배포·Public 활성화 승인이 아니다.
+
+## 3. 현재 상태와 저장소 증거
+
+시작 HEAD `5bd1b3f`, 브랜치 `codex/phone-test`, origin `Newrred/anime-collector`. 기존 UI 소스·문구·테스트 변경 및 interface-rebuild 계획이 미커밋 상태다. V8 시안은 Git 밖의 Codex visualizations 디렉터리에 있으며 기존 localhost4348 서버는 그 PC에만 존재한다. 기존 작업은 되돌리거나 덮어쓰지 않는다.
+
+## 4. 범위
+
+포함: 현 UI 작업/문서/테스트 체크포인트, 생성된 시안·로고·비교/검증 근거의 이식 가능한 사본, 의존성 없는 로컬 미리보기 명령, 새 PC 재개 문서, 원격 SHA 확인.
+
+제외: 환경변수/인증 세션/원본 사용자 사진/DB dump/카탈로그 원본/빌드 산출물, 운영배포·DB·앱 기능 추가, 자동 이미지 공개. 원본 시안 폴더는 보존한다.
+
+## 5. 아키텍처·데이터 흐름
+
+선별한 기존 시안 → `design/prototypes/film-archive/` → Node built-in loopback 정적 서버 → 최신 V8/이전 시안 비교. 실제 Astro 앱과 별도이며 `public/`에 넣지 않는다. 절대 PC 경로 의존성을 제거하고 문서에 원래 위치/시점과 이전 상태를 구분한다.
+
+## 6. 변경 파일 지도
+
+- `CODEX_START_HERE.md`: 10/5 최신 인계 진입점.
+- `docs/moemoa/operations/2026-10-05-design-handoff.md`: 현재 승인/실제 코드와 시안 차이/검증/새 PC 명령/다음 작업.
+- `design/prototypes/film-archive/`: 검토 소스·생성 자산·증거·README/manifest.
+- `design/evidence/original-design-5bd1b3f/`: 최초 서비스와 초기 앱 개편의 동일 조건 비교 원본37개와 안내.
+- `.gitattributes`: 보관 자료의 원본 바이트와 checksum을 다른 운영체제에서도 유지.
+- `scripts/serve-design-prototypes.mjs`, `scripts/check-design-prototypes.mjs`, 관련 Node test: 실행·누락 검증.
+- `package.json`: dependency 변화 없이 design 미리보기/검사 명령만 추가.
+- 기존 변경 파일: 그대로 체크포인트 보존하며 별도 검사 결과 기록.
+
+## 7. 데이터·스키마 마이그레이션
+
+없음. 복사 대상은 검토용 생성 자산과 코드/기록뿐이다. 개인정보/권리 불명 원본 발견 시 대상에서 제외하고 확인한다.
+
+## 8. 마일스톤
+
+1. 현 diff와 외부 시안 목록/참조/권리·비밀값 위험을 확인한다.
+2. 시안 파일/자산/증거를 repository 경로로 옮긴 사본과 실행 명령을 준비한다.
+3. 참조·구문·fixture·loopback 서버 접근제어와 실제 브라우저 로드를 검증한다. 기존 앱 unit/build 결과를 별도 기록한다.
+4. 시작 문서/인계 갱신→명시 대상 stage→staged diff/비밀값/크기 검사→commit→non-force push→원격 SHA/깨끗한 worktree 확인.
+
+## 9. 테스트와 검증
+
+새 PC 경로/환경변수 없이 Node로 prototype 실행. HTML/CSS/JS 로컬 참조와 비교 이미지 무결성, 파일 checksum, traversal/금지파일 차단 테스트. V8 처음/펼침/모바일 smoke. 기존 앱 unit/build는 결과를 실제 실행 기준으로 보고하며 이전 PASS와 섞지 않는다. Required test 실패 시 사용자 지침에 따라 멈추고 결과를 보고한다.
+
+## 10. 보안·개인정보·권리 영향
+
+비밀값 파일/브라우저 profile/private 이미지/외부 reference 원본은 commit하지 않는다. 생성된 허구 작품과 제품 시안만 포함한다. 서버는127.0.0.1에만 바인딩하고 지정한 디자인 폴더만 제공한다. 원격 Git push 외 외부 mutation 없다. 기존 브랜치의 자동 Preview 발생 가능성과 운영 master 미변경을 구분한다.
+
+## 11. 관찰 가능성·분석 이벤트
+
+새 tracking/API/log 수집 없음. 검사 결과는 시안과 코드의 공개 가능한 기술 증거만 기록한다.
+
+## 12. 롤백·복구
+
+원본 외부 시안 폴더 보존. Git 체크포인트는 이력으로 복구 가능하며 파괴적 reset/clean/force push 금지. 자동 업그레이드/의존성 변경 없음. 서버 종료만으로 시안 미리보기 중단.
+
+## 13. 위험과 완화
+
+Git 밖 파일 누락→참조 closure/manifest 검사. 사진/키 노출→명시 whitelist 및 staged 검사. 새PC 경로 종속→상대 경로와 별도 checkout 모의 검사. 오래된 UI를 최종 디자인으로 오인→V8 디자인/기존 app 구현 경계·다음 승인 명시. 대형 중복 이미지→최종/참조된 근거만 선별하고 제외 기준 기록.
+
+## 14. 필요한 사용자 결정
+
+현재 checkpoint/push는 승인됨. 운영배포/실서비스 V8 적용/새PC의 로그인·환경변수 공급은 별도다.
+
+## 15. 진행 기록
+
+- 2026-10-05: 필수 문서·현재 branch/remote/status 확인. 계획 기록 후 자산/코드 audit와 인계 준비 시작.
+- 2026-10-05: 외부 시안169개 및 원래 서비스 비교37개 보존. 원본 비교37개는 원본과 SHA256 일치. 원본 폴더와 이전 서버는 변경하지 않았다.
+- 2026-10-05: 앱 단위407/407·빌드19pages 통과. 새 경로의 V8을 Chromium1440/320px에서 열고 필름 펼침·비교 페이지·누락 로고 안내를 확인, console error 없음.
+
+## 16. 발견 사항과 계획 변경
+
+- 오래된 로고 후보4개는 기존 폴더에서도 부재였다. 해당 갤러리만 부재 안내로 바꾸고 확대 기능을 제거했다. 최신 필름 로고2안은 정상 보존. 169개 중168개 원본 bytes 동일,1개 갤러리 수정 전/후 hash를 manifest에 구분했다.
+- 제3자 Are.na 원화면4개와 참조되지 않는 중간/중복 캡처44개는 복사하지 않았다. 실제 실패/수정 증거로 참조된 파일은 보존했다.
+- 과거 프롬프트/결과 JSON의 절대경로는 역사적 메타데이터다. 실행 HTML/CSS/JS는 옛 PC 경로에 의존하지 않는다. 최신 V8은 로컬 이미지/동작 코드와 온라인 폰트, 일부 초기 가이드는 온라인 폰트/스크립트에 의존한다.
+- 앱 소스는 초기 UI 개편 WIP, V8은 별도 RAM-only 시안이다. 기존 E2E의 과거 PASS와 이번 unit/build/smoke 결과를 분리했다.
+- 검증기에서 srcdoc의 entity-encoded data SVG와 JS 동적 로고 경로를 로컬 파일로 오인하는 파서 거짓 양성을 발견했다. 자산을 바꾸지 않고 검사기/회귀 테스트를 보완한다.
+
+## 17. 완료 보고
+
+실제 검증 및 push 결과 확정 후 기록한다.

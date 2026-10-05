@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-05 최신 디자인 작업 / 다른 PC 재개:** 최신 개발 브랜치는 계속 `codex/phone-test`다. [10/5 인계](docs/moemoa/operations/2026-10-05-design-handoff.md)를 먼저 읽는다. 최신 검토본은 **V8 선반 탭 + 고정 표지 그리드 + 선택 행 아래 필름**이며 `design/prototypes/film-archive/`에 소스·이미지·비교·검증 기록을 보존했다. `npm run design:preview`로 실행한다. **Hero 금지, 로고2안 유지. V8은 별도 시안이고 실제 앱 src에는 아직 전면 적용하지 않았다.** 이번 Git 체크포인트는 PC 이전용이며 master 병합·운영 배포·공개 활성화 승인이 아니다. 아래 날짜별 미커밋/최신 표기는 당시 이력이다.
+
 > **2026-09-29 다른 PC 재개:** 최신 개발 브랜치는 `codex/phone-test`이며 master가 아니다. [최신 인계](docs/moemoa/operations/2026-09-29-desktop-handoff.md)를 먼저 읽는다. 비공개 사진 다기기/목록 연결은 확인했으며 공개 준비·게시/철회 검증과 UI 전반 정리는 남아 있다. 아래 master 이전 안내는 날짜별 과거 이력이다.
 
 > **2026-09-27 최신 범위 확정:** `GENERAL-PUBLIC-POSTMODERATION-01` — 성인 인증·성인 이미지 공개는 보류. 비공개 업로드와 일반 이미지의 간단한 공개 확인·신고·관리자 사후 검토로 첫 Web 후보를 좁힌다. 성인 공급자 문의/계약·추가 인증 개발을 출시 필수 작업으로 진행하지 않는다. 12세 목표의 보호자 동의와 KR/PH/TH 조건은 별도 D04 잔여. 기존 사전심사 코드와 새 목표의 차이는 W08/W09/W11/W14에서 마감한다. 실행 지시는 [단일 진행판의 현재 작업 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md) 하나만 따른다. 아래 재개·일시정지·다음작업 표시는 날짜별 이력이며4ead72b는 검토 checkpoint, 운영 RC가 아니다.

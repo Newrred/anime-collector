@@ -588,3 +588,55 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - migration impact: 이 결정 반영은 문서만 변경. 후속 DB 후보는 추가 migration 및 로컬 검증으로 준비하고 운영/public flags 변경·유료 계약·배포는 D06의 정확한 승인 전 실행하지 않는다.
 - approved by/date: 사용자, 2026-09-27, “성인 인증은 보류”와 후속 “맞음, 일반 이미지 공개만 허용”.
 - review date/trigger: 사후 검토 흐름 검증, D04 보호자/권리·운영 정책 마감, D06 Web 후보 또는 향후 성인 영역 재도입.
+
+## Decision Log — FILM-ARCHIVE-DIRECTION-01 (2026-10-03)
+
+- status: CONFIRMED_DIRECTION / DESIGN_REVIEW_PENDING. 컨셉과 선행 설계 진행 승인이지 새 시안·수치·서비스 적용의 일괄 승인이 아니다.
+- context: 사용자는 C 시안을 선택한 뒤 작품 하나를 하나의 필름, 저장한 이미지와 시청 기록을 그 안의 내용으로 보는 개인 필름집 컨셉을 제안했다. 메인 외 화면도 통일되도록 먼저 계획하고 진행하라고 승인했다.
+- options: 메인만 필름 장식 / 전체 화면을 강한 필름 형태로 변경 / 공통 디자인 언어를 공유하고 화면 역할에 따라 표현 강도를 조절.
+- chosen option: 세 번째. 작품 표지를 전체 아카이브 그리드로 보는 기능은 유지하고, 작품 안에서 좌우로 기억을 탐색하는 필름 표현을 구체화한다. 보드는 여러 작품의 Memory를 묶는 기존 N:M 의미를 유지한다.
+- identity: 첨부 로고의 둥근 소문자 `moemoa` 글자 형태·두께·자간을 유지하는 방향. 왼쪽 심벌만 필름을 연상하도록 수정한다. 첨부는 래스터 시안이며 실제 폰트 파일/이름이 확인된 것은 아니다. 최종 심벌, 벡터 원본, 작은 크기 판독성은 검토 전이다.
+- reason: 작품 전체를 한눈에 찾는 밀도와 개인 기록을 넘겨보는 감각을 함께 유지하고, 메인에만 적용한 테마가 다른 화면과 단절되는 것을 방지한다.
+- preserved: 작품 저장·WatchLog·Complete Memory의 독립, Poster/Memory dual view와 사용자 마지막 선택, 기존 nav 명칭, Board membership, 로컬/계정/이미지/공개 경계. `필름`은 우선 읽기 표현이며 새 저장 엔터티나 자동 Memory 생성의 승인이 아니다.
+- consequences: 현재는 1) 화면·상태/흐름 조사, 2) 화면별 컨셉 배분, 3) 로고·디자인·문구·모션 기준안까지 작성한다. 다음 연결형 프로토타입 검토 후 서비스 전면 적용으로 진행한다. 기존 미커밋 UI는 보존하되 승인된 디자인으로 간주하지 않는다. 기존 Astro/React 구조를 유지하며 언어/프레임워크 교체는 필요성 증거와 별도 기술 검토 없이 실행하지 않는다.
+- files/modules affected: `plans/2026-10-03-interface-rebuild.md`, 후속 공통 shell/스타일과 Title/Memory/Board/작성/보조 화면. 이번 턴은 문서와 별도 로컬 검토 자료만 작성.
+- migration impact: 없음. DB·동기화·공개 flags·운영 배포·private 이미지 업로드 변경 없음.
+- approved by/date: 사용자, 2026-10-03, C 선택, 필름집 제안, 전체 화면 계획 필요성 제기 후 “그렇게 진행해줘”와 첨부 로고 심벌 수정 요청.
+- review date/trigger: 로고 심벌 및 공통 가이드 검토 → PC/모바일 연결형 프로토타입 검토 → 전체 적용. WatchLog의 구체 통합 표현·정렬/회차 없는 기록 처리는 제안으로 남기며 기존 저장 모델을 바꾸지 않는다.
+- 2026-10-03 후속 선택: 사용자 “로고는 2안이 더 나았음.” 로고 심벌의 발전 기준은 `이어지는 필름` 2안으로 확정한다. 최종 정제된 도형/벡터·최소 크기 승인과는 구분하며, 1안을 최종 채택한 것으로 기록하지 않는다.
+
+## Decision Log — FILM-BOOKSHELF-PREVIEW-01 (2026-10-03)
+
+- status: CONFIRMED_PROTOTYPE_SCOPE / PRODUCT_REPLACEMENT_PENDING.
+- context: 사용자는 보드의 역할이 애매하다고 평가하고, 미니홈피처럼 꾸미는 개인 필름책장과 작품당 한 행의 가로 필름 탐색을 제안했다. 역할 구분 설명 후 “ㅇㅋ 그렇게 발전시켜보자”로 새 시안 진행을 승인했다.
+- chosen option: 별도 로컬 시안에서 `내 책장(홈) / 작품 / 기억` 메뉴, 직접 고르고 꾸미는 책장, 유지되는 표지 그리드, `기억 함께 보기`의 고정 표지+독립 가로 필름 행, 더 정돈된 작품 상세 필름을 검토한다. 로고 2안 방향 유지.
+- preserved: BOARD-01 및 기존 보드·공개 미니홈 참조/철회 계약은 아직 대체하지 않는다. 메뉴에서 보드가 없는 시안과 보드 기능/데이터의 영구 제거는 다르다. 전체 작품 집합과 책장 진열 선택을 분리하며, 진열/해제가 작품 저장·기억·시청 기록을 생성/삭제하지 않는다. 꾸미기와 공개 동의를 분리한다.
+- scope: 가상 데이터 기반 프로토타입만. 기존 2차 시안을 보존하고 새 HTML/CSS/JS로 비교 가능하게 제공. 개인정보/사진 업로드, 서버, 저장소, 동기화, 실제 공개 전시는 제외.
+- reason: 작품 전체를 찾는 목록과 개인 취향을 고르는 전시 공간의 목적을 분리하고, 작품별 기억을 목록에서도 바로 넘겨 볼 수 있게 한다.
+- consequences: 최종 메뉴/보드 역할·실제 책장 저장 모델·공개 미니홈 연결은 새 시안 검토 후 결정한다. 기존 작품 목록의 preview 최대3개 계약을 실제 서비스에서 확대할 경우 추가 로딩/성능 설계와 검증이 필요하다.
+- files/modules affected: `plans/2026-10-03-interface-rebuild.md`, 별도 검토 폴더의 `moemoa-film-bookshelf.html`, `film-bookshelf.css`, `film-bookshelf.js`.
+- migration impact: 없음. 실서비스 변경/보드 이전/삭제/운영배포 승인 아님.
+- approved by/date: 사용자, 2026-10-03, “ㅇㅋ 그렇게 발전시켜보자”.
+- review date/trigger: 책장 꾸미기·작품 필름 행·상세 필름 PC/모바일 시안 확인 후 서비스 적용 범위 결정.
+
+## Decision Log — NO-HERO-UI-01 (2026-10-05)
+
+- status: CONFIRMED_DESIGN_CONSTRAINT / PROTOTYPE_IMPLEMENTATION_APPROVED.
+- context: 사용자는 정돈된 홈이 개인 기록 공간보다 정적인 구식 템플릿처럼 보인다고 평가한 뒤, “hero 영역이 들어가 있다면 해당 섹션 전부 제거 후 리디자인 진행. hero영역은 절대 넣지 않기”라고 지시했다.
+- options: 소개 영역 축소 / 소개·대표 이미지 영역을 제거하고 실제 컬렉션과 조작부터 시작.
+- chosen option: 후자. 향후 MOEMOA 디자인에 hero를 넣지 않는다. 대형 소개 문구, 대표 이미지 배너, 별도 spotlight/환영 무대로 다시 포장하지 않는다. 짧은 페이지 제목·탐색·실제 기록·기능적 빈 상태는 유지할 수 있다.
+- reason: 서비스 소개보다 개인 수집과 재열람·기록 행동을 우선한다.
+- consequences: V7 격리 시안에서 홈의 shelf-intro/profile/bio/featured 구조 전체와 대형 빈 상태 예시 무대를 제거한다. 선반에서 사용자가 선택한 작품만 연결된 필름을 펼치며 최초 진입은 자동 spotlight 없이 시작한다. 기존 로고2안/표지 그리드/책장 진열/작품·Memory·WatchLog 독립성을 유지한다.
+- files/modules affected: `plans/2026-10-03-interface-rebuild.md`, 별도 검토 폴더의 V7 HTML/CSS/JS. 기존 V6는 비교 근거로 보존한다.
+- migration impact: 없음. 실제 서비스 적용·데이터/공개/배포 범위를 확대하지 않는다.
+- approved by/date: 사용자, 2026-10-05, 위 명시 요청.
+- review date/trigger: hero 없는 홈과 필름 펼침/기억 추가 흐름의 PC·모바일 시안 검토 후 실제 서비스 확장 승인.
+
+## Decision Log — SHELF-ROW-PREVIEW-01 (2026-10-05)
+
+- status: CONFIRMED_PROTOTYPE_SCOPE / SERVICE_APPLICATION_PENDING.
+- approved by: 사용자 “진행해줘”. 책장 레이아웃 재검토에 대해 제안한 작은 선반 탭 + 연속 표지 그리드 + 선택 행 아래 필름 펼침을 별도 V8 시안으로 진행한다.
+- chosen option: 표지 자체를 가로로 늘리지 않고 선택한 행 아래에 연결된 커버/필름 패널 하나를 연다. 옆 표지의 x좌표·폭은 유지한다. 초기 선택 없음, hero 없음.
+- preserved: 책장은 선별 진열, 전체 탭은 선반 합집합이다. My Titles/Memory/WatchLog/Board 및 비공개·동기화 계약은 바꾸지 않는다. V7 비교 보존, 가상 RAM 데이터만 사용한다.
+- migration impact: 없음. 운영 코드 교체·공개·배포 승인이 아니다. 다음 게이트는 PC/모바일 시안 확인과 실제 서비스 적용 범위다.
+- execution: `plans/2026-10-03-interface-rebuild.md` 8차, 별도 `moemoa-film-grid.html`/`film-grid.css`/`film-grid.js`.
