@@ -75,6 +75,7 @@ Git 밖 파일 누락→참조 closure/manifest 검사. 사진/키 노출→명�
 - 2026-10-05: 앱 단위407/407·빌드19pages 통과. 새 경로의 V8을 Chromium1440/320px에서 열고 필름 펼침·비교 페이지·누락 로고 안내를 확인, console error 없음.
 - 2026-10-05: 최종 참조 검사171파일/98참조/7JS 구문/7fixture/169checksum PASS, 미리보기 서버·검사기 회귀9/9 PASS(skip0).
 - 2026-10-05: Git index tree `69c2dac04381363601cab84a6bdefd427f99ffce`를 별도 공백 포함 경로로 archive/extract. 저장소와 다른 CWD에서 Node만으로 같은169checksum·98참조·7fixture 및9/9 테스트 재통과. 기존 node_modules·환경변수·Codex 원본 경로 없이 이식 파일을 검증했다. 다른 OS/실제 두 번째 PC 실행을 대신했다고 주장하지 않는다.
+- 2026-10-05 16:55 KST: `git push origin codex/phone-test` 완료. 코드/자산/도구 commit `0abc021ed249c0c70dd19b903e4a3198b85005a8`의 local HEAD=remote SHA 확인, worktree clean. master 원격 `06d2e38d79d38c66753f0ec25a21b615bdc5fa60` 불변. 아래 완료 기록은 후속 문서 커밋으로 함께 올린다.
 
 ## 16. 발견 사항과 계획 변경
 
@@ -127,6 +128,8 @@ DB/스키마/카탈로그/실사용자 데이터 migration 없음. 원본 디렉
 
 서버는127.0.0.1의 시안 폴더만 제공하고 dotfile/금지 확장자/traversal/link 탈출을 차단한다. 환경변수·인증·개인 사진은 제외, 검토용 생성 이미지/제공 로고/합성 데이터 화면만 보존한다. 제3자 원화면4개는 제외했다. public flag·업로드·API·분석 이벤트·DB·운영설정 변경 없음.
 
+최종 read-only 감사는 시작5bd1b3f 대비263파일/105텍스트/신규260blob 범위다. 실제 credential·새 연락처·개인사진 폴더·DB dump 없음, 모든158PNG의 text/EXIF metadata chunk 없음, 최대blob3.53MB로100MB 초과0개. 기존 mock token과 desk 파일명 오탐은 비밀값이 아니다. 과거 작업 출처 문서/JSON5개의 로컬 계정 경로는 역사적 증거로 보존했으며 실행 의존성이나 원본 사진 경로가 아니다.
+
 ### 8. 남은 위험과 다음 게이트
 
-V8 승인과 앱 이식 ExecPlan, 전체19route/320px 회귀·실기기 접근성·공개 이미지 준비9/29 잔여가 남는다. master 전용 CI이므로 이 개발 브랜치 push에서 동일 CI가 자동 실행된다고 가정하지 않는다. 기존 Git 연동 Preview는 발생할 수 있으나 운영 master 배포는 하지 않는다. 원격 push/SHA/clean 확인은 마지막 완료 항목으로 기록한다.
+Git 이전 목표는 달성했다. V8 승인과 앱 이식 ExecPlan, 전체19route/320px 회귀·실기기 접근성·공개 이미지 준비9/29 잔여가 남는다. master 전용 CI이므로 이 개발 브랜치 push에서 동일 CI가 자동 실행된다고 가정하지 않는다. 기존 Git 연동 Preview는 발생할 수 있으나 운영 master 배포는 하지 않았다. 원격 push/SHA/clean 확인은 위 진행 기록에 남겼다.
