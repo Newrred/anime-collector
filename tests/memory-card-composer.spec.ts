@@ -17,8 +17,8 @@ test.beforeEach(async ({ page }) => {
 
 test("explicit save keeps working when the title retains focus on Safari", async ({ page }) => {
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  const title = page.getByLabel("작품 또는 카드 제목");
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  const title = page.getByLabel("작품명");
   await title.fill("Safari focus regression");
   const save = page.getByRole("button", { name: "카드 저장", exact: true });
   await expect(save).toBeEnabled();
@@ -32,12 +32,12 @@ test("explicit save keeps working when the title retains focus on Safari", async
 
 test("Memory routes follow the selected English locale from composer through detail", async ({ page }) => {
   await page.goto("/memory/new/");
-  await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "기억 남기기" })).toBeVisible();
 
   await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
   await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "EN" }).click();
 
-  await expect(page.getByRole("heading", { name: "My anime memory card" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Add a memory" })).toBeVisible();
   await page.getByRole("button", { name: "Use system design" }).click();
   await page.getByLabel("Anime or card title").fill("Frieren");
   await page.getByLabel("Short reflection").fill("A quiet journey worth remembering.");
@@ -121,19 +121,19 @@ test("prepared image errors retranslate without retrying the native claim", asyn
 test("browser route presents system design as the available visual path without exposing a file input", async ({ page }) => {
   await page.goto("/memory/new/");
 
-  await expect(page.getByRole("heading", { name: "나만의 애니 메모리 카드" })).toBeVisible();
-  await expect(page.getByText("웹에서는 시스템 디자인으로 바로 시작")).toBeVisible();
-  await expect(page.getByText(/직접 이미지 가져오기는 Android 앱에서 연결됩니다/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "기억 남기기" })).toBeVisible();
+  await expect(page.getByText("사진 없이도 남길 수 있어요")).toBeVisible();
+  await expect(page.getByText('작품 표지를 고르거나 디자인으로 만들어보세요.')).toBeVisible();
   await expect(page.locator('input[type="file"]')).toHaveCount(0);
   const save = page.getByRole("button", { name: "카드 저장" });
   await expect(save).toBeDisabled();
-  await expect(page.locator("#memory-save-reason")).toContainText("먼저 이미지 또는 시스템 디자인을 선택해 주세요.");
+  await expect(page.locator("#memory-save-reason")).toContainText("사진, 작품 표지, 디자인 중 하나를 골라주세요.");
 
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  await expect(page.locator("#memory-save-reason")).toContainText("작품 또는 카드 제목을 입력해 주세요.");
-  await page.getByLabel("작품 또는 카드 제목").fill("Flow fixture");
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await expect(page.locator("#memory-save-reason")).toContainText("작품명을 입력해 주세요.");
+  await page.getByLabel("작품명").fill("Flow fixture");
   await expect(save).toBeEnabled();
-  await expect(page.locator("#memory-save-reason")).toContainText("저장하면 이 기기의 비공개 기억 아카이브에서 바로 다시 볼 수 있어요.");
+  await expect(page.locator("#memory-save-reason")).toContainText("비공개로 저장해요.");
 });
 
 test("native card save opens the packaged Archive document", async ({ page }) => {
@@ -141,8 +141,8 @@ test("native card save opens the packaged Archive document", async ({ page }) =>
     (window as typeof window & { androidBridge?: Record<string, unknown> }).androidBridge = {};
   });
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  await page.getByLabel("작품 또는 카드 제목").fill("Native route memory");
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await page.getByLabel("작품명").fill("Native route memory");
 
   await page.getByRole("button", { name: "카드 저장" }).click();
 
@@ -191,7 +191,7 @@ test("Archive turns an unavailable private preview into a recoverable visual sta
   }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("Missing scene");
+  await page.getByLabel("작품명").fill("Missing scene");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
 
@@ -235,7 +235,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
-  await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
+  await page.getByLabel("작품명").fill("Frieren");
   await page.getByLabel("짧은 감상").fill("The quiet journey stayed with me.");
   await expect(page.locator("#memory-save-reason")).toContainText("이미지 사용 권리를 확인해 주세요.");
   await page.getByRole("checkbox").check();
@@ -329,7 +329,7 @@ test("card detail replaces a local image only after explicit rights confirmation
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
-  await page.getByLabel("작품 또는 카드 제목").fill("Frieren");
+  await page.getByLabel("작품명").fill("Frieren");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Frieren" }).click();
@@ -425,7 +425,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
-  await page.getByLabel("작품 또는 카드 제목").fill("Missing Image Card");
+  await page.getByLabel("작품명").fill("Missing Image Card");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Missing Image Card" }).click();
@@ -475,7 +475,7 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
-  await page.getByLabel("작품 또는 카드 제목").fill("Picker Ownership");
+  await page.getByLabel("작품명").fill("Picker Ownership");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Picker Ownership" }).click();
@@ -545,7 +545,7 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
 
   await page.goto("/memory/new/");
   await expect(page.getByAltText("선택한 이미지 미리보기")).toBeVisible();
-  await page.getByLabel("작품 또는 카드 제목").fill("Rejected Replacement");
+  await page.getByLabel("작품명").fill("Rejected Replacement");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Rejected Replacement" }).click();
@@ -590,16 +590,16 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
 
 test("browser can create a deterministic system design card without an image upload", async ({ page }) => {
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("A Place Further Than the Universe");
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
-  await expect(page.getByText("시스템 디자인 미리보기")).toBeVisible();
+  await page.getByLabel("작품명").fill("A Place Further Than the Universe");
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await expect(page.getByText("디자인 카드")).toBeVisible();
 
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
   await expect(
     page.getByRole("heading", { name: "A Place Further Than the Universe" }),
   ).toBeVisible();
-  await expect(page.getByText("시스템 디자인 미리보기")).toBeVisible();
+  await expect(page.getByText("디자인 카드")).toBeVisible();
 });
 
 test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle", async ({ page }) => {
@@ -622,22 +622,22 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   }, SYNTHETIC_IMAGE_PREVIEW);
 
   await page.goto("/memory/new/");
-  const titleInput = page.getByLabel("작품 또는 카드 제목");
+  const titleInput = page.getByLabel("작품명");
   await expect(titleInput).toHaveAttribute("type", "search");
   await expect(titleInput).toHaveAttribute("inputmode", "search");
   await expect(titleInput).toHaveAttribute("enterkeyhint", "search");
   await titleInput.fill("Frieren");
   await titleInput.press("Enter");
-  await expect(page.getByText("온라인 작품 후보")).toBeVisible();
+  await expect(page.getByText("검색 결과")).toBeVisible();
   const resultPoster = page.locator(".memory-composer__title-result-poster");
   await expect(resultPoster).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
   expect(await resultPoster.evaluate((element) => ({
     width: element.getBoundingClientRect().width,
     height: element.getBoundingClientRect().height,
-  }))).toEqual({ width: 48, height: 68 });
+  }))).toEqual({ width: 42, height: 60 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "Frieren: Beyond Journey's End" })).toBeVisible();
 
@@ -707,12 +707,12 @@ test("an approved official cover can be selected, saved by reference, and displa
   }, { coverPreviewUrl: SYNTHETIC_IMAGE_PREVIEW, animeId, ref: catalogCoverRef });
 
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("프리렌");
-  await page.getByLabel("작품 또는 카드 제목").press("Enter");
+  await page.getByLabel("작품명").fill("프리렌");
+  await page.getByLabel("작품명").press("Enter");
   await page.getByRole("button", { name: "장송의 프리렌 선택" }).click();
-  await page.getByRole("button", { name: "공식 표지를 카드에 사용" }).click();
+  await page.getByRole("button", { name: "작품 표지 사용" }).click();
 
-  await expect(page.getByText("승인된 공식 표지")).toBeVisible();
+  await expect(page.locator('.memory-composer__cover-badge')).toHaveText("공식 표지");
   await expect(page.getByRole("button", { name: "카드 저장" })).toBeDisabled();
   await expect(page.locator("#memory-save-reason")).toContainText("짧은 감상을 입력해 주세요");
   await page.getByLabel("짧은 감상").fill("여정을 마친 뒤 남은 조용한 감정.");
@@ -778,10 +778,10 @@ test("catalog detail deep-link restores the exact AnimeRef before saving", async
   });
 
   await page.goto("/memory/new/?animeId=anime%3A11111111-1111-4111-8111-000000000001&title=temporary");
-  await expect(page.getByLabel("작품 또는 카드 제목")).toHaveValue("카우보이 비밥");
-  await expect(page.getByText("작품 정보 있음")).toBeVisible();
+  await expect(page.getByLabel("작품명")).toHaveValue("카우보이 비밥");
+  await expect(page.locator('.memory-composer__selected-title').getByText("작품", { exact: true })).toBeVisible();
   await expect(page.getByText("일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.")).toBeHidden();
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "카우보이 비밥" })).toBeVisible();
 
@@ -817,11 +817,11 @@ test("provider unavailability keeps the typed PrivateTitle save path available",
   });
 
   await page.goto("/memory/new/");
-  await page.getByLabel("작품 또는 카드 제목").fill("My Offline Anime");
+  await page.getByLabel("작품명").fill("My Offline Anime");
   await page.getByRole("button", { name: "작품 검색" }).click();
   await expect(page.getByText(/온라인 검색을 사용할 수 없어요/)).toBeVisible();
-  await expect(page.getByText(/개인 제목으로 저장/)).toBeVisible();
-  await page.getByRole("button", { name: "시스템 디자인 사용" }).click();
+  await expect(page.getByText(/나만의 작품명으로 저장/)).toBeVisible();
+  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
   await expect(page.getByRole("button", { name: "카드 저장" })).toBeEnabled();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "My Offline Anime" })).toBeVisible();
@@ -848,12 +848,12 @@ test("a late title response cannot replace results after the query changes", asy
   });
 
   await page.goto("/memory/new/");
-  const title = page.getByLabel("작품 또는 카드 제목");
+  const title = page.getByLabel("작품명");
   await title.fill("Frieren");
   await page.getByRole("button", { name: "작품 검색" }).click();
   await title.fill("Violet Evergarden");
   await page.waitForTimeout(250);
 
   await expect(page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" })).toHaveCount(0);
-  await expect(page.getByText(/“Violet Evergarden”을 개인 제목으로 저장/)).toBeVisible();
+  await expect(page.getByText(/“Violet Evergarden”을 나만의 작품명으로 저장/)).toBeVisible();
 });

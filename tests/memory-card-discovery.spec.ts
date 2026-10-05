@@ -100,7 +100,7 @@ test("catalog search card action preserves the exact AnimeRef without changing L
 
   await expect(page).toHaveURL(new RegExp(`/memory/new/\\?animeId=${encodeURIComponent(catalogAnimeId)}`));
   await expect(page.getByLabel("Anime or card title")).toHaveValue("카우보이 비밥");
-  await expect(page.getByText("Catalog match")).toBeVisible();
+  await expect(page.locator('.memory-composer__selected-title').getByText("Anime", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"))).toEqual([]);
   expect(await memoryCardCount(page)).toBe(0);
 });

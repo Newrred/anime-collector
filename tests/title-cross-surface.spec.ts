@@ -3,8 +3,8 @@ import { installAppState } from "./helpers/appState";
 
 async function saveFirstCard(page: Page, locale: "en" | "ko" = "en", title = "A remembered scene") {
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: locale === "ko" ? "시스템 디자인 사용" : "Use system design", exact: true }).click();
-  await page.getByLabel(locale === "ko" ? "작품 또는 카드 제목" : "Anime or card title", { exact: true }).fill(title);
+  await page.getByRole("button", { name: locale === "ko" ? "디자인으로 만들기" : "Use system design", exact: true }).click();
+  await page.getByLabel(locale === "ko" ? "작품명" : "Anime or card title", { exact: true }).fill(title);
   await page.getByRole("button", { name: locale === "ko" ? "카드 저장" : "Save card", exact: true }).click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
 }

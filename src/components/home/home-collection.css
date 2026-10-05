@@ -1,0 +1,52 @@
+.collection-start { padding-block: 30px 60px; }
+.collection-start__heading { max-width: 760px; margin-bottom: 48px; }
+.collection-start__heading h1 { margin: 0 0 18px; font-size: clamp(34px, 4.2vw, 58px); line-height: 1.22; font-weight: 600; letter-spacing: -.05em; word-break: keep-all; }
+.collection-start__heading > p:last-child { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.7; }
+.collection-start__grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 24px; align-items: start; }
+.collection-start__grid > * { display: block; min-width: 0; background: none; border: 0; padding: 0; color: var(--text-primary); font: inherit; text-align: left; text-decoration: none; border-radius: 20px; }
+.collection-start__titles { cursor: pointer; }
+.collection-start__canvas, .collection-start__shelf, .collection-start__mosaic { height: clamp(180px, 24vw, 310px); border-radius: 20px; overflow: hidden; }
+.collection-start__canvas { display: grid; place-items: center; background: #cad5bb; color: #455739; }
+.collection-start__frame { display: grid; place-items: center; width: 50%; height: 68%; border: 1px solid #45573970; border-radius: 10px; transform: rotate(-7deg); }
+.collection-start__shelf { display: flex; gap: 10px; align-items: center; justify-content: center; background: #e2d7c5; padding: 24px; }
+.collection-start__shelf span { width: 29%; height: 64%; border-radius: 8px; background: #a48b6c; }
+.collection-start__shelf span:nth-child(2) { background: #84947d; transform: translateY(-10px); }
+.collection-start__shelf span:nth-child(3) { background: #c6bfa9; }
+.collection-start__mosaic { display: grid; grid-template-columns: 1.4fr 1fr; grid-template-rows: 1fr 1fr; gap: 5px; background: var(--bg-app); }
+.collection-start__mosaic span { background: #a7b6b2; }
+.collection-start__mosaic span:first-child { grid-row: span 2; background: #899b93; }
+.collection-start__mosaic span:last-child { background: #c6c5b5; }
+.collection-start__caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 2px 0; }
+.collection-start__caption h2 { margin: 0 0 6px; font-size: 19px; font-weight: 600; }
+.collection-start__caption p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+.collection-start__caption > svg { flex: none; color: var(--text-tertiary); }
+.collection-start__privacy { margin: 36px 0 0; font-size: 13px; color: var(--text-tertiary); }
+.home-collection-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 12px 28px; }
+.home-collection-heading h1 { margin: 0; }
+.home-board-collections { padding-top: 16px; }
+html .home-memory-overview { display: grid; gap: 28px; }
+html .home-rediscovery { gap: 40px; }
+html .home-rediscovery__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+html .home-rediscovery h2 { font-weight: 600; font-size: 21px; margin-bottom: 20px; }
+html .home-legacy-insights { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-subtle); }
+@media (max-width: 850px) {
+  .collection-start__grid { gap: 16px; }
+  html .home-rediscovery__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+}
+@media (max-width: 600px) {
+  .collection-start { padding-top: 12px; }
+  .collection-start__heading { margin-bottom: 28px; }
+  .collection-start__heading h1 { font-size: 34px; }
+  .collection-start__grid { grid-template-columns: 1fr 1fr; gap: 28px 16px; }
+  .collection-start__memory { grid-column: 1 / -1; }
+  .collection-start__canvas { height: 190px; }
+  .collection-start__frame { width: 31%; }
+  .collection-start__shelf, .collection-start__mosaic { height: 160px; }
+  .collection-start__shelf { padding: 12px; gap: 6px; }
+  .collection-start__caption { padding-top: 12px; align-items: start; }
+  .collection-start__caption h2 { font-size: 16px; }
+  .collection-start__caption p { font-size: 13px; }
+  .collection-start__caption > svg { width: 18px; }
+  .home-collection-heading { align-items: start; flex-direction: column; padding-bottom: 0; gap: 18px; }
+  html .home-rediscovery__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+}

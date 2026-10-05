@@ -1,5 +1,5 @@
 .memory-detail {
-  padding-block: 28px 64px;
+  padding-block: 8px 64px;
 }
 
 .memory-detail__header {
@@ -24,10 +24,10 @@
 
 .memory-detail__card {
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(260px, 1.2fr) minmax(0, .8fr);
   gap: clamp(22px, 3.5vw, 40px);
   align-items: start;
-  padding: clamp(16px, 2.8vw, 28px);
+  padding: clamp(20px, 3vw, 40px);
 }
 
 .memory-detail__visual,
@@ -44,9 +44,9 @@
   gap: 16px;
   margin: 20px 0;
   padding: 18px;
-  border: 1px solid rgba(185, 151, 255, 0.24);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  background: rgba(127, 100, 168, 0.08);
+  background: var(--bg-surface-2);
 }
 
 .memory-detail__replacement-head {
@@ -195,7 +195,7 @@
 
 .memory-photo-sync {
   padding: 16px;
-  border: 1px solid rgba(185, 151, 255, 0.2);
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
 }
 

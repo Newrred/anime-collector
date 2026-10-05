@@ -1,6 +1,6 @@
 export const THEME_META_COLORS = {
-  dark: "#0b1220",
-  light: "#f3f3f0",
+  dark: "#171817",
+  light: "#fafaf7",
 };
 
 export const RECAP_SHARE_PALETTE = {

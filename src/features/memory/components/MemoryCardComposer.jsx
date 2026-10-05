@@ -171,6 +171,7 @@ function MemoryCardComposerContent({ base }) {
                       : composerCopy.noImage}
                 </p>
                 {status === "browser" ? <small>{composerCopy.webVisualBody}</small> : null}
+                {runtime?.imageIntake.available ? <button type="button" className="btn" onClick={chooseImage} disabled={busy}>{composerCopy.chooseImage}</button> : null}
               </div>
             )}
 
@@ -182,7 +183,7 @@ function MemoryCardComposerContent({ base }) {
 
             {runtime?.imageIntake.available || ticket || catalogCoverAvailable || catalogCoverSelection ? (
             <div className="action-row memory-composer__image-actions" role="group" aria-label={composerCopy.visualChoices}>
-              {runtime?.imageIntake.available ? (
+              {runtime?.imageIntake.available && hasVisual ? (
                 <button
                   type="button"
                   className="btn memory-composer__visual-primary"

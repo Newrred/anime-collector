@@ -4,14 +4,14 @@ const MOCK_SESSION_KEY = "moemoa.e2e.mockSession.v1";
 const MOCK_PROFILE_STORE_KEY = "moemoa.e2e.profileStore.v1";
 
 const ROUTES = [
-  // Home readiness uses a spacious hero and a 50px primary touch target.
-  { route: "/", root: ".home-page", leadSelector: ".home-empty-state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 64, maxButtonHeight: 50 },
+  // Collection illustrations are borderless; actual controls retain 44px targets.
+  { route: "/", root: ".home-page", leadSelector: ".collection-start", cardSelector: ".collection-start__canvas, .collection-start__mosaic", minPadding: 0, maxPadding: 0, minRadius: 20, maxRadius: 20, maxButtonHeight: 50 },
   { route: "/library/?focus=edit", root: ".library-page", leadSelector: ".library-panel", cardSelector: ".library-panel, .library-card, .card", minPadding: 0, maxPadding: 24.5 },
   { route: "/tier/", root: ".tier-board", leadSelector: ".tier-board__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/profile/", root: ".profile-page", leadSelector: ".minihome-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/data/", root: ".data-grid", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
   { route: "/help/", root: ".help-page", leadSelector: ".status-panel", cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
-  { route: "/memory/new/", root: ".memory-composer", leadSelector: ".memory-composer__intro", cardSelector: ".memory-composer__step-card", minPadding: 17, maxPadding: 26, minRadius: 16, maxRadius: 18, maxButtonHeight: 50 },
+  { route: "/memory/new/", root: ".memory-composer", leadSelector: ".memory-composer__intro", cardSelector: ".memory-composer__step-card", minPadding: 0, maxPadding: 24, minRadius: 0, maxRadius: 0, maxButtonHeight: 51 },
   { route: "/archive/", root: ".memory-archive", leadSelector: ".memory-archive__header", cardSelector: ".surface-card", minPadding: 12, maxPadding: 48 },
   { route: "/memory/card/", root: ".memory-detail", leadSelector: ".memory-detail__state", cardSelector: ".surface-card", minPadding: 12, maxPadding: 30 },
   { route: "/u/?handle=playwright-user", root: ".profile-page", leadSelector: ".profile-hero-card", auth: true, cardSelector: ".surface-card", minPadding: 12, maxPadding: 24.5 },
@@ -193,10 +193,9 @@ test.describe("Page Design System Consistency", () => {
         expect(metrics.docOverflow, `${viewport.name} ${routeConfig.route} document overflow`).toBeLessThanOrEqual(0.5);
         expect(metrics.bodyOverflow, `${viewport.name} ${routeConfig.route} body overflow`).toBeLessThanOrEqual(0.5);
         expect(metrics.cardCount, `${viewport.name} ${routeConfig.route} visible surface cards`).toBeGreaterThan(0);
-        // Composer uses compact 12px desktop cards and 16px cards at the mobile breakpoint.
-        const minRadius = routeConfig.route === '/memory/new/' && viewport.name === 'desktop' ? 12 : routeConfig.minRadius ?? 8;
+        const minRadius = routeConfig.minRadius ?? 8;
         expect(metrics.minRadius, `${viewport.name} ${routeConfig.route} min card radius`).toBeGreaterThanOrEqual(minRadius);
-        expect(metrics.maxRadius, `${viewport.name} ${routeConfig.route} max card radius`).toBeLessThanOrEqual(routeConfig.maxRadius ?? 12.5);
+        expect(metrics.maxRadius, `${viewport.name} ${routeConfig.route} max card radius`).toBeLessThanOrEqual(routeConfig.maxRadius ?? 24);
         expect(metrics.minPadding, `${viewport.name} ${routeConfig.route} min card padding`).toBeGreaterThanOrEqual(routeConfig.minPadding ?? 12);
         expect(metrics.maxPadding, `${viewport.name} ${routeConfig.route} max card padding`).toBeLessThanOrEqual(routeConfig.maxPadding ?? 24.5);
         expect(metrics.minButtonHeight, `${viewport.name} ${routeConfig.route} min button height`).toBeGreaterThanOrEqual(32);

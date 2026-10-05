@@ -380,11 +380,11 @@ test('approved and supplemental viewport widths retain one-axis reflow and the p
   ]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
-    await expect(page.locator('.home-empty-state')).toBeVisible();
+    await expect(page.locator('.collection-start')).toBeVisible();
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.locator('main h1')).toHaveCount(1);
     const geometry = await page.evaluate(() => {
-      const primary = document.querySelector('.home-empty-state__actions .btn');
+      const primary = document.querySelector('.collection-start__memory');
       const rect = primary?.getBoundingClientRect();
       return {
         documentOverflow: document.documentElement.scrollWidth - innerWidth,
@@ -412,10 +412,10 @@ test('200% zoom retains one-axis reflow and an operable primary action', async (
   await page.setViewportSize({ width: 320, height: 720 });
   await installVisualFixtureState(page, { locale: 'en', theme: 'dark' });
   await page.goto('/');
-  await expect(page.locator('.home-empty-state')).toBeVisible();
+  await expect(page.locator('.collection-start')).toBeVisible();
 
   const geometry = await page.evaluate(() => {
-    const action = document.querySelector('.home-empty-state__actions .btn');
+    const action = document.querySelector('.collection-start__memory');
     const rect = action?.getBoundingClientRect();
     return {
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -430,13 +430,15 @@ test('200% zoom retains one-axis reflow and an operable primary action', async (
   expect(geometry.actionRight).toBeLessThanOrEqual(320.5);
   expect(geometry.actionWidth).toBeGreaterThanOrEqual(44);
   expect(geometry.actionHeight).toBeGreaterThanOrEqual(44);
-  await expect(page.locator('.home-empty-state__actions .btn').first()).toBeEnabled();
+  await expect(page.locator('.collection-start__memory').first()).toBeEnabled();
 });
 
 test('dark and light Memory surfaces meet numerical WCAG text contrast', async ({ page }) => {
   await installVisualFixtureState(page, { locale: 'en', theme: 'dark' });
   await page.goto('/memory/new/');
   await page.getByRole('button', { name: 'Use system design', exact: true }).click();
+  await page.getByLabel('Anime or card title').fill('Contrast fixture');
+  await expect(page.getByRole('button', { name: 'Save card', exact: true })).toBeEnabled();
 
   for (const theme of ['dark', 'light']) {
     if (theme === 'light') await page.locator('.data-menu-theme-trigger:visible').click();
@@ -462,9 +464,9 @@ test('dark and light Memory surfaces meet numerical WCAG text contrast', async (
       const rootStyle = getComputedStyle(document.documentElement);
       return [
         { selector: '.pageTitle', backgroundToken: '--bg-app' },
-        { selector: '#memory-save-reason', backgroundToken: '--bg-surface' },
-        { selector: '.memory-composer__step-heading', backgroundToken: '--bg-surface' },
-        { selector: '.memory-composer__save-gate .btn', backgroundToken: '--bg-surface-2' },
+        { selector: '#memory-save-reason', backgroundToken: '--bg-app' },
+        { selector: '.memory-composer__step-heading', backgroundToken: '--bg-app' },
+        { selector: '.memory-composer__save-gate .btn', backgroundToken: '--accent' },
       ].map(({ selector, backgroundToken }) => {
           const element = root.querySelector(selector);
           if (!element) return { selector, ratio: 0 };

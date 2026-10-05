@@ -42,25 +42,19 @@ test("new visitor sees memory card creation as the primary action", async ({ pag
   await clearAppState(page);
   await installAppState(page, { locale: "en" });
   await page.goto("/");
-  const emptyHome = page.locator(".home-empty-state");
+  const emptyHome = page.locator(".collection-start");
   const createCard = emptyHome.getByRole("link", { name: "Add Memory", exact: true });
   await expect(createCard.first()).toBeVisible();
-  await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toHaveCount(1);
-  await expect(emptyHome.locator(".memory-visual--system .system-design-preview")).toBeVisible();
-  await expect(emptyHome.getByText("Saved only on this device for now. Creating a card does not publish it.")).toBeVisible();
+  await expect(emptyHome.getByRole("button", { name: "Find a title" })).toHaveCount(1);
+  await expect(emptyHome.locator(".collection-start__canvas")).toBeVisible();
+  await expect(emptyHome.getByText("Start without an account. Your memories are private.")).toBeVisible();
   const readingOrder = await emptyHome.locator(
-    ".home-empty-state__promise, .home-empty-state__specimen, .home-empty-state__actions, .home-empty-state__local-note",
+    ".collection-start__heading, .collection-start__memory, .collection-start__titles, .collection-start__board, .collection-start__privacy",
   ).evaluateAll((nodes) => nodes.map((node) => [
-    "home-empty-state__promise",
-    "home-empty-state__specimen",
-    "home-empty-state__actions",
-    "home-empty-state__local-note",
+    "collection-start__heading", "collection-start__memory", "collection-start__titles", "collection-start__board", "collection-start__privacy",
   ].find((className) => node.classList.contains(className))));
   expect(readingOrder).toEqual([
-    "home-empty-state__promise",
-    "home-empty-state__specimen",
-    "home-empty-state__actions",
-    "home-empty-state__local-note",
+    "collection-start__heading", "collection-start__memory", "collection-start__titles", "collection-start__board", "collection-start__privacy",
   ]);
   await expect(page.locator(".library-card")).toHaveCount(0);
 });
@@ -78,14 +72,14 @@ test("saved Memory Card becomes Home's archive source without a legacy Library o
 
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");
-  const memory = page.getByRole("region", { name: "Return to your memories" });
+  const memory = page.getByRole("region", { name: "Worth coming back to." });
   await expect(memory).toBeVisible();
   await expect(memory.getByRole("region", { name: "Recent memories" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "Home Memory Fixture" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "View Memories" })).toBeVisible();
   await expect(memory.getByRole("link", { name: "Add Memory", exact: true })).toBeVisible();
   await expect(memory.locator(".memory-preview")).toHaveCount(1);
-  await expect(page.getByRole("button", { name: "Search or add a title" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Find a title" })).toHaveCount(0);
   await expect(page.getByText("Add your first anime", { exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
@@ -113,9 +107,10 @@ test("unconfigured cloud stays local-only and never claims a cloud backup", asyn
   await clearAppState(page);
   await page.goto("/data/");
   const syncCard = page.locator(".sync-card");
-  await expect(syncCard).toContainText("Local only");
+  await expect(syncCard).toHaveAttribute('data-memory-account-status', 'LOCAL_ONLY');
+  await expect(syncCard).toContainText("Saved on this device");
   await expect(syncCard).not.toContainText("Cloud backup found");
-  await expect(page.getByText(/Private Memory Cards and images remain in this device's Guest namespace/u)).toBeVisible();
+  await expect(syncCard.getByText('Records and photos are saved on this device.')).toBeVisible();
   await expect(page.getByText(/Memory Cards and their images are not included/u)).toBeVisible();
 });
 
@@ -126,9 +121,9 @@ test("visitor without a Memory Card keeps the memory-led empty Home", async ({ p
     watchLogs: [{ id: "log-1", anilistId: 1, createdAt: 1, updatedAt: 1 }],
   });
   await page.goto("/");
-  const emptyHome = page.locator(".home-empty-state");
+  const emptyHome = page.locator(".collection-start");
   await expect(emptyHome.getByRole("link", { name: "Add Memory", exact: true })).toBeVisible();
-  await expect(emptyHome.getByRole("button", { name: "Search or add a title" })).toBeVisible();
+  await expect(emptyHome.getByRole("button", { name: "Find a title" })).toBeVisible();
 });
 
 test("empty Home primary CTA opens the card composer without creating a legacy log", async ({ page }) => {
@@ -139,7 +134,7 @@ test("empty Home primary CTA opens the card composer without creating a legacy l
     mediaById: { "1": { id: 1, title: { english: "Fixture Anime", romaji: "Fixture Anime" }, genres: [] } },
   });
   await page.goto("/");
-  await page.locator(".home-empty-state").getByRole("link", { name: "Add Memory", exact: true }).click();
+  await page.locator(".collection-start").getByRole("link", { name: "Add Memory", exact: true }).click();
   await expect(page).toHaveURL(url => url.pathname === '/memory/new/' && url.searchParams.get('returnTo') === '/');
   const logs = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]"));
   expect(logs).toEqual([]);

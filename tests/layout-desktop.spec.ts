@@ -27,11 +27,11 @@ test("Home editorial composition stays bounded at 768px and 1440px", async ({ br
     const page = await context.newPage();
     await installAppState(page, { locale: "en", list: [], watchLogs: [] });
     await page.goto("/");
-    await expect(page.locator(".home-empty-state")).toBeVisible();
+    await expect(page.locator(".collection-start")).toBeVisible();
 
     const geometry = await page.evaluate(() => {
       const home = document.querySelector(".home-page");
-      const copy = document.querySelector(".home-empty-state__copy");
+      const copy = document.querySelector(".collection-start__heading");
       const homeRect = home?.getBoundingClientRect();
       const copyRect = copy?.getBoundingClientRect();
       return {
@@ -42,8 +42,8 @@ test("Home editorial composition stays bounded at 768px and 1440px", async ({ br
       };
     });
 
-    expect(geometry.homeWidth).toBeLessThanOrEqual(Math.min(1200, geometry.viewportWidth));
-    expect(geometry.copyWidth).toBeLessThanOrEqual(680);
+    expect(geometry.homeWidth).toBeLessThanOrEqual(Math.min(1440, geometry.viewportWidth));
+    expect(geometry.copyWidth).toBeLessThanOrEqual(760);
     expect(geometry.overflow).toBeLessThanOrEqual(0.5);
     await context.close();
   }
@@ -85,7 +85,7 @@ test.describe("Desktop Layout Regression", () => {
       const page = await context.newPage();
 
       const rhythmCases = [
-        { route: "/", leadSelector: ".home-empty-state" },
+        { route: "/", leadSelector: ".collection-start" },
         { route: "/library/?focus=edit", leadSelector: ".library-panel" },
         { route: "/data/", leadSelector: ".surface-card" },
       ];

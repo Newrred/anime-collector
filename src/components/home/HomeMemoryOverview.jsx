@@ -1,11 +1,15 @@
 import HomeRediscovery from "./HomeRediscovery.jsx";
+import BoardCollectionGrid from "../../features/memory/components/BoardCollectionGrid.tsx";
+import "./home-collection.css";
 
 export default function HomeMemoryOverview({ base, copy, memory, locale = "ko" }) {
   const titleId = "home-memory-overview-title";
   return (
     <section className="home-section-block home-memory-overview" aria-labelledby={titleId}>
-      <div className="pageHeader">
-        <h1 id={titleId} className="sectionTitle home-section-title">{memory.groups ? (locale === "ko" ? "내 기억 다시 보기" : "Return to your memories") : copy.title}</h1>
+      <div className="home-collection-heading">
+        <div><p className="collection-kicker">{locale === "ko" ? "나의 컬렉션" : "Your collection"}</p>
+        <h1 id={titleId} className="pageTitle">{locale === "ko" ? "다시 보고 싶은 순간들" : "Worth coming back to."}</h1></div>
+        <a className="btn" href={`${base}memory/new/`} aria-label={copy.createCard}>{locale === "ko" ? "+ 기억 남기기" : "+ Add Memory"}</a>
       </div>
 
       {memory.status === "loading" && (
@@ -24,7 +28,10 @@ export default function HomeMemoryOverview({ base, copy, memory, locale = "ko" }
       )}
 
       {memory.status === "ready" && memory.groups ? <>
-        <div className="action-row"><a className="btn" href={`${base}memory/new/`}>{locale === "ko" ? "기억 남기기" : "Add Memory"}</a><a className="btn btn--subtle" href={`${base}archive/`}>{copy.openArchive}</a></div>
+        {memory.boards?.length ? <section className="home-board-collections">
+          <div className="collection-section-head"><h2>{locale === "ko" ? "나의 보드" : "Your boards"}</h2><a href={`${base}boards/`}>{locale === "ko" ? "모두 보기" : "View all"} →</a></div>
+          <BoardCollectionGrid boards={memory.boards} runtime={memory.runtime} base={base} locale={locale} />
+        </section> : null}
         <HomeRediscovery groups={memory.groups} base={base} locale={locale} />
       </> : null}
 

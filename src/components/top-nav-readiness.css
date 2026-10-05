@@ -11,17 +11,17 @@
 }
 
 .top-nav .top-nav__memory-action {
-  border-color: #d8ff72;
-  background: #d8ff72;
-  color: #17210b;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
   font-weight: var(--fw-bold);
 }
 
 .top-nav .top-nav__memory-action:hover,
 .top-nav .top-nav__memory-action:focus-visible {
-  border-color: #e7ffa8;
-  background: #e7ffa8;
-  color: #101806;
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: var(--accent-contrast);
 }
 
 .top-nav .quick-action__input {
@@ -81,13 +81,13 @@
 
 .data-menu-section--account .auth-sheet {
   padding: 14px;
-  border: 1px solid color-mix(in srgb, #d8ff72 14%, var(--border-subtle));
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border-subtle));
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--bg-surface-2) 66%, transparent);
 }
 
 .data-menu-section--account .auth-sheet__avatar {
-  color: #d8ff72;
+  color: var(--accent);
 }
 
 .data-menu-utility-grid {
@@ -117,8 +117,8 @@
   }
 
   .top-nav .top-nav__mobile-menu-trigger[aria-expanded="true"] {
-    border-color: color-mix(in srgb, #d8ff72 38%, var(--border-strong));
-    background: color-mix(in srgb, #d8ff72 10%, var(--bg-surface));
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--border-strong));
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg-surface));
   }
 
   .data-menu-panel--manage .data-menu-stack {
@@ -151,8 +151,8 @@
   }
 
   .data-menu-section--navigation .data-menu-link.is-active {
-    border-color: color-mix(in srgb, #d8ff72 32%, var(--border-strong));
-    background: color-mix(in srgb, #d8ff72 10%, var(--bg-surface-2));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border-strong));
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg-surface-2));
     color: var(--text-primary);
   }
 

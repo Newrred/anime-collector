@@ -55,13 +55,13 @@ test('navigation — 1440 KO light desktop search result', async ({ page }) => {
 test('Home — 390 EN dark empty', async ({ page }) => {
   await prepare(page, { width: 390, height: 844, locale: 'en', theme: 'dark' });
   await page.goto('/');
-  await expectReadyPage(page, '.home-empty-state', 'home-empty-en-dark-390x844.png');
+  await expectReadyPage(page, '.collection-start', 'home-empty-en-dark-390x844.png');
 });
 
 test('Home — 1440 KO light empty', async ({ page }) => {
   await prepare(page, { width: 1440, height: 900, locale: 'ko', theme: 'light' });
   await page.goto('/');
-  await expectReadyPage(page, '.home-empty-state', 'home-empty-ko-light-1440x900.png');
+  await expectReadyPage(page, '.collection-start', 'home-empty-ko-light-1440x900.png');
 });
 
 test('Home — 390 KO dark active', async ({ page }) => {
@@ -89,7 +89,7 @@ test('Composer — 390 KO light system design selected', async ({ page }) => {
   await prepare(page, { width: 390, height: 844, locale: 'ko', theme: 'light' });
   await page.goto('/memory/new/');
   await page.locator('#memory-title-input').fill('바이올렛 에버가든');
-  await page.getByRole('button', { name: '시스템 디자인 사용' }).click();
+  await page.getByRole('button', { name: '디자인으로 만들기' }).click();
   await expect(page.locator('.memory-composer__system-preview')).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expectReadyPage(page, '.memory-composer', 'composer-system-ko-light-390x844.png');

@@ -188,13 +188,7 @@ export default function TopNavDataMenu({
           className="top-nav__brand"
           aria-label={`MOEMOA ${copy.home}`}
         >
-          <img
-            src={`${base}MOEMOA.svg`}
-            alt="MOEMOA"
-            className="top-nav__brand-mark"
-            width="155"
-            height="41"
-          />
+          <span className="collection-wordmark" aria-hidden="true">moe<span>moa</span>.</span>
         </a>
         <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} />
 

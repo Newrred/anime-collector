@@ -20,7 +20,8 @@ export function useHomeMemoryArchive() {
     let active = true;
 
     getPlatformMemoryRuntime().then(async (runtime) => {
-      const archive = (await runtime.listArchive()).filter(Boolean);
+      const [archiveEntries, boards] = await Promise.all([runtime.listArchive(), runtime.listBoards().catch(() => [])]);
+      const archive = archiveEntries.filter(Boolean);
       const selections = selectHomeRediscovery(archive);
       const groups = Object.fromEntries(await Promise.all(Object.entries(selections).map(async ([key, bundles]) =>
         [key, await Promise.all(bundles.map(async (bundle) => ({ ...bundle, visual: await loadMemoryVisual(bundle, runtime) })))])));
@@ -32,6 +33,8 @@ export function useHomeMemoryArchive() {
         count: archive.length,
         groups,
         latest: latestBundle,
+        boards: boards.slice(0, 3),
+        runtime,
       });
     }).catch(() => {
       if (active) setState({ status: "error", ownerKey: owner.ownerKey, count: 0, latest: null });

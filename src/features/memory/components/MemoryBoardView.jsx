@@ -1,6 +1,7 @@
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PrivateMemoryCardPreview from "./PrivateMemoryCardPreview.jsx";
+import BoardCollectionGrid from "./BoardCollectionGrid.tsx";
 import MemoryPublicationPanel from "./MemoryPublicationPanel.jsx";
 import { minihomeUiEnabled } from "../runtime/platformPublication.js";
 import { loadMemoryVisual } from "../application/loadMemoryVisual.js";
@@ -114,27 +115,30 @@ function MemoryBoardContent({ base }) {
   };
 
   return (
-    <div className="memory-boards page-shell page-shell--wide" aria-busy={busy}>
-      <header className="memory-boards__header">
+    <div className={`memory-boards page-shell page-shell--wide${selectedBoardId ? " has-detail" : ""}`} aria-busy={busy}>
+      {!detail && <header className="memory-boards__header">
         <div className="pageHeader">
           <h1 className="pageTitle">{boardCopy.title}</h1>
           {minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
         </div>
         <a className="btn btn--subtle" href={`${base}archive/`}>{boardCopy.archiveLink}</a>
-      </header>
+      </header>}
 
       {status === "loading" && <p className="surface-card memory-boards__state" role="status">{boardCopy.loading}</p>}
       {status === "error" && <p className="surface-card memory-boards__state" role="alert">{boardCopy.loadFailed} <button type="button" className="btn btn--subtle" onClick={() => globalThis.location.reload()}>{locale === "ko" ? "다시 시도" : "Try again"}</button></p>}
       {feedback && <p className="memory-boards__feedback" role="status">{feedback}</p>}
 
       {status === "ready" && (
-        <div className="memory-boards__layout">
+        <div className={`memory-boards__layout${selectedBoardId ? " is-detail" : " is-collection"}`}>
           <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
-            <div>
+            {detail && <a className="memory-boards__back" href={`${base}boards/`} data-astro-reload>← {boardCopy.title}</a>}
+            {!selectedBoardId && <div>
               <h2>{boardCopy.yourBoards}</h2>
-            </div>
+            </div>}
             {boards.length === 0 ? <p className="memory-boards__muted">{boardCopy.empty}</p> : (
-              <nav className="memory-boards__list">
+              <details className="memory-boards__switcher">
+                <summary>{boardCopy.yourBoards}</summary>
+              <nav className="memory-boards__list" aria-label={boardCopy.yourBoards}>
                 {boards.map((board) => (
                   <a
                     key={board.id}
@@ -148,6 +152,7 @@ function MemoryBoardContent({ base }) {
                   </a>
                 ))}
               </nav>
+              </details>
             )}
             {detail ? <a href={`${base}boards/`} data-astro-reload>{boardCopy.newBoard}</a> : <details className="memory-boards__tools">
               <summary>{boardCopy.createTitle}</summary>
@@ -166,12 +171,10 @@ function MemoryBoardContent({ base }) {
             </details>}
           </aside>
 
-          <section className="surface-card memory-boards__detail" aria-live="polite">
+          <section className="memory-boards__detail" aria-live="polite">
             {!selectedBoardId ? (
-              <div className="memory-boards__welcome">
-                <h2>{boardCopy.chooseTitle}</h2>
-                <p>{boardCopy.chooseBody}</p>
-              </div>
+              boards.length ? <BoardCollectionGrid boards={boards} runtime={runtime} base={base} locale={locale} /> :
+                <div className="memory-boards__welcome"><span className="board-collection__empty-mark" aria-hidden="true"><span /><span /><span /></span><h2>{boardCopy.chooseTitle}</h2><p>{boardCopy.chooseBody}</p></div>
             ) : !detail ? (
               <div className="memory-boards__welcome">
                 <h2>{boardCopy.notFound}</h2>
@@ -180,11 +183,11 @@ function MemoryBoardContent({ base }) {
             ) : (
               <>
                 <div className="memory-boards__section-heading">
-                  <div><h2>{detail.board.title}</h2>{detail.board.description && <p>{detail.board.description}</p>}</div>
+                  <div><h1>{detail.board.title}</h1>{detail.board.description && <p>{detail.board.description}</p>}</div>
                   <button type="button" className="btn btn--subtle" aria-expanded={editing} disabled={busy} onClick={() => { setTitle(detail.board.title); setDescription(detail.board.description); setEditing((value) => !value); }}>{editing ? (locale === "ko" ? "취소" : "Cancel") : boardCopy.edit}</button>
                 </div>
                 {editing && <form className="memory-boards__edit" onSubmit={saveBoard}>
-                    <small>{locale === "ko" ? "취소는 이름·설명에만 적용됩니다. 카드 추가·제거·순서는 바로 저장됩니다." : "Cancel discards title and description edits only. Card additions, removals and order save immediately."}</small>
+                    <small>{locale === "ko" ? "이름과 설명은 저장을 눌러 반영해요. 카드 구성은 바로 저장돼요." : "Save your name and description changes. Card arrangement saves as you go."}</small>
                   <div>
                     <span className="memory-boards__privacy">{boardCopy.privateBadge}</span>
                     {syncLabel(detail.board) ? <span className="status-badge">{syncLabel(detail.board)}</span> : null}
@@ -251,7 +254,6 @@ function MemoryBoardContent({ base }) {
                   )}
                 </section>
 
-                <MemoryPublicationPanel detail={detail} runtime={runtime} locale={locale} base={base} disabled={busy || editing} />
                 <details className="memory-boards__tools">
                   <summary>{boardCopy.addTitle}</summary>
                   <div className="memory-boards__add">
@@ -270,6 +272,7 @@ function MemoryBoardContent({ base }) {
                   )}
                   </div>
                 </details>
+                <MemoryPublicationPanel detail={detail} runtime={runtime} locale={locale} base={base} disabled={busy || editing} />
               </>
             )}
           </section>

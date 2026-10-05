@@ -64,6 +64,7 @@ test("private Boards keep cards reusable, ordered, and independent from Archive"
   await createBoard(page, "Favorites");
   await addCard(page, "Alpha memory");
 
+  await page.locator('.memory-boards__switcher > summary').click();
   await page.getByRole("link", { name: "Remembered scenes" }).click();
   const alphaInFirst = page.locator(".memory-boards__cards li").filter({ hasText: "Alpha memory" });
   await page.getByRole("button", { name: "Edit Board", exact: true }).click();
@@ -71,6 +72,7 @@ test("private Boards keep cards reusable, ordered, and independent from Archive"
   await expect(alphaInFirst).toHaveCount(0);
   await expect(page.locator(".memory-boards__cards li").filter({ hasText: "Beta memory" })).toBeVisible();
 
+  await page.locator('.memory-boards__switcher > summary').click();
   await page.getByRole("link", { name: "Favorites" }).click();
   await expect(page.locator(".memory-boards__cards li").filter({ hasText: "Alpha memory" })).toBeVisible();
   page.once("dialog", (dialog) => dialog.accept());
