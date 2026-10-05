@@ -1,0 +1,174 @@
+{
+  "version": "V6",
+  "createdAt": "2026-10-04",
+  "status": "ready_with_reported_wide_dimension_variance",
+  "mode": "built-in image_gen",
+  "intent": "generate",
+  "useCase": "illustration-story",
+  "scope": "Original fictional artwork for the isolated local collection prototype only. No reference originals downloaded or reused; no production upload or deployment.",
+  "existingAssetsPreserved": [
+    "prototype-scenes.png",
+    "prototype-posters.png"
+  ],
+  "spriteContract": {
+    "layout": "2x2 quadrants",
+    "gap": 0,
+    "mappingOrder": [
+      "top-left",
+      "top-right",
+      "bottom-left",
+      "bottom-right"
+    ],
+    "backgroundSize": "200% 200%",
+    "positions": [
+      "0% 0%",
+      "100% 0%",
+      "0% 100%",
+      "100% 100%"
+    ],
+    "requirement": "Preserve actual cell aspect ratio when rendered; do not letterbox all assets into a fixed4:5 frame."
+  },
+  "verification": {
+    "method": "Native generated output visually inspected; actual PNG dimensions read via System.Drawing.Image. No raster editing, resizing, cropping or image processing was used.",
+    "visualResults": [
+      "12 distinct compositions across3 sprite sheets",
+      "Requested subject and titleId mapping preserved",
+      "No gutters, visible border, watermark, logo or readable lettering",
+      "Portrait and square half-cell boundaries visually centered",
+      "Wide dimension variance recorded, not silently described as exact16:9"
+    ],
+    "limitations": [
+      "Fictional illustration fixtures, not real anime screenshots or user memories",
+      "Not identical-character-continuity guarantee across separately generated sheets",
+      "Final UI cropping and mixed-ratio collection layout must be verified by the integrating agent"
+    ]
+  },
+  "assets": [
+    {
+      "id": "portraits",
+      "file": "collection-portraits.png",
+      "ratio": "2:3",
+      "mapping": [
+        {
+          "index": 0,
+          "position": "top-left",
+          "titleId": "t2",
+          "subject": "purple night city cyclist portrait"
+        },
+        {
+          "index": 1,
+          "position": "top-right",
+          "titleId": "t3",
+          "subject": "forest letter messenger portrait"
+        },
+        {
+          "index": 2,
+          "position": "bottom-left",
+          "titleId": "t5",
+          "subject": "snowy observatory astronomer portrait"
+        },
+        {
+          "index": 3,
+          "position": "bottom-right",
+          "titleId": "t7",
+          "subject": "yellow umbrella in meadow portrait"
+        }
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: original raster illustration sprites for a private fictional anime-memory archive prototype.\nCreate one portrait canvas with aspect ratio exactly 2:3, preferably 1024 by 1536 pixels. Divide the ENTIRE canvas into an EXACT 2 by 2 grid of four equal rectangular images. Each quadrant is itself a 2:3 portrait illustration. The dividing boundaries must be exactly at 50% width and 50% height. Images directly touch at these boundaries: no gutters, no border, no margin, no rounded corners. Each cell is a separate full-bleed finished composition, not one scene spanning cells.\nTop-left: original adult cyclist pausing beside a bicycle on a purple-blue city street at night, natural candid three-quarter portrait, violet neon reflecting on their jacket and wet pavement.\nTop-right: original adult forest letter messenger carrying a weathered canvas mail satchel, holding a sealed unmarked envelope, luminous green forest background, natural human expression.\nBottom-left: original adult astronomer in a winter coat beside a snowy mountaintop observatory, pale cobalt dusk and soft warm light from its doorway, portrait composition.\nBottom-right: original adult person carrying a bright yellow umbrella in a breezy spring meadow, soft green grass, luminous overcast sky, gently moving hair, portrait composition.\nStyle: expressive original anime illustration with believable anatomy, confident clean linework, painted atmospheric backgrounds, subtle cinematic lighting, rich but natural color. These are quiet specific moments, not promotional posters. Each image must feel distinct and personally collectible.\nConstraints: completely original people and settings; no existing franchise characters, no artist imitation, no brands, no signatures, no readable text, no labels, no lettering, no watermarks, no captions, no UI, no decorative framing. Avoid duplicated poses/compositions. Full-bleed art in all four cells; exact equal 2x2 layout is critical for CSS sprite cropping.",
+      "assetPath": "C:/Users/shjb0/.codex/visualizations/2026/10/03/01a10016-8e69-7791-b51b-32b0f7bd2d51/collection-portraits.png",
+      "sourcePath": "C:/Users/shjb0/.codex/generated_images/01a10119-ff7e-7592-a64b-0a079907b040/exec-0045a637-ed58-41d7-a0f0-9cff1294a722.png",
+      "actualWidth": 1024,
+      "actualHeight": 1536,
+      "actualRatio": "2/3",
+      "cellWidth": 512,
+      "cellHeight": 768,
+      "dimensionVariance": null,
+      "inspected": true,
+      "selection": "selected_original_tool_output"
+    },
+    {
+      "id": "squares",
+      "file": "collection-squares.png",
+      "ratio": "1:1",
+      "mapping": [
+        {
+          "index": 0,
+          "position": "top-left",
+          "titleId": "t2",
+          "subject": "bicycle wheel and neon puddle closeup"
+        },
+        {
+          "index": 1,
+          "position": "top-right",
+          "titleId": "t3",
+          "subject": "botanical forest letter still life"
+        },
+        {
+          "index": 2,
+          "position": "bottom-left",
+          "titleId": "t4",
+          "subject": "sunlit library reading chair"
+        },
+        {
+          "index": 3,
+          "position": "bottom-right",
+          "titleId": "t6",
+          "subject": "red rain city street without portrait"
+        }
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: original raster illustration sprites for a private fictional anime-memory archive prototype.\nCreate one EXACT SQUARE canvas, preferably 1536 by 1536 pixels. Divide the ENTIRE canvas into an EXACT 2 by 2 grid of four equal square illustrations. Dividing boundaries at exactly 50% width and 50% height. Images directly touch: no gutters, no margins, no separator lines, no borders, no rounded corners. Four independent full-bleed square scenes, never one continuous panorama.\nTop-left: close-up of a bicycle front wheel beside a violet-blue neon puddle at night, tiny raindrops and reflected urban lights, no visible person, intimate detailed composition.\nTop-right: an unmarked closed paper envelope and folded botanical sprig resting on a mossy forest stone, dappled emerald sunlight, tactile letter still life, no writing visible.\nBottom-left: a comfortably worn reading chair beside a tall sunlit library window and wooden bookshelves, warm cream and amber light, empty chair, a quiet inviting interior with unlabelled books.\nBottom-right: a rain-soaked city side street at night, deep red-orange shop-window glow on wet pavement, atmospheric buildings and trolley wires, no portrait or foreground person, no readable signage.\nStyle: expressive original anime background illustration, detailed painted environments, confident subtle linework, cinematic natural light, distinct individual palettes. These are everyday visual memories, not advertising.\nConstraints: original fictional environments only; no recognizable franchise scenes, no imitation of a named artist, no brands, no signatures, no logos, no readable text, no captions, no labels, no watermarks, no UI, no frames. Do not repeat the same scene in different cells. Exact edge-to-edge 2x2 geometry is critical for CSS sprite cropping.",
+      "assetPath": "C:/Users/shjb0/.codex/visualizations/2026/10/03/01a10016-8e69-7791-b51b-32b0f7bd2d51/collection-squares.png",
+      "sourcePath": "C:/Users/shjb0/.codex/generated_images/01a10119-ff7e-7592-a64b-0a079907b040/exec-bc6065d6-5f69-4ceb-a7df-6e52d485feed.png",
+      "actualWidth": 1254,
+      "actualHeight": 1254,
+      "actualRatio": "1/1",
+      "cellWidth": 627,
+      "cellHeight": 627,
+      "dimensionVariance": "Requested preferred 1536x1536, generated1254x1254; exact square ratio maintained.",
+      "inspected": true,
+      "selection": "selected_original_tool_output"
+    },
+    {
+      "id": "wides",
+      "file": "collection-wides.png",
+      "ratio": "16:9",
+      "mapping": [
+        {
+          "index": 0,
+          "position": "top-left",
+          "titleId": "t2",
+          "subject": "night city riverside cyclist wide scene"
+        },
+        {
+          "index": 1,
+          "position": "top-right",
+          "titleId": "t4",
+          "subject": "warm library window wide interior"
+        },
+        {
+          "index": 2,
+          "position": "bottom-left",
+          "titleId": "t5",
+          "subject": "snowy observatory mountain panorama"
+        },
+        {
+          "index": 3,
+          "position": "bottom-right",
+          "titleId": "t6",
+          "subject": "rain city red umbrella trolley scene"
+        }
+      ],
+      "prompt": "Use case: illustration-story\nAsset type: original raster illustration sprites for a private fictional anime-memory archive prototype.\nCreate one landscape canvas with aspect ratio EXACTLY 16:9, preferably 2048 by 1152 pixels. Divide the ENTIRE canvas into an EXACT 2 by 2 grid of four equal landscape illustrations. Each cell is itself 16:9. The two dividers are precisely at 50% width and 50% height. Art touches edge to edge with NO gutters, margins, separator lines, border, rounded corners or lettering. Four independent wide compositions, not a single scene crossing cells.\nTop-left: an original adult cyclist moving along a riverside path at night, small in the scene, purple-blue city skyline and luminous reflections across the river, broad cinematic framing.\nTop-right: a quiet warm library interior with a long wall of unlabelled books, high windows and shafts of afternoon light falling over reading tables, broad room view, inviting amber atmosphere.\nBottom-left: a snowy mountaintop observatory with its dome beneath a crisp twilight sky, expansive blue-white mountain range, a few subtle warm window lights, a still majestic wide view.\nBottom-right: a red city trolley passing through a rainy evening street, an original adult pedestrian with a red umbrella on the pavement, dramatic but natural wet reflections, wide composition.\nStyle: original anime scene illustration, fine confident linework and hand-painted atmospheric backgrounds, coherent lighting within each scene, visually rich distinct settings without visual noise. High quality quiet memorable moments, not splash art or promotional posters.\nConstraints: completely original scenes and people, no real franchise characters or identifiable existing anime frames, no named artist imitation, no brands, no logos, no signatures, no readable signs/text, no caption, no UI, no watermark, no decorative film strips. Keep each scene fully contained in its exact equal quadrant for lossless CSS sprite display.",
+      "assetPath": "C:/Users/shjb0/.codex/visualizations/2026/10/03/01a10016-8e69-7791-b51b-32b0f7bd2d51/collection-wides.png",
+      "sourcePath": "C:/Users/shjb0/.codex/generated_images/01a10119-ff7e-7592-a64b-0a079907b040/exec-0528bd26-ea58-43c7-9752-323cb73531a1.png",
+      "actualWidth": 1672,
+      "actualHeight": 941,
+      "actualRatio": "1672/941",
+      "cellWidth": 836,
+      "cellHeight": 470.5,
+      "dimensionVariance": "Requested 16:9/preferred2048x1152, generated1672x941 (~1.776833); ratio differs from16:9 by0.05313%. Odd941px height means equal CSS half-cells are470.5px; source raster top/bottom boundary may differ by1px. Use actual aspect ratio; not pixel-exact16:9.",
+      "inspected": true,
+      "selection": "selected_original_tool_output"
+    }
+  ]
+}

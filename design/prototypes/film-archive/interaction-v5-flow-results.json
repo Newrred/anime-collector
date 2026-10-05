@@ -1,0 +1,205 @@
+{
+  "version": "V5",
+  "date": "2026-10-04",
+  "target": "http://127.0.0.1:4348/moemoa-film-interaction.html#titles",
+  "session": "interaction-v5-flow",
+  "browser": "Headless Chromium 1208 via agent-browser",
+  "viewports": [
+    [
+      1440,
+      1000
+    ],
+    [
+      1200,
+      1000
+    ]
+  ],
+  "scope": "Standalone preview only; no production, API, auth, persistence or user-data changes.",
+  "status": "PASS within tested scope",
+  "fixes": [
+    {
+      "issue": "A single initial 100px pointer move escaped the 44px handle before capture, leaving width unchanged.",
+      "change": "Listen for pointermove on window while a gesture is pending; capture only after horizontal intent is established.",
+      "retest": "The same native mouse movement changed drawer width 1034→934px while held."
+    },
+    {
+      "issue": "An Escape/pointercancel followed by a delayed mouse release could outlive the 700ms click-suppression timeout and toggle unexpectedly.",
+      "change": "Keep drag-click suppression until its resulting pointer click or the next deliberate pointerdown; keyboard activation remains allowed.",
+      "retest": "Delayed releases after Escape, dispatched pointercancel and resize preserve the original open state."
+    }
+  ],
+  "checks": [
+    {
+      "id": "drag-continuity",
+      "status": "PASS",
+      "method": "Native mouse move/down/move, inspect DOM while held, native mouse up",
+      "evidence": {
+        "openWidth": 1034,
+        "heldWidth": 934,
+        "liveWidth": "934px",
+        "pulling": true,
+        "railInert": true,
+        "closedAfterRelease": 200,
+        "closedExpanded": "false",
+        "inlineWidthAfterSettle": ""
+      }
+    },
+    {
+      "id": "drag-open-and-independent-row",
+      "status": "PASS",
+      "method": "Native mouse outward100px from closed handle",
+      "evidence": {
+        "closedWidth": 200,
+        "heldWidth": 300,
+        "settledWidth": 1034,
+        "expanded": "true",
+        "railInertAfterSettle": false,
+        "otherRowExpanded": "true"
+      }
+    },
+    {
+      "id": "activation-and-rapid-repeat",
+      "status": "PASS",
+      "method": "Native pointer clicks and batch of four Enter activations",
+      "evidence": "Click toggles both ways; four rapid Enter presses return to open, width1034px, without stale is-pulling or inert state."
+    },
+    {
+      "id": "escape-delayed-release",
+      "status": "PASS",
+      "method": "Native drag, Escape, separate delayed mouse-up command",
+      "evidence": {
+        "expanded": "true",
+        "width": 1034,
+        "pulling": false,
+        "inlineWidth": "",
+        "focus": "pull-t1"
+      }
+    },
+    {
+      "id": "pointercancel",
+      "status": "PASS",
+      "method": "Native pointer drag followed by diagnostic dispatch of pointercancel with observed pointerId1, then delayed native release",
+      "evidence": {
+        "expanded": "true",
+        "width": 1034,
+        "pulling": false
+      },
+      "limitation": "Cancellation dispatch is synthetic, not an operating-system interruption."
+    },
+    {
+      "id": "resize-during-drag",
+      "status": "PASS",
+      "method": "Native drag then viewport1440→1200 while held, followed by native release",
+      "evidence": {
+        "expanded": "true",
+        "pulling": false,
+        "inlineWidth": "",
+        "width": 914,
+        "liveWidth": "914px",
+        "railInert": false
+      }
+    },
+    {
+      "id": "scroll-preservation-and-closed-guard",
+      "status": "PASS",
+      "method": "Next-frame control, drag close, click reopen; close then cover/detail/back and reopen",
+      "evidence": {
+        "firstRoundTrip": {
+          "before": 120,
+          "after": 120,
+          "otherRail": 0
+        },
+        "detailRoundTrip": {
+          "before": 328,
+          "after": 328,
+          "closedExpanded": "false",
+          "closedInert": true,
+          "closedTabIndex": -1
+        },
+        "homeRoundTrip": {
+          "before": 328,
+          "after": 328
+        }
+      }
+    },
+    {
+      "id": "memory-dialog",
+      "status": "PASS",
+      "method": "Native click row-t1-m2 then Escape",
+      "evidence": {
+        "dialogOpenAfterClose": false,
+        "restoredFocus": "row-t1-m2",
+        "restoredScrollLeft": 120
+      }
+    },
+    {
+      "id": "more-keyboard-inner-drag",
+      "status": "PASS",
+      "method": "Native next-scenes button, End/Home, internal rail mouse drag",
+      "evidence": {
+        "initialFrames": 3,
+        "loadedFrames": 6,
+        "endScrollLeft": 956,
+        "endMaximum": 956,
+        "innerDragScrollLeft": 328,
+        "otherRailScrollLeft": 0,
+        "unwantedDialog": false,
+        "unwantedCasePulling": false
+      }
+    },
+    {
+      "id": "search-and-edit-regression",
+      "status": "PASS",
+      "method": "Search 별을, clear, home editor name change/Escape, new name/apply",
+      "evidence": {
+        "searchRows": 1,
+        "searchTitle": "별을 건너는 밤",
+        "clearedRows": 8,
+        "cancelName": "오래 머무는 장면들",
+        "appliedName": "드래그 시안 책장",
+        "editorClosed": true,
+        "curatedCovers": 6,
+        "localStorageEntries": 0
+      }
+    },
+    {
+      "id": "reduced-motion",
+      "status": "PASS",
+      "method": "Emulate prefers-reduced-motion, native drag and release",
+      "evidence": {
+        "mediaMatches": true,
+        "computedDuration": "0s",
+        "activeDrawerAnimationsAfterRelease": 0,
+        "settledClosedWidth": 200,
+        "expanded": "false",
+        "inert": true
+      }
+    },
+    {
+      "id": "integrity-and-errors",
+      "status": "PASS",
+      "method": "Node syntax check and fixture execution, byte-normalized comparison to retained original source, browser errors command",
+      "evidence": {
+        "nodeCheckExit": 0,
+        "fixtureExit": 0,
+        "fixtureAssertions": 14,
+        "v4SourceUnchanged": true,
+        "browserErrors": [],
+        "sessionClosed": true,
+        "touchAction": "pan-y"
+      }
+    }
+  ],
+  "notVerified": [
+    "Physical touch-device horizontal drag versus vertical page scroll; only the pan-y policy and separate touch threshold were inspected.",
+    "Native operating-system pointercancel or release outside the browser document. Pointer capture is implemented; release outside the narrow handle was exercised.",
+    "Dedicated native drag started midway through a width transition; fast repeated keyboard toggles were exercised, but this specific overlap is not claimed.",
+    "Cross-browser Safari/Firefox behavior. Verification used Chromium only.",
+    "V5 exhaustive composer/data-model re-test was not repeated; inherited V4 checks and the14 Node assertions remain available."
+  ],
+  "filesChanged": [
+    "film-interaction.js",
+    "interaction-v5-flow-results.json"
+  ],
+  "privacy": "All tests ran in a dedicated local headless session with seeded fictional data; no upload, network mutation, account access or persistent storage."
+}

@@ -1,0 +1,185 @@
+{
+  "checkedAt": "2026-10-04",
+  "scope": "Read-only, signed-out desktop collection inspection plus official dated articles. Not a survey of all trends.",
+  "references": [
+    {
+      "name": "Cosmos — the best newspaper type",
+      "url": "https://www.cosmos.so/design/the-best-newspaper-type",
+      "method": "Agent-browser, 1440x1000",
+      "measurements": {
+        "columns": 5,
+        "tileWidth": 247.594,
+        "horizontalGap": 32,
+        "pageInset": 32,
+        "imageRadius": 0,
+        "clippingWrapperRadius": 3,
+        "border": "1px black at 12%",
+        "shadow": "none",
+        "hoverImageGeometry": "unchanged",
+        "hoverTransform": "none",
+        "hoverFilter": "none",
+        "overlayOpacity": "0 to 1",
+        "overlayDuration": "150ms",
+        "title": "26px / 29.9px"
+      },
+      "detail": {
+        "url": "https://www.cosmos.so/e/329460258",
+        "image": "505.188x631.984",
+        "radius": 3,
+        "shadow": "none",
+        "back": "collection URL and tile rectangle restored"
+      },
+      "adoption": "Still image geometry; quiet contextual action; 2px image corner is a MOEMOA proposal, not an exact clone. Do not copy the full dark scrim.",
+      "limits": "One public desktop collection; no signed-in or mobile behavior tested."
+    },
+    {
+      "name": "Are.na — Wild Animals vs. Manmade Materials",
+      "url": "https://www.are.na/laurel-schwulst/wild-animals-vs-manmade-materials",
+      "method": "Agent-browser, 1440x1000, dark theme",
+      "measurements": {
+        "clickArea": "316.25x361.25",
+        "image": "237.1875x316.25",
+        "radius": 0,
+        "border": 0,
+        "shadow": "none",
+        "hoverTransform": "none",
+        "hoverGeometry": "unchanged",
+        "hoverActions": "Options and Connect appear",
+        "connectButton": "3px radius, 40px high"
+      },
+      "detail": {
+        "url": "https://www.are.na/block/45026882",
+        "image": "662x883",
+        "back": "scrollY440 and image rectangle restored; focus BODY, not a passed focus restoration"
+      },
+      "adoption": "Keep content stable on hover and assign film movement to deliberate drag/click.",
+      "limits": "One public desktop block; reorder/drag and touch not tested."
+    },
+    {
+      "name": "Linear — A calmer interface for a product in motion",
+      "url": "https://linear.app/now/behind-the-latest-design-refresh",
+      "published": "2026-03-12",
+      "method": "Official article, not a logged-in app test",
+      "observation": "Reduce secondary navigation weight and unnecessary separators; lower saturation. Some corners were made rounder, so square equals modern is not a supported generalization.",
+      "adoption": "Remove nested shelf panels and repeated shadows; role-based 0/2/4/8px corner proposal."
+    },
+    {
+      "name": "Framer — Unified navigation",
+      "url": "https://www.framer.com/updates/community/unified-navigation",
+      "published": "2026-08-21",
+      "method": "Official changelog",
+      "observation": "Hover menus remain; carousel keyboard behavior and focus outlines are explicitly refined.",
+      "adoption": "Do not remove alternative keyboard/button access when adding direct manipulation."
+    },
+    {
+      "name": "Motion — gesture and accessibility docs",
+      "urls": [
+        "https://motion.dev/docs/hover",
+        "https://motion.dev/docs/press",
+        "https://motion.dev/docs/react-drag",
+        "https://motion.dev/docs/react-accessibility"
+      ],
+      "published": null,
+      "method": "Current official docs, not a dated trend announcement",
+      "adoption": "Fine-pointer-only decorative hover; distinguish press/drag/cancel; bounded horizontal drag; no animated settling when reduced motion is requested. No Motion dependency added."
+    }
+  ],
+  "excluded": [
+    {
+      "name": "Savee",
+      "url": "https://savee.com/login/",
+      "reason": "Public Start browsing led to login and a Cloudflare check. Internal feed was not inspected."
+    }
+  ],
+  "sourceMedia": "No originals downloaded or reused; reference screenshots are audit evidence only.",
+  "proposal": {
+    "imageRadius": "0–2px",
+    "controls": "4px",
+    "dialog": "8px",
+    "hover": "120ms color/opacity only",
+    "filmSettle": "220ms; pointer follows continuously during drag",
+    "dialogReveal": "140ms opacity",
+    "reducedMotion": "0"
+  },
+  "rootChecks": [
+    {
+      "name": "V4 shelf hover baseline",
+      "before": {
+        "x": 128,
+        "y": 575.75,
+        "w": 150,
+        "h": 225,
+        "transform": "none",
+        "radius": "4px 8px 8px 4px",
+        "shadow": "4px 6px 10px"
+      },
+      "hover": {
+        "x": 128,
+        "y": 570.75,
+        "w": 150,
+        "h": 225,
+        "transform": "translateY(-5px)",
+        "shadow": "4px 10px 16px"
+      }
+    },
+    {
+      "name": "V5 shelf hover",
+      "before": {
+        "x": 100,
+        "y": 534.75,
+        "w": 181.328125,
+        "h": 271.984375
+      },
+      "after": {
+        "x": 100,
+        "y": 534.75,
+        "w": 181.328125,
+        "h": 271.984375
+      },
+      "transform": "none",
+      "shadow": "none",
+      "radius": "2px",
+      "note": "Measured before final 4px preview-bar height adjustment; relative hover behavior remains identical."
+    },
+    {
+      "name": "V5 cover hover final CSS",
+      "before": {
+        "x": 100,
+        "y": 520.984375,
+        "w": 184,
+        "h": 276
+      },
+      "after": {
+        "x": 100,
+        "y": 520.984375,
+        "w": 184,
+        "h": 276
+      },
+      "transform": "none",
+      "filter": "none",
+      "radius": "2px",
+      "staticEdge": "1px right edge only, unchanged",
+      "hintOpacity": 1
+    },
+    {
+      "name": "V5 selected view final CSS",
+      "radius": 0,
+      "background": "transparent",
+      "borderBottom": "2px solid ink",
+      "inactiveBorder": "2px transparent",
+      "minHeight": 44
+    },
+    {
+      "name": "V5 detail modal",
+      "radius": 8,
+      "imageRadius": 2,
+      "animation": "opacity 140ms",
+      "escapeFocus": "title-t1-m1"
+    },
+    {
+      "name": "PC1440",
+      "documentWidth": 1440,
+      "errors": []
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-03",
+  "scope": "Standalone personal bookshelf prototype; not production app regression evidence",
+  "url": "http://127.0.0.1:4348/moemoa-film-bookshelf.html",
+  "environment": "Windows, headless Chromium via agent-browser; final delivery also opened and visually checked in user Chrome",
+  "checks": [
+    {"name":"Desktop home","viewport":[1440,1000],"result":"PASS","evidence":"document.scrollWidth=1440; two shelves each 670x334px, book width152px; final full-page screenshot inspected."},
+    {"name":"Desktop title films","viewport":[1440,1000],"result":"PASS","evidence":"document.scrollWidth=1440; rows1376px wide,326-336px high; short films end at1010/846/564/282px, no empty full-width black tail; styled title and expansion buttons."},
+    {"name":"Desktop detail film","viewport":[1440,1000],"result":"PASS","evidence":"document.scrollWidth=1440; rail1376px with3408px internal content, frames568px; intentional internal overflow only."},
+    {"name":"Mobile home","viewport":[390,844],"result":"PASS","evidence":"document.scrollWidth=390; six curated books; screenshot inspected."},
+    {"name":"Narrow home and cancel","viewport":[320,800],"result":"PASS","evidence":"After canceling a long-name/lilac draft, original name and mint restored, document.scrollWidth=320."},
+    {"name":"Narrow title films","viewport":[320,800],"result":"PASS","evidence":"document.scrollWidth=320; each row288px, cover column68px, populated scrollable rails210px, frame188px; one-scene strip188px. Eight rows including empty-memory title."},
+    {"name":"Narrow title detail","viewport":[320,800],"result":"PASS","evidence":"document.scrollWidth=320; rail288px, frame272px; screenshot inspected."},
+    {"name":"Narrow editor and long bookcase name","viewport":[320,800],"result":"PASS_AFTER_FIX","evidence":"Before fix document420px/editor404px and18 reorder buttons36px; after minmax(0,1fr), preview min-width0 and specific touch-target rule: document320px/editor288px, zero reorder buttons below44x44. Long name appears in preview, lilac selected; final screenshot inspected."},
+    {"name":"Narrow memory archive","viewport":[320,800],"result":"PASS","evidence":"document.scrollWidth=320; heading shows18 memories; screenshot inspected. Existing4:5 contain framing retained, not a new masonry design."},
+    {"name":"Mobile JavaScript errors","result":"PASS","evidence":"agent-browser errors empty after home, title rows/detail, editor input/theme/cancel and memory archive navigation."}
+  ],
+  "artifacts":["bookshelf-desktop-final-home.png","bookshelf-desktop-final-films.png","bookshelf-desktop-final-detail.png","bookshelf-home-390.png","bookshelf-home-320.png","bookshelf-rows-320.png","bookshelf-detail-320.png","bookshelf-editor-320.png","bookshelf-memories-320.png"],
+  "limitations":["Responsive viewport checks are not physical touch-device verification","Safari and Firefox not checked","Reduced-motion setting recognition was checked in separate flow evidence; dedicated animation timing comparison remains unverified","No production server, authentication, publication, data migration or real-image load testing","Existing V2 comparison link is a previous prototype, not the original production-design baseline"],
+  "existing_assets":"Previously generated fictional posters and scenes reused without editing",
+  "mobile_test_session_closed":true
+}

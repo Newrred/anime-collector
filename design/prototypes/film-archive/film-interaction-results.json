@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-03",
+  "scope": "Standalone fictional-data prototype only; not a production application regression report",
+  "url": "http://127.0.0.1:4348/moemoa-film-prototype.html",
+  "browser": "Chromium 1208, headless, isolated agent-browser session film-interaction-check",
+  "viewport": { "width": 1440, "height": 1000 },
+  "sessionClosed": true,
+  "pageErrors": [],
+  "checks": [
+    { "name": "Title search", "result": "PASS_AFTER_FIX", "observed": "Searching 여름 keeps the input value and returns only t1. The initial whole-app input rerender detached the input; fixed to update only #title-results and the result count." },
+    { "name": "Filter, sort, and view continuity", "result": "PASS", "observed": "여름 query + 보는 중 filter + 제목순 + 기억 함께 보기 preserved the same t1. Opening and returning from its title retained all controls and focused t1." },
+    { "name": "Film movement and modal return", "result": "PASS", "observed": "Next moved the rail to 492px. Opening m2 and closing with Escape restored 492px and focus to m2; the modal was closed." },
+    { "name": "WatchLog separation", "result": "PASS", "observed": "t1 watch view rendered 3 watch entries and no memory film; memory tab still displayed 6." },
+    { "name": "Explicit image choice and title-save independence", "result": "PASS", "observed": "Composer save stayed disabled with only a title. Selecting a scene enabled save. Saving a note on unsaved t4 changed its memories from 2 to 3 while title-save aria-pressed remained false." },
+    { "name": "Board N:M and duplicate prevention", "result": "PASS", "observed": "New m19 was added to b1 and b2. Each selected board became disabled with 담긴 보드. Board counts changed from 8/6 to 9/7." },
+    { "name": "Board removal preserves other membership and original", "result": "PASS", "observed": "Removing m19 from b1 returned b1 to 8 with m19 absent there; b2 retained 7 and m19. Memory archive retained all 19 including m19." },
+    { "name": "Composer cancellation", "result": "PASS", "observed": "After selecting an image, title, and entering a note, cancel closed the dialog, preserved 19 memories, and did not add the cancelled note." },
+    { "name": "Refresh resets page-memory data", "result": "PASS", "observed": "Reload returned the archive to 18 with m19 absent and board counts to initial 8/6/4." },
+    { "name": "Requested copy and label polish", "result": "PASS", "observed": "Home H1 is 다시 펼쳐 보는 장면들 with 나의 필름집 eyebrow. 짧은 감상 and (선택) share one label span." }
+  ],
+  "staticChecks": {
+    "syntax": { "command": "node --check film-prototype.js", "exitCode": 0 },
+    "fixtures": { "command": "node film-prototype.js", "assertionCount": 8, "exitCode": 0 }
+  },
+  "changedFiles": ["film-prototype.js", "film-interaction-results.json"],
+  "notVerifiedHere": [
+    "Real accounts, production API, storage, sync, public image rights or publishing",
+    "Physical mobile touch, screen readers, keyboard-only full traversal",
+    "Mouse drag and reduced-motion behavior in this subagent session",
+    "New-board creation and board-internal memory picker in this subagent session",
+    "Exhaustive empty-state, error-state, or browser matrix coverage"
+  ],
+  "safety": "Only local standalone prototype files were edited. No service source, dependency, DB, analytics, public flag, deployment, or user-data write was performed. No real user images or accounts were used."
+}

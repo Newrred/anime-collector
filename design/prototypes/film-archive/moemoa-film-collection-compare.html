@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MOEMOA · 기억 아카이브 전후 비교</title>
+  <link rel="icon" href="data:,">
+  <style>
+    *{box-sizing:border-box}body{margin:0;color:#222;background:#f7f7f7;font-family:Pretendard,'Malgun Gothic',sans-serif}a{color:inherit;text-underline-offset:4px}header{padding:32px 40px;background:#fff;display:flex;justify-content:space-between;gap:24px;align-items:center}h1{font-size:24px;letter-spacing:-.04em;margin:0 0 9px;font-weight:600}p{font-size:13px;line-height:1.8;color:#666;margin:0}header>a{font-size:13px;flex:none;min-height:44px;display:flex;align-items:center}main{padding:32px 40px 64px;max-width:1800px;margin:auto}.switch{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}button{font:inherit;font-size:12px;border:0;border-radius:3px;background:#e9e9e9;color:#555;min-height:44px;padding:10px 18px;cursor:pointer}button[aria-pressed=true]{background:#222;color:#fff}button:focus-visible,a:focus-visible{outline:2px solid #222;outline-offset:4px}.screens{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}.screens[data-mode=before],.screens[data-mode=after]{grid-template-columns:1fr}.screens[data-mode=before] figure:last-child,.screens[data-mode=after] figure:first-child{display:none}figure{margin:0;min-width:0}figcaption{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:13px;font-weight:600}figcaption>a{font-size:12px;font-weight:400;min-height:30px;display:flex;align-items:center}figure>a{display:block;border:1px solid #e6e6e6;background:white}img{display:block;width:100%;height:auto}.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin:40px 0 0;border-top:1px solid #ddd;padding-top:28px}.notes h2{font-size:15px;font-weight:600;margin:0 0 10px}.footnote{margin-top:30px;font-size:11px;color:#777}@media(max-width:700px){header{padding:24px 20px;align-items:start;flex-direction:column;gap:12px}main{padding:24px 20px 48px}.screens{grid-template-columns:1fr;gap:30px}.notes{grid-template-columns:1fr;gap:24px}h1{font-size:22px}}
+  </style>
+</head>
+<body>
+  <header><div><h1>기억 아카이브, 무엇이 달라졌나요?</h1><p>이번 수정 직전 시안 05와 새 시안 06을 같은 1440 × 1000 화면으로 비교합니다.<br>서비스 최초 디자인과의 비교가 아닙니다.</p></div><a href="moemoa-film-collection.html#memories">새 시안 직접 보기 ↗</a></header>
+  <main>
+    <div class="switch" aria-label="비교 방식"><button aria-pressed="true" data-mode="both">나란히 보기</button><button aria-pressed="false" data-mode="before">수정 전 크게</button><button aria-pressed="false" data-mode="after">수정 후 크게</button></div>
+    <section class="screens" data-mode="both" aria-label="동일 화면 크기의 전후 캡처">
+      <figure><figcaption>수정 전 · 시안 05<a href="moemoa-film-interaction.html#memories" target="_blank" rel="noopener">직접 열기 ↗</a></figcaption><a href="collection-v6-before-1440.png" target="_blank" rel="noopener"><img src="collection-v6-before-1440.png" width="1440" height="1000" alt="수정 전: 동일한 4대5 틀 안에 작은 가로 이미지와 넓은 회녹색 여백이 반복되는 기억 목록"></a></figure>
+      <figure><figcaption>수정 후 · 시안 06<a href="moemoa-film-collection.html#memories" target="_blank" rel="noopener">직접 열기 ↗</a></figcaption><a href="collection-v6-after-1440.png" target="_blank" rel="noopener"><img src="collection-v6-after-1440.png" width="1440" height="1000" alt="수정 후: 세로와 가로 이미지가 본래 비율로 이어지고, 작품명만 작게 표시된 기억 아카이브"></a></figure>
+    </section>
+    <section class="notes" aria-label="변경 이유">
+      <div><h2>01 · 틀보다 이미지</h2><p>고정된 4:5 틀을 없앴습니다. 상하 색 여백이 차지하던 55%를 제거하고, 이미지마다 본래 비율로 높이가 정해집니다.</p></div>
+      <div><h2>02 · 반복보다 취향</h2><p>여러 작품에 반복되던 장면을 작품별로 구분했습니다. 감상과 날짜는 상세에서 읽고, 목록에는 이미지와 짧은 작품명만 남겼습니다.</p></div>
+      <div><h2>03 · 전시에서 수집으로</h2><p>빈 아카이브에서 첫 장면을 고르고 작품에 연결해 보세요. 추가한 기억이 전체 목록과 해당 작품의 필름에 함께 나타납니다.</p></div>
+    </section>
+    <p class="footnote">새 이미지는 시안용으로 생성한 가상 장면입니다. 원본 작품·개인 사진을 사용하지 않았으며, 이미지 선택과 작성은 새로고침하면 초기화됩니다. 작품 표지 그리드·개인 책장·필름을 당기는 조작은 유지했습니다.</p>
+  </main>
+  <script>
+    document.querySelectorAll('.switch button').forEach(button=>button.addEventListener('click',()=>{
+      document.querySelector('.screens').dataset.mode=button.dataset.mode;
+      document.querySelectorAll('.switch button').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+    }));
+  </script>
+</body>
+</html>

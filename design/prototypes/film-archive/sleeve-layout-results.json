@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-04",
+  "scope": "V4 standalone film-sleeve prototype, not production regression evidence",
+  "url": "http://127.0.0.1:4348/moemoa-film-sleeve.html#titles",
+  "environment": "Windows; Chromium via agent-browser, sleeve-layout session; final screenshots visually inspected",
+  "checks": [
+    {"name":"Desktop first render","viewport":[1440,1000],"result":"PASS","evidence":"document.scrollWidth1440; stage1240; cover184; first rail1012. Cover and film share one overlapping stage."},
+    {"name":"320px title rows","viewport":[320,850],"result":"PASS","evidence":"document.scrollWidth320; stage288; cover104; rail184; frame176. Single-scene stage280/rail176 ends at content; empty-memory title retained."},
+    {"name":"320px row independence and fold restore","result":"PASS","evidence":"Next moved row-t1 to176px while row-t2 stayed0. Close then open restored row-t1 to176 and row-t2 stayed0."},
+    {"name":"320px memory modal return","result":"PASS","evidence":"Opened second memory and pressed Escape; dialog closed, row-t1 remained176, focus row-t1-m2. Modal screenshot inspected."},
+    {"name":"320px detail","result":"PASS","evidence":"document.scrollWidth320; rail288/frame272; full screenshot inspected."},
+    {"name":"390px list return","viewport":[390,844],"result":"PASS","evidence":"Returned from title detail to title rows; document.scrollWidth390, cover112, rail246, frame212, focus row-cover-t1."},
+    {"name":"320px home and editor","result":"PASS","evidence":"Home full screenshot and editor viewport inspected. Editor document.scrollWidth320, editor clientWidth288, white surface. Cancel returned to home. Editing copy and navigation retained."},
+    {"name":"Mode selection clarity","result":"FIXED","evidence":"First review both modes inherited generic gray button background. Specific selected rule added; white selected pill confirmed in subsequent screenshot."},
+    {"name":"Readability cleanup","result":"FIXED","evidence":"Metadata separator added; mobile status placed on its own line. Repeated scroll instruction hidden in open rows, so short films do not claim they scroll."},
+    {"name":"Browser errors","result":"PASS","evidence":"agent-browser errors empty after mobile fold/open, modal, detail/return and editor flows."}
+  ],
+  "artifacts": ["sleeve-titles-320.png","sleeve-titles-390.png","sleeve-mobile-closed.png","sleeve-home-320.png","sleeve-editor-320.png","sleeve-detail-320.png","sleeve-dialog-320.png"],
+  "limits": ["No physical touch-device testing","No Safari/Firefox or production-server flow testing","User taste approval remains pending","A few mobile captures precede final removal of repeated scroll instruction; geometry unchanged","Logo raster source is unchanged; monochrome display uses CSS only"],
+  "session_closed": true,
+  "production_code_or_data_changed": false
+}

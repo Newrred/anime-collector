@@ -1,0 +1,148 @@
+/* V7: the first thing on the desk is the collection. No introduction, banner,
+   featured stage or automatic open case. A film opens only at the user's hand. */
+.desk-prototype {--ink:#252525;--muted:#71716e;--line:#e5e5e2;--radius-control:2px;--radius-dialog:4px;background:#fff}
+.desk-prototype .site-header {background:#fff;border:0;box-shadow:none}
+.desk-prototype .header-inner {min-height:76px;gap:54px}
+.desk-prototype .brand-image {--brand-width:140px}
+.desk-prototype .main-nav button {font-size:13px}
+.desk-prototype .main-nav button[aria-current=page]:after {bottom:12px}
+.desk-prototype #app {padding-top:18px;min-height:0}
+.desk-prototype .preview-bar {min-height:26px;padding-block:2px;background:#f7f7f5;font-size:10px}
+.desk-prototype .button {border-radius:2px;min-height:44px}
+.desk-prototype .button.quiet {color:#60605d}
+.desk-prototype .button.quiet:hover {text-decoration:underline;text-underline-offset:4px}
+.desk-prototype :is(.button,.desk-title) {transition:color 120ms,background-color 120ms}
+
+/* One utility line, immediately followed by the real shelves. */
+.desk-home {min-width:0}
+.desk-toolbar {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;min-height:44px}
+.desk-toolbar h1 {font-size:18px;line-height:1.4;font-weight:550;letter-spacing:-.035em;margin:0;overflow-wrap:anywhere}
+.desk-toolbar>.button {flex-shrink:0;background:transparent!important;font-size:12px;padding:0 4px;color:#62625f}
+.desk-toolbar>.button:before {content:'↗';margin-right:4px}
+.desk-shelf {min-width:0;margin:0 0 34px}
+.desk-shelf-heading {display:flex;align-items:center;gap:12px;min-height:24px;margin:0 0 8px}
+.desk-shelf-heading h2 {font-size:12px;line-height:1.5;font-weight:500;letter-spacing:0;margin:0;overflow-wrap:anywhere}
+.desk-shelf-heading>div {display:flex;align-items:center;gap:10px;min-width:0}
+.desk-shelf-heading :is(.muted,small,span) {font:10px/1.5 ui-monospace,monospace;color:#81817d}
+.desk-shelf-heading>.button {margin-left:auto;padding:0 4px;background:transparent!important;font-size:11px;color:#73736f}
+.desk-shelf-items {display:flex;flex-wrap:wrap;align-items:flex-start;gap:26px 28px;min-width:0}
+.desk-case {--desk-cover:184px;--desk-peek:32px;--desk-art-height:206px;width:calc(var(--desk-cover) + var(--desk-peek));max-width:100%;flex:none;min-width:0;position:relative}
+.desk-case.is-open {width:min(100%,800px);min-height:calc(var(--desk-cover) * 1.5 + 128px)}
+.desk-case-body {display:flex;align-items:flex-start;isolation:isolate;min-width:0;position:relative}
+.desk-cover {position:relative;display:block;flex:0 0 var(--desk-cover);width:var(--desk-cover);height:calc(var(--desk-cover) * 1.5);padding:0;border:0;border-radius:0;background:#ededeb;box-shadow:none;color:#fff;overflow:hidden;z-index:2;text-align:left;cursor:pointer}
+.desk-cover>.art {display:block;width:100%;height:100%;aspect-ratio:2/3;border-radius:0;transform:none!important;filter:none!important;box-shadow:none!important}
+.desk-cover:after {content:'';position:absolute;inset:0 0 0 auto;width:3px;border-left:1px solid #ffffff35;background:#00000022;pointer-events:none}
+.desk-pull-label {position:absolute;inset:auto 10px 10px auto;background:#fff;color:#262626;padding:6px 8px;font-size:10px;font-weight:500;line-height:1;letter-spacing:.01em;transition:background-color 120ms;pointer-events:none}
+.desk-cover:hover .desk-pull-label {background:#ececea}
+.desk-cover[aria-expanded=true] .desk-pull-label {background:#252525;color:#fff}
+.desk-cover:focus-visible {outline-offset:5px;z-index:4}
+.desk-drawer {flex:1;min-width:0;overflow:hidden;align-self:flex-start;padding-top:12px;position:relative}
+.desk-case:not(.is-open) .desk-drawer {height:calc(var(--desk-art-height) + 36px);max-height:calc(var(--desk-cover) * 1.5 - 12px);pointer-events:none}
+.desk-case:not(.is-open) .desk-drawer:after {content:'';position:absolute;top:12px;right:0;bottom:0;width:8px;background:#262626;border-right:1px solid #555}
+.desk-case:not(.is-open) .desk-drawer-footer {display:none}
+.desk-case.is-empty:not(.is-open) .desk-drawer {visibility:hidden}
+.desk-case.is-open .desk-drawer {animation:desk-unfold 200ms cubic-bezier(.2,.65,.3,1) both}
+@keyframes desk-unfold {from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.desk-prototype .desk-drawer .film-track-shell {width:max-content;max-width:100%;min-width:0;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0}
+.desk-prototype .desk-drawer .film-track-shell:after {display:none}
+.desk-prototype .desk-drawer .film-rail {display:flex;align-items:flex-start;width:max-content;max-width:100%;gap:0;padding:0;background:transparent;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x proximity;border:0;border-radius:0;cursor:grab;touch-action:pan-x pan-y}
+.desk-prototype .desk-drawer .film-rail::-webkit-scrollbar {display:none}
+.desk-prototype .desk-drawer .film-frame {--frame-art-height:var(--desk-art-height);--frame-gutter:12px;flex:0 0 calc(var(--desk-art-height) * var(--frame-art-ratio,1.777777778) + 12px);width:calc(var(--desk-art-height) * var(--frame-art-ratio,1.777777778) + 12px);max-width:none;min-width:0;padding:12px 6px 0;background:linear-gradient(#262626 0 calc(var(--desk-art-height) + 24px),transparent calc(var(--desk-art-height) + 24px));border:0;border-radius:0;position:relative;text-align:left;scroll-snap-align:start}
+.desk-prototype .desk-drawer .film-frame:before,
+.desk-prototype .desk-drawer .film-frame:after {content:'';position:absolute;left:6px;right:6px;height:3px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='3'%3E%3Crect width='6' height='3' rx='.6' fill='%23b8b8b3'/%3E%3C/svg%3E");background-size:18px 3px;pointer-events:none}
+.desk-prototype .desk-drawer .film-frame:before {top:4px}
+.desk-prototype .desk-drawer .film-frame:after {top:calc(var(--desk-art-height) + 16px);bottom:auto}
+.desk-prototype .desk-drawer .film-frame .frame-image {height:var(--desk-art-height);width:100%;margin:0;background:transparent;border-radius:0;overflow:hidden}
+.desk-prototype .desk-drawer .frame-image>.art {height:100%;width:100%;max-width:none;aspect-ratio:var(--art-ratio);transform:none!important;filter:none!important;border-radius:0}
+.desk-prototype .desk-drawer .frame-caption {display:flex;align-items:baseline;gap:10px;min-width:0;padding:21px 2px 0;font-size:12px;line-height:1.6;color:#555;background:transparent}
+.desk-prototype .desk-drawer .frame-note {overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;color:#3c3c39}
+.desk-prototype .desk-drawer .frame-number {color:#8b8b86;font-size:10px;flex:none}
+.desk-prototype .desk-drawer .frame-date {color:#888;font-size:10px;flex:none}
+.desk-prototype .desk-drawer .film-frame:hover .frame-note {color:#111;text-decoration:underline;text-underline-offset:3px}
+.desk-drawer-footer {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;padding-left:10px;min-height:44px}
+.desk-drawer-footer>.button {background:transparent!important;font-size:11px;padding:0 10px;color:#555;min-width:44px}
+.desk-drawer-footer>.button:last-child {margin-left:auto}
+.desk-drawer-footer>span {font:10px/1.5 ui-monospace,monospace;color:#82827d;white-space:nowrap}
+.desk-drawer-footer .rail-controls {margin:0;gap:2px}
+.desk-drawer-footer .rail-controls .button {width:44px;min-height:44px;border:0;border-radius:0;background:transparent;font-size:16px;color:#343434}
+.desk-drawer-footer .rail-controls .button:disabled {color:#bbb;opacity:1}
+.desk-caption {width:var(--desk-cover);min-width:0;padding-top:11px;display:grid;gap:4px;line-height:1.5}
+.desk-case.is-open .desk-caption {position:absolute;left:0;top:calc(var(--desk-cover) * 1.5);padding-top:11px}
+.desk-prototype .desk-title.button {display:block;padding:0;border:0;background:transparent!important;text-align:left;color:#282826;font-size:13px;font-weight:500;line-height:1.5;min-height:32px;white-space:normal;overflow-wrap:anywhere}
+.desk-prototype .desk-title.button:hover {text-decoration:underline;text-underline-offset:4px}
+.desk-meta {font-size:10px;color:#81817b;line-height:1.6}
+.desk-note {font-size:12px;color:#51514c;font-weight:400;line-height:1.65;margin:3px 0 0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.desk-case.is-new .desk-meta {color:#376149}
+.desk-prototype .desk-drawer .film-frame.is-new .frame-note:before {content:'●';color:#527a5d;margin-right:6px;font-size:8px}
+.desk-prototype .desk-empty {font-size:13px;color:#777;margin:0;padding:12px 0;line-height:1.7;background:none;border:0}
+.desk-prototype .desk-drawer .desk-empty {padding:16px;min-width:0}
+.desk-prototype .desk-empty .button {margin-top:8px}
+.desk-prototype .desk-empty-shelf {padding:10px 0;font-size:13px;color:#777}
+.desk-prototype .desk-no-memory {font-size:12px;line-height:1.7;color:#777;padding:12px;min-width:0;margin:0}
+.desk-prototype .desk-case:not(.is-open) .desk-no-memory {display:none}
+.desk-prototype .desk-drawer .film-load-more {flex-basis:130px;height:calc(var(--desk-art-height) + 24px);font-size:11px;background:#262626;border:0;border-radius:0}
+.desk-prototype .desk-drawer .film-load-more>strong {font-size:11px}
+
+/* Functional empty states have no illustrative stage and no minimum height. */
+.desk-prototype .collection-empty {display:block;margin:8px 0 24px;min-height:0;max-width:none;padding:12px 0;background:none}
+.desk-prototype .collection-empty>h2 {font-size:17px;line-height:1.5;font-weight:500;margin:0 0 8px;letter-spacing:-.025em}
+.desk-prototype .collection-empty>p {font-size:13px;line-height:1.7;color:#73736f;margin:0 0 14px}
+.desk-prototype .empty-copy h2 {font-size:17px;line-height:1.5;font-weight:500;margin:0 0 8px;letter-spacing:-.025em}
+.desk-prototype .empty-copy p {font-size:13px;line-height:1.7;max-width:none;margin:0 0 12px}
+.desk-prototype .empty-demo-note {margin-top:10px}
+.desk-prototype .empty-state {min-height:0;background:transparent;padding:20px 0;border:0}
+.desk-prototype .empty-state h2 {font-size:18px}
+.desk-prototype .empty-state p {font-size:13px}
+.desk-prototype .shelf-editor {border:1px solid #e5e5e2;border-radius:0;background:#fafaf8;box-shadow:none}
+.desk-prototype .shelf-editor h2 {font-size:18px}
+.desk-prototype .shelf-editor .editor-heading p {font-size:12px}
+.desk-prototype .shelf-editor .editor-actions {background:#fafaf8}
+.desk-prototype .shelf-editor .curation-item {border-color:#e5e5e2}
+.desk-prototype .shelf-edit-layout {grid-template-columns:290px minmax(0,1fr);gap:28px}
+.desk-prototype .shelf-edit-banner {background:transparent;border:0;color:#666;padding:0 0 14px;margin:0;font-size:12px}
+.desk-prototype .shelf-editor .control {border:0;border-bottom:1px solid #bdbdb6;border-radius:0;background:transparent}
+.desk-prototype .site-footer {margin-top:0;border-top:1px solid #eeeeeb;font-size:11px}
+
+@media(min-width:1500px){.desk-case{--desk-cover:196px;--desk-art-height:224px}}
+@media(max-width:1100px){.desk-case{--desk-cover:170px;--desk-art-height:185px}.desk-case.is-open{width:100%}.desk-shelf-items{gap:24px}.desk-prototype .shelf-edit-layout{grid-template-columns:260px minmax(0,1fr);gap:20px}}
+@media(max-width:800px){.desk-prototype .shelf-edit-layout{grid-template-columns:1fr}.desk-prototype .shelf-editor{position:static;max-height:none}.desk-shelf-items{gap:24px 20px}.desk-case{--desk-cover:160px;--desk-art-height:174px}.desk-prototype #app{padding-top:16px}}
+@media(max-width:600px){
+  .desk-prototype .header-inner{min-height:104px;padding-top:8px;gap:8px}
+  .desk-prototype .brand-image{--brand-width:126px}
+  .desk-prototype .main-nav{gap:30px}
+  .desk-prototype .main-nav button[aria-current=page]:after{bottom:0}
+  .desk-prototype .preview-bar{min-height:26px}
+  .desk-prototype .preview-links{gap:12px}
+  .desk-prototype .header-actions .button{font-size:11px;padding-inline:12px}
+  .desk-toolbar{gap:12px;margin-bottom:8px;align-items:center;min-height:44px}
+  .desk-toolbar h1{font-size:17px;line-height:1.5}
+  .desk-toolbar>.button{font-size:11px;min-width:44px;padding:0}
+  .desk-toolbar>.button:before{display:none}
+  .desk-shelf{margin-bottom:32px}
+  .desk-shelf-heading{margin-bottom:8px;gap:8px;min-height:32px}
+  .desk-shelf-heading h2{font-size:11px}
+  .desk-shelf-heading>.button{font-size:10px}
+  .desk-shelf-items{gap:22px 16px}
+  .desk-case{width:calc((100% - 16px) / 2);--desk-cover:calc((100vw - 48px) / 2 - 20px);--desk-peek:20px;--desk-art-height:calc(((100vw - 48px) / 2 - 20px) * 1.5 - 40px)}
+  .desk-case.is-open{width:100%;--desk-cover:104px;--desk-art-height:126px}
+  .desk-drawer{padding-top:8px}
+  .desk-case:not(.is-open) .desk-drawer:after{top:8px;width:5px}
+  .desk-caption{padding-top:8px;gap:2px}
+  .desk-prototype .desk-title.button{font-size:12px;line-height:1.6;min-height:44px}
+  .desk-meta{font-size:10px}
+  .desk-note{font-size:11px;line-height:1.7;margin-top:3px}
+  .desk-pull-label{inset:auto 6px 7px auto;font-size:9px;padding:5px 6px}
+  .desk-prototype .desk-drawer .frame-caption{font-size:11px;padding-top:19px;gap:6px}
+  .desk-prototype .desk-drawer .frame-date{display:none}
+  .desk-prototype .desk-drawer .frame-number{font-size:9px}
+  .desk-drawer-footer{padding-left:2px;gap:0;margin-top:0}
+  .desk-drawer-footer>.button{font-size:10px;padding-inline:6px}
+  .desk-drawer-footer>.button:last-child{margin-left:0}
+  .desk-drawer-footer>span{display:none}
+  .desk-drawer-footer .rail-controls{gap:0}
+  .desk-drawer-footer .rail-controls .button{width:44px;padding:0}
+  .desk-prototype .desk-drawer .desk-empty{padding:8px;font-size:11px}
+  .desk-prototype .desk-drawer .desk-empty .button{padding:4px;font-size:10px}
+  .desk-prototype .site-footer{padding-top:20px}
+}
+@media(prefers-reduced-motion:reduce){.desk-case.is-open .desk-drawer{animation:none}.desk-prototype :is(.button,.desk-title,.desk-pull-label){transition:none}}

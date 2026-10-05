@@ -1,0 +1,210 @@
+{
+  "baseline": "5bd1b3fb132baaafbcb6cf892ece0793139fc7ce",
+  "after": "current uncommitted working tree",
+  "locale": "ko",
+  "theme": "light",
+  "records": "10 synthetic private cards; 3 boards; same fixed time and deterministic IDs",
+  "noRealUserData": true,
+  "noExternalNetwork": true,
+  "devToolbar": false,
+  "captures": [
+    {
+      "version": "before",
+      "name": "home-desktop",
+      "route": "/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "home-desktop-before.png",
+      "contentHeight": 1663
+    },
+    {
+      "version": "before",
+      "name": "boards-desktop",
+      "route": "/boards/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "boards-desktop-before.png",
+      "contentHeight": 1000
+    },
+    {
+      "version": "before",
+      "name": "board-detail-desktop",
+      "route": "/boards/?id=00000000-0000-4000-8000-000000000042",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "board-detail-desktop-before.png",
+      "contentHeight": 2929
+    },
+    {
+      "version": "before",
+      "name": "archive-desktop",
+      "route": "/archive/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "archive-desktop-before.png",
+      "contentHeight": 1983
+    },
+    {
+      "version": "before",
+      "name": "titles-desktop",
+      "route": "/titles/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "titles-desktop-before.png",
+      "contentHeight": 2154
+    },
+    {
+      "version": "before",
+      "name": "titles-posters-desktop",
+      "route": "/titles/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "titles-posters-desktop-before.png",
+      "contentHeight": 1094
+    },
+    {
+      "version": "before",
+      "name": "composer-desktop",
+      "route": "/memory/new/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "composer-desktop-before.png",
+      "contentHeight": 1115
+    },
+    {
+      "version": "before",
+      "name": "boards-mobile",
+      "route": "/boards/",
+      "viewport": [
+        390,
+        844
+      ],
+      "file": "boards-mobile-before.png",
+      "contentHeight": 992
+    },
+    {
+      "version": "before",
+      "name": "board-detail-mobile",
+      "route": "/boards/?id=00000000-0000-4000-8000-000000000042",
+      "viewport": [
+        390,
+        844
+      ],
+      "file": "board-detail-mobile-before.png",
+      "contentHeight": 2168
+    },
+    {
+      "version": "after",
+      "name": "home-desktop",
+      "route": "/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "home-desktop-after.png",
+      "contentHeight": 1944
+    },
+    {
+      "version": "after",
+      "name": "boards-desktop",
+      "route": "/boards/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "boards-desktop-after.png",
+      "contentHeight": 1000
+    },
+    {
+      "version": "after",
+      "name": "board-detail-desktop",
+      "route": "/boards/?id=00000000-0000-4000-8000-000000000042",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "board-detail-desktop-after.png",
+      "contentHeight": 1366
+    },
+    {
+      "version": "after",
+      "name": "archive-desktop",
+      "route": "/archive/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "archive-desktop-after.png",
+      "contentHeight": 2154
+    },
+    {
+      "version": "after",
+      "name": "titles-desktop",
+      "route": "/titles/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "titles-desktop-after.png",
+      "contentHeight": 2236
+    },
+    {
+      "version": "after",
+      "name": "titles-posters-desktop",
+      "route": "/titles/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "titles-posters-desktop-after.png",
+      "contentHeight": 1212
+    },
+    {
+      "version": "after",
+      "name": "composer-desktop",
+      "route": "/memory/new/",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "file": "composer-desktop-after.png",
+      "contentHeight": 1057
+    },
+    {
+      "version": "after",
+      "name": "boards-mobile",
+      "route": "/boards/",
+      "viewport": [
+        390,
+        844
+      ],
+      "file": "boards-mobile-after.png",
+      "contentHeight": 844
+    },
+    {
+      "version": "after",
+      "name": "board-detail-mobile",
+      "route": "/boards/?id=00000000-0000-4000-8000-000000000042",
+      "viewport": [
+        390,
+        844
+      ],
+      "file": "board-detail-mobile-after.png",
+      "contentHeight": 1842
+    }
+  ]
+}

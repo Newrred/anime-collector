@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-04",
+  "scope": "V4 standalone cover-and-film prototype, page-only invented content",
+  "url": "http://127.0.0.1:4348/moemoa-film-sleeve.html#titles",
+  "browser": "Headless Chromium via agent-browser session sleeve-flow-check; closed after tests",
+  "viewports": [[1440, 1000], [1000, 900]],
+  "checks": [
+    {"name": "Initial route and default presentation", "result": "PASS", "evidence": "Initial #titles opened Memory View with eight titles and seven expanded film cases. Title with zero memories had cover and first-memory action, no pull handle."},
+    {"name": "Collapse and expand", "result": "PASS", "evidence": "At1440px drawer changed from1034 to200 and back1034. Rail scrollLeft120 restored exactly after collapse/expand. Other row remained open at scroll0."},
+    {"name": "Collapsed accessibility and keyboard exclusion", "result": "PASS", "evidence": "Collapsed pull aria-expanded=false; rail inert=true, aria-hidden=true, tabindex=-1; drawer aria-hidden=true; controls hidden. Focus stayed pull-t1. Tab skipped hidden frames and moved to next title. ArrowRight while collapsed did not expand."},
+    {"name": "Expanded accessibility", "result": "PASS", "evidence": "Reopened rail inert=false, tabindex0; drawer full width and retained left120."},
+    {"name": "Closed case through detail round trip", "result": "PASS", "evidence": "Collapsed t1 then clicked its cover to detail and Back. Returned #titles with collapsed state/inert retained and row-cover-t1 focus."},
+    {"name": "Closed case through view switch", "result": "PASS", "evidence": "Poster then Memory View kept eight titles and t1 collapsed. Reopen restored remembered120px."},
+    {"name": "Independent rows", "result": "PASS", "evidence": "At1000px t1 was290px; moving t2 from158 to0 left t1 exactly290."},
+    {"name": "Incremental frames", "result": "PASS", "evidence": "Initial three previews plus +3. Expanding rendered six frames, focused first new frame row-t1-m4, other row stayed0."},
+    {"name": "Memory modal return", "result": "PASS", "evidence": "Opened m4 at870px. Escape closed modal, restored focus row-t1-m4 and scrollLeft870."},
+    {"name": "Keyboard and scroll restoration at end", "result": "PASS", "evidence": "Home set0, End reached1028 maximum. Collapse/reopen retained1028. Other row remained0."},
+    {"name": "Mouse drag", "result": "PASS", "evidence": "Drag moved t1 from1028 to870 without opening modal; other row stayed0."},
+    {"name": "Search and view equivalence", "result": "PASS", "evidence": "Searching 여름 retained input focus, one row, collapsed state and six loaded frames. Poster View showed same one title and query. Memory View retained same state."},
+    {"name": "CSS content-size properties and helper", "result": "PASS", "evidence": "After reload, t1 --frame-count3/--more-slots1, t2 3/0, t3 2/0. Helper reads 필름 끝의 손잡이를 눌러 보세요. Renderer derives counts from currently loaded frames."},
+    {"name": "Reduced motion and DOM preservation", "result": "PASS", "evidence": "Normal transitionDuration0.28s. Emulated reduced-motion gave0s; first animation frame after collapse was already final180px drawer width with zero active animations. Rail node identity remained exactly the same across toggle."},
+    {"name": "Rapid interrupted toggles", "result": "PASS", "evidence": "With normal0.28s transition, four keyboard Enter toggles arrived at5ms,3ms,23ms intervals. Final state expanded=true, inert=false, focus pull-t1, and original290px scroll retained."},
+    {"name": "Bookshelf edit regression", "result": "PASS", "evidence": "Draft rename then Escape restored original name and exited editing. New rename 커버와 필름, lilac and t1 reorder applied correctly; home order t3,t1,t2,t6,t4,t5. Memory archive remained18."},
+    {"name": "Runtime errors and storage", "result": "PASS", "evidence": "agent-browser errors empty after main and rapid-toggle checks. localStorage/sessionStorage lengths both0."},
+    {"name": "Syntax, fixtures and V3 preservation", "result": "PASS", "evidence": "node --check and direct Node fixture execution passed. Eleven fixture assertions include open-by-default, initial3 previews and folded-view/domain independence. Source comparison confirmed film-bookshelf.js unchanged from initial read."}
+  ],
+  "changes_during_verification": [
+    "Parent-requested --frame-count/--more-slots style properties were added only to new V4 JS.",
+    "Parent-requested helper text shortened only in new V4 JS.",
+    "No JS defect requiring behavioral fix was found in these tests."
+  ],
+  "test_notes": [
+    "CSS was refined by parent in parallel. Earlier explicit geometry measurements reflect the then-current CSS; final mobile geometry is recorded separately by parent.",
+    "A batch command formatting attempt was rejected by CLI before any actions. Correct individual batch arguments then executed four real keyboard toggles.",
+    "Temporary page-only diagnostic references measured node identity and animation-frame geometry; no domain records or browser storage were changed by diagnostics."
+  ],
+  "not_verified_here": ["Physical touch/swipe", "Mobile layout and visual polish (parent separately verifying)", "Safari/Firefox and screen-reader announcement quality", "Production data, accounts, image rights/publication, API or large-image loading", "Full composer regression in V4 beyond existing preserved implementation"],
+  "production_changes": false,
+  "session_closed": true
+}

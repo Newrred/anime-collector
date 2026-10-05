@@ -1,0 +1,464 @@
+{
+  "version": 6,
+  "status": "PASS_WITH_NONBLOCKING_USABILITY_NOTES",
+  "checkedAtLocalDate": "2026-10-04",
+  "scope": "Read-only independent visual/layout QA of local fictional prototype. No production, private files, uploads, API or backend verification.",
+  "source": "http://127.0.0.1:4348/moemoa-film-collection.html",
+  "session": "collection-v6-layout",
+  "browser": "Headless Chromium 1440x1000, 390x844, 320x800",
+  "baseline": {
+    "label": "V5 fictional interaction prototype, NOT original production",
+    "source": "moemoa-film-interaction.html#memories",
+    "comparisonScreenshot": "collection-v6-before-1440.png",
+    "comparisonDimensions": [
+      1440,
+      1000
+    ],
+    "allArtworkRatio": "16:9",
+    "artFractionOfWrapper": 0.45,
+    "coloredBlankFractionOfWrapper": 0.55,
+    "fullPageScreenshots": [
+      "collection-v6-baseline-v5-memories-1440.png",
+      "collection-v6-baseline-v5-memories-390.png",
+      "collection-v6-baseline-v5-memories-320.png"
+    ]
+  },
+  "archive": {
+    "finalComparisonScreenshot": "collection-v6-after-1440.png",
+    "comparisonDimensions": [
+      1440,
+      1000
+    ],
+    "imageCount": 18,
+    "generatedFixtures": true,
+    "ratioMeasurementNote": "Art is CSS background atlas tiles, not standalone img naturalWidth/naturalHeight. Compared rendered ratios against source atlas tile ratios.",
+    "sourceAtlasTiles": [
+      {
+        "file": "prototype-scenes.png",
+        "atlas": [
+          2048,
+          768
+        ],
+        "grid": [
+          3,
+          2
+        ],
+        "tileRatio": "16:9"
+      },
+      {
+        "file": "collection-portraits.png",
+        "atlas": [
+          1024,
+          1536
+        ],
+        "grid": [
+          2,
+          2
+        ],
+        "tileRatio": "2:3"
+      },
+      {
+        "file": "collection-squares.png",
+        "atlas": [
+          1254,
+          1254
+        ],
+        "grid": [
+          2,
+          2
+        ],
+        "tileRatio": "1:1"
+      },
+      {
+        "file": "collection-wides.png",
+        "atlas": [
+          1672,
+          941
+        ],
+        "grid": [
+          2,
+          2
+        ],
+        "tileRatio": "1672:941"
+      }
+    ],
+    "metrics": [
+      {
+        "width": 1440,
+        "pageWidth": 1440,
+        "columns": 5,
+        "grid": {
+          "x": 40,
+          "y": 226,
+          "width": 1360,
+          "height": 1100.4375,
+          "top": 226,
+          "right": 1400,
+          "bottom": 1326.4375,
+          "left": 40
+        },
+        "gap": "24px",
+        "cardWidths": [
+          252.796875
+        ],
+        "overlaps": [],
+        "domOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "visualOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "maxRatioError": 0.00013431013431031147,
+        "allWrapperEqual": true,
+        "allPaddingZero": true,
+        "allWrapperTransparent": true
+      },
+      {
+        "width": 390,
+        "pageWidth": 390,
+        "columns": 2,
+        "grid": {
+          "x": 16,
+          "y": 280.5,
+          "width": 358,
+          "height": 1756.09375,
+          "top": 280.5,
+          "right": 374,
+          "bottom": 2036.59375,
+          "left": 16
+        },
+        "gap": "14px",
+        "cardWidths": [
+          172
+        ],
+        "overlaps": [],
+        "domOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "visualOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "maxRatioError": 0.00008371222550151991,
+        "allWrapperEqual": true,
+        "allPaddingZero": true,
+        "allWrapperTransparent": true
+      },
+      {
+        "width": 320,
+        "pageWidth": 320,
+        "columns": 2,
+        "grid": {
+          "x": 16,
+          "y": 280.5,
+          "width": 288,
+          "height": 1467.3125,
+          "top": 280.5,
+          "right": 304,
+          "bottom": 1747.8125,
+          "left": 16
+        },
+        "gap": "14px",
+        "cardWidths": [
+          137
+        ],
+        "overlaps": [],
+        "domOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "visualOrder": [
+          "m7",
+          "m1",
+          "m10",
+          "m14",
+          "m2",
+          "m12",
+          "m16",
+          "m3",
+          "m18",
+          "m8",
+          "m4",
+          "m11",
+          "m13",
+          "m5",
+          "m15",
+          "m17",
+          "m6",
+          "m9"
+        ],
+        "maxRatioError": 0.00022399822179863804,
+        "allWrapperEqual": true,
+        "allPaddingZero": true,
+        "allWrapperTransparent": true
+      }
+    ],
+    "conclusions": [
+      "No document horizontal overflow at all three widths",
+      "No pairwise card overlap at all three widths",
+      "DOM order matches top-then-left visual order for this fixture",
+      "All artwork wrappers equal art bounds, padding zero, transparent background",
+      "Source-tile ratios maintained within subpixel rounding"
+    ],
+    "fixtureOrderNote": "Curated fixture order. Not claiming chronological ordering.",
+    "screenshots": [
+      "collection-v6-after-1440.png",
+      "collection-v6-archive-final-390.png",
+      "collection-v6-archive-final-320.png"
+    ]
+  },
+  "memoryModal": {
+    "portrait320": {
+      "dialog": [
+        296,
+        682.890625
+      ],
+      "art": [
+        264,
+        396
+      ],
+      "ratio": "2:3",
+      "overflowX": 0
+    },
+    "portrait1440": {
+      "dialog": [
+        1060,
+        951.984375
+      ],
+      "art": [
+        546.65625,
+        819.984375
+      ],
+      "ratio": "2:3",
+      "overflowX": 0
+    },
+    "wide320": {
+      "dialog": [
+        296,
+        435.390625
+      ],
+      "art": [
+        264,
+        148.5
+      ],
+      "ratio": "16:9",
+      "overflowX": 0
+    },
+    "wide1440": {
+      "dialog": [
+        1060,
+        487.8125
+      ],
+      "art": [
+        632.5625,
+        355.8125
+      ],
+      "ratio": "16:9",
+      "overflowX": 0
+    },
+    "wrapperMatchesArtwork": true,
+    "visuallyInspected": true,
+    "screenshots": [
+      "collection-v6-modal-portrait-1440.png",
+      "collection-v6-modal-portrait-320.png",
+      "collection-v6-modal-wide-320.png"
+    ]
+  },
+  "composer": {
+    "choiceCount": 18,
+    "checkedWidths": [
+      1440,
+      390,
+      320
+    ],
+    "horizontalOverflow": false,
+    "initialFieldsDisabledUntilImage": true,
+    "lastChoiceAccessedThroughScrollablePicker": true,
+    "selectingLastChoiceEnablesTitleAndNote": true,
+    "mobileControlFontPx": 16,
+    "dialog320": {
+      "width": 296,
+      "height": 776,
+      "left": 12,
+      "top": 12
+    },
+    "selectedState320": {
+      "dialogScrollHeight": 893,
+      "choiceGridClientHeight": 190,
+      "choiceGridScrollHeight": 427
+    },
+    "desktopDialogWidth": 980,
+    "escapeReturnsFocusTo": "global-add",
+    "screenshots": [
+      "collection-v6-composer-final-320.png",
+      "collection-v6-composer-final-1440.png"
+    ]
+  },
+  "empty": {
+    "query": "?start=empty#memories",
+    "itemCount": 0,
+    "ctaOpensComposer": true,
+    "checkedWidths": [
+      1440,
+      320
+    ],
+    "horizontalOverflow": false,
+    "screenshots": [
+      "collection-v6-empty-1440.png",
+      "collection-v6-empty-320.png"
+    ]
+  },
+  "preservedFlows": {
+    "homePortraitEdit": {
+      "memory": "m7",
+      "mobileArt": [
+        200,
+        300
+      ],
+      "desktopArt": [
+        240,
+        360
+      ],
+      "fullRatioMaintained": true,
+      "documentOverflowX": false
+    },
+    "titleFilm320": {
+      "rows": 8,
+      "cases": 8,
+      "documentWidth": 320
+    },
+    "detailT2At320": {
+      "documentWidth": 320,
+      "shellWidth": 288,
+      "railClientWidth": 288,
+      "railScrollWidth": 546,
+      "frameWidths": [
+        113.25,
+        271.859375,
+        160.875
+      ],
+      "frameHeight": 207.375,
+      "note": "Horizontal rail scrolling is intentional, not document overflow."
+    },
+    "screenshots": [
+      "collection-v6-home-portrait-320.png",
+      "collection-v6-home-portrait-1440.png",
+      "collection-v6-detail-final-320.png",
+      "collection-v6-titles-film-320.png"
+    ]
+  },
+  "interactionChecks": {
+    "representativeArchiveHover": {
+      "memory": "m7",
+      "rectBeforeAndAfter": [
+        40,
+        226,
+        252.796875,
+        407.1875
+      ],
+      "transform": "none"
+    },
+    "reducedMotion": {
+      "mediaQueryMatched": true,
+      "representativeArchiveAnimationDuration": "0s",
+      "representativeArchiveTransitionDuration": "0s"
+    },
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "nonblockingNotes": [
+    "The 18-choice picker has its own vertical scroll; mobile initial viewport does not reveal every option or the modal footer. Options and footer are reachable by scrolling. A visible more-images hint would improve discoverability.",
+    "Applying the long mobile bookshelf editor preserves prior page scroll position, so the changed featured image may require scrolling upward to inspect."
+  ],
+  "limitations": [
+    "This is representative Chromium visual/layout QA, not all-browser or screen-reader certification.",
+    "No native touch-device, OS keyboard, backend, persistence, production, rights, public-publishing or real-upload test.",
+    "No drag regression performed by this agent; separate functional QA owns it.",
+    "No blanket claim that every target is 44px; auxiliary links and in-film targets follow existing prototype rules.",
+    "Spacing measurements are actual proposed V6 values, not exact measurements copied from a third-party reference.",
+    "Snapshots were captured after announced final fixes for their respective surfaces; earlier temporary files are not final comparison evidence."
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "version": "V8 isolated prototype",
+  "date": "2026-10-05",
+  "status": "PASS_WITHIN_TESTED_BOUNDS",
+  "scope": "Independent browser layout and responsive QA; fictional RAM fixture only. No production, API, private image or public publishing test.",
+  "browser": {
+    "engine": "Chromium",
+    "session": "grid-qa",
+    "closed": true,
+    "url": "http://127.0.0.1:4348/moemoa-film-grid.html#home",
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        1000,
+        844
+      ],
+      [
+        768,
+        844
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        320,
+        844
+      ]
+    ]
+  },
+  "documentsRead": [
+    "CODEX_START_HERE.md",
+    "docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+    "docs/moemoa/operations/2026-09-29-desktop-handoff.md",
+    "docs/moemoa/plans/2026-10-03-interface-rebuild.md (8차)",
+    "vercel/0.21.4/skills/agent-browser/SKILL.md"
+  ],
+  "sourceHashesAtFinalCheck": {
+    "moemoa-film-grid.html": "329CAEA37AD49B7BEFDEEDE30C23AC02EAAA6B27279F5A8FCA1C68427EB822D1",
+    "film-grid.css": "4B7569AB6C2FF1D564254AAFA643B832F055ABA6CD7BCA16B7591C01176425E5",
+    "film-grid.js": "01BE4B0B96D9CAD2E1A16BE0FE1523D0F0D7D56A22EFD5C8B9AC120231F7C865"
+  },
+  "checks": [
+    {
+      "name": "Initial home",
+      "status": "PASS",
+      "evidence": "1440 and fresh 320: hero-class elements 0, open panels 0, six curated tiles t1,t3,t2,t6,t4,t5. Home h1 18px desktop /17px mobile. My Titles independently shows 8."
+    },
+    {
+      "name": "Cover geometry invariant",
+      "status": "PASS",
+      "evidence": "All six tile x/width values identical before/after first-row opening at1440 and320; 390 closed/open t3 and t2 retain x/width. 320 t1→t3→cross-row t6 retains all x/width. Only lower rows shift vertically."
+    },
+    {
+      "name": "Same-row swap",
+      "status": "PASS",
+      "evidence": "1440 t1→t3 panelY670.1875;320 t1→t3 panelY571.140625. One .shelf-film-panel only."
+    },
+    {
+      "name": "Cross-row selection",
+      "status": "PASS",
+      "evidence": "320 actual page scroll then t6 click moves panel after row end t6 atY890.28125, from first-row t3 atY571.140625. Initial offscreen CLI click without scrolling did not change selection; not counted as test result."
+    },
+    {
+      "name": "Resize selected panel",
+      "status": "PASS",
+      "evidence": "Selected t2 at390→320→768→1000 relocated panel after t6/t6/t2/t6 respectively. Final t3 resize320→390→768→1000→1440 puts panel after t3/t3/t2/t6/t5. Document scrollWidth equals viewport at every measured width."
+    },
+    {
+      "name": "Natural image ratios",
+      "status": "PASS",
+      "evidence": "t3 images square108×108 and portrait72×108 mobile;168×168 and112×168 desktop. t2 portrait72×108,wide191.890625×108,square108×108 mobile. Atlas tile ratios, not standalone img intrinsic dimensions."
+    },
+    {
+      "name": "Shelf filters and empty shelf",
+      "status": "PASS",
+      "evidence": "All6; s1 shows t1,t3,t2 count3; s2 shows t6,t4,t5 count3 and clears hidden t3 selection. Via real editor remove three s1 titles and Apply: All3/s1=0/s2=3; empty s1 displays explanation and 작품 고르기,0 tiles/0 panels; document width320. Whole union empty and duplicate-union editing not independently tested."
+    },
+    {
+      "name": "Targets and keyboard",
+      "status": "PASS_WITHIN_SAMPLE",
+      "evidence": "Final320 shelf tabs min44×44,all6 cover/title buttons≥44×44,visible t3 +기억/접기44×44. Title Tab focus has2px outline+4px offset;Enter navigates to t3 detail. Not every link/control audited."
+    },
+    {
+      "name": "Reduced motion and hover geometry",
+      "status": "PASS_WITHIN_SAMPLE",
+      "evidence": "matchMedia reduce=true; sampled covers/drawer/rail transition0s,scrollBehavior auto;opening works at320. t3 cover before/after hover x168,y252,w136,h204 unchanged."
+    },
+    {
+      "name": "Existing route smoke at320",
+      "status": "PASS",
+      "evidence": "UI navigation to My Titles8,poster/film, t3 detail, Archive18. Each document scrollWidth320. Screenshots visually reviewed. Not full functional regression."
+    },
+    {
+      "name": "Modal and composer smoke at320",
+      "status": "PASS",
+      "evidence": "Archive portrait modal296×682.890625 atx12,y80.546875;art264×396. Escape closes. Composer296×815.390625 atx12,y14.296875,clientWidth=scrollWidth296;18 accessible image-choice buttons from snapshot,requires image before enabling fields. Escape closes. No fake memory submitted."
+    },
+    {
+      "name": "Console and page errors",
+      "status": "PASS",
+      "evidence": "agent-browser console and errors returned empty at final check."
+    }
+  ],
+  "finalLayout": [
+    {
+      "viewport": [
+        320,
+        844
+      ],
+      "scrollWidth": 320,
+      "coverWidth": 136,
+      "columns": 2,
+      "panel": {
+        "x": 16,
+        "y": 571.140625,
+        "w": 288,
+        "h": 206.59375,
+        "bottom": 777.734375
+      },
+      "afterTitle": "t3"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "scrollWidth": 390,
+      "coverWidth": 171,
+      "columns": 2,
+      "panel": {
+        "x": 16,
+        "y": 623.640625,
+        "w": 358,
+        "h": 206.59375,
+        "bottom": 830.234375
+      },
+      "afterTitle": "t3"
+    },
+    {
+      "viewport": [
+        768,
+        844
+      ],
+      "scrollWidth": 768,
+      "coverWidth": 226.65625,
+      "columns": 3,
+      "panel": {
+        "x": 24,
+        "y": 694.1875,
+        "w": 720,
+        "h": 288.1875,
+        "bottom": 982.375
+      },
+      "afterTitle": "t2"
+    },
+    {
+      "viewport": [
+        1000,
+        844
+      ],
+      "scrollWidth": 1000,
+      "coverWidth": 212,
+      "columns": 4,
+      "panel": {
+        "x": 40,
+        "y": 678.1875,
+        "w": 920,
+        "h": 288.1875,
+        "bottom": 966.375
+      },
+      "afterTitle": "t6"
+    },
+    {
+      "viewport": [
+        1440,
+        1000
+      ],
+      "scrollWidth": 1440,
+      "coverWidth": 206.65625,
+      "columns": 6,
+      "panel": {
+        "x": 40,
+        "y": 670.1875,
+        "w": 1360,
+        "h": 288.1875,
+        "bottom": 958.375
+      },
+      "afterTitle": "t5"
+    }
+  ],
+  "issueHistory": [
+    {
+      "issue": "All shelf tab width below44px",
+      "before": {
+        "desktop": 40.75,
+        "mobile": 36.515625,
+        "height": 44
+      },
+      "resolution": "Parent added min-width44px; fresh query final320 and subsequent390/768/1000/1440 all measured44×44",
+      "status": "FIXED"
+    }
+  ],
+  "screenshots": {
+    "finalViewport": [
+      "grid-v8-final-t3-320-qa.png",
+      "grid-v8-final-t3-390-qa.png",
+      "grid-v8-final-t3-768-qa.png",
+      "grid-v8-final-t3-1000-qa.png",
+      "grid-v8-final-t3-1440-qa.png"
+    ],
+    "otherValidated": [
+      "grid-v8-empty-shelf-320-qa.png",
+      "grid-v8-crossrow-320-qa.png",
+      "grid-v8-t3-focus-320-qa.png",
+      "grid-v8-detail-320-qa.png",
+      "grid-v8-titles-320-qa.png",
+      "grid-v8-titles-film-320-qa.png",
+      "grid-v8-archive-320-qa.png",
+      "grid-v8-modal-320-qa.png",
+      "grid-v8-composer-320-qa.png"
+    ],
+    "intermediateBeforeTabFix": [
+      "grid-v8-t3-open-1440-qa.png",
+      "grid-v8-t3-open-390-qa.png"
+    ],
+    "note": "Screenshots saved from actual browser capture and opened with view_image. Crossrow and early390 are fullpage; finalViewport images use listed viewport sizes. QA images are not production baseline."
+  },
+  "limits": [
+    "Headless Chromium CSS viewport emulation, not physical Android/iOS or assistive technology testing.",
+    "No backend, persistence, real photo, public rights, authentication, deployment, or production data changes.",
+    "Only specified layout and basic smoke bounds tested; other agent owns full grid functional flows.",
+    "No claim of whole-app accessibility, release readiness, final design approval or complete regression.",
+    "Observed file hashes at final check; root may make subsequent changes requiring targeted recheck."
+  ],
+  "filesChanged": [
+    "grid-v8-layout-results.json",
+    "grid-v8-*-qa.png only"
+  ],
+  "migrations": "None",
+  "rollback": "Delete only newly generated QA report/screenshots if unwanted; source prototypes and older artifacts preserved."
+}

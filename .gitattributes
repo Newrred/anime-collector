@@ -1,3 +1,7 @@
 tools/publication-boundary/*.sh text eol=lf
 tools/private-images/*.sh text eol=lf
 tools/identity/*.sh text eol=lf
+
+# Preserve archived design evidence byte-for-byte across Windows/macOS/Linux.
+design/prototypes/film-archive/** -text
+design/evidence/original-design-5bd1b3f/** -text

@@ -1,0 +1,310 @@
+{
+  "version": "V6",
+  "date": "2026-10-04",
+  "target": "http://127.0.0.1:4348/moemoa-film-collection.html#memories",
+  "emptyTarget": "http://127.0.0.1:4348/moemoa-film-collection.html?start=empty#memories",
+  "session": "collection-v6-flow",
+  "browser": "Headless Chromium1208 via agent-browser",
+  "viewports": [
+    [
+      1440,
+      1000
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      320,
+      844
+    ]
+  ],
+  "status": "PASS within tested scope",
+  "scope": "New standalone film-collection.js and this report only. Root owns HTML/CSS; asset agent owns generated sheets. No production, database, API, authentication or persistent-storage change.",
+  "implementation": {
+    "visuals": 18,
+    "uniqueSeedVisuals": 18,
+    "preservedCoastalScenes": "t1 m1..m6 only",
+    "newSheets": [
+      "collection-portraits.png",
+      "collection-squares.png",
+      "collection-wides.png"
+    ],
+    "wideRatio": "1672/941 (actual generated sheet)",
+    "archiveOrder": [
+      "m7",
+      "m1",
+      "m10",
+      "m14",
+      "m2",
+      "m12",
+      "m16",
+      "m3",
+      "m18",
+      "m8",
+      "m4",
+      "m11",
+      "m13",
+      "m5",
+      "m15",
+      "m17",
+      "m6",
+      "m9"
+    ],
+    "masonry": "Shortest column using measured heights, original DOM order unchanged, CSS column/gap variables, ResizeObserver, readiness flag, scroll anchor and retained DOM focus",
+    "newMemory": "Explicit sample visual then title; optional note; archive result plus title-film link",
+    "emptyDemo": "Separate in-page empty memory array; title, WatchLog, Board fixtures remain unchanged"
+  },
+  "checks": [
+    {
+      "id": "seed-and-ratios",
+      "status": "PASS",
+      "method": "DOM inspection at1440",
+      "evidence": {
+        "count": 18,
+        "uniqueVisuals": 18,
+        "columns": 5,
+        "tileWidth": 252.796875,
+        "portraitHeight": 379.1875,
+        "squareHeight": 252.796875,
+        "coastWideHeight": 142.1875,
+        "pageOverflow": false
+      }
+    },
+    {
+      "id": "archive-search",
+      "status": "PASS",
+      "method": "Native fill, zero-result search and reset",
+      "evidence": {
+        "query": "별을 건너는",
+        "cards": 3,
+        "resultText": "3개의 기억",
+        "totalText": "18",
+        "retainedFocus": "memory-search",
+        "noResultResetRestores": 18
+      },
+      "note": "Search matches both title and optional note. Total heading stays18 while result count updates."
+    },
+    {
+      "id": "archive-modal-full-portrait",
+      "status": "PASS",
+      "method": "Native memory-m7 click, bounds inspection, Escape",
+      "evidence": {
+        "visual": 6,
+        "note": "강변의 밤",
+        "wrapperWidth": 546.65625,
+        "wrapperHeight": 819.984375,
+        "imageWidth": 546.65625,
+        "imageHeight": 819.984375,
+        "restoredFocus": "memory-m7"
+      }
+    },
+    {
+      "id": "empty-entry-and-cancel",
+      "status": "PASS",
+      "method": "Open ?start=empty, enter composer and Escape, reload",
+      "evidence": {
+        "initialCount": 0,
+        "emptyCTA": "첫 기억 남기기",
+        "sampleChoices": 18,
+        "selectedChoices": 0,
+        "initialSaveDisabled": true,
+        "initialTitleDisabled": true,
+        "initialNoteDisabled": true,
+        "fileInputs": 0,
+        "cancelCreatesMemory": false
+      }
+    },
+    {
+      "id": "explicit-image-first-gate",
+      "status": "PASS",
+      "method": "Native scroll and click 오후의 도서관 선택 in a fresh composer",
+      "evidence": {
+        "selectedVisual": 11,
+        "selectedTitle": "",
+        "titleEnabled": true,
+        "saveStillDisabled": true
+      },
+      "note": "The first offscreen automation click did not activate. The clean retest scrolled the actual button into view before clicking; disabled-select automation was not treated as user verification."
+    },
+    {
+      "id": "first-save-without-note",
+      "status": "PASS",
+      "method": "Select t4 after visual11, leave note empty, native submit",
+      "evidence": {
+        "archiveCount": 1,
+        "cardId": "m19",
+        "cardVisual": 11,
+        "focus": "memory-m19",
+        "masonryReady": "true",
+        "feedback": "기억을 남겼어요.다음 역, 우리 집 필름 보기 →",
+        "localStorageEntries": 0
+      }
+    },
+    {
+      "id": "title-film-and-save-independence",
+      "status": "PASS",
+      "method": "Click post-save title-film link",
+      "evidence": {
+        "hash": "#title/t4",
+        "title": "다음 역, 우리 집",
+        "saved": false,
+        "saveButton": "작품 저장",
+        "filmFrames": 1,
+        "filmVisual": 11,
+        "watchCount": 0
+      }
+    },
+    {
+      "id": "refresh-and-empty-home",
+      "status": "PASS",
+      "method": "Return to archive, reload ?start=empty, navigate home",
+      "evidence": {
+        "resetCount": 0,
+        "feedbackRemoved": true,
+        "emptyFeatured": true,
+        "shelves": 2,
+        "curatedCovers": 6
+      }
+    },
+    {
+      "id": "masonry-resize-and-keyboard",
+      "status": "PASS",
+      "method": "Focus memory-m14 at1440 then resize390 and Tab",
+      "evidence": {
+        "columnsAt390": 2,
+        "documentWidth": 390,
+        "viewport": 390,
+        "overlappingPairs": [],
+        "domOrderUnchanged": true,
+        "focusAfterResize": "memory-m14",
+        "focusAfterTab": "memory-m2"
+      }
+    },
+    {
+      "id": "existing-case-drag-and-scroll",
+      "status": "PASS",
+      "method": "Native +3, next, handle drag100px left, release, click reopen",
+      "evidence": {
+        "frames": 6,
+        "beforeScroll": 836,
+        "openDrawerWidth": 1154,
+        "heldDrawerWidth": 1054,
+        "pulling": true,
+        "inertDuringDrag": true,
+        "otherRowExpanded": true,
+        "restoredScroll": 836,
+        "restoredExpanded": true,
+        "inlineWidthAfterSettle": ""
+      }
+    },
+    {
+      "id": "natural-width-detail-and-modal",
+      "status": "PASS",
+      "method": "Reload latest JS/CSS, inspect t2 at320, End, click m9, Escape, resize1440",
+      "evidence": {
+        "mobileFrameWidths": [
+          113.25,
+          271.859375,
+          160.875
+        ],
+        "mobileArtDimensions": [
+          [
+            95.25,
+            142.875
+          ],
+          [
+            253.859375,
+            142.875
+          ],
+          [
+            142.875,
+            142.875
+          ]
+        ],
+        "mobilePageWidth": 320,
+        "endScroll": 258,
+        "endMaximum": 258,
+        "modalRestoredFocus": "title-t2-m9",
+        "modalRestoredScroll": 258,
+        "desktopFrameWidths": [
+          223.75,
+          559.703125,
+          324.625
+        ],
+        "desktopRailAndShellWidth": 1108.078125
+      }
+    },
+    {
+      "id": "long-title-film-overflow",
+      "status": "PASS",
+      "method": "Open t1 detail at1440, focus rail and press End",
+      "evidence": {
+        "scrollLeft": 2000,
+        "maximum": 2000,
+        "documentWidth": 1440
+      }
+    },
+    {
+      "id": "home-editor-and-recent",
+      "status": "PASS",
+      "method": "Edit home name then Escape",
+      "evidence": {
+        "name": "오래 머무는 장면들",
+        "editorClosed": true,
+        "recentMemoryIds": [
+          "m1",
+          "m2",
+          "m3",
+          "m4"
+        ],
+        "recentMasonryReady": "true"
+      }
+    },
+    {
+      "id": "static-integrity",
+      "status": "PASS",
+      "method": "node --check, node fixture execution, compare retained V5 source",
+      "evidence": {
+        "syntaxExit": 0,
+        "fixtureExit": 0,
+        "fixtureAssertions": 22,
+        "V5SourceUnchanged": true
+      }
+    },
+    {
+      "id": "final-browser-cleanup",
+      "status": "PASS",
+      "method": "Errors command in fresh post-fixture-fix session and explicit close",
+      "evidence": {
+        "browserErrors": [],
+        "sessionClosed": true
+      }
+    }
+  ],
+  "developmentFindings": [
+    {
+      "issue": "Adding the short t5 note 별을 기다리는 사람 made the broad fixture query 별을 match4 rather than3 memories.",
+      "resolution": "Clarified the title-search-only fixture query to 별을 건너는. Product search correctly continues matching both title and note.",
+      "final": "22fixture assertions pass; earlier construction failure is not concealed as an always-clean run."
+    },
+    {
+      "issue": "Portrait modal child had natural ratio but its parent still used16:9 fallback and clipped the image.",
+      "resolution": "Pass selected visual ratio to the detail-art wrapper.",
+      "final": "Parent and image bounds match546.65625×819.984375."
+    },
+    {
+      "issue": "Home recent section briefly used archive curation order, inconsistent with the recent label.",
+      "resolution": "Restore sequence-descending recent order m1..m4; archive intentionally stays interleaved."
+    }
+  ],
+  "notVerified": [
+    "Physical mobile touch, OS pointercancel, document-external release, Safari/Firefox and full screen-reader speech.",
+    "Full V5 drag cancellation/transition/reduced-motion matrix was not repeated; core native handle drag, state restoration and both detail keyboard rails were rechecked.",
+    "Automated mass-data/image-load stress beyond the18 seeded memories.",
+    "Real image import, upload, server storage, authenticated sync, public publishing or production routes. These remain outside this preview.",
+    "Root and separate QA visual/layout checks are recorded in their own reports, not claimed as this session's tests."
+  ],
+  "rollback": "Prior V5 files unchanged; close or reload the standalone preview to discard session changes.",
+  "securityPrivacyRights": "Only fictional seeded data and locally generated art. No local user images, credential access, file-input/upload route, storage writes, or analytics added."
+}

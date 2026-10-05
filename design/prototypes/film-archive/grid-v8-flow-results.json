@@ -1,0 +1,260 @@
+{
+  "version": "V8",
+  "date": "2026-10-05",
+  "status": "PASS",
+  "url": "http://127.0.0.1:4348/moemoa-film-grid.html#home",
+  "scope": "Local generated-image prototype. HOME grid/panel implementation and focused functional regression only.",
+  "browser": {
+    "tool": "agent-browser",
+    "session": "grid-flow",
+    "engine": "Chromium 1208",
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        1000,
+        1000
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        320,
+        800
+      ]
+    ],
+    "sessionClosed": true
+  },
+  "fixtureAssertions": 32,
+  "tests": [
+    {
+      "id": "initial_closed_no_hero",
+      "result": "PASS",
+      "evidence": {
+        "heroDOM": 0,
+        "tiles": 6,
+        "panels": 0,
+        "desktopColumns": 6,
+        "desktopDocumentOverflow": 0
+      }
+    },
+    {
+      "id": "cover_geometry_and_identity",
+      "result": "PASS",
+      "evidence": "Saved six native DOM references and x/width values before opening. Opening t1 retained every cover node/x/width. Exactly one panel followed t5 (last tile of six-column row)."
+    },
+    {
+      "id": "same_row_switch",
+      "result": "PASS",
+      "evidence": "t1→t3 preserved all cover DOM nodes/x/width and the panel document Y. Panel contents changed to t3, still after t5."
+    },
+    {
+      "id": "responsive_panel_placement",
+      "result": "PASS",
+      "evidence": [
+        {
+          "width": 1000,
+          "columns": 4,
+          "selected": "t3",
+          "after": "t6",
+          "documentOverflow": 0
+        },
+        {
+          "width": 390,
+          "columns": 2,
+          "selected": "t3",
+          "after": "t3",
+          "documentOverflow": 0
+        },
+        {
+          "width": 320,
+          "columns": 2,
+          "selected": "t3",
+          "after": "t3",
+          "documentOverflow": 0
+        }
+      ]
+    },
+    {
+      "id": "different_row_keyboard_close",
+      "result": "PASS",
+      "evidence": "At320, focused t4 cover then Enter: one panel after t5, only t4 aria-expanded=true. Escape removed panel and returned focus to desk-cover-home-t4."
+    },
+    {
+      "id": "rail_more_end_modal_restore",
+      "result": "PASS",
+      "evidence": {
+        "initialPreview": 3,
+        "afterMore": 6,
+        "afterMoreFocus": "home-t1-m4",
+        "endScrollLeft": 648,
+        "railClientWidth": 1216,
+        "railScrollWidth": 1864,
+        "modalOpener": "home-t1-m6",
+        "modalEscapeFocus": "home-t1-m6",
+        "modalEscapeLeft": 648,
+        "measurementNote": "Numeric rail geometry is the measurement during this functional pass; root's final visual/layout report remains authoritative for final dimensions."
+      }
+    },
+    {
+      "id": "close_reopen_title_back",
+      "result": "PASS",
+      "evidence": "Closing/reopening t1 retained six loaded frames and scrollLeft648. Grid title→Title Hub→돌아가기 retained #home, all tab, t1 panel and scrollLeft648."
+    },
+    {
+      "id": "shelf_filter",
+      "result": "PASS",
+      "evidence": {
+        "selectedTab": "shelf-tab-s2",
+        "ids": [
+          "t6",
+          "t4",
+          "t5"
+        ],
+        "excludedT1PanelClosed": true
+      }
+    },
+    {
+      "id": "contextual_composer_cancel",
+      "result": "PASS",
+      "evidence": {
+        "selectedTitle": "t4",
+        "titleLocked": true,
+        "initialSaveDisabled": true,
+        "cancelFocus": "desk-compose-home-t4",
+        "selectedPanelRetained": "t4"
+      }
+    },
+    {
+      "id": "contextual_composer_save",
+      "result": "PASS",
+      "evidence": {
+        "selectedScene": 11,
+        "note": "다시 펼친 오후",
+        "route": "#home",
+        "activeShelf": "s2",
+        "selectedPanel": "t4",
+        "focus": "home-t4-m19",
+        "frames": [
+          "home-t4-m19",
+          "home-t4-m12",
+          "home-t4-m13"
+        ],
+        "tileMemoryCount": 3,
+        "independentTitleSaveButton": "작품 저장",
+        "watchLogCount": 0
+      }
+    },
+    {
+      "id": "editor_cancel_apply_curation",
+      "result": "PASS",
+      "evidence": "Name edit + Escape restored original name and t4 panel/s2 tab. Applied new name, removed t4 from s2, and added duplicate t1 to s2. Selected absent panel closed. s2=[t6,t5,t1], all=[t1,t3,t2,t6,t5], count5; Archive19 preserved."
+    },
+    {
+      "id": "current_accessibility_patch",
+      "result": "PASS",
+      "evidence": {
+        "freshReloadClosedControlsReferences": 0,
+        "openControls": "desk-panel-home-t1",
+        "referencedPanelExists": true,
+        "panelCoverTitleHubBackFocus": "desk-panel-cover-home-t1"
+      }
+    },
+    {
+      "id": "reduced_motion",
+      "result": "PASS",
+      "evidence": {
+        "emulatedPreference": true,
+        "panelAnimationName": "none",
+        "panelDuration": "0s",
+        "drawerAnimationName": "none",
+        "note": "Normal panel itself was also none/0s; no claim of a normal animation duration."
+      }
+    },
+    {
+      "id": "empty_demo_context",
+      "result": "PASS",
+      "evidence": {
+        "query": "?start=empty",
+        "curatedTiles": 6,
+        "openedPanel": 1,
+        "memoryFrames": 0,
+        "emptyText": "아직 남긴 기억이 없어요.",
+        "contextualCTA": "첫 기억 남기기",
+        "composerPrefilledTitle": "t4",
+        "composerInitialSaveDisabled": true
+      }
+    },
+    {
+      "id": "refresh_reset",
+      "result": "PASS",
+      "evidence": {
+        "route": "#home",
+        "activeTab": "shelf-tab-all",
+        "tiles": 6,
+        "panels": 0,
+        "name": "오래 머무는 장면들"
+      }
+    }
+  ],
+  "changes": [
+    {
+      "file": "film-grid.js",
+      "reason": "New V8 fork; deduplicated curated shelf tabs, stable cover grid, responsive row-attached single panel, retained rail and composer/editor state."
+    },
+    {
+      "file": "film-grid.js",
+      "reason": "Review hardening: aria-controls only while panel exists; panel-cover stable id restores exact Title Hub return focus."
+    }
+  ],
+  "checks": [
+    {
+      "command": "node --check film-grid.js",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "node film-grid.js",
+      "result": "PASS",
+      "assertions": 32,
+      "exitCode": 0
+    },
+    {
+      "check": "V7 film-desk.js normalized source equals retained pre-V8 original",
+      "result": "PASS"
+    },
+    {
+      "command": "agent-browser --session grid-flow errors",
+      "result": "PASS",
+      "reportedErrors": 0
+    }
+  ],
+  "knownTestingNotes": [
+    "An offscreen CLI click on t4 did not activate during resize setup; native scroll-into-view/focus/Enter was used and its state asserted. This was not reported as a passed click or an app defect.",
+    "Final aria-controls/panel-cover-id patch was reloaded and specifically verified before completion."
+  ],
+  "notVerified": [
+    "Physical touch/Android/iOS/Safari/Firefox or full screen-reader operation.",
+    "Every inherited V5/V6 pointer-handle and Archive flow; parent handles separate visual and smoke checks.",
+    "Real uploads/auth/network persistence, production migrations, public publishing and deployment."
+  ],
+  "privacyDataRollback": "RAM-only fictional data changed during test and reset by navigation. No production data, database, storage, analytics or rights policy changes. V7 source remains untouched and is the rollback/comparison reference.",
+  "lineReferences": {
+    "curatedUnion": 100,
+    "rowEnd": 104,
+    "modelChecks": 115,
+    "selection": 220,
+    "tileMarkup": 261,
+    "panelMarkup": 269,
+    "gridMarkup": 282,
+    "responsivePlacement": 295,
+    "gridObserver": 311,
+    "panelOnlyRefresh": 322,
+    "externalCoverBinding": 463,
+    "contextualSave": 676,
+    "shelfFilterAction": 703
+  }
+}

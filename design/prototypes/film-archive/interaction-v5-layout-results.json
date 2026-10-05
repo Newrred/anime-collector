@@ -1,0 +1,228 @@
+{
+  "task": "V5 independent layout QA",
+  "date": "2026-10-04",
+  "url": "http://127.0.0.1:4348/moemoa-film-interaction.html",
+  "scope": "Fictional local prototype only; no production service, APIs, JS or CSS modified.",
+  "browser": {
+    "tool": "agent-browser",
+    "session": "interaction-v5-layout",
+    "headless": true,
+    "closed": true,
+    "viewports": [
+      {
+        "width": 320,
+        "height": 800
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 1440,
+        "height": 1000
+      }
+    ]
+  },
+  "status": "No remaining blocking layout defects in independently checked states. Reported target-size defects were fixed and rechecked.",
+  "independent_coverage": {
+    "320": [
+      "home",
+      "editor",
+      "poster list",
+      "title film list",
+      "title detail",
+      "memory dialog",
+      "composer"
+    ],
+    "390": [
+      "editor",
+      "poster list",
+      "title film list",
+      "title detail",
+      "memory dialog",
+      "composer"
+    ],
+    "1440": [
+      "home",
+      "shelf-card hover geometry"
+    ]
+  },
+  "coverage_limits": [
+    "390 home was navigated but not independently measured or captured.",
+    "1440 editor, poster list, film list, detail, memory dialog and composer were not independently repeated in this subtask; the root agent separately reported PC home/film/detail/modal verification.",
+    "This is representative visual/layout QA, not exhaustive accessibility or functional regression.",
+    "Pointer drag behavior was assigned to another agent and is not certified here.",
+    "Only one representative shelf card was measured before/after hover."
+  ],
+  "overflow": {
+    "320": {
+      "home": 320,
+      "editor": 320,
+      "poster": 320,
+      "film": 320,
+      "detail": 320,
+      "memory_dialog": 320,
+      "composer": 320
+    },
+    "390": {
+      "editor": 390,
+      "poster": 390,
+      "film": 390,
+      "detail": 390,
+      "memory_dialog": 390,
+      "composer": 390
+    },
+    "1440": {
+      "home": 1440
+    },
+    "note": "Values are document.documentElement.scrollWidth. Shelf and film internal scrolling are intentional; off-viewport children clipped by those scroll containers are not page overflow."
+  },
+  "measurements": {
+    "editor_320": {
+      "width": 288,
+      "scrollWidth": 286
+    },
+    "editor_390": {
+      "checkbox_label_width": 320,
+      "checkbox_label_height": 44
+    },
+    "poster_320": {
+      "grid_width": 288,
+      "card_width": 133,
+      "image_radius": 2
+    },
+    "film_320_final": {
+      "cover_width": 104,
+      "rail_width": 183.875,
+      "rail_right": 303.875,
+      "handle_right": 303.875,
+      "handle_width": 76,
+      "handle_height": 44,
+      "main_buttons_below_44_by_44": 0
+    },
+    "film_390": {
+      "cover_width": 112,
+      "rail_width": 246,
+      "page_width": 390
+    },
+    "detail_320_final": {
+      "memory_tab_width": 44,
+      "memory_tab_height": 44,
+      "watch_tab_width": 54.765625,
+      "watch_tab_height": 44,
+      "tab_radius": 0,
+      "tab_background": "transparent",
+      "tab_bottom_border_width": 2
+    },
+    "memory_dialog_320": {
+      "width": 286,
+      "height": 419.375,
+      "scrollWidth": 286,
+      "radius": 8,
+      "close_width": 51.328125,
+      "close_height": 44,
+      "primary_width": 254,
+      "primary_height": 44
+    },
+    "memory_dialog_390": {
+      "width": 356,
+      "scrollWidth": 356
+    },
+    "composer_320": {
+      "width": 296,
+      "height": 674.34375,
+      "scrollWidth": 296,
+      "radius": 8,
+      "image_choice_width_min": 82.65625,
+      "image_choice_height": 50
+    },
+    "composer_390": {
+      "width": 366,
+      "height": 682,
+      "scrollWidth": 366,
+      "radius": 8,
+      "visible_controls_below_44_by_44": 0
+    },
+    "auxiliary_links_final": {
+      "preview_link_height": 24,
+      "footer_link_height": 24,
+      "brand_height": 44
+    }
+  },
+  "visual_tokens": {
+    "verified": [
+      "shelf/poster/cover radius 2px",
+      "standard button radius 4px",
+      "dialog radius 8px",
+      "selected segmented tab radius 0px, transparent background, 2px bottom border",
+      "film handle radius 0px"
+    ],
+    "exception": "Inner .frame-image and its artwork were measured at 0px radius. Do not describe every image element as 2px."
+  },
+  "keyboard": {
+    "memory_dialog_tab": {
+      "focus_visible": true,
+      "outline": "rgb(73, 119, 93) solid 2px"
+    },
+    "composer_escape": {
+      "open_dialogs_after": 0,
+      "focus_returned_to": "global-add"
+    },
+    "editor": {
+      "initial_input_focus_outline_visually_present": true
+    }
+  },
+  "hover": {
+    "viewport": 1440,
+    "element": "#shelf-s1-t1",
+    "before": {
+      "x": 100,
+      "y": 538.75,
+      "width": 181.328125,
+      "height": 321.984375
+    },
+    "after": {
+      "x": 100,
+      "y": 538.75,
+      "width": 181.328125,
+      "height": 321.984375
+    },
+    "card_transform_before": "none",
+    "card_transform_after": "none",
+    "image_transform_before": "none",
+    "image_transform_after": "none",
+    "passed": true
+  },
+  "findings": [
+    {
+      "issue": "Brand and auxiliary links had undersized hit areas",
+      "initial": "Brand 126x36; preview link 69.52x15.5; footer 54.11x18",
+      "resolution": "Brand now 44px high; auxiliary links intentionally 24px high. Not an all-controls-44px claim.",
+      "status": "resolved_with_documented_exception"
+    },
+    {
+      "issue": "Mobile Entire/Completed filter chips were only 39.02px wide",
+      "resolution": "Final mobile film main controls were measured with no width/height below 44px.",
+      "status": "fixed_and_rechecked"
+    },
+    {
+      "issue": "Memory 6 detail tab was 31.19px wide",
+      "resolution": "Final 320px measurement is 44x44px.",
+      "status": "fixed_and_rechecked"
+    },
+    {
+      "issue": "Old inherited pill/background remained on segmented controls",
+      "resolution": "Final screenshots and computed styles show radius 0, transparent background and 2px lower border.",
+      "status": "fixed_and_rechecked"
+    }
+  ],
+  "final_screenshots": [
+    "interaction-v5-home-final-320.png",
+    "interaction-v5-film-final-320.png",
+    "interaction-v5-detail-final-320.png",
+    "interaction-v5-film-final-390.png",
+    "interaction-v5-home-final-1440.png"
+  ],
+  "intermediate_screenshots_note": "Other interaction-v5-* images without -final- in the filename were captured before the last CSS corrections. They are preserved as intermediate evidence, not final design references.",
+  "final_image_review": "The final 320 home, film and detail screenshots were opened with view_image; no unexpected clipping or page-level horizontal overflow was observed."
+}

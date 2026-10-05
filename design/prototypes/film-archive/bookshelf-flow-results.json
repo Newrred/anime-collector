@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-03",
+  "scope": "Standalone local prototype only; no production service or account data",
+  "url": "http://127.0.0.1:4348/moemoa-film-bookshelf.html",
+  "browser": "Headless Chromium, agent-browser session bookshelf-flow-check (closed after verification)",
+  "viewports": [[1440, 1000], [1000, 900], [1440, 900], [320, 800]],
+  "checks": [
+    {"name": "Initial curated home", "result": "PASS", "evidence": "#home; two named shelves with six selected titles, independent from eight-title archive."},
+    {"name": "Escape cancels draft", "result": "PASS", "evidence": "Changed name to 취소 확인 책장, Escape restored 오래 머무는 장면들, editing false, six shelf books."},
+    {"name": "Explicit apply", "result": "PASS", "evidence": "Applied 나의 여름 필름책장, amber, featured m2, reordered t1 behind t3, removed t4 from shelf. Home showed t3,t1,t2,t6,t5."},
+    {"name": "Cancel preserves previous applied version", "result": "PASS", "evidence": "Second draft changed name to 취소 버튼 확인; Cancel restored 나의 여름 필름책장 and amber."},
+    {"name": "Select additional title and edit text", "result": "PASS", "evidence": "Checked t8 in first shelf, updated bio and first shelf name, applied; displayed t3,t1,t2,t8,t6,t5 with updated text."},
+    {"name": "Curation independent of archive", "result": "PASS", "evidence": "Removing t4 from shelf left eight title rows and t4 미저장 · 기억 2개 unchanged."},
+    {"name": "Independent row scrolling", "result": "PASS", "evidence": "At 1000px row-t1 next changed 0 to 103 while row-t2 remained 0. Row-t2 next then changed 0 to 70 while row-t1 stayed 103."},
+    {"name": "Memory modal return", "result": "PASS", "evidence": "Opened row-t1-m2 at scrollLeft 103; Escape closed dialog, focus restored to row-t1-m2, scrollLeft remained exactly 103."},
+    {"name": "Incremental row expansion", "result": "PASS", "evidence": "row-t1 initially rendered three frames; +3 expanded to six, focused first new frame row-t1-m4; row-t2 stayed 70."},
+    {"name": "Keyboard navigation", "result": "PASS", "evidence": "End reached max 916, Home returned 0, ArrowRight moved to 282; other row remained 70."},
+    {"name": "Mouse drag and click suppression", "result": "PASS", "evidence": "Pointer drag x730 to430 moved row-t1 from282 to564; row-t2 remained70 and no memory dialog opened."},
+    {"name": "Detail and tab return", "result": "PASS", "evidence": "Opened t1 detail, advanced rail to500, selected three watch logs including vague date 2026년 여름, returned to memory rail at500."},
+    {"name": "Back to title rows", "result": "PASS", "evidence": "Back restored #titles, row-cover-t1 focus, row-t1 282 with six loaded frames, row-t2 70 with three frames."},
+    {"name": "Memory creation independent of saved title", "result": "PASS", "evidence": "Selected scene1 and unsaved t4 without note; save produced 미저장 · 기억3개, title-save aria-pressed=false, archive19. Canceling another image choice kept19."},
+    {"name": "Search and shared view state", "result": "PASS", "evidence": "Search 여름 gave one film row and retained input focus; switching to poster gave same one result with query preserved. Missing title gave empty state, reset restored eight."},
+    {"name": "Refresh resets in-page changes", "result": "PASS", "evidence": "Reload reset archive19 to18 and home to original name, mint, m1, initial six selected titles. localStorage and sessionStorage both length0."},
+    {"name": "Latest CSS regression", "result": "PASS", "evidence": "After reload more button width164, flex-shrink0, custom dark background. Row-title-link transparent background and border0. Screenshot bookshelf-flow-final.png visually inspected."},
+    {"name": "Reduced-motion preference", "result": "PARTIAL", "evidence": "Emulated reduced-motion; matchMedia returned true. Dedicated animation timing comparison not performed."},
+    {"name": "JavaScript errors", "result": "PASS", "evidence": "agent-browser errors was empty before and after reload/search tests."},
+    {"name": "Syntax and fixture invariants", "result": "PASS", "evidence": "node --check and direct node execution passed; fixtures cover seed counts, independent curation, preserved board memberships, equal title sets across views."},
+    {"name": "Editor internal scroll restoration after reorder", "result": "PASS_AFTER_FIX", "evidence": "Before fix, second-shelf reorder reset panel scrollTop545 to0 while windowY698 stayed. After small rerenderEditor scroll capture/restore change and reload, same reorder preserved panel545 and windowY367."},
+    {"name": "Editor internal scroll after removal", "result": "PASS_AFTER_FIX", "evidence": "Removed second-shelf title at panel545. New panel height reduced maximum to482, and scrollTop correctly clamped to482 instead of0; windowY367 preserved."},
+    {"name": "Empty shelf apply and subsequent cancel", "result": "PASS", "evidence": "Removed all three titles from second shelf. Empty message 이 선반에 꺼내 둘 작품을 골라 주세요. and zero shelf books remained after Apply. A later draft rename then Cancel retained empty shelf and original name 다시 꺼내 볼 작품."},
+    {"name": "Long shelf names desktop and mobile reflow", "result": "PASS", "evidence": "Applied continuous Korean and English long shelf names. At1440px document width1440; heading clientWidth=scrollWidth347/224. At320px document width320; heading clientWidth=scrollWidth220/199. Mobile editor width288 and document width320; no page overflow."}
+  ],
+  "issues": [
+    {"finding": "Initial native-looking title/load-more buttons and shrinking load-more width", "status": "FIXED_BY_PARENT_CSS_AND_RECHECKED"},
+    {"finding": "agent-browser sometimes clicked an offscreen element center despite partial visibility", "status": "HARNESS_LIMITATION", "resolution": "Scrolled requested frame fully into viewport and confirmed actual dialog behavior; not reported as app defect."},
+    {"finding": "Shelf editor internal scroll reset after reorder/removal", "status": "FIXED_AND_RECHECKED", "resolution": "film-bookshelf.js rerenderEditor now captures editor scrollTop and restores it after DOM replacement and on next frame; natural new maximum clamp retained."}
+  ],
+  "not_verified_here": ["Physical touch/swipe and mobile visual review (parent separately verifying mobile layouts)", "Production data, authentication, synchronization, publishing or Board migration", "Large data sets or real image pagination/network performance", "Screen reader announcement quality", "Dedicated reduced-motion timing comparison"],
+  "artifacts": ["bookshelf-flow-final.png", "bookshelf-flow-debug.png"],
+  "production_changes": false,
+  "session_closed": true
+}

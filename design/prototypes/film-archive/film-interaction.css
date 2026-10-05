@@ -1,0 +1,211 @@
+/* V5 proposal: still images, direct film manipulation, one quiet control system.
+   The prefix deliberately beats historical V2–V4 hover/shape rules. */
+.interaction-prototype {
+  --bg:#fafafa; --surface:#fff; --raised:#f0f0ef; --line:#e5e5e3;
+  --ink:#242525; --muted:#686b6a; --faint:#737675;
+  --mint:#344a40; --on-mint:#fff;
+  --film:#252726; --film-ink:#f5f5f2; --film-muted:#babfbb;
+  --radius-image:2px; --radius-control:4px; --radius-dialog:8px;
+  --motion-feedback:120ms; --motion-film:220ms;
+  --ease-settle:cubic-bezier(.22,.68,0,1);
+  background:var(--bg);
+}
+.interaction-prototype ::selection {background:#dce9e0;color:#242525}
+.interaction-prototype :is(button,a,input,textarea,select,[tabindex]):focus-visible {outline:2px solid #49775d;outline-offset:4px}
+.interaction-prototype .preview-bar {background:#efefee;color:#646665}
+.interaction-prototype .preview-bar a,
+.interaction-prototype .site-footer a {display:inline-flex;align-items:center;min-height:24px}
+.interaction-prototype .site-header {background:var(--bg)}
+.interaction-prototype .main-nav button {transition:color var(--motion-feedback);color:var(--muted)}
+.interaction-prototype .main-nav button[aria-current=page] {color:var(--ink)}
+.interaction-prototype .main-nav button[aria-current=page]:after {height:2px;width:auto;left:4px;right:4px;bottom:18px;border-radius:0;transform:none;background:var(--ink)}
+.interaction-prototype .button,
+.interaction-prototype .button:not(.primary):not(.quiet),
+.interaction-prototype .icon-button {
+  border:0;border-radius:var(--radius-control);background:#eeefed;color:var(--ink);
+  min-height:44px;box-shadow:none;transform:none;
+  transition:background-color var(--motion-feedback),color var(--motion-feedback);
+}
+.interaction-prototype .button.primary {background:#292c2a;color:#fff}
+.interaction-prototype .button.quiet {background:transparent;color:var(--muted)}
+.interaction-prototype .button:hover:not(:disabled) {background:#eeefed;color:var(--ink)}
+.interaction-prototype .button.primary:hover:not(:disabled) {background:#292c2a;color:#fff}
+.interaction-prototype .button.quiet:hover:not(:disabled) {background:transparent;color:var(--muted)}
+.interaction-prototype .icon-button {min-width:44px;width:44px;height:44px}
+.interaction-prototype :is(.button,.icon-button,.chip,.case-pull):active:not(:disabled) {background:#d8ddd9;color:#253c2f}
+.interaction-prototype .button.primary:active:not(:disabled) {background:#505752;color:#fff}
+.interaction-prototype .control {border:1px solid #d5d8d4;border-radius:var(--radius-control);background:#fff;box-shadow:none;color:var(--ink)}
+.interaction-prototype .control::placeholder {color:#737773}
+.interaction-prototype .sort-field .control {background:transparent;border-color:transparent}
+.interaction-prototype .segmented {padding:0;background:transparent;border:0;border-radius:0;gap:16px}
+.interaction-prototype .segmented .button,
+.interaction-prototype .segmented .button:not(.primary):not(.quiet),
+.interaction-prototype .segmented button {
+  min-height:44px;min-width:44px;padding:8px 0;border-radius:0;background:transparent;color:var(--muted);
+  border:0;border-bottom:2px solid transparent;box-shadow:none;
+}
+.interaction-prototype .segmented .button[aria-pressed=true],
+.interaction-prototype .segmented .button:not(.primary):not(.quiet)[aria-pressed=true],
+.interaction-prototype .segmented button[aria-selected=true],
+.interaction-prototype .segmented :is(.active,.is-active) {background:transparent;border-bottom-color:var(--ink);color:var(--ink);font-weight:600;box-shadow:none}
+.interaction-prototype .filters {gap:8px}
+.interaction-prototype .chip {border-radius:var(--radius-control);min-height:44px;min-width:44px;background:transparent;border:0;color:var(--muted);transition:background-color var(--motion-feedback),color var(--motion-feedback)}
+.interaction-prototype .chip:is([aria-pressed=true],.is-active,.active) {background:#e9eee9;color:#304537;font-weight:600;border:0}
+.interaction-prototype .badge {border-radius:2px;color:#385541;background:#e8eee7}
+.interaction-prototype .page-heading h1 {font-weight:600}
+.interaction-prototype .page-heading .eyebrow {color:var(--muted)}
+
+/* Image geometry never changes on hover or keyboard focus. */
+.interaction-prototype .poster-tile,
+.interaction-prototype .poster-tile>.art,
+.interaction-prototype .poster-tile:hover>.art,
+.interaction-prototype .memory-tile .memory-image,
+.interaction-prototype .memory-tile>.art,
+.interaction-prototype .title-cover .art,
+.interaction-prototype .detail-art,
+.interaction-prototype .image-choice,
+.interaction-prototype .image-choice .art {border-radius:var(--radius-image);box-shadow:none;filter:none;transform:none;transition:none}
+.interaction-prototype .memory-tile .memory-image {background:#eceeeb}
+.interaction-prototype .memory-tile:hover .memory-info h3 {color:var(--ink)}
+.interaction-prototype .poster-title,
+.interaction-prototype .memory-info h3,
+.interaction-prototype .book-caption strong {text-decoration-color:transparent;text-underline-offset:4px;text-decoration-thickness:1px}
+.interaction-prototype .poster-grid {gap:30px 22px}
+
+/* A shelf is a grouping, not another rounded card around each group. */
+.interaction-prototype .bookshelf-home {--shelf-accent:#466151;--shelf-tone:#f0f3ef;--shelf-line:#c5d1c6;--shelf-paper:#38463b}
+.interaction-prototype .bookshelf-home[data-theme=amber] {--shelf-accent:#8b6b42;--shelf-tone:#f6f2eb;--shelf-line:#ddd0ba;--shelf-paper:#57452b}
+.interaction-prototype .bookshelf-home[data-theme=lilac] {--shelf-accent:#77628f;--shelf-tone:#f4f0f7;--shelf-line:#d2c6de;--shelf-paper:#58436f}
+.interaction-prototype .shelf-kicker {color:var(--shelf-accent)}
+.interaction-prototype .shelf-profile h1 {font-weight:550}
+.interaction-prototype .featured-memory,
+.interaction-prototype .featured-memory:hover {border-radius:var(--radius-image);background:transparent;padding:0;box-shadow:none;transform:none;overflow:visible}
+.interaction-prototype .featured-memory:before {display:none}
+.interaction-prototype .featured-memory .featured-image>.art {border-radius:var(--radius-image)}
+.interaction-prototype .featured-caption {padding:13px 0 0}
+.interaction-prototype .featured-caption :is(strong,span) {color:var(--ink)}
+.interaction-prototype .shelf-heading {margin-bottom:18px}
+.interaction-prototype .shelf-display {border-radius:0;background:transparent;border:0;border-bottom:1px solid var(--shelf-line);padding:0 0 24px;gap:28px;scroll-padding-inline:0;min-height:0}
+.interaction-prototype .shelf-display:after {display:none}
+.interaction-prototype .shelf-book {border-radius:var(--radius-image);flex-basis:calc((100% - 56px)/3);width:calc((100% - 56px)/3)}
+.interaction-prototype .book-sleeve,
+.interaction-prototype .shelf-book:hover .book-sleeve,
+.interaction-prototype .shelf-book:focus-visible .book-sleeve {border-radius:var(--radius-image);box-shadow:none;transform:none;transition:none}
+.interaction-prototype .book-sleeve>.art {border-radius:var(--radius-image)}
+.interaction-prototype .book-sleeve:after {display:none}
+.interaction-prototype .book-caption {position:relative;padding-right:18px}
+.interaction-prototype .book-caption:after {content:'↗';position:absolute;right:0;top:13px;color:var(--muted);opacity:0;transition:opacity var(--motion-feedback)}
+.interaction-prototype .shelf-actions .button:not(.primary):not(.quiet) {background:#eeefed;color:var(--ink)}
+.interaction-prototype .shelf-actions .button.primary {background:#292c2a;color:#fff}
+.interaction-prototype .shelf-actions .button.quiet {background:transparent;color:var(--muted)}
+.interaction-prototype .brand {min-height:44px}
+.interaction-prototype .shelf-recent .memory-image {border-radius:var(--radius-image)}
+
+/* Editing uses the same small controls, without nested rounded panels. */
+.interaction-prototype .shelf-editor {background:#fff;border:1px solid var(--line);border-radius:var(--radius-control);box-shadow:none}
+.interaction-prototype .shelf-editor .control {background:#fff}
+.interaction-prototype .shelf-edit-banner {border-radius:0;background:#eff3ef;border:0;color:#466151}
+.interaction-prototype .theme-choice {border-radius:var(--radius-control);border:1px solid transparent;background:#f2f3f1;box-shadow:none;color:var(--ink)}
+.interaction-prototype .theme-choice[aria-pressed=true] {border-color:#697c6a;background:#e9eee8;box-shadow:none}
+.interaction-prototype .curation-item button {border-radius:var(--radius-control);background:#eeefed;color:var(--ink);min-width:44px}
+.interaction-prototype .shelf-edit-layout .shelf-display {padding:0 0 24px}
+.interaction-prototype .shelf-edit-layout .shelf-book {flex-basis:116px;width:116px}
+.interaction-prototype .shelf-editor details>summary {color:#3e614a}
+.interaction-prototype .title-picker input {accent-color:#52745b}
+
+/* Cover stays anchored; only the film drawer moves, and only on intent. */
+.interaction-prototype .case-cover,
+.interaction-prototype .case-cover:hover,
+.interaction-prototype .film-case:not(.is-open) .case-cover {border-radius:var(--radius-image);box-shadow:1px 0 0 #10151024;transform:none;transition:none;background:var(--film)}
+.interaction-prototype .case-cover:before {display:none}
+.interaction-prototype .case-cover:after {content:'↗';display:grid;place-items:center;inset:auto 9px 9px auto;width:30px;height:30px;border:0;border-radius:2px;box-shadow:none;background:#242825e8;color:#fff;font:18px/1 sans-serif;opacity:0;transition:opacity var(--motion-feedback)}
+.interaction-prototype .case-drawer {border-radius:0;box-shadow:none;transition:width var(--motion-film) var(--ease-settle)}
+.interaction-prototype .case-drawer:before {width:8px;background:linear-gradient(90deg,#10161033,transparent)}
+.interaction-prototype .case-drawer .film-track-shell,
+.interaction-prototype .detail-film .film-track-shell {border-radius:0;box-shadow:none;background:var(--film)}
+.interaction-prototype .case-pull,
+.interaction-prototype .film-case:not(.is-open) .case-pull {background:#e6ebe4;color:#435646;border-radius:0;border:0;cursor:ew-resize;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:background-color var(--motion-feedback);font-weight:500}
+.interaction-prototype .case-pull:hover {background:#e6ebe4;color:#435646}
+.interaction-prototype .case-pull:after {width:3px;height:22px;background:#a3afa3;border-radius:0}
+.interaction-prototype .film-case.is-pulling .case-drawer {transition:none}
+.interaction-prototype .film-case.is-pulling .case-pull {background:#cbd8c9;cursor:grabbing}
+.interaction-prototype .film-case.is-pulling {user-select:none}
+.interaction-prototype .rail-controls .button,
+.interaction-prototype .rail-controls .button:not(.primary):not(.quiet),
+.interaction-prototype .rail-controls>button {border-radius:var(--radius-control);background:transparent;border:0;box-shadow:none;color:#505952}
+.interaction-prototype .sleeve-heading h2 button {min-height:44px}
+.interaction-prototype .film-track-shell .film-frame {background:var(--film)}
+.interaction-prototype .film-frame .frame-image,
+.interaction-prototype .film-frame:hover .frame-image,
+.interaction-prototype .film-frame:focus-visible .frame-image {border-radius:0;border:0;box-shadow:none;filter:none;transform:none;transition:none}
+.interaction-prototype .film-frame .frame-caption {color:#e0e4df}
+.interaction-prototype .frame-caption .frame-number {color:#abbcae}
+.interaction-prototype .frame-caption .frame-date {color:#a8b0a9}
+.interaction-prototype .film-frame:before,
+.interaction-prototype .film-frame:after {background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='21' height='4'%3E%3Crect width='8' height='4' rx='1' fill='%2398a398'/%3E%3C/svg%3E");opacity:.6}
+.interaction-prototype .film-load-more {background:#2c332e;color:#e6ece6}
+.interaction-prototype .film-load-more:hover {background:#2c332e;color:#e6ece6}
+.interaction-prototype .film-frame:focus-visible {outline-color:#d5e6d8;outline-offset:-3px}
+.interaction-prototype .case-empty,
+.interaction-prototype .empty-state,
+.interaction-prototype .row-empty {border:0;border-radius:0;background:#f0f2ee}
+.interaction-prototype .case-empty .button,
+.interaction-prototype .empty-state .button {background:#e1e8df;color:#37513c}
+.interaction-prototype .watch-entry {border-color:var(--line)}
+
+/* Modals: short fade, no zoom, overshoot, or heavy frosted glass. */
+.interaction-prototype dialog {border-radius:var(--radius-dialog);box-shadow:0 16px 60px #101a1229;background:#fff;border:0}
+.interaction-prototype dialog::backdrop {background:#171e1aaa;backdrop-filter:none}
+.interaction-prototype dialog[open] {animation:dialog-reveal 140ms ease-out}
+.interaction-prototype .dialog-header .button {background:#eeefed}
+.interaction-prototype .image-choice[aria-pressed=true] {border-color:#5a7a61}
+.interaction-prototype #toast {border-radius:var(--radius-control);background:#2a302b;box-shadow:0 4px 18px #151b1817}
+.interaction-prototype .site-footer {color:var(--muted)}
+@keyframes dialog-reveal {from{opacity:0}to{opacity:1}}
+
+/* Hover-only feedback never becomes a sticky touch state. */
+@media(hover:hover) and (pointer:fine) {
+  .interaction-prototype .button:hover:not(:disabled),
+  .interaction-prototype .icon-button:hover:not(:disabled) {background:#e3e7e2;color:var(--ink)}
+  .interaction-prototype .button.primary:hover:not(:disabled) {background:#414b43;color:#fff}
+  .interaction-prototype .button.quiet:hover:not(:disabled) {background:transparent;color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+  .interaction-prototype .segmented .button:hover {background:transparent;color:var(--ink)}
+  .interaction-prototype .rail-controls .button:not(.primary):not(.quiet):hover:not(:disabled) {background:#e3e7e2}
+  .interaction-prototype .chip:hover:not([aria-pressed=true]) {background:#f0f2ee;color:var(--ink)}
+  .interaction-prototype .main-nav button:hover {color:var(--ink)}
+  .interaction-prototype .poster-tile:hover .poster-title,
+  .interaction-prototype .memory-tile:hover .memory-info h3,
+  .interaction-prototype .shelf-book:hover .book-caption strong,
+  .interaction-prototype .featured-memory:hover .featured-caption strong {text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;text-decoration-color:#a6b1a8}
+  .interaction-prototype .shelf-book:hover .book-caption:after,
+  .interaction-prototype .case-cover:hover:after {opacity:1}
+  .interaction-prototype .case-pull:hover {background:#d7e1d3;color:#2f4834}
+  .interaction-prototype .film-frame:hover .frame-note {text-decoration:underline;text-underline-offset:3px;text-decoration-color:#9dab9f}
+  .interaction-prototype .film-load-more:hover {background:#3a463d}
+}
+.interaction-prototype .shelf-book:focus-visible .book-caption:after,
+.interaction-prototype .case-cover:focus-visible:after {opacity:1}
+@media(max-width:800px) {
+  .interaction-prototype .shelf-book {flex-basis:136px;width:136px}
+}
+@media(max-width:600px) {
+  .interaction-prototype .main-nav button[aria-current=page]:after {bottom:0;left:0;right:0}
+  .interaction-prototype .header-actions .button {border-radius:var(--radius-control)}
+  .interaction-prototype .segmented {gap:14px}
+  .interaction-prototype .segmented button {font-size:11px;padding-inline:0;min-height:44px}
+  .interaction-prototype .chip {min-height:44px}
+  .interaction-prototype .shelf-display {padding:0 0 20px;gap:20px;scroll-padding-inline:0}
+  .interaction-prototype .shelf-book,
+  .interaction-prototype .shelf-edit-layout .shelf-book {flex-basis:112px;width:112px}
+  .interaction-prototype .featured-caption {padding:12px 0 0}
+  .interaction-prototype .case-pull,
+  .interaction-prototype .film-case:not(.is-open) .case-pull,
+  .interaction-prototype .film-case.is-pulling .case-pull {border-radius:0;min-width:76px;bottom:-39px;left:calc(var(--cover) + var(--drawer-live-width,var(--peek)) - var(--overlap) - 76px);right:auto}
+  .interaction-prototype .case-cover:after {inset:auto 6px 6px auto;width:26px;height:26px;font-size:15px}
+  .interaction-prototype dialog {border-radius:var(--radius-dialog)}
+}
+@media(prefers-reduced-motion:reduce) {
+  .interaction-prototype {--motion-feedback:0ms;--motion-film:0ms}
+  .interaction-prototype .case-drawer,
+  .interaction-prototype dialog[open] {animation:none;transition:none}
+}

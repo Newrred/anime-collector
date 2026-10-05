@@ -1,0 +1,233 @@
+{
+  "version": "V7",
+  "date": "2026-10-05",
+  "scope": "HOME functional flows, plus compact empty Archive entry; local generated-image prototype only",
+  "url": "http://127.0.0.1:4348/moemoa-film-desk.html#home",
+  "browser": {
+    "tool": "agent-browser",
+    "session": "desk-flow",
+    "engine": "Chromium 1208",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "interaction": "Native browser click, focus, keyboard, input, navigation; read-only DOM measurements"
+  },
+  "status": "PASS",
+  "fixtureAssertions": 28,
+  "geometryTimingNote": "Functional rail position measurements (716px client / End1553) were captured before the final case width reduction from900px to800px. They evidence position restoration at that stage, not final geometry. Final responsive QA separately measured800px case/616px drawer; final scroll maxima depend on this width.",
+  "tests": [
+    {
+      "id": "initial_no_hero",
+      "result": "PASS",
+      "evidence": {
+        "route": "#home",
+        "heroDOMCount": 0,
+        "curatedCases": 6,
+        "openCases": 0,
+        "titleSecondaryButtons": 6,
+        "closedDrawersInert": true,
+        "closedDrawersAriaHidden": true
+      }
+    },
+    {
+      "id": "one_open_click_keyboard_escape",
+      "result": "PASS",
+      "evidence": "Clicked t1 cover, then focused t3 cover and Enter. Only home-s1-t3 remained open; t1 became inert. Escape closed all and restored desk-cover-home-s1-t3 focus."
+    },
+    {
+      "id": "rail_preview_more_keyboard",
+      "result": "PASS",
+      "evidence": {
+        "initialFrames": 3,
+        "nextButtonScrollLeft": 378,
+        "moreFrames": 6,
+        "moreFocus": "home-s1-t1-m4",
+        "endScrollLeft": 1553,
+        "railClientWidth": 716,
+        "railScrollWidth": 2269
+      }
+    },
+    {
+      "id": "memory_modal_escape_restore",
+      "result": "PASS",
+      "evidence": {
+        "opener": "home-s1-t1-m6",
+        "scrollLeftBefore": 1553,
+        "scrollLeftAfter": 1553,
+        "focusAfter": "home-s1-t1-m6",
+        "homeOpenCasesAfter": 1,
+        "dialogClosed": true
+      }
+    },
+    {
+      "id": "title_detail_back_restore",
+      "result": "PASS",
+      "evidence": {
+        "action": "Secondary t1 title button → Title Hub → 돌아가기",
+        "routeAfter": "#home",
+        "openCaseAfter": "home-s1-t1",
+        "scrollLeftAfter": 1553,
+        "loadedFramesAfter": 6
+      }
+    },
+    {
+      "id": "contextual_compose_cancel",
+      "result": "PASS",
+      "evidence": {
+        "title": "t4",
+        "titlePrefilledAndLocked": true,
+        "visualInitiallyUnselected": true,
+        "submitInitiallyDisabled": true,
+        "afterImageThenEscape": {
+          "route": "#home",
+          "openCase": "home-s2-t4",
+          "focus": "desk-compose-home-s2-t4",
+          "memories": 2
+        }
+      }
+    },
+    {
+      "id": "contextual_compose_save",
+      "result": "PASS",
+      "evidence": {
+        "title": "t4",
+        "selectedScene": 11,
+        "note": "창가에 남은 오후",
+        "routeAfter": "#home",
+        "openCase": "home-s2-t4",
+        "focusAfter": "home-s2-t4-m19",
+        "frameOrder": [
+          "m19",
+          "m12",
+          "m13"
+        ],
+        "memoryCount": 3,
+        "titleHubSaveButton": "작품 저장",
+        "watchLogCount": 0,
+        "feedback": "기억을 남겼어요."
+      }
+    },
+    {
+      "id": "editor_cancel",
+      "result": "PASS",
+      "evidence": "Edited book name then Escape: original book name restored, editor removed, t4 remained open, focus returned to shelf-edit. No bio/theme/featured controls were present."
+    },
+    {
+      "id": "editor_apply_and_remove_active_case",
+      "result": "PASS",
+      "evidence": {
+        "appliedBookName": "내가 고른 필름책장",
+        "appliedSecondShelfName": "다시 보고 싶은 장면",
+        "removedCurationTitle": "t4",
+        "remainingCases": 5,
+        "ghostOpenCases": 0,
+        "archiveMemoryCount": 19,
+        "otherFilmRetained": {
+          "rail": "home-s1-t1",
+          "scrollLeft": 1553,
+          "loaded": 6
+        }
+      }
+    },
+    {
+      "id": "empty_demo",
+      "result": "PASS",
+      "evidence": {
+        "query": "?start=empty",
+        "homeCases": 6,
+        "homeMemoryCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialOpenCases": 0,
+        "openedEmptyCaseHasContextualCTA": true,
+        "archiveHeading": "기억 아카이브 0",
+        "emptyArchiveArtCount": 0,
+        "firstMemoryButtonOpensComposer": true,
+        "globalComposerTitleInitiallyBlank": true,
+        "globalComposerSubmitInitiallyDisabled": true
+      }
+    },
+    {
+      "id": "reload_reset_default_home",
+      "result": "PASS",
+      "evidence": {
+        "navigation": "Fresh no-query, no-hash URL",
+        "route": "#home",
+        "bookName": "오래 머무는 장면들",
+        "cases": 6,
+        "openCases": 0,
+        "t4Memories": 2,
+        "newMemoryM19Absent": true
+      }
+    },
+    {
+      "id": "reduced_motion_and_repeat",
+      "result": "PASS",
+      "evidence": {
+        "emulatedPrefersReducedMotion": true,
+        "computedCaseTransition": "0s",
+        "computedDrawerTransition": "0s",
+        "openedDrawerInert": false,
+        "threeEnterToggleFinalOpen": 0,
+        "threeEnterFinalExpanded": false,
+        "threeEnterFinalInert": true,
+        "normalAnimationName": "desk-unfold",
+        "normalAnimationDuration": "0.2s",
+        "reducedAnimationName": "none",
+        "reducedAnimationDuration": "0s",
+        "note": "Fresh desk-flow-final session with final root CSS verified actual animation properties: normal drawer desk-unfold 200ms, reduced-motion none/0s. Both cases remained open and runtime errors stayed empty; session closed."
+      }
+    }
+  ],
+  "bugsFoundAndResolved": [
+    {
+      "location": "film-desk.js renderDeskCase",
+      "issue": "Missing closing quote in desk-close aria-label swallowed subsequent DOM markup.",
+      "fix": "Closed the attribute quote; fresh snapshot confirms six title secondary buttons and normal accessible labels."
+    },
+    {
+      "location": "film-desk.js renderBookshelf",
+      "issue": "Missing closing quote in per-shelf edit aria-label.",
+      "fix": "Removed redundant per-shelf edit buttons per parent design request. Global edit and empty-shelf picker remain."
+    }
+  ],
+  "staticChecks": [
+    {
+      "command": "node --check film-desk.js",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "node film-desk.js",
+      "result": "PASS",
+      "exitCode": 0,
+      "assertions": 28
+    },
+    {
+      "check": "V6 film-collection.js normalized source equals retained pre-V7 original",
+      "result": "PASS"
+    },
+    {
+      "command": "agent-browser --session desk-flow errors",
+      "result": "PASS",
+      "reportedErrors": 0
+    }
+  ],
+  "notVerified": [
+    "Physical touch, Android device, iOS Safari, or other real mobile hardware.",
+    "Mobile visual layout, contrast and screenshot comparison: parent-owned separate checks.",
+    "All inherited V5/V6 pointer-drag and Archive flows were not exhaustively repeated in this HOME-scoped pass.",
+    "Real image intake, upload, auth, cloud persistence, production data, publishing or deployment; none implemented or exercised."
+  ],
+  "mutationImpact": "Only in-memory fictional prototype data changed during tests and was reset by fresh navigation. V6 source, production code, user assets, database, network integrations and storage were not changed.",
+  "filesOwnedThisPass": [
+    "film-desk.js",
+    "desk-v7-flow-results.json"
+  ]
+}

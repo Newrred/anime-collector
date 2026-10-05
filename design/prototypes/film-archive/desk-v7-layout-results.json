@@ -1,0 +1,404 @@
+{
+  "version": 7,
+  "checkedAtLocalDate": "2026-10-05",
+  "status": "PASS_FOR_TESTED_RESPONSIVE_SCOPE",
+  "scope": "Independent read-only responsive/visual QA of the isolated fictional V7 prototype. Only screenshots and this JSON were written; no service/CSS/JS edits, real backend, private photos, uploads, publishing or deployment.",
+  "url": "http://127.0.0.1:4348/moemoa-film-desk.html#home",
+  "browser": {
+    "engine": "headless Chromium",
+    "session": "desk-qa",
+    "sessionClosed": true,
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        320,
+        800
+      ]
+    ]
+  },
+  "documentsRead": [
+    "C:/web/anime/CODEX_START_HERE.md",
+    "C:/web/anime/docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md",
+    "C:/web/anime/docs/moemoa/operations/2026-09-29-desktop-handoff.md",
+    "C:/web/anime/docs/moemoa/07_QA_ANALYTICS_LAUNCH_OPERATIONS.md",
+    "C:/Users/shjb0/.codex/plugins/cache/openai-curated-remote/vercel/0.21.4/skills/agent-browser/SKILL.md"
+  ],
+  "decision": "NO-HERO-UI-01: no intro/featured/spotlight stage; brief headings and functional empty states are allowed.",
+  "inspectedFileHashesSHA256": {
+    "moemoa-film-desk.html": "4B3B536E337DDEA64B909AAB3B8C69B2A621AFC329AA320FF3DAE9C0B49EA845",
+    "film-desk.css": "C32C768A73EAB3AF6D97FFFFF8A8294CB2911063E37151BD811D8BAE5F194132",
+    "film-desk.js": "1A746F3B1128C9922991021925DC65685D9B7C5A665DF0A2747DB27CEAF304D2"
+  },
+  "home": {
+    "noHero": {
+      "selectorCount": 0,
+      "selectors": ".hero,.shelf-intro,.shelf-profile,.shelf-bio,.featured-memory,.empty-art",
+      "visualInspection": "No large intro, featured image or spotlight stage; first content is actual curated shelf."
+    },
+    "defaultOpenCount": 0,
+    "density": [
+      {
+        "viewport": 1440,
+        "documentWidth": 1440,
+        "headerBottom": 104,
+        "firstCoverTop": 198,
+        "firstCoverDelta": 94,
+        "maximumRequestedDelta": 96,
+        "h1Px": 18,
+        "closedCover": [
+          184,
+          276
+        ],
+        "closedCaseWidth": 216,
+        "openCaseWidth": 800,
+        "openDrawerWidth": 616
+      },
+      {
+        "viewport": 390,
+        "documentWidth": 390,
+        "headerBottom": 132,
+        "firstCoverTop": 240,
+        "firstCoverDelta": 108,
+        "maximumRequestedDelta": 120,
+        "h1Px": 17,
+        "closedCover": [
+          151,
+          226.5
+        ],
+        "closedCaseWidth": 171,
+        "openCover": [
+          104,
+          156
+        ],
+        "openCaseWidth": 358,
+        "openDrawerWidth": 254
+      },
+      {
+        "viewport": 320,
+        "documentWidth": 320,
+        "headerBottom": 132,
+        "firstCoverTop": 240,
+        "firstCoverDelta": 108,
+        "maximumRequestedDelta": 120,
+        "h1Px": 17,
+        "closedCover": [
+          116,
+          174
+        ],
+        "closedCaseWidth": 136,
+        "openCover": [
+          104,
+          156
+        ],
+        "openCaseWidth": 288,
+        "openDrawerWidth": 184
+      }
+    ],
+    "openedFirstShelfTitles": [
+      "t1",
+      "t3",
+      "t2"
+    ],
+    "openedTitleCoverage": "Each of the three first-shelf titles opened separately at all three widths; no document overflow or visible overlap. Initial pass preceded final footer/short-film adjustments; final changed surfaces retested at 1440 and 320, and final 390 portrait open recaptured.",
+    "mobilePortraitNaturalRatio": {
+      "viewport": 390,
+      "title": "t2",
+      "artSizes": [
+        [
+          84,
+          126
+        ],
+        [
+          223.875,
+          126
+        ],
+        [
+          126,
+          126
+        ]
+      ],
+      "sourceRatios": [
+        "2:3",
+        "1672:941",
+        "1:1"
+      ],
+      "wrapperMatchesArtwork": true,
+      "note": "CSS atlas tile ratios, not standalone image naturalWidth/naturalHeight measurements."
+    },
+    "denseCurationAndEmptyShelf": {
+      "createdViaUI": true,
+      "firstShelfCount": 6,
+      "secondShelfCount": 0,
+      "checkedWidths": [
+        1440,
+        320
+      ],
+      "overlaps": 0,
+      "documentHorizontalOverflow": false,
+      "emptyShelfCTA": "작품 고르기",
+      "snapshotTiming": "QA screenshots precede final footer-min-width and short-film-end-shadow fixes. They are not final CSS visual approval screenshots.",
+      "dataImpact": "Only transient fictional prototype selection; reset by navigation reload."
+    }
+  },
+  "findingsAndRetests": [
+    {
+      "issue": "Opened drawer footer buttons below 44px width",
+      "before": {
+        "viewport": 390,
+        "addMemory": [
+          43.3125,
+          44
+        ],
+        "close": [
+          29.296875,
+          44
+        ]
+      },
+      "rootFix": "Minimum width 44px",
+      "final": {
+        "viewport": 320,
+        "previous": [
+          44,
+          44
+        ],
+        "next": [
+          44,
+          44
+        ],
+        "addMemory": [
+          44,
+          44
+        ],
+        "close": [
+          44,
+          44
+        ]
+      },
+      "status": "RESOLVED_AND_RETESTED"
+    },
+    {
+      "issue": "Short two-image film rail retained unused trailing area and end fade",
+      "before": {
+        "viewport": 1440,
+        "drawerWidth": 616,
+        "contentWidth": 367.328125
+      },
+      "rootFix": "Content-sized film shell/rail; disabled end fade",
+      "final": {
+        "viewport": 1440,
+        "filmShellWidth": 367.328125,
+        "filmRailWidth": 367.328125,
+        "shellAfterDisplay": "none"
+      },
+      "status": "RESOLVED_AND_RETESTED",
+      "caveat": "Open case itself still reserves up to 800px; this is layout whitespace, not a colored image wrapper or horizontal overflow."
+    }
+  ],
+  "focusAndTargets": {
+    "representativeRailKeyboardFocus": true,
+    "focusedElementClass": "film-rail",
+    "computedFocusOutline": "rgb(49, 49, 49) solid 2px",
+    "outlineOffset": "4px",
+    "modalEscapeFocusReturn": "global-add",
+    "scope": "Representative checks only. No blanket claim that every link, checkbox or in-film element is 44px."
+  },
+  "regressionsAt320": {
+    "titlePoster": {
+      "titleCount": 8,
+      "documentWidth": 320,
+      "visuallyInspected": true
+    },
+    "titleFilm": {
+      "rowCount": 8,
+      "documentWidth": 320,
+      "visuallyInspected": true
+    },
+    "titleDetail": {
+      "title": "t2",
+      "documentWidth": 320,
+      "railClientWidth": 288,
+      "railScrollWidth": 546,
+      "artSizes": [
+        [
+          95.25,
+          142.875
+        ],
+        [
+          253.859375,
+          142.875
+        ],
+        [
+          142.875,
+          142.875
+        ]
+      ],
+      "note": "Internal horizontal rail scroll is expected, not document overflow."
+    },
+    "archivePopulated": {
+      "count": 18,
+      "documentWidth": 320,
+      "pairwiseOverlaps": 0,
+      "visuallyInspected": true
+    },
+    "archiveEmpty": {
+      "query": "?start=empty#memories",
+      "count": 0,
+      "documentWidth": 320,
+      "decorativeImageCount": 0,
+      "heroNodeCount": 0,
+      "h2Px": 22,
+      "cta": "첫 기억 남기기"
+    },
+    "composer": {
+      "choiceCount": 18,
+      "dialogRect": {
+        "x": 12,
+        "y": 12,
+        "width": 296,
+        "height": 776
+      },
+      "horizontalOverflow": 0,
+      "verticalScrollRequired": true,
+      "visuallyInspected": true
+    },
+    "portraitModal": {
+      "dialog": [
+        296,
+        682.890625
+      ],
+      "art": [
+        264,
+        396
+      ],
+      "wrapper": [
+        264,
+        396
+      ],
+      "ratio": "2:3",
+      "horizontalOverflow": 0,
+      "visuallyInspected": true
+    }
+  },
+  "rootFinalFollowup": {
+    "scope": "After independent QA, root added direct-child empty Archive typography rules only; prior selector .empty-copy did not match the compact V7 markup.",
+    "viewport": [320,844],
+    "emptyArchiveHeadingPx": 17,
+    "emptyArchiveHeightPx": 165.1875,
+    "documentWidth": 320,
+    "decorativeArtCount": 0,
+    "screenshot": "desk-v7-empty-final-320.png",
+    "visuallyInspectedByRoot": true,
+    "hashCaveat": "inspectedFileHashesSHA256 above describe the independent QA snapshot before this last typography-only amendment."
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "screenshots": [
+    {
+      "file": "desk-v7-home-closed-1440-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-home-short-film-1440-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-home-closed-390-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-home-portrait-open-390-qa.png",
+      "cssStage": "final-css",
+      "type": "full-page",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-home-closed-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-home-open-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-dense-empty-shelf-320-qa.png",
+      "cssStage": "before-footer44-and-short-film-fixes",
+      "type": "full-page",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-dense-empty-shelf-1440-qa.png",
+      "cssStage": "before-footer44-and-short-film-fixes",
+      "type": "full-page",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-titles-poster-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-titles-film-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-detail-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-memory-modal-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-archive-populated-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-archive-empty-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    },
+    {
+      "file": "desk-v7-composer-320-qa.png",
+      "cssStage": "final-css",
+      "type": "viewport",
+      "visuallyInspected": true
+    }
+  ],
+  "limitations": [
+    "Responsive review in Chromium only; not native touch/device, cross-browser, full WCAG, screen-reader or 200% zoom certification.",
+    "Home layout covered 1440/390/320; existing screen regression coverage is primarily 320px, not a full matrix at every width.",
+    "The six-title/empty-shelf configuration was tested before the final small footer/rail fixes; final changed surfaces were separately retested.",
+    "Composer/modal checks are visual/geometry smoke tests; no new Memory submission or complete functional flow duplication. Separate agent owns functional behavior tests.",
+    "The 18-choice picker and mobile composer use vertical scrolling; all content is not visible simultaneously.",
+    "No private photos, service data, backend, sync, persisted production state, public rights or publishing gates were exercised.",
+    "Prototype visual acceptance remains a human review gate; passing geometry is not design approval.",
+    "Screenshots suffixed qa are independent QA evidence and must not be presented as original production baseline."
+  ]
+}
