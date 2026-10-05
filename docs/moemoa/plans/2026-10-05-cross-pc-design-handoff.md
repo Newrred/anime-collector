@@ -73,6 +73,8 @@ Git 밖 파일 누락→참조 closure/manifest 검사. 사진/키 노출→명�
 - 2026-10-05: 필수 문서·현재 branch/remote/status 확인. 계획 기록 후 자산/코드 audit와 인계 준비 시작.
 - 2026-10-05: 외부 시안169개 및 원래 서비스 비교37개 보존. 원본 비교37개는 원본과 SHA256 일치. 원본 폴더와 이전 서버는 변경하지 않았다.
 - 2026-10-05: 앱 단위407/407·빌드19pages 통과. 새 경로의 V8을 Chromium1440/320px에서 열고 필름 펼침·비교 페이지·누락 로고 안내를 확인, console error 없음.
+- 2026-10-05: 최종 참조 검사171파일/98참조/7JS 구문/7fixture/169checksum PASS, 미리보기 서버·검사기 회귀9/9 PASS(skip0).
+- 2026-10-05: Git index tree `69c2dac04381363601cab84a6bdefd427f99ffce`를 별도 공백 포함 경로로 archive/extract. 저장소와 다른 CWD에서 Node만으로 같은169checksum·98참조·7fixture 및9/9 테스트 재통과. 기존 node_modules·환경변수·Codex 원본 경로 없이 이식 파일을 검증했다. 다른 OS/실제 두 번째 PC 실행을 대신했다고 주장하지 않는다.
 
 ## 16. 발견 사항과 계획 변경
 
@@ -80,8 +82,51 @@ Git 밖 파일 누락→참조 closure/manifest 검사. 사진/키 노출→명�
 - 제3자 Are.na 원화면4개와 참조되지 않는 중간/중복 캡처44개는 복사하지 않았다. 실제 실패/수정 증거로 참조된 파일은 보존했다.
 - 과거 프롬프트/결과 JSON의 절대경로는 역사적 메타데이터다. 실행 HTML/CSS/JS는 옛 PC 경로에 의존하지 않는다. 최신 V8은 로컬 이미지/동작 코드와 온라인 폰트, 일부 초기 가이드는 온라인 폰트/스크립트에 의존한다.
 - 앱 소스는 초기 UI 개편 WIP, V8은 별도 RAM-only 시안이다. 기존 E2E의 과거 PASS와 이번 unit/build/smoke 결과를 분리했다.
-- 검증기에서 srcdoc의 entity-encoded data SVG와 JS 동적 로고 경로를 로컬 파일로 오인하는 파서 거짓 양성을 발견했다. 자산을 바꾸지 않고 검사기/회귀 테스트를 보완한다.
+- 검증기에서 srcdoc의 entity-encoded data SVG와 JS 동적 로고 경로를 로컬 파일로 오인하는 파서 거짓 양성을 발견했다. 자산을 바꾸지 않고 검사기/회귀 테스트를 보완했다. 선언된 choose01/02 버튼에 한해 로고 경로를 확장해 둘 다 존재 검증하며 실제 누락 시 실패한다. 임의 동적식이나 외부 URL은 정적 검사 범위가 아니다.
 
 ## 17. 완료 보고
 
-실제 검증 및 push 결과 확정 후 기록한다.
+### 1. 읽은 문서와 근거
+
+`AGENTS.md`, `CODEX_START_HERE.md`, 확정 결정01, `PLANS.md`, QA/운영07, 변경통제09, 9/29 인계와10/3 interface-rebuild 기록. 실제 `package.json`, Git ignore/attributes/workflow, 기존 src/test diff, 시안 소스/manifest/생성 프롬프트/검증 JSON 및 원본 비교 manifest를 확인했다.
+
+### 2. 가정과 미확정 사항
+
+이번 승인은 현 개발 작업을 보존하는 commit/push다. V8의 최종 미감 승인·실제 앱 적용·배포 승인이 아니다. 로고 초기4이미지는 복구하지 못했으며 기존 온라인 폰트/초기 가이드 CDN 의존성은 유지한다.
+
+### 3. 계획
+
+본 ExecPlan을 수정 전 작성했다. 원본 보존 → 이식/검증 → 문서/결정·기존 앱·대형 디자인 자료·재개 도구를 추적 가능하게 분리 커밋 → 개발 브랜치 non-force push 순서다.
+
+### 4. 변경 파일과 이유
+
+섹션6 파일 지도를 따른다. 기존 src·테스트는 개발 체크포인트로 보존했고 이번 요청에서 추가로 UI를 변경하지 않았다. `design/`은169시안 파일과37원본비교 파일 및안내/manifest, `scripts/`2개와 Node test1개는 이식 실행/검사용이다. package script3개만 추가했으며 dependency/lock은 바꾸지 않았다.
+
+### 5. 데이터와 롤백
+
+DB/스키마/카탈로그/실사용자 데이터 migration 없음. 원본 디렉터리는 보존됐다. 필요 시 이번 Git 커밋을 대상으로 별도 revert를 검토하며 파괴적 reset/clean은 하지 않는다. 이식성 확인용 Git archive를 풀어 checksum을 재검증했으나 운영 DB 복원 테스트는 범위가 아니다.
+
+### 6. 테스트와 결과
+
+환경: Windows, Node24.19.0/npm11.17.0, Chromium. 다음은 이번 인계에서 실제 실행했다.
+
+| 명령/검사 | 결과와 범위 |
+| --- | --- |
+| `npm run test:unit` |407/407 PASS, 실패·skip0 |
+| `npm run build` |19정적페이지 및 후처리 PASS; 큰 JS chunk 경고 잔여 |
+| `node scripts/check-design-prototypes.mjs` |171파일,98로컬참조,7외부JS구문·7fixture,169checksum PASS;21외부URL 요청하지 않음 |
+| `node --test tests/design-prototypes-server.test.mjs` |9/9 PASS, skip0; loopback·메서드·traversal·symlink·포트충돌·누락/변조 검사 |
+| Git tree archive 사본에서 위2개 명령 |동일 PASS; 다른 CWD·공백 경로·환경변수/의존성 설치 없이 실행 |
+| 원본 비교37파일 SHA256 |원본과 사본37/37 동일 |
+| `npm run design:preview -- --port 4350` + browser smoke |V8 1440/320px·표지 펼침·모바일 비교 양쪽 이미지·로고 부재 안내 PASS, console errors0·수평 overflow0 |
+| `git diff --check` / staged 검사 |PASS |
+
+브라우저 검증 스킬(agent-browser/agent-browser-verify/verification)을 사용했다. 실제 API/저장/외부 동기화는 RAM-only 시안이라 연결 대상이 없다. 전체 앱 E2E는 이번에 재실행하지 않았으며 과거97개 PASS와 구분한다. 실제 새 PC npm ci나 다른 OS/브라우저까지 검증한 것은 아니다.
+
+### 7. 보안·권리·관찰 가능성
+
+서버는127.0.0.1의 시안 폴더만 제공하고 dotfile/금지 확장자/traversal/link 탈출을 차단한다. 환경변수·인증·개인 사진은 제외, 검토용 생성 이미지/제공 로고/합성 데이터 화면만 보존한다. 제3자 원화면4개는 제외했다. public flag·업로드·API·분석 이벤트·DB·운영설정 변경 없음.
+
+### 8. 남은 위험과 다음 게이트
+
+V8 승인과 앱 이식 ExecPlan, 전체19route/320px 회귀·실기기 접근성·공개 이미지 준비9/29 잔여가 남는다. master 전용 CI이므로 이 개발 브랜치 push에서 동일 CI가 자동 실행된다고 가정하지 않는다. 기존 Git 연동 Preview는 발생할 수 있으나 운영 master 배포는 하지 않는다. 원격 push/SHA/clean 확인은 마지막 완료 항목으로 기록한다.
