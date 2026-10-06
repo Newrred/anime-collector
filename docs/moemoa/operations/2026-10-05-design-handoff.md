@@ -1,5 +1,24 @@
 # MOEMOA 디자인 작업 재개 — 2026-10-05
 
+## PC 종료 인계 — 2026-10-07
+
+- 사용자 요청으로 이번 구현은 완료 상태에서 정리하고 PC를 정상 종료한다. 새 기능 작업은 시작하지 않는다. 종료 전 확인한 `6fbea0d621e476c7c4f62a1e5134fda92c283ca9`는 로컬/master 원격/실제 www.moemoa.xyz의 Git 배포 SHA가 같고 [CI37504154213](https://github.com/Newrred/anime-collector/actions/runs/37504154213)이 SUCCESS다. 구현 후보는0f46310이며6fbea0d는 문서만 변경한 동일 코드다. 이 인계도 문서만 master에 추가하고 최신 SHA는 `git log -1`과 운영 build-info에서 확인한다.
+- 다시 시작할 작업1개: **배포 링크에서 실물 휴대폰 감상 기록→장면 저장→재열람 확인**. 이후 TITLE-STATE-SYNC-01의 자체 catalog 전체 원격 기록 모델 결정과 기존 공개 출시 정책·권리·비용·백업/경보 잔여를 이어간다. 취소30차/Android 제외, 운영 Public/private-image 비활성은 유지한다. 기존 테스트 전용 공개/다기기 절차를 운영에서 그대로 실행하지 않는다.
+- 카드 classification migration20261005090000은 test/production 적용 완료다. 두 data release ID·hash·검사/복귀 절차는 기존31차 보고/evidence에 있다. 새 PC에서 전체 과거 migration을 일괄 적용하거나 이 migration을 반복하지 않는다. 종료 때문에 DB·권한·flags·사용자 자료를 다시 변경하지 않는다.
+- 비밀 환경 설정과 DB 복구 자료/검사 로그는 Git 제외 상태로 이 PC에 보존한다. 브라우저의 개인 기록·이미지도 Git으로 이전되지 않는다. 새 PC는 기존 비밀 보관 경로의 개인 dev 환경 파일을 별도로 준비하고 기존 계정 동기화/백업 범위와 사진 원본의 기기 보관을 구분한다. 운영 이미지 자동 업로드는 수행하지 않았다.
+- Node.js24.19.0을 준비한다. 새 checkout은 `git clone https://github.com/Newrred/anime-collector.git` 후 해당 폴더에서 아래 명령을 실행한다. 기존 checkout에 미커밋 작업이 있으면 먼저 보존하고, `--ff-only` 실패를 reset/force로 해결하지 않는다.
+
+```powershell
+git switch master
+git pull --ff-only origin master
+npm ci
+npm run dev
+```
+
+Codex 재개 요청: **“AGENTS.md, CODEX_START_HERE.md와 최신 종료 인계를 읽고 기존31차/단일 release-v2 작업판 기준으로 이어가줘. 먼저 실휴대폰 감상 기록→장면 저장→재열람을 확인하고, 취소30차·Android 제외와 공개/이미지 동기화 게이트를 유지해줘.”**
+
+현재 작업/배포는 완료됐지만 실물폰·새 원격 기록 모델·전체 공개 출시를 완료로 표시하지 않는다. 아래 날짜별 로컬 미커밋/미적용 상태는 당시 실행 이력이다.
+
 > **31차 재개 기준(2026-10-07):** 현재 승인 범위는 master Git 운영 반영/카드 classification DB 갱신까지다. Web 코드0f46310은 master/Vercel Git 동일 SHA·CI37502913118 성공과 운영 읽기 확인까지 완료했다. 문서 후속 커밋도 master에서 이어지며 최신 commit/배포는 [증거](../release-v2/evidence/2026-10-07-web-design-deployment.json), 기능/검사/남은 범위는 [31차 보고](../reports/2026-10-05-v84-web-application.md#31차--핵심-기능-비교와-webdb-운영-반영-2026-10-07)를 따른다. 새 PC는 master를 clone/pull하고 Node24.19.0에서 npm ci 후 기존 환경 파일을 비밀 보관 경로에서 준비한다. 로컬 dev는 .env.production을 자동 사용하지 않으므로 기존 개인 dev 환경이 별도로 필요하다. 새 classification migration은 test/production 이미 적용됐으며 전체 과거 migration을 일괄 db push하지 않는다. 운영 참조 okchpyagfucpzpyrfgol, test nmgkhknponvzcwliajyk. 암호·DB 복구 자료·브라우저 개인 기록은 Git에 없다.30차 취향 배치는 취소 유지하며29차까지 선반/감상 흐름을 보존한다. 아래 로컬 미커밋/DB 미적용 표시는 과거 이력이다.
 
 > **30차 취소/원복(2026-10-07):** 사용자 요청으로 새 취향 컬렉션/작품 탭 선반 이전을 제거했다. 아래29차까지가 유효한 작업 기준이며 취소된30차를 재개하지 않는다. 기존 선반/태그/감상 기록은 보존했다. 이번 unit424/관련 Chromium16/build20 및 실제4363 기존 화면 확인 PASS. [원복 근거](../reports/2026-10-05-v84-web-application.md#30차-요청-취소와-원복-2026-10-07). 배포/DB/flags 변경 없음.
