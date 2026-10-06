@@ -1,0 +1,18 @@
+:root{--mm-ink:#252525;--mm-muted:#686862;--mm-paper:#fff;--mm-soft:#fff0f6;--mm-line:#dddcd8;--mm-accent:#e60068;--mm-danger:#a52c36;--mm-success:#356547;--mm-radius:7px;--mm-fast:120ms;--mm-reveal:180ms;--mm-ease:cubic-bezier(.2,.65,.3,1)}
+.mm-button{position:relative;display:inline-flex;gap:23px;align-items:center;justify-content:center;min-height:46px;min-width:46px;padding:11px 18px 11px 12px;border:1px solid #c8c7c2;border-radius:7px;background:#fff;color:var(--mm-ink);font-family:inherit;font-size:14px;font-weight:600;line-height:1.4;letter-spacing:-.025em;cursor:pointer;box-shadow:0 2px 0 #deddd8;transition:background 120ms,border-color 120ms,box-shadow 120ms,transform 80ms}
+.mm-button:has(img)::before{content:'';position:absolute;left:43px;top:8px;bottom:8px;border-left:1px dashed #bbb9b4;pointer-events:none}
+.mm-button img{width:20px;height:20px;flex:none;object-fit:contain}
+.mm-button.primary{background:var(--mm-accent);border-color:var(--mm-accent);color:white;box-shadow:0 3px 0 #a8004c}
+.mm-button.primary::before{border-color:#ffffff80}
+.mm-button:hover:not(:disabled){background:#fff0f6;border-color:#e60068}
+.mm-button.primary:hover:not(:disabled){background:#d0005e;border-color:#d0005e;box-shadow:0 3px 0 #950043}
+.mm-button:active:not(:disabled){transform:translateY(2px);box-shadow:0 0 0 transparent}
+.mm-button:focus-visible{outline:2px solid #e60068;outline-offset:4px}
+.mm-button:disabled{background:#efeeeb;color:#777570;border-color:#dddbd5;box-shadow:none;cursor:default}
+.mm-button:disabled img{opacity:.4}
+.mm-button[aria-label]{gap:0;padding:11px;border-radius:50%;box-shadow:none}
+.mm-button[aria-label]::before{display:none}
+.mm-button[aria-busy=true]{cursor:progress}.mm-button[aria-busy=true] img{animation:mm-spin 900ms linear infinite}
+.mm-button.success{color:#356547;border-color:#b8cfbf;background:#edf4ef;box-shadow:0 2px 0 #c5dacb}.mm-button.danger{color:#a52c36}
+@keyframes mm-spin{to{transform:rotate(360deg)}}@keyframes mm-reveal{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.mm-button:active:not(:disabled){transform:none}}

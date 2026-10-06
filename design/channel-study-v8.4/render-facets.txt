@@ -1,0 +1,14 @@
+  // Explicit synthetic watch-log associations, not image recognition or real user records.
+  const facetLabels={성장:'서사',디자인:'비주얼',성우:'성우연기',기억남음:'인상 깊었음',불호지만강렬:'불호인데 강렬함'};
+  const fixtureCharacterNames=['하루 (가상)','유나 (가상)','소라 (가상)','민 (가상)','루카 (가상)','렌 (가상)','아오 (가상)'];
+  const fixtureLogFacets=titles.slice(0,7).map((t,i)=>({titleId:t.id,characterId:'fixture-character-'+i,name:fixtureCharacterNames[i],reasonTags:[serviceFacetOptions.REASON_TAG_OPTIONS[i],serviceFacetOptions.REASON_TAG_OPTIONS[(i+1)%7]],affinity:serviceFacetOptions.AFFINITY_OPTIONS[i%3]}));
+  let activeFacets={tag:'',character:'',affinity:''};
+  function matchesArchiveFacets(memory){
+    if(!Object.values(activeFacets).some(Boolean))return true;
+    return fixtureLogFacets.some(log=>log.titleId===memory.titleId&&(!activeFacets.tag||log.reasonTags.includes(activeFacets.tag))&&(!activeFacets.character||log.characterId===activeFacets.character)&&(!activeFacets.affinity||log.affinity===activeFacets.affinity));
+  }
+  function renderArchiveFacets(){
+    const links=(key,options)=>`<div class="facet-links" role="group" aria-label="${key==='tag'?'포인트 태그':key==='character'?'캐릭터':'캐릭터 감정'}">${options.map(([value,text],i)=>`<button type="button" id="facet-${key}-${i}" data-facet-key="${key}" data-facet-value="${esc(value)}" aria-pressed="${activeFacets[key]===value}">${esc(text)}</button>`).join('')}</div>`;
+    return `<div class="archive-facets"><div class="channel-info-cell facet-cell"><h2>포인트 태그</h2>${links('tag',serviceFacetOptions.REASON_TAG_OPTIONS.map(t=>[t,facetLabels[t]||t]))}<div class="facet-status"><span role="status">${archiveItems().length}개의 기억</span><button type="button" data-clear-facets>전체 보기 ↗</button></div><p class="facet-context">작품의 감상 기록으로 모아보기</p></div><div class="channel-info-cell facet-cell"><h2>캐릭터</h2>${links('character',fixtureLogFacets.map(l=>[l.characterId,l.name.replace(' (가상)','')]))}<h3>캐릭터 감정</h3>${links('affinity',serviceFacetOptions.AFFINITY_OPTIONS.map(t=>[t,facetLabels[t]||t]))}<p class="facet-context">캐릭터·연결은 가상 자료</p></div></div>`;
+  }
+  app.addEventListener('click',event=>{const target=event.target.closest('[data-facet-key]');if(target){const key=target.dataset.facetKey,value=target.dataset.facetValue;activeFacets[key]=activeFacets[key]===value?'':value;render({focusId:target.id});}else if(event.target.closest('[data-clear-facets]')){activeFacets={tag:'',character:'',affinity:''};render({focusId:'facet-tag-0'});}});

@@ -1,0 +1,66 @@
+{
+  "rows": [
+    {
+      "width": 1920,
+      "x": 65,
+      "y": 400,
+      "w": 1790,
+      "columns": "285.828px 285.828px 285.844px 285.828px 285.828px 285.844px",
+      "cellW": 285.828125,
+      "cellH": 368.703125,
+      "overflow": 0
+    },
+    {
+      "width": 1440,
+      "x": 65,
+      "y": 400,
+      "w": 1310,
+      "columns": "316.25px 316.25px 316.25px 316.25px",
+      "cellW": 316.25,
+      "cellH": 407.953125,
+      "overflow": 0
+    },
+    {
+      "width": 1024,
+      "x": 65,
+      "y": 400,
+      "w": 894,
+      "columns": "288px 288px 288px",
+      "cellW": 288,
+      "cellH": 371.515625,
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "x": 15,
+      "y": 318.84375,
+      "w": 360,
+      "columns": "177.5px 177.5px",
+      "cellW": 177.5,
+      "cellH": 228.96875,
+      "overflow": 0
+    },
+    {
+      "width": 320,
+      "x": 15,
+      "y": 346.6875,
+      "w": 290,
+      "columns": "290px",
+      "cellW": 290,
+      "cellH": 374.09375,
+      "overflow": 0
+    }
+  ],
+  "errors": [],
+  "flows": [
+    "info expand",
+    "table",
+    "browser back to grid",
+    "search match",
+    "search empty",
+    "clear",
+    "film",
+    "title route",
+    "home return"
+  ]
+}

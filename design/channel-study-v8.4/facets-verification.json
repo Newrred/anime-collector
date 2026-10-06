@@ -1,0 +1,35 @@
+[
+  {
+    "width": 1440,
+    "shelfBreadcrumb": true,
+    "tag": 7,
+    "character": 6,
+    "incompatible": 0,
+    "searchAndTable": 1,
+    "reset": 18,
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "shelfBreadcrumb": true,
+    "tag": 7,
+    "character": 6,
+    "incompatible": 0,
+    "searchAndTable": 1,
+    "reset": 18,
+    "overflow": 0,
+    "errors": []
+  },
+  {
+    "width": 320,
+    "shelfBreadcrumb": true,
+    "tag": 7,
+    "character": 6,
+    "incompatible": 0,
+    "searchAndTable": 1,
+    "reset": 18,
+    "overflow": 0,
+    "errors": []
+  }
+]

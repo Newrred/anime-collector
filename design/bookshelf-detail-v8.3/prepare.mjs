@@ -1,0 +1,25 @@
+import {readFile,writeFile} from 'node:fs/promises';
+const source='design/prototypes/film-archive/',dest='design/bookshelf-detail-v8.3/';
+let html=await readFile(source+'moemoa-film-grid.html','utf8');
+html=html.replace(/href="(film-[^"]+\.css)"/g,'href="../prototypes/film-archive/$1"');
+html=html.replace('src="film-grid.js"','src="bookshelf.js"');
+html=html.replace('</head>','<link rel="stylesheet" href="../ui-kit-v8.2/line-film.css"><link rel="stylesheet" href="detail.css"></head>');
+html=html.replace('시안 08','상세 시안 08.3').replace('moemoa-film-grid.html?start=empty#memories','index.html?start=empty#home').replace('moemoa-film-grid-compare.html','../ui-kit-v8.2/v8-refined.html#home').replace('전후 비교 ↗','직전 시안 ↗').replace('moemoa-film-desk.html#home','../ui-kit-v8.2/v8-refined.html#home');
+html=html.replace('<span aria-hidden="true">＋</span>','<img src="../ui-kit-v8.2/png/plus-inverse-48.png" alt="">').replace('</body>','<script src="menu.js"></script></body>');
+let js=await readFile(source+'film-grid.js','utf8');
+js=js.replace('url(${visual.sheet})','url(../prototypes/film-archive/${visual.sheet})');
+js=js.replaceAll('필름 보기 ↗','필름 보기');
+const old='const button = (text, action, extra = "", attributes = "") => `<button type="button" class="button ${extra}" data-action="${action}" ${attributes}>${text}</button>`;';
+const replacement=`const button = (text, action, extra = "", attributes = "") => {
+ const icons={ 'desk-close':'chevron-up','shelf-edit':'edit','shelf-apply':'check','compose':'plus','shelf-up':'chevron-up','shelf-down':'chevron-down','shelf-remove':'close' };
+ const icon=icons[action];const glyph=icon?'<img class="action-icon" src="../ui-kit-v8.2/png/'+icon+'-ink-48.png" alt="">':'';
+ const label=['shelf-up','shelf-down','shelf-remove'].includes(action)?'':text;
+ return '<button type="button" class="button '+extra+'" data-action="'+action+'" '+attributes+'>'+glyph+'<span>'+label+'</span></button>';
+ };`;
+if(!js.includes(old))throw Error('button source changed');js=js.replace(old,replacement);
+js=js.replace('button("책장 꾸미기", "shelf-edit", "quiet", \'id="shelf-edit"\')',`'<details class="shelf-menu"><summary id="shelf-menu-trigger" aria-label="책장 메뉴"><img src="../ui-kit-v8.2/png/more-ink-48.png" alt=""></summary><div class="shelf-menu-content">'+button("책장 꾸미기", "shelf-edit", "quiet", 'id="shelf-edit"')+'<a href="#titles"><img src="../ui-kit-v8.2/png/grid-ink-48.png" alt="">전체 작품 보기</a><p>진열을 바꿔도 기억은 그대로예요.</p></div></details>'`);
+js=js.replace("+ '<div class=\"desk-case-body\"><button", "+ '<header class=\"film-panel-heading\"><div><span class=\"film-eyebrow\">MEMORY FILM</span><h2>' + esc(title.name) + '</h2></div><span class=\"film-total\">기억 ' + items.length + '개</span>' + button('접기', 'desk-close', 'panel-close', 'data-rail=\"' + railId + '\" aria-label=\"필름 접기\"') + '</header><div class=\"desk-case-body\"><button");
+js=js.replace('items.length ? "+ 기억" : "첫 기억 남기기"','items.length ? "기억 추가" : "첫 기억 남기기"');
+js=js.replaceAll('focusId: "shelf-edit"','focusId: "shelf-menu-trigger"');
+await writeFile(dest+'index.html',html);await writeFile(dest+'bookshelf.js',js);
+console.log('V8.3 generated; original V8 preserved; no base URL');

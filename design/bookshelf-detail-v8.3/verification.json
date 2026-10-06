@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "grid": "unchanged",
+      "overflow": 0,
+      "menuEscape": true,
+      "editCancelApply": true,
+      "routeContained": true
+    },
+    {
+      "width": 390,
+      "grid": "unchanged",
+      "overflow": 0,
+      "menuEscape": true,
+      "editCancelApply": true,
+      "routeContained": true
+    },
+    {
+      "width": 320,
+      "grid": "unchanged",
+      "overflow": 0,
+      "menuEscape": true,
+      "editCancelApply": true,
+      "routeContained": true
+    }
+  ],
+  "pageErrors": [],
+  "reducedMotion": true,
+  "scope": "Desktop Chromium; prototype RAM only"
+}

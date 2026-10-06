@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "icons": 28,
+      "overflow": 0,
+      "states": [
+        "success",
+        "failure",
+        "unknown-query"
+      ],
+      "coverGeometry": "unchanged"
+    },
+    {
+      "width": 320,
+      "icons": 28,
+      "overflow": 0,
+      "states": [
+        "success",
+        "failure",
+        "unknown-query"
+      ],
+      "coverGeometry": "unchanged"
+    }
+  ],
+  "reducedMotion": "0s",
+  "pageErrors": [],
+  "limits": "Desktop Chromium simulation; no real phone, backend, production or full service testing"
+}

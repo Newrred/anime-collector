@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head><base href="../prototypes/film-archive/">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MOEMOA · 내 필름책장</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="film-prototype.css">
+  <link rel="stylesheet" href="film-bookshelf.css">
+  <link rel="stylesheet" href="film-sleeve.css">
+  <link rel="stylesheet" href="film-interaction.css">
+  <link rel="stylesheet" href="film-collection.css">
+  <link rel="stylesheet" href="film-desk.css">
+  <link rel="stylesheet" href="film-grid.css">
+<style>
+/* V8.2: preserve stable geometry; add local interaction feedback. */
+.grid-prototype{--muted:#686862}
+.grid-prototype .button:focus-visible,.grid-prototype button:focus-visible{outline:2px solid #e60068;outline-offset:3px}
+.grid-prototype .button{transition:background-color 120ms,color 120ms,transform 80ms}
+.grid-prototype .button:active:not(:disabled){transform:translateY(1px)}
+.grid-prototype .shelf-cover[aria-expanded=true]{outline:2px solid #e60068;outline-offset:3px}
+.grid-prototype .shelf-caption .desk-meta{color:#686862;font-size:12px}
+.grid-prototype .shelf-cover .desk-pull-label{font-size:11px;display:flex;gap:5px;align-items:center}
+.grid-prototype .shelf-cover:not([aria-expanded=true]) .desk-pull-label:after{content:'';width:14px;height:14px;background:url('../../ui-kit-v8.2/png/chevron-down-ink-48.png') center/contain no-repeat}
+.grid-prototype .header-actions .primary img{width:20px;height:20px}
+.grid-prototype .shelf-tabs .button{font-size:12px}
+@media(prefers-reduced-motion:reduce){.grid-prototype *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.grid-prototype .header-actions .primary{position:relative;background:#e60068;border-color:#e60068;color:#fff;border-radius:7px;box-shadow:0 3px 0 #a8004c;gap:22px;padding-inline:12px 16px;font-weight:600}
+.grid-prototype .header-actions .primary:before{content:'';position:absolute;left:43px;top:9px;bottom:9px;border-left:1px dashed #ffffff80}
+.grid-prototype .header-actions .primary:hover{background:#d0005e}
+.grid-prototype .header-actions .primary:active{box-shadow:none;transform:translateY(2px)}
+.grid-prototype .shelf-tabs .button[aria-pressed=true]{color:#c40059}
+.grid-prototype .shelf-tabs .button[aria-pressed=true]:after{background:#e60068;height:2px}
+.grid-prototype .shelf-cover[aria-expanded=true] .desk-pull-label{background:#e60068;color:white}
+.grid-prototype .shelf-cover .desk-pull-label{border-radius:3px}
+.grid-prototype .shelf-film-panel .desk-drawer-footer .button{border-radius:5px}
+.grid-prototype .shelf-film-panel .desk-drawer-footer .button:hover{background:#fff0f6;color:#c40059}
+@media(prefers-reduced-motion:reduce){.grid-prototype .button:active{transform:none}}
+</style><link rel="stylesheet" href="../../ui-kit-v8.2/line-film.css"></head>
+<body class="bookshelf-prototype sleeve-prototype interaction-prototype collection-prototype desk-prototype grid-prototype">
+  <div class="preview-bar"><span><b>시안 08.2</b><span class="preview-detail"> · 가상 기록 · 새로고침하면 초기화됩니다</span></span><div class="preview-links"><a href="moemoa-film-grid.html?start=empty#memories" target="_blank" rel="noopener">빈 기록 체험 ↗</a><a href="moemoa-film-grid-compare.html" target="_blank" rel="noopener">V7/V8 비교 ↗</a></div></div>
+  <header class="site-header"><div class="header-inner">
+    <a class="brand" href="#home" aria-label="MOEMOA 내 책장"><span class="brand-image" role="img" aria-label="moemoa"></span></a>
+    <nav class="main-nav" aria-label="주요 메뉴"><button data-page="home">내 책장</button><button data-page="titles">작품</button><button data-page="memories">기억</button></nav>
+    <div class="header-actions"><button class="button primary" id="global-add"><img src="../../ui-kit-v8.2/png/plus-inverse-48.png" alt=""><span>기억 남기기</span></button></div>
+  </div></header>
+  <main id="app" tabindex="-1"></main>
+  <footer class="site-footer"><span>MOEMOA</span><span>가상 작품과 이미지로 만든 시안입니다. 실제 저장·공개되지 않습니다.</span><a href="moemoa-film-desk.html#home">이전 시안 ↗</a></footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="memory-dialog" class="memory-dialog" aria-label="기억 보기"></dialog>
+  <dialog id="composer-dialog" class="composer-dialog" aria-label="기억 남기기"></dialog>
+  <script src="film-grid.js"></script>
+</body>
+</html>

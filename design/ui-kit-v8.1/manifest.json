@@ -1,0 +1,2060 @@
+{
+  "version": "v8.1",
+  "method": "Original geometric SVG rendered with existing sharp; no AI raster generation",
+  "icons": [
+    "arrow-right",
+    "arrow-left",
+    "arrow-up-right",
+    "chevron-down",
+    "chevron-up",
+    "chevron-left",
+    "chevron-right",
+    "plus",
+    "close",
+    "check",
+    "search",
+    "edit",
+    "shelf",
+    "film",
+    "image",
+    "bookmark",
+    "heart",
+    "share",
+    "download",
+    "more",
+    "lock",
+    "globe",
+    "report",
+    "retry",
+    "info",
+    "spinner",
+    "trash",
+    "grid"
+  ],
+  "colors": {
+    "ink": "#252525",
+    "muted": "#686862",
+    "inverse": "#ffffff",
+    "accent": "#315dce"
+  },
+  "pngCount": 336,
+  "buttonSpecimens": 5,
+  "records": [
+    {
+      "file": "png/arrow-right-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-right-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "arrow-right"
+    },
+    {
+      "file": "png/arrow-left-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-left-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "arrow-left"
+    },
+    {
+      "file": "png/arrow-up-right-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/arrow-up-right-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "arrow-up-right"
+    },
+    {
+      "file": "png/chevron-down-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-down-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "chevron-down"
+    },
+    {
+      "file": "png/chevron-up-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-up-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "chevron-up"
+    },
+    {
+      "file": "png/chevron-left-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-left-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "chevron-left"
+    },
+    {
+      "file": "png/chevron-right-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/chevron-right-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "chevron-right"
+    },
+    {
+      "file": "png/plus-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "plus"
+    },
+    {
+      "file": "png/plus-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "plus"
+    },
+    {
+      "file": "png/close-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "close"
+    },
+    {
+      "file": "png/close-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "close"
+    },
+    {
+      "file": "png/close-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "close"
+    },
+    {
+      "file": "png/close-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "close"
+    },
+    {
+      "file": "png/close-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "close"
+    },
+    {
+      "file": "png/close-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "close"
+    },
+    {
+      "file": "png/close-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "close"
+    },
+    {
+      "file": "png/close-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "close"
+    },
+    {
+      "file": "png/close-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "close"
+    },
+    {
+      "file": "png/close-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "close"
+    },
+    {
+      "file": "png/close-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "close"
+    },
+    {
+      "file": "png/close-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "close"
+    },
+    {
+      "file": "png/check-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "check"
+    },
+    {
+      "file": "png/check-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "check"
+    },
+    {
+      "file": "png/check-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "check"
+    },
+    {
+      "file": "png/check-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "check"
+    },
+    {
+      "file": "png/check-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "check"
+    },
+    {
+      "file": "png/check-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "check"
+    },
+    {
+      "file": "png/check-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "check"
+    },
+    {
+      "file": "png/check-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "check"
+    },
+    {
+      "file": "png/check-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "check"
+    },
+    {
+      "file": "png/check-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "check"
+    },
+    {
+      "file": "png/check-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "check"
+    },
+    {
+      "file": "png/check-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "check"
+    },
+    {
+      "file": "png/search-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "search"
+    },
+    {
+      "file": "png/search-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "search"
+    },
+    {
+      "file": "png/search-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "search"
+    },
+    {
+      "file": "png/search-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "search"
+    },
+    {
+      "file": "png/search-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "search"
+    },
+    {
+      "file": "png/search-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "search"
+    },
+    {
+      "file": "png/search-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "search"
+    },
+    {
+      "file": "png/search-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "search"
+    },
+    {
+      "file": "png/search-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "search"
+    },
+    {
+      "file": "png/search-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "search"
+    },
+    {
+      "file": "png/search-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "search"
+    },
+    {
+      "file": "png/search-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "search"
+    },
+    {
+      "file": "png/edit-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "edit"
+    },
+    {
+      "file": "png/edit-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "edit"
+    },
+    {
+      "file": "png/shelf-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "shelf"
+    },
+    {
+      "file": "png/shelf-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "shelf"
+    },
+    {
+      "file": "png/film-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "film"
+    },
+    {
+      "file": "png/film-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "film"
+    },
+    {
+      "file": "png/film-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "film"
+    },
+    {
+      "file": "png/film-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "film"
+    },
+    {
+      "file": "png/film-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "film"
+    },
+    {
+      "file": "png/film-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "film"
+    },
+    {
+      "file": "png/film-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "film"
+    },
+    {
+      "file": "png/film-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "film"
+    },
+    {
+      "file": "png/film-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "film"
+    },
+    {
+      "file": "png/film-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "film"
+    },
+    {
+      "file": "png/film-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "film"
+    },
+    {
+      "file": "png/film-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "film"
+    },
+    {
+      "file": "png/image-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "image"
+    },
+    {
+      "file": "png/image-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "image"
+    },
+    {
+      "file": "png/image-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "image"
+    },
+    {
+      "file": "png/image-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "image"
+    },
+    {
+      "file": "png/image-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "image"
+    },
+    {
+      "file": "png/image-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "image"
+    },
+    {
+      "file": "png/image-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "image"
+    },
+    {
+      "file": "png/image-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "image"
+    },
+    {
+      "file": "png/image-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "image"
+    },
+    {
+      "file": "png/image-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "image"
+    },
+    {
+      "file": "png/image-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "image"
+    },
+    {
+      "file": "png/image-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "image"
+    },
+    {
+      "file": "png/bookmark-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/bookmark-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "bookmark"
+    },
+    {
+      "file": "png/heart-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "heart"
+    },
+    {
+      "file": "png/heart-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "heart"
+    },
+    {
+      "file": "png/share-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "share"
+    },
+    {
+      "file": "png/share-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "share"
+    },
+    {
+      "file": "png/share-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "share"
+    },
+    {
+      "file": "png/share-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "share"
+    },
+    {
+      "file": "png/share-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "share"
+    },
+    {
+      "file": "png/share-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "share"
+    },
+    {
+      "file": "png/share-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "share"
+    },
+    {
+      "file": "png/share-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "share"
+    },
+    {
+      "file": "png/share-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "share"
+    },
+    {
+      "file": "png/share-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "share"
+    },
+    {
+      "file": "png/share-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "share"
+    },
+    {
+      "file": "png/share-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "share"
+    },
+    {
+      "file": "png/download-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "download"
+    },
+    {
+      "file": "png/download-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "download"
+    },
+    {
+      "file": "png/download-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "download"
+    },
+    {
+      "file": "png/download-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "download"
+    },
+    {
+      "file": "png/download-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "download"
+    },
+    {
+      "file": "png/download-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "download"
+    },
+    {
+      "file": "png/download-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "download"
+    },
+    {
+      "file": "png/download-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "download"
+    },
+    {
+      "file": "png/download-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "download"
+    },
+    {
+      "file": "png/download-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "download"
+    },
+    {
+      "file": "png/download-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "download"
+    },
+    {
+      "file": "png/download-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "download"
+    },
+    {
+      "file": "png/more-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "more"
+    },
+    {
+      "file": "png/more-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "more"
+    },
+    {
+      "file": "png/more-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "more"
+    },
+    {
+      "file": "png/more-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "more"
+    },
+    {
+      "file": "png/more-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "more"
+    },
+    {
+      "file": "png/more-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "more"
+    },
+    {
+      "file": "png/more-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "more"
+    },
+    {
+      "file": "png/more-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "more"
+    },
+    {
+      "file": "png/more-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "more"
+    },
+    {
+      "file": "png/more-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "more"
+    },
+    {
+      "file": "png/more-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "more"
+    },
+    {
+      "file": "png/more-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "more"
+    },
+    {
+      "file": "png/lock-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "lock"
+    },
+    {
+      "file": "png/lock-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "lock"
+    },
+    {
+      "file": "png/globe-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "globe"
+    },
+    {
+      "file": "png/globe-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "globe"
+    },
+    {
+      "file": "png/report-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "report"
+    },
+    {
+      "file": "png/report-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "report"
+    },
+    {
+      "file": "png/report-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "report"
+    },
+    {
+      "file": "png/report-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "report"
+    },
+    {
+      "file": "png/report-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "report"
+    },
+    {
+      "file": "png/report-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "report"
+    },
+    {
+      "file": "png/report-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "report"
+    },
+    {
+      "file": "png/report-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "report"
+    },
+    {
+      "file": "png/report-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "report"
+    },
+    {
+      "file": "png/report-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "report"
+    },
+    {
+      "file": "png/report-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "report"
+    },
+    {
+      "file": "png/report-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "report"
+    },
+    {
+      "file": "png/retry-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "retry"
+    },
+    {
+      "file": "png/retry-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "retry"
+    },
+    {
+      "file": "png/info-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "info"
+    },
+    {
+      "file": "png/info-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "info"
+    },
+    {
+      "file": "png/info-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "info"
+    },
+    {
+      "file": "png/info-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "info"
+    },
+    {
+      "file": "png/info-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "info"
+    },
+    {
+      "file": "png/info-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "info"
+    },
+    {
+      "file": "png/info-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "info"
+    },
+    {
+      "file": "png/info-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "info"
+    },
+    {
+      "file": "png/info-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "info"
+    },
+    {
+      "file": "png/info-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "info"
+    },
+    {
+      "file": "png/info-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "info"
+    },
+    {
+      "file": "png/info-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "info"
+    },
+    {
+      "file": "png/spinner-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "spinner"
+    },
+    {
+      "file": "png/spinner-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "spinner"
+    },
+    {
+      "file": "png/trash-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "trash"
+    },
+    {
+      "file": "png/trash-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "trash"
+    },
+    {
+      "file": "png/grid-ink-24.png",
+      "size": 24,
+      "tone": "ink",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-ink-48.png",
+      "size": 48,
+      "tone": "ink",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-ink-72.png",
+      "size": 72,
+      "tone": "ink",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-muted-24.png",
+      "size": 24,
+      "tone": "muted",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-muted-48.png",
+      "size": 48,
+      "tone": "muted",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-muted-72.png",
+      "size": 72,
+      "tone": "muted",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-inverse-24.png",
+      "size": 24,
+      "tone": "inverse",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-inverse-48.png",
+      "size": 48,
+      "tone": "inverse",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-inverse-72.png",
+      "size": 72,
+      "tone": "inverse",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-accent-24.png",
+      "size": 24,
+      "tone": "accent",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-accent-48.png",
+      "size": 48,
+      "tone": "accent",
+      "name": "grid"
+    },
+    {
+      "file": "png/grid-accent-72.png",
+      "size": 72,
+      "tone": "accent",
+      "name": "grid"
+    }
+  ]
+}

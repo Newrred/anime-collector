@@ -1,0 +1,31 @@
+import {chromium,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch(),results=[];
+for(const width of [1440,390,320]){
+ const p=await browser.newPage({viewport:{width,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.goto('http://127.0.0.1:4351/channel-study-v8.4/index.html#titles');
+ await expect(p.locator('.channel-items')).toBeVisible();
+ const layout=await p.locator('.channel-items').evaluate(el=>({x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y,columns:getComputedStyle(el).gridTemplateColumns,overflow:document.documentElement.scrollWidth-innerWidth}));
+ if(layout.overflow>0)throw Error('title overflow');
+ await p.screenshot({path:`design/channel-study-v8.4/titles-${width}.png`,fullPage:true});
+ await p.locator('.tab-info-toggle').click();
+ const all=await p.locator('.channel-item').count();
+ await p.locator('#filter-saved').click();if(await p.locator('.channel-item').count()>all)throw Error('filter');
+ await p.locator('#filter-all').click();await p.locator('#title-search').fill('여름');await expect(p.locator('.channel-item')).toHaveCount(1);
+ await p.locator('#title-search').fill('없는작품zzz');await expect(p.getByText('찾는 작품이 없어요')).toBeVisible();
+ await p.locator('[data-action=reset]').click();await expect(p.locator('.channel-item')).toHaveCount(all);
+ await p.locator('#title-sort').selectOption('title');await p.locator('#view-album').click();await expect(p.locator('.sleeve-row').first()).toBeVisible();
+ await p.locator('#view-poster').click();await p.locator('.channel-item').first().click();await expect(p.locator('.title-identity')).toBeVisible();
+ await p.locator('[data-action=title-back]').click();await expect(p.locator('.channel-tab')).toBeVisible();
+ await p.locator('nav [data-page=memories]').click();await expect(p.locator('.channel-items')).toBeVisible();await p.evaluate(()=>window.scrollTo(0,0));await p.waitForTimeout(100);
+ const memoryLayout=await p.locator('.channel-items').evaluate(el=>({x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y,columns:getComputedStyle(el).gridTemplateColumns,overflow:document.documentElement.scrollWidth-innerWidth}));if(memoryLayout.overflow>0)throw Error('memory overflow');
+ await p.screenshot({path:`design/channel-study-v8.4/memories-${width}.png`,fullPage:true});
+ await p.locator('#channel-global-search').click();await expect(p.locator('#memory-search')).toBeFocused();await p.locator('#memory-search').fill('아무 말');await expect(p.locator('.channel-item')).toHaveCount(1);
+ await p.locator('#memory-search').fill('없는기억zzz');await expect(p.getByText('찾는 기억이 없어요')).toBeVisible();await p.locator('[data-action=memory-reset]').first().click();
+ const first=await p.locator('.channel-item').first().getAttribute('data-id');await p.locator('#archive-sort').selectOption('oldest');if(await p.locator('.channel-item').first().getAttribute('data-id')===first)throw Error('sort unchanged');
+ await p.locator('[data-tab-action=memory-view][data-view=table]').click();await expect(p.locator('.channel-table')).toBeVisible();await p.locator('.channel-table [data-action=memory]').first().click();await expect(p.locator('#memory-dialog')).toBeVisible();await p.keyboard.press('Escape');
+ await p.locator('[data-tab-action=memory-view][data-view=grid]').click();await p.locator('.channel-item').first().click();await expect(p.locator('#memory-dialog')).toBeVisible();await p.keyboard.press('Escape');
+ await p.locator('nav [data-page=home]').click();await expect(p.locator('.shelf-cover-grid')).toBeVisible();
+ if(errors.length)throw Error(errors.join('\n'));results.push({width,layout,memoryLayout,searchEmptyReset:true,views:true,sort:true,detailBack:true,errors});await p.close();
+}
+await browser.close();await writeFile('design/channel-study-v8.4/tabs-verification.json',JSON.stringify(results,null,2));console.log(results);

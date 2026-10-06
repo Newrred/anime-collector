@@ -1,0 +1,19 @@
+/* Keep images on paper; film identity is a fine outline, never a dark mat. */
+.grid-prototype .film-track-shell,
+.grid-prototype .film-rail,
+.grid-prototype .film-frame{background:transparent!important;box-shadow:none}
+.grid-prototype .film-frame{color:#252525}
+.grid-prototype .film-frame::before,
+.grid-prototype .film-frame::after{height:5px;background-color:transparent;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='5' viewBox='0 0 18 5'%3E%3Crect x='.5' y='.5' width='6' height='4' rx='1' fill='none' stroke='%23aaa9a3' stroke-width='.8'/%3E%3C/svg%3E")!important;background-size:18px 5px;background-repeat:repeat-x;opacity:.8}
+.grid-prototype .desk-drawer .film-frame{background:linear-gradient(#deddd8,#deddd8) left top/100% 1px no-repeat,linear-gradient(#deddd8,#deddd8) left calc(var(--desk-art-height) + 23px)/100% 1px no-repeat!important}
+.grid-prototype .desk-drawer .film-frame::before{top:3px}
+.grid-prototype .desk-drawer .film-frame::after{top:calc(var(--desk-art-height) + 16px)}
+.grid-prototype .film-frame .frame-image{box-shadow:none;background:transparent}
+.grid-prototype .film-frame .frame-caption{color:#686862;background:transparent}
+.grid-prototype .desk-drawer .film-load-more,
+.grid-prototype .film-load-more{background:#fff!important;color:#686862!important;border:0;border-block:1px solid #deddd8;border-radius:0;box-shadow:none}
+.grid-prototype .film-load-more:hover{background:#fff7fa!important;color:#c40059!important}
+.grid-prototype .film-load-more :is(span,strong){color:inherit}
+.grid-prototype .desk-case:not(.is-open) .desk-drawer::after{background:transparent;border-right:1px solid #deddd8}
+.grid-prototype .desk-drawer .film-frame::before,
+.grid-prototype .desk-drawer .film-frame::after{height:5px;background-size:18px 5px}

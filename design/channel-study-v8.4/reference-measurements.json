@@ -1,0 +1,621 @@
+{
+  "url": "https://www.are.na/chase-body/ad_direzione",
+  "widths": [
+    {
+      "width": 1920,
+      "nav": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 55,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "headers": [
+        {
+          "x": 65,
+          "y": 90,
+          "w": 490.09375,
+          "h": 35,
+          "size": "28px",
+          "line": "35px",
+          "gap": "normal 15px",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "grids": [
+        {
+          "x": 65,
+          "y": 170,
+          "w": 1790,
+          "h": 211.375,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px",
+          "columns": "285.828px 285.828px 285.844px 285.828px 285.828px 285.828px"
+        },
+        {
+          "x": 65,
+          "y": 400,
+          "w": 1790,
+          "h": 97298.53125,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px 0px 95840.2px",
+          "columns": "285.828px 285.828px 285.844px 285.828px 285.828px 285.844px"
+        }
+      ],
+      "images": [
+        {
+          "x": 96.921875,
+          "y": 400,
+          "w": 221.984375,
+          "h": 285.828125,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 406.796875,
+          "y": 400,
+          "w": 203.890625,
+          "h": 285.828125,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 729.0625,
+          "y": 400,
+          "w": 161.015625,
+          "h": 285.84375,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 967.5,
+          "y": 447.15625,
+          "w": 285.828125,
+          "h": 191.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 1292.625,
+          "y": 400,
+          "w": 237.234375,
+          "h": 285.828125,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 1602.03125,
+          "y": 400,
+          "w": 220.09375,
+          "h": 285.84375,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "overflow": 0
+    },
+    {
+      "width": 1440,
+      "nav": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 55,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "headers": [
+        {
+          "x": 65,
+          "y": 90,
+          "w": 490.09375,
+          "h": 35,
+          "size": "28px",
+          "line": "35px",
+          "gap": "normal 15px",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "grids": [
+        {
+          "x": 65,
+          "y": 170,
+          "w": 1310,
+          "h": 194.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px",
+          "columns": "316.25px 316.25px 316.25px 316.25px"
+        },
+        {
+          "x": 65,
+          "y": 400,
+          "w": 1310,
+          "h": 157986.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px 0px 155594px",
+          "columns": "316.25px 316.25px 316.25px 316.25px"
+        }
+      ],
+      "images": [
+        {
+          "x": 100.3125,
+          "y": 400,
+          "w": 245.609375,
+          "h": 316.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 441.578125,
+          "y": 400,
+          "w": 225.578125,
+          "h": 316.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 796.546875,
+          "y": 400,
+          "w": 178.140625,
+          "h": 316.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 1058.75,
+          "y": 452.1875,
+          "w": 316.25,
+          "h": 211.875,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 91.875,
+          "y": 806.25,
+          "w": 262.484375,
+          "h": 316.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 432.625,
+          "y": 806.25,
+          "w": 243.5,
+          "h": 316.25,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "overflow": 0
+    },
+    {
+      "width": 1024,
+      "nav": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1024,
+          "h": 55,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "headers": [
+        {
+          "x": 65,
+          "y": 90,
+          "w": 490.09375,
+          "h": 35,
+          "size": "28px",
+          "line": "35px",
+          "gap": "normal 15px",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "grids": [
+        {
+          "x": 65,
+          "y": 170,
+          "w": 894,
+          "h": 211.375,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px",
+          "columns": "288px 288px 288px"
+        },
+        {
+          "x": 65,
+          "y": 400,
+          "w": 894,
+          "h": 195759,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px 0px 192780px",
+          "columns": "288px 288px 288px"
+        }
+      ],
+      "images": [
+        {
+          "x": 97.15625,
+          "y": 400,
+          "w": 223.671875,
+          "h": 288,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 409.28125,
+          "y": 400,
+          "w": 205.4375,
+          "h": 288,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 733.875,
+          "y": 400,
+          "w": 162.234375,
+          "h": 288,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 65,
+          "y": 825.515625,
+          "w": 288,
+          "h": 192.953125,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 392.484375,
+          "y": 778,
+          "w": 239.03125,
+          "h": 288,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 704.125,
+          "y": 778,
+          "w": 221.75,
+          "h": 288,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "nav": [],
+      "headers": [
+        {
+          "x": 15,
+          "y": 15,
+          "w": 337.296875,
+          "h": 27.84375,
+          "size": "19.2px",
+          "line": "27.84px",
+          "gap": "normal 10.2857px",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "grids": [
+        {
+          "x": 15,
+          "y": 119.84375,
+          "w": 360,
+          "h": 497.75,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px",
+          "columns": "360px"
+        },
+        {
+          "x": 15,
+          "y": 319.84375,
+          "w": 360,
+          "h": 176762.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "5px",
+          "padding": "0px 0px 174038px",
+          "columns": "177.5px 177.5px"
+        }
+      ],
+      "images": [
+        {
+          "x": 34.828125,
+          "y": 319.84375,
+          "w": 137.84375,
+          "h": 177.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 222.9375,
+          "y": 319.84375,
+          "w": 126.609375,
+          "h": 177.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 53.75,
+          "y": 547.34375,
+          "w": 99.984375,
+          "h": 177.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 197.5,
+          "y": 576.625,
+          "w": 177.5,
+          "h": 118.921875,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 30.09375,
+          "y": 774.84375,
+          "w": 147.3125,
+          "h": 177.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 217.90625,
+          "y": 774.84375,
+          "w": 136.671875,
+          "h": 177.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "overflow": 0
+    },
+    {
+      "width": 320,
+      "nav": [],
+      "headers": [
+        {
+          "x": 15,
+          "y": 15,
+          "w": 290,
+          "h": 55.6875,
+          "size": "19.2px",
+          "line": "27.84px",
+          "gap": "normal 10.2857px",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "grids": [
+        {
+          "x": 15,
+          "y": 147.6875,
+          "w": 290,
+          "h": 531.5,
+          "size": "16px",
+          "line": "16px",
+          "gap": "45px 15px",
+          "padding": "0px",
+          "columns": "290px"
+        },
+        {
+          "x": 15,
+          "y": 347.6875,
+          "w": 290,
+          "h": 528355,
+          "size": "16px",
+          "line": "16px",
+          "gap": "5px",
+          "padding": "0px 0px 520200px",
+          "columns": "290px"
+        }
+      ],
+      "images": [
+        {
+          "x": 47.390625,
+          "y": 347.6875,
+          "w": 225.21875,
+          "h": 290,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 56.5625,
+          "y": 687.6875,
+          "w": 206.859375,
+          "h": 290,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 78.3125,
+          "y": 1027.6875,
+          "w": 163.359375,
+          "h": 290,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 15,
+          "y": 1415.53125,
+          "w": 290,
+          "h": 194.296875,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 39.65625,
+          "y": 1707.6875,
+          "w": 240.6875,
+          "h": 290,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        },
+        {
+          "x": 48.34375,
+          "y": 2047.6875,
+          "w": 223.296875,
+          "h": 290,
+          "size": "16px",
+          "line": "16px",
+          "gap": "normal",
+          "padding": "0px",
+          "columns": "none"
+        }
+      ],
+      "overflow": 0
+    }
+  ],
+  "actions": [
+    {
+      "action": "More",
+      "text": "Search Are.na\nLog in\nSign up\nAre.na\nChase Body\nAD_Direzione\nConnect\nMore\nInfo\n\nIllustration, color, graphic direction, etc.\n\nStarted\nover 8 years ago\nModified\n24 days ago\nLength\n1.6k\nFollowers\n149\nThis channel appears in\n_Vis, Clippings, Colour, Des, * I JUST WANT TO SCROLL, 3. Visual Ideologies for Pleasing My Eyes, triggers, 👨‍💻 actual (re)source, bandaid, Design / Production / Visuals, Inspiration, VP, jul22 collaterals refs, Art Direction, branding, Art Direction, Design Depot, Channel Tunnel, aRTd 001, NO-BISE COLLECTIVE, ˚˚˚˚˚˚˚. GD inspo graphic .˚˚˚˚˚˚˚, NOT MY BOARDS, art direction + strategy, its AD bb\nConnect\nView\nGrid\nTable\nken-price.jpg\n5f62bc5168c7d7bc9d41b9524bbacefa.jpg\nseohyo - Google Search, 2025 | Çizim\nHotel_Wren_inspiration_03.jpg (2000×1339)\ncrops state fair ribbon iowa 1854 - Google Search\ncrops state fair ribbon iowa 1854 - Google Search\nBmrks logo by Lance — Logosystem\nherman miller branding - Google Search\nimage\nimage\nimage\nR-2426678-1506767169-7141.jpeg.jpg\nimage\nimage\nimage\nPrimordial Om - IntEnTA by <//-(HYPERSONICS)-//>\nanisbel | MNRL ARQUIVO #001 by anisbel\ne557e054-5efd-45e3-a06a-9eee1d8972d0.png\n4.gif\n90s basketball design - Google Search\n90s basketball design - Google Search\nWillow Honey – Visual Journal\n642638041_18564273124043373_8824394909542956263_n.jpg 1,222×1,530 pixels\n643053166_18564273142043373_3641409367694504770_n.jpg 1,214×1,520 pixels\n\nLoading"
+    },
+    {
+      "action": "Table",
+      "url": "https://www.are.na/chase-body/ad_direzione/table",
+      "text": "Search Are.na\nLog in\nSign up\nAre.na\nChase Body\nAD_Direzione\nConnect\nMore\nInfo\n\nIllustration, color, graphic direction, etc.\n\nStarted\nover 8 years ago\nModified\n24 days ago\nLength\n1.6k\nFollowers\n149\nThis channel appears in\n_Vis, Clippings, Colour, Des, * I JUST WANT TO SCROLL, 3. Visual Ideologies for Pleasing My Eyes, triggers, 👨‍💻 actual (re)source, bandaid, Design / Production / Visuals, Inspiration, VP, jul22 collaterals refs, Art Direction, branding, Art Direction, Design Depot, Channel Tunnel, aRTd 001, NO-BISE COLLECTIVE, ˚˚˚˚˚˚˚. GD inspo graphic .˚˚˚˚˚˚˚, NOT MY BOARDS, art direction + strategy, its AD bb\nConnect\nView\nGrid\nTable\n​\nThis feature requires Premium to access.\n\nAD_Direzione | Are.na"
+    },
+    {
+      "action": "Reveal More",
+      "text": "Search Are.na\nLog in\nSign up\nAre.na\nChase Body\nAD_Direzione\nConnect\nMore\nInfo\n\nIllustration, color, graphic direction, etc.\n\nStarted\nover 8 years ago\nModified\n24 days ago\nLength\n1.6k\nFollowers\n149\nThis channel appears in\n_Vis, Clippings, Colour, Des, * I JUST WANT TO SCROLL, 3. Visual Ideologies for Pleasing My Eyes, triggers, 👨‍💻 actual (re)source, bandaid, Design / Production / Visuals, Inspiration, VP, jul22 collaterals refs, Art Direction, branding, Art Direction, Design Depot, Channel Tunnel, aRTd 001, NO-BISE COLLECTIVE, ˚˚˚˚˚˚˚. GD inspo graphic .˚˚˚˚˚˚˚, NOT MY BOARDS, art direction + strategy, its AD bb\nConnect\nView\nGrid\nTable\nken-price.jpg\n5f62bc5168c7d7bc9d41b9524bbacefa.jpg\nseohyo - Google Search, 2025 | Çizim\nHotel_Wren_inspiration_03.jpg (2000×1339)\ncrops state fair ribbon iowa 1854 - Google Search\ncrops state fair ribbon iowa 1854 - Google Search\nBmrks logo by Lance — Logosystem\nherman miller branding - Google Search\nimage\nimage\nimage\nR-2426678-1506767169-7141.jpeg.jpg\nimage\nimage\nimage\nPrimordial Om - IntEnTA by <//-(HYPERSONICS)-//>\nanisbel | MNRL ARQUIVO #001 by anisbel\ne557e054-5efd-45e3-a06a-9eee1d8972d0.png\n4.gif\n90s basketball design - Google Search\n90s basketball design - Google Search\nWillow Honey – Visual Journal\n642638041_18564273124043373_882439490954"
+    },
+    {
+      "action": "Search",
+      "inputs": [
+        {
+          "placeholder": "Search within AD_Direzione…",
+          "type": "text"
+        }
+      ],
+      "text": "Search Are.na\nLog in\nSign up\nAre.na\nChase Body\nAD_Direzione\nConnect\nMore\nInfo\n\nIllustration, color, graphic direction, etc.\n\nStarted\nover 8 years ago\nModified\n24 days ago\nLength\n1.6k\nFollowers\n149\nThis channel appears in\n_Vis, Clippings, Colour, Des, * I JUST WANT TO SCROLL, 3. Visual Ideologies for Pleasing My Eyes, triggers, 👨‍💻 actual (re)source, bandaid, Design / Production / Visuals, Inspiration, VP, jul22 collaterals refs, Art Direction, branding, Art Direction, Design Depot, Channel Tunnel, aRTd 001, NO-BISE COLLECTIVE, ˚˚˚˚˚˚˚. GD inspo graphic .˚˚˚˚˚˚˚, NOT MY BOARDS, art direction + strategy, its AD bb\nConnect\nView\nGrid\nTable\nken-price.jpg\n5f62bc5168c7d7bc9d41b9524bbacefa.jpg\nseohyo - Google Search, 2025 | Çizim\nHotel_Wren_inspiration_03.jpg (2000×1339)\ncrops state fair ribbon iowa 1854 - Google Search\ncrops state fair ribbon iowa 1854 - Google Search\nBmrks logo by Lance — Logosystem\nherman miller branding - Google Search\nimage\nimage\nimage\nR-2426678-1506767169-7141.jpeg.jpg"
+    },
+    {
+      "action": "Block",
+      "url": "https://www.are.na/block/41971491",
+      "text": "Search Are.na\nLog in\nSign up\nAre.na\nChase Body\nAD_Direzione\nConnect\nMore\nInfo\n\nIllustration, color, graphic direction, etc.\n\nStarted\nover 8 years ago\nModified\n24 days ago\nLength\n1.6k\nFollowers\n149\nThis channel appears in\n_Vis, Clippings, Colour, Des, * I JUST WANT TO SCROLL, 3. Visual Ideologies for Pleasing My Eyes, triggers, 👨‍💻 actual (re)source, bandaid, Design / Production / Visuals, Inspiration, VP, jul22 collaterals refs, Art Direction, branding, Art Direction, Design Depot, Channel Tunnel, aRTd 001, NO-BISE COLLECTIVE, ˚˚˚˚˚˚˚. GD inspo graphic .˚˚˚˚˚˚˚, NOT MY BOARDS, art direction + strategy, its AD bb\nConnect\nView\nGrid\nTable\nken-price.jpg\n5f62bc5168c7d7bc9d41b9524bbacefa.jpg\nseohyo - Google Search, 2025 | Çizim\nHotel_Wren_inspiration_03.jpg (2000×1339)\ncrops state fair ribbon iowa 1854 - Google Search\ncrops state fair ribbon iowa 1854 - Google Search\nBmrks logo by Lance — Logosystem\nherman miller branding - Google Search\nimage\nimage\nimage\nR-2426678-1506767169-7141.jpeg.jpg\nimage\nimage\nimage\nPrimordial Om - IntEnTA by <//-(HYPERSONICS)-//>\nanisbel | MNRL ARQUIVO #001 by anisbel\ne557e054-5efd-45e3-a06a-9eee1d8972d0.png\n4.gif\n90s basketball design - Google Search\n90s basketball design - Google Search\nWillow Honey – Visual Journal\n642638041_18564273124043373_8824394909542956263_n.jpg 1,222×1,530 pixels\n643053166_18564273142043373_3641409367694504770_n.jpg 1,214×1,520 pixels\n\nAD_Direzione | Are.na\n\nseohyo - Google Search, 2025 | Çizim\nNo description\nAdded\n10 months ago\nModified\n5 days ago\nBy\nJenna Zaitchik\nSource\nseohyo - Google Search, 2025 | Çizim\nDimensions\n736 × 1308\nConnect\nActions\nConnections\n14\nComments\nAll connections\nSeptember 2026\nHARLEM\nHARLEM\n98\nDanny Rutledge\nILLU\nILLU\n51\nYuri Nauta\nAD_Direzione\n1.6k\nChase Body\n⊚ sampled, perhaps\n⊚ sampled, perhaps\n"
+    }
+  ]
+}

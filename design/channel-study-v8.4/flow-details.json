@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1440,
+    "shelf": true,
+    "dialogEscape": true,
+    "dialogOverflow": 0,
+    "search": true,
+    "editCancel": true
+  },
+  {
+    "width": 390,
+    "shelf": true,
+    "dialogEscape": true,
+    "dialogOverflow": 0,
+    "search": true,
+    "editCancel": true
+  },
+  {
+    "width": 320,
+    "shelf": true,
+    "dialogEscape": true,
+    "dialogOverflow": 0,
+    "search": true,
+    "editCancel": true
+  }
+]
