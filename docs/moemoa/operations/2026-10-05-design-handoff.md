@@ -1,6 +1,94 @@
 # MOEMOA 디자인 작업 재개 — 2026-10-05
 
-## 먼저 확인할 상태
+## 최신 Git 인계 — 2026-10-06 / 실제 Web 적용20~23차
+
+재개 브랜치는 **`codex/phone-test`**다. 기준 `54c39cb` 이후의 V8.1~V8.4 시안·PNG/SVG·실제 Web 코드·테스트·카드 분류 migration 후보와 아래 문서를 Git 개발 체크포인트로 보존한다. 최신 기준은 **실제 앱 `src/`와 기존 interface-rebuild23차 결과**, 인계 절차는24차다. 아래 ‘로컬 미커밋’, ‘시안만 존재’, V8 미적용 안내는 각 날짜의 과거 상태다. 운영 `master`/moemoa.xyz의 최신 배포를 뜻하지 않는다.
+
+### 완료 범위와 아직 남은 것
+
+- 실제 앱: 공통 상단/핑크 주요 버튼, 내 책장의 명시 선택 선반·행 아래 필름, 작품 두 보기, 기억 원본 비율 목록/분류, 테마 메뉴와 적은 이미지 좌측 정렬. Hero 금지와 로고2안 유지.
+- 카드 분류: 카드별 캐릭터/커스텀 태그 저장·Archive 교집합·metadata 백업 복원, 실제 작품 캐릭터 읽기. 현재 **이 기기에 저장**되며 소유자별 선반 설정도 서버 동기화하지 않는다.
+- 최신 상세: 기본 읽기 → ‘기억 수정’ → 검색 가능한 별도 캐릭터 선택창 → 적용/Save, 기억·관리 탭과 Board/공개/이미지/삭제 경로. 원본·개인 감상·Board N:M·기존 공개 동의 계약 유지.
+- 미적용 후보: `supabase/migrations/20261005090000_memory_card_classification.sql`, `tools/card-classification/`. hosted/운영 적용과 `PUBLIC_MEMORY_CARD_CLASSIFICATION_SYNC_V1` 활성화는 미실행. 승인된 test 적용 후 실제 계정 save/pull/conflict/promotion 확인이 필요하다.
+- 다음 작업 **1개**: 기존 실제 기억 상세의 읽기→수정→관리 배치를 사용자와 검토한다. 그 뒤 남은 실폰/Safari·새 태그 다기기·기존 출시 gate를 검증한다. Android 제외, 운영 migration/Public/master merge·push·배포는 D06 정확한 후보 승인 유지.
+
+### 다른 PC에서 실제 앱 열기
+
+Git과 Node.js24.19.0을 권장한다(지원22~26, npm11.17.0). 처음 받는 경우:
+
+```powershell
+git clone --branch codex/phone-test https://github.com/Newrred/anime-collector.git
+cd anime-collector
+npm ci
+npm run dev -- --host 127.0.0.1 --port 4363
+```
+
+기존 저장소는 먼저 `git status --short`로 변경을 확인하고 보존한다. 깨끗한 상태에서:
+
+```powershell
+git fetch origin
+git switch codex/phone-test
+git pull --ff-only origin codex/phone-test
+npm ci
+npm run dev -- --host 127.0.0.1 --port 4363
+```
+
+브랜치가 없으면 `git switch --track origin/codex/phone-test`. 분기/충돌 시 force/reset/clean하지 않고 차이를 확인한다. 실제 앱은 http://127.0.0.1:4363/ . 포트가 사용 중이면 다른 포트를 지정하며 **origin이 바뀌면 브라우저 로컬 기록도 다른 저장소**다. 로컬·원격 기준 확인은 `git rev-parse HEAD`, `git ls-remote origin refs/heads/codex/phone-test`의 SHA를 대조한다.
+
+`.env`/`.env.local`, 비밀번호·service role·브라우저 로그인/IndexedDB·원본 사진·선반 설정·cache 로그는 이번 Git 인계에 넣지 않는다. **기존 `.env.production`은 공개 client 설정만 든 추적 파일**이며 이번에 수정하지 않았다(키 이름/공개 여부만 확인, 비밀 키 없음). 따라서 아래 과거 ‘모든 env가 이전되지 않음’ 안내에는 이 예외가 있다. 코드 이전으로 개인 자료가 따라오지 않는다. 필요한 기록은 기존 앱 내보내기/복원과 명시 이미지 백업 경로로 별도 보존한다. 실제 표지 검색을 계속하려면 기존 공개 설정의 **`PUBLIC_CATALOG_SUPABASE_URL` / `PUBLIC_CATALOG_SUPABASE_ANON_KEY`** 두 값만 새 PC의 무시되는 `.env.local`에 별도 설정한다. client 공개 설정을 DB 비밀번호/service role로 대체하지 않는다. 로컬 파일 선택 검토만 할 때는 `PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1=1`; 계정/Private/Public/새 태그 sync 설정을 디자인 미리보기 때문에 켜지 않는다. 서버를 재시작해 반영한다. dev는 `.env.production`을 자동 로드하지 않으므로 같은 카탈로그/로그인 환경이 자동 구성되지는 않는다.
+
+### 최신 시안·디자인 자료와 반복 검사
+
+최신 V8.4 시안은 실제 앱과 별개이며 합성 데이터/RAM-only다. 다른 터미널에서:
+
+```powershell
+npm run design:preview:v84
+```
+
+http://127.0.0.1:4351/channel-study-v8.4/index.html#home 에서 연다. 충돌하면 `npm run design:preview:v84 -- --port 4352`. 같은 서버의 `/ui-kit-v8.1/index.html`, `/ui-kit-v8.2/index.html`, `/bookshelf-detail-v8.3/index.html`에 이전 자료가 있다. 기존 `npm run design:preview`는 이전 V8 서버4348이며 최신 V8.4 실행 명령과 구분한다. PNG/SVG·규칙은 `design/ui-kit-v8.1/`, `design/ui-kit-v8.2/`, 실제 서비스 합성 캡처/설명은 `design/evidence/v84-service-2026-10-05/`, 구현 결과는 기존 [보고서](../reports/2026-10-05-v84-web-application.md)다. Are.na 분석은 `design/channel-study-v8.4/ANALYSIS.md`; 제3자 원본 캡처와 실제 catalog 표지 QA 캡처는 cache 검토 전용으로 Git에 넣지 않는다.
+
+```powershell
+npm run test:unit
+npm run design:check
+npm run test:design-server
+npx playwright install chromium
+npm run test:e2e:channel
+npm run build
+```
+
+Playwright Chromium 설치는 새 PC에 브라우저가 없는 경우 필요하며 앱 의존성 버전을 바꾸지 않는다. `test:e2e:channel`은 기존 격리 서버 도구로 새 loopback 포트를 소유하고 credentials/rollout flags를 차단한다. 합성 fixture·모의 계정 경계를 검사하며 hosted/OAuth/실폰 PASS를 뜻하지 않는다. cache 전용 실행기가 필요하지 않다. build와 E2E는 순차 실행한다. 첫 Astro 최적화가 시작 제한시간을 넘으면 해당 로그를 보존하고 재시도한다. 실패가 계속되면 환경을 조사하며 PASS로 표기하지 않는다.
+
+### Codex 재개 요청
+
+> AGENTS.md → CODEX_START_HERE.md → 확정 결정01 → 최신 디자인 인계 → 기존 interface-rebuild 계획23·24차/보고서를 읽고 이어서 진행해줘. V8.4는 실제 src에 적용돼 있어. 먼저 기존 실제 기억 상세의 읽기·수정·관리 배치를 검토하고, 기존 W/D/Q와 검증 근거를 유지해줘. 새 계획판을 만들지 말고 Android/운영 DB/Public/master 배포는 별도 승인 경계를 유지해줘.
+
+### Git 완료 근거와 이번 재검사
+
+자료 체크포인트 **`fb25167b9563807e9eeb22f89f82f9f42651d3a7`**를 `origin/codex/phone-test`에 push하고 로컬 HEAD/`git ls-remote` SHA 일치를 확인했다. 구현은 `9cf424e`, 미적용 SQL 후보는 `4bfb3da`, 결정/기존 계획은 `2c0c480`, 시안/합성 증거는 `fb25167`이다. 이 기록을 담은 **후속 인계 문서 커밋까지 받은 브랜치 HEAD**에서 재개한다. 자료 커밋 SHA와 최종 문서 커밋 SHA를 혼동하지 않는다.
+
+이번24차는 unit416/격리 Chromium64/build19, 기존 V8 검사169checksum·서버9, V8.1~V8.4 시안8화면(1440/320, JS오류·로컬404·넘침0)과 최신 preview CLI200/URL출력을 확인했다. 첫 E2E는 Astro 최적화 준비시간 제한으로 중단 후 재실행 PASS; 새 디자인 text7개 EOF 빈 줄만 정리 후 staged whitespace 검사 PASS. 이전23차66·22차SQL19 및 다른 실행 PASS와 합산하지 않는다. [24차 보고](../reports/2026-10-05-v84-web-application.md#24차--다른-pc-git-인계-2026-10-06)에 명령/한계를 기록했다. 비밀 키/실제 이미지/cache는 새로 commit하지 않았고 기존 공개 client 환경 설정도 변경하지 않았다.
+
+이 인계는 소스·문서의 Git 이전이다. 실제 두 번째 PC나 휴대폰에서 실행한 검증으로 확대하지 않는다. 운영 배포/DB/flags 변경0, 자동 Git Preview 완료는 미조회다. 이하 실행 로그와 과거 PASS는 보존한다.
+
+## 최신23차 — 읽기·명시 수정·관리 (2026-10-06)
+
+기존 실제 기억 상세를 기본 읽기/‘기억 수정’/기억·관리 탭으로 정리했다. 캐릭터 전체 목록은 별도 검색 선택창이며 Escape/취소는 선택 초안을 버리고 focus를 복귀한다. 적용 후 카드 Save로 저장한다. Board는 짧은 액션, 공개/이미지/삭제는 관리에 모았다. private preview는 접힌 패널에서도 유지하며 이미지 없을 때 복구 경로를 자동으로 연다. 기존 사용자 기록은 변경하지 않았다.
+
+이번 unit416/고유 Chromium66/build19 PASS. 이전22차61/21차64 및 반복 검사를 합산하지 않는다. 실제 프리렌 표지/30명 catalog 목록에서 Fern/Frieren 선택과1440/390/320/dark를 별도 disposable context로 검증했다. 합성7장/실제 표지6장의 캡처 범위를 구분한다. [23차 보고](../reports/2026-10-05-v84-web-application.md#23차-후속--상세-읽기수정관리-분리-2026-10-06)와 기존 interface-rebuild23차가 최신이다.4363 실제 앱 유지/로컬 미커밋; 카드 태그는 현재 기기 저장이고22차 후보의 hosted/운영 적용·flags·push/배포는 미실행이다. 다음1개는 사용자의 기존 실제 기억 상세 배치 검토다.
+
+## 이전22차 기억 상세·분류 — 2026-10-06 마감
+
+CARD-CLASSIFICATION-01 승인으로 카드별 캐릭터·커스텀 태그 저장/Archive 분류/metadata 백업 복원을 실제 src에 추가했다. 기존 장르·WatchLog와 분리하며 현재 이 기기에 저장됨을 표시한다. 상세는 감상/분류 → 공개 범위 → Board → 접힌 이미지 관리 → 삭제 순서다. 실제 catalog 프리렌 캐릭터6개/더 보기12개도 확인했다. unit416/고유 Chromium61/격리 PG SQL19/build19 PASS이며 마지막 경계 변경 후 그중12개를 재검사했다. 이전 결과와 합산하지 않는다. [22차 보고](../reports/2026-10-05-v84-web-application.md#22차-후속--카드별-분류와-기억-상세)와 기존 interface-rebuild22차가 최신이다.
+
+새 private classification migration과 `tools/card-classification/README.md`를 준비했지만 hosted/운영 적용과 `PUBLIC_MEMORY_CARD_CLASSIFICATION_SYNC_V1` 활성화는 미실행이다. 기본off client는 구서버 응답으로 로컬 분류를 지우지 않는다. 원격/다른 기기 태그 PASS가 아니며 승인된 test 환경에서 새 metadata 흐름을 확인해야 한다. 운영 후보는 D06 별도. 현재 변경은 **로컬 미커밋**, 다른 PC에는 아직 없다.4363 실제 앱과 기존 사용자 기록을 유지했다. 실폰·운영 공개/배포 미검증. 다음1개는 실제 기억의 새 상세 화면 사용자 검토다.
+
+## 이전21차 실제 서비스 적용 — 2026-10-05 후속
+
+사용자가 V8.4의 큰 틀을 채택하고 실서비스 적용을 승인했다. `src/`의 실제 내 책장·작품·기억·이미지 상세와 공통 메뉴에 반영했고 후속 선택 메뉴·검색 초점·로고 hover·좌측 필름을 마감했다. 단위410/build19 routes와 이번 Chromium 고유64개를 검증했다(기존51개와 합산하지 않음). [결과 보고](../reports/2026-10-05-v84-web-application.md)와 기존 interface-rebuild 계획20·21차가 최신이다. 실제 앱4363에 기존 public catalog의 익명 읽기만 연결해 실제 표지5개를 확인했고 앱 내 ‘디자인 확인’ 선반에 작품5개를 선택했다. 실제폰·다른기기 연동은 이번 검증에 포함하지 않는다. V8.4 시안은 `design/channel-study-v8.4/`, 실제 앱은 `npm run dev`로 연다. 선반은 소유자별 이 기기 설정으로 저장되며 서버 동기화는 추가하지 않았다. 이번 변경은 **로컬 미커밋**으로 다른 PC의 Git에는 아직 없다. 운영 배포·Public·DB 변경도 없다.
+
+아래 Git 이전 안내와 V8 설명은 이번 실서비스 적용 **이전 시점**의 인계 기록이다. 당시 시안 검증과 최신 실제 앱 검증을 합산하지 않는다.
+
+## 이전 체크포인트 상태
 
 - 저장소: https://github.com/Newrred/anime-collector
 - 최신 개발 브랜치: **`codex/phone-test`**. `master`가 아니다.

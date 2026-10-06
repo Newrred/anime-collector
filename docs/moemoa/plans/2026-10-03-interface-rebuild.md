@@ -500,3 +500,5 @@ main이 실제src 합성데이터의 PC/모바일/dark 캡처를 직접 열어 �
 - 이번 unit416 PASS/skip0, 기존 V8 portable 검사 errors0/169checksum과 서버9 PASS, 새 `test:e2e:channel` 최종64 PASS/skip0, build19 PASS. 이전23차66과 합산하지 않는다. 첫 E2E는 Astro 최초 최적화 준비시간 제한으로 중단됐고 같은 실행기를 재시도해 통과했다. 초기 정적 문자열 자산검사는 HTML base/JS 동적 상대경로를 반영하지 못해 false positive가 나와 브라우저의 실제 요청으로 대조했다.
 - 새 V8.4 preview CLI의200/최신URL 출력, V8.1/V8.2/V8.3/V8.4 각각1440·320의8화면과 최신3탭 왕복을 실제 Chromium에서 확인: JS오류/로컬404/수평넘침0. 외부 폰트는 차단하고 fallback으로 검사했다. 실제폰/다른PC/hosted/원격 태그 동기화 PASS가 아니다.
 - 소스/의존성 버전·기존 사용자 기록·DB/flags/운영 배포는 변경하지 않았다. 인계/시안·격리 회귀 npm 명령만 추가했다. 로그는 `.cache/v84-service/handoff-24-*`로 로컬 보존한다. Git 완료 판정은 후속 인계 문서의 자료 커밋과 최종 원격 SHA 대조를 따른다.
+
+24차 Git 자료 완료: 결정/계획2c0c480 → SQL 후보4bfb3da → 실제 Web9cf424e → 시안/합성 증거fb25167. `git push origin HEAD:codex/phone-test` 후 자료 HEAD `fb25167b9563807e9eeb22f89f82f9f42651d3a7`와 `git ls-remote` 일치 확인. 후속 인계 문서 커밋까지 받고 재개한다. 새 디자인 text7개 EOF 빈 줄만 정리했고 staged check PASS. `operations/2026-10-05-design-handoff.md` 최신절과 결과 보고24차에 새 PC/실제 앱/V8.4 시안/검사·환경과 개인자료 한계를 기록했다. 운영/DB/flags 변경0, 자동 Preview 완료 미조회. 최종 문서 push/SHA 확인 후 인계 완료로 판정한다.
