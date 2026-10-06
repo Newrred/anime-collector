@@ -1,6 +1,6 @@
 # V8.4 실제 Web 디자인 적용 — 2026-10-05
 
-> 최신 실행 기록은 하단 **30차 요청 취소와 원복** 절이다(2026-10-07). 유효한 구현은29차 감상 기록과 장면 저장 동선 복원까지다. 원격 체크포인트2c1811d 이후25~29차 로컬 미커밋이다. 20~29차의 당시 상태·실패·PASS와 이번 원복 검사를 구분한다.
+> 최신 실행 기록은 하단 **31차 핵심 기능 비교와 Web/DB 운영 반영** 절이다(2026-10-07). 유효20~29차와31차 기능 보완은 코드0f46310으로 master/Vercel Git 동일 SHA·CI 성공·운영 읽기 확인을 마쳤고 classification DB도 적용했다. 취소30차/Android 제외와 운영 Public/private-image off를 유지한다. 문서 후속은 master에서 이어지며 배포 증거와 종료 보고의 최신 SHA를 따른다. 아래 미커밋/미배포·과거 실패/PASS 표시는 당시 실행 이력이다.
 
 사용자 “시안에 전체적인 큰 틀의 디자인은 나온 것 같으니, 이제 실 서비스 디자인 적용 작업 진행해줘”에 따른 **로컬 서비스 코드 적용 및 실제 브라우저 검증 결과**다. `codex/phone-test`, 기준 HEAD `54c39cb` 이후 working tree 변경이며 아직 커밋·push·운영 배포하지 않았다. 기존 release-v2 진행판이나 W/D/Q의 hosted PASS를 변경하지 않았다.
 
@@ -552,4 +552,14 @@ git diff --check
 | git diff --check 및 staged secret/개인자료 검사 | Git 직전 결과와 배포 결과는 아래 최종 증거에서 확인 |
 
 7. **보안/권리/관측:** DB 비밀키·비밀번호·raw private 데이터/브라우저 인증정보·사용자 사진·노트·선반명·검색어를 Git/일반 로그에 넣지 않았다. 실제 사용자 브라우저 데이터에는 QA 쓰기를 하지 않았다. test SQL 설정은 기존값 그대로이며 운영 새 classification sync만1, private-image/Public/mini-home/follow/moderation 기존off 유지. 계정 수동 metadata sync가 사진 자동 업로드나 공개가 되지 않는다. 새 analytics payload/권리 승격/유료·성인 인증·Android 변경0. evidence에는 release ID/hash와 검사·배포 상태만 기록한다.
-8. **잔여/다음1개/배포:** 이번 유효 Web 구현 및 새 DB 필드 계약의 미해결 회귀는 최종 검사/배포 결과로 판단한다. 기존 실물폰·자체 catalog 전체 remote 기록·운영 Public/CDN 실제 철회/정책·비용·복구 사본/경보는 그대로 미완료다. 새 유료·법적/권리 범위·Public 활성화를 임의 승인하지 않는다. 현재 Git/Vercel 검증이 남았으며 결과는 [31차 배포 증거](../release-v2/evidence/2026-10-07-web-design-deployment.json)에 같은 후보 SHA로 기록한다. 다음1개는 **배포된 링크에서 실제 휴대폰 감상 기록→장면 저장→재열람 확인**이다.
+8. **잔여/다음1개/배포:** 이번 유효 Web 구현 및 새 DB 필드 계약의 미해결 회귀는 최종 검사/배포 결과로 판단한다. 기존 실물폰·자체 catalog 전체 remote 기록·운영 Public/CDN 실제 철회/정책·비용·복구 사본/경보는 그대로 미완료다. 새 유료·법적/권리 범위·Public 활성화를 임의 승인하지 않는다. Web 코드 후보0f46310의 Git/Vercel/CI 검증과 운영 읽기 확인은 완료했다. 후속 문서 커밋의 최신 master/Vercel SHA·CI도 종료 전에 확인한다. 결과는 [31차 배포 증거](../release-v2/evidence/2026-10-07-web-design-deployment.json)에 같은 후보 SHA로 기록한다. 다음1개는 **배포된 링크에서 실제 휴대폰 감상 기록→장면 저장→재열람 확인**이다.
+
+
+### 31차 실제 운영 반영 결과
+
+- **Git/Web:** `git commit`으로 유효20~29차와31차 마감을0f46310cb99743598bc8717042b4abd9bf9df4df에 보존했다. `git switch master`, `git merge --ff-only codex/phone-test`, `git push origin master` 성공. origin/master 기존06d2e38에서 새 후보로 정상 갱신했으며 force/CLI production deploy0. [Vercel Production](https://vercel.com/newrreds-projects/anime-collector/7rF7mt8BDH8MYP1Xhbdi3seuLiR7)은 Ready와 master/0f46310·www.moemoa.xyz 연결을 표시했다. 실제 [운영 build-info](https://www.moemoa.xyz/build-info.json)의 commit=checkoutCommit=동일40자리/source=vercel-git, builtAt=2026-10-06T17:21:55.348Z 확인.
+- **원본 추적:** workingTreeDirty=true는 그대로 정직하게 보존한다. Vercel build log는 `Build provenance changed paths: M vercel.json` 한 경로만 기록했고 tracked/build bytes hash는 다르지만 JSON `semanticMatch=true`다. 설정 내용 변경/임의 local source 배포 증거가 아니다. 이전06d2e38의 dirty 표시 원인은 소급 확정하지 않는다.
+- **이번 GitHub 검사:** [Service quality37502913118](https://github.com/Newrred/anime-collector/actions/runs/37502913118)은 publication-contract/verify 두 job SUCCESS. publication+classification PostgreSQL, unit/catalog/build, 기존 서비스·계정·동기화·공개 UI·화면간 회귀, Web 이미지/모바일, 새 Collection·감상 이력 검사를 실제 GitHub runner에서 통과했다. 로컬 PASS와 중복 합산하지 않는다.
+- **이번 운영 사용자 화면:** 기존 Continue with Google·로컬 사용/수동 계정 관리 유지, 전역 Add Memory1개→감상/장면 선택, 실제 Steins;Gate 표지460×667 decode·캐릭터, 같은 Title Hub 감상 탭과 명시 작품 저장 조건, Manage→기존 이력 관리 `/library/?focus=edit`, 기존 Collection 선반/취소30차 부재, Archive의 기존 카드 읽기/명시 수정/관리와 카드 태그 compiled classification1 문구를 확인했다. Edit 후 Cancel만 수행하여 실제 기록/이미지/태그 저장·업로드0. 새 Google OAuth 로그인이나 운영 계정 태그 write/pull 한 바퀴 PASS로 확대하지 않는다.
+- **환경 한계:** 운영1280px Collection/Title no-overflow 확인. 운영 CUA의390/320 override 요청 뒤 실제 DOM은1280으로 남아 이 두 운영 폭은 미검증이다. 이미 통과한 로컬 Chromium/WebKit 반응형 검사는 유지하고 실물 휴대폰 검사를 대신하지 않는다. 공개 표지 화면 screenshot/배포 경로 screenshot은 ignored `.cache/v84-service/release31-production-title-full.png`/`release31-vercel-provenance.png`로 보관하며 해시는 추적 evidence에 있다. 사용자 사진/노트/개인 선반명 screenshot은 Git에 없다.
+- **문서 후속:** 이 결과를 기존 시작/결정/ExecPlan/보고/인계/단일 작업판/evidence에만 반영한다. 문서 후속은 코드0f46310의 source/migration/dependency lock/flags를 바꾸지 않으며, 최신 master의 Vercel Git SHA·CI 재확인 후 종료한다. 다음1개는 **실제 휴대폰에서 배포 링크 감상 기록→장면 저장→재열람**이다. Android·운영 Public/private-image 활성/정식 전체 공개 RC·TITLE-STATE-SYNC-01은 미완료 유지.

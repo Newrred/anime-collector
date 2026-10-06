@@ -625,3 +625,9 @@ main이 실제src 합성데이터의 PC/모바일/dark 캡처를 직접 열어 �
 31차 Git 직전 최종 결과:
 - 추가 화면 회귀128개 중127 PASS/1기존 환경 skip, 최종 build20 PASS. 보드 상세 미니홈 링크와320px switcher2px 넘침을 최소 수정했다. 과거 Home/상세 selector 보정과 초기115 PASS/12 FAIL/1 skip·focused10 PASS/2 FAIL·보완2 PASS는 보존한다. WebKit35/관리Chromium96+2skip/단위424/catalog256+2skip와 중복 합산하지 않는다.
 - staged 비밀/개인자료 scan0 및 Git diff check 통과 뒤 master non-force merge/push/Vercel Git 배포를 진행한다. 코드/DB 후보 승인 반복 요청 없음. 배포 SHA/CI/실제 운영 확인은 같은31차 보고/evidence에 이어 기록한다.
+
+
+31차 운영 반영 완료(코드 후보0f46310):
+- non-force fast-forward master merge/push, Vercel Git Production dpl_7rF7mt8BDH8MYP1Xhbdi3seuLiR7 Ready, moemoa.xyz/www의 build-info commit=checkoutCommit=0f46310cb99743598bc8717042b4abd9bf9df4df/source=vercel-git 확인. GitHub Service quality37502913118 두 job success. 변경 경로 로그는 M vercel.json 하나이고 tracked/build JSON semanticMatch=true, source 코드 dirty로 오해하지 않는다.
+- 실제 운영 UI에서 Google 진입/로컬 데이터, 공통 감상·장면 분기, 실제 Steins;Gate 표지/캐릭터, 같은 작품 감상 탭, 기존 이력 관리 link, Collection/취소30차 부재 및 기존 카드 Edit/Manage·compiled classification1 hint를 읽기 확인했다. 저장/사진 업로드0. 실폰은 미실행; CUA viewport 요청 뒤 실제 DOM1280 유지되어 운영320/390 PASS로 세지 않았다.
+- 최종 보고/단일 작업판/인계/evidence만 후속 master commit/push한다. source/migration/lock/flags 변경0을 Git diff로 확인하고 같은 최신 master Vercel SHA/CI가 성공한 뒤 종료한다. DB는 이미 적용되어 재실행하지 않는다. 다음1개는 배포 링크의 실휴대폰 감상 기록→장면 저장→재열람이다.

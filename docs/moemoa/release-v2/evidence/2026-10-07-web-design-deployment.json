@@ -1,7 +1,7 @@
 {
   "scope": "WEB-DESIGN-RELEASE-CLOSEOUT-01",
   "date": "2026-10-07",
-  "status": "READY_FOR_AUTHORIZED_MASTER_GIT_DEPLOY",
+  "status": "WEB_CODE_AND_DB_DEPLOYMENT_VERIFIED",
   "baseline": {
     "commit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
     "source": "vercel-git",
@@ -124,9 +124,48 @@
     "catalog-only complete remote TitleState/WatchLog model",
     "existing general Public release policy/rights/cost/backup/alert gates"
   ],
-  "finalDeployment": null,
+  "finalDeployment": {
+    "commit": "0f46310cb99743598bc8717042b4abd9bf9df4df",
+    "gitStatus": "success",
+    "statuses": [
+      {
+        "context": "Vercel",
+        "state": "success",
+        "url": "https://vercel.com/newrreds-projects/anime-collector/7rF7mt8BDH8MYP1Xhbdi3seuLiR7",
+        "updatedAt": "2026-10-06T17:22:17Z"
+      }
+    ],
+    "ci": [
+      {
+        "id": 37502913118,
+        "name": "Service quality",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/Newrred/anime-collector/actions/runs/37502913118"
+      }
+    ],
+    "production": {
+      "commit": "0f46310cb99743598bc8717042b4abd9bf9df4df",
+      "checkoutCommit": "0f46310cb99743598bc8717042b4abd9bf9df4df",
+      "builtAt": "2026-10-06T17:21:55.348Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "productionMatches": true,
+    "verifiedAt": "2026-10-06T17:30:43.817Z",
+    "dirtyPaths": [
+      "vercel.json"
+    ],
+    "dirtyPathEvidence": "Vercel Build Logs: Build provenance changed paths: M vercel.json",
+    "dirtyConfigSemanticMatch": true
+  },
   "stagedScan": {
-    "changedFiles": 55,
+    "changedFiles": 7,
     "findings": 0,
     "publicAnonAllowed": true,
     "ignoredPrivateMaterialStaged": false
@@ -199,5 +238,45 @@
       "path": ".cache/v84-service/release31-build-final.log",
       "sha256": "888c51655119e5c59740d5eb85337900f6a51cccb09f9e1b91fc16fd8597acfd"
     }
-  ]
+  ],
+  "codeCommitScan": {
+    "changedFiles": 55,
+    "findings": 0,
+    "publicAnonAllowed": true,
+    "ignoredPrivateMaterialStaged": false
+  },
+  "documentationFollowup": {
+    "scope": "documentation only; code, migrations, dependency lock and deployment settings unchanged",
+    "branch": "master",
+    "latestCommit": "Resolve origin/master and live build-info; final response records the documentation follow-up SHA",
+    "verification": "Require the follow-up Vercel Git SHA, semantic config match and its Service quality success before ending the task"
+  },
+  "productionUi": {
+    "kind": "read-only browser observations; no production record/image writes",
+    "origin": "https://www.moemoa.xyz",
+    "checks": [
+      "Existing Continue with Google and local-only account/data surface present (new OAuth sign-in not performed)",
+      "Exactly one global Add Memory link opens watch-record / scene-image purpose choice",
+      "Steins;Gate actual catalog cover decoded 460x667 and title characters displayed",
+      "Add watch record reaches same title watch tab; unsaved title requires explicit Save title",
+      "Manage watch history reaches /library/?focus=edit",
+      "Collection shelves retained; cancelled collection-space absent",
+      "Existing Archive card opens read/Edit/Manage; compiled classification hint confirms sync flag enabled",
+      "Edit cancelled without save; account/data counts and private bytes not modified",
+      "Actual 1280px title/Collection no horizontal overflow"
+    ],
+    "mobileLimit": "CUA production viewport override was requested but DOM still measured 1280px; no production 320/390 PASS claimed. Local Chromium/WebKit breakpoint tests passed; physical phones remain pending",
+    "screenshots": [
+      {
+        "path": ".cache/v84-service/release31-production-title-full.png",
+        "sha256": "20845ceb43dc0b08bea067fe298eb6f80d20357c76a354ce32144f7412a6a7bb",
+        "tracked": false
+      },
+      {
+        "path": ".cache/v84-service/release31-vercel-provenance.png",
+        "sha256": "a044e3f44cc773dc86a33d1b7bb1f8c3a1830ee8a83945c8bd2039297738e398",
+        "tracked": false
+      }
+    ]
+  }
 }
