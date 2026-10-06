@@ -200,8 +200,8 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko", accountS
 
       if (!withMeta && key === "escape" && desktopOpen && !mobileOpen) {
         event.preventDefault();
+        desktopInputRef.current?.focus();
         setDesktopOpen(false);
-        requestAnimationFrame(() => desktopInputRef.current?.focus());
       }
     }
 

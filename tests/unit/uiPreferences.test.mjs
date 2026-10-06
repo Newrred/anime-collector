@@ -52,14 +52,14 @@ test("boot script preserves JSON-encoded English and dark preferences before hyd
   assert.notEqual(meta.content, "");
 });
 
-test("boot script falls back to fresh English and dark preferences for malformed storage", () => {
+test("boot script falls back to fresh English and light preferences for malformed storage", () => {
   const { root, meta } = runBootScript({
     [UI_PREFERENCE_KEYS.locale]: "not-json",
     [UI_PREFERENCE_KEYS.theme]: JSON.stringify("system"),
   });
 
   assert.equal(root.lang, "en");
-  assert.equal(root.dataset.theme, "dark");
+  assert.equal(root.dataset.theme, "light");
   assert.notEqual(meta.content, "");
 });
 

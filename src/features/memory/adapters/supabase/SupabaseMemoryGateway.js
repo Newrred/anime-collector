@@ -3,6 +3,7 @@ import {
   parsePromotionResult,
   parsePullResult,
 } from "../../sync/memorySyncContract.js";
+import { classificationSyncEnabled, normalizeCardClassification } from "../../domain/cardClassification.js";
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CATALOG_ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -196,6 +197,10 @@ const parseEntityRow = (entityType, model, row, userId) => {
       fail("SYNC_RESPONSE_INVALID", "Remote private title is invalid");
     }
   } else if (entityType === "MEMORY_CARD") {
+    if (Object.hasOwn(row, "classification")) {
+      try { mapped.classification = normalizeCardClassification(row.classification); }
+      catch { fail("SYNC_RESPONSE_INVALID", "Remote Card classification is invalid"); }
+    }
     const hasCatalog = typeof row.catalog_anime_id === "string" && row.catalog_anime_id.length > 0;
     const hasPrivateTitle = row.private_title_id != null;
     if (hasCatalog === hasPrivateTitle || (hasPrivateTitle && !UUID_V4.test(String(row.private_title_id)))
@@ -250,7 +255,8 @@ const parseEntityRow = (entityType, model, row, userId) => {
 };
 
 export class SupabaseMemoryGateway {
-  constructor(client) {
+  constructor(client, { classificationSync = classificationSyncEnabled() } = {}) {
+    this.classificationSync = classificationSync;
     if (!client || typeof client.rpc !== "function" || typeof client.from !== "function") {
       fail("SUPABASE_CLIENT_INVALID", "A Supabase Auth client is required");
     }
@@ -354,7 +360,8 @@ export class SupabaseMemoryGateway {
   }
 
   async readEntities({ entityType, entityIds, userId, signal }) {
-    const model = READ_MODELS[entityType];
+    const baseModel = READ_MODELS[entityType];
+    const model = entityType === "MEMORY_CARD" && this.classificationSync ? { ...baseModel, columns: [...baseModel.columns, "classification"] } : baseModel;
     if (!model || !Array.isArray(entityIds) || entityIds.length < 1 || entityIds.length > 200) {
       fail("SYNC_REQUEST_INVALID", "Entity read request is invalid");
     }
@@ -377,7 +384,8 @@ export class SupabaseMemoryGateway {
   }
 
   async readAllEntities({ entityType, userId, limit = 5000, signal }) {
-    const model = READ_MODELS[entityType];
+    const baseModel = READ_MODELS[entityType];
+    const model = entityType === "MEMORY_CARD" && this.classificationSync ? { ...baseModel, columns: [...baseModel.columns, "classification"] } : baseModel;
     const validUserId = uuid(userId, "userId");
     const maximum = safeInteger(limit, { min: 1, max: 5000 });
     if (!model) fail("SYNC_REQUEST_INVALID", "Entity read request is invalid");

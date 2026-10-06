@@ -17,6 +17,8 @@ export function buildDeleteCompletion({ card, asset, operation, now }) {
     episode: null,
     sceneCue: null,
     emotionTags: [],
+    classification: { version: 1, tags: [], characters: [] },
+    classificationPending: false,
     rewatchIntent: null,
     updatedAt: now,
   };

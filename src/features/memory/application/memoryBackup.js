@@ -1,5 +1,6 @@
 import { assertCompletePrivateCard, createDefaultSyncEnvelope, createPrivateTitle, requireOwnerId } from "../domain/memoryDomain.js";
 import { createMemoryBoard, createBoardCard } from "../domain/memoryBoard.js";
+import { normalizeCardClassification } from "../domain/cardClassification.js";
 
 export const BACKUP_STORES = ["private_titles", "anime_refs", "visual_assets", "memory_cards", "memory_boards", "memory_board_cards"];
 const fail = () => { throw Object.assign(new Error("Invalid Memory backup"), { code: "INVALID_MEMORY_BACKUP" }); };
@@ -41,7 +42,14 @@ export function prepareMemoryRestore(snapshot, ownerId, nextId = () => crypto.ra
     if (!Number.isFinite(Date.parse(r.createdAt)) || !Number.isFinite(Date.parse(r.updatedAt))) fail();
     const row = { ...structuredClone(r), id: maps[key].get(r.id), ...(key === "anime_refs" ? {} : { ownerId }), sync: createDefaultSyncEnvelope(r.updatedAt) };
     if (key === "visual_assets") { row.localRef = null; if (r.cardId != null) row.cardId = ref("memory_cards", r.cardId); }
-    if (key === "memory_cards") Object.assign(row, {privateTitleId: ref("private_titles", r.privateTitleId), animeRefId: ref("anime_refs", r.animeRefId), visualAssetId: ref("visual_assets", r.visualAssetId)});
+    if (key === "memory_cards") {
+      let classification;
+      try { classification = normalizeCardClassification(r.classification); } catch { fail(); }
+      Object.assign(row, {
+        privateTitleId: ref("private_titles", r.privateTitleId), animeRefId: ref("anime_refs", r.animeRefId), visualAssetId: ref("visual_assets", r.visualAssetId),
+        classification, classificationPending: classification.tags.length > 0 || classification.characters.length > 0,
+      });
+    }
     if (key === "memory_board_cards") Object.assign(row, {boardId: ref("memory_boards", r.boardId), cardId: ref("memory_cards", r.cardId)});
     return row;
   })]));

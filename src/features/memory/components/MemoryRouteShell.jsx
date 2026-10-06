@@ -19,7 +19,7 @@ export default function MemoryRouteShell({ base = "/", currentRoute = "", childr
   useMemoryReturnNavigation(base);
   const owner = useMemoryOwnerBoundary();
   const copy = getMessageGroup(locale, "memoryRoutes");
-  const contextValue = useMemo(() => ({ locale, copy }), [locale, copy]);
+  const contextValue = useMemo(() => ({ locale, copy, ownerKey: owner.ownerKey }), [locale, copy, owner.ownerKey]);
 
   return (
     <MemoryRouteUiContext.Provider value={contextValue}>

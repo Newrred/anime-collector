@@ -16,7 +16,7 @@ export const UI_PREFERENCE_KEYS = {
 };
 
 export const DEFAULT_UI_PREFERENCES = {
-  theme: UI_THEME.dark,
+  theme: UI_THEME.light,
   locale: UI_LOCALE.en,
 };
 
@@ -26,7 +26,7 @@ const THEME_META = {
 };
 
 export function normalizeUiTheme(value) {
-  return value === UI_THEME.light ? UI_THEME.light : UI_THEME.dark;
+  return value === UI_THEME.dark ? UI_THEME.dark : DEFAULT_UI_PREFERENCES.theme;
 }
 
 export function normalizeUiLocale(value) {

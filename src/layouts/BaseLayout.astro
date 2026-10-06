@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import "../styles/collection-design.css";
+import "../styles/channel-service.css";
 import Analytics from "@vercel/analytics/astro";
 import { ClientRouter } from "astro:transitions";
 import { buildUiPreferenceBootScript } from "../domain/uiPreferences";
@@ -40,7 +41,7 @@ const authReturnGuardScript = `
 })();
 `;
 ---
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

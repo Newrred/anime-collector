@@ -1,4 +1,5 @@
 import TitleCover from "./TitleCover.jsx";
+import "./title-collection.css";
 
 export default function TitlePosterTile({ album, href, copy, titleKey }) {
   return (

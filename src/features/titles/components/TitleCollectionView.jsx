@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import LibraryFiltersPanel from "../../../components/library/LibraryFiltersPanel.jsx";
+
 import { formatGenreLabel } from "../../../components/library/libraryCopy.js";
 import { useStoredState } from "../../../hooks/useStoredState.js";
 import { STORAGE_KEYS } from "../../../storage/keys.js";
@@ -11,6 +11,9 @@ import { createTitleCollectionService } from "../application/titleCollectionServ
 import MemoryRouteShell, { useMemoryRouteUi } from "../../memory/components/MemoryRouteShell.jsx";
 import TitleAlbumCard from "./TitleAlbumCard.jsx";
 import TitlePosterTile from "./TitlePosterTile.jsx";
+import TitleViewModeControl from "./TitleViewModeControl.jsx";
+import ChannelHeader, { ChannelFacts, ChannelSection, TextChoices } from "../../../components/collection/ChannelHeader.jsx";
+import CollectionSelect from "../../../components/collection/CollectionSelect.jsx";
 import "./title-collection.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -39,8 +42,8 @@ function TitleCollectionContent({ base }) {
   const [sortDir, setSortDir] = useState("desc");
   const [query, setQuery] = useState("");
   const [genres, setGenres] = useState([]);
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
-  const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 5);
+
+  const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 4);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
 
@@ -101,11 +104,11 @@ function TitleCollectionContent({ base }) {
   }, [status, mode, hasVisibleAlbums]);
 
   const effectiveCols = useMemo(() => {
-    const baseColumns = clamp(Number(cardsPerRowBase) || 5, 2, 10);
+    const baseColumns = clamp(Number(cardsPerRowBase) || 4, 2, 10);
     if (!Number.isFinite(gridWidth) || gridWidth <= 0) return baseColumns;
-    const scaled = Math.round(baseColumns * (gridWidth / 1080));
+    const scaled = Math.round(baseColumns * (gridWidth / 1310));
     const posterMode = mode === "POSTER";
-    const minColumns = posterMode ? 2 : 1;
+    const minColumns = posterMode && gridWidth >= 320 ? 2 : 1;
     const minCardWidth = posterMode ? 120 : 300;
     const maxColumnsByWidth = Math.max(minColumns, Math.floor(gridWidth / minCardWidth));
     return clamp(scaled, minColumns, Math.max(minColumns, maxColumnsByWidth));
@@ -158,58 +161,28 @@ function TitleCollectionContent({ base }) {
     { value: "YEAR", label: copy.sorts.YEAR },
     { value: "GENRE", label: copy.sorts.GENRE },
   ];
-  const viewOptions = [
-    { value: "MEMORY", label: copy.memoryView },
-    { value: "POSTER", label: copy.posterView },
-  ];
+
 
   if (status === "loading") return <div className="title-collection"><p className="title-collection__state">{copy.loading}</p></div>;
   if (status === "error") return <div className="title-collection"><p className="title-collection__state" role="alert">{copy.loadFailed}</p></div>;
 
   return (
     <div className="title-collection">
-      <header className="title-collection__header">
-        <h1 className="pageTitle">{copy.title}</h1>
-        <span className="title-collection__count">{copy.count(albums.length)}</span>
-      </header>
+      <ChannelHeader base={base} title={copy.title} locale={locale} sections={<>
+        <ChannelSection title={locale === "ko" ? "정보" : "Info"}><p>{locale === "ko" ? "저장한 작품과 기억을 남긴 작품을 한곳에." : "Saved titles and titles with memories, together."}</p><ChannelFacts rows={[[locale === "ko" ? "전체 작품" : "All titles", albums.length], [copy.saved, albums.filter(a => a.tracking.isSaved).length], [copy.filters.HAS_MEMORY, albums.filter(a => a.memoryCount).length]]} /></ChannelSection>
+        <ChannelSection title={locale === "ko" ? "찾아보기" : "Browse"}><label className="channel-search"><span className="sr-only">{copy.searchLabel}</span><input type="search" value={query} placeholder={copy.searchPlaceholder} onChange={e => setQuery(e.target.value)} /></label><TextChoices label={locale === "ko" ? "작품 필터" : "Title filters"} options={filterOptions} value={filter} onChange={setFilter} /><p role="status">{copy.count(visibleAlbums.length)}</p></ChannelSection>
+        <ChannelSection title={locale === "ko" ? "보기" : "View"}><TitleViewModeControl mode={mode} copy={copy} onChange={changeMode} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "작품 정렬" : "Title sort"} value={sort} onChange={changeSort} options={sortOptions} /></div></ChannelSection>
+      </>} />
 
       {albums.length ? (
         <>
-          <LibraryFiltersPanel
-            locale={locale}
-            filteredCount={visibleAlbums.length}
-            open={filterPanelOpen}
-            onToggle={() => setFilterPanelOpen((current) => !current)}
-            sortKey={sort}
-            onSortKeyChange={changeSort}
-            status={filter}
-            onStatusChange={setFilter}
-            groupByStatus={false}
-            onGroupByStatusChange={() => {}}
-            sortDir={sortDir}
-            onToggleSortDir={() => setSortDir((current) => current === "asc" ? "desc" : "asc")}
-            query={query}
-            onQueryChange={setQuery}
-            cardView={mode}
-            onCardViewChange={changeMode}
-            genreSet={new Set(genres)}
-            genreOptions={genreOptions}
-            onClearGenres={clearGenres}
-            onToggleGenre={toggleGenre}
-            cardsPerRowBase={cardsPerRowBase}
-            onCardsPerRowBaseChange={setCardsPerRowBase}
-            effectiveCols={effectiveCols}
-            formatGenreLabel={(genre) => formatGenreLabel(genre, locale)}
-            sortOptions={sortOptions}
-            statusOptions={filterOptions}
-            viewOptions={viewOptions}
-            viewLabel={copy.viewLabel}
-            showGroupByStatus={false}
-            showStatusSelect={false}
-            searchPlaceholder={copy.searchPlaceholder}
-            searchAriaLabel={copy.searchLabel}
-            controlsId="title-collection-filter-panel-content"
-          />
+          <details className="channel-advanced"><summary aria-controls="title-collection-filter-panel-content">{locale === "ko" ? "장르·열 수와 추가 탐색" : "Genres, columns and more controls"}</summary>
+            <div id="title-collection-filter-panel-content" className="channel-advanced-controls">
+              <section><h2>{locale === "ko" ? "장르" : "Genres"}</h2><div className="channel-choices"><button aria-pressed={!genres.length} onClick={clearGenres}>{locale === "ko" ? "전체" : "All"}</button>{genreOptions.map(genre => <button key={genre} aria-pressed={genres.includes(genre)} onClick={() => toggleGenre(genre)}>{formatGenreLabel(genre, locale)}</button>)}</div></section>
+              <label>{locale === "ko" ? "표지 열 수" : "Poster columns"}<input type="range" min="2" max="10" step="1" value={cardsPerRowBase} onChange={e => setCardsPerRowBase(Number(e.target.value))} /><span>{locale === "ko" ? "기준 " + cardsPerRowBase + " · 현재 " + effectiveCols + "열" : "Base " + cardsPerRowBase + " · Current " + effectiveCols + " columns"}</span></label>
+              <button className="btn btn--subtle" onClick={() => setSortDir(value => value === "asc" ? "desc" : "asc")}>{locale === "ko" ? (sortDir === "asc" ? "오름차순 ↑" : "내림차순 ↓") : (sortDir === "asc" ? "Ascending ↑" : "Descending ↓")}</button>
+            </div>
+          </details>
 
           {hasVisibleAlbums ? (
             <section

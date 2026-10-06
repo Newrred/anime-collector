@@ -42,6 +42,13 @@ async function originalHashes(page: Page) {
   });
 }
 
+async function openPhotoTools(page: Page) {
+  await page.getByRole('tab', { name: 'Manage', exact: true }).click();
+  if (await page.locator('.memory-detail__tools').getAttribute('open') === null) {
+    await page.locator('.memory-detail__tools > summary').click();
+  }
+}
+
 for (const failure of ['ambiguous', 'quota']) {
 test(`actual Web picker/optimizer/journal preserve original through ${failure} retry and remote-only reload`, async ({ page }, testInfo) => {
   test.setTimeout(90000);
@@ -89,6 +96,7 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
     }); repo.close();
   });
   await page.getByRole('link', { name: 'Private sync test', exact: true }).click();
+  await openPhotoTools(page);
   const panel = page.getByRole('region', { name: 'Photo sync', exact: true });
   await expect(panel.getByText('This photo is only on this device', { exact: true })).toBeVisible();
   expect(posts.length).toBe(0);
@@ -98,6 +106,7 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await panel.getByRole('button', { name: 'Sync photo', exact: true }).click();
   await expect(panel.getByRole('alert')).toContainText(failure === 'quota' ? 'Photo storage is at its limit' : 'Photo sync did not finish');
   await page.reload();
+  await openPhotoTools(page);
   await expect(panel.getByRole('button', { name: 'Retry photo sync', exact: true })).toBeEnabled();
   expect(posts.length).toBe(1);
   await panel.getByRole('button', { name: 'Retry photo sync', exact: true }).click();
@@ -119,6 +128,10 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await expect(panel.getByText('Photo storage:', { exact: false })).not.toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('photo-sync-mobile.png'), fullPage: true });
+  await page.getByRole('tab', { name: 'Memory', exact: true }).click();
+  await expect(panel).toBeHidden();
+  await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
+  expect(posts.length).toBe(2);
   const detailUrl = page.url();
   const titleHref = await page.locator('.memory-detail__title-link').getAttribute('href');
   const boardId = await page.evaluate(async () => {
@@ -135,12 +148,18 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await expect(page.locator('.memory-preview img[src^="blob:"]')).toBeVisible();
   expect(reads.at(-1)).toContain('variant=thumb'); expect(posts.length).toBe(2);
   await page.goto('/');
-  await expect(page.locator('.home-rediscovery img[src^="blob:"]').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Edit bookshelf', exact: true }).click();
+  await page.getByRole('button', { name: 'Add shelf', exact: true }).click();
+  await page.locator('.bookshelf-picker').getByLabel('Private sync test', { exact: true }).check();
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  await page.getByRole('button', { name: 'Private sync test memory film', exact: true }).click();
+  await expect(page.locator('.bookshelf-film img[src^="blob:"]').first()).toBeVisible();
   expect(posts.length).toBe(2);
   await page.goto(titleHref!);
   await expect(page.locator('.title-hub__memory img[src^="blob:"]')).toBeVisible();
   expect(posts.length).toBe(2);
   await page.goto('/titles/');
+  await page.getByRole('button', { name: 'Expand information and controls', exact: true }).click();
   await page.getByRole('radio', { name: 'Memory View', exact: true }).check();
   await expect(page.locator('.title-album-card__preview img[src^="blob:"]')).toBeVisible();
   const collectionReads = reads.length;

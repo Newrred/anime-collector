@@ -487,6 +487,8 @@ export class IndexedDbMemoryRepository {
     const card = {
       ...current,
       ...(Object.hasOwn(changes || {}, "note") ? { note: changes.note } : {}),
+      ...(Object.hasOwn(changes || {}, "classification") ? { classification: clone(changes.classification) } : {}),
+      ...(Object.hasOwn(changes || {}, "classificationPending") ? { classificationPending: changes.classificationPending === true } : {}),
       updatedAt: String(now),
     };
     const asset = await requestResult(transaction.objectStore("visual_assets").get(card.visualAssetId));

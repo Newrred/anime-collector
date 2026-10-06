@@ -42,6 +42,7 @@ test(`accepting first-Memory guidance opens Memory View without adding data (nat
   await saveFirstCard(page);
   await page.getByRole("button", { name: "Open Memory View", exact: true }).click();
   await expect(page).toHaveURL(native ? /\/titles\/index\.html$/ : /\/titles\/$/);
+  await page.getByRole("button", { name: "Expand information and controls" }).click();
   await expect(page.getByRole("radio", { name: "Memory View", exact: true })).toHaveAttribute("aria-checked", "true");
   await expect(page.locator(".title-album-card")).toHaveCount(1);
   await expect(page.locator(".title-album-card")).toContainText("Not saved · 1 Memory");
@@ -54,7 +55,7 @@ test(`accepting first-Memory guidance opens Memory View without adding data (nat
 });
 }
 
-test("Home and Board preserve the same Memory and Title Hub, with title summaries below the Memory", async ({ page }) => {
+test("Bookshelf and Board preserve the same Memory and Title Hub after choosing a shelf", async ({ page }) => {
   await installAppState(page, {
     locale: "en",
     list: [1, 2, 3].map((anilistId) => ({ anilistId, koTitle: `Saved title ${anilistId}`, status: "보는중", addedAt: anilistId })),
@@ -63,17 +64,17 @@ test("Home and Board preserve the same Memory and Title Hub, with title summarie
   });
   await saveFirstCard(page);
   await page.goto("/");
-  const memory = page.locator(".home-memory-overview");
-  await expect(memory).toBeVisible();
-  await expect(page.locator(".home-page h1")).toHaveCount(1);
-  const hubHref = await memory.getByRole("link", { name: "View this title" }).getAttribute("href");
+  await page.getByRole("button", { name: "Edit bookshelf", exact: true }).click();
+  await page.getByRole("button", { name: "Add shelf", exact: true }).click();
+  await page.locator('.bookshelf-picker').getByLabel("A remembered scene", { exact: true }).check();
+  await page.getByRole("button", { name: "Apply", exact: true }).click();
+  await page.getByRole("button", { name: "A remembered scene memory film", exact: true }).click();
+  const film = page.locator(".bookshelf-film");
+  await expect(film).toBeVisible();
+  const hubHref = await film.locator('.title-album-card__identity').getAttribute("href");
   expect(hubHref).toMatch(/^\/title\/\?privateTitleId=/);
-  await expect(page.locator(".home-resurfacing-list-card").first()).toHaveAttribute("href", /^\/title\/\?anilistId=/);
-  const memoryBox = await memory.boundingBox();
-  const summaryBox = await page.locator(".home-focus-card").boundingBox();
-  expect(summaryBox!.y).toBeGreaterThan(memoryBox!.y + memoryBox!.height);
-  await page.screenshot({ path: "test-results/phase6-home-desktop.png", fullPage: true });
-  await memory.getByRole("link", { name: "A remembered scene", exact: true }).click();
+  await page.screenshot({ path: "test-results/channel-bookshelf-cross-surface.png", fullPage: true });
+  await film.locator('.title-album-card__preview').click();
   await expect(page.locator(".memory-detail__title-link")).toHaveAttribute("href", hubHref!);
   const cardId = new URL(page.url()).searchParams.get("id");
   const boardId = await page.evaluate(async (id) => {

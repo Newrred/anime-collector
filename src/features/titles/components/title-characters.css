@@ -1,0 +1,12 @@
+.title-characters ul { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.title-characters li { min-width: 0; }
+.title-characters__entry, .title-characters li button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px; border: 1px solid var(--border-subtle); background: transparent; color: inherit; text-align: left; font: inherit; font-size: 13px; border-radius: 2px; min-height: 44px; }
+.title-characters li button { cursor: pointer; }
+.title-characters li button[aria-pressed=true] { border-color: var(--accent); color: var(--accent); }
+.title-characters li button:disabled { opacity: .5; cursor: default; }
+.title-characters li img, .title-characters__initial { width: 30px; height: 38px; flex: 0 0 auto; object-fit: cover; }
+.title-characters__initial { display: grid; place-items: center; background: var(--bg-surface-2); color: var(--text-muted); }
+.title-characters li span:not(.title-characters__initial) { min-width: 0; overflow-wrap: anywhere; }
+.title-characters small { display: block; color: var(--text-muted); margin-top: 3px; }
+.title-characters__source { font-size: 11px; }
+.title-hub__characters { padding: 18px 0; border-top: 1px solid var(--border-subtle); }

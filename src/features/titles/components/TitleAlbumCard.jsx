@@ -3,6 +3,7 @@ import { GenresRow } from "../../../components/library/LibraryUi.jsx";
 import MemoryVisual from "../../memory/components/MemoryVisual.jsx";
 import PrivateMemoryCardPreview from "../../memory/components/PrivateMemoryCardPreview.jsx";
 import TitleCover from "./TitleCover.jsx";
+import "./title-collection.css";
 
 const stateText = (album, copy) => [
   album.tracking?.isSaved ? copy.saved : copy.notSaved,
@@ -33,7 +34,7 @@ export default function TitleAlbumCard({ album, href, base, native, copy, locale
         onPickGenre={onPickGenre}
       />
       {album.previewMemories.length ? (
-        <div className="title-album-card__previews" style={{ gridTemplateColumns: `repeat(${Math.min(3, album.previewMemories.length)}, minmax(0, 1fr))` }} aria-label={copy.memoryCount(album.memoryCount)}>
+        <div className="title-album-card__previews" aria-label={copy.memoryCount(album.memoryCount)}>
           {album.previewMemories.map((memory, index) => (
             <PrivateMemoryCardPreview key={memory.card.id} bundle={memory} locale={locale} visual={memory.visual} title={album.displayTitle} missingLabel={copy.missingMemory}>
               {({ visual, missingLabel, elementRef }) => (

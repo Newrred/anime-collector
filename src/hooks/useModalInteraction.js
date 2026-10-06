@@ -31,6 +31,8 @@ export function useModalInteraction({ open, onClose, busy = false }) {
     const onKeyDown = (event) => {
       if (!isTop()) return;
       if (event.key === "Escape") {
+        // An expanded combobox consumes the first Escape; the dialog owns the next.
+        if (event.target.closest?.('[role="combobox"][aria-expanded="true"]')) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         if (!options.current.busy) options.current.onClose?.();

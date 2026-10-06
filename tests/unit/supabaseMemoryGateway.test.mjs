@@ -119,6 +119,14 @@ test("readEntities uses an allowlisted table and rejects foreign or unknown rows
   assert.equal(calls[0][1], "memory_cards");
   assert.deepEqual(calls.at(-1), ["in", "id", [ENTITY_ID]]);
   assert.equal(result[0].titleSnapshot, "Frieren");
+  assert.equal(calls.find(call => call[0] === "select")[1].includes("classification"), false);
+  const classification = { version: 1, tags: ["Synthetic"], characters: [] };
+  const tagged = createClient({ rows: [{ ...row, classification }] });
+  const taggedResult = await new SupabaseMemoryGateway(tagged.client, { classificationSync: true }).readEntities({ entityType: "MEMORY_CARD", entityIds: [ENTITY_ID], userId: USER_ID });
+  assert.deepEqual(taggedResult[0].classification, classification);
+  assert.equal(tagged.calls.find(call => call[0] === "select")[1].includes("classification"), true);
+  const invalid = createClient({ rows: [{ ...row, classification: { ...classification, tags: [null] } }] });
+  await assert.rejects(() => new SupabaseMemoryGateway(invalid.client, { classificationSync: true }).readEntities({ entityType: "MEMORY_CARD", entityIds: [ENTITY_ID], userId: USER_ID }), { code: "SYNC_RESPONSE_INVALID" });
   const all = await gateway.readAllEntities({ entityType: "MEMORY_CARD", userId: USER_ID, limit: 200 });
   assert.equal(all[0].id, ENTITY_ID);
   assert.deepEqual(calls.slice(-3), [

@@ -15,12 +15,12 @@ test("empty Home keeps its primary action in view at 320px and 390px", async ({ 
     const page = await context.newPage();
     await installAppState(page, { locale: "en", list: [], watchLogs: [] });
     await page.goto("/");
-    await expect(page.locator(".collection-start")).toBeVisible();
+    await expect(page.locator(".bookshelf-page")).toBeVisible();
 
     const geometry = await page.evaluate(() => {
-      const home = document.querySelector(".home-page");
-      const copy = document.querySelector(".collection-start__heading");
-      const cta = document.querySelector(".collection-start__memory");
+      const home = document.querySelector(".bookshelf-page");
+      const copy = document.querySelector(".channel-heading");
+      const cta = document.querySelector(".top-nav__memory-action");
       const homeRect = home?.getBoundingClientRect();
       const copyRect = copy?.getBoundingClientRect();
       const ctaRect = cta?.getBoundingClientRect();

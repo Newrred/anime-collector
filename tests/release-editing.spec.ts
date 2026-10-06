@@ -93,6 +93,7 @@ test('watch log X, Escape, backdrop and Cancel share draft-discard behavior', as
 test('pending reflection save locks inputs and navigation, rejects duplicates, and preserves a failed draft', async ({ page }) => {
   await createMemory(page);
   await page.locator('.memory-archive__card').first().click();
+  await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
   const note = page.locator('.memory-detail textarea');
   await expect(note).toHaveValue('Original reflection');
   await page.evaluate(async () => {
@@ -121,20 +122,22 @@ test('pending reflection save locks inputs and navigation, rejects duplicates, a
   await page.locator('.memory-detail form button[type=submit]').click();
   await expect.poll(() => page.evaluate(() => (window as any).saveCalls)).toBe(2);
   await page.evaluate(() => (window as any).releaseSave());
-  await expect(note).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Edit memory', exact: true })).toBeEnabled();
+  await expect(page.locator('.memory-detail__reflection')).toContainText('Draft survives failure');
   await page.reload();
-  await expect(note).toHaveValue('Draft survives failure');
+  await expect(page.locator('.memory-detail__reflection')).toContainText('Draft survives failure');
 });
 
 test('Archive filters and Board origin survive a Memory detail round trip', async ({ page }) => {
   await createMemory(page, 'Return fixture');
   await page.getByLabel('Find memories').fill('Return');
-  await page.getByLabel('Sort', { exact: true }).selectOption('updated');
+  await page.getByRole('combobox', { name: 'Sort', exact: true }).click();
+  await page.getByRole('option', { name: 'Recently edited', exact: true }).click();
   await page.locator('.memory-archive__card').first().click();
   await expect(page).toHaveURL(/returnTo=/);
   await page.locator('.memory-detail__header a').click();
   await expect(page.getByLabel('Find memories')).toHaveValue('Return');
-  await expect(page.getByLabel('Sort', { exact: true })).toHaveValue('updated');
+  await expect(page.getByRole('combobox', { name: 'Sort', exact: true })).toHaveAttribute('data-value', 'updated');
   await page.goto('/boards/');
   await page.locator('summary').filter({ hasText: 'New Board' }).click();
   await page.getByLabel('Board title').fill('Return Board');
@@ -196,7 +199,7 @@ test('composer pending save locks all editable fields and prevents a second card
 
 test('browser Back can keep a title-only draft and cancel returns to the valid source', async ({ page }) => {
   await page.goto('/archive/');
-  await page.locator('.memory-archive__header a').click();
+  await page.locator('.top-nav__memory-action').click();
   await page.getByLabel('Anime or card title').fill('Back draft');
   page.once('dialog', dialog => dialog.dismiss());
   await page.goBack({ timeout: 2000, waitUntil: 'commit' }).catch(() => {});

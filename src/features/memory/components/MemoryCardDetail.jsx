@@ -7,7 +7,10 @@ import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.j
 import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
-import MemoryPublicCardControl from "./MemoryPublicCardControl.jsx";
+import MemorySharingSettings from "./MemorySharingSettings.jsx";
+import MemoryClassificationEditor from "./MemoryClassificationEditor.jsx";
+import { addCustomTag, characterTagKey, classificationSyncEnabled, EMPTY_CLASSIFICATION, normalizeCardClassification } from "../domain/cardClassification.js";
+import { publicationUiEnabled } from "../runtime/platformPublication.js";
 import MemoryPrivateImageSync from "./MemoryPrivateImageSync.jsx";
 import { isPrivateUserImage, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
 import MemoryVisual from "./MemoryVisual.jsx";
@@ -21,18 +24,24 @@ const INITIAL_STATE = Object.freeze({
   remotePreviewDataUrl: null,
   catalogCover: null,
   note: "",
+  classification: EMPTY_CLASSIFICATION,
+  draftTag: "",
   status: "loading",
   message: "",
   deleteDialogOpen: false,
+  imageToolsOpen: false,
+  editing: false,
+  detailTab: "memory",
 });
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
-const localizedMessage = (message, copy) => {
+const localizedMessage = (message, copy, locale) => {
   if (!message) return "";
   if (message.scope === "detail") return copy.detail[message.key] || "";
   if (message.scope === "replacement") return copy.replacement[message.key] || "";
   if (message.scope === "error") {
+    if (message.code === "CARD_CLASSIFICATION_INVALID") return locale === "ko" ? "태그는 48자 이내 최대 20개, 캐릭터는 최대 12개까지 저장할 수 있어요." : "Use up to 20 tags (48 characters each) and 12 characters.";
     return copy.errors[message.code] || copy.errors.replacementFallback;
   }
   return "";
@@ -53,14 +62,32 @@ function MemoryCardDetailContent({ base }) {
   const detailCopy = copy.detail;
   const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
-  const { runtime, bundle, previewDataUrl, remotePreviewDataUrl, catalogCover, note, status, message, deleteDialogOpen } = state;
+  const { runtime, bundle, previewDataUrl, remotePreviewDataUrl, catalogCover, note, classification, draftTag, status, message, deleteDialogOpen } = state;
+  const dirty = Boolean(bundle && (draftTag.trim() || note !== (bundle.card.note || "") || JSON.stringify(classification) !== JSON.stringify(normalizeCardClassification(bundle.card.classification))));
   const onPrivatePreview = useCallback(value => updateState({ remotePreviewDataUrl: value }), []);
   const onPrivateBusy = useCallback(value => updateState({ status: value ? 'private-sync' : 'ready' }), []);
-  const allowLeave = useUnsavedNavigation(Boolean(bundle && note !== (bundle.card.note || "")), locale, { busy: ["saving", "deleting", "replacing", "private-sync"].includes(status) });
+  const allowLeave = useUnsavedNavigation(dirty, locale, { busy: ["saving", "deleting", "replacing", "private-sync"].includes(status) });
   const saveInFlight = useRef(false);
   const deleteTriggerRef = useRef(null);
   const deleteCancelRef = useRef(null);
   const deleteDialogRef = useRef(null);
+  const editTriggerRef = useRef(null);
+  const noteRef = useRef(null);
+  const tabRefs = useRef({});
+  useEffect(() => { if (state.editing) noteRef.current?.focus(); }, [state.editing]);
+  const endEditing = () => window.requestAnimationFrame(() => editTriggerRef.current?.focus());
+  const cancelEditing = () => {
+    updateState({ editing: false, note: bundle.card.note || "", classification: normalizeCardClassification(bundle.card.classification), draftTag: "", message: "" });
+    endEditing();
+  };
+  const switchTabByKey = event => {
+    if (state.editing || status !== "ready") return;
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "Home" ? "memory" : event.key === "End" ? "manage" : state.detailTab === "memory" ? "manage" : "memory";
+    updateState({ detailTab: next });
+    tabRefs.current[next]?.focus();
+  };
 
   useEffect(() => {
     let active = true;
@@ -89,7 +116,11 @@ function MemoryCardDetailContent({ base }) {
         previewDataUrl: preview,
         catalogCover: resolvedCover,
         note: cardBundle.card.note || "",
+        classification: normalizeCardClassification(cardBundle.card.classification),
+        imageToolsOpen: !cardBundle.asset.designSpec && !preview && !resolvedCover?.publicUrl,
+        detailTab: !cardBundle.asset.designSpec && !preview && !resolvedCover?.publicUrl ? "manage" : "memory",
         status: "ready",
+        editing: false,
       });
     }).catch(() => {
       if (active) updateState({ status: "error" });
@@ -103,16 +134,20 @@ function MemoryCardDetailContent({ base }) {
     saveInFlight.current = true;
     updateState({ status: "saving", message: "" });
     try {
-      const card = await runtime.updateCard(bundle.card.id, { note });
+      const card = await runtime.updateCard(bundle.card.id, { note, classification: addCustomTag(classification, draftTag) });
       updateState({
         bundle: { ...bundle, card },
         note: card.note || "",
+        classification: normalizeCardClassification(card.classification),
+        draftTag: "",
         message: { scope: "detail", key: "saved" },
         status: "ready",
+        editing: false,
       });
+      endEditing();
     } catch (error) {
       updateState({
-        message: error?.code === "CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED" ? { scope: "error", code: error.code } : { scope: "detail", key: "saveFailed" },
+        message: ["CATALOG_COVER_PERSONAL_SIGNAL_REQUIRED", "CARD_CLASSIFICATION_INVALID"].includes(error?.code) ? { scope: "error", code: error.code } : { scope: "detail", key: "saveFailed" },
         status: "ready",
       });
     } finally {
@@ -215,7 +250,7 @@ function MemoryCardDetailContent({ base }) {
       <header className="memory-detail__header">
         <a href={returnHref}>{returnHref === `${base}archive/` ? detailCopy.archiveLink : (locale === "ko" ? "돌아가기" : "Back")}</a>
         <span className="memory-detail__badges">
-          <span className="status-badge">{privateImageUiEnabled() && isPrivateUserImage(bundle.asset) ? (locale === 'ko' ? '비공개' : 'Private') : detailCopy.privacy}</span>
+          <span className="status-badge">{publicationUiEnabled() ? (locale === "ko" ? "비공개 원본" : "Private original") : privateImageUiEnabled() && isPrivateUserImage(bundle.asset) ? (locale === 'ko' ? '비공개' : 'Private') : detailCopy.privacy}</span>
           {bundle.asset.imageType === "CATALOG_COVER"
             ? <span className="status-badge">{detailCopy.catalogCover}</span>
             : null}
@@ -255,45 +290,58 @@ function MemoryCardDetailContent({ base }) {
         </div>
         <div className="memory-detail__body">
           <h1 className="pageTitle">{bundle.title.displayTitle}</h1>
+          <dl className="memory-detail__facts">
+            <div><dt>{locale === "ko" ? "기록일" : "Created"}</dt><dd>{new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en", { dateStyle: "medium" }).format(new Date(bundle.card.createdAt))}</dd></div>
+            <div><dt>{locale === "ko" ? "이미지" : "Visual"}</dt><dd>{bundle.asset.designSpec ? copy.archive.systemDesign : bundle.asset.imageType === "CATALOG_COVER" ? detailCopy.catalogCover : copy.archive.privateImage}</dd></div>
+          </dl>
           <MemoryTitleLink bundle={bundle} base={base} label={detailCopy.openTitleHub} className="memory-detail__title-link" />
-          <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
-            hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
-          <MemoryImageReplacement
-            runtime={runtime}
-            imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
-            disabled={status !== "ready"}
-            onReplace={replaceImage}
-            onBusyChange={(isBusy) => updateState({ status: isBusy ? "replacing" : "ready" })}
-            onMessage={(nextMessage) => updateState({ message: nextMessage })}
-            copy={copy.replacement}
-          />
-          <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} />
-          <MemoryPublicCardControl card={bundle.card} locale={locale} disabled={status !== "ready"} />
-
-            <form onSubmit={save}>
+          <div className="memory-detail__toolbar">
+            <button ref={editTriggerRef} type="button" className="memory-detail__edit-trigger" disabled={status !== "ready" || state.editing} onClick={() => updateState({ editing: true, detailTab: "memory", message: "" })}>{locale === "ko" ? "기억 수정" : "Edit memory"}</button>
+            <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} disabled={status !== "ready" || state.editing} />
+          </div>
+          <div className="memory-detail__tabs" role="tablist" aria-label={locale === "ko" ? "기억 상세" : "Memory details"} onKeyDown={switchTabByKey}>
+            {[['memory', locale === 'ko' ? '기억' : 'Memory'], ['manage', locale === 'ko' ? '관리' : 'Manage']].map(([key, label]) => <button key={key} ref={node => { tabRefs.current[key] = node; }} id={`memory-detail-tab-${key}`} type="button" role="tab" aria-selected={state.detailTab === key} aria-controls={`memory-detail-panel-${key}`} tabIndex={state.detailTab === key ? 0 : -1} disabled={status !== 'ready' || state.editing} onClick={() => updateState({ detailTab: key })}>{label}</button>)}
+          </div>
+          <section id="memory-detail-panel-memory" role="tabpanel" aria-labelledby="memory-detail-tab-memory" hidden={state.detailTab !== "memory"}>
+          {state.editing ? <form className="memory-detail__editor" onSubmit={save}>
             <label className="memory-detail__field">
               <span>{detailCopy.noteLabel}</span>
               <textarea
+                ref={noteRef}
                 className="textarea"
                 value={note}
                 disabled={status !== "ready"}
                 maxLength={500}
-                rows={6}
+                rows={3}
                 onChange={(event) => updateState({ note: event.target.value })}
               />
               <small>{note.length}/500</small>
             </label>
-            {message && (
-              <p className="memory-detail__message" role="status">
-                {localizedMessage(message, copy)}
-              </p>
-            )}
+            <MemoryClassificationEditor title={bundle.title} value={classification} onChange={value => updateState({ classification: value, message: "" })} draftTag={draftTag} onDraftTag={value => updateState({ draftTag: value, message: "" })} locale={locale} disabled={status !== "ready"} />
             <div className="memory-detail__actions">
-              {note !== (bundle.card.note || "") && <button className="btn btn--subtle" type="button" disabled={status !== "ready"} onClick={() => updateState({ note: bundle.card.note || "", message: "" })}>{locale === "ko" ? "감상 수정 취소" : "Cancel reflection changes"}</button>}
+              <button className="btn btn--subtle" type="button" aria-label={locale === "ko" ? "감상 수정 취소" : "Cancel reflection changes"} disabled={status !== "ready"} onClick={cancelEditing}>{locale === "ko" ? "취소" : "Cancel"}</button>
               <button className="btn" type="submit" disabled={status !== "ready"}>
                 {status === "saving" ? detailCopy.saving : detailCopy.save}
               </button>
-              <button
+            </div>
+          </form> : <div className="memory-detail__read">
+            <div className="memory-detail__reflection"><h2>{detailCopy.noteLabel}</h2><p className={!note ? "memory-detail__empty" : undefined}>{note || (locale === "ko" ? "아직 남긴 감상이 없어요." : "No reflection yet.")}</p></div>
+            <dl className="memory-detail__classification">
+              <div><dt>{locale === "ko" ? "캐릭터" : "Characters"}</dt><dd>{classification.characters.length ? classification.characters.map(row => <span className="memory-detail__tag" key={characterTagKey(row)}>{row.name}</span>) : <span className="memory-detail__empty">{locale === "ko" ? "선택 안 함" : "None selected"}</span>}</dd></div>
+              <div><dt>{locale === "ko" ? "커스텀 태그" : "Custom tags"}</dt><dd>{classification.tags.length ? classification.tags.map(tag => <span className="memory-detail__tag" key={tag}>#{tag}</span>) : <span className="memory-detail__empty">{locale === "ko" ? "태그 없음" : "No tags"}</span>}</dd></div>
+            </dl>
+            {!classificationSyncEnabled() && (classification.tags.length > 0 || classification.characters.length > 0) && <small className="memory-detail__local-hint">{locale === "ko" ? "카드 태그는 현재 이 기기에만 저장돼요." : "Memory tags are currently saved on this device only."}</small>}
+          </div>}
+          </section>
+          <section id="memory-detail-panel-manage" role="tabpanel" aria-labelledby="memory-detail-tab-manage" hidden={state.detailTab !== "manage"}>
+          <MemorySharingSettings card={bundle.card} locale={locale} base={base} disabled={status !== "ready"} />
+          <details className="memory-detail__tools" open={state.imageToolsOpen} onToggle={event => { if (event.currentTarget.open !== state.imageToolsOpen) updateState({ imageToolsOpen: event.currentTarget.open }); }}><summary>{locale === "ko" ? "이미지 변경·관리" : "Change and manage image"}</summary>
+            <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
+              hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
+            <MemoryImageReplacement runtime={runtime} imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
+              disabled={status !== "ready"} onReplace={replaceImage} onBusyChange={isBusy => updateState({ status: isBusy ? "replacing" : "ready" })} onMessage={nextMessage => updateState({ message: nextMessage })} copy={copy.replacement} />
+          </details>
+          <div className="memory-detail__danger"><button
                 ref={deleteTriggerRef}
                 className="btn btn--danger"
                 type="button"
@@ -302,8 +350,9 @@ function MemoryCardDetailContent({ base }) {
               >
                 {status === "deleting" ? detailCopy.deleting : detailCopy.remove}
               </button>
-            </div>
-          </form>
+          </div>
+          </section>
+          {message && <p className="memory-detail__message" role="status">{localizedMessage(message, copy, locale)}</p>}
         </div>
       </article>
       {deleteDialogOpen && (

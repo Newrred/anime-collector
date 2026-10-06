@@ -3,6 +3,7 @@ import {
   createDefaultSyncEnvelope,
   requireOwnerId,
 } from "../../domain/memoryDomain.js";
+import { EMPTY_CLASSIFICATION, normalizeCardClassification } from "../../domain/cardClassification.js";
 
 const ENTITY_TYPES = new Set([
   "PRIVATE_TITLE",
@@ -204,6 +205,8 @@ const toLocalEntity = (entityType, remoteInput, ownerId, existing = null) => {
     episode: remote.episode ?? null,
     sceneCue: remote.sceneCue ?? null,
     emotionTags: remote.emotionTags || [],
+    classification: remote.deletedAt ? structuredClone(EMPTY_CLASSIFICATION) : normalizeCardClassification(existing?.classificationPending ? existing.classification : remote.classification ?? existing?.classification),
+    classificationPending: !remote.deletedAt && existing?.classificationPending === true,
     rewatchIntent: remote.rewatchIntent ?? null,
   };
   if (entityType === "VISUAL_ASSET") return {

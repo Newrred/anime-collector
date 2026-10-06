@@ -188,9 +188,9 @@ export default function TopNavDataMenu({
           className="top-nav__brand"
           aria-label={`MOEMOA ${copy.home}`}
         >
-          <span className="collection-wordmark" aria-hidden="true">moe<span>moa</span>.</span>
+          <span className="channel-wordmark" style={{ backgroundImage: `url(${base}brand/moemoa-film.png)` }} aria-hidden="true" />
         </a>
-        <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} />
+        <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} locale={locale} />
 
         <a className="btn top-nav__memory-action" href={`${base}memory/new/`} aria-label={copy.createMemory} data-astro-reload>
           <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
@@ -264,7 +264,7 @@ export default function TopNavDataMenu({
                     </span>
                     <div className="data-menu-section-title">{copy.navigationTitle}</div>
                   </div>
-                  <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} mobile onNavigate={() => setDataMenuOpen(false)} />
+                  <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} locale={locale} mobile onNavigate={() => setDataMenuOpen(false)} />
                 </section>
 
                 <section className="data-menu-section data-menu-section--account">
@@ -338,6 +338,7 @@ export default function TopNavDataMenu({
                     <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
                   <div className="data-menu-utility-grid">
+                    <a href={`${base}boards/`} className="btn btn--subtle data-menu-link" data-astro-reload aria-current={currentRoute === "boards" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "내 보드 →" : "My Boards →"}</a>
                     <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
                       aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>
                       <ActionLabel icon={<IconTrophy size={15} />}>{copy.tier}</ActionLabel>

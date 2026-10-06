@@ -1,5 +1,6 @@
 import { getMessageGroup } from "../../domain/messages.js";
 import { formatStatusLabel } from "../library/libraryCopy.js";
+import CollectionSelect from "../collection/CollectionSelect.jsx";
 
 function Section({ title, children }) {
   return (
@@ -211,21 +212,10 @@ export default function QuickActionPanel({
       ) : null}
 
       <div className="quick-action-panel__footer">
-        <label className="small quick-action-default-status">
+        <div className="small quick-action-default-status">
           <span>{copy.defaultStatus}</span>
-          <select
-            className="select quick-action-default-status__select"
-            value={quickAddStatus}
-            onChange={(event) => onQuickAddStatusChange?.(event.target.value)}
-            aria-label={copy.defaultStatus}
-          >
-            {copy.statusOptions?.map((row) => (
-              <option key={row.value} value={row.value}>
-                {row.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          <CollectionSelect label={copy.defaultStatus} value={quickAddStatus} options={copy.statusOptions || []} onChange={onQuickAddStatusChange} />
+        </div>
       </div>
     </div>
   );

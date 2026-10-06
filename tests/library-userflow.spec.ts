@@ -503,16 +503,16 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
 
   if (viewport.width > 900) {
     const primary = page.locator(".top-nav__links--routes");
-    await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Bookshelf" })).toBeVisible();
     await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
-    await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Memories" })).toBeVisible();
     return;
   }
 
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
   const mobileMenu = page.locator("#data-menu-panel");
   const primary = mobileMenu.locator(".top-nav-mobile-links");
-  await expect(primary.getByRole("link", { name: "Home" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Bookshelf" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
@@ -523,20 +523,23 @@ async function assertLocalMemoryAccountInEnglish(page: Page) {
   await page.goto("/data/", { waitUntil: "networkidle" });
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   const syncCard = page.locator(".sync-card");
-  await expect(syncCard).toContainText("Memory account");
-  await expect(syncCard).toContainText("Local only");
-  await expect(syncCard).toContainText("Metadata sync does not start automatically");
+  await expect(syncCard).toHaveAttribute("data-memory-account-status", "LOCAL_ONLY");
+  await expect(syncCard.getByRole("heading", { name: "Account & sync" })).toBeVisible();
+  await expect(syncCard).toContainText("Records and photos are saved on this device.");
+  await expect(syncCard.getByRole("button", { name: "Continue with Google" })).toBeDisabled();
   await expect(syncCard).not.toContainText("Cloud backup found");
 }
 
 async function evaluateHomeMemoryBoundary(page: Page): Promise<FlowMetrics> {
-  await expect(page.locator(".home-rediscovery")).toBeAttached();
-  return page.evaluate(() => {
-    const createMemory = document.querySelector('.home-memory-overview a[href$="memory/new/"]');
+  await expect(page.locator(".bookshelf-page .channel-empty")).toBeVisible();
+  return page.evaluate(async () => {
+    const { getPlatformMemoryRuntime } = await import("/src/features/memory/runtime/platformMemoryRuntime.js");
+    const archive = await (await getPlatformMemoryRuntime()).listArchive();
+    const createMemory = document.querySelector('.top-nav__memory-action');
     const createRect = createMemory?.getBoundingClientRect();
 
     return {
-      emptyMemoryState: Boolean(document.querySelector(".home-rediscovery")) && document.querySelectorAll(".home-rediscovery a[href*='memory/card/']").length === 0,
+      emptyMemoryState: archive.length === 0 && document.querySelectorAll(".bookshelf-page a[href*='memory/card/']").length === 0,
       createMemoryVisible: Boolean(createRect && createRect.width > 0 && createRect.height > 0),
       legacyResurfacingSections: document.querySelectorAll(".home-legacy-insights[open]").length,
       horizontalOverflow: Number(Math.max(document.documentElement.scrollWidth - window.innerWidth, 0).toFixed(2)),

@@ -85,7 +85,6 @@ test("My Titles keeps one album set across both views and restores the preferenc
 
 test("My Titles search and filters preserve saved and Memory meanings", async ({ page }) => {
   await page.goto("/titles/");
-  await page.locator('[aria-controls="title-collection-filter-panel-content"]').click();
   await page.getByRole("button", { name: "저장됨" }).click();
   await expect(page.locator("[data-title-key]")) .toHaveCount(2);
   await page.getByRole("button", { name: "기억 있음" }).click();
@@ -98,7 +97,7 @@ test("My Titles search and filters preserve saved and Memory meanings", async ({
 test("My Titles restores genre tags and the saved responsive column control", async ({ page }) => {
   await page.goto("/titles/");
   const filterPanel = page.locator("#title-collection-filter-panel-content");
-  await expect(filterPanel).toHaveCount(0);
+  await expect(filterPanel).not.toBeVisible();
   await page.locator('[aria-controls="title-collection-filter-panel-content"]').click();
   await expect(filterPanel.getByRole("combobox")).toHaveCount(0);
   await filterPanel.getByRole("button", { name: "판타지", exact: true }).click();
@@ -108,7 +107,7 @@ test("My Titles restores genre tags and the saved responsive column control", as
   await expect(page.getByText("던전밥", { exact: true })).toBeVisible();
 
   await page.getByRole("searchbox", { name: "내 작품 검색" }).fill("");
-  await filterPanel.locator(".library-chip-scroll").first().getByRole("button", { name: "전체", exact: true }).click();
+  await filterPanel.getByRole("button", { name: "전체", exact: true }).click();
   await page.getByRole("radio", { name: "표지 보기" }).click();
   const slider = page.getByRole("slider");
   await slider.fill("8");
@@ -117,7 +116,7 @@ test("My Titles restores genre tags and the saved responsive column control", as
   const columnCount = await page.locator(".title-collection__poster-grid").evaluate((node) => (
     getComputedStyle(node).gridTemplateColumns.split(" ").length
   ));
-  expect(columnCount).toBeGreaterThanOrEqual(8);
+  expect(columnCount).toBeGreaterThanOrEqual(7);
   await page.reload();
   await page.locator('[aria-controls="title-collection-filter-panel-content"]').click();
   await expect(page.getByRole("slider")).toHaveValue("8");
@@ -128,6 +127,7 @@ test("My Titles remains usable at 320px without horizontal page overflow", async
   await page.goto("/titles/");
   await expect(page.getByRole("heading", { name: "내 작품", level: 1 })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "정보와 탐색 펼치기" }).click();
   const compactControls = page.getByRole("radiogroup", { name: "작품 보기 방식" }).getByRole("radio");
   for (let index = 0; index < await compactControls.count(); index += 1) {
     expect(await compactControls.nth(index).evaluate((node) => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);

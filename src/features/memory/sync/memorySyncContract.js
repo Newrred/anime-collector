@@ -1,5 +1,6 @@
 import { stableStringify } from "../../../domain/syncHash.js";
 import { normalizeCatalogCoverRef } from "../domain/memoryDomain.js";
+import { classificationSyncEnabled, normalizeCardClassification } from "../domain/cardClassification.js";
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CATALOG_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -108,7 +109,7 @@ export function toRemotePrivateTitle(entity) {
   });
 }
 
-export function toRemoteMemoryCard(bundle) {
+export function toRemoteMemoryCard(bundle, { includeClassification = classificationSyncEnabled() } = {}) {
   if (!plainObject(bundle) || !plainObject(bundle.card) || !plainObject(bundle.title)) {
     fail("SYNC_DTO_INVALID", "Card bundle is required");
   }
@@ -142,6 +143,7 @@ export function toRemoteMemoryCard(bundle) {
     episode,
     sceneCue: nullableText(card.sceneCue, "sceneCue", 500),
     emotionTags: boundedTexts(card.emotionTags || [], "emotionTags", 20, 48),
+    ...(includeClassification ? { classification: normalizeCardClassification(card.classification) } : {}),
     rewatchIntent: nullableText(card.rewatchIntent, "rewatchIntent", 100),
     visibility: "PRIVATE",
     createdAt: timestamp(card.createdAt || card.updatedAt, "createdAt"),

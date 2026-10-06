@@ -6,6 +6,7 @@ import MemoryRouteShell, { useMemoryRouteUi } from "../../memory/components/Memo
 import { createTitleHubService } from "../application/titleHubService.js";
 import { parseTitleHubRequest } from "../domain/titleNavigation.js";
 import "./title-hub.css";
+import TitleCharacters from "./TitleCharacters.jsx";
 
 const dateLabel = (value, locale) => {
   const parsed = Date.parse(value);
@@ -113,6 +114,10 @@ function TitleFacts({ album, copy, base, service, onTracking, locale }) {
           <div key={label}><dt>{label}</dt><dd>{displayValue(value)}</dd></div>
         ))}</dl>
       </section>
+      {!album.isPrivateTitle && <section className="surface-card title-hub__characters">
+        <h2>{locale === "ko" ? "등장 캐릭터" : "Characters"}</h2>
+        <TitleCharacters animeId={album.titleRef.kind === "ANIME" ? album.titleRef.animeId : null} anilistId={album.anilistId} locale={locale} />
+      </section>}
       <section className="surface-card title-hub__tracking">
         <h2>{copy.watchLogs(album.watchLogs.length)}</h2>
         {album.tracking.isSaved && album.anilistId ? (

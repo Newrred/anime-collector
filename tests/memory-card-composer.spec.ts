@@ -48,9 +48,11 @@ test("Memory routes follow the selected English locale from composer through det
   await expect(page.getByText("Revisit the scenes and reflections saved on this device.")).toHaveCount(0);
   await page.getByRole("link", { name: "Frieren" }).click();
 
-  await expect(page.getByLabel("Short reflection")).toHaveValue("A quiet journey worth remembering.");
-  await expect(page.getByRole("button", { name: "Save changes" })).toBeVisible();
+  await expect(page.locator(".memory-detail__reflection")).toContainText("A quiet journey worth remembering.");
+  await page.getByRole("tab", { name: "Manage", exact: true }).click();
   await expect(page.getByRole("button", { name: "Delete card" })).toBeVisible();
+  await page.getByRole("button", { name: "Edit memory", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save changes" })).toBeVisible();
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Changes saved on this device.")).toBeVisible();
 
@@ -118,13 +120,12 @@ test("prepared image errors retranslate without retrying the native claim", asyn
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("locale-error-claim-count"))).toBe("1");
 });
 
-test("browser route presents system design as the available visual path without exposing a file input", async ({ page }) => {
+test("browser route offers the design path without opening a picker or saving without a visual", async ({ page }) => {
   await page.goto("/memory/new/");
 
   await expect(page.getByRole("heading", { name: "기억 남기기" })).toBeVisible();
-  await expect(page.getByText("사진 없이도 남길 수 있어요")).toBeVisible();
-  await expect(page.getByText('작품 표지를 고르거나 디자인으로 만들어보세요.')).toBeVisible();
-  await expect(page.locator('input[type="file"]')).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "디자인으로 만들기", exact: true })).toBeVisible();
+  await expect(page.locator('input[type="file"]:visible')).toHaveCount(0);
   const save = page.getByRole("button", { name: "카드 저장" });
   await expect(save).toBeDisabled();
   await expect(page.locator("#memory-save-reason")).toContainText("사진, 작품 표지, 디자인 중 하나를 골라주세요.");
@@ -154,7 +155,7 @@ test("empty Archive exposes one page-level create action", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "기억 아카이브" })).toBeVisible();
   await expect(page.getByText("아직 저장한 카드가 없어요.")).toBeVisible();
-  await expect(page.locator('.memory-archive a[href$="memory/new/"]')).toHaveCount(1);
+  await expect(page.locator('.top-nav__memory-action')).toHaveCount(1);
 });
 
 test("Archive turns an unavailable private preview into a recoverable visual state", async ({ page }) => {
@@ -261,12 +262,14 @@ test("private card saves once and remains visible in Archive after reload", asyn
     const utilities = document.querySelector(".memory-detail__body");
     return Boolean(visual && utilities && (visual.compareDocumentPosition(utilities) & Node.DOCUMENT_POSITION_FOLLOWING));
   })).toBe(true);
+  await page.getByRole("button", { name: "기억 수정", exact: true }).click();
   await page.getByLabel("짧은 감상").fill("A quieter memory after revisiting.");
   await page.getByRole("button", { name: "변경 저장" }).click();
   await expect(page.getByText("변경 내용을 이 기기에 저장했어요.")).toBeVisible();
 
   await page.reload();
-  await expect(page.getByLabel("짧은 감상")).toHaveValue("A quieter memory after revisiting.");
+  await expect(page.locator(".memory-detail__reflection")).toContainText("A quieter memory after revisiting.");
+  await page.getByRole("tab", { name: "관리", exact: true }).click();
 
   const deleteButton = page.getByRole("button", { name: "카드 삭제" });
   await deleteButton.click();
@@ -336,6 +339,8 @@ test("card detail replaces a local image only after explicit rights confirmation
 
   const currentImage = page.getByAltText("Frieren 메모리 카드");
   await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
+  await page.getByRole("tab", { name: "관리", exact: true }).click();
+  await page.locator(".memory-detail__tools > summary").click();
   await page.getByRole("button", { name: "이미지 교체" }).click();
   await expect(page.getByAltText("새 이미지 미리보기")).toHaveAttribute(
     "src",
@@ -479,6 +484,8 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Picker Ownership" }).click();
+  await page.getByRole("tab", { name: "관리", exact: true }).click();
+  await page.locator(".memory-detail__tools > summary").click();
 
   await page.getByRole("button", { name: "이미지 교체" }).evaluate((button: HTMLButtonElement) => {
     button.click();
@@ -549,6 +556,7 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
   await page.getByRole("link", { name: "Rejected Replacement" }).click();
+  await page.getByRole("tab", { name: "관리", exact: true }).click();
   await page.evaluate(async () => {
     const request = indexedDB.open("moemoa-memory-v1");
     const database: IDBDatabase = await new Promise((resolve, reject) => {
@@ -570,6 +578,7 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
     database.close();
   });
 
+  await page.locator(".memory-detail__tools > summary").click();
   await page.getByRole("button", { name: "이미지 교체" }).click();
   await page.getByLabel("이 이미지를 개인 기록에 사용할 권리와 책임이 나에게 있음을 확인합니다.").check();
   await page.getByRole("button", { name: "이 이미지로 교체" }).click();
@@ -750,16 +759,20 @@ test("an approved official cover can be selected, saved by reference, and displa
   expect(JSON.stringify(storedAssets)).not.toContain("catalog-covers-preview");
 
   await page.getByRole("link", { name: "장송의 프리렌" }).click();
-  await expect(page.getByText("승인된 공식 표지", { exact: true })).toBeVisible();
+  await expect(page.locator(".memory-detail__facts").getByText("승인된 공식 표지", { exact: true })).toBeVisible();
   await expect(page.getByAltText("장송의 프리렌 메모리 카드")).toBeVisible();
   await expect(page.locator(".memory-detail__visual .memory-visual--contain")).toHaveCount(1);
-  await expect(page.getByLabel("짧은 감상")).toHaveValue("여정을 마친 뒤 남은 조용한 감정.");
+  await expect(page.locator(".memory-detail__reflection")).toContainText("여정을 마친 뒤 남은 조용한 감정.");
   await page.goto("/");
-  const homeMemory = page.locator(".home-memory-overview");
-  await expect(homeMemory.getByText("공식 표지", { exact: true })).toBeVisible();
-  await expect(homeMemory.getByAltText("장송의 프리렌 메모리 카드")).toBeVisible();
+  await page.getByRole("button", { name: "책장 꾸미기", exact: true }).click();
+  await page.getByRole("button", { name: "선반 추가", exact: true }).click();
+  await page.locator('.bookshelf-picker').getByLabel("장송의 프리렌", { exact: true }).check();
+  await page.getByRole("button", { name: "적용", exact: true }).click();
+  await page.getByRole("button", { name: "장송의 프리렌 기억 필름", exact: true }).click();
+  const homeMemory = page.locator(".bookshelf-film");
+  await expect(homeMemory.getByAltText("장송의 프리렌 공식 표지 기반 메모리 카드")).toBeVisible();
   await expect(homeMemory.locator(".memory-visual--contain")).toHaveCount(1);
-  await expect(homeMemory.getByRole("link", { name: "이 작품 보기" })).toHaveAttribute("href", new RegExp(`^/title/\\?animeId=${encodeURIComponent(animeId)}`));
+  await expect(homeMemory.locator(".title-album-card__identity")).toHaveAttribute("href", new RegExp("^/title/\\?animeId=" + encodeURIComponent(animeId)));
 });
 
 test("catalog detail deep-link restores the exact AnimeRef before saving", async ({ page }) => {
