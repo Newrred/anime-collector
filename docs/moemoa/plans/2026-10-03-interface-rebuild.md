@@ -20,6 +20,8 @@ CARD-01, BOARD-01, ACCOUNT-01, IA-01, TITLE-COLLECTION-01, TITLE-VIEW-01, NAMING
 ### 제외
 DB/동기화/권리 정책 변경, 운영 배포, 새 production 의존성, 실제 사용자 사진 업로드, 미완료 공개 준비 서버 문제 해결.
 
+22차의 명시 사용자 승인으로 카드별 분류의 로컬 저장과 원격 동기화 migration **후보 준비/격리 검증**만 범위를 보완했다. 운영 DB 적용·동기화 flag 활성화·배포는 제외를 유지한다.
+
 ## 5. 아키텍처·데이터 흐름
 기존 runtime/repository/owner boundary와 동작 handler를 유지하고 presentation을 교체한다. 보드 표지는 해당 사용자의 실제 membership 첫 3장으로 구성한다. 런타임의 안전한 이미지 renderer를 재사용하고 보이는 타일부터 읽는다. 이미지 실패 시 정직한 빈 표지를 사용한다. DOM 순서는 키보드 탐색/보드 저장 순서와 일치한다.
 
@@ -335,3 +337,166 @@ DB, 이미지 원본, 공개 정책/flags, production dependencies 변경 없음
 - 검증 기록: `grid-v8-flow-results.json`, `grid-v8-layout-results.json` (상기 검토 폴더). `first/check` 이미지는 중간 확인용이며 비교 페이지에는 `final` 캡처만 사용한다.
 
 8차 마감: main이 두 JSON 전체와 최종 PC/320 첫 화면·펼침·비교,390 정사각/세로 필름·빈 선반·작성창 캡처를 직접 열어 확인했다. 기능15그룹/fixture32 PASS, 독립 레이아웃12항목은 명시된 범위 내 PASS(일부 키보드/접근성 sample 한정). reduced-motion 에뮬레이션에서 펼침 작동·drawer animation none, 표본 transition0s/scrollBehavior auto 확인.320px 작품8/표지·필름/상세/Archive18/세로 모달264×396/작성창 smoke 가로 넘침0. 모든 검사 브라우저 세션 종료. Codex 패널의 새 시안·비교 열기는 `queued`로 반환되었으므로 표시 완료로 주장하지 않고 직접 링크를 함께 제공한다. 이후 코드 수정 없이 검토 게이트로 인계한다.
+
+### 9차 — V8.1 적용 준비 키트 (2026-10-05)
+- 목적/승인: 사용자가 V8을 조금 다듬고 덜 정적인 서비스로 느껴지도록 디자인 규칙·버튼·화살표 PNG 준비를 요청했다. V8 고정 그리드/행 아래 필름/NO-HERO/로고2안을 보존한다.
+- 범위: design/ui-kit-v8.1의 재생성 가능한 SVG→PNG 아이콘, 버튼 상태 견본, CSS 토큰, 인터랙티브 검토 페이지, 적용 명세. 기존 V8·src·공개 게이트는 그대로 보존한다.
+- 구조/파일: generate.mjs가 명시적 24px 선형 도형을 기존 sharp로 래스터화한다. index.html은 버튼 상태와 필름 열림을 체험한다. DESIGN_RULES.md는 컴포넌트/상태/동작/도입 순서를 정의한다.
+- 단계: 원본 V8 캡처/CSS 확인 → 규칙·자산 제작 → PNG 크기/alpha/참조 검사 → 320/1440 브라우저 확인 → 결과 보고.
+- 검증: 새 PNG 실제 해상도/alpha/파일 개수, HTML 참조, 브라우저 반응/가로 넘침/감소 모션. 기존 앱 전체 회귀 PASS로 확대하지 않는다.
+- 데이터/권리/관측: 신규 schema/API/업로드/분석/개인자료/유료 서비스 없음. 자체 기하 도형과 기존 가상 시안 이미지만 사용. 추가 의존성 설치 없음.
+- 롤백: 별도 키트 폴더 제거로 복구 가능; 기존 시안은 변경하지 않는다.
+- 위험/미정: 미감 승인, 실제 서비스 컴포넌트 이전 및 Safari/실폰 검증은 후속. 버튼 라벨은 이미지에 굽지 않고 실제 텍스트를 사용한다. PNG는 견본/아이콘 납품이며 AI 생성이 아닌 재현 가능한 벡터 기반 출력이다.
+- 진행: 제작 착수. 완료 근거는 이 절에 추가한다.
+
+#### 9차 준비·검증 결과 — 2026-10-05
+- 읽은 근거: 시작 문서/확정 결정의 NO-HERO와 SHELF-ROW, 제품02, QA07, PLANS, V8 HTML/CSS/실제1440 캡처 및 최신 인계. 서비스 적용 전 준비 범위로 해석했다.
+- 제작: design/ui-kit-v8.1/의 DESIGN_RULES.md, tokens.css, index.html, v8-refined.html 및 재생성/실행/검사 도구. 자체28SVG → 4색×3해상도 투명PNG336개, 모형 버튼5개, 한국어 라벨 버튼6개. 기존 V8/서비스 src는 수정0.
+- 실제 실행: node generate.mjs 28종/336개 크기·alpha PASS; render-buttons.mjs 실제 브라우저 3x6견본 출력. verify.mjs Chromium1440/320에서 각28아이콘·성공/확정실패/불확실상태조회·가로넘침0·표지x/width불변·reduced-motion0s·pageerror0. 마지막 CSS 문법/문서 링크 수정 후 재검사 통과. kit/refined 화면PNG4개와 verification.json 보존. git diff --check 통과(줄바꿈 경고만).
+- 디자인 판단: 흰 배경/먹색/필름구조 유지, 작은 선택 강조·120ms버튼·44px타깃·보조텍스트 가독성 보완. V8의 기존180ms필름 동작을 그대로 사용하며 새 서비스 기능으로 과장하지 않는다. 벡터 기반 PNG 생성으로 AI 이미지 생성 호출은 사용하지 않았다.
+- DB/migration/운영/의존성/개인정보/분석 변경0. 로컬loopback시안만. 원복은 새키트를 사용하지 않으면 된다. 실제backend·실물휴대폰·Safari·전체앱 회귀·미감승인은 미완료.
+- 다음: V8.1 검토 후 실제 공통 버튼 및 공개 이미지 준비 결과 표시 한 흐름부터 적용. 공개/운영배포 승인은 별도.
+
+### 10차 — 핑크 필름 탭 비교안 (2026-10-05)
+- 사용자 승인: 쨍한 핑크/특색 있는 버튼 제안 후 “ㄱㄱ”. V8.1을 보존하고 별도 ui-kit-v8.2를 제작한다. 최종 운영 디자인 승인 아님.
+- 범위: #E60068 강조색, 구획이 있는 필름 탭 버튼, 핵심 이미지/책장/기억추가 도형 개선, PNG 재출력, 기존 V8 동작을 유지한 검토 화면.
+- 단계/검증: 기존 키트 복제→색/형태/아이콘 개선→336PNG/버튼 출력→1440/320 흐름·넘침·행 고정·모션감소 검사→캡처 직접검토.
+- 데이터/롤백/위험: DB/서비스src/외부연동/의존성/분석 변경0. 이전V8.1로 즉시 비교 가능. 대비와 작은 아이콘 식별성 확인, 실폰/미감승인은 후속.
+
+10차 결과: ui-kit-v8.2 별도 생성. tokens/index/prepare-refined 및 생성기 수정, 자체28SVG/336투명PNG/실라벨버튼6개 재출력. 기존V8.1 보존. generate.mjs 크기/alpha 검증, render-buttons.mjs, verify.mjs 통과: Chromium1440/320 가로넘침0, 표지좌표/폭불변, 준비3상태·상태조회 정상, pageerror0, reduced-motion0s. main이 kit1440/refined320 PNG 직접 확인. 뒤이어 예전 추상버튼 목록을 숨기고 최종키트1440/320 재캡처. Pink/white 대비 계산4.6007:1. git diff --check 오류0. 실제src/DB/배포 없음. 실폰/최종미감 미확인. 다음은 핑크안 미감 검토 후 공통컴포넌트 이전.
+
+### 11차 — 필름 면 제거 (2026-10-05)
+- 사용자 요청: 흰 배경에서 회색 필름 채움이 튀므로 선 장식으로 변경. V8.2의 필름 프레임/추가읽기 영역만 흰 바탕·윤곽 퍼포레이션으로 변경한다.
+- 근거: film-desk.css:50의 #262626 gradient, :52의 채워진 구멍, :83의 추가읽기 배경.
+- 범위/검증: line-film.css 및 재생성 HTML, 디자인규칙 갱신. 실제320/1440 캡처, 배경 computedStyle·표지좌표·넘침·기존 상태회귀. DB/src/의존성/배포0. 이전 캡처는 cache에 보존. V8/V8.1 원본 유지.
+
+11차 결과: prepare-refined.mjs/v8-refined.html에 line-film.css 연결, DESIGN_RULES 갱신. verify.mjs1440/320 표지좌표/폭 불변·넘침0·3상태/감소모션 통과. 별도 computedStyle에서 프레임 투명배경·윤곽SVG·5px구멍 확인, 최종1440/320 캡처 및 line-film-verification.json 보존. main이320 화면 직접 검토. 원본 이미지 대비/색 변경0. 실제서비스/실폰 미검증.
+추가 검사 이력: 첫 computedStyle 검사는 동일 URL 재방문 후 열린 패널을 다시 눌러 닫는 테스트 상태 문제로 timeout. 각 폭에서 새 문서로 진입하도록 검사기를 수정한 뒤1440/320 투명배경·fill=none·5px 모두 확인했다. 제품 코드 추가수정 없음.
+
+### 12차 — 책장·열린 필름 상세 디자인 (2026-10-05)
+- 승인/목적: 사용자 “ㅇㅇ ㄱ ㄱ”. 시안의 큰 구조가 아닌 실제 화면의 글자 위계/버튼/아이콘/편집 메뉴/선택/빈 상태를 완성할 검토 단위를 만든다.
+- 범위: 별도 design/bookshelf-detail-v8.3. V8 모델을 재사용한 홈·필름·책장 편집 상세화. 실제 앱/DB/계정/공개/배포/새 의존성 제외. 이미지/작품 가상fixture 유지.
+- 근거: film-grid.js:254–350의 타일/필름/편집기, 기존V8.2 토큰/line-film. base href 때문에 hash 링크가 prototypes 폴더로 이동하는 문제도 새 문서에서 제거한다.
+- 구조/파일: prepare.mjs → index.html / bookshelf.js, detail.css, 작은 menu.js; 기존CSS/자산을 명시적 상대경로로 참조. 단일 진행계획 본절 유지.
+- 단계: 상세시안 생성→1440/390/320 펼침·메뉴·편집취소/적용·상세왕복·빈선반·키보드/모션 검사→실제캡처 검토→미감 인계. 제품 전면 완료 아님.
+- 롤백/위험: 이전V8.2 보존, 새링크만 사용. 서비스 저장모델 변경0. 스크린리더/실물터치/Safari/전체라우트는 미검증으로 남긴다. 새 통계나 성공상태를 꾸며내지 않는다.
+
+12차 완료 보고: design/bookshelf-detail-v8.3의 prepare/생성HTML·JS/detail.css/menu.js/README/검사·캡처를 추가했다. 자료: 시작문서/결정01/기존V8 모델/9~11차 디자인규칙. 원본모델을 재사용하며 src/DB/생산의존성/공개/배포/분석 변경0. 검사 node --check 및 verify.mjs(1440/390/320:표지x/폭불변·넘침0·Escape·편집취소/적용·상세왕복·감소모션), verify-empty.mjs(접기·빈선반·재선택) 최종PASS. 초기 생성기 quote구문 오류는 생성전 발견/수정했고, 빈선반 테스트 locator재해석 timeout은 고정ID검사로 수정 후통과. 모바일 접기 줄바꿈을 캡처에서 발견해 헤더44px조작부로 이동. main이320필름/1440편집 실제이미지 직접 확인. 취소/적용 후 숨은 메뉴항목 대신 메뉴트리거로 초점 복귀. 브라우저 실제서버 검증은 Chromium가상RAM범위이며 실폰/전체서비스 아님. 다음게이트는 이 책장 상세 화면 미감 검토, 이어서 상세·작성 등 화면별 상태설계.
+
+### 13차 — Are.na 실제 UI 재검토와 장식 제거 (2026-10-05)
+- 사용자: Are.na의 상단바/버튼/레이아웃/선요소를 더 참고하고 과장된 버튼을 재작업하라는 요청.
+- 실제 관찰: Are.na/explore의 로드된 이미지/채널목록을1440에서 관찰. nav55px/그림자0, 소형중립버튼 radius3px,28px breadcrumb 제목, 얇은 구분선. 특정 typography 채널은 skeleton/placeholder 상태여서 실제자료 레이아웃 근거 제외. 원격화면은cache에만 보존, 개인정보/제3자이미지 Git보관0.
+- 변경범위: 기존V8.3 상세시안을 수정. 절취선/단면/원형/핑크채움 제거, 컴팩트 상단/제목/평면조작·편집선 정리. Pink는 선택/초점/주요행동 텍스트에 제한. grid모델/행펼침/회색면 제거는 유지.
+- 검증/롤백: 직전CSS/cache캡처 보존, 동일1440/390/320 흐름검사와 캡처. src/DB/배포/의존성0. 이식/실기기/최종미감 미완료.
+13차 결과: detail.css 전면정리 및 README 현행규칙 갱신, 관찰JSON 보존. 실제Are.na/explore 이미지목록과 nav55px/shadow0/radius3px 측정; MOEMOA58px상단/2px평면버튼/24px제목은 제안치로 구분. 절취선·단면·핑크채움·원형장식 제거. verify.mjs와 verify-empty.mjs 최종PASS(1440/390/320, 표지좌표/폭유지·넘침0·메뉴/취소/적용/상세왕복·감소모션·빈상태복구). main이 home1440/film320 실제최종캡처 검토. 운영/DB/src 변경0, 실폰/스크린리더/전체화면미감은미완료.
+
+### 14차 — AD_Direzione 실측 기반 페이지 구조 (2026-10-05)
+- 사용자 지정 https://www.are.na/chase-body/ad_direzione 를 실제 로드. 1920/1440/1024/390/320 상단·스크롤10장과 메뉴/정보펼침/검색/블록상세/표전환 등 캡처. .cache/arena-ad-study는 외부이미지 포함 로컬검토자료이며 Git미포함.
+- 실측: nav55; 제목x65/y90/28px; 정보y170; gridy400; 1920 6열285.83/1440 4열316.25/1024 3열288; 간격15. 정사각셀에 원본비율contain. 모바일390 2열177.5/320 1열290, 가장자리15; 모바일정보는1열 접힘/하단탐색. 기존모든폭6/2열과 표지2:3 fill은 비율불일치 원인이었다.
+- 관찰 한계: Table은Premium게이트, 실제표내용은 미관찰. More는Flag/Present/API/RSS이며 소유자편집이 아니다. 검색대화상자와 블록URL/좌이미지·우정보를 관찰. 계정/연결/유료조작0.
+- 구현: 기존V8.3 보존, design/channel-study-v8.4에 홈페이지 구조 재현. 실제MOEMOA 가상책장정보/선반/보기 Grid·Table/검색/정보펼침/행아래필름/상세연결. Table은MOEMOA제안이지Are.na내부복제아님. 상단정보는기능정보이며hero아님. 기존도메인불변.
+- 계획/검증: 기존모델 재사용하여 생성→5폭실측/정사각셀/contain/선반/검색/표복귀/정보펼침/상세/편집→캡처/분석보고. DB/src/외부쓰기/의존성/배포0. 원복은V8.3링크. 실폰/최종미감은후속.
+
+14차 결과: 지정 채널 캡처17장과 실측JSON, ANALYSIS.md, 로컬검토ZIP을 보존했다. prepare.mjs, node --check channel.js, verify.mjs, verify-details.mjs 통과. 1920/1440/1024/390/320에서 정사각셀·열수·가로넘침0, 정보펼침·표전환/뒤로가기·검색/빈결과·필름·작품왕복 확인. 1440/390/320에서 선반필터·큰이미지상세/Escape·편집취소 통과. 1440의 x65/y400/셀316.25는 원격실측과 일치하고 모바일 목록Y는 약1px 차이. 최종1440 홈/상세 캡처 직접 확인. git diff --check 오류0(줄바꿈 경고만). 새 파일은 design/channel-study-v8.4에 한정하고 기존시안 유지. 원격이미지는 cache 검토자료만 사용했다. Table은 Premium 때문에 원본내용 미관찰, 자체표 제안이며 검색도 책장내 간단검색만 구현했다. 실제서비스/실폰/전체라우트/대량데이터 검증과 최종미감은 미완료. Codex 패널 열기는 queued이므로 링크 제공. 다음은 이 구조 기준의 사용자 검토 후 작품·작성 화면 상세화이며 운영 적용/배포는 이번 범위에 포함하지 않는다.
+
+### 15차 — 작품·기억 탭에 채널 구조 확장 (2026-10-05)
+- 사용자 승인: 내 책장뿐 아니라 작품·기억도 같은 흐름. 기존 V8.4 안에서 공통 경로제목/정보/검색/보기/정사각 이미지 무대를 적용한다. 작품 상태와 기억을 합치지 않는다.
+- 근거: 시작문서, 결정01, 제품02, Title Hub 명세, PLANS, channel.js의 renderTitles/renderMemories와 기존 이벤트. 기존 계획에 흡수한다.
+- 파일: prepare.mjs 생성기, render-tabs.txt, channel.css, 생성 channel.js, 브라우저 검증/분석 기록. 모델·src·DB·공개·배포·의존성 변경 없음.
+- 단계: 공유 상단/탭별 탐색 구현 → 1440/390/320 레이아웃·검색·필터·보기·상세/복귀 및 책장 회귀 → 캡처 확인.
+- 롤백: 새 템플릿 연결과 탭 CSS 제거 후 재생성. 실제 서비스/실폰/전체 라우트 검증은 범위 밖. 최종 미감은 사용자 검토로 남긴다.
+15차 결과: V8.4 안에 render-tabs.txt 공유 상단·작품/기억 목록 추가, prepare/channel.css/channel.js 갱신. node prepare, node --check, verify-tabs 1440/390/320 검색·초기화·필터·보기·정렬·상세왕복 PASS, 기존 verify 5폭 책장 회귀 PASS. 최종 둘 다1440 x65/y400/4열316.25,390 2열177.5,320 1열290; 넘침0·JS오류0. 초기 캡처의 상속 버튼 배경/높이를 수정 후 재검사했다. CSS 마감 후 최종검사 PASS. git diff --check 오류0(줄바꿈 경고). ANALYSIS에 파일/명령/한계/롤백 기록. 실제서비스·DB·배포0. 다음: 세 탭 미감/동작 사용자 검토.
+
+### 16차 — 이미지 밀도와 기억 남기기 강조
+사용자 캡처의 과도한 이미지/글/행 간격을 줄인다. V8.4 책장·작품 표지 폭 확대, 설명 간격 축소, 기억 목록은 기존 masonry 배치기를 재사용해 원본 비율의 빈 공간을 줄인다. 기억 남기기를 핑크 단색으로 강조한다. CSS/기억 템플릿만 수정하며 src/DB/배포/의존성 변경 없음. 3폭 실제 캡처·검색/보기/상세·작성창 열기 검사. 기존 시안 코드 복구로 롤백, 실폰/운영 미검증.
+16차 결과: 표지 폭66.67→86%, 행45→24px/설명간격축소, 기억은 기존masonry 원본비율배치, 상단/탭 기억남기기 핑크 적용. 생성 후 verify-tabs3폭/verify-details3폭/verify5폭 PASS(작성창열기·Escape 포함), 넘침0·JS오류0. 기존 정사각 assertion은 사용자 요청으로 바뀐1:1.29 표지무대로 갱신. 최종 기억1440/작품390 캡처 직접검토. 서비스/DB/배포 변경0, 실폰 미검증. 파일·검증은 ANALYSIS 후속절. 다음은 현재 시안의 밀도 검토.
+16차 후속: 사용자 중복 지적으로 render-tabs.txt 제목 옆 작성 버튼 제거, channel.js 재생성. 공통 #global-add 유지. Chromium1440/390 작품·기억 두 탭에서 제목 옆 중복0·공통 버튼 작성창 열기/Escape PASS. DB/배포 없음.
+
+### 17차 — 선반 경로와 기존 기록 분류 탐색
+사용자 승인: 전체는 내 책장, 선택시 선반명. 기억에 서비스 기존 태그/캐릭터 분류 적용. 근거 libraryCopy.js4~5의 affinity/reason enum, ko.js libraryLabels 표시명, Library.jsx1660대 characterRefs, ArchiveView165대 검색. Memory에 characterRefs 직접 연결이 없으므로 시안은 명시적 가상 작품기록 기반 분류로 한정하고 실제 데이터 join/자동 캐릭터 판단은 구현하지 않는다. prepare에서 실제 enum을 읽어 생성, 가상 연결은 별도 표시. 검색+분류 교집합/해제/빈결과/표동일집합/선반명/모바일 검증. src/DB/공개/배포 변경0. 기존17차 템플릿 수정 원복 가능. 실제 서비스 이식은 별도 작업.
+17차 결과: prepare 실제 enum읽기/선반 breadcrumb, render-facets 가상 연결, CSS/생성JS 반영. verify-facets1440/390/320 태그7·캐릭터6·불일치0·검색/표1·초기화18, 선반명전환 PASS; 넘침/JS오류0. 실제서비스 감상기록 기반임을 명시, 이미지 캐릭터 직접연결 미구현. ANALYSIS에 파일/근거/검증/롤백/한계 기록. DB/배포 없음.
+18차 계획: 사용자 표시 상단 오른쪽에 분류 이동, select 제거하고 Are.na 실제 채널 연결목록(기존1440 캡처)처럼 줄바꿈 텍스트버튼·선택강조로 변경. 실제 태그/가상연결 계약 유지. 1440/390/320 버튼선택/해제/교집합/검색/표검증과 상단위치 캡처. DB/src/배포0.
+18차 결과: 상단오른쪽 태그/캐릭터 텍스트 선택으로 교체. prepare/render-facets/channel.css/생성JS와 검사기 갱신. verify-facets3폭 PASS, 별도 재클릭 해제18개·상단오른쪽 위치검사PASS. 1440캡처 직접확인. 기존Are.na실캡처 재검토(이번web재접근 오류), 자체필터로 구분. src/DB/배포0. ANALYSIS 참조.
+19차 계획: 첨부 Are.na 블록 상세의 좌측 큰 원본비율이미지/우측좁은정보/구분선/작은버튼을 V8.4 기억상세에 적용. 기존 openMemory 초점/닫기/작품이동 유지. 기록일/비율/공개범위와 실제fixture Board membership 표시, 가짜 댓글/작성자/해상도 만들지 않음. prepare 생성템플릿/CSS 수정, 1440/390/320 실제상세/닫기/작품이동 검증. src/DB/배포0.
+19차 결과: render-detail/prepare/channel.css/생성JS 반영. 이미지/우측메타/연결보드 실제fixture 표시. verify-details3폭 PASS, 별도3폭세로이미지/보드펼침/작품이동PASS. 가로1440/390 직접캡처확인. git diff --check 오류0. src/DB/배포0. 상세기록 ANALYSIS 참조.
+
+### 20차 — V8.4 실제 Web 적용 (2026-10-05)
+- 승인/결정: V84-WEB-APPLICATION-01. 사용자가 시안 큰틀 채택 후 실서비스 적용 지시. 로컬Web코드 구현/검증을 완료하며 운영배포는 별도다.
+- 실제 근거: BaseLayout.astro 공통토큰/라우트, MemoryRouteShell.jsx 소유자경계, TitleCollectionView/TitleAlbumCard의 projection/최대3preview, ArchiveView.jsx runtime/private preview, MemoryCardDetail.jsx 삭제/미저장/공개/교체handler, watchLogRepo.js characterRefs, 기존V8.4.
+- 구조: 공통 ChannelHeader/metadata + channel-service.css; 홈은 owner-bound BookshelfView, 소유자별 bounded 로컬진열설정(서버sync없음). 선반 합집합/선택한 작품만 진열하고 초기auto선택없음. 기존 title collection readservice와 안전한 preview renderer 재사용. 선택한 행 아래 필름은3preview와 작품전체보기, 원본불변.
+- 분류: 실제WatchLog sourceBinding 외부ID가 Memory와 일치하는 기록만 매칭, 이미지 자체character inference없음. 동일record 내 조건 교집합, 데이터미확보일 때정직한빈안내. 검색/표/그리드/돌아가기상태보존.
+- 지도: src/components/collection/*, src/features/bookshelf/*, title/memory presentation, PrimaryNavigationLinks/TopNavDataMenu, BaseLayout/style/public logo, tests/channel-service.spec.ts + 필요한unit, 기존계획/보고.
+- 단계: shell+책장 저장/행필름 → 작품+기억분류/원본비율목록 → 상세/공통작성스타일 → 실제저장/수정/보드/소유자/필터/320/390/1440·밝음/어둠·한영browser/기존핵심회귀 → unit/build → 결과/링크.
+- 검증: 새저장setting에 의미있는owner/유효값검사, 실제Memory runtime 합성fixture로기록생성/책장선택재로드·취소·필름·상세수정/복귀. 기존title collection/hub/cross-surface/composer suites와build. 기존사진시안asset은제품에복제하지않으며 최종capture가실제src를실행했음을구분.
+- 안전: DB/migration/ingestion/analytics/새의존성/비공개사진자동업로드0. 로컬setting은명시저장만, bounded/ownerkey, 실패시성공표시안함. 원격민감정보에대한기본로그없음.
+- 롤백: 이번서비스presentation/new localsetting reader만복구, 기존원본데이터/flags 변경없음. setting은복구후무시할수있고강제삭제없음.
+- 위험/게이트: 실제저장모델없는시안항목은 UI범위와일치하는최소로컬표현, 기존memory/private security경로재사용. 운영OAuth/실폰/Android/hosted공개는미검증범위, 운영배포는정확한후보검토후별도.
+
+#### 20차 적용·검증 결과 — 2026-10-05
+
+실제 `src`의 공통메뉴/핑크토큰/흰배경, 소유자별 로컬선반·행필름, 작품두보기/실제필터, 기억 원본비율 masonry/기존감상기록 분류, 큰이미지/우정보 상세를 반영했다. 원본·Board·Title 모델과 공개/동기화 handler를 유지했다. 책장 공유카드 stylesheet 누락을 수정했고 편집 중 신규작품 갱신·stale응답방지를 보완했다. 선반설정은 이기기에만 저장하며 시안가상기록/추가읽기 기능을 전체 제품기능으로 가져오지 않았다.
+
+Node24.19/npm11.17: unit410 PASS, build19 routes PASS(기존 TopNav 약1,021kB 경고), 최종 순차 Chromium51 PASS/skip0. 실제테마버튼/안정된색 추가확인은 해당5건 재검사 PASS이며 고유56건으로 합산하지 않는다. Apply/Cancel재로드, 선택행필름·동일Memory/Title/Board왕복, 감상저장, 기록기반분류/표/복귀, 실제로컬PNG원본비율3폭/업로드0,320키보드/CTA1/로고잘림0을 확인했다. build/dev병렬로딩 실패 회차는 중단하고 새서버로 재실행했다. git diff --check 오류0. 과거50건47PASS/3fail 및 이번발견은 보고서에 보존했다.
+
+main이 실제src 합성데이터의 PC/모바일/dark 캡처를 직접 열어 확인. 증거10PNG는 `design/evidence/v84-service-2026-10-05/`, 상세파일/실행/권리/롤백은 [결과 보고](../reports/2026-10-05-v84-web-application.md). 로컬미커밋·DB/운영배포/공개flags/의존성변경0, Android/실폰/hosted미검증. 다음은 실제기록으로 사용자 화면검토 후 정확한Git후보 배포승인이다. 기존release-v2 W/D/Q 및과거PASS를 변경하지 않는다.
+
+### 21차 — 실제 Web 디테일·카탈로그 확인 (2026-10-05)
+
+- 사용자 요청: 첨부4장/추가로고 캡처의 정렬·기본추가상태·책장 검색·로고 hover와 적은 기억의 중앙배치를 정리하고 실제 애니 표지로 서비스 느낌을 확인한다.
+- 근거: ArchiveView110/TitleCollection173/QuickActionPanel footer의 native select, channel-service search focus/TitleAlbum의 count-dependent grid, global `.nav a:hover`와 brand 스타일 충돌. 현4363 서버에 catalog URL/key가 없어 표지 미표시; 기존 production catalog 익명 read에서5작품과 승인READY 표지를 확인했다.
+- 범위/구조: 공용 CollectionSelect(얇은 trigger/테마 listbox/keyboard/Escape/outside/viewport 배치)로 해당3선택기 교체, 검색 placeholder/밑줄초점, 고정크기 좌측필름/작은표지 fallback, brand투명hover. 기존 선택값/저장/rights/Memory/Board 계약과 범위 유지.
+- 실제 데이터: 로컬 서버에 기존 public catalog read 설정만 연결, 같은4363 origin과 기존사용자기록 보존. 원격쓰기/공개flags/metadata sync/ingestion 없음. 실카탈로그 표지 표시 확인은 별도 테스트 context에서 기존service·사용자선택 흐름으로 수행하며 사용자에게 가짜Memory를 주입하지 않는다.
+- 순서: 공용선택기/디테일 → 적은이미지/320·390·1440/밝음·어둠/키보드·취소·정렬복귀/기존검색회귀 → unit/build순차 →4363카탈로그읽기재시작/실표지 표시/캡처·보고.
+- 검증: 기존channel/title/search/release-editing 관련검사, 새공용선택실제키보드와저장상태 보존,1/2이미지left/ratio/overflow, 로고hover투명, 책장placeholder. real catalog read/그림load 확인과관련자료를추가한다.
+- 롤백/안전: 이번presentation과selectimport원복, catalog환경연결만중지. DB/키원문/새의존성/유료/운영배포 없음. 실제폰/운영D06 별도; 새진행판 없음.
+
+21차 결과: 공용선택기3곳/밑줄focus/책장placeholder/로고투명hover/고정폭 좌측필름과작은표지fallback을 실제src에 반영. 기존 desktop검색의 Escape→input focus→재열림을 실제검사로 발견해 focus 후닫기 순서로 수정. 모바일 listbox는dialog 안에 portal해 modal 접근성경계와focus를 보존하고 첫Escape는목록/다음Escape는검색창을 닫는다. unit410/build19 routes PASS. 최종회귀61 PASS/2실패/2외부live skip 중 과거계정문구 assertion2건을 현행LOCAL_ONLY 계약으로 대조·보정한 재검사2 PASS. 테마/320/필름390 추가검사11 PASS(새고유1건+재검사10건). 이번고유 Chromium **64 PASS**, 과거20차51과합산하지 않는다. 실제카탈로그5개표지load·실제TitleHub→SaveTitle→선반Apply와1440/390/320넘침0/JS오류0/Memory생성0 검증. 별도검사context에서 HTTPS nonGET은모두차단했으며 GraphQL read POST를쓰기라고잘못분류한 helperassertion은분리기록 후정정·재검사했다. 사용자 IAB의빈목록에도실제UI로5작품/‘디자인확인’선반만선택하고5표지naturalWidth460을확인했다. 새합성캡처7장보존, 실제표지캡처5장은cache에만보존. 자세한명령·변경파일·한계는 기존결과보고21차절. 로컬4363 유지, DB/운영배포/Public/새의존성0. 다음은실제표지와기존사용자행동기준미감검토 후D06의정확한Git후보승인이다.
+
+### 22차 — 기억 상세의 편집·분류·공개 경로와 작품 캐릭터 (2026-10-05)
+
+- 사용자 결과: 큰 관리 안내보다 감상/분류/공개 범위가 먼저 보이는 실제 상세 화면. 작품 정보에서 실제 캐릭터를 확인한다.
+- 근거: MemoryCardDetail의 감상 form 앞에 이미지/Board 관리 배치, 기본 privacy badge는 원본과 공개 사본을 구분하지 않음. TitleHub는 catalog people read를 호출하지 않음. WatchLog.characterRefs/contextTags는 기존 저장 계약이며 Memory update는 note만 지원. TAG-01의 새 카드별 모델은 임의 확정하지 않는다.
+- 구조/범위: 현재 원본 저장·공개 snapshot 계약 유지. 감상 우선/관리 접힘, 독립 공개 설정 섹션에서 기존 Board preview·게시/미니홈/전체 카드 철회로 연결. Public off/비로그인/미연동은 명확한 안내. 작품 캐릭터는 catalog getPeople 및 기존 exact AniList ID 캐시 reader, provenance 표시/실패 재시도/추가페이지를 제공하고 정보 미확보를 가짜 빈 목록 성공으로 만들지 않는다.
+- 분류 결정: 기존 작품 감상 기록 편집과 카드별 새 분류 중 사용자 선택을 요청했다. 답변 전 관리/캐릭터 UI를 진행한다. 기본은 기존 감상 기록 계약을 재사용하며 카드 이미지의 등장인물 자동 판단이나 새 DB 모델을 만들지 않는다.
+- 파일 지도: MemoryCardDetail/detail CSS, 기존 공개/Board 조작, title character reader/TitleHub, 선택에 따른 기존 WatchLog 분류 UI/Archive facets, 실제 browser 및 domain 검증. 이 계획과 기존 결과 보고/인계만 갱신한다.
+- 단계/검증: UI 재배치·공개 경로 → 캐릭터 reader/실데이터 → 분류 편집·저장 취소/재로드/교집합 → 기존 상세 수정/삭제취소/이미지교체·Title Hub 회귀와 320/390/1440 캡처 → unit/build. 합성 fixture PASS와 실제 카탈로그 read PASS를 구분한다.
+- 안전/롤백: 운영 DB/migration/Public flags/자동이미지업로드/ingestion/의존성/분석/배포0. 카드 note/원본/Board membership을 보존하고 명시 저장만 허용. 로컬 기능 변경 원복 시 기존 저장값을 삭제하지 않는다. 서버 공개 상태를 확인 못하면 비공개로 단정하지 않는다. 과거 PASS/기존 W/D/Q 유지, 운영 배포 D06 별도.
+
+22차 범위 보완: 사용자 카드별 태그 승인(CARD-CLASSIFICATION-01). 기존 card JSON에 versioned classification(tags 최대20×48자, characters 최대12개/출처·ID·이름 snapshot) 추가. IndexedDB object schema 변경 없이 저장·기존 기록 empty fallback·삭제/내보내기 보존. card update의 명시 필드만 atomic 저장, Archive에서 카드 분류와 기존 작품 감상 분류를 구분. 원격은 별도 PUBLIC_MEMORY_CARD_CLASSIFICATION_SYNC_V1로 rollout하며 기본off: 구서버 요청 shape 유지/로컬 분류 보존. 추가 nullable 아닌 default JSON column과 validation/기존 mutation·conflict·promotion transaction wrapper migration 후보 및 DB 검증을 준비. 운영 적용/활성화 없음. 롤백은 flag off/구UI 복원, column/data는 보존하며 drop하지 않는다.
+
+22차 결과 — 2026-10-06 00시 마감:
+- 실제 상세에 감상/카드 캐릭터·커스텀 태그/저장 → 공개 범위 → Board → 접힌 이미지 관리 → 삭제 순서 적용. 기존 공개 preview·동의·게시/철회 경로를 연결하고 Public off는 사용 불가로 표시한다. 공개된 사본을 조회하지 않고 모두 비공개로 단정하지 않는다.
+- 카드 JSON의 분류를 명시 필드만 저장하며 원본 note/asset/Board·다른 카드 보존. Archive 카드별 필터와 기존 작품 감상 분류를 구분, URL/표 보기/재로드 유지. typed tag는 별도 Enter 없이 Save해도 저장하고 실패/취소 시 초안 보호.
+- 실제 title catalog의 프리렌 캐릭터/성우 표시 확인. 처음6개와 더 보기12개를 실제 IAB에서 확인. catalog 추가 페이지 실패는 다른 provider 첫 페이지로 대체하지 않고 재시도 상태로 유지한다.
+- 동기화는 default-off, 구서버 DTO shape 유지/기존 서버 응답이 로컬 분류를 지우지 않음. pending marker, flag 활성 후 명시 Save outbox 준비, 새 select/validation, 게스트 promotion/conflict RPC 후보. export/restore는 분류와 참조 결속 보존 및 잘못된 태그 atomic 거부. 삭제 시 분류 scrub.
+- 단위 최종416 PASS; 독립 서버 Chromium 고유61 PASS, 마지막 pagination 경계 변경 후 그중12 재검사 PASS; build19 PASS. 숫자 합산하지 않는다. 기존21차410/64는 당시 근거로 보존한다.
+- Docker daemon 부재는 외부 차단으로 남기지 않고 기존 WSL/PG16의 임시 socket-only cluster로 후보 검증. SQL19 assertions PASS(Auth/Storage stubs, pg_cron 제외). hosted Supabase/실제 OAuth/운영 DB의 새 태그 동기화 PASS가 아니다.
+- 실제 src 합성 카드 상세 캡처1440/390/320 보존·1440/320 직접 검토. 실폰 미검증. 상세 결과/실패/파일/명령/rollback은 기존 2026-10-05-v84-web-application 보고22차에 기록.
+- 외부 차단 없음. 운영 migration/Public/새 flag/커밋/push/배포/의존성 설치0. 다음1개: 4363 실제 기록의 새 상세/분류를 사용자 검토. 원격 태그 동기화는 승인된 test 적용·새 필드 검증 후 D06에서 운영 후보를 구분한다.
+
+### 23차 — Are.na 상세 구조에 맞춘 읽기·수정·관리 구분 (2026-10-06)
+
+- 요청/근거: 사용자 실제 상세 캡처에서 textarea, 전체 캐릭터 선택 목록, 공개/Board/이미지 관리 안내가 한 세로 흐름으로 쌓인다. 실제 Are.na AD_Direzione의 block/50278090을 열어 이미지 중심 좌측/좁은 우측, 짧은 metadata, Connect·Actions, Connections·Comments 전환을 캡처·DOM으로 확인했다. 공식 Connections/Settings 문서도 대조했다.
+- 사용자 결과: 기본 상세는 감상과 선택된 캐릭터·태그를 읽는 화면. 명시적 ‘기억 수정’에서만 입력·저장·취소를 보여준다. Board 연결은 짧은 액션, 공개/이미지/삭제는 관리 탭으로 구분한다. 캐릭터 선택은 검색 가능한 별도 창으로 옮겨 우측 패널 안의 이중 목록 스크롤을 없앤다.
+- 파일 지도: 기존 MemoryCardDetail, MemoryClassificationEditor, MemorySharingSettings, AddMemoryToBoard, TitleCharacters, detail/channel CSS와 해당 실제 E2E. 기존 모달 focus/Escape 훅을 재사용하며 note/classification 저장과 private preview hydration, Board N:M, 공개 snapshot·권리 확인 계약을 보존한다.
+- 순서: 상세 읽기/수정/관리·선택창 구현 → 선택/검색/닫기/focus/취소/저장실패/재로드·기존 상세/이미지·Board 회귀 → 1440/390/320 밝음·어둠 캡처 검토 → unit/build → 기존 결과 보고·인계의 최신 요약 갱신. 소스 변경 중 회귀를 실행하지 않는다.
+- 수용 기준: 기본 화면에 큰 textarea/전체 캐릭터 목록/관리 설명이 없음. 모든 기존 행동을 명시 액션으로 접근 가능. picker의 검색은 로드한 실제 캐릭터 범위로 명시하고 추가 페이지/실패 경계를 유지. Escape/포커스 복귀, 선택 유지/수정 취소, failed save draft 보존, 320px 가로 넘침 없음, missing image 자동 복구 접근 유지.
+- 안전/롤백: 이번 presentation과 picker만 원복 가능. 데이터/동기화 모델 및 migration 후보를 변경하지 않고 기존 사용자 기록을 수정하지 않는다. private preview 컴포넌트는 접힌 상태에서도 유지. 운영 DB/Public/flags/배포/push/유료/의존성 변경0. 22차/기존 W/D/Q 기록 보존, 새로운 계획·진행판 없음.
+
+23차 결과: 읽기/명시 수정/기억·관리 탭과 별도 선택창 적용. 선택 staging/검색/Escape·focus/취소/저장 실패/긴35명·12명 제한·320dark·Board/이미지 교체/삭제 취소와 숨긴 관리 패널의 private preview 회귀 검증. unit416/고유 Chromium66/build19 PASS; 기본63 + 새 긴 목록1 + private2이며 반복14를 더하지 않는다. 긴 목록 테스트의 저장 완료 전 reload와 private 테스트의 이전 home selector/모바일 접힌 제어를 실제 현행 경로로 수정 후 재검사. 실패 회차와 과거22차61/SQL19 등은 별도 보존. 실제 승인 catalog 프리렌 표지/30명·Fern/Frieren 선택·1440/390/320/dark를 별도 disposable context에서 확인, 사용자 기록/원격쓰기0. 합성7장/실제 표지6장(후자는cache)을 보존하고 직접 화면 검토했다. DB/flag/운영 배포·push/의존성 변경0, 실제폰/Safari/hosted 새 태그 동기화는 미검증. 기존 결과 보고23차에8항목과 명령/실패/rollback 기록. 외부 차단 없음. 다음1개는4363의 기존 사용자 기억 상세 배치 검토다.
+
+### 24차 — 최신 디자인·구현의 다른 PC Git 인계 (2026-10-06)
+
+- 요청: 지금까지의 작업과 문서를 Git에 갱신하여 다른 PC에서 이어서 개발한다. 원격 `codex/phone-test`와 로컬 기준 `54c39cb`가 일치함을 fetch 후 확인했다.
+- 범위: 누적 V8.1~V8.4 시안/디자인 자산, 실제 Web 적용20~23차, 카드 분류 코드·테스트와 미적용 migration 후보를 개발 브랜치에 보존한다. 새 계획/진행판을 만들지 않는다. master/운영 배포·DB/flags 변경은 포함하지 않는다.
+- 파일 지도: 기존 시작 문서/인계/결과 보고/작업판 최신 요약, 재실행 가능한 V8.4 preview와 격리 회귀 실행기·package scripts. 기존 소스 동작·의존성 버전은 변경하지 않는다.
+- 순서: 파일·개인자료/키 점검 → 인계/실행 경로 정리 → 새 실행기와 기존 unit/build/시안 검사 → 검토한 경로만 stage → docs, SQL 후보, 실제 Web, 디자인 자료를 구분해 commit → 비강제 push → 원격 SHA/작업 트리 확인.
+- 수용 기준: 새 PC는 npm ci 후 실제 앱과 최신 V8.4 시안을 각각 실행 가능. 기존 cache 전용 도구에 의존하지 않고 주요 회귀를 재실행 가능. 원격 브랜치의 SHA가 로컬 최종 HEAD와 같다. 실제 표지/사용자 자료·.env·로그는 Git에 넣지 않는다.
+- 보안/한계: 환경변수와 브라우저 IndexedDB/원본/소유자별 선반 설정은 Git으로 이전되지 않는다. 카드 태그는 현재 이 기기에 저장되며 hosted PASS로 승격하지 않는다. 기존 검증 숫자와 이번 인계 검증을 구분한다.
+- 롤백/게이트: 코드 원복은 해당 개발 커밋을 revert하며 사용자 데이터/새 column은 삭제하지 않는다. 충돌 시 force/reset 없이 차이를 확인한다. 운영 migration·Public·master merge/push·배포는 정확한 D06 후보 승인 후 별도 진행. 다음1개는 기존 실제 기억 상세의 사용자 배치 검토.
+
+24차 인계 검증 — 2026-10-06:
+- 원격 fetch 후 기준54c39cb/개발 브랜치 ahead0·behind0 확인. 비밀 키/개인자료 후보 파일명 및 text179개 점검에서 새 secret/JWT literal 발견0. 기존 추적 `.env.production`은 공개 client 설정9개뿐이며 수정하지 않았다.
+- 이번 unit416 PASS/skip0, 기존 V8 portable 검사 errors0/169checksum과 서버9 PASS, 새 `test:e2e:channel` 최종64 PASS/skip0, build19 PASS. 이전23차66과 합산하지 않는다. 첫 E2E는 Astro 최초 최적화 준비시간 제한으로 중단됐고 같은 실행기를 재시도해 통과했다. 초기 정적 문자열 자산검사는 HTML base/JS 동적 상대경로를 반영하지 못해 false positive가 나와 브라우저의 실제 요청으로 대조했다.
+- 새 V8.4 preview CLI의200/최신URL 출력, V8.1/V8.2/V8.3/V8.4 각각1440·320의8화면과 최신3탭 왕복을 실제 Chromium에서 확인: JS오류/로컬404/수평넘침0. 외부 폰트는 차단하고 fallback으로 검사했다. 실제폰/다른PC/hosted/원격 태그 동기화 PASS가 아니다.
+- 소스/의존성 버전·기존 사용자 기록·DB/flags/운영 배포는 변경하지 않았다. 인계/시안·격리 회귀 npm 명령만 추가했다. 로그는 `.cache/v84-service/handoff-24-*`로 로컬 보존한다. Git 완료 판정은 후속 인계 문서의 자료 커밋과 최종 원격 SHA 대조를 따른다.

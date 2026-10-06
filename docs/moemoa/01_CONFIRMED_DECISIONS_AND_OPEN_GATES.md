@@ -1,5 +1,13 @@
 # 01. 확정 결정과 미정 게이트
 
+> 2026-10-05: 사용자 “실 서비스 디자인 적용 작업 진행해줘”로 V8.4의 Web presentation 적용 승인. 아래 `V84-WEB-APPLICATION-01` 참조.
+
+> 2026-10-05: 사용자 “카드별 태그로 진행 (추천)” 승인. `CARD-CLASSIFICATION-01`: Memory별 캐릭터 참조·커스텀 태그를 작품 장르·기존 WatchLog와 분리해 명시 저장한다. 동일 작품의 모든 이미지에 자동 적용하지 않는다. 비공개 metadata이며 공개 snapshot에 자동 포함하지 않는다. 로컬 저장/검증 및 동기화 migration 후보 준비 승인, 운영 DB 적용·배포·Public 활성화는 별도 D06. 원격 지원 전에는 이 기기 보관임을 표시하고 기존 원격 응답으로 로컬 분류를 지우지 않는다. TAG-01의 전체 taxonomy는 이 제한된 카드 분류 승인으로 모두 확정하지 않는다.
+
+> 2026-10-06 마감: 카드 분류의 로컬 저장·실제 Archive 분류·백업 복원, 실제 작품 캐릭터 표시를 검증했다. 원격 migration 후보는 격리 PostgreSQL에서 검증했으며 hosted/운영 적용·새 동기화 flag 활성화는 미실행이다. [22차 결과](reports/2026-10-05-v84-web-application.md#22차-후속--카드별-분류와-기억-상세).
+
+> 2026-10-06 상세 정리 후속: 기존 V84/CARD-CLASSIFICATION 결정 안에서 읽기·명시 수정·관리 탭과 별도 캐릭터 선택창을 적용했다. 이번 unit416/고유 Chromium66/build19 PASS, 실제 catalog 표지/30명 표시 확인. 제품/공개 정책·DB·flags·배포 변경 없음. [23차 결과](reports/2026-10-05-v84-web-application.md#23차-후속--상세-읽기수정관리-분리-2026-10-06).22차/과거 PASS와 구분한다.
+
 > **문서 상태: `CANONICAL PRODUCT DECISIONS`**
 > **최종 갱신:** `2026-09-23 — PUBLIC-LAUNCH-V2-01 출시 범위 승인`
 > 제품 범위와 gate에 관한 최상위 기준이다. `미정` 표에 등록된 항목과 보고서의 권장안은 사용자 승인 전 확정 결정이 아니다.
@@ -640,3 +648,24 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - preserved: 책장은 선별 진열, 전체 탭은 선반 합집합이다. My Titles/Memory/WatchLog/Board 및 비공개·동기화 계약은 바꾸지 않는다. V7 비교 보존, 가상 RAM 데이터만 사용한다.
 - migration impact: 없음. 운영 코드 교체·공개·배포 승인이 아니다. 다음 게이트는 PC/모바일 시안 확인과 실제 서비스 적용 범위다.
 - execution: `plans/2026-10-03-interface-rebuild.md` 8차, 별도 `moemoa-film-grid.html`/`film-grid.css`/`film-grid.js`.
+
+## Decision Log — V84-WEB-APPLICATION-01 (2026-10-05)
+- approved by: 사용자 “시안에 전체적인 큰 틀의 디자인은 나온 것 같으니, 이제 실 서비스 디자인 적용 작업 진행해줘”.
+- scope: V8.4의 공통 메뉴/핑크 주요행동, 내 책장 선반과 행 아래 필름, 작품 두 보기, 기억 검색·기록기반 분류/원본비율 목록, 이미지 상세 좌이미지/우정보를 실제 Web 코드에 적용한다.
+- presentation: 새 기기의 기본 테마는 시안의 흰 배경으로 맞추고 기존 사용자의 저장된 밝음/어둠 선택은 보존한다. 주요 CTA는 하나만 유지한다.
+- data boundary: 작품 저장·Memory·WatchLog·Board의 독립성 유지. 책장 선반은 소유자별 이 기기의 진열 설정으로 추가하며 원본·Board를 이동/삭제하지 않는다. 원격 책장 sync/schema/Public 연결은 추후 범위. 가상 시안 기록은 실제 제품으로 이전하지 않는다. 태그/캐릭터는 실제 WatchLog의 작품과 Memory의 source binding이 정확히 일치할 때만 분류한다.
+- preserved: NO-HERO, 로고2안, 기능 flags/권리·개인정보·계정경계, 기존19 routes. Web-only 후보; Android release 작업 제외. 운영배포·master merge/push·DB migration 승인은 포함하지 않는다.
+- execution: 기존 interface-rebuild ExecPlan20차. 저장 가능한 UI와 실제 browser 회귀·미감 캡처를 완료하고 로컬 서비스 링크 제공.
+
+## Decision Log — CARD-CLASSIFICATION-01 (2026-10-05 승인)
+
+- status: CONFIRMED_LOCAL_AND_SYNC_CANDIDATE_SCOPE.
+- context: 같은 작품의 서로 다른 이미지에서 캐릭터와 개인 태그를 따로 선택해 모아볼 필요가 있다. 기존 WatchLog 분류는 작품의 감상 기록에 붙어 있다.
+- options: 기존 작품 감상 분류 재사용 / Memory별 분류 추가.
+- chosen option: 사용자 “카드별 태그로 진행 (추천)”에 따라 카드별 캐릭터 참조·커스텀 태그를 명시 저장한다. 장르·기존 감상 분류는 유지한다.
+- reason: 같은 작품의 여러 이미지가 항상 같은 등장인물·태그를 가진 것으로 간주하지 않는다.
+- consequences: version1 classification, 태그 최대20개/48자·캐릭터 최대12개(출처/ID/이름), 원본 이미지 자동 분석 없음. 현재 원격 지원 전에는 이 기기 보관임을 표시한다. 공개 snapshot에는 자동 포함하지 않는다.
+- files/modules affected: Memory editor/update/IndexedDB/Archive/metadata backup, sync DTO/gateway, title characters reader. 기존 interface-rebuild 22차와 결과 보고 참조.
+- migration impact: additive private JSON column 및 검증/RPC wrapper 후보만 준비·로컬 검증. 운영 적용·새 sync flag 활성화·Public·배포는 별도이며 승인되지 않았다.
+- approved by/date: 사용자, 2026-10-05. 질문에 명시된 로컬 검증·동기화 준비 범위 승인.
+- review date/trigger: 승인된 test 환경의 새 metadata save/pull/conflict/promotion 검증, 이후 D06의 정확한 운영 후보 검토. TAG-01 전체 체계는 별도 잔여다.
