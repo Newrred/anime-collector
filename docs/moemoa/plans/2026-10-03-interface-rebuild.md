@@ -502,3 +502,126 @@ main이 실제src 합성데이터의 PC/모바일/dark 캡처를 직접 열어 �
 - 소스/의존성 버전·기존 사용자 기록·DB/flags/운영 배포는 변경하지 않았다. 인계/시안·격리 회귀 npm 명령만 추가했다. 로그는 `.cache/v84-service/handoff-24-*`로 로컬 보존한다. Git 완료 판정은 후속 인계 문서의 자료 커밋과 최종 원격 SHA 대조를 따른다.
 
 24차 Git 자료 완료: 결정/계획2c0c480 → SQL 후보4bfb3da → 실제 Web9cf424e → 시안/합성 증거fb25167. `git push origin HEAD:codex/phone-test` 후 자료 HEAD `fb25167b9563807e9eeb22f89f82f9f42651d3a7`와 `git ls-remote` 일치 확인. 후속 인계 문서 커밋까지 받고 재개한다. 새 디자인 text7개 EOF 빈 줄만 정리했고 staged check PASS. `operations/2026-10-05-design-handoff.md` 최신절과 결과 보고24차에 새 PC/실제 앱/V8.4 시안/검사·환경과 개인자료 한계를 기록했다. 운영/DB/flags 변경0, 자동 Preview 완료 미조회. 최종 문서 push/SHA 확인 후 인계 완료로 판정한다.
+
+### 25차 — 컬렉션 명칭·선과 이미지 중심 실제 Web 정리 (2026-10-06)
+
+- 목적/승인: LINE-IMAGE-COLLECTION-01. 사용자의 필름 장식 전부 제거·인터랙션 유지·보기 옆 작품 탐색·겹치는 이미지와 모션 요청 및 컬렉션 명칭 선택을 실제 Web에 적용한다. 별도 시안/진행판을 만들지 않는다.
+- 현재 증거: BookshelfView의 cover trigger/선택 행 아래 패널, channel-service.css의 perforation pseudo-elements/로고 sprite/cover geometry, TitleCollectionView의 헤더 밖 장르·열 수, ChannelHeader의 3/5칸 구조. 과거 SHELF-ROW-PREVIEW-01은 행 아래 방식에 대한 제안 진행 승인; 사용자가 최초부터 아래 펼침을 직접 지시한 것으로 보고하지 않는다.
+- 구조/범위: 화면 문구만 Collection으로 변경하고 저장 키/사용자 선반 이름을 유지한다. 로고는 기존 glyph의 문자 전용 영역을 CSS로 표시한다. 필름 pseudo-decoration을 제거하고 line separators로 정리한다. 기존 POSTER/MEMORY 계약과 별개인 일시적 이미지 배치 옵션을 추가하고 펼침/필터/열 수와 실제 hitbox를 보존한다. 작은 폭과 reduced-motion에서 이미지 가림·transform을 제한한다.
+- 파일 지도: ChannelHeader/PrimaryNavigationLinks, BookshelfView, TitleCollectionView, channel-service.css, 관련 channel/title E2E, 기존 결정/계획/보고/시작·인계 최신 요약.
+- 마일스톤: 명칭·장식과 탐색 위치 → 겹쳐보기/hover/focus → 실제 src 합성 fixture의 선택/패널/검색/취소/키보드/열 수/3폭/테마/reduced-motion → unit/build 및 실제4363 catalog 화면 캡처 → 기존 보고 최신화.
+- 검사: npm run test:e2e:channel 관련 회귀 및 새 겹침·hitbox/펼침·헤더 위치 검사, npm test, npm run build, git diff --check. 실제 표지 확인은 사용자 origin의 기록을 주입/교체하지 않고 read-only 화면으로 별도 확인한다. 합성 fixture PASS와 실제 사용자 화면 확인을 구분한다.
+- 데이터/보안/관찰: schema/migration/계정/이미지 업로드/공개 flags/analytics/의존성 변경 없음. 이미지 바이트와 개인 검색·태그를 로그/증거 Git에 추가하지 않는다. 실제 자료 캡처는 .cache에만 둔다.
+- 롤백/위험/게이트: 이번 source/doc presentation diff만 원복하면 기존 로컬 설정을 그대로 읽는다. 겹침 때문에 선택 면적이나 글자가 가려지면 모션·겹침 정도를 줄이고 테스트로 확인한다. 기본 그리드는 유지하며 별도 겹쳐보기로 비교 가능하게 한다. 운영 DB/배포와 Android/실폰은 이번 범위 밖이다.
+- 진행: 계획·승인 로그 반영 완료. 코드/이번 실행 결과는 아직 미검증.
+
+25차 실행 결과 — 2026-10-07 마감:
+- 실제 src의 Collection 한영 문구/문자 로고 crop/필름 장식 제거, 헤더 4칸의 보기 옆 작품 탐색, 별도 겹쳐보기와 hover/focus/reduced-motion을 적용했다. 내부 bookshelf 설정 키·사용자 선반명과 선택 행 아래 기억을 유지한다. 기본 그리드는 보존하며 좁은 폭에서는 겹침을 풀어 표지가 가려지지 않는다.
+- 이번 unit416/build19 PASS. 첫 channel+title+cross-surface77검사는76PASS/1테스트 실패: CSS zoom 뒤 숨은 펼침 버튼을 무조건 누른 새 검사 오류. 표시 여부를 확인하도록 고친 회귀72PASS, 최종 CSS 모션 감소의 focus 우선순위 보완 후 해당4검사 재실행PASS. 초기 cross-surface5PASS를 보존하되72/4/과거64·66과 합산하지 않는다. npm/PowerShell의 grep 인수 전달 누락으로 보정 재검사가72개 전체로 실행된 사실을 보고에 기록했다.
+- 실제4363 기존 사용자 기록5작품/0Memory를 그대로 읽어 로고·컬렉션·보기 옆 탐색·겹쳐보기/실제 표지를 확인했다. Action 단일 장르1작품·전체5작품 복귀, 적은 이미지 좌측 배치 확인. 실제 원본이나 가짜 카드를 사용자 origin에 주입/업로드하지 않았다. 캡처는 .cache/v84-service/*-real-*-25.png에 로컬 보관한다. 브라우저 임시 viewport override는 reset했다.
+- source diff 점검과 상세8항목은 기존 [보고25차](../reports/2026-10-05-v84-web-application.md#25차--컬렉션과-선이미지-중심-후속-2026-10-0607). DB/flags/의존성/운영배포/Android 변경0, 로컬 미커밋. 다음1개는 새 배치 사용자 검토다.
+
+### 26차 — 작품 표지 뒤 해당 기억 이미지 겹침으로 정정 (2026-10-07)
+
+- 목적/승인: TITLE-MEMORY-STACK-01. 사용자가 겹침 대상을 정정했다.25차의 다른 작품 표지 간 겹침/별도 보기 옵션을 없애고 같은 작품에 저장된 기억 이미지를 표지 뒤로 배치한다. Collection 명칭/선·장르 탐색 이동은 유지한다.
+- 증거/구조: TitlePosterTile → TitleCover가 실제 컬렉션/작품 표지를 제어한다. 서비스 projection의 previewMemories는 최대3개이고 PrivateMemoryCardPreview/MemoryVisual은 owner 권한·원본 종류/실패·lazy read를 보존한다. 새로운 read 모델/인증 경로를 만들지 않고 기존 렌더러를 재사용하는 TitleMemoryStack을 넣는다. 뒤 이미지는 aria-hidden/pointer-events:none이며 기존 표지/제목의 조작이 우선한다. 기억0개에서는 뒤 이미지를 만들지 않는다.
+- 파일 지도: TitleMemoryStack/TitlePosterTile, BookshelfView, TitleCollectionView, channel-service.css, channel-service/title-collection 테스트 및 기존 결정/계획/보고/최신 요약.
+- 단계/수용: 잘못된 layered 옵션·작품 간 transform 제거 → 실제 Memory 최대3개/빈 상태/hover·focus 모션·reduced-motion → 동일 title ID·0/1/3개 뒤 이미지·표지 중심/뒤 이미지 영역 hitbox·행 패널/제목 이동·1440/390/320/열 수와 no-overflow → unit/build/관련 browser 회귀 → 실제4363 확인·합성 src 캡처와 사용자 실제 기록의 차이 표시.
+- 데이터/보안/관찰: DB/flags/의존성/업로드·공개/analytics 변경0. private thumbnail의 소유자 검증/실패 표시/4개 동시 요청 큐와 IntersectionObserver를 재사용한다. 사용자의 origin에 사진·가짜 Memory를 넣지 않는다. 실제 기억0인 경우 합성 소유 테스트 문맥의 실제 src 캡처로 효과를 보여주고 정직하게 구분한다.
+- 롤백/위험/결정: source presentation diff만 복구, 기존 카드/선반 키 보존. 뒤 이미지가 인접 작품/글자/조작을 가리면 여유폭·각도·hitbox를 조정해 검사한다. Title Hub 본문 갤러리를 재구성하는 요청으로 확장하지 않는다. 운영 후보 승인·실폰/hosted·Android 잔여 유지. 다음1개는 뒤 이미지 겹침의 실제 UI 사용자 검토.
+
+26차 실행 결과:
+- 새로운 TitleMemoryStack과 공유 PosterTile에서 해당 작품 preview 최대3개만 표시. 잘못된 겹쳐보기 옵션/작품 간 transform 제거. 앞표지 크기를 기억0/1/3개에서도 통일하고 뒤 이미지를 포함한 Collection hitbox를 맞췄다.
+- 최초 Chromium77 중75 PASS/2실패를 보존했다. 기존 감상 저장 검사는 비동기 저장 완료 전에 reload했고, 새 검사에서는 정렬 후 첫 타일을 기억2개 작품으로 잘못 가정했다. 실제 save의 updateCard await→읽기 복귀를 확인해 기다린 후 reload하고, 정확한 작품 label로 고쳤다. 최종 해당2개+Titles3폭의5개 PASS. 단순 재시도나 기대값 완화가 아니다.
+- unit 최초415/1실패(listen EACCES 127.0.0.1:23139), 소스/테스트 변경 없이 기존 랜덤 포트가 달라지는 재실행416 PASS. Windows 제외 범위 조회는23139를 설명하지 못했으므로 원인은 미확정. build19 PASS, 기존500kB chunk 경고 유지. 상세 명령은 기존 보고26차.
+- 실제4363 사용자 origin의5표지/0Memory, stack5/뒤 이미지0/no-overflow를 확인하고 기록을 주입하지 않았다. 합성 실제 src의0/1/3개·크기/장르/상세/모션 감소·1440/390/320와 실제 IndexedDB Collection2개·뒤 영역 클릭·모든 표지 키보드·원본 행동 확인은 별도 근거다. 실제폰/hosted 새 이미지 검증이 아니다.
+- 후속 사용자 승인으로27차의 컬렉션 옆 펼침을 진행한다.26차 아래 패널 PASS는 이 시점 근거이며27차 완료로 승격하지 않는다.
+
+### 27차 — 컬렉션 표지 옆 기억 펼침 (2026-10-07)
+
+- 목적/승인: COLLECTION-SIDE-FAN-01. 클릭한 작품 묶음이 한 줄을 사용하며 앞표지 옆으로 기억이 펼쳐지게 한다. 휴대폰에서는 아래 가로 넘김. 기존26차의 뒤 겹침과 실제 Memory/Title identity를 유지한다.
+- 현재 증거/아키텍처: BookshelfView가 선택 행의 끝에 별도 TitleAlbumCard를 삽입한다. 이를 선택 타일 안의 표지 열+Memory 열로 재배치한다. 기존 TitleAlbumCard/PrivateMemoryCardPreview/동일 href를 재사용하고 읽기 모델·저장 구조는 바꾸지 않는다. 고정 비율의 CSS grid 계산으로 앞표지 폭을 보존한다. 표지와 닫기/Escape는 선택 상태만 바꾸고 포커스를 표지로 돌린다.
+- 파일 지도: BookshelfView/channel-service.css, channel-service/title-cross-surface 실제 사용자 흐름 검사, 기존 시작/인계/보고/작업판·결정·이 계획. Title Hub나 별도 시안/진행판을 만들지 않는다.
+- 마일스톤/검사: 선택 타일의 PC 옆 열·모바일 아래 rail → 얇은 선/짧은 펼침 모션·reduced-motion/포커스 → 실제 local seed의0/1/2개 및 max3 경계·표지 크기/옆 위치·뒤 tail hitbox·재클릭/접기/Escape·모든 표지/검색/보기/기억 상세/동일 Title Hub·1440/390/320/no-overflow → 관련 Chromium와 unit/build 및 실제4363 화면 확인.
+- 데이터/보안/관찰: schema/DB/flags/의존성/업로드/공개/analytics 변경0, 사용자 origin 합성 주입0. owner 검증·private read4개 큐·실패/원본 표시 그대로. 캡처는cache 로컬 전용.
+- 롤백/위험/게이트: presentation diff를 원복하면 기존 선반/카드 그대로이며 데이터 롤백 불필요. 펼침 시 선택 타일이 새 전체 행으로 이동하는 reflow는 허용하되 표지 크기와 이웃 조작이 가려지지 않는지 검사한다. mobile scroll은 문서 가로 넘침 없이 rail 안으로 제한한다. 이번 로컬 외부 차단 없음. 운영 D06/실폰·hosted/Android 잔여 유지. 다음1개는 옆 펼침 실제 배치 사용자 검토.
+
+27차 실행 결과:
+- 실제 BookshelfView 선택 타일에 같은 크기의 표지 열+기존 AlbumCard preview 열을 배치했다.700px 이하에는 기억을 아래 rail로 넘긴다. 포커스/재클릭/접기/Escape 및 선택 표지의 nearest scroll을 연결하고 표 보기/검색/선반 변경 시 선택 정리를 유지한다. 기억0의 첫 기억 안내/불필요한0개 전체보기 제거, 중복 cover/장르/감상 숨김, 짧은 순차 펼침/reduced-motion 적용.
+- 초기 관련3검사1PASS/2오류(애니메이션 도중 x=-41px 위치를 완료 값으로 검사, 선택 타일 내부 중복 cover selector). 정확한 front와 animation 완료 대기를 반영한 전체77 중76PASS/1위치 대기 누락은 보존했다. 추가 실파일·3개 제한 검사5개는2PASS/3실패: animation-fill:both가 완료 뒤 identity matrix를 계속 유지. source를 backwards로 바꿔 종료 후 transform을 해제하고 다시 검사했다.
+- 최종 관련5 PASS/skip0: PC 옆/동일 표지 폭, mobile 아래/390・320 scroll/no-overflow, 모든 표지 키보드/tail/재클릭/Escape·focus/reduced-motion, 실제 local 파일 선택·IDB 저장·뒤/펼침 이미지 같은 src/object-fit/no-upload, 실제4Memory의3preview/+1/모두보기4 및 동일 Memory/Title/Board. unit416/build19 PASS, 기존 bundle 경고 유지. 초기/보정 로그와 실제 명령은 기존 보고27차에 보존, 과거/중복 PASS를 합산하지 않는다.
+- 실제4363의5표지/0Memory를 읽기/클릭만으로 확인했다. 실제 첫 기억 안내 캡처와 합성 src/실제 local 파일 검증 캡처는 구분해cache 로컬에 보관. 사용자 기록/원격/flags 변경0. 로컬 미커밋, 다음1개는 컬렉션 옆 펼침 사용자 배치 검토다.
+
+### 28차 — 선반 편집 정리와 작품 표지 표시 (2026-10-07)
+
+- 목적/승인: SHELF-EDITOR-COVERS-01. 사용자의 선반 편집 정리·애니 표지 동시 표시 요청을 실제 Collection 편집에 적용한다. 기존27차 펼침과 저장 계약을 유지한다.
+- 증거/구조: BookshelfView의 모든 선반 fieldset·텍스트 checkbox를 별도 BookshelfEditor 표현 컴포넌트로 분리한다. 왼쪽 선반 선택/개수와 오른쪽 활성 선반 이름·작품 선택을 구분한다. 실제 album의 TitleCover를 재사용하며 없는 표지는 기존 fallback. 부모의 draft/settings·owner 저장·적용 오류를 그대로 사용한다. 검색과 선택됨 보기는 draft 선택을 삭제하지 않는다.
+- 범위/파일: BookshelfEditor/BookshelfView/channel-service.css, 의미 있는 실제 runtime 선반 브라우저 검사, 기존 결정/계획/보고/시작/인계/작업판 최신 요약. 새 모델/DB·migration·의존성·공개 flags·업로드/운영 배포/Android 변경 없음.
+- 마일스톤/수용: 선반 한 개씩 편집·표지/이름/기억 수·선택 표시 → 검색/선택됨·추가/제거/빈 상태 → 기존20선반·300작품·80자 범위 보존·취소/적용/저장 오류의 draft 유지 → 실제 runtime의 다중 선반 독립성/같은 title key/새로고침/320・390・1440/테마/표지 fallback/no-overflow 검사 및 기존 cross-surface 회귀 → unit/build와4363 실제 catalog 표지 화면 확인.
+- 보안/관찰/롤백: private Memory 바이트는 picker에서 읽지 않는다. 기존 승인 catalog cover만 표시하며 선택 행위를 Memory 생성/공개/업로드로 연결하지 않는다. 사용자 origin에 합성 자료 주입/현재 편집 자동 적용 없음. 증거 cache 로컬 전용/analytics 추가0. 이번 presentation diff만 원복하면 기존 선반 키/사용자 자료를 그대로 읽는다.
+- 위험/게이트: 긴 이름·여러 선반/필터가 선택을 숨길 수 있어 총 선택 수와 초기화/빈 상태를 표시한다. 소유 테스트 문맥과 사용자4363 확인을 구분하고 전자가 hosted/실폰 PASS가 아님을 기록한다. 현재 외부 차단 없음; 다음1개는 사용자의 실제 선반 편집 배치 검토, 운영 D06 잔여는 그대로다.
+- 진행: 구현 전 계획 반영. 이번 결과는 아직 미검증.
+
+28차 실행 결과:
+- BookshelfEditor에서 선반 목록/활성 선반·이름·표지44×66/작품명/기억 수 선택과 검색/선택됨을 연결했다. 선택은 draft에만 보관하며 선반 제거 후 다음 선반의 검색을 초기화한다. 기존 적용/취소/owner 저장·저장 실패 처리와27차 표지 펼침 유지. missing catalog는 기존 fallback이며 Memory 이미지로 대체하지 않는다.
+- 신규2+기존3의 관련 Chromium5 PASS/skip0. 초기5PASS 후 제거 시 필터 초기화 source를 보완하고 같은5개를 다시 검사해5PASS(합산하지 않음). 두 선반 독립성/겹치는 title key·검색 복귀·취소/제거 적용·새로고침·quota 실패 시 draft/저장본 보존,1440・390・320/테마/fallback/no-overflow, 새 작품 자동 표시·동일 Memory/Title/Board 통과. unit416/build19 최종PASS, 기존500kB chunk 경고 유지.
+- 실제4363의 기존5작품/0Memory,5catalog 표지 정상 로드/44×66,1440・390/no-overflow를 별도 확인. 사용자 저장 설정/카드·이미지 업로드0, 적용 버튼 자동 실행0. 도구의 별도 좁은 탭 캡처319px를 PC 근거로 쓰지 않고 실제 탭의1440 fullPage를 저장했다. viewport reset 후 편집 화면을 남겼다. 사용자 첨부2작품/3Memory 상태의 재현이나 실폰/hosted PASS로 주장하지 않는다.
+- 상세8항목·실제 명령/로그는 기존 보고28차.25~28차 로컬 미커밋/기준2c1811d, DB/Public/운영배포/Android 변경0. 새 외부 차단 없음. 다음1개는 표지가 보이는 선반 편집 사용자 배치 검토다.
+
+### 29차 — 감상 기록과 장면 저장의 사용자 흐름 연결 (2026-10-07)
+
+- 목적/승인: WATCH-RECORD-FLOW-01. 사용자 요청은 별점/시청 상태/정주행/기존 감상 이력을 핵심 기능으로 되살리는 실제 사용자 동선이다. 감상 필드를 이미지 업로드 폼에 붙이지 않는다. LIBRARY-INTEGRATION-01/TITLE-HUB-01의 보존 의무를 이행하며 기존 이미지 중심 Archive/Complete Card 조건은 유지한다.
+- 증거: 공통 기억 남기기는 memory/new로 바로 이동한다. TitleHub는 Memory gallery 중심이고 catalog-only 상태/평점만 접힌 보조 폼에 있으며 재시청·감상 작성/이력 내용은 없다. AniList 저장 작품은 library/edit로 빠진다. WatchLog repo/snapshot codec은 숫자 AniList만 받아 자체 catalog 작품에 이력을 연결하지 못한다. 기존 저장 상태/재시청/memo/WatchLog와 user visual은 서로 독립이다.
+- 사용자 결과: 공통 진입 `/record/`에서 감상 기록 또는 장면 저장을 고른다. 감상은 내 작품/기존 검색 resolver로 작품 선택→같은 Title Hub의 감상 탭→시청 상태/별점/재시청·날짜/감상 기록→이력 재열람. 기존 memory/new와 선택한 title의 이미지 저장은 보존한다. Title Hub에 기억 이미지/감상 이력 탭과 양쪽 연결을 넣고 기본 gallery는 유지한다. 이미지 없이 기록 가능, 감상 저장/시청 완료만으로 Memory 생성0. 미저장 작품은 기존 명시 작품 저장을 먼저 안내한다.
+- 구조/파일 지도: RecordStart/record route/TopNav, TitleHub/공유 감상 editor와 얇은 선 CSS, titleHubService/검증·저장 application, titleAlbumProjection, 기존 watchLogRepo와 snapshot codec의 optional catalogAnimeId 호환 필드, catalog title backup의 기존 상태/재시청 보존, 기존 문서 요약과 의미 있는 unit/실제 runtime E2E. 새 plan tree·DB schema·의존성·Android/flags/운영 배포 없음.
+- 데이터/실패: 숫자 AniList와 canonical anime UUID를 구분하고 fake AniList ID를 만들지 않는다. 현재 watch_logs/JSON snapshot에 catalog identity를 additive하게 보관하고 기존 날짜 precision·note/캐릭터/태그·긴 memo를 보존한다. 기록 operationId를 고정해 재시도 중 이력 중복/재시청 이중 증가를 막고 부분 저장을 전체 실패/PASS로 숨기지 않는다. 기존 snapshot export/restore도 새 optional identity를 보존한다. 작품 저장 해제/Memory 삭제가 WatchLog 삭제가 되지 않는다. 원격 WatchLog sync는 새로 승인/활성화하지 않는다.
+- 마일스톤: 실제 사용자 동선과 명시 기록/이미지 분기 → legacy·catalog 동일 record editor/조회 → retry/부분 실패·미저장/취소/날짜·정주행/별점0 → 백업과 IDB-only/재로드 identity → 단위·관련 Chromium 및1440/390/320와 실제4363 읽기 화면 캡처 → 현재 보고/작업판 요약.
+- 보안/롤백/관찰: 모든 감상·로그는 기존 비공개 로컬 저장 경로, 원본·이미지 업로드/공개·개인 text analytics 추가0. cache 증거만 저장하고 실제 사용자 기록을 QA용으로 변경하지 않는다. 코드 UI를 원복해도 새 catalog 로그 bytes를 삭제하지 않는다; 구버전 codec이 못 읽는 catalog identity가 있어 최신 전체 감상 백업을 보존한 뒤 원복한다. D06 운영 후보/실폰·hosted 및 카드 태그 sync 잔여 유지.
+- 진행/위험: 코드 전 계획 반영 후 아래 실행 결과로 마감했다. 로컬 동선/저장/부분 실패·재시도와 백업을 검증했다. 자체 작품 원격 sync·실폰/hosted 출시 gate 완료는 주장하지 않는다. 필요한 새 사용자 결정/외부 차단 없음. 다음1개는 이 기록 동선의 실제 사용자 검토.
+
+29차 실행 결과:
+- 공통 RecordStart의 감상/장면 분기, 실제 saved 작품/기존 resolver 선택, 같은 Title Hub의 감상/기억 탭과 현재 시청 상태·별점·정주행/기존 긴 메모·WatchLog 읽기/신규 작성·이력 재열람을 연결했다. 신규 제공처 검색 후보는 명시 저장 전에 쓰지 않으며 catalog 미연결/legacy identity 상태를 유지한다. 기존 이미지/카드 분류·선반 옆 펼침과 legacy Library 경로는 보존한다.
+- WatchLog의 optional canonical identity와 기존 snapshot 끝 필드로 현재 로컬 store/백업을 확장했다. 새 DB version/schema 없음. 자체 로그는 AniList0으로 원격 전송하지 않고 기존 원격 snapshot이 현재 기기의 자체 로그를 지우지 않는다. 자체 작품 tracking 백업은 기존 catalog title 백업, 이력 백업은 전체 snapshot이다. 둘을 모두 보존해야 전체 감상 자료를 다른 PC에서 복원할 수 있다. 구버전 코드로 원복하기 전에 최신 백업 bytes를 보존한다.
+- 최종 `npm run test:unit`424 PASS/실패·skip0, 관련 owned Chromium16 PASS/skip0, `npm run build`20 pages PASS. 전체103 회차99 PASS/2 FAIL/2기존 환경 skip는 별도 기록이며 전체 PASS로 바꾸지 않는다. 실제 실패한 Home/취소 복귀 두 경로와 새 제공처 후보 중복 제거 source를 보완해 최종16에서 검증했다. 초기 server readiness timeout과 접근성/strict selector 실패·수정 근거도 기존 보고29차에 보존했다. 반복 PASS 합산 없음.
+- 새 사용자 행동: legacy 별점/정주행·메모/태그/캐릭터 보존, 이미지 없는 기록, 별점0/미평가·날짜 precision, 재시청 취소·quota 실패 draft·부분 저장 재시도 exactly-once, IDB-only 전체 승격·canonical backup/restore·원격 snapshot 보존, 미저장 후보 명시 저장/새로고침, 최신 검색 결과·미저장 이탈 보호,1440/390/320 overflow0.
+- 실제4363 기존5작품/0Memory의 RecordStart/Steins;Gate 실제 표지(naturalWidth460)·빈 감상 폼1440/390/320을 읽기/클릭으로 확인했다. 최종 PC viewport1440/scrollWidth1430/forms1. 실제 사용자 감상 저장/합성 자료 주입·이미지 업로드0. cache의 `record-start-real-29.png`, `watch-real-desktop-final-29.png`, `watch-real-mobile-29.png`와 격리 저장 테스트 근거를 구분한다. viewport reset/확인 탭 유지.25~29차 미커밋/기준2c1811d, 운영/DB/Public/Android 변경0. 상세8항목과 실제 명령은 기존 보고29차다.
+
+### 30차 — 작품 표지 펼침 이전과 개인 취향 컬렉션 (2026-10-07)
+
+- **상태: 사용자 취소 / 요청 직전 29차로 원복 진행.** 새 취향 배치와 작품 탭의 선반/펼침 이전만 제거한다. 기존25~29차의 미커밋 디자인·카드 태그·선반 편집·감상 기록 복원은 보존한다. 새 CollectionSpace/TitlePosterFan와 전용 테스트를 제거하고 index 및 TitleCollectionService를 되돌리며 TitleCollectionView의30차 부분만 역변경한다. DB·브라우저 사용자 데이터·원본·기존 선반 설정은 수정하지 않는다. 기존 선반/표지 클릭과 작품 두 보기·감상 동선의 격리 브라우저 회귀 및 빌드로 원복을 검증한다. 아래 내용은 취소된 실행 이력이며 다음 작업 지시가 아니다.
+
+- 목적/관련 결정: COLLECTION-TASTE-SPACE-01. 실제 작품 Poster View에 현재 컬렉션의 같은 작품 기억 뒤 겹침/옆 펼침을 이전하고, `/` 컬렉션에는 첨부 이미지의 이미지 벽/대각 겹침/원형 배치를 구현한다. 같은 사이트 공통 UI와 owner별 비공개 자료를 유지하며 미래 public mini-home 준비와 실제 활성화를 구분한다. NO-HERO의 장식 광고형 hero 금지는 유지하되 사용자 자료를 주본문에 크게 배치한다.
+- 현재 근거: index.astro→BookshelfView에 선반/선택 펼침, TitleCollectionView Poster는 href 전체 클릭이고 Memory View는 TitleAlbumCard. titleCollectionService는 모든 작품 preview bytes를 eagerly 읽는다. private preview는IntersectionObserver/4-read queue/thumb·owner 검증을 이미 가진다. 카드 classification과 기존 archive facet이 실제 태그/캐릭터 기준이다. Pinterest 단축 링크는 web 도구 접근불가이며 제공 첨부4장을 레퍼런스로 사용한다.
+- 범위/파일: 재사용 TitlePosterFan와 Titles 기존선반 범위/BookshelfEditor, CollectionSpace/owner settings/순수 selection·layout domain/lazy visual loader·CSS, index route와 TitleCollectionService metadata-only 옵션. 기존 단위/실제 runtime·browser evidence, 결정/제품 흐름/계획/시작/보고/인계/단일 workboard 요약. 새 계획 트리/원격 모델/DB/migration/의존성/Android/배포 없음.
+- 구조/비용: 원본과 Memory ID/표지 reference 재사용; 배치는 작은 설정 JSON만 보관. 컬렉션은 metadata 우선→태그/캐릭터 AND 필터→정렬/재배치→wall24·stack/ring12의 bounded slice(모바일12)→viewport 근처 loadMemoryVisual/기존 thumb. 페이지를 넘겨 이전 nodes unmount, load concurrency4·작은LRU/해제·owner reset. 선택한 범위 밖 자료는 bytes를 읽지 않음. 작품 표지는 함께보기 선택일 때만 표시하고 카드 태그가 있으면 제외.200metadata는 허용하지만200bytes를 한 번에 읽지 않음.3D 무한 animation/WebGL·원본 download·서버 image duplication 없음.
+- 마일스톤/검사: 기존 선반/이미지/Title source와 권한 확인→공유 fan/Poster 이전·선반 편집 유지→실제 collection saved cards/covers·범위 chips·3layout/draft·적용/취소·재배치·page→200자료 lazy bound·tag scope·sameCard/Title·owner/key/reload/quota·새로고침/빈 상태→1440/390/320 light/dark/reduced-motion/키보드·no-overflow→unit/관련 Chromium/build·실제4363 read-only 표지 캡처→8항목 보고/현재 문서 요약.
+- 보안/관찰/롤백: 레이아웃 저장은 비공개 로컬 owner key, 사용자 원본/감상/태그/선반명 ordinary log/Git0. 실제 사용자 origin 합성 주입/설정 적용0. 기존 선반 key와 records 무변경, 새 presentation/settings key를 사용하므로 UI 원복 시 보존 가능. hosted public에도 같은배치 쓸 때는 승인된 public IDs/작은thumbnail만manifest에 넣고 consent hash·rights·철회/kill-switch를 그대로 연결해야 하며 이번에는 미실행.
+- 위험/결정/진행: 큰 이미지 원본/fan overlap hitboxes·focus/모바일 접근성·owner변경·quota 저장 실패·누적 preview memory 비용을 검증한다. server egress는 요청수×bytes와 traffic/cache에 좌우됨, 현재 월비용을200장이라는 개수로 확정하지 않는다. 실제 thumb용량 측정 없이60KB 가정치는 예시로만 사용한다. 새 사용자 결정/외부 차단 없음; 구현 전 계획 반영. 다음1개는 새 개인 취향 공간 사용자 검토, 출시 W/Q/D와 TITLE-STATE-SYNC-01/태그 hosted sync 잔여는 유지.
+
+30차 취소/원복 실행 결과:
+- 새 취향 컬렉션·작품 표지 fan/선반 이전과 전용 테스트를 제거하고29차까지의 유효한 구현을 보존했다. index/TitleCollectionService HEAD diff0, TitleCollectionView에는 이전 장르·열 수 탐색 변경만 남는다. 사용자 DB/카드/로그/이미지/기존 선반 데이터 삭제0.
+- 원복 후 unit424/관련 Chromium16/build20 PASS/exit0. 실제4363 기존5표지/선반 및 펼침·닫기를 확인하고 미저장 배치 Cancel/viewport reset/기존 화면으로 복귀했다. 취소 전 테스트 실패/보정 로그는 cache에 보존했다. 실행 명령·8항목/한계는 기존 보고의 ‘30차 요청 취소와 원복’ 절 참조.
+- COLLECTION-TASTE-SPACE-01 CANCELLED.30차 기능을 자동 재개하지 않는다. 현재 구현/잔여 기준은29차다. 운영/DB/Public/Git push/Android 변경0.
+
+### 31차 — 배포 버전 대비 핵심 기능 마감과 운영 Git/DB 반영 (2026-10-07)
+
+1. 목적: 사용자 “내 승인 없이 … 전부 작업 … 기존 배포 버전 대비 빠진 … 중요한 기능 … 추가 작업 … 실 서비스 배포(db구조도 업데이트)”의 직접 승인으로 현재 유효한25~29차와 기존20~23차를 마감·검증하고 master Git 운영 배포 및 필요한 비파괴 DB 변경을 진행한다. 취소된30차/Android/성인 인증/유료 계약/무제한 공개/자동 이미지 업로드는 범위가 아니다. 기존 공개 flags/권리·운영 gate는 유지한다.
+2. 승인/기준: 사용자가 이번 운영 commit/merge/push/배포와 필요한 DB 구조 갱신을 승인했다. 반복 승인 요청 없이 기존 제품 결정을 따른다. 현재 운영 `moemoa.xyz/build-info.json`은06d2e38d79d38c66753f0ec25a21b615bdc5fa60/vercel-git, workingTreeDirty=true. fetch 후 origin/master도 동일하다. 시작 codex/phone-test HEAD2c1811d36e28659c6055175bf1a31025389f2e3e,25~29차 미커밋을 보존한다. local master4ead72b의 검토 checkpoint도 잃지 않는다.
+3. 지도/감사: origin/master→HEAD와 작업 diff를 제품 계약에 대조한다. 작품 저장/검색/감상·별점/시청 상태/재시청·기록 태그/캐릭터, 이미지·시스템 디자인·공식 표지 Memory, 카드 분류/Archive, 선반/Board N:M/순서, 로그인/승격/private sync, 백업·복원/삭제/설정, 공개·운영 메뉴의 flags 경계를 현재 route/handler/tests로 확인한다. 증거 파일/줄과 실제 runtime 결과를 기존 보고31차에 남긴다.
+4. 구조/변경: 현재 UI와 domain/storage/sync contract를 재사용한다. 끊긴 action이나 저장/동기화 누락은 최소 수정+관련 회귀로 마감한다. Card classification의20261005090000 후보를 포함해 실제 test/prod 적용 버전과 RPC를 먼저 대조한다. 기존 memory source/원본 bytes/ID/권리/legacy를 바꾸지 않는다. 신규 Title state 원격 schema 전체는 자동 재작성하지 않고 기존 legacy sync 기능과 원격 차이를 확인해 실제 회귀만 보완한다. 의존성 교체/업그레이드 없음.
+5. DB/롤백: 대상 project ref·기존 버전·필수함수·RLS·private bucket/flags를 읽기 확인→변경 전 schema/안전한 복구 자료를 추적 제외 위치 보관→필요한 migration만 version-controlled code/hash/data release ID로 순차 적용→실제 HTTP/RPC 권한·owner/operation·旧client 호환/데이터 수 유지 확인. restore로 원본·철회/삭제 fence를 덮어쓰지 않는다. 실패 시 기능 flag 유지/클라이언트 이전 Git 후보 복귀, 추가 column/이력 삭제 rollback은 하지 않는다.
+6. 마일스톤: 배포 baseline·기능표·설정/자격 읽기→누락 최소 수정→unit/관련 full Web 회귀(Chromium+WebKit 등 실행 가능범위)/SQL·build→test backend additive candidate 실제 저장/pull/conflict/승격과 old payload 호환→prod preflight·backup/migration→secret/개인자료 없이 현재 변경 commit→origin/master와 non-force merge/push→Vercel Git deployment READY/source SHA 일치·moemoa.xyz provenance/카탈로그/route/기록 흐름/CDN/flags 검증→문서·인계·단일 작업판 마감.
+7. 테스트: npm test:unit/build, 기존 isolation runner의 실 route/기능 회귀, classification SQL와 실제 테스트 environment 계약, 운영 읽기 전용 smoke. 실제 사용자 기록·이미지를 QA용으로 쓰지 않는다. 구배포/새 local/hosted/운영 통과를 구분하고 필수 실패를 무시한 배포 금지. 정상 통과 후 반복 검사 확대는 실제 새 변경/문제만 있을 때 한다.
+8. 보안/권리/관찰: privileged keys는 서버/ignored credential file에만 사용하고 출력/Git에 포함하지 않는다. notes/image bytes/private Board명/검색 로그 추가0. private 자료 공개/권리 gate확대/새 UGC 활성화0. data release ID와 migrations hash, commit/deployed SHA·상태/오류 코드만 기록한다.
+9. 위험/차단: 실제 관리 인증·prod DB 연결이 부족하면 가능한 검증/구체 후보/백업 계획까지 완료한 후 정확한 접근 정보만 요청한다. 사람의 실폰 입력은 자동 PASS로 만들지 않는다. 새로운 제품 범위/irreversible identity loss/유료변경은 이 승인에서 추론하지 않는다. 필요한 질문은 새 차단이 있을 때만 하고 독립 작업은 계속한다.
+10. 현재 진행: 위 기준은 source 변경 전에 기록했다. 배포 baseline·remote fetch 확인 완료, 핵심 기능 비교와 환경 preflight 진행 중. 새 진행판/계획 트리 없음; 기존 M/W/C/Q/D 번호와 과거 로그 유지. 완료/남은 사항과 다음1개는 실제 결과로 갱신한다.
+
+31차 중간 실행 결과(배포 전):
+- 화면 간 회귀에서 기존 보드 상세의 ‘내 공개 미니홈’ 진입이 상세 헤더 분리 후 사라진 실제 누락을 발견했다. 기존 미니홈 flag 경계를 유지하며 보드 상세에서 같은 편집 페이지로 이동하는 링크만 복원하고 기존 publication UI 대표 선택/순서/비공개·moderation 검사를 재실행한다. 새 공개 기능 활성화나 schema 변경이 아니다. 카드 삭제 회귀는 기존23차 관리 탭을 연 뒤 검사한다.
+- 같은320px 검사에서 보드 선택 summary가 남은 flex 공간보다 커져2px 화면 넘침을 재현했다. 모바일 보드 선택을 한 줄 폭으로 배치하는 최소 CSS만 보완한다. 과거 Home의 hero/동작 selector는 승인된 Collection/명시 선반 선택/기록 목적 분기의 현재 계약으로 대체하며 기능 삭제를 가짜 PASS로 덮지 않는다.
+- 기존06d2e38와 주요 기능을 대조하고 감상 이력 관리 진입/카탈로그 조회 실패 시 기존 캐릭터 name·image·role 보존을 최소 보완했다.25~29차 및 취소30차를 보존한다. unit424/catalog256+2skip/최종 관리Chromium96+2skip/WebKit35, local publication SQL/classification19 PASS. 추가 cross-surface/최종 build/Git 배포 결과는31차 보고와 기존 evidence에 이어 기록한다.
+- Test/production classification migration20261005090000 적용 완료. 두 data release ID·hash/backup·구client/권한·operating data fingerprint 유지, test SDK HTTP12checks 및 production rollback-only RPC 계약 PASS. 새 classification flag1만 활성, 기존 Public/private-image flags0. 모든 과거 DB migration 일괄 적용/원본·legacy 삭제0. 새 전체 원격 WatchLog 모델/실물폰/Public 출시 PASS는 별도 잔여다.
+
+31차 Git 직전 최종 결과:
+- 추가 화면 회귀128개 중127 PASS/1기존 환경 skip, 최종 build20 PASS. 보드 상세 미니홈 링크와320px switcher2px 넘침을 최소 수정했다. 과거 Home/상세 selector 보정과 초기115 PASS/12 FAIL/1 skip·focused10 PASS/2 FAIL·보완2 PASS는 보존한다. WebKit35/관리Chromium96+2skip/단위424/catalog256+2skip와 중복 합산하지 않는다.
+- staged 비밀/개인자료 scan0 및 Git diff check 통과 뒤 master non-force merge/push/Vercel Git 배포를 진행한다. 코드/DB 후보 승인 반복 요청 없음. 배포 SHA/CI/실제 운영 확인은 같은31차 보고/evidence에 이어 기록한다.

@@ -61,7 +61,8 @@ export function libraryCloudRowsToItems(rows) {
 
 export function buildWatchLogCloudRows(userId, logs, updatedAt = new Date().toISOString()) {
   const safeUserId = trimString(userId);
-  return toArray(logs).map((log) => ({
+  // Catalog-only watch records have no approved remote schema. Never cast null to AniList 0.
+  return toArray(logs).filter((log) => log?.anilistId != null).map((log) => ({
     user_id: safeUserId,
     log_id: trimString(log?.id),
     anilist_id: Number(log?.anilistId),

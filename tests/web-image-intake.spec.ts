@@ -34,6 +34,7 @@ test('real Web picker saves local original and preview across reload and removes
   });
   expect(records).toEqual([{ hash: createHash('sha256').update(pngBytes).digest('hex'), bytes: Array.from(pngBytes) }]);
   expect(uploads).toEqual([]);
+  await page.getByRole('tab', { name: 'Manage', exact: true }).click();
   await page.getByRole('button', { name: 'Delete card', exact: true }).click();
   await page.getByRole('button', { name: 'Confirm card deletion', exact: true }).click();
   await expect(page).toHaveURL(/\/archive\/$/);

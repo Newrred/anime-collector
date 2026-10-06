@@ -1,5 +1,7 @@
 # 01. 확정 결정과 미정 게이트
 
+> 2026-10-07: `WATCH-RECORD-FLOW-01` — 기존 감상 기록을 이미지 저장과 같은 작품에서 이어 쓰되 공통 진입에서 목적을 구분한다. 아래 결정/기존 interface-rebuild29차와 [실행 보고](reports/2026-10-05-v84-web-application.md#29차--감상-기록과-장면-저장-동선-복원-2026-10-07) 참조. 감상 저장은 Memory 자동 생성/이미지 요구/원격 WatchLog 이관 승인이 아니다. 카탈로그 미연결 제공처 항목은 개인 감상 용도의 legacy identity로 유지하고 verified catalog로 승격하지 않는다.
+
 > 2026-10-05: 사용자 “실 서비스 디자인 적용 작업 진행해줘”로 V8.4의 Web presentation 적용 승인. 아래 `V84-WEB-APPLICATION-01` 참조.
 
 > 2026-10-05: 사용자 “카드별 태그로 진행 (추천)” 승인. `CARD-CLASSIFICATION-01`: Memory별 캐릭터 참조·커스텀 태그를 작품 장르·기존 WatchLog와 분리해 명시 저장한다. 동일 작품의 모든 이미지에 자동 적용하지 않는다. 비공개 metadata이며 공개 snapshot에 자동 포함하지 않는다. 로컬 저장/검증 및 동기화 migration 후보 준비 승인, 운영 DB 적용·배포·Public 활성화는 별도 D06. 원격 지원 전에는 이 기기 보관임을 표시하고 기존 원격 응답으로 로컬 분류를 지우지 않는다. TAG-01의 전체 taxonomy는 이 제한된 카드 분류 승인으로 모두 확정하지 않는다.
@@ -669,3 +671,56 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - migration impact: additive private JSON column 및 검증/RPC wrapper 후보만 준비·로컬 검증. 운영 적용·새 sync flag 활성화·Public·배포는 별도이며 승인되지 않았다.
 - approved by/date: 사용자, 2026-10-05. 질문에 명시된 로컬 검증·동기화 준비 범위 승인.
 - review date/trigger: 승인된 test 환경의 새 metadata save/pull/conflict/promotion 검증, 이후 D06의 정확한 운영 후보 검토. TAG-01 전체 체계는 별도 잔여다.
+
+## Decision Log — LINE-IMAGE-COLLECTION-01 (2026-10-06)
+
+- status: CONFIRMED_LOCAL_WEB_PRESENTATION_SCOPE.
+- approved by: 사용자 “필름 컨셉으로 들어간 디자인들 전부 빼고(인터렉션은 유지) … 선적인 요소들”, 작품 탐색을 보기 옆으로 이동, 이미지 겹침·모션 요청. 이름 질문에는 “컬렉션 / Collection (추천)”을 선택했다.
+- chosen option: 홈/내 책장 표시명을 컬렉션/Collection으로 바꾼다. 필름 구멍·띠·필름 아이콘과 관련 조작 문구를 없애고 얇은 구분선과 이미지 중심으로 정리한다. 작품의 장르·열 수는 헤더의 보기 옆 탐색 칸으로 옮긴다. 컬렉션/작품 표지는 읽기 쉬운 그리드와 가벼운 겹쳐보기를 선택할 수 있으며 hover/focus에서 표지를 펼친다. 자동 재생 없이 reduced-motion을 존중한다.
+- preserved: 기존 사용자 선반 이름과 owner별 로컬 설정 저장 키, Title/Memory/WatchLog/Board 모델, 표지 선택→한 패널 펼침 및 작품 상세 이동은 유지한다. SHELF-ROW-PREVIEW-01의 행 아래 펼침은 이번에도 유지하며 옆 펼침으로 바꾸라는 명시 요청으로 해석하지 않는다. NO-HERO/핑크 주요 행동도 유지한다.
+- supersedes: FILM/LOGO-2/V84-WEB-APPLICATION-01의 필름 표현만 이번 사용자 지시에 따라 대체한다. 과거 승인·실행 로그는 보존한다.
+- migration impact: 없음. 로컬 presentation과 문구만 변경하며 원본 이미지/카드 데이터, DB/flags/운영배포/Android를 변경하지 않는다.
+- execution/next gate: 기존 interface-rebuild ExecPlan25차에서 실제 src와 브라우저를 검증한다. 실제 사용자 화면 확인 후 추가 배치 조정; 운영 반영은 D06의 정확한 후보 승인 범위다.
+
+## Decision Log — TITLE-MEMORY-STACK-01 (2026-10-07)
+
+- approved by: 사용자 “애니 표지 뒤쪽으로 이미지들이 겹쳐보이는 듯한 느낌”. 기존 겹침 요청의 대상을 정정했다.
+- chosen option: 서로 다른 작품 표지를 겹치는25차 해석을 대체한다. 컬렉션/작품 Poster View에서 각 작품의 실제 저장된 Memory preview(최대3개)를 그 작품 표지 뒤로 살짝 겹친다. 기본 그리드에 적용하고 잘못 해석한 별도 겹쳐보기 옵션을 제거한다. 실제 기억이 없는 작품은 표지만 표시하고 장식용 가짜 사진이나 Memory를 생성하지 않는다.
+- preserved: 표지/작품명/기억 펼침의 기존 동작, 행 아래 한 패널, POSTER/MEMORY 데이터 의미, owner별 미디어 권한과 lazy private preview, NO-HERO/선·핑크/Collection 명칭. 원본이나 개인 태그·감상을 공개하지 않는다.
+- execution: 기존 interface-rebuild26차. 로컬 src/합성 runtime 회귀/실제 표지 화면 확인이며 DB/Public/배포·Android 승인 범위는 확대하지 않는다. LINE-IMAGE-COLLECTION-01의 다른 결정과 과거25차 근거는 보존한다.
+
+## Decision Log — COLLECTION-SIDE-FAN-01 (2026-10-07)
+
+- approved by: 사용자 “클릭 시에는 겹친게 펼쳐지면 …”에 대한 선택 질문에서 “표지 옆으로 펼침 (추천)” 승인.
+- chosen option: 컬렉션의 선택한 작품 묶음을 한 줄로 확장하고, 앞표지 옆에서 해당 Memory preview 최대3장을 펼친다. 다른 작품은 다음 줄로 밀리며 앞표지는 일반 타일과 같은 크기로 유지한다. 휴대폰은 표지 아래 가로 넘김. 다시 표지 선택/접기/Escape로 닫고 기억 이미지는 해당 카드 상세, 작품 이름은 동일 Title Hub로 이동한다.
+- supersedes: SHELF-ROW-PREVIEW-01/25·26차의 별도 행 아래 패널 위치만 사용자 승인으로 교체한다. TITLE-MEMORY-STACK-01의 같은 작품 Memory 뒤 겹침과 기존 Collection 이름·선/핑크·데이터/owner 권한 계약은 유지한다. 작품 탭의 Title Hub 탐색 계약은 이번 컬렉션 클릭 위치 변경과 별개다.
+- impact/next: 기존 interface-rebuild27차의 로컬 Web presentation. DB/migration/원본·업로드/flags/운영배포/Android 변경은 승인되지 않았다. 실제 src의 옆 펼침·모바일 넘김·키보드·동일 카드/작품 이동을 검증하고 사용자 배치 검토로 이어간다.
+
+## Decision Log — SHELF-EDITOR-COVERS-01 (2026-10-07)
+
+- approved by: 사용자 “선반 편집 부분 좀 정리 … 애니 표지가 같이 나오면 좋겠어”.
+- chosen option: 실제 Collection 편집에서 활성 선반 한 개의 이름과 작품을 편집한다. 선택 작품은 실제 catalog 표지·제목·기억 개수로 표시하며 검색/선택됨 보기로 찾는다. 선반 목록에서 이동하고 추가/제거는 draft에만 반영한다.
+- preserved/impact: 적용/취소·owner별 기존 선반 저장 키·기존 범위·Memory/Title identity·27차 펼침 유지. 없는 표지는 기존 fallback. 표지 선택이 Memory 생성이나 이미지 업로드/공개가 되지 않는다. 기존 interface-rebuild28차의 로컬 Web 표현 작업이며 DB/flags/운영배포 승인으로 확장하지 않는다.
+
+## Decision Log — WATCH-RECORD-FLOW-01 (2026-10-07)
+
+- approved by: 사용자 “기존의 감상 기록들(별점, 시청 상태, 정주행 횟수 등) … 사용자관점에서 플로우를 고민 후에 적용”.
+- chosen option: 공통 기억 남기기에서 감상 기록/장면 저장의 목적을 구분하고, 감상 기록은 작품 선택 후 같은 Title Hub에서 작성·이력 확인한다. 별점/시청 상태/재시청·날짜/기존 메모와 WatchLog를 다시 연결한다. 일반 감상은 이미지 선택 없이 저장하며 이미지는 별도 명시 선택으로 이어간다.
+- preserved: LIBRARY-INTEGRATION-01/TITLE-HUB-01의 기존 개인 기록 보존, Memory와 Title 상태/WatchLog의 독립, Complete Card의 작품+visual·표지의 개인 신호 조건, image-first Archive/Board. 기존 이름/이미지 composer direct route와 legacy edit 호환 유지. 작품 저장 해제나 Memory 삭제로 감상 이력을 지우지 않는다.
+- execution/impact: 기존 interface-rebuild29차. 숫자 AniList가 없는 자체 catalog 로그에 optional canonical identity를 로컬로 보존하고 snapshot 호환/실패 재시도까지 검증한다. 신규 normalized remote schema/자동 원격 이관은 만들지 않는다. 운영 DB/flags/배포와 Android는 이번 승인에 포함하지 않는다.
+
+## Decision Log — COLLECTION-TASTE-SPACE-01 (2026-10-07)
+
+- **상태: 사용자 취소 (2026-10-07).** “이 요청 그냥 취소.. 롤백 해줘”에 따라 이번 위치 이전·새 취향 배치 승인을 철회했다. 기존 컬렉션 선반/표지 뒤 겹침·옆 펼침과 작품 두 보기를 유지한다. 감상 기록/태그 등29차까지의 작업은 계속 유효하다. 아래는 취소된 요청의 과거 기록이다.
+
+- status/approval: CANCELLED — 원래 승인 요청은 사용자 “컬렉션에 적용된 저 느낌을 작품 탭의 표지보기 일 때로 옮기고 … 실험적인 여러 레이아웃들로 자신의 애니 취향을 시각적으로 나타낼 수 있는 공간 … 태그 선택 … 모바일 … 리소스 고려”였으나 이후 사용자 취소로 무효다.
+- chosen option: 현재 표지 뒤 같은 작품 Memory 겹침/PC 옆·모바일 아래 펼침을 작품 Poster View로 옮긴다. 제목은 같은 Title Hub, 기억은 같은 상세로 이동한다. 컬렉션은 개인 취향 이미지 공간으로 분리하고 벽면/대각 겹침/원형 배치, 카드 태그·캐릭터 범위, 순서 재배치를 제공한다. 기존 공통 메뉴/폰트/핑크/테마는 유지하며 컬렉션에 channel의3~4열 정보 header를 강제하지 않는다.
+- preserved: 기존 Title/Memory/WatchLog/Board와 owner 경계, 감상 기록 동선, 저장/해제 독립, 원본 bytes/카드 태그/선반 설정을 삭제하지 않는다. 이전 선반은 작품 탭의 범위와 편집으로 접근한다. 기존 COLLECTION-SIDE-FAN-01의 위치만 Poster View로 이전한다. 모바일은 한정된2열 이미지 모음으로 배치하고 복잡한 PC 입체 조작은 강제하지 않는다.
+- local implementation: 기존 이미지/표지 참조와 bounded 미리보기 재사용, 카드 태그 조건에 작품 표지를 끼워 넣지 않음, owner별 로컬 배치 설정/적용·취소. 서버 이미지 복제/신규 UGC 자동 게시/공개 페이지 활성화 없음. 향후 미니홈은 기존 public snapshot/권리/철회 gate에 연결할 별도 잔여다. 개인 레이아웃이 private 자료를 공개하는 승인은 아니다.
+- impact/gate: 기존 interface-rebuild30차. DB/migration/의존성/유료변경/운영배포/Android 승인0. 실제/합성 runtime·200장 loading budget·모바일·기존 작품 두 보기/감상과 선반 보존을 검증한다.
+
+## Decision Log — WEB-DESIGN-RELEASE-CLOSEOUT-01 (2026-10-07)
+
+- status/approval: 사용자 직접 “내 승인 없이 … 전부 작업 … 중요한 기능 … 검토 … 추가 작업 … 실 서비스 배포(db구조도 업데이트)” 승인. 현재 유효한 Web 변경의 누락 마감/검증 후 필요한 비파괴 DB 후보와 master Git 운영 배포를 진행한다. 반복 후보 확인 질문 없이 실행한다.
+- preserved: 취소된 COLLECTION-TASTE-SPACE-01은 취소 유지. Android/성인 인증/유료 계약·권리 확대/private 자동 upload와 미검증 Public 활성화는 승인 범위가 아니다. 기존 개인정보/권리/RLS·owner·삭제/철회 fence 및 사용자 기록은 보존한다. TITLE-STATE-SYNC-01의 신규 전체 remote 모델 선택을 이 배포 지시로 임의 확정하지 않는다.
+- execution: 기존 interface-rebuild31차/단일 release-v2 진행판. 실제 production SHA/DB 버전·migration hash/data release ID 및 검증/백업·복귀 경로를 기록하고 정상 검사 후 Git merge/push→Vercel Git SHA 확인. DB 새 classification 적용/실제 test HTTP12 및 운영 rollback-only RPC 계약은 완료했다. Web 검사/최종 Git 배포 결과는 기존31차 보고/배포 증거에 결속한다. Public 출시 전체 PASS로 확대하지 않는다.

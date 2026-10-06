@@ -76,7 +76,7 @@ const createAlbum = (identity) => ({
   officialCover: null,
   catalogDetail: null,
   libraryItem: null,
-  tracking: { isSaved: false, watchStatus: null, rating: null },
+  tracking: { isSaved: false, watchStatus: null, rating: null, rewatchCount: 0, lastRewatchAt: null },
   memories: [],
 });
 
@@ -165,6 +165,8 @@ export function buildTitleAlbumProjections({
       isSaved: true,
       watchStatus: text(item?.status) || null,
       rating: item?.score != null && String(item.score).trim() !== "" && Number.isFinite(Number(item.score)) ? Number(item.score) : null,
+      rewatchCount: Math.min(999, Math.max(0, Math.round(Number(item?.rewatchCount) || 0))),
+      lastRewatchAt: item?.lastRewatchAt || null,
     };
   }
 

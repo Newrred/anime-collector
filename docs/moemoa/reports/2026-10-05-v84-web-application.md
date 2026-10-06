@@ -1,6 +1,6 @@
 # V8.4 실제 Web 디자인 적용 — 2026-10-05
 
-> 최신 결과는 하단 **22차: 카드별 분류와 기억 상세** 절이다(10/5 착수, 10/6 마감). 20·21차의 과거 PASS와 이번 실행을 구분한다.
+> 최신 실행 기록은 하단 **30차 요청 취소와 원복** 절이다(2026-10-07). 유효한 구현은29차 감상 기록과 장면 저장 동선 복원까지다. 원격 체크포인트2c1811d 이후25~29차 로컬 미커밋이다. 20~29차의 당시 상태·실패·PASS와 이번 원복 검사를 구분한다.
 
 사용자 “시안에 전체적인 큰 틀의 디자인은 나온 것 같으니, 이제 실 서비스 디자인 적용 작업 진행해줘”에 따른 **로컬 서비스 코드 적용 및 실제 브라우저 검증 결과**다. `codex/phone-test`, 기준 HEAD `54c39cb` 이후 working tree 변경이며 아직 커밋·push·운영 배포하지 않았다. 기존 release-v2 진행판이나 W/D/Q의 hosted PASS를 변경하지 않았다.
 
@@ -342,3 +342,214 @@ git diff --check
 
 7. **보안/권리/관찰 영향:** 새 비밀·실제 표지 QA 캡처·사용자 감상/사진/cache는 commit하지 않았다. 기존 공개 client 설정은 유지한다. 새 실행기는 credentials/rollout flags를 제거하고 기존 격리 loopback 서버를 소유한다. UI assets는 합성 시안/직접 만든 SVG·PNG/로고와 합성 서비스 증거이며 Are.na 제3자 원본 캡처는 cache 전용이다. analytics/일반 로그 필드 추가0, Private 자동 업로드/Public 활성화0.
 8. **Git 근거/잔여/다음 gate:** 결정/계획 `2c0c480` → SQL 후보 `4bfb3da` → 실제 Web `9cf424e` → 시안/합성 증거 `fb25167`. 자료 commit `fb25167b9563807e9eeb22f89f82f9f42651d3a7`를 `git push origin HEAD:codex/phone-test`로 올리고 `git rev-parse HEAD`/`git ls-remote origin refs/heads/codex/phone-test` 일치를 확인했다. 이 기록의 후속 문서 commit까지 포함한 최종 branch HEAD를 새 PC에서 받는다. 자동 Vercel Preview 완료는 미조회이며 운영 배포로 보고하지 않는다. 외부 Git 차단 없음. 다음1개는 **기존 실제 기억 상세의 읽기→수정→관리 배치 사용자 검토**. 새 태그 hosted·실폰/Safari·기존 출시 D01~D06 잔여는 유지하며 Android 제외/운영 후보 승인은 별도다.
+
+## 25차 — 컬렉션과 선·이미지 중심 후속 (2026-10-06~07)
+
+1. **읽은 문서와 소스:** AGENTS.md → CODEX_START_HERE.md → 최상위01/제품02/Title Hub dual-view UI 명세·계획, PLANS.md/변경09/QA07 및 기존 interface-rebuild 계획·보고·인계·단일 출시 작업판을 대조했다. 실제 BookshelfView/설정 reader, TitleCollectionView/PosterTile/AlbumCard/collection query, ChannelHeader/PrimaryNavigationLinks/TopNavDataMenu, channel-service/title-collection CSS와 관련 channel/title/helper/runner 테스트를 읽었다. Are.na 재접근 web 도구는 실패했으므로 새 사이트 실측을 주장하지 않고 사용자의 첨부와 이전 검토 근거를 사용했다. verify-before-claiming에 따라 실제 src와 런타임을 대조했다.
+
+2. **승인·가정:** 사용자의 필름 장식 전부 제거(인터랙션 유지), 작품 탐색 이동, 이미지 겹침/모션 요청과 “컬렉션 / Collection (추천)” 답을 LINE-IMAGE-COLLECTION-01에 기록했다. SHELF-ROW-PREVIEW-01의 행 아래 펼침은 제가 제안한 V8 진행에 동의한 이력이 있으며 최초부터 사용자가 직접 아래 방식으로 바꾸라고 지시한 것은 아니었다. 사용자의 여러 책장일 때 느낌이 달랐다는 후속은 옆 펼침 복원 요청으로 해석하지 않았다. 기본 그리드는 유지하고 겹쳐보기로 비교한다. 추가 필수 결정/이번 로컬 차단은 없다.
+
+3. **계획:** 새 진행판이나 계획 트리 없이 `plans/2026-10-03-interface-rebuild.md` 25차에서 승인/지도/순서/수용 기준/안전/롤백을 구현 전에 기록했다. 같은 계획의 실행 결과에 이번 PASS와 최초 테스트 오류를 보존했다.
+
+4. **변경 파일과 이유:**
+
+| 현재 경로/근거 | 변경 내용 |
+| --- | --- |
+| `src/features/bookshelf/BookshelfView.jsx:46–67` | 화면 제목/편집/검색/보기의 Collection 문구, 기억 펼치기 문구, 별도 layered 선택; 기존 선택 행 아래 한 패널 유지 |
+| `src/components/PrimaryNavigationLinks.jsx:22` | PC/모바일 공통 Collection 이름; route와 저장 키 변경 없음 |
+| `src/components/collection/ChannelHeader.jsx:12–17` | 확장 헤더의 칸 수를 지정해 작품의 탐색을 보기 옆으로 배치, 기존 Archive 5칸 유지 |
+| `src/features/titles/components/TitleCollectionView.jsx:43,172–189` | 기존 POSTER/MEMORY 의미와 독립된 일시적 이미지 배치 옵션, 장르/열 수/방향을 헤더 탐색 칸으로 이동 |
+| `src/styles/channel-service.css` | 기존 PNG의 문자만 CSS로 표시, 구멍/띠 pseudo decoration 제거, 일반 표지94%, 얇은 선과 가벼운 overlap/hover/focus; 모바일/reduced-motion pose를 none으로 제한 |
+| `tests/channel-service.spec.ts`, `tests/title-collection.spec.ts` | 겹침의 실제 center hit test, 모든 표지의 키보드 선택/단일 기억 패널, 모션 감소·모바일/탐색 위치·장르와 동일 title 집합/상세 이동 검사 |
+| `tests/channel-controls.spec.ts`, `tests/library-userflow.spec.ts`, `tests/memory-card-composer.spec.ts`, `tests/private-image-sync.spec.ts`, `tests/title-cross-surface.spec.ts` | 사용자 승인으로 바뀐 표시명/접근성 문구만 갱신. private-image/library 전체 suite는 이번 재실행하지 않았으며 나머지는 아래 범위로 검사 |
+| 최상위01/시작, 기존 계획/이 보고/인계/출시 작업판 | 결정 및 현재 로컬 요약을 좁게 갱신; 과거 이력과 W/Q의 hosted 상태 보존 |
+
+5. **데이터/마이그레이션/롤백:** migration/DB/ingestion/remote flags/의존성 변경0. 내부 bookshelf 클래스·저장 키와 사용자 선반 이름은 호환성 때문에 유지했지만 필름 표현은 보이지 않는다. 원본 이미지 바이트, Memory/Title/WatchLog/Board의 동작은 그대로다. 이번 source presentation diff만 원복하면 기존 로컬 설정을 그대로 읽는다. 기존 미적용 분류 SQL은 그대로 미적용이며 삭제/원격 적용하지 않았다.
+
+6. **이번 명령/실행 결과:** Node24.19.0/npm11.17.0, `. .\.cache\activate.ps1` 활성화 후 실행했다.
+
+| 실행 | 실제 결과와 한계 |
+| --- | --- |
+| `npm run test:e2e:channel -- tests/title-collection.spec.ts tests/title-cross-surface.spec.ts` | 최초77개 중76 PASS/1실패. 새 테스트가 CSS zoom 뒤 숨은 펼침 버튼을 무조건 클릭했다. 현재 표시 여부를 확인하게 보정했다. 초기 cross-surface5개 PASS도 이 회차 근거이며 Android 앱 검증이 아니다 |
+| `npm run test:e2e:channel -- tests/title-collection.spec.ts --grep 'My Titles remains usable'` | npm/PowerShell에서 grep 옵션이 전달되지 않아 의도한1개 대신 기본+title72개 회귀가 실행됨.72 PASS/skip0. 다른 suite와 합산하지 않음 |
+| `node scripts/run-channel-e2e.mjs tests/title-collection.spec.ts '--grep=layered Collection\|Title exploration'` | 최종 CSS의 reduced-motion hover/focus 우선순위 보완 후 Collection1+Titles3폭 **4개 재검사 PASS**.72개와 중복이며 고유4개를 더했다고 보고하지 않음 |
+| `npm run test:unit` |416 PASS/실패·skip0 |
+| `npm run build` |19 routes PASS; 기존 TopNav1,026.82kB/gzip372.08kB 및500kB chunk 경고 유지 |
+| `git diff --check` |오류0, LF/CRLF 안내만. 이후 문서 추가의 최종 확인도 실시 |
+| 실제4363 IAB |기존5작품/0Memory, 실제 카탈로그 표지·Collection 이름/문자 로고·겹쳐보기·보기 옆 탐색 관찰. Action만 선택→1작품 좌측, 전체→5작품 복귀. 여러 장르 선택은 기존 query의 OR 계약을 유지하며 새 교집합 구현으로 주장하지 않음 |
+
+이번 새로 통과한 사용자 행동은 겹쳐보기에서 모든 표지 중심 선택/키보드 기억 펼침·같은 패널 교체, 모션 감소 시 focus에도 정지, 보기 옆 장르와 열 수 제어, 필터된 동일 Title 집합/두 보기/상세 이동이다. 기본 데이터/72 table 복원이나 hosted A/B/Public 검사를 반복하지 않았다. 격리 합성 fixture PASS와 실제 카탈로그 화면 확인은 별도 근거다. 실제 사용자 origin에 합성 카드나 사진을 넣지 않았다.
+
+로그: `.cache/v84-service/line-25-unit.log`, `line-25-build.log`, `line-25-motion-e2e.log`; 합성 UI 캡처 `collection-layered-1440.png`, `titles-layered-{1440,390,320}.png`. 실제 표지 캡처 `collection-real-layered-25.png`, `titles-real-sparse-25.png`, `titles-real-layered-25.png`는 cache에만 보관한다. 브라우저 임시 viewport override는 reset했고 서비스 탭을 남겼다. 실표지 PNG 일부 오른쪽이 잘리는 캡처 한계가 있다(원인은 확정하지 않음). DOM 수평 넘침 결과 및 headless3폭 layout 검사와 구분한다. 새 실측 Are.na 원본/실폰/Safari/hosted/운영 배포 PASS가 아니다.
+
+7. **보안·권리·관찰:** 비공개 이미지 자동 업로드·공개 범위/동의·계정/권한·moderation·analytics 변경0. 실제 이미지 내용이나 metadata를 재생성/분석하지 않았다. CSS transform은 표시뿐이며 원본 파일은 유지한다. 실제 카탈로그 캡처/개인 설정은 Git에 추가하지 않는다. 공용 문구와 UI 제어만 변경한다.
+
+8. **잔여/다음 승인:** 로컬 미커밋으로 기존 개발 HEAD2c1811d 이후 변경이다. 이번 로컬 구현의 외부 차단은 없다. 출시 W/Q의 실폰/Safari, 새 private classification hosted save/pull/conflict/promotion 및 D01~D06의 실제 잔여는 미완료이며 이번 디자인 PASS로 채우지 않는다. Android 제외, 운영 migration/Public/master merge·push·배포의 정확한 D06 후보 승인은 유지한다. 다음 작업1개는 **컬렉션·작품의 새 선/이미지 배치 사용자 검토**다. 행 옆 펼침 복원은 이번 작업에서 확정하지 않았다.
+
+## 26차 — 같은 작품 기억을 표지 뒤로 겹침 (2026-10-07)
+
+1. **문서/소스:** 기존 AGENTS→시작→최상위01/제품02/Title Hub dual-view 명세·계획 및 PLANS/변경09/QA07, 같은 interface-rebuild·보고·인계·작업판을 대조했다. PosterTile/Cover/AlbumCard, BookshelfView/TitleCollectionView/projection 서비스와 PrivateMemoryCardPreview/MemoryVisual, channel-service CSS, channel/title/cross-surface 테스트 및 MemoryCardDetail의 async save를 읽었다. verify-before-claiming 적용.
+2. **승인/가정:** 사용자 정정으로 겹침의 대상은 서로 다른 작품 표지가 아니라 한 작품 표지 뒤의 그 작품 Memory다. TITLE-MEMORY-STACK-01에 기록했다. 기억0인 작품에 가짜 이미지를 넣지 않으며 현재 실제 origin에는5작품/0Memory다. 초기 행 아래 동작 유지 검증 후, 후속 승인으로27차 옆 펼침을 이어간다.
+3. **계획:** 기존 interface-rebuild26차를 코드 전에 갱신했다. 실행 결과/실패를 누적하고 새로운 진행판은 만들지 않았다.
+4. **변경 파일:** `src/features/titles/components/TitleMemoryStack.jsx:1–20` 신규: 해당 preview 최대3개를 기존 owner별 이미지 렌더러로 읽어 aria-hidden 장식에 표시. `TitlePosterTile.jsx:1–20`: 공유 stack 연결, locale 전달. `BookshelfView.jsx:46–67`/`TitleCollectionView.jsx:174–205`: 잘못 해석한 Layered 옵션 제거, 두 보기/제목 href/기억 펼침 유지. `channel-service.css:97,165–172,223–227`: 앞표지 폭 통일, 뒤 이미지 작은 회전/hover·focus/reduced-motion, tail 클릭 범위. `tests/channel-service.spec.ts`/`tests/title-collection.spec.ts`: 정확한 source ID,0/1/3개, 동일 앞표지 크기, tail/키보드/단일 패널·상세와3폭. 기존 문서 현재 요약도 후속27차 마감에 맞춘다.25차의 필름 제거/명칭/탐색 위치 변경과 과거 근거는 보존한다.
+5. **DB/롤백:** 새 migration/DB/flags/의존성0. 기존 미적용 카드 분류 SQL 상태 유지. source presentation만 원복하며 원본/카드/선반 키와 저장 데이터는 삭제하지 않는다.
+6. **실제 명령/결과:** `. .\.cache\activate.ps1` 후 Node24.19.0/npm11.17.0. `node scripts/run-channel-e2e.mjs tests/title-collection.spec.ts tests/title-cross-surface.spec.ts` 최초77개75PASS/2실패. 기존 저장 검사에서 async save 전에 reload, 새 검사에서 정렬 후 첫 작품을2Memory 작품으로 잘못 고른 오류다. updateCard await 후 읽기 복귀를 기다리고 정확한 작품 label로 검사하도록 보정했다. `node scripts/run-channel-e2e.mjs tests/title-collection.spec.ts '--grep=real shelves persist|Collection previews|per-title memory stacks'` 최종5 PASS/skip0(초기 회차와 합산하지 않음). 새 실제 행동은 카드별 뒤 ID/개수·동일 앞표지 크기·exposed rear tail 클릭/모든 표지 키보드·같은 기억/Title 상세·모션 감소·1440/390/320/no-overflow다. `npm run test:unit` 최초415/1실패는 로컬 listen EACCES:23139, 소스·검사 변경 없이 재실행416 PASS/skip0. netsh 제외 포트 목록에 해당 포트가 없어서 원인은 미확정이다. `npm run build`19 routes PASS, 기존 TopNav1,026.82kB/gzip372.08kB/500kB 경고 유지. 최초/최종 로그는 `.cache/v84-service/memory-stack-26-{e2e,e2e-final,unit,unit-final,build}.log`. 실제4363의5stack/0뒤 이미지/0Memory/no-overflow 확인은 실제 카탈로그 근거이며 합성 src 캡처 `titles-memory-stack-{1440,390,320}.png`, 실제 로컬 runtime `collection-memory-stack-1440.png`와 구분한다. 실제 사용자 캡처는 `collection-real-no-memories-26.png`이며 현재 좁은 앱 패널에서 관찰했다. 사용자 데이터 주입/이미지 업로드0.
+7. **보안/권리/관찰:** 기존 owner 검증/lazy private preview/4개 동시 read 큐/실패 및 object URL 정리 재사용. 중복 장식은 aria-hidden이고 독립 조작/공개/새 API 경로가 없다. 사진 바이트/개인 기록/검색을 새 로그나 Git에 넣지 않았다. 원본 이미지와 공개 동의 경계 유지.
+8. **미완료/다음:** 로컬 미커밋, 운영 배포 완료 아님. 실제폰/Safari/hosted 새 태그 sync와 기존 W/Q·D01~D06 잔여는 유지한다. 새로운 외부 차단 없음. 후속 사용자 승인 **COLLECTION-SIDE-FAN-01**에 따라 다음1개는 컬렉션의 PC 옆 펼침/휴대폰 아래 넘김 구현·검증이다.26차 행 아래 PASS는27차의 새 위치 PASS가 아니다.
+
+## 27차 — 컬렉션 표지 옆으로 기억 펼침 (2026-10-07)
+
+1. **읽은 문서/소스:**26차 목록과 같은 기존 결정/계획/인계/작업판을 계속 사용하고 PLANS.md를 대조했다. BookshelfView의 selectedRow/Fragment 삽입, TitleAlbumCard의 동일 card href/최대3개와 extra/빈 상태, 공유 PosterStack/PrivateMemoryCardPreview/MemoryVisual, GenresRow의 실제 class, channel CSS 및 channel/cross-surface 검사 근거를 확인했다. verify-before-claiming 적용.
+2. **승인/가정:** “클릭 시에는 겹친게 펼쳐지면” 및 선택 답 “표지 옆으로 펼침 (추천)”을 COLLECTION-SIDE-FAN-01에 기록했다. PC 선택 묶음이 한 줄 전체를 사용하고 다른 작품은 다음 줄로 이동한다는 방식을 안내했다. 이는 SHELF-ROW-PREVIEW-01/26차의 별도 행 아래 위치에 대한 명시 교체 승인이다. 컬렉션 클릭 범위이며 작품 탭의 Title Hub 이동 계약은 유지한다. 기억0에는 가짜 자료를 생성하지 않는다.
+3. **계획:** 기존 interface-rebuild27차를 코드 전에 갱신했다. 데이터/보안/롤백/마일스톤과 source 제어를 기록하고 기존26차/과거 PASS를 남겼다.
+4. **변경 파일/이유:** `src/features/bookshelf/BookshelfView.jsx:19–30,46–74`: 선택한 타일 안으로 표지 열/Memory 열을 옮기고 aria-controls/region, 다시 클릭·접기/Escape·표지 focus 복귀, 선택 표지 nearest scroll과 보기·편집 때 선택 정리. `src/styles/channel-service.css:84,173–185,226–230,243`: 일반 타일과 같은 표지 폭의 전체 행, PC 옆/휴대폰 아래 rail, 실제 이미지 contain/왼쪽 정렬·scroll snap·짧은 순차 펼침/모션 감소, 중복 정보 숨김. `tests/channel-service.spec.ts:35–113,151–227,230–308`: 위치·크기/행동과 저장된 이미지·최대3개 및 전체4개 연결 검사. 시작/최상위01/인계/이 계획/보고/단일 작업판의 현재 요약만 갱신했다.26차 신규 `TitleMemoryStack`은 그대로 사용한다.
+5. **DB/데이터/롤백:** migration/DB/remote flag/의존성/Android 변경0. 기존 source presentation diff만 원복하며 원본·메모·태그·선반 키/Board N:M·카드 id를 유지한다. 기존 카드 분류 SQL 후보는 미적용이다. 사용자 origin의 카드/사진 생성·업로드0.
+6. **실제 명령/결과:** Node24.19.0/npm11.17.0, `. .\.cache\activate.ps1` 후 아래 검사. 모든 initial 로그를 cache에 보존했고 과거/반복 PASS와 합산하지 않는다.
+
+| 실행/근거 | 이번 결과와 한계 |
+| --- | --- |
+| `node scripts/run-channel-e2e.mjs tests/title-cross-surface.spec.ts '--grep=real shelves persist|Collection previews|Bookshelf and Board'` |초기3 중1PASS/2검사 오류: animation 중 x=-41px를 완료 값으로 검사, 선택 타일 내부 hidden duplicate cover로 strict selector 실패. source/front를 정확히 선택하고 종료 상태를 기다리도록 보정 |
+| `node scripts/run-channel-e2e.mjs tests/title-collection.spec.ts tests/title-cross-surface.spec.ts` |77 중76PASS/1위치 대기 누락. 기존 no-overlap/Title3폭·두 보기/검색/계정/카드 행동은 이 회차 근거. 애니메이션 중 위치는 poll로 완료 후 판단 |
+| `node scripts/run-channel-e2e.mjs tests/title-cross-surface.spec.ts '--grep=real shelves persist|Collection previews|actual local image bytes|Collection unfolds|Bookshelf and Board'` |추가 검사 회차2PASS/3실패: animation-fill:both가 종료 후 identity matrix를 유지. source를 backwards로 바꿔 종료 뒤 transform이 해제되게 함. 최종 같은 명령 **5 PASS/skip0**, `side-fan-27-e2e-complete.log` |
+| `npm run test:unit` / `npm run build` |**416 PASS/skip0 /19 routes PASS**.27차 신규 실행이며26차 EACCES 실패/재시도와 별도. 기존 TopNav 큰 bundle/500kB 경고 유지 |
+| `git diff --check` / 실제4363 IAB |오류0(LF/CRLF 안내만). 실제 기존5표지/0Memory 보존, Steins;Gate 표지 선택 시 첫 기억 안내·불필요한0개 링크 없음. 실제폰/hosted/운영배포 PASS 아님 |
+
+새 사용자 행동 PASS: PC 펼침 전후 같은 표지 폭/옆 위치, 휴대폰390・320 아래 rail의 실제 scroll와 문서 no-overflow, 모든 표지 center/tail/키보드·단일 선택, 표지 재클릭/접기/Escape·focus/reduced-motion, local 파일 선택→IDB 저장한 합성 이미지의 같은 src/contain/자동 upload0, 실제4Memory의 preview3/+1→전체보기4, 같은 card/Title/Board 연결과 감상 저장 후 reload. 연령/권리/공개 실검증이나 기기 Safari PASS로 승격하지 않는다.
+
+초기/전체/보정 로그: `.cache/v84-service/side-fan-27-{e2e,e2e-final,e2e-verified,e2e-complete,unit,build}.log`. 최종 합성 실제 src 캡처: `collection-side-fan-open-1440.png`, `collection-side-fan-{390,320}.png`, `collection-side-fan-three-1440.png`; 실파일로 저장한 합성 이미지 캡처 `collection-side-fan-local-image-dark.png`. 실제 사용자 자료는 `collection-side-fan-real-empty-27.png`에 별도 보관한다. 임시 viewport override 없이 현재 앱 패널의 좁은 화면을 관찰했으며 사용자 브라우저에 fixture를 주입하지 않았다.
+
+7. **보안/개인정보/권리/관찰:** 기존 owner/lazy/4read 큐·실패/objectURL 정리를 재사용하며 source reader/API/원본 bytes/개인 분류/공개 동의는 변경하지 않는다. 겹친 뒤 이미지는 aria-hidden, 펼친 카드는 기존 href/접근성 이름으로 조작한다. 사진·검색·개인 감상을 신규 로그/Git에 추가하지 않았고 analytics 이벤트 추가0. 모든 QA 파일은cache 로컬이며 원격/운영 DB 쓰기0.
+8. **잔여/다음 gate:**25~27차는 로컬 미커밋이며 원격 기준2c1811d 이후이다. 이번 로컬 작업의 외부 차단 없음. 다음 작업1개는 **컬렉션 옆 펼침 사용자 배치 검토**. 현재 사용자 기록의0Memory 때문에 실제 개인 사진이 채워진 팬의 육안 검토는 아직 없다. 격리 real runtime에서 합성 자료/실파일 저장으로 대신 검증한 범위를 명시한다. 기존 W/Q의 실폰/Safari/hosted 태그 sync와 D01~D06 잔여, Android 제외, 운영 migration/Public/master merge・push/배포의 정확한 후보 승인 게이트는 유지한다.
+
+## 28차 — 선반 편집 정리와 실제 표지 (2026-10-07)
+
+1. **문서/소스:** AGENTS→CODEX_START_HERE→최상위 결정01→제품02/Title Hub dual-view 명세와 기존 계획을 읽었다. PLANS/QA07/변경09와 기존 interface-rebuild·보고·인계·단일 작업판을 대조했다. 실제 BookshelfView/owner별 bookshelfSettings, TitleCover/collection service·projection, ChannelHeader/TextChoices, channel CSS·channel/cross-surface 검사와 appState·격리 실행기를 확인했다. verify-before-claiming 적용을 이어간다.
+2. **승인/가정/질문:** 사용자 “선반 편집 부분 좀 정리 … 애니 표지가 같이 나오면 좋겠어”를 SHELF-EDITOR-COVERS-01에 기록했다. 실제 catalog 표지와 제목을 같은 선택 행에 표시하고 활성 선반 한 개씩 편집한다. 선반 추가/제거는 적용 전 draft이며 취소 시 저장본을 보존한다. 새 작품이나 Memory/표지 이미지를 생성하지 않는다. 첨부는2작품/3Memory였으나 접근 가능한4363 탭은 기존5작품/0Memory다. 이 서로 다른 상태를 동일 재현으로 주장하지 않고 검사 문맥을 구분한다. 추가 사용자 결정/외부 차단 없음.
+3. **계획:** 코드 전에 기존 `plans/2026-10-03-interface-rebuild.md:555`의28차를 갱신했다. 별도 계획 트리/작업판을 만들지 않았다. 현재 요약·후속 카드만 좁게 갱신하며20~27차의 실제 실패/PASS·W/Q/D 출시 근거를 보존한다.
+4. **파일/이유:** 신규 `src/features/bookshelf/BookshelfEditor.jsx:1–46`은 선반 목록/개수·활성 선반 이름/제거·검색/선택됨·표지44×66/제목/Memory 수/선택 표시·빈 상태·분리된 취소/적용 footer. 기존 최대20선반/80자 이름을 유지하고 저장 계층의 최대300개 선택에 맞춰 추가 선택을 제한한다(상한300개 실량 검사는 이번 범위 아님). 기존 `BookshelfView.jsx:56–59`는 부모 draft/owner/save·오류 handler를 그대로 전달한다. `src/styles/channel-service.css:120–162,270–276`은 큰 fieldset/멀리 떨어진 텍스트 checkbox를 선반 열+compact3열 선택/얇은 선으로 바꾸고 모바일은 한 열·테마/focus를 지원한다. 신규 `tests/bookshelf-editor.spec.ts:1–117`은 실제 플랫폼 runtime의 합성3Memory·두 선반을 통해 검색/전환/겹치는 title key·재로드/취소/삭제·저장 실패를 검증한다. 기존 시작/결정/이 계획/보고/인계/작업판 최신 요약도 갱신했다. 기존 다른25~27차 수정은 원복하지 않았다.
+5. **DB/데이터/롤백:** DB/migration/remote flags/의존성/Android 변경0. 기존 owner별 localStorage 키와 원본/카드/Title/Board 관계를 유지한다. UI diff만 원복하면 기존 선반을 계속 읽으며 데이터 삭제/복구 작업은 불필요하다. 기존 카드 분류 SQL 후보는 미적용 상태다.
+6. **실행과 실제 결과:** `. .\.cache\activate.ps1` 후 Node24.19.0/npm11.17.0. 다음 결과는 이번 실행이며 과거26・27차 PASS와 합산하지 않는다.
+
+| 실제 실행/근거 | 결과와 증명 범위 |
+| --- | --- |
+| `node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-cross-surface.spec.ts '--grep=shelf editor|real shelves persist|a title added while|Bookshelf and Board preserve'` |초기5 PASS/skip0. 선반 제거 뒤 이전 검색/선택 필터가 다음 선반을 가릴 수 있어 source에서 초기화하고 검사에 추가. 최종 같은 명령5 PASS/skip0, 초기/최종은 중복 검사이며10개로 합산하지 않음 |
+| `npm run test:unit` |최종416 PASS/실패·skip0. 제거 필터 초기화 전416도 통과했으며 별도 합산하지 않음 |
+| `npm run build` |최종19 routes PASS. 기존500kB chunk 경고 유지. 초기 build19는 필터 초기화 전 근거이며 최종 소스로 다시 빌드 |
+| 실제4363 CUA / source `TitleCover` |기존5작품/0Memory, 실제 catalog 표지5개 모두 naturalWidth>0/44×66·1440과390 no-overflow. 다른 좁은 agent 탭의319px 캡처를1440로 잘못 표기한 파일명은 `shelf-editor-real-319-separate-tab-28.png`로 정정. 실제 탭 fullPage1440 캡처를 별도로 저장. 캡처 크기와 화면 검증을 구분 |
+| `git diff --check` |최종 확인에서 공백 오류0. LF/CRLF 안내는 있으나 Git stage/push 없음 |
+
+새 사용자 행동 PASS: 두 선반이 같은 작품을 독립적으로 선택·검색/선택됨 후 선택 유지·선반 전환·제거 후 다른 선반의 검색 초기화·취소로 삭제 철회/저장본 동일·적용/새로고침의 title keys와 합집합 유지·QuotaExceededError 뒤 이름/체크 draft 보존 및 취소·이미지 없는 작품 fallback·1440/light/390/dark/320/light no-overflow. 기존 새 작품 이벤트 갱신과 Memory 감상 저장·동일 Title Hub/Board 왕복도 통과했다. 실제 catalog 이미지 로드와 소유 테스트 문맥의 private 제목 fallback을 구분한다. 이번 실제 데이터/기록 주입·선반 적용·이미지 업로드0. 관찰 가능한 탭의 실제 표지를 읽고 편집을 열었으며 합성 Memory는 격리 검사에만 만들었다.
+
+로그: `.cache/v84-service/shelf-editor-{e2e,e2e-final,unit,unit-final,build,build-final}-28.log`. 격리 runtime 캡처: `shelf-editor-{1440-light,390-dark,320-light}-28.png`(표지 없는 합성 제목). 실제 catalog 캡처: `shelf-editor-real-desktop-full-28.png`, `shelf-editor-real-390-28.png`. 모두 cache 로컬 전용이며 Git에 넣지 않는다. 임시 viewport override를 reset하고 실제 편집 탭을 남긴다.
+7. **보안·개인정보·권리·관찰:** picker는 기존 승인 catalog cover 경로를 재사용하고 사용자 Memory 이미지를 표지로 대체하지 않는다. 기존 collection service/owner 권한·private preview 읽기는 변경하지 않았다. 새 이미지 업로드/API/계정 권한/공개 동의·이미지 권리 정책/analytics 추가0. 검색·사용자 선반명·사진을 새로운 ordinary log나 Git에 넣지 않는다.
+8. **미완료·다음 gate:**25~28차 로컬 미커밋/기준2c1811d, 운영 배포 완료 아님. 이번 편집 UI의 외부 차단 없음. 다음1개는 **표지가 보이는 선반 편집 사용자 배치 검토**. 실제폰/Safari/hosted 새 카드 태그 sync·기존 W/Q/D01~D06 출시 잔여와 Android 제외는 유지한다. 운영 migration/Public/master merge・push/배포는 D06의 정확한 후보 승인 뒤 별도다.
+
+## 29차 — 감상 기록과 장면 저장 동선 복원 (2026-10-07)
+
+1. **읽은 문서/소스:** AGENTS→CODEX_START_HERE→최상위01→제품02/Title Hub dual-view 명세와 기존 계획, PLANS.md, QA07/변경09와 기존 interface-rebuild·본 보고·인계·release-v2 단일 작업판을 대조했다. TitleHub/service/projection/TitleCollectionView·공통 TopNav, 기존 Library status/quick-log·WatchLog editor/repo/IDB hydration, snapshot codec·catalog title backup·cloud rows/remote apply, Memory composer/복귀 훅·공유 CSS와 실제 unit/브라우저 검사를 읽었다. verify-before-claiming 적용. 기존25~28차 로컬 diff를 보존했다.
+
+2. **승인·가정:** 사용자 요청은 이미지 업로드 폼에 별점 등을 붙이는 것이 아니라 기존 감상 기록의 핵심 가치를 사용자 동선에서 복원하는 것이다. `WATCH-RECORD-FLOW-01`에 기록했다. 공통 진입에서 감상/장면을 구분하고 같은 작품 상세에 감상/기억 탭을 연결한다. 일반 감상은 이미지 없이 기록하고 별점/완료만으로 Memory를 만들지 않는다. 신규 provider 결과는 기존 resolver를 재사용하며 catalog 미연결 후보를 verified catalog로 승격하지 않는다. PrivateTitle의 새 tracking, 자체 catalog 감상의 새 원격 모델/동기화는 이번 범위가 아니다. 현재 실제4363에서 읽힌5작품/0Memory/감상0은 사용자 첨부의 다른 시점2작품/3Memory나 과거 별점 자료의 재현이 아니다.
+
+3. **ExecPlan:** 기존 `docs/moemoa/plans/2026-10-03-interface-rebuild.md:571–587`의29차를 코드 전에 작성하고 실제 결과를 같은 절에 누적했다. 새로운 계획 트리/진행판 없이 현재 시작/결정/제품 flow/인계/작업판의 요약만 좁게 갱신했다. 과거 W/Q/D 완료 여부와 실행 로그를 덮어쓰지 않았다.
+
+4. **변경 파일·이유:** 이번29차 소스와 검사는 아래다.25~28차의 미커밋 선반·겹침·공통 디자인 파일은 별도 이전 작업으로 보존한다.
+
+| 파일/위치 | 이번 동작 |
+| --- | --- |
+| `src/pages/record.astro:1–6`, `src/components/TopNavDataMenu.jsx:195`, 신규 `src/features/titles/components/RecordStart.jsx:11–75` | 단일 공통 기억 남기기→감상/장면 분기. 기존 내 작품/실제 표지·상태/별점/재시청과 기존 resolver 검색→같은 Title Hub. 선택만으로 저장하지 않음. 검색 최신 요청만 반영, canonical ID가 없는 제공처 후보를 서로 같은 작품으로 잘못 제거하지 않음 |
+| `src/features/titles/components/TitleHub.jsx:21–64,101–134,145–238`, 신규 `TitleWatchRecords.jsx:10–125`, `title-hub.css:42–109` | 같은 작품의 기억/감상 탭·본문 작성/기존 메모/시청 이력과 sidebar 요약. 상태/0~5 half-step 별점·미평가/재시청 횟수, 이번 감상/시작/완료/재시청/하차와 일·월·연도·미상. 명시 Save Title 선행·취소/이탈 보호·저장 중 재진입/해제 방지. 이미지 composer/캐릭터 읽기는 유지. 얇은 선과1440/390/320 배치 |
+| 신규 `src/features/titles/domain/titleWatchRecord.js:1–44`, `application/titleWatchRecordWriter.js:4–61`, `application/titleHubService.js:83–140`, `titleAlbumProjection.js:160–170` | 실제 달력/별점/횟수/identity 검증, 기존 status alias는 draft에서만 정규화. 저장된 작품에 log→현재 tracking 반영. operationId 고정과 순차 저장/이미 저장된 내용 변경 거부·부분 완료/재시도; 절대 횟수 값으로 이중 증가 방지. 기존 긴 memo는 덮어쓰지 않음 |
+| 신규 `src/domain/watchLogIdentity.js:1–16`, `src/repositories/watchLogRepo.js:129–165,193–241,259–325`, `src/domain/snapshotCodec.js:216–248,499–558,677–697` | 숫자 AniList와 optional canonical identity로 실제 old/new 이력 조회·IDB 전체 승격·동일 store/JSON 읽기. 미평가 null과0 구분. compact v5 trailing index11의 catalog ID, catalog-only 숫자 null 보존. 명시 백업 restore와 원격 snapshot 적용의 보존 조건 분리 |
+| `src/domain/cloudSyncTables.js:62–80`, `src/repositories/syncRepo.js:584–588` | 자체 catalog-only 이력을 AniList0으로 보내지 않음. 기존 원격 전체 snapshot을 적용해도 현재 로컬 자체 이력을 유지. 신규 원격 schema/flag 없음 |
+| `src/domain/search/memoryReturnNavigation.js:1–40`, `tests/unit/memoryReturnNavigation.test.mjs` | record 선택을 거쳐도 이미지 composer의 원래 Board/Archive/스크롤 복귀 목적지 유지, 외부/중첩 return 차단 계약 유지 |
+| 신규 `tests/unit/titleWatchRecord.test.mjs`, `tests/watch-record-flow.spec.ts`, 수정 `tests/release-editing.spec.ts:200`, `tests/index.spec.ts:92`, `tests/storage-hydration.spec.ts:360` | 의미 있는 저장·실패·재시도/보존/백업 unit와 실제 browser 동선. 변경된 공통 chooser를 실제 image Back 검사에 반영하고 obsolete Home hero 대신 현재 Collection/실제 감상 이력을 확인 |
+
+5. **DB·데이터·롤백:** 새 migration/DB schema/IDB version·production 데이터/flags/의존성 변경0. WatchLog 로컬 optional field와 기존 백업 tuple의 끝 필드를 추가했다. 예전 숫자 로그/기존 메모·태그·캐릭터·이미지/Board 관계는 읽기·저장·백업으로 보존한다. 자체 작품의 상태/별점/재시청은 기존 catalog title 백업, 시청 이력은 전체 snapshot 백업에 포함되므로 **둘을 함께 보존**해야 다른 PC에서 전체 자료를 복원할 수 있다. UI/code 원복은 가능하지만 구버전 codec으로 새 canonical 로그를 내보내면 유실 가능성이 있으므로 먼저 현재 버전의 두 백업 bytes를 보관하고 local store/로그를 삭제하지 않는다. 원격 신규 normalized WatchLog/TitleState sync는 별도 `TITLE-STATE-SYNC-01` gate다.
+
+6. **실행 명령·결과:** `. .\.cache\activate.ps1` 후 Node24.19.0/npm11.17.0. 아래 로그는 `.cache/v84-service/` 로컬 전용이다. 각 회차는 합산하지 않으며 이전 PASS/이번 PASS를 구분한다.
+
+| 실제 실행 | 결과/보존 근거 |
+| --- | --- |
+| `npm run test:unit` | 초기421PASS(`watch-unit-29.log`), 최종 수정 소스424PASS/실패·skip0(`watch-unit-29-final.log`). 최종 수치는424이며 과거416과 합산하지 않음 |
+| `node scripts/run-channel-e2e.mjs tests/watch-record-flow.spec.ts tests/source-independent-title.spec.ts tests/title-cross-surface.spec.ts '--grep=watch flow:|Title Hub|UUID navigation|catalog-only title|same Title'` | 최초owned server readiness timeout으로 검사 시작0(`watch-browser-29-initial.log`, 원인 미확정). 재실행13 중9PASS/4FAIL(`watch-browser-29-second.log`): label의 option/help/textarea 내용까지 accessible name에 섞여 exact selector 실패. 명시 aria-label을 source에 적용 |
+| `node scripts/run-channel-e2e.mjs tests/watch-record-flow.spec.ts '--grep=watch flow:'` |5 중4PASS/1 strict selector 충돌(`watch-browser-29-fix.log`): alert role status가 작품 캐릭터 로딩과 겹침. 저장 완료 기대값을 현재 감상 region에 한정 |
+| `node scripts/run-channel-e2e.mjs tests/watch-record-flow.spec.ts tests/source-independent-title.spec.ts tests/title-cross-surface.spec.ts tests/storage-hydration.spec.ts tests/library-userflow.spec.ts tests/review-improvements.spec.ts` |103 중99PASS/2FAIL/2기존 환경 skip(`watch-browser-29-final.log`). 구 공통 CTA→직접composer Back 기대값과 obsolete Home hero selector 실패. 새로운 chooser/Collection→감상 경로로 검사를 보정. 두 skipped live Library 환경 검사는 이번 PASS에 포함하지 않음 |
+| `node scripts/run-channel-e2e.mjs tests/watch-record-flow.spec.ts tests/storage-hydration.spec.ts tests/source-independent-title.spec.ts tests/index.spec.ts '--grep=watch flow:|browser Back|Home initial entry|mobile exposes memory|Title Hub|UUID navigation|catalog-only title'` | 첫16 중14PASS/2FAIL(`watch-browser-29-closeout.log`): 빈 선반의 hidden displayed-titles selector를 현재 bookshelf-page로 한정하고, 신규 제공처 후보의 undefined canonical ID를 같은 ID로 판단해 검색에서 제거하는 실제 source 문제를 고침. 최종 동일 명령16PASS/실패·skip0/exit0/25.9s(`watch-browser-29-verified.log`).103개 전체를 다시 PASS로 주장하지 않음 |
+| `npm run build` |20 pages/exit0 PASS(`watch-build-29.log`). 기존500kB chunk 경고 유지. 새 record route 포함 |
+| CUA 실제4363 읽기/클릭·DOM/캡처 | 실제 내 작품5개/기억0, Steins;Gate catalog 표지 naturalWidth460과 빈 감상 작성 폼1개.1440/390/320 가로 넘침 없음. 최종PC width1440/scrollWidth1430. `record-start-real-29.png`, `watch-real-desktop-final-29.png`, `watch-real-mobile-29.png`. 현재 locale 영어 유지; 기록 입력·저장/이미지 업로드·fixture 주입0. 실제 화면 증거와 아래 격리 저장 PASS를 구분. 임시viewport reset/탭 유지 |
+| `git diff --check`, `git ls-files '.cache/v84-service/*'` | 공백 오류0/exit0, 증거 cache 추적 파일0. LF/CRLF 안내만 존재. commit/stage/push 없음 |
+
+새로 통과한 사용자 행동(격리 소유 테스트 문맥): 공통 진입→기존 AniList 작품의 별점4.5/재시청2와 긴 memo·old cue/tag/character→재시청3/별점0/월 단위 감상→reload; 이미지/Memory0. canonical 작품 명시 Save Title/취소0쓰기·별5/완료·note→전체 이력 snapshot 및 catalog title backup의 fresh-browser 복원→미평가 clear/일 단위→unsave 후 로그 유지. 신규 검색의 미연결 제공처 작품 explicit save/별3/note/reload. JSON 없는 legacy/canonical IDB 전체 승격·null 대0·원격 snapshot에서 로컬 canonical 이력 보존. quota append 실패 draft 보존/수정 재시도, tracking 부분 실패의 정확한 알림/입력 잠금/같은operationId 재시도·기록1개/재시청1 유지. 늦은 검색 결과 무시·이탈 취소/draft 유지·1440/390/320 no-overflow. 기존 이미지 선택/Back/Archive 복귀와 현재 Home IDB hydration 두 실패 경로도 최종16에서 통과했다.103회차의99PASS는 legacy quick-log/status/character edit·기존 이미지/private/Board·Title 행동의 해당 회차 근거이며 최종16에 더하지 않는다.
+
+7. **보안·개인정보·권리·관찰:** 감상과 날짜/횟수/별점은 기존 비공개 로컬 경로다. 자체 로그의 새 원격 전송·이미지 upload/공개·새 UGC flags/권리 승인·moderation/계정 권한 변경0. 사용자 note·검색·사진·개인 기록을 analytics/ordinary log/Git에 추가하지 않는다. picker는 기존 catalog cover와 resolver를 재사용하고 개인 기록은 검색 제공처로 보내지 않는다. 기존 image/rights/공개 동의 경계를 유지한다. 합성 fixture/실패 주입은 owned isolated browser에서만 실행하고 사용자 origin에는 쓰지 않았다. 캡처·raw 테스트 로그는 cache이며 Git 추적 제외다.
+
+8. **미완료·외부 차단·다음 gate:** 브랜치`codex/phone-test`, HEAD`2c1811d36e28659c6055175bf1a31025389f2e3e`;25~29차 로컬 미커밋. 운영 배포/remote push 완료 아님. 이번 로컬 작업의 새 외부 차단 없음. 자체 TitleState/WatchLog 원격 동기화·새 카드 분류 hosted save/pull/conflict/promotion·실제 휴대폰/Safari 및 기존 W/Q/D01~D06의 출시 미완료 조건은 이번 로컬 PASS로 채우지 않는다. Android 제외 유지. 운영 migration/Public/master merge·push/배포는 정확한 후보 승인 후 별도다. 다음 작업1개는 **사용자가 실제 감상/장면 진입과 같은 작품의 기록 배치를 검토**하는 것이다.
+
+## 30차 요청 취소와 원복 (2026-10-07)
+
+1. **읽은 문서/파일:** AGENTS.md, CODEX_START_HERE, 최상위 결정01, PLANS.md, 기존 interface-rebuild 계획·보고/인계/단일 작업판과 제품02·구조06·UGC05·QA07·변경통제09를 대조했다. 이번 세션에서 원복 대상 index, titleCollectionService, TitleCollectionView의 실제 diff 및 기존 BookshelfView/BookshelfEditor/TitlePosterTile, shelf/channel/title/watch 회귀를 확인했다. verify-before-claiming 기준으로 실제 앱을 검증했다.
+
+2. **범위/가정:** 사용자 “이 요청 그냥 취소.. 롤백 해줘”는 직전의 실험적 개인 취향 컬렉션과 작품 탭으로 표지 펼침/선반 이동 요청 취소다.25~29차의 기존 미커밋 디자인·카드 태그·선반 편집·감상 기록 복원은 원복 범위가 아니다. 추가 결정/질문 없음.
+
+3. **계획:** 기존 `plans/2026-10-03-interface-rebuild.md`30차에 사용자 취소와 원복 범위를 코드 수정 전에 표시했다. 새 계획/작업판 없음. COLLECTION-TASTE-SPACE-01은 CANCELLED로 바꾸고 원래 요청은 이력으로 보존했다.
+
+4. **실제 변경:** `src/pages/index.astro`는 기존 BookshelfView로, `src/features/titles/application/titleCollectionService.js`는 기존 load 계약으로 복구했다(두 파일 현재 HEAD 대비 diff0). TitleCollectionView에서는 이번 fan/shelf editor/filter/selection만 역변경하고 이전 장르·열 수 탐색 배치는 유지했다. 새 TitlePosterFan, collection/의5개 파일(CollectionSpace/CollectionVisual/model/loader/CSS), 이번 전용 browser/unit 테스트를 제거했다. 기존 BookshelfView/TitleMemoryStack/BookshelfEditor·감상 기록 구현/기존 테스트는 유지했다. 시작·결정·계획·보고·인계·작업판에는 취소/원복 사실만 기록했다.
+
+5. **데이터/롤백:** DB/schema/migration0. 사용자 카드·감상·별점·시청 상태·정주행·태그·이미지 bytes·기존 선반 설정 수정/삭제0. 실제4363의 미저장 실험 배치만 Cancel 후 새로고침했다. source 원복 전3파일/계획/결정은 추적 제외 `.cache/v84-service/rollback-30/`에 보존했다. Git reset/전체 restore·commit/stage/push 없음.
+
+6. **이번 검증:** 아래는 원복 후 새 실행 결과이며 과거 PASS와 합산하지 않는다.
+
+| 실제 실행/관찰 | 이번 결과 |
+| --- | --- |
+| `npm run test:unit` |424 PASS/실패·skip0/exit0; `.cache/v84-service/rollback-30-unit.log` |
+| `node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts '--grep=shelf editor&#124;real shelves&#124;Collection previews&#124;Collection unfolds&#124;actual local image bytes&#124;My Titles&#124;watch flow:'` |16 PASS/실패·skip0/exit0/35.9s; `rollback-30-browser.log`. 선반 검색/독립 선택·취소·quota/재로드, 컬렉션 표지 뒤 기억·PC 옆/모바일 아래 펼침·실제 이미지 비율/최대3개, 작품 두 보기·장르·열 수/320px, 감상 기록/백업/재시도 보존 |
+| `npm run build` |20 pages PASS/exit0; `rollback-30-build.log` |
+| 실제4363 CUA 읽기/클릭·새로고침 | 기존 Collection/‘디자인 확인’ 선반·표지5개 정상 로드, Memory0 유지; Steins;Gate 표지 클릭 펼침/닫기 확인. `.collection-space` 없음, `.bookshelf-page` 존재. 사진/기록 입력·저장/업로드0. `rollback-30-real-collection.png`; 임시 viewport reset, 기존 컬렉션 탭 유지 |
+| `git diff --check` 및 source 참조 검색 | 공백 오류0, 활성 source/test에서 CollectionSpace/TitlePosterFan/resolvePreviews 참조0 |
+
+취소 전30차 실행의 unit429 및 초기4PASS/1FAIL(reduced-motion CSS), 보정 후14PASS/1FAIL(Title poster 링크 hitbox 회귀)은 cache의 taste-space 로그에 그대로 보존한다. 취소된 구현의 출시/완료 PASS로 사용하지 않는다. 이번 원복16개에서 기존 작품 표지 링크 이동까지 통과했다.
+
+7. **보안/권리/관찰 영향:** 공개/권리 gate, DB/flags·운영 권한·원격 업로드·analytics·유료 서비스 변경0. private→public 전환 없음. 합성 QA는 격리 브라우저에서만 수행했고 실제 사용자 origin에는 자료를 주입하지 않았다. 캐시 캡처/로그는 Git 추적 제외다.
+
+8. **잔여/다음 gate:** 이번 요청 원복 완료. 현재 유효한 작업 기준은29차까지이며 취소된 취향 공간을 이어가지 않는다.25~29차는 계속 로컬 미커밋, 기준2c1811d/codex/phone-test다. 실폰/Safari/hosted 및 원격 동기화/기존 W/Q/D 출시 잔여는 그대로다. 새 외부 차단 없음. 다음 작업1개는 기존29차 감상 기록 동선의 사용자 검토이며 추가 구현은 새 요청을 따른다. 운영 배포/DB/Public/Android는 이번 원복 대상이나 신규 승인 대상이 아니다.
+
+## 31차 — 핵심 기능 비교와 Web/DB 운영 반영 (2026-10-07)
+
+1. **읽은 문서/기준:** AGENTS→START→확정 결정01, 제품02/Title Hub·dual-view spec, 감사03·UGC05·구조06·QA07·runbook08·변경09, PLANS, 기존 interface-rebuild 및 인계/이 보고/단일 작업판. 운영 moemoa.xyz는 www로 이동하고 build-info source=vercel-git/SHA06d2e38d79d38c66753f0ec25a21b615bdc5fa60, origin/master도 동일했다. 당시 workingTreeDirty=true와 Vercel 성공/CI37461754826 성공은 **배포 전 조회 결과**다. 현재 개발 시작2c1811d 이후25~29차 미커밋과 master4ead72b 검토 checkpoint를 보존하고 취소30차를 다시 넣지 않았다. 실제 컴파일된 운영 client의 catalog/계정 host와 Supabase dashboard를 대조해 운영 ref okchpyagfucpzpyrfgol(이름 moemoa-preview)을 확정했다.
+2. **가정/미확정:** 사용자의 이번 직접 승인으로 필요한 비파괴 DB 적용 및 master merge/push/Git 배포를 수행한다. 반복 승인 질문 없음. 실물 휴대폰·새 Google OAuth 사용자 전체 검증, 자체 catalog TitleState/WatchLog 전체 원격 모델 선택(TITLE-STATE-SYNC-01), 공개 출시 정책/백업·비용/권리 gate는 이번 일반 Web 배포로 완료하지 않는다. 기존 운영 로그인/수동 sync는 보존한다. Public schema는 운영에 없고 flags도off인 기준이며 이는 이번 변경의 기능 삭제가 아니다.
+3. **계획:** 기존 `plans/2026-10-03-interface-rebuild.md`의31차를 소스 변경 전에 추가했다. 기존 M0~M5/W01~W20/C01~C12/Q01~Q24/D01~D06을 유지한다. 신규 진행판/계획 트리 없음. 현재 기능 감사→누락 최소 수정→로컬/hosted 검사→DB 적용→master/Vercel 같은 SHA→운영 읽기 확인 순서다.
+4. **변경/핵심 기능 비교:** 아래 표는06d2e38의 계약과 현재 구현을 비교한다. 단순 route 존재를 사용자 동작 PASS로 대신하지 않았다. 이번 추가 소스는 TitleWatchRecords/TitleHub·TopNavDataMenu의 이력 관리 진입, Library 기존 캐릭터 snapshot fallback, MemoryBoardView.jsx:132–136의 flag 내 미니홈 진입 복원과 memory-board.css:65–76의 모바일 선택 메뉴 폭 보완이며25~29차 유효 변경도 함께 배포한다. 이전 상세 폼 테스트는23차 읽기/수정/관리 탭에 맞게 갱신했다. 신규 필수 회귀를 quality CI에 넣었고 npm production 의존성 변경0이다.
+
+| 중요한 기능 | 현재 결과/보완 | 소스·실행 증거(저장소 상대 경로:행 범위) |
+|---|---|---|
+| 작품 검색/명시 저장·표지/기억 두 보기·장르/열 수 | 동일 작품 집합, 저장만으로 Memory 생성0; 보기 옆 탐색 | TitleHub.jsx:35–60, TitleCollectionView.jsx; tests/title-collection.spec.ts:68–192 |
+| 별점·시청 상태·정주행·날짜/감상 작성 | /record/ 목적 선택→같은 작품 감상 탭; 이미지 없이 작성,0점/미평가 구분 | TitleWatchRecords.jsx:13–125, titleWatchRecordWriter.js; tests/watch-record-flow.spec.ts:66–248 |
+| 기존 감상 이력 편집/삭제·context 태그/캐릭터 | 기존 Library editor 진입 복원; fresh 캐릭터 조회 실패에도 저장 이름·이미지·role 보존 | TitleWatchRecords.jsx:105–115, TopNavDataMenu.jsx:341, Library.jsx:1073–1088/1282–1301; tests/watch-record-flow.spec.ts:42–64 |
+| 사용자 이미지·시스템 디자인·공식 표지 Memory | 원본/preview 보존·교체 실패/취소, explicit cover+개인 신호; 기존 완성 조건 유지 | MemoryCardComposer.jsx:66–80/184–267; tests/web-image-intake.spec.ts:16–94 |
+| 상세 수정/관리·캐릭터/커스텀 태그·Archive 분류 | 읽기/명시 수정/관리와 실제 카드 classification; 필터→상세→필터 복귀 | MemoryCardDetail.jsx:299–343, ArchiveView.jsx:57–123; tests/memory-classification.spec.ts, channel-service.spec.ts:131–149 |
+| 컬렉션 선반·표지 뒤 실제 기억·옆 펼침 | 선반 편집/적용/취소·표지·검색/선택됨; 최대3 preview, 같은4개 전체 기억은 상세 유지 | BookshelfView.jsx:47–70, BookshelfEditor.jsx:5–45, TitleMemoryStack.jsx:5–20; channel-service.spec.ts:35–129/151–228/280–308, bookshelf-editor.spec.ts:24–116 |
+| Board N:M/정렬/삭제·Archive 독립 | 같은 카드 다중 보드·순서/삭제 tombstone/Board 보존 | tests/memory-board.spec.ts:39–152, service-finishing.spec.ts |
+| 계정·승격/수동 sync·기존 tier/pin·백업/복원 | 기존 메뉴/저장소 유지; IDB-only/재로드·기존 legacy sync·원복/백업 보존 | memory-account-sync.spec.ts:184–308, storage-hydration.spec.ts:143–385; snapshotCodec.js:521–537/679–689, syncRepo.js:587 |
+| 새 카드 분류 원격 save/pull/conflict/promotion | 테스트 실제 SDK+HTTP 및 운영 실제 RPC rollback 계약 통과; 구client가 새tags를 지우지 않음 | SupabaseMemoryGateway.js:200–202/258–259/364–388, migration20261005090000; 아래 hosted 증거 |
+| 자체 catalog-only 시청 이력 원격 한계 | 로컬/IDB/두 백업 보존; legacy apply가 삭제하지 않고 AniList0으로 업로드하지 않음. 신규 전체 remote 모델은 미구현/미완료 유지 | cloudSyncTables.js:60–82, snapshotCodec.js:679–682, watchLogRepo.js:231–239; watch-record-flow.spec.ts:95–149/172–189 |
+| Public/신고·차단·moderation·철회 | 보드 상세→내 미니홈 진입 누락 복원/모바일 넘침 보완, 기존 구현/로컬 회귀 보존, 운영 flags off. 실제 공개 활성 테스트 PASS를 이번 배포로 추가하지 않음 | publication-ui.spec.ts, publication-boundary SQL; .env.production |
+
+5. **DB/데이터/롤백:** version-controlled `supabase/migrations/20261005090000_memory_card_classification.sql`만 선택 적용했다. canonical LF SHA256=ab422e1e50a35c2f5eb1f0015409fab5eb4444dae3e4fb21d7c6e8393b6b6e64. Test data release=MOEMOA_TEST_CARD_CLASSIFICATION_20261007_31, prod=MOEMOA_PROD_CARD_CLASSIFICATION_20261007_31. 변경 전 schema/함수/권한·제약/트리거 backup은 ignored .cache/v84-service/release31-{test,prod}-schema-before.json에 보관한다. test 기존23카드 수/기존 rows fingerprint·설정 유지, 합성계정2개만 생성/정리했다. 운영 기존0카드/fingerprint 동일, 익명 raw SELECT 불가, 기존3 wrapper ACL 유지, migration history/notify reload 반영. 운영 transaction에서 synthetic auth/draft save/read·구payload tags 보존·삭제 scrub 후 ROLLBACK하여 지속 synthetic자료0 확인했다. 최신 공개/삭제 fence나 legacy 데이터 삭제/승격0. 다른 과거 migration을 일괄 적용하지 않았으며 향후 전체 Public/private-image SQL 실행 전 버전과 wrapper chain을 재대조해야 한다. rollback은 새 classification flag0/클라이언트 이전 Git 후보로 복귀하고 column/태그/이력은 보존한다. 자동 stale DB restore/drop 금지.
+6. **이번 실제 명령/결과:** 아래 검사는 이번31차 실행이며 이전20~30차 PASS와 합산하지 않는다. logs는 ignored .cache/v84-service/release31-*에 남겼다.
+
+| 명령/검증 | 이번 결과/한계 |
+|---|---|
+| npm run test:unit |424 PASS/0 fail/0 skip |
+| npm run catalog:test |256 PASS/0 fail/Windows 플랫폼 검사2 skip |
+| wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh | exit0 PASS, 실제 local PostgreSQL 계약/경쟁조건; hosted 아님 |
+| 같은 WSL 명령 tools/card-classification/run-local-postgres.sh |19 assertion PASS |
+| node scripts/run-channel-e2e.mjs +watch-flow/library-userflow/memory-board/service-finishing/web-image-intake/source-independent-title/bookshelf-editor/title-collection | 최종98개 중96 PASS/2기존 환경 skip/0 fail. 초기115개108 PASS/3 FAIL/4 skip와 관리98개94 PASS/2 FAIL/2 skip는 보존; 이전 상세 UI selector/잘못된 새label을 보정하고 재실행한 결과이며 합산 안 함 |
+| node .cache/release31-webkit.mjs |35/35 PASS. 기존 Playwright WebKit26 runtime만 공식 경로에서 설치. 초기28 PASS/7 FAIL은 fixture init-script 상대 import와 기존 backlink selector였으며 origin을 명시/현재 header link로 고쳤다. focused3 PASS 후 같은 전체35 PASS, 중복 합산 없음. 실물 iPhone/Safari 아님 |
+| node scripts/run-channel-e2e.mjs tests/title-cross-surface.spec.ts tests/publication-ui.spec.ts tests/layout-mobile.spec.ts tests/index.spec.ts tests/storage-hydration.spec.ts | 최종128개 중127 PASS/1기존 환경 skip/0 fail. 초기115 PASS/12 FAIL/1 skip는 보존했다. 실제 누락인 보드 상세→미니홈 링크와320px switcher2px 넘침을 복원/수정했다. 나머지는 승인된 Collection/기록 분기 및 상세 관리 탭의 과거 selector를 갱신했다. focused12에서10 PASS/2 FAIL 후 두 원인을 보완해2 PASS, 마지막 동일 전체128 회귀127 PASS/1 skip. 반복 합산 없음 |
+| node .cache/release31-hosted-classification.mjs | 실제 test Supabase SDK/HTTP12checks PASS: exact save/read, operation replay, 구client 보존, conflict/current-version resolve/pull, Guest 승격, 새column owner scope/익명거부, tombstone scrub, 합성계정 정리 |
+| 운영 SQL editor에서 tracked migration transaction/postflight/rollback-only contract | 실제 운영 DB 적용/기록/권한/기존 데이터 보존 및 rollback-only 계약 PASS. Google/browser 운영 로그인 flow PASS라는 뜻 아님 |
+| npm run build | 최종20 pages PASS/exit0. 기존500kB chunk 경고 유지 |
+| git diff --check 및 staged secret/개인자료 검사 | Git 직전 결과와 배포 결과는 아래 최종 증거에서 확인 |
+
+7. **보안/권리/관측:** DB 비밀키·비밀번호·raw private 데이터/브라우저 인증정보·사용자 사진·노트·선반명·검색어를 Git/일반 로그에 넣지 않았다. 실제 사용자 브라우저 데이터에는 QA 쓰기를 하지 않았다. test SQL 설정은 기존값 그대로이며 운영 새 classification sync만1, private-image/Public/mini-home/follow/moderation 기존off 유지. 계정 수동 metadata sync가 사진 자동 업로드나 공개가 되지 않는다. 새 analytics payload/권리 승격/유료·성인 인증·Android 변경0. evidence에는 release ID/hash와 검사·배포 상태만 기록한다.
+8. **잔여/다음1개/배포:** 이번 유효 Web 구현 및 새 DB 필드 계약의 미해결 회귀는 최종 검사/배포 결과로 판단한다. 기존 실물폰·자체 catalog 전체 remote 기록·운영 Public/CDN 실제 철회/정책·비용·복구 사본/경보는 그대로 미완료다. 새 유료·법적/권리 범위·Public 활성화를 임의 승인하지 않는다. 현재 Git/Vercel 검증이 남았으며 결과는 [31차 배포 증거](../release-v2/evidence/2026-10-07-web-design-deployment.json)에 같은 후보 SHA로 기록한다. 다음1개는 **배포된 링크에서 실제 휴대폰 감상 기록→장면 저장→재열람 확인**이다.

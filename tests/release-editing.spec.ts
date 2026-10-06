@@ -200,6 +200,7 @@ test('composer pending save locks all editable fields and prevents a second card
 test('browser Back can keep a title-only draft and cancel returns to the valid source', async ({ page }) => {
   await page.goto('/archive/');
   await page.locator('.top-nav__memory-action').click();
+  await page.getByRole('link', { name: /Keep a scene or image/ }).click();
   await page.getByLabel('Anime or card title').fill('Back draft');
   page.once('dialog', dialog => dialog.dismiss());
   await page.goBack({ timeout: 2000, waitUntil: 'commit' }).catch(() => {});

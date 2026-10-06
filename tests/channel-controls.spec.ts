@@ -70,7 +70,7 @@ for (const width of [1440, 390, 320]) test(`search status menu stays inside the 
 
 test("bookshelf search has a visible cue and dark wordmark has no hover plate", async ({ page }) => {
   await page.goto("/");
-  const search = page.getByRole("searchbox", { name: "Search bookshelf", exact: true });
+  const search = page.getByRole("searchbox", { name: "Search collection", exact: true });
   await expect(search).toHaveAttribute("placeholder", "Find a title");
   await search.focus(); await expect(search).toHaveCSS("outline-style", "none");
   await expect(search).toHaveCSS("border-bottom-color", "rgb(230, 0, 104)");

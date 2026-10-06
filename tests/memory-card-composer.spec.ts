@@ -491,7 +491,7 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
     button.click();
     button.click();
   });
-  await page.getByRole("link", { name: "돌아가기", exact: true }).click();
+  await page.locator(".memory-detail__header a").click();
   await expect(page).toHaveURL(/\/memory\/card\//);
   await page.evaluate(() => (window as any).__resolveReplacementPicker());
   await page.getByRole('region', { name:'카드 이미지 관리' }).getByRole('button', { name:'취소', exact:true }).click();
@@ -764,11 +764,11 @@ test("an approved official cover can be selected, saved by reference, and displa
   await expect(page.locator(".memory-detail__visual .memory-visual--contain")).toHaveCount(1);
   await expect(page.locator(".memory-detail__reflection")).toContainText("여정을 마친 뒤 남은 조용한 감정.");
   await page.goto("/");
-  await page.getByRole("button", { name: "책장 꾸미기", exact: true }).click();
+  await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByRole("button", { name: "선반 추가", exact: true }).click();
   await page.locator('.bookshelf-picker').getByLabel("장송의 프리렌", { exact: true }).check();
   await page.getByRole("button", { name: "적용", exact: true }).click();
-  await page.getByRole("button", { name: "장송의 프리렌 기억 필름", exact: true }).click();
+  await page.getByRole("button", { name: "장송의 프리렌 기억 펼치기", exact: true }).click();
   const homeMemory = page.locator(".bookshelf-film");
   await expect(homeMemory.getByAltText("장송의 프리렌 공식 표지 기반 메모리 카드")).toBeVisible();
   await expect(homeMemory.locator(".memory-visual--contain")).toHaveCount(1);

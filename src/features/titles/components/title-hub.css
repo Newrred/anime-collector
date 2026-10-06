@@ -33,3 +33,70 @@
   .title-hub__actions .btn { width: 100%; text-align: center; }
 }
 @media (forced-colors: active) { .title-hub__poster { border: 1px solid CanvasText; } }
+
+/* Watch records share the title, while keeping image creation independent. */
+.title-hub__body { min-width: 0; }
+.title-hub__tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 24px; }
+.title-hub__tabs a { display: flex; align-items: center; gap: 8px; padding: 10px 0; text-decoration: none; color: var(--text-secondary); border-bottom: 3px solid transparent; }
+.title-hub__tabs a[aria-current] { color: var(--text-primary); border-color: var(--accent, #ed007b); }
+.title-hub__tabs small { font-size: .8em; }
+.title-watch-records { min-width: 0; display: grid; gap: 24px; }
+.title-watch-records .title-hub__section-heading { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 12px; }
+.watch-record-editor { display: grid; gap: 24px; }
+.watch-record-editor fieldset { min-width: 0; border: 0; border-top: 1px solid var(--border-subtle); padding: 18px 0 0; margin: 0; display: grid; gap: 16px; }
+.watch-record-editor legend { padding: 0 12px 0 0; font-weight: 600; }
+.watch-record-editor label { display: grid; min-width: 0; gap: 8px; }
+.watch-record-editor input, .watch-record-editor select, .watch-record-editor textarea { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; color: var(--text-primary); background: transparent; border: 1px solid var(--border-subtle); border-radius: 2px; padding: 10px 12px; font: inherit; }
+.watch-record-editor select option { color: var(--text-primary); background: var(--surface-base, #fff); }
+.watch-record-editor textarea { resize: vertical; }
+.watch-record-editor__summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.watch-record-editor__event-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.watch-record-editor small, .watch-record-help { font-size: .85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+.watch-record-editor__rating { display: grid; gap: 8px; }
+.watch-record-editor__stars { display: flex; gap: 4px; }
+.watch-record-editor__stars button { min-width: 0; flex: 1; padding: 0; height: 36px; border: 0; background: none; color: var(--text-tertiary); font-size: 1.65rem; cursor: pointer; }
+.watch-record-editor__stars button.is-filled { color: var(--accent, #ed007b); }
+.watch-record-editor__rating-value { display: flex; gap: 8px; align-items: center; }
+.watch-record-editor__rating-value input { width: 108px; }
+.watch-record-editor__rating-value button { background: none; color: var(--text-secondary); border: 0; white-space: nowrap; padding: 6px 0; cursor: pointer; }
+.watch-record-editor__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.title-watch-records__timeline { list-style: none; margin: 0; padding: 0; }
+.title-watch-records__timeline li { padding: 20px 0; border-top: 1px solid var(--border-subtle); }
+.title-watch-records__timeline header { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-secondary); font-size: .85rem; }
+.title-watch-records__timeline strong { color: var(--text-primary); }
+.title-watch-records__timeline p, .title-watch-records__legacy p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.title-watch-records__timeline h3 { font-size: 1rem; }
+.title-watch-records__legacy { border-top: 1px solid var(--border-subtle); padding-top: 16px; }
+.title-watch-records__legacy h3 { margin: 0; font-size: .9rem; color: var(--text-secondary); }
+.record-start { max-width: 1100px; margin-inline: auto; display: grid; gap: 36px; padding-block: 20px 72px; }
+.record-start h1 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.record-start h2 { font-size: 1.25rem; margin: 0 0 20px; }
+.record-start h3 { font-size: .9rem; color: var(--text-secondary); margin: 24px 0 12px; }
+.record-start header p { color: var(--text-secondary); line-height: 1.6; }
+.record-start__paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+.record-start__path { display: grid; gap: 10px; padding: 20px 18px; text-decoration: none; color: var(--text-primary); }
+.record-start__path + .record-start__path { border-left: 1px solid var(--border-subtle); }
+.record-start__path strong { font-size: 1.1rem; }
+.record-start__path span { color: var(--text-secondary); font-size: .9rem; line-height: 1.6; }
+.record-start__path.is-active { box-shadow: inset 0 -3px var(--accent, #ed007b); }
+.record-start__path:hover { background: var(--surface-hover, #f8f8f8); }
+.record-start__search { display: grid; gap: 10px; max-width: 500px; color: var(--text-secondary); }
+.record-start__search input { border: 0; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-primary); font: inherit; padding: 12px 0; width: 100%; min-width: 0; }
+.record-start__titles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+.record-start__titles > a { display: grid; grid-template-columns: 52px minmax(0, 1fr) 20px; gap: 16px; align-items: center; border-bottom: 1px solid var(--border-subtle); padding: 14px 0; text-decoration: none; color: var(--text-primary); min-width: 0; }
+.record-start__titles .title-cover { width: 52px; height: 78px; margin: 0; overflow: hidden; background: var(--surface-subtle, #f5f5f5); }
+.record-start__titles .title-cover img { width: 100%; height: 100%; object-fit: contain; }
+.record-start__titles .title-cover > span { font-size: .6rem; }
+.record-start__titles .title-cover small { display: none; }
+.record-start__titles > a > span { min-width: 0; overflow-wrap: anywhere; }
+.record-start__titles strong { display: block; font-size: .95rem; }
+.record-start__titles small { display: block; margin-top: 7px; line-height: 1.5; color: var(--text-secondary); }
+@media (max-width: 700px) {
+  .watch-record-editor__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .watch-record-editor__event-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .record-start__titles { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 380px) {
+  .watch-record-editor__summary, .watch-record-editor__event-row, .record-start__paths { grid-template-columns: minmax(0, 1fr); }
+  .record-start__path + .record-start__path { border-left: 0; border-top: 1px solid var(--border-subtle); }
+}

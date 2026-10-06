@@ -1,5 +1,6 @@
 import { readTitleLibrary, writeTitleLibrary } from "../../../repositories/titleLibraryRepo.js";
-import { listWatchLogsByAnimeId } from "../../../repositories/watchLogRepo.js";
+import { listWatchLogsByAnimeId, appendWatchLog, createWatchLog } from "../../../repositories/watchLogRepo.js";
+import { createTitleWatchRecordWriter } from "./titleWatchRecordWriter.js";
 import { createSupabaseCatalogRepository } from "../../catalog/catalogRepository.js";
 import { catalogSupabase, isCatalogSupabaseConfigured } from "../../catalog/catalogSupabaseClient.js";
 import { getPlatformMemoryRuntime } from "../../memory/runtime/platformMemoryRuntime.js";
@@ -69,6 +70,8 @@ export function createTitleHubService({
   readLibrary = readTitleLibrary,
   writeLibrary = writeTitleLibrary,
   readWatchLogs = listWatchLogsByAnimeId,
+  appendLog = appendWatchLog,
+  createLog = createWatchLog,
   catalogRepository = isCatalogSupabaseConfigured
     ? createSupabaseCatalogRepository({ client: catalogSupabase })
     : null,
@@ -77,7 +80,9 @@ export function createTitleHubService({
   dispatchLibraryUpdated = () => globalThis.dispatchEvent?.(new Event("moemoa:library-updated")),
 } = {}) {
   let runtimePromise = memoryRuntime ? Promise.resolve(memoryRuntime) : getPlatformMemoryRuntime();
+  const saveWatchRecord = createTitleWatchRecordWriter({ readLibrary, writeLibrary, readWatchLogs, appendLog, createLog, dispatchLibraryUpdated });
   return Object.freeze({
+    saveWatchRecord,
     async load(request) {
       if (!request) return null;
       const runtime = await runtimePromise;
@@ -102,9 +107,14 @@ export function createTitleHubService({
         const id = Number(matching?.title?.sourceBinding?.externalId);
         if (Number.isSafeInteger(id) && id > 0) key = `ANILIST:${id}`;
       }
-      const album = albums.find((candidate) => request.kind === "ANIME"
+      let album = albums.find((candidate) => request.kind === "ANIME"
         ? candidate.titleRef?.kind === "ANIME" && candidate.titleRef.animeId === request.animeId
         : candidate.key === key);
+      if (!album && request.kind === "LEGACY_ANILIST" && request.title) {
+        // A provider candidate is a personal title entry, never verified catalog data.
+        const [candidate] = buildTitleAlbumProjections({ libraryItems: [{ anilistId: request.anilistId, koTitle: request.title }] });
+        album = { ...candidate, libraryItem: null, tracking: { ...candidate.tracking, isSaved: false }, presence: "NOT_SAVED_NO_MEMORY" };
+      }
       if (!album) {
         if (catalogError) throw catalogError;
         return null;
@@ -113,8 +123,8 @@ export function createTitleHubService({
         ...memory,
         visual: await resolveMemoryVisual(memory, runtime),
       })));
-      const watchLogs = album.anilistId
-        ? await readWatchLogs(album.anilistId).catch(() => [])
+      const watchLogs = !album.isPrivateTitle
+        ? await readWatchLogs(album.anilistId, { catalogAnimeId: album.titleRef.kind === "ANIME" ? album.titleRef.animeId : null })
         : [];
       return { ...album, memories, watchLogs };
     },

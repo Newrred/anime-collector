@@ -18,6 +18,7 @@ jobs:
       - run: sudo apt-get update -qq
       - run: sudo apt-get install -y postgresql-16
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/publication-boundary/run-local-postgres.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/card-classification/run-local-postgres.sh
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -39,6 +40,8 @@ jobs:
         env:
           PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1: '1'
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4358
+      - name: Verify current Web design and watch records
+        run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

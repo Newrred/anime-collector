@@ -1075,8 +1075,12 @@ export default function Library() {
     const byId = new Map(
       (Array.isArray(quickLogCandidates) ? quickLogCandidates : []).map((c) => [Number(c.id), c])
     );
-    return ids.map((id) => byId.get(id) || { id, name: `#${id}`, image: "", role: "" });
-  }, [quickLogCandidates, quickLogCharacterIds]);
+    const snapshots = new Map((quickLogDraft?.originalCharacterRefs || []).map((ref) => [Number(ref.characterId), ref]));
+    return ids.map((id) => {
+      const ref = snapshots.get(id);
+      return byId.get(id) || { id, name: ref?.nameSnapshot || `#${id}`, image: ref?.imageSnapshot || "", role: ref?.role || "" };
+    });
+  }, [quickLogCandidates, quickLogCharacterIds, quickLogDraft]);
   const quickLogPrimaryCharacterIdSafe = useMemo(() => {
     const id = Number(quickLogPrimaryCharacterId);
     if (!Number.isFinite(id)) return null;
@@ -1287,7 +1291,7 @@ export default function Library() {
       };
     }
 
-    const initialDraft = { ...draft, watchedAtPrecision: precision, watchedAtValue: value };
+    const initialDraft = { ...draft, watchedAtPrecision: precision, watchedAtValue: value, originalCharacterRefs: existingRefs };
     setQuickLogInitial(quickLogFingerprint(initialDraft, compactIds, resolvedPrimaryId, nextMeta));
     setQuickLogDraft(initialDraft);
     setQuickLogSaveError("");

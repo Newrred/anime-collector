@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
       card: { id, note, updatedAt },
       title: { displayTitle: title },
       sourceKind: "CATALOG_COVER",
-      visual: { kind: "IMAGE", src: coverUrl, alt: `${title} 메모리` },
+      visual: { kind: "IMAGE", src: coverUrl.replace("5f6c91", id === "memory-1" ? "e88598" : id === "memory-3" ? "80ae95" : "edbe70"), alt: `${title} 메모리` },
     });
     window.__MOEMOA_TEST_TITLE_COLLECTION_SERVICE__ = {
       load: async () => [{
@@ -24,10 +24,10 @@ test.beforeEach(async ({ page }) => {
         officialCover: { src: coverUrl, width: 200, height: 300 },
         tracking: { isSaved: true, watchStatus: "보는중", rating: 5 },
         libraryItem: { addedAt: 30 },
-        memoryCount: 2,
+        memoryCount: 3,
         latestMemoryAt: "2026-09-03T03:00:00.000Z",
-        memories: [memory("memory-1", "장송의 프리렌", "눈 내리던 장면이 오래 남았다.", "2026-09-03T03:00:00.000Z")],
-        previewMemories: [memory("memory-1", "장송의 프리렌", "눈 내리던 장면이 오래 남았다.", "2026-09-03T03:00:00.000Z")],
+        memories: [memory("memory-1", "장송의 프리렌", "눈 내리던 장면이 오래 남았다.", "2026-09-03T03:00:00.000Z"), memory("memory-3", "장송의 프리렌", "합성 기억3", "2026-09-02T03:00:00.000Z"), memory("memory-4", "장송의 프리렌", "합성 기억4", "2026-09-01T03:00:00.000Z")],
+        previewMemories: [memory("memory-1", "장송의 프리렌", "눈 내리던 장면이 오래 남았다.", "2026-09-03T03:00:00.000Z"), memory("memory-3", "장송의 프리렌", "합성 기억3", "2026-09-02T03:00:00.000Z"), memory("memory-4", "장송의 프리렌", "합성 기억4", "2026-09-01T03:00:00.000Z")],
       }, {
         key: "ANILIST:153518",
         titleRef: { kind: "ANIME", animeId: "anime:22222222-2222-4222-8222-000000153518" },
@@ -96,9 +96,9 @@ test("My Titles search and filters preserve saved and Memory meanings", async ({
 
 test("My Titles restores genre tags and the saved responsive column control", async ({ page }) => {
   await page.goto("/titles/");
-  const filterPanel = page.locator("#title-collection-filter-panel-content");
-  await expect(filterPanel).not.toBeVisible();
-  await page.locator('[aria-controls="title-collection-filter-panel-content"]').click();
+  const filterPanel = page.locator(".channel-explore");
+  await expect(filterPanel.locator(".channel-choices")).toBeHidden();
+  await filterPanel.locator("summary").click();
   await expect(filterPanel.getByRole("combobox")).toHaveCount(0);
   await filterPanel.getByRole("button", { name: "판타지", exact: true }).click();
   await expect(page.locator("[data-title-key]")) .toHaveCount(2);
@@ -118,7 +118,6 @@ test("My Titles restores genre tags and the saved responsive column control", as
   ));
   expect(columnCount).toBeGreaterThanOrEqual(7);
   await page.reload();
-  await page.locator('[aria-controls="title-collection-filter-panel-content"]').click();
   await expect(page.getByRole("slider")).toHaveValue("8");
 });
 
@@ -137,7 +136,62 @@ test("My Titles remains usable at 320px without horizontal page overflow", async
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.reload();
   await page.evaluate(() => { document.documentElement.style.zoom = "2"; });
+  const expand = page.getByRole("button", { name: "정보와 탐색 펼치기" });
+  if (await expand.isVisible()) await expand.click();
   await expect(page.getByRole("radio", { name: "표지 보기" })).toBeVisible();
   await page.getByRole("radio", { name: "표지 보기" }).click();
   await expect(page.getByRole("radio", { name: "표지 보기" })).toHaveAttribute("aria-checked", "true");
+});
+
+for (const width of [1440, 390, 320]) test(`Title exploration and per-title memory stacks preserve the same filtered titles at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 1000 });
+  await page.goto("/titles/");
+  if (width < 700) await page.getByRole("button", { name: "정보와 탐색 펼치기" }).click();
+  await page.getByRole("radio", { name: "표지 보기", exact: true }).click();
+  const before = await page.locator("[data-title-key]").evaluateAll(nodes => nodes.map(n => n.getAttribute("data-title-key")));
+  const frieren = page.locator('[data-title-key="ANILIST:154587"]');
+  const dungeon = page.locator('[data-title-key="ANILIST:153518"]');
+  const privateTitle = page.locator('[data-title-key="PRIVATE:private-one"]');
+  await expect(frieren.locator('.title-cover-stack__memory')).toHaveCount(3);
+  await expect(dungeon.locator('.title-cover-stack__memory')).toHaveCount(0);
+  await expect(privateTitle.locator('.title-cover-stack__memory')).toHaveCount(1);
+  expect(await frieren.locator('.title-cover-stack__memory').evaluateAll(nodes => nodes.map(n => n.getAttribute('data-memory-card-id')))).toEqual(['memory-1', 'memory-3', 'memory-4']);
+  await expect(page.getByRole('button', {name:'겹쳐보기',exact:true})).toHaveCount(0);
+  await expect(frieren.locator('.title-cover')).toHaveCSS('transform','none');
+  const geometry = await frieren.locator('.title-cover-stack').evaluate(stack => {
+    const front = stack.querySelector('.title-cover')!.getBoundingClientRect();
+    const back = stack.querySelector('.title-cover-stack__memory:last-child')!.getBoundingClientRect();
+    return { front: front.right, back: back.right, layered: getComputedStyle(stack.querySelector('.title-cover')!).zIndex > getComputedStyle(stack.querySelector('.title-cover-stack__memory')!).zIndex };
+  });
+  expect(geometry.back).toBeGreaterThan(geometry.front); expect(geometry.layered).toBe(true);
+  const coverSizes = await page.locator('.title-poster-tile .title-cover').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().width));
+  expect(Math.max(...coverSizes) - Math.min(...coverSizes)).toBeLessThan(1);
+  expect(await page.locator("[data-title-key]").evaluateAll(nodes => nodes.map(n => n.getAttribute("data-title-key")))).toEqual(before);
+  const explore = page.locator(".channel-section").filter({ has: page.getByRole("heading", { name: "탐색", exact: true }) });
+  expect(await explore.evaluate(node => Boolean(node.closest(".channel-metadata")))).toBe(true);
+  if (width === 1440) {
+    const view = page.locator(".channel-section").filter({ has: page.getByRole("heading", { name: "보기", exact: true }) });
+    const v = await view.boundingBox(), e = await explore.boundingBox();
+    expect(Math.abs(e!.y - v!.y)).toBeLessThan(2); expect(e!.x).toBeGreaterThan(v!.x);
+  }
+  await explore.locator("summary").click();
+  await explore.getByRole("button", { name: "판타지", exact: true }).click();
+  await expect(page.locator("[data-title-key]")).toHaveCount(2);
+  for (const title of ["장송의 프리렌", "던전밥"]) {
+    const link = page.getByRole("link", { name: title, exact: true });
+    await link.focus();
+    const rect = await link.locator(".title-cover").boundingBox();
+    expect(await link.evaluate((node, r) => node.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)), rect!)).toBe(true);
+  }
+  await page.screenshot({ path: `.cache/v84-service/titles-memory-stack-${width}.png`, fullPage: true });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(frieren.locator('.title-cover')).toHaveCSS('transform','none');
+  await expect(frieren.locator('.title-cover-stack__memory').first()).toHaveCSS('transition-duration','0s');
+  await explore.getByRole("button", { name: "전체", exact: true }).click();
+  await page.getByRole("radio", { name: "기억 함께 보기", exact: true }).click();
+  await expect(page.locator("[data-title-key]")).toHaveCount(3);
+  await page.getByRole("radio", { name: "표지 보기", exact: true }).click();
+  await page.getByRole("link", { name: "장송의 프리렌", exact: true }).click();
+  await expect(page).toHaveURL(/animeId=anime%3A11111111/);
 });

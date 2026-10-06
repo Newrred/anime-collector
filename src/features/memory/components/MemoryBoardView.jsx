@@ -132,6 +132,7 @@ function MemoryBoardContent({ base }) {
         <div className={`memory-boards__layout${selectedBoardId ? " is-detail" : " is-collection"}`}>
           <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
             {detail && <a className="memory-boards__back" href={`${base}boards/`} data-astro-reload>← {boardCopy.title}</a>}
+            {detail && minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
             {!selectedBoardId && <div>
               <h2>{boardCopy.yourBoards}</h2>
             </div>}

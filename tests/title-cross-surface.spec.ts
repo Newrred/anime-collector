@@ -64,11 +64,11 @@ test("Bookshelf and Board preserve the same Memory and Title Hub after choosing 
   });
   await saveFirstCard(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "Edit bookshelf", exact: true }).click();
+  await page.getByRole("button", { name: "Edit collection", exact: true }).click();
   await page.getByRole("button", { name: "Add shelf", exact: true }).click();
   await page.locator('.bookshelf-picker').getByLabel("A remembered scene", { exact: true }).check();
   await page.getByRole("button", { name: "Apply", exact: true }).click();
-  await page.getByRole("button", { name: "A remembered scene memory film", exact: true }).click();
+  await page.getByRole("button", { name: "A remembered scene open memories", exact: true }).click();
   const film = page.locator(".bookshelf-film");
   await expect(film).toBeVisible();
   const hubHref = await film.locator('.title-album-card__identity').getAttribute("href");

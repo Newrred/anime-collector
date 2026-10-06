@@ -7,6 +7,7 @@ import {
 } from "../storage/idb.js";
 import { loadAuthoritativeWatchLogSnapshot } from "../services/watchLogSource.js";
 import { markLocalDirty } from "./syncRepo.js";
+import { watchLogIdentity, hasWatchLogIdentity, watchLogMatchesTitle } from "../domain/watchLogIdentity.js";
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
@@ -139,7 +140,7 @@ function normalizeWatchLog(raw) {
 
   return {
     id: String(raw?.id || makeId()),
-    anilistId: Number(raw?.anilistId),
+    ...watchLogIdentity(raw),
     eventType: String(raw?.eventType || "시작"),
     watchedAtValue: String(raw?.watchedAtValue || ""),
     watchedAtPrecision: String(raw?.watchedAtPrecision || "unknown"),
@@ -149,7 +150,7 @@ function normalizeWatchLog(raw) {
     cue: String(raw?.cue || "").trim(),
     note: String(raw?.note || "").trim(),
     contextTags: toArray(raw?.contextTags).map((x) => String(x || "").trim()).filter(Boolean),
-    scoreAtThatTime: Number.isFinite(Number(raw?.scoreAtThatTime))
+    scoreAtThatTime: raw?.scoreAtThatTime != null && String(raw.scoreAtThatTime).trim() !== "" && Number.isFinite(Number(raw.scoreAtThatTime))
       ? Number(raw.scoreAtThatTime)
       : null,
     characterIds,
@@ -161,7 +162,7 @@ function normalizeWatchLog(raw) {
 
 function readWatchLogsLocal() {
   const rows = readJson(STORAGE_KEYS.watchLogs, []);
-  return toArray(rows).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
+  return toArray(rows).map(normalizeWatchLog).filter(hasWatchLogIdentity);
 }
 
 function writeWatchLogsLocal(rows) {
@@ -179,7 +180,7 @@ async function readAuthoritativeWatchLogs(options = {}) {
     const rows = await getRecentWatchLogsIdb(Number.MAX_SAFE_INTEGER);
     return toArray(rows)
       .map(normalizeWatchLog)
-      .filter((row) => Number.isFinite(row.anilistId));
+      .filter(hasWatchLogIdentity);
   });
   return loadAuthoritativeWatchLogSnapshot({
     hasLocalSnapshot: hasLocalWatchLogSnapshot,
@@ -197,7 +198,7 @@ export function createWatchLog(input) {
 
   return normalizeWatchLog({
     id: makeId(),
-    anilistId: Number(input?.anilistId),
+    ...watchLogIdentity(input),
     eventType: input?.eventType || "시작",
     watchedAtValue: value,
     watchedAtPrecision: precision,
@@ -217,7 +218,7 @@ export function createWatchLog(input) {
 
 export async function appendWatchLog(logInput, options = {}) {
   const row = normalizeWatchLog(logInput);
-  if (!Number.isFinite(row.anilistId)) return null;
+  if (!hasWatchLogIdentity(row)) return null;
 
   const rows = readWatchLogsLocal();
   rows.push(row);
@@ -227,15 +228,15 @@ export async function appendWatchLog(logInput, options = {}) {
   return row;
 }
 
-export async function listWatchLogsByAnimeId(anilistId) {
+export async function listWatchLogsByAnimeId(anilistId, { catalogAnimeId } = {}) {
   const id = Number(anilistId);
-  if (!Number.isFinite(id)) return [];
+  if (!hasWatchLogIdentity(watchLogIdentity({ anilistId, catalogAnimeId }))) return [];
   // localStorage is the authoritative watch-log snapshot. IndexedDB is a
   // rebuildable query mirror and is consulted only to promote a complete
   // legacy IDB-only snapshot before applying this scoped query.
   const rows = await readAuthoritativeWatchLogs();
   return rows
-    .filter((x) => x.anilistId === id)
+    .filter((row) => catalogAnimeId ? watchLogMatchesTitle(row, { catalogAnimeId, anilistId: id }) : row.anilistId === id)
     .sort((a, b) => Number(b.watchedAtSort || 0) - Number(a.watchedAtSort || 0));
 }
 
@@ -256,7 +257,7 @@ export async function readAllWatchLogsPreferred(options = {}) {
 }
 
 export async function replaceWatchLogs(logs, options = {}) {
-  const rows = toArray(logs).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
+  const rows = toArray(logs).map(normalizeWatchLog).filter(hasWatchLogIdentity);
   writeWatchLogsLocal(rows);
   if (!options?.skipSyncMark) markLocalDirty();
   replaceWatchLogsIdb(rows).catch(() => {});
@@ -264,7 +265,7 @@ export async function replaceWatchLogs(logs, options = {}) {
 }
 
 export async function replaceWatchLogsDurable(logs, options = {}) {
-  const rows = toArray(logs).map(normalizeWatchLog).filter((x) => Number.isFinite(x.anilistId));
+  const rows = toArray(logs).map(normalizeWatchLog).filter(hasWatchLogIdentity);
   writeWatchLogsLocal(rows);
   if (!options?.skipSyncMark) markLocalDirty();
   const replaceIdb = options?.storage?.replaceWatchLogsIdb || replaceWatchLogsIdb;
@@ -307,7 +308,7 @@ export function readAllWatchLogsSnapshot() {
 export async function mergeWatchLogs(incomingLogs) {
   const incoming = toArray(incomingLogs)
     .map(normalizeWatchLog)
-    .filter((x) => Number.isFinite(x.anilistId));
+    .filter(hasWatchLogIdentity);
   if (!incoming.length) return 0;
 
   const map = new Map();

@@ -1,5 +1,24 @@
 # MOEMOA 디자인 작업 재개 — 2026-10-05
 
+> **31차 재개 기준(2026-10-07):** 현재 승인 범위는 master Git 운영 반영/카드 classification DB 갱신까지다. 최신 commit/배포는 [증거](../release-v2/evidence/2026-10-07-web-design-deployment.json), 기능/검사/남은 범위는 [31차 보고](../reports/2026-10-05-v84-web-application.md#31차--핵심-기능-비교와-webdb-운영-반영-2026-10-07)를 따른다. 새 PC는 master를 clone/pull하고 Node24.19.0에서 npm ci 후 기존 환경 파일을 비밀 보관 경로에서 준비한다. 로컬 dev는 .env.production을 자동 사용하지 않으므로 기존 개인 dev 환경이 별도로 필요하다. 새 classification migration은 test/production 이미 적용됐으며 전체 과거 migration을 일괄 db push하지 않는다. 운영 참조 okchpyagfucpzpyrfgol, test nmgkhknponvzcwliajyk. 암호·DB 복구 자료·브라우저 개인 기록은 Git에 없다.30차 취향 배치는 취소 유지하며29차까지 선반/감상 흐름을 보존한다. 아래 로컬 미커밋/DB 미적용 표시는 과거 이력이다.
+
+> **30차 취소/원복(2026-10-07):** 사용자 요청으로 새 취향 컬렉션/작품 탭 선반 이전을 제거했다. 아래29차까지가 유효한 작업 기준이며 취소된30차를 재개하지 않는다. 기존 선반/태그/감상 기록은 보존했다. 이번 unit424/관련 Chromium16/build20 및 실제4363 기존 화면 확인 PASS. [원복 근거](../reports/2026-10-05-v84-web-application.md#30차-요청-취소와-원복-2026-10-07). 배포/DB/flags 변경 없음.
+
+> **현재 재개 기준(2026-10-07):** 아래29차가 최신 로컬 상태다. 원격2c1811d 이후25~29차는 로컬 미커밋이며 다른 PC로 가져갈 수 있도록 push한 상태는 아니다. 공통 기억 남기기→감상/장면 분기와 Title Hub 감상 이력을 적용했다. 28차 선반 편집과26・27차 같은 작품 기억 뒤 겹침·PC 옆/모바일 아래 펼침은 유지한다. 이전 필름·행 아래 패널 설명은 당시 기록이다.
+
+## 29차 현재 — 감상 기록과 장면 저장 연결 (2026-10-07)
+
+- 실제 `/record/`의 RecordStart와 공통 TopNav, TitleHub/TitleWatchRecords, titleWatchRecordWriter/검증·watchLogRepo가 제어 파일이다. 내 작품 또는 기존 resolver로 선택→같은 작품의 감상 탭→상태/별점/재시청·날짜/감상→이력 확인. 기존 이미지 composer와 캐릭터/카드 분류는 그대로다. 감상 저장만으로 Memory를 만들지 않는다.
+- WatchLog는 숫자 AniList와 optional canonical ID를 현재 로컬 store에 보관한다. 기존 snapshot 백업은 로그 identity를, 기존 catalog title 백업은 자체 작품 상태/별점/재시청을 보존한다. 자체 로그를 AniList0으로 원격 전송하지 않고 기존 원격 snapshot 적용도 로컬 자체 로그를 지우지 않는다. 신규 remote schema/활성화 없음.
+- 최종 unit424/관련 Chromium16/build20 PASS. 전체99PASS/2FAIL/2환경 skip, 접근성 이름·이전 Home selector·취소/복귀·새 제공처 결과 중복 제거 보정과 재검증은 [29차 보고](../reports/2026-10-05-v84-web-application.md#29차--감상-기록과-장면-저장-동선-복원-2026-10-07)에 보존한다. 실제4363 표지/빈 폼1440・390・320 확인은 합성 record 저장/백업 검증과 별도다.
+- 현재 로컬 미커밋, 사용자 기록에 QA 저장/사진 주입 없음. 다음1개는 감상 기록 동선 사용자 검토. 실폰/Safari/hosted·TITLE-STATE-SYNC-01·카드 분류 sync/기존 W/Q/D01~D06 잔여와 Android 제외·운영 후보 승인을 유지한다.
+
+## 28차 현재 — 선반 편집과 실제 작품 표지 (2026-10-07)
+
+- 실제 Collection 편집의 `BookshelfEditor.jsx`/BookshelfView/channel CSS가 제어 파일이다. PC 선반 목록+작품 선택, 모바일 세로 목록, 실제 TitleCover·제목·기억 수/선택 표시·검색/선택됨. 저장 키/owner/적용/취소 및27차 펼침 유지.
+- 이번 최종 unit416/관련 Chromium5/build19 PASS, 실제4363 catalog 표지5개1440・390/no-overflow 확인. 격리 문맥의3Memory·두 선반·quota 실패 검증과 사용자 표지 읽기는 구분한다. 초기/최종5개의 재실행을 합산하지 않는다. [28차 상세](../reports/2026-10-05-v84-web-application.md#28차--선반-편집-정리와-실제-표지-2026-10-07), 기존 interface-rebuild28차 참조.
+- 25~28차 로컬 미커밋이다. 지금 사용자의 편집을 자동 적용하거나 사용자 origin에 fixture를 주입하지 않았다. 실제폰/hosted 새 분류 sync·DB/Public/운영배포의 잔여 유지. 다음1개는 새 선반 편집 사용자 배치 검토. 아래 최신 Git 안내는24차 체크포인트 시점이다.
+
 ## 최신 Git 인계 — 2026-10-06 / 실제 Web 적용20~23차
 
 재개 브랜치는 **`codex/phone-test`**다. 기준 `54c39cb` 이후의 V8.1~V8.4 시안·PNG/SVG·실제 Web 코드·테스트·카드 분류 migration 후보와 아래 문서를 Git 개발 체크포인트로 보존한다. 최신 기준은 **실제 앱 `src/`와 기존 interface-rebuild23차 결과**, 인계 절차는24차다. 아래 ‘로컬 미커밋’, ‘시안만 존재’, V8 미적용 안내는 각 날짜의 과거 상태다. 운영 `master`/moemoa.xyz의 최신 배포를 뜻하지 않는다.
@@ -203,3 +222,12 @@ V8 홈은 작은 선반 선택줄 + 연속 표지 그리드다. 전체는 선반
 - 원격 `master`는 `06d2e38d79d38c66753f0ec25a21b615bdc5fa60`으로 변경하지 않았다. 브랜치 push가 기존 Git 연동 Preview를 유발할 수 있지만 운영 배포를 수정·승격하지 않았다.
 
 상세 읽기 목록·변경 범위·검증 명령·마이그레이션/롤백·보안·잔여 게이트는 [이전 ExecPlan 완료 보고](../plans/2026-10-05-cross-pc-design-handoff.md#17-완료-보고)에 있다.
+## 2026-10-07 추가 로컬 상태 — 기존25차
+
+이번25차는 `2c1811d` 이후 **로컬 미커밋**이다. 홈은 컬렉션/Collection, 필름 구멍·띠·아이콘 대신 문자 로고/얇은 선, 작품 탐색은 보기 옆, 겹쳐보기는 그리드와 선택 비교 가능하다. 기존 선반 이름/owner 저장 키/선택 행 아래 기억/Title 두 보기와 원본·공개·동기화 계약을 유지한다. 초기77 검사76PASS/1테스트 오류 후 보정 회귀72PASS, 최종 모션4 재검사PASS·unit416/build19. 실제4363 카탈로그5표지 및 Action1개/전체5개 복귀를 확인했다. 과거64/66과 합산하지 않는다. [25차 보고](../reports/2026-10-05-v84-web-application.md#25차--컬렉션과-선이미지-중심-후속-2026-10-0607), 기존 ExecPlan25차/LINE-IMAGE-COLLECTION-01 참조. 다음1개는 새 실제 서비스 배치 사용자 검토다. Android/실폰/새 태그 hosted·운영 DB/Public/배포 게이트는 남아 있다.
+
+## 2026-10-07 최신 추가 로컬 상태 — 26・27차
+
+TITLE-MEMORY-STACK-01/사용자 정정으로 겹침 대상은 **각 작품의 Memory**가 되었다. 별도 Layered 옵션은 제거하고 기억0이면 앞표지만 표시한다. COLLECTION-SIDE-FAN-01/사용자의 “표지 옆으로 펼침” 승인으로 컬렉션의 선택 묶음은 한 줄 전체 폭으로 확장하되 앞표지는 같은 크기, 기억은 PC 옆/휴대폰 아래 가로 넘김이다. 표지 재클릭·접기/Escape·포커스 복귀, 기억 상세·작품 이름의 Title Hub·미리보기3개와 전체4개 연결을 검증했다. 작품 탭의 두 보기/Title Hub 경로는 유지한다.
+
+26차 최초 Chromium75PASS/2검사 오류→보정된 관련5PASS, unit415/1listen EACCES→소스 변경 없는 재실행416PASS/build19.27차 전체76PASS/1애니메이션 도중 위치 검사 실패와 최종 source/검사 보정 후 관련5PASS·unit416/build19. 상세 초기 실패·원인 한계/명령은 기존 [보고26・27차](../reports/2026-10-05-v84-web-application.md#27차--컬렉션-표지-옆으로-기억-펼침-2026-10-07)에 보존하며 PASS를 합산하지 않는다. 실제4363 사용자 데이터는5작품/0Memory로 보존했고 첫 기억 안내를 확인했다. 합성 local 파일 선택/저장·same src/no-upload와 system design/card identity는 격리 runtime 검증이며 실제 사용자 사진/hosted/실폰 PASS가 아니다.25~27차는 아직 Git에 안 올린 로컬 작업이다. 다음1개는 **컬렉션 옆 펼침 사용자 검토**. 기존 Android 제외/운영 D06·실폰·새 태그 hosted 잔여 유지.

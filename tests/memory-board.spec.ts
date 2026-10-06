@@ -128,6 +128,7 @@ test("deleting a Card tombstones its Board membership without deleting the Board
   await addCard(page, "Temporary memory");
   const sourceBoardUrl = page.url();
   await page.locator(".memory-boards__cards li").filter({ hasText: "Temporary memory" }).getByRole("link").click();
+  await page.getByRole("tab", { name: "Manage", exact: true }).click();
   await page.getByRole("button", { name: "Delete card" }).click();
   const dialog = page.getByRole("dialog", { name: "Delete memory card" });
   await dialog.getByRole("button", { name: "Confirm card deletion" }).click();

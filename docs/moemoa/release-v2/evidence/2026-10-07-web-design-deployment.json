@@ -1,0 +1,203 @@
+{
+  "scope": "WEB-DESIGN-RELEASE-CLOSEOUT-01",
+  "date": "2026-10-07",
+  "status": "READY_FOR_AUTHORIZED_MASTER_GIT_DEPLOY",
+  "baseline": {
+    "commit": "06d2e38d79d38c66753f0ec25a21b615bdc5fa60",
+    "source": "vercel-git",
+    "workingTreeDirty": true
+  },
+  "migration": {
+    "path": "supabase/migrations/20261005090000_memory_card_classification.sql",
+    "version": "20261005090000",
+    "canonicalLfSha256": "ab422e1e50a35c2f5eb1f0015409fab5eb4444dae3e4fb21d7c6e8393b6b6e64",
+    "testRelease": "MOEMOA_TEST_CARD_CLASSIFICATION_20261007_31",
+    "productionRelease": "MOEMOA_PROD_CARD_CLASSIFICATION_20261007_31",
+    "hostedChecks": {
+      "testProject": "nmgkhknponvzcwliajyk",
+      "checks": [
+        "hosted authenticated save carries exact card tags and characters",
+        "hosted repeated operation keeps one acknowledgement",
+        "hosted fresh read hydrates classification",
+        "hosted old client update preserves current tags",
+        "hosted conflict returns current classification",
+        "hosted conflict resolution stores current-version tags",
+        "hosted changed card is present in sync pull",
+        "hosted guest promotion retains card tags",
+        "new classification read model remains owner scoped",
+        "anonymous raw classification read remains denied",
+        "hosted tombstone scrubs private classification",
+        "only newly created synthetic test accounts removed"
+      ],
+      "passed": true,
+      "syntheticAccounts": 2
+    },
+    "productionPostflight": {
+      "releaseId": "MOEMOA_PROD_CARD_CLASSIFICATION_20261007_31",
+      "classificationColumn": true,
+      "recorded": true,
+      "cards": 0,
+      "existingRowsFingerprint": "d41d8cd98f00b204e9800998ecf8427e",
+      "anonymousRawRead": false,
+      "publicSchemaPresent": false,
+      "wrapperAcl": [
+        {
+          "name": "apply_memory_card_mutation",
+          "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "name": "promote_guest_memory",
+          "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "name": "resolve_memory_conflict",
+          "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+        }
+      ]
+    },
+    "productionRollbackContract": {
+      "rollbackContractPassed": true,
+      "cards": 0,
+      "syntheticAuthPersisted": false,
+      "existingRowsFingerprint": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "tests": {
+    "unit": {
+      "passed": 424,
+      "failed": 0,
+      "skipped": 0
+    },
+    "catalog": {
+      "passed": 256,
+      "failed": 0,
+      "skipped": 2
+    },
+    "managementChromium": {
+      "passed": 96,
+      "failed": 0,
+      "skipped": 2
+    },
+    "webkit": {
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0
+    },
+    "classificationSql": {
+      "assertions": 19,
+      "passed": true
+    },
+    "publicationSql": {
+      "exitCode": 0
+    },
+    "crossSurfaceChromium": {
+      "passed": 127,
+      "failed": 0,
+      "skipped": 1,
+      "total": 128
+    },
+    "build": {
+      "pages": 20,
+      "passed": true,
+      "existingChunkWarning": true
+    }
+  },
+  "flags": {
+    "webImageIntake": true,
+    "cardClassificationSync": true,
+    "privateImageSync": false,
+    "publication": false,
+    "miniHome": false,
+    "follows": false,
+    "moderation": false
+  },
+  "exclusions": [
+    "cancelled Collection taste redesign",
+    "Android",
+    "adult verification",
+    "paid changes",
+    "new Public activation",
+    "automatic private image upload"
+  ],
+  "remaining": [
+    "physical phone verification of this commit",
+    "catalog-only complete remote TitleState/WatchLog model",
+    "existing general Public release policy/rights/cost/backup/alert gates"
+  ],
+  "finalDeployment": null,
+  "stagedScan": {
+    "changedFiles": 55,
+    "findings": 0,
+    "publicAnonAllowed": true,
+    "ignoredPrivateMaterialStaged": false
+  },
+  "initialFailures": {
+    "crossSurface": {
+      "passed": 115,
+      "failed": 12,
+      "skipped": 1
+    },
+    "sourceFixed": [
+      "Board detail lost My public home link after header split",
+      "320px Board switcher flex summary overflowed by 2px"
+    ],
+    "testContractsUpdated": [
+      "Home hero/navigation replaced by approved Collection and explicit shelf selection",
+      "Card deletion/withdrawal now enters Manage and Sharing settings"
+    ],
+    "focused": {
+      "passed": 10,
+      "failed": 2
+    },
+    "finalFocused": {
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "logs": [
+    {
+      "path": ".cache/v84-service/release31-unit.log",
+      "sha256": "82e4aa082d90befd8719631ea61193e8eb21caa3cfcf0cb321bfd692dd292d13"
+    },
+    {
+      "path": ".cache/v84-service/release31-catalog.log",
+      "sha256": "b3ac2f333a07bf5d2fca6ac5167a61b4e36e2b53a71267b95d04bd9398e502f5"
+    },
+    {
+      "path": ".cache/v84-service/release31-sql.log",
+      "sha256": "7b911b4a09cb78370654c16ecd25e5b03a80784c94f5e47f1f151788faadc064"
+    },
+    {
+      "path": ".cache/v84-service/release31-classification-sql.log",
+      "sha256": "fa371a6b8815dc6f7b3c51155ded263a19eb6e71645c95773cc58331fcb596a7"
+    },
+    {
+      "path": ".cache/v84-service/release31-management-browser-final.log",
+      "sha256": "d83ed226b5b7b59797b9900bf6c5bb62d91eb3c5875078ba361f30c6b0bdb5da"
+    },
+    {
+      "path": ".cache/v84-service/release31-webkit-final.log",
+      "sha256": "7f3005ac9fc9885e5f92a00b3011813b9e6c9dc3dd1886412e5185872a4d870a"
+    },
+    {
+      "path": ".cache/v84-service/release31-cross-surface.log",
+      "sha256": "12942a0366eb57aa3cc78db9e493606e46746014d0eeb8b36fa12fd140fb0a83"
+    },
+    {
+      "path": ".cache/v84-service/release31-cross-focused.log",
+      "sha256": "aeefbc85abe4193adb7140acadf218636107df8678c1d84c3ac77cf35db3fdb0"
+    },
+    {
+      "path": ".cache/v84-service/release31-cross-repair.log",
+      "sha256": "6d0d4b80243158d3f9cdab6ad4c1b3559d7a0971f58422974d6245a04784e9b4"
+    },
+    {
+      "path": ".cache/v84-service/release31-cross-surface-final.log",
+      "sha256": "2c8c68559def15474c0abbd17f0dee973f4029a96eb43007c57d02bee1a2e5d1"
+    },
+    {
+      "path": ".cache/v84-service/release31-build-final.log",
+      "sha256": "888c51655119e5c59740d5eb85337900f6a51cccb09f9e1b91fc16fd8597acfd"
+    }
+  ]
+}

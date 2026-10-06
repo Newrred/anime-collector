@@ -7,6 +7,7 @@ import { createTitleHubService } from "../application/titleHubService.js";
 import { parseTitleHubRequest } from "../domain/titleNavigation.js";
 import "./title-hub.css";
 import TitleCharacters from "./TitleCharacters.jsx";
+import TitleWatchRecords, { watchStatusLabel } from "./TitleWatchRecords.jsx";
 
 const dateLabel = (value, locale) => {
   const parsed = Date.parse(value);
@@ -17,7 +18,7 @@ const dateLabel = (value, locale) => {
 
 const displayValue = (value) => String(value || "").trim() || "—";
 
-function TitleIdentity({ album, copy, memoryHref, busy, onToggleSaved }) {
+function TitleIdentity({ album, copy, memoryHref, recordHref, locale, busy, editing, onToggleSaved }) {
   const detail = album.catalogDetail;
   const canAddMemory = album.titleRef.kind === "ANIME" || album.isPrivateTitle;
   const facts = [
@@ -37,20 +38,21 @@ function TitleIdentity({ album, copy, memoryHref, busy, onToggleSaved }) {
       </div>
       <div className="title-hub__identity-copy">
         <div className="title-hub__badges">
-          <span className="status-badge">{album.isPrivateTitle ? copy.privateBadge : copy.catalogBadge}</span>
+          <span className="status-badge">{album.isPrivateTitle ? copy.privateBadge : !detail ? locale === "ko" ? "작품 정보 미연결" : "Title information pending" : copy.catalogBadge}</span>
           <span className="status-badge">{album.tracking.isSaved ? copy.saved : copy.notSaved}</span>
         </div>
         <h1 className="pageTitle">{album.displayTitle}</h1>
         {facts.length ? <p className="title-hub__facts">{facts.join(" · ")}</p> : null}
         {album.isPrivateTitle ? <p className="title-hub__private-notice">{copy.privateNotice}</p> : null}
         <div className="title-hub__actions">
+          {!album.isPrivateTitle && <a className="btn btn--subtle" href={recordHref} data-astro-reload>{locale === "ko" ? "감상 기록 남기기" : "Add watch record"}</a>}
           {canAddMemory ? (
             <a className="btn" href={memoryHref} data-astro-reload>
               {album.memoryCount ? copy.addMemory : copy.firstMemory}
             </a>
           ) : null}
           {album.anilistId || album.titleRef?.kind === "ANIME" ? (
-            <button className="btn btn--subtle" type="button" disabled={busy} onClick={onToggleSaved}>
+            <button className="btn btn--subtle" type="button" disabled={busy || editing} onClick={onToggleSaved}>
               {busy ? copy.savingTitle : album.tracking.isSaved ? copy.removeTitle : copy.saveTitle}
             </button>
           ) : null}
@@ -96,7 +98,7 @@ function TitleMemoryGallery({ album, base, copy, locale }) {
   );
 }
 
-function TitleFacts({ album, copy, base, service, onTracking, locale }) {
+function TitleFacts({ album, copy, recordHref, locale }) {
   const detail = album.catalogDetail;
   const studios = detail?.studios?.map((row) => row.name).filter(Boolean).join(", ");
   const rows = [
@@ -120,40 +122,16 @@ function TitleFacts({ album, copy, base, service, onTracking, locale }) {
       </section>}
       <section className="surface-card title-hub__tracking">
         <h2>{copy.watchLogs(album.watchLogs.length)}</h2>
-        {album.tracking.isSaved && album.anilistId ? (
-          <a className="btn btn--subtle" href={`${base}library/?animeId=${album.anilistId}&focus=edit`} data-astro-reload>{copy.editTracking}</a>
-        ) : null}
-        {album.tracking.isSaved && album.titleRef.kind === "ANIME" && !album.anilistId ? <TitleTrackingEditor album={album} service={service} onTracking={onTracking} locale={locale} /> : null}
         <dl>
-          <div><dt>{copy.watchingStatus}</dt><dd>{displayValue(album.tracking.watchStatus)}</dd></div>
+          <div><dt>{copy.watchingStatus}</dt><dd>{watchStatusLabel(album.tracking.watchStatus, locale === "ko")}</dd></div>
           <div><dt>{copy.rating}</dt><dd>{album.tracking.rating == null ? "—" : album.tracking.rating}</dd></div>
+          <div><dt>{locale === "ko" ? "재시청" : "Rewatches"}</dt><dd>{album.tracking.rewatchCount || 0}</dd></div>
         </dl>
+        {!album.isPrivateTitle && <a href={recordHref} data-astro-reload>{locale === "ko" ? "감상 기록 보기 →" : "View watch records →"}</a>}
         {!album.watchLogs.length ? <p>{copy.noWatchLogs}</p> : null}
       </section>
     </aside>
   );
-}
-
-function TitleTrackingEditor({ album, service, onTracking, locale }) {
-  const ko = locale === "ko";
-  const [watchStatus, setWatchStatus] = useState(album.tracking.watchStatus || "미분류");
-  const [rating, setRating] = useState(album.tracking.rating ?? "");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  return <details><summary>{ko ? "시청 상태·평점 수정" : "Edit status and rating"}</summary>
-    <form className="ui-panel-stack" onSubmit={async (event) => {
-      event.preventDefault(); if (busy) return; setBusy(true); setMessage("");
-      try { onTracking(await service.updateTracking(album, { watchStatus, rating })); setMessage(ko ? "저장했어요" : "Saved"); }
-      catch { setMessage(ko ? "저장하지 못했어요. 다시 시도해 주세요." : "Could not save. Please try again."); }
-      finally { setBusy(false); }
-    }}>
-      <label>{ko ? "시청 상태" : "Watch status"}<select value={watchStatus} onChange={(e) => setWatchStatus(e.target.value)}>
-        {["미분류", "보는중", "완료", "보류", "하차", "볼예정"].map((value, i) => <option key={value} value={value}>{ko ? value : ["Unsorted", "Watching", "Completed", "On hold", "Dropped", "Plan to watch"][i]}</option>)}
-      </select></label>
-      <label>{ko ? "평점 (0~5, 미평가는 비워두기)" : "Rating (0–5, leave blank if unrated)"}<input type="number" min="0" max="5" step="0.5" value={rating} onChange={(e) => setRating(e.target.value)} /></label>
-      <button className="btn" disabled={busy}>{ko ? "저장" : "Save"}</button><p role="status">{message}</p>
-    </form>
-  </details>;
 }
 
 export default function TitleHub({ base = "/" }) {
@@ -176,6 +154,9 @@ function TitleHubContent({ base }) {
   const [album, setAlbum] = useState(null);
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
+  const [watchEditing, setWatchEditing] = useState(false);
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const watchTab = params.get("tab") === "watch";
 
   useEffect(() => {
     let active = true;
@@ -197,13 +178,11 @@ function TitleHubContent({ base }) {
     setMessage("");
     try {
       const isSaved = await service.setSaved(album, !album.tracking.isSaved);
-      setAlbum((current) => ({
-        ...current,
-        tracking: { ...current.tracking, isSaved },
-        presence: isSaved
-          ? (current.memoryCount ? "SAVED_WITH_MEMORY" : "SAVED_NO_MEMORY")
-          : (current.memoryCount ? "NOT_SAVED_WITH_MEMORY" : "NOT_SAVED_NO_MEMORY"),
-      }));
+      const refreshed = await service.load(request).catch(() => null);
+      setAlbum(refreshed || { ...album, libraryItem: isSaved ? album.libraryItem : null,
+        tracking: { ...album.tracking, isSaved }, presence: isSaved
+          ? (album.memoryCount ? "SAVED_WITH_MEMORY" : "SAVED_NO_MEMORY")
+          : (album.memoryCount ? "NOT_SAVED_WITH_MEMORY" : "NOT_SAVED_NO_MEMORY") });
     } catch {
       setMessage(copy.actionFailed);
     } finally {
@@ -227,15 +206,32 @@ function TitleHubContent({ base }) {
     native: Capacitor.isNativePlatform(),
     row: { catalogAnimeId: album.titleRef.kind === "ANIME" ? album.titleRef.animeId : "", privateTitleId: album.titleRef.privateTitleId, title: album.displayTitle },
   });
+  const tabHref = (tab, writing = false) => {
+    const next = new URLSearchParams(window.location.search);
+    next.set("tab", tab); next.delete("record"); if (writing) next.set("record", "new");
+    return `${window.location.pathname}?${next}`;
+  };
+  const recordHref = tabHref("watch", true);
 
   return (
     <div className="title-hub page-shell">
       <a className="title-hub__back" href={`${base}titles/`} data-astro-reload>{copy.back}</a>
-      <TitleIdentity album={album} copy={copy} memoryHref={memoryHref} busy={status === "saving"} onToggleSaved={toggleSaved} />
+      <TitleIdentity album={album} copy={copy} memoryHref={memoryHref} recordHref={recordHref} locale={locale} busy={status === "saving"} editing={watchEditing} onToggleSaved={toggleSaved} />
       {message ? <p className="title-hub__message" role="status">{message}</p> : null}
       <div className="title-hub__content">
-        <TitleMemoryGallery album={album} base={base} copy={copy} locale={locale} />
-        <TitleFacts album={album} copy={copy} base={base} service={service} locale={locale} onTracking={(tracking) => setAlbum((current) => ({ ...current, tracking }))} />
+        <div className="title-hub__body">
+          <nav className="title-hub__tabs" aria-label={locale === "ko" ? "작품 기록 보기" : "Title records"}>
+            <a href={tabHref("memories")} aria-current={!watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "기억 이미지" : "Memory images"} <small>{album.memoryCount}</small></a>
+            {!album.isPrivateTitle && <a href={tabHref("watch")} aria-current={watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "감상 기록" : "Watch records"} <small>{album.watchLogs.length}</small></a>}
+          </nav>
+          {watchTab && !album.isPrivateTitle ? <TitleWatchRecords album={album} service={service} locale={locale} base={base}
+            startWriting={params.get("record") === "new"} busy={status === "saving"} onSaveTitle={toggleSaved}
+            onEditingChange={setWatchEditing}
+            onSaved={({ log, tracking }) => setAlbum((current) => ({ ...current, tracking,
+              watchLogs: [log, ...current.watchLogs.filter((row) => row.id !== log.id)] }))} />
+            : <TitleMemoryGallery album={album} base={base} copy={copy} locale={locale} />}
+        </div>
+        <TitleFacts album={album} copy={copy} recordHref={tabHref("watch")} locale={locale} />
       </div>
     </div>
   );

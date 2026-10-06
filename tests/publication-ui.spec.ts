@@ -623,6 +623,7 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
   await page.goto(`/memory/card/?id=${cardId}`);
   await expect(page.getByRole("heading", { name: "Shared memory" })).toBeVisible();
   mock.control.revokeError = true;
+  await page.getByRole("tab", { name: "Manage", exact: true }).click();
   await page.getByRole("button", { name: "Delete card", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Confirm card deletion", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Shared memory" })).toBeVisible();
@@ -631,6 +632,8 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
   await page.reload();
   await expect(page.getByRole("heading", { name: "Shared memory" })).toBeVisible();
   mock.control.revokeError = false;
+  await page.getByRole("tab", { name: "Manage", exact: true }).click();
+  await page.getByText("Sharing settings", { exact: true }).click();
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Stop sharing this memory everywhere" }).click();
   await expect(page.getByText("Sharing of this memory has stopped everywhere.", { exact: false })).toBeVisible();
@@ -723,7 +726,10 @@ test("320px preview remains readable, omits unselected notes and supports Korean
   const preview = page.getByRole("region", { name: "Visitor preview" });
   await expect(preview.getByRole("img", { name: "Shared memory" })).toBeVisible();
   await expect(preview).not.toContainText("Selected reflection");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const geometry = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth - innerWidth,
+    outside: [...document.querySelectorAll("body *")].filter(node => node.getBoundingClientRect().right > innerWidth + 0.5)
+      .slice(0, 8).map(node => ({ tag: node.tagName, className: node.className, right: node.getBoundingClientRect().right })) }));
+  expect(geometry.overflow, JSON.stringify(geometry.outside)).toBeLessThanOrEqual(0.5);
   await page.screenshot({ path: ".cache/w09-preview-320.png", fullPage: true });
   await context.addInitScript(() => localStorage.setItem("ui:locale:v1", JSON.stringify("ko")));
   await page.goto(`/public/board/?id=${PUBLICATION}`);

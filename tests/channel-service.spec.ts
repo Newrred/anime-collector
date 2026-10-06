@@ -32,11 +32,11 @@ test.beforeEach(async ({ page }) => {
   await page.route("https://**/*", route => route.abort());
 });
 
-test("real shelves persist, expand below their poster row and preserve card/title/Board identity", async ({ page }) => {
+test("real shelves persist, unfold beside their cover and preserve card/title/Board identity", async ({ page }) => {
   const cards = await seed(page);
   await page.reload();
   await expect(page.getByText("아직 진열한 작품이 없어요.")).toBeVisible();
-  await page.getByRole("button", { name: "책장 꾸미기", exact: true }).click();
+  await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByRole("button", { name: "선반 추가", exact: true }).click();
   await page.getByLabel("선반 이름").fill("오래 머무는 장면들");
   const choices = page.locator(".bookshelf-picker input");
@@ -45,7 +45,7 @@ test("real shelves persist, expand below their poster row and preserve card/titl
   await page.getByRole("button", { name: "적용", exact: true }).click();
   await page.reload();
   await expect(page.locator(".bookshelf-tile")).toHaveCount(6);
-  await page.getByRole("button", { name: "책장 꾸미기", exact: true }).click();
+  await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByLabel("선반 이름").fill("취소할 변경");
   await page.locator(".bookshelf-picker input").first().uncheck();
   await page.getByRole("button", { name: "취소", exact: true }).click();
@@ -53,44 +53,49 @@ test("real shelves persist, expand below their poster row and preserve card/titl
   await page.reload();
   await expect(page.getByRole("button", { name: "오래 머무는 장면들", exact: true })).toBeVisible();
   expect(await page.locator(".channel-wordmark").evaluate(node => node.getBoundingClientRect().top >= 0)).toBe(true);
-  await page.getByRole("button", { name: "테스트 작품 기억 필름", exact: true }).click();
+  const cover = page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true });
+  const coverWidth = await cover.boundingBox();
+  await cover.click();
   const film = page.locator(".bookshelf-film");
   await expect(film).toBeVisible();
   const row = await page.locator(".bookshelf-grid").evaluate(grid => {
-    const children = [...grid.children], filmIndex = children.findIndex(node => node.classList.contains("bookshelf-film"));
-    const tiles = children.filter(node => node.classList.contains("bookshelf-tile"));
-    return { filmIndex, selected: tiles.findIndex(node => node.querySelector('[aria-expanded="true"]')), tiles: tiles.length, cols: Number.parseInt(getComputedStyle(grid).getPropertyValue("--channel-columns")), width: children[filmIndex].getBoundingClientRect().width, gridWidth: grid.getBoundingClientRect().width };
+    const selected = grid.querySelector('.bookshelf-tile.is-expanded')!, cover = selected.querySelector('.bookshelf-cover-area')!.getBoundingClientRect(), fan = selected.querySelector('.collection-memory-fan')!.getBoundingClientRect();
+    return { width: selected.getBoundingClientRect().width, gridWidth: grid.getBoundingClientRect().width, side: fan.left >= cover.right, topDifference: Math.abs(fan.top - cover.top) };
   });
-  expect(row.filmIndex).toBe(Math.min((Math.floor(row.selected / row.cols) + 1) * row.cols, row.tiles));
   expect(row.width).toBeCloseTo(row.gridWidth, 0);
+  expect(row.side).toBe(true); expect(row.topDifference).toBeLessThan(1);
+  expect((await cover.boundingBox())!.width).toBeCloseTo(coverWidth!.width, 0);
   const alignment = () => film.locator(".title-album-card__previews").evaluate(rail => {
     const r = rail.getBoundingClientRect(), items = [...rail.querySelectorAll(".title-album-card__preview")].map(node => node.getBoundingClientRect());
     return { left: items[0].left - r.left, widthRatio: items[0].width / r.width, count: items.length };
   });
-  expect(await alignment()).toMatchObject({ left: 0, count: 2 });
+  await expect.poll(alignment).toMatchObject({ left: 0, count: 2 });
   expect((await alignment()).widthRatio).toBeLessThan(.4);
-  await page.getByRole("button", { name: "테스트 작품 2 기억 필름", exact: true }).click();
-  expect(await alignment()).toMatchObject({ left: 0, count: 1 });
+  await page.getByRole("button", { name: "테스트 작품 2 기억 펼치기", exact: true }).click();
+  await expect.poll(alignment).toMatchObject({ left: 0, count: 1 });
   expect((await alignment()).widthRatio).toBeLessThan(.4);
-  await page.screenshot({ path: `${evidence}/film-left-1280.png`, fullPage: true });
+  await page.screenshot({ path: `${evidence}/collection-side-fan-1280.png`, fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
+  const mobile = await page.locator('.bookshelf-tile.is-expanded').evaluate(tile => ({ cover: tile.querySelector('.bookshelf-cover-area')!.getBoundingClientRect().bottom, fan: tile.querySelector('.collection-memory-fan')!.getBoundingClientRect().top }));
+  expect(mobile.fan).toBeGreaterThan(mobile.cover);
   expect(await alignment()).toMatchObject({ left: 0, count: 1 });
-  expect((await alignment()).widthRatio).toBeLessThan(.51);
+  expect((await alignment()).widthRatio).toBeLessThan(.65);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: `${evidence}/film-left-390.png`, fullPage: true });
+  await page.screenshot({ path: `${evidence}/collection-side-fan-390.png`, fullPage: true });
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.getByRole("button", { name: "테스트 작품 기억 필름", exact: true }).click();
+  await page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true }).click();
   await page.screenshot({ path: `${evidence}/bookshelf-1280.png`, fullPage: true });
   await expand(page);
   await page.getByRole("button", { name: "오래 머무는 장면들", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("내 책장 / 오래 머무는 장면들");
-  await page.getByRole("button", { name: "테스트 작품 기억 필름", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("컬렉션 / 오래 머무는 장면들");
+  await page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true }).click();
   const href = await film.locator(".title-album-card__identity").getAttribute("href");
   await film.locator(".title-album-card__preview").first().click();
   await expect(page.locator(".memory-detail__title-link")).toHaveAttribute("href", href!);
   await page.getByRole("button", { name: "기억 수정", exact: true }).click();
   await page.locator(".memory-detail textarea").fill("수정한 실제 감상");
   await page.locator('.memory-detail form button[type="submit"]').click();
+  await expect(page.locator(".memory-detail__reflection")).toContainText("수정한 실제 감상");
   await page.reload();
   await expect(page.locator(".memory-detail__reflection")).toContainText("수정한 실제 감상");
   const boardId = await page.evaluate(async cardId => {
@@ -109,7 +114,7 @@ test("real shelves persist, expand below their poster row and preserve card/titl
 
 test("a title added while the bookshelf is open becomes available without reloading", async ({ page }) => {
   await seed(page); await page.reload();
-  await page.getByRole("button", { name: "책장 꾸미기", exact: true }).click();
+  await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByRole("button", { name: "선반 추가", exact: true }).click();
   await expect(page.locator(".bookshelf-picker input")).toHaveCount(6);
   await page.evaluate(async () => {
@@ -120,7 +125,7 @@ test("a title added while the bookshelf is open becomes available without reload
   await expect(page.locator(".bookshelf-picker input")).toHaveCount(7);
   await page.locator(".bookshelf-picker").getByLabel("방금 저장한 작품", { exact: true }).check();
   await page.getByRole("button", { name: "적용", exact: true }).click();
-  await expect(page.getByRole("button", { name: "방금 저장한 작품 기억 필름", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "방금 저장한 작품 기억 펼치기", exact: true })).toBeVisible();
 });
 
 test("archive uses stored title character facets, clears them, and restores them from a detail visit", async ({ page }) => {
@@ -141,6 +146,85 @@ test("archive uses stored title character facets, clears them, and restores them
   await expect(page.locator(".memory-archive__card")).toHaveCount(2);
   await page.getByRole("group", { name: "기억 보기", exact: true }).getByRole("button", { name: "표", exact: true }).click();
   await expect(page.locator(".channel-table tbody tr")).toHaveCount(2);
+});
+
+test("Collection previews its own saved memories behind each cover and keeps every cover selectable", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await seed(page); await page.reload();
+  await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
+  await page.getByRole("button", { name: "선반 추가", exact: true }).click();
+  const choices = page.locator(".bookshelf-picker input");
+  for (let i = 0; i < await choices.count(); i++) await choices.nth(i).check();
+  await page.getByRole("button", { name: "적용", exact: true }).click();
+  const remembered = page.locator('.bookshelf-tile').filter({ has: page.getByRole('button', { name: '테스트 작품 기억 펼치기', exact: true }) });
+  const first = remembered.locator('.title-cover-stack__front');
+  const backs = remembered.locator('.title-cover-stack__memory');
+  const rememberedTrigger = remembered.locator('.bookshelf-cover-trigger');
+  await expect(backs).toHaveCount(2);
+  await expect(page.getByRole('button', { name: '겹쳐보기', exact: true })).toHaveCount(0);
+  await expect(first).toHaveCSS('transform', 'none');
+  expect(await page.locator('.bookshelf-tile .title-cover').evaluateAll(nodes => {
+    const [a, b] = nodes.map(n => n.getBoundingClientRect()); return a.right <= b.left;
+  })).toBe(true);
+  const triggers = page.locator(".bookshelf-cover-trigger");
+  for (let i = 0; i < await triggers.count(); i++) {
+    const trigger = triggers.nth(i);
+    await trigger.scrollIntoViewIfNeeded();
+    expect(await trigger.evaluate(node => { const r = node.getBoundingClientRect(); return node.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); })).toBe(true);
+    await trigger.focus(); await page.keyboard.press("Enter");
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(".bookshelf-film")).toHaveCount(1);
+    const title = await trigger.getAttribute("aria-label");
+    await expect(page.locator(".bookshelf-film .title-album-card__title")).toHaveText(title!.replace(" 기억 펼치기", ""));
+  }
+  await page.locator('.film-close').click();
+  await rememberedTrigger.scrollIntoViewIfNeeded();
+  const exposed = await remembered.evaluate(tile => {
+    const front = tile.querySelector('.title-cover')!.getBoundingClientRect();
+    const rear = tile.querySelector('.title-cover-stack__memory:last-child')!.getBoundingClientRect();
+    const point = { x: (front.right + rear.right) / 2, y: (front.top + front.bottom) / 2 };
+    return { ...point, hit: tile.querySelector('.bookshelf-cover-trigger')!.contains(document.elementFromPoint(point.x, point.y)) };
+  });
+  expect(exposed.hit).toBe(true);
+  await page.mouse.click(exposed.x, exposed.y);
+  await expect(rememberedTrigger).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.bookshelf-film .title-album-card__title')).toHaveText('테스트 작품');
+  await expect(page.locator('.collection-memory-fan .title-album-card__preview').last()).toHaveCSS('transform', 'none');
+  await expect(rememberedTrigger).toHaveAttribute('aria-controls', await page.locator('.collection-memory-fan').getAttribute('id') as string);
+  const previews = page.locator(".title-album-card__previews");
+  expect(await previews.evaluate(node => getComputedStyle(node, "::before").content)).toBe("none");
+  await page.screenshot({ path: `${evidence}/collection-memory-stack-1440.png`, fullPage: true });
+  await remembered.screenshot({ path: `${evidence}/collection-side-fan-open-1440.png` });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator('.collection-memory-fan .title-album-card__preview').first()).toHaveCSS('animation-name', 'none');
+  await expect(first).toHaveCSS("transform", "none");
+  await expect(backs.first()).toHaveCSS('transition-duration', '0s');
+  const stillPose = await backs.first().evaluate(node => getComputedStyle(node).transform);
+  await rememberedTrigger.focus();
+  await expect(first).toHaveCSS('transform', 'none');
+  await expect(backs.first()).toHaveCSS('transform', stillPose);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.collection-memory-fan')).toHaveCount(0);
+  await expect(rememberedTrigger).toBeFocused();
+  await rememberedTrigger.click();
+  await expect(page.locator('.collection-memory-fan')).toBeVisible();
+  await rememberedTrigger.click();
+  await expect(page.locator('.collection-memory-fan')).toHaveCount(0);
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await rememberedTrigger.click();
+    const rail = page.locator('.collection-memory-fan .title-album-card__previews');
+    expect(await rail.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true);
+    await rail.evaluate(node => { node.scrollLeft = node.scrollWidth; });
+    expect(await rail.evaluate(node => node.scrollLeft)).toBeGreaterThan(0);
+    await page.screenshot({ path: `${evidence}/collection-side-fan-${width}.png`, fullPage: true });
+    await page.keyboard.press('Escape');
+    await expect(first).toHaveCSS("transform", "none");
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await expand(page);
+  await page.getByRole("group", { name: "컬렉션 보기", exact: true }).getByRole("button", { name: "표", exact: true }).click();
+  await expect(page.locator(".channel-table tbody tr")).toHaveCount(6);
 });
 
 test("actual local image bytes retain their aspect ratio in archive and detail at desktop/mobile widths", async ({ page }) => {
@@ -175,7 +259,52 @@ test("actual local image bytes retain their aspect ratio in archive and detail a
   await expect.poll(() => page.locator(".memory-detail__title-link").evaluate(node => getComputedStyle(node).backgroundColor)).toBe("rgb(36, 36, 36)");
   await expect(page.locator(".memory-detail__title-link")).toHaveCSS("color", "rgb(237, 237, 237)");
   await page.screenshot({ path: `${evidence}/image-detail-dark.png`, fullPage: true });
+  await page.goto('/');
+  await page.getByRole('button', {name:'컬렉션 편집',exact:true}).click();
+  await page.getByRole('button', {name:'선반 추가',exact:true}).click();
+  for (const name of ['가로 이미지', '세로 이미지']) await page.locator('.bookshelf-picker').getByLabel(name, {exact:true}).check();
+  await page.getByRole('button', {name:'적용',exact:true}).click();
+  await expect.poll(() => page.locator('.title-cover-stack__memory img').evaluateAll(images => images.length === 2 && images.every((image: HTMLImageElement) => image.naturalWidth > 0))).toBe(true);
+  const tile = page.locator('.bookshelf-tile').filter({has:page.getByRole('button',{name:'가로 이미지 기억 펼치기',exact:true})});
+  const source = await tile.locator('.title-cover-stack__memory img').getAttribute('src');
+  await tile.getByRole('button',{name:'가로 이미지 기억 펼치기',exact:true}).click();
+  const image = tile.locator('.collection-memory-fan img');
+  await expect(image).toHaveCount(1);
+  await expect(image).toHaveAttribute('src',source!);
+  await expect(image).toHaveCSS('object-fit','contain');
+  await expect(tile.locator('.collection-memory-fan .title-album-card__preview')).toHaveCSS('transform','none');
+  await tile.screenshot({path:`${evidence}/collection-side-fan-local-image-dark.png`});
   expect(uploads).toEqual([]);
+});
+
+test('Collection unfolds at most three real previews and keeps all four memories in Title Hub', async ({page}) => {
+  await page.setViewportSize({width:1440,height:1000});
+  await seed(page);
+  await page.evaluate(async () => {
+    const {getPlatformMemoryRuntime} = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+    const runtime = await getPlatformMemoryRuntime();
+    for (let i=0;i<2;i++) await runtime.createCard({
+      titleChoice:{kind:'ANIME_REF',animeId:'anime:11111111-1111-4111-8111-000000000001',displayTitle:'테스트 작품',sourceBinding:{provider:'ANILIST',externalId:'1'},verificationState:'PROVIDER_CANDIDATE',genres:[],aliases:[]},
+      note:`합성 추가 기억 ${i}`,systemDesignSpec:{version:1,templateId:'memory-gradient',paletteId:'mint-dusk',patternSeed:`fan-cap-${i}`,titleLayout:'BOTTOM_LEFT',genreTokens:[]}
+    });
+  });
+  await page.reload();
+  await page.getByRole('button',{name:'컬렉션 편집',exact:true}).click();
+  await page.getByRole('button',{name:'선반 추가',exact:true}).click();
+  await page.locator('.bookshelf-picker').getByLabel('테스트 작품',{exact:true}).check();
+  await page.getByRole('button',{name:'적용',exact:true}).click();
+  await expect(page.locator('.title-cover-stack__memory')).toHaveCount(3);
+  const cardIds = await page.locator('.title-cover-stack__memory').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-memory-card-id')));
+  await page.getByRole('button',{name:'테스트 작품 기억 펼치기',exact:true}).click();
+  const previews = page.locator('.collection-memory-fan .title-album-card__preview');
+  await expect(previews).toHaveCount(3);
+  expect(await previews.evaluateAll(nodes => nodes.map(node => new URL((node as HTMLAnchorElement).href).searchParams.get('id')))).toEqual(cardIds);
+  await expect(page.locator('.title-album-card__extra')).toHaveText('+1');
+  await expect(previews.last()).toHaveCSS('transform','none');
+  await page.locator('.bookshelf-tile.is-expanded').screenshot({path:`${evidence}/collection-side-fan-three-1440.png`});
+  await page.getByRole('link',{name:'기억 4개 모두 보기 →',exact:true}).click();
+  await expect(page.locator('.title-hub__memory')).toHaveCount(4);
+  expect(await page.evaluate(async () => {const {getPlatformMemoryRuntime}=await import('/src/features/memory/runtime/platformMemoryRuntime.js');return (await (await getPlatformMemoryRuntime()).listArchive()).length;})).toBe(9);
 });
 
 test("320px controls expand, respond to keyboard input, and expose one common Memory action", async ({ page }) => {

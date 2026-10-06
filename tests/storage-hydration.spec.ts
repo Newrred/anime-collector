@@ -378,10 +378,12 @@ test("Home initial entry preserves an IDB-only watch log without presenting it a
   });
 
   await page.goto("/");
-  await expect(page.getByRole('region', { name: 'Return to your memories' })).toBeVisible();
-  await expect(page.locator('.home-memory-overview .memory-preview')).toHaveCount(0);
-  // Watch-log insights may exist in their separate collapsed section, never in the Memory collection.
-  await expect(page.locator(".home-memory-overview .home-focus-card__cue")).toHaveCount(0);
+  await expect(page.locator('.bookshelf-page')).toBeVisible();
+  await expect(page.locator('.bookshelf-page a[href*="memory/card/"]')).toHaveCount(0);
+  // The current Collection reads titles; opening watch records hydrates the separate log source.
+  await page.locator('.top-nav__memory-action').click();
+  await page.locator('.record-start__titles a').filter({ hasText: '#777' }).click();
+  await expect(page.getByText('Home hydrates this memory directly', { exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");
     return rows.map((row) => row.cue);

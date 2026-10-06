@@ -1,0 +1,6 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import RecordStart from "../features/titles/components/RecordStart.jsx";
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout><RecordStart base={base} client:only="react" /></BaseLayout>

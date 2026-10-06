@@ -6,6 +6,7 @@ import { DEFAULT_TIER_TOPIC_ID, getActiveTierTopic, isLegacyTierState } from "./
 import { readAllWatchLogsPreferred, replaceWatchLogsDurable } from "../repositories/watchLogRepo.js";
 import { listCharacterPinsPreferred, replaceCharacterPinsDurable } from "../repositories/characterPinRepo.js";
 import { runGuardedMutationSteps } from "../services/guardedMutationSteps.js";
+import { watchLogIdentity, hasWatchLogIdentity } from "./watchLogIdentity.js";
 import {
   DEFAULT_TIERS,
   normalizeRewatchCount,
@@ -206,8 +207,8 @@ function normalizeSnapshotCharacterRefs(rawRefs) {
 }
 function normalizeSnapshotWatchLogs(value) {
   return toArray(value).map((raw, idx) => {
-    const anilistId = Number(raw?.anilistId);
-    if (!Number.isFinite(anilistId)) return null;
+    const identity = watchLogIdentity(raw);
+    if (!hasWatchLogIdentity(identity)) return null;
     const rawCreatedAt = Number.isFinite(Number(raw?.createdAt)) ? Number(raw.createdAt) : idx;
     const precision = normalizeString(raw?.watchedAtPrecision, "unknown").toLowerCase();
     const watchedAtValue = String(raw?.watchedAtValue || "").trim();
@@ -225,7 +226,7 @@ function normalizeSnapshotWatchLogs(value) {
       Number.isFinite(Number(raw.scoreAtThatTime));
     return {
       id: normalizeString(raw?.id, `log-${idx}`),
-      anilistId,
+      ...identity,
       eventType: normalizeString(raw?.eventType, "시작"),
       watchedAtValue,
       watchedAtPrecision: precision,
@@ -507,7 +508,7 @@ function encodeWatchLogsCompact(rows, poolMap, numberPoolMap) {
     const precisionCode = encodeEnum(precision, PRECISION_CODES, 4);
     return trimCompactArray([
       row.id,
-      encodeNumberRef(row.anilistId, numberPoolMap),
+      row.anilistId == null ? null : encodeNumberRef(row.anilistId, numberPoolMap),
       eventCode === 0 ? null : eventCode,
       row.watchedAtValue || null,
       precisionCode === 4 ? null : precisionCode,
@@ -517,12 +518,13 @@ function encodeWatchLogsCompact(rows, poolMap, numberPoolMap) {
       row.contextTags?.length ? row.contextTags.map((tag) => encodeStringRef(tag, poolMap)) : null,
       refs.length ? refs : null,
       needsCreatedAt ? createdAt : null,
+      row.catalogAnimeId || null,
     ]);
   });
 }
 function decodeWatchLogsCompact(rows, pool, numberPool) {
   return toArray(rows).map((row, idx) => {
-    const anilistId = decodeNumberRef(row?.[1], numberPool, null);
+    const anilistId = row?.[11] && row?.[1] == null ? null : decodeNumberRef(row?.[1], numberPool, null);
     const precision = decodeEnum(row?.[4], PRECISION_CODES, "unknown");
     const watchedAtValue = String(row?.[3] || "").trim();
     const createdAtHint = Number.isFinite(Number(row?.[10])) ? Number(row[10]) : null;
@@ -532,6 +534,7 @@ function decodeWatchLogsCompact(rows, pool, numberPool) {
     return {
       id: normalizeString(row?.[0], `log-${idx}`),
       anilistId,
+      ...(row?.[11] ? { catalogAnimeId: row[11] } : {}),
       eventType: decodeEnum(row?.[2], EVENT_CODES, "시작"),
       watchedAtValue,
       watchedAtPrecision: precision,
@@ -673,6 +676,11 @@ export function isSnapshotEffectivelyEmpty(snapshot) {
 }
 export async function applySyncSnapshot(snapshot, options = {}) {
   const safe = normalizeSyncSnapshot(snapshot);
+  if (options.preserveCatalogWatchLogs) {
+    const incomingIds = new Set(safe.watchLogs.map((row) => row.id));
+    const localOnly = (await readAllWatchLogsPreferred()).filter((row) => row.anilistId == null && row.catalogAnimeId && !incomingIds.has(row.id));
+    safe.watchLogs = [...safe.watchLogs, ...localOnly];
+  }
   const cardsPerRowBase = Number(safe.preferences?.cardsPerRowBase);
   const cardView = String(safe.preferences?.cardView || "").trim();
   const steps = [

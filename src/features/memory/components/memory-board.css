@@ -63,6 +63,7 @@ html .memory-boards__cards .system-design-preview { border-radius: 0; }
 @media (max-width: 1279px) { .memory-boards__cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 24px; } }
 @media (max-width: 1000px) { .memory-boards__cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) {
+  .memory-boards__switcher { flex: 1 1 100%; }
   html .container:has(.memory-boards) { --page-pad: 16px; }
   .memory-boards { gap: 24px; }
   .memory-boards__header { flex-wrap: wrap; gap: 12px; }

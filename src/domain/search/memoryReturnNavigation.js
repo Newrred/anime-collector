@@ -26,10 +26,12 @@ export function addMemoryReturn(href, locationHref, scrollY = 0, base = "/") {
   const current = new URL(locationHref);
   const target = new URL(href, current);
   const root = normalizeBase(base);
-  if (target.origin !== current.origin || ![`${root}memory/new/`, `${root}memory/card/`, `${root}memory/new/index.html`, `${root}memory/card/index.html`].includes(target.pathname)) return href;
-  const from = safeMemoryReturn(`${current.pathname}${current.search}`, base);
+  if (target.origin !== current.origin || ![`${root}record/`, `${root}record/index.html`, `${root}memory/new/`, `${root}memory/card/`, `${root}memory/new/index.html`, `${root}memory/card/index.html`].includes(target.pathname)) return href;
+  const isRecordEntry = [ `${root}record/`, `${root}record/index.html` ].includes(current.pathname);
+  const from = safeMemoryReturn(isRecordEntry ? current.searchParams.get("returnTo") : `${current.pathname}${current.search}`, base);
   if (!from) return href;
+  const y = isRecordEntry ? Number(current.searchParams.get("returnY")) || 0 : scrollY;
   target.searchParams.set("returnTo", from);
-  target.searchParams.set("returnY", String(Math.min(200000, Math.max(0, Math.round(scrollY)))));
+  target.searchParams.set("returnY", String(Math.min(200000, Math.max(0, Math.round(y)))));
   return `${target.pathname}${target.search}${target.hash}`;
 }

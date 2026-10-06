@@ -119,9 +119,12 @@ test('Memory editing can be cancelled and unsaved navigation keeps the original 
   await page.getByLabel('Short reflection').fill('Original reflection');
   await page.getByRole('button', { name: 'Save card', exact: true }).click();
   await page.locator('.memory-archive__card').first().click();
+  await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
   const note = page.locator('.memory-detail textarea');
   await note.fill('Unwanted edit');
   await page.getByRole('button', { name: 'Cancel reflection changes' }).click();
+  await expect(page.locator('.memory-detail__reflection')).toContainText('Original reflection');
+  await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
   await expect(note).toHaveValue('Original reflection');
   await note.fill('Unsaved edit');
   page.once('dialog', dialog => dialog.dismiss());
@@ -131,5 +134,6 @@ test('Memory editing can be cancelled and unsaved navigation keeps the original 
   await page.locator('.memory-detail__header a').click();
   await expect(page).toHaveURL(/\/archive\/$/);
   await page.locator('.memory-archive__card').first().click();
+  await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
   await expect(note).toHaveValue('Original reflection');
 });

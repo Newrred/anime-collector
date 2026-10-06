@@ -16,7 +16,7 @@ export default function PrimaryNavigationLinks({ base, currentRoute, copy, local
         <a key={route} href={`${base}${path}`} data-astro-reload
           className={`${linkClass}${activeRoute === route ? " is-active" : ""}`}
           aria-current={activeRoute === route ? "page" : undefined} onClick={onNavigate}>
-          {mobile ? <><span className="data-menu-action-label"><Icon size={17} /><span>{route === "home" ? (locale === "ko" ? "내 책장" : "Bookshelf") : copy[label]}</span></span><IconArrowRight size={14} /></> : ({ home: locale === "ko" ? "내 책장" : "Bookshelf", titles: locale === "ko" ? "작품" : "Titles", archive: locale === "ko" ? "기억" : "Memories" }[route] || copy[label])}
+          {mobile ? <><span className="data-menu-action-label"><Icon size={17} /><span>{route === "home" ? (locale === "ko" ? "컬렉션" : "Collection") : copy[label]}</span></span><IconArrowRight size={14} /></> : ({ home: locale === "ko" ? "컬렉션" : "Collection", titles: locale === "ko" ? "작품" : "Titles", archive: locale === "ko" ? "기억" : "Memories" }[route] || copy[label])}
         </a>
       ))}
     </div>

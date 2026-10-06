@@ -10,13 +10,19 @@ test('Memory returns preserve supported filters while excluding external, auth a
   assert.equal(memoryReturnHref('?returnTo=https://evil.test&returnY=9'), '/archive/');
   assert.equal(memoryReturnHref('?returnTo=%2Fboards%2F%3Fid%3Dx&returnY=400'), '/boards/?id=x&restoreY=400');
 });
-test('only Memory detail and composer links receive a safe source context', () => {
+test('Memory detail, composer and the shared record entry receive a safe source context', () => {
   const value = addMemoryReturn('/memory/card/?id=card', 'https://local.test/archive/?q=foo', 450);
   const parsed = new URL(value, 'https://local.test');
   assert.equal(parsed.searchParams.get('returnTo'), '/archive/?q=foo');
   assert.equal(parsed.searchParams.get('returnY'), '450');
   assert.equal(addMemoryReturn('https://evil.test/memory/card/', 'https://local.test/archive/'), 'https://evil.test/memory/card/');
   assert.equal(addMemoryReturn('/data/', 'https://local.test/archive/'), '/data/');
+});
+test('the record chooser carries the original source and scroll into image creation without nested or external returns', () => {
+  const start = addMemoryReturn('/record/', 'https://local.test/boards/?id=one', 450);
+  const image = addMemoryReturn('/memory/new/', `https://local.test${start}`, 20);
+  assert.equal(memoryReturnHref(new URL(image, 'https://local.test').search), '/boards/?id=one&restoreY=450');
+  assert.equal(addMemoryReturn('/memory/new/', 'https://local.test/record/?returnTo=https://evil.test'), '/memory/new/');
 });
 test('quick log dirty comparison includes character metadata and ignores unselected leftovers', () => {
   const draft = { mode: 'create', note: '' };

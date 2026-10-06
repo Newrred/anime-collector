@@ -584,6 +584,7 @@ export async function applyRemoteSnapshot(remoteRow, options = {}) {
     steps: [() => applySyncSnapshot(snapshot, {
       canMutate: options.canMutate,
       storage: options.storage,
+      preserveCatalogWatchLogs: true,
     })],
     onComplete: () => markSyncCompleted({
       userId,

@@ -148,11 +148,11 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await expect(page.locator('.memory-preview img[src^="blob:"]')).toBeVisible();
   expect(reads.at(-1)).toContain('variant=thumb'); expect(posts.length).toBe(2);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Edit bookshelf', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit collection', exact: true }).click();
   await page.getByRole('button', { name: 'Add shelf', exact: true }).click();
   await page.locator('.bookshelf-picker').getByLabel('Private sync test', { exact: true }).check();
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
-  await page.getByRole('button', { name: 'Private sync test memory film', exact: true }).click();
+  await page.getByRole('button', { name: 'Private sync test open memories', exact: true }).click();
   await expect(page.locator('.bookshelf-film img[src^="blob:"]').first()).toBeVisible();
   expect(posts.length).toBe(2);
   await page.goto(titleHref!);

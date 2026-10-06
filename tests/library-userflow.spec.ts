@@ -503,7 +503,7 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
 
   if (viewport.width > 900) {
     const primary = page.locator(".top-nav__links--routes");
-    await expect(primary.getByRole("link", { name: "Bookshelf" })).toBeVisible();
+    await expect(primary.getByRole("link", { name: "Collection" })).toBeVisible();
     await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
     await expect(primary.getByRole("link", { name: "Memories" })).toBeVisible();
     return;
@@ -512,7 +512,7 @@ async function assertFreshEnglishNavigation(page: Page, viewport: (typeof VIEWPO
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();
   const mobileMenu = page.locator("#data-menu-panel");
   const primary = mobileMenu.locator(".top-nav-mobile-links");
-  await expect(primary.getByRole("link", { name: "Bookshelf" })).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Collection" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Titles" })).toBeVisible();
   await expect(primary.getByRole("link", { name: "Boards" })).toBeVisible();
   await page.locator(".top-nav__mobile-menu-trigger:visible").click();

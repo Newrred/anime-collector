@@ -168,22 +168,19 @@ function TitleCollectionContent({ base }) {
 
   return (
     <div className="title-collection">
-      <ChannelHeader base={base} title={copy.title} locale={locale} sections={<>
+      <ChannelHeader base={base} title={copy.title} locale={locale} extended={albums.length > 0} sectionColumns={4} sections={<>
         <ChannelSection title={locale === "ko" ? "정보" : "Info"}><p>{locale === "ko" ? "저장한 작품과 기억을 남긴 작품을 한곳에." : "Saved titles and titles with memories, together."}</p><ChannelFacts rows={[[locale === "ko" ? "전체 작품" : "All titles", albums.length], [copy.saved, albums.filter(a => a.tracking.isSaved).length], [copy.filters.HAS_MEMORY, albums.filter(a => a.memoryCount).length]]} /></ChannelSection>
         <ChannelSection title={locale === "ko" ? "찾아보기" : "Browse"}><label className="channel-search"><span className="sr-only">{copy.searchLabel}</span><input type="search" value={query} placeholder={copy.searchPlaceholder} onChange={e => setQuery(e.target.value)} /></label><TextChoices label={locale === "ko" ? "작품 필터" : "Title filters"} options={filterOptions} value={filter} onChange={setFilter} /><p role="status">{copy.count(visibleAlbums.length)}</p></ChannelSection>
         <ChannelSection title={locale === "ko" ? "보기" : "View"}><TitleViewModeControl mode={mode} copy={copy} onChange={changeMode} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "작품 정렬" : "Title sort"} value={sort} onChange={changeSort} options={sortOptions} /></div></ChannelSection>
+        {albums.length > 0 && <ChannelSection title={locale === "ko" ? "탐색" : "Explore"}>
+          <details className="channel-explore"><summary>{locale === "ko" ? "장르" : "Genres"}{genres.length > 0 ? ` · ${genres.length}` : ""}</summary><div className="channel-choices"><button aria-pressed={!genres.length} onClick={clearGenres}>{locale === "ko" ? "전체" : "All"}</button>{genreOptions.map(genre => <button key={genre} aria-pressed={genres.includes(genre)} onClick={() => toggleGenre(genre)}>{formatGenreLabel(genre, locale)}</button>)}</div></details>
+          <label className="channel-columns">{locale === "ko" ? "표지 열 수" : "Poster columns"}<input type="range" min="2" max="10" step="1" value={cardsPerRowBase} onChange={e => setCardsPerRowBase(Number(e.target.value))} /><span>{locale === "ko" ? "기준 " + cardsPerRowBase + " · 현재 " + effectiveCols + "열" : "Base " + cardsPerRowBase + " · Current " + effectiveCols + " columns"}</span></label>
+          <button className="channel-text-button" onClick={() => setSortDir(value => value === "asc" ? "desc" : "asc")}>{locale === "ko" ? (sortDir === "asc" ? "오름차순 ↑" : "내림차순 ↓") : (sortDir === "asc" ? "Ascending ↑" : "Descending ↓")}</button>
+        </ChannelSection>}
       </>} />
 
       {albums.length ? (
         <>
-          <details className="channel-advanced"><summary aria-controls="title-collection-filter-panel-content">{locale === "ko" ? "장르·열 수와 추가 탐색" : "Genres, columns and more controls"}</summary>
-            <div id="title-collection-filter-panel-content" className="channel-advanced-controls">
-              <section><h2>{locale === "ko" ? "장르" : "Genres"}</h2><div className="channel-choices"><button aria-pressed={!genres.length} onClick={clearGenres}>{locale === "ko" ? "전체" : "All"}</button>{genreOptions.map(genre => <button key={genre} aria-pressed={genres.includes(genre)} onClick={() => toggleGenre(genre)}>{formatGenreLabel(genre, locale)}</button>)}</div></section>
-              <label>{locale === "ko" ? "표지 열 수" : "Poster columns"}<input type="range" min="2" max="10" step="1" value={cardsPerRowBase} onChange={e => setCardsPerRowBase(Number(e.target.value))} /><span>{locale === "ko" ? "기준 " + cardsPerRowBase + " · 현재 " + effectiveCols + "열" : "Base " + cardsPerRowBase + " · Current " + effectiveCols + " columns"}</span></label>
-              <button className="btn btn--subtle" onClick={() => setSortDir(value => value === "asc" ? "desc" : "asc")}>{locale === "ko" ? (sortDir === "asc" ? "오름차순 ↑" : "내림차순 ↓") : (sortDir === "asc" ? "Ascending ↑" : "Descending ↓")}</button>
-            </div>
-          </details>
-
           {hasVisibleAlbums ? (
             <section
               ref={gridRef}

@@ -192,7 +192,7 @@ export default function TopNavDataMenu({
         </a>
         <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} locale={locale} />
 
-        <a className="btn top-nav__memory-action" href={`${base}memory/new/`} aria-label={copy.createMemory} data-astro-reload>
+      <a className="btn top-nav__memory-action" href={`${base}record/`} aria-label={copy.createMemory} data-astro-reload>
           <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
           <span className="top-nav__memory-action-short" aria-hidden>{copy.memoryShort}</span>
           <span className="top-nav__memory-action-label">{copy.createMemory}</span>
@@ -338,6 +338,7 @@ export default function TopNavDataMenu({
                     <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
                   <div className="data-menu-utility-grid">
+                    <a href={`${base}library/?focus=edit`} className="btn btn--subtle data-menu-link" data-astro-reload onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "감상 이력 관리 →" : "Manage watch history →"}</a>
                     <a href={`${base}boards/`} className="btn btn--subtle data-menu-link" data-astro-reload aria-current={currentRoute === "boards" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "내 보드 →" : "My Boards →"}</a>
                     <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
                       aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>
