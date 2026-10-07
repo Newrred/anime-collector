@@ -1,6 +1,8 @@
 # CODEX START HERE — MOEMOA
 
-> **2026-10-07 현재 운영 구조 읽기:** [현재 구조와 화면 흐름](docs/moemoa/CURRENT_STRUCTURE_AND_FLOW.md)에서 실제 `master` 기준 라우트·기록/동기화 경계·남은 옛 서재 연결을 먼저 확인한다. [화면 혼재 감사](docs/moemoa/reports/2026-10-07-live-flow-consolidation-audit.md)는 문제 원인과 향후 정리 순서다. 두 문서는 현재 상태 설명이며 UI 통합 구현 완료 보고가 아니다. 운영 소스 SHA는 [build-info](https://www.moemoa.xyz/build-info.json)와 Git `master`를 대조한다. 아래 날짜별 ‘최신’ 문구는 당시 이력이다.
+> **2026-10-07 현재 운영 구조 읽기:** [현재 구조와 화면 흐름](docs/moemoa/CURRENT_STRUCTURE_AND_FLOW.md)에서 실제 `master` 기준 라우트·기록/동기화 경계·옛 서재의 호환 경로를 확인한다. [화면 혼재 감사](docs/moemoa/reports/2026-10-07-live-flow-consolidation-audit.md)는 당시 문제 원인과 개선 순서이며, 완료 상태는 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)의 맨 위를 따른다. 운영 소스 SHA는 [build-info](https://www.moemoa.xyz/build-info.json)와 Git `master`를 대조한다. 아래 날짜별 ‘최신’ 문구는 당시 이력이다.
+
+> **2026-10-07 다른 PC 인계:** 감상 관리 통합·옛 서재 기능 연결은 `6565c5e`·`83cdf49`를 `master`에 push해 Web 운영에 반영했다. 기존 저장소에서 `git fetch origin` → `git switch master` → `git pull --ff-only origin master` → `npm ci` 후 이어서 작업한다. [이번 배포·검증·미확인 범위](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#2026-10-07-git-운영-배포다른-pc-인계)를 먼저 읽는다. Git은 개인 로컬 기록·원본 이미지·비밀 설정을 옮기지 않는다.
 
 > **2026-10-07 최신32차 — 작품 기록 다기기 동기화:** 운영 PC의 저장 작품 51개·감상 기록 22개가 같은 계정의 iPhone Safari에서 0개로 보였던 원인을 수정했다. 작품·감상 기록·컬렉션 선반을 계정별로 동기화하고, 기존 로컬 기록 보호·삭제/충돌·계정 경계를 둔다. 테스트/운영 DB에 migration `20261007093000`을 적용했고 사용자 승인으로 master Git 배포 `ad1995a`를 진행했다. 운영 DB는 51개 작품·22개 감상 기록·선반 1개, iPhone Safari는 51개 작품·22개 감상 기록을 확인했다. 원본 이미지·Public·Android와 기존 티어/캐릭터 고정의 동기화 범위는 변경하지 않았다. [ExecPlan](docs/moemoa/plans/2026-10-07-title-state-account-sync.md)과 [운영 증거](docs/moemoa/release-v2/evidence/2026-10-07-title-state-sync-production.json)를 따른다. 아래31차 이하의 ‘최신’ 표기는 당시 이력이다.
 

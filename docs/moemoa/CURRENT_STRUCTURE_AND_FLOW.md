@@ -2,7 +2,7 @@
 
 > 기준: 2026-10-07 `master`의 Web 운영 구조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
 
-> **로컬 수정 후보(운영 미배포):** `/title/`에서 감상 기록 작성·같은 ID 수정/삭제, 현재 작품 상태/평점/재시청/메모 수정, 캐릭터 즐겨찾기 고정/해제와 관련 시리즈 보기/명시 저장을 연결했다. 일반 관리 메뉴는 `/titles/`로 가고, 검색 목록으로 돌아갈 때 필터/위치를 탭 임시 상태에서 복원한다. 유효한 작품 ID가 있는 옛 `focus=edit/quick-log` 링크는 새 상세의 감상 탭으로 이동한다. ID 없는 옛 목록과 `legacy=1` 호환 진입만 남는다. 캐릭터 즐겨찾기는 기존처럼 이 기기에만 저장된다. 아래 표는 **운영 기준**이며 이 후보를 운영 완료로 읽지 않는다. [실행 계획과 검증](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결).
+> **2026-10-07 운영 반영:** 감상 기록 작성·같은 ID 수정/삭제, 현재 작품 상태/평점/재시청/메모 수정, 캐릭터 즐겨찾기 고정/해제와 관련 시리즈 보기/명시 저장이 `/title/`에 있다. 유효한 작품 ID가 있는 옛 `focus=edit/quick-log` 링크는 새 상세의 감상 탭으로 이동한다. ID 없는 옛 목록과 `legacy=1` 호환 진입은 남는다. 캐릭터 즐겨찾기는 여전히 **이 기기에만** 저장된다. 기능 커밋 `83cdf49`를 Git/Vercel 운영에서 확인했고, 이 문서의 최종 배포 커밋은 아래 동적 확인 링크를 따른다. [실행 계획과 검증](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결).
 
 - [공개 소스 저장소](https://github.com/Newrred/anime-collector) · 기본 브랜치 `master`
 - [현재 운영 Web](https://www.moemoa.xyz/) · [실제 제공 커밋 확인](https://www.moemoa.xyz/build-info.json)
@@ -32,14 +32,14 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 | --- | --- | --- |
 | `/` 컬렉션 | 사용자가 골라 선반에 진열한 작품과 그 작품의 Memory 미리보기. 전체 작품 목록과 집합이 다르다. | 표지의 기억 펼침, 작품 상세 `/title/`, 선반 편집 |
 | `/titles/` 내 작품 | 저장 작품과 Complete Memory가 있는 작품의 합집합. 표지 보기/기억 함께 보기, 필터·검색. | 작품 상세 `/title/` |
-| `/title/` 작품 상세 | 한 작품의 카탈로그 표지·정보, 저장/시청 상태, 감상 기록 탭, Memory 탭. | 감상 기록 작성, Memory 작성, 기존 기록 관리의 옛 화면 |
+| `/title/` 작품 상세 | 한 작품의 카탈로그 표지·정보, 저장/시청 상태, 감상 기록 탭, Memory 탭. | 감상 기록 작성·수정·삭제, 현재 작품 정보 수정, 캐릭터 고정·관련 시리즈, Memory 작성 |
 | `/record/` 공통 작성 진입 | 감상 기록과 장면·이미지 Memory 작성 중 선택. | 감상은 작품 상세 감상 탭, 이미지는 `/memory/new/` |
 | `/memory/new/` | 이미지·공식 표지·시스템 디자인을 고르는 Memory 작성. | 완료 후 `/archive/` |
 | `/archive/`, `/memory/card/` | 완성된 Memory의 전체 목록과 상세·수정/관리. 일반 감상 기록은 여기에 나타나지 않는다. | 작품 상세, 보드 |
 | `/boards/` | Memory를 사용자가 선택해 묶는 비공개 보드. | Memory 상세, 선택적 공개 흐름 |
 | `/data/` | 계정 로그인·동기화, 저장 공간, 범위가 서로 다른 파일 백업/복원. | 계정 동기화·백업 |
 | `/tier/` | 작품 순위 도구. Memory 보드와 별개. | 관리 메뉴의 보조 기능 |
-| `/library/?focus=edit` | **기존 서재 호환 화면.** 감상 이력 수정/삭제·상황 태그·캐릭터 등 남은 기능 때문에 현재도 사용된다. | Title Hub 감상 탭과 왕복 |
+| `/library/?focus=edit` | **ID 없는 기존 서재 호환 목록.** 일반 메뉴에서 연결하지 않는다. ID가 있는 옛 감상 링크는 `/title/`로 전환한다. | 회귀·백업 호환 |
 
 라우트 구현: `src/pages/index.astro:2-6`, `src/pages/titles.astro:2-8`, `src/pages/title.astro:2-8`, `src/pages/record.astro:2-6`, `src/pages/archive.astro:2-8`, `src/pages/boards.astro:2-8`, `src/pages/data.astro:2-6`, `src/pages/tier.astro:2-6`, `src/pages/library.astro:2-7`. 상단 주요 이동은 `src/components/PrimaryNavigationLinks.jsx:3-24`, 작성/관리 메뉴는 `src/components/TopNavDataMenu.jsx:189-200,343-365`에 있다.
 
@@ -69,10 +69,10 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 
 ## 의도적으로 남은 이전 경로와 현재 한계
 
-- 운영의 새 `/title/` 감상 탭은 기록 작성·조회가 가능하지만 기존 로그 관리와 일부 보조 기능은 `/library/?focus=edit`를 사용한다. 현재 로컬 후보에서는 같은 ID 관리와 캐릭터 고정·관계 시리즈를 새 상세로 옮기고, 작품 ID가 있는 옛 링크를 새 상세로 전환했다. `contextTags`는 옛 편집 시트의 직접 설정 항목이 아니며 자동 생성·보존 필드다(`src/components/Library.jsx`, `src/components/library/LibraryQuickLogSheet.jsx`, `src/features/titles/domain/titleNavigation.js`).
+- `/title/`가 감상 기록의 작성·같은 ID 수정/삭제와 캐릭터 고정·관계 시리즈를 담당한다. 작품 ID가 있는 옛 링크는 새 상세로 전환한다. `contextTags`는 옛 편집 시트의 직접 설정 항목이 아니며 자동 생성·보존 필드다(`src/components/Library.jsx`, `src/components/library/LibraryQuickLogSheet.jsx`, `src/features/titles/domain/titleNavigation.js`).
 - `/`는 옛 `src/components/Home.jsx`가 아니라 컬렉션 선반 `src/features/bookshelf/BookshelfView.jsx`를 사용한다(`src/pages/index.astro:2-6`). 이전 Home 코드의 존재를 운영 홈 기능으로 해석하지 않는다.
 - Public 보드/미니홈·관리 경로는 코드에 있어도 현재 운영 기능 플래그가 꺼져 있다. 라우트 존재만으로 공개 서비스가 활성화됐다고 판단하지 않는다(`src/features/memory/runtime/platformPublication.js:7-12`, `.env.production:14-17`).
-- 로컬 후보의 검증이 끝나도 운영은 별도 Git 배포·실계정/실기기 확인 전까지 이전 흐름이다. ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 상세 근거와 회귀 범위는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
+- ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 운영에서 익명 링크 전환과 화면 표시는 확인했지만 실계정 두 기기·실휴대폰의 기록 동작은 이번 배포에서 재검증하지 않았다. 이전 흐름의 문제 근거는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
 
 ## 소스와 운영 배포가 같은지 확인하는 방법
 

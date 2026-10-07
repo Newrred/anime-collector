@@ -1,12 +1,18 @@
 # MOEMOA · 단일 출시 작업판
 
-## 2026-10-07 W18 옛 서재 기능 대비·작품 상세 연결 — 로컬 후보, 운영 미배포
+## 2026-10-07 Git 운영 배포·다른 PC 인계
+
+- 사용자 명시 승인으로 `6565c5e`와 `83cdf49`를 `master`에 push했다. Git 원격과 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)의 `commit`·`checkoutCommit`이 기능 커밋 `83cdf49c0c31f5d70f40ce18c1cc72089338e9f5`로 일치했고 `source=vercel-git`이었다. 옛 `focus=edit` 운영 링크가 새 감상 탭으로 이동하고 캐릭터 즐겨찾기·관련 작품 접힘 버튼이 표시됨을 익명 브라우저로 확인했다. 이 문서 보정 커밋은 별도 Git 배포를 만들므로 최종 SHA는 링크에서 다시 확인한다.
+- 다른 PC의 기존 저장소: `git fetch origin` → `git switch master` → `git pull --ff-only origin master` → `npm ci` → `npm run dev -- --port 4363`. 새 PC에 저장소가 없으면 [저장소](https://github.com/Newrred/anime-collector)를 먼저 clone한다. 시작 문서는 `CODEX_START_HERE.md`, 현재 구조는 `docs/moemoa/CURRENT_STRUCTURE_AND_FLOW.md`, 이 작업판과 [ExecPlan](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결)이다. 개인 로컬 이미지·브라우저 저장 기록·비밀 설정은 Git으로 이전되지 않는다.
+- 이번 배포는 Web 코드/문서다. DB migration·기존 운영 사용자 데이터·Public/Android 설정 변경0. 운영에서 익명 UI·HTTP만 직접 확인했고 실계정 두 기기·실휴대폰 재검증은 남아 있다.
+
+## 2026-10-07 W18 옛 서재 기능 대비·작품 상세 연결 — 운영 반영, 실계정 재검증 잔여
 
 - 실제 옛 서재 코드를 대조해 남은 조작이 numeric AniList 캐릭터 즐겨찾기와 관련 시리즈 보기/추가임을 확인했다. `contextTags`는 직접 설정 항목이 아니라 자동 생성·보존 필드다. 새 `/title/`에는 두 기능을 접힌 보조 영역으로 연결하고, catalog 관계의 ID가 없을 때 임의 링크를 만들지 않는다. 즐겨찾기는 기존처럼 이 기기에만 저장한다.
-- 작품 ID가 있는 옛 감상 링크는 `/title/` 감상 탭으로 이동하며 빠른 기록 링크는 새 기록 입력을 연다. ID 없는 옛 목록과 명시적 `legacy=1`은 호환/복구용으로 남긴다. 기존 사용자 데이터·DB·Public·Android·운영은 변경하지 않았다. 검증 결과와 롤백 경로는 [실행 계획](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결)을 따른다.
-- 이번 로컬 검증: unit439/439, Chromium 영향 합본44 PASS·퇴역된 옛 다중 탐색2 및 외부 live-only2 SKIP, WebKit 새 작품/감상16 PASS, build20페이지 PASS. React Doctor 이번 diff는 신규 진단0. 합성 브라우저 검사를 실계정/실폰/운영 확인으로 해석하지 않는다. 다음은 Git 배포 승인 후 운영에서 옛 링크·핀·관계·감상·기기별 pin 보존을 확인하는 것이다.
+- 작품 ID가 있는 옛 감상 링크는 `/title/` 감상 탭으로 이동하며 빠른 기록 링크는 새 기록 입력을 연다. ID 없는 옛 목록과 명시적 `legacy=1`은 호환/복구용으로 남긴다. 기존 사용자 데이터·DB·Public·Android 설정은 변경하지 않았다. 검증 결과와 롤백 경로는 [실행 계획](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결)을 따른다.
+- 이번 로컬 검증: unit439/439, Chromium 영향 합본44 PASS·퇴역된 옛 다중 탐색2 및 외부 live-only2 SKIP, WebKit 새 작품/감상16 PASS, build20페이지 PASS. React Doctor 이번 diff는 신규 진단0. 합성 브라우저 검사를 실계정/실폰 확인으로 해석하지 않는다. 다음은 운영에서 실제 계정의 감상 관리·관계·기기별 pin 보존을 확인하는 것이다.
 
-## 2026-10-07 W18 감상 관리 통합 보완 — 로컬 후보, 운영 미배포
+## 2026-10-07 W18 감상 관리 통합 보완 — 당시 로컬 검증, 후속 운영 반영
 
 - 첨부 재검증 10개 합성 관찰을 현재 소스와 대조한 뒤 오래된 감상 초안/부분 재시도의 최신 상태 덮어쓰기, 읽기 불가 snapshot의 삭제 전파, Title Hub의 기존 기록 관리 누락을 수정했다. 과거 로그는 같은 ID로 수정·삭제하고 미편집 계절/태그/캐릭터를 유지한다. 현재 작품 정보 수정은 과거 로그와 분리했다. 내 작품 검색/필터/스크롤 복귀도 연결했다.
 - 당시 로컬 unit439 PASS, Chromium 관련 감상11·호환 경로4 PASS, WebKit 감상11 PASS, build20 PASS. 합성 브라우저 검사이며 실계정 두 기기 동시 편집·실폰 검증/운영 적용은 아니다. 당시 남겼던 관계·캐릭터 기능은 위 후속 후보에서 연결했다. 상황 태그는 옛 시트의 직접 설정 기능이 아니었다. DB migration/운영 데이터/배포0. [계획·파일·검증·잔여](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-감상-관리-통합-보완--재검증-자료-반영).

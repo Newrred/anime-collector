@@ -22,7 +22,8 @@
 - [2026-10-07 로컬 구현] `TitleFavoriteCharacters.jsx`는 기존 numeric pin 저장소를 재사용해 고정/해제와 실패 재시도를 제공한다. 개인 pin은 이 기기에만 저장된다고 명시한다. `TitleRelatedSeries.jsx`는 AniList 관계 ID가 있는 행만 새 작품 상세로 이동·명시 저장하고 catalog의 ID 없는 관계는 정보만 표시한다. `titleHubService.js`의 추가 명령은 형식/ID를 검사하고 이미 저장한 작품을 덮어쓰지 않는다. 두 영역은 작품 상세 보조 패널 안에 접어 두었다.
 - [2026-10-07 로컬 구현] 유효한 작품 ID가 있는 옛 `focus=edit`는 새 감상 탭, `focus=quick-log`는 새 기록 입력으로 전환한다. ID 없는 호환 목록과 명시적 `legacy=1`은 기능 회귀/복구용으로 보존하고, 옛 팝업을 닫을 때 URL의 임시 파라미터도 지운다. 옛 다중 검색 fixture는 현재 catalog 우선 검색과 제목/ID 계약이 달라 퇴역 처리하고, 실제 기본 흐름은 새 작품·기록 검사로 대체한다.
 - [2026-10-07 검증] unit 439/439, Astro build 20페이지, React Doctor `--scope changed --base HEAD` 신규 문제 0. Chromium 영향 합본 44 PASS·옛 다중 탐색2/외부 live-only2 SKIP, WebKit 새 링크·핀·관련작품·감상 16/16 PASS. 후속으로 이미 저장한 관련 작품의 중복 추가 방지, 비애니 관계의 잘못된 내부 링크 방지, 320px 폭을 Chromium/WebKit 각각 확인했다. 저장소 복원 검사에는 실 catalog와 겹치지 않는 합성 ID를 사용한다. 검사는 합성 브라우저 자료이며 실제 계정/실폰/운영 검증으로 승격하지 않는다.
-- [2026-10-07 범위/복구] DB migration·운영 데이터 변경 없음. `master` push/운영 배포 없음. 기존 `Library.jsx`와 로컬 pin/감상 자료를 지우지 않았으므로 이 UI/경로 diff의 로컬 복귀가 가능하다. 실제 두 기기 동시 편집 및 native Android는 별도 검증이다.
+- [2026-10-07 로컬 검증 당시 범위/복구] DB migration·운영 데이터 변경 없음. 이 시점의 `master` push/운영 배포는 없었다. 기존 `Library.jsx`와 로컬 pin/감상 자료를 지우지 않았으므로 UI/경로 변경을 코드에서 되돌릴 수 있다. 실제 두 기기 동시 편집 및 native Android는 별도 검증이다.
+- [2026-10-07 운영 반영/다른 PC 인계] 사용자 명시 승인으로 `6565c5e`·`83cdf49`를 `master`에 fast-forward push했다. Git 원격과 Vercel Git 운영 `build-info.json`의 `commit`·`checkoutCommit`이 `83cdf49c0c31f5d70f40ce18c1cc72089338e9f5`로 일치하고, 옛 `focus=edit` 링크가 실제 운영 `/title/?anilistId=1&tab=watch`로 이동하며 새 즐겨찾기/관계 접힘 버튼을 표시했다. `/`, `/titles/`, `/title/`, `/record/` HTTP 200 확인. DB·운영 사용자 데이터·Public/Android 설정 변경0. 이 문서 보정도 Git 배포를 발생시키므로 최종 SHA는 운영 `build-info.json`과 `master`를 다시 대조한다. 새 실계정·실휴대폰 동작 검사는 별도다.
 
 ## 2026-10-07 W18 감상 관리 통합 보완 — 재검증 자료 반영
 
