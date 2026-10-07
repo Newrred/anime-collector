@@ -12,6 +12,18 @@ export function readJson(key, fallbackValue) {
   }
 }
 
+// Personal snapshots must distinguish an empty store from a snapshot that cannot be read.
+export function readJsonSnapshot(key) {
+  if (!canUseStorage()) return { status: "unavailable" };
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return { status: "missing" };
+    return { status: "valid", value: JSON.parse(raw) };
+  } catch {
+    return { status: "invalid" };
+  }
+}
+
 export function writeJson(key, value) {
   if (!canUseStorage()) return false;
   try {

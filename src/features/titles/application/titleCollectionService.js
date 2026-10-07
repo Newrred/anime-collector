@@ -35,7 +35,7 @@ export function createTitleCollectionService({
       const runtime = await runtimePromise;
       await runtime.initialize();
       const [libraryItems, memoryBundles] = await Promise.all([
-        readLibrary([]).catch(() => []),
+        readLibrary([]),
         runtime.listArchive(),
       ]);
       const ids = aniListIdsFrom(libraryItems, memoryBundles);

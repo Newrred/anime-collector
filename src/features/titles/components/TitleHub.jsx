@@ -5,6 +5,7 @@ import PrivateMemoryCardPreview from "../../memory/components/PrivateMemoryCardP
 import MemoryRouteShell, { useMemoryRouteUi } from "../../memory/components/MemoryRouteShell.jsx";
 import { createTitleHubService } from "../application/titleHubService.js";
 import { parseTitleHubRequest } from "../domain/titleNavigation.js";
+import { titleReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
 import "./title-hub.css";
 import TitleCharacters from "./TitleCharacters.jsx";
 import TitleWatchRecords, { watchStatusLabel } from "./TitleWatchRecords.jsx";
@@ -155,6 +156,7 @@ function TitleHubContent({ base }) {
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
   const [watchEditing, setWatchEditing] = useState(false);
+  const [newerRecordNotice, setNewerRecordNotice] = useState(false);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const watchTab = params.get("tab") === "watch";
 
@@ -172,8 +174,26 @@ function TitleHubContent({ base }) {
     return () => { active = false; };
   }, [request, service]);
 
+  useEffect(() => {
+    if (!request) return undefined;
+    let active = true;
+    const refresh = () => {
+      if (watchEditing) { setNewerRecordNotice(true); return; }
+      service.load(request).then(next => {
+        if (!active || !next) return;
+        setAlbum(next);
+        setNewerRecordNotice(false);
+      }).catch(() => {});
+    };
+    window.addEventListener("moemoa:library-updated", refresh);
+    return () => { active = false; window.removeEventListener("moemoa:library-updated", refresh); };
+  }, [request, service, watchEditing]);
+
   const toggleSaved = async () => {
     if (!album || status !== "ready") return;
+    if (album.tracking.isSaved && !window.confirm(locale === "ko"
+      ? "작품을 저장 해제하면 현재 시청 상태·평점·작품 메모·재시청 요약이 제거돼요. 감상 기록과 기억 이미지는 남습니다. 계속할까요?"
+      : "Removing this saved title clears its current status, rating, title memo and rewatch summary. Watch records and memories remain. Continue?")) return;
     setStatus("saving");
     setMessage("");
     try {
@@ -212,12 +232,16 @@ function TitleHubContent({ base }) {
     return `${window.location.pathname}?${next}`;
   };
   const recordHref = tabHref("watch", true);
+  const backHref = titleReturnHref(window.location.search, base);
 
   return (
     <div className="title-hub page-shell">
-      <a className="title-hub__back" href={`${base}titles/`} data-astro-reload>{copy.back}</a>
+      <a className="title-hub__back" href={backHref} data-astro-reload>{copy.back}</a>
       <TitleIdentity album={album} copy={copy} memoryHref={memoryHref} recordHref={recordHref} locale={locale} busy={status === "saving"} editing={watchEditing} onToggleSaved={toggleSaved} />
       {message ? <p className="title-hub__message" role="status">{message}</p> : null}
+      {newerRecordNotice && watchEditing ? <p className="title-hub__message" role="status">{locale === "ko"
+        ? "다른 곳에서 작품 기록이 바뀌었을 수 있어요. 저장 전에 최신 내용을 확인해 주세요."
+        : "This title may have changed elsewhere. Review the latest details before saving."}</p> : null}
       <div className="title-hub__content">
         <div className="title-hub__body">
           <nav className="title-hub__tabs" aria-label={locale === "ko" ? "작품 기록 보기" : "Title records"}>
@@ -228,7 +252,11 @@ function TitleHubContent({ base }) {
             startWriting={params.get("record") === "new"} busy={status === "saving"} onSaveTitle={toggleSaved}
             onEditingChange={setWatchEditing}
             onSaved={({ log, tracking }) => setAlbum((current) => ({ ...current, tracking,
-              watchLogs: [log, ...current.watchLogs.filter((row) => row.id !== log.id)] }))} />
+              watchLogs: [log, ...current.watchLogs.filter((row) => row.id !== log.id)] }))}
+            onLogChanged={(updated, deletedId = null) => setAlbum(current => ({ ...current,
+              watchLogs: deletedId ? current.watchLogs.filter(row => row.id !== deletedId)
+                : current.watchLogs.map(row => row.id === updated.id ? updated : row) }))}
+            onTitleDetailsSaved={() => service.load(request).then(next => next && setAlbum(next)).catch(() => {})} />
             : <TitleMemoryGallery album={album} base={base} copy={copy} locale={locale} />}
         </div>
         <TitleFacts album={album} copy={copy} recordHref={tabHref("watch")} locale={locale} />

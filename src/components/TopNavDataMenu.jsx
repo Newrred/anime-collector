@@ -340,7 +340,7 @@ export default function TopNavDataMenu({
                     <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
                   <div className="data-menu-utility-grid">
-                    <a href={`${base}library/?focus=edit`} className="btn btn--subtle data-menu-link" data-astro-reload onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "감상 이력 관리 →" : "Manage watch history →"}</a>
+                    <a href={`${base}titles/`} className="btn btn--subtle data-menu-link" data-astro-reload onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "작품·감상 관리 →" : "Titles and watch records →"}</a>
                     <a href={`${base}boards/`} className="btn btn--subtle data-menu-link" data-astro-reload aria-current={currentRoute === "boards" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "내 보드 →" : "My Boards →"}</a>
                     <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
                       aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>

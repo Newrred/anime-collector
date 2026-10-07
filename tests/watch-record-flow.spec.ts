@@ -23,6 +23,9 @@ async function prepare(page: Page, saved = true) {
     window.__MOEMOA_TEST_TITLE_HUB_SERVICE__ = {
       load: async (request) => (await service()).load(request), setSaved: async (album, value) => (await service()).setSaved(album, value),
       saveWatchRecord: async (album, input) => (await service()).saveWatchRecord(album, input),
+      editWatchLog: async (album, log, input) => (await service()).editWatchLog(album, log, input),
+      deleteWatchLog: async (album, log) => (await service()).deleteWatchLog(album, log),
+      updateTitleDetails: async (album, input) => (await service()).updateTitleDetails(album, input),
     };
     window.__MOEMOA_TEST_RECORD_START__ = {
       collection: { load: async () => { const { createTitleCollectionService } = await import(`${location.origin}/src/features/titles/application/titleCollectionService.js`); return createTitleCollectionService({ memoryRuntime: runtime, catalogRepository: catalog }).load(); } },
@@ -41,7 +44,8 @@ const readState = (page: Page) => page.evaluate(async () => {
 
 test("watch flow: existing detailed history management remains reachable and edits the same record", async ({ page }) => {
   await prepare(page); await page.goto("/title/?anilistId=3&tab=watch");
-  const manage = page.getByRole("link", { name: "감상 이력 관리 →", exact: true });
+  await page.getByText("이전 서재의 추가 설정", { exact: true }).click();
+  const manage = page.getByRole("link", { name: "캐릭터·관계 설정 열기 →", exact: true });
   await expect(manage).toHaveAttribute("href", "/library/?animeId=3&focus=edit");
   await manage.click();
   const detail = page.getByRole("dialog", { name: oldTitle, exact: true });
@@ -61,6 +65,82 @@ test("watch flow: existing detailed history management remains reachable and edi
   await expect(page.getByText("수정한 시청 이력", { exact: true })).toBeVisible();
   await page.goto(ownHref().replace("&record=new", ""));
   await expect(page.locator(".title-watch-records__management")).toHaveCount(0);
+});
+
+test("watch flow: edit and delete the same legacy log in title detail, preserving season and metadata", async ({ page }) => {
+  await prepare(page); await page.goto("/");
+  await page.evaluate(() => {
+    const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");
+    rows[0].watchedAtPrecision = "season"; rows[0].watchedAtValue = "2024-Spring";
+    localStorage.setItem("anime:watchLogs:v1", JSON.stringify(rows));
+  });
+  await page.goto("/title/?anilistId=3&tab=watch");
+  await page.getByRole("button", { name: "수정", exact: true }).click();
+  const editor = page.getByRole("form", { name: "감상 기록 수정" });
+  await expect(editor.getByLabel("연도", { exact: true })).toHaveValue("2024");
+  await editor.getByLabel("한줄 감상").fill("같은 기록 수정");
+  await editor.getByRole("button", { name: "수정 저장" }).click();
+  const [updated] = (await readState(page)).logs;
+  expect(updated).toMatchObject({ id: "legacy-event-29", cue: "같은 기록 수정", watchedAtPrecision: "season",
+    watchedAtValue: "2024-Spring", contextTags: ["친구와"] });
+  expect(updated.characterRefs[0]).toMatchObject({ characterId: 7, nameSnapshot: "기존 캐릭터" });
+  expect((await readState(page)).titles.find(row => row.anilistId === 3)).toMatchObject({ status: "보는중", score: 4.5, rewatchCount: 2 });
+  page.once("dialog", dialog => dialog.dismiss());
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  expect((await readState(page)).logs).toHaveLength(1);
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await expect(page.getByText("감상 기록을 삭제했어요.")).toBeVisible();
+  expect((await readState(page)).logs).toHaveLength(0);
+  expect((await readState(page)).titles.find(row => row.anilistId === 3)).toBeTruthy();
+});
+
+test("watch flow: catalog-only history can be edited and deleted without an external ID", async ({ page }) => {
+  await prepare(page); await page.goto("/");
+  await page.evaluate(({ animeId }) => {
+    const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");
+    rows.push({ id: "own-log", catalogAnimeId: animeId, anilistId: null, eventType: "NOTE", watchedAtPrecision: "unknown",
+      watchedAtValue: "", cue: "첫 감상", note: "기존 메모", createdAt: 2, updatedAt: 2 });
+    localStorage.setItem("anime:watchLogs:v1", JSON.stringify(rows));
+  }, { animeId });
+  await page.goto(`/title/?animeId=${encodeURIComponent(animeId)}&tab=watch`);
+  await expect(page.locator(".title-watch-records__management")).toHaveCount(0);
+  await page.getByRole("button", { name: "수정", exact: true }).click();
+  const editor = page.getByRole("form", { name: "감상 기록 수정" });
+  await editor.locator("textarea").fill("자체 작품 수정");
+  await editor.getByRole("button", { name: "수정 저장" }).click();
+  expect((await readState(page)).logs.find(row => row.id === "own-log")?.note).toBe("자체 작품 수정");
+  page.once("dialog", dialog => dialog.accept());
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await expect(page.getByText("감상 기록을 삭제했어요.")).toBeVisible();
+  expect((await readState(page)).logs.map(row => row.id)).not.toContain("own-log");
+});
+
+test("watch flow: current title details edit leaves historical logs untouched", async ({ page }) => {
+  await prepare(page); await page.goto("/title/?anilistId=3&tab=watch");
+  await page.getByRole("button", { name: "현재 상태·작품 메모 수정" }).click();
+  const editor = page.getByRole("form", { name: "현재 작품 정보 수정" });
+  await editor.getByLabel("시청 상태").selectOption("완료");
+  await editor.getByLabel("내 평점").fill("5");
+  await editor.getByLabel("다시 정주행한 횟수").fill("3");
+  await editor.locator("textarea").fill("새 작품 메모");
+  await editor.getByRole("button", { name: "변경 저장" }).click();
+  await expect(page.getByText("작품 정보를 수정했어요.")).toBeVisible();
+  const state = await readState(page);
+  expect(state.titles.find(row => row.anilistId === 3)).toMatchObject({ status: "완료", score: 5, rewatchCount: 3, memo: "새 작품 메모" });
+  expect(state.logs[0]).toMatchObject({ id: "legacy-event-29", cue: "처음 본 날", scoreAtThatTime: 4 });
+});
+
+test("watch flow: return to the same title search without placing the query in the URL", async ({ page }) => {
+  await prepare(page); await page.goto("/titles/");
+  const search = page.locator(".channel-search input");
+  await search.fill("자체 작품");
+  await page.locator(".title-poster-tile").filter({ hasText: ownTitle }).locator("a").click();
+  await expect(page).toHaveURL(url => url.pathname === "/title/" && /^\/titles\/\?view=[a-f0-9-]+$/iu.test(url.searchParams.get("returnTo") || ""));
+  await page.locator(".title-hub__back").click();
+  await expect(page).toHaveURL(url => url.pathname === "/titles/" && Boolean(url.searchParams.get("view")));
+  await expect(search).toHaveValue("자체 작품");
+  await expect(page.locator(".title-poster-tile")).toHaveCount(1);
 });
 
 test("watch flow: common entry restores legacy rating, rewatches and history without an image", async ({ page }) => {
@@ -99,6 +179,9 @@ test("watch flow: catalog-only save is explicit, cancel keeps data and backups p
   const form = page.getByRole("form", { name: "감상 기록 작성" });
   await expect(form).toBeVisible();
   await form.getByLabel("기록 종류", { exact: true }).selectOption("재시청");
+  await form.getByRole("button", { name: "취소", exact: true }).click();
+  await expect(form).toBeVisible();
+  page.once("dialog", dialog => dialog.accept());
   await form.getByRole("button", { name: "취소", exact: true }).click();
   expect((await readState(page)).logs).toHaveLength(1);
   expect((await readState(page)).titles.find(row => row.catalogAnimeId === animeId)?.rewatchCount).toBe(0);
@@ -245,6 +328,9 @@ test("watch flow: responsive entry, latest search, unsaved navigation and read-o
   page.once("dialog", dialog => dialog.dismiss());
   await page.getByRole("link", { name: /^기억 이미지/ }).click();
   await expect(form).toBeVisible(); await expect(form.getByLabel("감상", { exact: true })).toHaveValue("아직 저장하지 않은 내용");
+  await form.getByRole("button", { name: "취소", exact: true }).click();
+  await expect(form).toBeVisible();
+  page.once("dialog", dialog => dialog.accept());
   await form.getByRole("button", { name: "취소", exact: true }).click();
   expect((await readState(page)).logs).toHaveLength(1);
   await page.getByRole("link", { name: /^기억 이미지/ }).click();

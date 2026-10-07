@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from "../storage/keys.js";
-import { hasStoredValue, readJson, writeJson } from "../storage/localJsonStore.js";
+import { readJsonSnapshot, writeJson } from "../storage/localJsonStore.js";
 import {
   getRecentWatchLogsIdb,
   putWatchLogIdb,
@@ -161,8 +161,10 @@ function normalizeWatchLog(raw) {
 }
 
 function readWatchLogsLocal() {
-  const rows = readJson(STORAGE_KEYS.watchLogs, []);
-  return toArray(rows).map(normalizeWatchLog).filter(hasWatchLogIdentity);
+  const snapshot = readJsonSnapshot(STORAGE_KEYS.watchLogs);
+  if (snapshot.status === "missing") return [];
+  if (snapshot.status !== "valid" || !Array.isArray(snapshot.value)) throw new Error("WATCH_LOG_SNAPSHOT_UNREADABLE");
+  return snapshot.value.map(normalizeWatchLog).filter(hasWatchLogIdentity);
 }
 
 function writeWatchLogsLocal(rows) {
@@ -172,7 +174,9 @@ function writeWatchLogsLocal(rows) {
 }
 
 function hasLocalWatchLogSnapshot() {
-  return hasStoredValue(STORAGE_KEYS.watchLogs);
+  const snapshot = readJsonSnapshot(STORAGE_KEYS.watchLogs);
+  if (snapshot.status === "invalid" || snapshot.status === "unavailable") throw new Error("WATCH_LOG_SNAPSHOT_UNREADABLE");
+  return snapshot.status === "valid";
 }
 
 async function readAuthoritativeWatchLogs(options = {}) {

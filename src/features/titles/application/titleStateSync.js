@@ -3,6 +3,7 @@ import { readAllWatchLogsPreferred, replaceWatchLogsDurable } from "../../../rep
 import { readJson, writeJson } from "../../../storage/localJsonStore.js";
 import { supabase } from "../../../lib/supabaseClient.js";
 import { normalizeBookshelf, readBookshelf, saveBookshelf } from "../../bookshelf/bookshelfSettings.js";
+import { withTitleStateMutation } from "./titleStateMutationLock.js";
 
 const TABLE = "user_title_sync_entities";
 const BASE_KEY = "moemoa:title-sync-base:v1:";
@@ -176,6 +177,7 @@ export async function syncTitleState(userId, { client = supabase, allowPromotion
     }
     if (plan.pull.length) {
       await assertAccount(client, userId);
+      await withTitleStateMutation(async () => {
       const current = await readLocal(userId);
       for (const item of plan.pull) {
         if (fingerprint(current.entries.get(item.id)?.payload) !== item.localHash) throw new Error("TITLE_SYNC_LOCAL_CHANGED");
@@ -203,6 +205,7 @@ export async function syncTitleState(userId, { client = supabase, allowPromotion
         version: Number(item.row.version), hash: item.row.deleted_at ? null : fingerprint(item.row.payload),
       };
       globalThis.dispatchEvent?.(new Event("moemoa:library-updated"));
+      });
     }
     await assertAccount(client, userId);
     saveBaseline(userId, baseline);
@@ -239,8 +242,11 @@ export async function resolveTitleStateConflict(userId, conflict, choice, { clie
     await assertAccount(client, userId);
     baseline[conflict.id] = { kind: conflict.kind, key: conflict.key, version: Number(data.version), hash: fingerprint(localItem?.payload) };
   } else {
-    const titles = titleMapPreservingUnkeyed(current.titles);
-    const logs = new Map(current.watchLogs.map(log => [String(log.id), log]));
+    await withTitleStateMutation(async () => {
+    const latest = await readLocal(userId);
+    if (fingerprint(latest.entries.get(conflict.id)?.payload) !== conflict.localHash) throw new Error("TITLE_SYNC_LOCAL_CHANGED");
+    const titles = titleMapPreservingUnkeyed(latest.titles);
+    const logs = new Map(latest.watchLogs.map(log => [String(log.id), log]));
     if (row.entity_kind === "title") {
       if (row.deleted_at) titles.delete(row.entity_key);
       else titles.set(row.entity_key, row.payload);
@@ -256,6 +262,7 @@ export async function resolveTitleStateConflict(userId, conflict, choice, { clie
     await assertAccount(client, userId);
     baseline[conflict.id] = { kind: row.entity_kind, key: row.entity_key, version: Number(row.version), hash: row.deleted_at ? null : fingerprint(row.payload) };
     globalThis.dispatchEvent?.(new Event("moemoa:library-updated"));
+    });
   }
   saveBaseline(userId, baseline);
   return baseline[conflict.id];

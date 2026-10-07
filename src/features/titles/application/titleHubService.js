@@ -1,11 +1,14 @@
 import { readTitleLibrary, writeTitleLibrary } from "../../../repositories/titleLibraryRepo.js";
-import { listWatchLogsByAnimeId, appendWatchLog, createWatchLog } from "../../../repositories/watchLogRepo.js";
+import { listWatchLogsByAnimeId, readAllWatchLogsPreferred, replaceWatchLogs, updateWatchLog, appendWatchLog, createWatchLog, buildWatchedRange } from "../../../repositories/watchLogRepo.js";
+import { watchLogMatchesTitle } from "../../../domain/watchLogIdentity.js";
+import { normalizeWatchStatus, titleWatchIdentity, validateHistoricalWatchLogEdit } from "../domain/titleWatchRecord.js";
 import { createTitleWatchRecordWriter } from "./titleWatchRecordWriter.js";
 import { createSupabaseCatalogRepository } from "../../catalog/catalogRepository.js";
 import { catalogSupabase, isCatalogSupabaseConfigured } from "../../catalog/catalogSupabaseClient.js";
 import { getPlatformMemoryRuntime } from "../../memory/runtime/platformMemoryRuntime.js";
 import { getPlatformTitleResolver } from "../../memory/runtime/platformTitleResolver.js";
 import { buildTitleAlbumProjections } from "./titleAlbumProjection.js";
+import { withTitleStateMutation } from "./titleStateMutationLock.js";
 
 const requestKey = (request, detail) => {
   if (request.kind === "PRIVATE_TITLE") return `PRIVATE:${request.privateTitleId}`;
@@ -83,12 +86,79 @@ export function createTitleHubService({
   const saveWatchRecord = createTitleWatchRecordWriter({ readLibrary, writeLibrary, readWatchLogs, appendLog, createLog, dispatchLibraryUpdated });
   return Object.freeze({
     saveWatchRecord,
+    editWatchLog(album, original, input) { return withTitleStateMutation(async () => {
+      const identity = titleWatchIdentity(album);
+      const rows = await readAllWatchLogsPreferred();
+      const current = rows.find(row => row.id === original?.id);
+      if (!current || !watchLogMatchesTitle(current, identity)) throw new Error("WATCH_LOG_NOT_FOUND");
+      if (JSON.stringify(current) !== JSON.stringify(original)) throw new Error("WATCH_LOG_CHANGED");
+      const patch = validateHistoricalWatchLogEdit(input, current);
+      if (!Object.keys(patch).length) return current;
+      if (Object.hasOwn(patch, "watchedAtPrecision")) {
+        const range = buildWatchedRange(patch.watchedAtValue, patch.watchedAtPrecision, current.createdAt);
+        Object.assign(patch, range);
+      }
+      const updated = await updateWatchLog(current.id, patch);
+      if (!updated) throw new Error("WATCH_LOG_NOT_FOUND");
+      dispatchLibraryUpdated();
+      return updated;
+    }); },
+    deleteWatchLog(album, original) { return withTitleStateMutation(async () => {
+      const identity = titleWatchIdentity(album);
+      const rows = await readAllWatchLogsPreferred();
+      const current = rows.find(row => row.id === original?.id);
+      if (!current || !watchLogMatchesTitle(current, identity)) throw new Error("WATCH_LOG_NOT_FOUND");
+      if (JSON.stringify(current) !== JSON.stringify(original)) throw new Error("WATCH_LOG_CHANGED");
+      await replaceWatchLogs(rows.filter(row => row.id !== current.id));
+      dispatchLibraryUpdated();
+      return current.id;
+    }); },
+    updateTitleDetails(album, input) { return withTitleStateMutation(async () => {
+      const identity = titleWatchIdentity(album);
+      if (!album.tracking.isSaved || !album.libraryItem) throw new Error("TITLE_NOT_SAVEABLE");
+      const status = String(input.status || "");
+      const score = input.score == null || input.score === "" ? null : Number(input.score);
+      const rewatchCount = Number(input.rewatchCount);
+      const lastRewatchAt = String(input.lastRewatchAt || "").trim() || null;
+      const memo = String(input.memo || "");
+      if (!["미분류", "보는중", "완료", "보류", "하차", "볼예정"].includes(status)) throw new Error("INVALID_STATUS");
+      if (score != null && (!Number.isFinite(score) || score < 0 || score > 5 || score * 2 % 1)) throw new Error("INVALID_SCORE");
+      if (!Number.isInteger(rewatchCount) || rewatchCount < 0 || rewatchCount > 999) throw new Error("INVALID_REWATCH_COUNT");
+      if (lastRewatchAt && (Number.isNaN(Date.parse(`${lastRewatchAt}T00:00:00Z`))
+        || new Date(`${lastRewatchAt}T00:00:00Z`).toISOString().slice(0, 10) !== lastRewatchAt)) throw new Error("INVALID_WATCH_DATE");
+      if (memo.length > 10000) throw new Error("NOTE_TOO_LONG");
+      const desired = { status, score, rewatchCount, lastRewatchAt, memo };
+      const baseline = album.libraryItem;
+      const current = await readLibrary([]);
+      let found = false;
+      const next = current.map(item => {
+        if (!watchLogMatchesTitle(item, identity)) return item;
+        found = true;
+        const update = { ...item };
+        for (const [key, value] of Object.entries(desired)) {
+          const initial = key === "status" ? normalizeWatchStatus(baseline[key])
+            : key === "score" || key === "lastRewatchAt" ? baseline[key] ?? null
+            : key === "memo" ? baseline[key] || "" : key === "rewatchCount" ? Number(baseline[key]) || 0 : baseline[key] || "미분류";
+          const latest = key === "status" ? normalizeWatchStatus(item[key])
+            : key === "score" || key === "lastRewatchAt" ? item[key] ?? null
+            : key === "memo" ? item[key] || "" : key === "rewatchCount" ? Number(item[key]) || 0 : item[key] || "미분류";
+          if (value === initial) continue;
+          if (latest !== initial) throw new Error("TITLE_TRACKING_CONFLICT");
+          update[key] = value;
+        }
+        return update;
+      });
+      if (!found) throw new Error("TITLE_NOT_SAVEABLE");
+      await writeLibrary(next);
+      dispatchLibraryUpdated();
+      return next.find(item => watchLogMatchesTitle(item, identity));
+    }); },
     async load(request) {
       if (!request) return null;
       const runtime = await runtimePromise;
       await runtime.initialize();
       const [libraryItems, archive] = await Promise.all([
-        readLibrary([]).catch(() => []),
+        readLibrary([]),
         runtime.listArchive(),
       ]);
       let detail = null;
@@ -129,7 +199,7 @@ export function createTitleHubService({
       return { ...album, memories, watchLogs };
     },
 
-    async updateTracking(album, { watchStatus, rating }) {
+    updateTracking(album, { watchStatus, rating }) { return withTitleStateMutation(async () => {
       if (album.titleRef?.kind !== "ANIME" || !album.tracking.isSaved) throw new Error("TITLE_NOT_SAVEABLE");
       if (!["미분류", "보는중", "완료", "보류", "하차", "볼예정"].includes(watchStatus)) throw new Error("INVALID_STATUS");
       const score = rating == null || String(rating).trim() === "" ? null : Number(rating);
@@ -145,9 +215,9 @@ export function createTitleHubService({
       await writeLibrary(next);
       dispatchLibraryUpdated();
       return { ...album.tracking, watchStatus, rating: score };
-    },
+    }); },
 
-    async setSaved(album, shouldSave) {
+    setSaved(album, shouldSave) { return withTitleStateMutation(async () => {
       const anilistId = Number(album?.anilistId) || null;
       const catalogAnimeId = album?.titleRef?.kind === "ANIME" ? album.titleRef.animeId : null;
       if (!catalogAnimeId && (!Number.isSafeInteger(anilistId) || anilistId < 1)) throw new Error("TITLE_NOT_SAVEABLE");
@@ -170,6 +240,6 @@ export function createTitleHubService({
       await writeLibrary(next);
       dispatchLibraryUpdated();
       return shouldSave;
-    },
+    }); },
   });
 }

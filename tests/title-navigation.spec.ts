@@ -31,8 +31,10 @@ test("old numeric title links open Title Hub and keep watch record editing avail
   });
   await page.goto("/library/?animeId=1");
   await expect(page).toHaveURL(/\/title\/\?anilistId=1$/);
-  await expect(page.getByRole("heading", { name: "Fixture Anime", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Edit status & watch records" }).click();
+  await expect(page.locator(".title-hub h1")).toBeVisible();
+  await page.getByRole("link", { name: /^Watch records/ }).first().click();
+  await page.getByText("Additional settings in the older library", { exact: true }).click();
+  await page.getByRole("link", { name: "Open character and relation settings →" }).click();
   await expect(page).toHaveURL(/\/library\/\?animeId=1&focus=edit$/);
   await expect(page.getByRole("dialog", { name: "Fixture Anime" })).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]")[0].memo)).toBe("preserved");

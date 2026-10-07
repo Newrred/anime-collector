@@ -40,3 +40,46 @@ export function validateTitleWatchRecord(raw) {
   return { operationId, watchStatus: raw.watchStatus, rating, rewatchCount, eventType: raw.eventType,
     watchedAtPrecision: precision, watchedAtValue: value, note };
 }
+
+// Historical edits do not run the new-record validator: old season precision and
+// metadata belong to the existing log, not to today's title tracking state.
+export function validateHistoricalWatchLogEdit(raw, original) {
+  const patch = {};
+  const eventType = String(raw.eventType ?? original.eventType);
+  if (eventType !== original.eventType) {
+    if (!WATCH_EVENTS.includes(eventType)) throw new Error("INVALID_EVENT");
+    patch.eventType = eventType;
+  }
+  const precision = String(raw.watchedAtPrecision ?? original.watchedAtPrecision);
+  const value = String(raw.watchedAtValue ?? original.watchedAtValue ?? "").trim();
+  if (precision !== original.watchedAtPrecision || value !== original.watchedAtValue) {
+    const dateIsValid = precision === "unknown" ? !value
+      : precision === "year" ? /^[1-9]\d{3}$/u.test(value)
+      : precision === "month" ? /^[1-9]\d{3}-(0[1-9]|1[0-2])$/u.test(value)
+      : precision === "season" ? /^[1-9]\d{3}-(spring|summer|fall|winter)$/iu.test(value)
+      : precision === "day" && /^[1-9]\d{3}-\d{2}-\d{2}$/u.test(value)
+        && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+        && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+    if (!dateIsValid) throw new Error("INVALID_WATCH_DATE");
+    patch.watchedAtPrecision = precision;
+    patch.watchedAtValue = value;
+  }
+  const cue = String(raw.cue ?? original.cue ?? "").trim();
+  const note = String(raw.note ?? original.note ?? "").trim();
+  if (cue.length > 120 || note.length > 10000) throw new Error("NOTE_TOO_LONG");
+  if (cue !== original.cue) patch.cue = cue;
+  if (note !== original.note) patch.note = note;
+  if (Object.hasOwn(raw, "scoreAtThatTime")) {
+    const rating = raw.scoreAtThatTime == null || raw.scoreAtThatTime === "" ? null : Number(raw.scoreAtThatTime);
+    if (rating != null && (!Number.isFinite(rating) || rating < 0 || rating > 5 || rating * 2 % 1)) throw new Error("INVALID_SCORE");
+    if (rating !== original.scoreAtThatTime) patch.scoreAtThatTime = rating;
+  }
+  if (Object.hasOwn(raw, "characterRefs")) {
+    if (!Array.isArray(raw.characterRefs) || raw.characterRefs.length > 12) throw new Error("INVALID_CHARACTERS");
+    if (JSON.stringify(raw.characterRefs) !== JSON.stringify(original.characterRefs || [])) {
+      patch.characterRefs = raw.characterRefs;
+      patch.characterIds = raw.characterRefs.map(ref => Number(ref.characterId)).filter(Number.isFinite);
+    }
+  }
+  return patch;
+}

@@ -67,3 +67,58 @@ test("legacy English status is displayed consistently without an automatic write
   assert.equal(normalizeWatchStatus("completed"), "완료");
   assert.equal(normalizeWatchStatus("보는중"), "보는중");
 });
+
+test("an old note-only draft preserves tracking received while the form was open", async () => {
+  const opened = { ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } };
+  let library = [{ catalogAnimeId: animeId, status: "완료", score: 5, rewatchCount: 2 }];
+  const logs = [];
+  const save = createTitleWatchRecordWriter({ readLibrary: async () => structuredClone(library),
+    writeLibrary: async rows => { library = rows; }, readWatchLogs: async () => logs,
+    appendLog: async row => { logs.push(row); return row; }, createLog: row => row, dispatchLibraryUpdated: () => {} });
+  const result = await save(opened, { ...draft, watchStatus: "보는중", rating: 4, rewatchCount: 0, eventType: "NOTE" });
+  assert.deepEqual([library[0].status, library[0].score, library[0].rewatchCount], ["완료", 5, 2]);
+  assert.equal(result.log.scoreAtThatTime, 5);
+  assert.equal(logs.length, 1);
+});
+
+test("a changed tracking field conflicts before appending a new record", async () => {
+  const opened = { ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } };
+  let writes = 0; let appends = 0;
+  const save = createTitleWatchRecordWriter({ readLibrary: async () => [{ catalogAnimeId: animeId, status: "완료", score: 5, rewatchCount: 2 }],
+    writeLibrary: async () => { writes++; }, readWatchLogs: async () => [],
+    appendLog: async () => { appends++; }, createLog: row => row, dispatchLibraryUpdated: () => {} });
+  await assert.rejects(save(opened, { ...draft, watchStatus: "하차", rating: 4, rewatchCount: 0 }), /TITLE_TRACKING_CONFLICT/);
+  assert.equal(writes, 0); assert.equal(appends, 0);
+});
+
+test("partial retry never undoes an intervening tracking change", async () => {
+  const opened = { ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } };
+  let library = [{ catalogAnimeId: animeId, status: "보는중", score: 4, rewatchCount: 0 }];
+  const logs = []; let fail = true;
+  const config = { readLibrary: async () => structuredClone(library),
+    writeLibrary: async rows => { if (fail) { fail = false; throw new Error("quota"); } library = rows; },
+    readWatchLogs: async () => logs, appendLog: async row => { logs.push(row); return row; },
+    createLog: row => row, dispatchLibraryUpdated: () => {} };
+  const save = createTitleWatchRecordWriter(config);
+  await assert.rejects(save(opened, draft), /TITLE_TRACKING_PENDING/);
+  library[0] = { ...library[0], status: "완료", score: 5, rewatchCount: 9 };
+  await assert.rejects(save(opened, draft), /TITLE_TRACKING_CONFLICT/);
+  assert.deepEqual([library[0].status, library[0].score, library[0].rewatchCount], ["완료", 5, 9]);
+  assert.equal(logs.length, 1);
+  await assert.rejects(createTitleWatchRecordWriter(config)(opened, draft), /RECORD_RESULT_UNKNOWN/);
+});
+
+test("a completed operation can be repeated without changing newer tracking", async () => {
+  let library = [{ catalogAnimeId: animeId, status: "보는중", score: 4, rewatchCount: 0 }];
+  const logs = []; let writes = 0;
+  const save = createTitleWatchRecordWriter({ readLibrary: async () => structuredClone(library),
+    writeLibrary: async rows => { library = rows; writes++; }, readWatchLogs: async () => logs,
+    appendLog: async row => { logs.push(row); return row; }, createLog: row => row, dispatchLibraryUpdated: () => {} });
+  await save({ ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } }, draft);
+  library[0] = { ...library[0], status: "완료", score: 5, rewatchCount: 8 };
+  await save({ ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } }, draft);
+  assert.equal(writes, 1); assert.equal(logs.length, 1); assert.equal(library[0].rewatchCount, 8);
+  logs.length = 0;
+  await assert.rejects(save({ ...album, tracking: { isSaved: true, watchStatus: "보는중", rating: 4, rewatchCount: 0 } }, draft), /RECORD_RESULT_UNKNOWN/);
+  assert.equal(writes, 1);
+});

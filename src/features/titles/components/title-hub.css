@@ -60,10 +60,28 @@
 .watch-record-editor__rating-value input { width: 108px; }
 .watch-record-editor__rating-value button { background: none; color: var(--text-secondary); border: 0; white-space: nowrap; padding: 6px 0; cursor: pointer; }
 .watch-record-editor__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.watch-record-editor--historical { padding: 16px; border: 1px solid var(--border-subtle); border-radius: 12px; }
+.watch-record-editor--historical h3 { margin: 0; }
+.watch-record-editor__season { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.watch-record-editor__characters { border-top: 1px solid var(--border-subtle); padding-top: 16px; }
+.watch-record-editor__characters summary { cursor: pointer; font-weight: 600; }
+.watch-record-editor__character { display: grid; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border-subtle); }
+.watch-record-editor__character-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.watch-record-editor__reasons { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.watch-record-editor__reasons > span { flex-basis: 100%; }
+.watch-record-editor__reasons label, .watch-record-editor__character label:has(input[type="radio"]) { display: inline-flex; align-items: center; width: fit-content; gap: 6px; }
+.watch-record-editor__reasons input, .watch-record-editor__character input[type="radio"] { width: auto; }
+.watch-record-editor__character-search { margin-top: 16px; display: grid; gap: 12px; }
+.watch-record-editor__candidates { display: flex; flex-wrap: wrap; gap: 8px; }
 .title-watch-records__timeline { list-style: none; margin: 0; padding: 0; }
 .title-watch-records__timeline li { padding: 20px 0; border-top: 1px solid var(--border-subtle); }
 .title-watch-records__timeline header { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-secondary); font-size: .85rem; }
 .title-watch-records__timeline strong { color: var(--text-primary); }
+.title-watch-records__row-actions { display: flex; gap: 14px; margin-left: auto; }
+.title-watch-records__details-action { justify-self: start; }
+.title-watch-records__management { color: var(--text-secondary); border-top: 1px solid var(--border-subtle); padding-top: 12px; }
+.title-watch-records__management summary { cursor: pointer; width: fit-content; }
+.title-watch-records__management .btn { margin-top: 12px; }
 .title-watch-records__timeline p, .title-watch-records__legacy p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
 .title-watch-records__timeline h3 { font-size: 1rem; }
 .title-watch-records__legacy { border-top: 1px solid var(--border-subtle); padding-top: 16px; }

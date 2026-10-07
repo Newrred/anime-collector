@@ -2,6 +2,8 @@
 
 > 기준: 2026-10-07 `master`의 Web 운영 구조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
 
+> **로컬 수정 후보(운영 미배포):** 2026-10-07 첨부 재검증 자료 반영으로 `/title/`에서 기존 감상 기록의 수정·삭제와 현재 작품 정보 수정을 추가했고, 일반 관리 메뉴는 `/titles/`로 연결했다. 검색 목록으로 돌아갈 때 필터/위치를 탭 임시 상태에서 복원한다. 아래 표는 여전히 운영 기준이다. 관계·상황 태그 등 추가 설정과 기존 딥링크는 `/library/?focus=edit`에 남겨 기능을 유지한다. [실행 계획과 검증 결과](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-감상-관리-통합-보완--재검증-자료-반영).
+
 - [공개 소스 저장소](https://github.com/Newrred/anime-collector) · 기본 브랜치 `master`
 - [현재 운영 Web](https://www.moemoa.xyz/) · [실제 제공 커밋 확인](https://www.moemoa.xyz/build-info.json)
 - [현재 화면 혼재 감사와 개선 순서](reports/2026-10-07-live-flow-consolidation-audit.md)

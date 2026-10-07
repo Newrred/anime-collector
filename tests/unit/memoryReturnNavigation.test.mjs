@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { safeMemoryReturn, memoryReturnHref, addMemoryReturn } from '../../src/domain/search/memoryReturnNavigation.js';
+import { safeMemoryReturn, memoryReturnHref, titleReturnHref, addMemoryReturn } from '../../src/domain/search/memoryReturnNavigation.js';
 import { quickLogFingerprint } from '../../src/domain/quickLogDraft.js';
 test('Memory returns preserve supported filters while excluding external, auth and nested returns', () => {
   for (const value of ['https://evil.test/', '//evil.test/archive/', '/auth/callback/?code=secret', '/memory/new/', '/other/archive/', '/archive/\\evil']) assert.equal(safeMemoryReturn(value), null);
@@ -23,6 +23,14 @@ test('the record chooser carries the original source and scroll into image creat
   const image = addMemoryReturn('/memory/new/', `https://local.test${start}`, 20);
   assert.equal(memoryReturnHref(new URL(image, 'https://local.test').search), '/boards/?id=one&restoreY=450');
   assert.equal(addMemoryReturn('/memory/new/', 'https://local.test/record/?returnTo=https://evil.test'), '/memory/new/');
+});
+test('a title returns to its safe source with an opaque view key and scroll position', () => {
+  const target = '/title/?anilistId=3&returnTo=%2Ftitles%2F%3Fview%3Dabc12345';
+  const linked = addMemoryReturn(target, 'https://local.test/titles/', 420);
+  assert.equal(titleReturnHref(new URL(linked, 'https://local.test').search), '/titles/?view=abc12345&restoreY=420');
+  assert.equal(titleReturnHref('?returnTo=https://evil.test/titles/'), '/titles/');
+  assert.equal(titleReturnHref('?returnTo=%2Ftitle%2F%3FanilistId%3D3'), '/titles/');
+  assert.equal(addMemoryReturn('/title/?anilistId=3', 'https://local.test/'), '/title/?anilistId=3&returnTo=%2F&returnY=0');
 });
 test('quick log dirty comparison includes character metadata and ignores unselected leftovers', () => {
   const draft = { mode: 'create', note: '' };

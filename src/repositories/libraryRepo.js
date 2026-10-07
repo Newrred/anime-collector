@@ -1,6 +1,6 @@
 import { STORAGE_KEYS } from "../storage/keys.js";
-import { readJson, writeJson } from "../storage/localJsonStore.js";
-import { getAllLibraryItemsIdb, replaceLibraryItemsIdb } from "../storage/idb.js";
+import { readJson, readJsonSnapshot, writeJson } from "../storage/localJsonStore.js";
+import { getAllLibraryItemsIdb, isIdbSupported, replaceLibraryItemsIdb } from "../storage/idb.js";
 import { markLocalDirty } from "./syncRepo.js";
 
 export function readLibraryList(fallback = []) {
@@ -8,11 +8,20 @@ export function readLibraryList(fallback = []) {
 }
 
 export async function readLibraryListPreferred(fallback = []) {
+  let idbFailed = false;
   try {
     const rows = await getAllLibraryItemsIdb();
     if (Array.isArray(rows) && rows.length > 0) return rows;
-  } catch {}
-  return readLibraryList(fallback);
+  } catch { idbFailed = true; }
+  const mirror = readJsonSnapshot(STORAGE_KEYS.list);
+  if (mirror.status === "valid") {
+    if (!Array.isArray(mirror.value)) throw new Error("LIBRARY_SNAPSHOT_UNREADABLE");
+    return mirror.value;
+  }
+  if (mirror.status === "invalid" || mirror.status === "unavailable" || (idbFailed && isIdbSupported())) {
+    throw new Error("LIBRARY_SNAPSHOT_UNREADABLE");
+  }
+  return fallback;
 }
 
 export function writeLibraryList(list, options = {}) {

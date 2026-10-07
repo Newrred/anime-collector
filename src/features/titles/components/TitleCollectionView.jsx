@@ -17,6 +17,15 @@ import CollectionSelect from "../../../components/collection/CollectionSelect.js
 import "./title-collection.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const filters = new Set(["ALL", "SAVED", "HAS_MEMORY", "WATCHING", "COMPLETED", "ON_HOLD", "DROPPED", "UNSORTED"]);
+const sorts = new Set(["RECENT_MEMORY", "RECENT_SAVED", "TITLE", "SCORE", "YEAR", "GENRE"]);
+const VIEW_KEY = "moemoa:titles-view:";
+function readViewSession() {
+  const rawToken = new URLSearchParams(window.location.search).get("view");
+  const token = /^[a-f0-9-]{8,80}$/iu.test(rawToken || "") ? rawToken : crypto.randomUUID();
+  try { return { token, state: JSON.parse(sessionStorage.getItem(`${VIEW_KEY}${token}`) || "null") || {} }; }
+  catch { return { token, state: {} }; }
+}
 
 export default function TitleCollectionView({ base = "/" }) {
   return (
@@ -37,15 +46,22 @@ function TitleCollectionContent({ base }) {
   const [albums, setAlbums] = useState([]);
   const [status, setStatus] = useState("loading");
   const [mode, setMode] = useState(null);
-  const [filter, setFilter] = useState("ALL");
-  const [sort, setSort] = useState("RECENT_MEMORY");
-  const [sortDir, setSortDir] = useState("desc");
-  const [query, setQuery] = useState("");
-  const [genres, setGenres] = useState([]);
+  const [viewSession] = useState(readViewSession);
+  const [filter, setFilter] = useState(() => filters.has(viewSession.state.filter) ? viewSession.state.filter : "ALL");
+  const [sort, setSort] = useState(() => sorts.has(viewSession.state.sort) ? viewSession.state.sort : "RECENT_MEMORY");
+  const [sortDir, setSortDir] = useState(() => viewSession.state.sortDir === "asc" ? "asc" : "desc");
+  const [query, setQuery] = useState(() => String(viewSession.state.query || "").slice(0, 120));
+  const [genres, setGenres] = useState(() => Array.isArray(viewSession.state.genres)
+    ? viewSession.state.genres.filter(value => typeof value === "string" && value.length <= 100).slice(0, 12) : []);
 
   const [cardsPerRowBase, setCardsPerRowBase] = useStoredState(STORAGE_KEYS.cardsPerRowBase, 4);
   const gridRef = useRef(null);
   const [gridWidth, setGridWidth] = useState(0);
+
+  useEffect(() => {
+    try { sessionStorage.setItem(`${VIEW_KEY}${viewSession.token}`, JSON.stringify({ query, filter, sort, sortDir, genres })); }
+    catch { /* Filter memory still works during this visit. */ }
+  }, [viewSession.token, query, filter, sort, sortDir, genres]);
 
   useEffect(() => {
     let active = true;
@@ -115,13 +131,20 @@ function TitleCollectionContent({ base }) {
   }, [cardsPerRowBase, gridWidth, mode]);
 
   const native = Capacitor.isNativePlatform();
-  const hrefFor = (album) => buildTitleHubHref({
+  const hrefFor = (album) => {
+    const href = buildTitleHubHref({
     base,
     native,
     titleRef: album.titleRef,
     anilistId: album.anilistId,
     title: album.displayTitle,
-  });
+    });
+    const url = new URL(href, window.location.href);
+    const list = new URL(`${base}titles/`, window.location.href);
+    list.searchParams.set("view", viewSession.token);
+    url.searchParams.set("returnTo", `${list.pathname}${list.search}`);
+    return `${url.pathname}${url.search}${url.hash}`;
+  };
   const changeMode = (nextMode) => {
     setMode(nextMode);
     writeTitleCollectionViewPreference(nextMode);

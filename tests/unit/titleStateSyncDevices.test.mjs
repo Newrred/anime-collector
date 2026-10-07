@@ -103,3 +103,33 @@ test("a different account cannot upload an existing account's local titles", asy
   await assert.rejects(syncTitleState("account-b", { client: otherAccount, allowPromotion: true }), /TITLE_SYNC_OTHER_ACCOUNT/);
   assert.equal(otherAccount.rows.size, 0);
 });
+
+test("an unreadable personal snapshot cannot be treated as a remote deletion", async () => {
+  const accountId = "account-corrupt-local";
+  const server = fakeServer(accountId);
+  const corruptTitles = device({ [STORAGE_KEYS.watchLogs]: [] });
+  corruptTitles.setItem(STORAGE_KEYS.list, "{broken");
+  selectDevice(corruptTitles);
+  await assert.rejects(syncTitleState(accountId, { client: server, allowPromotion: true }), /LIBRARY_SNAPSHOT_UNREADABLE/);
+  assert.equal(server.rows.size, 0);
+
+  const corruptLogs = device({ [STORAGE_KEYS.list]: [{ anilistId: 1, koTitle: "저장 작품" }] });
+  corruptLogs.setItem(STORAGE_KEYS.watchLogs, "{broken");
+  selectDevice(corruptLogs);
+  await assert.rejects(syncTitleState(accountId, { client: server, allowPromotion: true }), /WATCH_LOG_SNAPSHOT_UNREADABLE/);
+  assert.equal(server.rows.size, 0);
+});
+
+test("unavailable storage and a corrupt catalog mirror stop title sync before any remote write", async () => {
+  const accountId = "account-unreadable-catalog";
+  const server = fakeServer(accountId);
+  selectDevice({ getItem() { throw new Error("storage denied"); } });
+  await assert.rejects(syncTitleState(accountId, { client: server, allowPromotion: true }), /(LIBRARY|CATALOG_TITLE)_SNAPSHOT_UNREADABLE/);
+  assert.equal(server.rows.size, 0);
+
+  const corruptCatalog = device({ [STORAGE_KEYS.list]: [], [STORAGE_KEYS.watchLogs]: [] });
+  corruptCatalog.setItem("moemoa:catalog-saved-titles:v1", "{broken");
+  selectDevice(corruptCatalog);
+  await assert.rejects(syncTitleState(accountId, { client: server, allowPromotion: true }), /CATALOG_TITLE_SNAPSHOT_UNREADABLE/);
+  assert.equal(server.rows.size, 0);
+});

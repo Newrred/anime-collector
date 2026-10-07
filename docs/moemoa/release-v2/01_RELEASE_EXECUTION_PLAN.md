@@ -1,5 +1,40 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-07 W18 감상 관리 통합 보완 — 재검증 자료 반영
+
+### 목적과 사용자 결과
+
+기존 컬렉션·작품·기억·보드 구조를 유지하면서, 작품 상세에서 새 감상과 기존 감상의 관리를 완료한다. 사용자가 오래 열어 둔 입력이나 부분 저장 재시도로 다른 기기의 최신 시청 상태를 되돌리지 않는다. 첨부 `MOEMOA_0c398f9_STRUCTURE_REVALIDATED_2026-10-07.zip`은 제안·합성 재현 자료이며 실행 승인이나 운영 검증 증거로 취급하지 않는다.
+
+### 관련 결정·현행 증거·범위
+
+`WATCH-RECORD-FLOW-01`, `CARD-01`, 기존 W06/W18/W19/W20 및 `docs/moemoa/reports/2026-10-07-live-flow-consolidation-audit.md`를 따른다. 기준 소스 `0c398f9`: `titleWatchRecordWriter.js`는 감상 append 후 최신 title row에 오래된 draft의 상태·평점·재시청 값을 대입한다. `TitleWatchRecords.jsx`는 외부 ID가 있는 저장 작품만 옛 편집 화면으로 보내고, `titleLibraryRepo.js`/`libraryRepo.js`/`localJsonStore.js`는 특정 읽기 실패를 빈 목록으로 만든다. 기존 기록의 실제 편집기는 `LibraryQuickLogSheet.jsx`에 있고 `watchLogRepo.js`는 같은 log ID 수정·삭제 경계를 제공한다. 자체 catalog ID와 PrivateTitle은 구분한다.
+
+포함: 저장 전 기준값/의도 비교와 부분 저장 재시도, 개인 목록 읽기 실패 구분, Title Hub의 같은 log ID 수정·삭제, 미편집 필드·`season` 보존, 호환 진입과 관련 화면 복귀, 영향 회귀와 문구. 제외: DB 스키마·운영 데이터 이관, 새 PrivateTitle WatchLog, Memory 자동 생성, Public/이미지 flag, Android 새 배포, 새 범용 동기화 엔진, 확정되지 않은 상태변경 자동 로그·저장해제 의미 변경.
+
+### 데이터 흐름·변경 파일 지도
+
+UI 입력 → `titleWatchRecordWriter` 또는 기존 log ID용 별도 서비스 명령 → `titleLibraryRepo`/`watchLogRepo` → 기존 title-state sync. 현재 상태와 과거 로그는 별도 수정 명령이다. `src/features/titles/application`, `src/features/titles/components`, `src/repositories`, `src/storage`, `src/features/titles/domain`, 호환 route 및 관련 `tests/`만 변경한다. 실제 파일은 진행 기록에 확정한다. 건강한 저장소 사본 복구를 유지하고 확인 불가를 빈 snapshot으로 동기화하지 않는다. 로컬 변경/원격 pull의 적용 구간은 가능한 범위에서 공통 잠금으로 직렬화하며, 미지원 브라우저의 경합 한계를 검사·기록한다.
+
+### 마일스톤·검증
+
+1. **저장 경계:** 오래된 draft의 T03, 부분 저장 T04/T05, 정상 T06/T10, 건강한 사본 T08과 확인 실패 T09를 현재 계약의 회귀로 작성·통과한다. 로그 append 전에 충돌을 판정하고, 완료한 operation의 재시도는 상태를 재적용하지 않는다. 개인 자료 확인 실패가 sync tombstone으로 이어지지 않는다.
+2. **같은 작품에서 관리:** AniList/자체 catalog ID의 기존 log를 같은 ID로 수정·삭제하며 `season`, cue/note/scoreAtThatTime/contextTags/characterRefs와 기타 미편집 필드를 보존한다. 현재 평점·재시청·Memory는 과거 로그 편집에서 바꾸지 않는다. 실패·취소 시 입력과 원본을 보존한다.
+3. **호환·복귀:** 기능 이전 뒤 옛 `focus=edit/quick-log`의 목적과 작품 ID를 새 상세로 옮긴다. ID 없는 경로는 기존 선택 경로를 유지한다. 외부 복귀 URL은 허용하지 않는다. 메뉴·문구는 실제 결과와 일치시킨다.
+4. **검증:** 영향 unit/E2E, 320/390px·키보드·기존 기록 round trip·빌드를 실행한다. 지원 휴대폰과 두 기기 계정 동기화는 실제 실행 전까지 미검증으로 남긴다. React 변경은 React Doctor로 회귀를 확인한다. 기존 CI 성공을 변경 후보의 성공으로 합산하지 않는다.
+
+### 보안·관찰·복구·결정
+
+개인 감상·이미지·계정 ID를 로그나 공개 문서에 싣지 않는다. 기존 owner/sync dirty 및 원격 버전 충돌 경계를 보존하고, 저장 실패는 사용자에게 상태 확인/다시 시도를 구분해 알린다. DB migration 없음. 롤백은 이 UI/저장 경계 diff 복귀이며 사용자 로그를 지우지 않는다. 기존 편집 경로는 새 경로의 기능 대비·회귀가 통과하기 전 제거하지 않는다. 작품 저장 해제를 숨김-only로 바꾸거나 상태 변경에 자동 로그를 붙이는 것은 별도 제품 결정이다. 운영 배포는 별도 명시 승인 후 `master` Git SHA와 Vercel SHA를 대조한다.
+
+### 진행 기록·발견·완료 보고
+
+- [2026-10-07] 첨부 SHA256 manifest 14개 모두 일치. 현재 `master`는 고정 SHA와 같으며 핵심 원문 Git blob 6개가 자료의 식별값과 일치한다. T01~T10은 제3자 합성 관찰로 분류했고 실제 기기/운영 PASS로 세지 않는다.
+- [2026-10-07] 코드 대조에서 오래된 draft 덮어쓰기, 완료 뒤 replay 의미 부재, 읽기 실패 정상 빈 목록화, 외부 ID 없는 기존 로그 관리 부재를 확인했다. 이 절은 기존 W18의 보완이며 별도 작업판이 아니다.
+- [2026-10-07 로컬 구현] 새 감상 저장은 초안에서 실제로 바꾼 상태 필드만 최신 행에 반영하고, 변한 기준값은 append 전에 충돌로 처리한다. 부분 저장 재시도와 완료 replay는 작업 ID/기존 로그를 확인하며, 이후 상태를 재적용하지 않는다. 개인 목록·로그 snapshot의 손상/접근 불가를 빈 목록과 분리해 동기화 삭제 전파를 막는다. 같은 작품 화면에서 과거 로그의 같은 ID 수정·확인 후 삭제(외부 ID 없는 자체 catalog 포함), 현재 작품 상태·평점·재시청·메모 수정을 제공한다. 검색·필터·스크롤 복귀는 탭 임시 키로 연결하고 검색어를 URL에 싣지 않는다. 메뉴의 일반 관리 진입은 `/titles/`로 바꿨다.
+- 검증: unit 439/439, Chromium `watch-record-flow` 11/11 및 `title-navigation` 4/4, WebKit `watch-record-flow` 11/11, build 20페이지 통과. React Doctor 변경 범위 19파일에서 성능 경고 1건(`titleWatchRecordWriter.js`의 초기 await); 실제 저장 순서와 중복 append 경계를 우선해 그대로 둔다. 브라우저 검사는 합성 데이터이며 실제 계정·실휴대폰·두 기기 경합 확인은 아니다.
+- 잔여: 관계·상황 태그 등의 고급 설정은 구 서재로 연결해 기능을 보존한다. 따라서 ID가 있는 `focus=edit/quick-log`를 새 상세로 일괄 전환하지 않고, 호환 경로의 완전 퇴역은 기능 대비와 별도 회귀 뒤 결정한다. Web Locks 미지원 브라우저의 서로 다른 탭 간 변경 직렬화도 미보장이다. 운영 DB/데이터/배포 변경은 없다.
+
 ## 현재 실행 범위 — 2026-09-27 일반 공개·사후 검토로 축소
 
 `GENERAL-PUBLIC-POSTMODERATION-01` 사용자 확정에 따라 첫 Web-only 후보에서 성인 인증과 성인 이미지 공개를 보류한다. 일반 이미지는 간단한 공개 확인·미리보기 동의 후 게시하고 신고·관리자 사후 검토로 처리한다. 비공개 업로드에 공개 동의를 요구하지 않는다. 기존 identity/eligibility prototype과 과거 검증은 보존하되 성인 공급자 문의·계약·추가 guard/경합 검사를 이번 출시 필수 작업에서 제외한다. 최소12세·KR/PH/TH는 변경하지 않았으며 아동 개인정보/보호자 동의는 D04의 별도 미완료 조건이다.

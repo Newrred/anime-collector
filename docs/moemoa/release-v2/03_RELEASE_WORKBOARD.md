@@ -1,5 +1,10 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-07 W18 감상 관리 통합 보완 — 로컬 후보, 운영 미배포
+
+- 첨부 재검증 10개 합성 관찰을 현재 소스와 대조한 뒤 오래된 감상 초안/부분 재시도의 최신 상태 덮어쓰기, 읽기 불가 snapshot의 삭제 전파, Title Hub의 기존 기록 관리 누락을 수정했다. 과거 로그는 같은 ID로 수정·삭제하고 미편집 계절/태그/캐릭터를 유지한다. 현재 작품 정보 수정은 과거 로그와 분리했다. 내 작품 검색/필터/스크롤 복귀도 연결했다.
+- 최종 로컬 unit439 PASS, Chromium 관련 감상11·호환 경로4 PASS, WebKit 감상11 PASS, build20 PASS. 합성 브라우저 검사이며 실계정 두 기기 동시 편집·실폰 검증/운영 적용은 아니다. 고급 관계·상황 설정은 기존 서재에 남겨 완전한 경로 퇴역은 보류한다. DB migration/운영 데이터/배포0. [계획·파일·검증·잔여](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-감상-관리-통합-보완--재검증-자료-반영).
+
 ## 2026-10-07 Web31차/운영 DB 현재
 
 - 사용자 WEB-DESIGN-RELEASE-CLOSEOUT-01에 따라 기존20~29차의 중요 기능을06d2e38과 대조/마감한다. 감상 이력 관리·캐릭터 snapshot 보존 보완, unit424/catalog256+2skip/Chromium96+2skip/WebKit35·SQL 계약 통과. 추가 화면 간Chromium127+1skip/build20 PASS, 운영 코드0f46310 master/Vercel SHA 일치·CI37502913118 SUCCESS·실 화면 읽기 확인 완료. 문서 후속의 최신 Git/deployed SHA도 종료 전에 검증한다. Git 최종은 [31차 보고](../reports/2026-10-05-v84-web-application.md#31차--핵심-기능-비교와-webdb-운영-반영-2026-10-07)/[증거](evidence/2026-10-07-web-design-deployment.json)를 따른다. 취소30차·Android 제외 유지.
