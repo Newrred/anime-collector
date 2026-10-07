@@ -183,7 +183,7 @@ test("watch flow: catalog-only save is explicit, cancel keeps data and backups p
   await form.getByRole("button", { name: "5점", exact: true }).click();
   await form.getByLabel("감상", { exact: true }).fill("이미지 없이 남긴 자체 작품 감상");
   await form.getByRole("button", { name: "감상 기록 저장", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("감상 기록을 저장했어요.");
+  await expect(page.getByRole("status").filter({ hasText: "감상 기록을 저장했어요." })).toBeVisible();
   const backup = await page.evaluate(async () => {
     const { exportSyncSnapshot, encodeSyncSnapshot, normalizeSyncSnapshot, applySyncSnapshot } = await import("/src/domain/snapshotCodec.js");
     const repo = await import("/src/repositories/watchLogRepo.js");
@@ -218,9 +218,11 @@ test("watch flow: catalog-only save is explicit, cancel keeps data and backups p
   await form.getByLabel("날짜 단위", { exact: true }).selectOption("day");
   await form.getByLabel("시청한 날짜", { exact: true }).fill("2026-10-07");
   await form.getByRole("button", { name: "감상 기록 저장", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("감상 기록을 저장했어요.");
+  await expect(page.getByRole("status").filter({ hasText: "감상 기록을 저장했어요." })).toBeVisible();
   expect((await readState(page)).titles.find(row => row.catalogAnimeId === animeId)?.score).toBeNull();
+  page.once("dialog", dialog => dialog.accept());
   await page.getByRole("button", { name: "작품 저장 해제", exact: true }).click();
+  await expect(page.getByRole("button", { name: "작품 저장", exact: true })).toBeVisible();
   expect((await readState(page)).logs).toHaveLength(3);
 });
 

@@ -50,6 +50,7 @@ test("catalog-only title saves durably, reloads, and remains removable without A
   await page.reload();
   await expect(page.getByRole("button", { name: "작품 저장 해제" })).toBeVisible();
   await expect(page.locator('a[href*="anilist.co"]')).toHaveCount(0);
+  page.once("dialog", dialog => dialog.accept());
   await page.getByRole("button", { name: "작품 저장 해제" }).click();
   await expect(page.getByRole("button", { name: "작품 저장", exact: true })).toBeVisible();
   await page.reload();

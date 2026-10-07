@@ -5,6 +5,7 @@
 - 사용자 명시 승인으로 `6565c5e`와 `83cdf49`를 `master`에 push했다. Git 원격과 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)의 `commit`·`checkoutCommit`이 기능 커밋 `83cdf49c0c31f5d70f40ce18c1cc72089338e9f5`로 일치했고 `source=vercel-git`이었다. 옛 `focus=edit` 운영 링크가 새 감상 탭으로 이동하고 캐릭터 즐겨찾기·관련 작품 접힘 버튼이 표시됨을 익명 브라우저로 확인했다. 이 문서 보정 커밋은 별도 Git 배포를 만들므로 최종 SHA는 링크에서 다시 확인한다.
 - 다른 PC의 기존 저장소: `git fetch origin` → `git switch master` → `git pull --ff-only origin master` → `npm ci` → `npm run dev -- --port 4363`. 새 PC에 저장소가 없으면 [저장소](https://github.com/Newrred/anime-collector)를 먼저 clone한다. 시작 문서는 `CODEX_START_HERE.md`, 현재 구조는 `docs/moemoa/CURRENT_STRUCTURE_AND_FLOW.md`, 이 작업판과 [ExecPlan](01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결)이다. 개인 로컬 이미지·브라우저 저장 기록·비밀 설정은 Git으로 이전되지 않는다.
 - 이번 배포는 Web 코드/문서다. DB migration·기존 운영 사용자 데이터·Public/Android 설정 변경0. 운영에서 익명 UI·HTTP만 직접 확인했고 실계정 두 기기·실휴대폰 재검증은 남아 있다.
+- 배포 후 전체 CI에서 작품 저장 해제 확인창을 자동 검사기가 취소한 탓에 기존 화면 검사 2건이 실패했다. 검사에서 확인창을 승인하고 실제 저장 해제·기억 보존을 확인하도록 보정했다. 감상 기록 검사도 중복 상태 메시지에 흔들리지 않도록 저장 성공 메시지를 정확히 선택한다. CI 최종 결과는 [최신 GitHub Actions](https://github.com/Newrred/anime-collector/actions)를 따른다.
 
 ## 2026-10-07 W18 옛 서재 기능 대비·작품 상세 연결 — 운영 반영, 실계정 재검증 잔여
 

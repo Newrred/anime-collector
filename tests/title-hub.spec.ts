@@ -51,6 +51,7 @@ test("Title Hub keeps saved state and Memories independent and opens the exact c
   await expect(page.getByText("조용한 여정이 오래 남았다.")).toBeVisible();
   await expect(page.getByText("Madhouse")).toBeVisible();
 
+  page.once("dialog", dialog => dialog.accept());
   await page.getByRole("button", { name: "작품 저장 해제" }).click();
   await expect(page.getByText("미저장", { exact: true })).toBeVisible();
   await expect(page.getByText("내 기억 1개")).toBeVisible();
