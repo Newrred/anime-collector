@@ -8,6 +8,8 @@ import { parseTitleHubRequest } from "../domain/titleNavigation.js";
 import { titleReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
 import "./title-hub.css";
 import TitleCharacters from "./TitleCharacters.jsx";
+import TitleFavoriteCharacters from "./TitleFavoriteCharacters.jsx";
+import TitleRelatedSeries from "./TitleRelatedSeries.jsx";
 import TitleWatchRecords, { watchStatusLabel } from "./TitleWatchRecords.jsx";
 
 const dateLabel = (value, locale) => {
@@ -99,7 +101,7 @@ function TitleMemoryGallery({ album, base, copy, locale }) {
   );
 }
 
-function TitleFacts({ album, copy, recordHref, locale }) {
+function TitleFacts({ album, copy, recordHref, locale, base, service }) {
   const detail = album.catalogDetail;
   const studios = detail?.studios?.map((row) => row.name).filter(Boolean).join(", ");
   const rows = [
@@ -121,6 +123,8 @@ function TitleFacts({ album, copy, recordHref, locale }) {
         <h2>{locale === "ko" ? "등장 캐릭터" : "Characters"}</h2>
         <TitleCharacters animeId={album.titleRef.kind === "ANIME" ? album.titleRef.animeId : null} anilistId={album.anilistId} locale={locale} />
       </section>}
+      {!album.isPrivateTitle && <TitleFavoriteCharacters anilistId={album.anilistId} locale={locale} />}
+      {!album.isPrivateTitle && <TitleRelatedSeries album={album} service={service} base={base} locale={locale} />}
       <section className="surface-card title-hub__tracking">
         <h2>{copy.watchLogs(album.watchLogs.length)}</h2>
         <dl>
@@ -248,7 +252,7 @@ function TitleHubContent({ base }) {
             <a href={tabHref("memories")} aria-current={!watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "기억 이미지" : "Memory images"} <small>{album.memoryCount}</small></a>
             {!album.isPrivateTitle && <a href={tabHref("watch")} aria-current={watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "감상 기록" : "Watch records"} <small>{album.watchLogs.length}</small></a>}
           </nav>
-          {watchTab && !album.isPrivateTitle ? <TitleWatchRecords album={album} service={service} locale={locale} base={base}
+          {watchTab && !album.isPrivateTitle ? <TitleWatchRecords album={album} service={service} locale={locale}
             startWriting={params.get("record") === "new"} busy={status === "saving"} onSaveTitle={toggleSaved}
             onEditingChange={setWatchEditing}
             onSaved={({ log, tracking }) => setAlbum((current) => ({ ...current, tracking,
@@ -259,7 +263,7 @@ function TitleHubContent({ base }) {
             onTitleDetailsSaved={() => service.load(request).then(next => next && setAlbum(next)).catch(() => {})} />
             : <TitleMemoryGallery album={album} base={base} copy={copy} locale={locale} />}
         </div>
-        <TitleFacts album={album} copy={copy} recordHref={tabHref("watch")} locale={locale} />
+        <TitleFacts album={album} copy={copy} recordHref={tabHref("watch")} locale={locale} base={base} service={service} />
       </div>
     </div>
   );

@@ -42,21 +42,14 @@ const readState = (page: Page) => page.evaluate(async () => {
   return { titles: await readTitleLibrary(), logs: await readAllWatchLogsPreferred() };
 });
 
-test("watch flow: existing detailed history management remains reachable and edits the same record", async ({ page }) => {
-  await prepare(page); await page.goto("/title/?anilistId=3&tab=watch");
-  await page.getByText("이전 서재의 추가 설정", { exact: true }).click();
-  const manage = page.getByRole("link", { name: "캐릭터·관계 설정 열기 →", exact: true });
-  await expect(manage).toHaveAttribute("href", "/library/?animeId=3&focus=edit");
-  await manage.click();
-  const detail = page.getByRole("dialog", { name: oldTitle, exact: true });
-  await detail.getByRole("tab", { name: "감상 기록", exact: true }).click();
-  await expect(detail.getByText("처음 본 날", { exact: true })).toBeVisible();
-  await detail.getByRole("button", { name: "기록 편집", exact: true }).click();
-  const sheet = page.locator(".log-sheet");
-  await expect(sheet.getByText("기존 캐릭터", { exact: true })).toBeVisible();
-  await sheet.getByLabel("한줄 감상", { exact: true }).fill("수정한 시청 이력");
-  await sheet.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(sheet).toBeHidden();
+test("watch flow: old management link reaches the same editable history in Title Hub", async ({ page }) => {
+  await prepare(page); await page.goto("/library/?animeId=3&focus=edit");
+  await expect(page).toHaveURL(/\/title\/\?anilistId=3&tab=watch$/);
+  await expect(page.getByText("처음 본 날", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "수정", exact: true }).click();
+  const editor = page.getByRole("form", { name: "감상 기록 수정" });
+  await editor.getByLabel("한줄 감상").fill("수정한 시청 이력");
+  await editor.getByRole("button", { name: "수정 저장" }).click();
   const rows = (await readState(page)).logs;
   expect(rows).toHaveLength(1);
   expect(rows[0]).toMatchObject({ id: "legacy-event-29", anilistId: 3, cue: "수정한 시청 이력", contextTags: ["친구와"] });

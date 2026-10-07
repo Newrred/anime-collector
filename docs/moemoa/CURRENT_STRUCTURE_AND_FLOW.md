@@ -2,7 +2,7 @@
 
 > 기준: 2026-10-07 `master`의 Web 운영 구조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
 
-> **로컬 수정 후보(운영 미배포):** 2026-10-07 첨부 재검증 자료 반영으로 `/title/`에서 기존 감상 기록의 수정·삭제와 현재 작품 정보 수정을 추가했고, 일반 관리 메뉴는 `/titles/`로 연결했다. 검색 목록으로 돌아갈 때 필터/위치를 탭 임시 상태에서 복원한다. 아래 표는 여전히 운영 기준이다. 관계·상황 태그 등 추가 설정과 기존 딥링크는 `/library/?focus=edit`에 남겨 기능을 유지한다. [실행 계획과 검증 결과](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-감상-관리-통합-보완--재검증-자료-반영).
+> **로컬 수정 후보(운영 미배포):** `/title/`에서 감상 기록 작성·같은 ID 수정/삭제, 현재 작품 상태/평점/재시청/메모 수정, 캐릭터 즐겨찾기 고정/해제와 관련 시리즈 보기/명시 저장을 연결했다. 일반 관리 메뉴는 `/titles/`로 가고, 검색 목록으로 돌아갈 때 필터/위치를 탭 임시 상태에서 복원한다. 유효한 작품 ID가 있는 옛 `focus=edit/quick-log` 링크는 새 상세의 감상 탭으로 이동한다. ID 없는 옛 목록과 `legacy=1` 호환 진입만 남는다. 캐릭터 즐겨찾기는 기존처럼 이 기기에만 저장된다. 아래 표는 **운영 기준**이며 이 후보를 운영 완료로 읽지 않는다. [실행 계획과 검증](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결).
 
 - [공개 소스 저장소](https://github.com/Newrred/anime-collector) · 기본 브랜치 `master`
 - [현재 운영 Web](https://www.moemoa.xyz/) · [실제 제공 커밋 확인](https://www.moemoa.xyz/build-info.json)
@@ -69,10 +69,10 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 
 ## 의도적으로 남은 이전 경로와 현재 한계
 
-- 새 `/title/` 감상 탭은 기록 작성·조회가 가능하지만 기존 로그의 수정/삭제·상황 태그/캐릭터는 `/library/?focus=edit`로 보낸다(`src/features/titles/components/TitleWatchRecords.jsx:103-115`). 일반 `/library/`는 새 작품 화면/상세로 이동하고 `focus=edit`/`focus=quick-log`만 예전 화면을 연다(`src/features/titles/domain/titleNavigation.js:52-64`). 이것이 현재 가장 큰 UI/flow 혼재 지점이다.
+- 운영의 새 `/title/` 감상 탭은 기록 작성·조회가 가능하지만 기존 로그 관리와 일부 보조 기능은 `/library/?focus=edit`를 사용한다. 현재 로컬 후보에서는 같은 ID 관리와 캐릭터 고정·관계 시리즈를 새 상세로 옮기고, 작품 ID가 있는 옛 링크를 새 상세로 전환했다. `contextTags`는 옛 편집 시트의 직접 설정 항목이 아니며 자동 생성·보존 필드다(`src/components/Library.jsx`, `src/components/library/LibraryQuickLogSheet.jsx`, `src/features/titles/domain/titleNavigation.js`).
 - `/`는 옛 `src/components/Home.jsx`가 아니라 컬렉션 선반 `src/features/bookshelf/BookshelfView.jsx`를 사용한다(`src/pages/index.astro:2-6`). 이전 Home 코드의 존재를 운영 홈 기능으로 해석하지 않는다.
 - Public 보드/미니홈·관리 경로는 코드에 있어도 현재 운영 기능 플래그가 꺼져 있다. 라우트 존재만으로 공개 서비스가 활성화됐다고 판단하지 않는다(`src/features/memory/runtime/platformPublication.js:7-12`, `.env.production:14-17`).
-- UI 통합의 다음 순서는 옛 감상 관리 기능을 Title Hub로 옮긴 뒤 호환 URL을 새 화면으로 연결하는 것이다. 기능 이전 전에 예전 경로를 제거하면 기록 관리가 끊긴다. 상세 근거와 회귀 범위는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
+- 로컬 후보의 검증이 끝나도 운영은 별도 Git 배포·실계정/실기기 확인 전까지 이전 흐름이다. ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 상세 근거와 회귀 범위는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
 
 ## 소스와 운영 배포가 같은지 확인하는 방법
 

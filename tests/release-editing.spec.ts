@@ -11,7 +11,7 @@ test('quick log character selection keeps one valid primary through deselection'
       {role:'MAIN',node:{id:101,name:{full:'Fixture One'}}},
       {role:'MAIN',node:{id:102,name:{full:'Fixture Two'}}},
     ]}}} });
-  await page.goto('/library/?animeId=1&focus=quick-log');
+  await page.goto('/library/?animeId=1&focus=quick-log&legacy=1');
   const sheet=page.locator('.log-sheet');
   await sheet.locator('.log-sheet__character-toggle').filter({hasText:'Fixture One'}).click();
   await sheet.locator('.log-sheet__character-toggle').filter({hasText:'Fixture Two'}).click();
@@ -69,7 +69,7 @@ async function createMemory(page, title = 'Editing fixture') {
 test('watch log X, Escape, backdrop and Cancel share draft-discard behavior', async ({ page }) => {
   await installAppState(page, { locale: 'en', list: [{ anilistId: 1, status: 'completed', score: 9, addedAt: 1 }], watchLogs: [],
     mediaById: { '1': { id: 1, title: { english: 'Fixture Anime' }, genres: [] } } });
-  await page.goto('/library/?animeId=1&focus=quick-log');
+  await page.goto('/library/?animeId=1&focus=quick-log&legacy=1');
   const sheet = page.locator('.log-sheet');
   await expect(sheet).toBeVisible();
   const note = sheet.locator('textarea');

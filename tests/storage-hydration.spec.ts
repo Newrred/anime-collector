@@ -317,7 +317,7 @@ test("an IndexedDB-only watch-log migration restores the complete local source",
     ],
   });
 
-  await page.goto("/library/?animeId=777&focus=edit");
+  await page.goto("/library/?animeId=777&focus=edit&legacy=1");
   await expect(page.locator(".modal")).toBeVisible();
   await page.locator(".modal .library-modal-tab").nth(1).click();
   await expect(page.locator(".library-modal-log-card")).toHaveCount(1);
@@ -360,13 +360,13 @@ test("IDB-only watch logs reach snapshot export before any Library scoped read",
 test("Home initial entry preserves an IDB-only watch log without presenting it as a Memory Card", async ({ page }) => {
   await seedIdbOnlyState(page, {
     list: [
-      { anilistId: 777, status: "completed", addedAt: 1 },
-      { anilistId: 778, status: "completed", addedAt: 2 },
-      { anilistId: 779, status: "completed", addedAt: 3 },
+      { anilistId: 900000001, status: "completed", addedAt: 1 },
+      { anilistId: 900000002, status: "completed", addedAt: 2 },
+      { anilistId: 900000003, status: "completed", addedAt: 3 },
     ],
     watchLogs: [{
       id: "home-first-entry-log",
-      anilistId: 777,
+      anilistId: 900000001,
       eventType: "completed",
       watchedAtPrecision: "day",
       watchedAtValue: "2026-08-02",
@@ -382,7 +382,7 @@ test("Home initial entry preserves an IDB-only watch log without presenting it a
   await expect(page.locator('.bookshelf-page a[href*="memory/card/"]')).toHaveCount(0);
   // The current Collection reads titles; opening watch records hydrates the separate log source.
   await page.locator('.top-nav__memory-action').click();
-  await page.locator('.record-start__titles a').filter({ hasText: '#777' }).click();
+  await page.locator('.record-start__titles a').filter({ hasText: '#900000001' }).click();
   await expect(page.getByText('Home hydrates this memory directly', { exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(localStorage.getItem("anime:watchLogs:v1") || "[]");

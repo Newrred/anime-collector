@@ -153,6 +153,19 @@ export function createTitleHubService({
       dispatchLibraryUpdated();
       return next.find(item => watchLogMatchesTitle(item, identity));
     }); },
+    saveRelatedTitle({ anilistId, title, format }) { return withTitleStateMutation(async () => {
+      const id = Number(anilistId);
+      const allowedFormats = new Set(["TV", "TV_SHORT", "MOVIE", "SPECIAL", "OVA", "ONA", "MUSIC"]);
+      if (!Number.isSafeInteger(id) || id < 1 || !allowedFormats.has(String(format || "").toUpperCase())) {
+        throw new Error("RELATED_TITLE_UNAVAILABLE");
+      }
+      const current = await readLibrary([]);
+      if (current.some(item => Number(item?.anilistId) === id)) return false;
+      await writeLibrary([...current, { anilistId: id, koTitle: String(title || "").trim().slice(0, 120),
+        status: "미분류", score: null, memo: "", rewatchCount: 0, lastRewatchAt: null, addedAt: now() }]);
+      dispatchLibraryUpdated();
+      return true;
+    }); },
     async load(request) {
       if (!request) return null;
       const runtime = await runtimePromise;

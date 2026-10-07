@@ -11,7 +11,7 @@ const quickLogFixture = {
 
 test("closing a Library deep link clears it so reload does not reopen the detail", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=edit");
+  await page.goto("/library/?animeId=1&focus=edit&legacy=1");
   await expect(page.locator(".modal")).toBeVisible();
 
   await page.locator(".modalCloseBtn").click();
@@ -126,7 +126,7 @@ test("Library reports unavailable Memory counts instead of silently claiming zer
 
 test("opening and cancelling quick log does not persist a row", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=quick-log");
+  await page.goto("/library/?animeId=1&focus=quick-log&legacy=1");
   const sheet = page.locator(".log-sheet");
   await expect(sheet).toBeVisible();
   await sheet.getByLabel("Close", { exact: true }).click();
@@ -136,7 +136,7 @@ test("opening and cancelling quick log does not persist a row", async ({ page })
 
 test("saving then editing a quick log keeps one row", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=quick-log");
+  await page.goto("/library/?animeId=1&focus=quick-log&legacy=1");
   const sheet = page.locator(".log-sheet");
   await expect(sheet).toBeVisible();
   await sheet.getByRole("button", { name: "Save" }).click();
@@ -155,7 +155,7 @@ test("saving then editing a quick log keeps one row", async ({ page }) => {
 
 test("failed quick log save keeps the draft available for retry", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=quick-log");
+  await page.goto("/library/?animeId=1&focus=quick-log&legacy=1");
   const sheet = page.locator(".log-sheet");
   await expect(sheet).toBeVisible();
   await sheet.getByLabel("One-line impression").fill("Retry me");
@@ -186,7 +186,7 @@ test("failed quick log save keeps the draft available for retry", async ({ page 
 
 test("rapid repeated save clicks create exactly one quick log", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=quick-log");
+  await page.goto("/library/?animeId=1&focus=quick-log&legacy=1");
   const sheet = page.locator(".log-sheet");
   const save = sheet.getByRole("button", { name: "Save" });
   await expect(save).toBeVisible();
@@ -238,7 +238,7 @@ test("rapid repeated save clicks create exactly one quick log", async ({ page })
 
 test("a failed IndexedDB mirror cannot hide a successful local quick log after reload", async ({ page }) => {
   await installAppState(page, quickLogFixture);
-  await page.goto("/library/?animeId=1&focus=quick-log");
+  await page.goto("/library/?animeId=1&focus=quick-log&legacy=1");
   const sheet = page.locator(".log-sheet");
   await expect(sheet).toBeVisible();
   await page.evaluate(async () => {
@@ -278,7 +278,7 @@ test("a failed IndexedDB mirror cannot hide a successful local quick log after r
   await expect(sheet).toBeHidden();
 
   const reloadedPage = await page.context().newPage();
-  await reloadedPage.goto("/library/?animeId=1&focus=edit");
+  await reloadedPage.goto("/library/?animeId=1&focus=edit&legacy=1");
   await expect(reloadedPage.locator(".modal")).toBeVisible();
   await reloadedPage.locator(".modal .library-modal-tab").nth(1).click();
   const rows = reloadedPage.locator(".library-modal-log-card");
@@ -441,7 +441,7 @@ async function addByQuery(
       const rows = JSON.parse(localStorage.getItem("anime:list:v1") || "[]");
       return rows[rows.length - 1]?.anilistId;
     });
-    await page.goto(`/library/?animeId=${addedAnimeId}&focus=edit`);
+    await page.goto(`/library/?animeId=${addedAnimeId}&focus=edit&legacy=1`);
     await expect(page.locator(".modal")).toBeVisible();
     await page.locator(".modalCloseBtn").click();
     await expect(page.locator(".modal")).toBeHidden();
@@ -644,7 +644,9 @@ async function expectFlowContract(browser: Browser, testInfo: TestInfo, viewport
   }
 }
 
-test.describe("Library UX fixture flow", () => {
+// Retired navigation contract: catalog-first title search now leads through Title Hub.
+// Active search/add/record coverage lives in title-navigation and watch-record-flow.
+test.describe.skip("Library UX fixture flow", () => {
   test.skip(LIVE_E2E, "The explicit live command runs the external-network variant instead.");
   test.setTimeout(120000);
 

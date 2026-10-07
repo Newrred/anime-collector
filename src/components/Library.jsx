@@ -1359,6 +1359,7 @@ export default function Library() {
       const nextUrl = new URL(window.location.href);
       nextUrl.searchParams.delete("animeId");
       nextUrl.searchParams.delete("focus");
+      nextUrl.searchParams.delete("legacy");
       window.history.replaceState(window.history.state, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
     }
   }

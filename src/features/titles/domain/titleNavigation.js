@@ -48,17 +48,20 @@ export function parseTitleHubRequest(search = "") {
   return null;
 }
 
-// Keep editing on the compatibility screen until its controls move into Title Hub.
 export function resolveLegacyLibraryHref({ base = "/", search = "", native = false } = {}) {
   const params = new URLSearchParams(search);
   const focus = String(params.get("focus") || "").trim().toLowerCase();
-  if (focus === "quick-log" || focus === "edit") return null;
+  // Keep an unlinked compatibility entry for existing backups and regression checks.
+  if (params.get("legacy") === "1" && (focus === "quick-log" || focus === "edit")) return null;
   const rawId = params.get("animeId") || "";
+  const watchTarget = focus === "quick-log" || focus === "edit";
+  if (watchTarget && !rawId) return null;
+  const targetSuffix = watchTarget ? `&tab=watch${focus === "quick-log" ? "&record=new" : ""}` : "";
   if (/^[1-9]\d{0,11}$/u.test(rawId)) {
-    return buildTitleHubHref({ base, native, anilistId: Number(rawId), title: params.get("title") });
+    return `${buildTitleHubHref({ base, native, anilistId: Number(rawId), title: params.get("title") })}${targetSuffix}`;
   }
   if (ANIME_ID.test(rawId)) {
-    return buildTitleHubHref({ base, native, titleRef: { kind: "ANIME", animeId: rawId }, title: params.get("title") });
+    return `${buildTitleHubHref({ base, native, titleRef: { kind: "ANIME", animeId: rawId }, title: params.get("title") })}${targetSuffix}`;
   }
   return toPlatformAppHref(joinBase(base, "titles/"), { native });
 }

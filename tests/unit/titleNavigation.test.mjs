@@ -16,8 +16,11 @@ test("legacy URLs map safely without losing explicit editing or quick-log action
   assert.equal(resolveLegacyLibraryHref(), "/titles/");
   assert.equal(resolveLegacyLibraryHref({ base: "/Anime/", search: "?animeId=154587" }), "/Anime/title/?anilistId=154587");
   assert.equal(resolveLegacyLibraryHref({ native: true, search: "?animeId=154587" }), "/title/index.html?anilistId=154587");
-  assert.equal(resolveLegacyLibraryHref({ search: "?animeId=154587&focus=quick-log" }), null);
-  assert.equal(resolveLegacyLibraryHref({ search: "?animeId=154587&focus=edit" }), null);
+  assert.equal(resolveLegacyLibraryHref({ search: "?animeId=154587&focus=quick-log" }), "/title/?anilistId=154587&tab=watch&record=new");
+  assert.equal(resolveLegacyLibraryHref({ search: "?animeId=154587&focus=edit" }), "/title/?anilistId=154587&tab=watch");
+  assert.equal(resolveLegacyLibraryHref({ native: true, search: "?animeId=154587&focus=edit" }), "/title/index.html?anilistId=154587&tab=watch");
+  assert.equal(resolveLegacyLibraryHref({ search: "?focus=edit" }), null);
+  assert.equal(resolveLegacyLibraryHref({ search: "?animeId=154587&focus=edit&legacy=1" }), null);
   assert.equal(resolveLegacyLibraryHref({ search: "?animeId=javascript:alert(1)&next=https://example.com" }), "/titles/");
 });
 

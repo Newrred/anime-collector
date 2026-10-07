@@ -106,7 +106,7 @@ function WatchEditor({ album, service, locale, onSaved, onCancel }) {
   </form>;
 }
 
-export default function TitleWatchRecords({ album, service, locale, base = "/", onSaved, onLogChanged, onTitleDetailsSaved, onSaveTitle, onEditingChange, busy, startWriting = false }) {
+export default function TitleWatchRecords({ album, service, locale, onSaved, onLogChanged, onTitleDetailsSaved, onSaveTitle, onEditingChange, busy, startWriting = false }) {
   const ko = locale === "ko";
   const [editing, setEditing] = useState(startWriting);
   const [editingLogId, setEditingLogId] = useState(null);
@@ -148,12 +148,6 @@ export default function TitleWatchRecords({ album, service, locale, base = "/", 
         onSaved={() => { setEditingTitle(false); onTitleDetailsSaved(); setManagementMessage(ko ? "작품 정보를 수정했어요." : "Title details saved."); }} />
       : <button type="button" className="btn btn--subtle title-watch-records__details-action"
         onClick={() => { setManagementMessage(""); setEditingTitle(true); }}>{ko ? "현재 상태·작품 메모 수정" : "Edit status and title memo"}</button>)}
-    {album.anilistId && album.tracking.isSaved && !editing && <details className="title-watch-records__management">
-      <summary>{ko ? "이전 서재의 추가 설정" : "Additional settings in the older library"}</summary>
-      <a className="btn btn--subtle" data-astro-reload href={`${base}library/?${new URLSearchParams({ animeId: String(album.anilistId), focus: "edit" })}`}>
-        {ko ? "캐릭터·관계 설정 열기 →" : "Open character and relation settings →"}
-      </a>
-    </details>}
     {album.libraryItem?.memo && <section className="title-watch-records__legacy"><h3>{ko ? "기존 감상 메모" : "Earlier reflection"}</h3><p>{album.libraryItem.memo}</p></section>}
     <ol className="title-watch-records__timeline">{album.watchLogs.map((log) => <li key={log.id}>
       {editingLogId === log.id ? <HistoricalWatchLogEditor album={album} log={log} service={service} locale={locale}

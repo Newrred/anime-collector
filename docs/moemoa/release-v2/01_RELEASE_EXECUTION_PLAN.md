@@ -1,5 +1,29 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-07 W18 옛 서재 기능 대비·작품 상세 연결
+
+### 목적·확정 범위
+
+`0c398f9` 운영과 로컬 `6565c5e`를 구분한다. 앞 단계에서 감상 작성/조회/같은 ID 수정·삭제, 현재 상태/평점/재시청/메모가 Title Hub에 연결됐다. 옛 `LibraryQuickLogSheet.jsx`를 실제로 대조하면 `contextTags`는 직접 편집하지 않고 자동 생성된 값을 보존하며, 남은 조작은 AniList numeric ID의 캐릭터 고정과 관계 시리즈 열기·추가다. 이번 단계는 기존 고정 저장 형식과 작품 identity를 그대로 사용해 이 조작을 Title Hub에 연결하고, ID가 있는 구 서재 URL을 목적에 맞게 전환한다. ID 없는 구 서재 진입은 목록/호환 동작을 유지한다. Memory·Public·Android·DB 스키마·동기화 범위는 변경하지 않는다.
+
+### 현재 코드와 변경 지도
+
+`src/components/library/LibraryDetailModal.jsx`의 캐릭터/관련 탭, `src/components/Library.jsx`의 `getRelatedSeriesRows`·`toggleCharacterPin`·`onAddRelatedSeries`, `src/repositories/characterPinRepo.js`, `src/features/titles/components/TitleCharacters.jsx`·`TitleHub.jsx` 및 catalog detail의 관계 필드를 대조한다. AniList 관계는 numeric ID가 있어 같은 Title Hub로 연결 가능하지만 catalog 관계 payload는 title/type/format만 있어 ID를 지어내지 않는다. 고정은 기존 numeric character/media ID만 쓰고 개인 pin의 local-only 성격을 바꾸지 않는다. UI 추가는 작품 상세의 보조 영역에 두어 기본 감상 흐름을 복잡하게 만들지 않는다.
+
+### 마일스톤·검증·복구
+
+1. 기존 기능 대비표를 코드 근거와 함께 남기고, numeric 캐릭터의 고정/해제 및 관련 작품 이동·명시 저장을 Title Hub에 구현한다. 외부 검색/관계 로딩 실패는 개인 기록을 지우지 않고 재시도 가능하게 한다.
+2. `focus=edit/quick-log`+유효 ID는 `/title/?…&tab=watch`로 전환한다. quick-log는 새 기록 입력을 연다. ID 없는 `focus=edit` 목록은 기존 백업/호환 진입으로 남겨두되 메뉴·상세에서 연결하지 않는다. 잘못된 ID는 안전한 목록으로 간다. 북마크·native 정적 경로를 검사한다.
+3. unit·Chromium/WebKit의 옛 링크/핀/관계/기록 회귀와 빌드·React Doctor를 실행한다. 계정 실기기·운영 배포는 별도 검증이다. 롤백은 이번 UI/경로 diff만 되돌리고 구 서재 컴포넌트·개인 데이터는 삭제하지 않는다.
+
+### 진행 기록
+
+- [2026-10-07] 현재 Git 작업 폴더 clean, 로컬 HEAD `6565c5e`, 원격/운영 `0c398f9`. 구 서재에는 실제로 캐릭터 pin과 AniList 관계 이동/추가가 남아 있으며 로그의 `contextTags`는 이 편집 시트에서 직접 편집하지 않는다. catalog 관계는 ID 없는 표시 자료라 자동 동일시하지 않는다.
+- [2026-10-07 로컬 구현] `TitleFavoriteCharacters.jsx`는 기존 numeric pin 저장소를 재사용해 고정/해제와 실패 재시도를 제공한다. 개인 pin은 이 기기에만 저장된다고 명시한다. `TitleRelatedSeries.jsx`는 AniList 관계 ID가 있는 행만 새 작품 상세로 이동·명시 저장하고 catalog의 ID 없는 관계는 정보만 표시한다. `titleHubService.js`의 추가 명령은 형식/ID를 검사하고 이미 저장한 작품을 덮어쓰지 않는다. 두 영역은 작품 상세 보조 패널 안에 접어 두었다.
+- [2026-10-07 로컬 구현] 유효한 작품 ID가 있는 옛 `focus=edit`는 새 감상 탭, `focus=quick-log`는 새 기록 입력으로 전환한다. ID 없는 호환 목록과 명시적 `legacy=1`은 기능 회귀/복구용으로 보존하고, 옛 팝업을 닫을 때 URL의 임시 파라미터도 지운다. 옛 다중 검색 fixture는 현재 catalog 우선 검색과 제목/ID 계약이 달라 퇴역 처리하고, 실제 기본 흐름은 새 작품·기록 검사로 대체한다.
+- [2026-10-07 검증] unit 439/439, Astro build 20페이지, React Doctor `--scope changed --base HEAD` 신규 문제 0. Chromium 영향 합본 44 PASS·옛 다중 탐색2/외부 live-only2 SKIP, WebKit 새 링크·핀·관련작품·감상 16/16 PASS. 후속으로 이미 저장한 관련 작품의 중복 추가 방지, 비애니 관계의 잘못된 내부 링크 방지, 320px 폭을 Chromium/WebKit 각각 확인했다. 저장소 복원 검사에는 실 catalog와 겹치지 않는 합성 ID를 사용한다. 검사는 합성 브라우저 자료이며 실제 계정/실폰/운영 검증으로 승격하지 않는다.
+- [2026-10-07 범위/복구] DB migration·운영 데이터 변경 없음. `master` push/운영 배포 없음. 기존 `Library.jsx`와 로컬 pin/감상 자료를 지우지 않았으므로 이 UI/경로 diff의 로컬 복귀가 가능하다. 실제 두 기기 동시 편집 및 native Android는 별도 검증이다.
+
 ## 2026-10-07 W18 감상 관리 통합 보완 — 재검증 자료 반영
 
 ### 목적과 사용자 결과
@@ -33,7 +57,7 @@ UI 입력 → `titleWatchRecordWriter` 또는 기존 log ID용 별도 서비스 
 - [2026-10-07] 코드 대조에서 오래된 draft 덮어쓰기, 완료 뒤 replay 의미 부재, 읽기 실패 정상 빈 목록화, 외부 ID 없는 기존 로그 관리 부재를 확인했다. 이 절은 기존 W18의 보완이며 별도 작업판이 아니다.
 - [2026-10-07 로컬 구현] 새 감상 저장은 초안에서 실제로 바꾼 상태 필드만 최신 행에 반영하고, 변한 기준값은 append 전에 충돌로 처리한다. 부분 저장 재시도와 완료 replay는 작업 ID/기존 로그를 확인하며, 이후 상태를 재적용하지 않는다. 개인 목록·로그 snapshot의 손상/접근 불가를 빈 목록과 분리해 동기화 삭제 전파를 막는다. 같은 작품 화면에서 과거 로그의 같은 ID 수정·확인 후 삭제(외부 ID 없는 자체 catalog 포함), 현재 작품 상태·평점·재시청·메모 수정을 제공한다. 검색·필터·스크롤 복귀는 탭 임시 키로 연결하고 검색어를 URL에 싣지 않는다. 메뉴의 일반 관리 진입은 `/titles/`로 바꿨다.
 - 검증: unit 439/439, Chromium `watch-record-flow` 11/11 및 `title-navigation` 4/4, WebKit `watch-record-flow` 11/11, build 20페이지 통과. React Doctor 변경 범위 19파일에서 성능 경고 1건(`titleWatchRecordWriter.js`의 초기 await); 실제 저장 순서와 중복 append 경계를 우선해 그대로 둔다. 브라우저 검사는 합성 데이터이며 실제 계정·실휴대폰·두 기기 경합 확인은 아니다.
-- 잔여: 관계·상황 태그 등의 고급 설정은 구 서재로 연결해 기능을 보존한다. 따라서 ID가 있는 `focus=edit/quick-log`를 새 상세로 일괄 전환하지 않고, 호환 경로의 완전 퇴역은 기능 대비와 별도 회귀 뒤 결정한다. Web Locks 미지원 브라우저의 서로 다른 탭 간 변경 직렬화도 미보장이다. 운영 DB/데이터/배포 변경은 없다.
+- 당시 잔여(위 후속 작업 전): 관계·캐릭터 설정을 구 서재에 남겼으므로 ID가 있는 `focus=edit/quick-log` 전환을 보류했다. 위 후속 대조에서 `contextTags`는 직접 편집 항목이 아님을 확인하고, 관계·numeric 캐릭터 고정 및 링크 전환을 구현했다. Web Locks 미지원 브라우저의 서로 다른 탭 간 변경 직렬화는 여전히 미보장이다. 운영 DB/데이터/배포 변경은 없다.
 
 ## 현재 실행 범위 — 2026-09-27 일반 공개·사후 검토로 축소
 
