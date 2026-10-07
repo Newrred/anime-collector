@@ -1,0 +1,54 @@
+{
+  "releaseId": "MOEMOA_PROD_TITLE_STATE_SYNC_20261007_32",
+  "scope": "Private saved-title, watch-record and bookshelf account sync",
+  "approval": "User approved production database application and master Git deployment on 2026-10-07",
+  "codeCommit": "ad1995acc74b7f709ae6815df87dbe50e58e968d",
+  "repository": "https://github.com/Newrred/anime-collector",
+  "site": "https://www.moemoa.xyz",
+  "deployment": {
+    "method": "master Git push to Vercel",
+    "vercelStatus": "success",
+    "vercelDeployment": "https://vercel.com/newrreds-projects/anime-collector/CRn5h1mvArJQPr3xh1kX1F7j8urJ",
+    "productionBuildInfoCommit": "ad1995acc74b7f709ae6815df87dbe50e58e968d",
+    "productionBuildInfoSource": "vercel-git",
+    "productionBuildConfigSemanticMatch": true
+  },
+  "database": {
+    "projectRef": "okchpyagfucpzpyrfgol",
+    "releaseId": "MOEMOA_PROD_TITLE_STATE_SYNC_20261007_32",
+    "migrationVersion": "20261007093000",
+    "migrationSource": "supabase/migrations/20261007093000_title_state_sync.sql",
+    "migrationSourceSha256": "ae064fd0728f5abe9426a9c13874917157bec733d824aeab8b791f0c19cb8bbe",
+    "migrationHistoryRecords": 1,
+    "rowLevelSecurityEnabled": true,
+    "authenticatedRpcAllowed": true,
+    "directAuthenticatedInsertAllowed": false,
+    "preSyncRows": 0
+  },
+  "dataVerification": {
+    "pcLocalTitlesBefore": 51,
+    "pcLocalWatchLogsBefore": 22,
+    "serverActiveTitlesAfter": 51,
+    "serverActiveWatchLogsAfter": 22,
+    "serverBookshelfRowsAfter": 1,
+    "serverDeletedRowsAfter": 0,
+    "iphoneSafariTitlesReported": 51,
+    "iphoneSafariWatchLogsReported": 22,
+    "reloadedPcTitleAndWatchLogVersionsUnchanged": true
+  },
+  "validation": {
+    "unit": "432 passed",
+    "focusedChromium": "10 passed",
+    "build": "20 pages built",
+    "reactDoctor": "87/100, no changed-file issues",
+    "testDatabase": "Owner A/B SQL role, direct write, version conflict, tombstone, bookshelf passed in rollback-only transaction",
+    "githubServiceQualityRun": "https://github.com/Newrred/anime-collector/actions/runs/37551364386",
+    "githubServiceQualityStatus": "success"
+  },
+  "rollback": "Turn PUBLIC_TITLE_STATE_SYNC_V1 off in a reviewed Git commit and redeploy. Preserve additive database rows and the PC backup; do not drop the table.",
+  "limits": [
+    "The iPhone result was reported by the user; the agent did not remotely inspect Safari.",
+    "A real separate-account browser JWT probe was not run; test SQL role isolation and local device simulations passed.",
+    "Private image bytes, tier placement, character pins and public content are outside this release."
+  ]
+}

@@ -1,5 +1,7 @@
 # MOEMOA 디자인 작업 재개 — 2026-10-05
 
+> **32차 운영 인계(2026-10-07):** 작품 51개·감상 기록 22개의 PC→계정→iPhone Safari 동기화를 운영에서 확인했다. 자체 카탈로그 작품·WatchLog도 신규 계정 모델의 대상이고, 선반 설정도 포함한다. 테스트/운영 migration `20261007093000`을 다시 적용하지 않는다. 변경 코드와 기능 플래그는 master Git 배포 `ad1995a`부터 반영됐다. 최신 배포 SHA·검사·남은 범위는 [증거](../release-v2/evidence/2026-10-07-title-state-sync-production.json)를 따른다. 개인 사진·티어·캐릭터 고정은 이번 동기화 범위 밖이다. 아래 종료/31차 안내는 당시 이력이다.
+
 ## PC 종료 인계 — 2026-10-07
 
 - 사용자 요청으로 이번 구현은 완료 상태에서 정리하고 PC를 정상 종료한다. 새 기능 작업은 시작하지 않는다. 종료 전 확인한 `6fbea0d621e476c7c4f62a1e5134fda92c283ca9`는 로컬/master 원격/실제 www.moemoa.xyz의 Git 배포 SHA가 같고 [CI37504154213](https://github.com/Newrred/anime-collector/actions/runs/37504154213)이 SUCCESS다. 구현 후보는0f46310이며6fbea0d는 문서만 변경한 동일 코드다. 이 인계도 문서만 master에 추가하고 최신 SHA는 `git log -1`과 운영 build-info에서 확인한다.
