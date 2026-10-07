@@ -1,6 +1,7 @@
 import { readLibraryListPreferred, writeLibraryListDurable } from "./libraryRepo.js";
 import { getMetaValue, putMetaValue, isIdbSupported } from "../storage/idb.js";
 import { readJson, writeJson } from "../storage/localJsonStore.js";
+import { markLocalDirty } from "./syncRepo.js";
 
 const KEY = "moemoa:catalog-saved-titles:v1";
 const ANIME_ID = /^anime:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -22,12 +23,13 @@ export async function readTitleLibrary() {
   return [...legacy, ...catalog];
 }
 
-export async function writeTitleLibrary(items) {
+export async function writeTitleLibrary(items, options = {}) {
   const catalog = items.filter(isCatalogSavedTitle);
   const legacy = items.filter((item) => !isCatalogSavedTitle(item));
   const previousLegacy = await readLibraryListPreferred([]);
   const previousCatalog = await readCatalogTitles();
-  if (JSON.stringify(previousLegacy) !== JSON.stringify(legacy)) await writeLibraryListDurable(legacy);
+  const legacyChanged = JSON.stringify(previousLegacy) !== JSON.stringify(legacy);
+  if (legacyChanged) await writeLibraryListDurable(legacy, options);
   if (JSON.stringify(previousCatalog) !== JSON.stringify(catalog)) {
     if (isIdbSupported()) {
       await putMetaValue(KEY, catalog);
@@ -35,6 +37,7 @@ export async function writeTitleLibrary(items) {
     } else if (!writeJson(KEY, catalog)) {
       throw new Error("CATALOG_TITLE_SAVE_FAILED");
     }
+    if (!legacyChanged && !options.skipSyncMark) markLocalDirty();
   }
   return items;
 }

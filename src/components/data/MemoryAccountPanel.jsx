@@ -9,8 +9,19 @@ const leadFor = (copy, account) => {
   if (account.syncResultCode) return copy.syncLeads?.[account.syncResultCode] || copy.statusLeads?.[account.status];
   return copy.statusLeads?.[account.status] || copy.statusLeads.LOCAL_ONLY;
 };
+const titleSyncErrorFor = (error, locale) => {
+  if (error === "TITLE_SYNC_OTHER_ACCOUNT") return locale === "ko"
+    ? "이 기기에 다른 계정의 작품 기록이 있습니다. 원래 계정으로 로그인해 확인해 주세요."
+    : "This device has title records from another account. Sign in to the original account to review them.";
+  if (error === "TITLE_SYNC_DUPLICATE_KEY") return locale === "ko"
+    ? "같은 작품이 중복 저장되어 동기화를 멈췄습니다. 기록을 확인해 주세요."
+    : "A title is saved twice, so sync stopped. Review the records.";
+  return locale === "ko"
+    ? "작품·감상 기록을 동기화하지 못했습니다. 이 기기의 기록은 그대로 있습니다. 다시 시도해 주세요."
+    : "Title records could not sync. Local records remain. Try again.";
+};
 
-export default function MemoryAccountPanel({ copy, auth, account }) {
+export default function MemoryAccountPanel({ copy, auth, account, titleSync, locale = "ko" }) {
   const connected = Boolean(auth?.session?.user);
   const [choiceState, setChoiceState] = useState({ sourceHash: null, values: {} });
   const [dismissedConflictId, setDismissedConflictId] = useState(null);
@@ -43,7 +54,7 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
       <div className="sync-card__header">
         <div className="pageHeader">
           <h2 className="sectionTitle">{copy.title}</h2>
-          <p className="pageLead">{copy.lead}</p>
+          <p className="pageLead">{titleSync?.enabled ? (locale === "ko" ? "기억·보드와 저장 작품·감상 기록을 계정에 동기화합니다." : "Sync memories, boards, saved titles and watch records with your account.") : copy.lead}</p>
         </div>
         <div className="sync-card__status">
           <span className="sync-dot" aria-hidden />
@@ -75,9 +86,9 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
           </button>
         ) : null}
         {connected && ["ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(account.status) ? (
-          <button type="button" className="btn" onClick={() => { setDismissedConflictId(null); account.syncNow(); }} disabled={account.syncBusy || account.promotionBusy}>
+          <button type="button" className="btn" onClick={() => { setDismissedConflictId(null); account.syncNow(); titleSync?.runNow({ allowPromotion: true }); }} disabled={account.syncBusy || account.promotionBusy || titleSync?.busy}>
             <span className="btn__icon"><IconRefreshCw size={14} /></span>
-            <span className="btn__label">{account.syncBusy ? copy.syncing : copy.syncNow}</span>
+            <span className="btn__label">{account.syncBusy || titleSync?.busy ? copy.syncing : copy.syncNow}</span>
           </button>
         ) : null}
         {account.syncBusy ? <button type="button" className="btn btn--ghost" onClick={account.pauseSync}>{copy.pauseSync}</button> : null}
@@ -89,6 +100,10 @@ export default function MemoryAccountPanel({ copy, auth, account }) {
       </div>
 
       {account.syncResultCode && (!account.syncErrorCode || account.syncResultCode === "PAUSED") ? <div className="small page-feedback" role="status">{copy.syncResults[account.syncResultCode] || copy.syncResults.ERROR}</div> : null}
+      {connected && titleSync?.enabled && titleSync.result?.promotionRequired && <div className="small page-feedback" role="status">{locale === "ko" ? "이 기기의 작품·감상 기록을 계정에 저장하려면 기록 동기화를 눌러 주세요." : "Select Sync records to save this device's title records to your account."}</div>}
+      {connected && titleSync?.enabled && titleSync.result && !titleSync.result.promotionRequired && <div className="small page-feedback" role="status">{titleSync.result.conflicts.length ? (locale === "ko" ? `작품·감상 기록 ${titleSync.result.conflicts.length}건을 확인해야 합니다.` : `${titleSync.result.conflicts.length} title records need review.`) : (locale === "ko" ? "작품·감상 기록도 동기화했어요." : "Titles and watch records synced.")}</div>}
+      {connected && titleSync?.enabled && titleSync.result?.conflicts?.length > 0 && <details className="list-stack"><summary>{locale === "ko" ? "충돌 확인" : "Review conflicts"}</summary><p className="small">{locale === "ko" ? "두 기기에서 같은 기록을 바꿨습니다. 선택하지 않은 쪽의 변경은 반영되지 않습니다." : "The same record changed on two devices. The other version will not be applied."}</p>{titleSync.result.conflicts.map((item) => <div key={item.id} className="list-stack"><strong>{item.displayName}</strong>{item.remoteVersion > 0 && <div className="sync-card__actions"><button type="button" className="btn btn--subtle" disabled={titleSync.busy} onClick={() => titleSync.resolveConflict(item, "local")}>{locale === "ko" ? "이 기기 기록 사용" : "Use this device"}</button><button type="button" className="btn btn--subtle" disabled={titleSync.busy} onClick={() => titleSync.resolveConflict(item, "cloud")}>{locale === "ko" ? "계정 기록 사용" : "Use account record"}</button></div>}</div>)}</details>}
+      {connected && titleSync?.enabled && titleSync.error && <div className="small page-feedback" role="alert">{titleSyncErrorFor(titleSync.error, locale)}</div>}
       {account.syncErrorCode && account.syncResultCode !== "PAUSED" ? <div className="small page-feedback" role="alert">{copy.syncErrors?.[account.syncErrorCode] || copy.syncFailed}</div> : null}
 
       {preview ? (

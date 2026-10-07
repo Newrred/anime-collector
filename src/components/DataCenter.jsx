@@ -10,6 +10,7 @@ import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
+import { useTitleStateSync } from "../hooks/useTitleStateSync.js";
 import { formatBackupAgo, formatStatusToggleLabel } from "../domain/uiText";
 import { getMessageGroup } from "../domain/messages.js";
 import { IconShield } from "./ui/AppIcons.jsx";
@@ -31,6 +32,7 @@ export default function DataCenter() {
   const accountCopy = getMessageGroup(locale, "memoryAccount");
   const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}data/`);
   const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
+  const titleSync = useTitleStateSync({ session: auth.session, autoSync: true });
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState(copy.checking);
   const [usage, setUsage] = useState(null);
@@ -125,6 +127,12 @@ export default function DataCenter() {
       alive = false;
     };
   }, [copy.storageEngineIndexed, copy.storageEngineLegacy]);
+
+  useEffect(() => {
+    const refresh = () => { refreshLocalOverview().catch(() => {}); };
+    window.addEventListener("moemoa:library-updated", refresh);
+    return () => window.removeEventListener("moemoa:library-updated", refresh);
+  }, []);
 
   useEffect(() => {
     function syncInstallState() {
@@ -253,7 +261,7 @@ export default function DataCenter() {
         {message && <div className="small page-feedback">{message}</div>}
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
-      <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} />
+      <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} titleSync={titleSync} locale={locale} />
       <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
     </div>
   );

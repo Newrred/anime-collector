@@ -1,0 +1,26 @@
+{
+  "releaseId": "title-state-sync-test-2026-10-07",
+  "environment": "moemoa-test",
+  "supabaseProjectRef": "nmgkhknponvzcwliajyk",
+  "migrationVersion": "20261007093000",
+  "migrationName": "title_state_sync",
+  "migrationSource": "supabase/migrations/20261007093000_title_state_sync.sql",
+  "migrationSourceSha256": "ae064fd0728f5abe9426a9c13874917157bec733d824aeab8b791f0c19cb8bbe",
+  "status": "test-database-applied",
+  "checks": {
+    "schemaAndRpcApplied": true,
+    "migrationHistoryRecorded": true,
+    "syntheticOwnerARead": "pass",
+    "syntheticOwnerBIsolation": "pass",
+    "directAuthenticatedWriteDenied": "pass",
+    "staleVersionDenied": "pass",
+    "bookshelfWrite": "pass",
+    "titleTombstone": "pass",
+    "syntheticUsersAfterRollback": 0,
+    "syntheticRowsAfterRollback": 0
+  },
+  "limits": [
+    "SQL Editor simulated authenticated roles in one transaction; no real browser JWT A/B test was run.",
+    "Production database, Vercel flags, and iPhone Safari remain unchanged."
+  ]
+}

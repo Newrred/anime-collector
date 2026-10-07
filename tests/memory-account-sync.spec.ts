@@ -297,7 +297,7 @@ test('sync pause and retry show partial progress instead of false success', asyn
   await page.getByRole('button', { name: 'Pause sync', exact: true }).click();
   await page.evaluate(() => (window as any).finishSyncRequest());
   await expect(page.getByRole('status').filter({ hasText: 'Sync paused.' })).toBeVisible();
-  await expect(page.getByText('Records synced. Sync each photo from its card.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Memories and boards synced. Sync each photo from its card.', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Sync records', exact: true }).click();
-  await expect(page.getByText('Records synced. Sync each photo from its card.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Memories and boards synced. Sync each photo from its card.', { exact: true })).toBeVisible();
 });

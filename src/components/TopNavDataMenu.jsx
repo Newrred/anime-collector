@@ -4,6 +4,7 @@ import { getMessageGroup } from "../domain/messages.js";
 import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
+import { useTitleStateSync } from "../hooks/useTitleStateSync.js";
 import {
   IconDatabase,
   IconGear,
@@ -117,6 +118,7 @@ export default function TopNavDataMenu({
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const auth = useAuthSession(`${base}data/`);
   const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
+  useTitleStateSync({ session: auth.session, autoSync: true });
   const accountCopy = getMessageGroup(locale, "memoryAccount");
   const accountTone = accountToneFor(account.status, account.loading, auth.session?.user);
 

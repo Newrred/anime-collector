@@ -181,7 +181,7 @@ spoiler/content rating
 - Operation ID와 request hash로 retry를 idempotent하게 만들고 server-generated `sync_seq`로 변경분을 pull한다.
 - 사용자 이미지 file은 sync하지 않는다. `LOCAL_ONLY` metadata와 system-design spec만 Phase 1 대상이다.
 - 작품 대표 표지 기반 Memory는 이미지 bytes를 사용자 데이터로 복제하지 않고 `catalogCoverId` 또는 동등한 안정적 reference metadata만 동기화할 수 있다.
-- 작품 저장 상태, 평점, WatchLog의 신규 remote sync는 `TITLE-STATE-SYNC-01`이 결정되기 전 자동으로 범위에 추가하지 않는다.
+- 작품 저장 상태, 평점, WatchLog의 신규 remote sync는 별도 결정 `TITLE-STATE-SYNC-01`을 따른다. 2026-10-07 재발 방지 요청으로 아래 Decision Log에서 비공개 작품 기록 범위를 확정했다.
 ### CATALOG-01 — 제한된 자체 카탈로그
 
 상태: **확정**
@@ -510,7 +510,6 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 | ID | 미정 항목 | 필요한 제안 |
 | --- | --- | --- |
 | IMAGE-SYNC-01 | 최적화 사본 연동 확정 / 원본 백업 별도 | FREE-PRIVATE-IMAGE-SYNC-01에 따라 무료 최적화 사본 연동은 첫 Web 범위. 원본 백업 상품은 후속·미확정. 최종 용량/보관·삭제·복구 운영값은 D03/D05 잔여 |
-| TITLE-STATE-SYNC-01 | 작품 저장 상태·평점·WatchLog remote sync | 신규 normalized entity, 승격·충돌·삭제·Web/Android 정합성 |
 | AGE-01 | 12세 이용 목표 유지 / 성인 인증·성인 공개 보류 | 보호자 동의·국가별 아동 개인정보 조건은 별도 미완료. 이번 후보는 일반 공개·사후 검토이며 성인 공급자 계약/검증을 필수 작업에서 제외 |
 | MODERATION-01 | 사전 심사 대 사후 심사 | 초기 베타 권장안과 운영량 추정 |
 | SOURCE-01 | 출처별 사용 등급 | 직접 적재, 공식 검증, 대조 전용, 금지 |
@@ -724,3 +723,10 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - status/approval: 사용자 직접 “내 승인 없이 … 전부 작업 … 중요한 기능 … 검토 … 추가 작업 … 실 서비스 배포(db구조도 업데이트)” 승인. 현재 유효한 Web 변경의 누락 마감/검증 후 필요한 비파괴 DB 후보와 master Git 운영 배포를 진행한다. 반복 후보 확인 질문 없이 실행한다.
 - preserved: 취소된 COLLECTION-TASTE-SPACE-01은 취소 유지. Android/성인 인증/유료 계약·권리 확대/private 자동 upload와 미검증 Public 활성화는 승인 범위가 아니다. 기존 개인정보/권리/RLS·owner·삭제/철회 fence 및 사용자 기록은 보존한다. TITLE-STATE-SYNC-01의 신규 전체 remote 모델 선택을 이 배포 지시로 임의 확정하지 않는다.
 - execution: 기존 interface-rebuild31차/단일 release-v2 진행판. 실제 production SHA/DB 버전·migration hash/data release ID 및 검증/백업·복귀 경로를 기록하고 정상 검사 후 Git merge/push→Vercel Git SHA 확인. DB 새 classification 적용/실제 test HTTP12 및 운영 rollback-only RPC 계약은 완료했다. Web 코드 후보0f46310의 master/Vercel Git SHA·CI37502913118 성공 및 운영 읽기 검증을31차 보고/배포 증거에 결속했다. 문서만 후속 반영할 때에도 최신 master의 실제 Vercel SHA/CI를 확인한다. Public 출시 전체 PASS로 확대하지 않는다.
+
+## Decision Log — TITLE-STATE-SYNC-01 (2026-10-07)
+
+- status/approval: **CONFIRMED** — 같은 계정의 PC 저장 작품 51개가 iPhone Safari에는 0개로 보이는 사례에서, 사용자는 “이 데이터를 옮기고 말고의 문제가 아니라 이런 현상이 안 생기도록 해결을 해야지”라고 명시했다.
+- chosen scope: 비공개 작품 저장 상태·평점·재시청·WatchLog와 컬렉션 선반 구성을 AniList/자체 카탈로그 ID 모두 계정 동기화한다. 기존 로컬 기록을 보존하고 최초 연결은 추가·병합, 동일 행의 양쪽 변경은 충돌로 처리한다. 삭제는 tombstone으로 동기화하며 다른 계정의 로컬 기록을 자동 업로드하지 않는다.
+- preserved: Memory/Board와 이미지 bytes/Public/Android 네이티브 동기화 범위는 변경하지 않는다. 개인 제목·메모는 일반 로그에 남기지 않는다.
+- execution: [ExecPlan](plans/2026-10-07-title-state-account-sync.md)을 따른다. 운영 DB/웹 적용은 별도 검증 및 배포 gate를 따른다.

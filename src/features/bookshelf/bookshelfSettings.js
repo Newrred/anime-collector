@@ -12,7 +12,9 @@ export function normalizeBookshelf(value) {
 export function readBookshelf(owner, storage = globalThis.localStorage) {
   try { return normalizeBookshelf(JSON.parse(storage.getItem(keyFor(owner)) || "null")); } catch { return { shelves: [] }; }
 }
-export function saveBookshelf(owner, value, storage = globalThis.localStorage) {
+export function saveBookshelf(owner, value, storage = globalThis.localStorage, { source = "local" } = {}) {
   if (!owner) throw new Error("BOOKSHELF_OWNER_REQUIRED");
-  const normalized = normalizeBookshelf(value); storage.setItem(keyFor(owner), JSON.stringify(normalized)); return normalized;
+  const normalized = normalizeBookshelf(value); storage.setItem(keyFor(owner), JSON.stringify(normalized));
+  if (storage === globalThis.localStorage) globalThis.dispatchEvent?.(new CustomEvent("moemoa:bookshelf-updated", { detail: { source } }));
+  return normalized;
 }
