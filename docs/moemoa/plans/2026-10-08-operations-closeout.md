@@ -76,7 +76,8 @@ CI/문서 변경에 문제가 있으면 해당 Git 커밋을 revert 후 `master`
 
 - 2026-10-08: `adba637` 운영 SHA와 Git `master`를 대조. 최신 `Service quality`의 20분 취소 직전 로그에서 제거된 시스템 디자인 버튼 대기와 반복 재시도를 확인. 설정 지도는 미추적 상태.
 - 2026-10-08: 제거된 디자인 작성 UI를 기다리던 검사들을 현행 공식 표지 작성/Guest 사진 gate/과거 디자인 카드 읽기로 수정. 새 카드·보드/상세 흐름 79 PASS·1 기존 skip, 전체 composer 13 PASS·6 `fixme`, 모바일/Guest 10 PASS·과거 Web picker 3 `fixme`. 자체 카탈로그 캐릭터 fixture의 영향 범위 49 PASS·1 사진 시나리오 `fixme`. 전체 채널 회귀 80 PASS·5 skip(기존 skip 포함). 단위 454 PASS, 카탈로그 256 PASS·2 skip, build 20페이지 PASS. GitHub CI·운영 SHA 대조는 진행 중.
-- 2026-10-08: 첫 GitHub CI는 전체 화면 묶음을 통과했지만 공식 표지 카드의 선반 편집 검사에서 실패. CI에서는 작품 표시명이 `장송의 프리렌`, 로컬에서는 영문 별칭으로 나타나는 차이를 실패 증거의 접근성 트리에서 확인했다. 검사에서 두 표시명을 허용하도록 수정했고 전체 composer 13 PASS·6 skip으로 재확인했다. 두 번째 CI 결과는 아직 확인 전이다.
+- 2026-10-08: 첫 GitHub CI는 전체 화면 묶음을 통과했지만 공식 표지 카드의 선반 편집 검사에서 실패. CI에서는 작품 표시명이 `장송의 프리렌`, 로컬에서는 영문 별칭으로 나타나는 차이를 실패 증거의 접근성 트리에서 확인했다. 검사에서 두 표시명을 허용하도록 수정했고 전체 composer 13 PASS·6 skip으로 재확인했다.
+- 2026-10-08: 코드 커밋 `5923bcc`에 대한 [Service quality 실행](https://github.com/Newrred/anime-collector/actions/runs/37746861642)에서 `publication-contract`와 `verify` 모두 성공(`verify` 8분 26초). 운영 `/build-info.json`의 `commit`·`checkoutCommit`도 `5923bcc`이고 배포 출처는 `vercel-git`으로 확인했다. 사용자 실기기에서는 새 사진 카드를 iPhone Safari에 저장할 때 첫 시도에 사진 전송 관련 대기 코드가 나타났으나 재시도 뒤 iPhone 보관함과 PC에서 카드·사진 모두 표시됐다. 정확한 첫 오류 코드는 확보하지 못했으므로 원인을 확정하지 않는다.
 
 ## 16. 발견 사항과 계획 변경
 
@@ -85,4 +86,7 @@ CI/문서 변경에 문제가 있으면 해당 Git 커밋을 revert 후 `master`
 
 ## 17. 완료 보고
 
-- 검증·배포 후 실제 변경 파일, 검사 결과, 운영 SHA, 미검증 실기기 항목을 기록한다.
+- 운영 설정 지도 `docs/moemoa/operations/2026-10-08-configuration-map.md`를 Git에 추가하고, `CODEX_START_HERE.md`·작업판·`.env.production` 주석의 현재 사진 자동 저장 설명을 맞췄다. 환경 값, Supabase 정책, 운영 데이터는 바꾸지 않았다.
+- 제거된 신규 시스템 디자인 작성 경로를 기다리던 브라우저 검사를 현행 공식 표지·Guest gate·기존 카드 읽기 흐름에 맞췄다. 관련 파일은 `.github/workflows/quality.yml`, `scripts/run-channel-e2e.mjs`, `tests/helpers/approvedCoverCard.ts`, 영향받은 `tests/*.spec.ts`, DEV 전용 합성 캐릭터 reader를 가진 `src/features/titles/application/titleCharacters.js`다. 실제 제품의 캐릭터 조회는 자체 카탈로그 경로 그대로다.
+- 로컬 단위 454 PASS, 카탈로그 256 PASS·2 skip, 20개 화면 build, 첫 브라우저 묶음 79 PASS·1 기존 skip, composer 13 PASS·6 `fixme`, 모바일/Guest 10 PASS·Web picker 3 `fixme`, 채널 회귀 80 PASS·5 skip. GitHub `Service quality` 두 필수 job 성공. 과거 Guest 개인 사진 작성 시나리오 10건은 현재 정책과 맞지 않아 `fixme`로 명시했으며 로그인 사진 fixture를 갖춰 다시 작성해야 한다.
+- 운영 Git/Vercel 검증 코드는 `5923bcc`. iPhone Safari 새 사진 카드의 재시도 후 양 기기 표시까지는 사용자 확인을 받았다. 첫 시도 대기의 정확한 원인, 자동 복구 시간, 수정·삭제 왕복, 오프라인 재연결, 다른 계정 간 경계는 이번 실기기 확인 범위 밖이다. 추가 검증 없이 이 항목들을 완료로 표시하지 않는다.
