@@ -724,6 +724,25 @@ Codex는 완료된 저장소 감사 증거를 바탕으로 옵션을 제안하�
 - preserved: 취소된 COLLECTION-TASTE-SPACE-01은 취소 유지. Android/성인 인증/유료 계약·권리 확대/private 자동 upload와 미검증 Public 활성화는 승인 범위가 아니다. 기존 개인정보/권리/RLS·owner·삭제/철회 fence 및 사용자 기록은 보존한다. TITLE-STATE-SYNC-01의 신규 전체 remote 모델 선택을 이 배포 지시로 임의 확정하지 않는다.
 - execution: 기존 interface-rebuild31차/단일 release-v2 진행판. 실제 production SHA/DB 버전·migration hash/data release ID 및 검증/백업·복귀 경로를 기록하고 정상 검사 후 Git merge/push→Vercel Git SHA 확인. DB 새 classification 적용/실제 test HTTP12 및 운영 rollback-only RPC 계약은 완료했다. Web 코드 후보0f46310의 master/Vercel Git SHA·CI37502913118 성공 및 운영 읽기 검증을31차 보고/배포 증거에 결속했다. 문서만 후속 반영할 때에도 최신 master의 실제 Vercel SHA/CI를 확인한다. Public 출시 전체 PASS로 확대하지 않는다.
 
+## Decision Log — SAVE-TO-ACCOUNT-ON-SAVE-01 (2026-10-08)
+
+- status/approval: **CONFIRMED** — 사용자가 수동 동기화 뒤에야 다른 기기에 저장되는 흐름을 불편하다고 지적하고, 저장 시 자동 반영 범위를 **카드 정보와 개인 사진 모두**로 선택했다.
+- chosen scope: 로그인 계정으로 새 Memory 카드를 저장하면 현행 계정 metadata outbox를 즉시 반영하고, 저장 화면에서 선택한 신규 개인 사진은 현행 정책·용량·원본 확인을 거쳐 비공개 최적화 사본을 전송한다. Guest 기록과 기존 사진의 일괄 자동 전송은 하지 않는다. 오프라인/실패 시 기기 저장을 유지하고 같은 카드의 계정 반영을 재시도한다.
+- preserved: 원본 파일은 기기에 남고 공개 게시와 별개다. 다른 계정 기록의 자동 승격·업로드 금지, 기존 이미지 권리·owner/RLS·source-version·quota·동의 경계를 유지한다. 운영 image flag와 Public 활성화, DB migration/배포는 이번 결정만으로 완료 처리하지 않는다.
+- execution: [ExecPlan](plans/2026-10-08-save-to-account-on-save.md).
+
+## Decision Log — AUTOMATIC-SAVE-AND-GUEST-COVER-01 (2026-10-08)
+
+- status/approval: **CONFIRMED** — 사용자는 모든 로그인 기록을 별도 동기화 조작 없이 저장하고, 비로그인은 작품·감상 기록과 공식 표지 카드를 기기에 저장하며, 개인 사진에는 로그인 안내를 요구했다. 시스템 디자인 기능은 제거하라고 명시했다.
+- context/options: 기존 `ACCOUNT-01`은 guest의 모든 Private 카드·Board·사진 입력을 허용하고 카드 metadata/사진 백업 동의를 분리했다. 정상 저장에서 계정 반영을 사용자가 따로 판단하는 흐름과 충돌한다. 가능한 범위는 현행 선택 동기화 유지 / 로그인 저장 자동 반영과 guest 공식 표지 허용이다.
+- chosen option/reason: 로그인 사용자의 작품·감상 및 Memory 카드·보드 저장/수정/삭제는 기기 저장 후 계정 반영을 자동 시도한다. 사용자가 새 개인 사진을 선택해 저장할 때 비공개 최적화 사본 전송을 같은 저장 흐름으로 묶고, 비로그인 사진 선택에는 로그인 안내를 보인다. 비로그인 공식 표지 카드는 허용하며 표지 bytes를 복제하지 않고 카탈로그 참조와 개인 감상만 로컬에 둔다. 신규 시스템 디자인 카드 선택 UI는 제거한다. 정상 사용에서 동기화 버튼을 요구하지 않기 위해서다.
+- consequences: `ACCOUNT-01`의 guest 개인 사진 작성 및 별도 metadata/신규 사진 동기화 선택을 이 범위에서 대체한다. 기존 guest/시스템 디자인 카드와 과거 로컬 사진은 삭제·일괄 업로드하지 않는다. 로그인 후 guest 카드 계정 승격은 명시 검토를 유지한다. 서버 사진 policy·quota·RLS·권리·Public 게시 분리는 유지한다. 오프라인/실패에는 기기 저장과 계정 반영 대기를 구분한다.
+- files/modules affected: Memory composer/detail/Board, account sync trigger와 private photo intent, 문구·제품 흐름·테스트.
+- migration impact: 원격 DB 변경 없음. 개인 사진 전송 의도만 기기에 보존한다. 기존 카드 schema와 catalog cover 참조는 유지한다.
+- review date/trigger: 운영 사진 feature flag/서버 정책 확인과 iPhone Safari 실제 두 기기 왕복 검증 뒤 배포 후보 재검토.
+- approved by/date: 사용자, 2026-10-08 현재 대화.
+- execution: [ExecPlan](plans/2026-10-08-save-to-account-on-save.md). 운영 flag 변경·배포는 이번 구현과 별도다.
+
 ## Decision Log — TITLE-STATE-SYNC-01 (2026-10-07)
 
 - status/approval: **CONFIRMED** — 같은 계정의 PC 저장 작품 51개가 iPhone Safari에는 0개로 보이는 사례에서, 사용자는 “이 데이터를 옮기고 말고의 문제가 아니라 이런 현상이 안 생기도록 해결을 해야지”라고 명시했다.

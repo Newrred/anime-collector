@@ -83,6 +83,36 @@ test("runtime preserves an already active Account owner instead of forcing Guest
   assert.equal(calls.find(([name]) => name === "archive")[1], accountOwner.id);
 });
 
+test("committed account card and Board writes request automatic sync, but failed writes do not", async () => {
+  const userId = "22222222-2222-4222-8222-222222222222";
+  const owner = { id: `account:${userId}`, kind: "ACCOUNT", userId };
+  const notifications = [];
+  let failBoard = false;
+  const runtime = createMemoryRuntime({
+    repository: {
+      ensureInstallationIdentity: async () => ({ guestOwner: { id: OWNER_ID, kind: "GUEST" } }),
+      getActiveOwner: async () => owner,
+      readDeviceSyncState: async () => ({ deviceId: "33333333-3333-4333-8333-333333333333" }),
+      createBoard: async board => {
+        if (failBoard) throw new Error("write failed");
+        return board;
+      },
+    },
+    imageIntake: { available: false },
+    createCommand: { execute: async () => ({ cardId: "card-1" }) },
+    uuid: () => crypto.randomUUID(),
+    clock: { now: () => "2026-10-08T00:00:00.000Z" },
+    onMutation: ownerId => notifications.push(ownerId),
+  });
+
+  await runtime.createCard({ titleChoice: { kind: "PRIVATE_TITLE", displayTitle: "Frieren" } });
+  await runtime.createBoard({ title: "Favorite memories" });
+  assert.deepEqual(notifications, [owner.id, owner.id]);
+  failBoard = true;
+  await assert.rejects(runtime.createBoard({ title: "Failed Board" }), /write failed/);
+  assert.deepEqual(notifications, [owner.id, owner.id]);
+});
+
 test("runtime exposes title search without initializing an owner or logging the query", async () => {
   const calls = [];
   const runtime = createMemoryRuntime({

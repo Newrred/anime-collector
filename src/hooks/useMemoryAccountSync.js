@@ -16,8 +16,50 @@ const INITIAL_STATE = Object.freeze({
   conflicts: [],
   conflictBusy: false,
 });
+const pausedAutoUsers = new Set();
 
-export function useMemoryAccountSync({ session, authLoading = false } = {}) {
+function startAutoMemorySync(userId, syncNow) {
+  let active = true;
+  let timer = null;
+  let running = false;
+  let changedWhileRunning = false;
+  const schedule = (delay = 900) => {
+    if (!active || pausedAutoUsers.has(userId)) return;
+    if (running) { changedWhileRunning = true; return; }
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(async () => {
+      timer = null;
+      if (!active || pausedAutoUsers.has(userId) || navigator.onLine === false || document.visibilityState === "hidden") return;
+      running = true;
+      const result = await syncNow({ resumeAuto: false });
+      running = false;
+      if (!active || pausedAutoUsers.has(userId)) return;
+      if (changedWhileRunning) {
+        changedWhileRunning = false;
+        schedule(250);
+      } else if (result?.syncResultCode === "PARTIAL") schedule(5000);
+    }, delay);
+  };
+  const onMutation = (event) => {
+    if (event.detail?.ownerId === `account:${userId}`) schedule(350);
+  };
+  const onResume = () => schedule(350);
+  schedule(350);
+  const interval = setInterval(() => schedule(900), 45000);
+  globalThis.addEventListener("moemoa:memory-updated", onMutation);
+  globalThis.addEventListener("online", onResume);
+  globalThis.addEventListener("focus", onResume);
+  return () => {
+    active = false;
+    if (timer) clearTimeout(timer);
+    clearInterval(interval);
+    globalThis.removeEventListener("moemoa:memory-updated", onMutation);
+    globalThis.removeEventListener("online", onResume);
+    globalThis.removeEventListener("focus", onResume);
+  };
+}
+
+export function useMemoryAccountSync({ session, authLoading = false, autoSync = false, initialSync = false } = {}) {
   const [state, setState] = useState(INITIAL_STATE);
   const [retryToken, setRetryToken] = useState(0);
   const activeUserId = useRef({ userId: session?.user?.id || null });
@@ -50,7 +92,13 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
       .then(async (runtime) => {
         if (!alive) return null;
         if (!runtime.enabled) return runtime.getState();
-        if (session?.user?.id) return runtime.initializeAccountSession(session);
+        if (session?.user?.id) {
+          const ready = await runtime.initializeAccountSession(session);
+          if (initialSync && navigator.onLine !== false && ["ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(ready?.status)) {
+            await runtime.syncNow().catch(() => null);
+          }
+          return runtime.getState();
+        }
         await runtime.handleSignedOut();
         return runtime.getState();
       })
@@ -72,7 +120,7 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     return () => {
       alive = false;
     };
-  }, [authLoading, session, retryToken]);
+  }, [authLoading, session, retryToken, initialSync]);
 
   const retry = useCallback(() => setRetryToken((value) => value + 1), []);
   const buildPromotionPreview = useCallback(async () => {
@@ -115,23 +163,53 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
       return null;
     }
   }, []);
-  const syncNow = useCallback(async () => {
+  const syncNow = useCallback(async ({ resumeAuto = true } = {}) => {
     const userId = activeUserId.current;
+    if (resumeAuto && userId.userId) pausedAutoUsers.delete(userId.userId);
     setState((current) => ({ ...current, syncBusy: true, syncResultCode: null, syncErrorCode: null }));
+    globalThis.dispatchEvent?.(new CustomEvent("moemoa:memory-sync-state", { detail: { userId: userId.userId, state: { syncBusy: true, syncResultCode: null, syncErrorCode: null } } }));
     try {
       const runtime = await getPlatformMemoryAccountRuntime();
       if (activeUserId.current !== userId) return null;
       const next = await runtime.syncNow();
       if (activeUserId.current !== userId) return null;
+      let photoCompleted = 0;
+      if (["SYNCED", "PARTIAL"].includes(next?.syncResultCode) && userId.userId) {
+        try {
+          const { drainPlatformPrivatePhotos } = await import("../features/memory/runtime/platformPrivateImages.js");
+          photoCompleted = (await drainPlatformPrivatePhotos(userId.userId)).completed;
+        } catch {
+          // The durable photo intent is retried on the next online/focus sync.
+        }
+      }
+      if (activeUserId.current !== userId) return null;
       setState((current) => ({ ...current, ...next, syncBusy: false }));
+      globalThis.dispatchEvent?.(new CustomEvent("moemoa:memory-sync-state", { detail: { userId: userId.userId, state: next, photoCompleted } }));
       return next;
     } catch (error) {
       if (activeUserId.current === userId) {
-        setState((current) => ({ ...current, syncBusy: false, syncResultCode: "ERROR", syncErrorCode: error?.code || "MEMORY_GATEWAY_FAILED" }));
+        const failure = { syncBusy: false, syncResultCode: "ERROR", syncErrorCode: error?.code || "MEMORY_GATEWAY_FAILED" };
+        setState((current) => ({ ...current, ...failure }));
+        globalThis.dispatchEvent?.(new CustomEvent("moemoa:memory-sync-state", { detail: { userId: userId.userId, state: failure } }));
       }
       return null;
     }
   }, []);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!autoSync || !userId || authLoading || !["ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(state.status)
+      || state.userId !== userId) return undefined;
+    return startAutoMemorySync(userId, syncNow);
+  }, [autoSync, authLoading, session?.user?.id, state.status, state.userId, syncNow]);
+
+  useEffect(() => {
+    const onSyncState = (event) => {
+      if (event.detail?.userId === session?.user?.id) setState((current) => ({ ...current, ...event.detail.state }));
+    };
+    globalThis.addEventListener("moemoa:memory-sync-state", onSyncState);
+    return () => globalThis.removeEventListener("moemoa:memory-sync-state", onSyncState);
+  }, [session?.user?.id]);
   const resolveConflict = useCallback(async (conflictId, selection) => {
     const userId = activeUserId.current;
     setState((current) => ({ ...current, conflictBusy: true, syncErrorCode: null }));
@@ -167,7 +245,10 @@ export function useMemoryAccountSync({ session, authLoading = false } = {}) {
     cancelPromotionPreview,
     promote,
     syncNow,
-    pauseSync: async () => (await getPlatformMemoryAccountRuntime()).pauseSync?.(),
+    pauseSync: async () => {
+      if (activeUserId.current.userId) pausedAutoUsers.add(activeUserId.current.userId);
+      return (await getPlatformMemoryAccountRuntime()).pauseSync?.();
+    },
     resolveConflict,
     exportConflictBackup,
   });

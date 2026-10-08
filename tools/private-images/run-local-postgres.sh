@@ -18,7 +18,7 @@ for migration in "$root"/supabase/migrations/*.sql; do
   "${psql[@]}" -f "$migration" >/dev/null
 done
 "${psql[@]}" -f "$root/tools/private-images/contract.sql"
-source "$root/tools/private-images/races.sh"
+source <(sed 's/\r$//' "$root/tools/private-images/races.sh")
 if [[ "${ELIGIBILITY_MUTATION_TEST:-0}" == 1 ]]; then
   "${psql[@]}" -f "$root/tools/identity/eligibility-candidate.sql" >/dev/null
   "${psql[@]}" -f "$root/tools/identity/eligibility-mutation-candidate.sql" >/dev/null

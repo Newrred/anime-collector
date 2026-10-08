@@ -26,7 +26,14 @@ async function account(page: Page) {
     const repo = () => promise ||= import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js').then(m => m.IndexedDbMemoryRepository.open());
     (window as any).__MOEMOA_TEST_MEMORY_ACCOUNT_ADAPTERS__ = {
       enabled: true, repository: new Proxy({}, { get: (_, method) => async (...args) => (await repo())[method](...args) }),
-      gateway: { ensureUserProfile: async () => ({ userId: JSON.parse(localStorage.getItem('moemoa.e2e.mockSession.v1')).user.id }), registerDevice: async data => ({ id: data.deviceId, installationId: data.installationId, lastSyncSeq: 0 }), promoteGuest: async () => { throw new Error('not requested'); } },
+      gateway: {
+        ensureUserProfile: async () => ({ userId: JSON.parse(localStorage.getItem('moemoa.e2e.mockSession.v1')).user.id }),
+        registerDevice: async data => ({ id: data.deviceId, installationId: data.installationId, lastSyncSeq: 0 }),
+        promoteGuest: async () => { throw new Error('not requested'); },
+        applyCardMutation: async () => ({ status: 'APPLIED', entityVersion: 1, syncSeq: 1 }),
+        applyBoardMutation: async () => ({ status: 'APPLIED', entityVersion: 1, syncSeq: 1 }),
+        pullChanges: async ({ afterSeq }) => ({ changes: [], nextSyncSeq: afterSeq, requiresFullResync: false }),
+      },
       readDeviceSyncState: async id => (await import('/src/features/memory/adapters/indexeddb/memorySyncStore.js')).readDeviceSyncState((await repo()).database, id),
       writeDeviceSyncState: async state => (await import('/src/features/memory/adapters/indexeddb/memorySyncStore.js')).writeDeviceSyncState((await repo()).database, state),
       uuid: () => crypto.randomUUID(), clock: { now: () => new Date().toISOString() },
@@ -81,35 +88,32 @@ test(`actual Web picker/optimizer/journal preserve original through ${failure} r
   await page.getByRole('button', { name: 'Choose image', exact: true }).click();
   await (await chooser).setFiles({ name: 'synthetic-noise.png', mimeType: 'image/png', buffer: source });
   await expect(page.getByAltText('Selected image preview')).toBeVisible();
-  await page.getByLabel('Anime or card title').fill('Private sync test');
-  await page.getByLabel(/I confirm that I have the right/).check();
-  await page.getByRole('button', { name: 'Save card', exact: true }).click();
-  await expect(page).toHaveURL(/\/archive\/$/);
-  // Only metadata sync/Auth/HTTP are fixture boundaries. File picker, original store, canvas and UI are real.
-  await page.evaluate(async () => {
-    const { IndexedDbMemoryRepository } = await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
-    const repo = await IndexedDbMemoryRepository.open();
-    await new Promise<void>((resolve, reject) => {
-      const tx = repo.database.transaction('visual_assets', 'readwrite');
-      const r = tx.objectStore('visual_assets').openCursor(); r.onsuccess = () => { const c = r.result; if (!c) return; c.update({ ...c.value, sync: { ...c.value.sync, syncState: 'SYNCED', remoteVersion: 1 } }); c.continue(); };
-      tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
-    }); repo.close();
+  // Seed a pre-existing account photo without a new-photo auto-save intent. Its manual
+  // transfer path still needs to work for photos created before this release.
+  const cardId = await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>(resolve => { const r = indexedDB.open('moemoa-web-media-v1'); r.onsuccess = () => resolve(r.result); });
+    const tickets = await new Promise<any[]>(resolve => { const r = db.transaction('tickets').objectStore('tickets').getAll(); r.onsuccess = () => resolve(r.result); }); db.close();
+    const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+    const runtime = await getPlatformMemoryRuntime();
+    return (await runtime.createCard({ titleChoice: { kind: 'PRIVATE_TITLE', displayTitle: 'Private sync test' },
+      intakeTicketId: tickets.at(-1).id, rightsConfirmed: true })).cardId;
   });
-  await page.getByRole('link', { name: 'Private sync test', exact: true }).click();
+  await page.goto(`/memory/card/?id=${cardId}`);
+  // Only metadata sync/Auth/HTTP are fixture boundaries. File picker, original store, canvas and UI are real.
   await openPhotoTools(page);
   const panel = page.getByRole('region', { name: 'Photo sync', exact: true });
   await expect(panel.getByText('This photo is only on this device', { exact: true })).toBeVisible();
   expect(posts.length).toBe(0);
   await page.screenshot({ path: testInfo.outputPath('photo-sync-before.png'), fullPage: true });
-  await expect(panel.getByRole('button', { name: 'Sync photo', exact: true })).toBeEnabled();
-  await expect(panel.getByText('Sync photo saves a smaller copy to your account. Only you can see it.')).toBeVisible();
-  await panel.getByRole('button', { name: 'Sync photo', exact: true }).click();
+  await expect(panel.getByRole('button', { name: 'Save photo to account', exact: true })).toBeEnabled();
+  await expect(panel.getByText('Choose to save a smaller private copy of this older photo to your account.')).toBeVisible();
+  await panel.getByRole('button', { name: 'Save photo to account', exact: true }).click();
   await expect(panel.getByRole('alert')).toContainText(failure === 'quota' ? 'Photo storage is at its limit' : 'Photo sync did not finish');
   await page.reload();
   await openPhotoTools(page);
-  await expect(panel.getByRole('button', { name: 'Retry photo sync', exact: true })).toBeEnabled();
+  await expect(panel.getByRole('button', { name: 'Retry photo storage', exact: true })).toBeEnabled();
   expect(posts.length).toBe(1);
-  await panel.getByRole('button', { name: 'Retry photo sync', exact: true }).click();
+  await panel.getByRole('button', { name: 'Retry photo storage', exact: true }).click();
   await expect(panel.getByText('Available on your other devices', { exact: true })).toBeVisible();
   await expect(page.locator('.memory-detail img[src^="blob:"]')).toBeVisible();
   expect(posts.length).toBe(2); expect(posts[1].operation).toBe(posts[0].operation);

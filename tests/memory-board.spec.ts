@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { seedSystemDesignCards } from "./helpers/memoryVisualFixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -7,12 +8,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function createSystemCard(page, title: string, note: string) {
-  await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "Use system design" }).click();
-  await page.getByLabel("Anime or card title").fill(title);
-  await page.getByLabel("Short reflection").fill(note);
-  await page.getByRole("button", { name: "Save card" }).click();
-  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
+  // Boards must continue to handle previously saved system-design cards, even
+  // though the composer no longer offers that visual for new cards.
+  await seedSystemDesignCards(page, [{ title, note }]);
+  await page.goto("/archive/");
 }
 
 async function createBoard(page, title: string) {

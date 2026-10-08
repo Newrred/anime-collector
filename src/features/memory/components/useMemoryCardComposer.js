@@ -2,7 +2,11 @@ import { useEffect, useReducer, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
+import { getPlatformMemoryAccountRuntime } from "../runtime/platformMemoryAccountRuntime.js";
+import { privateImageTransfer, privateImageUiEnabled, isPrivateUserImage, queuePlatformPrivatePhoto, drainPlatformPrivatePhotos } from "../runtime/platformPrivateImages.js";
+import { getAuthSession } from "../../../repositories/authRepo.js";
 import { recordFirstMemoryViewSuggestion } from "../../titles/application/firstMemoryViewSuggestion.js";
+import { saveNewMemoryToAccount } from "../application/saveNewMemoryToAccount.js";
 
 const titleChoiceKey = (choice) => choice ? JSON.stringify([choice.kind, choice.animeId, choice.privateTitleId, choice.anilistId, choice.displayTitle]) : "";
 const errorCode = (code) => String(code || "fallback");
@@ -10,7 +14,6 @@ const errorCode = (code) => String(code || "fallback");
 const INITIAL_STATE = Object.freeze({
   runtime: null,
   ticket: null,
-  designSpec: null,
   catalogCoverSelection: null,
   status: "checking",
   message: "",
@@ -23,18 +26,21 @@ const INITIAL_STATE = Object.freeze({
   remoteTitleStatus: "SKIPPED",
   note: "",
   rightsConfirmed: false,
+  savedCardId: null,
+  cloudStage: null,
 });
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
 
-export function useMemoryCardComposer({ base = "/" } = {}) {
+export function useMemoryCardComposer({ base = "/", accountUserId = null } = {}) {
   const saveInFlight = useRef(false);
+  const cloudInFlight = useRef(false);
+  const savedCloudOptions = useRef(null);
   const titleSearchGeneration = useRef(0);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
   const {
     runtime,
     ticket,
-    designSpec,
     catalogCoverSelection,
     status,
     title,
@@ -139,44 +145,20 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
     };
   }, []);
 
-  const busy = ["checking", "processing", "picking", "removing", "saving"].includes(status);
+  const busy = ["checking", "processing", "picking", "removing", "saving", "syncing", "saved-local"].includes(status);
 
   const chooseImage = async () => {
     updateState({ status: "picking", message: "" });
     try {
       const result = await runtime.imageIntake.pick();
       if (result.cancelled || !result.ticket) {
-        updateState({ status: ticket || catalogCoverSelection || designSpec ? "ready" : "empty" });
+        updateState({ status: ticket || catalogCoverSelection ? "ready" : "empty" });
         return;
       }
       if (ticket && ticket.ticketId !== result.ticket.ticketId) {
         await runtime.imageIntake.discard(ticket.ticketId);
       }
-      updateState({ ticket: result.ticket, designSpec: null, catalogCoverSelection: null, rightsConfirmed: false, status: "ready" });
-    } catch (error) {
-      updateState({ status: "error", message: errorCode(error?.code) });
-    }
-  };
-
-  const useSystemDesign = async () => {
-    if (!runtime || busy) return;
-    updateState({ status: "processing", message: "" });
-    try {
-      if (ticket) await runtime.imageIntake.discard(ticket.ticketId);
-      updateState({
-        ticket: null,
-        catalogCoverSelection: null,
-        rightsConfirmed: false,
-        designSpec: {
-          version: 1,
-          templateId: "memory-gradient",
-          paletteId: "violet-dawn",
-          patternSeed: globalThis.crypto.randomUUID(),
-          titleLayout: "BOTTOM_LEFT",
-          genreTokens: selectedTitleChoice?.genres || [],
-        },
-        status: "ready",
-      });
+      updateState({ ticket: result.ticket, catalogCoverSelection: null, rightsConfirmed: false, status: "ready" });
     } catch (error) {
       updateState({ status: "error", message: errorCode(error?.code) });
     }
@@ -191,7 +173,6 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
       if (ticket) await runtime.imageIntake.discard(ticket.ticketId);
       updateState({
         ticket: null,
-        designSpec: null,
         rightsConfirmed: false,
         catalogCoverSelection: {
           previewUrl: coverPreviewUrl,
@@ -217,7 +198,6 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
       titleSearchStatus: "idle",
       remoteTitleStatus: "SKIPPED",
       catalogCoverSelection: null,
-      ...(designSpec ? { designSpec: { ...designSpec, genreTokens: [] } } : {}),
     });
   };
 
@@ -254,9 +234,6 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
       title: safeCandidate.displayTitle,
       titleResults: [],
       catalogCoverSelection: null,
-      ...(designSpec
-        ? { designSpec: { ...designSpec, genreTokens: safeCandidate.genres || [] } }
-        : {}),
     });
   };
 
@@ -267,7 +244,6 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
       titleSearchStatus: "idle",
       remoteTitleStatus: "SKIPPED",
       catalogCoverSelection: null,
-      ...(designSpec ? { designSpec: { ...designSpec, genreTokens: [] } } : {}),
     });
   };
 
@@ -282,13 +258,49 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
     }
   };
 
-  const saveCard = async (event, onSaved = () => {}) => {
+  const openArchive = () => window.location.assign(toPlatformAppHref(`${base}archive/`, {
+    native: Capacitor.isNativePlatform(),
+    origin: window.location.origin,
+  }));
+
+  const syncSavedCard = async (cardId, options) => {
+    if (cloudInFlight.current) return;
+    cloudInFlight.current = true;
+    updateState({ status: "syncing", cloudStage: null });
+    try {
+      if (options.includePhoto && options.accountUserId && privateImageUiEnabled()) {
+        try { await queuePlatformPrivatePhoto(runtime, options.accountUserId, cardId); }
+        catch { updateState({ status: "saved-local", cloudStage: "photo" }); return; }
+      }
+      const result = await saveNewMemoryToAccount({
+        cardId,
+        userId: options.accountUserId,
+        runtime,
+        includePhoto: options.includePhoto,
+        photoEnabled: privateImageUiEnabled(),
+        getSession: getAuthSession,
+        getAccountRuntime: getPlatformMemoryAccountRuntime,
+        createPhotoTransfer: privateImageTransfer,
+        isPrivateImage: isPrivateUserImage,
+        saveQueuedPhoto: () => drainPlatformPrivatePhotos(options.accountUserId, cardId),
+      });
+      if (result.status === "SYNCED" || result.status === "LOCAL_ONLY") {
+        openArchive();
+        return;
+      }
+      updateState({ status: "saved-local", cloudStage: result.stage });
+    } finally {
+      cloudInFlight.current = false;
+    }
+  };
+
+  const saveCard = async (event, onSaved = () => {}, { includePhoto = false } = {}) => {
     event.preventDefault();
     if (
       !runtime ||
-      (!ticket && !designSpec && !catalogCoverSelection) ||
+      (!ticket && !catalogCoverSelection) ||
       !title.trim() ||
-      (ticket && !rightsConfirmed) ||
+      (ticket && (!rightsConfirmed || !accountUserId || !privateImageUiEnabled())) ||
       saveInFlight.current
     ) return;
     saveInFlight.current = true;
@@ -298,9 +310,7 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
         titleChoice: selectedTitleChoice || { kind: "PRIVATE_TITLE", displayTitle: title },
         ...(ticket
           ? { intakeTicketId: ticket.ticketId }
-          : designSpec
-            ? { systemDesignSpec: designSpec }
-            : { catalogCoverRef: catalogCoverSelection.catalogCoverRef }),
+          : { catalogCoverRef: catalogCoverSelection.catalogCoverRef }),
         note: state.note,
         rightsConfirmed,
       });
@@ -309,11 +319,10 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
       } catch {
         // Optional guidance must never turn a successful save into a failed save.
       }
-      onSaved();
-      window.location.assign(toPlatformAppHref(`${base}archive/`, {
-        native: Capacitor.isNativePlatform(),
-        origin: window.location.origin,
-      }));
+      updateState({ savedCardId: result.cardId });
+      try { onSaved(); } catch { /* Navigation guidance cannot reverse a saved Card. */ }
+      savedCloudOptions.current = { accountUserId, includePhoto };
+      await syncSavedCard(result.cardId, savedCloudOptions.current);
     } catch (error) {
       saveInFlight.current = false;
       updateState({ status: "ready", message: errorCode(error?.code) });
@@ -322,20 +331,20 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
 
   return {
     ...state,
-    dirty: Boolean(ticket || designSpec || catalogCoverSelection || state.note
+    dirty: !state.savedCardId && Boolean(ticket || catalogCoverSelection || state.note
       || title !== state.initialTitle || titleChoiceKey(selectedTitleChoice) !== titleChoiceKey(state.initialTitleChoice)),
     busy,
     canSave: Boolean(
       runtime &&
-      (ticket || designSpec || catalogCoverSelection) &&
+      (ticket || catalogCoverSelection) &&
       title.trim() &&
-      (designSpec || catalogCoverSelection || rightsConfirmed) &&
+      (catalogCoverSelection || (rightsConfirmed && accountUserId && privateImageUiEnabled())) &&
       (!catalogCoverSelection || state.note.trim()) &&
+      !state.savedCardId &&
       !busy
     ),
     displayTitle: selectedTitleChoice?.displayTitle || title,
     chooseImage,
-    useSystemDesign,
     useCatalogCover,
     changeTitle,
     searchTitles,
@@ -344,6 +353,8 @@ export function useMemoryCardComposer({ base = "/" } = {}) {
     removeImage,
     removeCatalogCover,
     saveCard,
+    retryAccountSave: () => state.savedCardId && savedCloudOptions.current
+      ? syncSavedCard(state.savedCardId, savedCloudOptions.current) : Promise.resolve(),
     changeNote: (event) => updateState({ note: event.target.value }),
     changeRightsConfirmed: (event) => updateState({ rightsConfirmed: event.target.checked }),
   };

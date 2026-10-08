@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthSession } from '../../../hooks/useAuthSession.js';
-import { isPrivateUserImage, privateImageTransfer, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
+import { isPrivateUserImage, privateImageTransfer, privateImageUiEnabled, hasPlatformPrivatePhotoIntent, drainPlatformPrivatePhotos } from '../runtime/platformPrivateImages.js';
 
 const message = (code, ko) => {
   if (['ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code)) return ko ? '계정 확인이 필요해요. 사진은 이 기기에 보관돼 있어요.' : 'Your account needs verification. The photo is still on this device.';
@@ -20,7 +20,7 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
     bundle.card.ownerId === `account:${auth.user?.id}` && bundle.asset.sync?.syncState === 'SYNCED' && bundle.asset.sync.remoteVersion > 0;
   const transfer = useMemo(() => eligible ? privateImageTransfer(runtime, bundle) : null,
     [eligible, runtime, bundle.card.id, bundle.card.ownerId, bundle.asset.id, bundle.asset.sync?.remoteVersion]);
-  const [state, setState] = useState({ status: 'checking', busy: false, policy: null, error: null, pending: false });
+  const [state, setState] = useState({ status: 'checking', busy: false, policy: null, error: null, pending: false, autoPending: false });
   const request = useRef(null), objectUrl = useRef(null), mounted = useRef(false);
   const showBlob = blob => {
     if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
@@ -31,15 +31,16 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
     if (!transfer) return () => { mounted.current = false; };
     let active = true;
     const abort = new AbortController(); request.current = abort;
-    setState({ status: 'checking', busy: false, policy: null, error: null, pending: false });
+    setState({ status: 'checking', busy: false, policy: null, error: null, pending: false, autoPending: false });
     const timer = setTimeout(() => { abort.abort(); if (active) setState(s => ({ ...s, status: 'failed', error: 'PRIVATE_IMAGE_REQUEST_FAILED' })); }, 30000);
     (async () => {
-      const [{ policy, blob }, pending] = await Promise.all([
+      const [{ policy, blob }, pending, autoPending] = await Promise.all([
         transfer.readWithPolicy(abort.signal, { includeBlob: !hasLocalPreview }), transfer.pending(abort.signal),
+        hasPlatformPrivatePhotoIntent(bundle.card.ownerId, bundle.asset.id),
       ]);
       if (!active || abort.signal.aborted) return;
       if (blob) showBlob(blob);
-      setState(s => ({ ...s, policy, pending, status: policy.representation ? 'ready' : 'local' }));
+      setState(s => ({ ...s, policy, pending, autoPending, status: policy.representation ? 'ready' : 'local' }));
     })().catch(error => {
       if (active && !abort.signal.aborted) setState(s => ({ ...s, status: 'failed', error: error.code }));
     }).finally(() => { clearTimeout(timer); if (request.current === abort) request.current = null; });
@@ -52,7 +53,7 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
   if (!privateImageUiEnabled() || !isPrivateUserImage(bundle.asset)) return null;
   if (!eligible) return <section className="memory-detail__field memory-photo-sync">
     <strong>{ko ? '사진 동기화' : 'Photo sync'}</strong>
-    <p>{auth.user ? (ko ? '계정 설정에서 기록을 동기화한 뒤 사진도 옮길 수 있어요.' : 'Sync your records in account settings before syncing this photo.') : (ko ? '로그인하면 다른 기기에서도 이 사진을 볼 수 있어요.' : 'Sign in to use this photo on other devices.')}</p>
+    <p>{auth.user ? (ko ? '카드 정보를 계정에 반영하고 있어요. 새 사진도 이어서 저장해요.' : 'Card details are being saved to your account. Your new photo follows automatically.') : (ko ? '사진을 저장하려면 로그인해 주세요.' : 'Sign in to save a photo.')}</p>
   </section>;
 
   const run = async action => {
@@ -62,14 +63,17 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
     const timer = setTimeout(() => abort.abort(), 30000);
     try {
       if (action === 'cancel') await transfer.cancel(abort.signal);
-      else if (action === 'upload') await transfer.upload({ consented: true, signal: abort.signal });
+      else if (action === 'upload') {
+        await transfer.upload({ consented: true, signal: abort.signal });
+        if (state.autoPending && auth.user) await drainPlatformPrivatePhotos(auth.user.id, bundle.card.id);
+      }
       if (action !== 'cancel') {
         const blob = await transfer.read(abort.signal);
         if (!abort.signal.aborted && mounted.current && request.current === abort) showBlob(blob);
       }
       // A confirmed cancellation stays confirmed even when policy reads are subsequently paused.
       const policy = action === 'cancel' ? await transfer.policy(abort.signal).catch(() => null) : await transfer.policy(abort.signal);
-      if (!abort.signal.aborted && mounted.current && request.current === abort) setState(s => ({ ...s, policy, pending: false, status: action === 'cancel' ? 'local' : 'ready' }));
+      if (!abort.signal.aborted && mounted.current && request.current === abort) setState(s => ({ ...s, policy, pending: false, autoPending: false, status: action === 'cancel' ? 'local' : 'ready' }));
     } catch (error) {
       const pending = await transfer.pending().catch(() => false);
       if (mounted.current && request.current === abort) setState(s => ({ ...s, status: 'failed', error: error.code || 'PRIVATE_IMAGE_REQUEST_FAILED', pending }));
@@ -82,11 +86,11 @@ export default function MemoryPrivateImageSync({ runtime, bundle, locale, hasLoc
   const canUpload = Boolean(bundle.asset.localRef);
   return <section className="memory-detail__field memory-photo-sync" aria-label={ko ? '사진 동기화' : 'Photo sync'}>
     <strong>{ko ? '사진 동기화' : 'Photo sync'}</strong>
-    <p role="status">{state.busy ? (ko ? '사진 동기화 중…' : 'Syncing photo…') : state.status === 'checking' ? (ko ? '사진 확인 중…' : 'Checking photo…') : state.status === 'failed' ? (ko ? '사진 동기화를 확인해 주세요' : 'Photo sync needs attention') : ready ? (ko ? '다른 기기에서도 볼 수 있어요' : 'Available on your other devices') : (canUpload ? (ko ? '이 기기에만 있는 사진이에요' : 'This photo is only on this device') : (ko ? '이 기기에 사진이 없어요' : 'This photo is not on this device'))}</p>
+    <p role="status">{state.busy ? (ko ? '사진 저장 중…' : 'Saving photo…') : state.status === 'checking' ? (ko ? '사진 확인 중…' : 'Checking photo…') : state.status === 'failed' ? (ko ? '사진 저장을 확인해 주세요' : 'Photo storage needs attention') : ready ? (ko ? '다른 기기에서도 볼 수 있어요' : 'Available on your other devices') : state.autoPending ? (ko ? '계정에 자동 저장 중이에요' : 'Saving to your account automatically') : (canUpload ? (ko ? '이 기기에만 있는 사진이에요' : 'This photo is only on this device') : (ko ? '이 기기에 사진이 없어요' : 'This photo is not on this device'))}</p>
     {state.error && <p role="alert">{message(state.error, ko)}</p>}
     {!ready && canUpload && !state.busy && <>
-      <p id="memory-photo-sync-consent">{ko ? '사진 동기화를 누르면 내 계정에 작은 사본을 저장해요. 나만 볼 수 있어요.' : 'Sync photo saves a smaller copy to your account. Only you can see it.'}</p>
-      <button type="button" className="btn" aria-describedby="memory-photo-sync-consent" disabled={disabled || state.status === 'checking'} onClick={() => run('upload')}>{state.pending || state.error ? (ko ? '사진 동기화 다시 시도' : 'Retry photo sync') : (ko ? '사진 동기화' : 'Sync photo')}</button>
+      {!state.autoPending && <p id="memory-photo-sync-consent">{ko ? '이전 사진을 계정에도 저장하려면 작은 비공개 사본 전송을 선택해 주세요.' : 'Choose to save a smaller private copy of this older photo to your account.'}</p>}
+      <button type="button" className="btn" aria-describedby={!state.autoPending ? "memory-photo-sync-consent" : undefined} disabled={disabled || state.status === 'checking'} onClick={() => run('upload')}>{state.autoPending ? (ko ? '지금 다시 시도' : 'Retry now') : state.pending || state.error ? (ko ? '사진 저장 다시 시도' : 'Retry photo storage') : (ko ? '계정에 사진 저장' : 'Save photo to account')}</button>
     </>}
     {!ready && !canUpload && state.status !== 'checking' && <>
       <p>{ko ? '사진을 추가한 기기에서 이 카드를 열고 사진 동기화를 눌러주세요.' : 'Open this card on the device where you added the photo, then choose Sync photo.'}</p>

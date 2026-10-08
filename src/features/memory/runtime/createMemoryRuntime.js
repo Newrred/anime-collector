@@ -24,6 +24,7 @@ export function createMemoryRuntime({
   titleResolver = { search: async () => ({ results: [], remoteStatus: "UNAVAILABLE" }) },
   ticketCleanup,
   beforeDelete,
+  onMutation = () => {},
 }) {
   if (!repository || !imageIntake || !uuid || !clock) {
     throw new TypeError("Memory runtime dependencies are required");
@@ -105,6 +106,12 @@ export function createMemoryRuntime({
   const prepare = (ownerId, specs, createdAt) => prepareAccountSyncOperations({
     repository, ownerId, specs: () => specs(), ids: syncIds, createdAt,
   });
+  const committed = (owner, result) => {
+    if (owner?.kind === "ACCOUNT") {
+      try { onMutation(owner.id); } catch { /* A notification cannot undo a committed write. */ }
+    }
+    return result;
+  };
 
   return Object.freeze({
     imageIntake,
@@ -122,11 +129,11 @@ export function createMemoryRuntime({
 
     async createCard(input) {
       const owner = await initialize();
-      return command.execute({
+      return committed(owner, await command.execute({
         ...input,
         operationId: input.operationId || uuid(),
         ownerId: owner.id,
-      });
+      }));
     },
 
     async exportMemoryBackup() {
@@ -163,7 +170,7 @@ export function createMemoryRuntime({
         entityType: "MEMORY_BOARD", entityId: board.id, operationType: "UPSERT",
         baseVersion: board.sync?.remoteVersion, payload: toRemoteBoard(board),
       }], now);
-      return repository.createBoard(board, { syncOperations });
+      return committed(owner, await repository.createBoard(board, { syncOperations }));
     },
 
     async updateBoard(boardId, changes) {
@@ -183,13 +190,13 @@ export function createMemoryRuntime({
         entityType: "MEMORY_BOARD", entityId: updated.id, operationType: "UPSERT",
         baseVersion: updated.sync?.remoteVersion, payload: toRemoteBoard(updated),
       }], now);
-      return repository.updateBoard({
+      return committed(owner, await repository.updateBoard({
         ownerId: owner.id,
         boardId,
         changes,
         now,
         syncOperations,
-      });
+      }));
     },
 
     async deleteBoard(boardId) {
@@ -203,7 +210,7 @@ export function createMemoryRuntime({
         { entityType: "MEMORY_BOARD", entityId: deletedBoard.id, operationType: "DELETE", baseVersion: deletedBoard.sync?.remoteVersion, payload: toRemoteBoard(deletedBoard) },
         ...memberships.map((membership) => ({ entityType: "MEMORY_BOARD_CARD", entityId: membership.id, operationType: "DELETE", baseVersion: membership.sync?.remoteVersion, payload: toRemoteBoardCard(membership) })),
       ], now);
-      return repository.deleteBoard({ ownerId: owner.id, boardId, now, syncOperations });
+      return committed(owner, await repository.deleteBoard({ ownerId: owner.id, boardId, now, syncOperations }));
     },
 
     async listBoards() {
@@ -235,7 +242,7 @@ export function createMemoryRuntime({
         entityType: "MEMORY_BOARD_CARD", entityId: membership.id, operationType: "UPSERT",
         baseVersion: membership.sync?.remoteVersion, payload: toRemoteBoardCard(membership),
       }], membership.updatedAt);
-      return repository.addCardToBoard(membership, { syncOperations });
+      return committed(owner, await repository.addCardToBoard(membership, { syncOperations }));
     },
 
     async removeCardFromBoard(boardId, cardId) {
@@ -249,13 +256,13 @@ export function createMemoryRuntime({
         entityType: "MEMORY_BOARD_CARD", entityId: removed.id, operationType: "DELETE",
         baseVersion: removed.sync?.remoteVersion, payload: toRemoteBoardCard(removed),
       }], now);
-      return repository.removeCardFromBoard({
+      return committed(owner, await repository.removeCardFromBoard({
         ownerId: owner.id,
         boardId,
         cardId,
         now,
         syncOperations,
-      });
+      }));
     },
 
     async reorderBoardCard(boardId, cardId, { leftPosition = null, rightPosition = null } = {}) {
@@ -270,14 +277,14 @@ export function createMemoryRuntime({
         entityType: "MEMORY_BOARD_CARD", entityId: updated.id, operationType: "UPSERT",
         baseVersion: updated.sync?.remoteVersion, payload: toRemoteBoardCard(updated),
       }], now);
-      return repository.reorderBoardCard({
+      return committed(owner, await repository.reorderBoardCard({
         ownerId: owner.id,
         boardId,
         cardId,
         positionKey,
         now,
         syncOperations,
-      });
+      }));
     },
 
     async getCard(cardId) {
@@ -287,12 +294,12 @@ export function createMemoryRuntime({
 
     async updateCard(cardId, updates) {
       const owner = await initialize();
-      return updateCommand.execute({ ownerId: owner.id, cardId, ...updates });
+      return committed(owner, await updateCommand.execute({ ownerId: owner.id, cardId, ...updates }));
     },
 
     async deleteCard(cardId) {
       const owner = await initialize();
-      return deleteCommand.execute({ ownerId: owner.id, cardId, operationId: uuid() });
+      return committed(owner, await deleteCommand.execute({ ownerId: owner.id, cardId, operationId: uuid() }));
     },
 
     async replaceCardImage(cardId, input) {
@@ -303,6 +310,7 @@ export function createMemoryRuntime({
         cardId,
         operationId: input.operationId || uuid(),
       }).then(async (result) => {
+        committed(owner, result);
         try {
           const bundle = await repository.getCardBundle(owner.id, cardId);
           const previewDataUrl = bundle?.asset.localRef

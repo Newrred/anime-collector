@@ -1,10 +1,11 @@
 import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
+import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
-import SystemDesignPreview from "./SystemDesignPreview.jsx";
 import MemoryTitleSelector from "./MemoryTitleSelector.jsx";
 import { useMemoryCardComposer } from "./useMemoryCardComposer.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import { IconImage, IconPlus } from "../../../components/ui/AppIcons.jsx";
+import { privateImageUiEnabled } from "../runtime/platformPrivateImages.js";
 import "./memory-card-composer.css";
 
 const formatBytes = (value) => {
@@ -24,12 +25,13 @@ export default function MemoryCardComposer({ base = "/" }) {
 
 function MemoryCardComposerContent({ base }) {
   const { copy, locale } = useMemoryRouteUi();
+  const auth = useAuthSession();
+  const photoAccountAvailable = Boolean(auth.user && privateImageUiEnabled());
   const composerCopy = copy.composer;
   const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const {
     runtime,
     ticket,
-    designSpec,
     catalogCoverSelection,
     status,
     message,
@@ -40,12 +42,13 @@ function MemoryCardComposerContent({ base }) {
     remoteTitleStatus,
     note,
     rightsConfirmed,
+    savedCardId,
+    cloudStage,
     busy,
     dirty,
     canSave,
     displayTitle,
     chooseImage,
-    useSystemDesign,
     useCatalogCover,
     changeTitle,
     searchTitles,
@@ -54,28 +57,31 @@ function MemoryCardComposerContent({ base }) {
     removeImage,
     removeCatalogCover,
     saveCard,
+    retryAccountSave,
     changeNote,
     changeRightsConfirmed,
-  } = useMemoryCardComposer({ base });
+  } = useMemoryCardComposer({ base, accountUserId: auth.user?.id || null });
 
-  const allowLeave = useUnsavedNavigation(dirty, locale, { busy: status === "saving" });
+  const allowLeave = useUnsavedNavigation(dirty, locale, { busy: status === "saving" || status === "syncing" });
   const saveReason = busy
     ? composerCopy.saveBlockedBusy
     : !runtime
       ? composerCopy.saveBlockedBusy
-      : !ticket && !designSpec && !catalogCoverSelection
+      : !ticket && !catalogCoverSelection
         ? composerCopy.saveBlockedVisual
         : !title.trim()
           ? composerCopy.saveBlockedTitle
           : catalogCoverSelection && !note.trim()
             ? composerCopy.saveBlockedReflection
+            : ticket && !photoAccountAvailable
+              ? composerCopy.photoSignInRequired
             : ticket && !rightsConfirmed
             ? composerCopy.saveBlockedRights
             : composerCopy.saveHint;
-  const statusAnnouncement = status === "saving" ? composerCopy.saving : "";
-  const hasVisual = Boolean(ticket || designSpec || catalogCoverSelection);
+  const statusAnnouncement = status === "saving" ? composerCopy.saving : status === "syncing" ? composerCopy.syncingAccount : "";
+  const hasVisual = Boolean(ticket || catalogCoverSelection);
   const hasTitle = Boolean(title.trim());
-  const hasRights = Boolean(designSpec || catalogCoverSelection || (ticket && rightsConfirmed));
+  const hasRights = Boolean(catalogCoverSelection || (ticket && rightsConfirmed));
   const catalogCoverAvailable = Boolean(
     selectedTitleChoice?.coverPreviewUrl && selectedTitleChoice?.catalogCoverRef,
   );
@@ -89,8 +95,9 @@ function MemoryCardComposerContent({ base }) {
       searchTitles(activeElement.value);
       return;
     }
-    saveCard(event, allowLeave);
+    saveCard(event, allowLeave, { includePhoto: Boolean(ticket && photoAccountAvailable) });
   };
+  const signInForPhoto = () => auth.signIn(`${window.location.pathname}${window.location.search}`);
 
   return (
     <div className="memory-composer page-shell page-shell--wide">
@@ -101,7 +108,7 @@ function MemoryCardComposerContent({ base }) {
         </div>
         <details className="memory-composer__storage-help">
           <summary>{composerCopy.privacyTitle}</summary>
-          <p>{composerCopy.privacyBody}</p>
+          <p>{photoAccountAvailable ? composerCopy.privacyBodyAccount : composerCopy.privacyBody}</p>
         </details>
       </section>
 
@@ -130,20 +137,7 @@ function MemoryCardComposerContent({ base }) {
               )}
             </div>
 
-            {status === "browser" && !designSpec && !ticket && !catalogCoverSelection ? (
-              <button type="button" className="btn memory-composer__visual-primary memory-composer__empty-cta" onClick={useSystemDesign}>
-                {composerCopy.useSystemDesign}
-              </button>
-            ) : null}
-
-            {designSpec ? (
-              <SystemDesignPreview
-                className="memory-composer__preview memory-composer__system-preview"
-                spec={designSpec}
-                title={displayTitle}
-                copy={copy.systemDesign}
-              />
-            ) : ticket ? (
+            {ticket ? (
               <div className="memory-composer__preview-wrap">
                 <img
                   className="memory-composer__preview"
@@ -164,14 +158,12 @@ function MemoryCardComposerContent({ base }) {
               <div className="memory-composer__empty-image">
                 <span className="memory-composer__empty-image-icon" aria-hidden="true"><IconImage size={34} /></span>
                 <p>
-                  {status === "browser"
-                    ? composerCopy.webVisualTitle
-                    : busy
-                      ? composerCopy.preparing
-                      : composerCopy.noImage}
+                  {busy ? composerCopy.preparing : composerCopy.noImage}
                 </p>
-                {status === "browser" ? <small>{composerCopy.webVisualBody}</small> : null}
-                {runtime?.imageIntake.available ? <button type="button" className="btn" onClick={chooseImage} disabled={busy}>{composerCopy.chooseImage}</button> : null}
+                <small>{composerCopy.chooseTitleForCover}</small>
+                {runtime?.imageIntake.available && photoAccountAvailable ? <button type="button" className="btn" onClick={chooseImage} disabled={busy}>{composerCopy.chooseImage}</button> : null}
+                {!auth.loading && !auth.user && <button type="button" className="btn btn--subtle" disabled={!auth.configured} onClick={signInForPhoto}>{composerCopy.signInForPhoto}</button>}
+                {!auth.loading && auth.user && !privateImageUiEnabled() && <small>{composerCopy.photoTemporarilyUnavailable}</small>}
               </div>
             )}
 
@@ -183,7 +175,7 @@ function MemoryCardComposerContent({ base }) {
 
             {runtime?.imageIntake.available || ticket || catalogCoverAvailable || catalogCoverSelection ? (
             <div className="action-row memory-composer__image-actions" role="group" aria-label={composerCopy.visualChoices}>
-              {runtime?.imageIntake.available && hasVisual ? (
+              {runtime?.imageIntake.available && hasVisual && photoAccountAvailable ? (
                 <button
                   type="button"
                   className="btn memory-composer__visual-primary"
@@ -214,14 +206,6 @@ function MemoryCardComposerContent({ base }) {
                   {composerCopy.removeOfficialCover}
                 </button>
               ) : null}
-              <button
-                type="button"
-                className={`btn memory-composer__system-action${runtime?.imageIntake.available ? " btn--subtle" : " memory-composer__visual-primary"}`}
-                onClick={useSystemDesign}
-                disabled={!runtime || busy}
-              >
-                {composerCopy.useSystemDesign}
-              </button>
             </div>
             ) : null}
           </section>
@@ -285,6 +269,9 @@ function MemoryCardComposerContent({ base }) {
                 </label>
             </section>}
 
+            {ticket && photoAccountAvailable && <p className="memory-composer__account-photo-choice">{composerCopy.savePhotoInAccount}</p>}
+            {ticket && !auth.user && <div className="memory-composer__photo-sign-in" role="status"><p>{composerCopy.photoSignInRequired}</p><button type="button" className="btn" disabled={!auth.configured} onClick={signInForPhoto}>{composerCopy.signInForPhoto}</button></div>}
+
             <div className={`memory-composer__save-gate memory-composer__step-card${canSave ? " is-current" : ""}`}>
               <div>
                 <button type="submit" name="save-memory" className="btn memory-composer__save-button" disabled={!canSave} aria-describedby="memory-save-reason">
@@ -300,6 +287,13 @@ function MemoryCardComposerContent({ base }) {
           </div>
         </div>
         </fieldset>
+        {savedCardId && status === "saved-local" && <div className="surface-card memory-composer__account-pending" role="status">
+          <p>{cloudStage === "photo" ? composerCopy.photoPending : composerCopy.accountPending}</p>
+          <div className="action-row">
+            <button type="button" className="btn" onClick={retryAccountSave}>{composerCopy.retryAccountSave}</button>
+            <a className="btn btn--subtle" href={`${base}memory/card/?id=${encodeURIComponent(savedCardId)}`} data-astro-reload>{composerCopy.viewSavedCard}</a>
+          </div>
+        </div>}
       </form>
     </div>
   );

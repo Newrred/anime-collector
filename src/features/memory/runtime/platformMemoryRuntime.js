@@ -33,6 +33,9 @@ export function getPlatformMemoryRuntime() {
       repository,
       imageIntake: selectImageIntake(),
       titleResolver: selectTitleResolver(),
+      onMutation: (ownerId) => {
+        globalThis.dispatchEvent?.(new CustomEvent("moemoa:memory-updated", { detail: { ownerId } }));
+      },
       beforeDelete: async (input) => {
         if (!input.ownerId.startsWith("account:")) return;
         const { retirePublicationBeforeDelete } = await import("../application/retirePublicationBeforeDelete.js");

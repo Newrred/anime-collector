@@ -22,7 +22,6 @@ html .memory-composer.page-shell { max-width: 1120px; }
 .memory-composer__empty-image p, .memory-composer__empty-image small { margin: 0; color: var(--text-secondary); max-width: 32ch; }
 .memory-composer__preview-wrap { display: grid; place-items: center; position: relative; min-height: 300px; padding: 16px; border-radius: 22px; background: var(--bg-surface-2); overflow: hidden; }
 .memory-composer__preview { display: block; width: auto; max-width: 100%; max-height: min(64vh, 640px); border-radius: 12px; object-fit: contain; }
-.memory-composer__system-preview[data-pattern-token] { width: 100%; max-width: 420px; max-height: none; margin-inline: auto; }
 .memory-composer__cover-badge { position: absolute; bottom: 16px; left: 16px; }
 .memory-composer__image-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .memory-composer__image-actions .btn { flex: 1 1 auto; font-size: 13px; }
@@ -49,6 +48,11 @@ html .memory-composer.page-shell { max-width: 1120px; }
 .memory-composer__step-heading { margin: 0; font-size: 16px; font-weight: 600; }
 .memory-composer__rights { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 12px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
 .memory-composer__rights input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px; }
+.memory-composer__account-photo-choice { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+.memory-composer__photo-sign-in { display: grid; justify-items: start; gap: 10px; color: var(--text-secondary); }
+.memory-composer__photo-sign-in p { margin: 0; }
+.memory-composer__account-pending { display: grid; gap: 12px; margin-top: 16px; padding: 18px; }
+.memory-composer__account-pending p { margin: 0; }
 .memory-composer__save-gate { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--border-subtle); padding-top: 24px; }
 .memory-composer__save-gate p { margin: 0; font-size: 13px; color: var(--text-secondary); flex: 1; min-width: 120px; }
 .memory-composer__save-button { min-width: 130px; }
@@ -63,6 +67,5 @@ html .memory-composer.page-shell { max-width: 1120px; }
   .memory-composer__empty-image { min-height: 230px; }
   .memory-composer__preview-wrap { min-height: 200px; }
   .memory-composer__preview { max-height: 380px; }
-  .memory-composer__system-preview { max-width: 300px; }
   .memory-composer__selected-title { flex-wrap: wrap; }
 }

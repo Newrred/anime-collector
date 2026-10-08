@@ -85,10 +85,12 @@ export default function MemoryAccountPanel({ copy, auth, account, titleSync, loc
             {account.promotionBusy ? copy.reviewing : copy.reviewPromotion}
           </button>
         ) : null}
-        {connected && ["ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(account.status) ? (
+        {connected && ["ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(account.status)
+          && (account.syncErrorCode || ["PARTIAL", "PAUSED", "REJECTED", "ERROR"].includes(account.syncResultCode)
+            || titleSync?.error || titleSync?.result?.promotionRequired) ? (
           <button type="button" className="btn" onClick={() => { setDismissedConflictId(null); account.syncNow(); titleSync?.runNow({ allowPromotion: true }); }} disabled={account.syncBusy || account.promotionBusy || titleSync?.busy}>
             <span className="btn__icon"><IconRefreshCw size={14} /></span>
-            <span className="btn__label">{account.syncBusy || titleSync?.busy ? copy.syncing : copy.syncNow}</span>
+            <span className="btn__label">{account.syncBusy || titleSync?.busy ? copy.syncing : titleSync?.result?.promotionRequired ? (locale === "ko" ? "이 기기 기록 가져오기" : "Import device records") : copy.syncNow}</span>
           </button>
         ) : null}
         {account.syncBusy ? <button type="button" className="btn btn--ghost" onClick={account.pauseSync}>{copy.pauseSync}</button> : null}
@@ -100,7 +102,7 @@ export default function MemoryAccountPanel({ copy, auth, account, titleSync, loc
       </div>
 
       {account.syncResultCode && (!account.syncErrorCode || account.syncResultCode === "PAUSED") ? <div className="small page-feedback" role="status">{copy.syncResults[account.syncResultCode] || copy.syncResults.ERROR}</div> : null}
-      {connected && titleSync?.enabled && titleSync.result?.promotionRequired && <div className="small page-feedback" role="status">{locale === "ko" ? "이 기기의 작품·감상 기록을 계정에 저장하려면 기록 동기화를 눌러 주세요." : "Select Sync records to save this device's title records to your account."}</div>}
+      {connected && titleSync?.enabled && titleSync.result?.promotionRequired && <div className="small page-feedback" role="status">{locale === "ko" ? "로그인 전에 이 기기에 저장한 작품·감상 기록은 계정에 가져올 수 있어요." : "Titles and watch records saved on this device before sign-in can be imported into your account."}</div>}
       {connected && titleSync?.enabled && titleSync.result && !titleSync.result.promotionRequired && <div className="small page-feedback" role="status">{titleSync.result.conflicts.length ? (locale === "ko" ? `작품·감상 기록 ${titleSync.result.conflicts.length}건을 확인해야 합니다.` : `${titleSync.result.conflicts.length} title records need review.`) : (locale === "ko" ? "작품·감상 기록도 동기화했어요." : "Titles and watch records synced.")}</div>}
       {connected && titleSync?.enabled && titleSync.result?.conflicts?.length > 0 && <details className="list-stack"><summary>{locale === "ko" ? "충돌 확인" : "Review conflicts"}</summary><p className="small">{locale === "ko" ? "두 기기에서 같은 기록을 바꿨습니다. 선택하지 않은 쪽의 변경은 반영되지 않습니다." : "The same record changed on two devices. The other version will not be applied."}</p>{titleSync.result.conflicts.map((item) => <div key={item.id} className="list-stack"><strong>{item.displayName}</strong>{item.remoteVersion > 0 && <div className="sync-card__actions"><button type="button" className="btn btn--subtle" disabled={titleSync.busy} onClick={() => titleSync.resolveConflict(item, "local")}>{locale === "ko" ? "이 기기 기록 사용" : "Use this device"}</button><button type="button" className="btn btn--subtle" disabled={titleSync.busy} onClick={() => titleSync.resolveConflict(item, "cloud")}>{locale === "ko" ? "계정 기록 사용" : "Use account record"}</button></div>}</div>)}</details>}
       {connected && titleSync?.enabled && titleSync.error && <div className="small page-feedback" role="alert">{titleSyncErrorFor(titleSync.error, locale)}</div>}

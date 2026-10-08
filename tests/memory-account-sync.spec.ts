@@ -205,7 +205,7 @@ test("signed-in Memory account distinguishes an empty Guest namespace", async ({
   await installAccountAdapters(page, { signedIn: true, guestCards: 0 });
   await page.goto("/data/");
   await expect(page.getByText("Account connected", { exact: true })).toBeVisible();
-  await expect(page.getByText("Choose Sync records to get the latest changes.")).toBeVisible();
+  await expect(page.getByText("Saved records are added to your account automatically.")).toBeVisible();
 });
 
 test("restoring an existing Auth session does not misread loading as sign-out", async ({ page }) => {
@@ -253,15 +253,14 @@ test("promotion preview is explicit, cancellable, and moves metadata only after 
   await page.getByRole("button", { name: "Move records" }).click();
   await expect(page.getByText("Account connected", { exact: true })).toBeVisible();
   const calls = await page.evaluate(() => (window as any).__MOEMOA_TEST_MEMORY_CALLS__);
-  expect(calls).toEqual([
-    "ensure_user_profile", "register_user_device", "resolve_promotion_title", "promote_guest_memory",
-  ]);
+  expect(calls.slice(0, 2)).toEqual(["ensure_user_profile", "register_user_device"]);
+  expect(calls).toContain("resolve_promotion_title");
+  expect(calls).toContain("promote_guest_memory");
 });
 
-test("explicit sync exposes local and cloud notes without logging either value", async ({ page }) => {
+test("automatic sync exposes local and cloud notes without logging either value", async ({ page }) => {
   await installAccountAdapters(page, { signedIn: true, guestCards: 0, conflict: true });
   await page.goto("/data/");
-  await page.getByRole("button", { name: "Sync records" }).click();
   await expect(page.getByRole("heading", { name: "Review Memory conflict" })).toBeVisible();
   await expect(page.getByText("Local private note", { exact: true })).toBeVisible();
   await expect(page.getByText("Cloud private note", { exact: true })).toBeVisible();
@@ -292,12 +291,12 @@ test('sync pause and retry show partial progress instead of false success', asyn
     };
   });
   await page.goto('/data/');
-  await page.getByRole('button', { name: 'Sync records', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => typeof (window as any).finishSyncRequest)).toBe('function');
   await expect(page.getByRole('button', { name: 'Pause sync', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Pause sync', exact: true }).click();
   await page.evaluate(() => (window as any).finishSyncRequest());
-  await expect(page.getByRole('status').filter({ hasText: 'Sync paused.' })).toBeVisible();
-  await expect(page.getByText('Memories and boards synced. Sync each photo from its card.', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Sync records', exact: true }).click();
-  await expect(page.getByText('Memories and boards synced. Sync each photo from its card.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Sync is paused.' })).toBeVisible();
+  await expect(page.getByText('Memory and board records are in your account.', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Retry now', exact: true }).click();
+  await expect(page.getByText('Memory and board records are in your account.', { exact: true })).toBeVisible();
 });

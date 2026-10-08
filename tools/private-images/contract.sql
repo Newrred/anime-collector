@@ -26,6 +26,14 @@ select pg_temp.fails($q$select public.complete_memory_private_image(gen_random_u
 reset role;
 update private.memory_private_media_policy set enabled=true,approved=true,revision='LOCAL_TEST',observed_at=now(),quota_bytes=50000000,physical_bytes=100000000,preparations_per_day=10,decode_attempts_per_day=1,asset_count_max=1000,read_bytes_per_month=1000,global_read_bytes_per_month=10000;
 set role authenticated;
+select pg_temp.fails('select public.observe_memory_private_image_capacity()','permission denied','client cannot refresh private capacity observation');
+reset role;
+select set_config('request.jwt.claim.role','service_role',false);
+set role service_role;
+select pg_temp.ok(public.observe_memory_private_image_capacity()->>'observedAt' is not null,'service observes storage and refreshes policy freshness');
+reset role;
+select set_config('request.jwt.claim.role','',false);
+set role authenticated;
 select pg_temp.ok((public.get_memory_private_image_policy('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',1)->>'quotaBytes')::bigint=50000000,'owner reads active quota');
 select public.authorize_memory_private_image_attempt('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',1,'LOCAL_TEST');
 select pg_temp.fails($q$select public.authorize_memory_private_image_attempt('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',1,'LOCAL_TEST')$q$,'PRIVATE_IMAGE_RATE_LIMITED','decode attempts rate limited separately before image processing');

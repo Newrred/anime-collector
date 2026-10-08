@@ -1,5 +1,11 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-08 자동 계정 저장·Guest 공식 표지 — 로컬 후보, 운영 미적용
+
+- 로그인 계정의 새 Memory 카드·수정·삭제와 보드 변경은 로컬 확정 뒤 자동 계정 반영을 요청한다. 새 개인 사진은 사용자 선택·저장 뒤 비공개 최적화 사본만 자동 전송하며 실패 시 같은 카드/전송 의도를 재시도한다. Guest는 공식 표지 카드와 작품·감상 기록을 기기에 저장할 수 있고 사진 선택은 로그인 안내를 받는다. 시스템 디자인 신규 작성은 제거했다. 과거 카드/사진은 삭제·일괄 업로드하지 않는다.
+- [실행 계획·검증·잔여](../plans/2026-10-08-save-to-account-on-save.md): unit449/449, Chromium 자동 저장·Guest/계정11, 공식 표지 관통1, 기존 사진 관리4 PASS, build20. React Doctor 86/신규 진단0. Windows Playwright WebKit Blob/IndexedDB 제약으로 실제 iPhone Safari·hosted 사진 왕복은 미검증이다.
+- 운영 `.env.production`의 사진 flag는 현재 off다. Git push·운영 배포/flag·DB 변경은 없었다. 다음은 운영 또는 격리된 hosted 환경의 계정·Storage 정책/용량을 확인하고 실제 iPhone→PC 새 카드/사진 왕복을 검증한 뒤 Git 배포 후보를 결정한다.
+
 ## 2026-10-07 Git 운영 배포·다른 PC 인계
 
 - 사용자 명시 승인으로 `6565c5e`와 `83cdf49`를 `master`에 push했다. Git 원격과 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)의 `commit`·`checkoutCommit`이 기능 커밋 `83cdf49c0c31f5d70f40ce18c1cc72089338e9f5`로 일치했고 `source=vercel-git`이었다. 옛 `focus=edit` 운영 링크가 새 감상 탭으로 이동하고 캐릭터 즐겨찾기·관련 작품 접힘 버튼이 표시됨을 익명 브라우저로 확인했다. 이 문서 보정 커밋은 별도 Git 배포를 만들므로 최종 SHA는 링크에서 다시 확인한다.

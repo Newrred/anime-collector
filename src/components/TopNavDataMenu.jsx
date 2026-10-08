@@ -117,7 +117,7 @@ export default function TopNavDataMenu({
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const auth = useAuthSession(`${base}data/`);
-  const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
+  const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading, autoSync: true });
   useTitleStateSync({ session: auth.session, autoSync: true });
   const accountCopy = getMessageGroup(locale, "memoryAccount");
   const accountTone = accountToneFor(account.status, account.loading, auth.session?.user);

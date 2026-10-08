@@ -55,7 +55,7 @@ function RecordStartContent({ base }) {
   return <div className="record-start page-shell">
     <header><h1>{ko ? "기억 남기기" : "Add Memory"}</h1><p>{ko ? "작품의 감상을 기록하거나, 오래 남기고 싶은 장면을 저장하세요." : "Record your impressions, or keep a scene you want to remember."}</p></header>
     <div className="record-start__paths"><a className="record-start__path is-active" href="#watch-title-picker" aria-current="true"><strong>{ko ? "감상 기록" : "Watch record"}</strong><span>{ko ? "시청 상태 · 별점 · 정주행 · 감상 이력" : "Status · rating · rewatches · reflections"}</span></a>
-      <a className="record-start__path" href={`${base}memory/new/`} data-astro-reload><strong>{ko ? "장면·이미지 남기기 →" : "Keep a scene or image →"}</strong><span>{ko ? "내 이미지, 디자인 카드, 선택한 작품 표지" : "Your image, a design card, or a selected cover"}</span></a></div>
+      <a className="record-start__path" href={`${base}memory/new/`} data-astro-reload><strong>{ko ? "장면·이미지 남기기 →" : "Keep a scene or image →"}</strong><span>{ko ? "공식 표지로 남기거나 로그인 후 내 사진 추가" : "Use an official cover, or sign in to add your photo"}</span></a></div>
     <section id="watch-title-picker"><h2>{ko ? "어떤 작품의 감상을 남길까요?" : "Which title are you recording?"}</h2>
       <label className="record-start__search">{ko ? "작품 찾기" : "Find a title"}<input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={ko ? "내 작품이나 새 작품 검색" : "Search your titles or find a new one"} /></label>
       <h3>{ko ? "내 작품" : "My titles"}</h3>

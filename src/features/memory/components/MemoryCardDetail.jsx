@@ -1,5 +1,6 @@
 import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.js";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
+import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import AddMemoryToBoard from "./AddMemoryToBoard.jsx";
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
@@ -12,7 +13,7 @@ import MemoryClassificationEditor from "./MemoryClassificationEditor.jsx";
 import { addCustomTag, characterTagKey, classificationSyncEnabled, EMPTY_CLASSIFICATION, normalizeCardClassification } from "../domain/cardClassification.js";
 import { publicationUiEnabled } from "../runtime/platformPublication.js";
 import MemoryPrivateImageSync from "./MemoryPrivateImageSync.jsx";
-import { isPrivateUserImage, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
+import { isPrivateUserImage, privateImageUiEnabled, queuePlatformPrivatePhoto } from '../runtime/platformPrivateImages.js';
 import MemoryVisual from "./MemoryVisual.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
@@ -32,6 +33,7 @@ const INITIAL_STATE = Object.freeze({
   imageToolsOpen: false,
   editing: false,
   detailTab: "memory",
+  photoSyncRevision: 0,
 });
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
@@ -59,10 +61,13 @@ export default function MemoryCardDetail({ base = "/" }) {
 
 function MemoryCardDetailContent({ base }) {
   const { copy, locale } = useMemoryRouteUi();
+  const auth = useAuthSession();
   const detailCopy = copy.detail;
   const returnHref = memoryReturnHref(globalThis.location?.search, base);
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
   const { runtime, bundle, previewDataUrl, remotePreviewDataUrl, catalogCover, note, classification, draftTag, status, message, deleteDialogOpen } = state;
+  const cardId = bundle?.card.id;
+  const authUserId = auth.user?.id;
   const dirty = Boolean(bundle && (draftTag.trim() || note !== (bundle.card.note || "") || JSON.stringify(classification) !== JSON.stringify(normalizeCardClassification(bundle.card.classification))));
   const onPrivatePreview = useCallback(value => updateState({ remotePreviewDataUrl: value }), []);
   const onPrivateBusy = useCallback(value => updateState({ status: value ? 'private-sync' : 'ready' }), []);
@@ -127,6 +132,21 @@ function MemoryCardDetailContent({ base }) {
     });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!runtime || !cardId || !authUserId || state.editing) return undefined;
+    let active = true;
+    const onSync = (event) => {
+      if (event.detail?.userId !== authUserId || event.detail?.state?.syncBusy) return;
+      runtime.getCard(cardId).then((next) => {
+        if (active && next) updateState({ bundle: next, note: next.card.note || "",
+          classification: normalizeCardClassification(next.card.classification),
+          ...(event.detail.photoCompleted > 0 ? { photoSyncRevision: state.photoSyncRevision + 1 } : {}) });
+      }).catch(() => {});
+    };
+    globalThis.addEventListener("moemoa:memory-sync-state", onSync);
+    return () => { active = false; globalThis.removeEventListener("moemoa:memory-sync-state", onSync); };
+  }, [runtime, cardId, authUserId, state.editing, state.photoSyncRevision]);
 
   const save = async (event) => {
     event.preventDefault();
@@ -214,6 +234,11 @@ function MemoryCardDetailContent({ base }) {
       intakeTicketId: ticket.ticketId,
       rightsConfirmed: true,
     });
+    let photoQueued = false;
+    if (auth.user && privateImageUiEnabled()) {
+      try { photoQueued = Boolean(await queuePlatformPrivatePhoto(runtime, auth.user.id, bundle.card.id)); }
+      catch { /* Local replacement is already committed. Keep it and show the pending state below. */ }
+    }
     updateState(result.bundle ? {
       bundle: result.bundle,
       previewDataUrl: result.previewDataUrl || ticket.previewDataUrl,
@@ -221,7 +246,7 @@ function MemoryCardDetailContent({ base }) {
       catalogCover: null,
       message: {
         scope: "detail",
-        key: result.cleanupPending ? "imageSavedCleanup" : "imageSaved",
+        key: result.cleanupPending ? "imageSavedCleanup" : photoQueued ? "imageSavedAccountPending" : "imageSaved",
       },
     } : {
       message: { scope: "detail", key: "imageSavedRefresh" },
@@ -336,10 +361,12 @@ function MemoryCardDetailContent({ base }) {
           <section id="memory-detail-panel-manage" role="tabpanel" aria-labelledby="memory-detail-tab-manage" hidden={state.detailTab !== "manage"}>
           <MemorySharingSettings card={bundle.card} locale={locale} base={base} disabled={status !== "ready"} />
           <details className="memory-detail__tools" open={state.imageToolsOpen} onToggle={event => { if (event.currentTarget.open !== state.imageToolsOpen) updateState({ imageToolsOpen: event.currentTarget.open }); }}><summary>{locale === "ko" ? "이미지 변경·관리" : "Change and manage image"}</summary>
-            <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}`} runtime={runtime} bundle={bundle} locale={locale}
+            <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}:${state.photoSyncRevision}`} runtime={runtime} bundle={bundle} locale={locale}
               hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
-            <MemoryImageReplacement runtime={runtime} imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
-              disabled={status !== "ready"} onReplace={replaceImage} onBusyChange={isBusy => updateState({ status: isBusy ? "replacing" : "ready" })} onMessage={nextMessage => updateState({ message: nextMessage })} copy={copy.replacement} />
+            {auth.loading ? null : !auth.user ? <div className="memory-detail__replacement"><p>{locale === "ko" ? "로그인한 뒤 이 기기의 카드를 계정으로 가져오면 사진을 추가할 수 있어요." : "After signing in, import this device's card to your account before adding a photo."}</p><button type="button" className="btn btn--subtle" disabled={!auth.configured} onClick={() => auth.signIn(`${base}data/`)}>{locale === "ko" ? "로그인하고 카드 가져오기" : "Sign in and import card"}</button></div>
+              : auth.user && !privateImageUiEnabled() ? <p className="memory-detail__replacement-note">{locale === "ko" ? "지금은 사진 계정 저장을 사용할 수 없어요." : "Account photo storage is unavailable right now."}</p>
+                : <MemoryImageReplacement runtime={runtime} imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
+                  disabled={status !== "ready"} onReplace={replaceImage} onBusyChange={isBusy => updateState({ status: isBusy ? "replacing" : "ready" })} onMessage={nextMessage => updateState({ message: nextMessage })} copy={copy.replacement} />}
           </details>
           <div className="memory-detail__danger"><button
                 ref={deleteTriggerRef}
