@@ -3,9 +3,9 @@ import { createTitleCharactersReader } from "../application/titleCharacters.js";
 import { characterTagKey } from "../../memory/domain/cardClassification.js";
 import "./title-characters.css";
 
-export default function TitleCharacters({ animeId, anilistId, locale = "ko", selected, onSelect, disabled = false, query = "" }) {
+export default function TitleCharacters({ animeId, anilistId, locale = "ko", selected, onSelect, disabled = false, query = "", readCharacters }) {
   const ko = locale === "ko", selectable = typeof onSelect === "function";
-  const reader = useMemo(() => createTitleCharactersReader(), []);
+  const reader = useMemo(() => readCharacters ?? createTitleCharactersReader(), [readCharacters]);
   const [state, setState] = useState({ status: "loading", rows: [], page: 0, hasMore: false, source: null });
   const [retry, setRetry] = useState(0);
   const [visibleCount, setVisibleCount] = useState(6);

@@ -31,6 +31,8 @@ test.beforeEach(async ({ page }) => {
       watchLogs: [],
     };
     window.__MOEMOA_TEST_TITLE_HUB_SERVICE__ = {
+      readCharacters: async ({ page = 1 }) => ({ source: "CATALOG", page, hasMore: false,
+        characters: [{ source: "CATALOG", id: "anilist:7", name: "주인공", role: "MAIN", castings: [] }] }),
       load: async () => ({
         ...baseAlbum,
         tracking: { ...baseAlbum.tracking, isSaved: sessionStorage.getItem("title-saved") !== "false" },
@@ -72,10 +74,6 @@ test("Title Hub fits a 320px viewport without horizontal clipping", async ({ pag
 test("Title Hub pins a catalog character without asking AniList for candidates", async ({ page }) => {
   let anilistCalls = 0;
   page.on("request", request => { if (request.url().startsWith("https://graphql.anilist.co/")) anilistCalls += 1; });
-  await page.route("**/rest/v1/catalog_anime_people?**", route => route.fulfill({ status: 200,
-    contentType: "application/json", body: JSON.stringify({ anime_id: animeId, page: 1,
-      payload: { schemaVersion: 2, animeId, page: 1, totalCount: 1, entries: [{ characterId: "anilist:7",
-        canonicalName: "주인공", role: "MAIN", castings: [] }] } }) }));
   await page.goto(`/title/?animeId=${encodeURIComponent(animeId)}`);
   await page.getByRole("button", { name: /즐겨찾는 캐릭터/ }).click();
   await page.getByRole("button", { name: "고정", exact: true }).click();

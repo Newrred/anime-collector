@@ -3,12 +3,13 @@ import { catalogCharacterAniListId, createTitleCharactersReader } from "../appli
 import { readCharacterPinsSnapshot, removeCharacterPin, upsertCharacterPin } from "../../../repositories/characterPinRepo.js";
 import { withTitleStateMutation } from "../application/titleStateMutationLock.js";
 
-const reader = createTitleCharactersReader();
+const catalogReader = createTitleCharactersReader();
 const numericId = value => {
   return catalogCharacterAniListId(value);
 };
 
-export default function TitleFavoriteCharacters({ animeId, anilistId, locale }) {
+export default function TitleFavoriteCharacters({ animeId, anilistId, locale, readCharacters }) {
+  const reader = readCharacters ?? catalogReader;
   const ko = locale === "ko";
   const mediaId = numericId(anilistId);
   const [open, setOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function TitleFavoriteCharacters({ animeId, anilistId, locale }) 
       if (active) setState({ status: "ready", rows: result.characters.filter(row => numericId(row.id)), page: result.page, hasMore: result.hasMore });
     }).catch(() => active && setState({ status: "error", rows: [], page: 0, hasMore: false }));
     return () => { active = false; };
-  }, [animeId, open, mediaId, retry]);
+  }, [animeId, open, mediaId, reader, retry]);
   if (!mediaId) return null;
   const ownPins = pins.filter(pin => pin.mediaId === mediaId);
   const pinIds = new Set(ownPins.map(pin => pin.characterId));
