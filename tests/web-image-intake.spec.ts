@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { pngBytes } from './catalog-lab/fixtures/cover-valid-images.mjs';
+import { installSignedInPhotoAccount } from './helpers/signedInPhotoAccount';
 
-test.skip(process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== '1', 'Explicit local Web intake flag required');
+test.skip(process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== '1' || process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated Web photo flags required');
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ui:locale:v1', JSON.stringify('en')));
 });
@@ -14,9 +15,7 @@ async function pick(page, name = 'Choose image', invalid = false) {
 }
 
 test('real Web picker saves local original and preview across reload and removes media on card deletion', async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo picker is intentionally unavailable.');
-  const uploads: string[] = [];
-  page.on('request', req => { if (req.method() === 'POST' && /storage|public-image|private-image/.test(req.url())) uploads.push(req.url()); });
+  const { uploads } = await installSignedInPhotoAccount(page);
   await page.goto('/memory/new/');
   await pick(page);
   await expect(page.getByAltText('Selected image preview')).toBeVisible();
@@ -26,7 +25,7 @@ test('real Web picker saves local original and preview across reload and removes
   await expect(page).toHaveURL(/\/archive\/$/);
   await page.reload();
   await page.getByRole('link', { name: 'Local Web image' }).click();
-  await expect(page.locator('img[src^="data:image/jpeg"]')).toBeVisible();
+  await expect(page.locator('.memory-detail__visual img')).toBeVisible();
   const records = await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => { const r = indexedDB.open('moemoa-web-media-v1', 1); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
     const rows = await new Promise<any[]>((resolve) => { const r = db.transaction('assets').objectStore('assets').getAll(); r.onsuccess = () => resolve(r.result); });
@@ -34,7 +33,7 @@ test('real Web picker saves local original and preview across reload and removes
     return Promise.all(rows.map(async row => ({ hash: row.hash, bytes: Array.from(new Uint8Array(await row.blob.arrayBuffer())) })));
   });
   expect(records).toEqual([{ hash: createHash('sha256').update(pngBytes).digest('hex'), bytes: Array.from(pngBytes) }]);
-  expect(uploads).toEqual([]);
+  await expect.poll(() => uploads.length).toBe(1);
   await page.getByRole('tab', { name: 'Manage', exact: true }).click();
   await page.getByRole('button', { name: 'Delete card', exact: true }).click();
   await page.getByRole('button', { name: 'Confirm card deletion', exact: true }).click();
@@ -44,7 +43,7 @@ test('real Web picker saves local original and preview across reload and removes
 });
 
 test('invalid replacement and picker cancellation preserve selection; new image resets consent', async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo picker is intentionally unavailable.');
+  await installSignedInPhotoAccount(page);
   await page.goto('/memory/new/');
   await pick(page);
   await page.getByLabel(/I confirm that I have the right/).check();
@@ -64,7 +63,7 @@ test('invalid replacement and picker cancellation preserve selection; new image 
 });
 
 test('IndexedDB media promotion replay is atomic and rejects a different operation', async ({ page }) => {
-  test.fixme(true, 'Drive the Web intake adapter directly or supply an authenticated photo fixture.');
+  await installSignedInPhotoAccount(page);
   await page.goto('/memory/new/');
   await pick(page);
   await expect(page.getByAltText('Selected image preview')).toBeVisible();

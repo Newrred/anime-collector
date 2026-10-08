@@ -34,15 +34,24 @@ jobs:
       - run: npm run test:unit
       - run: npm run catalog:test
       - run: npm run build
-      - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
-      # Legacy guest-photo scenarios are explicitly fixme until an authenticated photo fixture exists.
-      - name: Verify current card composer
-        run: node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts --project=chromium --workers=1 --reporter=line
-      - name: Verify guest photo gate and phone layout
+      - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-cross-device-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
+      - name: Verify signed-in card composer
+        run: node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/memory-save-account.spec.ts --project=chromium --workers=1 --reporter=line
+        env:
+          PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1: '1'
+          PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1: '1'
+      - name: Verify signed-in Web intake, guest gate and phone layout
         run: node scripts/run-e2e.mjs tests/memory-guest-save.spec.ts tests/web-image-intake.spec.ts tests/layout-mobile.spec.ts --project=chromium --workers=1 --reporter=line
         env:
           PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1: '1'
+          PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1: '1'
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4358
+      - name: Verify signed-in channel photo
+        run: node scripts/run-e2e.mjs tests/channel-service.spec.ts --project=chromium --workers=1 --reporter=line --grep "actual local image bytes"
+        env:
+          PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1: '1'
+          PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1: '1'
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4359
       - name: Verify current Web design and watch records
         run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts
       - uses: actions/upload-artifact@v4

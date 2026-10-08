@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { jpegBytes, nonSquareJpegBytes } from "./catalog-lab/fixtures/cover-valid-images.mjs";
 import { installApprovedCoverResolver, selectApprovedCover } from './helpers/approvedCoverCard';
 import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
+import { installSignedInPhotoAccount, openArchiveAfterPhotoSave } from './helpers/signedInPhotoAccount';
 
 // Project-owned 1×1 JPEG bytes keep the browser fixture aligned with the
 // native bridge contract without introducing third-party artwork.
@@ -163,7 +164,8 @@ test("empty Archive exposes one page-level create action", async ({ page }) => {
 });
 
 test("Archive turns an unavailable private preview into a recoverable visual state", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -201,13 +203,14 @@ test("Archive turns an unavailable private preview into a recoverable visual sta
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
 
-  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/u);
-  await expect(page.getByRole("status", { name: "이미지를 불러올 수 없어요." })).toBeVisible();
+  await openArchiveAfterPhotoSave(page, 'ko');
+  await expect(page.getByRole("status", { name: "사진을 불러오지 못했어요" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Missing scene", exact: true })).toBeVisible();
 });
 
 test("private card saves once and remains visible in Archive after reload", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -251,7 +254,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await expect(save).toBeEnabled();
   await save.dblclick();
 
-  await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
+  await openArchiveAfterPhotoSave(page, 'ko');
   await expect(page.getByRole("heading", { name: "Frieren" })).toBeVisible();
   await expect(page.getByText("The quiet journey stayed with me.")).toBeVisible();
   await expect(page.getByAltText("Frieren 메모리 카드")).toBeVisible();
@@ -271,7 +274,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
   await page.getByRole("button", { name: "기억 수정", exact: true }).click();
   await page.getByLabel("짧은 감상").fill("A quieter memory after revisiting.");
   await page.getByRole("button", { name: "변경 저장" }).click();
-  await expect(page.getByText("변경 내용을 이 기기에 저장했어요.")).toBeVisible();
+  await expect(page.getByText("변경 내용을 저장했어요.")).toBeVisible();
 
   await page.reload();
   await expect(page.locator(".memory-detail__reflection")).toContainText("A quieter memory after revisiting.");
@@ -294,7 +297,8 @@ test("private card saves once and remains visible in Archive after reload", asyn
 });
 
 test("card detail replaces a local image only after explicit rights confirmation", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
@@ -342,6 +346,7 @@ test("card detail replaces a local image only after explicit rights confirmation
   await page.getByLabel("작품명").fill("Frieren");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
+  await openArchiveAfterPhotoSave(page, 'ko');
   await page.getByRole("link", { name: "Frieren" }).click();
 
   const currentImage = page.getByAltText("Frieren 메모리 카드");
@@ -362,7 +367,7 @@ test("card detail replaces a local image only after explicit rights confirmation
   await applyReplacement.click();
 
   await expect(currentImage).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW_ALT);
-  await expect(page.getByText("새 이미지를 이 기기에 저장했어요.")).toBeVisible();
+  await expect(page.getByText("새 이미지를 저장했어요. 계정에도 자동 반영하고 있어요.")).toBeVisible();
 
   const stored = await page.evaluate(async () => {
     const request = indexedDB.open("moemoa-memory-v1");
@@ -403,7 +408,8 @@ test("card detail replaces a local image only after explicit rights confirmation
 });
 
 test("missing local image exposes recovery and delete actions", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -441,6 +447,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
   await page.getByLabel("작품명").fill("Missing Image Card");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
+  await openArchiveAfterPhotoSave(page, 'ko');
   await page.getByRole("link", { name: "Missing Image Card" }).click();
 
   await expect(page.getByText("이미지를 불러올 수 없어요.")).toBeVisible();
@@ -449,7 +456,8 @@ test("missing local image exposes recovery and delete actions", async ({ page })
 });
 
 test("pending picker blocks leaving detail and rapid clicks open only one picker, with durable cancel cleanup", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript((previewDataUrl) => {
     const ticket = (ticketId: string) => ({
       ticketId,
@@ -492,6 +500,7 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
   await page.getByLabel("작품명").fill("Picker Ownership");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
+  await openArchiveAfterPhotoSave(page, 'ko');
   await page.getByRole("link", { name: "Picker Ownership" }).click();
   await page.getByRole("tab", { name: "관리", exact: true }).click();
   await page.locator(".memory-detail__tools > summary").click();
@@ -521,7 +530,8 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
 });
 
 test("pre-reservation replacement rejection keeps the ticket until discard is confirmed", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
+  test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated photo flag required');
+  await installSignedInPhotoAccount(page, 'ko');
   await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
@@ -565,6 +575,7 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
   await page.getByLabel("작품명").fill("Rejected Replacement");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "카드 저장" }).click();
+  await openArchiveAfterPhotoSave(page, 'ko');
   await page.getByRole("link", { name: "Rejected Replacement" }).click();
   await page.getByRole("tab", { name: "관리", exact: true }).click();
   await page.evaluate(async () => {

@@ -5,6 +5,10 @@ const SAFE_FAILURE_CODES = new Set([
   "SYNC_SERVER_SCHEMA_UNAVAILABLE", "SYNC_RESPONSE_INVALID", "SYNC_REQUEST_INVALID",
   "SYNC_OWNER_CHANGED", "DEVICE_NOT_REGISTERED", "DEVICE_SYNC_STATE_INVALID",
   "MEMORY_GATEWAY_FAILED", "PHOTO_METADATA_PENDING", "MEDIA_STORAGE_FULL",
+  "PRIVATE_IMAGE_REQUEST_FAILED", "PRIVATE_IMAGE_DISABLED", "PRIVATE_IMAGE_PAUSED",
+  "PRIVATE_IMAGE_POLICY_STALE", "PRIVATE_IMAGE_QUOTA_EXCEEDED",
+  "PRIVATE_IMAGE_CAPACITY_EXCEEDED", "PRIVATE_IMAGE_RATE_LIMITED", "IMAGE_SIZE_LIMIT",
+  "ORIGINAL_IMAGE_UNAVAILABLE", "SOURCE_IMAGE_MISMATCH", "PRIVATE_IMAGE_SOURCE_CHANGED",
 ]);
 const safeFailureCode = (value, fallback) => SAFE_FAILURE_CODES.has(value) ? value : fallback;
 
@@ -58,7 +62,9 @@ export async function saveNewMemoryToAccount({
     if (!photoEnabled) return { status: "PENDING", stage: "photo", reason: "PHOTO_UNAVAILABLE" };
     if (saveQueuedPhoto) {
       const result = await saveQueuedPhoto(cardId);
-      return result?.pending ? { status: "PENDING", stage: "photo", reason: "PHOTO_TRANSFER_PENDING" } : { status: "SYNCED" };
+      return result?.pending
+        ? { status: "PENDING", stage: "photo", reason: safeFailureCode(result.reason, "PHOTO_TRANSFER_PENDING") }
+        : { status: "SYNCED" };
     }
     if (!isPrivateImage(syncedBundle.asset)
       || !(syncedBundle.asset.sync.remoteVersion > 0)) {

@@ -39,10 +39,10 @@ test("photo intent waits for metadata and survives a failed transfer before comp
   options.runtime.getCard = async () => ({ card, asset: { ...asset, sync: synced ? asset.sync : { syncState: "PENDING", remoteVersion: 0 } } });
   options.createPhotoTransfer = () => ({ upload: async () => { attempts++; if (attempts === 1) throw new Error("offline"); } });
   await queueNewPrivatePhoto({ runtime: options.runtime, userId, cardId: card.id, store: options.store, isPrivateImage: options.isPrivateImage });
-  assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 0, pending: 1 });
+  assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 0, pending: 1, reason: "PHOTO_METADATA_PENDING" });
   assert.equal(attempts, 0);
   synced = true;
-  assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 0, pending: 1 });
+  assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 0, pending: 1, reason: "PHOTO_TRANSFER_PENDING" });
   assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 1, pending: 0 });
   assert.equal(attempts, 2);
   assert.deepEqual(await options.store.list(ownerId), []);
@@ -51,9 +51,60 @@ test("photo intent waits for metadata and survives a failed transfer before comp
 test("another account cannot drain an intent, and replaced assets discard only their old intent", async () => {
   const options = input();
   await queueNewPrivatePhoto({ runtime: options.runtime, userId, cardId: card.id, store: options.store, isPrivateImage: options.isPrivateImage });
-  assert.deepEqual(await drainPrivatePhotoAutoSave({ ...options, getSession: async () => ({ user: { id: "other" } }) }), { completed: 0, pending: 1 });
+  assert.deepEqual(await drainPrivatePhotoAutoSave({ ...options, getSession: async () => ({ user: { id: "other" } }) }), { completed: 0, pending: 1, reason: "PHOTO_TRANSFER_PENDING" });
   assert.equal((await options.store.list(ownerId)).length, 1);
   options.runtime.getCard = async () => ({ card, asset: { ...asset, id: "asset-2" } });
   assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 1, pending: 0 });
+  assert.deepEqual(await options.store.list(ownerId), []);
+});
+
+test("a transient private-image request retries the same photo intent before reporting pending", async () => {
+  const options = input();
+  let attempts = 0;
+  options.createPhotoTransfer = () => ({ upload: async () => {
+    attempts++;
+    if (attempts === 1) throw Object.assign(new Error("temporary request failure"), { code: "PRIVATE_IMAGE_REQUEST_FAILED" });
+  } });
+  await queueNewPrivatePhoto({ runtime: options.runtime, userId, cardId: card.id, store: options.store, isPrivateImage: options.isPrivateImage });
+  assert.deepEqual(await drainPrivatePhotoAutoSave(options), { completed: 1, pending: 0 });
+  assert.equal(attempts, 2);
+  assert.deepEqual(await options.store.list(ownerId), []);
+});
+
+test("a permanent private-image policy failure preserves the intent without another upload", async () => {
+  const options = input();
+  let attempts = 0;
+  options.createPhotoTransfer = () => ({ upload: async () => {
+    attempts++;
+    throw Object.assign(new Error("quota"), { code: "PRIVATE_IMAGE_QUOTA_EXCEEDED" });
+  } });
+  await queueNewPrivatePhoto({ runtime: options.runtime, userId, cardId: card.id, store: options.store, isPrivateImage: options.isPrivateImage });
+  assert.deepEqual(await drainPrivatePhotoAutoSave(options), {
+    completed: 0, pending: 1, reason: "PRIVATE_IMAGE_QUOTA_EXCEEDED",
+  });
+  assert.equal(attempts, 1);
+  assert.equal((await options.store.list(ownerId)).length, 1);
+});
+
+test("simultaneous automatic and save-screen drains share one photo upload", async () => {
+  const options = input();
+  let started;
+  let release;
+  const uploadStarted = new Promise(resolve => { started = resolve; });
+  const canFinish = new Promise(resolve => { release = resolve; });
+  let uploads = 0;
+  options.createPhotoTransfer = () => ({ upload: async () => {
+    uploads++;
+    started();
+    await canFinish;
+  } });
+  await queueNewPrivatePhoto({ runtime: options.runtime, userId, cardId: card.id, store: options.store, isPrivateImage: options.isPrivateImage });
+  const first = drainPrivatePhotoAutoSave(options);
+  await uploadStarted;
+  const second = drainPrivatePhotoAutoSave(options);
+  release();
+  assert.deepEqual(await first, { completed: 1, pending: 0 });
+  assert.deepEqual(await second, { completed: 1, pending: 0 });
+  assert.equal(uploads, 1);
   assert.deepEqual(await options.store.list(ownerId), []);
 });

@@ -70,6 +70,17 @@ test("a failed photo transfer leaves the existing Card available for an idempote
   assert.equal(attempts, 2);
 });
 
+test("queued photo transfer reports its safe cause without exposing unexpected errors", async () => {
+  const known = harness({ includePhoto: true, saveQueuedPhoto: async () => ({ pending: 1, reason: "PRIVATE_IMAGE_REQUEST_FAILED" }) });
+  assert.deepEqual(await saveNewMemoryToAccount(known.input), {
+    status: "PENDING", stage: "photo", reason: "PRIVATE_IMAGE_REQUEST_FAILED",
+  });
+  const unknown = harness({ includePhoto: true, saveQueuedPhoto: async () => ({ pending: 1, reason: "secret-internal-detail" }) });
+  assert.deepEqual(await saveNewMemoryToAccount(unknown.input), {
+    status: "PENDING", stage: "photo", reason: "PHOTO_TRANSFER_PENDING",
+  });
+});
+
 test("an official-cover card syncs metadata without uploading private bytes", async () => {
   const { input, calls } = harness();
   assert.deepEqual(await saveNewMemoryToAccount(input), { status: "SYNCED" });

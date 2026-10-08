@@ -6,7 +6,8 @@ const userId = '11111111-1111-4111-8111-111111111111';
 
 test.skip(process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1' || process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== '1', 'Private photo and Web picker flags required');
 
-test('Save card automatically retries the same private photo after navigation without making another card', async ({ page, browserName }) => {
+for (const failedPosts of [1, 2]) {
+test(`Save card recovers after ${failedPosts} transient private photo failure${failedPosts === 1 ? '' : 's'} without making another card`, async ({ page, browserName }) => {
   test.skip(browserName === 'webkit', 'Windows Playwright WebKit cannot persist Blob records in IndexedDB');
   test.setTimeout(90000);
   const source = await sharp({ create: { width: 800, height: 800, channels: 3, background: '#a746d0' } }).png().toBuffer();
@@ -17,7 +18,11 @@ test('Save card automatically retries the same private photo after navigation wi
     let repositoryPromise;
     const repository = () => repositoryPromise ||= import(location.origin + '/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js')
       .then(module => module.IndexedDbMemoryRepository.open());
-    const requests = [];
+    const requests = JSON.parse(sessionStorage.getItem('__SAVE_ACCOUNT_REQUESTS__') || '[]');
+    const recordRequest = request => {
+      requests.push({ entityType: request.entityType, entityId: request.entityId });
+      sessionStorage.setItem('__SAVE_ACCOUNT_REQUESTS__', JSON.stringify(requests));
+    };
     (window as any).__SAVE_ACCOUNT_REQUESTS__ = requests;
     (window as any).__MOEMOA_TEST_MEMORY_ACCOUNT_ADAPTERS__ = {
       enabled: true,
@@ -27,11 +32,11 @@ test('Save card automatically retries the same private photo after navigation wi
         registerDevice: async data => ({ id: data.deviceId, installationId: data.installationId, lastSyncSeq: 0 }),
         promoteGuest: async () => { throw new Error('Guest promotion not requested'); },
         applyCardMutation: async request => {
-          requests.push({ entityType: request.entityType, entityId: request.entityId });
+          recordRequest(request);
           return { status: 'APPLIED', entityVersion: 1, syncSeq: requests.length };
         },
         applyBoardMutation: async request => {
-          requests.push({ entityType: request.entityType, entityId: request.entityId });
+          recordRequest(request);
           return { status: 'APPLIED', entityVersion: 1, syncSeq: requests.length };
         },
         pullChanges: async ({ afterSeq }) => ({ changes: [], nextSyncSeq: afterSeq, requiresFullResync: false }),
@@ -56,7 +61,7 @@ test('Save card automatically retries the same private photo after navigation wi
     }
     if (request.method() === 'POST') {
       posts++;
-      if (posts === 1) return route.abort('failed');
+      if (posts <= failedPosts) return route.abort('failed');
       const bytes = request.postDataBuffer()!;
       return route.fulfill({ json: {
         state: 'READY', sourceVersion: 1, mainBytes: bytes.length,
@@ -75,14 +80,21 @@ test('Save card automatically retries the same private photo after navigation wi
   await page.getByLabel(/I confirm that I have the right/).check();
   await expect(page.getByText('Saving also stores a smaller private copy in your account. The original stays on this device.')).toBeVisible();
   await page.getByRole('button', { name: 'Save card', exact: true }).click();
-  await expect(page.getByText('Card details are in your account. Photo transfer will retry automatically.')).toBeVisible();
-  expect(posts).toBe(1);
-  const requests = await page.evaluate(() => (window as any).__SAVE_ACCOUNT_REQUESTS__);
+  if (failedPosts === 1) {
+    await expect(page).toHaveURL(/\/archive\//);
+    expect(posts).toBe(2);
+  } else {
+    await expect(page.getByText('Card details are in your account. Photo transfer will retry automatically.')).toBeVisible();
+    expect(posts).toBe(2);
+    await page.getByRole('link', { name: 'View saved card' }).click();
+    await expect(page).toHaveURL(/\/memory\/card\//);
+  }
+  if (failedPosts === 1) await page.getByRole('link', { name: 'Save account test' }).click();
+  await expect(page).toHaveURL(/\/memory\/card\//);
+  await expect.poll(() => posts).toBe(failedPosts + 1);
+  const requests = await page.evaluate(() => JSON.parse(sessionStorage.getItem('__SAVE_ACCOUNT_REQUESTS__') || '[]'));
   expect(requests.some(row => row.entityType === 'MEMORY_CARD')).toBe(true);
   expect(requests.some(row => row.entityType === 'VISUAL_ASSET')).toBe(true);
-  await page.getByRole('link', { name: 'View saved card' }).click();
-  await expect(page).toHaveURL(/\/memory\/card\//);
-  await expect.poll(() => posts).toBe(2);
   await expect.poll(() => page.evaluate(async () => {
     const { createPrivatePhotoAutoSaveStore } = await import('/src/features/memory/adapters/indexeddb/privatePhotoAutoSaveStore.js');
     return (await createPrivatePhotoAutoSaveStore().list(`account:${'11111111-1111-4111-8111-111111111111'}`)).length;
@@ -94,3 +106,4 @@ test('Save card automatically retries the same private photo after navigation wi
   });
   expect(saved).toHaveLength(1);
 });
+}

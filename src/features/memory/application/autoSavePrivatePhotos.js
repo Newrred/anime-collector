@@ -1,5 +1,15 @@
 const inFlight = new Map();
 const ownerFor = userId => `account:${userId}`;
+const transientRequestError = error => error?.code === "PRIVATE_IMAGE_REQUEST_FAILED";
+const waitBeforeRetry = () => new Promise(resolve => setTimeout(resolve, 350));
+const safePendingReasons = new Set([
+  "PHOTO_METADATA_PENDING", "PRIVATE_IMAGE_REQUEST_FAILED", "PRIVATE_IMAGE_DISABLED",
+  "PRIVATE_IMAGE_PAUSED", "PRIVATE_IMAGE_POLICY_STALE", "PRIVATE_IMAGE_QUOTA_EXCEEDED",
+  "PRIVATE_IMAGE_CAPACITY_EXCEEDED", "PRIVATE_IMAGE_RATE_LIMITED", "IMAGE_SIZE_LIMIT",
+  "AUTH_REQUIRED", "ORIGINAL_IMAGE_UNAVAILABLE", "SOURCE_IMAGE_MISMATCH",
+  "PRIVATE_IMAGE_SOURCE_CHANGED",
+]);
+const safePendingReason = error => safePendingReasons.has(error?.code) ? error.code : "PHOTO_TRANSFER_PENDING";
 
 export async function queueNewPrivatePhoto({ runtime, userId, cardId, store, isPrivateImage }) {
   if (!userId) return null;
@@ -25,9 +35,11 @@ export async function drainPrivatePhotoAutoSave({
   const intents = (await store.list(ownerId)).filter(intent => !cardId || intent.cardId === cardId);
   let completed = 0;
   let pending = 0;
+  let reason = null;
   for (const intent of intents.slice(0, 20)) {
     if (inFlight.has(intent.key)) {
-      try { await inFlight.get(intent.key); completed++; } catch { pending++; }
+      try { await inFlight.get(intent.key); completed++; }
+      catch (error) { pending++; reason ||= safePendingReason(error); }
       continue;
     }
     const work = (async () => {
@@ -39,14 +51,24 @@ export async function drainPrivatePhotoAutoSave({
         return;
       }
       if (bundle.asset.sync?.syncState !== "SYNCED" || !(bundle.asset.sync.remoteVersion > 0)) {
-        throw new Error("PHOTO_METADATA_PENDING");
+        throw Object.assign(new Error("PHOTO_METADATA_PENDING"), { code: "PHOTO_METADATA_PENDING" });
       }
-      await createPhotoTransfer(runtime, bundle).upload({ consented: true });
+      const transfer = createPhotoTransfer(runtime, bundle);
+      try { await transfer.upload({ consented: true }); }
+      catch (error) {
+        if (!transientRequestError(error) || globalThis.navigator?.onLine === false) throw error;
+        await waitBeforeRetry();
+        if (globalThis.navigator?.onLine === false) throw error;
+        await transfer.upload({ consented: true });
+      }
       await store.remove(intent.key);
     })();
     inFlight.set(intent.key, work);
-    try { await work; completed++; } catch { pending++; }
+    try { await work; completed++; }
+    catch (error) { pending++; reason ||= safePendingReason(error); }
     finally { if (inFlight.get(intent.key) === work) inFlight.delete(intent.key); }
   }
-  return { completed, pending: pending + Math.max(0, intents.length - 20) };
+  const result = { completed, pending: pending + Math.max(0, intents.length - 20) };
+  if (reason) result.reason = reason;
+  return result;
 }

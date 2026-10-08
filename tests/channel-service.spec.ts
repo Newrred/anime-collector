@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { installAppState } from "./helpers/appState";
+import { installSignedInPhotoAccount } from './helpers/signedInPhotoAccount';
 
 const evidence = ".cache/v84-service";
 async function seed(page: Page) {
@@ -228,9 +229,8 @@ test("Collection previews its own saved memories behind each cover and keeps eve
 });
 
 test("actual local image bytes retain their aspect ratio in archive and detail at desktop/mobile widths", async ({ page }) => {
-  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
-  test.skip(process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== "1", "Local Web image intake required");
-  const uploads: string[] = []; page.on("request", request => { if (request.method() === "POST" && /storage|public-image|private-image/.test(request.url())) uploads.push(request.url()); });
+  test.skip(process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== '1' || process.env.PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 !== '1', 'Authenticated Web photo flags required');
+  const { uploads } = await installSignedInPhotoAccount(page, 'ko');
   for (const [name, width, height] of [["가로 이미지", 900, 450], ["세로 이미지", 400, 600]] as const) {
     await page.goto("/memory/new/");
     const data = await page.evaluate(({ width, height }) => { const canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height; const c = canvas.getContext("2d")!; const gradient = c.createLinearGradient(0, 0, width, height); gradient.addColorStop(0, "#e60068"); gradient.addColorStop(1, "#191919"); c.fillStyle = gradient; c.fillRect(0, 0, width, height); c.fillStyle = "white"; c.font = "28px sans-serif"; c.fillText("SYNTHETIC TEST IMAGE", 20, 60); return canvas.toDataURL("image/png").split(",")[1]; }, { width, height });
@@ -275,7 +275,7 @@ test("actual local image bytes retain their aspect ratio in archive and detail a
   await expect(image).toHaveCSS('object-fit','contain');
   await expect(tile.locator('.collection-memory-fan .title-album-card__preview')).toHaveCSS('transform','none');
   await tile.screenshot({path:`${evidence}/collection-side-fan-local-image-dark.png`});
-  expect(uploads).toEqual([]);
+  expect(uploads).toHaveLength(2);
 });
 
 test('Collection unfolds at most three real previews and keeps all four memories in Title Hub', async ({page}) => {
