@@ -28,6 +28,7 @@ const INITIAL_STATE = Object.freeze({
   rightsConfirmed: false,
   savedCardId: null,
   cloudStage: null,
+  cloudReason: null,
 });
 
 const mergeState = (state, patch) => ({ ...state, ...patch });
@@ -266,11 +267,11 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
   const syncSavedCard = async (cardId, options) => {
     if (cloudInFlight.current) return;
     cloudInFlight.current = true;
-    updateState({ status: "syncing", cloudStage: null });
+    updateState({ status: "syncing", cloudStage: null, cloudReason: null });
     try {
       if (options.includePhoto && options.accountUserId && privateImageUiEnabled()) {
         try { await queuePlatformPrivatePhoto(runtime, options.accountUserId, cardId); }
-        catch { updateState({ status: "saved-local", cloudStage: "photo" }); return; }
+        catch { updateState({ status: "saved-local", cloudStage: "photo", cloudReason: "PHOTO_QUEUE_FAILED" }); return; }
       }
       const result = await saveNewMemoryToAccount({
         cardId,
@@ -288,7 +289,7 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
         openArchive();
         return;
       }
-      updateState({ status: "saved-local", cloudStage: result.stage });
+      updateState({ status: "saved-local", cloudStage: result.stage, cloudReason: result.reason || "ACCOUNT_SAVE_FAILED" });
     } finally {
       cloudInFlight.current = false;
     }

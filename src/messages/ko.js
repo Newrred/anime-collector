@@ -109,8 +109,11 @@ const koMessages = {
       saving: "카드 저장 중…",
       syncingAccount: "내 계정에 저장 중…",
       savePhotoInAccount: "저장하면 사진의 작은 비공개 사본도 내 계정에 저장돼요. 원본은 이 기기에 남아요.",
-      accountPending: "카드는 이 기기에 저장됐어요. 계정 반영은 연결되면 자동으로 이어져요.",
+      accountPending: "카드는 이 기기에 저장됐지만 계정 저장은 아직 끝나지 않았어요.",
       photoPending: "카드 정보는 계정에 저장됐어요. 사진 전송은 자동으로 다시 시도해요.",
+      pendingReason: (code) => code === "OFFLINE" ? "인터넷에 연결되면 다시 시도해 주세요."
+        : code === "SYNC_CONFLICT" ? "기록이 충돌했어요. 데이터 화면에서 확인해 주세요."
+          : `다시 시도해도 그대로라면 문제 코드 ${code}를 알려주세요.`,
       retryAccountSave: "지금 다시 시도",
       viewSavedCard: "저장한 카드 보기",
       save: "카드 저장",

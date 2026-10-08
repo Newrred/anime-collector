@@ -44,6 +44,7 @@ function MemoryCardComposerContent({ base }) {
     rightsConfirmed,
     savedCardId,
     cloudStage,
+    cloudReason,
     busy,
     dirty,
     canSave,
@@ -289,6 +290,7 @@ function MemoryCardComposerContent({ base }) {
         </fieldset>
         {savedCardId && status === "saved-local" && <div className="surface-card memory-composer__account-pending" role="status">
           <p>{cloudStage === "photo" ? composerCopy.photoPending : composerCopy.accountPending}</p>
+          {cloudReason && <small>{composerCopy.pendingReason(cloudReason)}</small>}
           <div className="action-row">
             <button type="button" className="btn" onClick={retryAccountSave}>{composerCopy.retryAccountSave}</button>
             <a className="btn btn--subtle" href={`${base}memory/card/?id=${encodeURIComponent(savedCardId)}`} data-astro-reload>{composerCopy.viewSavedCard}</a>

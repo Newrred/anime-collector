@@ -109,8 +109,11 @@ const enMessages = {
       saving: "Saving card…",
       syncingAccount: "Saving to your account…",
       savePhotoInAccount: "Saving also stores a smaller private copy in your account. The original stays on this device.",
-      accountPending: "The card is saved here. Account storage will resume automatically when connected.",
+      accountPending: "The card is saved on this device, but account storage has not finished.",
       photoPending: "Card details are in your account. Photo transfer will retry automatically.",
+      pendingReason: (code) => code === "OFFLINE" ? "Reconnect to the internet, then retry."
+        : code === "SYNC_CONFLICT" ? "There is a record conflict. Review it on the Data page."
+          : `If retrying does not help, share issue code ${code}.`,
       retryAccountSave: "Retry now",
       viewSavedCard: "View saved card",
       save: "Save card",

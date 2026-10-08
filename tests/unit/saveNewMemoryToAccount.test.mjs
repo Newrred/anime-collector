@@ -48,15 +48,15 @@ test("new account photo is sent only after its Card metadata has a remote versio
 
 test("account change or a partial metadata sync never uploads a photo", async () => {
   const changed = harness({ includePhoto: true, getSession: async () => ({ user: { id: "other" } }) });
-  assert.deepEqual(await saveNewMemoryToAccount(changed.input), { status: "PENDING", stage: "account" });
+  assert.deepEqual(await saveNewMemoryToAccount(changed.input), { status: "PENDING", stage: "account", reason: "AUTH_SESSION_MISMATCH" });
   assert.deepEqual(changed.calls, []);
 
-  const partial = harness({ includePhoto: true, getAccountRuntime: async () => ({
+  const partial = harness({ includePhoto: true, runtime: { getCard: async () => { partial.calls.push("read-card"); return localBundle; } }, getAccountRuntime: async () => ({
     initializeAccountSession: async () => ({ status: "ACCOUNT_READY", userId }),
     syncNow: async () => ({ syncResultCode: "PARTIAL" }),
   }) });
-  assert.deepEqual(await saveNewMemoryToAccount(partial.input), { status: "PENDING", stage: "metadata" });
-  assert.deepEqual(partial.calls, ["read-card"]);
+  assert.deepEqual(await saveNewMemoryToAccount(partial.input), { status: "PENDING", stage: "metadata", reason: "SYNC_PARTIAL" });
+  assert.deepEqual(partial.calls, ["read-card", "read-card"]);
 });
 
 test("a failed photo transfer leaves the existing Card available for an idempotent retry", async () => {
@@ -65,7 +65,7 @@ test("a failed photo transfer leaves the existing Card available for an idempote
     calls.push("photo");
     if (++attempts === 1) throw new Error("network unavailable");
   } }) });
-  assert.deepEqual(await saveNewMemoryToAccount(input), { status: "PENDING", stage: "photo" });
+  assert.deepEqual(await saveNewMemoryToAccount(input), { status: "PENDING", stage: "photo", reason: "ACCOUNT_SAVE_FAILED" });
   assert.deepEqual(await saveNewMemoryToAccount(input), { status: "SYNCED" });
   assert.equal(attempts, 2);
 });
@@ -78,6 +78,25 @@ test("an official-cover card syncs metadata without uploading private bytes", as
 
 test("a concurrent batch result cannot claim this new Card was already saved", async () => {
   const { input, calls } = harness({ runtime: { getCard: async () => { calls.push("read-card"); return localBundle; } } });
-  assert.deepEqual(await saveNewMemoryToAccount(input), { status: "PENDING", stage: "metadata" });
+  assert.deepEqual(await saveNewMemoryToAccount(input), { status: "PENDING", stage: "metadata", reason: "CARD_NOT_CONFIRMED" });
   assert.deepEqual(calls, ["read-card", "initialize", "metadata", "read-card"]);
+});
+
+test("a new Card proceeds after its own metadata sync even if another record fails", async () => {
+  const { input, calls } = harness({ includePhoto: true, getAccountRuntime: async () => ({
+    initializeAccountSession: async () => ({ status: "ACCOUNT_READY", userId }),
+    syncNow: async () => ({ syncResultCode: "REJECTED", syncErrorCode: "SYNC_QUOTA_EXCEEDED" }),
+  }) });
+  assert.deepEqual(await saveNewMemoryToAccount(input), { status: "SYNCED" });
+  assert.deepEqual(calls, ["read-card", "read-card", "photo"]);
+});
+
+test("a server failure on this Card is returned as a safe issue code", async () => {
+  const { input } = harness({ runtime: { getCard: async () => localBundle }, getAccountRuntime: async () => ({
+    initializeAccountSession: async () => ({ status: "ACCOUNT_READY", userId }),
+    syncNow: async () => ({ syncResultCode: "ERROR", syncErrorCode: "SYNC_SERVER_SCHEMA_UNAVAILABLE" }),
+  }) });
+  assert.deepEqual(await saveNewMemoryToAccount(input), {
+    status: "PENDING", stage: "metadata", reason: "SYNC_SERVER_SCHEMA_UNAVAILABLE",
+  });
 });
