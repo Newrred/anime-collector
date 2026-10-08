@@ -79,6 +79,7 @@
 - 2026-10-09: 과거 Guest 사진 전제의 `test.fixme` 10건을 로그인 합성 계정·실제 파일 선택·가짜 private-image API로 전환했다. 관련 카드 작성/계정 저장 Chromium 21 PASS, Web 이미지/Guest/레이아웃 13 PASS, channel 사진 1 PASS, 남은 `test.fixme` 0건. CI는 사진 flag를 켠 전용 실행 단계에서 이를 검사한다.
 - 2026-10-09: 전체 unit 458 PASS, catalog 256 PASS/기존 skip 2건. Chromium 주요 회귀 81건 중 79 PASS·기존 skip 1건·팝업 harness 로딩 지연 1건 실패; 해당 `service-finishing.spec.ts` 단독 재실행 6 PASS. 이 실패는 사진 코드 경로가 아니라 Vite test harness 첫 마운트 후 버튼 대기에서 발생했고, CI 결과도 확인한다.
 - 2026-10-09: 화면·감상 channel 회귀 80 PASS/기존 skip 5건, 정적 Web 빌드 20페이지 PASS. React Doctor 변경 파일 92/100, 새 진단 0건. 모든 fixture의 계정·이미지·gateway는 합성값이며 운영 데이터 접근은 없다.
+- 2026-10-09: 구현·테스트·인계 커밋 `364de73988d85213c6bc25a5991e2e9c7c62826c`를 원격 `master`에 push. [GitHub Service quality 37816923071](https://github.com/Newrred/anime-collector/actions/runs/37816923071)의 `publication-contract`·`verify` 모두 성공(verify 7분 50초). 특히 첫 로컬 묶음에서 지연됐던 팝업 harness도 CI 전체 묶음에서는 통과했다. Vercel Git 상태 success, 운영 `/build-info.json`의 `commit`·`checkoutCommit`과 구현 커밋이 일치하고 `source=vercel-git`, `deploymentConfig.semanticMatch=true`를 확인. 운영 `/memory/new/`·`/archive/` HTTP 200. 사용자에게 실기기 수정·삭제 확인을 요청했지만 지금은 테스트하기 어려워 미확인으로 둔다.
 
 ## 16. 발견 사항과 계획 변경
 
@@ -91,5 +92,5 @@
 - 변경: 일시적 사진 HTTP 요청 실패만 같은 의도/journal로 350ms 뒤 1회 재시도한다. 대기 이유는 지정된 안전 코드만 표시한다. 로그인 사진 `fixme` 10건을 제거하고 CI 사진 전용 실행과 합성 두 기기 메타데이터 왕복 회귀를 추가했다. 시작 문서에 인계 절차를 적었다.
 - 로컬 검증: unit 458 PASS, catalog 256 PASS/2 skip, 로그인 사진 묶음 Chromium 21+13+1 PASS, 두 기기 Chromium·WebKit 각 1 PASS, channel 80 PASS/5 skip, build 20페이지 PASS. 주요 Chromium 묶음은 79 PASS/1 skip/팝업 harness 첫 로딩 지연 1 fail이었고 그 파일 단독 재실행은 6 PASS다.
 - DB·환경 설정·운영 사진·권리 정책 변경 없음. 실패 시 이 변경 커밋을 `git revert`하고 `master`에 push한다. 사진 전송 의도와 기기 원본은 보존한다.
-- GitHub CI와 Vercel Git 배포는 push 후 확인한다. 운영 SHA는 `/build-info.json`의 `commit`·`checkoutCommit`이 원격 `master`와 같은지 확인한다.
+- 구현 커밋 `364de73`의 GitHub CI 두 job과 Vercel Git 배포가 성공했고, 당시 운영 SHA도 일치했다. 이 완료 기록을 반영한 문서 후속 커밋의 최신 원격/운영 SHA는 `/build-info.json`의 `commit`·`checkoutCommit`과 `git rev-parse origin/master`로 다시 대조한다.
 - 실제 iPhone Safari에서 이번 개선본의 첫 저장 무재시도 성공률, 기기 간 수정·삭제·오프라인 복구는 사용자 실기기 확인이 남아 있다. 정확한 과거 `photo_transfer_...` 오류 문자열이 없어 이번 재시도가 원인을 완전히 해결했다고 주장하지 않는다.
