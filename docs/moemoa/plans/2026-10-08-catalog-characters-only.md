@@ -61,4 +61,4 @@ AniList는 허용 범위의 오프라인 수집·검토 단계에서만 원천 �
 - 최신 공식 AniList 약관은 대량 수집과 API를 저장소 대용으로 쓰는 행위를 제한한다. 저장소에는 사용자가 별도로 확보했다고 확인한 Production 허가만 기록돼 있고 원문은 없다. 이번 수집은 고유 작품 ID가 이미 연결된 누락 199개만 대상으로 제한한다.
 
 ## 17. 완료 보고
-화면의 캐릭터 직접 AniList 대체 조회는 제거했다. 카탈로그 캐릭터의 숫자형 외부 ID를 기존 즐겨찾기·감상 참조와 연결했다. 깨끗한 Git checkout에서 단위 440개, 관련 Chromium 9개, Web build 20페이지가 통과했다. 카탈로그 검사는 256개 통과·2개 환경 건너뜀. 운영 후보와 원천·DB 사본은 Git 밖 `D:/hong/Web/Anime/.moemoa-character-audit-2026-10-08/`에 보관한다. 승인된 DB release가 활성화되었고 46개 미바인딩과 AniList에도 캐릭터가 없는 68개는 남는다. 이 기록 작성 시점에 Git push·Web 배포는 아직 진행 중이다.
+화면의 캐릭터 직접 AniList 대체 조회는 제거했다. 카탈로그 캐릭터의 숫자형 외부 ID를 기존 즐겨찾기·감상 참조와 연결했다. 깨끗한 Git checkout에서 단위 440개, 관련 Chromium 9개, Web build 20페이지가 통과했다. 카탈로그 검사는 256개 통과·2개 환경 건너뜀. 운영 후보와 원천·DB 사본은 Git 밖 `D:/hong/Web/Anime/.moemoa-character-audit-2026-10-08/`에 보관한다. 승인된 DB release가 활성화되었고 46개 미바인딩과 AniList에도 캐릭터가 없는 68개는 남는다. Git `master` push와 Vercel Git 배포를 확인했다.

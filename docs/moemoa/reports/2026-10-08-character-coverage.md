@@ -24,4 +24,4 @@
 - 원천 자료, 운영 사본, 후보 및 요약은 Git 밖 `D:/hong/Web/Anime/.moemoa-character-audit-2026-10-08/`에 보관한다. 재현 코드: `tools/catalog-lab/reports/missing-characters.mjs`, `tools/catalog-preview/character-backfill-release.mjs`.
 - 사용자 승인 후 운영 DB에 후보를 staging하고 네 종류의 행(4,292/4,292/4,292/5,214개)을 전수 해시 비교했다. `catalog-people-b05fefa545fcce9864eb476f`를 활성화했고 익명 카탈로그 재감사에서 작품 4,292개 중 캐릭터가 있는 작품 4,178개, 없는 작품 114개(연결된 AniList에도 없는 68개·연결 없는 46개), 충돌 0개를 확인했다.
 - 운영 DB에는 2026-09-24의 `activate_catalog_release_checked`가 없어 기존 `activate_catalog_release`로 전환했다. 이 함수는 release 해시, 전체 행 수, 표지 Storage 존재를 검사하지만 예상 이전 릴리스 ID를 원자적으로 비교하지는 않는다. 도구는 전환 직전 활성 포인터를 확인한다. 문제가 있으면 이전 release의 행을 재검증한 뒤 staging으로 되돌리고 기존 함수를 통해 재활성화한다.
-- Git push 및 Web 배포는 이 기록 작성 시점에 아직 하지 않았다.
+- 캐릭터 조회 코드와 릴리스 기록을 Git `master`에 push했다. Vercel Git 배포 성공 상태와 `www.moemoa.xyz/build-info.json`의 커밋 일치를 확인했고, 보강 표본 `anime:8138e4e8-e3fe-4172-aace-0fb0ef19e2c1`에서 익명 캐릭터 24명과 작품 화면 HTTP 200을 확인했다.
