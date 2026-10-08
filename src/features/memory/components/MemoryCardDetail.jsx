@@ -2,18 +2,21 @@ import { memoryReturnHref } from "../../../domain/search/memoryReturnNavigation.
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import AddMemoryToBoard from "./AddMemoryToBoard.jsx";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
 import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
+import { getPlatformMemoryAccountRuntime } from "../runtime/platformMemoryAccountRuntime.js";
+import { getAuthSession } from "../../../repositories/authRepo.js";
+import { saveNewMemoryToAccount } from "../application/saveNewMemoryToAccount.js";
 import MemoryImageReplacement from "./MemoryImageReplacement.jsx";
 import MemorySharingSettings from "./MemorySharingSettings.jsx";
 import MemoryClassificationEditor from "./MemoryClassificationEditor.jsx";
 import { addCustomTag, characterTagKey, classificationSyncEnabled, EMPTY_CLASSIFICATION, normalizeCardClassification } from "../domain/cardClassification.js";
 import { publicationUiEnabled } from "../runtime/platformPublication.js";
 import MemoryPrivateImageSync from "./MemoryPrivateImageSync.jsx";
-import { isPrivateUserImage, privateImageUiEnabled, queuePlatformPrivatePhoto } from '../runtime/platformPrivateImages.js';
+import { isPrivateUserImage, privateImageUiEnabled, queuePlatformPrivatePhoto, hasPlatformPrivatePhotoIntent, drainPlatformPrivatePhotos, privateImageTransfer } from '../runtime/platformPrivateImages.js';
 import MemoryVisual from "./MemoryVisual.jsx";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-card-detail.css";
@@ -50,6 +53,47 @@ const localizedMessage = (message, copy, locale) => {
 };
 
 const syncLabel = (entity, copy) => copy.syncStates?.[entity?.sync?.syncState] || "";
+
+function AccountSaveRetry({ runtime, bundle, userId, locale, copy, onResolved }) {
+  const [busy, setBusy] = useState(false);
+  const [reason, setReason] = useState(null);
+  if (!userId || bundle.card.ownerId !== `account:${userId}`
+    || (bundle.card.sync?.syncState === "SYNCED" && bundle.asset.sync?.syncState === "SYNCED")) return null;
+  const retry = async () => {
+    if (busy) return;
+    setBusy(true);
+    setReason(null);
+    try {
+      const includePhoto = privateImageUiEnabled()
+        && await hasPlatformPrivatePhotoIntent(bundle.card.ownerId, bundle.asset.id);
+      const result = await saveNewMemoryToAccount({
+        cardId: bundle.card.id,
+        userId,
+        runtime,
+        includePhoto,
+        photoEnabled: privateImageUiEnabled(),
+        getSession: getAuthSession,
+        getAccountRuntime: getPlatformMemoryAccountRuntime,
+        createPhotoTransfer: privateImageTransfer,
+        isPrivateImage: isPrivateUserImage,
+        saveQueuedPhoto: () => drainPlatformPrivatePhotos(userId, bundle.card.id),
+      });
+      await onResolved();
+      if (result.status !== "SYNCED") setReason(result.reason || "ACCOUNT_SAVE_FAILED");
+    } catch {
+      setReason("ACCOUNT_SAVE_FAILED");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return <div className="memory-detail__message" role="status">
+    <p>{locale === "ko" ? "이 카드는 기기에 저장됐지만 계정 저장은 아직 끝나지 않았어요." : "This card is on this device, but account storage has not finished."}</p>
+    {reason && <small>{copy.composer.pendingReason(reason)}</small>}
+    <button type="button" className="btn" disabled={busy} onClick={retry}>{busy
+      ? locale === "ko" ? "계정에 저장 중…" : "Saving to account…"
+      : locale === "ko" ? "계정 저장 다시 시도" : "Retry account save"}</button>
+  </div>;
+}
 
 export default function MemoryCardDetail({ base = "/" }) {
   return (
@@ -320,6 +364,11 @@ function MemoryCardDetailContent({ base }) {
             <div><dt>{locale === "ko" ? "이미지" : "Visual"}</dt><dd>{bundle.asset.designSpec ? copy.archive.systemDesign : bundle.asset.imageType === "CATALOG_COVER" ? detailCopy.catalogCover : copy.archive.privateImage}</dd></div>
           </dl>
           <MemoryTitleLink bundle={bundle} base={base} label={detailCopy.openTitleHub} className="memory-detail__title-link" />
+          <AccountSaveRetry runtime={runtime} bundle={bundle} userId={authUserId} locale={locale} copy={copy}
+            onResolved={async () => {
+              const next = await runtime.getCard(bundle.card.id);
+              if (next) updateState({ bundle: next, photoSyncRevision: state.photoSyncRevision + 1 });
+            }} />
           <div className="memory-detail__toolbar">
             <button ref={editTriggerRef} type="button" className="memory-detail__edit-trigger" disabled={status !== "ready" || state.editing} onClick={() => updateState({ editing: true, detailTab: "memory", message: "" })}>{locale === "ko" ? "기억 수정" : "Edit memory"}</button>
             <AddMemoryToBoard cardId={bundle.card.id} base={base} locale={locale} disabled={status !== "ready" || state.editing} />

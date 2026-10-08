@@ -13,10 +13,13 @@ insert into auth.users values('11111111-1111-4111-8111-111111111111'),('22222222
 insert into public.memory_cards(id,user_id,catalog_anime_id,title_snapshot,status,client_updated_at)
  select ('cccccccc-cccc-4ccc-8ccc-'||lpad(n::text,12,'0'))::uuid,'11111111-1111-4111-8111-111111111111',
  'anime:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Synthetic private test','DRAFT',now() from generate_series(1,4) n;
-insert into public.memory_visual_assets(id,user_id,card_id,asset_type,state,is_current,checksum_sha256,mime_type,byte_size,width,height,client_updated_at)
+insert into public.memory_visual_assets(id,user_id,card_id,asset_type,state,is_current,checksum_sha256,mime_type,byte_size,width,height,design_spec,client_updated_at)
  select ('aaaaaaaa-aaaa-4aaa-8aaa-'||lpad(n::text,12,'0'))::uuid,'11111111-1111-4111-8111-111111111111',
- ('cccccccc-cccc-4ccc-8ccc-'||lpad(n::text,12,'0'))::uuid,'USER_IMAGE','READY',true,repeat('a',64),'image/png',500,10,10,now() from generate_series(1,4) n;
+ ('cccccccc-cccc-4ccc-8ccc-'||lpad(n::text,12,'0'))::uuid,'USER_IMAGE','READY',true,repeat('a',64),'image/png',500,10,10,
+ case when n=1 then 'null'::jsonb else null::jsonb end,now() from generate_series(1,4) n;
 commit;
+select pg_temp.ok((select design_spec is null from public.memory_visual_assets where id='aaaaaaaa-aaaa-4aaa-8aaa-000000000001'),'offline JSON null image design normalizes to SQL NULL');
+select pg_temp.fails($q$update public.memory_visual_assets set design_spec='{}'::jsonb where id='aaaaaaaa-aaaa-4aaa-8aaa-000000000001'$q$,'memory_visual_assets_source_metadata_check','non-null image design still rejected');
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
 set role authenticated;
 select pg_temp.fails($q$select public.get_memory_private_image_policy('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',1)$q$,'PRIVATE_IMAGE_DISABLED','default policy closed');
