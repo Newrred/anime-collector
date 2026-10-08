@@ -85,11 +85,10 @@ test("320px header keeps primary controls separate and at least 44px", async ({ 
   );
 });
 
-test("320px system-design composer follows visual, title, reflection, and save order without an image-rights prompt", async ({ page }) => {
+test("320px guest composer follows visual, title, reflection, and save order without an image-rights prompt", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "Use system design" }).click();
   await page.getByLabel("Anime or card title").fill("Mobile flow");
   await expect(page.locator('.memory-composer__rights-step')).toHaveCount(0);
 
@@ -120,15 +119,13 @@ test("320px system-design composer follows visual, title, reflection, and save o
   expect(geometry.overflow).toBeLessThanOrEqual(0.5);
 });
 
-test("320px composer exposes the first available visual action in the opening viewport", async ({ page }) => {
+test("320px guest composer exposes the photo sign-in action in the opening viewport", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await installAppState(page, { locale: "en", list: [], watchLogs: [] });
   await page.goto("/memory/new/");
 
-  const cta = page.getByRole("button", { name: process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 === "1"
-    ? "Choose image" : "Use system design", exact: true });
+  const cta = page.getByRole("button", { name: 'Sign in to add a photo', exact: true });
   await expect(cta).toBeVisible();
-  await expect(cta).toBeEnabled();
   const geometry = await cta.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     return { top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight };

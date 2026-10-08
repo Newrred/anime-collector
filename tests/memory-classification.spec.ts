@@ -3,9 +3,14 @@ import { installAppState } from "./helpers/appState";
 
 const titleId = "anime:11111111-1111-4111-8111-000000000001";
 test.beforeEach(async ({ page }) => {
-  await installAppState(page, { locale: "ko", mediaById: { "1": { id: 1, title: { english: "Synthetic title" }, genres: [], characters: { edges: [
-    { role: "MAIN", node: { id: 10, name: { full: "합성 캐릭터 A" } } }, { role: "MAIN", node: { id: 20, name: { full: "합성 캐릭터 B" } } },
-  ] } } } });
+  await installAppState(page, { locale: 'ko' });
+  await page.addInitScript(() => {
+    window.__MOEMOA_TEST_TITLE_CHARACTERS__ = async () => ({ source: 'CATALOG', page: 1, hasMore: false,
+      characters: [
+        { source: 'CATALOG', id: 'anilist:10', name: '합성 캐릭터 A', role: 'MAIN', castings: [] },
+        { source: 'CATALOG', id: 'anilist:20', name: '합성 캐릭터 B', role: 'MAIN', castings: [] },
+      ] });
+  });
   await page.route("https://**/*", route => route.abort());
 });
 async function seed(page: Page, privateTitle = false) {
@@ -63,12 +68,12 @@ test("cancel and delete-cancel preserve classification, while management is fold
   await page.getByText("공개·비공개 설정", { exact: true }).click();
   await expect(page.getByText("현재 이 환경에서는 공개 게시를 사용할 수 없어요.")).toBeVisible();
 });
-test("actual Title Hub displays bound characters without needing a saved title", async ({ page }) => {
+test("actual Title Hub displays catalog characters without needing a saved title", async ({ page }) => {
   await seed(page);
-  await page.goto(`/title/?anilistId=1`);
+  await page.goto(`/title/?animeId=${encodeURIComponent(titleId)}`);
   await expect(page.getByRole("heading", { name: "등장 캐릭터" })).toBeVisible();
   await expect(page.getByText("합성 캐릭터 A", { exact: true })).toBeVisible();
-  await expect(page.getByText("AniList · 대표 캐릭터", { exact: true })).toBeVisible();
+  await expect(page.getByText("작품 카탈로그", { exact: true })).toBeVisible();
 });
 
 test("save commits an unsubmitted tag and a failed save preserves both tag and reflection drafts", async ({ page }) => {
@@ -167,8 +172,8 @@ for (const width of [1440, 390, 320]) test(`detail classification fits ${width}p
 
 test("long character selection stays usable at 320px in dark mode and enforces the existing limit", async ({ page }) => {
   await page.addInitScript(() => {
-    const edges = Array.from({ length: 35 }, (_, index) => ({ role: "MAIN", node: { id: index + 100, name: { full: `선택 캐릭터 ${index + 1}` } } }));
-    localStorage.setItem("anime:mediaCache:v1", JSON.stringify({ "1": { ts: Date.now(), media: { id: 1, title: { english: "Synthetic title" }, genres: [], characters: { edges } } } }));
+    window.__MOEMOA_TEST_TITLE_CHARACTERS__ = async () => ({ source: 'CATALOG', page: 1, hasMore: false,
+      characters: Array.from({ length: 35 }, (_, index) => ({ source: 'CATALOG', id: `anilist:${index + 100}`, name: `선택 캐릭터 ${index + 1}`, role: 'MAIN', castings: [] })) });
   });
   const [id] = await seed(page);
   await page.goto(`/memory/card/?id=${id}`);

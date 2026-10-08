@@ -19,7 +19,7 @@ process.exitCode = await runIsolatedE2E({
   env,
   playwrightArgs: [
     'tests/memory-classification.spec.ts', 'tests/channel-service.spec.ts', 'tests/channel-controls.spec.ts',
-    'tests/title-hub.spec.ts', 'tests/memory-card-composer.spec.ts', 'tests/memory-account-sync.spec.ts',
+    'tests/title-hub.spec.ts', 'tests/memory-guest-save.spec.ts', 'tests/memory-account-sync.spec.ts',
     'tests/release-editing.spec.ts', '--project=chromium', '--workers=1', '--reporter=line',
     ...process.argv.slice(2),
   ],

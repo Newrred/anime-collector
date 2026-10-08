@@ -1,11 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import { installAppState } from "./helpers/appState";
+import { createApprovedCoverCard } from './helpers/approvedCoverCard';
 
 async function saveFirstCard(page: Page, locale: "en" | "ko" = "en", title = "A remembered scene") {
-  await page.goto("/memory/new/");
-  await page.getByRole("button", { name: locale === "ko" ? "디자인으로 만들기" : "Use system design", exact: true }).click();
-  await page.getByLabel(locale === "ko" ? "작품명" : "Anime or card title", { exact: true }).fill(title);
-  await page.getByRole("button", { name: locale === "ko" ? "카드 저장" : "Save card", exact: true }).click();
+  await createApprovedCoverCard(page, title, 'A remembered scene', locale);
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
 }
 
@@ -72,7 +70,7 @@ test("Bookshelf and Board preserve the same Memory and Title Hub after choosing 
   const film = page.locator(".bookshelf-film");
   await expect(film).toBeVisible();
   const hubHref = await film.locator('.title-album-card__identity').getAttribute("href");
-  expect(hubHref).toMatch(/^\/title\/\?privateTitleId=/);
+  expect(hubHref).toMatch(/^\/title\/\?animeId=/);
   await page.screenshot({ path: "test-results/channel-bookshelf-cross-surface.png", fullPage: true });
   await film.locator('.title-album-card__preview').click();
   await expect(page.locator(".memory-detail__title-link")).toHaveAttribute("href", hubHref!);

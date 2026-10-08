@@ -1,8 +1,10 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-08 현재 운영 상태:** 새 카드·사진의 계정 자동 저장은 운영 Git `master`에 반영돼 있고 운영 사진 설정 `PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1`이다. 기존 iPhone 카드의 저장 재시도 뒤 사용자가 PC에서 카드와 사진을 확인했다. 이는 새 카드 작성·오프라인 복구까지 실기기 전수 검증했다는 뜻은 아니다. 환경 변수·DB 정책·관리 화면의 위치와 변경 절차는 [운영 설정 지도](docs/moemoa/operations/2026-10-08-configuration-map.md), 남은 검증과 CI 현황은 [마감 계획](docs/moemoa/plans/2026-10-08-operations-closeout.md)을 따른다. 아래 날짜별 ‘로컬 후보’ 및 ‘off’ 표기는 당시 기록이다. 정확한 운영 버전은 [빌드 정보](https://www.moemoa.xyz/build-info.json)로 확인한다.
+
 > **2026-10-08 운영 iPhone 사진 카드 저장 복구:** 운영 카드 전송의 `MEMORY_GATEWAY_FAILED`는 사진 업로드 전에 이미지 metadata RPC가 DB의 `memory_visual_assets_source_metadata_check`에서 거절된 결과였다. 비디자인 이미지에 들어온 JSON `null`을 SQL `NULL`로 정규화하는 migration `20261008093000`을 운영에 적용하고 이력·트리거·함수 각 1건을 확인했다. 복구 UI는 기존 기기 카드 ID로 계정 저장을 재시도한다. 구현 커밋은 `f9ea8915b6402b14eb871a59236377c91f26634a`이며 최신 Git `master`와 운영 Web SHA는 `build-info.json`을 대조한다. **사용자가 기존 iPhone 카드 재시도 후 PC에서 카드와 사진이 모두 잘 보인다고 확인했다.** 아래의 ‘운영 미반영’ 문구는 당시 기록이다. [계획/검증](docs/moemoa/plans/2026-10-08-save-to-account-on-save.md).
 
-> **2026-10-08 로컬 후보(운영 미반영):** 사용자는 로그인 상태의 기록·카드·보드·신규 비공개 사진 자동 저장, 비로그인 공식 표지 카드·작품/감상 기기 저장, 개인 사진의 로그인 요구, 시스템 디자인 신규 작성 종료를 확정했다. [결정](docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md#decision-log--automatic-save-and-guest-cover-01-2026-10-08)·[ExecPlan](docs/moemoa/plans/2026-10-08-save-to-account-on-save.md)·[단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)의 최신 로컬 후보를 따른다. 운영 사진 flag는 여전히 off이고 Git push·운영 배포는 하지 않았다.
+> **2026-10-08 당시 로컬 후보(이후 운영 반영):** 사용자는 로그인 상태의 기록·카드·보드·신규 비공개 사진 자동 저장, 비로그인 공식 표지 카드·작품/감상 기기 저장, 개인 사진의 로그인 요구, 시스템 디자인 신규 작성 종료를 확정했다. [결정](docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md#decision-log--automatic-save-and-guest-cover-01-2026-10-08)·[ExecPlan](docs/moemoa/plans/2026-10-08-save-to-account-on-save.md)을 참조한다. 당시에는 사진 flag가 off이고 Git push·운영 배포 전이었다. 현재 상태는 이 문서 맨 위를 따른다.
 
 > **2026-10-07 현재 운영 구조 읽기:** [현재 구조와 화면 흐름](docs/moemoa/CURRENT_STRUCTURE_AND_FLOW.md)에서 실제 `master` 기준 라우트·기록/동기화 경계·옛 서재의 호환 경로를 확인한다. [화면 혼재 감사](docs/moemoa/reports/2026-10-07-live-flow-consolidation-audit.md)는 당시 문제 원인과 개선 순서이며, 완료 상태는 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)의 맨 위를 따른다. 운영 소스 SHA는 [build-info](https://www.moemoa.xyz/build-info.json)와 Git `master`를 대조한다. 아래 날짜별 ‘최신’ 문구는 당시 이력이다.
 

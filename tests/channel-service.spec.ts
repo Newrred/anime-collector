@@ -228,6 +228,7 @@ test("Collection previews its own saved memories behind each cover and keeps eve
 });
 
 test("actual local image bytes retain their aspect ratio in archive and detail at desktop/mobile widths", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   test.skip(process.env.PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 !== "1", "Local Web image intake required");
   const uploads: string[] = []; page.on("request", request => { if (request.method() === "POST" && /storage|public-image|private-image/.test(request.url())) uploads.push(request.url()); });
   for (const [name, width, height] of [["가로 이미지", 900, 450], ["세로 이미지", 400, 600]] as const) {

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { installAppState } from './helpers/appState';
+import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
+import { installApprovedCoverResolver, selectApprovedCover } from './helpers/approvedCoverCard';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ui:locale:v1', JSON.stringify('en')));
@@ -58,12 +60,9 @@ test('new Board text is protected and clearing it removes the warning', async ({
 
 
 async function createMemory(page, title = 'Editing fixture') {
-  await page.goto('/memory/new/');
-  await page.getByRole('button', { name: 'Use system design' }).click();
-  await page.getByLabel('Anime or card title').fill(title);
-  await page.getByLabel('Short reflection').fill('Original reflection');
-  await page.getByRole('button', { name: 'Save card', exact: true }).click();
-  await expect(page).toHaveURL(/\/archive\/$/);
+  await seedSystemDesignCards(page, [{ title, note: 'Original reflection' }]);
+  await page.goto('/archive/');
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
 }
 
 test('watch log X, Escape, backdrop and Cancel share draft-discard behavior', async ({ page }) => {
@@ -169,9 +168,9 @@ test('dirty navigation runs before the Android link adapter', async ({ page }) =
 
 
 test('composer pending save locks all editable fields and prevents a second card', async ({ page }) => {
+  await installApprovedCoverResolver(page, 'Pending card');
   await page.goto('/memory/new/');
-  await page.getByRole('button', { name: 'Use system design' }).click();
-  await page.getByLabel('Anime or card title').fill('Pending card');
+  await selectApprovedCover(page, 'Pending card');
   await page.getByLabel('Short reflection').fill('Pending note');
   await page.evaluate(async () => {
     const { IndexedDbMemoryRepository } = await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');

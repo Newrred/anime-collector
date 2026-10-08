@@ -1,4 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
 import sharp from "sharp";
 import { createHash } from 'node:crypto';
 
@@ -399,15 +400,11 @@ function mockPublication() {
 }
 
 async function seedOwner(page: Page) {
-  // Real local UI/IndexedDB; only remote account/sync acknowledgement is synthetic.
-  for (const title of ["Shared memory", "Unselected private memory"]) {
-    await page.goto("/memory/new/");
-    await page.getByRole("button", { name: "Use system design" }).click();
-    await page.getByLabel("Anime or card title").fill(title);
-    await page.getByLabel("Short reflection").fill(title === "Shared memory" ? "Selected reflection" : "PRIVATE ONLY NOTE");
-    await page.getByRole("button", { name: "Save card" }).click();
-    await expect(page).toHaveURL(/\/archive\/$/);
-  }
+  // Existing design cards remain readable and publishable; new design-card creation was removed.
+  await seedSystemDesignCards(page, [
+    { title: 'Shared memory', note: 'Selected reflection' },
+    { title: 'Unselected private memory', note: 'PRIVATE ONLY NOTE' },
+  ]);
   await page.goto("/boards/");
   await page.locator("summary").filter({ hasText: "New Board" }).click();
   await page.getByLabel("Board title").fill("PRIVATE BOARD NAME");

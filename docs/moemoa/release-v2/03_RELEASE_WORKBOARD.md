@@ -1,10 +1,15 @@
 # MOEMOA · 단일 출시 작업판
 
-## 2026-10-08 자동 계정 저장·Guest 공식 표지 — 로컬 후보, 운영 미적용
+## 2026-10-08 운영 저장 상태·검증 잔여
+
+- 신규 카드와 비공개 사진의 계정 자동 저장을 Git `master`로 운영 반영했고, `.env.production`의 `PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1=1`이다. 운영 카드 전송 오류를 낸 이미지 metadata DB 제약은 migration `20261008093000`으로 수정했다. 사용자가 기존 iPhone 카드의 재시도 후 PC에서 카드와 사진이 보인다고 확인했다. 새 카드 작성, 오프라인 재시도, 변경·삭제의 실기기 왕복은 별도로 남는다.
+- 현재 운영 출처는 [빌드 정보](https://www.moemoa.xyz/build-info.json)의 `commit`·`source`와 Git `master`를 대조한다. 환경 변수·DB 정책·관리 화면은 [운영 설정 지도](../operations/2026-10-08-configuration-map.md), CI와 실기기 마감은 [실행 계획](../plans/2026-10-08-operations-closeout.md)에 기록한다. 아래 ‘로컬 후보/flag off’는 배포 이전 이력이다.
+
+## 2026-10-08 자동 계정 저장·Guest 공식 표지 — 당시 로컬 후보, 이후 운영 반영
 
 - 로그인 계정의 새 Memory 카드·수정·삭제와 보드 변경은 로컬 확정 뒤 자동 계정 반영을 요청한다. 새 개인 사진은 사용자 선택·저장 뒤 비공개 최적화 사본만 자동 전송하며 실패 시 같은 카드/전송 의도를 재시도한다. Guest는 공식 표지 카드와 작품·감상 기록을 기기에 저장할 수 있고 사진 선택은 로그인 안내를 받는다. 시스템 디자인 신규 작성은 제거했다. 과거 카드/사진은 삭제·일괄 업로드하지 않는다.
 - [실행 계획·검증·잔여](../plans/2026-10-08-save-to-account-on-save.md): unit449/449, Chromium 자동 저장·Guest/계정11, 공식 표지 관통1, 기존 사진 관리4 PASS, build20. React Doctor 86/신규 진단0. Windows Playwright WebKit Blob/IndexedDB 제약으로 실제 iPhone Safari·hosted 사진 왕복은 미검증이다.
-- 운영 `.env.production`의 사진 flag는 현재 off다. Git push·운영 배포/flag·DB 변경은 없었다. 다음은 운영 또는 격리된 hosted 환경의 계정·Storage 정책/용량을 확인하고 실제 iPhone→PC 새 카드/사진 왕복을 검증한 뒤 Git 배포 후보를 결정한다.
+- 당시 운영 `.env.production`의 사진 flag는 off였고 Git push·운영 배포/flag·DB 변경은 없었다. 이후 운영에 반영됐으며 현재 범위는 이 작업판 맨 위와 [실행 계획](../plans/2026-10-08-operations-closeout.md)을 따른다.
 
 ## 2026-10-07 Git 운영 배포·다른 PC 인계
 

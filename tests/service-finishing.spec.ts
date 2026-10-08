@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ui:locale:v1', JSON.stringify('en')));
@@ -49,7 +50,6 @@ test('nested dialogs trap focus, dismiss only the top, and restore the trigger',
 
 test('composer cancellation preserves a draft when declined and leaves when accepted', async ({ page }) => {
   await page.goto('/memory/new/');
-  await page.getByRole('button', { name: 'Use system design' }).click();
   await page.getByLabel('Anime or card title').fill('Unsaved sample');
   await page.getByLabel('Short reflection').fill('Keep this while cancelling');
   page.once('dialog', dialog => dialog.dismiss());
@@ -113,11 +113,8 @@ test('backup cancellation allows selecting the same file again', async ({ page }
 });
 
 test('Memory editing can be cancelled and unsaved navigation keeps the original record', async ({ page }) => {
-  await page.goto('/memory/new/');
-  await page.getByRole('button', { name: 'Use system design' }).click();
-  await page.getByLabel('Anime or card title').fill('Edit sample');
-  await page.getByLabel('Short reflection').fill('Original reflection');
-  await page.getByRole('button', { name: 'Save card', exact: true }).click();
+  await seedSystemDesignCards(page, [{ title: 'Edit sample', note: 'Original reflection' }]);
+  await page.goto('/archive/');
   await page.locator('.memory-archive__card').first().click();
   await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
   const note = page.locator('.memory-detail textarea');

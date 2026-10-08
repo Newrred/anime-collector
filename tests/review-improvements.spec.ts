@@ -1,24 +1,29 @@
 import { test, expect } from "@playwright/test";
+import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("ui:locale:v1", JSON.stringify("en")));
 });
 
 test("private title accepts a second memory through its hub and archive search persists", async ({page}) => {
-  await page.goto("/memory/new/");
-  await page.getByRole("button", {name: "Use system design"}).click();
-  await page.getByLabel("Anime or card title").fill("Review private title");
-  await page.getByLabel("Short reflection").fill("First reflection");
-  await page.getByRole("button", {name: "Save card", exact: true}).click();
-  await expect(page).toHaveURL(/\/archive\//);
+  await seedSystemDesignCards(page, [{ title: 'Review private title', note: 'First reflection' }]);
+  await page.goto('/archive/');
   await page.getByRole("heading", {name: "Review private title"}).click();
   await page.locator('a[href*="title/?privateTitleId"]').click();
   await page.locator('.title-hub__actions').getByRole("link", {name: "Add Memory"}).click();
   await expect(page).toHaveURL(/privateTitleId=/);
   await expect(page.getByText("Existing private title", {exact: true})).toBeVisible();
-  await page.getByRole("button", {name: "Use system design"}).click();
-  await page.getByLabel("Short reflection").fill("Second reflection");
-  await page.getByRole("button", {name: "Save card", exact: true}).click();
+  await page.evaluate(async () => {
+    const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+    const runtime = await getPlatformMemoryRuntime();
+    const first = (await runtime.listArchive())[0];
+    await runtime.createCard({
+      titleChoice: { kind: 'PRIVATE_TITLE', privateTitleId: first.card.privateTitleId },
+      systemDesignSpec: { version: 1, templateId: 'memory-gradient', paletteId: 'violet-dawn', patternSeed: 'second-review-memory', titleLayout: 'BOTTOM_LEFT', genreTokens: [] },
+      note: 'Second reflection',
+    });
+  });
+  await page.goto('/archive/');
   await expect(page.locator('.memory-archive__card')).toHaveCount(2);
   const ids = await page.evaluate(async () => {
     const {getPlatformMemoryRuntime} = await import('/src/features/memory/runtime/platformMemoryRuntime.js');

@@ -12,6 +12,9 @@ export function createTitleCharactersReader({
 } = {}) {
   return async ({ animeId, page = 1 }) => {
     if (!animeId) return { source: null, page: 1, hasMore: false, characters: [] };
+    if (import.meta.env?.DEV && globalThis.__MOEMOA_TEST_TITLE_CHARACTERS__) {
+      return globalThis.__MOEMOA_TEST_TITLE_CHARACTERS__({ animeId, page });
+    }
     if (!catalog?.getPeople) throw new Error("TITLE_CHARACTERS_UNAVAILABLE");
     let result;
     try { result = await catalog.getPeople(animeId, page); }

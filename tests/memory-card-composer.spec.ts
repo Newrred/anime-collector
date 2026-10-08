@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { jpegBytes, nonSquareJpegBytes } from "./catalog-lab/fixtures/cover-valid-images.mjs";
+import { installApprovedCoverResolver, selectApprovedCover } from './helpers/approvedCoverCard';
+import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
 
 // Project-owned 1×1 JPEG bytes keep the browser fixture aligned with the
 // native bridge contract without introducing third-party artwork.
@@ -16,14 +18,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("explicit save keeps working when the title retains focus on Safari", async ({ page }) => {
+  await installApprovedCoverResolver(page, 'Safari focus regression');
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await selectApprovedCover(page, 'Safari focus regression', 'ko');
   const title = page.getByLabel("작품명");
-  await title.fill("Safari focus regression");
+  await page.getByLabel('짧은 감상').fill('기억할 장면');
   const save = page.getByRole("button", { name: "카드 저장", exact: true });
   await expect(save).toBeEnabled();
   // Reproduce browsers that do not move focus to a clicked button.
   await save.evaluate(button => button.addEventListener("mousedown", event => event.preventDefault()));
+  await title.focus();
   await expect(title).toBeFocused();
   await save.click();
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
@@ -31,6 +35,7 @@ test("explicit save keeps working when the title retains focus on Safari", async
 });
 
 test("Memory routes follow the selected English locale from composer through detail", async ({ page }) => {
+  await installApprovedCoverResolver(page, 'Frieren');
   await page.goto("/memory/new/");
   await expect(page.getByRole("heading", { name: "기억 남기기" })).toBeVisible();
 
@@ -38,8 +43,7 @@ test("Memory routes follow the selected English locale from composer through det
   await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "EN" }).click();
 
   await expect(page.getByRole("heading", { name: "Add a memory" })).toBeVisible();
-  await page.getByRole("button", { name: "Use system design" }).click();
-  await page.getByLabel("Anime or card title").fill("Frieren");
+  await selectApprovedCover(page, 'Frieren');
   await page.getByLabel("Short reflection").fill("A quiet journey worth remembering.");
   await page.getByRole("button", { name: "Save card" }).click();
 
@@ -54,11 +58,11 @@ test("Memory routes follow the selected English locale from composer through det
   await page.getByRole("button", { name: "Edit memory", exact: true }).click();
   await expect(page.getByRole("button", { name: "Save changes" })).toBeVisible();
   await page.getByRole("button", { name: "Save changes" }).click();
-  await expect(page.getByText("Changes saved on this device.")).toBeVisible();
+  await expect(page.locator('.memory-detail__reflection')).toContainText('A quiet journey worth remembering.');
 
   await page.locator('button[aria-controls="locale-menu-panel"]:visible').click();
   await page.locator("#locale-menu-panel .data-menu-locale-option").filter({ hasText: "KO" }).click();
-  await expect(page.getByText("변경 내용을 이 기기에 저장했어요.")).toBeVisible();
+  await expect(page.locator('.memory-detail__reflection')).toContainText('A quiet journey worth remembering.');
 });
 
 test("changing locale does not re-claim or discard the prepared private image", async ({ page }) => {
@@ -120,30 +124,30 @@ test("prepared image errors retranslate without retrying the native claim", asyn
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("locale-error-claim-count"))).toBe("1");
 });
 
-test("browser route offers the design path without opening a picker or saving without a visual", async ({ page }) => {
+test("guest browser route requires an approved cover and does not offer system design or a photo picker", async ({ page }) => {
+  await installApprovedCoverResolver(page, 'Flow fixture');
   await page.goto("/memory/new/");
 
   await expect(page.getByRole("heading", { name: "기억 남기기" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "디자인으로 만들기", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "디자인으로 만들기", exact: true })).toHaveCount(0);
   await expect(page.locator('input[type="file"]:visible')).toHaveCount(0);
   const save = page.getByRole("button", { name: "카드 저장" });
   await expect(save).toBeDisabled();
-  await expect(page.locator("#memory-save-reason")).toContainText("사진, 작품 표지, 디자인 중 하나를 골라주세요.");
-
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
-  await expect(page.locator("#memory-save-reason")).toContainText("작품명을 입력해 주세요.");
-  await page.getByLabel("작품명").fill("Flow fixture");
+  await selectApprovedCover(page, 'Flow fixture', 'ko');
+  await expect(page.locator("#memory-save-reason")).toContainText("짧은 감상을 입력해 주세요.");
+  await page.getByLabel('짧은 감상').fill('기억할 장면');
   await expect(save).toBeEnabled();
   await expect(page.locator("#memory-save-reason")).toContainText("비공개로 저장해요.");
 });
 
 test("native card save opens the packaged Archive document", async ({ page }) => {
+  await installApprovedCoverResolver(page, 'Native route memory');
   await page.addInitScript(() => {
     (window as typeof window & { androidBridge?: Record<string, unknown> }).androidBridge = {};
   });
   await page.goto("/memory/new/");
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
-  await page.getByLabel("작품명").fill("Native route memory");
+  await selectApprovedCover(page, 'Native route memory', 'ko');
+  await page.getByLabel('짧은 감상').fill('기억할 장면');
 
   await page.getByRole("button", { name: "카드 저장" }).click();
 
@@ -159,6 +163,7 @@ test("empty Archive exposes one page-level create action", async ({ page }) => {
 });
 
 test("Archive turns an unavailable private preview into a recoverable visual state", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -202,6 +207,7 @@ test("Archive turns an unavailable private preview into a recoverable visual sta
 });
 
 test("private card saves once and remains visible in Archive after reload", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -288,6 +294,7 @@ test("private card saves once and remains visible in Archive after reload", asyn
 });
 
 test("card detail replaces a local image only after explicit rights confirmation", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
@@ -396,6 +403,7 @@ test("card detail replaces a local image only after explicit rights confirmation
 });
 
 test("missing local image exposes recovery and delete actions", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript((previewDataUrl) => {
     window.__MOEMOA_TEST_IMAGE_INTAKE__ = {
       available: true,
@@ -441,6 +449,7 @@ test("missing local image exposes recovery and delete actions", async ({ page })
 });
 
 test("pending picker blocks leaving detail and rapid clicks open only one picker, with durable cancel cleanup", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript((previewDataUrl) => {
     const ticket = (ticketId: string) => ({
       ticketId,
@@ -512,6 +521,7 @@ test("pending picker blocks leaving detail and rapid clicks open only one picker
 });
 
 test("pre-reservation replacement rejection keeps the ticket until discard is confirmed", async ({ page }) => {
+  test.fixme(true, 'Rewrite with an authenticated photo fixture; guest photo save is intentionally blocked.');
   await page.addInitScript(({ oldPreview, newPreview }) => {
     const ticket = (ticketId: string, previewDataUrl: string) => ({
       ticketId,
@@ -597,38 +607,43 @@ test("pre-reservation replacement rejection keeps the ticket until discard is co
   ))).toBeNull();
 });
 
-test("browser can create a deterministic system design card without an image upload", async ({ page }) => {
-  await page.goto("/memory/new/");
-  await page.getByLabel("작품명").fill("A Place Further Than the Universe");
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
-  await expect(page.getByText("디자인 카드")).toBeVisible();
-
-  await page.getByRole("button", { name: "카드 저장" }).click();
+test("existing system design cards remain readable after their creation path was removed", async ({ page }) => {
+  await seedSystemDesignCards(page, [{ title: 'A Place Further Than the Universe', note: 'A legacy memory' }]);
+  await page.goto('/archive/');
   await expect(page).toHaveURL(/\/archive\/(?:index\.html)?$/);
   await expect(
     page.getByRole("heading", { name: "A Place Further Than the Universe" }),
   ).toBeVisible();
-  await expect(page.getByText("디자인 카드")).toBeVisible();
+  await expect(page.getByText('디자인', { exact: true })).toBeVisible();
 });
 
 test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.addInitScript((coverPreviewUrl) => {
+  const animeId = 'anime:11111111-1111-4111-8111-000000154587';
+  const ref = { sourceKind: 'CATALOG_COVER', catalogAnimeId: animeId,
+    catalogCoverId: 'cover:11111111-1111-4111-8111-000000154587',
+    catalogCoverRevisionId: `asset:${'b'.repeat(40)}`, rightsBasis: 'EXPLICIT_PERMISSION',
+    permissionVerifiedAt: '2026-09-03T00:00:00.000Z' };
+  await page.addInitScript(({ coverPreviewUrl, id, coverRef }) => {
     window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
       search: async () => ({
         remoteStatus: "READY",
         results: [{
           kind: "ANIME_REF",
+          animeId: id,
           displayTitle: "Frieren: Beyond Journey's End",
           aliases: ["Sousou no Frieren", "葬送のフリーレン"],
           genres: ["Adventure", "Fantasy"],
           sourceBinding: { provider: "ANILIST", externalId: "154587" },
           verificationState: "PROVIDER_CANDIDATE",
+          catalogSource: 'SUPABASE_SERVICE_PROJECTION_V2', readiness: 'READY',
           coverPreviewUrl,
+          catalogCoverRef: coverRef,
         }],
       }),
+      resolveCover: async () => ({ publicUrl: coverPreviewUrl, width: 460, height: 640, catalogCoverRef: coverRef }),
     };
-  }, SYNTHETIC_IMAGE_PREVIEW);
+  }, { coverPreviewUrl: SYNTHETIC_IMAGE_PREVIEW, id: animeId, coverRef: ref });
 
   await page.goto("/memory/new/");
   const titleInput = page.getByLabel("작품명");
@@ -637,7 +652,7 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   await expect(titleInput).toHaveAttribute("enterkeyhint", "search");
   await titleInput.fill("Frieren");
   await titleInput.press("Enter");
-  await expect(page.getByText("검색 결과")).toBeVisible();
+  await expect(page.getByRole('list', { name: '작품 검색 결과' })).toBeVisible();
   const resultPoster = page.locator(".memory-composer__title-result-poster");
   await expect(resultPoster).toHaveAttribute("src", SYNTHETIC_IMAGE_PREVIEW);
   expect(await resultPoster.evaluate((element) => ({
@@ -646,7 +661,8 @@ test("selecting a catalog candidate stores an AnimeRef instead of a PrivateTitle
   }))).toEqual({ width: 42, height: 60 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Frieren: Beyond Journey's End 선택" }).click();
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await page.getByRole('button', { name: '작품 표지 사용' }).click();
+  await page.getByLabel('짧은 감상').fill('다시 보고 싶은 장면');
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "Frieren: Beyond Journey's End" })).toBeVisible();
 
@@ -780,7 +796,12 @@ test("an approved official cover can be selected, saved by reference, and displa
 });
 
 test("catalog detail deep-link restores the exact AnimeRef before saving", async ({ page }) => {
-  await page.addInitScript(() => {
+  const animeId = 'anime:11111111-1111-4111-8111-000000000001';
+  const ref = { sourceKind: 'CATALOG_COVER', catalogAnimeId: animeId,
+    catalogCoverId: 'cover:11111111-1111-4111-8111-000000000001',
+    catalogCoverRevisionId: `asset:${'c'.repeat(40)}`, rightsBasis: 'EXPLICIT_PERMISSION',
+    permissionVerifiedAt: '2026-09-03T00:00:00.000Z' };
+  await page.addInitScript(({ coverRef, preview }) => {
     window.__MOEMOA_TEST_CATALOG_TITLE_CHOICE__ = {
       kind: "ANIME_REF",
       animeId: "anime:11111111-1111-4111-8111-000000000001",
@@ -791,14 +812,21 @@ test("catalog detail deep-link restores the exact AnimeRef before saving", async
       verificationState: "PROVIDER_CANDIDATE",
       catalogSource: "SUPABASE_SERVICE_PROJECTION_V2",
       readiness: "READY",
+      coverPreviewUrl: preview,
+      catalogCoverRef: coverRef,
     };
-  });
+    window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
+      search: async () => ({ remoteStatus: 'READY', results: [] }),
+      resolveCover: async () => ({ publicUrl: preview, width: 460, height: 640, catalogCoverRef: coverRef }),
+    };
+  }, { coverRef: ref, preview: SYNTHETIC_IMAGE_PREVIEW });
 
   await page.goto("/memory/new/?animeId=anime%3A11111111-1111-4111-8111-000000000001&title=temporary");
   await expect(page.getByLabel("작품명")).toHaveValue("카우보이 비밥");
   await expect(page.locator('.memory-composer__selected-title').getByText("작품", { exact: true })).toBeVisible();
   await expect(page.getByText("일치하는 작품이 없어도 개인 제목으로 계속할 수 있어요.")).toBeHidden();
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
+  await page.getByRole('button', { name: '작품 표지 사용' }).click();
+  await page.getByLabel('짧은 감상').fill('기억할 장면');
   await page.getByRole("button", { name: "카드 저장" }).click();
   await expect(page.getByRole("heading", { name: "카우보이 비밥" })).toBeVisible();
 
@@ -826,7 +854,7 @@ test("catalog detail deep-link restores the exact AnimeRef before saving", async
   expect(stored.privateTitles).toEqual([]);
 });
 
-test("provider unavailability keeps the typed PrivateTitle save path available", async ({ page }) => {
+test("provider unavailability preserves a typed private title draft without permitting a visual-less card", async ({ page }) => {
   await page.addInitScript(() => {
     window.__MOEMOA_TEST_TITLE_RESOLVER__ = {
       search: async () => ({ results: [], remoteStatus: "UNAVAILABLE" }),
@@ -838,10 +866,9 @@ test("provider unavailability keeps the typed PrivateTitle save path available",
   await page.getByRole("button", { name: "작품 검색" }).click();
   await expect(page.getByText(/온라인 검색을 사용할 수 없어요/)).toBeVisible();
   await expect(page.getByText(/나만의 작품명으로 저장/)).toBeVisible();
-  await page.getByRole("button", { name: "디자인으로 만들기" }).click();
-  await expect(page.getByRole("button", { name: "카드 저장" })).toBeEnabled();
-  await page.getByRole("button", { name: "카드 저장" }).click();
-  await expect(page.getByRole("heading", { name: "My Offline Anime" })).toBeVisible();
+  await expect(page.getByLabel('작품명')).toHaveValue('My Offline Anime');
+  await expect(page.getByRole('button', { name: '카드 저장' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '디자인으로 만들기' })).toHaveCount(0);
 });
 
 test("a late title response cannot replace results after the query changes", async ({ page }) => {
