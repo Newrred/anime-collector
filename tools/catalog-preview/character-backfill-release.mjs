@@ -189,13 +189,46 @@ async function stage() {
   await save('release-staged.json', { releaseId: prepared.release.id, releaseHash: prepared.release.release_hash, at: new Date().toISOString() });
 }
 
+async function transitionRelease({ requestedRelease, expectedActiveId, restoreRetired = false }) {
+  const active = (await request('catalog_active_release?select=release_id'))?.[0]?.release_id;
+  if (active === requestedRelease.id) {
+    const row = (await request(`catalog_releases?id=eq.${encodeURIComponent(requestedRelease.id)}&select=status`))?.[0];
+    if (row?.status === 'ACTIVE') return;
+  }
+  if (active !== expectedActiveId) throw new Error('Active catalog changed before transition');
+  try {
+    await request('rpc/activate_catalog_release_checked', { method: 'POST', body: {
+      requested_release_id: requestedRelease.id, requested_release_hash: requestedRelease.release_hash,
+      expected_active_release_id: expectedActiveId,
+    } });
+  } catch (error) {
+    if (!String(error.message).includes('404') || !String(error.message).includes('PGRST202')) throw error;
+    // Older production databases expose only the original transition function.
+    if ((await request('catalog_active_release?select=release_id'))?.[0]?.release_id !== expectedActiveId) {
+      throw new Error('Active catalog changed before legacy transition');
+    }
+    if (restoreRetired) {
+      const before = await json('release-before.json');
+      for (const table of tables) {
+        if (sha256(await releaseRows(table, requestedRelease.id)) !== sha256(before.data[table])) {
+          throw new Error(`Rollback ${table} data mismatch`);
+        }
+      }
+      const restored = await request(`catalog_releases?id=eq.${encodeURIComponent(requestedRelease.id)}&status=eq.RETIRED`, {
+        method: 'PATCH', body: { status: 'STAGING' }, extraHeaders: { Prefer: 'return=representation' },
+      });
+      if (restored?.length !== 1) throw new Error('Rollback release could not be staged');
+    }
+    await request('rpc/activate_catalog_release', { method: 'POST', body: {
+      requested_release_id: requestedRelease.id, requested_release_hash: requestedRelease.release_hash,
+    } });
+  }
+}
+
 async function activate() {
   const prepared = await json('release-prepared.json'), staged = await json('release-staged.json');
   if (staged.releaseId !== prepared.release.id || staged.releaseHash !== prepared.release.release_hash) throw new Error('Staged release evidence mismatch');
-  await request('rpc/activate_catalog_release_checked', { method: 'POST', body: {
-    requested_release_id: prepared.release.id, requested_release_hash: prepared.release.release_hash,
-    expected_active_release_id: prepared.baseRelease.id,
-  } });
+  await transitionRelease({ requestedRelease: prepared.release, expectedActiveId: prepared.baseRelease.id });
   if ((await request('catalog_active_release?select=release_id'))?.[0]?.release_id !== prepared.release.id) throw new Error('Activation could not be confirmed');
   await save('release-activated.json', { releaseId: prepared.release.id, at: new Date().toISOString() });
   console.log(`Activated ${prepared.release.id}`);
@@ -206,10 +239,7 @@ async function rollback() {
   if ((await request('catalog_active_release?select=release_id'))?.[0]?.release_id !== prepared.release.id) {
     throw new Error('The candidate release is not active');
   }
-  await request('rpc/activate_catalog_release_checked', { method: 'POST', body: {
-    requested_release_id: prepared.baseRelease.id, requested_release_hash: prepared.baseRelease.release_hash,
-    expected_active_release_id: prepared.release.id,
-  } });
+  await transitionRelease({ requestedRelease: prepared.baseRelease, expectedActiveId: prepared.release.id, restoreRetired: true });
   if ((await request('catalog_active_release?select=release_id'))?.[0]?.release_id !== prepared.baseRelease.id) {
     throw new Error('Rollback could not be confirmed');
   }
