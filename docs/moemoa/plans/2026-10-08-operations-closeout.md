@@ -76,6 +76,7 @@ CI/문서 변경에 문제가 있으면 해당 Git 커밋을 revert 후 `master`
 
 - 2026-10-08: `adba637` 운영 SHA와 Git `master`를 대조. 최신 `Service quality`의 20분 취소 직전 로그에서 제거된 시스템 디자인 버튼 대기와 반복 재시도를 확인. 설정 지도는 미추적 상태.
 - 2026-10-08: 제거된 디자인 작성 UI를 기다리던 검사들을 현행 공식 표지 작성/Guest 사진 gate/과거 디자인 카드 읽기로 수정. 새 카드·보드/상세 흐름 79 PASS·1 기존 skip, 전체 composer 13 PASS·6 `fixme`, 모바일/Guest 10 PASS·과거 Web picker 3 `fixme`. 자체 카탈로그 캐릭터 fixture의 영향 범위 49 PASS·1 사진 시나리오 `fixme`. 전체 채널 회귀 80 PASS·5 skip(기존 skip 포함). 단위 454 PASS, 카탈로그 256 PASS·2 skip, build 20페이지 PASS. GitHub CI·운영 SHA 대조는 진행 중.
+- 2026-10-08: 첫 GitHub CI는 전체 화면 묶음을 통과했지만 공식 표지 카드의 선반 편집 검사에서 실패. CI에서는 작품 표시명이 `장송의 프리렌`, 로컬에서는 영문 별칭으로 나타나는 차이를 실패 증거의 접근성 트리에서 확인했다. 검사에서 두 표시명을 허용하도록 수정했고 전체 composer 13 PASS·6 skip으로 재확인했다. 두 번째 CI 결과는 아직 확인 전이다.
 
 ## 16. 발견 사항과 계획 변경
 

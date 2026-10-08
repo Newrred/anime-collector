@@ -786,9 +786,9 @@ test("an approved official cover can be selected, saved by reference, and displa
   await page.goto("/");
   await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByRole("button", { name: "선반 추가", exact: true }).click();
-  await page.locator('.bookshelf-picker').getByLabel("Frieren: Beyond Journey’s End", { exact: true }).check();
+  await page.locator('.bookshelf-picker').getByLabel(/^(?:장송의 프리렌|Frieren: Beyond Journey’s End)$/u).check();
   await page.getByRole("button", { name: "적용", exact: true }).click();
-  await page.getByRole("button", { name: "Frieren: Beyond Journey’s End 기억 펼치기", exact: true }).click();
+  await page.getByRole("button", { name: /^(?:장송의 프리렌|Frieren: Beyond Journey’s End) 기억 펼치기$/u }).click();
   const homeMemory = page.locator(".bookshelf-film");
   await expect(homeMemory.getByAltText("장송의 프리렌 공식 표지 기반 메모리 카드")).toBeVisible();
   await expect(homeMemory.locator(".memory-visual--contain")).toHaveCount(1);
