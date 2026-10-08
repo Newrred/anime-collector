@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { AFFINITY_OPTIONS, REASON_TAG_OPTIONS, SEASON_TERM_OPTIONS } from "../../../components/library/libraryCopy.js";
 import { WATCH_EVENTS } from "../domain/titleWatchRecord.js";
-import { createTitleCharactersReader } from "../application/titleCharacters.js";
+import { catalogCharacterAniListId, createTitleCharactersReader } from "../application/titleCharacters.js";
 
 const eventText = (value, ko) => value === "NOTE" ? (ko ? "감상" : "Reflection") : value;
 const seasonParts = value => {
@@ -53,7 +53,7 @@ export default function HistoricalWatchLogEditor({ album, log, service, locale, 
     } finally { setBusy(false); }
   };
   const season = seasonParts(draft.watchedAtValue);
-  const candidates = characters.filter(row => Number.isSafeInteger(Number(row.id)) && Number(row.id) > 0
+  const candidates = characters.filter(row => catalogCharacterAniListId(row.id)
     && row.name.toLocaleLowerCase().includes(characterQuery.trim().toLocaleLowerCase()));
   return <form className="watch-record-editor watch-record-editor--historical" onSubmit={save}
     aria-label={ko ? "감상 기록 수정" : "Edit watch record"}>
@@ -106,9 +106,9 @@ export default function HistoricalWatchLogEditor({ album, log, service, locale, 
       </div>)}
       {album.anilistId && <div className="watch-record-editor__character-search"><label>{ko ? "캐릭터 찾기" : "Find a character"}<input disabled={busy}
         value={characterQuery} onChange={event => setCharacterQuery(event.target.value)} /></label>
-        {characterQuery.trim() && <div className="watch-record-editor__candidates">{candidates.filter(row => !draft.characterRefs.some(ref => Number(ref.characterId) === Number(row.id))).slice(0, 8)
+        {characterQuery.trim() && <div className="watch-record-editor__candidates">{candidates.filter(row => !draft.characterRefs.some(ref => Number(ref.characterId) === catalogCharacterAniListId(row.id))).slice(0, 8)
           .map(row => <button type="button" className="btn btn--subtle" key={row.id} disabled={busy || draft.characterRefs.length >= 3}
-            onClick={() => patch({ characterRefs: [...draft.characterRefs, { characterId: Number(row.id), mediaId: album.anilistId,
+            onClick={() => patch({ characterRefs: [...draft.characterRefs, { characterId: catalogCharacterAniListId(row.id), mediaId: album.anilistId,
               nameSnapshot: row.name, imageSnapshot: row.image || null, role: row.role || "", affinity: "기억남음", reasonTags: [], note: "",
               order: draft.characterRefs.length, isPrimary: draft.characterRefs.length === 0 }] })}>{row.name}</button>)}</div>}</div>}
     </details>

@@ -69,6 +69,23 @@ test("Title Hub fits a 320px viewport without horizontal clipping", async ({ pag
   expect(await page.locator(".title-hub__memory").evaluate((element) => element.getBoundingClientRect().width <= window.innerWidth)).toBe(true);
 });
 
+test("Title Hub pins a catalog character without asking AniList for candidates", async ({ page }) => {
+  let anilistCalls = 0;
+  page.on("request", request => { if (request.url().startsWith("https://graphql.anilist.co/")) anilistCalls += 1; });
+  await page.route("**/rest/v1/catalog_anime_people?**", route => route.fulfill({ status: 200,
+    contentType: "application/json", body: JSON.stringify({ anime_id: animeId, page: 1,
+      payload: { schemaVersion: 2, animeId, page: 1, totalCount: 1, entries: [{ characterId: "anilist:7",
+        canonicalName: "주인공", role: "MAIN", castings: [] }] } }) }));
+  await page.goto(`/title/?animeId=${encodeURIComponent(animeId)}`);
+  await page.getByRole("button", { name: /즐겨찾는 캐릭터/ }).click();
+  await page.getByRole("button", { name: "고정", exact: true }).click();
+  await expect(page.getByRole("button", { name: "고정 해제" })).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("anime:characterPins:v1") || "[]"))).toMatchObject([
+    { characterId: 7, mediaId: 154587, nameSnapshot: "주인공" },
+  ]);
+  expect(anilistCalls).toBe(0);
+});
+
 test("global search opens the same Title Hub instead of the legacy detail modal", async ({ page }) => {
   await page.addInitScript(({ id }) => {
     window.__MOEMOA_TEST_GLOBAL_SEARCH__ = {

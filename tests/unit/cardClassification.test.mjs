@@ -4,7 +4,7 @@ import { normalizeCardClassification } from "../../src/features/memory/domain/ca
 import { matchesArchiveFacets, archiveFacetOptions } from "../../src/features/memory/application/archiveFacets.js";
 import { createUpdateMemoryCardCommand } from "../../src/features/memory/application/updateMemoryCard.js";
 import { toRemoteMemoryCard } from "../../src/features/memory/sync/memorySyncContract.js";
-import { createTitleCharactersReader } from "../../src/features/titles/application/titleCharacters.js";
+import { catalogCharacterAniListId, createTitleCharactersReader } from "../../src/features/titles/application/titleCharacters.js";
 
 const classification = { version: 1, tags: ["우산"], characters: [{ source: "ANILIST", id: "10", name: "합성 캐릭터" }] };
 test("card classification bounds and provenance survive normalization without private image fields", () => {
@@ -34,12 +34,19 @@ test("classification-only save preserves note and old-server DTO while staying o
   assert.deepEqual(toRemoteMemoryCard({ card: result, title }, { includeClassification: true }).classification, classification);
   await assert.rejects(command.execute({ ownerId: "guest:44444444-4444-4444-8444-444444444444", cardId: card.id, classification }), /Private Card was not found/);
 });
-test("character reads use the exact title ID and keep catalog/provider errors distinct from no characters", async () => {
+test("character reads use only catalog data and distinguish empty results from errors", async () => {
   let calls = 0;
-  const read = createTitleCharactersReader({ catalog: { getPeople: async () => null }, readMedia: async ids => { calls++; assert.deepEqual(ids, [1]); return new Map([[1, { id: 1, characters: { edges: [{ node: { id: 10, name: { full: "Synthetic" } } }] } }]]); } });
-  assert.equal((await read({ animeId: "anime:one", anilistId: 1 })).characters[0].id, "10");
-  assert.equal((await read({})).characters.length, 0); assert.equal(calls, 1);
-  await assert.rejects(createTitleCharactersReader({ catalog: null, readMedia: async () => new Map() })({ anilistId: 1 }), /UNAVAILABLE/);
+  const read = createTitleCharactersReader({ catalog: { getPeople: async id => {
+    calls++; assert.equal(id, "anime:one"); return null;
+  } } });
+  assert.deepEqual((await read({ animeId: "anime:one", anilistId: 1 })).characters, []);
+  assert.equal((await read({ anilistId: 1 })).characters.length, 0); assert.equal(calls, 1);
+  await assert.rejects(createTitleCharactersReader({ catalog: null })({ animeId: "anime:one", anilistId: 1 }), /UNAVAILABLE/);
+});
+test("catalog character IDs preserve legacy numeric favorite and watch references", () => {
+  assert.equal(catalogCharacterAniListId("anilist:355049"), 355049);
+  assert.equal(catalogCharacterAniListId("355049"), 355049);
+  assert.equal(catalogCharacterAniListId("catalog:355049"), null);
 });
 
 test("explicit save after sync rollout queues locally pending classification without changing the note", async () => {
@@ -56,13 +63,11 @@ test("explicit save after sync rollout queues locally pending classification wit
   assert.deepEqual(saved.syncOperations[0].payload.classification, classification);
 });
 
-test("catalog pagination failure keeps provider boundaries and remains retryable", async () => {
-  let fallbackCalls = 0;
+test("catalog pagination failure remains retryable without a provider request", async () => {
   const read = createTitleCharactersReader({ catalog: { getPeople: async (_id, page) => {
     if (page === 2) throw new Error("Synthetic catalog failure");
     return { entries: [{ characterId: "catalog-character-1", name: "Synthetic", castings: [] }], totalCount: 31 };
-  } }, readMedia: async () => { fallbackCalls++; return new Map(); } });
+  } } });
   assert.equal((await read({ animeId: "anime:one", anilistId: 1 })).hasMore, true);
   await assert.rejects(read({ animeId: "anime:one", anilistId: 1, page: 2 }), /TITLE_CHARACTERS_UNAVAILABLE/);
-  assert.equal(fallbackCalls, 0);
 });

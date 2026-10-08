@@ -123,7 +123,7 @@ function TitleFacts({ album, copy, recordHref, locale, base, service }) {
         <h2>{locale === "ko" ? "등장 캐릭터" : "Characters"}</h2>
         <TitleCharacters animeId={album.titleRef.kind === "ANIME" ? album.titleRef.animeId : null} anilistId={album.anilistId} locale={locale} />
       </section>}
-      {!album.isPrivateTitle && <TitleFavoriteCharacters anilistId={album.anilistId} locale={locale} />}
+      {!album.isPrivateTitle && <TitleFavoriteCharacters animeId={album.titleRef.kind === "ANIME" ? album.titleRef.animeId : null} anilistId={album.anilistId} locale={locale} />}
       {!album.isPrivateTitle && <TitleRelatedSeries album={album} service={service} base={base} locale={locale} />}
       <section className="surface-card title-hub__tracking">
         <h2>{copy.watchLogs(album.watchLogs.length)}</h2>
