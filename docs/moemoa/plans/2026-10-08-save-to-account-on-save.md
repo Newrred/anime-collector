@@ -42,6 +42,7 @@ Memory runtime의 mutation 알림, account 자동 동기화 hook, private photo 
 
 ## 12. 롤백·복구
 클라이언트 변경을 되돌리면 현행 수동 동기화 경로가 남는다. 이미 로컬 확정된 카드/원본과 계정에 반영된 기록은 삭제하지 않는다. 운영 배포가 필요하면 `master` Git SHA와 Vercel SHA를 확인한다.
+이번 DB 호환 트리거는 기존 행을 수정하지 않는다. 문제가 확인되면 별도 후속 migration에서 트리거와 함수를 제거하고 이력은 보존한다. 다만 제거하면 이전 버전의 JSON null 전송이 다시 거절되므로, 먼저 호환 가능한 클라이언트가 배포되고 기기 대기 항목이 소진됐는지 확인해야 한다.
 
 ## 13. 위험과 완화
 저장 중 네트워크 지연과 앱 이탈은 로컬 확정을 잃지 않도록 하고, 부분 실패 화면에서 같은 카드의 계정 반영만 재시도한다. Guest→로그인 승격은 기존 명시 검토를 유지한다. 서버 기능 flag가 꺼져 있으면 사진 전송을 제공하지 않는다.
@@ -54,6 +55,7 @@ Memory runtime의 mutation 알림, account 자동 동기화 hook, private photo 
 - 2026-10-08 운영 iPhone 후속 검증: 단위 454/454, 해당 신규 사진 저장·재진입 Chromium 1/1, Web 20페이지 build, React Doctor 변경분 93/진단 0. 실제 iPhone의 기존 카드 재시도 결과와 정확한 실패 코드는 새 Git 배포 후 확인한다. 재시도는 새 카드를 만들지 않는다.
 - 2026-10-08 운영 iPhone 후속 보완: 기존 저장 화면은 배포 전에 열린 JavaScript를 계속 사용하고 새로고침하면 `savedCardId` 상태를 잃는다. 이미 제공된 `View saved card` 링크로 새 버전의 상세 화면을 열어 같은 카드 ID의 계정 저장만 재시도할 수 있게 한다. 상세의 재시도는 새 카드 생성·과거 사진 자동 선택을 하지 않는다.
 - 2026-10-08 운영 원인 확정: iPhone Safari의 `/rest/v1/rpc/apply_memory_card_mutation` 400 응답과 같은 시각 Postgres의 `memory_visual_assets_source_metadata_check` 오류를 확인했다. 로컬 `toRemoteVisualAsset`은 비디자인 사진에도 `designSpec: null`을 JSON으로 넣고, 운영 SQL은 `p_payload -> 'designSpec'`으로 JSON null을 그대로 `design_spec`에 넣는다. DB check의 `design_spec is null`은 SQL NULL만 허용한다. 이미 기기에 기록된 outbox payload를 보존해 복구하려면 클라이언트만 수정해선 안 된다. `USER_IMAGE`/`CATALOG_COVER`의 JSON null만 SQL NULL로 정규화하는 비파괴적 DB migration을 추가·검증·기록 후 적용한다. 객체형 디자인 데이터와 권리·소유·공개 정책은 바꾸지 않는다.
+- 2026-10-08 운영 복구 릴리스 `MOEMOA_MEMORY_JSON_NULL_20261008_01`: `f9ea8915b6402b14eb871a59236377c91f26634a`를 `master`로 push했고 운영 `build-info.json`의 `commit`/`checkoutCommit`/`source=vercel-git`을 대조했다. 운영 DB에는 버전 관리된 `20261008093000_memory_visual_asset_json_null_compat.sql`과 동일한 호환 함수/트리거를 `tools/private-images/activate-memory-json-null-20261008.sql`의 transaction으로 적용했다. 적용 후 `supabase_migrations` 이력·트리거·함수가 각 1건임을 별도 조회했다. 기존 데이터 변경·삭제 없음. 로컬 PostgreSQL 비공개 이미지 계약 51 assertion/동시성 2, unit 454/454, 신규 사진 Chromium 1/1, Web 20페이지 build 및 React Doctor 변경분 진단 0을 통과했다. iPhone 기존 카드 재시도와 PC 사진 조회는 실제 기기 결과를 기다린다.
 - 2026-10-08: 현재 코드/결정/운영 flag 조사 및 계획 작성.
 - 2026-10-08: 새 카드의 로컬 저장→계정 metadata→선택한 비공개 사진 순서를 연결했다. 계정/사진 전송이 중단되면 로컬 카드를 보존하고 동일 cardId로 재시도한다. 첫 후보의 별도 사본 저장 선택 UI는 뒤이은 자동 저장 결정에 따라 제거했다.
 - 2026-10-08: 합성 Chromium에서 신규 사진 전송 첫 실패→동일 operation 재시도와 기존 수동 사진 관리 2경로를 확인했다. 기존 계정 동기화 안내 회귀를 보정했다.
