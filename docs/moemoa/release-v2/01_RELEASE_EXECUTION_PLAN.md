@@ -15,6 +15,8 @@
 - **실패 기록/수정:** inspector 첫 production 실행은 URL 대신 분리된 연결 필드 때문에 실패→고정 host/user 대조를 유지하면서 두 형식 지원 후 PASS. local initdb는 기본root로 실패, runuser 실행 파일도 없어 실패→WSL의 명시적 postgres 사용자로 실행 성공. 서버/운영 인증 재설정 없음.
 - **변경/영향/잔여:** 읽기 전용 집계 도구·4안전검사, 기존 purge의 로컬 후보/합성회귀,50건 포화 경보/단위회귀, 검토 개인정보 문구 및 기존00~03/시작문서/설정지도/증거를 갱신했다. DB migration 등록·hosted 실행·새 수집·원문로그·운영 배포0. candidate는 기존5종 Memory entity에 한정하며 전체 사용자 데이터/모든 동기화 저장소의 삭제 보장을 의미하지 않는다. 다음1개는 정확한 SQL 후보의 테스트 적용 검토. 운영 적용 전 비가역 본문 제거·복구 경계 승인이 필요하다. 외부 백업/키·삭제 metadata/지원로그 기한·국가별최종 고지는 기존 D04/D05에 남긴다.
 
+- **승인 후 적용 결과:** source ebdff44의 후보를 test release `MOEMOA_RETENTION_RESPONSE_TEST_20261010_01`로 적용(실행도구4502da7). 기본 inspect로 기존 함수 일치 확인→apply 단일트랜잭션→별도 inspect로 후보 일치/권한 보존 확인. 모든 정리0, cards23/assets25/boards10/memberships17/privateTitles5/operations38 동일. 적용도구 포함 안전 검사6PASS. 첫 검사에서 Windows CRLF와 Git LF hash 차이로 DB 실행 전 차단→승인 커밋 blob SHA256 대조 후 LF 정규화 기준으로 보완. 운영 변경0. 초반 hosted미적용 표시는 승인 전 결과다. ebdff44 Git Preview AgjkjFs1eYCd6jcDtqHhDNZvJSgg Ready/source 일치 확인. 다음1개 D05 외부 백업 회전·삭제 반영·복구 기준 마감.
+
 ## 2026-10-10 W06/W14/C02·D04 고지 정리 후속
 
 - **목적/확정 결정:** KR14/PH13/TH13·미국/유럽 포함·국가/DOB/약관→Google 유지. PASS/KWS/보호자 메일과 새 진행판을 추가하지 않는다. 현재 동의된 10/9 문서와 영수증은 보존한다.

@@ -162,7 +162,7 @@
     "reproduced": "Original purge removes synthetic 31-day board while cached operation body survives.",
     "candidate": "Existing purge extended to remove orphan remoteEntity bodies, preserve operation identity/hash/status/acknowledgement, active/recent records and service-only ACL.",
     "limits": [
-      "SQL candidate not a deployed migration; neither hosted database mutated",
+      "At initial local validation neither hosted DB changed; see subsequent approved testRollout. Production remains unchanged.",
       "No new actual-user signup, physical object delete, backup restore or Safari PASS",
       "Full batch alert detects possible backlog, not proven backlog"
     ],
@@ -185,12 +185,47 @@
     "diffCheck": "PASS"
   },
   "remaining": [
-    "Exact SQL candidate review and test rollout before production",
+    "Production rollout of the approved SQL candidate remains separate; test rollout completed after explicit approval",
     "Deleted private-media metadata and cancellation/operation metadata retention must preserve replay/quota safety",
     "External backup rotation, deletion journal restore enforcement, independent key storage and external restore proof",
     "Support mailbox retention and provider-specific log/legal retention",
     "Country-specific final notice and D06 production candidate"
   ],
   "productionMutations": 0,
-  "secretValuesOutput": 0
+  "secretValuesOutput": 0,
+  "testRollout": {
+    "approval": "User approved ebdff44 candidate for moemoa-test only",
+    "releaseId": "MOEMOA_RETENTION_RESPONSE_TEST_20261010_01",
+    "candidateCommit": "ebdff448032ec3c314a76aaa331243b1784e6346",
+    "runnerCommit": "4502da7",
+    "approvedSqlSha256LF": "f562bdf6206c0215dd3f095c7f1689147920529bb8a339df16f1b343e3c95674",
+    "appliedAt": "2026-10-09T18:04:28.172331Z",
+    "commands": [
+      "wsl -e python3 -B /mnt/e/web/anime/tools/operations/apply-test-retention.py inspect",
+      "wsl -e python3 -B /mnt/e/web/anime/tools/operations/apply-test-retention.py apply",
+      "wsl -e python3 -B /mnt/e/web/anime/tools/operations/apply-test-retention.py inspect"
+    ],
+    "baselineMatched": true,
+    "committedFunctionMatched": true,
+    "serviceOnly": true,
+    "allPurgeCounts": 0,
+    "totalsBeforeAndAfter": {
+      "cards": 23,
+      "assets": 25,
+      "boards": 10,
+      "operations": 38,
+      "memberships": 17,
+      "privateTitles": 5
+    },
+    "inspectorAndApplySafetyTests": 6,
+    "initialFailure": "Candidate digest initially used CRLF checkout bytes; fail-closed before DB access. Verified approved Git blob LF hash and corrected portable guard.",
+    "limitation": "No hosted synthetic insertion/deletion; local 12-assertion regression separate from actual zero-target scheduled cleanup call."
+  },
+  "preview": {
+    "sourceCommit": "ebdff448032ec3c314a76aaa331243b1784e6346",
+    "deploymentId": "AgjkjFs1eYCd6jcDtqHhDNZvJSgg",
+    "state": "Ready",
+    "url": "https://anime-collector-f5gmg7i8x-newrreds-projects.vercel.app",
+    "verification": "Vercel deployment detail DOM source and status"
+  }
 }
