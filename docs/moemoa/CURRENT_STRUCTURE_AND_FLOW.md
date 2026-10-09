@@ -1,6 +1,6 @@
 # MOEMOA 현재 구조와 화면 흐름
 
-> 기준: 2026-10-09 Git `master`와 운영 Web `35fb912` 대조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
+> 기준: 2026-10-09 구현 `d4f6d91`의 Git `master`/Vercel 운영 SHA 일치·CI 두 job success와 실제 두 화면 삭제 수렴 확인. 문서 후속 커밋의 최신 SHA는 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 대조한다. 이 문서는 **현재 구현**을 설명하며 미래 목표·취소된 시안·과거 보고의 ‘최신’ 문구보다 실제 코드를 우선한다.
 
 > **2026-10-08~09 자동 저장 반영:** 로그인 사용자의 새 카드·보드와 기록 변경은 기기 저장 뒤 계정 반영을 자동 시도한다. 새로 선택해 저장한 개인 사진은 비공개 최적화 사본을 전송하고, 실패 시 같은 카드·전송 의도로 복구한다. Guest는 공식 표지 카드·작품/감상을 기기에 저장하며 사진 작성에는 로그인이 필요하다. 신규 시스템 디자인 작성은 종료했고 기존 디자인 카드는 보존한다. 운영 사진 flag는 `1`, Public 관련 flags는 `0`이다. [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md#decision-log--automatic-save-and-guest-cover-01-2026-10-08), [설정 지도](operations/2026-10-08-configuration-map.md), [최신 사진 검증·실기기 잔여](plans/2026-10-09-private-photo-reliability-and-handoff.md)를 따른다.
 

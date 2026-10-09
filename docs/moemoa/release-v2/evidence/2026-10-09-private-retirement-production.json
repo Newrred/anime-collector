@@ -30,13 +30,37 @@
     "deleteSucceededAfterCompatibilityMigration": true,
     "alreadyOpenOppositeDetailWasStale": true,
     "staleDetailCorrection": "MemoryCardDetail.jsx now clears card, preview and editing state when completed account sync finds no card; nondeleted unsaved edits remain protected.",
-    "postDeploymentVerification": "Check the latest ExecPlan execution record and current master build-info; local synthetic UI results do not by themselves prove production behavior."
+    "postDeploymentVerification": {
+      "codeCommit": "d4f6d918e7bee99e943266c1a2351d71416e6612",
+      "gitDeployment": "https://vercel.com/newrreds-projects/anime-collector/2TNMYXXRXH7pC8QcTCZzoPvfLUrk",
+      "productionCommitAndCheckoutMatch": true,
+      "source": "vercel-git",
+      "configSemanticMatch": true,
+      "separateDisposableCatalogCoverCardCreatedThroughUi": true,
+      "sameCardVisibleInIndependentSessions": true,
+      "chromeDeleteSucceeded": true,
+      "oppositeOpenEditingDetailBecameNotFoundWithoutReload": true,
+      "unsavedEditorAndImageRemoved": true,
+      "deletedCardUrlNotFoundInChrome": true,
+      "publicFlagsChanged": false,
+      "privatePhotoUploadedForFollowup": false
+    }
   },
   "localSql": {
     "selectivePrivateOnlyAssertions": 23,
     "fullPrivateImageAssertions": 51,
     "quotaAndIdempotencyRaces": 2,
     "rolloutAndRollbackTested": true
+  },
+  "validation": {
+    "unit": "458 passed",
+    "focusedChromium": "15 passed",
+    "build": "20 pages built",
+    "sourceCheckCommit": "d4f6d918e7bee99e943266c1a2351d71416e6612",
+    "githubServiceQuality": "https://github.com/Newrred/anime-collector/actions/runs/37901937296",
+    "githubVerify": "success",
+    "githubPublicationContract": "success",
+    "optionalWebKitDetail": "Not passed: account fixture initialization blocked two new detail cases and one existing owner-boundary case; isolated metadata convergence passed."
   },
   "limits": [
     "Actual iPhone save/edit was user-reported and matched the same photo/card on PC; no first-attempt latency or retry-count measurement.",
