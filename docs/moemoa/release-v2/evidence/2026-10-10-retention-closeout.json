@@ -1,0 +1,196 @@
+{
+  "date": "2026-10-10",
+  "baselineCommit": "f38ca9b8379c3e814d15397fecfd1b5912f12c24",
+  "scope": "W14/W15/W20 D04/D05 retention closeout; local candidate + hosted read-only inspection",
+  "production": {
+    "target": "production",
+    "readOnly": true,
+    "tables": {
+      "cron.job": true,
+      "public.memory_cards": true,
+      "public.sync_changes": true,
+      "cron.job_run_details": true,
+      "public.memory_boards": true,
+      "public.sync_operations": true,
+      "public.memory_board_cards": true,
+      "public.memory_visual_assets": true,
+      "private.memory_private_media": true,
+      "public.memory_private_titles": true,
+      "private.simple_signup_handoffs": false,
+      "private.simple_signup_admissions": false
+    },
+    "observed": {
+      "at": "2026-10-09T17:57:38.663781+00:00",
+      "privateImages": {
+        "dueForCleanup": 0,
+        "over24HoursDue": 0,
+        "deletedMetadataRows": 1,
+        "expiredPreparations": 0
+      },
+      "public.memory_cards": {
+        "deletedRows": 2,
+        "olderThan30Days": 0
+      },
+      "public.memory_boards": {
+        "deletedRows": 0,
+        "olderThan30Days": 0
+      },
+      "orphanOperationBodies": 0,
+      "public.memory_board_cards": {
+        "deletedRows": 0,
+        "olderThan30Days": 0
+      },
+      "syncChangesOlderThan30Days": 0,
+      "public.memory_visual_assets": {
+        "deletedRows": 2,
+        "olderThan30Days": 0
+      },
+      "public.memory_private_titles": {
+        "deletedRows": 0,
+        "olderThan30Days": 0
+      }
+    },
+    "jobs": {
+      "knownJobs": [
+        {
+          "name": "moemoa-memory-retention-daily",
+          "active": true,
+          "schedule": "15 3 * * *",
+          "latestRun": {
+            "ended": "2026-10-09T03:15:00.297445+00:00",
+            "status": "succeeded",
+            "started": "2026-10-09T03:15:00.183726+00:00"
+          }
+        }
+      ]
+    }
+  },
+  "test": {
+    "target": "test",
+    "readOnly": true,
+    "tables": {
+      "cron.job": true,
+      "public.memory_cards": true,
+      "public.sync_changes": true,
+      "cron.job_run_details": true,
+      "public.memory_boards": true,
+      "public.sync_operations": true,
+      "public.memory_board_cards": true,
+      "public.memory_visual_assets": true,
+      "private.memory_private_media": true,
+      "public.memory_private_titles": true,
+      "private.simple_signup_handoffs": true,
+      "private.simple_signup_admissions": true
+    },
+    "observed": {
+      "at": "2026-10-09T17:57:42.046992+00:00",
+      "privateImages": {
+        "dueForCleanup": 0,
+        "over24HoursDue": 0,
+        "deletedMetadataRows": 13,
+        "expiredPreparations": 0
+      },
+      "public.memory_cards": {
+        "deletedRows": 17,
+        "olderThan30Days": 0
+      },
+      "public.memory_boards": {
+        "deletedRows": 7,
+        "olderThan30Days": 0
+      },
+      "orphanOperationBodies": 0,
+      "public.memory_board_cards": {
+        "deletedRows": 11,
+        "olderThan30Days": 0
+      },
+      "syncChangesOlderThan30Days": 0,
+      "public.memory_visual_assets": {
+        "deletedRows": 4,
+        "olderThan30Days": 0
+      },
+      "public.memory_private_titles": {
+        "deletedRows": 1,
+        "olderThan30Days": 0
+      },
+      "private.simple_signup_handoffs": {
+        "expired": 0
+      },
+      "private.simple_signup_admissions": {
+        "expired": 0
+      }
+    },
+    "jobs": {
+      "knownJobs": [
+        {
+          "name": "moemoa-memory-retention-daily",
+          "active": true,
+          "schedule": "15 3 * * *",
+          "latestRun": {
+            "ended": "2026-10-09T03:15:00.453468+00:00",
+            "status": "succeeded",
+            "started": "2026-10-09T03:15:00.254811+00:00"
+          }
+        },
+        {
+          "name": "moemoa-simple-signup-purge",
+          "active": true,
+          "schedule": "17 * * * *",
+          "latestRun": {
+            "ended": "2026-10-09T17:17:00.180517+00:00",
+            "status": "succeeded",
+            "started": "2026-10-09T17:17:00.178679+00:00"
+          }
+        }
+      ]
+    }
+  },
+  "productionCleanupWorkflow": {
+    "runId": 37934721842,
+    "sourceCommit": "8fb4b491ddd118df6e330a8c7a6a19a0b848a144",
+    "event": "schedule",
+    "conclusion": "success",
+    "completedAt": "2026-10-09T13:08:38Z",
+    "limitation": "Successful job is not a new per-object physical deletion verification; GitHub schedule may be delayed."
+  },
+  "newValidation": {
+    "postgresAssertions": 12,
+    "unitTests": 32,
+    "inspectorSafetyTests": 4,
+    "postgresCommand": "wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-retention-local.sh",
+    "unitCommand": "node --test tests/unit/privateMaintenance.test.mjs tests/unit/memorySyncEngine.test.mjs",
+    "inspectorCommand": "python -m unittest discover -s tools/operations -p test_inspect_retention.py",
+    "reproduced": "Original purge removes synthetic 31-day board while cached operation body survives.",
+    "candidate": "Existing purge extended to remove orphan remoteEntity bodies, preserve operation identity/hash/status/acknowledgement, active/recent records and service-only ACL.",
+    "limits": [
+      "SQL candidate not a deployed migration; neither hosted database mutated",
+      "No new actual-user signup, physical object delete, backup restore or Safari PASS",
+      "Full batch alert detects possible backlog, not proven backlog"
+    ],
+    "initialFailures": [
+      "First production inspector expected URL but actual config used structured fields; supported and rechecked",
+      "Local PostgreSQL launch as default root rejected; runuser command unavailable; explicit wsl -u postgres succeeded"
+    ],
+    "signupBrowser": {
+      "passed": 5,
+      "seconds": 6.0,
+      "command": "node scripts/run-simple-signup-e2e.mjs",
+      "googleAndApi": "synthetic"
+    },
+    "build": {
+      "command": "npm run build",
+      "pages": 25,
+      "result": "PASS",
+      "warning": "existing client chunk >500kB"
+    },
+    "diffCheck": "PASS"
+  },
+  "remaining": [
+    "Exact SQL candidate review and test rollout before production",
+    "Deleted private-media metadata and cancellation/operation metadata retention must preserve replay/quota safety",
+    "External backup rotation, deletion journal restore enforcement, independent key storage and external restore proof",
+    "Support mailbox retention and provider-specific log/legal retention",
+    "Country-specific final notice and D06 production candidate"
+  ],
+  "productionMutations": 0,
+  "secretValuesOutput": 0
+}

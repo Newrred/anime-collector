@@ -1,5 +1,12 @@
 # MOEMOA 운영 설정 지도
 
+## 2026-10-10 보존·삭제 실제 상태
+
+- 읽기 전용 inspection: 운영/test 일별30일 정리 활성·최근 성공, 초과 tombstone/사진 정리 대기/고아 응답 사본0. test 단기 가입 정리 활성·최근 성공/만료 잔여0. 운영 간편 가입 테이블은 미설치 상태를 유지한다.
+- 사진 정리 GitHub run37934721842(10/9, master8fb4b49) SUCCESS. 매6시간 의도 예약은 지연될 수 있고 회당50건이므로 삭제 기한 보장이 아니다. 신규 코드의 `PRIVATE_CLEANUP_BATCH_LIMIT_REACHED`는50건 포화 가능성 경보이며 아직 master 미반영이다.
+- 동기화 삭제 사본 보완 SQL은 `tools/operations/retention-response-candidate.sql`에만 존재, DB 미적용. 운영/test `DELETED` 사진 metadata1/13행의 별도 보존 기준과 Drive 사본 회전은 미완료다.
+- [이번 집계/검증](../release-v2/evidence/2026-10-10-retention-closeout.json), [현재 계약](../release-v2/02_ACCEPTANCE_CONTRACTS.md). 기존 비밀값 위치/백업 파일·키는 변경하지 않았다.
+
 > **2026-10-10 현재 재개점 — 가입 시각 오차 보완:** 실제 신규 C 가입·동의 결속·로그인 PASS(add55d3)는 유지한다. start 요청에서 클라이언트가 서버보다1ms 빠르면503이 나는 별도 결함을 합성 재현했고, 최대60초 미래값만 서버 수신시각으로 낮추도록 보완했다. 과거30분 만료/10분 OAuth 만료·나이·약관·정책·계정 검증은 유지한다. 이번 unit479/가입 Chromium4/build24 PASS, 이전 add55d3 CI37965007645 전체SUCCESS. 최초 hosted503의 정확한 원인은 당시 진단 부족으로 미확정이며 이번 재현과 구분한다. 현재 보완은 테스트 Git Preview 반영 대상; 운영/master/Public/DB migration 변경0. 신규 시계오차의 실제 hosted 재현은 미검증이다. 다음1개는 C02 국가별 최종 가입 정책·고지 마감; 기존 D05 외부 복구/키 보관도 남는다. 아래 기록은 각 실행 시점의 근거다.
 
 > **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.

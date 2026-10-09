@@ -1,5 +1,19 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 W14/W15/W20·D04/D05 실제 보존·삭제 마감
+
+- **사용자 결과/범위:** 사용자 “마감진행 ㄱ”에 따라 기존 보존·삭제 구현과 실제 운영 예약 상태를 대조한다. 단순 문구 작업으로 완료 처리하지 않는다. 기존 signup/public 권한·최소 연령 결정은 유지한다.
+- **근거/파일:** AGENTS/시작문서/결정01/PLANS/QA07/보고09·기존00~03·설정 지도를 읽었다. `20260902055512_memory_user_retention.sql`의30일 soft-delete 정리, private image60초 안전 간격과6시간/50건 정리, signup10/5/2분 만료를 실제 운영/테스트의 조회 전용 관측과 대조한다.
+- **실행/검증:** 고정된 두 프로젝트만 허용하는 `tools/operations/inspect-retention.py`를 준비한다. 인증서 검증·읽기 전용 트랜잭션에서 테이블 존재, 예약/최근 성공, 만료 잔여 건수만 조회한다. 원문 계정·이미지·키·SQL 오류는 출력하지 않는다. 확인한 결과로 기존 고지 검토본과 설정 지도/작업판을 갱신하고 필요한 최소 수정만 한다. 단순 연결/전체 복원 검사는 반복하지 않는다.
+- **안전/롤백:** 이번 감사는 migration/삭제/예약 변경 없이 진행한다. 비밀 설정은 기존 Git 제외 파일에서 프로세스 내부로만 읽는다. 검사 도구와 고지 수정은 소스 revert로 복구한다. 만료 metadata와 이미지 bytes, 서버 삭제와 외부 백업 삭제를 구분한다. 유일한 복구 사본을 보존 기간 선언 때문에 지우지 않는다.
+- **잔여 판정:** 실제 정리 실패/미예약을 발견하면 정확한 대상으로 분리한다. 보관 기한을 구현·예약 증거 없이 확정 완료로 적지 않는다. 제공처 로그 보존/수령 법인/처리 국가의 외부 사실은 공식 문서와 설정 근거로 확인하며, 운영 계약 수락·새 인증정보·외부 전송은 이 감사에 포함하지 않는다.
+- **발견에 따른 로컬 보완:** 기존 `sync_operations.result_payload.remoteEntity`에 본문 사본이 남으며 기존30일 정리가 이를 다루지 않는다. 기존 purge 함수의 후보 SQL을 `tools/operations/retention-response-candidate.sql`에 준비하고 격리 DB에서 수정 전 재현→삭제 대상 사본 제거·최근/활성 자료 보존·operationId/hash/상태·중복 방지 보존을 검증한다. 배포 migration으로 등록하거나 hosted에 실행하지 않는다. 본문 제거는 되돌릴 수 없으므로 실제 적용은 이 정확한 후보/백업·복구 검토 게이트로 남긴다. 소스 revert는 함수 동작만 되돌리며 삭제된 내용을 복원하지 않는다. 이미지 정리는50건 처리 한도 도달 시 주의 경보만 추가하고 삭제량/주기/권한은 바꾸지 않는다.
+
+
+- **이번 실행 결과:** 운영/test inspector 실제 PASS, 초과30일 삭제 기록·만료 사진 준비/정리 대기·고아 operation 본문0. 운영 일별cron10/9 SUCCESS, test 일별/시간별cron SUCCESS. GitHub 사진 job37934721842 SUCCESS는 당시 동작이며 개별 사진 재삭제 PASS가 아니다. `python -m unittest discover -s tools/operations -p test_inspect_retention.py`4PASS, `node --test tests/unit/privateMaintenance.test.mjs tests/unit/memorySyncEngine.test.mjs`32PASS, `wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-retention-local.sh`12PASS(수정 전 잔여 재현 포함), `node scripts/run-simple-signup-e2e.mjs`5PASS(6.0초, 합성Google/API), `npm run build`25pages PASS·기존500KB bundle 경고, `git diff --check`PASS. 이전 전체479/실제가입/백업 복원은 이번 PASS가 아니다.
+- **실패 기록/수정:** inspector 첫 production 실행은 URL 대신 분리된 연결 필드 때문에 실패→고정 host/user 대조를 유지하면서 두 형식 지원 후 PASS. local initdb는 기본root로 실패, runuser 실행 파일도 없어 실패→WSL의 명시적 postgres 사용자로 실행 성공. 서버/운영 인증 재설정 없음.
+- **변경/영향/잔여:** 읽기 전용 집계 도구·4안전검사, 기존 purge의 로컬 후보/합성회귀,50건 포화 경보/단위회귀, 검토 개인정보 문구 및 기존00~03/시작문서/설정지도/증거를 갱신했다. DB migration 등록·hosted 실행·새 수집·원문로그·운영 배포0. candidate는 기존5종 Memory entity에 한정하며 전체 사용자 데이터/모든 동기화 저장소의 삭제 보장을 의미하지 않는다. 다음1개는 정확한 SQL 후보의 테스트 적용 검토. 운영 적용 전 비가역 본문 제거·복구 경계 승인이 필요하다. 외부 백업/키·삭제 metadata/지원로그 기한·국가별최종 고지는 기존 D04/D05에 남긴다.
+
 ## 2026-10-10 W06/W14/C02·D04 고지 정리 후속
 
 - **목적/확정 결정:** KR14/PH13/TH13·미국/유럽 포함·국가/DOB/약관→Google 유지. PASS/KWS/보호자 메일과 새 진행판을 추가하지 않는다. 현재 동의된 10/9 문서와 영수증은 보존한다.

@@ -45,6 +45,11 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
     storageAlertBytes: env.STORAGE_ALERT_BYTES ? Number(env.STORAGE_ALERT_BYTES) : 80_000_000,
     readAlertBytes: env.READ_ALERT_BYTES ? Number(env.READ_ALERT_BYTES) : 400_000_000,
   });
+  // A full batch is a possible backlog, not proof that deletion failed. Do not
+  // silently increase deletion volume; let the operator inspect remaining work.
+  if (!cleanupSkipped && !cleanupFailed && cleanup.deleted === 50) {
+    capacity.alerts.push('PRIVATE_CLEANUP_BATCH_LIMIT_REACHED');
+  }
   return { deleted: cleanupSkipped || cleanupFailed ? null : cleanup.deleted, cleanupSkipped, cleanupFailed, ...capacity };
 }
 

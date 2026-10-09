@@ -1,5 +1,29 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 W14/W15·D04/D05 보존·삭제 실측
+
+| 항목 | 확인 결과와 실제 범위 | 남은 조건 |
+| --- | --- | --- |
+| 기억/보드 삭제 기록 | 운영·test 30일 초과0; `moemoa-memory-retention-daily` 매일03:15 UTC,10/9 최신 성공 | 아래 동기화 본문 사본 보완 전 전체 사본30일 삭제라는 약속 금지 |
+| 비공개 사진 | 두 환경 정리 기한 경과0,24시간 초과0,만료 준비0; 운영 workflow37934721842 SUCCESS(master8fb4b49) | 회당50건,6시간 nominal 예약은 GitHub 지연 가능; 개별 이미지 물리 삭제 재검증이 아님 |
+| 삭제 완료 메타데이터 | 운영1/test13행; 사진 bytes와 구분 | 재시도/취소/할당량 보호에 쓰이는 메타데이터의 보존 기준 미완료; 무조건 TTL 삭제 금지 |
+| 가입 임시 자료 | test admissions/handoffs 만료 잔여0; 시간별17분 예약 최근 SUCCESS | 운영에는 새 가입 테이블 미설치(정상 미배포 상태); 운영 예약 PASS 아님 |
+| 동기화 응답 본문 | 기존 함수가 정리한 행의 `remoteEntity` 사본을 보존하는 결함을 합성 재현. 실제 고아 사본은 두 환경0 | 후보 SQL 로컬12항목 PASS; hosted 미적용. 식별자/hash/결과는 보존하며 본문 제거는 비가역 |
+| 외부 암호화 백업 | 앞선 승인 Drive 업로드 근거 유지; 이번 신규 전송/삭제0 | 회전·삭제 반영 기한/외부 재다운로드 복구/별도 키 보관 미완료. 유일한 복구 사본을 지우지 않음 |
+| 지원·로그 | 담당 sinong 유지; 사용자 원문을 일반 로그에서 제외하는 기준 유지 | 지원 메일·신고/보안 로그별 보존·법정 예외를 최종 고지에 구체화해야 함 |
+
+- 재사용 가능한 읽기 전용 도구: `tools/operations/inspect-retention.py --target production|test` (WSL). 고정 프로젝트, TLS 검증, 읽기 전용 트랜잭션·제한시간, 집계/예약만 출력. DB 연결 오류·사용자 본문·키는 출력하지 않는다. 안전 검사4PASS.
+- 실제 관측 시각·집계는 [evidence](evidence/2026-10-10-retention-closeout.json). 기존 전체 unit479·실제 Google C 가입·Drive 업로드는 과거 PASS이며 이번 재실행으로 합산하지 않는다.
+- 후보 `tools/operations/retention-response-candidate.sql`은 기존 purge 함수만 보완하고 cron/기간/사용자 데이터 모델을 바꾸지 않는다. 이미 없어진5종 entity의 캐시 본문을 null로 치환한다. 이전 operation 상태/버전/해시와 권한을 보존한다. 새/과거 동의 문서는 교체하지 않는다. 운영 적용은 D06 정확 후보와 백업/복구 검토 이후다.
+- 사진 정리50건 포화 경보는 **추가 대기가 있을 가능성**을 표시하며 확정 실패/실제 잔여 건수로 부르지 않는다. 주기·삭제량 자동 증가 없음.
+
+### 제공처 사실과 서비스 약속의 구분
+
+- [Vercel Runtime Logs](https://vercel.com/docs/logs/runtime): Hobby의 조회 보존1시간, Pro1일 등 플랜별 범위다. 이것을 모든 build/보안/지원 로그의 물리 삭제 기한으로 사용하지 않는다. 저장소 설정 `vercel.json`의 `sin1`도 모든 공급자 처리 국가를 뜻하지 않는다.
+- [Supabase 데이터 이전 FAQ](https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq): 일반 계약 주체 Supabase Pte. Ltd.(싱가포르), 미국 affiliate 지원/운영 및 별도 marketplace 예외를 설명한다. 실제 계약/하위처리자와 DB 지역을 대조해야 하며 이 문서 조회가 DPA 수락이나 국외 이전 근거 확정은 아니다.
+- [Google 보존 설명](https://policies.google.com/technologies/retention?hl=en): 제공처 목적별 보존과 MOEMOA Drive 사본의 회전은 별개다. 현재 MOEMOA 사본에 자동 회전이 있다는 근거는 없다.
+- 따라서 처리 법인/이전 근거·지원 기록·백업 기한은 계속 D04/D05 잔여다. 새 보호자 절차나 연령 상향으로 대체하지 않는다.
+
 ## 2026-10-10 C02·D04 개정 고지 검토 — 현행 동의 문서 보존
 
 **현재 산출물:** `/legal/review/`의 한국어/영어 약관·개인정보 개정 검토본. 현재 테스트 가입은 여전히 `terms/privacy-2026-10-09-draft`에 연결하며 새 초안은 동의 대상이 아니다. 새 DB 정책값이나 가입 제한을 추가하지 않았다. KR14/PH13/TH13·간단한 Google 가입 결정 유지. 전체 국가 법률 검토 완료/운영 출시 PASS가 아니다.

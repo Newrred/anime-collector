@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import { evaluatePrivateCapacity, runPrivateMaintenance } from '../../scripts/private-image-maintenance.mjs';
 
 const snapshot = (changes = {}) => ({ observedAt: new Date().toISOString(), storedBytes: 100, reservedBytes: 100, globalReadBytes: 200, ...changes });
+test('full cleanup batch alerts without extra deletion calls or claiming failure', async () => {
+  for (const deleted of [49, 50]) {
+    const calls = [];
+    const result = await runPrivateMaintenance({CLEANUP_ORIGIN:'https://example.test',CLEANUP_SECRET:'x'.repeat(32)}, async url => {
+      calls.push(url.pathname);
+      return {ok:true,json:async()=>url.pathname.endsWith('cleanup')?{deleted,failed:0}:snapshot()};
+    });
+    assert.deepEqual(calls, ['/api/private-image-cleanup','/api/private-image-observe']);
+    assert.equal(result.deleted, deleted);
+    assert.equal(result.cleanupFailed, false);
+    assert.deepEqual(result.alerts, deleted === 50 ? ['PRIVATE_CLEANUP_BATCH_LIMIT_REACHED'] : []);
+  }
+});
 test('manual observation never calls deletion endpoint', async () => {
   const calls=[];
   const result=await runPrivateMaintenance({CLEANUP_ORIGIN:'https://example.test',CLEANUP_SECRET:'x'.repeat(32),OBSERVE_ONLY:'true'}, async url => {
