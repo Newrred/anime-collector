@@ -30,6 +30,18 @@
   ],
   "previousEvidenceNotRepeated": ["hosted A/B/public round trip", "72-table restore", "iPhone user-reported create/edit", "two-browser private sync/delete"],
   "operations": {"productionDbWrites":0,"publicFlagsChanged":false,"credentialsReset":false,"externalBackupUploaded":false,"paidChanges":false,"guardianEmailsSent":0},
+  "implementationDeployment": {
+    "commit": "4a85aba6f7fc54349d777bc7e93bef9cc41f54d6",
+    "source": "vercel-git",
+    "checkoutCommitMatches": true,
+    "deploymentConfigSemanticMatch": true,
+    "builtAt": "2026-10-09T09:05:59.462Z",
+    "runtimeHelp": "KO/EN mailto:godburgundy@gmail.com, sinong and public-unavailable notice verified",
+    "capacityRun": "https://github.com/Newrred/anime-collector/actions/runs/37909102233",
+    "capacityRunResult": "success; 09:06:19.651 UTC; storage/reserved682714; monthly reads1054194; alerts none; cleanup skipped",
+    "qualityAtEvidenceWrite": "37909041957: SQL job success; Web job in progress. Check latest Actions for final result and follow-up documentation commit. Earlier041868b run cancelled by follow-up push.",
+    "backupAccess": "Current Supabase login shows Reset password disabled and insufficient configuration permissions. Vercel DB variable-name search returned0; no credentials revealed/reset. Owner credential recovery required."
+  },
   "remaining": [
     "Pre-account guardian consent implementation and actual verification, country-specific notice/retention/withdrawal conditions; existing identity receipt is not consent",
     "Operator does not know production DB password; ignored protected local settings template only. No password reset performed",

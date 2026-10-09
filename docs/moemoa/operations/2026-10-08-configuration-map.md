@@ -115,11 +115,15 @@ Dashboard: [프로젝트](https://supabase.com/dashboard/project/okchpyagfucpzpy
 
 | 작업 | Git 워크플로 | GitHub 측 설정 | 주기·영향 |
 | --- | --- | --- | --- |
-| 비공개 사진 정리·용량 관측 | `.github/workflows/private-image-cleanup.yml` | Variable `MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED=true`, `MOEMOA_PRIVATE_IMAGE_CLEANUP_ORIGIN=https://www.moemoa.xyz`; Secret `MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET` 존재 | 매일 03:07·09:07·15:07·21:07 KST. 운영 Vercel의 정리/관측 API 두 개 호출 |
+| 비공개 사진 정리·용량 관측 | `.github/workflows/private-image-cleanup.yml`, `scripts/private-image-maintenance.mjs` | Variable `MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED=true`, `MOEMOA_PRIVATE_IMAGE_CLEANUP_ORIGIN=https://www.moemoa.xyz`; Secret `MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET` 존재 | 기존 cron 유지. 수동 Run workflow는 관측만 하고 삭제를 호출하지 않음. 예약은 기존 정리+관측. 기본 저장/예약80MB·월읽기400MB 이상 또는 관측/정리 오류면 실패/경보 코드 |
 | 카탈로그 상태 점검 | `.github/workflows/catalog-health.yml` | Variables `PUBLIC_CATALOG_SUPABASE_URL`, `PUBLIC_CATALOG_SUPABASE_ANON_KEY` 존재 | 매일 08:17 KST. 익명 카탈로그 검색·상세·표지의 읽기 전용 검사. **새 애니 데이터 수집·수정은 하지 않음** |
 | 코드 품질 검사 | `.github/workflows/quality.yml` | 워크플로 안의 테스트용 값. 운영 변수와 분리 | Git 변경 후 검사. **배포 작업은 아님**; Vercel Git 연동이 운영 배포 수행 |
 
 사진 정리 작업은 GitHub의 실행 스위치와 Vercel의 API 수락 스위치가 **둘 다** 켜져야 한다. GitHub Secret과 Vercel Secret의 값도 맞아야 하지만 그 값은 이 문서에 남기지 않는다. GitHub 예약은 지연되거나 실패할 수 있으므로 실제 실행 기록과 결과를 Actions 화면에서 확인한다.
+
+2026-10-09 추가: `MOEMOA_PRIVATE_STORAGE_ALERT_BYTES` / `MOEMOA_PRIVATE_READ_ALERT_BYTES` GitHub Variables로 경보 임계값을 바꿀 수 있다(미설정 기본80,000,000/400,000,000). 이는 DB의 강제 한도 변경이 아니다. Actions 실패 알림은 운영자 GitHub 알림 설정/수신 여부를 별도로 확인한다. 수동 관측 [37909102233](https://github.com/Newrred/anime-collector/actions/runs/37909102233)은 `4a85aba`에서 성공했으며09:06:19 UTC 저장/예약682,714bytes·월읽기1,054,194bytes·경보없음/삭제SKIPPED였다. 임계 경보의 실제 메일 수신 PASS는 아니다. 금액 청구서 전체나 다른 서비스 비용을 측정하지 않는다.
+
+2026-10-09 백업 접근: 운영 Supabase는 Free로 관리형 백업 다운로드가 없고, 운영 DB 비밀번호는 사용자도 현재 모름. 현재 로그인에서 Database Settings의 Reset password 버튼 비활성화/설정 권한 부족 안내 확인. Vercel Project 환경 변수 `DB` 검색 결과0(임의 이름이나 외부 도구까지 부재 증명 아님). 원래 비밀번호 보관처 확인 또는 조직 소유자/해당 권한 계정에서 복구가 필요하다. 인증정보 변경은 사용자가 직접 처리하고, 알려지지 않은 직접 DB 연결에 대한 영향은 별도 확인한다. 웹의 조사한 운영 경로는 REST/서버 API 키를 사용한다. Git 제외 `.env.moemoaprod.server.local`에는 확인한 Session pooler host/user와 빈 비밀번호·서버 키 입력란만 준비했고 현재 사용자/SYSTEM 파일 접근으로 제한했다. 비밀값·신분증·원본을 채팅/Git에 넣지 않는다. Drive와 복구 키를 같은 저장소에 두지 않는다.
 
 ## 5. 자주 하는 변경의 정확한 위치
 

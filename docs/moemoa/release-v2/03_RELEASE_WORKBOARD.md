@@ -2,6 +2,8 @@
 
 ## 2026-10-09 운영 출시 마감 — 이번 실행
 
+- 운영 반영: 구현 `041868b` 및 수동 관측 분리 `4a85aba`를 master push했다.10/9 09:05:59 UTC Vercel Git build의 commit/checkoutCommit=`4a85aba6f7fc54349d777bc7e93bef9cc41f54d6`, deploymentConfig.semanticMatch=true. 운영 `/help/`의 KO/EN 지원 링크·sinong·공개 미제공 안내를 직접 확인했다. 수동 관측 [37909102233](https://github.com/Newrred/anime-collector/actions/runs/37909102233) SUCCESS: 저장/예약682,714bytes·월읽기1,054,194bytes·경보없음·삭제SKIPPED. 이번 변경의 SQL CI job 성공, Web CI는 이 기록 시 진행 중이며 후속 문서 커밋을 포함한 최신 Actions/운영 SHA는 실제 조회한다. `041868b` CI는 후속 push로 취소됐으며 실패/PASS로 기록하지 않는다.
+
 - 사용자 재확정: **12세·한국/필리핀/태국 유지 + 동의 절차 준비**, Safari/WebKit 추가 검사는 제외(PASS 아님). Android·성인 인증/성인 공개 후속 제외 유지. 기존 신원 prototype을 실제 보호자 동의로 승격하지 않는다. [C02의 구체 흐름/국가별 근거/현재 코드 한계](02_ACCEPTANCE_CONTRACTS.md#2026-10-09-보호자-동의-준비--w06w14w20-d04)를 준비했다.
 - 운영 읽기: 10/9 08:44 UTC private-only DB, 공개 schema/resource 정책 미설치, private 정책 on/approved, 물리100MB·계정50MB·월 전역 읽기500MB, 당시 저장/예약682,714bytes. 06:00 UTC 예약 정리·관측 성공. DB/사용자 정보는 수정하지 않았다.
 - W15: 기존 유지 workflow에80MB/월400MB 경보 및 관측 오류·정리 오류 실패 상태를 추가했다. 예약 실행의 성공만으로 비용 알림 수신을 주장하지 않는다. W17: 지원/신고/삭제/이의 연락처를 승인된 sinong / godburgundy@gmail.com으로 바로잡고 메일 링크를 연결했다.
