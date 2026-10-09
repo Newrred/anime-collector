@@ -1,5 +1,15 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 사용자 출시 지시 — 검증 확장 종료·운영 Git 반영
+
+- **직접 승인:** 사용자 “뭔 테스트를 이렇게 많이 하냐;; 출시 ㄱㄱ”. 기존 통과 근거를 재사용하고 추가 복구/기기/기초DB 검증을 이번 배포 선행 작업으로 늘리지 않는다. master Git 운영 배포를 승인한 지시로 기록한다. 미완성 기능·정책을 PASS로 변경한 것으로 해석하지 않는다.
+- **대조 근거:** 시작문서/결정01/기존00~03/AGENTS/PLANS/QA07/보고09, `api/signup.js`, `authRepo.js`, 간편 가입 정책/고지, `.env.production`, quality workflow를 읽음. 원격 master/실제 www build-info는8fb4b491ddd118df6e330a8c7a6a19a0b848a144, 후보bef8215의 기존 GitHub37973035614 전체SUCCESS. master 대비10커밋은 fast-forward 가능. 이번 새 소스 수정 없이 배포 기록만 추가한다.
+- **실제 반영 범위:** 검증된 소스·정리 포화 경보·운영 도구를 master에 commit/push하고 Vercel Git Production Ready/Source와 www.moemoa.xyz build-info의 SHA 일치를 확인한다. CLI 로컬 배포/강제push 없음. 현재 로컬 AuthCallback 줄바꿈/미추적 guardian 후보3파일은 포함하지 않는다.
+- **활성 범위:** 기존 개인 기록·감상·이미지 보관·계정 동기화를 유지. Vercel 목록상 간편가입 client/server·Google설정은 Preview codex/phone-test 한정이고 운영에는 없음. 새 가입은 기본off 유지; `/terms/`, `/privacy/`, `/legal/review/`는 명시된 검토 초안이며 확정 동의 문서 아님. Public도 기존 `.env.production` off 유지. 이 반영을 신규 간편가입/일반 공개 게시의 정식 출시 완료로 보고하지 않는다.
+- **DB/롤백:** 이번 web rollout에는 migration 실행이 필요하지 않음. signup migration 두 개와 retention 후보는 version control에 있으나 운영 미실행. 앱 문제 발생 시 이 fast-forward 범위를 revert하는 새 master commit→Git 배포로 복귀; 데이터 변경이 없어 역migration 불필요. 기존 backup/key 보존.
+- **최소 확인:** 이전 CI 전체PASS 재사용; 문서diff 검사, 새 Git/Vercel SHA 대조, 운영 홈·data 응답 및 signup 비활성 상태만 확인. 사용자 데이터 작성·삭제·추가 외부 업로드·키 조회 없음.
+- **실제 출시 잔여:** 신규 간편가입의 운영 Google callback/서버 설정/DB Hook·최종 고지 연결, 국가별 미완료 조건 및 Public 운영 schema/신고·관리자·권리/kill-switch 적용. 이들은 추가 테스트 횟수 문제가 아닌 미활성/미완성 항목이다. 현재 기존 웹 운영 업데이트는 먼저 마감한다.
+
 ## 2026-10-10 D05 외부 백업 회수·복구 마감
 
 - **목적/범위:** 사용자 재개 지시에 따라 승인된 기존 Drive 암호화 사본의 외부 회수·무결성과 격리 복구를 확인한다. 시작문서/결정01/AGENTS/PLANS/QA07/보고09/설정지도/기존 D05 증거·암호화/복구 코드를 읽었다. 새 계획판·새 공급자·새 업로드·운영 DB 쓰기는 없다.
