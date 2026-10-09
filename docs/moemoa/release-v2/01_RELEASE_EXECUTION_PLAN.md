@@ -11,6 +11,7 @@
 - **미확정:** 최종 국가별 조건과 법정 고지는 경쟁 서비스 약관만으로 적합성 PASS 처리하지 않는다. 기존 운영 Google secret은 local에 없고 Vercel에는 test 전용 값만 확인됨. 이 값과 운영자/정책에 필요한 실제 결정은 구체적 준비 후 요청하고 독립 DB 준비를 계속한다.
 
 - **10/10 연결 후속:** 사용자 직접 운영 Google client의 추가 secret 생성·보호된 local 파일 저장 완료. 기존 운영 client ID와 일치만 확인하고 원문 출력 없이 Vercel Production의 Secret 두 항목 등록 성공. 기존 Supabase callback을 보존하면서 `https://www.moemoa.xyz/api/signup?action=callback`을 추가 저장했다. 기존 secret 중지/삭제 없음. 운영 schema는 새 `tools/operations/prepare-production-public-signup.py`로 기존17개 migration을 조합한다. 정확16개 baseline ledger·고정 ref/TLS, transaction/lock timeout, 기존10개 table 전체 행/동기화 함수 보존, public/signup off·권한·trigger 검사를 포함한다. 2개 호환 치환은 기존 local rehearsal와 동일. 운영 한 트랜잭션 적용 후 ROLLBACK rehearsal 성공; 이 단계는 영구 적용/새 가입 성공이 아니다. 과거 암호화 사본 보존, 실패 시 transaction rollback, 성공 후에는 additive schema를 남기고 flags off로 복귀한다.
+- **10/10 실제 schema 반영:** source c72ddaf, release `MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01` 적용 후 별도 연결에서33개 migration 이력·public/signup off·새 게시물/미니홈/영수증0을 확인했다. 기존10개 table 행/동기화 함수 보존 확인. 사용자 godburgundy@gmail.com 관리자 지정 승인에 따라 별도 고정 대상 SQL로 해당1계정과 시간별 가입 임시정보 정리만 준비한다. 취소 시 moderator enabled=false/cron unschedule 가능; 데이터 삭제/공개 전환 없음.
 
 ## 2026-10-10 사용자 출시 지시 — 검증 확장 종료·운영 Git 반영
 
