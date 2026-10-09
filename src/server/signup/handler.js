@@ -3,6 +3,7 @@ import {resolveWebOAuthNext} from '../../features/auth/webOAuth.js';
 import {createSealer,createGoogleVerifier,randomToken,hash,same,reject} from './security.js';
 
 const FLOW='__Host-moemoa-signup',HANDOFF='__Host-moemoa-signup-session';
+const MAX_CLIENT_CLOCK_LEAD=60000;
 function cookie(req,name) {
   const matches=String(req.headers.cookie||'').split(';').map(x=>x.trim()).filter(x=>x.startsWith(name+'='));
   if(matches.length!==1)reject('SIGNUP_DETAILS_EXPIRED');
@@ -53,7 +54,14 @@ export function createSignupHandler({enabled=false,origin,clientId,clientSecret,
         const policy=await backend.policy();
         phase='declaration-check';
         if(policy.serverAdmission!==true)reject();
-        const d=validateDeclaration(body.declaration,policy,now());
+        const receivedAt=now(),submitted=body.declaration;
+        // Different devices need not agree to the millisecond. Clamp only a
+        // bounded future client timestamp; old declarations retain their expiry.
+        // The sealed flow and DB never receive this tolerated future timestamp.
+        const adjusted=Number.isSafeInteger(submitted?.createdAt)
+          && submitted.createdAt>receivedAt && submitted.createdAt-receivedAt<=MAX_CLIENT_CLOCK_LEAD
+          ? {...submitted,createdAt:receivedAt} : submitted;
+        const d=validateDeclaration(adjusted,policy,receivedAt);
         phase='flow-create';
         const state=randomToken(),nonce=randomToken();
         const next=resolveWebOAuthNext({rawNext:body.next,origin});

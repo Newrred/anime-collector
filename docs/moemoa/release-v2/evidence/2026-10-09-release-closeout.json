@@ -626,7 +626,7 @@
     "ci": {
       "id": 37965007645,
       "sql": "success",
-      "web": "in_progress"
+      "web": "success"
     },
     "priorFirstStart503": "UNRESOLVED_PRESERVED",
     "limits": [
@@ -634,5 +634,35 @@
       "Country-specific final policies and notices pending",
       "Production signup remains unchanged"
     ]
+  },
+  "simpleSignupClockLeadFix": {
+    "date": "2026-10-10",
+    "reproduction": {
+      "clientAheadMs": 1,
+      "beforeHttpStatus": 503,
+      "testResult": "1 failed, 1 passed"
+    },
+    "fix": {
+      "startOnly": true,
+      "maximumLeadMs": 60000,
+      "futureTimestampClampedToServerReceipt": true,
+      "staleTimestampPreserved": true,
+      "callbackAndDbValidationUnchanged": true
+    },
+    "validation": {
+      "focusedUnit": 16,
+      "fullUnit": 479,
+      "buildPages": 24,
+      "mockGoogleUiChromium": 4,
+      "firstUiRun": "4 failures while build overlapped; standalone rerun passed",
+      "gitDiffCheck": "PASS"
+    },
+    "originalHosted503Cause": "UNRESOLVED_NO_ORIGINAL_PHASE_DIAGNOSTIC",
+    "hostedClockLeadVerified": false,
+    "migrations": [],
+    "productionChanged": false,
+    "newPersonalDataLogged": false,
+    "rollback": "revert handler and test changes",
+    "next": "C02 final country policies and notices"
   }
 }

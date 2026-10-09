@@ -121,3 +121,33 @@ test('failure diagnostics expose only fixed phase/action and cannot alter the sa
  const broken=harness({observe:()=>{throw new Error('logger failed');}});
  assert.equal((await broken.request('start',{headers:{origin:'https://other.test'}})).statusCode,400);
 });
+
+test('start tolerates bounded client clock lead without carrying a future timestamp into admission',async()=>{
+ for(const lead of [1,1000,60000]) {
+  let received;
+  const h=harness({backend:{admit:async(_identity,d)=>{received=d;return 'admission';}}});
+  const r=await h.request('start',{body:{declaration:{...declaration,createdAt:time+lead}}});
+  assert.equal(r.statusCode,200,`client clock lead ${lead}ms`);
+  const flow=createSealer(key).open(r.headers['Set-Cookie'][0].split(';')[0].split('=')[1],'flow');
+  assert.equal(flow.declaration.createdAt,time);
+  assert.equal(flow.expiresAt,time+600000);
+  const callback=await h.request(`callback&code=c&state=${flow.state}`,{method:'GET',cookies:r.headers['Set-Cookie'][0].split(';')[0]});
+  assert.equal(callback.headers.Location,'/auth/complete/');
+  assert.equal(received.createdAt,time);
+ }
+});
+
+test('clock tolerance preserves stale, excessive future, invalid, age, agreement and policy rejection',async()=>{
+ for(const patch of [{createdAt:time+60001},{createdAt:time-1800000},{createdAt:NaN},{createdAt:Infinity},
+  {createdAt:String(time)},{createdAt:time+0.5},{createdAt:time+1000,age:13},
+  {createdAt:time+1000,accepted:false},{createdAt:time+1000,policyVersion:'old'}]) {
+  const h=harness();
+  const r=await h.request('start',{body:{declaration:{...declaration,...patch}}});
+  assert.equal(r.statusCode,503);assert.equal(r.headers['Set-Cookie'],undefined);assert.deepEqual(h.calls,[]);
+ }
+ const h=harness();
+ const r=await h.request('start',{body:{declaration:{...declaration,createdAt:time-1799999}}});
+ assert.equal(r.statusCode,200);
+ const flow=createSealer(key).open(r.headers['Set-Cookie'][0].split(';')[0].split('=')[1],'flow');
+ assert.equal(flow.declaration.createdAt,time-1799999);
+});
