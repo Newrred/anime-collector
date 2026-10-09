@@ -7,6 +7,8 @@ create temp table retirement_before on commit drop as
 select (select count(*) from public.memory_cards) as cards,
  (select count(*) from private.memory_publication_delete_fences) as fences,
  (select md5(to_jsonb(p)::text) from private.memory_private_media_policy p where id) as policy_hash;
+alter table retirement_before enable row level security;
+revoke all on retirement_before from public,anon,authenticated;
 do $$
 begin
   if to_regprocedure('public.retire_memory_card_publications(uuid)') is not null
