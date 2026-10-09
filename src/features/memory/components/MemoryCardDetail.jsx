@@ -178,12 +178,17 @@ function MemoryCardDetailContent({ base }) {
   }, []);
 
   useEffect(() => {
-    if (!runtime || !cardId || !authUserId || state.editing) return undefined;
+    if (!runtime || !cardId || !authUserId) return undefined;
     let active = true;
     const onSync = (event) => {
       if (event.detail?.userId !== authUserId || event.detail?.state?.syncBusy) return;
       runtime.getCard(cardId).then((next) => {
-        if (active && next) updateState({ bundle: next, note: next.card.note || "",
+        if (!active) return;
+        if (!next) {
+          updateState({ ...INITIAL_STATE, runtime, status: "not-found" });
+          return;
+        }
+        if (!state.editing) updateState({ bundle: next, note: next.card.note || "",
           classification: normalizeCardClassification(next.card.classification),
           ...(event.detail.photoCompleted > 0 ? { photoSyncRevision: state.photoSyncRevision + 1 } : {}) });
       }).catch(() => {});
@@ -302,7 +307,7 @@ function MemoryCardDetailContent({ base }) {
       <div className="memory-detail page-shell page-shell--narrow"><p>{detailCopy.loading}</p></div>
     );
   }
-  if (status === "not-found" || status === "error") {
+  if (!bundle || status === "not-found" || status === "error") {
     return (
       <div className="memory-detail page-shell page-shell--narrow">
         <section className="surface-card memory-detail__state">

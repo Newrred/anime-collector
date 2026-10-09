@@ -4,7 +4,7 @@
 
 - Git `master`/운영 `35fb912`의 일치와 최신 `Service quality` [37818042096](https://github.com/Newrred/anime-collector/actions/runs/37818042096) 성공을 읽기로 확인했다. 운영 유지 작업도 성공 상태다. 이 PC는 기존 테스트 환경으로 계정 연결·Memory/작품 동기화 상태를 표시하며 Public·사진 원격 전송을 켜지 않고 로컬 실행한다. 일반 운영 사진 동작은 실제 운영 링크에서 검증한다.
 - 이 PC의 단위458/build20 및 두 독립 브라우저의 수정·오프라인 재로드/재접속·반대 기기 삭제 수렴 Chromium/WebKit 각1 PASS. 첫 격리 검사 서버의 준비 시간 초과는 실패로 보존했다. 실제 iPhone의 새 테스트 카드 저장·감상 수정은 사용자 보고와 운영 PC의 동일 카드/수정 감상/사진 사본 디코딩으로 확인했다. 어제의 같은 작품 카드를 대조한 착오는 동기화 실패가 아니다. 실제 오프라인 재로드·복구·삭제 전파와 첫 저장 무재시도 성공률은 미확인이다. [기존 사진 계획의 재개 결과와 실행 방법](../plans/2026-10-09-private-photo-reliability-and-handoff.md)을 따른다. Android·공개 출시 전체 PASS로 확대하지 않는다.
-- 후속 사용자 요청으로 실제 오프라인 검사는 제외하고, 앱 브라우저/Chrome에서 수정·삭제를 직접 검사했다. 두 독립 세션의 사진·수정 수신은 확인했지만 운영 private-only DB의 retirement RPC 누락으로 삭제가 안전 중단됐다. 기존 W06/W19에서 additive migration `20261009090000`과 selective23/full51+race2 SQL PASS까지 준비했다. 운영 적용·실제 삭제 재검증은 아직 전이며 공개 출시 전체 완료로 처리하지 않는다.
+- 후속 사용자 요청으로 실제 오프라인 검사는 제외하고, 앱 브라우저/Chrome에서 수정·삭제를 직접 검사했다. 두 독립 세션의 사진·수정 수신을 확인했고, 운영 private-only DB의 retirement RPC 누락으로 첫 삭제가 안전 중단됐다. 기존 W06/W19에서 additive migration `20261009090000`을 로컬 selective23/full51+race2 SQL PASS 후 운영에 적용했다. 지정 테스트 카드 삭제 성공 및 서버 tombstone/fence/사진 retirement를 확인했다. 이미 열린 반대 상세가 null 결과를 무시하는 문제는 source/UI 회귀로 보완했다. 실제 iPhone 오프라인·삭제 및 공개 출시 전체 완료로 확대하지 않는다. [최신 실행/검사와 남은 한계](../plans/2026-10-09-private-photo-reliability-and-handoff.md#19-두-화면-직접-검증과-삭제-경계-마감), [DB release 증거](evidence/2026-10-09-private-retirement-production.json)를 따른다.
 
 ## 2026-10-08 운영 저장 상태·검증 잔여
 

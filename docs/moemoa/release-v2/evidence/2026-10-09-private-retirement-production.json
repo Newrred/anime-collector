@@ -1,0 +1,50 @@
+{
+  "releaseId": "MOEMOA_PRIVATE_RETIREMENT_20261009_01",
+  "approval": "User authorized important Web feature closeout, production DB updates and master Git deployment; directly requested two-browser verification of the disposable test card.",
+  "database": {
+    "projectRef": "okchpyagfucpzpyrfgol",
+    "migrationVersion": "20261009090000",
+    "migrationSource": "supabase/migrations/20261009090000_private_card_retirement_compat.sql",
+    "migrationSourceCommit": "00fb614f456e04955e294f916fbda1e9979ec1ef",
+    "migrationSourceSha256": "a83c48a4541a3034c6a25f3a61e923c5c9946de002cde42a0d766c8849e7b84b",
+    "guardedRollout": "tools/private-images/activate-retirement-compat-20261009.sql",
+    "rollback": "tools/private-images/rollback-retirement-compat-20261009.sql",
+    "observedResults": {
+      "rpcInstalled": true,
+      "anonymousDenied": true,
+      "authenticatedAllowed": true,
+      "publicSchemaAbsent": true,
+      "sourceRowsAndPolicyUnchangedAtInstallation": true,
+      "migrationRecorded": true,
+      "disposableTestCardDeleted": true,
+      "testFencePresent": true,
+      "testPhotoRetired": true,
+      "testPhotoReadyAbsent": true
+    }
+  },
+  "actualBrowserEvidence": {
+    "surfaces": ["Production Codex browser", "Production Chrome independent session"],
+    "sameNewPhotoDecodedInBoth": true,
+    "chromeEditReceivedAfterOtherBrowserReload": true,
+    "initialDeleteSafelyRefusedForMissingRpc": true,
+    "deleteSucceededAfterCompatibilityMigration": true,
+    "alreadyOpenOppositeDetailWasStale": true,
+    "staleDetailCorrection": "MemoryCardDetail.jsx now clears card, preview and editing state when completed account sync finds no card; nondeleted unsaved edits remain protected.",
+    "postDeploymentVerification": "Check the latest ExecPlan execution record and current master build-info; local synthetic UI results do not by themselves prove production behavior."
+  },
+  "localSql": {
+    "selectivePrivateOnlyAssertions": 23,
+    "fullPrivateImageAssertions": 51,
+    "quotaAndIdempotencyRaces": 2,
+    "rolloutAndRollbackTested": true
+  },
+  "limits": [
+    "Actual iPhone save/edit was user-reported and matched the same photo/card on PC; no first-attempt latency or retry-count measurement.",
+    "Actual iPhone offline test skipped at user request; desktop browsers and synthetic WebKit tests are not iPhone evidence.",
+    "Actual iPhone deletion was not tested; the agent deleted only the user-designated disposable card through Chrome.",
+    "Storage physical cleanup completion and immediate invalidation of previously issued signed URLs were not verified.",
+    "No Public activation, rights expansion, Android work or paid changes.",
+    "A future selective Public rollout must atomically replace the private-only compatibility RPC with the full retirement implementation."
+  ],
+  "privacy": "No account identifiers, card identifiers, user notes, photo bytes, tokens or signed URLs included."
+}

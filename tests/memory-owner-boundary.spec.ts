@@ -1,6 +1,72 @@
 import { test, expect } from '@playwright/test';
+import { installSignedInPhotoAccount } from './helpers/signedInPhotoAccount';
 const A = '11111111-1111-4111-8111-111111111111';
 const B = '22222222-2222-4222-8222-222222222222';
+
+for (const editing of [false, true]) {
+  test(`remote tombstone clears an already-open card${editing ? ' while editing' : ''}`, async ({ page }) => {
+    await installSignedInPhotoAccount(page);
+    await page.goto('/favicon.svg');
+    const cardId = await page.evaluate(async userId => {
+      const { IndexedDbMemoryRepository } = await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
+      const repo = await IndexedDbMemoryRepository.open();
+      const now = new Date().toISOString();
+      await repo.ensureInstallationIdentity({ uuid: crypto.randomUUID(), now });
+      const account = await repo.ensureAccountOwner({ userId, now });
+      await repo.activateOwner({ ownerId: account.id, now });
+      const store = await import('/src/features/memory/adapters/indexeddb/memorySyncStore.js');
+      await store.writeDeviceSyncState(repo.database, { ownerId: account.id, userId,
+        installationId: crypto.randomUUID(), deviceId: crypto.randomUUID(), lastSyncSeq: 0, updatedAt: now });
+      const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+      const runtime = await getPlatformMemoryRuntime();
+      const animeId = 'anime:11111111-1111-4111-8111-000000154587';
+      const result = await runtime.createCard({ titleChoice: { kind: 'ANIME_REF', animeId,
+        displayTitle: 'Synthetic remote delete', sourceBinding: null, verificationState: 'PROVIDER_CANDIDATE' },
+        note: 'Synthetic reflection', catalogCoverRef: { sourceKind: 'CATALOG_COVER', catalogAnimeId: animeId,
+          catalogCoverId: animeId.replace('anime:', 'cover:'), catalogCoverRevisionId: `asset:${'a'.repeat(40)}`,
+          rightsBasis: 'EXPLICIT_PERMISSION', permissionVerifiedAt: now } });
+      repo.close();
+      return result.cardId;
+    }, A);
+    await page.goto(`/memory/card/?id=${cardId}`);
+    await expect(page.getByRole('heading', { name: 'Synthetic remote delete', exact: true })).toBeVisible();
+    await page.getByRole('tab', { name: 'Memory', exact: true }).click();
+    await expect(page.getByText('Synthetic reflection', { exact: true })).toBeVisible();
+    if (editing) {
+      await page.getByRole('button', { name: 'Edit memory', exact: true }).click();
+      await page.locator('.memory-detail__editor textarea').fill('Unsaved synthetic draft');
+      await page.evaluate(userId => window.dispatchEvent(new CustomEvent('moemoa:memory-sync-state', {
+        detail: { userId, state: { syncBusy: false } },
+      })), A);
+      await expect(page.locator('.memory-detail__editor textarea')).toHaveValue('Unsaved synthetic draft');
+    }
+    // The real metadata sync engine pulls the remote tombstone into real IndexedDB.
+    await page.evaluate(async ({ id, userId }) => {
+      const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+      const bundle = await (await getPlatformMemoryRuntime()).getCard(id);
+      (window as any).__remoteDeletedCard = { ...bundle.card, entityType: 'MEMORY_CARD', userId,
+        version: 2, status: 'DELETED', deletedAt: new Date().toISOString() };
+      const adapters = (window as any).__MOEMOA_TEST_MEMORY_ACCOUNT_ADAPTERS__;
+      adapters.gateway.pullChanges = async ({ afterSeq }) => {
+        const row = (window as any).__remoteDeletedCard;
+        return { changes: afterSeq < 2 ? [{ syncSeq: 2, entityType: 'MEMORY_CARD',
+          entityId: row.id, operationType: 'DELETE', entityVersion: 2, changedAt: row.deletedAt }] : [],
+          nextSyncSeq: 2, requiresFullResync: false };
+      };
+      adapters.gateway.readEntities = async () => [(window as any).__remoteDeletedCard];
+      window.dispatchEvent(new Event('focus'));
+    }, { id: cardId, userId: A });
+    await expect.poll(() => page.evaluate(async id => {
+      const { getPlatformMemoryRuntime } = await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+      return await (await getPlatformMemoryRuntime()).getCard(id);
+    }, cardId)).toBeNull();
+    await expect(page.getByRole('heading', { name: 'Card not found.', exact: true })).toBeVisible();
+    await expect(page.getByText('Synthetic reflection', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.memory-detail textarea')).toHaveCount(0);
+    await expect(page.locator('.memory-detail__visual')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Back to Memories', exact: true })).toBeVisible();
+  });
+}
 
 test('late private detail response from A cannot appear after switching to B', async ({ page }) => {
   await page.goto('/favicon.svg');

@@ -90,6 +90,7 @@
 
 ## 16. 발견 사항과 계획 변경
 
+- 2026-10-09 운영 삭제 후 발견: 승인된 테스트 카드의 서버 tombstone·삭제 fence·사진 retirement는 확인됐지만, 이미 열려 있던 반대 브라우저의 상세는 삭제된 카드와 사진을 계속 표시했다. `MemoryCardDetail.jsx`의 sync 완료 구독이 `getCard()`의 null을 무시하며 편집 중에는 구독 자체가 중단된다. 기존 계획에서 같은 W06/W19의 삭제 수렴을 마감한다. 먼저 합성 실제 IndexedDB/동기화와 상세 UI로 실패를 재현하고, 삭제 수신 시 상세/미리보기/편집을 비우는 최소 수정 후 Chromium·WebKit/owner 경계/빌드·Git 배포를 검증한다. 살아 있는 카드의 미저장 편집과 다른 계정 이벤트는 보존한다. 운영 DB 호환 설치는 완료됐고 Public·정책·일반 사용자 행은 변경하지 않았다.
 - 정확한 첫 iPhone 오류 문자열/시각·네트워크 로그가 없어 이번 제한 재시도가 그때의 원인을 제거한다고 단정할 수 없다. 이후 동일 증상이 반복되면 안전 코드와 시각을 받아 사진 API 응답·기기 metadata 상태를 대조한다.
 - 두 BrowserContext 검사는 실제 iPhone Safari의 앱 백그라운드·네트워크 전환이나 운영 계정/사진 정책을 대신하지 않는다.
 - 대규모 로컬 회귀 중 팝업 harness가 한 차례 30초 안에 뜨지 않았지만 단독 실행에서는 통과했다. 실제 UI 결함이라고 단정하지 않고 GitHub CI에서도 재확인한다.
@@ -124,3 +125,13 @@ node --env-file=.env.moemoatest.local node_modules/astro/astro.js dev --host 127
 실기기 사진 검사는 `https://www.moemoa.xyz/`에서 같은 계정의 **새 테스트 카드**로 진행한다. 기존 개인 카드 삭제나 과거 사진의 일괄 전송을 하지 않는다. 순서는 새 사진 카드 저장/PC 표시 → iPhone의 짧은 감상 수정/PC 반영 → 오프라인 수정·재로드/온라인 복구 → 테스트 카드 삭제/PC 반영이다. 결과가 확인된 단계만 실제 기기 PASS로 기록한다.
 
 현재 새 카드의 저장/수정은 사용자 iPhone 보고와 PC의 동일 카드·감상·사진 실제 표시로 확인했다. 첫 전송의 시도 횟수나 소요 시간은 수집하지 않아 무재시도 성공률은 미측정이다. 오프라인 수정/재로드/재접속은 요청했으나 사용자가 건너뛰고 진행하라고 지시해 이번 실기기 검사에서 제외했다. 미확인으로 남기며 합성 PASS로 대체하지 않는다. 후속 사용자 지시에 따라 추가 휴대폰 조작 요청을 중단하고, PC의 앱 브라우저와 Chrome의 독립 저장소/세션으로 수정·삭제를 직접 검사한다. 사용자가 삭제 가능하다고 확인한 오늘 테스트 카드만 대상으로 하며, 두 PC 브라우저 검사를 실제 iPhone 삭제 PASS로 기록하지 않는다. 작품의 WatchLog와 카드의 짧은 감상은 서로 다른 기록이므로 주소/생성일로 카드를 먼저 식별한다.
+
+## 19. 두 화면 직접 검증과 삭제 경계 마감
+
+- 운영 DB: `MOEMOA_PRIVATE_RETIREMENT_20261009_01`, migration `20261009090000`을 guarded transaction으로 설치했다. 적용 직전 source 행 수/정책 hash와 적용 직후 값이 같고, 익명 실행 불가·인증 실행 가능·Public 테이블 없음·이력 기록을 확인했다. migration 소스는 `00fb614`이며 SHA256과 결과는 [release 증거](../release-v2/evidence/2026-10-09-private-retirement-production.json)에 있다. 기존 사용자 행·quota·bucket·공개 설정을 바꾸지 않았다. 제한 롤백 SQL은 새 compatibility RPC만 제거하며 fence/이미지 정리/tombstone을 보존한다. 운영 롤백은 실행하지 않았다.
+- 실제 운영 브라우저: 앱 브라우저/Chrome의 독립 세션에서 같은 신규 사진과 수정 수신을 확인했다. 함수 설치 후 지정 테스트 카드의 Chrome 삭제가 성공해 Archive로 돌아갔고 서버 tombstone/fence/사진 retirement/READY 없음도 확인했다. 사진 bytes의 물리적 정리 완료나 이미 발급된 서명 URL의 즉시 무효화를 검증한 것은 아니다.
+- 직접 발견한 UI 결함: 이미 열린 반대 상세가 동기화 후 `getCard() === null`을 무시해 삭제된 카드/사진을 유지했다. `MemoryCardDetail.jsx`는 null 수신 시 bundle/preview/편집/dialog를 비우고 not-found로 전환한다. 편집 중에도 삭제만 반영하며 살아 있는 카드의 미저장 입력은 유지한다. 다른 계정 event·late 응답의 기존 owner 경계는 보존한다.
+- 재현/검증: 수정 전 합성 실제 IndexedDB·metadata sync의 삭제 수신은 완료됐지만 열린 상세/편집 중 상세가 사라지지 않는 실패를 각각 재현했다. 수정 후 최종 Chromium의 `memory-owner-boundary`·`memory-cross-device-sync`·`release-editing` 묶음 15 PASS, unit458 PASS, build20 PASS. `.cache/run-detail-sync.mjs`는 기존 `scripts/lib/isolatedE2eServer.mjs`로 계정 환경을 비운 격리 서버를 실행한 이 PC의 보조 실행 파일이며 CI는 기존 quality 목록에서 같은 spec을 실행한다. 명령은 `node .cache/run-detail-sync.mjs tests/memory-owner-boundary.spec.ts tests/memory-cross-device-sync.spec.ts tests/release-editing.spec.ts --project=chromium --workers=1 --reporter=line`, `npm run test:unit`, `npm run build`다.
+- 실패 기록도 보존: 처음 실제 테스트 계정용4321 서버를 회귀 fixture에 재사용했을 때 mock session과 실제 Auth 설정이 섞여 fixture 준비가 실패했다. 격리 실행으로 구분했다. 선택적 WebKit 확대 검사는 순수 두 기기 metadata 수렴은 PASS지만 이번 상세 2건과 기존 owner 경계 1건이 계정 초기화/상세 진입 전에 실패했다. fixture를 공식 표지 참조로 바꾸고 gateway override 시점을 늦춰도 같은 초기화 차단이 반복돼 실제 iPhone/상세 PASS로 만들지 않는다. 확정 실패는 **WebKit 자동 검사의 계정 준비 단계**, 현재 사용자 iPhone 저장/수정의 실패로 판정하지 않는다. 관련 `.cache/detail-sync-*-20261009.log`에 보존했다.
+- Git/운영: 수정과 이번 기록을 기존 `master`에 커밋·push하고 Vercel Git 배포를 대조한다. 정확한 최신 결과는 `/build-info.json`의 `commit`·`checkoutCommit`·`source=vercel-git`·config semantic match와 같은 SHA의 [Service quality](https://github.com/Newrred/anime-collector/actions/workflows/quality.yml)를 확인한다. 로컬 빌드를 운영으로 promote하지 않는다.
+- 현재 W06/W19 미완료: 실제 iPhone 오프라인·삭제는 요청에 따라 이번 범위에서 제외/미검증, WebKit 상세 계정 fixture 준비 차단은 남는다. 삭제 반영은 기존 자동 sync 주기에 따르며 즉시 실시간 push를 약속하지 않는다. Public 출시·Android 전체 완료도 아니다. 외부 권한 추가 요청 없음. 다음1개는 **Git 배포 후 실제 두 브라우저의 열린 상세 삭제 수렴 재검증**이다.

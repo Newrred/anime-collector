@@ -75,7 +75,7 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 - `/title/`가 감상 기록의 작성·같은 ID 수정/삭제와 캐릭터 고정·관계 시리즈를 담당한다. 작품 ID가 있는 옛 링크는 새 상세로 전환한다. `contextTags`는 옛 편집 시트의 직접 설정 항목이 아니며 자동 생성·보존 필드다(`src/components/Library.jsx`, `src/components/library/LibraryQuickLogSheet.jsx`, `src/features/titles/domain/titleNavigation.js`).
 - `/`는 옛 `src/components/Home.jsx`가 아니라 컬렉션 선반 `src/features/bookshelf/BookshelfView.jsx`를 사용한다(`src/pages/index.astro:2-6`). 이전 Home 코드의 존재를 운영 홈 기능으로 해석하지 않는다.
 - Public 보드/미니홈·관리 경로는 코드에 있어도 현재 운영 기능 플래그가 꺼져 있다. 라우트 존재만으로 공개 서비스가 활성화됐다고 판단하지 않는다(`src/features/memory/runtime/platformPublication.js:7-12`, `.env.production:14-17`).
-- ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 10월9일 새 사진 카드의 저장/감상 수정은 사용자 iPhone 보고와 운영 PC의 동일 카드/수정 감상/사진 표시로 확인했다. 실제 오프라인 복구는 사용자 요청으로 이번 검사에서 제외했고, 삭제 전파는 아직 진행 중이다. 합성 두 브라우저 검사와 실기기 결과를 구분하며 [최신 인계](plans/2026-10-09-private-photo-reliability-and-handoff.md)를 따른다. 이전 흐름의 문제 근거는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
+- ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 10월9일 새 사진 카드의 저장/감상 수정은 사용자 iPhone 보고와 운영 PC의 동일 카드/수정 감상/사진 표시로 확인했다. 후속 앱 브라우저/Chrome 직접 검사에서 private-only DB의 삭제 RPC 누락을 보완하고 지정된 테스트 카드의 tombstone·fence·사진 retirement를 확인했다. 열린 상세의 삭제 수신 시 카드·미리보기·편집 상태도 비우도록 보완했다. 실제 iPhone 오프라인 복구는 사용자 요청으로 제외했고 iPhone 삭제도 미검증이다. 합성/PC/실기기 결과와 최신 Git 배포를 구분하며 [최신 인계](plans/2026-10-09-private-photo-reliability-and-handoff.md#19-두-화면-직접-검증과-삭제-경계-마감)를 따른다. 이전 흐름의 문제 근거는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
 
 ## 소스와 운영 배포가 같은지 확인하는 방법
 
