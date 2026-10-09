@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-10 운영 웹 업데이트 완료:** 사용자 출시 지시로 후보소스를 master에 반영했고 a2db3ca의 Vercel Git Production EApmGNaXtXGPhy9FvL5SwaiUYmSs Ready/Source와 www.moemoa.xyz build-info SHA 일치를 확인했다. 홈/data HTTP200. 기존 Google 로그인·개인 감상/사진·동기화 유지. 새 간편가입 API는404 SIGNUP_DISABLED, Public 기존off: 신규 DOB 절차/공개보드의 전체 출시 완료는 아님. DB/설정/키 변경0. 기존 CI37973035614 전체SUCCESS 재사용, master 새 CI는 진행 중. D05 추가 복구를 이번 웹 반영의 선행조건으로 반복하지 않았다. 다음1개는 신규 가입의 운영 연결·최종 고지 마감. 아래 기록은 당시 실행 근거다.
+
 > **2026-10-10 운영 반영 진행:** 사용자 직접 출시 지시로 추가 검증 확대를 멈추고, 기존 CI37973035614 SUCCESS 후보bef8215의 소스를 master Git 운영에 반영한다. 기존 개인 보관/감상/동기화 유지. 간편가입은 운영 설정·최종 고지가 미완료여서 기본off, Public도off 유지하며 전체 공개 출시 완료로 표시하지 않는다. 상세 범위/롤백은 기존 ExecPlan의 「사용자 출시 지시」 절. 아래 D05 추가 복구는 이번 웹 반영의 선행 작업으로 반복하지 않는다.
 
 > **2026-10-10 D05 외부 사본 회수 검증:** 기존 Drive 다운로드 ZIP918,803,598bytes의 SHA256이 승인 업로드 원본과 일치했다. 새 비공개 quarantine에서 AES-GCM4,308파일/917,084,869bytes 인증·해시·크기 일치 PASS, PG17 클라이언트로 복원 dump 목차 읽기 PASS. 합성 안전검사6PASS. 이는 DB 재가동/삭제 재노출 방지 PASS가 아니다. 사용자 확인: 복구키는 아직 이 PC에만 있음. 로컬 PG17 서버는 있으나 pg_cron/supabase_vault 확장 부재로 전체 운영 dump import 미실행. 회전/RPO/RTO·최신 삭제 대조도 미완료, D05 PARTIAL 유지. 운영 DB/master/Public/추가 전송 변경0. 다음1개는 필요한 확장을 갖춘 격리 복구 환경에서 DB 재가동과 최신 삭제 대조 준비. 아래 기록은 각 실행 당시의 근거다.

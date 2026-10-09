@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-10",
+  "authorization": "User explicitly requested launch and no further test expansion",
+  "scope": "Production Web source update; not activation of simple signup or Public UGC",
+  "sourceCommit": "a2db3cadb204c430be3cd0bb476c43dcaba04497",
+  "previousProductionCommit": "8fb4b491ddd118df6e330a8c7a6a19a0b848a144",
+  "branch": "master",
+  "deployment": {
+    "id": "EApmGNaXtXGPhy9FvL5SwaiUYmSs",
+    "environment": "Production",
+    "status": "Ready",
+    "sourceMatched": true,
+    "url": "https://anime-collector-3r88tf9pr-newrreds-projects.vercel.app",
+    "publicUrl": "https://www.moemoa.xyz"
+  },
+  "live": {
+    "buildInfoCommitMatches": true,
+    "buildInfoSource": "vercel-git",
+    "deploymentConfigSemanticMatch": true,
+    "buildInfoWorkingTreeDirty": true,
+    "workingTreeDirtyAlsoPresentInPreviousProduction": true,
+    "homeHttp": 200,
+    "dataHttp": 200,
+    "signupApiHttp": 404,
+    "signupApiCode": "SIGNUP_DISABLED"
+  },
+  "reusedCI": {
+    "run": 37973035614,
+    "commit": "bef8215f94e63002a187f3560503d12b72c2c872",
+    "conclusion": "success"
+  },
+  "newMasterCI": "in_progress_at_recording",
+  "migrationsApplied": [],
+  "configMutations": [],
+  "userDataMutations": false,
+  "privateContentInGit": false,
+  "rollback": "Revert the production rollout commits on master and deploy through connected Git. No database rollback required.",
+  "remaining": [
+    "Production simple-signup callback/server settings/DB Hook and final notices",
+    "Public schema, moderation/operator, rights and kill-switch operating rollout",
+    "Independent recovery key copy and existing D05 operations items"
+  ],
+  "localUnrelatedChangesPreserved": true
+}

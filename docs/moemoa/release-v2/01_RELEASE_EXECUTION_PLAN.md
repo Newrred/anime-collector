@@ -10,6 +10,9 @@
 - **최소 확인:** 이전 CI 전체PASS 재사용; 문서diff 검사, 새 Git/Vercel SHA 대조, 운영 홈·data 응답 및 signup 비활성 상태만 확인. 사용자 데이터 작성·삭제·추가 외부 업로드·키 조회 없음.
 - **실제 출시 잔여:** 신규 간편가입의 운영 Google callback/서버 설정/DB Hook·최종 고지 연결, 국가별 미완료 조건 및 Public 운영 schema/신고·관리자·권리/kill-switch 적용. 이들은 추가 테스트 횟수 문제가 아닌 미활성/미완성 항목이다. 현재 기존 웹 운영 업데이트는 먼저 마감한다.
 
+- **運営結果 / 운영 결과:** master a2db3cadb204c430be3cd0bb476c43dcaba04497, Vercel Git Production EApmGNaXtXGPhy9FvL5SwaiUYmSs Ready·Source 일치, www build-info commit/checkoutCommit 동일·source vercel-git·deploymentConfig semanticMatch=true. build-info workingTreeDirty=true는 이전 운영8fb4b49에서도 같은 값이며 로컬 미포함 변경을 배포했다는 뜻으로 해석하지 않는다. `/`·`/data/`200, 새 `/api/signup?action=start`404 SIGNUP_DISABLED 확인. 기존 Google 동선 유지(새 OAuth 왕복/사용자데이터 변경 미실행). DB migration/운영 flag/키 변경0.
+- **증거/한계:** [배포 JSON](evidence/2026-10-10-production-web-rollout.json). bef8215의 CI37973035614 전체SUCCESS를 재사용, 이번 master CI는 GitHub 자동 실행 중이며 완료 PASS로 기록하지 않음. 최종 기록 커밋은 소스변경 없이 이어 반영한다. 전체 공개 출시와 이번 운영 웹 업데이트를 구분한다.
+
 ## 2026-10-10 D05 외부 백업 회수·복구 마감
 
 - **목적/범위:** 사용자 재개 지시에 따라 승인된 기존 Drive 암호화 사본의 외부 회수·무결성과 격리 복구를 확인한다. 시작문서/결정01/AGENTS/PLANS/QA07/보고09/설정지도/기존 D05 증거·암호화/복구 코드를 읽었다. 새 계획판·새 공급자·새 업로드·운영 DB 쓰기는 없다.
