@@ -1,0 +1,238 @@
+{
+  "date": "2026-10-10",
+  "scope": "Production default-off schema and connection preparation; activation incomplete",
+  "schema": {
+    "release": "MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01",
+    "target": "okchpyagfucpzpyrfgol",
+    "sourceCommit": "c72ddaf1e7137054123ec40f69c582739b9f60f7",
+    "mode": "APPLIED_DEFAULT_OFF",
+    "migrations": [
+      {
+        "file": "supabase/migrations/20260923090000_memory_publication_boundary.sql",
+        "sourceSha256": "7ef52527adb8101e75c2651761fe68c25bc6a9920e55ec92529247217869798e",
+        "appliedSha256": "7ef52527adb8101e75c2651761fe68c25bc6a9920e55ec92529247217869798e",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260923093000_memory_public_images.sql",
+        "sourceSha256": "d39d21f5a22f40d9fafa2d2ea1b47d45383fb43436965241d54e0245a7863682",
+        "appliedSha256": "d39d21f5a22f40d9fafa2d2ea1b47d45383fb43436965241d54e0245a7863682",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260923182210_memory_publication_source_status.sql",
+        "sourceSha256": "822587d324aa5ff8106360179ef089234f7f0984460d5dfc50cf2eed8bbe808c",
+        "appliedSha256": "aa8ae18316e5b2c7edb0b4a4122cbd8565a5cecf435f34d3ce57af04752ae3b2",
+        "adaptations": [
+          {
+            "before": "create table private.memory_publication_delete_fences (",
+            "after": "create table if not exists private.memory_publication_delete_fences ("
+          },
+          {
+            "before": "create function public.retire_memory_card_publications(",
+            "after": "create or replace function public.retire_memory_card_publications("
+          }
+        ]
+      },
+      {
+        "file": "supabase/migrations/20260923183940_memory_minihomes.sql",
+        "sourceSha256": "57a63e576a61b0c96ca0353446a6c576399381d9eedde2ab1e92cb5cfb801916",
+        "appliedSha256": "57a63e576a61b0c96ca0353446a6c576399381d9eedde2ab1e92cb5cfb801916",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260923192300_memory_relationships.sql",
+        "sourceSha256": "128e38c080b1d774993ed235aa7ef1f081d72a1cad31dc65b4514cbd9723b6fb",
+        "appliedSha256": "128e38c080b1d774993ed235aa7ef1f081d72a1cad31dc65b4514cbd9723b6fb",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260923213901_memory_moderation.sql",
+        "sourceSha256": "11d4b4847288552d437f03ffa553a153373259201c284c3db444ff1331f5ef3a",
+        "appliedSha256": "11d4b4847288552d437f03ffa553a153373259201c284c3db444ff1331f5ef3a",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260924115258_memory_resource_controls.sql",
+        "sourceSha256": "de911ab7771e31b3a41ba7466c1b9a7acac472d2f5891c9a833af263dcbed282",
+        "appliedSha256": "de911ab7771e31b3a41ba7466c1b9a7acac472d2f5891c9a833af263dcbed282",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260924121214_catalog_release_transitions.sql",
+        "sourceSha256": "9211534cee96d2fce4eedc83c3c4f1a8bfa4e295d7faff2671ece0f5235087ca",
+        "appliedSha256": "9211534cee96d2fce4eedc83c3c4f1a8bfa4e295d7faff2671ece0f5235087ca",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260924193626_memory_image_retry_recovery.sql",
+        "sourceSha256": "910c1953b550357d5907e1665bd4f4ff73cb883c2cf0f68097594756defb8927",
+        "appliedSha256": "910c1953b550357d5907e1665bd4f4ff73cb883c2cf0f68097594756defb8927",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260924194059_memory_public_board_author.sql",
+        "sourceSha256": "cd296a5e531d50a648b8def8d8bfc9cf0ea4a9c459de493322332f8fc6497ffe",
+        "appliedSha256": "cd296a5e531d50a648b8def8d8bfc9cf0ea4a9c459de493322332f8fc6497ffe",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260924195510_memory_visual_json_null.sql",
+        "sourceSha256": "2dbe8d2e98dc7582ecf85bfbacd77c0534cdac173fd06f62b7951211c142c888",
+        "appliedSha256": "2dbe8d2e98dc7582ecf85bfbacd77c0534cdac173fd06f62b7951211c142c888",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260925164126_private_representation_public_rights.sql",
+        "sourceSha256": "58289cdae7699c925918886f01b1fd304068886d1e1e8ac4b075a75fa0f99da2",
+        "appliedSha256": "58289cdae7699c925918886f01b1fd304068886d1e1e8ac4b075a75fa0f99da2",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260926140122_memory_content_review.sql",
+        "sourceSha256": "45a599c7e62287b3c04be7503ebd011177ba620968bf0cb222d023ea4c8caa2c",
+        "appliedSha256": "45a599c7e62287b3c04be7503ebd011177ba620968bf0cb222d023ea4c8caa2c",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260927042334_memory_general_postmoderation.sql",
+        "sourceSha256": "dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2",
+        "appliedSha256": "dba59f6c4ce128c59b4344e1bd170ebd7c68fd11d29cf594b108cea1f80d68e2",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20260927044435_memory_self_declared_image_rights.sql",
+        "sourceSha256": "bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1",
+        "appliedSha256": "bc6ab74391012dd2500da1d03968ef0c343623db39b58f01709603adfcab0aa1",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20261009130000_simple_signup_declarations.sql",
+        "sourceSha256": "9c20974cfb707d25e626b87f58f142064e2598d32e8a17dc6337d0860ed0165d",
+        "appliedSha256": "9c20974cfb707d25e626b87f58f142064e2598d32e8a17dc6337d0860ed0165d",
+        "adaptations": []
+      },
+      {
+        "file": "supabase/migrations/20261009143000_simple_signup_admission.sql",
+        "sourceSha256": "99ffffafa064afc7f16decacaf2e62cef5cce02bb656df3fd9ceaad85fc0b6c8",
+        "appliedSha256": "99ffffafa064afc7f16decacaf2e62cef5cce02bb656df3fd9ceaad85fc0b6c8",
+        "adaptations": []
+      }
+    ],
+    "checks": [
+      {
+        "publicOff": true,
+        "signupOff": true,
+        "newMinihomes": 0,
+        "newPublications": 0,
+        "preservedTables": 10,
+        "newSignupReceipts": 0,
+        "permissionsChecked": true,
+        "syncFunctionsUnchanged": true
+      }
+    ]
+  },
+  "independentReadback": [
+    {
+      "minihomes": 0,
+      "publicOff": true,
+      "signupOff": true,
+      "migrations": [
+        "20260819021327",
+        "20260819021408",
+        "20260902054107",
+        "20260902054119",
+        "20260902054132",
+        "20260902055512",
+        "20260902055852",
+        "20260903141500",
+        "20260907193000",
+        "20260923090000",
+        "20260923093000",
+        "20260923182210",
+        "20260923183940",
+        "20260923192300",
+        "20260923213901",
+        "20260924115258",
+        "20260924121214",
+        "20260924193626",
+        "20260924194059",
+        "20260924195510",
+        "20260925152858",
+        "20260925152859",
+        "20260925164126",
+        "20260926140122",
+        "20260927042334",
+        "20260927044435",
+        "20261005090000",
+        "20261007093000",
+        "20261008090000",
+        "20261008093000",
+        "20261009090000",
+        "20261009130000",
+        "20261009143000"
+      ],
+      "publications": 0,
+      "signupReceipts": 0
+    }
+  ],
+  "expiry": {
+    "release": "MOEMOA_SIGNUP_EXPIRY_PROD_20261010_01",
+    "target": "okchpyagfucpzpyrfgol",
+    "sourceSha256": "0036a31456e8dbd729814bb64589ed9198fa06962fcc5fb831dbf546a48476cf",
+    "checks": [
+      {
+        "signupOff": true,
+        "signupPurgeScheduled": true
+      }
+    ]
+  },
+  "google": {
+    "client": "moemoa-auth",
+    "existingCallbackPreserved": true,
+    "addedCallback": "https://www.moemoa.xyz/api/signup?action=callback",
+    "existingSecretRevoked": false
+  },
+  "vercel": {
+    "environment": "Production",
+    "type": "Secret",
+    "registeredNames": [
+      "MOEMOA_GOOGLE_CLIENT_ID",
+      "MOEMOA_GOOGLE_CLIENT_SECRET",
+      "MOEMOA_SIGNUP_COOKIE_KEY",
+      "MOEMOA_SIGNUP_ORIGIN",
+      "MOEMOA_SIMPLE_SIGNUP_SERVER_ENABLED"
+    ],
+    "serverEnabled": false,
+    "deploymentPending": true
+  },
+  "operator": {
+    "selection": "User-selected operator account",
+    "accountExists": false,
+    "enabledModerators": 0,
+    "transactionRolledBack": true,
+    "userLoginPending": true
+  },
+  "newChecks": [
+    "Production schema transaction rehearsal: rollback PASS",
+    "Applied schema: ten existing tables preserved, sync function definitions unchanged, permissions checked",
+    "Independent connection: 33 migration versions, Public/signup OFF, publications/homes/receipts 0",
+    "Signup expiry job scheduled hourly: execution success not yet observed",
+    "node --test tests/unit/privateCleanup.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs: 11 PASS",
+    "npm run build: 25 pages PASS"
+  ],
+  "previousEvidenceNotRerun": [
+    "Actual test Google C signup",
+    "General Public hosted publishing/reporting/withdrawal",
+    "Private-only upgrade synthetic contract"
+  ],
+  "remaining": [
+    "Operator login then exact account grant",
+    "Final country eligibility and operating notices/document versions",
+    "Production Auth hook and aligned signup enablement",
+    "Public quotas/policy and backend/UI switches",
+    "Public cleanup environment and scheduler flag",
+    "master Git deployment and live source SHA/flow verification"
+  ],
+  "rollback": "Disable signup UI/server plus admission/Hook together; disable Public reads/writes. Preserve additive schema, accounts and existing data. No destructive down migration."
+}

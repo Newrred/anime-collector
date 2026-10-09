@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { cleanupPrivateImages } from './handler.js';
 
-export function createPrivateCleanupHandler({ enabled = false, secret, createBackend }) {
+export function createPrivateCleanupHandler({ enabled = false, secret, createBackend, cleanup = cleanupPrivateImages }) {
   return async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('CDN-Cache-Control', 'no-store');
@@ -15,7 +15,7 @@ export function createPrivateCleanupHandler({ enabled = false, secret, createBac
       return send(401, { error: 'AUTH_REQUIRED' });
     }
     try {
-      const { deleted, failed } = await cleanupPrivateImages(createBackend());
+      const { deleted, failed } = await cleanup(createBackend());
       return send(failed ? 503 : 200, { deleted, failed });
     } catch {
       return send(503, { error: 'CLEANUP_FAILED' });

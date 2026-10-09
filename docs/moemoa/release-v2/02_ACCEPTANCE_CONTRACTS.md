@@ -1,5 +1,13 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 운영 준비의 실제 범위 — C02/C06/C07/C08
+
+- 운영 release `MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01` 기본off 적용, 기존10개 table/동기화 함수 보존 및 별도 읽기33개 migration 확인. 공개 snapshot/미니홈/가입 영수증 생성0. 운영 실제 가입·게시 PASS가 아니다.
+- 운영 Google 기존 callback/secret 보존, 새 가입 callback 추가. Production Secret5개 등록, 서버 기능 false. 시간별17분 가입 임시정보 정리 예약 등록(실제 예약 실행 성공은 아직 확인 안 함).
+- 사용자가 선택한 godburgundy 계정은 운영 auth에 없어서 관리자 연결 트랜잭션은 전부 rollback했다. 해당 계정 로그인 필요. 다른 계정을 임의로 운영자로 지정하지 않는다.
+- 공개 이미지 cleanup 함수와 실제 예약 작업의 미연결을 보완하는 후보 준비. 기존 유지보수 자격·대상 검사 재사용, 기본off/회당50건, 실패 시 용량 확정 반환 없음. 관련11검사·build25 PASS. 운영 예약 실행 PASS 아님.
+- 기존 국가별/최종 고지·보존/이전 조건을 해결한 것으로 처리하지 않으며, 최종 문서 버전과 정책·Auth Hook·UI를 맞춘 뒤 활성화한다. 이전 테스트 Google/공개 왕복 PASS는 재실행 결과로 합산하지 않는다. [근거](evidence/2026-10-10-production-public-signup-preparation.json).
+
 ## 2026-10-10 D05 외부 회수·파일 복구 확인
 
 - **이번 실제 PASS:** Drive 유래 다운로드 ZIP과 업로드 원본 SHA256 일치; 새 quarantine의4,308파일/917,084,869bytes AES-GCM 인증·SHA256/크기 일치; 복원된 DB dump57,829,282bytes의 PG17 목차 읽기.

@@ -41,6 +41,15 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
       if (!Number.isInteger(cleanup.deleted) || cleanup.deleted < 0 || cleanup.deleted > 50 || cleanup.failed !== 0) throw new Error();
     } catch { cleanupFailed = true; }
   }
+  let publicDeleted = null, publicCleanupFailed = false;
+  const publicCleanupSkipped = cleanupSkipped || env.PUBLIC_CLEANUP_ENABLED !== 'true';
+  if (!publicCleanupSkipped) {
+    try {
+      const value = await call('/api/public-image-cleanup');
+      if (!Number.isInteger(value.deleted) || value.deleted < 0 || value.deleted > 50 || value.failed !== 0) throw new Error();
+      publicDeleted = value.deleted;
+    } catch { publicCleanupFailed = true; }
+  }
   const capacity = evaluatePrivateCapacity(await call('/api/private-image-observe'), {
     storageAlertBytes: env.STORAGE_ALERT_BYTES ? Number(env.STORAGE_ALERT_BYTES) : 80_000_000,
     readAlertBytes: env.READ_ALERT_BYTES ? Number(env.READ_ALERT_BYTES) : 400_000_000,
@@ -50,7 +59,10 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
   if (!cleanupSkipped && !cleanupFailed && cleanup.deleted === 50) {
     capacity.alerts.push('PRIVATE_CLEANUP_BATCH_LIMIT_REACHED');
   }
-  return { deleted: cleanupSkipped || cleanupFailed ? null : cleanup.deleted, cleanupSkipped, cleanupFailed, ...capacity };
+  if (publicDeleted === 50) capacity.alerts.push('PUBLIC_CLEANUP_BATCH_LIMIT_REACHED');
+  if (publicCleanupFailed) capacity.alerts.push('PUBLIC_CLEANUP_FAILED');
+  return { deleted: cleanupSkipped || cleanupFailed ? null : cleanup.deleted, cleanupSkipped, cleanupFailed,
+    publicDeleted, publicCleanupSkipped, publicCleanupFailed, ...capacity };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

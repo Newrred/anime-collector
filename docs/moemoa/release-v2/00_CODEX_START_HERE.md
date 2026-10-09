@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-10 운영 연결 준비:** 공개/가입17개 schema를 기본off로 운영 적용하고 기존10개 table·동기화 함수 보존/별도 이력 확인. Google callback·Production Secret5개·시간별 가입 purge 예약 등록. 지정 운영자 계정이 운영 auth에 없어 관리자 연결은 rollback, 사용자 로그인 대기. 공개 이미지 정리 예약 연결 후보11검사/build25 PASS·미배포. 활성화/최종 고지/국가표 완료 아님. [실행 근거](evidence/2026-10-10-production-public-signup-preparation.json). 다음1개: 지정 운영자 로그인 확인 후 연결.
+
 > **2026-10-10 운영 웹 업데이트 완료:** 사용자 출시 지시로 후보소스를 master에 반영했고 a2db3ca의 Vercel Git Production EApmGNaXtXGPhy9FvL5SwaiUYmSs Ready/Source와 www.moemoa.xyz build-info SHA 일치를 확인했다. 홈/data HTTP200. 기존 Google 로그인·개인 감상/사진·동기화 유지. 새 간편가입 API는404 SIGNUP_DISABLED, Public 기존off: 신규 DOB 절차/공개보드의 전체 출시 완료는 아님. DB/설정/키 변경0. 기존 CI37973035614 전체SUCCESS 재사용, master 새 CI는 진행 중. D05 추가 복구를 이번 웹 반영의 선행조건으로 반복하지 않았다. 다음1개는 신규 가입의 운영 연결·최종 고지 마감. 아래 기록은 당시 실행 근거다.
 
 > **2026-10-10 운영 반영 진행:** 사용자 직접 출시 지시로 추가 검증 확대를 멈추고, 기존 CI37973035614 SUCCESS 후보bef8215의 소스를 master Git 운영에 반영한다. 기존 개인 보관/감상/동기화 유지. 간편가입은 운영 설정·최종 고지가 미완료여서 기본off, Public도off 유지하며 전체 공개 출시 완료로 표시하지 않는다. 상세 범위/롤백은 기존 ExecPlan의 「사용자 출시 지시」 절. 아래 D05 추가 복구는 이번 웹 반영의 선행 작업으로 반복하지 않는다.

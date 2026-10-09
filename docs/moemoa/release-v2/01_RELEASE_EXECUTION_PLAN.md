@@ -12,6 +12,7 @@
 
 - **10/10 연결 후속:** 사용자 직접 운영 Google client의 추가 secret 생성·보호된 local 파일 저장 완료. 기존 운영 client ID와 일치만 확인하고 원문 출력 없이 Vercel Production의 Secret 두 항목 등록 성공. 기존 Supabase callback을 보존하면서 `https://www.moemoa.xyz/api/signup?action=callback`을 추가 저장했다. 기존 secret 중지/삭제 없음. 운영 schema는 새 `tools/operations/prepare-production-public-signup.py`로 기존17개 migration을 조합한다. 정확16개 baseline ledger·고정 ref/TLS, transaction/lock timeout, 기존10개 table 전체 행/동기화 함수 보존, public/signup off·권한·trigger 검사를 포함한다. 2개 호환 치환은 기존 local rehearsal와 동일. 운영 한 트랜잭션 적용 후 ROLLBACK rehearsal 성공; 이 단계는 영구 적용/새 가입 성공이 아니다. 과거 암호화 사본 보존, 실패 시 transaction rollback, 성공 후에는 additive schema를 남기고 flags off로 복귀한다.
 - **10/10 실제 schema 반영:** source c72ddaf, release `MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01` 적용 후 별도 연결에서33개 migration 이력·public/signup off·새 게시물/미니홈/영수증0을 확인했다. 기존10개 table 행/동기화 함수 보존 확인. 사용자 godburgundy@gmail.com 관리자 지정 승인에 따라 별도 고정 대상 SQL로 해당1계정과 시간별 가입 임시정보 정리만 준비한다. 취소 시 moderator enabled=false/cron unschedule 가능; 데이터 삭제/공개 전환 없음.
+- **현재 실제 차단/독립 작업:** 운영 auth에 지정 계정이 없어 관리자 준비 트랜잭션은 전부 rollback. 계정 로그인 요청을 보냈으며 다른 계정으로 대체하지 않는다. 가입 임시정보 purge는 독립 release `MOEMOA_SIGNUP_EXPIRY_PROD_20261010_01`로 매시17분 예약 완료(예약 등록 확인, 실행 성공 증거와 구분). 공개 이미지의 기존 cleanup 함수는 있으나 운영 예약 경로가 private에만 연결돼 있어 기존 인증/고정대상/6시간 예약에 별도 public cleanup endpoint를 연결한다. 기본 off, 회당50개/실패 시 quota finalization 없음, 기존 private 동작 유지. 이 연결만 합성 검증하고 같은 검사를 불필요하게 확대하지 않는다.
 
 ## 2026-10-10 사용자 출시 지시 — 검증 확장 종료·운영 Git 반영
 
