@@ -1,6 +1,8 @@
 # MOEMOA 현재 구조와 화면 흐름
 
-> 기준: 2026-10-07 `master`의 Web 운영 구조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
+> 기준: 2026-10-09 Git `master`와 운영 Web `35fb912` 대조. 이 문서는 **현재 구현**을 설명한다. 미래 목표·취소된 시안·과거 작업 보고의 ‘최신’ 문구보다 실제 코드와 [운영 빌드 정보](https://www.moemoa.xyz/build-info.json)를 우선한다.
+
+> **2026-10-08~09 자동 저장 반영:** 로그인 사용자의 새 카드·보드와 기록 변경은 기기 저장 뒤 계정 반영을 자동 시도한다. 새로 선택해 저장한 개인 사진은 비공개 최적화 사본을 전송하고, 실패 시 같은 카드·전송 의도로 복구한다. Guest는 공식 표지 카드·작품/감상을 기기에 저장하며 사진 작성에는 로그인이 필요하다. 신규 시스템 디자인 작성은 종료했고 기존 디자인 카드는 보존한다. 운영 사진 flag는 `1`, Public 관련 flags는 `0`이다. [확정 결정](01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md#decision-log--automatic-save-and-guest-cover-01-2026-10-08), [설정 지도](operations/2026-10-08-configuration-map.md), [최신 사진 검증·실기기 잔여](plans/2026-10-09-private-photo-reliability-and-handoff.md)를 따른다.
 
 > **2026-10-07 운영 반영:** 감상 기록 작성·같은 ID 수정/삭제, 현재 작품 상태/평점/재시청/메모 수정, 캐릭터 즐겨찾기 고정/해제와 관련 시리즈 보기/명시 저장이 `/title/`에 있다. 유효한 작품 ID가 있는 옛 `focus=edit/quick-log` 링크는 새 상세의 감상 탭으로 이동한다. ID 없는 옛 목록과 `legacy=1` 호환 진입은 남는다. 캐릭터 즐겨찾기는 여전히 **이 기기에만** 저장된다. 기능 커밋 `83cdf49`를 Git/Vercel 운영에서 확인했고, 이 문서의 최종 배포 커밋은 아래 동적 확인 링크를 따른다. [실행 계획과 검증](release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-07-w18-옛-서재-기능-대비작품-상세-연결).
 
@@ -34,7 +36,7 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 | `/titles/` 내 작품 | 저장 작품과 Complete Memory가 있는 작품의 합집합. 표지 보기/기억 함께 보기, 필터·검색. | 작품 상세 `/title/` |
 | `/title/` 작품 상세 | 한 작품의 카탈로그 표지·정보, 저장/시청 상태, 감상 기록 탭, Memory 탭. | 감상 기록 작성·수정·삭제, 현재 작품 정보 수정, 캐릭터 고정·관련 시리즈, Memory 작성 |
 | `/record/` 공통 작성 진입 | 감상 기록과 장면·이미지 Memory 작성 중 선택. | 감상은 작품 상세 감상 탭, 이미지는 `/memory/new/` |
-| `/memory/new/` | 이미지·공식 표지·시스템 디자인을 고르는 Memory 작성. | 완료 후 `/archive/` |
+| `/memory/new/` | 공식 표지 또는 로그인 사용자의 개인 사진으로 Memory 작성. 신규 시스템 디자인 선택은 종료. | 완료 후 `/archive/` |
 | `/archive/`, `/memory/card/` | 완성된 Memory의 전체 목록과 상세·수정/관리. 일반 감상 기록은 여기에 나타나지 않는다. | 작품 상세, 보드 |
 | `/boards/` | Memory를 사용자가 선택해 묶는 비공개 보드. | Memory 상세, 선택적 공개 흐름 |
 | `/data/` | 계정 로그인·동기화, 저장 공간, 범위가 서로 다른 파일 백업/복원. | 계정 동기화·백업 |
@@ -48,7 +50,7 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 ```text
 작품 검색 → 작품 상세 ── 작품만 저장 ── 내 작품
                     ├─ 감상 기록 작성 ── 작품 상세의 감상 탭
-                    └─ 이미지/디자인 Memory 작성 ── 기억 Archive ── 선택해 보드에 담기
+                    └─ 공식 표지/로그인 사진 Memory 작성 ── 기억 Archive ── 선택해 보드에 담기
 
 컬렉션 = 내 작품 중 사용자가 선반에 진열한 부분집합
 티어 = 작품 순위 도구; 보드 = Memory 묶음
@@ -62,17 +64,18 @@ Android: Capacitor shell에서 공통 Web UI와 native 이미지 수집 adapter 
 | --- | --- | --- |
 | 공용 작품 정보·대표 표지 | Supabase catalog 읽기 | 개인이 작품을 저장했다고 Memory가 생기지 않는다. |
 | 저장 작품·시청 상태·평점·WatchLog·컬렉션 선반 | 로컬 기록과 계정별 Title State 동기화 | 최초 연결·충돌·삭제는 별도 계약으로 처리한다. 2026-10-07의 추가 SQL은 `supabase/migrations/20261007093000_title_state_sync.sql`. |
-| Memory Card·Board·Visual metadata | IndexedDB 기반 Memory runtime과 계정 metadata 동기화 | 개인 이미지 **파일**과 metadata는 다른 보존 단위다. 현재 운영 private-image 원격 전송 UI flag는 꺼져 있다. |
+| Memory Card·Board·Visual metadata | IndexedDB 기반 Memory runtime과 로그인 계정 metadata 자동 반영 | 기기 저장과 계정 반영 완료를 구분하며 실패·오프라인에는 같은 카드의 대기 작업을 보존한다. |
+| 새로 선택해 저장한 개인 사진 | 원본은 기기 보관, 로그인 저장 시 비공개 최적화 사본 전송 | 운영 private-image flag는 켜져 있다. 기존 로컬 사진 일괄 업로드·원본 클라우드 백업·공개 게시를 뜻하지 않는다. |
 | 파일 내보내기 | Memory/Board 파일과 기존 작품/감상 파일이 분리되어 있다. | 어느 한 파일도 서비스의 모든 기록·원본 이미지를 뜻하지 않는다. |
 
-근거: `src/features/titles/application/titleStateSync.js:20-49`, `src/hooks/useTitleStateSync.js:1-30`, `src/features/memory/runtime/platformMemoryRuntime.js:1-43`, `src/components/DataCenter.jsx:264-265`, `src/components/data/ManualDataTools.jsx:240-245`. 저장소의 production 기본 설정 `.env.production:10-17`은 작품 상태/카드 분류 동기화를 켜고 private-image 전송·Public·미니홈·팔로우·공개 관리 UI를 꺼 둔다. Vercel 환경 값이 이를 덮어쓸 수 있으므로 실제 운영 여부는 배포와 화면에서 재확인한다.
+근거: `src/features/titles/application/titleStateSync.js`, `src/hooks/useTitleStateSync.js`, `src/hooks/useMemoryAccountSync.js`, `src/features/memory/application/saveNewMemoryToAccount.js`, `src/features/memory/application/autoSavePrivatePhotos.js`, `src/features/memory/runtime/platformPrivateImages.js`. 현재 `.env.production`은 작품 상태/카드 분류 동기화와 비공개 사진 전송을 켜고 Public·미니홈·팔로우·공개 관리 UI는 꺼 둔다. Vercel 환경 값이 이를 덮어쓸 수 있으므로 실제 운영 여부는 배포와 화면에서 재확인한다. 백업 파일 범위는 `src/components/DataCenter.jsx`와 `src/components/data/ManualDataTools.jsx`를 따른다.
 
 ## 의도적으로 남은 이전 경로와 현재 한계
 
 - `/title/`가 감상 기록의 작성·같은 ID 수정/삭제와 캐릭터 고정·관계 시리즈를 담당한다. 작품 ID가 있는 옛 링크는 새 상세로 전환한다. `contextTags`는 옛 편집 시트의 직접 설정 항목이 아니며 자동 생성·보존 필드다(`src/components/Library.jsx`, `src/components/library/LibraryQuickLogSheet.jsx`, `src/features/titles/domain/titleNavigation.js`).
 - `/`는 옛 `src/components/Home.jsx`가 아니라 컬렉션 선반 `src/features/bookshelf/BookshelfView.jsx`를 사용한다(`src/pages/index.astro:2-6`). 이전 Home 코드의 존재를 운영 홈 기능으로 해석하지 않는다.
 - Public 보드/미니홈·관리 경로는 코드에 있어도 현재 운영 기능 플래그가 꺼져 있다. 라우트 존재만으로 공개 서비스가 활성화됐다고 판단하지 않는다(`src/features/memory/runtime/platformPublication.js:7-12`, `.env.production:14-17`).
-- ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 운영에서 익명 링크 전환과 화면 표시는 확인했지만 실계정 두 기기·실휴대폰의 기록 동작은 이번 배포에서 재검증하지 않았다. 이전 흐름의 문제 근거는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
+- ID 없는 옛 목록은 회귀·백업 호환용으로 남고 현재 메뉴에서 직접 연결하지 않는다. 10월9일 새 사진 카드의 저장/감상 수정은 사용자 iPhone 보고와 운영 PC의 동일 카드/수정 감상/사진 표시로 확인했다. 실제 오프라인 복구는 사용자 요청으로 이번 검사에서 제외했고, 삭제 전파는 아직 진행 중이다. 합성 두 브라우저 검사와 실기기 결과를 구분하며 [최신 인계](plans/2026-10-09-private-photo-reliability-and-handoff.md)를 따른다. 이전 흐름의 문제 근거는 [화면 흐름 감사](reports/2026-10-07-live-flow-consolidation-audit.md)에 있다.
 
 ## 소스와 운영 배포가 같은지 확인하는 방법
 

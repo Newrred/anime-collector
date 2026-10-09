@@ -22,11 +22,11 @@
 
 ### 포함
 
-사진 대기 원인 경로 분석, 필요한 범위의 제한된 재시도·진단 개선, 현행 로그인 사진 검사 보강, 두 독립 기기 합성 계정 동기화 검사, 실기기 결과 범위 구분, CI·Git·운영 SHA 대조, 다른 PC 인계.
+사진 대기 원인 경로 분석, 필요한 범위의 제한된 재시도·진단 개선, 현행 로그인 사진 검사 보강, 두 독립 기기 합성 계정 동기화 검사, 실기기 결과 범위 구분, CI·Git·운영 SHA 대조, 다른 PC 인계. 10월9일 운영 두 브라우저 직접 검사에서 발견한 private-only DB의 카드 삭제 RPC 누락도 같은 기존 W06/W19 작업으로 보완한다. 공개 migration/flags는 켜지 않고 삭제 fence·인증·계정 경계를 유지하는 additive 호환 RPC와 선택적 스키마 회귀 검사를 먼저 준비한다.
 
 ### 제외
 
-운영 개인 사진·토큰을 테스트로 가져오기, 기존 사진 일괄 업로드, DB migration, 공개 게시 활성화, 권리·용량 정책 변경, 새 기능 UI 디자인.
+운영 개인 사진·토큰을 테스트 fixture로 가져오기, 기존 사진 일괄 업로드, 파괴적 DB migration, 공개 게시 활성화, 권리·용량 정책 변경, 새 기능 UI 디자인.
 
 ## 5. 아키텍처·데이터 흐름
 
@@ -38,7 +38,7 @@
 
 ## 7. 데이터·스키마 마이그레이션
 
-없음. 운영 DB/Storage 행·설정은 변경하지 않는다.
+초기 사진 재시도 보완에는 없음. 후속 운영 직접 검사에서 private-only 스키마에 `retire_memory_card_publications(uuid)`가 없는 것이 확인됐다. 기존 fence 테이블·private-media 정리 trigger는 설치돼 있다. additive migration으로 누락된 RPC만 설치하고 기존 full-public 구현은 보존한다. full-public 의존성이 불완전하면 삭제를 거부하고 원본을 보존한다. 사용자에게 이미 승인받은 중요 기능 마감·운영 DB 업데이트 범위에서, 로컬 selective/full SQL 검사 → 대상 읽기 대조/스키마 사본 → 제한된 설치/이력 기록 → 두 브라우저 테스트 카드 삭제를 순서대로 수행한다. 정책·bucket·기존 사용자 행은 migration에서 바꾸지 않는다.
 
 ## 8. 마일스톤
 
@@ -61,7 +61,7 @@
 
 ## 12. 롤백·복구
 
-문제가 생기면 해당 Git 커밋을 revert해 `master`로 push한다. 기기에 이미 확정된 카드·원본·사진 의도는 삭제하지 않는다. 서버·DB를 건드리지 않으므로 데이터 롤백은 없다.
+사진 재시도 변경은 해당 Git 커밋을 revert해 `master`로 push한다. 기기에 이미 확정된 카드·원본·사진 의도는 삭제하지 않는다. 후속 삭제 RPC 호환 설치는 설치 전 존재 여부/함수 정의·ACL을 기록하고, 새로 설치된 private-only RPC만 원복할 수 있게 한다. 삭제 fence와 이미 생긴 정리 대기 기록을 지우거나 카드/사진을 되살리지 않는다. 운영 시험에서 사용자가 지정한 테스트 카드 삭제는 의도된 결과이며 다른 개인 행은 건드리지 않는다.
 
 ## 13. 위험과 완화
 
@@ -73,6 +73,13 @@
 
 ## 15. 진행 기록
 
+- 2026-10-09 다른 PC 재개 계획: `master`의 `35fb912`를 이 PC에 fast-forward했고 이번 PC의 unit458/build20이 통과했다. 사용자의 후속 진행 지시에 따라 기존 테스트 환경 파일로 로그인 가능한 로컬 실행을 준비하고, 두 독립 브라우저의 수정·삭제·오프라인 복구 검사를 이 PC에서 확인한다. 기본 `.env.local`과 개인 브라우저 기록은 보존하고 로컬 실행의 Public·사진 원격 전송은 켜지 않는다. 운영 SHA/CI는 읽기로 대조한다. 실제 iPhone 결과·운영 DB/설정 변경·새 배포는 이번 준비만으로 완료 처리하지 않는다.
+- 2026-10-09 다른 PC 재개 결과: 기존 `.env.moemoatest.local`의 테스트 프로젝트 `nmgkhknponvzcwliajyk`로 실행했다. 실제 `http://127.0.0.1:4321/data/`에서 기존 테스트 A 계정 연결, Memory/Board 및 작품/감상 동기화 완료 표시를 확인했다. 공개 Auth 설정 조회 HTTP200/Google 활성도 확인했다. 기본 `.env.local`·계정 토큰·원본을 복사하거나 출력하지 않았다.
+- 2026-10-09 이번 PC 실행 명령: `npm ci --no-audit --no-fund` 성공(Node24.19.0/npm11.17.0), `npm run test:unit` 458/458 PASS, `npm run build` 20페이지 PASS. 후속 `PLAYWRIGHT_BASE_URL=http://127.0.0.1:4358 node scripts/run-e2e.mjs tests/memory-cross-device-sync.spec.ts --project=chromium --project=webkit --workers=1 --reporter=line`은 첫 서버 준비 시간 초과로 실패했고 `.cache/resume-20261009-cross-device.log`에 보존했다. 준비된 로컬4321을 대상으로 같은 검사를 다시 실행해 두 독립 BrowserContext의 수정·오프라인/재로드·재접속·삭제 수렴 2/2 PASS(`.cache/resume-20261009-cross-device-ready.log`). wrapper가4322에 띄운 추가 서버는 사용되지 않았고 종료됐으며4321만 남았다. 이 검사는 합성 metadata gateway이며 운영 사진 bytes·실기기 검증이 아니다.
+- 2026-10-09 운영 읽기 대조: Git `35fb912e56ea49c69f433b94559350d5283e0372`와 운영 build-info의 commit/checkoutCommit 일치, source=vercel-git/semanticMatch=true. 최신 Service quality37818042096 성공과 현재 maintenance/health 성공 상태를 확인했다. 운영 Archive 실제 화면은 읽기만 확인했다. DB migration/정책/운영 flags 변경·개인 사진 업로드 없음. 현재 구조 문서의 종료된 시스템 디자인 신규 작성/사진 flag off 설명을 현행 확정 결정에 맞췄다.
+- 2026-10-09 실기기 진행: 사용자가 운영 iPhone Safari에서 새 테스트 사진 카드의 저장·짧은 감상 수정 완료를 보고했다. 같은 계정의 운영 PC에서 오늘 생성한 카드, 수정된 테스트 감상 일치, 사진 사본 디코딩(740×1600), 다른 기기 이용 가능 표시를 직접 확인했다. 앞서 같은 작품의 어제 카드를 대조한 착오를 정정했고, 그때의 감상 없음은 동기화 실패로 판정하지 않는다. 사용자가 보낸 작품 감상 탭에는 별도 WatchLog도 표시됐으며 카드 감상과 혼합하지 않았다. 사진 bytes·서명 URL·계정 식별자·개인 메모는 증거 파일에 저장하지 않는다. 다음은 동일한 새 카드의 오프라인 수정/재로드/재접속이며 아직 미확인이다.
+- 2026-10-09 직접 두 브라우저: 사용자 요청으로 추가 휴대폰 조작 요청을 중단했다. 앱 브라우저와 Chrome의 독립 계정 저장소에서 동일한 오늘 테스트 카드·사진(740×1600)을 확인하고, Chrome 감상 수정 → 앱 브라우저 재로드 후 수정 수신을 확인했다. Chrome 삭제는 `공개 철회 미확인`으로 안전하게 중단됐다. 운영 DB 읽기 검사에서 retirement/revoke RPC와 Public 테이블은 없고 private 삭제 fence/trigger와 private-boundary migration은 설치됐음을 확인했다. migration `20261009090000`으로 누락된 private-only RPC만 추가한다. full-public 함수가 이미 있는 경우 정의·ACL을 건드리지 않고, 나중에 Public 테이블만 일부 설치되면 실패하도록 한다. 향후 Public 활성화에서는 full retirement 구현으로 원자적 교체하는 별도 migration 검토가 필요하다.
+- 2026-10-09 삭제 경계 로컬 검증: `wsl -u postgres -e bash /mnt/e/web/anime/tools/private-images/run-retirement-compat.sh` 최종23 assertions PASS(누락 재현, 인증/익명, B→A 사본 보존, 즉시 읽기 차단, 중복·늦은 삽입 fence, partial-public 거부, 설치/롤백). 첫 fixture는 기본 quota0 때문에 예약이 실패했고 합성 정책 값만 보정했다. 기존 `tools/private-images/run-local-postgres.sh` full schema51 assertions/동시 quota·동일 operation race2 PASS. 전체 migration replay에서 기존 Public retirement도 유지된다. CI에 selective 계약을 추가했다. 운영 적용 파일은 `tools/private-images/activate-retirement-compat-20261009.sql`, 제한 롤백은 같은 폴더 `rollback-retirement-compat-20261009.sql`이다. 이 줄 작성 시 운영 적용/삭제 재검증은 아직 전이다.
 - 2026-10-09: Git `979a759` clean 확인. 결정·시작·운영 마감/자동 저장 계획을 읽고 사진 대기 경로와 10건의 과거 Guest 테스트, 실제 기기 미확인 범위를 식별했다.
 - 2026-10-09: 사진 전송 의도 drain이 모든 오류를 `pending`으로 합치는 것을 확인. 일시적인 `PRIVATE_IMAGE_REQUEST_FAILED`만 동일한 journal/operation으로 350ms 뒤 1회 재시도하고, 정책·quota 오류는 반복하지 않도록 수정. 허용된 안전 코드만 카드 저장 결과에 전달하며 알 수 없는 내부 오류는 일반 대기 코드로 남긴다. 관련 unit 15 PASS, React Doctor 변경 파일 검사 92점·새 진단 0건.
 - 2026-10-09: 독립 BrowserContext·IndexedDB와 합성 공용 gateway로 카드 저장→다른 기기 pull→오프라인 수정 대기→재로드·재접속 복구→반대 기기 삭제/tombstone 반영을 확인. Chromium 1 PASS, WebKit 1 PASS. GitHub CI Chromium 목록에 추가했다.
@@ -94,3 +101,26 @@
 - DB·환경 설정·운영 사진·권리 정책 변경 없음. 실패 시 이 변경 커밋을 `git revert`하고 `master`에 push한다. 사진 전송 의도와 기기 원본은 보존한다.
 - 구현 커밋 `364de73`의 GitHub CI 두 job과 Vercel Git 배포가 성공했고, 당시 운영 SHA도 일치했다. 이 완료 기록을 반영한 문서 후속 커밋의 최신 원격/운영 SHA는 `/build-info.json`의 `commit`·`checkoutCommit`과 `git rev-parse origin/master`로 다시 대조한다.
 - 실제 iPhone Safari에서 이번 개선본의 첫 저장 무재시도 성공률, 기기 간 수정·삭제·오프라인 복구는 사용자 실기기 확인이 남아 있다. 정확한 과거 `photo_transfer_...` 오류 문자열이 없어 이번 재시도가 원인을 완전히 해결했다고 주장하지 않는다.
+
+## 18. 이 PC의 개발 실행과 실기기 확인
+
+기존 `.env.local`은 운영 카탈로그 읽기 설정만 있으므로 그대로 둔다. 이 PC에 이미 있는 `.env.moemoatest.local`을 프로세스에 읽어 테스트 계정으로 개발한다. 개인 세션·비밀 설정은 Git으로 옮기지 않는다. 아래 실행은 테스트 계정 metadata와 기존 화면을 위한 것이며, 상대 경로의 운영 사진 API를 제공하는 서버가 아니므로 사진 원격 전송은 끈다.
+
+```powershell
+. .\.cache\activate.ps1
+$env:PUBLIC_MEMORY_ACCOUNT_SYNC_V1 = '1'
+$env:PUBLIC_TITLE_STATE_SYNC_V1 = '1'
+$env:PUBLIC_MEMORY_CARD_CLASSIFICATION_SYNC_V1 = '1'
+$env:PUBLIC_MEMORY_WEB_IMAGE_INTAKE_V1 = '1'
+$env:PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1 = '0'
+$env:PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1 = '0'
+$env:PUBLIC_MEMORY_PUBLICATION_V1 = '0'
+$env:PUBLIC_MEMORY_MINIHOME_V1 = '0'
+$env:PUBLIC_MEMORY_FOLLOWS_V1 = '0'
+$env:PUBLIC_MEMORY_MODERATION_V1 = '0'
+node --env-file=.env.moemoatest.local node_modules/astro/astro.js dev --host 127.0.0.1 --port 4321
+```
+
+실기기 사진 검사는 `https://www.moemoa.xyz/`에서 같은 계정의 **새 테스트 카드**로 진행한다. 기존 개인 카드 삭제나 과거 사진의 일괄 전송을 하지 않는다. 순서는 새 사진 카드 저장/PC 표시 → iPhone의 짧은 감상 수정/PC 반영 → 오프라인 수정·재로드/온라인 복구 → 테스트 카드 삭제/PC 반영이다. 결과가 확인된 단계만 실제 기기 PASS로 기록한다.
+
+현재 새 카드의 저장/수정은 사용자 iPhone 보고와 PC의 동일 카드·감상·사진 실제 표시로 확인했다. 첫 전송의 시도 횟수나 소요 시간은 수집하지 않아 무재시도 성공률은 미측정이다. 오프라인 수정/재로드/재접속은 요청했으나 사용자가 건너뛰고 진행하라고 지시해 이번 실기기 검사에서 제외했다. 미확인으로 남기며 합성 PASS로 대체하지 않는다. 후속 사용자 지시에 따라 추가 휴대폰 조작 요청을 중단하고, PC의 앱 브라우저와 Chrome의 독립 저장소/세션으로 수정·삭제를 직접 검사한다. 사용자가 삭제 가능하다고 확인한 오늘 테스트 카드만 대상으로 하며, 두 PC 브라우저 검사를 실제 iPhone 삭제 PASS로 기록하지 않는다. 작품의 WatchLog와 카드의 짧은 감상은 서로 다른 기록이므로 주소/생성일로 카드를 먼저 식별한다.

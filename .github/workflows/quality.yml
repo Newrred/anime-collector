@@ -19,6 +19,7 @@ jobs:
       - run: sudo apt-get install -y postgresql-16
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/publication-boundary/run-local-postgres.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/card-classification/run-local-postgres.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/private-images/run-retirement-compat.sh
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
