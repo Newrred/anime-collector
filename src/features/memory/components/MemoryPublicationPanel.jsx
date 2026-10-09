@@ -6,6 +6,7 @@ import { getPublicationServices, publicationUiEnabled } from "../runtime/platfor
 import { PUBLIC_FIELDS, publicationLink } from "../domain/publicationView.js";
 import PublicBoardSnapshot from "./PublicBoardSnapshot.jsx";
 import PublicLinkCopy from "./PublicLinkCopy.jsx";
+import PublicSignupNotice from "./PublicSignupNotice.jsx";
 import MemoryVisual from "./MemoryVisual.jsx";
 import { publicationCopy, publicationError } from "./publicationCopy.js";
 import "./memory-publication.css";
@@ -104,6 +105,7 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
     <header><h2>{copy.title}</h2><button type="button" className="btn btn--subtle" disabled={mutating} onClick={close}>{copy.close}</button></header>
     <p>{copy.intro}</p>
     {state.error && <p role="alert">{publicationError(state.error, locale)}</p>}
+    <PublicSignupNotice error={state.error} locale={locale} base={base} />
     {state.busy && <p role="status">{state.phase === "publishing" ? copy.publishing : state.phase === "preparing" ? copy.preparing : copy.loading}</p>}
     {state.phase === "imageReady" && <p role="status">{copy.imageReady}</p>}
     {state.phase === "cardRevoked" && <p role="status">{copy.cardRevoked}</p>}

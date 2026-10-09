@@ -11,6 +11,7 @@ import MinihomeSnapshot from "./MinihomeSnapshot.jsx";
 import MemoryRelationships from "./MemoryRelationships.jsx";
 import PublicLinkCopy from "./PublicLinkCopy.jsx";
 import MemorySafety from "./MemorySafety.jsx";
+import PublicSignupNotice from "./PublicSignupNotice.jsx";
 import "./memory-publication.css";
 
 function Review({ review, controller, services, locale, busy, base }) {
@@ -35,6 +36,7 @@ function Editor({ userId, locale, base }) {
     <p>{copy.intro}</p>
     {state.busy && <p role="status">{copy.loading}</p>}
     {state.error && <p role="alert">{state.error === "INVALID_SELECTION" ? copy.invalid : publicationError(state.error, locale)} <button className="btn btn--subtle" disabled={state.busy} onClick={() => controller.load()}>{copy.retry}</button></p>}
+    <PublicSignupNotice error={state.error} locale={locale} base={base} />
     {state.home?.published && (state.home.hidden || state.home.visible === false) && <p role="status">{copy.notVisible}</p>}
     {state.home?.published && !state.home.hidden && state.home.visible !== false && <p role="status">{copy.published} <a data-astro-reload href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
     {state.home?.published && !state.home.hidden && state.home.visible !== false && <PublicLinkCopy key={state.home.id} kind="home" id={state.home.id} locale={locale} base={base} />}

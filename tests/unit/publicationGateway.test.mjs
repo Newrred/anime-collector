@@ -13,6 +13,14 @@ function harness(response = { data: null, error: null }) {
   return { gateway: new SupabasePublicationGateway(client), calls };
 }
 
+test('public signup failures survive board and home transport without exposing upstream details', async () => {
+  for (const code of ['PUBLIC_SIGNUP_REQUIRED', 'PUBLIC_SIGNUP_UNAVAILABLE']) {
+    const { gateway } = harness({ error: { message: code, details: 'private receipt details' } });
+    await assert.rejects(gateway.publish({}), { code, message: code });
+    await assert.rejects(gateway.publishHome({}), { code, message: code });
+  }
+});
+
 test("publication preparation transmits selection only, never private bundles or spoofed owner", async () => {
   const { gateway, calls } = harness();
   await gateway.prepare({ boardId: "board", expectedRevision: 0, title: "Explicit", description: "",

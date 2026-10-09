@@ -59,6 +59,23 @@ const retention=[
  <article id="regions" aria-labelledby="regions-heading"><h2 id="regions-heading">국가별 조건 검토 / Regional conditions under review</h2><p>가입 가능 국가의 확정 목록이나 새 동의 화면이 아닙니다. 미완료 조건은 아래처럼 구분하며, 이 부록을 읽는 것으로 동의나 법적 적합성이 확인되지는 않습니다.</p><p lang="en">This is not a finalized availability list or an acceptance form. Reading this appendix does not establish consent or legal compliance.</p>{regionalReview.map(s=><section id={`region-${s.id}`}><h3>{s.title}</h3><p>{s.ko}</p><p lang="en">{s.en}</p></section>)}
  <p>검토 근거 / Review references: <a href="https://www.datatilsynet.dk/presse-og-nyheder/nyhedsarkiv/2024/maj/brev-til-boerns-vilkaar-om-boern-og-sociale-medier">덴마크 감독기관의 계정·동의 구분</a> · <a href="https://www.edpb.europa.eu/system/files/documents/files/file1/edpb_guidelines-art_6-1-b-adopted_after_public_consultation_en.pdf">EDPB 계약상 필요성 지침</a> · <a href="https://privacy.gov.ph/wp-content/uploads/2023/11/NPC-Circular-No.-2023-04_Guidelines-on-Consent_07Nov2023.pdf">필리핀 NPC 동의 지침</a> · <a href="https://www.mdes.go.th/law/detail/3577-Personal-Data-Protection-Act-B-E--2562--2019-">태국 PDPA</a> · <a href="https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions">미국 FTC COPPA 안내</a></p>
  </article>
+ <section id="age-reference" aria-labelledby="age-reference-heading">
+  <h2 id="age-reference-heading">유럽의 개인정보 동의 연령 참고 / European data-consent age reference</h2>
+  <p>2026-10-10 공식 자료 재확인. 아래 숫자는 아동 대상 온라인 서비스에서 개인정보 처리에 동의를 근거로 삼을 때의 기준입니다. MOEMOA 가입 가능 국가·연령을 확정하거나, 모든 처리에 보호자 동의가 필요하다고 정하는 표가 아닙니다.</p>
+  <p lang="en">Official sources reviewed on 10 October 2026. These thresholds concern consent-based personal-data processing for online services offered directly to children. They are not MOEMOA availability rules or a requirement for parental consent for every processing purpose.</p>
+  <ul>
+   <li><strong>13:</strong> Belgium (BE), Estonia (EE), Finland (FI), Latvia (LV), Malta (MT), Portugal (PT), Sweden (SE), Iceland (IS), Norway (NO), United Kingdom (GB).</li>
+   <li><strong>14:</strong> Austria (AT), Bulgaria (BG), Cyprus (CY), Italy (IT), Lithuania (LT), Spain (ES).</li>
+   <li><strong>15:</strong> Czechia (CZ), Denmark (DK), France (FR), Greece (GR), Slovenia (SI).</li>
+   <li><strong>16:</strong> Croatia (HR), Germany (DE), Hungary (HU), Ireland (IE), Luxembourg (LU), Netherlands (NL), Poland (PL), Romania (RO), Slovakia (SK), Liechtenstein (LI).</li>
+  </ul>
+  <p>덴마크15세와 슬로베니아15세는 과거 표의13세·16세를 그대로 쓰지 않도록 바로잡았습니다. 스위스는 이 표에 포함하지 않습니다. 별도 소셜 서비스 법률과 미성년 계약 조건은 추가로 구분합니다.</p>
+  <p lang="en">Denmark and Slovenia are both 15 for this purpose; older tables listing 13 and 16 are not reused. Switzerland is outside this table. Separate social-service laws and minor contract conditions still need to be distinguished.</p>
+  <p><a href="https://www.datatilsynet.dk/Media/638501550348383386/Brev%20til%20b%C3%B8rns%20vilk%C3%A5r.pdf">덴마크 감독기관 / Danish authority</a> · <a href="https://www.ip-rs.si/mnenja-zvop-2/privolitev-otroka-za-sodelovanje-v-raziskavi-1740738927">슬로베니아 감독기관 / Slovenian authority</a> · <a href="https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data/are-there-any-specific-safeguards-data-about-children_en">EU 처리 근거 안내 / EU guidance</a></p>
+  <p>Pinterest의 현행 약관도 기본13세·현지 상향 기준 외에13~18세의 보호자 허가 조건을 둡니다. 짧은 Google 가입 화면만으로 이 조건이 사라지는 것은 아닙니다. MOEMOA는 가입 확인을 성인 인증이나 이미지 공개 권리 확인으로 사용하지 않습니다.</p>
+  <p lang="en">Pinterest's current terms also require parental permission for ages 13–18 in addition to its basic 13-year minimum and higher local thresholds. A short Google signup screen does not remove those conditions. MOEMOA does not treat a signup declaration as adult verification or image publishing rights.</p>
+  <a href="https://policy.pinterest.com/en/terms-of-service">Pinterest 현행 약관 / Current terms</a>
+ </section>
  <section id="open-items" aria-labelledby="open-heading"><h2 id="open-heading">적용 전 남은 확인 / Before activation</h2>
   <p>위 문구 중 미확정 항목을 운영 안내인 것처럼 게시하지 않습니다. 운영자는 다음 사실을 기존 출시 작업판에서 마감한 뒤 새 문서 버전·가입 정책을 함께 적용합니다.</p>
   <p lang="en">Unresolved wording is not an operating notice. Close the following items before activating new document versions and the matching signup policy.</p>

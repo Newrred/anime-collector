@@ -55,6 +55,8 @@ const ko = {
 export const publicationCopy = (locale) => locale === "ko" ? ko : en;
 export function publicationError(code, locale) {
   const ko = locale === "ko", copy = publicationCopy(locale);
+  if (code === 'PUBLIC_SIGNUP_REQUIRED') return ko ? '공개 기능을 사용하려면 이 계정의 거주 국가·나이·약관 확인이 필요합니다.' : 'Review this account’s country, age and terms to use public features.';
+  if (code === 'PUBLIC_SIGNUP_UNAVAILABLE') return ko ? '현재 가입 기준을 준비 중이라 새 공개 게시를 할 수 없습니다. 기존 공개는 철회할 수 있습니다.' : 'New publishing is unavailable while signup requirements are being prepared. You can still withdraw existing publications.';
   if (code === "AUTH_REQUIRED") return copy.login;
   if (code === "SYNC_REQUIRED") return copy.sync;
   if (["PUBLICATION_DISABLED", "PUBLIC_IMAGE_DISABLED", "CLIENT_REQUIRED"].includes(code)) return copy.disabled;

@@ -3,6 +3,8 @@ import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import { followsUiEnabled, getPublicationServices } from "../runtime/platformPublication.js";
 import { minihomeLink } from "../domain/minihomeView.js";
 import { isPublicationId } from "../domain/publicationView.js";
+import PublicSignupNotice from './PublicSignupNotice.jsx';
+import { publicationError } from './publicationCopy.js';
 
 function Relationships({ userId, homeId, locale, base }) {
   const ko = locale === "ko", services = getPublicationServices();
@@ -26,7 +28,12 @@ function Relationships({ userId, homeId, locale, base }) {
       } else if (!Array.isArray(result?.items) || result.items.length > 20 || result.items.some((r) => !isPublicationId(r.id)
         || typeof r.available !== "boolean" || (r.nickname !== null && typeof r.nickname !== "string")) || (result.next !== null && !isPublicationId(result.next))) throw new Error();
       setData((old) => after ? { ...result, items: [...new Map([...(old?.items || []), ...result.items].map((r) => [r.id, r])).values()] } : result);
-    } catch { if (request.current === controller) { setError(true); setData(null); } }
+    } catch (failure) { if (request.current === controller) {
+      const signupError = ['PUBLIC_SIGNUP_REQUIRED', 'PUBLIC_SIGNUP_UNAVAILABLE'].includes(failure?.code);
+      setError(signupError ? failure.code : true);
+      // A rejected follow changes nothing; keep block/unfollow controls available.
+      if (!signupError) setData(null);
+    } }
     finally { clearTimeout(timer); if (request.current === controller) { request.current = null; setBusy(false); } }
   }
   useEffect(() => {
@@ -40,7 +47,8 @@ function Relationships({ userId, homeId, locale, base }) {
   const button = (action, label, id) => <button type="button" className="btn btn--subtle" disabled={busy} onClick={() => act(action, id)}>{label}</button>;
   return <section aria-label={ko ? "팔로우와 차단" : "Follows and blocks"} aria-busy={busy}>
     {!homeId && <><h2>{ko ? "내 팔로우 목록" : "My following"}</h2><button className="btn btn--subtle" disabled={busy} onClick={() => setBlocked((v) => !v)}>{blocked ? (ko ? "팔로우 목록" : "Show following") : (ko ? "차단 목록" : "Show blocked")}</button></>}
-    {error && <p role="alert">{ko ? "처리하지 못했습니다. 상태를 새로 확인해 주세요." : "Unable to complete. Refresh to check the current state."}</p>}
+    {error && <p role="alert">{typeof error === 'string' ? publicationError(error, locale) : ko ? "처리하지 못했습니다. 상태를 새로 확인해 주세요." : "Unable to complete. Refresh to check the current state."}</p>}
+    <PublicSignupNotice error={error} locale={locale} base={base} follow />
     {homeId && data && !data.self && <>{!data.blocked && button(data.following ? "unfollow" : "follow", data.following ? (ko ? "팔로우 해제" : "Unfollow") : (ko ? "팔로우" : "Follow"))}{button(data.blocked ? "unblock" : "block", data.blocked ? (ko ? "차단 해제" : "Unblock") : (ko ? "차단" : "Block"))}</>}
     {homeId && <a href={`${base}minihome/#following`}>{ko ? "내 팔로우 목록" : "My following"}</a>}
     {!homeId && data && <ul>{data.items.map((row) => <li key={row.id}>{row.available && !blocked ? <a href={minihomeLink(row.id, base)}>{row.nickname}</a> : <span>{row.available ? row.nickname : (ko ? "표시할 수 없는 미니홈" : "Home unavailable")}</span>}{button(blocked ? "unblock" : "unfollow", blocked ? (ko ? "차단 해제" : "Unblock") : (ko ? "팔로우 해제" : "Unfollow"), row.id)}</li>)}</ul>}

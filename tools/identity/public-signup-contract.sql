@@ -1,0 +1,51 @@
+-- Synthetic existing accounts, using the complete current migration chain.
+create function pg_temp.ok(value boolean, label text) returns void language plpgsql as $$
+begin if value is distinct from true then raise exception 'FAIL: %',label; end if;
+ raise notice 'PASS: %',label; end $$;
+create function pg_temp.fails(statement text, expected text, label text) returns void language plpgsql as $$
+begin begin execute statement; exception when others then
+ if sqlerrm=expected then perform pg_temp.ok(true,label); return; end if; raise;
+ end; raise exception 'Unexpected success: %',label; end $$;
+insert into auth.users(id) values('11111111-1111-4111-8111-111111111111'),('22222222-2222-4222-8222-222222222222');
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+select set_config('request.jwt.claim.role','authenticated',false);
+update private.memory_publication_settings set writes_enabled=true,reads_enabled=true,minihomes_enabled=true,policy_revision='LOCAL_TEST_ONLY';
+select pg_temp.ok(private.require_publication_writer()=auth.uid(),'default-off migration preserves existing write policy');
+update private.memory_publication_settings set signup_declaration_required=true;
+select pg_temp.fails('select private.require_publication_writer()','PUBLIC_SIGNUP_UNAVAILABLE','disabled signup cannot be bypassed by an existing session');
+update private.simple_signup_policy set enabled=true;
+insert into private.memory_minihomes(id,user_id) values('55555555-5555-4555-8555-555555555555','22222222-2222-4222-8222-222222222222');
+set role authenticated;
+select pg_temp.fails('select public.prepare_memory_publication(null,0,null)','PUBLIC_SIGNUP_REQUIRED','existing account board prepare requires its own receipt');
+select pg_temp.fails('select public.publish_memory_publication(null,0,null,null,gen_random_uuid())','PUBLIC_SIGNUP_REQUIRED','direct board publish cannot bypass preparation');
+select pg_temp.fails('select public.prepare_memory_minihome(0,null)','PUBLIC_SIGNUP_REQUIRED','existing account home prepare requires receipt');
+select pg_temp.fails('select public.publish_memory_minihome(0,null,null,gen_random_uuid())','PUBLIC_SIGNUP_REQUIRED','direct home publish cannot bypass preparation');
+select pg_temp.fails($q$select public.set_memory_relationship('55555555-5555-4555-8555-555555555555','follow')$q$,'PUBLIC_SIGNUP_REQUIRED','new follow also requires this account receipt');
+select public.set_memory_relationship('55555555-5555-4555-8555-555555555555','block');
+select pg_temp.ok((public.get_memory_relationship('55555555-5555-4555-8555-555555555555')->>'blocked')::boolean,'missing receipt does not prevent blocking');
+reset role;
+insert into private.simple_signup_declarations values('22222222-2222-4222-8222-222222222222','simple-signup-2026-10-09','KR','UNDER_18',14,'terms-2026-10-09-draft','privacy-2026-10-09-draft',now());
+select pg_temp.fails('select private.require_publication_writer()','PUBLIC_SIGNUP_REQUIRED','another account receipt grants nothing');
+set role authenticated;
+select public.record_simple_signup_declaration(auth.uid(),'KR',14,current_date,'simple-signup-2026-10-09','terms-2026-10-09-draft','privacy-2026-10-09-draft',true);
+reset role;
+select pg_temp.ok(private.require_publication_writer()=auth.uid(),'existing account can confirm current policy without replacing account or memories');
+update private.simple_signup_policy set privacy_version='changed';
+select pg_temp.fails('select private.require_publication_writer()','PUBLIC_SIGNUP_REQUIRED','old document receipt is not current acceptance');
+update private.simple_signup_policy set privacy_version='privacy-2026-10-09-draft';
+update private.simple_signup_countries set minimum_age=15 where country='KR';
+select pg_temp.fails('select private.require_publication_writer()','PUBLIC_SIGNUP_REQUIRED','old lower age threshold is not silently upgraded');
+update private.simple_signup_countries set minimum_age=14 where country='KR';
+update private.simple_signup_policy set enabled=false;
+insert into public.memory_boards(id,user_id,title,client_updated_at) values('bbbbbbbb-bbbb-4bbb-8bbb-000000000001',auth.uid(),'Synthetic private board',now());
+insert into private.memory_publications(id,user_id,board_id,state) values('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',auth.uid(),'bbbbbbbb-bbbb-4bbb-8bbb-000000000001','PUBLISHED');
+insert into private.memory_minihomes(user_id,published_selection) values(auth.uid(),'{"nickname":"Synthetic","bio":"","entries":[]}');
+set role authenticated;
+select public.revoke_memory_publication('aaaaaaaa-aaaa-4aaa-8aaa-000000000001',0);
+select public.revoke_memory_minihome(0);
+reset role;
+select pg_temp.ok((select state='REVOKED' from private.memory_publications where id='aaaaaaaa-aaaa-4aaa-8aaa-000000000001') and (select published_selection is null from private.memory_minihomes where user_id=auth.uid()),'both withdrawals work with signup disabled');
+select pg_temp.ok((select count(*)=2 from auth.users) and (select count(*)=2 from private.simple_signup_declarations) and (select count(*)=1 from public.memory_boards where title='Synthetic private board'),'accounts, receipts and private board remain intact');
+update private.simple_signup_policy set enabled=true;
+update private.memory_publication_settings set writes_enabled=false;
+select pg_temp.fails('select private.require_publication_writer()','PUBLICATION_DISABLED','valid signup never overrides public kill switch');

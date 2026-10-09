@@ -9,6 +9,60 @@ const PUBLIC_CARD = "33333333-3333-4333-8333-333333333333";
 const IMAGE = "44444444-4444-4444-8444-444444444444";
 const HASH = "a".repeat(64);
 
+for (const surface of ['board', 'home']) {
+  test(`existing account signup recovery from ${surface} preserves withdrawal`, async ({ page, context }) => {
+    await adapters(context); const backend = mockPublication(); await backend.attach(context);
+    await seedOwner(page); await choose(page); await publishSelected(page);
+    if (surface === 'home') {
+      await page.getByRole('link', { name: 'My public home' }).click();
+      await page.getByLabel('Public nickname', { exact: true }).fill('Existing account');
+      await page.getByLabel('Display this Board', { exact: true }).first().check();
+      await page.getByRole('button', { name: 'Preview public home', exact: true }).click();
+      await page.getByLabel('I reviewed this public home', { exact: false }).check();
+      await page.getByRole('button', { name: 'Publish public home', exact: true }).click();
+      await expect(page.getByRole('link', { name: 'Open public home', exact: true })).toBeVisible();
+      await page.getByRole('button', { name: 'Preview public home', exact: true }).click();
+      await page.getByLabel('I reviewed this public home', { exact: false }).check();
+    }
+    backend.control.publishError = 'PUBLIC_SIGNUP_REQUIRED';
+    // Board is already published; request a fresh preview before the attempted update.
+    if (surface === 'board') {
+      await page.getByRole('button', { name: 'Review and update public content' }).click();
+      await page.getByLabel('I have reviewed these memories', { exact: false }).check();
+    }
+    await page.getByRole('button', { name: surface === 'home' ? 'Publish public home' : 'Publish this version', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('country, age and terms');
+    const recovery = page.getByRole('link', { name: 'Review signup details for this account' });
+    const source = new URL(page.url());
+    const href = new URL(await recovery.getAttribute('href') || '', page.url());
+    expect(href.pathname).toBe('/auth/start/');
+    expect(href.searchParams.get('next')).toBe(source.pathname + source.search);
+    await expect(page.getByText('Continue with the same Google account', { exact: false })).toBeVisible();
+    // An unsuccessful update must not hide the existing owner's withdrawal action.
+    await expect(page.getByRole('button', { name: surface === 'home' ? 'Make public home private' : 'Withdraw this Board', exact: true })).toBeEnabled();
+    expect(backend.calls.some(c => c.name.includes('signup_declaration'))).toBe(false);
+  });
+}
+
+test('existing account signup recovery from follow preserves blocking', async ({ page, context }) => {
+  await adapters(context); const backend = mockPublication(); await backend.attach(context); await seedOwner(page);
+  const homeId = '55555555-5555-4555-8555-555555555555';
+  let blocked = false;
+  await context.route('**/__publication-test/rpc/*memory_relationship*', async route => {
+    const args = route.request().postDataJSON();
+    if (args.p_action === 'follow') return route.fulfill({ json: { data: null, error: { message: 'PUBLIC_SIGNUP_REQUIRED' } } });
+    if (args.p_action === 'block') blocked = true;
+    return route.fulfill({ json: { data: { self: false, following: false, blocked }, error: null } });
+  });
+  await page.goto(`/public/home/?id=${homeId}`);
+  await page.getByRole('button', { name: 'Follow', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Review signup details for this account' })).toBeVisible();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Block', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Unblock', exact: true })).toBeVisible();
+  expect(blocked).toBe(true);
+});
+
 for (const mode of ['board', 'home', 'appeals']) {
   test(`moderation workspace reviews ${mode} with exact package`, async ({ page, context }) => {
     await adapters(context); const backend=mockPublication(); await backend.attach(context); await seedOwner(page);

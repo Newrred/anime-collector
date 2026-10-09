@@ -1,5 +1,79 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 C02/D04 국가별 재조사 결론·W14 기존 계정 연결
+
+**현재 결론:** 한국14·필리핀13·태국13·미국13이라는 기존 제품 기준은 유지한다. 중립 DOB→약관→Google, 생년월일 원문 미전송, 성인 콘텐츠 공개 금지, PASS/KWS/보호자 메일 제외도 유지한다. 국가별 **개인정보 동의 기준**은 아래와 같이 근거를 고정한다. 이것을 서비스 전체의 가입 적법성 또는 미성년 계약능력으로 바꾸어 읽지 않는다. 이번 요청을 근거로 PH18/TH20으로 상향하거나 전 유럽13으로 설정하지 않는다.
+
+### 주요 국가와 실제 처리 결정
+
+| 국가 | 제품 기준 | 확인한 공식 근거와 적용 | 미완료인 정확한 조건 |
+|---|---:|---|---|
+| 한국 KR | 14 | [개인정보 보호법22조의2](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1020398523): 동의가 필요한14세 미만 처리의 법정대리인 동의·확인.14세 이상 자가 신고 경로 유지 | 미성년 계약·국외 이전 등 별도 요건은14세 숫자만으로 마감하지 않음 |
+| 필리핀 PH | 13 | [DPA3(l),13](https://privacy.gov.ph/data-privacy-act-/)은 나이를 민감정보 범주로 다룸. [NPC2023-04](https://privacy.gov.ph/wp-content/uploads/2023/11/NPC-Circular-No.-2023-04_Guidelines-on-Consent_07Nov2023.pdf)는 구체적 목적·항목·기간 고지와 계약법 문제를 구분. DOB를 나이/구간으로 줄여도 정보 처리 자체가 사라지지 않음 | **13~17세의 나이 처리에 어떤 근거·동의 권한을 적용하는지** 미확정. 현행 약관 체크를 별도 민감정보 동의로 소급 인정하지 않음 |
+| 태국 TH | 13 | [MDES PDPA20/23/24](https://www.mdes.go.th/law/detail/3577-Personal-Data-Protection-Act-B-E--2562--2019-): 동의에 의존하는 미성년 처리와 독립행위를 구분.10세 이하의 특칙은13세 기준의 근거가 아님. 계약 필요성 등 별도 근거 존재 | **MOEMOA의 무료 저장·선택적 공개 계약이 민상법22~24조의 독립행위에 해당하는지** 미확정. 일괄20세 제한도,13세면 모든 동의 가능이라는 단정도 하지 않음 |
+| 미국 US | 13 | [FTC FAQ](https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions): 일반 대상 서비스의 중립 나이 질문과13세 미만임을 실제 알게 된 경우 구분. [2025 개정 규칙](https://www.govinfo.gov/content/pkg/FR-2025-04-22/html/2025-05904.htm)의2026-04-22 준수 시점 포함 | 연방 기준 확인이며50개 주의 청소년 소셜 서비스 법·판결/적용 범위 전체 검토 완료 아님 |
+| 스위스 CH | 미설정 | EU/EEA 동의 연령표를 적용하지 않음. [EDOEB 설명](https://www.edoeb.admin.ch/en/7-questions-about)은 고지·자발성 등 조건을 설명하지만 이 자료로 MOEMOA에 적용할 고정 연령을 확정할 수 없음 | 단독 동의능력·해당 서비스 계약 조건의 직접 근거 미확보.13/16을 추정하여 DB에 넣지 않음 |
+
+PH의 [NPC2026-09-23 안내](https://privacy.gov.ph/public-advisory-npc-calls-on-digital-platforms-to-ensure-compliance/)는 성인용 기능 제한 등을 위한 비례적인 연령 보증을 요구한다. 이를 모든 가입자의 유료 신분확인 의무로 해석하지 않는다. 해당 페이지와 DPA는 검색 인덱스에서 확인했으나 직접 열기는403/실패였으므로 직접 본문 열람으로 기록하지 않는다. [NPC2019-046 수록본](https://privacy.gov.ph/wp-content/uploads/2023/05/2019-Compendium_rev-2-Single-1.pdf)의 인신매매 피해자 나이 확인 사례를 모든 서비스의18세 가입 의무로 일반화하지 않는다.
+
+### 유럽 국가별 확인표
+
+다음은 **아동 대상 온라인 서비스에서 개인정보 처리 근거를 동의로 삼을 때의 연령 기준**이다. 가입 최소 연령, 성년, 모든 계약의 독립 체결 연령과 다르다. 각 링크는 법령 또는 감독기관 자료이며 조회일2026-10-10. 검색 결과의 공식 본문 발췌도 사용했으므로 모든 링크의 전체 법령을 직접 열람했다고 주장하지 않는다. 별도의 신설 소셜 서비스 제한·시행령·법원 결정까지 전수 확인한 표가 아니다.
+
+| 국가 | 기준(세) | 공식 근거 |
+|---|---:|---|
+| 영국 GB | 13 | [ICO — 아동 정보 처리 근거](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/children-and-the-uk-gdpr/how-do-the-lawful-bases-apply-to-children-s-personal-information/) |
+| 오스트리아 AT | 14 | [DSB — Teens & Kids](https://dsb.gv.at/ueber-die-datenschutzbehoerde/teens-kids) |
+| 벨기에 BE | 13 | [APD — Consentement](https://www.autoriteprotectiondonnees.be/professionnel/rgpd-/bases-juridiques/consentement) |
+| 불가리아 BG | 14 | [CPDP — 아동 권리 안내](https://cpdp.bg/userfiles/file/Documents_2022/Pravata_na_decata_KZLD_brochure.pdf) |
+| 크로아티아 HR | 16 | [AZOP — 아동 개인정보](https://azop.hr/primjena-opce-usedbe-o-zastiti-podataka-u-skolskim-ustanovama/) |
+| 키프로스 CY | 14 | [감독기관 — 아동 보호](https://www.gov.cy/dataprotection/plirofories-gia-polites/prostasia-toy-paidioy/) |
+| 체코 CZ | 15 | [UOOU — 기본 안내](https://uoou.gov.cz/verejnost/zakladni-prirucka-k-ochrane-udaju) |
+| 덴마크 DK | 15 | [Datatilsynet2024-05-01 답변](https://www.datatilsynet.dk/Media/638501550348383386/Brev%20til%20b%C3%B8rns%20vilk%C3%A5r.pdf) — 예전13세 표를 재사용하지 않음 |
+| 에스토니아 EE | 13 | [AKI — 교육·아동](https://www.aki.ee/isikuandmed/kkk/haridus-ja-lapsed) |
+| 핀란드 FI | 13 | [감독기관 안내](https://tietosuojaharrastuksissa.fi/en/board-of-the-association/what-principles-must-be-observed-in-the-processing-of-personal-data/2-processing-requires-a-basis/2-3-consent-from-minors/), [법1050/2018](https://finlex.fi/en/legislation/collection/2018/1050) |
+| 프랑스 FR | 15 | [CNIL — Consentement](https://www.cnil.fr/les-bases-legales/consentement) |
+| 독일 DE | 16 | [BfDI — GDPR/BDSG Art8](https://www.bfdi.bund.de/SharedDocs/Downloads/DE/Broschueren/INFO1.pdf?__blob=publicationFile&v=27) |
+| 그리스 GR | 15 | [HDPA — 개인정보 보호](https://www.dpa.gr/el/polites/prostasia) |
+| 헝가리 HU | 16 | [NAIH — 중소기업 GDPR 안내](https://www.naih.hu/files/A-GDPR-egyszeruen-kis-es-kozepvallalkozasok-szamara.pdf) |
+| 아일랜드 IE | 16 | [DPC — 보호자 동의](https://www.dataprotection.ie/sites/default/files/uploads/2023-04/DPC_ChildrensData_ParentalConsent.pdf) |
+| 이탈리아 IT | 14 | [Garante — Minori](https://www.garanteprivacy.it/temi/minori) |
+| 라트비아 LV | 13 | [DVI — 아동 정보 처리 동의](https://www.dvi.gov.lv/lv/jaunums/dviskaidro-vecaku-piekrisana-berna-personas-datu-apstradei) |
+| 리투아니아 LT | 14 | [VDAI — GDPR 안내](https://vdai.lrv.lt/uploads/vdai/documents/files/Rekomend_SVV_BDAR_2018.pdf) |
+| 룩셈부르크 LU | 16 | [CNPD — Consentement](https://cnpd.public.lu/fr/professionnels/obligations/obligations-rgpd/liceite/consentement.html) |
+| 몰타 MT | 13 | [IDPC — S.L.586.11](https://idpc.org.mt/our-office/legislation/) |
+| 네덜란드 NL | 16 | [AP — Grondslag toestemming](https://autoriteitpersoonsgegevens.nl/themas/basis-avg/avg-algemeen/grondslag-toestemming) |
+| 폴란드 PL | 16 | [UODO — 아동 동의](https://www.uodo.gov.pl/pl/493/2261) |
+| 포르투갈 PT | 13 | [법58/2019 Art16](https://diariodarepublica.pt/dr/detalhe/lei/58-2019-123815982) |
+| 루마니아 RO | 16 | [ANSPDCP — FAQ](https://www.dataprotection.ro/index.jsp?lang=en&page=IntrebariFrecvente1) |
+| 슬로바키아 SK | 16 | [법18/2018](https://www.slov-lex.sk/ezbierky/pravne-predpisy/SK/ZZ/2018/18/?ucinnost=13.08.2025) |
+| 슬로베니아 SI | 15 | [IP — ZVOP2 설명](https://www.ip-rs.si/mnenja-zvop-2/privolitev-otroka-za-sodelovanje-v-raziskavi-1740738927) — 예전16세 표를 재사용하지 않음 |
+| 스페인 ES | 14 | [AEPD — 동의 연령](https://www.aepd.es/preguntas-frecuentes/10-menores-y-educacion/FAQ-1001-cual-es-la-edad-para-que-los-menores-puedan-prestar-consentimiento-para-tratar-sus-datos-personales) |
+| 스웨덴 SE | 13 | [IMY — Samtycke](https://www.imy.se/verksamhet/dataskydd/det-har-galler-enligt-gdpr/rattslig-grund/samtycke/) |
+| 아이슬란드 IS | 13 | [법90/2018 Art10 현행 통합본](https://www.althingi.is/lagas/nuna/2018090.html) |
+| 리히텐슈타인 LI | 16 | [Datenschutzstelle — 시민 안내](https://www.datenschutzstelle.li/datenschutz/fuer-buergerinnen-und-buerger) |
+| 노르웨이 NO | 13 | [정부의 현행 §5와 개정안 설명](https://www.regjeringen.no/no/dokumenter/horing-endringer-i-personopplysningsloven-aldersgrense-for-barns-samtykke-ved-bruk-av-informasjonssamfunnstjenester-sosiale-medier-mv/id3114264/), [2026 Medietilsynet 안내](https://prod.medietilsynet.no/digitale-medier/aldersgrenser-sosiale-medier/aldersgrense-sosiale-medier-slik-pavirkes-barna/) |
+
+**현행과 예정 구분:** EU KIDS Act는 [2026-09 공식 제안](https://digital-strategy.ec.europa.eu/en/news/eu-kids-act-restrict-social-media-platforms-access-children-eu) 단계다. PT의16세 상향은 [CNPD의2026 제안 논의](https://www.cnpd.pt/comunicacao-publica/noticias/presidente-da-cnpd-faz-intervencao-sobre-o-tema-how-to-comply-with-obligations-for-protection-of-minors-no-privacy-symposium/)와 현행법을 구분한다. 프랑스의2026년15세 미만 SNS 일괄 금지는 [헌법위원회2026-911 DC §22/주문1](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054743009)에서 위헌으로 판단됐다. 의회 통과 기사만 보고 시행 중인 일괄 금지로 넣지 않았다. 후속 기능별 제한 제안은 별도이며, 기존 CNIL의 데이터 동의15세 기준까지 폐지됐다는 뜻은 아니다.
+
+### Pinterest와 MOEMOA의 차이·확정한 구현 계약
+
+[Pinterest 현행 이용약관 §2a](https://policy.pinterest.com/en/terms-of-service)는 기본13세·현지 상향 기준에 더해13~18세의 보호자 허가와 함께 약관을 검토하는 조건을 둔다. 상단의11/12 예정판을 현재 약관으로 사용하지 않았다. Google 연동 화면이 짧다는 사실은 뒤의 계약 조건이나 유효한 동의를 면제하지 않는다. 전원에게 보호자 메일을 보내야 한다는 뜻도 아니다.
+
+- DOB 원문은 로컬 계산만, 임시 신고 나이와 영구 국가/구간/기준/정책·문서 버전의 용도를 구분한다. `accepted`는 약관 수락이며 보호자 확인·성인 인증·이미지 권리 승인으로 재사용하지 않는다.
+- 기존 계정은 **동일 Google 계정의 확인 기록**으로 연결한다. 계정 재생성/기록 이전/과거 동의 자동 채우기 없음. 공개 기능을 사용할 때 최신 정책·문서·국가별 기준의 자기 영수증이 필요하다.
+- 새 migration `20261010160000_publication_signup_connection.sql`은 기본off 설정 `signup_declaration_required`를 추가한다. 켜면 서버 공통 작성 경계에서 새 Board/Home 준비·게시, 공개 이미지 준비/권리 신고와 새 팔로우를 검사한다. 클라이언트 생략·다른 계정 영수증·과거 문서·상향 전 기준은 통과하지 않는다.
+- 열람·기존 개인 기록·공개 철회·팔로우 해제·차단·신고는 이 새 조건으로 막지 않는다. 기존 계정의 이미 공개된 snapshot을 자동 삭제/철회하지 않는다. 정책 off는 새 공개 동작을 거부하며 공개 kill switch는 영수증이 있어도 우회 불가.
+- Board/Home 화면은 `PUBLIC_SIGNUP_REQUIRED` 시 `/auth/start/?next=현재경로`로 연결한다. 같은 계정을 안내하고 돌아와 공개 내용을 다시 검토한다. 새 팔로우 오류에도 확인 경로와 차단 수단을 유지한다. 실제 Google 왕복 재실행은 하지 않았다.
+- **활성화 조건:** 최종 국가·처리 근거·새 문서 버전과 signup 정책을 먼저 맞추고 새 검사와 Public 설정을 함께 검토한다. 기존 영수증을 재확인이 필요하게 바꿀 때는 정책 버전을 올린다. 같은 버전에서 country threshold만 바꾸면 영수증 불변성 때문에 재확인을 해도 해결되지 않을 수 있다.
+- **롤백:** 아직 hosted 미적용. 활성화 전 migration 실패는 트랜잭션 rollback. 활성화 후 문제는 우선 Public 쓰기를 끄고 원인 확인; 새 검사만 꺼 공개 우회를 허용하는 것을 일반 rollback으로 삼지 않는다. 계정/기록/동의 원문 삭제 없음.
+
+**이번 검증 범위:** 로컬 실제 PostgreSQL 전체 적용 체인(pg_cron 보존 예약 migration 제외)의 합성 계정 경계15항목 PASS. Gateway6검사 PASS. Board/Home/팔로우 복귀·기존 관계 Chromium4항목과 고지1항목 PASS, build27 PASS. 최초 Board 테스트의 오래된 버튼명1실패는 수정 후 재실행했다. build/dev 동시 실행 중 fixture 동적 import4실패는 순차 재실행4PASS와 구분한다. 과거 hosted Google/운영 공개 왕복과 구분. 운영 DB/국가 row/feature flags 변경0. 실제 명령은 [증거](evidence/2026-10-10-regional-public-signup-connection.json)에 기록했다.
+
+**남는 판단:** PH13~17의 나이정보 근거, TH 미성년 계약의 독립행위 적용, CH 기준과 미국 주별·유럽 신설 소셜 조건의 실제 서비스 범위. 수동 승인이나 유료 인증을 임의 추가하지 않는다. 모든 국가의 운영 가입 허용을 이번 검색으로 확정했다고 보고하지 않는다. 다음 작업1개는 이 근거표에 맞춘 **최종 가입 정책·고지 버전 후보의 결정과 테스트 적용**이다.
+
+
+
 ## 2026-10-10 C02/D04 처리 목적별 조건 — 국가표의 숫자만으로 마감하지 않음
 
 기존 KR14/PH13/TH13·US/유럽 범위·중립 DOB·간단한 Google 가입은 유지한다. 아래는 **검토 근거와 후보 적용**, 법률 적합성 승인/운영 정책 변경이 아니다. 반복적인 국가 전체 검색 대신 실제 처리에 남는 조건을 구분한다.

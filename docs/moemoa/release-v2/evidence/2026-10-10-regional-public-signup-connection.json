@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-10",
+  "baseCommit": "ee31e1e",
+  "scope": "C02/W06/W14/D04; local candidate, not production activation",
+  "sourceFiles": [
+    "supabase/migrations/20261010160000_publication_signup_connection.sql",
+    "src/features/memory/components/PublicSignupNotice.jsx",
+    "src/features/memory/components/MemoryPublicationPanel.jsx",
+    "src/features/memory/components/MemoryMinihome.jsx",
+    "src/features/memory/components/MemoryRelationships.jsx",
+    "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+    "src/features/memory/components/publicationCopy.js",
+    "src/pages/legal/review.astro"
+  ],
+  "research": "02_ACCEPTANCE_CONTRACTS.md top section: 36 country selections, 31 European consent thresholds, primary-source links and explicit unresolved applicability. Not a final authorization list.",
+  "currentRuns": [
+    {
+      "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh",
+      "result": "PASS 15",
+      "scope": "Actual isolated PostgreSQL16, synthetic users; full migration chain except pg_cron retention scheduling migration. No hosted credentials."
+    },
+    {
+      "command": "node --test tests/unit/publicationGateway.test.mjs",
+      "result": "PASS 6",
+      "scope": "Gateway contract tests"
+    },
+    {
+      "command": "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4393 node scripts/run-e2e.mjs tests/publication-ui.spec.ts --project=chromium --no-deps --workers=1 --reporter=line --grep 'existing account signup recovery|relationships follow'",
+      "result": "PASS 4",
+      "scope": "Real Chromium UI with mock auth/publication API; three new scenarios and existing relationship regression. No actual Google login."
+    },
+    {
+      "command": "node scripts/run-simple-signup-e2e.mjs --grep 'revision review'",
+      "result": "PASS 1",
+      "scope": "390px review page, no consent capture, immutable signup-linked document versions unchanged"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS 27 routes",
+      "scope": "Local build; existing chunk warnings; not a deployment"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "scope": "Whitespace; unrelated AuthCallbackClient line-ending warning retained"
+    }
+  ],
+  "intermediateFailures": [
+    "Initial Board UI test used old Preview selected memories name after publication; corrected to existing Review and update public content; Board/Home rerun 2 passed.",
+    "Concurrent local build and dev UI test run failed 4 fixture dynamic imports while Vite reoptimized; sequential isolated rerun passed all 4. No source behavior declared broken or passed solely from that failed run."
+  ],
+  "behaviorVerified": [
+    "Existing session missing receipt denied by server for Board/Home prepare/publish and new follow",
+    "Another user's receipt and stale documents/threshold rejected",
+    "Current authenticated declaration allows writer without account replacement",
+    "Signup disabled still permits both withdrawals; no-receipt user can block",
+    "Public write kill switch still applies even with receipt",
+    "UI presents current-path recovery for Board/Home and keeps withdrawal; rejected follow retains and successfully uses block"
+  ],
+  "notPerformed": [
+    "Hosted migration",
+    "Production deploy or flags/country settings changes",
+    "Real Google recovery roundtrip this turn",
+    "New paid identity provider, guardian mail, external inquiry",
+    "Android or Safari check",
+    "Complete legal clearance for all target jurisdictions"
+  ],
+  "rollback": "Additive default-off candidate, no data rewrite. Before activation transaction rollback; after activation stop Public writes rather than disabling receipt checks while writes stay enabled.",
+  "next": "Resolve precise policy/applicability conditions and prepare matching policy/document version candidate for test."
+}

@@ -1,5 +1,7 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-10 C02/W14 국가 재조사·기존 계정 연결:** KR14/PH13/TH13/US13 기존 기준 유지. 공식 근거를36개 선택 국가별로 정리(유럽 동의 기준31개, CH 별도 미확정); DK15/SI15 및 법안·현행법 구분 반영. 개인정보 동의 연령을 가입 최소로 일괄 대입하지 않음. 기존 세션의 공개 작성이 가입 영수증을 확인하지 않던 연결을 기본off migration과 Board/Home/팔로우 복귀 안내로 보완. 이번 로컬 실제SQL15·gateway6·모의 API Chromium4+고지1 PASS, hosted/운영 PASS 아님. 새 migration hosted 미적용·국가 row/flags 변경0. PH 나이정보 근거·TH 계약 적용·CH/미국 주별/유럽 신설 소셜 범위는 잔여. 다음1개는 근거표에 맞춘 최종 가입 정책·고지 버전 후보 결정/테스트 적용. 상세는02 상단과 기존 ExecPlan, `evidence/2026-10-10-regional-public-signup-connection.json`.
+
 > **2026-10-10 C02/D04 후속:** 목적별 처리 후보/지역별 근거/정확한 미완료 조건을02 상단에 정리하고 미발효 고지에 짧은 안내·지역 부록을 추가했다. 새 Chromium 검토 화면1개·build27 PASS, 이전8개/실제 Google/운영 정리 PASS와 구분. PH 동의 주체/근거·TH 계약 적용·유럽 목적별 조건은 미확정이다. 현재 약관 `accepted`/privacyVersion을 별도 개인정보 동의로 바꾸지 않는다. 새 인증/국가 축소/DB/flags/문의 발송0. 추가 검색으로 자동 해소됐다고 표시하지 않고 다음 독립 작업 **W14 공개 보드·미니홈의 기존 계정 처리 연결 대조**로 이동한다.
 
 > **2026-10-10 현재 작업 — C02/W06/W14:** Vercel 문의는 사용자 지시로 취소/미발송이며 답변 대기를 다음 작업으로 요구하지 않는다. 가입 불가 국가·정책 off·문서 불일치를 DOB 입력 전에 알리고 국가 변경 시 DOB/동의를 비우도록 보완했다. 미발효 검토본의 저장·삭제 동작을6종으로 구분했다. 이번 모의 API 기반 실제 Chromium UI8/8 PASS, 고지 수정 후 관련1개 재검사 PASS(새9개 PASS로 합산하지 않음), build27 PASS. 기존 Google 실가입/운영 purge는 과거 근거. 국가/연령·기존 불변 문서/영수증·DB/flags 변경0. 다음1개는 국가별 최종 가입 조건·고지 마감. 출시 전체 PASS 아님.
@@ -665,7 +667,7 @@
 | W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
 | W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님; 10/10 기존 계정 가입 확인 연결 후보 SQL15/Chromium4 PASS, hosted 미적용 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 10/10 조회 전용 재확인: 최신 예약 정리 성공·기한 경과 사진0. 물리100MB·계정50MB·월전역500MB 유지.50건 batch 포화 가능성 경보 추가·관련 unit32 PASS(운영 미반영). 이전80MB/월400MB 경보 근거 보존. 실제 임계 알림 수신·공개 자원정책/예산 결속은 D03 잔여. 이전 quota/HTTP 근거 보존 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
@@ -680,13 +682,13 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-ID / M: W15/W17/W20 출시 운영 마감 + W06/D04 생년월일·최소 동의 가입
+ID / M: W06/W14·C02/D04 국가별 가입 조건과 기존 계정 공개 연결 (W15/W17/W20 운영 잔여 보존)
 출시 지역: 한국·필리핀·태국·미국·유럽(US/EUROPE-LAUNCH-SCOPE-01). 미국·유럽 국가별 판정/개인정보 조건은 C02 잔여. 지역 범위 승인과 출시 적합성 PASS를 구분.
 충분한 기존 증거: private 사진/두 화면 동기화·삭제, hosted 일반 공개 왕복 및72table 복원. 반복하지 않음.
-이번 변경/새 증거: 서버 Google 왕복·신규 계정 INSERT+동의 영수증·암호화 일회 session 전달. unit475/Chromium 모의 왕복4/격리 SQL 계약 및 두 연결 경합2/build24 PASS. 이전469/23·Public 보존13단언은 과거 증거. 운영 DB 변경0.
-구현 상태: 기본 off 서버 가입 후보 연결. 직접 신규 INSERT 우회/재사용·만료/계정 불일치를 로컬 검증. 실제 Google→hosted Auth/Hook 연결, 국가별 최종 정책/고지·hosted 적용은 미완료. 보호자 접수/PASS/KWS 제외.
-외부 잔여: 국가별 적용/보존 조건, Drive 사본 재다운로드 검증·별도 키 보관, Windows 복원 최종rename 오류·실제 DB 재구동, 경보 수신, Public 정확한 적용 후보.
-다음 행동1개: 기존 테스트 Preview의 나머지 signup 서버 설정·callback·임시정보 정리 예약을 마감하고 새 서버 흐름을 검증한다. 이전 키 중지 후 기존 Supabase Google OAuth 재로그인은 실제 PASS, 새 signup API/Hook은 미배포·미검증으로 구분한다. test DB 정책은 기본 off. 설정 이름과 순서는 운영 설정 지도를 따른다. 이전 보호자 승인 결속 SQL은 과거 후보로 동결.
+이번 변경/새 증거: 36개 선택 국가의 근거/미확정 구간과 유럽 동의 기준31개 정리. 기존 계정 공개 작성 경계의 자기 가입 영수증 검사·확인 화면 복귀·철회/차단 유지. 로컬 SQL15/gateway6/모의 API Chromium4+고지1/build27 PASS. 새 migration hosted 미적용, 운영 DB/flags 변경0.
+구현 상태: 이전 test 실제 신규 Google 가입·Hook/영수증 성공과 운영 기본off schema/운영자 연결·정리 예약 성공은 과거 증거로 보존. 이번 공개 가입 연결은 기본off 후보. 기존 계정/기록/동의 내용 자동 변경 없음. 보호자 접수/PASS/KWS 제외.
+외부 잔여: PH13~17 나이정보 근거·TH 미성년 계약 적용·CH/미국 주별/유럽 신설 소셜 범위, 고지/국외 이전/보존 조건. Drive 외부 회수·파일 복호화는 완료된 과거 근거; 별도 키 보관·전체 DB 재구동/RPO/회전·경보 수신·Public 적용 후보는 미완료.
+다음 행동1개: 근거표에 맞춘 최종 가입 정책·고지 버전 후보의 결정/테스트 적용. 같은 policy 버전에서 threshold만 올리지 않으며 과거 영수증 자동 승격 금지. Vercel 문의는 취소/미발송이며 답변을 선행조건으로 요구하지 않는다.
 Safari 추가 검사/Android/성인 인증은 제외. 미실행을 PASS로 표시하지 않음.
 제품 최소 KR14/PH13/TH13 승인(SIGNUP-KR-PH-TH-13-01). 국가별 조건/청소년 공개 보호는 유사 서비스 비교 후 연결. 약관 동의는 법정 책임의 전면 면제가 아님. Public 활성화/전체 출시 완료 아님.
 ```
@@ -817,7 +819,7 @@ NA 이유:
 | D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_CANDIDATE_APPLIED_RESTORED | 기본 A/B·키·기존 공개 증거 보존/재요청 금지.10/7 새classification test HTTP12·test/prod 선택 적용만 추가; 기존 테스트 운영 설정 그대로 유지 | 사용자 승인 후 test-general-public-20260927-01의 SQL3개 적용/실제backend28+정리4 PASS. flags off·정책/기존home복원·운영자0·생성객체/예약0 확인. 제품UI/실폰은 별도 잔여 | general-public-hosted JSON / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
-| D04 | 운영주체/정책/권리·연령/지원 | KR14_PH13_TH13_CONFIRMED / US_EUROPE_SCOPE_ADDED / SIMPLE_SIGNUP_LOCAL_CANDIDATE | 10/9 사용자 PH/TH13 유지 및 미국·유럽 출시 범위 추가 확정. 개인 sinong / godburgundy@gmail.com / 하루2~3회. PASS/보호자 메일/KWS·성인 공개 제외. Pinterest/Instagram 공식 정책·TikTok 태국 공식 운영 비교 기록 | test 실제 신규 Google 가입/Hook·영수증 PASS(앞선 add55d3).10/10 보존 실측과 고지 검토본 갱신. 국가별 최종 정책/처리 근거·수령 법인/국외 이전·지원/로그 기한은 미완료; 운영 가입 미적용. 이전 일괄 미성년자 차단 초안과 구분. 운영자 법정 의무와 이미지 권리 gate 유지 | SIGNUP-KR-PH-TH-13-01 / C02 |
+| D04 | 운영주체/정책/권리·연령/지원 | KR14_PH13_TH13_CONFIRMED / US_EUROPE_SCOPE_ADDED / SIMPLE_SIGNUP_LOCAL_CANDIDATE | 10/9 사용자 PH/TH13 유지 및 미국·유럽 출시 범위 추가 확정. 개인 sinong / godburgundy@gmail.com / 하루2~3회. PASS/보호자 메일/KWS·성인 공개 제외. Pinterest/Instagram 공식 정책·TikTok 태국 공식 운영 비교 기록 | test 실제 신규 Google 가입/Hook·영수증 PASS(앞선 add55d3).10/10 보존 실측과 고지 검토본 갱신. 10/10 국가별 공식 근거36개 선택 국가 정리·유럽 동의 기준31개 반영(DK15/SI15). PH 나이정보 근거·TH 계약·CH/미국 주별/유럽 신설 소셜 범위, 수령 법인/국외 이전·지원/로그 기한은 미완료; 운영 가입 미적용. 이전 일괄 미성년자 차단 초안과 구분. 운영자 법정 의무와 이미지 권리 gate 유지 | SIGNUP-KR-PH-TH-13-01 / C02 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / RESTORE_PARTIAL | 10/10 Drive 유래 ZIP 원본 SHA 일치, 새 quarantine4308파일/917,084,869bytes AES-GCM·SHA/크기 PASS. 복원 dump PG17 목차 읽기 PASS. 과거 로컬 사진12 decode와 구분 | 사용자: 키 별도 보관 안 함. 전체 DB import/최신 삭제 대조·회전/RPO/RTO·canonical 완전성 미완료. 로컬 pg_cron/supabase_vault 부재, Windows Node rename EPERM 미해결. 운영 변경0 | evidence/2026-10-10-external-backup-recovery.json |
 | D06 | SHA·DB/catalog·flags의 운영 적용 | PRIVATE_WEB_UPDATED / PUBLIC_RC_PENDING | 사용자10/10 출시 지시. a2db3ca master/Vercel Git Production Ready/www SHA 일치. 기존 private 사진·계정 기능 유지 | 신규 간편가입 운영설정·최종고지 미연결, signup API off/Public off. 이번 DB변경0. 전체 공개 출시 완료 아님 | evidence/2026-10-10-production-web-rollout.json |
 

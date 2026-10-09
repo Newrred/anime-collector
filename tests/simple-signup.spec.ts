@@ -102,6 +102,9 @@ test('revision review cannot collect acceptance or replace the documents linked 
  await expect(page.locator('#quick-privacy a')).toHaveAttribute('href','mailto:godburgundy@gmail.com');
  for(const region of ['KR','PH','TH','US','EUROPE']) await expect(page.locator(`#region-${region}`)).toHaveCount(1);
  await expect(page.locator('#regions')).toContainText('not a finalized availability list or an acceptance form');
+ await expect(page.locator('#age-reference')).toContainText('Denmark (DK)');
+ await expect(page.locator('#age-reference')).toContainText('Slovenia (SI)');
+ await expect(page.locator('#age-reference')).toContainText('They are not MOEMOA availability rules');
  expect(await page.locator('form,input').count()).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('legal-review-mobile.png')});
