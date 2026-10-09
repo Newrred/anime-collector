@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-10 현재 재개점 — test Google 왕복 PASS:** 기능 커밋 `92de9bc9aee1402e996ea6a05e3b6976286c05e0`의 Vercel Git Preview `G9NL8mj9pKhHM3NySLquyvQ3WQSk` Ready 확인. 사용자 직접 입력·동의 후 첫 start POST503은 원인 미확정으로 보존하며, 재시도 start200→Google A→callback303→session200→`/data/` A 일치/Sign out PASS. test 계정2 유지·동의기록1·임시 admission/handoff0 확인. 새 키는 Vercel 새 서버 경로에서도 사용됐고 원문 재조회0. 두 승인 A/B는 모두 기존 Auth 사용자여서 최초 계정 생성은 아직 미검증이다. 다음은 추가 Google 계정 제공 여부에 따라 신규 Hook/영수증 결속 검증 또는 정확한 차단 보존. 로컬 unit476/build24 + 후속 서버 단위8 PASS. 최신 CI37964046383 진행 중, 이전 CI37963376640은 후속 push로 취소됨. 운영/master/Public 변경0.
+
 > **2026-10-10 테스트 배포 완료:** Git `codex/phone-test`의 `b79d50fc071c43e34f45afb3eb080d31abe1635a`를 Vercel Git Preview `4Jgeybthi6zgpxRjAZBeQnj8EaMG` Ready/Source와 대조했다. 실제 `/auth/start/`에서 국가·생년월일·약관·Google 버튼과 한국14세 정책 읽기 PASS. test policy/admission on, Auth Hook·시간별 purge 연결, Preview A/B allowlist 필수. 로컬 unit476/build24 PASS; GitHub37963376640 SQL job 성공/브라우저 job 진행 중. 다음은 열린 Chrome에서 사용자 직접 생년월일·약관 확인→Google A 로그인 후 서버 영수증/복귀 확인. 실제 Google 신규 경로 PASS는 아직 아님. 운영/master/Public 변경0. 아래 미등록/미배포/off는 당시 이력이다.
 
 > **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.

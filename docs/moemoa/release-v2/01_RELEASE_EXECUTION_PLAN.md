@@ -4,6 +4,8 @@
 
 ### Hosted 테스트 연결 재개 (사용자 “진행 ㄱ”)
 
+- **2026-10-10 hosted A 실제 왕복:** 진단 후보 `92de9bc` Git Preview `G9NL8mj9pKhHM3NySLquyvQ3WQSk` Ready. 같은 사용자 입력의 재시도는 start POST200, Google A 선택, callback GET303, session POST200; `/data/` 승인 A 계정/Sign out 확인. test inspect는 users2/declarations1/admissions0/handoffs0. 첫503은 재현되지 않았고 원인 미확정(서버 Date와 PC 시각 차를 읽었지만 정확한 원인으로 단정하지 않음). 원문 payload/생년월일/키 로그0. 이 결과는 새 서버 경로의 기존계정 성공이며 최초 auth.users INSERT/Hook 성공이 아니다. 사용자가 신규 후보로 B를 지정했으나 읽기 대조에서 이미 존재/새동의기록 없음 확인. 제3 계정 제공 여부 요청 중; 기존 사용자 삭제/재생성0. 다음1개 신규계정 검증 범위 결정. CI 최신37964046383 진행 중, 이전37963376640 후속push취소.
+
 - **2026-10-10 첫 hosted 사용자 시도 실패:** 사용자 직접 제출 뒤 `/api/signup?action=start` POST503, 선행 GET405를 Vercel 배포 로그에서 확인. Google 이동 전 실패이며 신규 로그인 PASS로 처리하지 않는다. 다음은 값/계정/생년월일/오류본문 없이 고정된 처리 단계(action/phase)만 진단하여 DB policy 조회와 선언 검증 실패를 구분하는 최소 보완이다. 운영 변경은 없다.
 
 - **2026-10-10 Git Preview 실제 결과:** `b79d50f`를 로컬 `codex/simple-signup-preview`에서 원격 `codex/phone-test`로 fast-forward push. Vercel `4Jgeybthi6zgpxRjAZBeQnj8EaMG` Ready/Source 일치, 실제 가입 화면·한국14세 정책 읽기 PASS. `configure-simple-signup-test.py enable`에서 test policy/admission true, 기존 계정2·영수증0·정리예약true 확인. HTTP 비로그인 build-info 조회는 보호 페이지로 JSON 파싱 불가, Chrome JSON/API 직접 탐색은 ERR_BLOCKED_BY_CLIENT라 새 API 실제 성공은 미확인. 초기 배포 중404는 Ready 후 해소. 테스트 약관/실제 생년월일은 사용자가 직접 처리하도록 화면 준비·요청했다. CI37963376640 SQL job success, verify 진행 중. 과거 guardian 후보3파일·AuthCallback 줄바꿈 변경은 그대로 로컬 보존.

@@ -543,5 +543,43 @@
     "githubRun": 37963376640,
     "githubSqlJob": "success",
     "githubVerifyJob": "in_progress"
+  },
+  "simpleSignupHostedRoundTrip": {
+    "date": "2026-10-10",
+    "codeCommit": "92de9bc9aee1402e996ea6a05e3b6976286c05e0",
+    "vercelDeployment": "G9NL8mj9pKhHM3NySLquyvQ3WQSk",
+    "firstStartRequest": {
+      "status": 503,
+      "cause": "UNRESOLVED",
+      "userReportedError": true
+    },
+    "retry": {
+      "start": 200,
+      "callback": 303,
+      "session": 200,
+      "approvedAccountMatches": true,
+      "signOutVisible": true
+    },
+    "testDatabase": {
+      "users": 2,
+      "declarations": 1,
+      "admissions": 0,
+      "handoffs": 0,
+      "cleanupScheduled": true
+    },
+    "scope": "EXISTING_ACCOUNT_ON_NEW_SERVER_FLOW",
+    "newUserInsertHostedPass": false,
+    "proposedSecondAccountAlreadyExists": true,
+    "newSecretValueRead": false,
+    "productionChanged": false,
+    "followupUnitTests": 8,
+    "latestCi": {
+      "id": 37964046383,
+      "status": "in_progress"
+    },
+    "previousCi": {
+      "id": 37963376640,
+      "status": "cancelled_by_followup_push"
+    }
   }
 }
