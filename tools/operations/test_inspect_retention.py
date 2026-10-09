@@ -10,9 +10,27 @@ from unittest.mock import patch
 spec = importlib.util.spec_from_file_location('retention', Path(__file__).with_name('inspect-retention.py'))
 retention = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(retention)
+apply_spec = importlib.util.spec_from_file_location('apply_retention', Path(__file__).with_name('apply-test-retention.py'))
+apply_retention = importlib.util.module_from_spec(apply_spec)
+apply_spec.loader.exec_module(apply_retention)
 
 
 class RetentionSafety(unittest.TestCase):
+    def test_apply_requires_exact_approved_candidate(self):
+        with patch.object(apply_retention.Path, 'read_text', return_value='changed candidate'):
+            with self.assertRaisesRegex(ValueError, 'UNAPPROVED_CANDIDATE'):
+                apply_retention.sql_for('apply')
+
+    def test_default_inspection_cannot_execute_cleanup(self):
+        sql = apply_retention.sql_for('inspect')
+        self.assertTrue(sql.startswith('begin read only;'))
+        self.assertTrue(sql.endswith('rollback;'))
+        self.assertNotIn('create or replace', sql)
+        self.assertNotIn('purge_expired_memory_tombstones(now())', sql)
+        mutation = apply_retention.sql_for('apply')
+        self.assertIn('BASELINE_MISMATCH', mutation)
+        self.assertTrue(mutation.endswith('commit;'))
+
     def test_target_binding_and_verified_transport(self):
         ref = retention.TARGETS['test']
         values = {'SUPABASE_DB_URL': f'postgresql://postgres.{ref}:synthetic@aws-0.pooler.supabase.com:6543/postgres'}
