@@ -19,7 +19,6 @@ export default function SimpleSignup({base='/',enabled=false}) {
  useEffect(()=>{if(enabled)load();else setLoading(false);},[enabled]);
  const next=()=>resolveWebOAuthNext({rawNext:new URLSearchParams(window.location.search).get('next'),origin:window.location.origin,base});
  const names=new Intl.DisplayNames([en?'en':'ko'],{type:'region'});
- const minimum=policy?.countries?.find(row=>row.country===country)?.minimumAge;
  const submit=async event=>{
   event.preventDefault(); if(busy)return; setError('');setBusy(true);
   try {
@@ -41,7 +40,7 @@ export default function SimpleSignup({base='/',enabled=false}) {
    </select>
    <label htmlFor="signup-birthday">{t('생년월일','Date of birth')}</label>
    <input id="signup-birthday" type="date" required autoComplete="bday" min="1900-01-01" max={calendarDay()} value={birthDate} onChange={e=>{setBirthDate(e.target.value);setError('');}} disabled={busy||loading} aria-describedby="signup-birthday-help" />
-   <p id="signup-birthday-help" className="signup-hint">{minimum?t(`만 ${minimum}세부터 가입할 수 있습니다. `,`Available from age ${minimum}. `):''}{t('생년월일은 공개되지 않으며 연령 확인에만 사용합니다.','Your birthday is not public and is used to check your age.')}</p>
+   <p id="signup-birthday-help" className="signup-hint">{t('실제 생년월일을 입력해 주세요. 이 화면에서 나이를 계산하며, 생년월일 원문은 서버에 보내지 않습니다. 국가와 연령 구간 등 가입 확인 기록은 계정에 보관합니다.','Enter your actual date of birth. This form calculates your age without sending your full birth date to our server. Your account keeps a signup receipt including your country and age band.')}</p>
    <label className="signup-consent"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)} disabled={busy||loading} /><span><a href={`${base}terms/`} target="_blank" rel="noreferrer">{t('이용약관','Terms')}</a>{t('에 동의합니다.',' — I agree.')}</span></label>
    <p className="signup-hint"><a href={`${base}privacy/`} target="_blank" rel="noreferrer">{t('개인정보 처리 안내','Privacy notice')}</a>{t('에서 계정·기록의 저장과 삭제 방법을 확인하세요. 공개 게시는 별도로 선택합니다.',' explains account storage and deletion. Publishing is a separate choice.')}</p>
    {error&&<p role="alert">{(errors[error]||['연결을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.','Connection failed. Please try again.'])[en?1:0]}</p>}

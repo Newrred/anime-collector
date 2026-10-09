@@ -663,6 +663,46 @@
     "productionChanged": false,
     "newPersonalDataLogged": false,
     "rollback": "revert handler and test changes",
-    "next": "C02 final country policies and notices"
+    "next": "C02 final country policies and notices",
+    "gitPreview": {
+      "commit": "fc71cd26e2d1c13a45d5e7c54c31d881aaee962d",
+      "deployment": "7viGLNXKy3xuZWjb1gqrCQGiEtkv",
+      "readyVerifiedInPreviousTurn": true,
+      "ciRun": 37966479741,
+      "verify": "success",
+      "publicationContract": "success"
+    }
+  },
+  "signupNoticeReview": {
+    "date": "2026-10-10",
+    "scope": "TEST_CANDIDATE_ONLY",
+    "route": "/legal/review/",
+    "acceptedDocumentsUnchanged": true,
+    "policyVersionsUnchanged": true,
+    "migrations": [],
+    "productionChanged": false,
+    "legalLaunchApproval": false,
+    "newCredentialAccess": false,
+    "checks": {
+      "command": "node scripts/run-simple-signup-e2e.mjs",
+      "chromium": 5,
+      "seconds": 6.6,
+      "backend": "SYNTHETIC_API_AND_GOOGLE",
+      "buildCommand": "npm run build",
+      "buildPages": 25,
+      "diffCheck": "PASS"
+    },
+    "newBehavior": [
+      "neutral DOB helper before submission in KO/EN",
+      "review draft cannot collect acceptance",
+      "signup still links to unchanged Oct09 accepted documents",
+      "review page has no horizontal overflow at 390px"
+    ],
+    "remaining": [
+      "country-specific processing and minor conditions",
+      "actual recipients and processing countries / transfer safeguards",
+      "backup deletion and log retention deadlines"
+    ],
+    "next": "Close actual operating processing and retention facts in existing C02/D04/D05"
   }
 }

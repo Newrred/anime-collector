@@ -1,5 +1,32 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 C02·D04 개정 고지 검토 — 현행 동의 문서 보존
+
+**현재 산출물:** `/legal/review/`의 한국어/영어 약관·개인정보 개정 검토본. 현재 테스트 가입은 여전히 `terms/privacy-2026-10-09-draft`에 연결하며 새 초안은 동의 대상이 아니다. 새 DB 정책값이나 가입 제한을 추가하지 않았다. KR14/PH13/TH13·간단한 Google 가입 결정 유지. 전체 국가 법률 검토 완료/운영 출시 PASS가 아니다.
+
+### 공식 근거 대조 (조회 2026-10-10)
+
+| 지역/자료 | 직접 확인한 내용 | 이번 반영 / 남은 정확한 조건 |
+| --- | --- | --- |
+| [Pinterest 현행 약관 §2, 시행2025-04-30](https://policy.pinterest.com/en/terms-of-service) / [연령 이의제기 도움말](https://help.pinterest.com/en/article/age-verification-appeals) | 기본13·국가별 예외 및 미성년 보호자 허가 이용조건. 나이 수정/정지 이의제기에 추가 확인 안내. 사이트 상단의2026-11-12 예정판은 현행판으로 사용하지 않음 | 짧은 가입 UI와 약관의 조건을 분리. 전원 보호자 메일을 요구하는 근거 아님. PH/TH 현지 계정 가입을 수행했다는 증거도 아님 |
+| [한국 개인정보 보호법22조의2](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029331669) | 동의가 필요한 만14세 미만 아동 처리에 법정대리인 동의/확인 요구 | 확정 KR14 유지.14세가 성년·모든 계약의 단독 동의 기준이라는 뜻은 아님 |
+| [필리핀 DPA §3(l),12,13](https://privacy.gov.ph/data-privacy-act-/) / [NPC Circular2023-04 §3](https://privacy.gov.ph/wp-content/uploads/2023/11/NPC-Circular-No.-2023-04_Guidelines-on-Consent_07Nov2023.pdf) | 법에 나이가 민감정보로 열거됨. 개인정보 고지와 동의 취득은 별개. 구체적 목적·범위·기간·권리 안내 필요 | 제품 PH13 유지. DOB 원문을 안 남겨도 나이/구간 처리가 사라지는 것은 아님. 해당 처리 근거·미성년 계약/동의 적용은 미확정. 약관 checkbox 하나를 개인정보 동의/보호자 확인으로 기록하지 않음 |
+| [태국 MDES 제공 PDPA §20 영문 비공식 번역](https://www.mdes.go.th/law/detail/3577-Personal-Data-Protection-Act-B-E--2562--2019-) | 미성년자의 독립 행위 범위와 동의 조건을 구분하며 민상법22~24조를 참조 | 제품 TH13 유지.20세 미만 전원 가입 금지 또는13세부터 무조건 자기 동의 가능이라는 결론 모두 배제. MOEMOA 처리/계약의 적용은 잔여 |
+| [미국 FTC COPPA FAQ D7/G3](https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions) | 일반 대상 서비스의 중립적인 나이 입력과13세 미만 차단 안내. 허위 나이 입력을 유도하는 최소 연령 사전 강조를 피하도록 설명 | DOB 앞의 최소 나이 힌트를 제거. 빈 DOB/미체크 약관 유지. 뒤로 가기·재입력 대응 권고와 서비스 대상 분류/주법 검토까지 완료한 것으로 부풀리지 않음 |
+| [GDPR Art8](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng) | 동의 기반 온라인 서비스 아동 처리의 기본16·국가별13~16. 국내 계약법은 별도 | 전 유럽 공통13/16 가입 제한으로 바꾸지 않음. 처리 근거와 지원 국가별 현행 조건을 결합해야 함 |
+| [영국 ICO ISS consent](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/children-and-the-uk-gdpr/what-are-the-rules-about-an-iss-and-consent/) | 동의 기반 ISS13과 다른 처리 근거를 구분. 조회 시 URL이 `children-and-the-uk-gdpr-old`로 이동 | GB13은 기존 테스트 작업값. 최신 아동 서비스 기준까지 충족했다는 근거로 확대하지 않음 |
+| [프랑스 CNIL 권고4](https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans) / [아일랜드 DPC 아동 권리](https://www.dataprotection.ie/en/dpc-guidance/children-parents-and-data-protection-can-i-make-complaint-behalf-my-child) | 동의 기반 디지털 처리의 FR15·IE16 근거 | 모든 계약/청소년 소셜 서비스 이용 허용 기준은 아님. 실제 signup policy에 아직 추가하지 않음 |
+
+**유럽 코드 목록과 미완료 범위:** UI의 EU27 `AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE`, EEA 추가 `IS LI NO`, `GB CH`를 누락 없이 유지한다. 현재 실제 policy row는 GB만 있으며 나머지의 미지원 응답은 기존 상태다. FR/IE 근거도 해당 처리에 한정되며 새 가입 숫자값 승인이 아니다. DK 법안, EC 통지 문서·미래 시행 제안은 현행 확정표에 넣지 않았다. 스위스 고정13/16 숫자를 임의 생성하지 않았다. 미확정 국가표를 실제 지원 완료로 표시하지 않는다.
+
+### 초안에서 구체화한 내용과 코드 근거
+
+- **약관:** 서비스 목적·개인 운영자/지원 연락처·정확한 국가/DOB·조건부 보호자 허가·개인 저장/공개 분리·요청한 서비스에 한정한 콘텐츠 이용권·신고/제한/이의제기·원본/내보내기 한계·향후 과금의 별도 선택·법정 권리·버전 변경. 검토 초안이며 기존 이용자에게 새 허가를 받은 것으로 간주하지 않는다.
+- **개인정보:** `src/features/auth/simpleSignup.js`, `src/server/signup/handler.js`, `supabase/migrations/20261009130000_simple_signup_declarations.sql`·`20261009143000_simple_signup_admission.sql`의 DOB 미전송,10/5/2분 임시 처리, 연령 구간/문서 영수증과 계정 삭제 연계. 실제 나이·생년월일·키 원문은 문서/로그에 추가하지 않는다.
+- `src/components/data/MemoryBackupTools.jsx:21–31`의 내보내기 범위/개인 원본 미포함, `vercel.json:4`의 sin1 실행 지역, `docs/moemoa/operations/2026-10-08-configuration-map.md:185`의 승인된 Google Drive 암호화 사본을 반영했다. sin1을 모든 처리 국가로 단정하지 않는다. 임시 TTL과 물리 정리, DB 삭제와 외부 백업 삭제를 구분한다.
+- 최종 미확정: 처리 수령 법인·실제 국가/이전 근거, 목적별 적법 근거, 백업 회전·삭제·지원/보안 로그 기간, 필요한 지역 대표자/청소년 보호. 이 빈칸을 추정 날짜로 채우거나 운영 안내 완성이라고 보고하지 않는다. 담당자는 기존 sinong, 현재 W06/W14/W20·D04/D05 안에서 처리한다.
+- **적용 순서:** 미확정 사실 마감 → 검토본 최종화·불변 문서 버전 부여 → 버전 지정 URL 및 서버/DB 정책 동시 적용·기존 동의 보존 → 테스트 검증 → D06 정확 후보 운영 승인. 이번에는 첫 검토본·중립 DOB 안내까지이며 새 migration·운영 변경은 없다.
+
 > **2026-10-10 현재 재개점 — 가입 시각 오차 보완:** 실제 신규 C 가입·동의 결속·로그인 PASS(add55d3)는 유지한다. start 요청에서 클라이언트가 서버보다1ms 빠르면503이 나는 별도 결함을 합성 재현했고, 최대60초 미래값만 서버 수신시각으로 낮추도록 보완했다. 과거30분 만료/10분 OAuth 만료·나이·약관·정책·계정 검증은 유지한다. 이번 unit479/가입 Chromium4/build24 PASS, 이전 add55d3 CI37965007645 전체SUCCESS. 최초 hosted503의 정확한 원인은 당시 진단 부족으로 미확정이며 이번 재현과 구분한다. 현재 보완은 테스트 Git Preview 반영 대상; 운영/master/Public/DB migration 변경0. 신규 시계오차의 실제 hosted 재현은 미검증이다. 다음1개는 C02 국가별 최종 가입 정책·고지 마감; 기존 D05 외부 복구/키 보관도 남는다. 아래 기록은 각 실행 시점의 근거다.
 
 > **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.

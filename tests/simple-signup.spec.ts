@@ -31,15 +31,44 @@ async function fill(page:any,country='KR',dob='2000-10-09') {
 }
 test('below-age and missing terms stay before Google; Korean and English layouts fit mobile',async({page},info)=>{
  const calls=await mockBackend(page);await page.setViewportSize({width:390,height:844});
- await page.goto('/auth/start/');await fill(page,'KR','2020-10-09');
+ await page.goto('/auth/start/');
+ await expect(page.locator('#signup-birthday')).toHaveValue('');
+ await expect(page.getByRole('checkbox')).not.toBeChecked();
+ await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
+ for(const country of ['KR','PH','TH','US','GB']) {
+  await page.selectOption('#signup-country',country);
+  await expect(page.locator('#signup-birthday-help')).not.toContainText(/\d+\s*세|age\s*\d+/);
+ }
+ await fill(page,'KR','2020-10-09');
  await page.getByRole('button',{name:'Google로 계속'}).click();
  await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
  expect(calls.some(c=>c.path==='start')).toBe(false);
  await page.fill('#signup-birthday','2000-10-09');await page.getByRole('checkbox').uncheck();
  await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page.getByRole('alert')).toContainText('동의');
  await page.getByRole('button',{name:'English',exact:true}).click();await expect(page.getByRole('heading',{level:1})).toContainText('Keep your memories');
+ await expect(page.locator('#signup-birthday-help')).toContainText('without sending your full birth date');
+ await expect(page.locator('#signup-birthday-help')).not.toContainText(/age\s*\d+/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('signup-mobile.png'),fullPage:true});
+});
+
+test('revision review cannot collect acceptance or replace the documents linked by signup',async({page},info)=>{
+ const calls=await mockBackend(page);await page.setViewportSize({width:390,height:844});
+ await page.goto('/legal/review/');
+ await expect(page.getByRole('heading',{level:1})).toContainText('개정 검토');
+ await expect(page.getByText('Review draft — not effective and not used for signup acceptance.')).toBeVisible();
+ expect(await page.locator('form,input').count()).toBe(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:info.outputPath('legal-review-mobile.png')});
+ await page.getByRole('link',{name:'10/9 이용약관',exact:true}).click();
+ await expect(page).toHaveURL(/\/terms\/$/);
+ await expect(page.getByText('버전: terms-2026-10-09-draft', {exact:true})).toBeVisible();
+ await page.goto('/auth/start/');
+ await expect(page.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/terms/');
+ await expect(page.getByRole('link',{name:'개인정보 처리 안내',exact:true})).toHaveAttribute('href','/privacy/');
+ await page.goto('/privacy/');
+ await expect(page.getByText('버전: privacy-2026-10-09-draft', {exact:true})).toBeVisible();
+ expect(calls.some(c=>c.path==='start')).toBe(false);
 });
 test('simple Google handoff and completion restore session without DOB or tokens in URLs',async({page},info)=>{
  const calls=await mockBackend(page);await page.goto('/auth/start/?next=/terms/');await fill(page);

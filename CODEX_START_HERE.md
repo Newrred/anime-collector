@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-10 현재 재개점 — C02 고지 개정 검토:** 간단한 국가·DOB·약관→Google 흐름과 KR14/PH13/TH13 결정을 유지했다. DOB 앞의 최소 연령 유도 문구를 중립 안내로 교체하고, `/legal/review/`에 KO/EN 약관·개인정보 개정 검토본을 준비했다. 현재 동의 대상인10/9 문서/정책/영수증은 변경하지 않았다. 이번 합성 Google/API 기반 실제 가입 UI5·build25 PASS. 이전 실제 신규 C 가입 PASS와 구분한다. 국가별 조건·수령 법인/국외 이전·보존/삭제 기한은 아직 미완료이며 기존02 상단에 구체화했다. 이전fc71cd2 CI37966479741 두 job SUCCESS. 이번 변경은 테스트 Git Preview 대상, 운영/master/DB/Public 변경0. 다음1개는 실제 운영 처리 위치·보존/삭제 기준을 대조해 개정본의 빈칸 마감. 아래는 각 실행 시점 기록이다.
+
 > **2026-10-10 현재 재개점 — 가입 시각 오차 보완:** 실제 신규 C 가입·동의 결속·로그인 PASS(add55d3)는 유지한다. start 요청에서 클라이언트가 서버보다1ms 빠르면503이 나는 별도 결함을 합성 재현했고, 최대60초 미래값만 서버 수신시각으로 낮추도록 보완했다. 과거30분 만료/10분 OAuth 만료·나이·약관·정책·계정 검증은 유지한다. 이번 unit479/가입 Chromium4/build24 PASS, 이전 add55d3 CI37965007645 전체SUCCESS. 최초 hosted503의 정확한 원인은 당시 진단 부족으로 미확정이며 이번 재현과 구분한다. 현재 보완은 테스트 Git Preview 반영 대상; 운영/master/Public/DB migration 변경0. 신규 시계오차의 실제 hosted 재현은 미검증이다. 다음1개는 C02 국가별 최종 가입 정책·고지 마감; 기존 D05 외부 복구/키 보관도 남는다. 아래 기록은 각 실행 시점의 근거다.
 
 > **2026-10-10 테스트 배포 완료:** Git `codex/phone-test`의 `b79d50fc071c43e34f45afb3eb080d31abe1635a`를 Vercel Git Preview `4Jgeybthi6zgpxRjAZBeQnj8EaMG` Ready/Source와 대조했다. 실제 `/auth/start/`에서 국가·생년월일·약관·Google 버튼과 한국14세 정책 읽기 PASS. test policy/admission on, Auth Hook·시간별 purge 연결, Preview A/B allowlist 필수. 로컬 unit476/build24 PASS; GitHub37963376640 SQL job 성공/브라우저 job 진행 중. 다음은 열린 Chrome에서 사용자 직접 생년월일·약관 확인→Google A 로그인 후 서버 영수증/복귀 확인. 실제 Google 신규 경로 PASS는 아직 아님. 운영/master/Public 변경0. 아래 미등록/미배포/off는 당시 이력이다.
