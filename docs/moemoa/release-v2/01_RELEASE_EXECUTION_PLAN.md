@@ -2,6 +2,9 @@
 
 ## 2026-10-10 신규 가입·공개 보드/미니홈 운영 적용
 
+- **운영자 연결 후속:** 기존 운영 Google 로그인에서 승인된 godburgundy 계정으로 전환해 `/data/`의 계정 일치를 확인했다. 버전 관리된 `prepare-production-public-operator.sql`을 고정 운영 runner로 적용(`MOEMOA_PUBLIC_OPERATOR_PROD_20261010_01`). 별도 읽기 연결에서 해당 운영자 enabled/전체 enabled 1, signup/Public off 확인. 가입 임시정보 예약의 최근 실제 실행은 succeeded. 앞선 계정 부재/rollback은 과거 사실로 보존한다.
+- **이번 배포 범위:** 검증된 공개 이미지 cleanup endpoint와 기본off 예약 연결, 운영 준비 도구·증거만 master Git에 반영한다. 이전11검사/build25 결과를 재사용한다. 운영 신규 가입·Public의 최종 국가별 고지/정책·quota·Auth Hook·활성 flags가 아직 미완료이므로 기능 출시로 보고하지 않는다. master source와 Vercel Git Ready/build-info 일치 확인이 이번 배포 완료 조건이다. rollback은 새 master revert commit이며 additive DB와 사용자 기록은 보존한다.
+
 - **승인/목표:** 사용자 “새 생년월일 가입 절차와 공개 보드·미니홈 적용 ㄱ”. 해당 기능의 운영 DB/서버/Web 연결 및 master Git 배포 진행 승인. 기존 계정·기록·사진/동기화 보존, 성인 영역·별도 권리 미승인 이미지·자동 개인자료 게시 제외. 검사 범위를 확대하지 않고 기존 hosted/CI PASS를 재사용한다.
 - **확인 자료:** 시작문서/결정01/기존00~03/AGENTS/PLANS/UGC05/QA07/보고09/설정지도, 가입 migration/API·정책/고지, 기존 private-only→public 업그레이드 생성기/계약·최신 운영 preflight를 대조한다.
 - **진행:** 실제 운영 migration 이력과 필요한 schema 차이를 읽어 기본off의 추가 schema 묶음·SHA·release ID를 먼저 고정한다. 실행 도구는 고정 운영 ref/TLS/이력/현재함수 지문·삭제fence 보존을 검사하고 원자 적용/후속 읽기 확인. 소스/배포/정책 준비 전 flags는 켜지 않는다. 기존 local-only/test-only 도구의 가드를 해제하지 않고 별도 운영 경로를 준비한다.

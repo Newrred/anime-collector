@@ -208,10 +208,30 @@
   },
   "operator": {
     "selection": "User-selected operator account",
-    "accountExists": false,
-    "enabledModerators": 0,
-    "transactionRolledBack": true,
-    "userLoginPending": true
+    "accountExists": true,
+    "enabledModerators": 1,
+    "userLoginPending": false,
+    "release": {
+      "release": "MOEMOA_PUBLIC_OPERATOR_PROD_20261010_01",
+      "target": "okchpyagfucpzpyrfgol",
+      "sourceSha256": "ddb75d925528e27eceece7e865413a35996edb26a4c9f7864b383cb232ff1937",
+      "checks": [
+        {
+          "publicOff": true,
+          "signupOff": true,
+          "operatorConfigured": true,
+          "signupPurgeScheduled": true
+        }
+      ]
+    },
+    "independentReadback": {
+      "publicOff": true,
+      "signupOff": true,
+      "enabledModerators": 1,
+      "operatorConfigured": true,
+      "signupPurgeLastStatus": "succeeded"
+    },
+    "browser": "Production Google account selection then /data/ shows approved account; no import action"
   },
   "newChecks": [
     "Production schema transaction rehearsal: rollback PASS",
@@ -219,7 +239,8 @@
     "Independent connection: 33 migration versions, Public/signup OFF, publications/homes/receipts 0",
     "Signup expiry job scheduled hourly: execution success not yet observed",
     "node --test tests/unit/privateCleanup.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs: 11 PASS",
-    "npm run build: 25 pages PASS"
+    "npm run build: 25 pages PASS",
+    "Approved operator Google login, fixed-target role connection, independent readback: exactly one enabled moderator; signup/Public OFF; signup purge latest status succeeded"
   ],
   "previousEvidenceNotRerun": [
     "Actual test Google C signup",
@@ -227,12 +248,18 @@
     "Private-only upgrade synthetic contract"
   ],
   "remaining": [
-    "Operator login then exact account grant",
     "Final country eligibility and operating notices/document versions",
     "Production Auth hook and aligned signup enablement",
     "Public quotas/policy and backend/UI switches",
     "Public cleanup environment and scheduler flag",
     "master Git deployment and live source SHA/flow verification"
   ],
-  "rollback": "Disable signup UI/server plus admission/Hook together; disable Public reads/writes. Preserve additive schema, accounts and existing data. No destructive down migration."
+  "rollback": "Disable signup UI/server plus admission/Hook together; disable Public reads/writes. Preserve additive schema, accounts and existing data. No destructive down migration.",
+  "operatorPreviousAttempt": {
+    "selection": "User-selected operator account",
+    "accountExists": false,
+    "enabledModerators": 0,
+    "transactionRolledBack": true,
+    "userLoginPending": true
+  }
 }

@@ -2,6 +2,8 @@
 
 ## 2026-10-10 운영 준비의 실제 범위 — C02/C06/C07/C08
 
+- **후속 실제 완료:** 승인된 godburgundy 운영 계정의 Google 로그인·`/data/` 복귀 후 운영자 연결 release `MOEMOA_PUBLIC_OPERATOR_PROD_20261010_01` 적용. 별도 읽기에서 지정 운영자 1명만 활성, 새 가입/Public off 확인. 가입 임시정보 예약 최근 실행 succeeded. 아래 계정 부재/예약 미실행은 앞선 관측이며 새 상태로 구분한다. 기본off cleanup 코드의 master Git 배포를 진행하며 실제 공개 정리 실행 PASS와 구분한다.
+
 - 운영 release `MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01` 기본off 적용, 기존10개 table/동기화 함수 보존 및 별도 읽기33개 migration 확인. 공개 snapshot/미니홈/가입 영수증 생성0. 운영 실제 가입·게시 PASS가 아니다.
 - 운영 Google 기존 callback/secret 보존, 새 가입 callback 추가. Production Secret5개 등록, 서버 기능 false. 시간별17분 가입 임시정보 정리 예약 등록(실제 예약 실행 성공은 아직 확인 안 함).
 - 사용자가 선택한 godburgundy 계정은 운영 auth에 없어서 관리자 연결 트랜잭션은 전부 rollback했다. 해당 계정 로그인 필요. 다른 계정을 임의로 운영자로 지정하지 않는다.
