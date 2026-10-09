@@ -1,5 +1,19 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 D05 외부 백업 회수·복구 마감
+
+- **목적/범위:** 사용자 재개 지시에 따라 승인된 기존 Drive 암호화 사본의 외부 회수·무결성과 격리 복구를 확인한다. 시작문서/결정01/AGENTS/PLANS/QA07/보고09/설정지도/기존 D05 증거·암호화/복구 코드를 읽었다. 새 계획판·새 공급자·새 업로드·운영 DB 쓰기는 없다.
+- **새 근거:** Downloads의 기존 암호화 ZIP918,803,598bytes, 다운로드 origin host `drive.usercontent.google.com`, SHA256이 이전 승인 업로드와 일치한다. 과거 다운로드 도구 시간초과는 보존하고 이번 회수 확인과 구분한다.
+- **실행/파일 지도:** 기존 암호화 도구/삭제 journal 규약을 유지한다. 외부 ZIP 검증과 새 비공개 quarantine 복구를 위한 최소 실행 도구 및 기존 증거/작업판을 갱신한다. 키·원문·dump 오류는 일반 로그/Git에 출력하지 않는다. 운영 원본/유일한 사본을 지우지 않는다.
+- **검증/안전:** ZIP 경로·파일 수·크기·SHA·인증 복호화 및 기존 삭제 journal의 적용 가능 범위를 확인한다. DB 재구동은 외부 연결 없는 별도 로컬 DB에서만 가능하며 운영 설정/키는 복원 실행에 사용하지 않는다. 불가능한 전체 복구를 byte 복원 PASS로 대신하지 않는다. 기존 Windows 최종 rename EPERM은 재현/직접 검증 전 해결 처리하지 않는다.
+- **잔여/복구:** RPO24h/RTO48h·7일 회전은 아직 제안, 자동 주기/삭제를 임의 활성화하지 않는다. 별도 복구키 보관과 DB 복원 후 삭제 재노출 방지는 독립 게이트다. 소스 revert 가능, 새 격리 산출물은 접근 제한하되 입력/키/기존 사본은 보존한다.
+
+- **이번 결과:** 외부 ZIP SHA 일치,4,308파일/917,084,869bytes 인증·해시·길이 일치. `VERIFIED_BYTES_ONLY.json` 생성/불완전 marker 제거 확인. 실제 복원 dump를 PG17.11 `pg_restore --list`로 읽음(PG17.6에서 생성). 이 결과는 외부 회수/byte 복원까지다.
+- **실행 명령:** `wsl -e python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_verify_external_backup.py` →6PASS. 실제 verifier 실행은 [JSON 증거](evidence/2026-10-10-external-backup-recovery.json)의 invocation과 동일; exit0. UI/앱 코드는 변경하지 않아 이전479/unit·build·가입검사를 다시 실행하지 않았다.
+- **발견/실패 보존:** 첫 실제 실행은 ZIP의 기존 context.json/README.txt 추가파일 때문에 output 생성 전 거절. 두 파일만4KiB 이하로 허용하고 context는 인증된 manifest와 대조, 설명파일은 미복원/미실행하도록 보완. 합성 helper/tamper/path 검사 후 재실행 PASS. Windows Node rename 경로는 수정하지 않았다.
+- **남은 조건:** 사용자 「아직 별도 보관 안 함」으로 off-PC 키 보관 미완료 확정. 로컬 PG17.11 실행파일은 있으나 dump 요구 pg_cron/supabase_vault 확장이 없어 전체 import 미실행. 이 환경의 누락을 DB 복구 실패/불량 백업으로 단정하지 않는다. 최신 journal은 snapshot이므로 백업 이후 삭제의 완전한 이력 대체 불가. 다음1개는 확장을 포함한 격리 복구 환경에서 DB 재가동·최신 삭제 대조 준비.
+- **변경/롤백·영향:** verifier/6개 합성검사/사용법/기존00~03·시작/설정지도와 집계 JSON 갱신. migration/DB/운영/Public/권리정책/외부 업로드0, 원문 일반로그0. 코드 revert 가능, private quarantine/원본/키는 Git 제외·접근 제한 상태로 보존. 백업주기·삭제를 임의 활성화하지 않음.
+
 ## 2026-10-10 W14/W15/W20·D04/D05 실제 보존·삭제 마감
 
 - **테스트 적용 승인 후속:** 사용자 ebdff44의 정확한 후보를 moemoa-test에만 적용 승인. 기존/후보 함수 본문 fingerprint·후보 파일 SHA256·고정 test 프로젝트를 검사하는 도구로 단일 트랜잭션 적용한다. release `MOEMOA_RETENTION_RESPONSE_TEST_20261010_01`. 기존 일별 예약·기간은 그대로이며 결과는 집계만 기록. 기본 inspect, 명시 apply만 변경. 운영 및 master 제외. 함수 원복은 가능하지만 이미 정리된 본문은 복원하지 않는다.

@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-10",
+  "scope": "D05 external copy authentication and quarantined bytes only",
+  "baselineCommit": "2510d51",
+  "archive": {
+    "bytes": 918803598,
+    "sha256": "1e5788baf69fc5677866f26f894765ddc49961d86ccbc0dfc308bfe14bb2a36c",
+    "downloadOriginHost": "drive.usercontent.google.com",
+    "matchesApprovedUpload": true
+  },
+  "result": {
+    "authenticatedFiles": 4308,
+    "bytes": 917084869,
+    "allSha256AndLengthsMatch": true,
+    "databaseImportVerified": false,
+    "deletionReconciliationVerified": false,
+    "safeToServe": false
+  },
+  "dump": {
+    "bytes": 57829282,
+    "tocReadable": true,
+    "sourcePg": "17.6",
+    "pgRestore": "17.11",
+    "localPgServer": "17.11",
+    "missingLocalExtensions": [
+      "pg_cron",
+      "supabase_vault"
+    ],
+    "fullImportAttempted": false
+  },
+  "tests": {
+    "command": "wsl -e python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_verify_external_backup.py",
+    "passed": 6
+  },
+  "invocation": {
+    "tool": "tools/operations/verify-external-backup.py",
+    "archive": "C:/Users/hongs/Downloads/moemoa-production-backup-20261009-01.encrypted.zip",
+    "keyFile": "C:/Users/hongs/.moemoa/recovery-keys/moemoa-production-20261009.key",
+    "output": "E:/web/anime/.cache/operations-private/20261009-production/quarantine-external-20261010",
+    "project": "okchpyagfucpzpyrfgol",
+    "release": "production-backup-20261009-01",
+    "sha256": "1e5788baf69fc5677866f26f894765ddc49961d86ccbc0dfc308bfe14bb2a36c",
+    "platform": "WSL; translate Windows paths to /mnt/<drive>/...",
+    "exitCode": 0
+  },
+  "userConfirmedIndependentKeyCopy": false,
+  "productionChanges": false,
+  "externalUploads": 0,
+  "databaseMutations": 0,
+  "firstAttempt": "Rejected before output creation: existing context.json and README.txt. Bounded inert helper support plus test added; subsequent actual verification passed.",
+  "remaining": [
+    "Independent off-PC recovery key",
+    "Full isolated DB restore including required extensions",
+    "Latest complete deletion/account/source reconciliation before serving",
+    "Backup rotation and RPO/RTO decision",
+    "Canonical original completeness",
+    "Existing Windows Node final rename EPERM"
+  ],
+  "previousEvidenceNotRerun": [
+    "Local 4308-file decrypt and 12-photo decode",
+    "Drive upload",
+    "72-table synthetic restore",
+    "Application unit/build/signup checks"
+  ]
+}

@@ -54,6 +54,30 @@ directory; inspect its exact path before any cleanup. Do not infer durability
 from a successful file copy alone; the approved remote destination needs its own
 verification and key-recovery rehearsal.
 
+## Externally retrieved ZIP verification (WSL)
+
+`tools/operations/verify-external-backup.py` accepts an already downloaded ZIP,
+the separately stored key **file path**, expected project/release and the SHA-256
+recorded before upload. Use a new output directory under protected local staging:
+
+```text
+python3 -B tools/operations/verify-external-backup.py --archive <downloaded.zip> --key-file <separate.key> --output <new-quarantine> --project <project-ref> --release <release-id> --sha256 <original-archive-sha256>
+```
+
+Run with WSL paths and the existing Python `cryptography` package. The tool makes
+no network or database calls. It authenticates the manifest and every file,
+validates paths, lengths and hashes, and refuses an existing output. It never
+executes or restores export README/context helper files. Failures leave a
+`RESTORE_INCOMPLETE` marker; successful output has `VERIFIED_BYTES_ONLY.json`.
+Both remain private quarantine, never a serving directory. This verifier avoids
+the separate Windows Node final-rename path; it does not fix that path's EPERM.
+
+Byte verification does **not** prove database import, completeness, deletion
+reconciliation, or independent key availability. Keep the key off the backup
+Drive and also outside the source PC, for example on a separately secured
+external drive or in a password manager that supports protected file storage.
+Do not print or paste key contents into chat, Git or ordinary logs.
+
 ## Latest deletion reconciliation is mandatory
 
 `capture-recovery-journal.sql` reads one repeatable-read snapshot containing live

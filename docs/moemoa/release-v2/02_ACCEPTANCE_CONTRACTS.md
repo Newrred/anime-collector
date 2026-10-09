@@ -1,5 +1,13 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 D05 외부 회수·파일 복구 확인
+
+- **이번 실제 PASS:** Drive 유래 다운로드 ZIP과 업로드 원본 SHA256 일치; 새 quarantine의4,308파일/917,084,869bytes AES-GCM 인증·SHA256/크기 일치; 복원된 DB dump57,829,282bytes의 PG17 목차 읽기.
+- **미완료:** 운영 dump 전체 DB import/권한·실사용 재구동, 최신 삭제/철회·계정 대조, 백업 회전, RPO/RTO. 로컬 PG17.11 서버는 존재하지만 dump 요구 확장6종 중 pg_cron/supabase_vault가 없다. 확장을 빼거나 과거72table 합성 결과로 운영 복구 PASS를 만들지 않았다.
+- **키:** 사용자가 별도 보관하지 않았다고 확인. 현재 PC 밖의 안전한 저장소에 별도 보관해야 하며 Drive ZIP 옆으로 자동 전송하지 않는다. 키 값/사용자 원문은 증거에 없다.
+- **과거와 구분:** 10/9 로컬 독립 복호화·사진12 decode·Drive 업로드는 과거 근거다. 당시 다운로드 시간초과는 보존한다. 이번 외부 회수 결과로 해당 항목만 갱신하며 Windows Node rename EPERM은 미해결로 유지한다.
+- 도구 `tools/operations/verify-external-backup.py`, 사용법 `tools/private-images/BACKUP_USAGE.md`, [이번 증거](evidence/2026-10-10-external-backup-recovery.json). 운영/테스트 DB 변경·새 외부 전송 없음.
+
 ## 2026-10-10 W14/W15·D04/D05 보존·삭제 실측
 
 | 항목 | 확인 결과와 실제 범위 | 남은 조건 |
