@@ -4,6 +4,10 @@
 
 ### Hosted 테스트 연결 재개 (사용자 “진행 ㄱ”)
 
+- **2026-10-10 첫 hosted 사용자 시도 실패:** 사용자 직접 제출 뒤 `/api/signup?action=start` POST503, 선행 GET405를 Vercel 배포 로그에서 확인. Google 이동 전 실패이며 신규 로그인 PASS로 처리하지 않는다. 다음은 값/계정/생년월일/오류본문 없이 고정된 처리 단계(action/phase)만 진단하여 DB policy 조회와 선언 검증 실패를 구분하는 최소 보완이다. 운영 변경은 없다.
+
+- **2026-10-10 Git Preview 실제 결과:** `b79d50f`를 로컬 `codex/simple-signup-preview`에서 원격 `codex/phone-test`로 fast-forward push. Vercel `4Jgeybthi6zgpxRjAZBeQnj8EaMG` Ready/Source 일치, 실제 가입 화면·한국14세 정책 읽기 PASS. `configure-simple-signup-test.py enable`에서 test policy/admission true, 기존 계정2·영수증0·정리예약true 확인. HTTP 비로그인 build-info 조회는 보호 페이지로 JSON 파싱 불가, Chrome JSON/API 직접 탐색은 ERR_BLOCKED_BY_CLIENT라 새 API 실제 성공은 미확인. 초기 배포 중404는 Ready 후 해소. 테스트 약관/실제 생년월일은 사용자가 직접 처리하도록 화면 준비·요청했다. CI37963376640 SQL job success, verify 진행 중. 과거 guardian 후보3파일·AuthCallback 줄바꿈 변경은 그대로 로컬 보존.
+
 - **2026-10-10 실제 설정/검사:** Vercel bulk import는 기본 환경/Config로 재설정하고 항목별 부분 저장한다. 저장 전 Production/전체Preview를 해제해 정확한 `codex/phone-test` 범위를 확인했고, 기존 SUPABASE 3개는 중복 거부·보존했다. 새5개 등록과 cookie key Secret 전환, allowlist Secret 등록을 확인했다. 값 자체는 출력하지 않았다. Google는 Supabase callback 유지 + exact Preview `/api/signup?action=callback` 추가 저장 확인. Auth Hook은 기존 없음→`public.check_simple_signup_admission` ENABLED. `configure-simple-signup-test.py inspect/prepare` TLS 실DB 검사·시간별 cron 활성 확인, policy off/계정2·영수증0 유지. unit476/build24 PASS. 테스트 Git 배포 준비 중이며 운영/유료/Public 변경0. 롤백은 test policy disable + Preview flag off, Hook disable(이전 없음); 만료 정리와 계정/영수증은 보존.
 
 - **2026-10-10 범위 보완:** Google 프로젝트가 외부/프로덕션 게시 상태라 테스트 계정 제한을 제공하지 않는다. 공유 Google 프로젝트 설정을 바꾸지 않고 Preview 서버만 승인된 A/B 이메일 해시 allowlist를 요구하도록 보완한다. 누락·형식 오류는 fail-closed이며 승인되지 않은 계정은 Supabase 로그인/가입 전 거부한다. 새 실제 신규 계정은 추가 사용자 승인 없이는 만들거나 기존 사용자를 삭제하지 않는다.

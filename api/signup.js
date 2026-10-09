@@ -9,5 +9,6 @@ export default createSignupHandler({
   cookieKey:process.env.MOEMOA_SIGNUP_COOKIE_KEY,
   preview:process.env.VERCEL_ENV==='preview',
   allowedEmailHashes:process.env.MOEMOA_SIGNUP_ALLOWED_EMAIL_HASHES,
+  observe:event=>console.warn('signup_request_failed',JSON.stringify(event)),
   createBackend:()=>createSignupBackend(),
 });

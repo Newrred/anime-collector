@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-10 테스트 배포 완료:** Git `codex/phone-test`의 `b79d50fc071c43e34f45afb3eb080d31abe1635a`를 Vercel Git Preview `4Jgeybthi6zgpxRjAZBeQnj8EaMG` Ready/Source와 대조했다. 실제 `/auth/start/`에서 국가·생년월일·약관·Google 버튼과 한국14세 정책 읽기 PASS. test policy/admission on, Auth Hook·시간별 purge 연결, Preview A/B allowlist 필수. 로컬 unit476/build24 PASS; GitHub37963376640 SQL job 성공/브라우저 job 진행 중. 다음은 열린 Chrome에서 사용자 직접 생년월일·약관 확인→Google A 로그인 후 서버 영수증/복귀 확인. 실제 Google 신규 경로 PASS는 아직 아님. 운영/master/Public 변경0. 아래 미등록/미배포/off는 당시 이력이다.
+
 > **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.
 
 > **2026-10-10 복구 검증:** 사용자 직접 키 교체·이전9/24 키 중지 후 Google 관리 상태 확인, 테스트 세션 로그아웃→새 Google 로그인→동일 A 계정 복귀 PASS. 새10/10 키 활성, 원문 재조회/운영 변경0. 새 signup API는 아직 미배포. 다음은 기존 테스트 Preview의 나머지 서버 설정·callback·임시정보 정리 예약이다. 아래 교체 대기/화면 오류는 당시 이력이다.

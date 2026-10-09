@@ -22,12 +22,13 @@ async function jsonBody(req) {
   return raw;
 }
 
-export function createSignupHandler({enabled=false,origin,clientId,clientSecret,cookieKey,preview=false,allowedEmailHashes,createBackend,fetchImpl=fetch,now=Date.now,verifyGoogle}) {
+export function createSignupHandler({enabled=false,origin,clientId,clientSecret,cookieKey,preview=false,allowedEmailHashes,createBackend,fetchImpl=fetch,now=Date.now,verifyGoogle,observe=()=>{}}) {
   let verifier;
   return async(req,res)=>{
     res.setHeader('Cache-Control','no-store, max-age=0');res.setHeader('Referrer-Policy','no-referrer');
     res.setHeader('X-Content-Type-Options','nosniff');
     const action=new URL(req.url,'https://local.invalid').searchParams.get('action');
+    let phase='configuration';
     try {
       if(!enabled)return send(res,404,{error:'SIGNUP_DISABLED'});
       const allowlist=String(allowedEmailHashes||'').split(',').map(x=>x.trim()).filter(Boolean);
@@ -48,9 +49,12 @@ export function createSignupHandler({enabled=false,origin,clientId,clientSecret,
           if(result.expiresAt<=now())reject('SIGNUP_DETAILS_EXPIRED');
           res.setHeader('Set-Cookie',clearCookies());return send(res,200,result);
         }
+        phase='policy-read';
         const policy=await backend.policy();
+        phase='declaration-check';
         if(policy.serverAdmission!==true)reject();
         const d=validateDeclaration(body.declaration,policy,now());
+        phase='flow-create';
         const state=randomToken(),nonce=randomToken();
         const next=resolveWebOAuthNext({rawNext:body.next,origin});
         const sealed=sealer.seal({state,nonce,declaration:d,next,expiresAt:now()+600000},'flow');
@@ -92,6 +96,7 @@ export function createSignupHandler({enabled=false,origin,clientId,clientSecret,
       res.setHeader('Set-Cookie',[setCookie(FLOW,'',0),setCookie(HANDOFF,key,120)]);
       return redirect(res,'/auth/complete/');
     } catch(error) {
+      try {observe({phase,action:['start','session','callback'].includes(action)?action:'unknown'});}catch{/* Diagnostics must never alter the result. */}
       // Never echo provider bodies, codes, tokens, cookies, account data or stack traces.
       const safe=['SIGNUP_DETAILS_EXPIRED','COUNTRY_NOT_READY','SIGNUP_POLICY_CHANGED','BELOW_MINIMUM_AGE','GOOGLE_CANCELLED','INVALID_REQUEST'];
       const code=safe.includes(error?.code)?error.code:'SIGNUP_SERVICE_UNAVAILABLE';

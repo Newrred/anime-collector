@@ -110,3 +110,14 @@ test('Preview fails closed without valid account allowlist and rejects other ver
  assert.equal(ok.headers.Location,'/auth/complete/');
  assert(permitted.calls.includes('signIn'));
 });
+
+
+test('failure diagnostics expose only fixed phase/action and cannot alter the safe response',async()=>{
+ const events=[];const h=harness({observe:e=>events.push(e),backend:{policy:async()=>{throw new Error('private server body');}}});
+ const result=await h.request('start',{body:{declaration}});
+ assert.equal(result.statusCode,503);
+ assert.deepEqual(events,[{phase:'policy-read',action:'start'}]);
+ assert(!JSON.stringify(result).includes('private server body'));
+ const broken=harness({observe:()=>{throw new Error('logger failed');}});
+ assert.equal((await broken.request('start',{headers:{origin:'https://other.test'}})).statusCode,400);
+});

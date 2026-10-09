@@ -526,12 +526,22 @@
     "cookieKeySecretTypeVerified": true,
     "beforeUserCreatedHook": "public.check_simple_signup_admission",
     "cleanupSchedule": "17 * * * *",
-    "policyEnabled": false,
+    "policyEnabled": true,
     "existingAuthUserCount": 2,
     "receiptCount": 0,
     "unitTests": 476,
     "buildPages": 24,
     "hostedNewSignupPass": false,
-    "productionChanged": false
+    "productionChanged": false,
+    "commit": "b79d50fc071c43e34f45afb3eb080d31abe1635a",
+    "vercelGitDeployment": "4Jgeybthi6zgpxRjAZBeQnj8EaMG",
+    "vercelStatus": "Ready",
+    "signupPagePolicyKR14": "PASS",
+    "userDeclarationPending": true,
+    "buildInfoHttp": "protected-not-json",
+    "browserDirectJson": "ERR_BLOCKED_BY_CLIENT",
+    "githubRun": 37963376640,
+    "githubSqlJob": "success",
+    "githubVerifyJob": "in_progress"
   }
 }
