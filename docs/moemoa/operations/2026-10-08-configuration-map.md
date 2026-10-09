@@ -1,5 +1,37 @@
 # MOEMOA 운영 설정 지도
 
+> **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.
+
+- test configuration release: `MOEMOA_SIMPLE_SIGNUP_TEST_20261010_02`, version-controlled `tools/identity/configure-simple-signup-test.py` (inspect/prepare/enable/disable). Cleanup job `moemoa-simple-signup-purge`: `17 * * * *`, expired admissions/handoffs only.
+
+## 2026-10-09 간단한 가입 후보 (운영 미적용)
+
+**2026-10-10 복구 확인:** 사용자 직접 test Google 키 생성·test Supabase/Vercel 저장 후 이전9/24 키를 사용 중지했다. Google 날짜별 관리 상태(이전 중지/새10/10 활성)와 그 후 Chrome의 완전히 새 Google 로그인 왕복·A 계정 복귀를 확인했다. 새 키 원문 재조회0. 기존 Supabase OAuth 복구 PASS이며 Vercel 새 signup 서버의 실제 키 사용은 미배포라 미검증이다. 나머지 서버 변수·새 callback·Hook·purge는 아래 절차로 이어간다. 운영 변경0. 아래 교체 전 중단/로딩 오류는 과거 상태다.
+
+**실제 test 적용 후속:** 릴리스 `MOEMOA_SIMPLE_SIGNUP_TEST_20261009_01`로 moemoa-test에 두 migration을 적용했다. `enabled=false/admission_enabled=false`; 익명 정책 조회·admission401 확인. Vercel `MOEMOA_GOOGLE_CLIENT_SECRET`만 Preview `codex/phone-test`에 Secret 등록했다. 이 과정의 도구 응답 노출로 **키 교체 전 사용/새 배포 금지**, 다른 사용처 확인 후 사용자 직접 교체한다. 나머지 신규 변수/Google callback/Hook/purge는 미설정. Google Cloud 클라이언트 페이지는 최초/재시도 모두 로딩 오류였다. 운영은 변경하지 않았다.
+
+**최신 서버 연결 후보:** 아래 PKCE/사후 영수증 설명은 이전 후보다. 신규 flag-on 흐름은 서버 Google code 교환→Supabase ID-token→암호화 일회 전달을 사용한다. 기본 off PKCE는 유지한다. 유료 공급자/의존성 추가 없음.
+
+| 설정 위치 | 이번 후보의 정확한 설정 이름/값 형식 |
+| --- | --- |
+| Vercel 테스트 배포의 Web 변수 | `PUBLIC_SIMPLE_SIGNUP_V1=1` (운영은 아직 off) |
+| Vercel 동일 환경의 서버 변수 | `MOEMOA_SIMPLE_SIGNUP_SERVER_ENABLED=true`, `MOEMOA_SIGNUP_ORIGIN=https://정확한-고정-테스트-host` |
+| 같은 서버의 비밀 변수 | 기존 Google client의 `MOEMOA_GOOGLE_CLIENT_ID`, `MOEMOA_GOOGLE_CLIENT_SECRET`; 별도 무작위32byte hex `MOEMOA_SIGNUP_COOKIE_KEY` (값 기록/출력 금지) |
+| 같은 서버의 Supabase 변수 | 해당 **테스트** 프로젝트 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (운영 값을 재사용하지 않음) |
+| Google Auth Platform → Clients → 기존 Web OAuth client | Authorized redirect URI에 정확한 `https://테스트-host/api/signup?action=callback` 추가. 기존 Supabase callback 삭제하지 않음. scope는 기존 openid/email/profile만 |
+| Supabase 테스트 DB | `20261009130000` 다음 `20261009143000` 후보 적용·이력 기록. 국가 정책/문서 버전 확인 후 `simple_signup_policy.enabled/admission_enabled`를 함께 다룸 |
+| Supabase Auth → Hooks → Before User Created | `public.check_simple_signup_admission` 선택. 자체 INSERT trigger가 실제 ID를 결속하므로 Hook의 임시 UUID에 의존하지 않음 |
+| 테스트 DB 예약/운영 정리 | `public.purge_simple_signup_transients()`를 최소 매시간 호출하는 제한된 예약 구성 및 실제 성공 확인. 현재 미예약. 만료 즉시 거부와 물리 삭제 시점은 다름 |
+
+검증 순서: 기본 off로 migration 적용→테스트 서버/Google callback 준비→policy/Hook 활성→합성 신규 Google 계정 실제 가입/기존 계정 로그인/취소/만료/직접 Auth 생성 거부 확인. 현재 첫 DB 단계만 실환경에서 완료했다. 기존 브라우저 테스트는 API/Google 모의 응답이며 실제 Google 왕복 증거가 아니다. 로그인 실패율과 승인 거부는 개인 데이터 없는 코드/건수로만 관측한다.
+
+롤백은 **브라우저 flag만 끄지 않는다**. 이전 서버/UI Git 후보, `admission_enabled=false`와 기존 Auth Hook 설정을 함께 복원한다. 사용자/영수증 삭제 없음. 새 callback URI 제거는 이전 로그인 복구 확인 뒤 진행한다. 운영은 정확한 Git SHA·DB release ID·D06을 기록하고 Git master→Vercel Git 배포 방식만 사용한다.
+
+- Web 진입: `PUBLIC_SIMPLE_SIGNUP_V1=1`에서 `/auth/start/`를 거쳐 기존 PKCE로 이동. 기본 off는 기존 로그인 유지.
+- DB 후보: migration `20261009130000_simple_signup_declarations.sql`. `private.simple_signup_policy.enabled` 기본 false. 정책/문서 버전과 국가별 최소 연령은 DB에서 읽고, 영수증 쓰기는 해당 auth.uid만 가능하다.
+- 운영에 아직 적용하지 않았으며 flag만 켜면 안 된다. 직접 Auth 가입 경계·최종 국가별 정책/고지·D06 후보를 먼저 마감한다. seed의 US/GB13은 작업값이고 미설정 유럽 국가를 일괄13으로 판정하지 않는다.
+- 검증: `node scripts/run-simple-signup-e2e.mjs`는 운영 자격값을 전달하지 않는 독립 로컬 서버와 가짜 loopback Supabase 응답을 사용한다. `wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-local.sh`는 임시 로컬 PostgreSQL만 사용한다.
+
 > 확인 기준: 2026-10-08 KST, Git `master` 및 운영 Web `adba637024cef78a576dbe5b6289f442c159fd73`.
 > 이 문서는 **현재 설정의 위치와 적용 경로**를 기록한다. 비밀키의 값, 사용자 기록, 사진 원본은 기록하지 않는다. 시간이 지나면 대시보드 값을 다시 확인한다.
 
@@ -147,3 +179,5 @@ Dashboard: [프로젝트](https://supabase.com/dashboard/project/okchpyagfucpzpy
 5. 변경 기록에는 시각, Git SHA, DB 릴리스 ID, 변경한 설정의 **이름/범위**, 배포·검증 결과, 되돌릴 방법을 남긴다. 비밀값이나 개인 데이터는 남기지 않는다.
 
 `CODEX_START_HERE.md`, `docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md`, `docs/moemoa/plans/2026-10-08-save-to-account-on-save.md`의 “사진 flag off/운영 미반영” 문장은 각 작업 **당시**의 이력이다. 시작 문서와 작업판 맨 위에 현재 상태를 따로 표시했고 `.env.production` 주석도 현재 사진 활성 상태로 갱신했다. 다음 배포·DB 정책 변경 뒤에는 이 문서의 확인 날짜·SHA·상태를 갱신해야 한다.
+
+2026-10-09 후속: 사용자가 조직 소유자 로그인과 DB 비밀번호 재설정/로컬 저장을 직접 완료했다. 운영 PG17.6에 인증서 검증(verify-full)으로 연결했고 기존 service_role을 해당 Git 제외 파일에 저장했다(키 재발급 없음). 공식 PG17.11 client를 WSL 임시 파일로만 사용, 시스템/운영 DB 업그레이드 없음. DB dump57,829,282bytes 및 Storage4304개856,669,715bytes, 최신 삭제journal을 수집했다. Storage 수집 전후 목록이 일치하고 개별 크기/ETag 확인. AES-GCM4308파일917,084,869bytes를 독립 Python cryptography로 복호화하여 모든 SHA256/길이 일치와 복원 사진12 decode 확인. Windows Node 복원 도구는 최종폴더 rename EPERM이 반복되어 성공으로 기록하지 않으며 추측성 retry 수정은 원복했다. 현재 운영 SQL 변경/공개 flags 변경/정기 백업 활성화 없음. 구체 파일/계정의 사용자 전송 승인 후 Drive 비공개 폴더 업로드100%/1개 완료를 확인했다. 재다운로드는 브라우저 시간 제한/대체 locator 부재로 로컬 경로 미확보. 외부 회수 무결성·별도 복구키 보관·DB 재구동/canonical 원본 완전성은 아직 미완료. 로컬 민감 staging은 `.cache/operations-private` ACL 현재 사용자/SYSTEM으로 제한하며 일반 Git/CI에 포함하지 않는다.

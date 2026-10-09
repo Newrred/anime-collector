@@ -1,0 +1,7 @@
+---
+import SignupComplete from '../../components/auth/SignupComplete.jsx';
+import '../../styles/simple-signup.css';
+const enabled=import.meta.env.PUBLIC_SIMPLE_SIGNUP_V1==='1';
+---
+<html lang="ko"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><meta name="referrer" content="no-referrer" /><title>MOEMOA · 계정 연결</title></head>
+<body class="signup-page"><main><SignupComplete client:load enabled={enabled}/></main></body></html>

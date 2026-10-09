@@ -1,7 +1,7 @@
 name: Service quality
 on:
   push:
-    branches: [master]
+    branches: [master, codex/phone-test]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -20,6 +20,7 @@ jobs:
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/publication-boundary/run-local-postgres.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/card-classification/run-local-postgres.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/private-images/run-retirement-compat.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-admission-local.sh
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -35,6 +36,8 @@ jobs:
       - run: npm run test:unit
       - run: npm run catalog:test
       - run: npm run build
+      - name: Verify simple signup UI (mocked Google and API)
+        run: node scripts/run-simple-signup-e2e.mjs
       - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-cross-device-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
       - name: Verify signed-in card composer
         run: node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/memory-save-account.spec.ts --project=chromium --workers=1 --reporter=line

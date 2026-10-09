@@ -56,6 +56,9 @@ test("next navigation is restricted to the current origin and app base", () => {
   assert.equal(resolveWebOAuthNext({ ...input, rawNext: "https://evil.test/moemoa/" }), "/moemoa/data/");
   assert.equal(resolveWebOAuthNext({ ...input, rawNext: "/admin/" }), "/moemoa/data/");
   assert.equal(resolveWebOAuthNext({ ...input, rawNext: "//evil.test/path" }), "/moemoa/data/");
+  for(const rawNext of ['/moemoa/auth/complete/','/moemoa/api/signup?action=callback','/moemoa/%61uth/complete/']) {
+    assert.equal(resolveWebOAuthNext({...input,rawNext}),'/moemoa/data/');
+  }
   assert.equal(resolveWebOAuthNext({ ...input, rawNext: "", pendingNext: "/moemoa/boards/?id=1" }), "/moemoa/boards/?id=1");
 });
 

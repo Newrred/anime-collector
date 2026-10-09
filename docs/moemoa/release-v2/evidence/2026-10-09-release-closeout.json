@@ -4,7 +4,11 @@
   "scope": "W06/W15/W17/W20 closeout; no new plan or board",
   "decisions": {
     "ageAndCountries": "12+ / KR PH TH reaffirmed; prepare guardian consent",
-    "excluded": ["additional Safari/WebKit validation (not PASS)", "Android", "adult verification and mature public content"],
+    "excluded": [
+      "additional Safari/WebKit validation (not PASS)",
+      "Android",
+      "adult verification and mature public content"
+    ],
     "externalBackupDestination": "Google Drive / Google One 5 TB"
   },
   "productionReadOnly": {
@@ -22,14 +26,41 @@
     "maintenanceBeforeChange": "GitHub 37891316783 success at 2026-10-09T06:00Z"
   },
   "newValidation": [
-    {"command":"node --test tests/unit/privateMaintenance.test.mjs", "result":"Initial 4 PASS (follow-up manual-observation test also passed in unit463): threshold/reservation, stale data, cleanup failure still observes, bounded authenticated calls and aggregate output"},
-    {"command":"npm run test:unit", "result":"463 PASS, 0 fail/skip (includes maintenance5; final follow-up run)"},
-    {"command":"npm run build", "result":"20 pages PASS"},
-    {"command":"node tools/operations/build-public-upgrade-rehearsal.mjs", "result":"15 source migrations, 2 explicit compatibility adaptations, LOCAL_ONLY bundle and source/applied SHA256 manifest"},
-    {"command":"wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-public-upgrade-rehearsal.sh", "result":"13 SQL assertions PASS on disposable PG16. Existing synthetic card/classification/media/reservation/policy/sync/fences preserved; existing owner image read then retirement succeeds after upgrade; Public remains disabled. pg_cron not exercised."}
+    {
+      "command": "node --test tests/unit/privateMaintenance.test.mjs",
+      "result": "Initial 4 PASS (follow-up manual-observation test also passed in unit463): threshold/reservation, stale data, cleanup failure still observes, bounded authenticated calls and aggregate output"
+    },
+    {
+      "command": "npm run test:unit",
+      "result": "463 PASS, 0 fail/skip (includes maintenance5; final follow-up run)"
+    },
+    {
+      "command": "npm run build",
+      "result": "20 pages PASS"
+    },
+    {
+      "command": "node tools/operations/build-public-upgrade-rehearsal.mjs",
+      "result": "15 source migrations, 2 explicit compatibility adaptations, LOCAL_ONLY bundle and source/applied SHA256 manifest"
+    },
+    {
+      "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-public-upgrade-rehearsal.sh",
+      "result": "13 SQL assertions PASS on disposable PG16. Existing synthetic card/classification/media/reservation/policy/sync/fences preserved; existing owner image read then retirement succeeds after upgrade; Public remains disabled. pg_cron not exercised."
+    }
   ],
-  "previousEvidenceNotRepeated": ["hosted A/B/public round trip", "72-table restore", "iPhone user-reported create/edit", "two-browser private sync/delete"],
-  "operations": {"productionDbWrites":0,"publicFlagsChanged":false,"credentialsReset":false,"externalBackupUploaded":false,"paidChanges":false,"guardianEmailsSent":0},
+  "previousEvidenceNotRepeated": [
+    "hosted A/B/public round trip",
+    "72-table restore",
+    "iPhone user-reported create/edit",
+    "two-browser private sync/delete"
+  ],
+  "operations": {
+    "productionDbWrites": 0,
+    "publicFlagsChanged": false,
+    "credentialsReset": "user completed production DB password reset; no server-key rotation",
+    "externalBackupUploaded": true,
+    "paidChanges": false,
+    "guardianEmailsSent": 0
+  },
   "implementationDeployment": {
     "commit": "4a85aba6f7fc54349d777bc7e93bef9cc41f54d6",
     "source": "vercel-git",
@@ -44,9 +75,463 @@
   },
   "remaining": [
     "Pre-account guardian consent implementation and actual verification, country-specific notice/retention/withdrawal conditions; existing identity receipt is not consent",
-    "Operator does not know production DB password; ignored protected local settings template only. No password reset performed",
-    "Actual encrypted DB/Storage/canonical snapshot + current retirement journal, separately held recovery key, external restore",
+    "Drive encrypted DB/Storage/journal copy uploaded; external re-download integrity, separately held recovery key, full database import, canonical source completeness and retention/recovery targets remain",
     "Actual capacity alert receipt; healthy scheduled run is not notification-delivery evidence",
     "Approved exact production Public upgrade/ledger/release/rollback and full RC settings after applicable gates"
-  ]
+  ],
+  "backupFollowup": {
+    "date": "2026-10-09",
+    "userCompletedPasswordReset": true,
+    "existingServerKeyStoredLocally": true,
+    "tls": "verify-full",
+    "databaseServer": "17.6",
+    "isolatedDumpClient": "17.11",
+    "databaseDumpBytes": 57829282,
+    "storageObjects": 4304,
+    "storageBytes": 856669715,
+    "storageInventoryStableBeforeAfter": true,
+    "latestJournalRecaptured": true,
+    "encryptedFileRestore": {
+      "authenticatedFiles": 4308,
+      "bytes": 917084869,
+      "allSha256AndLengthsMatch": true,
+      "implementation": "independent Python cryptography AES-256-GCM",
+      "databaseImportVerified": false,
+      "windowsFinalRenameIssueUnresolved": true,
+      "privateImagesDecodedAfterRestore": 12
+    },
+    "archive": {
+      "archiveBytes": 918803598,
+      "sha256": "1e5788baf69fc5677866f26f894765ddc49961d86ccbc0dfc308bfe14bb2a36c",
+      "payloadFiles": 4309,
+      "keyIncluded": false
+    },
+    "externalUpload": {
+      "explicitUserApproval": true,
+      "result": "Drive UI 100 percent / one upload complete",
+      "visibility": "private",
+      "displaySizeMiB": 876.2,
+      "recoveryKeyIncluded": false,
+      "redownloadIntegrityVerified": false,
+      "blocker": "Browser download wait/click timed out; alternative observed-link downloadMedia locator no longer matched; no downloaded local path available",
+      "proofScreenshot": ".cache/production-backup-drive-uploaded.png"
+    },
+    "independentRecoveryKeyCopy": "not confirmed",
+    "productionSqlWrites": 0,
+    "publicFlagsChanged": false,
+    "paidChanges": false,
+    "windowsRestoreFinalRename": "EPERM remains; retry experiment reverted",
+    "fullDatabaseImportVerified": false,
+    "canonicalSourceCompletenessVerified": false,
+    "previousDeploymentCi": "8fb4b49 / 37909546625 SUCCESS"
+  },
+  "signupAdmissionFollowup": {
+    "scope": "LOCAL_ONLY; no production auth hook configured",
+    "files": [
+      "tools/identity/signup-admission-candidate.sql",
+      "tools/identity/signup-admission-contract.sql",
+      "tools/identity/run-signup-admission-local.sh"
+    ],
+    "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-signup-admission-local.sh",
+    "exitCode": 0,
+    "sqlAssertions": 23,
+    "concurrentTwoSessionAssertions": 1,
+    "syntheticOnly": true,
+    "consentIssuerImplemented": false,
+    "hostedOAuthVerified": false,
+    "beforeOAuthCollectionBlocked": false,
+    "productionSettingsChanged": false,
+    "emailsSent": 0,
+    "manualReviewMethod": "REJECTED_BY_USER: guardian email reply and operator manual review",
+    "next": "Superseded by DOB-SELF-DECLARATION-KR14-01; preserve local historical candidate, do not activate guardian admission or expand KWS work"
+  },
+  "kwsFeasibilityFollowup": {
+    "date": "2026-10-09",
+    "scope": "Read-only official source and portal inspection; existing release-v2 documentation update",
+    "userDecision": "Keep 12+ KR/PH/TH; reject manual guardian reply; investigate free KWS",
+    "confirmed": [
+      "Official licensing: PV/AV/CM free with no user volume restrictions",
+      "General terms 2026-05-13: websites included; adult contracting party and commercial use required",
+      "PV confirms designated adult, does not itself obtain processing consent",
+      "CM terms 2025-08-28 describe parent portal, permission status and child age confirmation",
+      "Official support lists Korean KCB i-PIN and PASS/SMS"
+    ],
+    "notVerified": [
+      "Actual onboarding eligibility of Korean individual without business registration",
+      "CM availability for this account and sandbox/live activation requirements",
+      "KR/PH/TH methods enabled for MOEMOA and applicable consent basis",
+      "Any real guardian flow, webhook, revocation or account binding"
+    ],
+    "portalObserved": "Authenticated existing organization godBurgundy; KWS PV has Get Started, User Permissions/Family Management/Age Gate/Age Verification have Contact Us; inquiry draft staged but not submitted",
+    "sources": [
+      "https://onlineservices.epicgames.com/licensing",
+      "https://www.kidswebservices.com/general-terms",
+      "https://www.kidswebservices.com/consent-management-terms",
+      "https://dev.epicgames.com/docs/kids-web-services/parent-verification-service/pv-service-flow?lang=en-US",
+      "https://dev.epicgames.com/docs/kids-web-services/kws-get-started?lang=en-US",
+      "https://www.epicgames.com/help/c-41468510/c-Trending_0/jake-metody-overovani-jsou-dostupne-vme-zemi-a11433351"
+    ],
+    "accountsCreated": 0,
+    "agreementsAccepted": 0,
+    "personalDataSubmitted": false,
+    "emailsSent": 0,
+    "productionChanged": false,
+    "newRuntimePasses": 0,
+    "next": "No KWS inquiry or integration: superseded by DOB-SELF-DECLARATION-KR14-01; draft was not submitted",
+    "portalTransientMaintenance": "First navigation showed maintenance; one reload recovered; global status reported operational",
+    "inquiryDraftPrepared": true,
+    "contactConsentChecked": false,
+    "inquirySubmitted": false,
+    "screenshotGitExcluded": ".cache/kws-inquiry-draft-20261009.jpg"
+  },
+  "simpleSignupPolicyFollowup": {
+    "date": "2026-10-09",
+    "decision": "DOB-SELF-DECLARATION-KR14-01",
+    "scope": "Policy research and existing documentation only",
+    "koreanMinimumAge": 14,
+    "ageEvidence": "Self-declared birth date; not verified identity or age",
+    "excluded": [
+      "PASS",
+      "guardian email workflow",
+      "KWS integration"
+    ],
+    "regionalConditionsRemaining": [
+      "PH",
+      "TH"
+    ],
+    "pinterestSignupObservation": "Korean signup modal: email, password, birth date, continue/Google buttons, terms acceptance and privacy acknowledgement notice; no separate terms checkbox observed on that screen",
+    "pinterestSignupCompletedByAgent": false,
+    "allCountrySignupFlowsVerified": false,
+    "termsVersionReviewed": "2025-04-30 current version; upcoming 2026-11-12 version not used as current",
+    "sources": [
+      "https://kr.pinterest.com/",
+      "https://policy.pinterest.com/ko/terms-of-service",
+      "https://policy.pinterest.com/ko/privacy-policy",
+      "https://www.law.go.kr/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000526556"
+    ],
+    "constraints": [
+      "User content responsibility does not exclude mandatory operator duties",
+      "Privacy notice acknowledgement is not blanket consent for all processing",
+      "Private storage and explicit publication remain separate",
+      "Generic terms checkbox does not grant third-party image rights"
+    ],
+    "applicationImplemented": false,
+    "newRuntimePasses": 0,
+    "databaseMigrations": 0,
+    "productionChanges": false,
+    "messagesSent": 0,
+    "next": "Use competitor comparison before implementing minimal signup; do not introduce blanket regional minor blocks"
+  },
+  "regionalCompetitorComparison": {
+    "date": "2026-10-09",
+    "approvedProductMinimums": {
+      "KR": 14,
+      "PH": 13,
+      "TH": 13
+    },
+    "userSteering": "Inspect how Pinterest and similar services operate in PH/TH before implementing",
+    "sources": [
+      "https://help.pinterest.com/en/article/age-verification-appeals",
+      "https://help.pinterest.com/en/article/teen-safety-options",
+      "https://policy.pinterest.com/en/terms-of-service",
+      "https://about.fb.com/news/2021/07/age-verification/amp/",
+      "https://about.fb.com/news/2024/09/instagram-teen-accounts/",
+      "https://about.fb.com/news/2026/05/ai-age-assurance-teens/",
+      "https://newsroom.tiktok.com/tiktok-digital-literacy-digital-well-being?lang=th-TH"
+    ],
+    "observations": [
+      "Pinterest: birthday and 13+ baseline with local exceptions; teen privacy defaults and targeted age checks; terms require parental permission for minors",
+      "Instagram: birthday screen; teen protections rolled out to all available countries by 2025-06-11; permission to relax under-16 protections differs from universal signup verification",
+      "TikTok Thailand official 2026-05-27 announcement: no under-13 accounts, protections for 13-17, private defaults and age-specific feature limits"
+    ],
+    "limits": [
+      "No PH/TH local-IP signup completed; localization is not proof of country-specific behavior",
+      "Pinterest exact PH/TH-specific signup variation not established",
+      "TikTok ROW terms tool fetch failed; US terms not substituted",
+      "Competitor behavior does not itself establish MOEMOA legal compliance"
+    ],
+    "prematureCandidate": {
+      "status": "WITHDRAWN_BEFORE_DEPLOYMENT",
+      "reason": "Blanket minor-review block and always-failing signup branch were premature",
+      "sourceDiffAfterRollback": "none under src",
+      "existingUserFilesPreserved": true
+    },
+    "newRuntimePasses": 0,
+    "databaseChanges": 0,
+    "productionChanges": false
+  },
+  "launchRegionExpansion": {
+    "date": "2026-10-09",
+    "decision": "US/EUROPE-LAUNCH-SCOPE-01",
+    "approvedScope": [
+      "KR",
+      "PH",
+      "TH",
+      "US",
+      "Europe"
+    ],
+    "existingApprovedMinimums": {
+      "KR": 14,
+      "PH": 13,
+      "TH": 13
+    },
+    "newRegionalAgeTableFinalized": false,
+    "flow": "Self-declared DOB, country, Google signup and minimal terms/privacy information; no PASS/KWS/guardian-email integration",
+    "sources": [
+      "https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions",
+      "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data/are-there-any-specific-safeguards-data-about-children_en"
+    ],
+    "limits": [
+      "Europe is not one jurisdiction; supported-country matrix remains to be finalized",
+      "EU 13-16 threshold concerns consent-based child data processing, not a universal signup age",
+      "No new country-local signup or legal-compliance PASS"
+    ],
+    "newRuntimePasses": 0,
+    "databaseChanges": 0,
+    "productionChanges": false
+  },
+  "simpleSignupImplementation": {
+    "date": "2026-10-09",
+    "status": "LOCAL_CANDIDATE_NOT_DEPLOYED",
+    "flag": "PUBLIC_SIMPLE_SIGNUP_V1",
+    "flagDefault": "off",
+    "migration": "20261009130000_simple_signup_declarations.sql",
+    "databaseApplied": "disposable local PostgreSQL only",
+    "countryChoices": 36,
+    "seedPolicyMinimums": {
+      "KR": 14,
+      "PH": 13,
+      "TH": 13,
+      "US": 13,
+      "GB": 13
+    },
+    "europeFinalPolicyComplete": false,
+    "commands": [
+      {
+        "command": "npm run test:unit",
+        "result": "469 PASS"
+      },
+      {
+        "command": "node scripts/run-simple-signup-e2e.mjs",
+        "result": "4 Chromium PASS; actual local UI, mocked OAuth/RPC"
+      },
+      {
+        "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-local.sh",
+        "result": "PASS; isolated SQL receipt contract"
+      },
+      {
+        "command": "npm run build",
+        "result": "23 pages built"
+      }
+    ],
+    "newBehaviors": [
+      "Age and terms rejection before Google",
+      "KO/EN signup and 390px layout",
+      "PKCE handoff/callback and account receipt",
+      "Receipt retry without re-exchanging OAuth code",
+      "Provider cancellation clears temporary declaration",
+      "Retry account change is rejected"
+    ],
+    "privacy": "No raw DOB sent to Google or stored on server; tab-local age summary expires logically after 30 minutes; receipt contains age band, country, policy versions and server timestamp",
+    "limitations": [
+      "OAuth creates Auth user before receipt; no server-side pre-account admission enforcement yet",
+      "European country policy values except GB remain unseeded; FR/DE test values are synthetic",
+      "Draft legal/retention/transfer notices; not final published terms",
+      "No hosted Google signup or production DB/flag changes"
+    ],
+    "initialFailures": [
+      "Vite build/dev shared optimize cache 504; restarted owned dev server",
+      "Input before hydration reset; disabled controls until ready"
+    ],
+    "productionChanges": false,
+    "next": "Connect signup review to the existing Supabase new-account admission boundary"
+  },
+  "simpleSignupServerAdmission": {
+    "date": "2026-10-09",
+    "status": "LOCAL_CANDIDATE_NOT_DEPLOYED",
+    "migration": "20261009143000_simple_signup_admission.sql",
+    "commands": [
+      {
+        "command": "npm run test:unit",
+        "result": "475 PASS, includes 6 new server security tests"
+      },
+      {
+        "command": "node scripts/run-simple-signup-e2e.mjs",
+        "result": "4 Chromium PASS, real UI with mocked Google/API"
+      },
+      {
+        "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-admission-local.sh",
+        "result": "PASS, transactional admission/receipt + two-connection insertion and one-use handoff races"
+      },
+      {
+        "command": "npm run build",
+        "result": "24 pages built"
+      },
+      {
+        "command": "git diff --check; node --check api/signup.js",
+        "result": "PASS"
+      },
+      {
+        "command": "wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+        "result": "Full migration/publication contract PASS; initial default PG14 path unavailable, rerun with installed PG16"
+      },
+      {
+        "command": "wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-local.sh",
+        "result": "Previous receipt contract PASS with expanded Auth harness"
+      }
+    ],
+    "newLocalBehaviors": [
+      "Google signature/nonce/audience/issuer/time validation before admission",
+      "CSRF/state/cookie rejection and no raw token/secret in error",
+      "Unapproved new Auth insert rejected; exact Google identity and real user ID bound atomically",
+      "Existing users retained, birthday login preserves historical receipt",
+      "Concurrent admission produces one user/receipt; encrypted handoff consumed once",
+      "Cancelled/expired completion offers same-tab restart"
+    ],
+    "discovery": "Supabase before-user-created external hook constructs a provisional user outside the account creation transaction. Do not bind admission to that provisional UUID; recheck and consume on actual auth.users INSERT.",
+    "sourceReferences": [
+      "https://supabase.com/docs/guides/auth/auth-hooks/before-user-created-hook",
+      "https://supabase.com/docs/guides/auth/social-login/auth-google",
+      "https://raw.githubusercontent.com/supabase/auth/master/internal/api/hooks.go",
+      "https://developers.google.com/identity/openid-connect/openid-connect"
+    ],
+    "initialFailure": "Random ciphertext happened to contain short text KR, causing a false-positive test. Assertion corrected to check structured plaintext, then full suite475 PASS.",
+    "privacy": "No raw DOB sent. Encrypted HttpOnly flow cookie10m, admission5m with Google subject/email hash and age band, encrypted handoff2m. Used entries deleted; unused expiry immediately denies reads. Hourly purge scheduling still required before hosted activation.",
+    "limitations": [
+      "No real hosted Google/Auth/Hook execution",
+      "Google callback registration/server confidential settings still needed",
+      "Country final policy values and draft legal notices unfinished",
+      "No production DB/flags/Public/deployment changes",
+      "This is age self-declaration, not verified identity or guardian consent"
+    ],
+    "productionChanges": false,
+    "next": "Configure and verify hosted test Google signup/returning login using the existing environment",
+    "githubCiExecuted": false
+  },
+  "simpleSignupHostedPreparation": {
+    "releaseId": "MOEMOA_SIMPLE_SIGNUP_TEST_20261009_01",
+    "target": "nmgkhknponvzcwliajyk",
+    "productionChanges": false,
+    "migrations": [
+      {
+        "file": "supabase/migrations/20261009130000_simple_signup_declarations.sql",
+        "sha256": "1b42a28d01a52a4475fbe887da1fc0fd5db8d0f54b9873c1b36afc0376c08947"
+      },
+      {
+        "file": "supabase/migrations/20261009143000_simple_signup_admission.sql",
+        "sha256": "99ffffafa064afc7f16decacaf2e62cef5cce02bb656df3fd9ceaad85fc0b6c8"
+      }
+    ],
+    "commands": [
+      {
+        "command": "wsl -e python3 /mnt/e/web/anime/tools/identity/prepare-simple-signup-test.py",
+        "result": "PASS transaction rehearsal then ROLLBACK"
+      },
+      {
+        "command": "wsl -e python3 /mnt/e/web/anime/tools/identity/prepare-simple-signup-test.py --apply",
+        "result": "PASS applied default off; migration history includes exact SHA256"
+      }
+    ],
+    "checks": {
+      "tls": "verify-full with existing Supabase CA; system CA-only attempt rejected certificate",
+      "policyEnabled": false,
+      "admissionEnabled": false,
+      "rpcPrivileges": "PASS",
+      "authInsertTrigger": "PRESENT_DISABLED_BY_POLICY",
+      "signupTables": "EMPTY",
+      "anonymousPolicyRest": "PASS",
+      "anonymousAdmissionRestStatus": 401
+    },
+    "vercel": {
+      "project": "newrreds-projects/anime-collector",
+      "environment": "Preview",
+      "branch": "codex/phone-test",
+      "savedNames": [
+        "MOEMOA_GOOGLE_CLIENT_SECRET"
+      ],
+      "newDeployment": false
+    },
+    "blockers": [
+      "Existing Google OAuth secret appeared in browser tool response during panel close transition; user credential replacement required before use. No secret value stored in this evidence or Git.",
+      "Google Cloud OAuth clients page failed to load on initial open and retry."
+    ],
+    "remaining": [
+      "Replace credential after checking existing consumers",
+      "Remaining Preview server variables and callback URI",
+      "Hourly transient purge and Auth hook",
+      "Actual hosted Google new signup, returning login and cancellation",
+      "Country final notices and exact production candidate"
+    ],
+    "realGoogleFlowPassed": false,
+    "newUserBehaviorPasses": 0
+  },
+  "simpleSignupCredentialRecovery": {
+    "date": "2026-10-10",
+    "userReportedReplacementSaved": true,
+    "secretValueRead": false,
+    "productionChanged": false,
+    "vercelNewDeployment": false,
+    "googleManagementBrowser": "Chrome",
+    "oldSecretCreated": "2026-09-24",
+    "newSecretCreated": "2026-10-10",
+    "oldSecretDisabledVerified": true,
+    "existingSupabaseOAuth": {
+      "result": "PASS",
+      "browser": "Chrome",
+      "origin": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+      "flow": [
+        "data/ Continue with Google",
+        "existing A account selection",
+        "data/ returned",
+        "A account matches and Sign out visible"
+      ],
+      "note": "Initial Signed in as locator did not match current UI; final account and Sign out checks passed."
+    },
+    "newSignupServerFlow": "NOT_DEPLOYED_NOT_VERIFIED",
+    "next": "Finish remaining test Preview signup configuration, callback and transient cleanup schedule",
+    "newSecretEnabledVerified": true,
+    "oldSecretPermanentlyDeleted": false,
+    "stateEvidence": {
+      "2026-09-24": "Enable control (currently disabled)",
+      "2026-10-10": "Disable control (currently enabled)"
+    },
+    "freshLoginAfterOldSecretDisabled": {
+      "result": "PASS",
+      "flow": [
+        "Explicit Sign out",
+        "Continue with Google",
+        "Existing A account selection",
+        "Returned to the exact test /data/ origin",
+        "Account matches; Sign out button visible"
+      ],
+      "transientCheck": "First locator wait expired during callback transition; final app state independently passed"
+    },
+    "containment": "Old credential disabled; existing test Supabase OAuth recovery verified",
+    "limits": [
+      "Historical tool output not deleted",
+      "External misuse absence not established",
+      "New Vercel signup API not deployed or verified"
+    ]
+  },
+  "simpleSignupPreviewConfiguration": {
+    "date": "2026-10-10",
+    "target": "nmgkhknponvzcwliajyk",
+    "release": "MOEMOA_SIMPLE_SIGNUP_TEST_20261010_02",
+    "previewBranch": "codex/phone-test",
+    "googleCallbackSaved": true,
+    "existingSupabaseCallbackPreserved": true,
+    "googleProjectExternalPublished": true,
+    "previewAccountAllowlistRequired": true,
+    "newGoogleSecretRead": false,
+    "cookieKeySecretTypeVerified": true,
+    "beforeUserCreatedHook": "public.check_simple_signup_admission",
+    "cleanupSchedule": "17 * * * *",
+    "policyEnabled": false,
+    "existingAuthUserCount": 2,
+    "receiptCount": 0,
+    "unitTests": 476,
+    "buildPages": 24,
+    "hostedNewSignupPass": false,
+    "productionChanged": false
+  }
 }

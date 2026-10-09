@@ -1,6 +1,20 @@
 # CODEX START HERE — MOEMOA
 
-> **2026-10-09 출시 마감 최신:** Safari 추가 검사 제외/PASS 아님,12세·한국/필리핀/태국과 보호자 동의 준비 재확정. 실제 운영 private 저장/삭제는 배포됐고 Public은 off/schema 미설치다. 용량 경보·지원 연락처 보완과 private-only→Public 로컬 보존 검사를 진행했다. Drive/One5TB 확인, 운영 DB 비밀번호는 현재 모름으로 실제 백업 대기(초기화 없음). 현재 작업/남은 차단은 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)과 [C02 동의 계약](docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md#2026-10-09-보호자-동의-준비--w06w14w20-d04)을 따른다. 아래 Safari 후속·Drive 서비스 미정·예전 미배포 표시는 당시 기록이다.
+> **2026-10-10 테스트 가입 연결:** 교체된 키를 재조회하지 않고 Preview `codex/phone-test`의 signup 설정을 등록했다. 기존 Supabase 서버 설정은 중복 거부로 보존했다. Google callback 추가 저장, test Before User Created Hook 활성, 시간별 만료 임시정보 정리 예약 완료. Google 프로젝트는 외부/프로덕션 게시 상태라 Preview 서버에 승인 A/B 계정 해시 제한을 추가했다(누락·타 계정은 fail-closed). unit476/build24 PASS. DB 가입 policy는 아직 off이며 다음은 Git Preview 배포 확인→test policy 활성→사용자 직접 생년월일/동의 후 실제 Google 왕복이다. 운영/master/Public 변경0. 실제 신규 가입 PASS는 아직 아니다.
+
+> **2026-10-10 키 교체 검증 완료 범위:** 사용자 직접 새 test Google 키 생성·Supabase/Vercel 저장 및 이전9/24 키 사용 중지 완료. 날짜별 Google 관리 상태에서 이전 키 중지/새10/10 키 활성 확인. 그 뒤 Chrome 테스트 배포에서 로그아웃→새 Google 로그인→`/data/` 복귀·A 계정 일치·Sign out 표시 PASS. 새 키 원문 재조회/운영 변경0. 신규 signup API는 아직 미배포이며 그 성공으로 기록하지 않는다. 다음은 기존 테스트 Preview의 나머지 서버 설정·callback·임시정보 정리 예약 마감. 아래 교체 대기·Google 화면 오류는 과거 이력이다.
+
+> **2026-10-09 test DB 적용 후 재개점:** 간편 가입 migration 두 개를 moemoa-test에 기본 off로 적용하고 실제 익명 정책 읽기/권한 거부를 확인했다. 운영 미변경. Google Secret을 Preview 전용으로 등록하는 중 도구 응답에 노출되어 교체 전 새 배포를 중단했다. Google Cloud 설정 페이지도 로딩 오류. 키 값은 문서/Git에 없으며, 기존 ExecPlan의 「Hosted 테스트 연결 재개」와 작업판 맨 위에서 사용자 직접 키 교체 후 재개한다. 로컬 검증과 실제 Google 가입 완료를 구분한다.
+
+> **2026-10-09 가입 서버 연결 로컬 후보:** 국가·생년월일·약관→Google의 화면 단계는 유지하고, 서버 Google 왕복·신규 Auth INSERT 경계·계정별 영수증·암호화 일회 로그인 전달을 연결했다. 이번 unit475/모의 Google·실제 UI Chromium4/격리 SQL 및 두 연결 경합2/build24 PASS. migration `20261009130000`·`20261009143000`은 기본 off, 운영 미적용. 실제 hosted Google/Hook·국가별 최종 정책/고지·정기 임시정보 정리 설정은 남아 있다. 기존469/23 결과는 이전 후보 증거이며 전체 출시 PASS가 아니다. 기존 ExecPlan과 단일 작업판의 현재 카드를 따른다.
+
+> **2026-10-09 현재 출시/가입 기준:** 사용자 승인으로 한국·필리핀·태국에 미국·유럽을 추가(US/EUROPE-LAUNCH-SCOPE-01). 기존 제품 최소 KR14/PH13/TH13, 생년월일 자가 입력·간단한 Google 가입·최소 약관/개인정보 안내 방향 유지. PASS/보호자 이메일/KWS 제외. 국가별 조건은 기존 C02·D04에서 관리하며 미국·유럽 전역의 동일 연령/적합성 완료를 뜻하지 않는다. 가입 구현·배포는 미완료, 아래 KWS/12세 기록은 과거 이력이다. 현재 작업은 release-v2 단일 작업판의 현재 카드와 C02 최신 절을 따른다.
+
+> **10/9 로그인 후 확인:** Epic 조직 대시보드와 KWS 진입을 확인했다. 보호자 인증은 시작하기, 사용자 권한(동의 관리)·가족 관리·Age Gate·연령 인증은 문의하기로 표시된다. Age Gate는 셀프 서비스 불가, 연령 인증은 셀프 서비스 활성화 문의 안내다. 미등록 개인의 최종 이용 승인은 확인되지 않았다. 문의 초안을 포털에 준비했으며 미발송/약관 미수락이다. 다음은 KWS 문의 발송의 사용자 명시 승인이다. 아래 로그아웃/로그인 요청 상태는 이 확인으로 대체한다.
+
+> **2026-10-09 동의 방식 후속:** 보호자 회신·운영자 수동 검토 방식은 사용자가 거절했다. 12세·KR/PH/TH 유지, 무료 KWS 가능성 조사 승인. 무료/Web 지원은 확인했지만 개인 등록·CM 실제 제공 조건은 Epic 포털 로그인 후 확인 필요. 가입 후보 SQL 확장·운영 적용은 보류한다. [C02 조사 결과](docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md#2026-10-09-kws-실현-가능성-조사)를 먼저 읽는다.
+
+> **2026-10-09 출시 마감 최신:** Safari 추가 검사 제외/PASS 아님,12세·한국/필리핀/태국과 보호자 동의 준비 재확정. 실제 운영 private 저장/삭제는 배포됐고 Public은 off/schema 미설치다. 용량 경보·지원 연락처 보완과 private-only→Public 로컬 보존 검사를 진행했다. Drive/One5TB 확인. 사용자 비밀번호 재설정 후 운영 연결 복구, DB·이미지4304개 암호화 및 독립 byte 복원4308파일 확인. 승인된 Drive 비공개 폴더 업로드는 완료했다. 외부 재다운로드 무결성/별도 키 보관/실제 DB 재구동은 미완료이며 Windows 복원 최종 rename 오류를 별도 기록했다. 현재 작업/남은 차단은 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)과 [C02 동의 계약](docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md#2026-10-09-보호자-동의-준비--w06w14w20-d04)을 따른다. 아래 Safari 후속·Drive 서비스 미정·예전 미배포 표시는 당시 기록이다.
 
 > **2026-10-09 두 화면 직접 검증 후속:** 운영의 비공개 전용 DB에 빠진 카드 삭제 RPC를 migration `20261009090000`으로 추가했고, 사용자가 지정한 오늘 테스트 카드의 삭제·fence·사진 retirement를 확인했다. 열려 있던 반대 상세가 삭제 결과를 무시하는 문제도 발견해 `MemoryCardDetail.jsx`에서 삭제 수신 시 카드/미리보기/편집을 비우도록 보완했다. Public·정책·일반 개인 기록은 변경하지 않았다. 실제 iPhone 오프라인 검사는 사용자 요청으로 제외했고 PC 두 브라우저 결과와 구분한다. [기존 계획의 후속 결과](docs/moemoa/plans/2026-10-09-private-photo-reliability-and-handoff.md#19-두-화면-직접-검증과-삭제-경계-마감), [DB release 증거](docs/moemoa/release-v2/evidence/2026-10-09-private-retirement-production.json)를 먼저 읽는다. 최신 운영 소스는 Git `master`와 [build-info](https://www.moemoa.xyz/build-info.json)를 대조한다.
 

@@ -1,5 +1,118 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-09 W06/C02 가입 전 서버 확인 연결
+
+### Hosted 테스트 연결 재개 (사용자 “진행 ㄱ”)
+
+- **2026-10-10 실제 설정/검사:** Vercel bulk import는 기본 환경/Config로 재설정하고 항목별 부분 저장한다. 저장 전 Production/전체Preview를 해제해 정확한 `codex/phone-test` 범위를 확인했고, 기존 SUPABASE 3개는 중복 거부·보존했다. 새5개 등록과 cookie key Secret 전환, allowlist Secret 등록을 확인했다. 값 자체는 출력하지 않았다. Google는 Supabase callback 유지 + exact Preview `/api/signup?action=callback` 추가 저장 확인. Auth Hook은 기존 없음→`public.check_simple_signup_admission` ENABLED. `configure-simple-signup-test.py inspect/prepare` TLS 실DB 검사·시간별 cron 활성 확인, policy off/계정2·영수증0 유지. unit476/build24 PASS. 테스트 Git 배포 준비 중이며 운영/유료/Public 변경0. 롤백은 test policy disable + Preview flag off, Hook disable(이전 없음); 만료 정리와 계정/영수증은 보존.
+
+- **2026-10-10 범위 보완:** Google 프로젝트가 외부/프로덕션 게시 상태라 테스트 계정 제한을 제공하지 않는다. 공유 Google 프로젝트 설정을 바꾸지 않고 Preview 서버만 승인된 A/B 이메일 해시 allowlist를 요구하도록 보완한다. 누락·형식 오류는 fail-closed이며 승인되지 않은 계정은 Supabase 로그인/가입 전 거부한다. 새 실제 신규 계정은 추가 사용자 승인 없이는 만들거나 기존 사용자를 삭제하지 않는다.
+
+- **2026-10-10 다음 실행 범위:** 교체된 Google secret은 Vercel에 이미 저장돼 있으므로 다시 읽지 않는다. 기존 test env 파일에서 나머지 서버 설정을 Git 제외/접근 제한 파일로 준비하여 승인된 Preview `codex/phone-test`에만 연결한다. Google callback도 정확한 Preview origin만 추가한다. 기존 test DB의 시간별 만료 임시정보 정리/Hook을 준비하고, 현재 변경을 별도 로컬 `codex/` 브랜치에 커밋해 기존 Preview 브랜치로 fast-forward push한다(master push/운영 배포 없음). 활성화 전 서버·DB 대상과 정책/Google 테스트 대상 제한을 확인한다. 실제 기존 로그인/취소와 신규 Google 계정 가입을 분리하며, 신규 계정을 임의 생성·삭제하지 않는다. 차단 발생 시 flag/DB enforcement를 꺼서 이전 로그인으로 복귀하고 이 작업판에 정확한 잔여를 남긴다.
+
+- **2026-10-10 이전 키 중지 후 재로그인 PASS:** 사용자 직접 사용 중지 완료 후 Google client의 날짜별 관리 버튼만 확인했다. 2026-09-24 항목은 「사용 설정」(현재 중지), 2026-10-10 항목은 「사용 중지」(현재 활성). Chrome 테스트 `/data/`의 기존 세션을 Sign out하고 Continue with Google→기존 A 계정 선택→같은 테스트 `/data/` 복귀·계정 일치·Sign out 표시를 새로 확인했다. 콜백 전환 중 첫 짧은 locator 대기는 만료됐으나 최종 앱 상태로 성공을 확인했다. **노출된 이전 키 사용 중지와 기존 OAuth 복구 확인 완료**이며 영구 삭제/외부 악용 부재/새 signup API 완료를 의미하지 않는다. 새 키 원문 조회0, 운영 설정/DB/배포 변경0. Vercel 교체값은 사용자 저장 완료이며 새 서버 배포의 실제 사용 검증은 다음 단계에 남는다. 다음1개는 기존 테스트 Preview의 나머지 signup 서버 설정·callback·정리 예약을 마감하는 것.
+
+- **2026-10-10 교체 후 실로그인:** 사용자가 새 Google secret 생성과 test Supabase/Vercel 저장 완료를 알렸다. secret 입력란 재조회 없이 두 편집 화면 닫힘을 확인했다. 기존 테스트 배포 `/data/`에서 Continue with Google→기존 A 계정 선택→같은 `/data/` 복귀·계정 일치·Sign out 표시를 실제 Chrome에서 확인했다. 처음 찾은 `Signed in as` 문구는 현재 UI와 달라 locator 실패였고 실제 Sign out/계정 표시로 확인했다. 이는 **교체 후 기존 Supabase OAuth 성공**이며 미배포 신규 signup API/Vercel 새 secret의 실행 검증은 아니다. Google 키 항목의 생성 날짜만 대조해 이전 2026-09-24/신규2026-10-10을 구분했다. 이전 키 사용 중지와 이후 재로그인은 아직 대기, 새 키 원문 조회0/운영 변경0.
+
+- **2026-10-10 키 교체 화면 인계:** 앱 브라우저는 클라이언트/프로젝트 목록 모두 로딩 실패. 사용자 「Chrome에서 계속」 승인 뒤 Chrome에서 정상 접근했고 정확한 `moemoa-test` client 상세의 「정보 및 요약 → Add secret」을 확인했다. 새 키 생성은 누르지 않았다. Chrome에 test Supabase Google 입력란과 Vercel `MOEMOA_GOOGLE_CLIENT_SECRET` 편집란을 준비했다. Vercel 입력란 비어 있음·Secret·Preview `codex/phone-test` 범위 유지 확인. 키 원문 재조회/새 키 생성/설정 저장/배포0. 사용자가 Google에서 새 secret 추가→test Supabase와 해당 Vercel 변수에 직접 입력·저장→생성창 닫기까지 수행해야 한다. 기존 secret 폐기는 교체 확인 뒤 진행하며 이 인계를 완료로 기록하지 않는다.
+
+- **노출 후 사용처 확인:** 운영 Supabase `okchpyagfucpzpyrfgol` Google 설정에서 공개 client ID만 읽어 테스트 client와 **서로 다름**을 확인했다. 비밀값 reveal/운영 설정 수정0. 따라서 확인한 운영 프로젝트는 이 테스트 client 교체 대상과 구분한다. 다른 외부 사용처 전체를 확인한 것은 아니다. 확인된 노출 위치는 이 대화의 브라우저 도구 응답이며 공개 인터넷 유출/악용 여부는 미확인이다. 과거 도구 응답을 삭제하거나 노출이 해소됐다고 주장하지 않는다. 기존 키 폐기 전에 정확한 테스트 client의 교체·소비처 갱신이 필요하다.
+
+- **이번 실행 결과:** `tools/identity/prepare-simple-signup-test.py`로 고정 test ref만 허용하고 verify-full 연결·단일 트랜잭션/5초 lock timeout으로 두 migration을 rehearsal/ROLLBACK한 뒤 실제 적용했다. 릴리스 `MOEMOA_SIMPLE_SIGNUP_TEST_20261009_01`; migration 이력 statements에 파일 SHA256을 함께 기록. 운영 DB는 변경하지 않았다. 익명 실제 REST에서 정책 `enabled=false/serverAdmission=false`, admission RPC401을 확인했다. 테스트 사용자·영수증 생성0. 전체 복원/A-B 격리는 반복하지 않았다.
+- **설정/차단:** 사용자에게 특정 키·대상 확인을 받아 기존 Google client secret을 Vercel **Preview `codex/phone-test`만** Secret으로 저장했다. 이때 Supabase 패널의 닫힘 전환 중 접근성 응답에 비밀값이 표시되는 처리 실수가 발생했다. 값은 문서/Git에 남기지 않는다. **해당 키를 사용하는 새 배포/활성화 중단; 사용자 직접 키 교체 후 재개.** 다른 사용처 확인 전 기존 키를 폐기하지 않는다. Google Cloud의 기존 anime-collector-auth 클라이언트 화면은 최초 진입/재시도 모두 로딩 오류로 callback 추가 미실행. Vercel의 나머지 서버키·cookie key·signup flags 미등록, 새 배포/Hook 변경0.
+- **다음 1개:** 기존 Google OAuth 키의 사용처를 대조하고 사용자 직접 교체를 완료한 뒤, 같은 Preview 설정·callback·시간별 임시정보 정리를 마감해 실제 Google 왕복 검증. Auth 자격 증명 변경은 브라우저 도구의 사용자 직접 조작 규칙에 따른다. 서버키나 새 비밀값을 채팅으로 받지 않는다.
+- **복구:** 이번 test 구조는 기본 off이며 계정/기록을 삭제하지 않는다. 향후 켰다면 서버/UI flag와 DB `admission_enabled`를 함께 끄고 기존 Hook 설정을 복원한다. 저장된 영수증/사용자 테이블 drop은 하지 않는다. 현재 Google Secret 설정은 새 배포 전 상태이며 교체 전 사용하지 않는다.
+
+- 기존 `moemoa-test` ref `nmgkhknponvzcwliajyk`와 Vercel 테스트 배포를 대상으로 설정을 먼저 읽는다. 운영 ref/Production 환경에는 쓰지 않는다. 기존 test Google 활성/신규 가입 허용/익명 비활성 상태를 관리 화면에서 확인했다.
+- 가입 migration 두 개만 정확한 hash/이력으로 비교하고 기본 off 상태에서 적용할 후보·원복을 준비한다. 계정/사진 전체 복원이나 A/B 격리를 반복하지 않는다. Google callback/서버 비밀값이 준비되기 전 admission enforcement를 켜지 않는다.
+- 테스트 배포는 운영 master push와 분리한다. 테스트 client ID/secret의 안전한 연결, 고정 HTTPS origin과 실제 신규 Google 계정 확보가 미확인이다. 도구가 요구하는 보안 설정/비밀값 전송 확인은 구체 화면·범위를 준비한 뒤 묻는다.
+- 검증은 실제 테스트 DB의 schema/권한·신규 계정/기존 로그인/취소를 구분한다. 로컬 mock 결과를 실제 Google 가입 성공으로 대체하지 않는다. 연결 차단이 있으면 정확한 상태와 준비한 파일을 현재 작업판에 남긴다.
+
+### 실행 결과 / 다음 PC 재개점
+
+- 읽음: AGENTS/PLANS, 시작 문서·확정 결정,06 아키텍처·07 QA·09 변경 관리,00/02/03 현행 가입 계약, authRepo/webOAuth/SimpleSignup/기존 callback, 기존 private API/SDK·migration/SQL harness. `verify-before-claiming` 기준으로 로컬 검증과 hosted 실행을 구분했다.
+- 구현: `api/signup.js`, `src/server/signup/{handler,security,backend}.js`의 서버 Google code 교환/RS256 검증→service-only admission→Supabase ID-token 로그인→영수증 확정→암호화 일회 전달. `authRepo.js`, `SignupComplete.jsx` 및 `/auth/complete/`를 연결했다. 기본 off/기존 PKCE callback은 배포된 동작으로 유지하고, 이전 후보의 사후 영수증 UI를 신규 계정 guard로 사용하지 않는다. 국가·DOB·체크·Google 단계 수는 같다.
+- 발견/계획 정정: [Supabase Auth hook 구현](https://github.com/supabase/auth/blob/master/internal/api/hooks.go)의 external before-create는 실제 INSERT 트랜잭션 밖에서 임시 user model을 만든다. **hook의 UUID를 실제 사용자 ID로 결속하면 안 된다.** hook은 현재 승인 유무를 검사하고 `auth.users AFTER INSERT`가 동일 Google sub/email hash·정책·만료를 다시 잠금 검사해 실제 ID와 영수증을 같은 트랜잭션으로 기록한다. 두 연결 경합에서 신규 사용자/영수증1개만 남는다. hosted 버전/실제 이벤트는 미검증이다.
+- DB: `20261009143000_simple_signup_admission.sql`은 기본 off 열·단기 admission/암호화 handoff·service-only RPC·hook/INSERT trigger를 추가한다. 기존 계정/기록 삭제 없음. 기존 사용자의 첫 영수증과 새 정책 영수증은 실제 `auth.identities`를 대조한다. 같은 정책에서 나이/거주지가 바뀌어도 최초 영수증을 덮어쓰거나 기존 로그인을 막지 않는다. 미확인 Auth 응답 뒤에는 해당 admission만 해제하고 이미 생긴 계정은 보존한다.
+- 이번 검사: `npm run test:unit`475 PASS(새 서버6 포함), `node scripts/run-simple-signup-e2e.mjs` 실제 React+모의 Google/API4 PASS, `wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-admission-local.sh` SQL 계약·동시 INSERT/일회 전달2경합 PASS, `npm run build`24페이지, `git diff --check`/`node --check api/signup.js` PASS. 임의 암호문이 짧은 `KR` 문자열을 우연히 포함한 검사 오탐은 구조화된 평문 노출 검사로 수정 후475 통과. 이전469/23 결과는 아래 과거 증거로 보존한다.
+- 통합 회귀: `wsl -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh` 전체 migration/publication 계약 PASS, 기존 `run-simple-signup-local.sh` 영수증 계약도 PASS. 처음 기본 PG14 경로로 실행했을 때는 설치 경로 오류가 났고 설치된16 경로를 명시해 통과했다. 운영 DB 복원/72table 검사를 반복한 것이 아니라 새 migration의 격리 호환 검사다.
+- CI/자료: 기존 SQL 공용 harness에 실제 Auth 필드·role fixture를 추가하고 새 SQL/UI 검사를 기존 quality.yml에 연결했다. GitHub 실행은 아직 아니다. 기존 evidence JSON의 `simpleSignupServerAdmission`에 이번 결과를 분리했다. 실제390px 브라우저 캡처도 확인했다.
+- 보안/개인정보: DOB 원문은 서버로 보내지 않는다. 암호화 HttpOnly/Secure/SameSite 쿠키10분, Google 주체/hash와 연령 구간의 admission5분, 암호화 session 전달2분. 사용 시 삭제, 만료는 즉시 거부, 미사용 만료 행은 다음 요청/정기 purge로 제거한다. 정기 purge는 hosted에서 아직 예약하지 않았다. 원문/쿠키/토큰/provider 오류를 일반 로그로 출력하지 않는다. 신원 인증/보호자 동의/공개 권한이 아니다.
+- 롤백/남은 승인: 운영 적용0·Git 배포0·Public 변경0. UI/server flag off와 `admission_enabled=false` 및 기존 Hook 설정 복원을 함께 해야 한다. 계정·영수증은 유지한다. 배포 후보 SHA/DB release ID/D06, 국가별 최종 정책/고지와 정기 purge/실제 Google 설정 검증 전에는 운영에 켜지 않는다.
+- 다음1개: 기존 테스트 환경에서 동일 Google client의 새 callback URI·서버 비밀 설정·Supabase hook을 대조하고 신규 가입/기존 로그인/취소·우회 차단을 실제 왕복으로 확인한다. 설정/비밀값을 새 채팅에 붙여넣도록 요청하지 않는다. 정확한 위치·설정 이름은 운영 설정 지도를 따른다.
+
+- 목적: 동일 국가/DOB/약관→Google 화면을 유지하면서 신규 Auth 계정 생성 전 서버 정책 검사를 결속한다. 사후 영수증만으로는 우회 차단이 되지 않는 이전 후보의 한계를 해결한다. 기존 로그인 provider/계정/데이터 모델과 기본 off 경로는 유지한다.
+- 방식: flag on의 Google 왕복만 서버의 confidential authorization-code 흐름으로 처리한다. 서버가 검증한 Google ID token의 email/sub와 최소 자기신고를 service-only RPC에 결속하고, Supabase Before User Created hook이 그 단기 승인만 소비한다. 기존 계정은 hook 대상이 아니므로 기존 로그인/기록을 삭제하거나 새 계정으로 옮기지 않는다. 새 인증 공급자/유료 서비스/의존성 없음.
+- 파일/데이터: 기존 signup UI와 authRepo, 새 `api/signup.js`/server signup 모듈·완료 화면, additive migration의 단기 admission/암호화 session handoff와 hook/영수증 연결. Google client secret·cookie 암호화 키는 서버 환경만 사용한다. Google callback URL 등록과 hosted hook 설정은 아직 필요하며 구현과 운영 활성화를 구분한다.
+- 경계: POST start는 고정 origin·작은 JSON·현재 정책을 검사하고 HttpOnly/Secure/SameSite cookie에 임시 요청을 암호화한다. state/nonce/Google 서명·aud/iss/exp/email_verified 검사 후에만 admission을 발급한다. 이메일·토큰은 일반 로그/Git에 넣지 않는다. hook은 provider/Google subject/hash·만료·정책·일회 계정 결속을 검사한다. 사용자 편집 metadata만으로 승인을 만들지 않는다.
+- 모바일/복구: 같은 탭 redirect를 사용해 popup 차단에 의존하지 않는다. callback은 세션을 URL에 넣지 않고 짧은 일회 handoff를 cookie와 결속하여 완료 화면에 반환한다. 서버 토큰 사본은 암호화하고 소비/만료 시 정리한다. 계정/동의 저장 후 응답이 유실된 경우 기존 계정으로 재시도하며 개인 데이터를 삭제하지 않는다.
+- 검증/마일스톤: 서명·nonce/CSRF/만료/정책·응답 누락 단위 검사 → 격리 PostgreSQL hook의 미승인/재사용/계정/동시성·실제 insert+receipt 검사 → mock Google/서버 왕복 브라우저 → 기존 unit/build. 실제 hosted Hook 이벤트/Google redirect 등록은 별도 증거 없이는 PASS로 표시하지 않는다.
+- rollback/잔여: 로컬만 실행한다. 운영은 서버/브라우저 flag·새 hook·Google callback을 함께 다뤄야 하며 UI flag만 끄는 복구는 충분하지 않다. 기존 영수증/계정은 보존, 새 기능 off와 hook 이전 설정 복원. 유럽 국가별 정책/최종 고지/hosted 설정은 그대로 남으며 이번에 임의 승인/배포하지 않는다.
+
+## 2026-10-09 구현 재개 — 간단한 가입의 실제 OAuth/동의 저장 slice
+
+- 사용자 결과: 국가·생년월일·짧은 약관 확인 후 기존 Google PKCE로 이동하고, 돌아온 계정에 자기신고와 약관 버전/서버 시각을 기록한다. PASS/KWS/보호자 이메일 없음. 기존 로그인/개인 기록은 기본 off flag에서 그대로 유지한다.
+- 흐름/경계: 생년월일은 화면 메모리에만 둔다. OAuth 왕복에는 국가·신고 나이·판정일·약관 버전만 sessionStorage에 최대30분 보관하고 완료/만료/취소 시 지운다. 이 값은 인증된 나이나 보호자 동의가 아니다. OAuth는 계정 생성과 세션을 먼저 반환하므로 이후 동의 RPC를 신규 Auth 계정 생성의 서버 차단으로 오인하지 않는다. 직접 Supabase 진입 차단은 이 slice의 PASS 대상이 아니며 운영 활성 전 잔여로 남긴다.
+- 파일 지도: features/auth 최소 정책/왕복 모듈, authRepo/Callback, 가입·약관 화면/스타일, additive migration(국가 정책/자기신고 영수증/RPC), 단위·브라우저·격리 SQL 검사, 기존00/02/03/evidence.
+- 정책: KR14/PH13/TH13/미국 기본13 방향 유지. 유럽은 국가별 설정을 읽는 구조로 구현하며 확인되지 않은 국가 연령을 임의 법적 확정값으로 seed하지 않는다. 로컬 합성 정책으로 국가별13/14/15/16 경계를 검증한다. 실제 국가 추가는 동일 정책 테이블 설정으로 가능하다.
+- 데이터/권한: DOB 원문·이메일 신규 저장 없음. auth.uid로 자기 계정만 최소 영수증 저장, 정책은 공개 읽기만, 쓰기는 서버 관리자만. 기존 eligibility/공개 권한 승격 없음. migration은 로컬만 검증, 운영 미적용.
+- 검증: 순수 날짜/연령·만료/변조/redirect 테스트, 실제 로컬 화면+mock OAuth/RPC 왕복·모바일 폭·저장 실패 재시도, 격리 PostgreSQL의 계정 격리/낡은 정책/익명 거부/재시도, 기존 unit/build. hosted Google/신규 계정 차단은 별도 표시.
+- 롤백/관찰: flag off로 기존 경로 복귀. 새 테이블은 기존 행/함수 수정 없이 추가하며 영수증 보존 후 코드 revert 가능. 원문 로그/analytics 없음. 로컬 후보 상태와 운영 배포 상태를 구분하고, 국가별 출시 정책/직접 가입 경계 해결 전 운영 flag를 켜지 않는다.
+
+### 구현 재개 결과 / 인계
+
+- **읽은 문서/소스:** AGENTS·CODEX_START_HERE·확정 결정·PLANS·제품 흐름02·QA07·변경통제09·release-v2 00/01/02/03, authRepo/webOAuth/AuthCallback/BaseLayout·Supabase client·기존 SQL harness/검사 runner. verify-before-claiming 기준을 적용했다.
+- **가정/잔여:** 최소 가입 흐름의 로컬 후보 구현이며 국가별 최종 법률 판단/운영 활성화 완료가 아니다. 유럽을 일률13 또는16으로 seed하지 않는다. 선택 목록36개와 실제 정책행5개(KR/PH/TH/US/GB)를 구분한다. 미설정 국가는 특정 미성년자만 우회 승인하지 않고 설정 확인 안내를 표시한다.
+- **변경 이유/파일:** `src/features/auth/simpleSignup.js`의 날짜/자기신고·30분 유효 왕복·계정 결속, `SimpleSignup.jsx`/`auth/start.astro`의 KO/EN·국가/DOB/약관 화면, `simple-signup.css`의 좁은 단일열/휴대폰 배치. authRepo는 기본 off flag로 진입을 연결하고 webOAuth는 가입 화면 재귀 redirect를 거절한다. Callback은 Google 코드 교환 이후 영수증 저장 및 저장만 재시도한다. `/terms/`·`/privacy/`는 운영 적용 전 검토용 안내다.
+- **DB/복구:** migration `20261009130000_simple_signup_declarations.sql`은 정책/국가/계정별 영수증과 RPC만 추가, 기존 데이터·eligibility·Public 변경0. DOB 원문 저장 없음, 최소 연령 충족/연령 구간과 문서 버전·서버 시각만 기록. auth.uid와 예상 계정이 달라지면 거부, 익명/직접 테이블 접근 차단, 동일 영수증 재시도는 시각/행을 바꾸지 않는다. 계정 삭제 시 cascade. 운영 flag off 유지로 기존 흐름 복귀 가능하며 기록이 생긴 테이블의 무조건 drop은 rollback으로 사용하지 않는다.
+- **실행 결과:** `node --test tests/unit/simpleSignup.test.mjs tests/unit/webOAuth.test.mjs` 12PASS; `npm run test:unit` 469PASS; `wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-simple-signup-local.sh` 격리 SQL 계약 PASS; `node scripts/run-simple-signup-e2e.mjs` Chromium4PASS; `npm run build` 정적23페이지 성공. 최종 source 보완 후에도 unit469 및 build23페이지 재검사 성공.
+- **이번 새 사용자 행동:** 로컬 실제 React 화면에서 최소 연령/약관 누락 거절, KO/EN과390px 넘침 없음, Google authorize 이동 후 callback의 계정별 저장/원래 화면 복귀, 저장 실패 후 OAuth 코드 재교환 없는 저장 재시도, 취소 시 임시 데이터/URL payload 제거. Google·RPC HTTP는 모의 응답이며 실제 Google 신규 가입/hosted Supabase PASS가 아니다.
+- **발견/보완:** 초기 브라우저 검사는 build/dev 동시 실행에 의한 Vite cache504로 실패. 서버 재시작 후 수화 전 입력이 초기화되는 상황도 발견하여 준비 완료 전 입력을 비활성화했다. 수정 뒤 격리 runner4PASS. 한 번의 묶음 shell 요청은 자동 승인 검토가 구체적 이유 없이 거절; 파일 변경과 로컬 검사 분리 후 정상 실행. 운영 접근 차단으로 오인하지 않는다.
+- **보안/개인정보/권리/관측:** 가입·문서 화면에 analytics 없음, DOB를 Google/URL/로그로 보내지 않음. 임시 요약에는 신고 나이만 포함되며30분 후 무효; 완료/취소/만료 읽기에 삭제. 원문 예외를 사용자/로그에 출력하지 않음. 권리 확인·성인 인증·Public/Android 변경0. 자체신고를 인증 나이나 보호자 동의로 사용하지 않는다.
+- **실제 잔여/다음1개:** Google OAuth는 Auth 계정을 먼저 생성하므로 이 영수증은 신규 계정 생성 전 서버 제한이 아니다. 직접 Supabase 가입 우회와 세션 발급/동기화 전 제한이 아직 남는다. 다음은 기존 Supabase 신규 계정 생성 경계를 가입 확인과 연결하는 작업이다. 유럽 실제 정책행/최종 약관·국외 처리/보존 안내와 hosted 검증을 마감한 뒤 정확한 D06 후보에서 운영 적용한다. 이전 백업·SQL23+경합1 PASS는 이번 결과에 합산하지 않는다.
+
+## 2026-10-09 출시 지역 확장 — US/EUROPE-LAUNCH-SCOPE-01
+
+- 목적/승인: 사용자 요청으로 한국·필리핀·태국에 미국·유럽을 운영 출시 검토/수용 범위로 추가한다. 기존 W06/W14/W20·C02·D04에 흡수한다.
+- 이번 범위: 확정 결정, 시작 문서, 이 계획, C02, 단일 작업판의 현재 카드/D04, 기존 evidence만 갱신. 코드·DB·배포·공급자 연동 변경 없음. 기존 실행 증거 보존.
+- 구현 기준: 생년월일 자가 입력·국가 선택·Google 가입·최소 약관/개인정보 안내라는 공통 흐름 유지. KR14/PH13/TH13 확정 유지. 미국·유럽의 국가별 적용 기준은 C02에서 구분하며 유럽을 하나의 법역/단일 연령으로 만들지 않는다.
+- 마일스톤/다음1개: 기존 경쟁 서비스 조사에 미국·유럽 적용 차이를 대조하고 국가별 가입 판정/청소년 공개 기본값을 하나의 계약으로 정리한 뒤 기존 OAuth에 연결한다. 국가별 가입 완료 실검증과 공식 문서 조사는 구분한다.
+- 검증/보안/복구: 문서 diff 공백·JSON 구조·src 변경 없음 확인. 새 runtime PASS0, migration0, 개인정보/분석/권리/flags 변화 없음. 이번 문서 diff만 되돌릴 수 있다. PASS/KWS/보호자 이메일 재도입 및 운영 출시 완료 선언은 이번 범위가 아니다.
+
+## 2026-10-09 W06/W14/W20·D04 — 생년월일·최소 동의로 전환
+
+### 3개국 가입 구현 slice — 2026-10-09 후속
+
+**후속 지시/정정:** 사용자 요청으로 구현에 앞서 유사 서비스의 PH/TH 운영을 대조했다. 아래 후보의 미성년자 일괄 검토 차단과 서버 미준비로 항상 실패하는 OAuth 분기는 채택하지 않고 이번에 작성한 앱 파일만 원복했다. C02의 ‘3개국 후속’에 공식 자료·지역 검증 한계를 기록했다. 아래 파일 지도/목표는 실행 완료가 아닌 철회된 초안이다. 다음은 조사에 맞춘 최소 가입/청소년 공개 보호 계약이며 새 가입 시스템 확대가 아니다.
+
+- 승인: SIGNUP-KR-PH-TH-13-01, 제품 기준 KR14/PH13/TH13. PHP18/TH20을 새 최소 연령으로 확정하지 않는다.
+- 포함: 기존 Web Google 진입에 기본 off `PUBLIC_SIMPLE_SIGNUP_V1` 분기, `/auth/start/` 한 화면, KO/EN 문구, KR/PH/TH 국가 선택, 엄격한 생년월일/만 나이 검증, 약관·개인정보 안내 페이지와 동의 분리. PH13–17/TH13–19는 조건 검토 상태이며 사용자 자신의 체크를 보호자 동의 증거로 만들지 않는다. 성년 구간까지도 법적 전수 검토 PASS는 아니다.
+- 데이터: DOB는 화면 메모리에만 두고 저장/URL/분석/Google query에 넣지 않는다. 가입 전 미완료 상태를 영구 동의 기록으로 만들지 않는다. 이번 DB migration0. 서버 동의 영수증·직접 Supabase 가입 경계는 별도 잔여이므로 기능 flag를 운영에서 활성화하지 않는다.
+- 파일: `src/features/auth/signupPolicy.js`, `src/components/auth/SignupStart.jsx`, `src/pages/auth/start.astro`, `src/pages/terms.astro`, `src/pages/privacy.astro`, 가입 문서 공통 컴포넌트/스타일, `src/repositories/authRepo.js`, pure/E2E 검사. 개인정보 notice는 실제 수집/저장/삭제·위탁 국가 확인과 구분하여 검토용 초안 표시.
+- 결과 목표: 세 국가·생일 경계/미달/조건검토/성년, 동의 누락, 안전한 복귀, 휴대폰 폭/키보드·언어 전환·flag off의 기존 로그인 유지. 테스트는 합성 입력·mock OAuth이며 실제 계정 생성 없음.
+- 보안/관찰: no-store 필요 서버 경계 미구현을 숨기지 않는다. 독립 가입/문서 화면에는 analytics를 포함하지 않는다. redirect는 기존 same-origin 검사를 재사용하고 auth/start 재귀를 막는다. 오류에 원문을 출력하지 않는다.
+- 복구: flag off 또는 이번 앱 diff revert. 기존 계정·기기 기록·Android·Public·운영 설정 불변. 추가 의존성 없음.
+- 조사 근거: 필리핀 NPC 2024 child transparency FAQ Q6/13/15는 고정 digital age나 전원 인증 도구를 정하지 않으며 자가 신고의 위험 비례 평가를 요구한다. 태국 PDPA20은 미성년자의 단독 행위 능력에 따라 보호자 동의를 구분하므로 ‘10세 넘으면 모두 자유’로 해석하지 않는다. 법적 근거/보호자 요건의 해당 서비스 적용은 미확인으로 남긴다.
+
+1. **목적/승인:** DOB-SELF-DECLARATION-KR14-01에 따라 한국14세 미만 가입 제한과 간단한 가입 안내를 준비한다. PASS/보호자 이메일/KWS는 제외하며 기존 조사 절은 과거 기록으로 보존한다.
+2. **현재 증거:** authRepo.js:48–78은 Google OAuth 직행. Pinterest 한국 가입 화면의 생년월일·계속하기/Google·약관 동의/개인정보 읽음 안내와 현행 약관을 확인했다. 모든 국가의 가입 완료 검증은 아니다. 비교 결과는 C02에 기록한다.
+3. **이번 범위/결과:** 최상위 결정·기존00/01/02/03·기존 evidence의 현재 상태만 갱신. 신규 가입 코드·DB·의존성·운영 배포·공급자 문의 없음. 이전 백업/SQL 실행 로그 보존.
+4. **다음 slice:** 기존 로그인 진입을 유지하면서 생년월일/국가 판정과 최소 약관·개인정보 안내를 연결한다. 약관 버전·동의 시각/계정 결속의 최소 기록, 생년월일 원문 보존 필요성과 기간은 구현 전 확정한다. 클라이언트 입력만으로 서버 가입 제한이 보장된다고 보고하지 않는다.
+5. **검증/관찰:** 이번은 `git diff --check`, JSON parse 및 현재 카드의 오래된 KWS 다음 행동 제거 확인. 이후 생일 경계/잘못된 날짜·직접 OAuth 우회·구계정 로그인 회귀를 검사한다. 생년월일·계정 원문을 URL/분석 로그에 남기지 않는다.
+6. **잔여/롤백:** PH/TH 조건과 실제 약관 문구/가입 경계 구현은 미완료. 이번 migration0, 문서의 이번 diff만 되돌릴 수 있으며 개인 데이터/기존 정책 증거는 삭제하지 않는다. Public은 기존 off 유지. 새 계획/진행판을 만들지 않는다.
+
+> **10/9 로그인 후 확인:** Epic 조직 대시보드와 KWS 진입을 확인했다. 보호자 인증은 시작하기, 사용자 권한(동의 관리)·가족 관리·Age Gate·연령 인증은 문의하기로 표시된다. Age Gate는 셀프 서비스 불가, 연령 인증은 셀프 서비스 활성화 문의 안내다. 미등록 개인의 최종 이용 승인은 확인되지 않았다. 문의 초안을 포털에 준비했으며 미발송/약관 미수락이다. 다음은 KWS 문의 발송의 사용자 명시 승인이다. 아래 로그아웃/로그인 요청 상태는 이 확인으로 대체한다.
+
+## 2026-10-09 W06/W14/W20·D04 — 무료 관리형 보호자 동의 조사
+
+- 사용자 결정: 12세·KR/PH/TH 유지. 보호자 이메일 회신→sinong 수동 심사는 거절했다. 무료·자동 처리 대안 KWS의 실제 이용 가능 여부 조사 승인이다. 아래 가입 전 SQL slice 당시의 ‘답변 대기’는 과거 기록이다.
+- 범위/순서: 공식 요금·일반/서비스 약관·국가별 인증·개발자 시작 문서를 읽고, 포털에서 개인 개발자/동의 관리(CM)의 활성화 조건을 확인한다. 기존 00/01/02/03·최상위 결정·증거만 갱신한다. 별도 계획/가입 시스템/의존성은 추가하지 않는다.
+- 확인 결과: 무료/사용량 제한 없음·Web 포함 소프트웨어 연동 확인. 일반 약관은 성년 계약자와 상업적 이용을 요구하며 법인을 대리하는 경우를 별도로 설명한다. 이것만으로 한국 미등록 개인 개발자의 실제 live 승인을 확정하지 않는다. PV는 성인 확인, CM은 보호자 동의/권한 관리로 구분한다. 상세 출처·조건은 C02 후속 절에 기록한다.
+- 실제 차단: Epic 개발자 포털은 로그아웃 상태. 개인 계정의 등록 요건·CM 사용 권한·한국 인증 수단 활성화·live 전환 조건은 로그인 후 확인해야 한다. 사용자에게 로그인만 요청했다. 계정/조직 생성·약관 수락·메시지 발송·API 호출·개인정보 전송은 하지 않았다.
+- 검증: 공식 페이지 직접 열람과 문서/JSON 일관성 및 `git diff --check`. 새 사용자 행동 PASS는 0이며 이전 SQL23+경합1 결과를 재실행/확대 해석하지 않는다.
+- 보안/롤백: 운영 코드·DB·flags 변경0. 기존 로컬 승인 결속 후보는 동결한다. 향후 PV 성공을 동의로 간주하지 않고 검증된 CM 권한 상태/철회를 지정 신청·계정과 결속해야 한다. 이번 문서 변경만 되돌릴 수 있다.
+- 다음1개: 로그인된 Epic 포털에서 MOEMOA의 개인 등록/CM 제공 조건 확인. 실제 KWS 사용에 앞서 구체적 약관 동의가 필요하며 조사 승인을 계약 승인으로 간주하지 않는다.
+
 ## 2026-10-09 W15/W17/W20 운영 출시 마감 — 현재 실행
 
 1. **목적:** 이미 배포된 개인용 Web을 보존하면서 실제 공개 출시의 비용·복구·운영·DB 잔여를 마감한다. 새 단계/진행판은 만들지 않는다.
@@ -1049,3 +1162,25 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 - 검증: 원본 로컬 제거 후 /titles/ 사진 표시, 재방문 binary 다운로드 증가 없음, 로그아웃/계정 변경 후 사진 제거를 기존 private-image-sync e2e에 추가. unit/build, 관련 Chromium 및 React Doctor. Git preview 배포 후 실제 로그인 화면 확인.
 - 보안/복구: DB migration/공개/자동 업로드/권한 변경 없음. 사진URL cleanup 및 소유자 검증 유지. 이 UI 커밋 revert로 복구.
 - 결과: unit407 PASS, Chromium8 PASS(원격 사진/재방문 캐시/계정 전환 및 기존 태그·열 조절·두 보기·320px 포함), build19 PASS. React Doctor72/100·20warnings으로 기존과 동일. codex/phone-test Git preview에 반영하며 실제 /titles/ 확인을 이어간다. 실기기 Safari는 별도 확인.
+
+### 2026-10-09 D05 운영 연결 복구·실제 백업 후속
+
+사용자가 소유자 계정 로그인 및 DB 비밀번호 재설정/로컬 파일 저장을 완료했다. 비밀값은 읽기 전용 연결 프로세스의 표준입력/환경으로만 전달하고 출력하지 않는다. 운영 PG17 연결 확인 후, 기존 PG16과 분리한 공식 PG17 client를 임시 폴더에서 사용한다. 기존 AES-GCM 도구를 재사용하여 ACL 제한 로컬 staging의 DB dump·Storage 사본·최신 retirement journal을 암호화한다. 운영 변경/삭제/flags 활성화는 하지 않는다. 서버 키 확보, 별도 복구키 보관 및 Drive 외부 사본/격리 복구의 실제 증거가 확보되기 전 D05를 완료로 표시하지 않는다. 다운로드한 임시 client는 시스템 설치하지 않으며 운영 설정 rollback은 필요 없다. 이번 연결/수집 결과는 과거 합성 복구 PASS와 구분하여 아래 누적한다.
+
+- 후속 결과: verify-full 운영 PG17.6 연결 성공. 시스템 변경 없이 공식 PG17.11 client로 read-only dump57,829,282bytes/Storage4304개856,669,715bytes 수집. 전후 Storage 목록 동일, 최신journal 갱신. 개별 ETag·크기 일치. Windows Node 복원은 최종rename EPERM이 재현되며 bounded retry 실험도 실패하여 소스 원복. 독립 Python AES-GCM으로4308파일917,084,869bytes 복호화·전파일SHA256/길이 일치, 복원된 개인 이미지12개 실제decode. 전체DB import/외부재난복구 PASS 아님. 관련 암호화 unit5 PASS, 이전 운영8fb4b49 CI37909546625 SUCCESS 확인. 새 비밀키/개인 원문을 Git에 넣지 않았고 암호화 키는 별도 로컬 ACL 폴더에 생성했다. 외부키 보관과 Drive 전송/회수 검증은 별도 미완료다. 실제 운영데이터를 포함하는 파일의 Drive 전송 직전 구체적 계정/파일을 사용자에게 확인한다.
+
+- 외부 사본 후속: 사용자가 암호화 ZIP의 지정 Google Drive 계정/비공개 폴더 업로드를 승인했다. 918,803,598bytes ZIP(키 제외)의 업로드100%/1개 완료 및 비공개 표시 확인. 외부 재다운로드는 download 대기/클릭의 브라우저 시간 제한, 다음 관측 링크의 대체 downloadMedia locator 부재로 로컬 파일 경로를 확보하지 못했다. 외부 SHA256·재난 복구는 PASS 아님; 같은 시도를 반복하지 않고 차단을 기록했다. 별도 키 사본은 사용자 확인 대기. 다음 독립 작업은 기존 W06/W14/W20의 가입 전 보호자 동의 절차다. 업로드 증거는 Git 제외 .cache/production-backup-drive-uploaded.png, 민감 원문/키는 Git에 포함하지 않는다.
+
+### 2026-10-09 W06/W14/W20 가입 전 승인 결속 — 기존 ExecPlan 후속
+
+1. 목적/결정: 12세·KR/PH/TH 및 보호자 동의 준비(C02)를 유지하며 승인 없는 새 계정 생성의 서버 우회 지점을 확인한다. 수동 이메일 방식은 사용자 답변 대기이고 국가별 법률/보존 조건은 미확정이다.
+2. 현재 증거: authRepo.js:50의 Google OAuth에 사전 동의 경계 없음. identity/eligibility 후보는 auth.users가 있어야 하므로 그대로 재사용할 수 없음. Supabase 공식 Before User Created hook은 DB insert 직전 user.id/email/app_metadata를 받으며 OAuth 시작 전 수집을 차단하는 기능이 아니다(https://supabase.com/docs/guides/auth/auth-hooks/before-user-created-hook, 2026-10-09 조회).
+3. 범위/아키텍처: 이번 독립 slice는 tools/identity의 로컬 SQL 후보+합성 계약 검사. 서버에서 이미 확인한 신청의 정책 버전/용도/만료/철회/정확한 Google 이메일과 제안 user ID의 일회 결속만 담당한다. 체크박스나 client user_metadata는 신뢰하지 않는다. 동의 증거 발급/메일 전송/국가 연령판정/공개·성인 권한 발급/API·운영 hook 설정은 제외한다.
+4. 파일 지도/스키마: signup-admission-candidate.sql, signup-admission-contract.sql, run-signup-admission-local.sh. 기존 테이블·데이터를 변경하지 않는 독립 local candidate이며 정식 migration 아님. policy는 기본 disabled, synthetic evidence만 사용. 새 라이브러리 없음.
+5. 마일스톤/검증: 신규 계정이 없는 상태의 승인 결속, 승인 없음/위조 metadata/만료/다른 이메일/다른 UUID/정책 변경/철회/잘못된 provider 거절, 동일 UUID retry, rollback 및 역할 권한 검사. disposable PostgreSQL에서 실행; hosted OAuth 실검증과 구분한다.
+6. 보안/관찰: 가입 email/증거 ID는 private 테이블에서만 조회, 일반 로그에는 조건별 PASS만. email은 OAuth 반환값과 비교할 서버 보유 hash만 후보에 저장한다(익명정보로 취급하지 않음). 신청 접수·동의 증빙 원문 보관은 별도 정책 확정 전 수집하지 않는다.
+7. 롤백/복구: 운영 적용 없음, disposable DB 종료; 기존 코드/로그인/기록 보존. 향후 hook은 서버 계정 생성 후 cloud 권한 발급·철회와 원자성/복구를 함께 검증하기 전 활성화 금지.
+8. 위험/필요 결정: before-create hook이 계정 생성 전후 동일 트랜잭션에 있는지 hosted 확인 필요. hook 성공 후 계정 생성 실패 시 승인 재사용 계약도 실제 확인. 보호자 자격 확인 방식/보존/국가 안내·기존 사용자 적용은 D04 잔여; 이 slice 통과로 동의 완료 또는 출시 가능 판정 금지.
+9. 진행/완료: 아래 실제 명령·결과를 누적한다. 기존 W/단일 작업판만 갱신한다.
+
+10. 완료 보고(로컬 slice): `wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-signup-admission-local.sh` 최종 실행 exit0, SQL23조건+실제 동시 세션1조건 PASS. `git diff --check` 통과. 이번 변경은 tools/identity의 후보 SQL/검사/격리 runner 및 기존 문서/증거뿐이며 앱 UI·운영 DB/flags·가입 설정·메일·결제 변경0. 합성 입력만 사용, 개인정보 신규 수집0, 새 의존성0. 기존463 unit/build20/백업4308 PASS는 이전 실행이며 이번에 반복하지 않았다. 공식 hook 계약 검토 및 기존 C02/최상위 결정·PLANS·QA07·보고09·authRepo/identity 후보를 읽었다. 보호자 확인 방식 질문 미응답, 보존/법률 조건 및 실제 Auth 서비스 통합은 미확인. 다음1개: 수동 확인 방식 확정 뒤 접수→검토→승인·철회 연결.

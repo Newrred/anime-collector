@@ -34,7 +34,7 @@ export function resolveWebOAuthNext({ rawNext = "", pendingNext = "", origin, ba
     const resolved = new URL(candidate, safeOrigin);
     if (resolved.origin !== safeOrigin.origin || resolved.username || resolved.password) return fallback;
     const path = decodeURIComponent(resolved.pathname);
-    if (path.startsWith(`${appBase}auth/callback`) || /(?:access_token|refresh_token|code|error_description)=/i.test(decodeURIComponent(resolved.search + resolved.hash))) return fallback;
+    if (path.startsWith(`${appBase}auth/`) || path.startsWith(`${appBase}api/`) || /(?:access_token|refresh_token|code|error_description)=/i.test(decodeURIComponent(resolved.search + resolved.hash))) return fallback;
     const insideBase = appBase === "/"
       || resolved.pathname === appBase.slice(0, -1)
       || resolved.pathname.startsWith(appBase);

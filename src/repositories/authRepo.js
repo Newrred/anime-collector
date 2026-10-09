@@ -12,6 +12,7 @@ import {
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 import { startNativeGoogleOAuth } from "../features/auth/nativeOAuth.js";
+import { clearPendingSignup } from '../features/auth/simpleSignup.js';
 
 const AUTH_NEXT_STORAGE_KEY = "auth.redirect.next";
 
@@ -46,6 +47,15 @@ export function consumePendingAuthNext() {
 }
 
 export async function signInWithGoogle(next = "/data/") {
+  if (typeof window !== 'undefined' && !Capacitor.isNativePlatform() && import.meta.env.PUBLIC_SIMPLE_SIGNUP_V1 === '1') {
+    const safeNext = resolveWebOAuthNext({ rawNext: next, origin: window.location.origin, base: basePath() });
+    window.location.assign(`${basePath()}auth/start/?next=${encodeURIComponent(safeNext)}`);
+    return;
+  }
+  return startGoogleOAuth(next);
+}
+
+export async function startGoogleOAuth(next = "/data/", declaration) {
   if (!supabase) throw new Error("Supabase env missing");
   if (typeof window === "undefined") throw new Error("Window unavailable");
 
@@ -64,6 +74,15 @@ export async function signInWithGoogle(next = "/data/") {
       base: basePath(),
     });
   }
+  if (import.meta.env.PUBLIC_SIMPLE_SIGNUP_V1 === '1') {
+    const response=await fetch('/api/signup?action=start',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({declaration,next:safeNext})});
+    const data=await response.json();
+    if(!response.ok||!data.url)throw Object.assign(new Error('Signup failed'),{code:data.error});
+    const target=new URL(data.url);
+    if(target.origin!=='https://accounts.google.com'||target.pathname!=='/o/oauth2/v2/auth')throw new Error('Invalid sign-in destination');
+    window.location.assign(target.toString());return;
+  }
   persistPendingAuthNext(safeNext);
   const redirectTo = buildWebOAuthRedirect({
     origin: window.location.origin,
@@ -78,6 +97,8 @@ export async function signInWithGoogle(next = "/data/") {
 }
 
 export async function signOutFromCloud() {
+  try { if (typeof window !== 'undefined') clearPendingSignup(window.sessionStorage); }
+  catch { /* Storage restrictions must never prevent signing out. */ }
   privateImageReadCache.clear();
   if (readMockAuthSession()) {
     clearMockAuthSession();

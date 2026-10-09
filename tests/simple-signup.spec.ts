@@ -1,0 +1,66 @@
+import {test,expect} from '@playwright/test';
+test.skip(process.env.MOEMOA_SIMPLE_SIGNUP_E2E !== '1', 'Run with scripts/run-simple-signup-e2e.mjs (isolated mock backend).');
+const policy={enabled:true,version:'simple-signup-2026-10-09',termsVersion:'terms-2026-10-09-draft',privacyVersion:'privacy-2026-10-09-draft',countries:[{country:'KR',minimumAge:14},{country:'PH',minimumAge:13},{country:'TH',minimumAge:13},{country:'US',minimumAge:13},{country:'GB',minimumAge:13},{country:'FR',minimumAge:15},{country:'DE',minimumAge:16}]};
+const account='11111111-1111-4111-8111-111111111111';
+const token=[{alg:'HS256',typ:'JWT'},{sub:account,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600},'signature'].map(x=>Buffer.from(typeof x==='string'?x:JSON.stringify(x)).toString('base64url')).join('.');
+async function mockBackend(page:any,{failSession=false}={}) {
+ const calls:any[]=[];
+ await page.route('**/api/signup?**',async(route:any)=>{
+  const req=route.request(),action=new URL(req.url()).searchParams.get('action');calls.push({path:action,body:req.postData(),url:req.url()});
+  if(action==='start')return route.fulfill({json:{url:'https://accounts.google.com/o/oauth2/v2/auth?state=fixture'}});
+  if(action==='session')return route.fulfill(failSession?{status:503,json:{error:'SIGNUP_DETAILS_EXPIRED'}}:{json:{session:{access_token:token,refresh_token:'test-refresh'},next:'/terms/'}});
+  return route.fulfill({status:404});
+ });
+ await page.route('https://accounts.google.com/**',route=>route.fulfill({contentType:'text/html',body:'<p>Mock Google handoff</p>'}));
+ await page.route('http://127.0.0.1:54399/**',async(route:any)=>{
+  const request=route.request(),url=new URL(request.url());calls.push({path:url.pathname,body:request.postData(),url:request.url()});
+  if(url.pathname.endsWith('/get_simple_signup_policy')) return route.fulfill({json:policy});
+  if(url.pathname==='/auth/v1/authorize')return route.fulfill({contentType:'text/html',body:'<p>Mock Google handoff</p>'});
+  if(url.pathname==='/auth/v1/token')return route.fulfill({json:{access_token:token,refresh_token:'test-refresh',expires_in:3600,token_type:'bearer',user:{id:account,email:'fixture@example.test',app_metadata:{provider:'google'},user_metadata:{}}}});
+  if(url.pathname==='/auth/v1/user')return route.fulfill({json:{id:account,email:'fixture@example.test'}});
+  return route.fulfill({status:404,json:{message:'unmocked'}});
+ });
+ return calls;
+}
+async function fill(page:any,country='KR',dob='2000-10-09') {
+ await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
+ await page.selectOption('#signup-country',country);
+ await page.fill('#signup-birthday',dob);
+ await page.getByRole('checkbox').check();
+ await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
+}
+test('below-age and missing terms stay before Google; Korean and English layouts fit mobile',async({page},info)=>{
+ const calls=await mockBackend(page);await page.setViewportSize({width:390,height:844});
+ await page.goto('/auth/start/');await fill(page,'KR','2020-10-09');
+ await page.getByRole('button',{name:'Google로 계속'}).click();
+ await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
+ expect(calls.some(c=>c.path==='start')).toBe(false);
+ await page.fill('#signup-birthday','2000-10-09');await page.getByRole('checkbox').uncheck();
+ await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page.getByRole('alert')).toContainText('동의');
+ await page.getByRole('button',{name:'English',exact:true}).click();await expect(page.getByRole('heading',{level:1})).toContainText('Keep your memories');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:info.outputPath('signup-mobile.png'),fullPage:true});
+});
+test('simple Google handoff and completion restore session without DOB or tokens in URLs',async({page},info)=>{
+ const calls=await mockBackend(page);await page.goto('/auth/start/?next=/terms/');await fill(page);
+ await page.screenshot({path:info.outputPath('signup-desktop.png'),fullPage:true});
+ await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
+ const start=calls.find(c=>c.path==='start');expect(JSON.parse(start.body)).toMatchObject({declaration:{country:'KR',accepted:true},next:'/terms/'});expect(start.body).not.toContain('2000-10-09');
+ await page.goto('/auth/complete/');await expect(page).toHaveURL(/\/terms\/$/);
+ expect(calls.filter(c=>c.path==='session')).toHaveLength(1);
+ expect(await page.evaluate(()=>sessionStorage.getItem('moemoa.signup.pending.v1'))).toBeNull();
+});
+test('lost or expired handoff provides a safe restart without exposing session',async({page})=>{
+ const calls=await mockBackend(page,{failSession:true});await page.goto('/auth/complete/');
+ await expect(page.getByRole('alert')).toContainText('다시 시작');
+ expect(calls.filter(c=>c.path==='session')).toHaveLength(1);
+ expect(calls.filter(c=>c.path==='/auth/v1/token')).toHaveLength(0);
+ await page.getByRole('link',{name:'다시 시작 · Start again'}).click();await expect(page).toHaveURL(/\/auth\/start\/$/);
+});
+test('provider cancellation clears pending declaration and URL payload',async({page})=>{
+ const calls=await mockBackend(page);await page.goto('/auth/start/');await fill(page);await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
+ await page.goto('/auth/complete/?error=GOOGLE_CANCELLED&error_description=private-provider-detail');
+ await expect(page.getByRole('alert')).toContainText('cancelled');expect(page.url()).not.toContain('private-provider-detail');
+ expect(await page.evaluate(()=>sessionStorage.getItem('moemoa.signup.pending.v1'))).toBeNull();
+ expect(calls.some(c=>c.path==='session')).toBe(false);
+});
