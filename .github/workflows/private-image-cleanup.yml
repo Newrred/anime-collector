@@ -24,4 +24,6 @@ jobs:
           CLEANUP_SECRET: ${{ secrets.MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET }}
           STORAGE_ALERT_BYTES: ${{ vars.MOEMOA_PRIVATE_STORAGE_ALERT_BYTES }}
           READ_ALERT_BYTES: ${{ vars.MOEMOA_PRIVATE_READ_ALERT_BYTES }}
+          # Manual verification observes only; scheduled maintenance keeps cleanup.
+          OBSERVE_ONLY: ${{ github.event_name == 'workflow_dispatch' }}
         run: node scripts/private-image-maintenance.mjs

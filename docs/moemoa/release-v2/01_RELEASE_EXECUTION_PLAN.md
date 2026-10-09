@@ -16,7 +16,7 @@
 12. **복귀:** 코드/운영 workflow는 해당 Git commit revert. DB rollback은 flags off와 안전한 함수 복원이며 삭제·철회 fence/개인 행을 역삭제하지 않는다. 백업 복구는 격리 검증 후 재개하며 stale 정책 자동 복원 금지.
 13. **위험:** 과거 진행판 미완료와 현행 미완료 혼동, private-only 설치에 과거 Public SQL을 무작정 replay하는 함수 덮어쓰기, Drive 사본/키를 같은 위치에 두는 위험을 피한다.
 14. **결정:** Drive/One 확정。12세·KR/PH/TH 유지와 동의 절차 준비를 사용자 재확정했다. C02에 가입 전 안내/접수·보호자 확인·계정 결속·철회 수용 계약을 마련했다. 실제 방법/보존/국가별 조건은 아직 미확정이며 성인 본인인증 도입과 분리한다. 운영 DB 비밀번호는 사용자 모름 응답, 임의 초기화하지 않는다.
-15. **진행:** 운영 read-only preflight·기존 예약 성공 확보. 경보 스크립트4개 포함 unit462/462·build20 PASS. 지원 이메일/메일 링크와 공개 미제공 안내 보완. `tools/operations/build-public-upgrade-rehearsal.mjs` → `run-public-upgrade-rehearsal.sh` 로컬13 SQL 단언 PASS. 실제 운영 기능의 추가 변경 없이 합성 기존 카드/태그/사진 읽기·retirement를 확인했다.
+15. **진행:** 운영 read-only preflight·기존 예약 성공 확보. 경보 스크립트5개 포함 unit463/462·build20 PASS. 지원 이메일/메일 링크와 공개 미제공 안내 보완. `tools/operations/build-public-upgrade-rehearsal.mjs` → `run-public-upgrade-rehearsal.sh` 로컬13 SQL 단언 PASS. 실제 운영 기능의 추가 변경 없이 합성 기존 카드/태그/사진 읽기·retirement를 확인했다.
 16. **발견/변경:** Public SQL은 private compat fence/retirement 함수와 충돌한다. 원본 migration 변경 없이 두 create 문장만 적응하는 로컬 전용 후보·hash manifest를 준비했다. 신규 schema+full retirement를 원자 적용한다. 운영에서는 백업·현행 ledger·정확한 적용 hash/data release/안전한 rollback 확인 뒤 별도 적용 후보가 필요하다. 72table 복원/기초 A-B 재검사 아님. 동의 기반 코드에는 pre-account guard/실접수/issuer가 없음을 확인해 단순 UI 체크나 identity receipt를 동의로 승격하지 않았다.
 17. **완료 보고/한계:** [이번 증거](evidence/2026-10-09-release-closeout.json),03 W/D/Q/현재 카드 참조. 운영 DB 변경0·백업 사본/키 생성·업로드0·유료 계약0. 변경한 경보·지원 코드만 Git 배포하고 SHA 확인한다. `revert`로 해당 코드 복귀 가능, 데이터/삭제 fence 역삭제 없음. 실제 동의 구현/운영과 외부 백업·경보 수신·Public 최종 후보는 미완료다. 읽은 문서는 AGENTS/시작/확정 결정/PLANS/QA07/변경09/기존 운영·backup/identity·release-v2, 실제 명령·결과는 증거에 분리했다.
 

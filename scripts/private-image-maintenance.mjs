@@ -33,16 +33,19 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
     return response.json();
   };
   // Cleanup failure must not prevent capacity observation; report both results.
+  const cleanupSkipped = env.OBSERVE_ONLY === 'true';
   let cleanup, cleanupFailed = false;
-  try {
-    cleanup = await call('/api/private-image-cleanup');
-    if (!Number.isInteger(cleanup.deleted) || cleanup.deleted < 0 || cleanup.deleted > 50 || cleanup.failed !== 0) throw new Error();
-  } catch { cleanupFailed = true; }
+  if (!cleanupSkipped) {
+    try {
+      cleanup = await call('/api/private-image-cleanup');
+      if (!Number.isInteger(cleanup.deleted) || cleanup.deleted < 0 || cleanup.deleted > 50 || cleanup.failed !== 0) throw new Error();
+    } catch { cleanupFailed = true; }
+  }
   const capacity = evaluatePrivateCapacity(await call('/api/private-image-observe'), {
     storageAlertBytes: env.STORAGE_ALERT_BYTES ? Number(env.STORAGE_ALERT_BYTES) : 80_000_000,
     readAlertBytes: env.READ_ALERT_BYTES ? Number(env.READ_ALERT_BYTES) : 400_000_000,
   });
-  return { deleted: cleanupFailed ? null : cleanup.deleted, cleanupFailed, ...capacity };
+  return { deleted: cleanupSkipped || cleanupFailed ? null : cleanup.deleted, cleanupSkipped, cleanupFailed, ...capacity };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -51,7 +54,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.log(JSON.stringify(result));
     if (process.env.GITHUB_STEP_SUMMARY) {
       await appendFile(process.env.GITHUB_STEP_SUMMARY,
-        `## Private image capacity\n\nObserved: ${result.observedAt}\n\nStorage/reservations: ${result.storageBytes} bytes (alert ${result.storageAlertBytes})\n\nMonthly reads: ${result.readBytes} bytes (alert ${result.readAlertBytes})\n\nCleanup: ${result.cleanupFailed ? 'FAILED' : `${result.deleted} retired representations removed`}\n\nAlerts: ${result.alerts.join(', ') || 'none'}\n`);
+        `## Private image capacity\n\nObserved: ${result.observedAt}\n\nStorage/reservations: ${result.storageBytes} bytes (alert ${result.storageAlertBytes})\n\nMonthly reads: ${result.readBytes} bytes (alert ${result.readAlertBytes})\n\nCleanup: ${result.cleanupSkipped ? 'SKIPPED (manual observation)' : result.cleanupFailed ? 'FAILED' : `${result.deleted} retired representations removed`}\n\nAlerts: ${result.alerts.join(', ') || 'none'}\n`);
     }
     for (const code of [...result.alerts, ...(result.cleanupFailed ? ['PRIVATE_CLEANUP_FAILED'] : [])]) console.error(`::error::${code}`);
     if (result.cleanupFailed || result.alerts.length) process.exitCode = 1;

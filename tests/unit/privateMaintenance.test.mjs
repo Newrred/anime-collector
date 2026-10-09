@@ -3,6 +3,17 @@ import assert from 'node:assert/strict';
 import { evaluatePrivateCapacity, runPrivateMaintenance } from '../../scripts/private-image-maintenance.mjs';
 
 const snapshot = (changes = {}) => ({ observedAt: new Date().toISOString(), storedBytes: 100, reservedBytes: 100, globalReadBytes: 200, ...changes });
+test('manual observation never calls deletion endpoint', async () => {
+  const calls=[];
+  const result=await runPrivateMaintenance({CLEANUP_ORIGIN:'https://example.test',CLEANUP_SECRET:'x'.repeat(32),OBSERVE_ONLY:'true'}, async url => {
+    calls.push(url.pathname);
+    return {ok:true,json:async()=>snapshot()};
+  });
+  assert.deepEqual(calls,['/api/private-image-observe']);
+  assert.equal(result.cleanupSkipped,true);
+  assert.equal(result.cleanupFailed,false);
+  assert.equal(result.deleted,null);
+});
 test('capacity alerts cover reserved storage and monthly reads at threshold', () => {
   assert.deepEqual(evaluatePrivateCapacity(snapshot()).alerts, []);
   assert.deepEqual(evaluatePrivateCapacity(snapshot({ reservedBytes: 80_000_000, globalReadBytes: 400_000_000 })).alerts,

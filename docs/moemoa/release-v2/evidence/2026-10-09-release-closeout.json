@@ -22,8 +22,8 @@
     "maintenanceBeforeChange": "GitHub 37891316783 success at 2026-10-09T06:00Z"
   },
   "newValidation": [
-    {"command":"node --test tests/unit/privateMaintenance.test.mjs", "result":"4 PASS: threshold/reservation, stale data, cleanup failure still observes, bounded authenticated calls and aggregate output"},
-    {"command":"npm run test:unit", "result":"462 PASS, 0 fail/skip (includes maintenance4)"},
+    {"command":"node --test tests/unit/privateMaintenance.test.mjs", "result":"Initial 4 PASS (follow-up manual-observation test also passed in unit463): threshold/reservation, stale data, cleanup failure still observes, bounded authenticated calls and aggregate output"},
+    {"command":"npm run test:unit", "result":"463 PASS, 0 fail/skip (includes maintenance5; final follow-up run)"},
     {"command":"npm run build", "result":"20 pages PASS"},
     {"command":"node tools/operations/build-public-upgrade-rehearsal.mjs", "result":"15 source migrations, 2 explicit compatibility adaptations, LOCAL_ONLY bundle and source/applied SHA256 manifest"},
     {"command":"wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-public-upgrade-rehearsal.sh", "result":"13 SQL assertions PASS on disposable PG16. Existing synthetic card/classification/media/reservation/policy/sync/fences preserved; existing owner image read then retirement succeeds after upgrade; Public remains disabled. pg_cron not exercised."}
