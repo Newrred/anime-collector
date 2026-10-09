@@ -241,7 +241,8 @@
     "node --test tests/unit/privateCleanup.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs: 11 PASS",
     "npm run build: 25 pages PASS",
     "Approved operator Google login, fixed-target role connection, independent readback: exactly one enabled moderator; signup/Public OFF; signup purge latest status succeeded",
-    "master d07a20d Vercel Git Production Ready and www build-info source/commit match; signup disabled; initial cleanup deployment disabled before added environment applies"
+    "master d07a20d Vercel Git Production Ready and www build-info source/commit match; signup disabled; initial cleanup deployment disabled before added environment applies",
+    "Global public reservation budget: 9 local checks; production migration and 20MiB ceiling applied with independent readback; private global 100000000 bytes unchanged; public still off"
   ],
   "previousEvidenceNotRerun": [
     "Actual test Google C signup",
@@ -252,7 +253,7 @@
     "Final country eligibility and operating notices/document versions",
     "Production Auth hook and aligned signup enablement",
     "Public quotas/policy and backend/UI switches",
-    "Next Git deployment includes new public cleanup environment; verify live auth boundary; actual scheduled cleanup is not yet observed"
+    "Actual authenticated scheduled public cleanup execution (not observed by unauthenticated 401 check)"
   ],
   "rollback": "Disable signup UI/server plus admission/Hook together; disable Public reads/writes. Preserve additive schema, accounts and existing data. No destructive down migration.",
   "operatorPreviousAttempt": {
@@ -293,9 +294,88 @@
       "name": "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED",
       "enabled": true
     },
-    "nextGitDeploymentRequired": true,
+    "nextGitDeploymentRequired": false,
     "authenticatedExecutionObserved": false,
     "scope": "Retired public derivatives only; existing private cleanup schedule unchanged; no publishing enabled",
-    "rollback": "Set server and GitHub public cleanup switches false; do not remove private maintenance or stored images"
+    "rollback": "Set server and GitHub public cleanup switches false; do not remove private maintenance or stored images",
+    "liveReadback": {
+      "build": {
+        "commit": "d5444046fc23fe808ca2fd20055109f9b25be657",
+        "checkoutCommit": "d5444046fc23fe808ca2fd20055109f9b25be657",
+        "source": "vercel-git"
+      },
+      "/api/public-image-cleanup": {
+        "status": 401,
+        "error": "AUTH_REQUIRED"
+      },
+      "/api/signup?action=start": {
+        "status": 404,
+        "error": "SIGNUP_DISABLED"
+      }
+    }
+  },
+  "freePlanDecision": "User: keep Free for now; no subscription or payment changes",
+  "storageObservation": {
+    "production": [
+      {
+        "bytes": 855987001,
+        "objects": 4292,
+        "bucket_id": "catalog-covers-preview"
+      },
+      {
+        "bytes": 454464,
+        "objects": 10,
+        "bucket_id": "memory-private-representations"
+      }
+    ],
+    "test": [
+      {
+        "bytes": 38464,
+        "objects": 2,
+        "bucket_id": "memory-private-representations"
+      },
+      {
+        "bytes": 34424,
+        "objects": 3,
+        "bucket_id": "memory-public-derivatives"
+      }
+    ],
+    "limitation": "Storage object metadata only, not a bill or bandwidth observation"
+  },
+  "publicGlobalBudget": {
+    "application": {
+      "release": "MOEMOA_PUBLIC_GLOBAL_BUDGET_PROD_20261010_01",
+      "mode": "APPLIED",
+      "target": "okchpyagfucpzpyrfgol",
+      "sourceCommit": "b8901aa31ab461adee5297149333ac6816386ba0",
+      "sourceSha256": "88275a716ae0e0f9da24bee8000c73eed757797b25eb93bf4923bffb8f7e571d"
+    },
+    "independentReadback": {
+      "release": "MOEMOA_PUBLIC_GLOBAL_BUDGET_PROD_20261010_01",
+      "mode": "INSPECT",
+      "target": "okchpyagfucpzpyrfgol",
+      "checks": [
+        {
+          "policy": {
+            "enabled": true,
+            "singleton": true,
+            "max_reserved_bytes": 20971520
+          },
+          "publicOff": true,
+          "triggerEnabled": true,
+          "migrationRecorded": true,
+          "privateGlobalBytes": 100000000,
+          "reservedPublicBytes": 0
+        }
+      ]
+    },
+    "localCommand": "wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-public-storage-budget-local.sh",
+    "localResult": "8 SQL assertions + 1 two-connection race PASS",
+    "failedHarnessAttempts": [
+      "Default WSL root rejected by initdb before any DB start",
+      "Missing local catalog revision dependency; corrected setup before successful run"
+    ],
+    "scope": "Adds global reserved bytes ceiling; no account quota changes, paid upgrades, image deletion or public activation",
+    "rollback": "Keep Public reads/writes off; disable private.memory_public_storage_policy.enabled. Preserve schema and reservations."
   }
 }

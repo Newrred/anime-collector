@@ -2,6 +2,8 @@
 
 ## 2026-10-10 신규 가입·공개 보드/미니홈 운영 적용
 
+- **총량 보완 실행 결과:** 실제 public asset 테이블에 기본off migration을 적용한 격리 PG16에서8개 경계검사와 서로 다른 계정의2연결 경합1개 PASS. 최초 harness는 root 실행/카탈로그 의존성 누락으로 준비 실패했고 postgres 사용자·기존 의존 migration 추가 후 통과했다. 운영 source b8901aa의 고정대상 runner `--apply`와 별도 inspect 성공: release `MOEMOA_PUBLIC_GLOBAL_BUDGET_PROD_20261010_01`, 정책20MiB/trigger enabled/ledger 기록/공개 예약0, 기존 private100,000,000bytes 유지, Public off. 적용 중 기존 공개 사본0/무료 여유/이력33을 검사했으며 원본 쓰기·삭제0. Python syntax와 diff 검사 PASS. 증거/결정/기존 작업판 갱신 후 master Git에 반영한다. 실제 공개 업로드 PASS나 서비스 전체 비용 상한 보장으로 부르지 않는다.
+
 - **무료 유지 결정과 필요한 보완:** 사용자 「일단 무료 유지」(10/10). 운영 storage metadata 집계: 표지855,987,001bytes/4,292개, 개인 사본454,464bytes/10개; test 개인38,464bytes/2개, 공개34,424bytes/3개. 결제/기존 이미지 삭제 없음. 현재 `reserve_memory_public_asset`의 asset_bytes_limit는 user_id별 합계여서 서비스 전체 예산을 제한하지 못한다. 기존 W08/W15·D03 안에서 별도 private 정책/증가분 trigger로 전 계정 공개 예약 총량을 제한한다. 준비/실패/삭제 대기도 포함, 실제 DELETED 이후만 반환. 정책 기본off, 운영 후보20MiB(공개 게시 활성 승인이 아님). 기존 operationId·원본·개인 저장 한도 보존. 격리 PostgreSQL에서 경계/서로 다른 계정 경합을 검사하고 버전 관리 migration/release ID로 기본off schema와 cap만 적용한다. rollback은 정책off(게시도off 유지)이며 원본/기록 삭제나 예약 ID 변경은 없다. 무료 저장/전송의 무제한 제공 또는 모든 비용 상한을 보장하는 설정은 아니다.
 
 - **운영 Git 결과/정리 설정:** master d07a20d의 Vercel Production `7F61XYncXGatcEUTkMUKwrGeGP6c` Ready 및 www build-info commit/checkoutCommit/source 일치 확인. 새 signup404/SIGNUP_DISABLED. 이어 Vercel Production `MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED=true`와 GitHub 동명 변수 true를 등록했다. 환경 등록보다 먼저 시작한 배포의 cleanup503/DISABLED는 예상 상태이며 다음 master Git 배포로 반영한다. 인증 없는 호출401 확인은 권한 경계만 입증하고 실제 정리/삭제 PASS와 구분한다. 기존6시간/50개 한도·private 작업은 유지하며 public 양쪽 switch false로 정리 예약만 중단 가능하다.
