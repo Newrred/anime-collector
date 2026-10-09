@@ -1,5 +1,17 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 신규 가입·공개 보드/미니홈 운영 적용
+
+- **승인/목표:** 사용자 “새 생년월일 가입 절차와 공개 보드·미니홈 적용 ㄱ”. 해당 기능의 운영 DB/서버/Web 연결 및 master Git 배포 진행 승인. 기존 계정·기록·사진/동기화 보존, 성인 영역·별도 권리 미승인 이미지·자동 개인자료 게시 제외. 검사 범위를 확대하지 않고 기존 hosted/CI PASS를 재사용한다.
+- **확인 자료:** 시작문서/결정01/기존00~03/AGENTS/PLANS/UGC05/QA07/보고09/설정지도, 가입 migration/API·정책/고지, 기존 private-only→public 업그레이드 생성기/계약·최신 운영 preflight를 대조한다.
+- **진행:** 실제 운영 migration 이력과 필요한 schema 차이를 읽어 기본off의 추가 schema 묶음·SHA·release ID를 먼저 고정한다. 실행 도구는 고정 운영 ref/TLS/이력/현재함수 지문·삭제fence 보존을 검사하고 원자 적용/후속 읽기 확인. 소스/배포/정책 준비 전 flags는 켜지 않는다. 기존 local-only/test-only 도구의 가드를 해제하지 않고 별도 운영 경로를 준비한다.
+- **가입 연결:** 운영 Google client는 테스트와 다르다. 기존 운영 client ID/secret 및 새 서버 cookie key의 필요한 저장만 준비한다. 비밀값은 사용자 직접 입력 또는 승인된 local secret 경로로 처리하며 tool/Git/로그에 출력하지 않는다. 운영 callback·Auth Hook·만료정보 purge·국가별 최종 정책/고지와 Web/API를 순서대로 연결한다. Hook/admission을 먼저 켜 기존 가입을 중단시키지 않는다.
+- **Public 연결:** 기존 신고/차단/관리자/철회/이의제기/감사/kill-switch·일반 이미지 확인 구현 및 운영 quota/policy를 먼저 연결한다. 실제 파일 복사 없이 빈 공개 schema를 준비하며 기존 private 이미지/보드를 자동 게시하지 않는다. 캡처·타인팬아트 별도권리 gate 유지. 임의 관리자 계정 부여/정책승인 생성 금지.
+- **검증/롤백:** 기존 정확 소스 CI/hosted 결과 재사용, 변경된 운영 schema/권한 보존·환경 연결·실배포 SHA·필수 실제 왕복만 확인한다. 문제 시 새 가입 API/Web off와 DB admission/Hook 이전상태 함께 복귀, Public reads/writes off; 사용자/영수증/기존자료 삭제 없는 additive schema 보존. destructive down migration 없음.
+- **미확정:** 최종 국가별 조건과 법정 고지는 경쟁 서비스 약관만으로 적합성 PASS 처리하지 않는다. 기존 운영 Google secret은 local에 없고 Vercel에는 test 전용 값만 확인됨. 이 값과 운영자/정책에 필요한 실제 결정은 구체적 준비 후 요청하고 독립 DB 준비를 계속한다.
+
+- **10/10 연결 후속:** 사용자 직접 운영 Google client의 추가 secret 생성·보호된 local 파일 저장 완료. 기존 운영 client ID와 일치만 확인하고 원문 출력 없이 Vercel Production의 Secret 두 항목 등록 성공. 기존 Supabase callback을 보존하면서 `https://www.moemoa.xyz/api/signup?action=callback`을 추가 저장했다. 기존 secret 중지/삭제 없음. 운영 schema는 새 `tools/operations/prepare-production-public-signup.py`로 기존17개 migration을 조합한다. 정확16개 baseline ledger·고정 ref/TLS, transaction/lock timeout, 기존10개 table 전체 행/동기화 함수 보존, public/signup off·권한·trigger 검사를 포함한다. 2개 호환 치환은 기존 local rehearsal와 동일. 운영 한 트랜잭션 적용 후 ROLLBACK rehearsal 성공; 이 단계는 영구 적용/새 가입 성공이 아니다. 과거 암호화 사본 보존, 실패 시 transaction rollback, 성공 후에는 additive schema를 남기고 flags off로 복귀한다.
+
 ## 2026-10-10 사용자 출시 지시 — 검증 확장 종료·운영 Git 반영
 
 - **직접 승인:** 사용자 “뭔 테스트를 이렇게 많이 하냐;; 출시 ㄱㄱ”. 기존 통과 근거를 재사용하고 추가 복구/기기/기초DB 검증을 이번 배포 선행 작업으로 늘리지 않는다. master Git 운영 배포를 승인한 지시로 기록한다. 미완성 기능·정책을 PASS로 변경한 것으로 해석하지 않는다.
