@@ -98,6 +98,10 @@ test('revision review cannot collect acceptance or replace the documents linked 
  await expect(page.locator('#retention')).toContainText('6시간 이내 삭제 보장이 아니며');
  await expect(page.locator('#retention')).toContainText('테스트 환경에만 적용');
  await expect(page.locator('#retention')).toContainText('not a 6-hour deletion guarantee');
+ await expect(page.locator('#quick-privacy')).toContainText('does not receive your Google password');
+ await expect(page.locator('#quick-privacy a')).toHaveAttribute('href','mailto:godburgundy@gmail.com');
+ for(const region of ['KR','PH','TH','US','EUROPE']) await expect(page.locator(`#region-${region}`)).toHaveCount(1);
+ await expect(page.locator('#regions')).toContainText('not a finalized availability list or an acceptance form');
  expect(await page.locator('form,input').count()).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('legal-review-mobile.png')});
