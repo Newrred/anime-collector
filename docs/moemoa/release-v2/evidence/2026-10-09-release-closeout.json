@@ -581,5 +581,58 @@
       "id": 37963376640,
       "status": "cancelled_by_followup_push"
     }
+  },
+  "simpleSignupHostedNewAccount": {
+    "date": "2026-10-10",
+    "timezone": "Asia/Tokyo",
+    "sourceCommit": "add55d3a4a64319c502568f4a65ede89a4e3146c",
+    "codeCommit": "92de9bc9aee1402e996ea6a05e3b6976286c05e0",
+    "vercelDeployment": "DD9JGhsdYeLLavSjWfr77yNMARhi",
+    "release": "MOEMOA_SIMPLE_SIGNUP_TEST_20261010_02",
+    "target": "nmgkhknponvzcwliajyk",
+    "before": {
+      "specifiedAccountExists": false,
+      "specifiedAccountHasSignupReceipt": false,
+      "users": 2,
+      "declarations": 1
+    },
+    "after": {
+      "specifiedAccountExists": true,
+      "specifiedAccountHasSignupReceipt": true,
+      "users": 3,
+      "declarations": 2,
+      "admissions": 0,
+      "handoffs": 0,
+      "cleanupScheduled": true
+    },
+    "browser": {
+      "dataManagementVisible": true,
+      "approvedAccountMatches": true,
+      "signOutVisible": true,
+      "alerts": []
+    },
+    "requests": {
+      "start": 200,
+      "callback": 303,
+      "session": 200
+    },
+    "scope": "HOSTED_NEW_AUTH_ACCOUNT_WITH_ACTIVE_HOOK_RECEIPT_AND_SESSION",
+    "result": "PASS",
+    "existingAccountsPreserved": true,
+    "newSecretValueRead": false,
+    "dobReadByAgent": false,
+    "productionChanged": false,
+    "migrationsThisVerification": [],
+    "ci": {
+      "id": 37965007645,
+      "sql": "success",
+      "web": "in_progress"
+    },
+    "priorFirstStart503": "UNRESOLVED_PRESERVED",
+    "limits": [
+      "Does not prove all failure/race cases on hosted service",
+      "Country-specific final policies and notices pending",
+      "Production signup remains unchanged"
+    ]
   }
 }

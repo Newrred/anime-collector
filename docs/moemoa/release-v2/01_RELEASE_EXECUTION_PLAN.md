@@ -4,6 +4,10 @@
 
 ### Hosted 테스트 연결 재개 (사용자 “진행 ㄱ”)
 
+- **2026-10-10 신규 C hosted 검증 완료:** 사용자 완료 보고 뒤 Chrome `/data/`의 지정 C 계정 일치·Sign out·오류 없음 확인. 배포 `add55d3`/`DD9JGhsdYeLLavSjWfr77yNMARhi`의 요청 로그는 02:19:02 start POST200 → 02:21:41 callback GET303 → 02:21:43 session POST200 (JST). `wsl -e python3 /mnt/e/web/anime/tools/identity/configure-simple-signup-test.py inspect` exit0: users3/declarations2/admissions0/handoffs0/cleanupScheduled=true. Git 제외의 대상 계정 boolean 대조 script도 exit0, accountExists/receipt=true(직전 false/false). 신규 Auth 생성·활성 Hook 경로·계정 동의 결속·로그인 성공 범위 PASS이며 경쟁/우회/전체 출시 판정으로 확대하지 않는다. 입력 생년월일·키·토큰·계정 원문을 수집하거나 증거에 추가하지 않았다. 첫 A503 원인은 미확정 유지. 코드·migration·DB 설정 변경 없이 기존00/02/03/설정 지도/JSON 증거를 갱신; 이전 unit476/build24/서버단위8은 재실행하지 않았다. CI37965007645 SQL success/Web 진행 중. 기존 롤백(test policy/서버 flag off + Hook 이전 설정, 계정/영수증 보존) 유지. 다음1개는 첫 start503 단계별 원인 분리이며, 국가별 정책/고지·운영 활성은 별도 잔여다.
+
+- **2026-10-10 신규 계정 검증 준비:** 사용자가 지정한 추가 Google 계정이 test Auth/동의기록에 모두 없음을 boolean 읽기로 확인했다(원문 이메일/UUID는 증거 파일에 기록하지 않음). 기존 A/B를 유지한 3계정 hash allowlist를 Vercel Secret/동일 Preview 범위로 저장했다. A 로그아웃 확인 후 signup 화면 준비. 문서 커밋 `add55d3`을 test 브랜치에 push하여 변경된 allowlist 배포를 진행한다. 신규 생성·Hook PASS는 사용자 직접 입력/Google 인증 뒤 실제 DB 결과로만 판정한다.
+
 - **2026-10-10 hosted A 실제 왕복:** 진단 후보 `92de9bc` Git Preview `G9NL8mj9pKhHM3NySLquyvQ3WQSk` Ready. 같은 사용자 입력의 재시도는 start POST200, Google A 선택, callback GET303, session POST200; `/data/` 승인 A 계정/Sign out 확인. test inspect는 users2/declarations1/admissions0/handoffs0. 첫503은 재현되지 않았고 원인 미확정(서버 Date와 PC 시각 차를 읽었지만 정확한 원인으로 단정하지 않음). 원문 payload/생년월일/키 로그0. 이 결과는 새 서버 경로의 기존계정 성공이며 최초 auth.users INSERT/Hook 성공이 아니다. 사용자가 신규 후보로 B를 지정했으나 읽기 대조에서 이미 존재/새동의기록 없음 확인. 제3 계정 제공 여부 요청 중; 기존 사용자 삭제/재생성0. 다음1개 신규계정 검증 범위 결정. CI 최신37964046383 진행 중, 이전37963376640 후속push취소.
 
 - **2026-10-10 첫 hosted 사용자 시도 실패:** 사용자 직접 제출 뒤 `/api/signup?action=start` POST503, 선행 GET405를 Vercel 배포 로그에서 확인. Google 이동 전 실패이며 신규 로그인 PASS로 처리하지 않는다. 다음은 값/계정/생년월일/오류본문 없이 고정된 처리 단계(action/phase)만 진단하여 DB policy 조회와 선언 검증 실패를 구분하는 최소 보완이다. 운영 변경은 없다.
