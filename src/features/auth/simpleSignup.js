@@ -6,6 +6,15 @@ export const PENDING_SIGNUP_KEY = 'moemoa.signup.pending.v1';
 export const PENDING_SIGNUP_TTL = 30 * 60 * 1000;
 const fail = code => { throw Object.assign(new Error(code), { code }); };
 export const COUNTRIES = Object.freeze(['KR','PH','TH','US','GB','AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','CH']);
+// Availability can be checked before asking for a birth date or acceptance.
+// This is a UI hint, never a replacement for server admission checks.
+export function signupAvailability(country, policy) {
+  if (!policy?.enabled) return 'SIGNUP_SERVICE_UNAVAILABLE';
+  if (policy.termsVersion!==TERMS_VERSION || policy.privacyVersion!==PRIVACY_VERSION) return 'SIGNUP_POLICY_CHANGED';
+  const rule=policy.countries?.find(row=>row.country===country);
+  if (!COUNTRIES.includes(country) || !rule || !Number.isInteger(rule.minimumAge) || rule.minimumAge<13 || rule.minimumAge>20) return 'COUNTRY_NOT_READY';
+  return null;
+}
 export function calendarDay(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
