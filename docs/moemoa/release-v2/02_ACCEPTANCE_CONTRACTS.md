@@ -1,5 +1,22 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-10 C02/D04 고지 버전 보존·제공처 대조
+
+- 현행 10/9 동의 문서는 `src/components/legal/Terms20261009Draft.astro`·`Privacy20261009Draft.astro`에 본문 변경 없이 보존했다. 가입은 `/legal/terms-2026-10-09-draft/`·`/legal/privacy-2026-10-09-draft/`를 열며 영수증 버전은 그대로다. `/terms/`·`/privacy/`는 현재 같은 문서를 제공한다. 향후 개정 때 고정 경로의 내용을 수정하지 않는다.
+- 개정 검토본 `src/pages/legal/review.astro`에는 실제 운영 signup purge 성공/주 저장 지역을 반영했다. 검토본은 동의를 수집하지 않고 신규 정책을 활성화하지 않는다.
+- 새 검증: 원본 HEAD의 두 문서 본문과 보존 component의 markup 정확 일치2/2; `node scripts/run-simple-signup-e2e.mjs` Chromium5 PASS(모의 Google/API, 실제 UI), `npm run build`27 routes PASS. 기존 실제 Google 계정 생성/공개 왕복은 이전 증거이며 이번 실행 PASS에 포함하지 않는다.
+
+| 항목 | 확인한 사실 | 남은 정확한 조건 |
+|---|---|---|
+| Supabase | 고정 운영 연결의 지역 `ap-southeast-1`; [공식 지역 설명](https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq)은 주 저장 지역과 해외 지원/CDN/telemetry를 구분. Supabase Pte. Ltd.가 일반 계약 주체 | 공급자의 [DPA](https://supabase.com/legal/customer-resources/data-processing-addendum)와 실제 고객 계약/국가별 이전 근거를 결합. 싱가포르 단독 처리라고 기재하지 않음 |
+| Vercel | Chrome의 팀 목록은 `newrred’s projects / Hobby` 하나. 사용자도 다른 결제 서비스였거나 기억 안 남으로 응답. [현행 일반 약관 §10.1](https://vercel.com/legal/terms)은 DPA를 포함한다고 설명하나 [DPA §1](https://vercel.com/legal/dpa)은 Pro/Enterprise를 명시 | Hobby에 적용되는 processor 계약/SCC 범위가 상충해 보이는 문구를 공급자에 확인해야 함. Hobby 사용 자체가 불법 또는 Pro 결제가 필수라고 단정하지 않음. 결제/계정 이전/외부 문의 발송0 |
+| Google 로그인·Drive | [공식 개인정보처리방침](https://policies.google.com/privacy?hl=en)은 국제 서버 처리를 설명. 별도 Drive에는 승인된 암호화 복구 사본만 업로드한 기존 증거 | 개인 Google One을 Workspace 기업 처리계약과 동일하게 표시하지 않음. Drive 사본의 회전/삭제 기간과 실제 적용 계약은 잔여 |
+| 필리핀·태국 | 기존 PH13/TH13 결정 유지. [태국 PDPA §20](https://www.mdes.go.th/law/detail/3577-Personal-Data-Protection-Act-B-E--2562--2019-)은 미성년자 독립행위와 동의를 구분 | 특정 MOEMOA 계약/나이정보 처리에 어떤 근거가 적용되는지 미확정. 새 보호자 인증 기능·일괄18/20 제한으로 대체하지 않음 |
+| 미국·유럽 | 기존 중립 DOB/US13 및 유럽 국가별 구분 유지 | 처리 근거별 국가표, 청소년 보호/필요한 지역 대표자 등 기존 잔여를 그대로 유지. 전 유럽 숫자 하나로 임의 확정하지 않음 |
+
+다음 독립 작업이 아니라 **현재 D04의 외부 확인**: Vercel Hobby에 실제 적용되는 처리 계약 범위. 질문은 “현재 Hobby 팀에서 계정 연결용 서버 요청을 처리할 때 일반 약관 §10.1의 DPA 편입과 DPA §1의 Pro/Enterprise 범위를 어떻게 해석하며, 적용 문서 및 국제 이전 조항은 무엇인가”로 좁힌다. 사용자·프로젝트 비밀값/메일주소/로그 첨부 불필요. 외부 발송은 별도 명시 지시 전 하지 않는다. 미성년 조건·보존 정책도 아직 마감되지 않았으므로 이 답변 하나만으로 전체 출시 gate가 통과되지는 않는다.
+
+
 ## 2026-10-10 운영 준비의 실제 범위 — C02/C06/C07/C08
 
 - **무료 운영 후속 / D03:** 사용자 무료 유지. 새 공개 저장 총량 상한20MiB를 운영에 적용했다. 기존 계정별 제한은 유지하며 준비·실패·삭제 대기도 예약량에 포함하고 실제 정리 이후에만 반환한다. 로컬 실제 테이블8검사·서로 다른 계정2연결 경합1PASS, 운영 별도 읽기에서 정책/trigger/ledger/공개off 확인. 실제 공개 게시나 업로드를 실행한 것은 아니다. 기존 용량/요금 약속을 임의로 무제한으로 확장하지 않는다.

@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-10 고지 버전 보존:** 가입 링크를 영수증과 동일한 10/9 고정 문서 URL에 연결하고 기존 본문을 그대로 보존했다. 개정 검토본에 운영 purge 성공·Supabase 주 저장 지역과 제공처 계약 적용 한계를 반영. 원문 보존2/2·모의 Google 기반 실제 UI5·build27 PASS. Vercel은 현재 Hobby 한 팀이며 일반약관의 DPA 편입과 DPA의 Pro/Enterprise 범위는 공급자 확인 잔여(유료 필수/위법으로 단정하지 않음). 새 가입/Public off, DB/결제 변경0. 다음1개는 D04의 Hobby 처리 계약 범위 확인. 국가별 미성년 조건·보존 정책도 미완료. 아래는 각 실행 시점의 기록이다.
+
 > **2026-10-10 무료 유지·공개 총량 보호:** 사용자 무료 유지 확정. 운영 표지 약856MB/개인0.45MB, test0.073MB metadata 집계. 기존 공개 한도가 계정별뿐인 점을 보완해 전 계정 예약 합계20MiB를 운영에 적용(`MOEMOA_PUBLIC_GLOBAL_BUDGET_PROD_20261010_01`, source b8901aa). 대기/실패/삭제 전 예약 포함·경합 등 새 로컬9검사 PASS, 별도 DB 확인 PASS. 기존 개인100MB 상한/원본/operationId 유지. 운영자1명 연결·signup purge 실제 성공. master d544404의 실제 www SHA 및 cleanup401 권한 경계 확인; 실제 정리 실행 PASS 아님. 새 가입·공개 게시 off. 다음1개: C02/D04 최종 국가별 가입 조건·고지 마감. [증거](docs/moemoa/release-v2/evidence/2026-10-10-production-public-signup-preparation.json). 아래는 각 시점의 기록이다.
 
 > **2026-10-10 운영자 연결 후속:** 지정된 godburgundy 운영 계정으로 실제 로그인하고 운영자 권한을 연결했다. 별도 DB 조회에서 해당 1계정만 활성/가입·Public off, 가입 임시정보 정리 예약의 최근 실행 succeeded 확인. 공개 이미지 정리 코드 master d07a20d의 Vercel Git Ready/실제 www SHA 일치 확인. 이후 Production 정리 설정과 기존 GitHub 예약의 public switch를 등록했고 다음 Git 배포에 반영한다(실제 정리 실행 미확인). 최종 국가별 고지·정책/공개 quota·Auth Hook·활성 설정은 잔여이며 새 가입·공개 서비스 출시 완료가 아니다. 기존 ExecPlan 상단과 [증거](docs/moemoa/release-v2/evidence/2026-10-10-production-public-signup-preparation.json)를 따른다.

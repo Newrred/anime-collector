@@ -61,12 +61,15 @@ test('revision review cannot collect acceptance or replace the documents linked 
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('legal-review-mobile.png')});
  await page.getByRole('link',{name:'10/9 이용약관',exact:true}).click();
- await expect(page).toHaveURL(/\/terms\/$/);
+ await expect(page).toHaveURL(/\/legal\/terms-2026-10-09-draft\/$/);
  await expect(page.getByText('버전: terms-2026-10-09-draft', {exact:true})).toBeVisible();
  await page.goto('/auth/start/');
- await expect(page.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/terms/');
- await expect(page.getByRole('link',{name:'개인정보 처리 안내',exact:true})).toHaveAttribute('href','/privacy/');
+ await expect(page.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/legal/terms-2026-10-09-draft/');
+ await expect(page.getByRole('link',{name:'개인정보 처리 안내',exact:true})).toHaveAttribute('href','/legal/privacy-2026-10-09-draft/');
+ await page.goto('/legal/privacy-2026-10-09-draft/');
+ const archivedPrivacy=await page.locator('main').innerText();
  await page.goto('/privacy/');
+ expect(await page.locator('main').innerText()).toBe(archivedPrivacy);
  await expect(page.getByText('버전: privacy-2026-10-09-draft', {exact:true})).toBeVisible();
  expect(calls.some(c=>c.path==='start')).toBe(false);
 });
@@ -74,7 +77,7 @@ test('simple Google handoff and completion restore session without DOB or tokens
  const calls=await mockBackend(page);await page.goto('/auth/start/?next=/terms/');await fill(page);
  await page.screenshot({path:info.outputPath('signup-desktop.png'),fullPage:true});
  await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
- const start=calls.find(c=>c.path==='start');expect(JSON.parse(start.body)).toMatchObject({declaration:{country:'KR',accepted:true},next:'/terms/'});expect(start.body).not.toContain('2000-10-09');
+ const start=calls.find(c=>c.path==='start');expect(JSON.parse(start.body)).toMatchObject({declaration:{country:'KR',accepted:true,termsVersion:'terms-2026-10-09-draft',privacyVersion:'privacy-2026-10-09-draft'},next:'/terms/'});expect(start.body).not.toContain('2000-10-09');
  await page.goto('/auth/complete/');await expect(page).toHaveURL(/\/terms\/$/);
  expect(calls.filter(c=>c.path==='session')).toHaveLength(1);
  expect(await page.evaluate(()=>sessionStorage.getItem('moemoa.signup.pending.v1'))).toBeNull();
