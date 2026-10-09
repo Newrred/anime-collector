@@ -1,6 +1,6 @@
 # CODEX START HERE — MOEMOA
 
-> **2026-10-10 운영자 연결 후속:** 지정된 godburgundy 운영 계정으로 실제 로그인하고 운영자 권한을 연결했다. 별도 DB 조회에서 해당 1계정만 활성/가입·Public off, 가입 임시정보 정리 예약의 최근 실행 succeeded 확인. 기본off 공개 이미지 정리 코드를 master Git 배포에 반영 중. 최종 국가별 고지·정책/공개 quota·Auth Hook·활성 설정은 잔여이며 새 가입·공개 서비스 출시 완료가 아니다. 기존 ExecPlan 상단과 [증거](docs/moemoa/release-v2/evidence/2026-10-10-production-public-signup-preparation.json)를 따른다.
+> **2026-10-10 운영자 연결 후속:** 지정된 godburgundy 운영 계정으로 실제 로그인하고 운영자 권한을 연결했다. 별도 DB 조회에서 해당 1계정만 활성/가입·Public off, 가입 임시정보 정리 예약의 최근 실행 succeeded 확인. 공개 이미지 정리 코드 master d07a20d의 Vercel Git Ready/실제 www SHA 일치 확인. 이후 Production 정리 설정과 기존 GitHub 예약의 public switch를 등록했고 다음 Git 배포에 반영한다(실제 정리 실행 미확인). 최종 국가별 고지·정책/공개 quota·Auth Hook·활성 설정은 잔여이며 새 가입·공개 서비스 출시 완료가 아니다. 기존 ExecPlan 상단과 [증거](docs/moemoa/release-v2/evidence/2026-10-10-production-public-signup-preparation.json)를 따른다.
 
 > **2026-10-10 가입·Public 운영 준비:** 사용자 승인으로 운영 DB에 공개/가입17개 migration을 기본off로 적용(`MOEMOA_PUBLIC_SIGNUP_SCHEMA_PROD_20261010_01`, source c72ddaf). 기존10개 table/동기화 함수 보존·별도 연결33개 이력 확인. 운영 Google callback/Vercel Secret5개·시간별 가입 임시정보 정리 예약 등록. 지정 관리자 계정은 운영 auth에 없어 권한 연결 트랜잭션 rollback·사용자 로그인 대기. 공개 이미지 정리 예약 연결 후보11검사/build25 PASS, 아직 미배포. 새 가입·Public 활성/최종 고지·국가표는 미완료. [이번 근거](docs/moemoa/release-v2/evidence/2026-10-10-production-public-signup-preparation.json), 기존 ExecPlan 상단 참조. 다음1개는 지정 운영자 로그인 확인 후 권한 연결. 아래 기록은 각 실행 당시 증거다.
 

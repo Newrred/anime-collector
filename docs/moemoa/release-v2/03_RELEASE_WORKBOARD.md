@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-10 운영자 연결 후속:** 지정된 godburgundy 운영 계정으로 실제 로그인하고 운영자 권한을 연결했다. 별도 DB 조회에서 해당 1계정만 활성/가입·Public off, 가입 임시정보 정리 예약의 최근 실행 succeeded 확인. 기본off 공개 이미지 정리 코드를 master Git 배포에 반영 중. 최종 국가별 고지·정책/공개 quota·Auth Hook·활성 설정은 잔여이며 새 가입·공개 서비스 출시 완료가 아니다. 기존 ExecPlan 상단과 [증거](evidence/2026-10-10-production-public-signup-preparation.json)를 따른다.
+> **2026-10-10 운영자 연결 후속:** 지정된 godburgundy 운영 계정으로 실제 로그인하고 운영자 권한을 연결했다. 별도 DB 조회에서 해당 1계정만 활성/가입·Public off, 가입 임시정보 정리 예약의 최근 실행 succeeded 확인. 공개 이미지 정리 코드 master d07a20d의 Vercel Git Ready/실제 www SHA 일치 확인. 이후 Production 정리 설정과 기존 GitHub 예약의 public switch를 등록했고 다음 Git 배포에 반영한다(실제 정리 실행 미확인). 최종 국가별 고지·정책/공개 quota·Auth Hook·활성 설정은 잔여이며 새 가입·공개 서비스 출시 완료가 아니다. 기존 ExecPlan 상단과 [증거](evidence/2026-10-10-production-public-signup-preparation.json)를 따른다.
 
 > **2026-10-10 W06/W08/W14/W20 운영 준비:** 운영 schema17개 기본off 적용·기존10개 table/동기화 함수 보존·별도 이력 확인. Google callback/Production Secret5개·가입 purge 시간별 예약 등록. 사용자 지정 운영자 계정이 운영 auth에 없어 관리자 설정 rollback·로그인 요청 대기. 공개 이미지 정리 예약 연결 후보11검사/build25 PASS·미배포. D01 키 미제공은 해소, 운영자 연결 잔여. D04 최종 고지/국가별 기준, D06 활성화/Git 배포 검증은 미완료. 새 사용자 행동 PASS0(이번은 schema/연결 준비). 다음1개는 지정 운영자 로그인 확인 후 권한 연결. [근거](evidence/2026-10-10-production-public-signup-preparation.json).
 

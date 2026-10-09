@@ -2,6 +2,8 @@
 
 ## 2026-10-10 신규 가입·공개 보드/미니홈 운영 적용
 
+- **운영 Git 결과/정리 설정:** master d07a20d의 Vercel Production `7F61XYncXGatcEUTkMUKwrGeGP6c` Ready 및 www build-info commit/checkoutCommit/source 일치 확인. 새 signup404/SIGNUP_DISABLED. 이어 Vercel Production `MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED=true`와 GitHub 동명 변수 true를 등록했다. 환경 등록보다 먼저 시작한 배포의 cleanup503/DISABLED는 예상 상태이며 다음 master Git 배포로 반영한다. 인증 없는 호출401 확인은 권한 경계만 입증하고 실제 정리/삭제 PASS와 구분한다. 기존6시간/50개 한도·private 작업은 유지하며 public 양쪽 switch false로 정리 예약만 중단 가능하다.
+
 - **운영자 연결 후속:** 기존 운영 Google 로그인에서 승인된 godburgundy 계정으로 전환해 `/data/`의 계정 일치를 확인했다. 버전 관리된 `prepare-production-public-operator.sql`을 고정 운영 runner로 적용(`MOEMOA_PUBLIC_OPERATOR_PROD_20261010_01`). 별도 읽기 연결에서 해당 운영자 enabled/전체 enabled 1, signup/Public off 확인. 가입 임시정보 예약의 최근 실제 실행은 succeeded. 앞선 계정 부재/rollback은 과거 사실로 보존한다.
 - **이번 배포 범위:** 검증된 공개 이미지 cleanup endpoint와 기본off 예약 연결, 운영 준비 도구·증거만 master Git에 반영한다. 이전11검사/build25 결과를 재사용한다. 운영 신규 가입·Public의 최종 국가별 고지/정책·quota·Auth Hook·활성 flags가 아직 미완료이므로 기능 출시로 보고하지 않는다. master source와 Vercel Git Ready/build-info 일치 확인이 이번 배포 완료 조건이다. rollback은 새 master revert commit이며 additive DB와 사용자 기록은 보존한다.
 

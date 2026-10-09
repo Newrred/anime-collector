@@ -204,7 +204,7 @@
       "MOEMOA_SIMPLE_SIGNUP_SERVER_ENABLED"
     ],
     "serverEnabled": false,
-    "deploymentPending": true
+    "deploymentPending": false
   },
   "operator": {
     "selection": "User-selected operator account",
@@ -240,7 +240,8 @@
     "Signup expiry job scheduled hourly: execution success not yet observed",
     "node --test tests/unit/privateCleanup.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs: 11 PASS",
     "npm run build: 25 pages PASS",
-    "Approved operator Google login, fixed-target role connection, independent readback: exactly one enabled moderator; signup/Public OFF; signup purge latest status succeeded"
+    "Approved operator Google login, fixed-target role connection, independent readback: exactly one enabled moderator; signup/Public OFF; signup purge latest status succeeded",
+    "master d07a20d Vercel Git Production Ready and www build-info source/commit match; signup disabled; initial cleanup deployment disabled before added environment applies"
   ],
   "previousEvidenceNotRerun": [
     "Actual test Google C signup",
@@ -251,8 +252,7 @@
     "Final country eligibility and operating notices/document versions",
     "Production Auth hook and aligned signup enablement",
     "Public quotas/policy and backend/UI switches",
-    "Public cleanup environment and scheduler flag",
-    "master Git deployment and live source SHA/flow verification"
+    "Next Git deployment includes new public cleanup environment; verify live auth boundary; actual scheduled cleanup is not yet observed"
   ],
   "rollback": "Disable signup UI/server plus admission/Hook together; disable Public reads/writes. Preserve additive schema, accounts and existing data. No destructive down migration.",
   "operatorPreviousAttempt": {
@@ -261,5 +261,41 @@
     "enabledModerators": 0,
     "transactionRolledBack": true,
     "userLoginPending": true
+  },
+  "webDeployment": {
+    "commit": "d07a20d58ac57654e6010ca1067320201ed6e5eb",
+    "vercelDeployment": "7F61XYncXGatcEUTkMUKwrGeGP6c",
+    "environment": "Production",
+    "ready": true,
+    "gitBranch": "master",
+    "live": {
+      "build": {
+        "commit": "d07a20d58ac57654e6010ca1067320201ed6e5eb",
+        "checkoutCommit": "d07a20d58ac57654e6010ca1067320201ed6e5eb",
+        "source": "vercel-git"
+      },
+      "/api/public-image-cleanup": {
+        "status": 503,
+        "error": "CLEANUP_DISABLED"
+      },
+      "/api/signup?action=start": {
+        "status": 404,
+        "error": "SIGNUP_DISABLED"
+      }
+    }
+  },
+  "publicCleanupActivation": {
+    "serverConfigRegistered": true,
+    "environment": "Production",
+    "name": "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED",
+    "scheduler": {
+      "status": 200,
+      "name": "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED",
+      "enabled": true
+    },
+    "nextGitDeploymentRequired": true,
+    "authenticatedExecutionObserved": false,
+    "scope": "Retired public derivatives only; existing private cleanup schedule unchanged; no publishing enabled",
+    "rollback": "Set server and GitHub public cleanup switches false; do not remove private maintenance or stored images"
   }
 }
