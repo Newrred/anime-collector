@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-10 종료 인계:** 사용자 요청으로 이번 작업을 정리하고 PC 정상 종료를 준비했다. 작업 브랜치는 `codex/simple-signup-preview`, 구현·국가 조사 커밋은 `390429f5473a51f800f7deca0095b63fa5427f9e`(origin 동일). 다른 PC에서는 이 브랜치를 받아 시작 문서와 release-v2/02 맨 위·03 현재 카드를 읽는다. 국가별 미완료 조건을 임의 PASS로 바꾸지 않는다. 새 공개 가입 연결 migration은 hosted 미적용이고 운영 배포/flags 변경 없음. 기존 로컬 초안3개와 AuthCallbackClient의 줄바꿈 차이는 이번 구현에 포함하지 않았으며, 이 PC의 `C:\Users\hongs\AppData\Local\MOEMOA\handoff-20261010-054340`에 원본 대조 SHA256 일치4개로 별도 보존했다. 이 사본·환경파일·키는 Git에 올리지 않는다. `__pycache__`는 생성물이다. 종료 후 서버 프로세스는 다시 시작해야 한다.
+
 > **2026-10-10 현재 재개점:** 국가별 재조사 근거는 `docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md` 맨 위. 기존 계정의 공개 Board/Home/팔로우를 최신 자기 가입 영수증에 연결하는 기본off migration과 복귀 안내를 준비했다. 로컬 SQL15·gateway6·모의 API Chromium4+고지1·build27 PASS. 새 hosted/운영 적용은 하지 않았다. PH 나이정보 근거·TH 계약 적용·CH/미국 주별/유럽 소셜 조건은 정확한 잔여로 구분한다. 다음은 최종 가입 정책·고지 버전 후보 결정/테스트 적용. 무료·Web-only·PASS/KWS 제외·외부 문의 미발송 유지.
 
 > **2026-10-10 C02 국가 조건 후속:** 처리 목적별 검토표와 KR/PH/TH/US/유럽 검토 부록·짧은 개인정보 요약을 준비했다. 유럽 동의 연령을 계정 가입 연령으로 일괄 대입하지 않는다. PH의 나이정보 동의 주체/근거와 TH의 미성년 계약 적용 판단은 여전히 미확정이며, 새 인증·checkbox·차단 정책으로 대체하지 않았다. 검토 화면1개/build27 PASS, 실제 가입/운영 정책 완료 아님. 다음 독립 작업은 W14 공개 보드·미니홈의 기존 계정 처리 연결 대조. 문의 미발송, DB/flags 변경0. 상세는 기존02 맨 위와 ExecPlan을 따른다.
