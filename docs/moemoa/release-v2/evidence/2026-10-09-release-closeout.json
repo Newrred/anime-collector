@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-09",
+  "baselineCommit": "751f29988846d8eb86a7a3952c1c060641aaed10",
+  "scope": "W06/W15/W17/W20 closeout; no new plan or board",
+  "decisions": {
+    "ageAndCountries": "12+ / KR PH TH reaffirmed; prepare guardian consent",
+    "excluded": ["additional Safari/WebKit validation (not PASS)", "Android", "adult verification and mature public content"],
+    "externalBackupDestination": "Google Drive / Google One 5 TB"
+  },
+  "productionReadOnly": {
+    "checkedAt": "2026-10-09T08:44:28.492369Z",
+    "projectRef": "okchpyagfucpzpyrfgol",
+    "publicSchemaInstalled": false,
+    "resourcePoliciesInstalled": false,
+    "privatePolicyEnabledAndApproved": true,
+    "storedBytes": 682714,
+    "reservedBytes": 682714,
+    "physicalLimitBytes": 100000000,
+    "accountQuotaBytes": 50000000,
+    "monthlyGlobalReadLimitBytes": 500000000,
+    "dashboardPlan": "FREE; no managed backup download",
+    "maintenanceBeforeChange": "GitHub 37891316783 success at 2026-10-09T06:00Z"
+  },
+  "newValidation": [
+    {"command":"node --test tests/unit/privateMaintenance.test.mjs", "result":"4 PASS: threshold/reservation, stale data, cleanup failure still observes, bounded authenticated calls and aggregate output"},
+    {"command":"npm run test:unit", "result":"462 PASS, 0 fail/skip (includes maintenance4)"},
+    {"command":"npm run build", "result":"20 pages PASS"},
+    {"command":"node tools/operations/build-public-upgrade-rehearsal.mjs", "result":"15 source migrations, 2 explicit compatibility adaptations, LOCAL_ONLY bundle and source/applied SHA256 manifest"},
+    {"command":"wsl -u postgres -e bash /mnt/e/web/anime/tools/operations/run-public-upgrade-rehearsal.sh", "result":"13 SQL assertions PASS on disposable PG16. Existing synthetic card/classification/media/reservation/policy/sync/fences preserved; existing owner image read then retirement succeeds after upgrade; Public remains disabled. pg_cron not exercised."}
+  ],
+  "previousEvidenceNotRepeated": ["hosted A/B/public round trip", "72-table restore", "iPhone user-reported create/edit", "two-browser private sync/delete"],
+  "operations": {"productionDbWrites":0,"publicFlagsChanged":false,"credentialsReset":false,"externalBackupUploaded":false,"paidChanges":false,"guardianEmailsSent":0},
+  "remaining": [
+    "Pre-account guardian consent implementation and actual verification, country-specific notice/retention/withdrawal conditions; existing identity receipt is not consent",
+    "Operator does not know production DB password; ignored protected local settings template only. No password reset performed",
+    "Actual encrypted DB/Storage/canonical snapshot + current retirement journal, separately held recovery key, external restore",
+    "Actual capacity alert receipt; healthy scheduled run is not notification-delivery evidence",
+    "Approved exact production Public upgrade/ledger/release/rollback and full RC settings after applicable gates"
+  ]
+}

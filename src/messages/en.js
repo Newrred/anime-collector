@@ -468,8 +468,8 @@ const enMessages = {
       {
         kind: "notice",
         date: "2026-03-15",
-        title: "Minihome is here!",
-        body: "You can now pick out the cards that feel most like you and arrange them into a public Minihome. Profile copy and public link settings were added too.",
+        title: "About public Minihomes",
+        body: "Public sharing is not yet generally available. When enabled, only Boards you explicitly select and publish will appear in your Minihome. Private records and images are never published automatically.",
       },
       {
         kind: "update",
@@ -497,9 +497,10 @@ const enMessages = {
     aboutIntro: "Our goal is to help you notice a version of yourself that becomes clearer over time, built from the records you've stacked up one by one.",
     aboutCreatorTitle: "Creator note",
     aboutCreatorText:
-      "Hi, I'm Shin Hong, the creator of MOEMOA. As someone who loves anime, I wanted watch logs to become more than a simple archive. I hoped they could turn into a journey where you discover your own taste and the memories that stay with you. That's why I started this service. I'll keep listening to your feedback and polishing the experience so it feels better over time. Let's build a new kind of fun around anime journaling together.",
+      "Hi, I'm sinong, the creator of MOEMOA. As someone who loves anime, I wanted watch logs to become more than a simple archive. I hoped they could turn into a journey where you discover your own taste and the memories that stay with you. That's why I started this service. I'll keep listening to your feedback and polishing the experience so it feels better over time. Let's build a new kind of fun around anime journaling together.",
     aboutVisionTitle: "CONTACT",
-    aboutVisionText: "minecrafthong@gmail.com",
+    aboutVisionText: "godburgundy@gmail.com",
+    supportScope: "Independently operated by sinong. Email us for support, reports, deletion requests, or appeals. Do not send passwords or identity documents.",
     aboutCopyButton: "Instagram account",
     feedbackCopyTemplate:
       "https://www.instagram.com/bottlegodburgundy/",

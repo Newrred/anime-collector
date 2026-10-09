@@ -468,7 +468,7 @@ const koMessages = {
       {
         kind: "update",
         date: "2026-03-15",
-        title: "미니홈 기능이 추가되었어요!",
+        title: "공개 미니홈 이용 안내",
         body: "공개 기능이 활성화되면 직접 선택해 게시한 보드를 미니홈에 전시할 수 있어요. 비공개 기록은 자동으로 추가되지 않습니다. 공개 공유는 아직 일반 제공 전입니다.",
       },
       {
@@ -489,7 +489,7 @@ const koMessages = {
       },
       {
         title: "미니홈",
-        body: "내 기록을 카드 형태로 구성해 공개 미니홈으로 발행하는 공간입니다. 자신만의 미니홈을 구성해 공유해 보세요.",
+        body: "공개 기능은 아직 일반 제공 전입니다. 제공 후에는 직접 선택해 게시한 보드만 미니홈에 전시하며, 비공개 기록과 사진은 자동 공개하지 않습니다.",
       },
     ],
     tipsTitle: "소개",
@@ -499,7 +499,8 @@ const koMessages = {
     aboutCreatorText:
       "애니를 좋아하는 한 사람으로서, 애니 감상 기록이 단순한 로그를 넘어 나만의 취향과 기억을 발견하는 여정이 되길 바라는 마음으로 이 서비스를 만들게 되었습니다. 함께 애니 기록의 새로운 즐거움을 만들어가요!",
     aboutVisionTitle: "CONTACT",
-    aboutVisionText: "minecrafthong@gmail.com",
+    aboutVisionText: "godburgundy@gmail.com",
+    supportScope: "개인 운영자 sinong · 이용 문의, 신고, 삭제 요청, 조치에 대한 이의는 이메일로 보내 주세요. 비밀번호나 신분증은 보내지 마세요.",
     aboutCopyButton: "인스타그램 계정",
     feedbackCopyTemplate:
       "https://www.instagram.com/bottlegodburgundy/",

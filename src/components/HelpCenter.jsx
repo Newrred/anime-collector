@@ -133,7 +133,8 @@ export default function HelpCenter() {
               </article>
               <article className="help-center__about-card">
                 <h3 className="sectionTitle help-center__about-title">{copy.aboutVisionTitle}</h3>
-                <p className="small help-center__about-text">{copy.aboutVisionText}</p>
+                <p className="small help-center__about-text"><a href={`mailto:${copy.aboutVisionText}`}>{copy.aboutVisionText}</a></p>
+                <p className="small help-center__about-text">{copy.supportScope}</p>
               </article>
             </div>
             <div className="help-center__about-actions">

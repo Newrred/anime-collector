@@ -1,5 +1,25 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-09 W15/W17/W20 운영 출시 마감 — 현재 실행
+
+1. **목적:** 이미 배포된 개인용 Web을 보존하면서 실제 공개 출시의 비용·복구·운영·DB 잔여를 마감한다. 새 단계/진행판은 만들지 않는다.
+2. **확정 범위:** 사용자 “safari검사는 빼 … 운영 출시까지 남은 작업들 전부”에 따라 Safari/WebKit 추가 검사는 이번 후보에서 제외한다. 기존 실패 근거는 보존하며 PASS로 바꾸지 않는다. Android·성인 인증은 후속이다. 외부 백업 저장소는 사용자가 Google Drive/Google One으로 확인했다.
+3. **시작 증거:** master/운영 `751f299`, Service quality37902919878 성공. 사진 자동 저장·삭제 RPC·반대 편집 화면 삭제 수렴은 완료됐다. Public은 off, 운영 DB는 private-only이며 공개 schema는 미설치다. 기존 W/D 표의 과거 off/미배포 문구를 최신 근거로 좁게 갱신한다.
+4. **포함/제외:** 현재 예약 정리·관측/한도·경보 확인과 필요한 보완, 외부 암호화 백업 준비/가능한 실제 실행, 현재 private DB→Public의 선택 적용·복구 후보, 정책/지원 안내와 실제 남은 결정을 정리한다. 기초 DB·A/B·72table 복원·Safari 검사를 반복하지 않는다. 유료 계약·미확정 연령/권리 정책을 임의 확정하지 않는다.
+5. **흐름:** 기존 private maintenance API→GitHub 예약 관측을 재사용한다. 백업은 기존 AES-GCM 도구를 재사용하며 DB·Storage·최신 삭제 상태의 실제 완전성을 별도로 확인한다. 공개 활성 전에는 현행 private 함수/분류·삭제 경계를 보존하는 migration 순서를 검증한다.
+6. **파일 지도:** `.github/workflows/private-image-cleanup.yml`, `scripts/`의 필요한 운영 검사, `tools/private-images/` 기존 백업·관측, `tools/operations/` 선택 적용/읽기 검사, 기존 release-v2 00/01/02/03과 운영 문서. 제품 동작의 확정 결함이 확인될 때만 해당 소스를 최소 수정한다.
+7. **DB:** 운영 읽기 preflight를 먼저 수행한다. 공개 migration은 이미 적용된 private/classification/title-state 변경과 충돌을 확인하고 정확한 적용 파일·hash·data release ID를 고정한다. 정책 게이트 미충족 상태에서 Public을 열지 않는다. 파괴적 migration은 제외한다.
+8. **마일스톤:** (a) 현재 운영 설정·예약/한도 증거 확보 (b) 누락 경보/지원·복구 실행 경로 마감 (c) 기존 private 자료를 보존하는 공개 적용 후보 검증 (d) 해소된 D와 실제 결정/접근 차단만 남겨 후보를 Git/운영 SHA와 연결.
+9. **검증:** 바뀐 운영 경계만 목적에 맞는 검사 후 Git 필수 CI/배포 SHA 확인. 기존 통과를 이번 통과로 합산하지 않는다. 외부 사본·수신·운영 적용은 실제 결과가 있을 때만 완료다.
+10. **보안/권리:** 비밀값·원문/사진·사용자 식별자를 일반 로그/Git/CI artifact에 남기지 않는다. 공개 원본 명시 선택/권리·preview·철회/신고/차단 gate를 유지한다.
+11. **관찰:** bytes/건수/안전 코드·실행 시각만 기록한다. 운영 알림은 기존 승인 담당자 sinong의 기존 서비스 알림을 우선 활용하며 임의 외부 메시지를 발송하지 않는다.
+12. **복귀:** 코드/운영 workflow는 해당 Git commit revert. DB rollback은 flags off와 안전한 함수 복원이며 삭제·철회 fence/개인 행을 역삭제하지 않는다. 백업 복구는 격리 검증 후 재개하며 stale 정책 자동 복원 금지.
+13. **위험:** 과거 진행판 미완료와 현행 미완료 혼동, private-only 설치에 과거 Public SQL을 무작정 replay하는 함수 덮어쓰기, Drive 사본/키를 같은 위치에 두는 위험을 피한다.
+14. **결정:** Drive/One 확정。12세·KR/PH/TH 유지와 동의 절차 준비를 사용자 재확정했다. C02에 가입 전 안내/접수·보호자 확인·계정 결속·철회 수용 계약을 마련했다. 실제 방법/보존/국가별 조건은 아직 미확정이며 성인 본인인증 도입과 분리한다. 운영 DB 비밀번호는 사용자 모름 응답, 임의 초기화하지 않는다.
+15. **진행:** 운영 read-only preflight·기존 예약 성공 확보. 경보 스크립트4개 포함 unit462/462·build20 PASS. 지원 이메일/메일 링크와 공개 미제공 안내 보완. `tools/operations/build-public-upgrade-rehearsal.mjs` → `run-public-upgrade-rehearsal.sh` 로컬13 SQL 단언 PASS. 실제 운영 기능의 추가 변경 없이 합성 기존 카드/태그/사진 읽기·retirement를 확인했다.
+16. **발견/변경:** Public SQL은 private compat fence/retirement 함수와 충돌한다. 원본 migration 변경 없이 두 create 문장만 적응하는 로컬 전용 후보·hash manifest를 준비했다. 신규 schema+full retirement를 원자 적용한다. 운영에서는 백업·현행 ledger·정확한 적용 hash/data release/안전한 rollback 확인 뒤 별도 적용 후보가 필요하다. 72table 복원/기초 A-B 재검사 아님. 동의 기반 코드에는 pre-account guard/실접수/issuer가 없음을 확인해 단순 UI 체크나 identity receipt를 동의로 승격하지 않았다.
+17. **완료 보고/한계:** [이번 증거](evidence/2026-10-09-release-closeout.json),03 W/D/Q/현재 카드 참조. 운영 DB 변경0·백업 사본/키 생성·업로드0·유료 계약0. 변경한 경보·지원 코드만 Git 배포하고 SHA 확인한다. `revert`로 해당 코드 복귀 가능, 데이터/삭제 fence 역삭제 없음. 실제 동의 구현/운영과 외부 백업·경보 수신·Public 최종 후보는 미완료다. 읽은 문서는 AGENTS/시작/확정 결정/PLANS/QA07/변경09/기존 운영·backup/identity·release-v2, 실제 명령·결과는 증거에 분리했다.
+
 ## 2026-10-07 W18 옛 서재 기능 대비·작품 상세 연결
 
 ### 목적·확정 범위

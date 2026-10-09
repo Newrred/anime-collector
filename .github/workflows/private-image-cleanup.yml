@@ -3,7 +3,8 @@ on:
   schedule:
     - cron: '7 0,6,12,18 * * *'
   workflow_dispatch:
-permissions: {}
+permissions:
+  contents: read
 concurrency:
   group: private-image-cleanup
   cancel-in-progress: false
@@ -11,25 +12,16 @@ jobs:
   cleanup:
     if: vars.MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 4
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Clean retired images and refresh observed capacity
         env:
           CLEANUP_ORIGIN: ${{ vars.MOEMOA_PRIVATE_IMAGE_CLEANUP_ORIGIN }}
           CLEANUP_SECRET: ${{ secrets.MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET }}
-        shell: bash
-        run: |
-          node --input-type=module <<'JS'
-          const origin = new URL(process.env.CLEANUP_ORIGIN);
-          if (origin.protocol !== 'https:' || origin.username || origin.password || origin.pathname !== '/' || origin.search || origin.hash || !process.env.CLEANUP_SECRET || process.env.CLEANUP_SECRET.length < 32) throw Error('Invalid cleanup configuration');
-          const response = await fetch(new URL('/api/private-image-cleanup', origin), { headers: { Authorization: `Bearer ${process.env.CLEANUP_SECRET}` }, redirect: 'error', signal: AbortSignal.timeout(45000) });
-          if (!response.ok) throw Error(`Cleanup HTTP ${response.status}`);
-          const result = await response.json();
-          if (!Number.isInteger(result.deleted) || result.deleted < 0 || result.deleted > 50 || result.failed !== 0) throw Error('Invalid cleanup result');
-          const observed = await fetch(new URL('/api/private-image-observe', origin), { headers: { Authorization: `Bearer ${process.env.CLEANUP_SECRET}` }, redirect: 'error', signal: AbortSignal.timeout(45000) });
-          if (!observed.ok) throw Error(`Observation HTTP ${observed.status}`);
-          const capacity = await observed.json();
-          if (!capacity.observedAt || !Number.isSafeInteger(capacity.storedBytes) || !Number.isSafeInteger(capacity.reservedBytes) || !Number.isSafeInteger(capacity.globalReadBytes)) throw Error('Invalid observation result');
-          console.log(JSON.stringify({ deleted: result.deleted, failed: result.failed, observedAt: capacity.observedAt,
-            storedBytes: capacity.storedBytes, reservedBytes: capacity.reservedBytes, globalReadBytes: capacity.globalReadBytes }));
-          JS
+          STORAGE_ALERT_BYTES: ${{ vars.MOEMOA_PRIVATE_STORAGE_ALERT_BYTES }}
+          READ_ALERT_BYTES: ${{ vars.MOEMOA_PRIVATE_READ_ALERT_BYTES }}
+        run: node scripts/private-image-maintenance.mjs

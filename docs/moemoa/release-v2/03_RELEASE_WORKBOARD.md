@@ -1,5 +1,15 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-09 운영 출시 마감 — 이번 실행
+
+- 사용자 재확정: **12세·한국/필리핀/태국 유지 + 동의 절차 준비**, Safari/WebKit 추가 검사는 제외(PASS 아님). Android·성인 인증/성인 공개 후속 제외 유지. 기존 신원 prototype을 실제 보호자 동의로 승격하지 않는다. [C02의 구체 흐름/국가별 근거/현재 코드 한계](02_ACCEPTANCE_CONTRACTS.md#2026-10-09-보호자-동의-준비--w06w14w20-d04)를 준비했다.
+- 운영 읽기: 10/9 08:44 UTC private-only DB, 공개 schema/resource 정책 미설치, private 정책 on/approved, 물리100MB·계정50MB·월 전역 읽기500MB, 당시 저장/예약682,714bytes. 06:00 UTC 예약 정리·관측 성공. DB/사용자 정보는 수정하지 않았다.
+- W15: 기존 유지 workflow에80MB/월400MB 경보 및 관측 오류·정리 오류 실패 상태를 추가했다. 예약 실행의 성공만으로 비용 알림 수신을 주장하지 않는다. W17: 지원/신고/삭제/이의 연락처를 승인된 sinong / godburgundy@gmail.com으로 바로잡고 메일 링크를 연결했다.
+- W20: 기존 private 삭제 fence와 retirement 함수에 충돌하는 Public SQL 두 지점을 확인했다. 원본 migration을 수정하지 않는 **로컬 전용** 선택 적용 리허설을 준비했다. 기존 카드·카드 태그·READY 사본/예약·정책·sync 함수 보존과 적용 후 기존 사진 읽기/삭제를13개 SQL 단언으로 검증했다. 운영 적용·ledger 기록은 하지 않았다.
+- 이번 새 검사: 단위462/462, build20 PASS. 이전 단위458·hosted 공개/72table 복원 결과와 분리한다. [이번 실행 근거](evidence/2026-10-09-release-closeout.json). Git/운영 반영 결과는 아래 최신 마감 기록과 build-info를 따른다.
+- D05: 보유 저장소 **Google Drive/Google One5TB** 확인. 운영 Supabase Free에는 다운로드할 관리형 백업이 없고, 운영 DB 비밀번호는 사용자도 현재 모른다고 답했다. Git 제외·접근제한 로컬 설정 파일만 준비했으며 초기화·새 키 발급·백업 업로드·유료 변경은 하지 않았다. 실제 DB/Storage 암호화 외부 사본과 별도 복구 키는 미완료다.
+
+
 ## 2026-10-09 다른 PC 재개·검증 범위
 
 - Git `master`/운영 `35fb912`의 일치와 최신 `Service quality` [37818042096](https://github.com/Newrred/anime-collector/actions/runs/37818042096) 성공을 읽기로 확인했다. 운영 유지 작업도 성공 상태다. 이 PC는 기존 테스트 환경으로 계정 연결·Memory/작품 동기화 상태를 표시하며 Public·사진 원격 전송을 켜지 않고 로컬 실행한다. 일반 운영 사진 동작은 실제 운영 링크에서 검증한다.
@@ -237,15 +247,15 @@
 | 항목 | 값 |
 |---|---|
 | 계획 | `MOEMOA_PUBLIC_LAUNCH_PLAN_V2_2026-09-22` |
-| 출시 목표 | 개인 기록 + 계정 + 무료 비공개 최적화 이미지 연동 + 공개 보드/미니홈·팔로우 + 최소 운영 + 12세 이용·성인 영역. 출시 일정 조정 승인, 새 날짜 미확정 |
+| 출시 목표 | 개인 기록 + 계정 + 무료 비공개 최적화 이미지 연동 + 일반 공개 보드/미니홈·팔로우 + 최소 운영.12세·한국/필리핀/태국 재확정, 보호자 동의 준비. 성인 인증/성인 공개 제외 |
 | 제품 대상 | 제품 Web+Android 유지. 첫 출시 후보 WEB_ONLY 확정, Android는 Web 개선 후 후속 출시(D02) |
-| 현재 milestone | **W08/W09/W11/W14 일반 공개·사후 검토 마감. 성인 인증 prototype 보존·동결. M1~M5 미완료** |
-| 현재 release 상태 | **NOT_RELEASE_READY — private 연동 과거 hosted 근거 확보. 사후 검토 변경·보호자 동의·최신 후보 실기기/운영 승인 잔여. 성인 인증은 이번 출시 제외** |
-| 현재 본 작업 | **새 동의 기반 일반 공개·사후 차단 로컬 구현/검증. 신규 일반 이미지의 별도 권리 확인 흐름 및 hosted 미완료** |
-| 다음 작업 | **W08 일반 이미지 권리 확인 경로 마감 후 정확한 hosted 시험 후보 준비** |
+| 현재 milestone | **W15/W17/W20 비용·복구·정책·운영 출시 마감. W06/D04 보호자 동의 준비. 성인 prototype 동결** |
+| 현재 release 상태 | **PRIVATE_WEB_DEPLOYED / PUBLIC_NOT_RELEASE_READY — 보호자 동의·운영 백업/키·경보 수신·정확한 Public DB/설정 후보 잔여. Safari 추가 검사 제외/PASS 아님** |
+| 현재 본 작업 | **운영 경보/지원 연락처 마감, private-only→Public 보존 리허설, 가입 전 보호자 동의 계약 구체화** |
+| 다음 작업 | **C02의 이메일 회신 방식 후보를 국가별 적용 조건·신청 보존/철회 기준과 결속해 보호자 접수 절차 마감** |
 | 작업 repository/branch | `Newrred/anime-collector` / `master` (사용자 승인 간이 Web 배포) |
-| 작업 HEAD / dirty 상태 | **4ead72b 검토 checkpoint: local master 및 origin/review/pro-progress-2026-09-27. 이번 문서 반영은 미커밋. 원격 master는 06d2e38(9/27 조회)** |
-| 운영 SHA / 후보 SHA | **운영06d2e38/READY는 과거 배포 증거. 이번 운영사이트 재조회 없음. 검토4ead72b는 not RC, 후보 미확정** |
+| 작업 HEAD / dirty 상태 | **이번 시작 master/origin751f299, 이번 변경은 아래 배포 기록을 따른다.4ead72b는 과거 검토 checkpoint** |
+| 운영 SHA / 후보 SHA | **시작 운영751f299/source=vercel-git. 최신 운영 SHA는 build-info와 master를 대조. Public 전체 RC는 미고정** |
 | 테스트 DB/Storage/계정 | `moemoa-test` (`nmgkhknponvzcwliajyk`). 과거 A/B·REST/Storage·복원/공개왕복 근거 유지. 새로운 합성 private-source 공개본 서버 철회·시험 세션 로그아웃·사본2종 DELETED/객체0·quota0/권리revoked·정책 정확 원복 확인. 이번 UI 철회는 도구 제한으로 미검증. Android 제외 |
 | 완료 milestone | **1/6 — M0만** |
 | 기본 작업 완료 | **4/20 — W01/W02/W04/W05** |
@@ -614,12 +624,12 @@
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
 | W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
 | W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님 |
-| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | private 계정/물리량·예약/변환·준비·월 전송 한도 및 병렬 검사 로컬 PASS. 작은교체 실제 quota 거부/수동정리 후 동일operation 복구 PASS. 자동 private 정리 API/기본off workflow·대기 가능성 UI 구현/검증. nonempty endpoint실제 검증완료. 실제 스케줄 기동·합산 예산/정책 감사 잔여. 기존 서버 자원/한도 로컬 SQL 근거 유지. 실제 정상 부하·우회/429·정지 검사는 승인된 test에서 진행 가능. 운영 수치·예산·경보 수신 D03 및 보존 D05 잔여 |
+| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 10/9 실제 private 예약 정리/관측 성공 확인. 물리100MB·계정50MB·월전역500MB 운영 중.80MB/월400MB workflow 경보 보완, 합성4/unit462 PASS. 실제 임계 알림 수신·공개 자원정책/예산 결속은 D03 잔여. 이전 quota/HTTP 근거 보존 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 과거 hosted72table 및 로컬 private15검사 이후 암호화 복구17/path-hardening 근거까지 확보(Q20과 동일). 외부 Storage/canonical 사본·키보관·지속 journal·운영 복구목표/실복구 D05 잔여. 기본 복원 재구축 금지 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 과거72table/암호화 복원 근거 보존. Drive/One5TB 확인, 기존 백업 도구 재사용. 운영 Free 관리형 사본 없음/사용자 DB비밀번호 모름으로 실제 수집 대기, 초기화 없음. 승인된 지원 연락처 보완.12세·KR/PH/TH 동의 계약 준비, 실제 동의·외부 사본/키·경보 수신 미완료 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 만료/복귀/후보 endpoint 조합 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | VERIFIED_WEB_UPDATE — FULL_RC_PENDING | 10/7 유효20~29차 마감 및 classification DB 적용/검사 완료, 코드0f46310 master/Vercel SHA·CI37502913118 SUCCESS·운영 읽기 확인 완료. Public/private-image flags off. 일반 공개 전체 RC 정책/비용/복구·실물폰 잔여는 별도 유지 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | PRIVATE_WEB_DEPLOYED / PUBLIC_RC_PENDING | 시작751f299 Git/Vercel 일치·CI37902919878 성공. private 사진·classification·작품 sync·삭제 RPC 운영 반영. Public off/schema 미설치. 추가15 migration 로컬 보존13단언 PASS, 운영 적용 없음. Safari 제외. 이번 경보/지원 변경 배포는 최신 마감 기록 참조 |
 
 ### 작업 수의 변화와 진행률
 
@@ -628,15 +638,14 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-ID / M: W08/W09/W11/W14 일반 공개·사후 검토
-이번에 닫을 행동: 확인·preview 동의 후 일반 게시→새 익명 열람→관리자 사후 차단.
-충분한 기존 증거: private 두 origin·일반 공개 한 바퀴·로컬 unit394/build19/viewer4/SQL143. 새 인증 hosted PASS 아님.
-이번 변경: 기존3개test migration을 사용하는 제품UI13+정리4 PASS 추가. 첫2회 fixture 실패 및 정리503 재시도 이력 보존. 제품 추가수정0. flags/정책/사본 원복, DB 구조는 test에 유지, 운영0.
-구현 잔여: 실기기/OAuth/CDN 및 전체 제품UI 조합. 자기 확인은 이미지 자동 분류/진짜 저작권 검증이 아니다. 캡처·타인 팬아트 별도 gate. 과거 local/unit/모의UI와 이번 actual backend PASS를 구분한다.
-진짜 외부 잔여: 12세 목표 보호자/국가 조건·별도 이미지 권리 운영, 외부 백업·키/경보 및 최종RC. 성인 공급자 계약은 제외.
-다음 행동1개: 실휴대폰용 정확한 Web-only test 배포후보 준비(운영D06 별도).
-새 연령 구현: prototype 보존·동결. 이번 후보에 성인 인증/업체/추가guard·반복race를 통합하지 않는다.
-D02 Web-only 유지, Android 후속. D01 test migration 승인/적용/원복 완료. D06 정확한 운영 후보 승인은 별도.
+ID / M: W15/W17/W20 출시 운영 마감 + W06/D04 보호자 동의 준비
+충분한 기존 증거: private 사진/두 화면 동기화·삭제, hosted 일반 공개 왕복 및72table 복원. 반복하지 않음.
+이번 변경/새 증거: 용량 임계 경보·지원 연락처, unit462/build20, private-only→Public 로컬 보존13단언. 운영 DB 변경0.
+구현 잔여: 가입 전 연령/국가 안내·실제 보호자 접수/확인/계정 결속·철회. 현행 OAuth에는 이 절차가 없음.
+외부 잔여: 국가별 적용/보존 조건, 운영 DB 비밀번호 복구(사용자 모름), 실제 암호화 Drive 사본·별도 키, 경보 수신, Public 정확한 적용 후보.
+다음 행동1개: C02의 이메일 회신 후보에 국가별 조건·신청 보존/철회를 결속해 동의 접수 절차 마감.
+Safari 추가 검사/Android/성인 인증은 제외. 미실행을 PASS로 표시하지 않음.
+12세/KR/PH/TH 유지. 실제 동의/복구 준비 전 Public 활성화나 전체 출시 완료 선언 금지.
 ```
 
 이 카드는 적용 시 현재 코드·증거에 맞춰 갱신한다. 이미 W08이 해결돼 있다면 중복 수정하지 않고 관련 실제 검증으로 이동한다. 긴 출력은 기존 evidence를 참조하고 진행판을 또 만들지 않는다.
@@ -764,10 +773,10 @@ NA 이유:
 |---|---|---|---|---|---|
 | D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_CANDIDATE_APPLIED_RESTORED | 기본 A/B·키·기존 공개 증거 보존/재요청 금지.10/7 새classification test HTTP12·test/prod 선택 적용만 추가; 기존 테스트 운영 설정 그대로 유지 | 사용자 승인 후 test-general-public-20260927-01의 SQL3개 적용/실제backend28+정리4 PASS. flags off·정책/기존home복원·운영자0·생성객체/예약0 확인. 제품UI/실폰은 별도 잔여 | general-public-hosted JSON / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
-| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / TEST_MEASURED | 월50,000원 추가 운영비 목표 유지,50MB/1MB 후보. 테스트 필요 시 가동 방향9/26 승인. 실제 Pro 결제/일시중지 없음. 성인 인증 비용/계약은 이번 후보 제외. 전송/전역 한도·경보 및 별도 아동 동의 운영비가 있다면 실제 금액 확인 | 유료/공급자 변경 미승인 | TEST-ON-DEMAND-01 / GENERAL-PUBLIC-POSTMODERATION-01 및 기존 비용 증거 |
-| D04 | 운영주체/정책/권리·연령/지원 | SCOPE_CONFIRMED / POLICY_IMPLEMENTATION_PENDING | 개인 sinong / godburgundy@gmail.com / 하루2~3회.9/27 성인 인증·성인 공개 보류, 일반 이미지의 간단한 확인 후 게시·신고/관리자 사후 검토 확정.12세 목표·한국/필리핀/태국 유지. 보호자/국가별 개인정보·별도 이미지 권리 근거·실제 사후 조치 운영 잔여 | 정책 구현/실검증 전. 성인 공급자 문의 미발송·보류 | GENERAL-PUBLIC-POSTMODERATION-01 / RELEASE-REGIONS-01 |
-| D05 | 공개 철회 지연·보존/복구 목표·사본 | PROPOSAL_PENDING / PARTIAL_VERIFIED | 기존72table/합성 복원 근거 보존. 매일·7일보관·RPO24h/RTO48h 제안 유지. Google 계열5TB 보유, Drive/One 대 Cloud Storage 확인 대기. 최신 journal 지속수집·암호화 외부보관·실복구 필요 | 서비스/키보관·백업 약속 승인 전 | 기존 복구 증거 및 TEST-ON-DEMAND-01 |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | WEB_UPDATE_DEPLOYED / PUBLIC_RC_PENDING | 10/7 직접 승인: 기존20~29차 Web 마감·classification DB·master Git 배포. Public/private-image 기존off, 새classification1 | 코드0f46310 Git/Vercel 후보 SHA·CI37502913118 SUCCESS·운영 읽기 확인 완료. 문서만 후속 master 반영/최신 배포 검증. 일반 공개 전체 RC 승인으로 확대하지 않음 | WEB-DESIGN-RELEASE-CLOSEOUT-01 / evidence/2026-10-07-web-design-deployment.json |
+| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
+| D04 | 운영주체/정책/권리·연령/지원 | SCOPE_RECONFIRMED / CONSENT_NOT_IMPLEMENTED | 10/9 12세·한국/필리핀/태국 유지·동의 준비 재확정. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 성인 인증·성인 공개 제외. C02에 가입 전 접수/회신/검토/계정 결속/철회 및 국가별 근거 준비 | 실제 접수/확인 방식·국가별 조건·보존/개인정보 고지 및 검증 미완료. 원본/캡처/팬아트 권리 gate 유지 | AGE12-REGIONS-CONSENT-01 / C02 |
+| D05 | 공개 철회 지연·보존/복구 목표·사본 | DESTINATION_CONFIRMED / ACCESS_BLOCKED | Google Drive/One5TB 확인. 운영 Free는 관리형 백업 다운로드 없음; 사용자 DB비밀번호 모름. Git 제외 입력 파일 준비만 함. 실제 암호화 DB/Storage/canonical·최신 삭제journal/별도 키·복구 잔여. 과거72table 복원 반복 금지 | 비밀번호 복구/별도 키·RPO24h/RTO48h·7일보관 제안 최종 확정 전, 초기화/결제 없음 | 10/9 사용자 답변 / release-closeout evidence |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | PRIVATE_WEB_DEPLOYED / PUBLIC_RC_PENDING | 사용자 전체 출시 작업·Git/DB 운영 반영 지시 유지. 시작751f299 Git/Vercel/CI 일치. private 사진 on, Public off. 이번 지원/경보 반영은 최신 마감 기록 참조 | 실제 백업·동의·권리/운영 조건 충족 전 Public 활성화 금지. local upgrade는 운영 migration 아님 | RELEASE-CLOSEOUT-FOCUS-01 / release-closeout evidence |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 
