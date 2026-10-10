@@ -1,7 +1,7 @@
 {
   "date": "2026-10-10",
-  "scope": "C02/W06 test-only recovery and real existing-account flow; user-confirmed account deletion committed but completion UI failed; no production release",
-  "checkpoint": "DELETION_ACK_BUG_FIXED_TEST_DEPLOYMENT_SOURCE_SCREEN_AND_SAME_COMMIT_CI_SUCCESS",
+  "scope": "C02/W06 test-only recovery, original deletion incident, corrected real signup/photo/deletion flow; no production release",
+  "checkpoint": "REAL_POST_FIX_COMPLETION_AND_SIGNOUT_PASS_PHOTO_RETIRED_TWO_FILES_PENDING_TEST_CLEANUP_CONNECTION",
   "followupFiles": [
     "CODEX_START_HERE.md",
     "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
@@ -268,6 +268,83 @@
       }
     }
   },
+  "realPostFixRetest": {
+    "date": "2026-10-10",
+    "sourceCommit": "8e1e5a600904815ab1d051ca7482332efa9d638c",
+    "userRequestedContinuation": true,
+    "userCompletedTermsAndGoogleSignup": true,
+    "userClickedFinalIrreversibleDelete": true,
+    "testOnly": true,
+    "fixture": {
+      "source": "tests/catalog-lab/fixtures/cover-valid-images.mjs pngBytes",
+      "kind": "repository-authored 1x1 synthetic transparent PNG",
+      "inputBytes": 68,
+      "cardsCreated": 1,
+      "personalPhotosOrThirdPartyArtworkUsed": false,
+      "actualComposerAndPrivateUploadUsed": true,
+      "photoStatus": "Available on your other devices",
+      "privateManifestCountBeforeAndAfterUpload": [14, 15],
+      "privateStorageObjectCountBeforeAndAfterUpload": [2, 4]
+    },
+    "capacityRefresh": {
+      "releaseId": "MOEMOA_PRIVATE_OBSERVATION_TEST_20261010_01",
+      "sourcePath": "tools/private-images/refresh-phone-test-observation-20260928.sql",
+      "scriptIntroductionCommit": "a71483b0151d8860605a71e204ff846be7a48b68",
+      "reviewedHead": "ac8ad945781beff43c69d488cb15babae1eb0c85",
+      "previousObservedAt": "2026-09-28T07:11:52.445753Z",
+      "newObservedAt": "2026-10-10T08:23:17.389028Z",
+      "storedAndReservedBytesBeforeUpload": 38464,
+      "invalidObjectSizes": 0,
+      "currentMonthReadBytesBeforeUpload": 0,
+      "onlyObservedAtChanged": true,
+      "flagsLimitsRevisionFreshnessGatePreserved": true
+    },
+    "realDeletion": {
+      "completionHeading": "Account deleted",
+      "signedOutState": "Saved on this device; Continue with Google",
+      "signOutButtonAndReceiptDeletionPanelAbsent": true,
+      "manualSignOutUsed": false,
+      "rawHttpStatusIndependentlyCollected": false,
+      "readOnlyDatabaseCheck": {
+        "usersRemaining": 2,
+        "oldVersionReceipts": 2,
+        "newVersionReceipts": 0,
+        "admissions": 0,
+        "handoffs": 0
+      },
+      "localSyntheticCardRetainedAsDocumented": true
+    },
+    "imageCleanup": {
+      "initialGoneOwnerPrivateObjects": 0,
+      "privateManifestCount": 15,
+      "goneOwnerActiveManifests": 0,
+      "goneOwnerNotDeletedManifests": 1,
+      "observedWaitingFenceThenDue": true,
+      "finalWaitingFence": 0,
+      "finalDue": 1,
+      "privateStorageObjectCount": 4,
+      "goneOwnerPrivateObjects": 2,
+      "originalPrivateStorageObjectsRetained": 2,
+      "physicalRemovalVerified": false,
+      "manualObjectDeletionPerformed": false,
+      "publicStorageObjectCountUnchanged": 3,
+      "preexistingUnmanifestedPublicObjectCount": 1,
+      "preexistingPublicObjectsTouched": false,
+      "previewCleanupSettingsPresent": false,
+      "settingsCheckedWithoutRevealingValues": ["MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET", "MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED", "MOEMOA_PRIVATE_IMAGE_CLEANUP_PROJECT"],
+      "existingSettingsEnvironment": "Production only",
+      "existingScheduledRun": "38028461102",
+      "existingScheduledOrigin": "https://www.moemoa.xyz",
+      "existingScheduledSuccessIsTestEvidence": false,
+      "nextGate": "User approval for test-only cleanup authentication/configuration and execution connection; no production change or existing key copying"
+    },
+    "limitations": [
+      "Successful real completion/signout and account deletion do not prove physical photo removal.",
+      "Unauthenticated shell probe reached Vercel login HTML; browser API navigation was blocked. Neither is cleanup endpoint status evidence.",
+      "No secret values were revealed or copied, no cleanup worker or manual Storage deletion was run.",
+      "Source changes are documentation-only; remote actions were the capacity refresh and recorded synthetic signup/upload/deletion. No app code, dependency or migration changes."
+    ]
+  },
   "production": {
     "masterCommitObserved": "bae5e796619583b07fac457735c14728b11f6484",
     "changed": false,
@@ -280,8 +357,6 @@
     "warning": "Source/config rollback cannot restore a completed account deletion."
   },
   "notPerformed": [
-    "New Auth account creation in this new-document test",
-    "Successful automatic completion UI after actual deletion",
     "End-to-end Storage cleanup",
     "Production deployment, master update or production database changes",
     "New credential generation, secret extraction or allowlist replacement",
