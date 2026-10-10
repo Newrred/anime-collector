@@ -1,0 +1,6 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AdminDashboard from '../components/AdminDashboard.jsx';
+import '../styles/admin.css';
+---
+<BaseLayout><AdminDashboard base={import.meta.env.BASE_URL} client:only="react" /></BaseLayout>

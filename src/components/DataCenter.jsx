@@ -19,6 +19,7 @@ import ManualDataTools from "./data/ManualDataTools.jsx";
 import AccountPrivacyPanel from "./data/AccountPrivacyPanel.jsx";
 import {verifyAccountStillExists} from '../features/auth/accountPrivacy.js';
 import {supabase} from '../lib/supabaseClient.js';
+import AdminEntry from '../features/admin/AdminEntry.jsx';
 
 function formatBytes(value) {
   const n = Number(value);
@@ -273,6 +274,7 @@ export default function DataCenter() {
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
       <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} titleSync={titleSync} locale={locale} />
+      <AdminEntry session={auth.session} locale={locale} base={base} />
       {import.meta.env.PUBLIC_ACCOUNT_PRIVACY_V1 === '1' && auth.user?.id && <AccountPrivacyPanel
         key={auth.user.id} user={auth.user} locale={locale} base={base}
         canDelete={import.meta.env.PUBLIC_ACCOUNT_DELETE_V1 === '1'}

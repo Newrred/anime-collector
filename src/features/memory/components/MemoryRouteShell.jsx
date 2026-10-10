@@ -14,10 +14,9 @@ export function useMemoryRouteUi() {
   return value;
 }
 
-export default function MemoryRouteShell({ base = "/", currentRoute = "", children }) {
+function MemoryRouteFrame({ base = "/", currentRoute = "", children, owner }) {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   useMemoryReturnNavigation(base);
-  const owner = useMemoryOwnerBoundary();
   const copy = getMessageGroup(locale, "memoryRoutes");
   const contextValue = useMemo(() => ({ locale, copy, ownerKey: owner.ownerKey }), [locale, copy, owner.ownerKey]);
 
@@ -40,4 +39,19 @@ export default function MemoryRouteShell({ base = "/", currentRoute = "", childr
       </div>
     </MemoryRouteUiContext.Provider>
   );
+}
+
+function OwnerBoundRouteShell(props) {
+  const owner = useMemoryOwnerBoundary();
+  return <MemoryRouteFrame {...props} owner={owner} />;
+}
+
+const UNBOUND_OWNER = Object.freeze({ ready: true, failed: false, ownerKey: "service" });
+
+export default function MemoryRouteShell({ accountBoundary = true, ...props }) {
+  // Service administration has its own authenticated RPC boundary and must not
+  // require personal archive initialization. Existing memory routes keep it.
+  return accountBoundary
+    ? <OwnerBoundRouteShell {...props} />
+    : <MemoryRouteFrame {...props} owner={UNBOUND_OWNER} />;
 }

@@ -1,0 +1,63 @@
+---
+// Fixed production acceptance document. Create a new version for later wording changes.
+// Never import the mutable legal review page into an acceptance document.
+import '../../styles/simple-signup.css';
+const base=import.meta.env.BASE_URL;
+const privacy=`${base}legal/privacy-2026-10-10/`;
+---
+<html lang="ko">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>MOEMOA · 이용약관 · Terms</title></head>
+<body class="signup-page"><main class="signup-panel signup-legal">
+ <div class="signup-heading"><a href={base}>MOEMOA</a><a href={`${base}auth/start/`}>가입 · Signup</a></div>
+ <h1>이용약관 · Terms</h1>
+ <p>2026년 10월 10일 문서 · Document dated 10 October 2026</p>
+ <p>문서 버전 / Document version: terms-2026-10-10<br/>가입 정책 / Signup policy: simple-signup-2026-10-10</p>
+ <p>이 버전이 안내된 가입에 적용합니다. 가입 가능 국가와 기능은 가입 화면에서 확인할 수 있습니다. 이 문서가 게시되어 있다고 모든 국가의 가입이나 공개 기능이 제공되는 것은 아닙니다. 이전에 수락한 문서는 그대로 보존합니다.</p>
+ <p lang="en">These Terms apply when this version is shown for your signup. Check the signup screen for available countries and features. Publishing this document does not make signup or public sharing available everywhere. Previously accepted documents are preserved.</p>
+ <section id="service">
+  <h2>서비스와 운영자 / Service and operator</h2>
+  <p>MOEMOA는 작품의 감상·시청 기록과 이미지로 개인의 기억을 보관하는 서비스입니다. 제공 중인 개인 기록·보관 기능은 안내된 용량과 기능 범위에서 무료입니다. 공개를 선택하지 않아도 비공개 보관을 이용할 수 있습니다. 개인 운영자 sinong이 운영하며 계정·개인정보·신고·이의제기 문의는 <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a>으로 받습니다.</p>
+  <p lang="en">MOEMOA is an archive for your viewing records, reflections and images. Available personal recording and storage features are free within the stated capacity and feature limits. You can use private storage without publishing. It is operated by sinong, an individual operator. Contact <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a> for account, privacy, reporting and appeal requests.</p>
+ </section>
+ <section id="eligibility">
+  <h2>가입과 연령 / Account eligibility</h2>
+  <p>기본 최소 연령은 만13세, 한국은 만14세입니다. 거주지에 더 높은 기준이 적용되면 그 기준을 따라야 하며, 실제 가입 가능 여부는 가입 화면에서 안내합니다. 거주 국가와 생년월일을 정확히 입력해 주세요. 법률상 보호자의 허가나 동의가 필요한 경우 보호자와 이 약관을 함께 확인하고 필요한 허가나 동의를 받아야 합니다. 생년월일 입력과 약관 체크는 신원이나 보호자 동의를 인증하는 절차가 아닙니다.</p>
+  <p lang="en">The basic minimum age is 13, or 14 in Korea. Higher applicable local requirements still apply; the signup screen shows current signup availability. Provide your actual country of residence and date of birth. If the law requires parental permission or consent, review these Terms with your parent or guardian and obtain it. Birth-date entry and the checkbox do not verify identity or parental consent.</p>
+  <p>계정과 가입 연령 정보의 처리 방법은 <a href={privacy}>개인정보 처리 안내</a>에서 확인할 수 있습니다. 필리핀 가입의 한 번 동의에는 <a href={`${privacy}#age-processing`}>가입조건 확인을 위한 연령 정보 처리</a>가 명시적으로 포함됩니다. 이는 공개 게시나 광고·분석을 위한 동의가 아닙니다.</p>
+  <p lang="en">The <a href={privacy}>Privacy Notice</a> explains account and signup age-data processing. The single agreement for Philippine signup expressly includes <a href={`${privacy}#age-processing`}>age-data processing to check signup eligibility</a>. It is not consent to publishing, advertising or analytics.</p>
+  <p>필리핀의 만13~17세 이용자는 부모 또는 법정대리인과 두 문서를 함께 확인해 주세요. 보호자는 가입과 안내된 목적의 연령 정보 처리에 동의하는 경우 가입 화면의 같은 동의 항목을 직접 선택해야 합니다. 이용자의 가입 사실만으로 보호자가 동의했다고 간주하지 않습니다.</p>
+  <p lang="en">Philippine users aged 13–17 must review both documents with a parent or legal guardian. The guardian must select the same agreement in the signup form themselves if they agree to signup and age-data processing for the stated purpose. A user signing up is not presumed to establish parental consent.</p>
+ </section>
+ <section id="storage">
+  <h2>내 기록과 저장 / Your records and storage</h2>
+  <p>기기에만 저장되는 기록과 계정에 동기화되는 기록은 저장 화면에서 구분해 안내합니다. 개인 사진 저장에는 로그인이 필요하며 사진은 표시·동기화용 사본으로 저장될 수 있습니다. 서비스 저장은 원본 파일 전체의 백업을 보장하지 않으므로 원본을 별도로 보관해 주세요. 공개를 선택하지 않은 개인 기록은 다른 이용자에게 공개하지 않습니다.</p>
+  <p lang="en">Storage controls distinguish device-only records from records synchronized to your account. Saving personal photos requires sign-in; stored copies may be optimized for display and synchronization. Keep originals separately: service storage does not guarantee a complete backup of original files. Private records are not made visible to other users without a separate publishing action.</p>
+ </section>
+ <section id="content-permission">
+  <h2>콘텐츠 권리와 공개 / Content rights and publishing</h2>
+  <p>콘텐츠의 권리는 이용자 또는 원래 권리자에게 남습니다. 이용자는 업로드·저장·공개에 필요한 권리를 갖추어야 합니다. 운영자에게는 요청한 저장·변환·전송·표시와 필요한 서비스 보안·백업에 한정된 비독점적 이용만 허용합니다. 광고용 재사용·판매나 AI 학습을 위한 허락은 아닙니다.</p>
+  <p lang="en">You or the original rights holder retain ownership. You must have the rights needed for each upload, storage or publication. You grant only non-exclusive permission limited to the storage, conversion, delivery and display you request, and necessary service security and backups. This does not permit advertising reuse, sale or AI training.</p>
+  <p>콘텐츠 삭제나 계정 해지 후 이 허락은 종료됩니다. 다만 삭제 요청 이행에 필요한 정리와 법률상 필요한 보존에는 그 목적과 필요한 기간에 한해서만 적용됩니다. 공개 기능이 제공되는 경우에도 선택한 내용을 미리 확인한 뒤 별도로 공개해야 합니다. 애니 캡처·타인 팬아트의 공개 권한은 약관 동의로 대신하지 않습니다.</p>
+  <p lang="en">Permission ends when content is deleted or the account is closed, except for cleanup needed to fulfill deletion and legally required retention, solely for those purposes and necessary periods. Where publishing is available, it requires a separate choice after previewing the selected content. Accepting these Terms does not grant publishing rights for anime screenshots or another person’s art.</p>
+ </section>
+ <section id="rules">
+  <h2>금지행위·신고·이의제기 / Rules, reports and appeals</h2>
+  <p>불법·권리침해·성인용 콘텐츠의 공개, 괴롭힘, 타인의 개인정보 노출, 계정 도용과 서비스 방해를 금지합니다. 신고와 운영 검토에 따라 콘텐츠 접근을 제한·삭제하거나 계정을 제한할 수 있습니다. 긴급한 피해 방지를 위해 먼저 제한할 수 있으며, 법률과 안전이 허용하는 범위에서 사유와 이의제기 방법을 안내합니다. 잘못된 조치라고 생각하면 지원 이메일로 재검토를 요청할 수 있습니다.</p>
+  <p lang="en">Do not publish unlawful, infringing or adult content, harass others, expose private information, take over accounts or disrupt the service. Reports and moderation may lead to content restrictions, removal or account restrictions. Urgent protection may require action first; where law and safety allow, we explain the reason and how to appeal. You may request a review through support.</p>
+ </section>
+ <section id="ending-account">
+  <h2>내보내기·탈퇴 / Export and account closure</h2>
+  <p>데이터 관리 화면에서 안내된 범위의 기록을 내보낼 수 있습니다. 내보내기에 개인 사진 원본 전체가 포함되는 것은 아닙니다. <a href={`${base}data/#account-privacy`}>계정 관리</a>에서 본인의 수락 이력을 확인하고, 명시적으로 확인한 뒤 클라우드 계정을 탈퇴할 수 있습니다. 필수 가입 연령 정보의 처리 동의도 클라우드 계정 종료를 통해 철회할 수 있습니다.</p>
+  <p lang="en">Data controls export the records described on that screen, not necessarily all original photos. In <a href={`${base}data/#account-privacy`}>account settings</a>, you can view your acceptance history and explicitly confirm closure of your own cloud account. Closing the cloud account also provides a way to withdraw consent to required signup age-data processing.</p>
+  <p>클라우드 계정 탈퇴와 기기 안의 사본 삭제는 다릅니다. 기기 사본은 남으며, 사진 정리 대기와 일부 보안·백업 자료가 탈퇴와 동시에 모두 삭제되지는 않습니다. 자세한 범위는 <a href={`${privacy}#retention`}>보관·삭제 안내</a>를 확인해 주세요. 공개를 철회하더라도 다른 사람이 이미 보관한 사본을 원격으로 지울 수는 없습니다.</p>
+  <p lang="en">Closing a cloud account is separate from deleting copies on your device. Local copies remain; queued photo cleanup and some security or backup records are not all erased immediately. See <a href={`${privacy}#retention`}>retention and deletion</a> for details. Withdrawing publication cannot remotely erase copies already kept by others.</p>
+ </section>
+ <section id="rights-and-revisions">
+  <h2>책임·법정 권리·변경 / Responsibility, statutory rights and revisions</h2>
+  <p>이용자는 자신의 콘텐츠와 위법행위에 대해 관련 법률이 정한 책임을 집니다. 운영자의 법적 책임이나 서비스 운영상 손실을 이용자에게 포괄적으로 전가하는 배상의무를 두지 않습니다. 미성년자에게 법률상 인정되는 계약 취소권을 포함해 이용자의 법정 권리와 강행법상 보호를 제한하지 않습니다.</p>
+  <p lang="en">You are responsible for your content and unlawful conduct to the extent provided by applicable law. These Terms impose no blanket indemnity transferring the operator’s legal liability or operating losses to you. Your statutory rights and mandatory protections, including any right a minor has under applicable law to avoid a contract, remain intact.</p>
+  <p>중요한 이용조건 변경은 적용 전에 알리고 필요한 동의를 다시 받습니다. 과거 수락 기록에 연결된 문서는 새 문안으로 덮어쓰지 않습니다. 유료 기능이 도입되면 가격과 조건을 따로 알리고 선택받으며, 이 약관 동의만으로 자동 과금하지 않습니다.</p>
+  <p lang="en">We will notify you before material changes take effect and obtain renewed agreement where required. New wording will not overwrite documents attached to earlier acceptances. Any future paid feature will disclose its price and terms separately and require a separate purchase choice; accepting these Terms does not authorize automatic charges.</p>
+ </section>
+ <p><a href={privacy}>개인정보 처리 안내 · Privacy Notice</a></p>
+</main></body></html>

@@ -36,6 +36,12 @@
 
 - 시작: 세 병렬 점검으로 PH/TH, KR/US/Europe, 현재 관리자 계약을 대조한다. `vibe-security`의 DB 권한·최소정보 원칙과 `vibe-ops`의 config/실제배포/rollback 검증을 적용한다. 연구/코드/운영 완료를 각각 구분한다.
 - 발견: 기존 admission flag off는 legacy 가입 허용 상태이며 관리자 pause와 같은 의미가 아니다. 신규 운영 제어는 admission guard를 보존해야 한다. 최종 결과·변경 파일·실제 tests/DB/source/잔여는 실행 후 이 절에 기록한다.
+- 2026-10-10 통합 후보: `/admin/`와 별도 operator RPC, 기존 계정 화면 진입점, 10/10 운영 문서 후보 및 PH13–17의 기존 단일 동의 안내를 구현했다. 사용자가 거절한 별도 보호자 체크·이메일·인증 단계는 추가하지 않는다. 체크를 보호자 인증으로 기록하지 않는다. 문서 후보 등록은 국가 활성과 다르다.
+- 로컬 검증: 단위 **553/553 PASS**, 가입/계정 Chromium **18 PASS**, Astro **32페이지 build PASS**, PostgreSQL admin 계약 **66 PASS**, 릴리스 생성 SQL **14 PASS**. 첫 전체 단위 실행의 Windows 임시 포트 `EACCES` 1건은 독립32개/전체553개 재실행에서 통과했다. 이를 코드 결함 수정이나 원격 검증으로 표시하지 않는다. 관리자 화면 및 Git CI 최종 결과는 뒤에 기록한다.
+- 실제 DB 사전 읽기: 운영 계정3/receipt0, 지정 Google 계정1 및 기존 moderator 연결, signup/admission false, Public reads/writes false, private policy `MOEMOA_PRIVATE_20261008_01`. 테스트는 계정2/receipt2, 지정 계정0, 기존 test signup true. 테스트에는 public budget table이 없어 admin 집계는 해당 한도를 null로 표시하며 별도 budget migration을 추가하지 않는다. 기존 사용자 row·Storage26개 테이블 내부 해시/개수 보존을 릴리스 SQL에서 확인하고 원문을 출력하지 않는다.
+- 유럽 해결 경로: 기존 현지 개인/단체의 실제 서면 위임 또는 DataRep 등 EU+UK 대표자 대행. DataRep Small의 공개 가격은 1,000명 이하/12개월 €150, GDPR 민감정보 옵션 €250이며 실제 수임·인원 산정·세금은 계약 전 확인한다. 대표자 없음 자체를 무기한 보류 계획으로 두지 않는다. 외부 위임·비용·운영자 실제 계약 정보만 사용자 결정 대상이며 아직 계약/결제/문의 전송은 하지 않았다. [공식 근거/대안](02_POLICY_MARKET_RESEARCH.md).
+- 제공처 조건 재검토: 운영 Vercel UI는 실제 Hobby다. 공개 DPA는 Pro/Enterprise 대상이며 민감정보 조항이 PH의 나이를 포함하는지는 확답하지 않는다. PH 법률상 가입 금지와 제공처 계약 불확실성을 구분한다. 기존 Supabase Edge로 가입 start/callback/session 전체를 직접 처리하면 추가 업체·의무 요금·보호자 입력 없이 해당 Vercel 연령 경로를 제거할 수 있다. 다만 OAuth/쿠키/일회 인계 변경의 별도 구현·회귀가 필요하고, 이미지 바이트도 Vercel을 통과하므로 가입 이전 하나를 전체 EU 처리 계약의 해결로 주장하지 않는다. 이 변경은 아직 구현/배포되지 않았다.
+- 현재 외부 변경: 이 통합 후보 시점은 원격 Git/DB/운영 설정 변경 전이다. additive schema 적용과 지정 계정 역할 부여는 분리된 생성 SQL을 사용한다. generator/두 migration은 HEAD와 일치해야 하며 기본 실행은 rollback. 역할 부여 직전 대상·범위 확인은 별도로 받는다. rollback은 flag off/operator 비활성 및 정상 Git 복귀이며 기존 수락·감사·개인 기록은 보존한다.
 
 ## 2026-10-10 W06 — 승인된 테스트 전용 사진 정리 실행 연결
 

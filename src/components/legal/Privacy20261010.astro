@@ -1,0 +1,92 @@
+---
+// Fixed production acceptance document. Create a new version for later wording changes.
+// Configured primary storage, provider operations and operator backups are separate.
+import '../../styles/simple-signup.css';
+const base=import.meta.env.BASE_URL;
+const terms=`${base}legal/terms-2026-10-10/`;
+---
+<html lang="ko">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>MOEMOA · 개인정보 안내 · Privacy Notice</title></head>
+<body class="signup-page"><main class="signup-panel signup-legal">
+ <div class="signup-heading"><a href={base}>MOEMOA</a><a href={`${base}auth/start/`}>가입 · Signup</a></div>
+ <h1>개인정보 처리 안내 · Privacy Notice</h1>
+ <p>2026년 10월 10일 문서 · Document dated 10 October 2026</p>
+ <p>문서 버전 / Document version: privacy-2026-10-10<br/>가입 정책 / Signup policy: simple-signup-2026-10-10</p>
+ <p>이 버전이 안내된 가입과 개인 기록 서비스의 처리 방식을 설명합니다. 실제 가입 가능 국가는 가입 화면에서 안내합니다. 이 문서 게시로 모든 국가의 가입이나 공개 기능이 활성화되는 것은 아니며, 이전 수락 기록을 새로운 동의로 바꾸지 않습니다.</p>
+ <p lang="en">This notice explains processing for signup linked to this version and the personal archive service. The signup screen shows country availability. Publishing this notice does not enable signup or public sharing everywhere, or turn earlier acceptances into new consent.</p>
+ <nav aria-label="문서 이동"><a href="#age-processing">가입 연령 정보</a> · <a href="#retention">보관·삭제</a> · <a href="#withdrawal">철회·권리</a></nav>
+ <section id="operator">
+  <h2>처리 주체와 문의 / Who handles your information</h2>
+  <p>개인 운영자 sinong이 MOEMOA의 개인정보 처리 목적과 방식을 정합니다. 열람·정정·삭제·이용 중단 등 개인정보 문의는 <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a>으로 보내 주세요. 비밀번호·로그인 코드·토큰·신분증은 보내지 마세요.</p>
+  <p lang="en">Individual operator sinong determines how and why MOEMOA processes personal information. Contact <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a> for access, correction, deletion, restriction or privacy questions. Do not send passwords, sign-in codes, tokens or identity documents.</p>
+ </section>
+ <section id="account-data">
+  <h2>계정과 개인 기록 / Account and private records</h2>
+  <p>Google 계정 식별자·이메일·프로필은 로그인과 계정 연결에 사용합니다. Google 비밀번호는 받지 않습니다. 작품·시청 상태·별점·감상·카드·태그·보드와 선택한 이미지는 요청한 기록 표시·저장·동기화에 사용합니다. 기기에만 보관되는 항목과 계정에 저장되는 항목은 기능 화면에서 안내합니다.</p>
+  <p lang="en">Google identifiers, email and profile details support sign-in and account linking. We do not receive your Google password. Titles, viewing status, ratings, notes, cards, tags, boards and selected images support the display, storage and synchronization you request. Feature screens explain which items stay on your device and which are stored in your account.</p>
+  <p>공개를 선택하지 않아도 개인 보관을 이용할 수 있습니다. 비공개는 다른 이용자에게 보이지 않는다는 뜻이며, 운영 시스템도 처리할 수 없는 종단간 암호화를 의미하지는 않습니다. 로그인이나 약관 동의만으로 기록·이미지를 공개하지 않습니다.</p>
+  <p lang="en">Private storage is available without publishing. Private means not visible to other users, not end-to-end encryption that prevents the operating system from processing the data. Signing in or accepting the Terms does not publish records or images.</p>
+ </section>
+ <section id="age-processing">
+  <h2>가입 연령 정보의 처리 / Processing signup age information</h2>
+  <p><strong>목적:</strong> 거주 국가에 따른 가입조건을 확인하고 그 확인 및 수락 기록을 보관합니다. 광고·공개 프로필이나 신원 인증에 사용하지 않습니다.</p>
+  <p lang="en"><strong>Purpose:</strong> Check signup eligibility for your country of residence and keep a record of the check and acceptance. This information is not used for advertising, public profiles or identity verification.</p>
+  <p><strong>항목:</strong> 생년월일 원문은 가입 화면에서 나이를 계산하는 데만 쓰고 MOEMOA 서버나 Google에 보내지 않습니다. Google 연결 중 국가·신고 나이·판정일·정책 및 문서 버전을 임시 처리합니다. 계정의 가입 확인 기록에는 국가·연령 구간·충족한 최소 연령·정책 및 약관·개인정보 안내 버전·서버 기록 시각을 남깁니다.</p>
+  <p lang="en"><strong>Data:</strong> Your full birth date is used only to calculate age in the signup form and is not sent to MOEMOA’s server or Google. Country, declared age, date, policy and document versions are processed temporarily during Google sign-in. The account receipt retains country, age band, minimum age met, policy, Terms and Privacy Notice versions, and the server timestamp.</p>
+  <p><strong>기간:</strong> 암호화 가입 쿠키는 10분, 계정 연결 자료는 5분, 암호화 로그인 전달 자료는 2분 후 만료됩니다. 사용한 서버 일회 자료는 삭제하며 만료 잔여는 매시간 정리합니다. 예약 지연·실패로 물리 삭제가 늦어질 수 있지만 만료 자료는 사용할 수 없습니다. 가입 확인 기록은 계정이 존재하는 동안 보관하고 계정 삭제에 연결해 삭제합니다. 자세한 내용은 <a href="#retention">보관·삭제</a>를 확인해 주세요.</p>
+  <p lang="en"><strong>Duration:</strong> The encrypted signup cookie expires after 10 minutes, account-binding data after 5 minutes and encrypted sign-in delivery after 2 minutes. Used server one-time data is deleted; expired leftovers are cleaned hourly. A delayed or failed job may delay physical removal, but expired data cannot be used. The receipt is kept while the account exists and linked to account deletion for removal. See <a href="#retention">retention and deletion</a>.</p>
+  <p><strong>필리핀 가입:</strong> 가입 화면의 한 번 동의는 “이용약관과 가입 연령 정보 처리에 동의합니다.”입니다. 여기서 연령 정보 처리 동의는 이 절에 적힌 목적·항목·기간에 한정되며, 전체 개인정보 처리나 공개 게시를 포괄하는 동의가 아닙니다. 이 체크로 본인이나 보호자의 동의 권한을 인증하지 않습니다.</p>
+  <p lang="en"><strong>Philippine signup:</strong> The single agreement reads, “I agree to the Terms and the processing of signup age information.” Consent to age-data processing is limited to the purpose, data and duration described in this section; it is not blanket consent to all processing or publishing. The checkbox does not verify your or a guardian’s authority to consent.</p>
+  <p>필리핀의 만13~17세 이용자는 부모 또는 법정대리인과 이 안내 및 약관을 함께 확인해야 합니다. 보호자는 해당 가입과 위 목적·항목·기간의 연령 정보 처리에 동의하는 경우 같은 동의 항목을 직접 선택해 주세요. 별도 항목이나 보호자 이메일을 요구하지 않으며, 이 선택을 신원·관계·동의 권한의 인증 기록으로 표시하지 않습니다.</p>
+  <p lang="en">Philippine users aged 13–17 must review this notice and the Terms with a parent or legal guardian. The guardian must select the same agreement themselves if they agree to signup and age-data processing for the purpose, data and duration above. No separate checkbox or guardian email is required. The selection is not recorded as verification of identity, relationship or authority to consent.</p>
+  <p><strong>거절·철회:</strong> 이 처리에 동의하지 않으면 클라우드 계정 가입을 진행할 수 없지만 허용된 기기 내 이용은 계속할 수 있습니다. 가입 후에는 <a href={`${base}data/#account-privacy`}>계정 관리</a>에서 명시적으로 확인하고 클라우드 계정을 종료해 필수 연령 정보 처리 동의를 철회할 수 있습니다. <a href="#withdrawal">철회와 삭제의 범위</a>를 함께 확인해 주세요.</p>
+  <p lang="en"><strong>Refusal and withdrawal:</strong> Without this processing consent, cloud-account signup cannot proceed, but permitted device-only use remains available. After signup, you can explicitly confirm closure of your cloud account in <a href={`${base}data/#account-privacy`}>account settings</a> to withdraw consent to required age-data processing. See the <a href="#withdrawal">scope of withdrawal and deletion</a>.</p>
+ </section>
+ <section id="processing-grounds">
+  <h2>처리 목적과 근거 / Purposes and legal grounds</h2>
+  <p>로그인·개인 보관·동기화에 필요한 정보는 이용자가 요청한 서비스를 제공하기 위해 처리합니다. 동의가 필요한 연령 정보 처리는 위에 설명한 명시 동의에 따릅니다. 서비스 보안·오류 대응과 법적 의무 이행은 각 목적에 필요한 범위 및 해당 지역 법률이 허용하는 근거로 처리합니다. 약관 체크를 광고·모든 개인정보 처리에 대한 포괄 동의로 사용하지 않습니다.</p>
+  <p lang="en">Information necessary for sign-in, private storage and synchronization is processed to provide the service you request. Age-data processing that requires consent relies on the express agreement above. Security, troubleshooting and compliance with legal obligations are limited to their necessary scope and the grounds permitted by applicable local law. The Terms checkbox is not blanket consent to advertising or every processing purpose.</p>
+  <p>EU/EEA 및 영국의 경우 요청된 서비스 이행에 필요한 처리는 계약 이행, 필수 보안·부정사용 방지는 정당한 이익, 법률이 요구하는 보존·대응은 법적 의무를 근거로 합니다. 계약 이행이라는 명칭으로 미성년자의 계약상 보호를 배제하지 않으며, 동의가 필요한 별도 목적을 계약 이행에 포함하지 않습니다. 동의를 근거로 하는 처리는 철회할 수 있습니다.</p>
+  <p lang="en">For the EU/EEA and UK, processing necessary for the requested service relies on contract performance, necessary security and abuse prevention on legitimate interests, and retention or responses required by law on legal obligations. Contract performance does not displace protections for minors or absorb separate purposes that require consent. Consent-based processing may be withdrawn.</p>
+ </section>
+ <section id="providers">
+  <h2>처리 서비스와 국외 처리 / Providers and international processing</h2>
+  <p>한국에서 운영하는 서비스로, 아래 제공처에 기능 수행에 필요한 정보를 전송합니다. 로그인·저장·동기화·웹 접속 때 암호화된 통신으로 전송하며, 주 저장 지역과 제공처의 지원·보안·접속 처리 위치는 서로 다릅니다.</p>
+  <p lang="en">The service is operated from Korea and sends providers the information necessary for their functions over encrypted connections when you sign in, save, synchronize or access the website. Primary storage location is separate from providers’ support, security and connection-processing locations.</p>
+  <ul>
+   <li><p><strong>Supabase Pte. Ltd.:</strong> 계정 식별자·이메일·프로필, 가입 확인 기록, 동기화한 기록과 선택한 이미지의 인증·저장·전송에 사용합니다. 운영 프로젝트의 주 데이터베이스·이미지 저장 지역은 싱가포르(ap-southeast-1)입니다. 싱가포르 계약 법인이 제공하며, 미국 등의 지원·운영과 EU 데이터센터의 로그 처리가 별도로 있습니다. 이미지 전송은 설정과 접속 위치에 따라 글로벌 전송망을 거칠 수 있습니다. 모든 사본·로그가 싱가포르에만 있다는 뜻은 아닙니다. <a href="https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq">처리 지역</a> · <a href="https://supabase.com/legal/customer-resources/data-processing-addendum">처리 계약</a></p><p lang="en"><strong>Supabase Pte. Ltd.:</strong> Authentication, storage and delivery of account identifiers, email, profile, signup receipts, synchronized records and selected images. The production project’s primary database and image storage are in Singapore (ap-southeast-1). Its contracting entity is in Singapore; support and operations may take place in the US and elsewhere, with operational logs in EU data centers. Image delivery may use a global network depending on configuration and user location. Not every copy or log is confined to Singapore.</p></li>
+   <li><p><strong>Vercel Inc.:</strong> 미국 제공처로 웹 전송, 가입·로그인 서버 요청, 접속·오류·보안 처리를 담당합니다. 가입 중 국가·신고 나이·문서 버전, 로그인 전달 자료와 요청에 필요한 접속정보가 처리됩니다. 서버 함수의 설정 지역은 싱가포르(sin1)이지만 웹 전송망은 전 세계에 분산되어 있고 미국 등의 운영·로그 처리는 별개입니다. 개인 사진 보관소를 Vercel에 별도로 만들지는 않습니다. <a href="https://vercel.com/legal/dpa">처리 계약·국외 처리 안내</a></p><p lang="en"><strong>Vercel Inc.:</strong> A US provider for web delivery, signup and sign-in server requests, and connection, error and security processing. This includes temporary country, declared age, document versions, sign-in delivery data and necessary connection information. Server functions are configured for Singapore (sin1); the delivery network is global, and operations and logs in the US and elsewhere are separate. Vercel is not a separate personal-photo repository.</p></li>
+   <li><p><strong>Google:</strong> 이용자가 선택한 Google 로그인을 제공하며 계정·접속·보안 정보를 자체 방침에 따라 처리합니다. 운영자의 별도 재해복구 사본은 암호화하여 비공개 Google Drive에도 보관합니다. Google 서비스는 미국 등을 포함한 전 세계 서버에서 처리될 수 있으며, 프로젝트의 싱가포르 저장 설정이 Google의 처리 위치를 제한하지 않습니다. <a href="https://policies.google.com/privacy">Google 개인정보처리방침</a></p><p lang="en"><strong>Google:</strong> Provides the Google sign-in you select and processes its own account, connection and security information under its policy. Separate disaster-recovery copies are also encrypted and stored privately in Google Drive. Google services may process data on servers worldwide, including in the US; the project’s Singapore setting does not limit Google’s locations.</p></li>
+  </ul>
+  <p>Supabase의 처리 계약에는 해당되는 국외 이전의 표준계약조항과 영국 추가조항이 포함되어 있습니다. Vercel과 Google의 처리 범위는 위에 연결한 공식 안내 및 해당 서비스 계약에 따릅니다. 제공처 자체의 계정·접속·보안 정보 처리는 각자의 방침도 적용됩니다. 관련 보호조치와 수령인에 관한 문의는 운영자에게 할 수 있습니다. 해외 인증·저장을 원하지 않으면 클라우드 가입·동기화를 이용할 수 없지만 허용된 기기 내 이용은 계속할 수 있습니다. 제공처의 보관도 아래 목적·삭제 기준과 각 처리 계약의 범위에 따릅니다.</p>
+  <p lang="en">Supabase’s processing agreement incorporates standard contractual clauses and the UK Addendum for applicable transfers. Vercel and Google processing is subject to the linked provider information and the applicable service arrangements. Providers’ own account, connection and security processing is also subject to their policies. Contact the operator for information about safeguards and recipients. Without overseas authentication and storage, cloud signup and synchronization are unavailable, but permitted device-only use remains available. Provider retention is subject to the purposes and deletion criteria below and the applicable processing arrangements.</p>
+ </section>
+ <section id="device-security">
+  <h2>기기 저장·접속·지원 / Device storage, access and support</h2>
+  <p>기기 기록·화면 설정·로그인 상태는 브라우저 저장소에 남을 수 있으며, 브라우저 데이터를 지우면 기기에만 있던 기록을 잃을 수 있습니다. 서비스에 자동 방문 분석 모듈을 사용하지 않습니다. 제공처의 필수 접속·보안 기록은 별개이며 요청 처리에 IP 등의 접속정보가 사용될 수 있습니다.</p>
+  <p lang="en">Local records, display settings and sign-in state may remain in browser storage. Clearing browser data can remove device-only records. The service uses no automatic visit-analytics module. Providers’ essential access and security logs are separate, and connection information such as IP addresses may be used to handle requests.</p>
+  <p>문의·신고에 제공한 내용은 문제 처리와 조치 검토에 사용합니다. 일반 앱 로그에 개인 감상·이미지 원본·비공개 보드 이름·검색어를 남기지 않는 것이 운영 기준입니다.</p>
+  <p lang="en">Information provided in support requests or reports is used to resolve issues and review actions. Our operating rule excludes private notes, original image bytes, private board names and search text from ordinary app logs.</p>
+ </section>
+ <section id="retention">
+  <h2>보관·삭제 / Retention and deletion</h2>
+  <p>가입 확인 기록은 계정이 존재하는 동안 보관하며 계정 삭제 시 함께 삭제됩니다. 사용 중인 개인 기록은 이용자가 삭제하거나 계정을 종료할 때까지 저장합니다. 삭제 표시된 기억·보드와 동기화 변경 기록은 30일 기준의 일별 정리 대상이며 남아 있는 참조 등 정리 조건에 따라 더 오래 남을 수 있습니다. 이는 모든 사본을 30일 이내에 지운다는 약속이 아닙니다.</p>
+  <p lang="en">Signup receipts are kept while the account exists and deleted with it. Active personal records are stored until you delete them or close the account. Deleted Memories, Boards and synchronization changes are subject to daily cleanup using a 30-day threshold; remaining references and other cleanup conditions can extend retention. This is not a promise that every copy is erased within 30 days.</p>
+  <p>사진은 삭제 처리 후 새 열람을 막고 안전 대기와 예약 정리를 거칩니다. 정리는 회당 최대 50건이며 대기량·실패·예약 지연으로 더 걸릴 수 있습니다. 이미 발급된 열람 주소는 유효기간 동안 접근될 수 있고, 기기에 받은 사본은 서버 삭제로 지워지지 않습니다.</p>
+  <p lang="en">Photo deletion blocks new reads before a safety delay and scheduled storage cleanup. Each run processes at most 50 items; queues, failures or scheduling delays may extend that time. Previously issued access links may remain usable until they expire, and server deletion does not erase copies received on a device.</p>
+  <p>지원·신고·보안 기록과 삭제 처리 식별 기록은 문의 해결, 조치 검토, 부정사용 대응 및 삭제 내용이 다시 나타나는 것을 막는 데 필요한 동안 보관하고, 목적이 끝나면 삭제하거나 개인을 알아볼 수 없게 처리합니다. 법률이 보존을 요구하거나 실제 분쟁 대응에 필요한 경우에는 그 사유에 필요한 항목·기간으로 제한합니다. 모든 이용자의 기록에 일률적인 장기 보관 기한을 적용하지 않습니다.</p>
+  <p lang="en">Support, reports, security records and deletion-processing identifiers are retained as necessary to resolve requests, review actions, address abuse and prevent deleted content from reappearing, then deleted or made non-identifying. Retention required by law or necessary for an actual dispute is limited to the relevant data and period. No blanket long-term retention period applies to every user’s records.</p>
+  <p>재해복구용 암호화 사본은 운영자의 저장장치와 비공개 Google Drive에 별도로 있으며 수동으로 관리합니다. 계정 삭제로 이 사본이나 제공처의 모든 보안·백업 기록까지 즉시 물리 삭제되지는 않습니다. 고정된 자동 백업 회전 주기나 모든 제공처 사본의 동일한 삭제 시각을 보장하지 않습니다. 보존 목적이 끝난 사본을 정리하고, 복구할 때는 최신 삭제 내역을 대조해 삭제된 정보를 다시 서비스하지 않도록 합니다.</p>
+  <p lang="en">Encrypted disaster-recovery copies are separately held on the operator’s storage and in private Google Drive, with manual management. Account deletion does not immediately physically erase these copies or every provider security or backup record. There is no guarantee of a fixed automatic backup-rotation cycle or one physical-erasure time for all provider copies. Copies are removed when their retention purpose ends; recovery must reconcile current deletions before deleted information is served again.</p>
+ </section>
+ <section id="withdrawal">
+  <h2>수락 이력·철회·권리 / Acceptance history, withdrawal and rights</h2>
+  <p><a href={`${base}data/#account-privacy`}>계정 관리</a>에서 본인의 수락 이력을 확인하고 클라우드 계정 탈퇴를 명시적으로 확인할 수 있습니다. 탈퇴가 완료되면 해당 클라우드 계정과 필수 가입 연령 처리도 종료합니다. 기기에 남은 사본은 자동으로 지우지 않으며, 허용된 기기 내 이용은 계속할 수 있습니다. 필요하면 기기 사본을 별도로 삭제해 주세요.</p>
+  <p lang="en">In <a href={`${base}data/#account-privacy`}>account settings</a>, you can view your acceptance history and explicitly confirm cloud-account closure. Completed closure ends that cloud account and required signup age-data processing. Local copies are not automatically erased, and permitted device-only use remains available. Delete device copies separately if desired.</p>
+  <p>처리 동의 철회는 철회 전 적법한 처리를 소급해 취소하지 않습니다. 계정 종료 후에도 <a href="#retention">정리 대기와 필요한 보존</a>이 남을 수 있습니다. 일부 기록의 삭제나 정정만 원하거나 계정 화면을 이용할 수 없다면 지원 이메일로 요청할 수 있습니다.</p>
+  <p lang="en">Withdrawal does not undo earlier lawful processing. <a href="#retention">Queued cleanup and necessary retention</a> may remain after account closure. Contact support if you want only certain records deleted or corrected, or cannot use account settings.</p>
+  <p>해당 법률이 인정하는 범위에서 열람·정정·삭제·이동·처리 제한·이의제기와 동의 철회를 요청하고 관할 감독기관에 민원을 제기할 수 있습니다. 약관 수락이 이러한 권리를 없애지 않습니다.</p>
+  <p lang="en">Subject to applicable law, you may request access, correction, erasure, portability, restriction, objection and withdrawal of consent, and complain to your supervisory authority. Accepting the Terms does not remove these rights.</p>
+ </section>
+ <p><a href={terms}>이용약관 · Terms</a> · <a href="mailto:godburgundy@gmail.com">개인정보 문의 · Privacy contact</a></p>
+</main></body></html>

@@ -9,12 +9,15 @@ export const publicationUiEnabled = () => env.PUBLIC_MEMORY_PUBLICATION_V1 === "
 export const minihomeUiEnabled = () => publicationUiEnabled() && (env.PUBLIC_MEMORY_MINIHOME_V1 === "1" || Boolean(testAdapters()));
 export const followsUiEnabled = () => minihomeUiEnabled() && (env.PUBLIC_MEMORY_FOLLOWS_V1 === "1" || Boolean(testAdapters()));
 export const safetyUiEnabled = () => publicationUiEnabled() && (env.PUBLIC_MEMORY_MODERATION_V1 === "1" || Boolean(testAdapters()));
-export const contentReviewUiEnabled = () => safetyUiEnabled() && (env.PUBLIC_MEMORY_CONTENT_REVIEW_V1 === '1' || Boolean(testAdapters()));
+// Operator review remains available when public reads/writes are paused.
+// Every review RPC independently verifies the live moderator role.
+export const contentReviewUiEnabled = () => env.PUBLIC_SERVICE_ADMIN_V1 === '1'
+  || (safetyUiEnabled() && (env.PUBLIC_MEMORY_CONTENT_REVIEW_V1 === '1' || Boolean(testAdapters())));
 let services;
 export function getPublicationServices() {
   if (services) return services;
   const test = testAdapters();
-  const client = test?.client || (publicationUiEnabled() && env.PUBLIC_SUPABASE_URL && env.PUBLIC_SUPABASE_ANON_KEY
+  const client = test?.client || ((publicationUiEnabled() || contentReviewUiEnabled()) && env.PUBLIC_SUPABASE_URL && env.PUBLIC_SUPABASE_ANON_KEY
     ? createClient(env.PUBLIC_SUPABASE_URL, env.PUBLIC_SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: "moemoa-public-reader" },
       global: { fetch: (url, init) => fetch(url, { ...init, cache: "no-store" }) },

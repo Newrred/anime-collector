@@ -32,6 +32,27 @@ async function fill(page:any,country='KR',dob='2000-10-09') {
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
 }
 
+test('production PH teen guidance uses the same one agreement and resets after birthday change',async({page})=>{
+ const signupPolicy={...policy,version:'simple-signup-2026-10-10',termsVersion:'terms-2026-10-10',privacyVersion:'privacy-2026-10-10'};
+ await page.clock.setFixedTime(new Date('2026-10-10T12:00:00Z'));
+ const calls=await mockBackend(page,{signupPolicy});
+ await page.setViewportSize({width:320,height:780});
+ await page.goto('/auth/start/');await fill(page,'PH','2011-06-01');
+ await expect(page.locator('#signup-guardian-notice')).toContainText('보호자와 함께');
+ await expect(page.getByRole('checkbox')).toHaveCount(1);
+ await expect(page.locator('form input,form select,form textarea')).toHaveCount(3);
+ await page.fill('#signup-birthday','2000-06-01');
+ await expect(page.getByRole('checkbox')).not.toBeChecked();
+ await expect(page.locator('#signup-guardian-notice')).toHaveCount(0);
+ await page.fill('#signup-birthday','2011-06-01');await page.getByRole('checkbox').check();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
+ const declaration=JSON.parse(calls.find(c=>c.path==='start').body).declaration;
+ expect(declaration).toMatchObject({country:'PH',age:15,accepted:true,policyVersion:signupPolicy.version});
+ expect(declaration).not.toHaveProperty('guardianVerified');
+ expect(JSON.stringify(declaration)).not.toContain('2011-06-01');
+});
+
 test('new PH test documents keep one explicit checkbox, correct versions and mobile layout',async({page},info)=>{
  const signupPolicy={...policy,version:'simple-signup-2026-10-10-test',termsVersion:'terms-2026-10-10-test',privacyVersion:'privacy-2026-10-10-test'};
  const calls=await mockBackend(page,{signupPolicy});await page.setViewportSize({width:320,height:780});
@@ -100,6 +121,8 @@ test('synthetic FR13 policy keeps one terms checkbox and starts Google without D
  await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
  expect(calls.filter(c=>c.path==='start')).toHaveLength(0);
  await page.fill('#signup-birthday','2013-10-01');
+ await expect(page.getByRole('checkbox')).not.toBeChecked();
+ await page.getByRole('checkbox').check();
  await expect(form.getByRole('checkbox')).toHaveCount(1);
  await expect(form.locator('input,select,textarea')).toHaveCount(3);
  await page.getByRole('button',{name:'Google로 계속'}).click();
