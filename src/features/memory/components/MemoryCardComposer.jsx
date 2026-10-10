@@ -7,6 +7,8 @@ import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import { IconImage, IconPlus } from "../../../components/ui/AppIcons.jsx";
 import { privateImageUiEnabled } from "../runtime/platformPrivateImages.js";
 import "./memory-card-composer.css";
+import { useImageFileTransfer } from "./useImageFileTransfer.js";
+import ImageInputHint from "./ImageInputHint.jsx";
 
 const formatBytes = (value) => {
   const bytes = Number(value);
@@ -50,6 +52,8 @@ function MemoryCardComposerContent({ base }) {
     canSave,
     displayTitle,
     chooseImage,
+    receiveImage,
+    reportImageError,
     useCatalogCover,
     changeTitle,
     searchTitles,
@@ -62,6 +66,14 @@ function MemoryCardComposerContent({ base }) {
     changeNote,
     changeRightsConfirmed,
   } = useMemoryCardComposer({ base, accountUserId: auth.user?.id || null });
+
+  const webFileInput = typeof runtime?.imageIntake.ingestFile === "function";
+  const imageTransfer = useImageFileTransfer({
+    active: webFileInput,
+    disabled: busy,
+    onFile: receiveImage,
+    onError: reportImageError,
+  });
 
   const allowLeave = useUnsavedNavigation(dirty, locale, { busy: status === "saving" || status === "syncing" });
   const saveReason = busy
@@ -117,7 +129,10 @@ function MemoryCardComposerContent({ base }) {
         <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <div className="memory-composer__workspace">
           <section
-            className={`memory-composer__visual-column memory-composer__step-card${hasVisual ? " is-complete" : " is-current"}`}
+            ref={imageTransfer.regionRef}
+            {...imageTransfer.handlers}
+            tabIndex={webFileInput ? 0 : undefined}
+            className={`memory-composer__visual-column memory-composer__step-card memory-image-input${hasVisual ? " is-complete" : " is-current"}${imageTransfer.dragging ? " is-dragging" : ""}`}
             aria-labelledby="memory-image-heading"
             aria-describedby={message ? "memory-composer-error" : undefined}
           >
@@ -167,6 +182,8 @@ function MemoryCardComposerContent({ base }) {
                 {!auth.loading && auth.user && !privateImageUiEnabled() && <small>{composerCopy.photoTemporarilyUnavailable}</small>}
               </div>
             )}
+
+            {webFileInput && photoAccountAvailable && <ImageInputHint copy={copy.imageInput} dragging={imageTransfer.dragging} />}
 
             {message && (
               <p id="memory-composer-error" className="memory-composer__error" role="alert" aria-live="assertive">

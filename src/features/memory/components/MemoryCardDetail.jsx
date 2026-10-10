@@ -420,6 +420,7 @@ function MemoryCardDetailContent({ base }) {
             {auth.loading ? null : !auth.user ? <div className="memory-detail__replacement"><p>{locale === "ko" ? "로그인한 뒤 이 기기의 카드를 계정으로 가져오면 사진을 추가할 수 있어요." : "After signing in, import this device's card to your account before adding a photo."}</p><button type="button" className="btn btn--subtle" disabled={!auth.configured} onClick={() => auth.signIn(`${base}data/`)}>{locale === "ko" ? "로그인하고 카드 가져오기" : "Sign in and import card"}</button></div>
               : auth.user && !privateImageUiEnabled() ? <p className="memory-detail__replacement-note">{locale === "ko" ? "지금은 사진 계정 저장을 사용할 수 없어요." : "Account photo storage is unavailable right now."}</p>
                 : <MemoryImageReplacement runtime={runtime} imageMissing={!bundle.asset.designSpec && !previewDataUrl && !remotePreviewDataUrl && !catalogCover?.publicUrl}
+                  active={state.detailTab === "manage" && state.imageToolsOpen && !deleteDialogOpen} inputCopy={copy.imageInput}
                   disabled={status !== "ready"} onReplace={replaceImage} onBusyChange={isBusy => updateState({ status: isBusy ? "replacing" : "ready" })} onMessage={nextMessage => updateState({ message: nextMessage })} copy={copy.replacement} />}
           </details>
           <div className="memory-detail__danger"><button

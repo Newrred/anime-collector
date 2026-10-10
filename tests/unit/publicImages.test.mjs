@@ -81,7 +81,8 @@ async function withServer(h,fn) {
       });
       break;
     } catch (error) {
-      if (error.code !== 'EADDRINUSE' || attempt >= 15) throw error;
+      // Windows excluded port ranges can reject an otherwise unused port with EACCES.
+      if (!['EADDRINUSE', 'EACCES'].includes(error.code) || attempt >= 15) throw error;
     }
   }
   try { await fn(`http://127.0.0.1:${server.address().port}`); }

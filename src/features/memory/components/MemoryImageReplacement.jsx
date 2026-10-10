@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import { useImageFileTransfer } from "./useImageFileTransfer.js";
+import ImageInputHint from "./ImageInputHint.jsx";
 
 export default function MemoryImageReplacement({
   runtime,
   imageMissing,
   disabled,
+  active = true,
   onReplace,
   onBusyChange,
   onMessage,
   copy,
+  inputCopy,
 }) {
   const [ticket, setTicket] = useState(null);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
@@ -17,6 +21,12 @@ export default function MemoryImageReplacement({
   const submitInFlightRef = useRef(false);
   const mountedRef = useRef(false);
   const pickerGenerationRef = useRef(0);
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
+  useEffect(() => {
+    if (!active) pickerGenerationRef.current += 1;
+  }, [active]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -49,20 +59,31 @@ export default function MemoryImageReplacement({
     setWorking(false);
   };
 
-  const chooseImage = async () => {
-    if (disabled || !runtime.imageIntake.available || !beginAction()) return;
+  const receiveImage = async (file) => {
+    if (!active || disabled || !runtime.imageIntake.available || !beginAction()) return;
     const generation = pickerGenerationRef.current + 1;
     pickerGenerationRef.current = generation;
+    const isCurrent = () => {
+      const region = imageTransfer.regionRef.current;
+      // A native <details> toggle hides its contents before React's onToggle
+      // update. Do not adopt a late image during that event/render gap.
+      return mountedRef.current && activeRef.current && pickerGenerationRef.current === generation
+        && region?.getClientRects().length > 0 && !region.closest('[hidden], details:not([open])');
+    };
+    let incoming = null;
     onMessage("");
     try {
-      const result = await runtime.imageIntake.pick();
-      if (!mountedRef.current || pickerGenerationRef.current !== generation) {
-        if (result.ticket) await runtime.releaseImageTicket(result.ticket.ticketId);
-        return;
-      }
+      const result = await (file ? runtime.imageIntake.ingestFile(file) : runtime.imageIntake.pick());
+      incoming = result.ticket;
+      if (!isCurrent()) return;
       if (result.cancelled || !result.ticket) return;
       if (pendingTicketRef.current && pendingTicketRef.current !== result.ticket.ticketId) {
         const removed = await runtime.releaseImageTicket(pendingTicketRef.current);
+        if (removed === true) {
+          pendingTicketRef.current = null;
+          if (mountedRef.current) { setTicket(null); setRightsConfirmed(false); }
+        }
+        if (!isCurrent()) return;
         if (removed !== true) {
           onMessage({ scope: "replacement", key: "cleanupFailed" });
           return;
@@ -71,12 +92,22 @@ export default function MemoryImageReplacement({
       pendingTicketRef.current = result.ticket.ticketId;
       setTicket(result.ticket);
       setRightsConfirmed(false);
+      incoming = null;
     } catch (error) {
-      if (mountedRef.current) onMessage({ scope: "error", code: String(error?.code || "replacementFallback") });
+      if (isCurrent()) onMessage({ scope: "error", code: String(error?.code || "replacementFallback") });
     } finally {
+      if (incoming && incoming.ticketId !== pendingTicketRef.current) await runtime.releaseImageTicket(incoming.ticketId);
       finishAction();
     }
   };
+  const chooseImage = () => receiveImage();
+  const webFileInput = typeof runtime.imageIntake.ingestFile === "function";
+  const imageTransfer = useImageFileTransfer({
+    active: active && webFileInput,
+    disabled: disabled || busy,
+    onFile: receiveImage,
+    onError: code => onMessage({ scope: "error", code }),
+  });
 
   const cancel = async () => {
     if (!ticket || !beginAction()) return;
@@ -139,7 +170,8 @@ export default function MemoryImageReplacement({
   }
 
   return (
-    <section className="memory-detail__replacement" aria-label={copy.regionLabel}>
+    <section ref={imageTransfer.regionRef} {...imageTransfer.handlers} tabIndex={webFileInput ? 0 : undefined}
+      className={`memory-detail__replacement memory-image-input${imageTransfer.dragging ? " is-dragging" : ""}`} aria-label={copy.regionLabel}>
       <div className="memory-detail__replacement-head">
         <div>
           <strong>{imageMissing ? copy.missingTitle : copy.replaceTitle}</strong>
@@ -156,6 +188,8 @@ export default function MemoryImageReplacement({
           </button>
         )}
       </div>
+
+      {webFileInput && inputCopy && <ImageInputHint copy={inputCopy} dragging={imageTransfer.dragging} />}
 
       {ticket && (
         <div className="memory-detail__replacement-review">

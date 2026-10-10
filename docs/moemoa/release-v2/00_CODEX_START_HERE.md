@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-10 최신 로컬 완료:** 계정 메뉴 통합과 데스크톱 이미지 drop/paste 구현·unit585/Chromium51/build32 PASS. [이번 보고](2026-10-10-account-menu-desktop-images.md)와 ExecPlan 최상단 참고. 운영 배포/DB 변경 없음. 아래 가입 운영 source6a2beff와 혼동하지 않는다.
+
 > **2026-10-10 현재 — KR14/US13/TH13 운영 가입 활성:** `FIRST-SIGNUP-KR-US-TH-UI-20261010` 승인 범위로 `6a2beff`를 master에 push했고 CI `38048163986` 전체 SUCCESS, Vercel Git Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready와 실제 www SHA/checkoutCommit/source·semanticMatch 일치를 확인했다. DB `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS(`2026-10-10T11:38:43.420647+00:00`): signup/admission=true, KR14·TH13·US13, Public off, 기존 계정3·수락0·26개 테이블/동기화 보존. **독립 readback·실제 가입/관리자 화면·기존회원 Google 로그인 복귀 PASS**. DOB/동의 공란에서 기존 계정 로그인→계정 연결·기억/보드와 작품/감상 동기화 성공·서비스 관리 링크를 확인했고 새 가입 기록은 생성되지 않았다. [이번 보고](2026-10-10-first-signup-ui-release.md)·[ExecPlan 최상단](01_RELEASE_EXECUTION_PLAN.md)·[현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)를 우선한다.
 >
 > 날짜 직접 입력·짧은 안내·기존회원 별도 로그인과 관리자 화면 개선은 배포됐다. 이번 운영 신규 Google 가입 왕복은 미실행이며 과거 test 사진 저장/탈퇴/정리 PASS와 구분한다. PH·EU/EEA·UK·CH와 Public은 이번에 활성화하지 않았다. 유료 대표자 대행 대신 [무보수 현지 위임](EU_UK_UNPAID_REPRESENTATIVE_PLAN.md)만 준비했고 실제 수임자는 미확보다. 아래12세·TH미확정·schema미설치·hosted미적용·후보테스트 대기 등은 **각 당시 이력**이며 현재 지시나 KR/US/TH 재승인 요구가 아니다.

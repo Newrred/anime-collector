@@ -1,0 +1,11 @@
+.memory-image-input { position: relative; outline: 2px solid transparent; outline-offset: 8px; }
+.memory-image-input.is-dragging { outline-color: var(--accent); }
+.memory-image-input:focus-visible { outline-color: var(--accent); }
+.memory-image-input__hint { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.memory-image-input__hint > p { margin: 0 0 4px; color: var(--text-primary); }
+.memory-image-input__hint > span { font-size: 12px; }
+.memory-image-input__hint kbd { font: inherit; white-space: nowrap; }
+.memory-image-input__hint details { margin-top: 4px; }
+.memory-image-input__hint summary { cursor: pointer; min-height: 44px; align-content: center; width: fit-content; }
+.memory-image-input__hint details p { margin: 0 0 8px; }
+.memory-image-input__hint summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

@@ -115,32 +115,36 @@ export function createWebImageIntake({ store = createWebMediaStore(), select = (
   decode = blob => createImageBitmap(blob), canvas = () => document.createElement('canvas'), crypto = globalThis.crypto } = {}) {
   const result = record => ({ localRef: `asset:${record.id}`, checksumSha256: record.hash,
     mimeType: record.mimeType, byteSize: record.blob.size, width: record.width, height: record.height });
+  // Every user-driven input shares this validation and local-only staging path.
+  const ingestFile = async (file) => {
+    if (!file) return { ticket: null, cancelled: true };
+    if (typeof file.arrayBuffer !== 'function') fail('UNSUPPORTED_IMAGE_TYPE');
+    if (!file.size || file.size > MAX_SOURCE) fail('IMAGE_TOO_LARGE');
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const info = inspectWebImage(bytes, file.type);
+    let bitmap;
+    try { bitmap = await decode(new Blob([bytes], { type: info.mimeType })); } catch { fail('IMAGE_DECODE_FAILED'); }
+    let previewDataUrl;
+    try {
+      if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > MAX_PIXELS) fail('IMAGE_TOO_COMPLEX');
+      info.width = bitmap.width; info.height = bitmap.height;
+      const c = canvas(), scale = Math.min(1, 640 / Math.max(bitmap.width, bitmap.height));
+      c.width = Math.max(1, Math.round(bitmap.width * scale)); c.height = Math.max(1, Math.round(bitmap.height * scale));
+      const ctx = c.getContext('2d'); if (!ctx) fail('IMAGE_DECODE_FAILED');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(bitmap, 0, 0, c.width, c.height);
+      previewDataUrl = c.toDataURL('image/jpeg', 0.8);
+      if (!previewDataUrl.startsWith('data:image/jpeg;base64,')) fail('PREVIEW_UNAVAILABLE');
+    } finally { bitmap.close(); }
+    const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(x => x.toString(16).padStart(2, '0')).join('');
+    const id = crypto.randomUUID();
+    await store.putTicket({ id, blob: new Blob([bytes], { type: info.mimeType }), ...info, hash, previewDataUrl });
+    return { ticket: { ticketId: id, ...info, byteSize: bytes.length, previewDataUrl, localOnly: true, createdAtEpochMs: Date.now() }, cancelled: false };
+  };
   return {
     available: true,
     claim: async () => ({ ticket: null, processing: false, errorCode: null }),
-    async pick() {
-      const file = await select(); if (!file) return { ticket: null, cancelled: true };
-      if (!file.size || file.size > MAX_SOURCE) fail('IMAGE_TOO_LARGE');
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const info = inspectWebImage(bytes, file.type);
-      let bitmap;
-      try { bitmap = await decode(new Blob([bytes], { type: info.mimeType })); } catch { fail('IMAGE_DECODE_FAILED'); }
-      let previewDataUrl;
-      try {
-        if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > MAX_PIXELS) fail('IMAGE_TOO_COMPLEX');
-        info.width = bitmap.width; info.height = bitmap.height;
-        const c = canvas(), scale = Math.min(1, 640 / Math.max(bitmap.width, bitmap.height));
-        c.width = Math.max(1, Math.round(bitmap.width * scale)); c.height = Math.max(1, Math.round(bitmap.height * scale));
-        const ctx = c.getContext('2d'); if (!ctx) fail('IMAGE_DECODE_FAILED');
-        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(bitmap, 0, 0, c.width, c.height);
-        previewDataUrl = c.toDataURL('image/jpeg', 0.8);
-        if (!previewDataUrl.startsWith('data:image/jpeg;base64,')) fail('PREVIEW_UNAVAILABLE');
-      } finally { bitmap.close(); }
-      const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(x => x.toString(16).padStart(2, '0')).join('');
-      const id = crypto.randomUUID();
-      await store.putTicket({ id, blob: new Blob([bytes], { type: info.mimeType }), ...info, hash, previewDataUrl });
-      return { ticket: { ticketId: id, ...info, byteSize: bytes.length, previewDataUrl, localOnly: true, createdAtEpochMs: Date.now() }, cancelled: false };
-    },
+    ingestFile,
+    async pick() { return ingestFile(await select()); },
     async discard(id) { if (!safeId(id)) return false; await store.remove('tickets', id); return true; },
     async promoteTicket({ ticketId, assetId, operationId }) {
       if (![ticketId, assetId, operationId].every(safeId)) fail('INVALID_MEDIA_PROMOTION');

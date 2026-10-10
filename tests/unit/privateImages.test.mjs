@@ -64,7 +64,8 @@ async function withServer(h,fn){
   const server=createServer(h.handler);
   for(let attempt=0;;attempt++) {
     try {await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(20000+Math.floor(Math.random()*30000),'127.0.0.1',()=>{server.removeListener('error',reject);resolve();});});break;}
-    catch(e){if(e.code!=='EADDRINUSE'||attempt>=15)throw e;}
+    // Windows excluded port ranges can reject an otherwise unused port with EACCES.
+    catch(e){if(!['EADDRINUSE','EACCES'].includes(e.code)||attempt>=15)throw e;}
   }
   try {await fn(`http://127.0.0.1:${server.address().port}`);} finally {await new Promise(resolve=>server.close(resolve));}
 }

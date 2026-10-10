@@ -1,5 +1,42 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 — 계정 메뉴 통합과 데스크톱 이미지 입력
+
+### 1–3. 목적·결정·현재 증거
+
+- 사용자 요청: 같은 설정 메뉴의 계정 설정/계정 및 데이터 중복을 정리하고 파일 드래그와 Windows Ctrl+V·Mac ⌘V 이미지 입력을 추가한다. 시작 소스 cc11aa4, clean `codex/simple-signup-preview`. 앞선 가입 운영 배포와 이번 로컬 기능 개선을 구분한다.
+- 시작/결정/02·05·06·07·09/Title Hub spec/PLANS를 읽었다. `TopNavDataMenu.jsx`의 AuthSheet와 utilities가 모두 `/data/`로 연결된다. `webImageIntake.js`의 pick은 이미 파일 형식·20MB·24MP·decode·미리보기·ticket 검증을 수행한다. 소비자는 composer와 상세 이미지 교체 두 곳이다.
+- 기존 흰색/핑크·얇은 선·hero 없음, Guest 표지 사용/개인 이미지 로그인, 명시 저장 후 기존 private sync, Public off를 유지한다. 새 제품 모델이나 계정 정책 변경은 없다.
+
+### 4–6. 범위·구조·변경 파일
+
+- 포함: 계정 및 데이터 단일 메뉴와 동일 페이지 제목/간결한 상태 문구; Web 이미지 추가/교체에 파일 drop·사용자 paste; 명시 미리보기·기존 저장/교체·권리 확인; 회귀/모바일 검증.
+- 제외: DB·의존성·Android picker 변경, 클립보드 자동 읽기/권한 요청, HTML/URL 이미지 다운로드, OS 캡처 자동 실행, 자동 카드 생성, 운영 배포.
+- 입력 흐름: file picker/drop/paste → 공통 `ingestFile(file)` → 검증된 로컬 임시 ticket → 사용자 작품/권리 확인 → 기존 save/replace. 사진 서버 전송은 기존 명시 저장 이후 경로만 사용한다.
+- 파일 지도/소유: 메뉴 담당은 TopNavDataMenu/AuthSheet/DataCenter/해당 CSS·ko/en의 authSheet·dataCenter 및 메뉴 검사. adapter 담당은 webImageIntake·파일 추출 helper·해당 단위 검사. root는 composer hook/UI·replacement·공통 이벤트 hook·이미지 안내/CSS·브라우저 검사/통합 문서. 각 locale 키의 소유를 분리한다.
+
+### 7–9. 데이터·마일스톤·검증
+
+- migration 없음. 기존 IndexedDB ticket/assets 및 개인 동기화 계약 재사용. 원본·기존 카드·백업·탈퇴·로그아웃 기능 보존.
+- M1: 메뉴 중복 제거, 기능 목적/페이지 제목 일치. M2: 공통 파일 처리와 편집 화면에만 drop/paste 연결; 처리 중 중복·소유자 전환·언마운트 뒤 늦은 ticket 정리. M3: 단위/Chromium/build 및 PC·320/390px 시각 확인 후 인계.
+- 검증: JPEG/PNG/WebP·잘못된 bytes/MIME·크기·다중 파일; guest/flag-off; 입력창 텍스트 paste와 외부 URL 비처리; hidden replacement 비처리; 파일 선택 호환; 교체/취소·권리 재확인·처리 경합. 합성 browser clipboard 결과를 Windows/Mac 실기기 확인으로 표현하지 않는다.
+- 기존 `npm run test:unit`, `npm run build`, `node scripts/run-e2e.mjs` 및 관련 web-image/composer/owner/menu Playwright 사용. 시각 확인은 desktop·320/390px 한 묶음과 수정 후 확인을 합쳐 최대2회.
+
+### 10–14. 안전·관찰·복귀·위험·승인
+
+- 클립보드는 사용자의 paste event에서만 File로 읽는다. 메모/input/contenteditable의 텍스트 붙여넣기를 방해하지 않고 HTML/URL을 가져오지 않는다. drop만으로 저장/업로드/공개하지 않는다. 개인 이미지 입력의 로그인/flags 경계를 유지한다.
+- 추가 analytics 없음. 파일명·이미지 bytes·텍스트·토큰을 로그/근거에 기록하지 않는다. 테스트는 합성 사진/계정만 사용한다.
+- 실패/취소 시 기존 미리보기와 기록을 보존하고 새 orphan ticket은 runtime의 재시도 가능한 release 경로로 정리한다. 복귀는 이번 UI/adapter 소스 변경만 되돌리며 기존 데이터는 삭제하지 않는다.
+- 위험: document-wide paste가 숨겨진 교체 도구나 입력창에 적용되는 것, 동시 입력 경합, 계정 전환 후 늦은 처리. 명시 활성 화면 범위·editable guard·세대/소유자/in-flight 방어와 회귀로 완화한다. native picker는 기존 기능을 유지한다.
+- 사용자 결정 없이 진행 가능한 로컬 구현/검증은 완료한다. 이번 기능의 운영 배포는 별도 승인 전 실행하지 않는다. 서버 정책·공개 기능·원본 자동 업로드로 범위를 확대하지 않는다.
+
+### 15–17. 진행·발견·완료 보고
+
+- 계획 작성: 코드 수정 전 현재 입력 경로·메뉴 중복·공식 MDN/Apple/Microsoft 문서를 확인했다. impeccable의 기존 시각 체계 유지/간소화 기준을 적용한다. 세부 변경·실행 결과·남은 실기기 확인은 완료 보고에 누적한다.
+- 발견: composer 기존 picker에 늦은 비동기 응답 방어가 없고 상세 replacement는 닫힌 관리 영역에도 마운트된다. 새 입력 이벤트 연결 전에 함께 보완한다.
+- 완료: 메뉴/입력/교체/수명주기 구현, unit585·Chromium51·build32 PASS. PC1280·390·320px 시각1묶음 확인. 초기 Windows 제외 포트 EACCES는 두 HTTP 테스트의 기존 bounded retry에 포함해 해소했고 native details 닫힘/React update 간 늦은 선택 경합도 회귀로 수정했다. 테스트 실패/수정 이력과 전체 변경·안전·복귀·잔여는 [8항 완료 보고](2026-10-10-account-menu-desktop-images.md). 운영·DB 미변경, OS 캡처 실기기/Safari 검증은 미실행.
+
+
 ## 2026-10-10 — KR·US·TH 첫 가입 활성과 입력·운영 화면 개선
 
 ### 1–3. 목적·결정·현재 증거

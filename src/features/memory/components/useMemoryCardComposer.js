@@ -38,6 +38,14 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
   const cloudInFlight = useRef(false);
   const savedCloudOptions = useRef(null);
   const titleSearchGeneration = useRef(0);
+  const mounted = useRef(false);
+  const intakeGeneration = useRef(0);
+  const intakeInFlight = useRef(false);
+  const pendingTicket = useRef(null);
+  const submittedTicket = useRef(null);
+  const activeRuntimeRef = useRef(null);
+  const currentOwner = useRef(accountUserId);
+  currentOwner.current = accountUserId;
   const [state, updateState] = useReducer(mergeState, INITIAL_STATE);
   const {
     runtime,
@@ -49,6 +57,19 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
     titleSearchStatus,
     rightsConfirmed,
   } = state;
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      intakeGeneration.current += 1;
+      if (typeof activeRuntimeRef.current?.imageIntake.ingestFile === "function"
+        && pendingTicket.current && !saveInFlight.current && pendingTicket.current !== submittedTicket.current) {
+        void activeRuntimeRef.current?.releaseImageTicket(pendingTicket.current);
+        pendingTicket.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -108,6 +129,7 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
         const result = await activeRuntime.imageIntake.claim();
         if (!active) return;
         if (result.ticket) {
+          pendingTicket.current = result.ticket.ticketId;
           updateState({ ticket: result.ticket, status: "ready", message: "" });
           return;
         }
@@ -131,6 +153,7 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
       await activeRuntime.initialize();
       if (!active) return;
       updateState({ runtime: activeRuntime });
+      activeRuntimeRef.current = activeRuntime;
       if (!activeRuntime.imageIntake.available) {
         updateState({ status: "browser" });
         return;
@@ -148,30 +171,57 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
 
   const busy = ["checking", "processing", "picking", "removing", "saving", "syncing", "saved-local"].includes(status);
 
-  const chooseImage = async () => {
+  const receiveImage = async (file) => {
+    if (!runtime?.imageIntake.available || busy || intakeInFlight.current || saveInFlight.current) return;
+    if (!accountUserId || !privateImageUiEnabled()) {
+      updateState({ message: accountUserId ? "IMAGE_STORAGE_UNAVAILABLE" : "IMAGE_SIGN_IN_REQUIRED" });
+      return;
+    }
+    if (file && typeof runtime.imageIntake.ingestFile !== "function") return;
+    intakeInFlight.current = true;
+    const generation = ++intakeGeneration.current;
+    const owner = accountUserId;
+    const isCurrent = () => mounted.current && intakeGeneration.current === generation && currentOwner.current === owner;
+    let incoming = null;
     updateState({ status: "picking", message: "" });
     try {
-      const result = await runtime.imageIntake.pick();
+      const result = await (file ? runtime.imageIntake.ingestFile(file) : runtime.imageIntake.pick());
+      incoming = result.ticket;
+      if (!isCurrent()) return;
       if (result.cancelled || !result.ticket) {
         updateState({ status: ticket || catalogCoverSelection ? "ready" : "empty" });
         return;
       }
       if (ticket && ticket.ticketId !== result.ticket.ticketId) {
-        await runtime.imageIntake.discard(ticket.ticketId);
+        if (await runtime.releaseImageTicket(ticket.ticketId) !== true) {
+          throw Object.assign(new Error("Image cleanup pending"), { code: "IMAGE_CLEANUP_FAILED" });
+        }
       }
+      if (!isCurrent()) return;
+      pendingTicket.current = result.ticket.ticketId;
       updateState({ ticket: result.ticket, catalogCoverSelection: null, rightsConfirmed: false, status: "ready" });
+      incoming = null;
     } catch (error) {
-      updateState({ status: "error", message: errorCode(error?.code) });
+      if (isCurrent()) updateState({ status: "error", message: errorCode(error?.code) });
+    } finally {
+      if (incoming && incoming.ticketId !== pendingTicket.current) await runtime.releaseImageTicket(incoming.ticketId);
+      intakeInFlight.current = false;
     }
   };
+  const chooseImage = () => receiveImage();
 
   const useCatalogCover = async () => {
     const coverPreviewUrl = String(selectedTitleChoice?.coverPreviewUrl || "");
     const catalogCoverRef = selectedTitleChoice?.catalogCoverRef;
-    if (!runtime || busy || !coverPreviewUrl || !catalogCoverRef) return;
+    if (!runtime || busy || intakeInFlight.current || !coverPreviewUrl || !catalogCoverRef) return;
+    intakeInFlight.current = true;
     updateState({ status: "processing", message: "" });
     try {
-      if (ticket) await runtime.imageIntake.discard(ticket.ticketId);
+      if (ticket && await runtime.releaseImageTicket(ticket.ticketId) !== true) {
+        throw Object.assign(new Error("Image cleanup pending"), { code: "IMAGE_CLEANUP_FAILED" });
+      }
+      pendingTicket.current = null;
+      if (!mounted.current) return;
       updateState({
         ticket: null,
         rightsConfirmed: false,
@@ -182,11 +232,14 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
         status: "ready",
       });
     } catch (error) {
-      updateState({ status: "error", message: errorCode(error?.code) });
+      if (mounted.current) updateState({ status: "error", message: errorCode(error?.code) });
+    } finally {
+      intakeInFlight.current = false;
     }
   };
 
   const removeCatalogCover = () => {
+    if (busy || intakeInFlight.current) return;
     updateState({ catalogCoverSelection: null, status: runtime?.imageIntake.available ? "empty" : "browser" });
   };
 
@@ -249,13 +302,20 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
   };
 
   const removeImage = async () => {
-    if (!ticket) return;
+    if (!ticket || busy || intakeInFlight.current) return;
+    intakeInFlight.current = true;
     updateState({ status: "removing" });
     try {
-      await runtime.imageIntake.discard(ticket.ticketId);
+      if (await runtime.releaseImageTicket(ticket.ticketId) !== true) {
+        throw Object.assign(new Error("Image cleanup pending"), { code: "IMAGE_CLEANUP_FAILED" });
+      }
+      pendingTicket.current = null;
+      if (!mounted.current) return;
       updateState({ ticket: null, status: "empty", message: "" });
     } catch (error) {
-      updateState({ status: "error", message: errorCode(error?.code) });
+      if (mounted.current) updateState({ status: "error", message: errorCode(error?.code) });
+    } finally {
+      intakeInFlight.current = false;
     }
   };
 
@@ -302,9 +362,13 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
       (!ticket && !catalogCoverSelection) ||
       !title.trim() ||
       (ticket && (!rightsConfirmed || !accountUserId || !privateImageUiEnabled())) ||
+      busy || intakeInFlight.current ||
       saveInFlight.current
     ) return;
     saveInFlight.current = true;
+    // Once submitted, createCard's recovery journal may own the ticket even if
+    // the operation rejects. Unmount cleanup must not discard that recovery data.
+    submittedTicket.current = ticket?.ticketId || null;
     updateState({ status: "saving", message: "" });
     try {
       const result = await runtime.createCard({
@@ -315,6 +379,8 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
         note: state.note,
         rightsConfirmed,
       });
+      pendingTicket.current = null;
+      submittedTicket.current = null;
       try {
         recordFirstMemoryViewSuggestion({ cardId: result.cardId, archive: await runtime.listArchive() });
       } catch {
@@ -326,6 +392,7 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
       await syncSavedCard(result.cardId, savedCloudOptions.current);
     } catch (error) {
       saveInFlight.current = false;
+      if (!mounted.current) return;
       updateState({ status: "ready", message: errorCode(error?.code) });
     }
   };
@@ -346,6 +413,8 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
     ),
     displayTitle: selectedTitleChoice?.displayTitle || title,
     chooseImage,
+    receiveImage,
+    reportImageError: (code) => updateState({ message: code }),
     useCatalogCover,
     changeTitle,
     searchTitles,

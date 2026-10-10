@@ -51,3 +51,80 @@ test('Web promotion refuses mismatched operations and arbitrary local paths', as
   await assert.rejects(intake.promoteTicket({ ticketId: '../t', assetId: 'a1', operationId: 'op1' }), { code: 'INVALID_MEDIA_PROMOTION' });
   assert.equal(await intake.getOriginal('https://other/image'), null);
 });
+
+function stagingHarness(overrides={}) {
+  const writes=[],removed=[];
+  const intake=createWebImageIntake({
+    store:{putTicket:async record=>writes.push(record),remove:async(...args)=>removed.push(args)},
+    crypto:webcrypto,
+    decode:async()=>({width:1,height:1,close(){}}),
+    canvas:()=>({getContext:()=>({fillRect(){},drawImage(){}}),toDataURL:()=>'data:image/jpeg;base64,AA=='}),
+    ...overrides,
+  });
+  return {intake,writes,removed};
+}
+
+test('picker and direct file intake share byte inspection, original staging and cancellation contract',async()=>{
+  let selected=null;
+  const {intake,writes}=stagingHarness({select:async()=>selected});
+  assert.deepEqual(await intake.ingestFile(null),{ticket:null,cancelled:true});
+  assert.deepEqual(await intake.pick(),{ticket:null,cancelled:true});
+  for(const [bytes,mime] of [[pngBytes,'image/png'],[jpegBytes,'image/jpeg'],[webpBytes,'image/webp']]){
+    selected=new File([bytes],'clipboard-image',{type:mime});
+    const direct=await intake.ingestFile(selected),picked=await intake.pick();
+    assert.notEqual(direct.ticket.ticketId,picked.ticket.ticketId);
+    for(const result of [direct,picked]){
+      assert.equal(result.cancelled,false);assert.equal(result.ticket.mimeType,mime);assert.equal(result.ticket.localOnly,true);
+    }
+    for(const row of writes.slice(-2)){
+      assert.deepEqual(new Uint8Array(await row.blob.arrayBuffer()),bytes);
+      assert.equal(row.hash,createHash('sha256').update(bytes).digest('hex'));
+      assert.equal(row.previewDataUrl,'data:image/jpeg;base64,AA==');
+    }
+  }
+  assert.equal(writes.length,6);
+});
+
+test('direct intake bounds declared bytes before reading and actual bytes before decode',async()=>{
+  const {intake,writes,removed}=stagingHarness({decode:()=>assert.fail('must not decode')});
+  for(const size of [0,20_000_001]){
+    await assert.rejects(intake.ingestFile({size,arrayBuffer:()=>assert.fail('must not read')}),{code:'IMAGE_TOO_LARGE'});
+  }
+  await assert.rejects(intake.ingestFile({size:1,type:'image/png',arrayBuffer:async()=>new ArrayBuffer(20_000_001)}),{code:'IMAGE_TOO_LARGE'});
+  await assert.rejects(intake.ingestFile({size:1,type:'image/png'}),{code:'UNSUPPORTED_IMAGE_TYPE'});
+  assert.equal(writes.length,0);assert.equal(removed.length,0);
+});
+
+test('direct intake rejects unsupported, spoofed, animated and truncated files without replacing old tickets',async()=>{
+  const {intake,writes,removed}=stagingHarness({decode:()=>assert.fail('must not decode')});
+  const animated=new Uint8Array(webpVp8xBytes);animated[20]|=2;
+  for(const [bytes,mime,code] of [
+    [new TextEncoder().encode('<svg/>'),'image/svg+xml','UNSUPPORTED_IMAGE_TYPE'],
+    [new TextEncoder().encode('GIF89a'),'image/gif','UNSUPPORTED_IMAGE_TYPE'],
+    [pngBytes,'image/jpeg','UNSUPPORTED_IMAGE_TYPE'],
+    [animated,'image/webp','UNSUPPORTED_IMAGE_TYPE'],
+    [pngBytes.slice(0,24),'image/png','IMAGE_DECODE_FAILED'],
+  ])await assert.rejects(intake.ingestFile(new File([bytes],'untouched-name',{type:mime})),{code});
+  assert.equal(writes.length,0);assert.equal(removed.length,0);
+});
+
+test('direct intake releases decoded bitmap on pixel or preview failure without a staged write',async()=>{
+  let closed=0;
+  const selected=new Blob([pngBytes],{type:'image/png'});
+  const huge=stagingHarness({decode:async()=>({width:24_000_001,height:1,close(){closed++;}})});
+  await assert.rejects(huge.intake.ingestFile(selected),{code:'IMAGE_TOO_COMPLEX'});
+  const preview=stagingHarness({decode:async()=>({width:1,height:1,close(){closed++;}}),
+    canvas:()=>({getContext:()=>({fillRect(){},drawImage(){}}),toDataURL:()=>''})});
+  await assert.rejects(preview.intake.ingestFile(selected),{code:'PREVIEW_UNAVAILABLE'});
+  assert.equal(closed,2);assert.equal(huge.writes.length+preview.writes.length,0);
+});
+
+test('direct intake accepts absent declared MIME by inspecting bytes, and propagates failed staging without deletion',async()=>{
+  const selected=new File([pngBytes],'capture-without-extension');
+  const {intake,writes}=stagingHarness();
+  assert.equal((await intake.ingestFile(selected)).ticket.mimeType,'image/png');
+  assert.equal(writes[0].blob.type,'image/png');
+  const failure=Object.assign(new Error('full'),{code:'MEDIA_STORAGE_FULL'});
+  const broken=stagingHarness({store:{putTicket:async()=>{throw failure;},remove:()=>assert.fail('existing media must not be deleted')}});
+  await assert.rejects(broken.intake.ingestFile(selected),error=>error===failure);
+});

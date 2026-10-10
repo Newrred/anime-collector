@@ -157,7 +157,7 @@ test("native Home actions target packaged index documents instead of clean Web r
 
   await page.getByRole("link", { name: "Add Memory" }).first().click();
 
-  await expect(page).toHaveURL(url => url.pathname === '/memory/new/index.html' && url.searchParams.get('returnTo') === '/');
+  await expect(page).toHaveURL(url => url.pathname === '/record/index.html' && url.searchParams.get('returnTo') === '/');
 });
 
 test("native search actions preserve the selected title in the packaged composer route", async ({ page }) => {
@@ -206,7 +206,7 @@ test("native account settings button opens the packaged Data document", async ({
   await page.goto("/");
   await page.locator('.top-nav__mobile-menu-trigger:visible').click();
 
-  await page.getByRole("button", { name: "Open account settings" }).click();
+  await page.getByRole("button", { name: "Account and data" }).click();
 
   await expect(page).toHaveURL(/\/data\/index\.html$/u);
 });
@@ -219,7 +219,7 @@ test("catalog search Library action adds only the Library row and creates no Mem
   await row.getByRole("button", { name: "Save Title" }).click();
 
   await expect(page).toHaveURL(/\/titles\/?$/u);
-  await expect(page.getByRole("status")).toHaveText("Title saved.");
+  await expect(page.getByRole("status").filter({ hasText: /^Title saved\.$/ })).toHaveText("Title saved.");
   await expect(page.locator(".title-poster-tile, .title-album-card")).toHaveCount(1);
   const library = await page.evaluate(() => JSON.parse(localStorage.getItem("anime:list:v1") || "[]"));
   expect(library).toHaveLength(1);

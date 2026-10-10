@@ -279,6 +279,7 @@ export default function TopNavDataMenu({
                     syncStatus={accountCopy.statusTitles?.[account.status] || accountCopy.statusTitles.LOCAL_ONLY}
                     syncing={account.loading}
                     showSyncActions={false}
+                    isDataPage={currentRoute === "data"}
                     onSignIn={async () => {
                       await auth.signIn(`${base}data/`);
                     }}
@@ -345,13 +346,6 @@ export default function TopNavDataMenu({
                     <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
                       aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>
                       <ActionLabel icon={<IconTrophy size={15} />}>{copy.tier}</ActionLabel>
-                    </a>
-                    <a
-                      href={`${base}data/`}
-                      className={`btn btn--subtle data-menu-link${currentRoute === "profile" ? " is-active" : ""}`}
-                      onClick={() => setDataMenuOpen(false)}
-                    >
-                      <ActionLabel icon={<IconGear size={15} />}>{locale === "ko" ? "계정 및 데이터" : "Account and data"}</ActionLabel>
                     </a>
                     <a
                       href={`${base}help/`}
