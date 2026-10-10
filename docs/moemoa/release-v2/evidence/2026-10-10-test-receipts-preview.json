@@ -1,7 +1,7 @@
 {
   "date": "2026-10-10",
   "scope": "C02/W06 test-only recovery and real existing-account flow; user-confirmed account deletion committed but completion UI failed; no production release",
-  "checkpoint": "DELETION_ACK_FIX_LOCAL_UNIT_UI_BUILD_PASS_CORRECTED_GIT_PREVIEW_PENDING",
+  "checkpoint": "DELETION_ACK_BUG_FIXED_TEST_DEPLOYMENT_SOURCE_SCREEN_AND_SAME_COMMIT_CI_SUCCESS",
   "followupFiles": [
     "CODEX_START_HERE.md",
     "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
@@ -10,13 +10,15 @@
     "tools/identity/verify-simple-signup-receipts-hosted.sql"
   ],
   "source": {
+    "phase": "Initial new-document deployment; corrected deployment is recorded under deletionCompletionIncident.plannedCorrection",
     "commit": "5d921d7ffbcb8d1c6b06b92626b772d435dbf2dd",
     "workingBranch": "codex/simple-signup-preview",
     "previewBranch": "codex/phone-test",
     "previousPreviewCommit": "927ba88e5956dfcdf7cb0039a0c6413f1b3d2f12",
     "push": "fast-forward; no force push",
-    "followupDocumentationDestination": "codex/simple-signup-preview; deletion acknowledgement fix is separately planned for existing phone-test Git Preview after regression checks",
-    "postLoginDocumentationCommit": "Not committed yet; incident and subsequent correction outcomes must remain distinct"
+    "followupDocumentationDestination": "Commit/push final handoff documentation to codex/simple-signup-preview only; keep verified codex/phone-test at 8e1e5a600904815ab1d051ca7482332efa9d638c",
+    "postLoginDocumentationCommit": "8e1e5a600904815ab1d051ca7482332efa9d638c",
+    "documentationCommitDistinction": "Initial real-login and deletion-incident records are included in 8e1e5a6; later deployment-result followup documentation is not yet committed."
   },
   "deployment": {
     "provider": "Vercel Git Preview",
@@ -199,7 +201,34 @@
       "preserved": "JWT/live-user/expected-owner/CSRF/Preview allowlist checks before deletion",
       "excluded": "Extra getUserById request, post-deletion authentication bypass, automatic retry, further account deletion",
       "verification": "Installed SDK regression, positive/negative unit cases, existing UI regressions, build/diff, then phone-test Git Preview Ready/Source and CI",
-      "status": "IMPLEMENTED_LOCAL_FULL_UNIT_UI_BUILD_PASS_CORRECTED_GIT_PREVIEW_PENDING",
+      "status": "BUG_FIX_AND_TEST_DEPLOYMENT_COMPLETE_LOCAL_REGRESSIONS_GIT_PREVIEW_SOURCE_SCREEN_AND_CI_PASS",
+      "correctedDeployment": {
+        "commit": "8e1e5a600904815ab1d051ca7482332efa9d638c",
+        "pushedBranches": ["codex/phone-test", "codex/simple-signup-preview"],
+        "pushMode": "fast-forward",
+        "representativeDeploymentId": "H5yDiaMMP5YqQvEGWH9zxb8c72h8",
+        "uniqueDeploymentIdentifier": "cs11oux1j",
+        "status": "Ready",
+        "environment": "Preview",
+        "branch": "codex/phone-test",
+        "sourceCommitDirectlyVerified": true,
+        "existingBranchAliasDirectlyVerified": true,
+        "method": "Vercel dashboard Create Deployment from specified Git branch; not a local or CLI build, not Production",
+        "reason": "Initially only simple-signup-preview appeared after both branch pushes; phone-test was still on prior source. A delayed automatic phone-test deployment also appeared later; H5 is the representative verified result.",
+        "postDeploymentDataPageCheck": "PASS: existing branch alias /data/ reloaded; signed out, Google button, no receipt/delete section, six displayed record counts zero; screenshot visually checked",
+        "postDeploymentScreenLimit": "Not another real deletion or automatic completion-flow success test",
+        "documentationFollowupCommitted": false
+      },
+      "correctedCi": {
+        "runId": "38034616466",
+        "headSha": "8e1e5a600904815ab1d051ca7482332efa9d638c",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": { "publication-contract": "SUCCESS", "verify": "SUCCESS" },
+        "jobCompletion": { "publication-contract": "completed", "verify": "completed" },
+        "latestObservedVerifyStep": "Verify current Web design and watch records completed; final verify job success confirmed",
+        "overallSuccessVerified": true
+      },
       "independentCorrectionReview": {
         "reviewer": "delete_ack_review",
         "scope": "backend and handler boundaries",
@@ -225,8 +254,17 @@
         "buildResult": "PASS 29 pages",
         "buildDurationSeconds": 10.63,
         "buildExitCode": 0,
-        "deploymentResult": "PENDING",
-        "correctedDeploymentCommit": null
+        "deploymentResult": "PHONE_TEST_GIT_PREVIEW_READY_SOURCE_MATCH_SIGNED_OUT_SCREEN_PASS_AND_SAME_COMMIT_CI_SUCCESS",
+        "correctedDeploymentCommit": "8e1e5a600904815ab1d051ca7482332efa9d638c"
+      },
+      "closeout": {
+        "bugFixAndTestDeploymentComplete": true,
+        "realAutomaticCompletionRetestedAfterFix": false,
+        "storageCleanupVerified": false,
+        "requestRepeatDeletionOrRecreation": false,
+        "handoffBranch": "codex/simple-signup-preview",
+        "verifiedPreviewBranchMustRemainAtCommit": "8e1e5a600904815ab1d051ca7482332efa9d638c",
+        "originalIncidentFailurePreserved": true
       }
     }
   },
