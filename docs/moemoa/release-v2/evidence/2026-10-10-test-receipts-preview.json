@@ -1,7 +1,7 @@
 {
   "date": "2026-10-10",
   "scope": "C02/W06 test-only recovery, original deletion incident, corrected real signup/photo/deletion flow; no production release",
-  "checkpoint": "REAL_POST_FIX_COMPLETION_AND_SIGNOUT_PASS_PHOTO_RETIRED_TWO_FILES_PENDING_TEST_CLEANUP_CONNECTION",
+  "checkpoint": "REAL_SIGNUP_PHOTO_DELETE_SIGNOUT_AND_PRIVATE_STORAGE_CLEANUP_PASS_WITH_EMPTY_REPLAY",
   "followupFiles": [
     "CODEX_START_HERE.md",
     "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
@@ -315,6 +315,7 @@
       "localSyntheticCardRetainedAsDocumented": true
     },
     "imageCleanup": {
+      "phase": "historical observation before user-approved cleanup connection; superseded by testCleanupCloseout below",
       "initialGoneOwnerPrivateObjects": 0,
       "privateManifestCount": 15,
       "goneOwnerActiveManifests": 0,
@@ -345,6 +346,99 @@
       "Source changes are documentation-only; remote actions were the capacity refresh and recorded synthetic signup/upload/deletion. No app code, dependency or migration changes."
     ]
   },
+  "testCleanupCloseout": {
+    "date": "2026-10-10",
+    "releaseId": "MOEMOA_TEST_PRIVATE_CLEANUP_20261010_01",
+    "sourceCommit": "9970120667164d02820badce4833413a8f96cd35",
+    "planCommit": "e4454a4",
+    "branch": "codex/phone-test",
+    "targetProject": "nmgkhknponvzcwliajyk",
+    "userApprovedTestOnlyConnectionAndSyntheticPhotoRemoval": true,
+    "executionMode": "Manually started GitHub job reusing cleanupPrivateImages; not a persistent test cron",
+    "environment": "moemoa-test-cleanup",
+    "allowedEnvironmentBranches": ["codex/phone-test"],
+    "allowedEnvironmentTags": [],
+    "secret": {
+      "name": "MOEMOA_TEST_SUPABASE_SERVICE_ROLE_KEY",
+      "enteredAndSubmittedDirectlyByUser": true,
+      "agentCheckedNamePresenceOnly": true,
+      "valueReadOrRecordedByAgent": false,
+      "existingTestLegacyServiceRoleReused": true,
+      "productionKeyUsed": false
+    },
+    "preflightReadOnly": {
+      "privateManifests": 15,
+      "due": 1,
+      "waitingFence": 0,
+      "privateStorageObjects": 4,
+      "goneOwnerObjects": 2,
+      "goneOwnerNotDeletedManifests": 1,
+      "goneOwnerActiveManifests": 0,
+      "sourceMissingActiveManifests": 0,
+      "unmanifestedPrivateObjects": 0,
+      "deletedManifestObjects": 0
+    },
+    "workflowRun": "38039510540",
+    "firstAttempt": {
+      "attempt": 1,
+      "jobId": "114176778884",
+      "status": "SUCCESS",
+      "deletedRepresentations": 1,
+      "failed": 0,
+      "physicalFilesRemoved": 2,
+      "productionJob": "SKIPPED"
+    },
+    "emptyReplay": {
+      "attempt": 2,
+      "jobId": "114177062870",
+      "status": "SUCCESS",
+      "deletedRepresentations": 0,
+      "failed": 0,
+      "productionJob": "SKIPPED"
+    },
+    "postflightReadOnlySameAfterBothAttempts": {
+      "privateManifests": 15,
+      "due": 0,
+      "waitingFence": 0,
+      "privateStorageObjects": 2,
+      "goneOwnerObjects": 0,
+      "goneOwnerNotDeletedManifests": 0,
+      "goneOwnerActiveManifests": 0,
+      "sourceMissingActiveManifests": 0,
+      "unmanifestedPrivateObjects": 0,
+      "deletedManifestObjects": 0,
+      "publicManifests": 14,
+      "publicStorageObjects": 3,
+      "preexistingUnmanifestedPublicObjects": 1,
+      "publicGoneOwnerObjects": 0
+    },
+    "verification": {
+      "unit": { "passed": 531, "failed": 0, "skipped": 0 },
+      "focusedRunnerWorkflowPrivateImages": { "passed": 24, "includedInUnit": true },
+      "independentCleanupReview": { "passed": 17, "includedInUnit": true, "blockingFindings": 0 },
+      "diffCheck": "PASS",
+      "qualityCiRun": "38039392044",
+      "qualityCiLastObserved": "COMPLETED_SUCCESS",
+      "qualityCiSourceCommit": "9970120667164d02820badce4833413a8f96cd35",
+      "qualityCiJobs": { "verify": "SUCCESS", "publication-contract": "SUCCESS" }
+    },
+    "impact": {
+      "schemaMigrations": 0,
+      "newDependencies": 0,
+      "manualObjectDeletion": false,
+      "existingPrivateAndPublicObjectsPreserved": true,
+      "productionMasterSettingsChanged": false,
+      "vercelProtectionBypassed": false,
+      "publicUgcEnabled": false,
+      "rawKeysOwnerIdsOrObjectPathsLogged": false
+    },
+    "rollback": "Remove the test environment secret or revert the test-branch job to stop future runs. Code rollback cannot restore removed bytes; the repository-authored synthetic source fixture remains local.",
+    "remaining": [
+      "No persistent test scheduler was created.",
+      "Production signup/self-deletion activation and jurisdictional launch review remain separate gates.",
+      "Provider annotations warn about existing Actions Node runtime and future ubuntu-latest migration; both cleanup attempts succeeded. No unrelated dependency upgrade performed."
+    ]
+  },
   "production": {
     "masterCommitObserved": "bae5e796619583b07fac457735c14728b11f6484",
     "changed": false,
@@ -357,7 +451,7 @@
     "warning": "Source/config rollback cannot restore a completed account deletion."
   },
   "notPerformed": [
-    "End-to-end Storage cleanup",
+    "Persistent test cleanup scheduling",
     "Production deployment, master update or production database changes",
     "New credential generation, secret extraction or allowlist replacement",
     "Public UGC activation or full jurisdictional legal clearance"
