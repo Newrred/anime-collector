@@ -3,6 +3,7 @@ import SimpleSignup from '../../components/auth/SimpleSignup.jsx';
 import '../../styles/simple-signup.css';
 const base=import.meta.env.BASE_URL;
 const enabled=import.meta.env.PUBLIC_SIMPLE_SIGNUP_V1==='1';
+const allowTestDocuments=import.meta.env.PUBLIC_SIGNUP_TEST_DOCUMENTS==='1';
 ---
 <html lang="ko"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" /><meta name="referrer" content="no-referrer" /><title>MOEMOA · 계정 시작</title></head>
-<body class="signup-page"><main><SimpleSignup client:load base={base} enabled={enabled}/></main></body></html>
+<body class="signup-page"><main><SimpleSignup client:load base={base} enabled={enabled} allowTestDocuments={allowTestDocuments}/></main></body></html>

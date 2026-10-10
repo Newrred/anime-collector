@@ -3,6 +3,7 @@ import {supabase} from '../../lib/supabaseClient.js';
 import {startGoogleOAuth} from '../../repositories/authRepo.js';
 import {resolveWebOAuthNext} from '../../features/auth/webOAuth.js';
 import {TERMS_VERSION,PRIVACY_VERSION,COUNTRIES,calendarDay,createDeclaration,fetchSignupPolicy,clearPendingSignup,signupAvailability} from '../../features/auth/simpleSignup.js';
+import {resolveSignupDocuments,needsAgeProcessingConsent} from '../../features/auth/signupDocuments.js';
 const errors={
  INVALID_BIRTH_DATE:['생년월일을 정확히 입력해 주세요.','Enter a valid date of birth.'],
  TERMS_REQUIRED:['이용약관을 확인하고 동의해 주세요.','Please agree to the terms.'],
@@ -12,11 +13,15 @@ const errors={
  SIGNUP_STORAGE_UNAVAILABLE:['이 브라우저에서 임시 저장을 허용한 뒤 다시 시도해 주세요.','Allow session storage in this browser, then try again.'],
  SIGNUP_POLICY_CHANGED:['가입 기준이 변경됐습니다. 새로고침 후 확인해 주세요.','Requirements changed. Refresh and review them again.'],
 };
-export default function SimpleSignup({base='/',enabled=false}) {
+export default function SimpleSignup({base='/',enabled=false,allowTestDocuments=false}) {
  const [lang,setLang]=useState('ko'), [country,setCountry]=useState(''), [birthDate,setBirthDate]=useState('');
  const [accepted,setAccepted]=useState(false),[policy,setPolicy]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const en=lang==='en',t=(ko,enText)=>en?enText:ko;
- const unavailable=signupAvailability(country,policy);
+ const documentSet=resolveSignupDocuments(policy,{allowTestDocuments});
+ const ageConsent=needsAgeProcessingConsent(country,documentSet);
+ const termsPath=`${base}legal/${documentSet?.termsVersion || TERMS_VERSION}/`;
+ const privacyPath=`${base}legal/${documentSet?.privacyVersion || PRIVACY_VERSION}/`;
+ const unavailable=signupAvailability(country,policy,{allowTestDocuments});
  const canEnterDetails=!loading && !!policy && !unavailable;
  const availabilityMessage=!loading && policy && (country || unavailable!=='COUNTRY_NOT_READY') ? unavailable : null;
  const load=async()=>{setLoading(true);setError('');try {if(!supabase)throw new Error();setPolicy(await fetchSignupPolicy(supabase));}catch {setError('SERVICE');}finally{setLoading(false);}};
@@ -26,7 +31,7 @@ export default function SimpleSignup({base='/',enabled=false}) {
  const submit=async event=>{
   event.preventDefault(); if(busy||!canEnterDetails)return; setError('');setBusy(true);
   try {
-   const declaration=createDeclaration({country,birthDate,accepted},policy);
+   const declaration=createDeclaration({country,birthDate,accepted},policy,Date.now(),{allowTestDocuments});
    clearPendingSignup(window.sessionStorage);
    await startGoogleOAuth(next(),declaration);
   }catch(e){try{clearPendingSignup(window.sessionStorage);}catch{}setError(e.code||'SERVICE');setBusy(false);}
@@ -46,8 +51,10 @@ export default function SimpleSignup({base='/',enabled=false}) {
    <label htmlFor="signup-birthday">{t('생년월일','Date of birth')}</label>
    <input id="signup-birthday" type="date" required autoComplete="bday" min="1900-01-01" max={calendarDay()} value={birthDate} onChange={e=>{setBirthDate(e.target.value);setError('');}} disabled={busy||!canEnterDetails} aria-describedby="signup-birthday-help" />
    <p id="signup-birthday-help" className="signup-hint">{t('실제 생년월일을 입력해 주세요. 이 화면에서 나이를 계산하며, 생년월일 원문은 서버에 보내지 않습니다. 국가와 연령 구간 등 가입 확인 기록은 계정에 보관합니다.','Enter your actual date of birth. This form calculates your age without sending your full birth date to our server. Your account keeps a signup receipt including your country and age band.')}</p>
-   <label className="signup-consent"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)} disabled={busy||!canEnterDetails} /><span><a href={`${base}legal/${TERMS_VERSION}/`} target="_blank" rel="noreferrer">{t('이용약관','Terms')}</a>{t('에 동의합니다.',' — I agree.')}</span></label>
-   <p className="signup-hint"><a href={`${base}legal/${PRIVACY_VERSION}/`} target="_blank" rel="noreferrer">{t('개인정보 처리 안내','Privacy notice')}</a>{t('에서 계정·기록의 저장과 삭제 방법을 확인하세요. 공개 게시는 별도로 선택합니다.',' explains account storage and deletion. Publishing is a separate choice.')}</p>
+   {documentSet?.testOnly && <p className="signup-hint">{t('테스트용 가입 문서입니다. 운영 서비스에는 적용되지 않습니다.','These signup documents are for testing, not the production service.')}</p>}
+   {ageConsent && <p id="signup-age-processing" className="signup-hint">{t('가입 연령 확인을 위해 국가·나이·확인일을 처리합니다. 계정에는 국가·연령 구간·동의 기록을 남깁니다. 탈퇴하면 이 기록이 삭제되며, 동의하지 않아도 기기에서 계속 사용할 수 있습니다.','We process your country, age and declaration date to check signup eligibility. Your account keeps your country, age band and acceptance record until account deletion. You can keep using local features without agreeing.')}</p>}
+   <label className="signup-consent"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)} disabled={busy||!canEnterDetails} aria-describedby={ageConsent?'signup-age-processing':undefined} /><span><a href={termsPath} target="_blank" rel="noreferrer">{t('이용약관','Terms')}</a>{ageConsent?<>{t('과 ',' and ')}<a href={`${privacyPath}#age-processing`} target="_blank" rel="noreferrer">{t('가입 연령 정보 처리','signup age information processing')}</a></>:null}{t('에 동의합니다.',' — I agree.')}</span></label>
+   <p className="signup-hint"><a href={privacyPath} target="_blank" rel="noreferrer">{t('개인정보 처리 안내','Privacy notice')}</a>{t('에서 계정·기록의 저장과 삭제 방법을 확인하세요. 공개 게시는 별도로 선택합니다.',' explains account storage and deletion. Publishing is a separate choice.')}</p>
    {error&&<p role="alert">{(errors[error]||['연결을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.','Connection failed. Please try again.'])[en?1:0]}</p>}
    {error==='SERVICE'&&!policy?<button type="button" onClick={load} disabled={loading}>{t('연결 다시 확인','Retry connection')}</button>:null}
    <button className="signup-primary" type="submit" disabled={busy||!canEnterDetails}>{busy?t('Google로 이동 중…','Opening Google…'):loading?t('준비 중…','Loading…'):t('Google로 계속','Continue with Google')}</button>

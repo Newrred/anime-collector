@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {generateKeyPairSync,sign} from 'node:crypto';
 import {createSealer,createGoogleVerifier,hash} from '../../src/server/signup/security.js';
 import {createSignupHandler} from '../../src/server/signup/handler.js';
+import {TEST_SIGNUP_POLICY_VERSION,TEST_TERMS_VERSION,TEST_PRIVACY_VERSION} from '../../src/features/auth/signupDocuments.js';
 
 const time=Date.parse('2026-10-09T10:00:00Z'),key='11'.repeat(32),origin='https://signup.example.test';
 const policy={enabled:true,serverAdmission:true,version:'simple-signup-2026-10-09',termsVersion:'terms-2026-10-09-draft',privacyVersion:'privacy-2026-10-09-draft',countries:[{country:'KR',minimumAge:14}]};
@@ -46,6 +47,26 @@ async function start(h) {
  const r=await h.request('start',{body:{declaration,next:'/terms/'}});assert.equal(r.statusCode,200);
  return {cookie:r.headers['Set-Cookie'][0].split(';')[0],state:new URL(JSON.parse(r.body).url).searchParams.get('state'),response:r};
 }
+
+test('test documents are Preview-only and rechecked after Google before any admission',async()=>{
+ const candidate={...policy,version:TEST_SIGNUP_POLICY_VERSION,termsVersion:TEST_TERMS_VERSION,privacyVersion:TEST_PRIVACY_VERSION};
+ const value={...declaration,policyVersion:candidate.version,termsVersion:candidate.termsVersion,privacyVersion:candidate.privacyVersion};
+ for(const flags of [{preview:false,allowTestDocuments:true},{preview:true,allowTestDocuments:false}]) {
+  const h=harness({...flags,allowedEmailHashes:hash('fixture@example.test'),backend:{policy:async()=>candidate}});
+  const r=await h.request('start',{body:{declaration:value}});
+  assert.equal(JSON.parse(r.body).error,'SIGNUP_POLICY_CHANGED');assert.deepEqual(h.calls,[]);
+ }
+ let current=candidate;
+ const h=harness({preview:true,allowTestDocuments:true,allowedEmailHashes:hash('fixture@example.test'),backend:{policy:async()=>current}});
+ const r=await h.request('start',{body:{declaration:value}});assert.equal(r.statusCode,200);
+ const cookies=r.headers['Set-Cookie'][0].split(';')[0],state=new URL(JSON.parse(r.body).url).searchParams.get('state');
+ current={...candidate,privacyVersion:policy.privacyVersion};
+ const changed=await h.request(`callback&code=c&state=${state}`,{method:'GET',cookies});
+ assert.match(changed.headers.Location,/SIGNUP_POLICY_CHANGED/);assert.deepEqual(h.calls,[]);
+ current=candidate;
+ const ok=await h.request(`callback&code=c&state=${state}`,{method:'GET',cookies});
+ assert.equal(ok.headers.Location,'/auth/complete/');assert(h.calls.includes('finalize'));
+});
 test('same-tab flow admits only after verified Google and delivers encrypted one-use session with no tokens in URLs',async()=>{
  const h=harness(),s=await start(h);
  assert.match(s.response.headers['Set-Cookie'][0],/HttpOnly; Secure; SameSite=Lax/);

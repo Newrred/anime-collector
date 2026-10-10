@@ -249,6 +249,9 @@ export function useMemoryAccountSync({ session, authLoading = false, autoSync = 
       if (activeUserId.current.userId) pausedAutoUsers.add(activeUserId.current.userId);
       return (await getPlatformMemoryAccountRuntime()).pauseSync?.();
     },
+    resumeAutoSync: () => {
+      if (activeUserId.current.userId) pausedAutoUsers.delete(activeUserId.current.userId);
+    },
     resolveConflict,
     exportConflictBackup,
   });

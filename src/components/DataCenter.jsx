@@ -16,6 +16,9 @@ import { getMessageGroup } from "../domain/messages.js";
 import { IconShield } from "./ui/AppIcons.jsx";
 import MemoryAccountPanel from "./data/MemoryAccountPanel.jsx";
 import ManualDataTools from "./data/ManualDataTools.jsx";
+import AccountPrivacyPanel from "./data/AccountPrivacyPanel.jsx";
+import {verifyAccountStillExists} from '../features/auth/accountPrivacy.js';
+import {supabase} from '../lib/supabaseClient.js';
 
 function formatBytes(value) {
   const n = Number(value);
@@ -32,7 +35,15 @@ export default function DataCenter() {
   const accountCopy = getMessageGroup(locale, "memoryAccount");
   const auth = useAuthSession(`${String(import.meta.env.BASE_URL || "/")}data/`);
   const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading });
-  const titleSync = useTitleStateSync({ session: auth.session, autoSync: true });
+  const [deletionOwner, setDeletionOwner] = useState(null);
+  const [deletedOwner, setDeletedOwner] = useState(null);
+  const titleSync = useTitleStateSync({ session: auth.session, autoSync: !deletionOwner || deletionOwner!==auth.user?.id });
+  useEffect(()=>{
+    if(auth.user?.id) {
+      setDeletedOwner(null);
+      setDeletionOwner(current=>current && current!==auth.user.id?null:current);
+    }
+  },[auth.user?.id]);
   const [loading, setLoading] = useState(true);
   const [engine, setEngine] = useState(copy.checking);
   const [usage, setUsage] = useState(null);
@@ -262,6 +273,18 @@ export default function DataCenter() {
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
       <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} titleSync={titleSync} locale={locale} />
+      {import.meta.env.PUBLIC_ACCOUNT_PRIVACY_V1 === '1' && auth.user?.id && <AccountPrivacyPanel
+        key={auth.user.id} user={auth.user} locale={locale} base={base}
+        canDelete={import.meta.env.PUBLIC_ACCOUNT_DELETE_V1 === '1'}
+        onBeforeDelete={async()=>{setDeletionOwner(auth.user.id);await account.pauseSync();}}
+        onCancelDelete={async()=>{
+          if(deletionOwner!==auth.user.id)return;
+          await verifyAccountStillExists(supabase,auth.user.id);
+          account.resumeAutoSync();setDeletionOwner(null);
+        }}
+        onDeleted={()=>setDeletedOwner(auth.user.id)}
+      />}
+      {deletedOwner && !auth.user && <section className="surface-card list-stack" role="status"><h2 className="sectionTitle">{locale==='ko'?'계정을 삭제했습니다':'Account deleted'}</h2><p className="small">{locale==='ko'?'사진 파일은 정리 작업에서 삭제됩니다. 기기에 저장한 사본은 남아 있습니다.':'Photo files will be removed by cleanup. Copies on your devices remain.'}</p></section>}
       <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
     </div>
   );

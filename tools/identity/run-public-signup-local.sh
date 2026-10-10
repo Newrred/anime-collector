@@ -2,7 +2,7 @@
 # Disposable PostgreSQL only; no URL, credentials or hosted changes.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
-pg_bin=/usr/lib/postgresql/16/bin
+pg_bin="${PG_BIN:-/usr/lib/postgresql/16/bin}"
 work="$(mktemp -d /tmp/moemoa-public-signup.XXXXXX)"
 trap '"$pg_bin/pg_ctl" -D "$work/data" -m immediate stop >/dev/null 2>&1 || true' EXIT
 "$pg_bin/initdb" -D "$work/data" -A trust --no-locale -E UTF8 > "$work/init.log"

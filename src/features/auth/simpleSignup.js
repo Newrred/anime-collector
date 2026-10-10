@@ -1,16 +1,15 @@
 // Self-declaration only: never use this receipt as identity or guardian verification.
-export const SIGNUP_POLICY_VERSION = 'simple-signup-2026-10-09';
-export const TERMS_VERSION = 'terms-2026-10-09-draft';
-export const PRIVACY_VERSION = 'privacy-2026-10-09-draft';
+import {resolveSignupDocuments} from './signupDocuments.js';
+export {SIGNUP_POLICY_VERSION, TERMS_VERSION, PRIVACY_VERSION} from './signupDocuments.js';
 export const PENDING_SIGNUP_KEY = 'moemoa.signup.pending.v1';
 export const PENDING_SIGNUP_TTL = 30 * 60 * 1000;
 const fail = code => { throw Object.assign(new Error(code), { code }); };
 export const COUNTRIES = Object.freeze(['KR','PH','TH','US','GB','AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','CH']);
 // Availability can be checked before asking for a birth date or acceptance.
 // This is a UI hint, never a replacement for server admission checks.
-export function signupAvailability(country, policy) {
+export function signupAvailability(country, policy, options) {
   if (!policy?.enabled) return 'SIGNUP_SERVICE_UNAVAILABLE';
-  if (policy.termsVersion!==TERMS_VERSION || policy.privacyVersion!==PRIVACY_VERSION) return 'SIGNUP_POLICY_CHANGED';
+  if (!resolveSignupDocuments(policy, options)) return 'SIGNUP_POLICY_CHANGED';
   const rule=policy.countries?.find(row=>row.country===country);
   if (!COUNTRIES.includes(country) || !rule || !Number.isInteger(rule.minimumAge) || rule.minimumAge<13 || rule.minimumAge>20) return 'COUNTRY_NOT_READY';
   return null;
@@ -31,24 +30,25 @@ export function ageOnDate(birthDate, day = calendarDay()) {
   if (age>120) fail('INVALID_BIRTH_DATE');
   return age;
 }
-export function validateDeclaration(value, policy, now = Date.now()) {
+export function validateDeclaration(value, policy, now = Date.now(), options) {
   if (!value || value.version !== 1 || !COUNTRIES.includes(value.country)
       || !Number.isInteger(value.age) || value.age<0 || value.age>120
       || !Number.isSafeInteger(value.createdAt) || value.createdAt>now || now-value.createdAt>=PENDING_SIGNUP_TTL
       || !/^\d{4}-\d{2}-\d{2}$/.test(value.declaredOn || '')
-      || value.termsVersion!==TERMS_VERSION || value.privacyVersion!==PRIVACY_VERSION || value.accepted!==true) fail('SIGNUP_DETAILS_EXPIRED');
+      || value.accepted!==true) fail('SIGNUP_DETAILS_EXPIRED');
   const rule = policy?.countries?.find(row => row.country===value.country);
   if (!policy?.enabled || !rule || !Number.isInteger(rule.minimumAge) || rule.minimumAge<13 || rule.minimumAge>20) fail('COUNTRY_NOT_READY');
-  if (value.policyVersion !== policy.version || policy.termsVersion!==TERMS_VERSION || policy.privacyVersion!==PRIVACY_VERSION) fail('SIGNUP_POLICY_CHANGED');
+  if (!resolveSignupDocuments(policy, options) || value.policyVersion !== policy.version
+      || value.termsVersion!==policy.termsVersion || value.privacyVersion!==policy.privacyVersion) fail('SIGNUP_POLICY_CHANGED');
   if (value.age<rule.minimumAge) fail('BELOW_MINIMUM_AGE');
   return {version:1,country:value.country,age:value.age,declaredOn:value.declaredOn,createdAt:value.createdAt,
     policyVersion:value.policyVersion,termsVersion:value.termsVersion,privacyVersion:value.privacyVersion,accepted:true};
 }
-export function createDeclaration({country,birthDate,accepted}, policy, now = Date.now()) {
+export function createDeclaration({country,birthDate,accepted}, policy, now = Date.now(), options) {
   if (!accepted) fail('TERMS_REQUIRED');
   const declaredOn=calendarDay(new Date(now));
   return validateDeclaration({version:1,country,age:ageOnDate(birthDate,declaredOn),declaredOn,createdAt:now,
-    policyVersion:policy?.version,termsVersion:TERMS_VERSION,privacyVersion:PRIVACY_VERSION,accepted:true},policy,now);
+    policyVersion:policy?.version,termsVersion:policy?.termsVersion,privacyVersion:policy?.privacyVersion,accepted:true},policy,now,options);
 }
 export function readPendingSignup(storage, now=Date.now()) {
   try {
@@ -70,7 +70,7 @@ export async function fetchSignupPolicy(client) {
   if(error || !data) fail('SIGNUP_SERVICE_UNAVAILABLE');
   return data;
 }
-export async function recordPendingSignup(client, storage, now=Date.now(), expectedOwner) {
+export async function recordPendingSignup(client, storage, now=Date.now(), expectedOwner, options) {
   const pending=readPendingSignup(storage,now);
   if(!pending) fail('SIGNUP_DETAILS_EXPIRED');
   const {data:authData,error:authError}=await client.auth.getUser();
@@ -79,7 +79,7 @@ export async function recordPendingSignup(client, storage, now=Date.now(), expec
     || (pending.ownerId && pending.ownerId!==owner)) fail('SIGNUP_ACCOUNT_CHANGED');
   writePendingSignup(storage,{...pending,ownerId:owner});
   const policy=await fetchSignupPolicy(client);
-  const value=validateDeclaration(pending,policy,now);
+  const value=validateDeclaration(pending,policy,now,options);
   const {data,error}=await client.rpc('record_simple_signup_declaration',{
     p_expected_user_id:owner,
     p_country:value.country,p_declared_age:value.age,p_declared_on:value.declaredOn,

@@ -23,7 +23,7 @@ async function jsonBody(req) {
   return raw;
 }
 
-export function createSignupHandler({enabled=false,origin,clientId,clientSecret,cookieKey,preview=false,allowedEmailHashes,createBackend,fetchImpl=fetch,now=Date.now,verifyGoogle,observe=()=>{}}) {
+export function createSignupHandler({enabled=false,origin,clientId,clientSecret,cookieKey,preview=false,allowTestDocuments=false,allowedEmailHashes,createBackend,fetchImpl=fetch,now=Date.now,verifyGoogle,observe=()=>{}}) {
   let verifier;
   return async(req,res)=>{
     res.setHeader('Cache-Control','no-store, max-age=0');res.setHeader('Referrer-Policy','no-referrer');
@@ -61,7 +61,7 @@ export function createSignupHandler({enabled=false,origin,clientId,clientSecret,
         const adjusted=Number.isSafeInteger(submitted?.createdAt)
           && submitted.createdAt>receivedAt && submitted.createdAt-receivedAt<=MAX_CLIENT_CLOCK_LEAD
           ? {...submitted,createdAt:receivedAt} : submitted;
-        const d=validateDeclaration(adjusted,policy,receivedAt);
+        const d=validateDeclaration(adjusted,policy,receivedAt,{allowTestDocuments:preview && allowTestDocuments});
         phase='flow-create';
         const state=randomToken(),nonce=randomToken();
         const next=resolveWebOAuthNext({rawNext:body.next,origin});
@@ -79,7 +79,7 @@ export function createSignupHandler({enabled=false,origin,clientId,clientSecret,
       if(q.getAll('code').length!==1||!q.get('code')||q.get('code').length>4096)reject('INVALID_REQUEST');
       const policy=await backend.policy();
       if(policy.serverAdmission!==true)reject();
-      const d=validateDeclaration(flow.declaration,policy,now());
+      const d=validateDeclaration(flow.declaration,policy,now(),{allowTestDocuments:preview && allowTestDocuments});
       const response=await fetchImpl('https://oauth2.googleapis.com/token',{method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),
         headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:q.get('code'),client_id:clientId,
           client_secret:clientSecret,redirect_uri:`${origin}/api/signup?action=callback`,grant_type:'authorization_code'})});

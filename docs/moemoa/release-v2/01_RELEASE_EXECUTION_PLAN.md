@@ -1,5 +1,140 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 C02/W06 — Chrome 관리자 연결 복구·기존 Preview 재사용
+
+- **목적/범위:** 사용자가 Chrome Supabase/Vercel 로그인을 완료했다. 이전 PC의 환경파일이나 새 키 발급 없이 기존 `moemoa-test`와 `codex/phone-test` Preview를 재사용한다. 바로 아래 새 문서/본인 이력/탈퇴 계획의 후속이며 운영/master/Public/기존 계정 삭제는 제외한다.
+- **읽은 근거:** 시작/확정결정/PLANS/QA07/기존 C02/W06 계획, 가입 API·handler·문서 registry·조회 migration·테스트 설정 도구·CI·Git refs. `vibe-ops` 점검은 코드와 실제 배포 환경의 범위 대조에 사용한다.
+- **실제 관찰:** Chrome 관리자 접근 성공. Supabase `nmgkhknponvzcwliajyk`(`moemoa-test`) Healthy/Singapore, SQL `BEGIN READ ONLY` 조회에서 기존10/9 정책 enabled/admission=true, KR14·PH13·TH13·US13·GB13, 사용자3·수락2·admission0·handoff0, 시간별 purge 정상. 새 receipt 함수와 migration은 모두 없음. 사용자 내용·이메일·키는 조회하지 않았다.
+- **설정 재사용:** Vercel `newrreds-projects/anime-collector`의 Preview **`codex/phone-test` 한정** Google secret/cookie/allowlist가 존재한다. 기존 공개 가입 switch=1·서버=true, origin=`https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app`, `PUBLIC_SUPABASE_URL`은 test ref. 서버 `SUPABASE_URL`은 같은 branch의 Secret으로 존재하지만 원문을 열지 않았으므로 그 값의 직접 확인으로 표현하지 않는다. 새 계정privacy/delete flags는 아직 없다. 기존 실제 가입 화면의 정책 로딩·Google 버튼까지 읽기 확인했다(가입 실행 아님).
+- **소스/마일스톤:** 원격 `codex/phone-test=927ba88`, `codex/simple-signup-preview=6dd270c`를 읽기로 확인했다. 현재 브랜치는 phone-test보다13커밋 앞/분기0. (1) 이전 로컬 검증 결과와 독립 검토·diff 확인 후 후보를 커밋, (2) 기존 phone-test로 fast-forward push하여 키/Google callback을 재사용, (3) Git Preview Ready·source SHA·기존10/9 문서 및 신규기능off 확인, (4) 새 자기이력 RPC 권한 적용 직전 브라우저 확인 후 migration/해시/data release 기록→test 문서off staging→Preview 전용 새 switches 연결, (5) 사용자 직접 별도 폐기용 계정 가입/탈퇴 검증 순서다.
+- **권한 두 차례 재검토:** 기존 사용자 승인과 본인 auth.uid/실사용자 조건·타계정/anon 거부를 독립 대조했다. Git Preview 준비/push는 기존 승인 범위다. 새 `authenticated EXECUTE`는 테스트 DB의 자기 수락 기록에 대한 신규 조회 권한이므로 브라우저 실행 직전 그 한 항목만 확인한다. 실제 약관 수락/계정 삭제는 별도 사용자 직접 행동 또는 실행 시점 확인이며 기술/법률 전체 승인 질문으로 확대하지 않는다.
+- **데이터/롤백/보안:** 이 단계는 DB 조회만, remote schema/data/flags 변경0. 새 코드도 새 flags 없이는 새 문서/탈퇴를 활성화하지 않는다. Preview rollback은 직전 Git 후보로 되돌리고 새 flags off; 기존 secret/보호설정/계정3·receipt2 보존. 신규 credential 발급·복사·노출/외부 문의/유료 변경0. 이 조회는 실제 신규 가입/탈퇴 PASS가 아니다.
+- **진행:** 소스 고정·Preview 배포 확인 진행 중. 아래 미커밋/관리자 로그아웃 기록은 복구 전 시점의 증거다. 새 권한/문서/탈퇴의 hosted 검증 완료로 표시하지 않는다.
+
+## 2026-10-10 C02/W06 — 새 문서·수락 기록·본인 탈퇴 연결
+
+### 1–4. 목적·결정·증거·범위
+
+- 사용자가 직전 제시한 새 가입 문서/동의 기록/철회·탈퇴 연결과 테스트 가입→저장→탈퇴 검증을 `진행해`로 승인했다. 기존13+·KR14·체크1개·추가 인증 제외·두 차례 재검토 원칙을 유지한다. 실제 국가 법률의 자동 승인이나 운영 공개 활성화로 해석하지 않는다.
+- 현재 `simpleSignup.js`/`SimpleSignup.jsx`/서버 handler는10/9 문서를 하드코딩한다. DB 영수증은 `(user_id,policy_version)`별 불변이며 기존 가입1회와 새로운 수락을 분리할 수 있다. 현재 계정 화면은 로그아웃만 제공하고 self-service 탈퇴 API는 없다. auth.users 삭제 시 receipt cascade와 이미지 retirement 기반은 있다.
+- 포함: 고정 테스트용10/10 문서2종, 신뢰된 문서 조합 선택/현재정책 재검사, 테스트 전용 허용 스위치, 본인 수락 이력 조회, 본인 확인·명시 확인 후 서버 계정 삭제 및 기기 로그아웃, 로컬 SQL/단위/UI 검증과 승인된 test 연결 준비.
+- 제외: 기존10/9 문서 덮어쓰기·과거 수락 의미 변경·새 보호자/ID절차·국가 일괄 활성·production flags/DB/배포·실제 기존 사용자/Google 계정 삭제. 이번 구현이 PH 미성년 동의 권한 및 국외이전/보존 잔여를 법률 PASS로 만들지 않는다.
+
+### 5–7. 흐름·파일·데이터
+
+- 서버가 반환한 정책을 허용된 policy/terms/privacy 조합에 맞춰 해석한다. 기존 버전은 그대로; 새 테스트 버전은 명시 test 모드에서만 허용한다. 화면 링크·체크 문구와 전송 버전·Google 복귀 재검사가 동일 조합을 사용한다. PH 신규 테스트 문서의 체크1개는 해당 고지의 연령 처리도 명시하며, 이전 버전에 같은 의미를 부여하지 않는다.
+- 문서 후보는 `Terms20261010Test`/`Privacy20261010Test`와 `/legal/*-2026-10-10-test/` 두 고정 경로. 검토 페이지의 내부 논의는 동의 본문으로 가져오지 않는다. 기존 `/terms/`·`/privacy/`와10/9 fixed 문서는 보존한다.
+- 파일 지도: auth의 문서 registry/가입 모듈·컴포넌트·server/API, 계정 privacy UI/helper·본인 삭제 server/API, 법률 component/routes, 본인 영수증 조회 additive SQL와 기존 identity harness, unit/UI tests, 기존 실행/수용/작업판 문서.
+- 새 조회 RPC는 JWT 소유자 자신의 최소 수락 이력만 반환한다. DB의 원본 영수증을 수정하지 않는다. 새 문서/정책으로 테스트 정책을 바꿀 때 이전 설정을 기록하고 기존 계정/원본은 보존한다. 새 조회 migration은 로컬부터 검증하며 원격 적용과 그 release ID를 별도로 기록한다.
+
+### 8–9. 마일스톤·검증
+
+1. 새 테스트 문서와 정책 조합을 연결하고 혼합/알 수 없는 버전·production에서의 테스트 문서·Google 도중 변경을 거부한다. 이전 수락 이력 불변 검증.
+2. 현재 계정의 수락 이력·철회/탈퇴 진입 연결. 서버는 같은 origin·POST JSON·유효 JWT·명시 확인·예상 계정 일치를 검사하고 입력 user ID만 믿지 않는다. 실패/불확실 결과를 삭제 완료로 표시하지 않는다.
+3. 단위 검사(양성/부정/계정변경/외부요청/실패/비밀 비노출), 격리 SQL(이력/다른계정/삭제 cascade·이미지정리), Chromium(체크1개/고정 링크/탈퇴 확인·취소·실패·완료)·build·diff 실행.
+4. 실제 test 환경은 대상/설정/allowlist를 먼저 읽기 확인한다. 실제 Google 신원·약관 확인은 사용자의 직접 행동과 구분한다. 기존 데이터가 있는 A/B 계정을 탈퇴 테스트 대상으로 임의 지정하지 않는다. 안전한 별도 테스트 계정이 없으면 두 차례 대조 후 그 구체적 제약만 보고한다.
+
+### 10–14. 안전·관찰·롤백·위험·결정 경계
+
+- 추가 DOB/부모정보/ID 수집 없음. 영수증은 본인 전용. 서비스키·Google 토큰/사용자본문을 브라우저 번들·로그·문서로 내보내지 않는다. 서버 삭제는 feature flag 기본off, Preview는 기존 승인 allowlist를 사용한다. 필수 인증 확인은 새 가입 인증 절차를 뜻하지 않는다.
+- 삭제는 명시한 본인 계정만 대상. 예약 이미지정리/이미 발급된 URL/외부 백업과 기기 사본의 잔여를 정확히 안내한다. Auth 사용자 삭제가 실패하면 재시도 가능한 실패로 남기며 타 계정/지원자 계정을 삭제하지 않는다. DB 직접 삭제로 Auth API의 보호를 우회하지 않는다.
+- 복구: 소스 revert와 테스트 기능off·이전 테스트 정책 복원. additive 조회 함수는 사용 중지 가능하고 기존 데이터 변형 없음. **사용자가 실제로 완료한 계정 삭제는 소스 revert로 복구되지 않으므로** 일반 사용자 데이터를 검사 재료로 삼지 않는다. 기존 백업을 탈퇴 복구 보장으로 안내하지 않는다.
+- 의존성 설치/유료서비스/외부문의 없음. 실제 테스트 계정 신원·파괴 대상이 불명확하면 로컬 합성 검증까지 마치고 필요한 경우에만 정확한 대상을 질문한다. 공개 기능의 권리/신고/차단/철회 gate는 그대로.
+
+### 15–17. 진행·발견·완료 보고
+
+- **완료 범위:** 새 고정 테스트 문서→정확한 버전 수락→본인 이력 조회→본인 탈퇴/로그아웃의 로컬 구현·검증. 실제 hosted Google 가입/탈퇴와 운영 배포는 미실행. 브랜치 `codex/simple-signup-preview`, 기준 HEAD `6dd270c`; 이번 변경은 미커밋/미푸시다.
+- **읽은 자료:** AGENTS/시작/확정결정/PLANS/제품02·UGC05·구조06·QA07·보고09, 기존 release-v2/01~03, 가입 UI/handler/backend·10/9 및 검토 문서·signup SQL, DataCenter/authRepo/계정 동기화, 이미지 API/삭제 fence·FK, unit/Chromium/SQL harness와 CI. `vibe-domain`은 서버 소유권/버전 경계에, `vibe-content`는 실제 처리·철회 범위와 문구의 일치에 적용했다.
+- **결정·가정:** 입력3개·체크1개·DOB 원문 미전송을 유지한다. 새 PH 목적 동의의 의미는 국가와 정확한10/10 policy/terms/privacy 조합으로만 결정하며 임의 `consentScopes`/`guardianVerified`나 과거 영수증에 부여하지 않는다. 이번 철회는 클라우드 계정 종료이며, 계정 유지형 목적별 철회/동일 버전 재수락 이력 기능을 구현한 것으로 설명하지 않는다. 지역별 동의 권한과 보존·이전 잔여가 자동 법률 PASS가 된 것은 아니다.
+- **변경 파일과 이유:** `signupDocuments.js:17–25` registry, `simpleSignup.js:33–52` 검증, `SimpleSignup.jsx`·`auth/start.astro`·signup handler/API로 현재 고정 문서와 테스트 고정 문서를 함께 지원한다. 서버는 시작/Google 복귀 모두 Preview와 명시 허용을 요구한다. 새 `Terms20261010Test`/`Privacy20261010Test` 및 고정 route4개는 무료·좁은 허락·PH 목적 동의·종료/잔여 보존을 포함한다. `accountPrivacy.js:11–61`, `AccountPrivacyPanel.jsx`, `DataCenter.jsx:38–47,276–289`, `useMemoryAccountSync.js`는 본인 이력, 확인/취소/실패/로그아웃을 연결한다. 새 accountDelete handler/backend/API는 검증된 JWT·실제 사용자·예상 소유자·same-origin·명시 확인·Preview allowlist 뒤 Auth API만 호출한다. 관련 unit3개·기존 signup unit2개, 계정 UI spec·signup spec/runner, SQL contract/harness·CI도 보완했다.
+- **DB/롤백:** 새 `20261010170000_simple_signup_receipts.sql:3–26`은 본인 최소5필드/최신20개 조회 함수만 추가한다. 원격 미적용, 데이터 변경0. `configure-simple-signup-test.py documents`는 고정 test ref와 TLS를 유지하며 migration/기존 버전 확인→이전 policy 출력→새 tuple 준비와 가입/admission off만 수행하도록 준비했다(이번 원격 실행0). 예상 data release ID는 `MOEMOA_SIGNUP_TEST_DOCUMENTS_20261010_03`이며 **적용 완료 ID가 아니다**. 소스 revert/flags off, 조회 함수 사용 중지, 이전 test tuple 복원으로 되돌릴 수 있다. 실제 완료한 계정 삭제를 되살리는 rollback은 아니다.
+- **단위·화면 검증:** `npm run test:unit` **510/510 PASS, skip0**. 새 서버12·화면 helper5·이미지 경합4·signup 버전3은 이 전체에 포함. `node scripts/run-simple-signup-e2e.mjs` **17/17 PASS**(모의 Google/Auth/API); `node scripts/run-e2e.mjs tests/memory-owner-boundary.spec.ts tests/memory-account-sync.spec.ts --project=chromium --workers=1 --reporter=line` **11/11 PASS**. 두 UI suite는 다른28개 검사이며 실제 hosted 성공이 아니다. 첫 계정 UI 시도는 fixture locale 미설정으로 실패/중단했고 한국어 fixture를 명시한 뒤 재실행했다. 320px 가입·탈퇴 확인 스크린샷을 직접 읽어 내용/버튼/넘침을 확인했다.
+- **빌드·보존:** `npm run build` **29 pages + postbuild PASS**, 기존 큰 chunk 경고 유지.29 HTML의 Vercel 분석 태그/SDK/endpoint0.10/9 component2·고정 route2·`terms.astro`/`privacy.astro` **6/6 Git blob 보존**. 이번에는 가입 소스가 의도적으로 변경됐으며 아래 이전 턴의 가입 소스까지6개 보존 기록과 구분한다. `git diff --check` PASS, Python 설정 helper AST 구문 PASS. 새 CI는 Preview branch와 receipt/public signup 하네스를 포함하지만 아직 원격 CI를 실행한 것은 아니다.
+- **SQL 실행:** WSL Ubuntu24.04/PostgreSQL16.15 격리 Unix socket·TCP off. `run-simple-signup-receipts-local.sh` **42 PASS**(receipt31+문서 전환SQL10+previousPolicy 출력1), `run-public-signup-local.sh`15, private-images `run-local-postgres.sh` 기존51+신규 계정삭제20+기존 실제경합2, `run-retirement-compat.sh`23 PASS. 기존 `run-simple-signup-local.sh` 전체 및 admission 전체+실제경합2 PASS(전자는 자체 숫자 집계 없음). 신규 SQL은 과거 수락 불변/새 수락/두 발급 경로/타계정 차단/삭제 cascade 및 READY·PREPARING 사진 삭제 fence를 확인했다. 설정 도구를 원격 실행/import하지 않고 AST에서 실제 SQL만 추출해 migration/cron/unknown·혼합 버전 거부, old→new/off·재실행/이전policy 출력과 계정·국가·receipt 불변을 검사했다. public 이미지의 계정삭제 전용 SQL은 신규 추가하지 않았으며 코드·모의 handler 경합까지만 검증했다.
+- **로컬 도구:** PG가 없고 Docker daemon도 없어서 공식 Ubuntu signed apt 목록과 PostgreSQL16/client/libpq3개를 WSL 전용 캐시에 추출했다. 시스템 패키지 설치/상시 서비스/프로젝트 의존성 변경0, 검사 후 PG 프로세스0. 재실행은 `PG_BIN=/home/wlsbum/.cache/moemoa-pg16.bz3vqi/runtime/usr/lib/postgresql/16/bin`, `LD_LIBRARY_PATH=/home/wlsbum/.cache/moemoa-pg16.bz3vqi/runtime/usr/lib/x86_64-linux-gnu`; 캐시378MB는 재사용용으로 보존했다. 도구 제거는 정확히 이 전용 캐시만 대상으로 하며 workspace/사용자 데이터 삭제와 무관하다.
+- **독립 재검토·수정:** 최초 검토에서 탈퇴 boolean 상태가 A→B 계정까지 남는 P2를 발견했다. 계정별 상태로 변경하고 새 계정 진입 때 초기화, 실패 취소는 실제 getUser와 전후 소유자를 확인한 뒤 자동 동기화 복구하도록 고쳤다. 별도 unit과 계정전환/취소 UI PASS; 2차 읽기 검토에서 기존 P2 해소·추가 핵심 finding 없음. 이미지 코드/새 SQL도 독립 대조했다.
+- **보안·개인정보·권리·관찰:** 새 생년월일/보호자/ID 수집 및 일반 로그/분석 추가0, 서비스키는 서버 전용. 성공은 Auth 계정 삭제 확인만 의미하며 사진/로컬/백업 즉시 삭제로 표시하지 않는다. [Supabase 공식 사용자 관리](https://supabase.com/docs/guides/auth/managing-user-data#deleting-users)에 따라 이미 발급된 JWT의 즉시 무효화를 주장하지 않는다. 민감 이미지 경로는 실제 사용자·원본 존재와 삭제 fence를 재확인하고, 다른 보조 RPC까지 모두 즉시 거부한다고 확대하지 않는다. Storage 소유 객체 등으로 Auth 삭제가 거부되면 SQL/파일 삭제로 우회하지 않는다. Public/캡처·팬아트 gate 불변.
+- **실제 연결 제약의 두 차례 확인:** (1) 이 PC에는 `.env.production`만 있고 `.env.moemoatest.server.local`·test env·test TLS CA·관련 프로세스 환경 이름·서비스 CLI가 없다(키 원문 미출력). (2) 연결 가능한 앱 브라우저는 기존 탭0, Supabase dashboard는 sign-in 화면으로 이동했다. 읽기 확인용 탭은 닫았고 로그인/설정/약관수락/계정삭제는 수행하지 않았다. 기존 A/B/C의 데이터가 있는 계정을 파괴 테스트에 임의 지정하지 않는다.
+
+### 다음 실행 순서 — 재질문 대신 기존 상태부터 대조
+
+1. 이전 PC의 test 전용 `.env.moemoatest.server.local`을 이 프로젝트에 복원하거나 test 관리자 연결을 복구한다. 비밀값은 채팅/Git에 넣지 않는다. target `nmgkhknponvzcwliajyk`/TLS/현재 정책·기존 계정 보존부터 확인한다. 운영 환경값을 대체 사용하지 않는다.
+2. source commit을 고정하고 test 조회 migration→`documents` staging(off) 결과/이전 policy를 기록한다. Preview의 `PUBLIC_SIGNUP_TEST_DOCUMENTS=1`, `MOEMOA_SIGNUP_TEST_DOCUMENTS=true`, `PUBLIC_ACCOUNT_PRIVACY_V1=1`, `PUBLIC_ACCOUNT_DELETE_V1=1`, `MOEMOA_ACCOUNT_DELETE_ENABLED=true` 및 기존 signup 설정/허용계정을 대조한다. 서버 test 문서는 `VERCEL_ENV=preview`에서만 사용 가능하다. 일반 운영 기본은 모두off다.
+3. 승인된 별도 폐기용 계정으로 사용자 직접 Google/약관 확인→서버 수락 이력→탈퇴를 검증한다. 실제 계정 삭제 대상/약관 수락이 불명확하면 그 지점만 정확히 확인한다. 기존 사용자를 검사 편의로 삭제하지 않는다.
+4. 이 결과와 최종 문서/국가별 잔여를 대조한 뒤 운영 반영 대상으로 정리한다. 이 로컬 결과만으로 master 배포/공개 활성화를 하지 않는다.
+
+## 2026-10-10 C02 — 실제 처리 적용·최소수집 후속
+
+### 목적·확정 범위·진행 원칙
+
+- 사용자는 승인 불필요 작업을 계속하고, 결정 요청 전에 같은 쟁점을 최소 두 차례 다시 검토하라고 지시했다. 첫 검토는 공식 근거와 실제 적용 범위, 두 번째는 반대 근거·기존 승인·승인 없이 가능한 대안 및 설명 오류를 확인한다. 법적 의무를 사용자 위험수용으로 대체하지 않는다. 새 유료 서비스·인증·국가 차단·운영 공개 활성화는 이 지시에서 추론하지 않는다.
+- C02의 남은 작업을 경쟁사 비교 반복이 아니라 실제 서비스 계약·처리 목적에 적용한다. KR14 및 PH/TH/US13·유럽13+ 대상, 입력3개/약관 체크1개, DOB 원문 미전송, 기존10/9 문서·영수증 불변을 유지한다.
+
+### 현재 증거·변경 지도·마일스톤
+
+- `BaseLayout.astro:5,12,84`는 production에서 `PUBLIC_DISABLE_VERCEL_ANALYTICS`가 없으면 Vercel Analytics를 자동 삽입한다. 실제 로컬 production 빌드의 홈에서도 모듈을 확인했다. 가입 화면만 분석이 없다는 기존 고지를 서비스 전체로 오해하지 않는다. `platformMemoryRuntime.js:53`의 이벤트 전송 비활성 원칙과 맞춰 불필요한 자동 분석 삽입을 제거한다. 필수 인증·저장·보안 처리와 공급자 접속 로그는 제거됐다고 주장하지 않는다.
+- 약관 검토본에는 무료 제공 범위, 미성년자의 법정 취소권, 필요한 범위의 콘텐츠 허락을 명확히 한다. PH의 새 목적 특정 동의 후보는 미발효 설명으로만 준비하고 기존 `accepted`를 소급해서 민감정보 동의로 바꾸지 않는다. TH 민법24·EU 목적별 근거·미국 실제 서비스 범위 평가를 기존02에 결속한다.
+- 변경 파일: 공통 layout, `legal/review.astro`, 관련 unit/UI 회귀, 기존 release-v2/01~03·확정결정01·시작 문서. 새 독립 계획판이나 production 의존성은 추가하지 않는다.
+- 마일스톤: (1) 공식 근거와 실제 처리의 두 차례 적용 검토, (2) 불필요 분석 제거·구체적 최소 약관/고지 후보 반영, (3) 가입 관련 unit·Chromium·production 빌드 및 산출 HTML의 분석 모듈 부재 검사, (4) 수정 전체 독립 검토와 실제 잔여 기록.
+
+### 데이터·검증·안전·롤백
+
+- DB/migration/활성 정책·국가 row·영수증·원본·Public flags 변경 없음. 고정10/9 동의 문서는 SHA 비교로 보존을 확인한다. 새 공급자/결제/외부 문의/운영 배포 없음.
+- 명령: `node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs tests/unit/optionalAnalytics.test.mjs`; `node scripts/run-simple-signup-e2e.mjs`; `npm run build`; 빌드 HTML에서 Vercel 분석 태그/endpoint 부재 검사; `git diff --check`. 실제 hosted/Google 성공과 합성 UI를 구분한다.
+- 개인정보·관찰: 선택적 분석 전송 경로를 줄인다. 나이·보호자·신분증 필드를 추가하지 않는다. 저장/동기화/보안 로그 기능은 유지한다. 취소·삭제·공개 철회와 UGC 권리 gate를 보존한다.
+- 롤백: 이 소스 변경만 선택 revert 가능. 데이터 복원·스키마 역변경 불필요. 분석 재도입은 별도 목적/범위 판단 후 수행하며 잘못된 국가 차단을 롤백 수단으로 쓰지 않는다.
+- 실제 다음 경계: 근거가 없는 포괄적인 ‘미확정’을 반복하지 않는다. 이번 검토로 준비 가능한 부분을 완료하고, 남는 구체적 법적 적용 판단은 사실·추론·실제 코드 미비를 나눠 기록한다. 운영 적용은 정확한 소스/문서/정책 버전과 기존 출시 승인 범위를 다시 대조한 후 진행한다.
+
+### 진행·완료 보고
+
+- 읽은 근거: 시작/확정결정/PLANS/기존 release-v2/01~03·QA07·보고09, `BaseLayout.astro`, `SimpleSignup.jsx`, `simpleSignup.js`, 가입 handler/SQL, 검토/고정 법률 문서, 관련 tests. `vibe-domain`으로 실제 수락과 개인정보/보호자 동의를 분리하고 `vibe-content`로 문구를 실제 데이터 수명주기에 맞췄다.
+- 변경: layout에서 자동 방문 분석 import/조건/렌더 제거, 고지 검토본에 무료·공개 비필수·좁은 허락과 종료·포괄배상 배제·미성년 취소권 및 PH 목적 특정 동의 후보 추가. 후보는 form/input0·미발효이며 기존 입력3개/체크1개를 그대로 유지한다. 관련 source guard와 Chromium assertions/snapshots, 기존 의사결정·작업판·시작 문서를 갱신했다. 새 production 의존성/대규모 구조 변경 없음.
+- 1차 검토: PH NPC §8/19·TH PDPA/민법24·EU GDPR/EDPB·KR 민법5·US FTC/Florida를 데이터 목적과 대조. 2차 검토: 미성년 계약의 취소 가능성≠즉시 무효, UK13 동의 경로, 개인 회고 알고리즘 실존, 부정확한 Florida 조문 번호와 미적용 단정을 바로잡음. 경쟁사 조건 복사·전원 ID·일괄 국가 차단이나 사용자 위험수용 질문으로 대체하지 않았다. 독립 검토의 구체적 근거는02 최상단.
+- 검증(Windows, 현행 의존성): `node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs tests/unit/optionalAnalytics.test.mjs` **19/19 PASS**; `npm run test:unit` **486/486 PASS, skip0**. 부분19는 전체486에 포함되며 합산하지 않는다.
+- `node scripts/run-simple-signup-e2e.mjs` **9/9 PASS, skip0 (9.1s)**. 모의 Google/API의 실제 Chromium 화면 검증; 현행/검토 문서 분리·추가입력0·DOB 원문 미전송·320/1280px 넘침0. 새 PH 후보320/1280 스크린샷 직접 확인. 실제 hosted 계정이나 Google 신규 가입 검사는 아님.
+- `npm run build` **27 pages + postbuild PASS**, 기존 chunk 크기 경고 유지. PowerShell로 모든 `dist/**/*.html`27개를 검사하여 Vercel Analytics 태그/SDK/insights endpoint 문자열 **0**. 이는 후보 빌드 증거이지 현재 운영 사이트/제공처 접속 로그 부재 보증이 아니다.
+- 보존: `git rev-parse HEAD:<path>`와 `git hash-object`로10/9 법률 component2개·고정 page2개·`simpleSignup.js`·`SimpleSignup.jsx` **6/6 blob 동일**. `git diff --check` PASS. 문서에서 예고했던 보존 비교는 SHA256 외부 도구가 아니라 Git blob 해시로 수행했다.
+- DB/migration/롤백·보안: 새 DB/정책/국가 row/flags/receipt/원본 변경0. 분석 전송 경로를 줄였고 추가 개인 정보/로그는 없다. 소스 선택 revert만으로 복구 가능. 운영 배포/새 Git push/유료계약/외부발송0. 현재 로컬 변경이며 전체 목표나 지역 전체 적합성 완료로 표시하지 않는다.
+- 최종 독립 정적 검토: 변경 layout·검토 문서·관련 tests·02 최신 적용 판단에서 차단 결함/수정 finding 없음. PH 민법1390/1394 반대 대조와 미발효/현행 분리, UK 동의 대안·Florida 누적요건/실제 코드 경계를 재확인했다. 독립 검토자가 unit/UI/build를 별도로 재실행한 것으로 세지 않는다.
+- 다음 실제 경계: 목적 특정 고지와 수락/철회·정책 버전 전환의 연결은 후속이다. PH 미성년 동의의 좁은 적용 불확실성·유럽 선택 근거별 조건·기존 보존/이전 사항은 유지하되 새로운 일괄 인증/부모ID/법률의견서 제출 요구를 만들지 않는다. 질문이 필요해 보이면 먼저 기존 승인과 두 차례 재검토 근거를 확인한다.
+
+## 2026-10-10 C02 — 실제 서비스 사례 기반 최소 가입 후보
+
+### 목적·결정·현재 증거
+
+- 사용자 요청: Pinterest·Instagram·TikTok의 실제 약관과 운영 사례를 참고해 한국·필리핀·태국·미국·유럽의 만13세 이상 대상을 유지하고 불필요한 절차를 만들지 않는다. 기존 한국14세 예외·간단한 국가/DOB/약관→Google·PASS/KWS/보호자 메일 제외 결정을 유지한다.
+- 확인한 소스: `simpleSignup.js`의 국가별 서버 정책 판정, `SimpleSignup.jsx`의 체크1개/Google 흐름, 고정10/9 법률 문서, `legal/review.astro`, 가입 unit/Chromium 검사. 기존 후보는 개인정보 동의 연령과 가입 최소 연령을 구분하지만 실제 서비스 사례가 Pinterest 하나에 치우치고 검토 문구가 반복된다.
+- 불확실성: 경쟁사의 운영은 MOEMOA의 법적 승인 자체가 아니다. 하지만 미확인을 이유로 전원 보호자 확인·유료 인증·전 국가 법률의견서 제출을 자동 선행조건으로 만들지도 않는다. 현행과 예정 약관, 지역 예외, 기능별 보호 설정과 가입 절차를 각각 기록한다.
+
+### 범위·흐름·변경 파일
+
+- 포함: 공식3사 비교를 기존 `02_ACCEPTANCE_CONTRACTS.md`에 기록; `01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md`에 이번 사용자 지시 반영; `/legal/review/`에 짧은 가입조건 후보와 채택/제외 범위 반영; 현재 작업판·시작 문서 인계 갱신.
+- 검증할 계약: 국가 선택→중립 DOB→약관 체크1개/개인정보 안내→Google. 서버가 지정한 최소값만 판정하고, 외부 개인정보 동의 연령표를 가입 제한으로 추론하지 않는다. 공개는 기존 별도 선택·미리보기이며 가입이 공개 허가나 보호자 인증을 만들지 않는다.
+- 직접 영향 테스트: `tests/unit/simpleSignup.test.mjs`, `tests/simple-signup.spec.ts`. 13세 후보(한국14 예외), 미달, 상향 예외, 미설정, 체크 개수, DOB 미전송, 고정 문서 보존을 합성 정책으로 확인한다. 테스트 정책은 실제 국가 허용/전체 법적 적합성 증거가 아니다.
+- 제외: 실제 국가 row·정책/문서 활성 버전·DB/flags·운영 배포·회원 데이터 변경, 새 인증/법률 서비스 계약, 추가 checkbox/보호자 연락처·신분증·생체정보 수집. 기존 보존/국외 이전 잔여를 삭제하거나 이번 가입 비교로 PASS 처리하지 않는다.
+
+### 마일스톤·검증·롤백
+
+1. 공식 현행 근거/접근 한계와 지역·기능 예외를 비교하고 최소 후보를 정리한다.
+2. 미발효 검토 문구만 고치고 합성 테스트를 보완한다. 기존10/9 동의 문서와 기록은 불변.
+3. 가입 관련 unit/Chromium·빌드·diff 검사를 실행하고 결과를 아래 기록한다. 실제 Google/hosted 성공을 새로 주장하지 않는다.
+- 명령: `node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs`; `node scripts/run-simple-signup-e2e.mjs`; `npm run build`; `git diff --check`.
+- 스키마/마이그레이션: 없음. 롤백은 이번 소스/문서 변경의 선택적 revert이며 원본/기존 영수증 삭제 없음. 새 production 의존성 없음.
+- 보안·개인정보·권리·관찰: 추가 개인정보·analytics/log 항목 없음. 자가신고와 인증/동의를 혼동하지 않으며 비공개 기본·공개 권리/신고/차단/철회 경계를 유지한다.
+- 다음 승인 경계: 이번은 로컬 정책/고지 후보 및 테스트다. 실제 적용에는 정확한 최종 문서·정책 버전과 해당 지역 예외를 맞춘 뒤 기존 D06에 따라 별도 운영 적용한다. 유료 자문/공급자 문의는 자동 실행하지 않는다.
+
+### 진행·완료 보고
+
+- 완료 범위: 공식3사 비교·미발효 고지 후보·합성 가입 회귀. 편집 전 worktree clean, branch `codex/simple-signup-preview` / HEAD `6dd270c`. 이번 변경은 로컬 미커밋/미푸시이며 운영 배포 완료가 아니다.
+- 읽은 문서/근거: AGENTS, CODEX_START_HERE, 확정결정01, PLANS, 보고09, 기존 release-v2/01~03와 이어가기에서 읽은 제품02/UGC05/구조06/QA07. `src/features/auth/simpleSignup.js:11–50`의 서버 정책 기반 판정과 `src/components/auth/SimpleSignup.jsx:37–54`의 입력/체크1개·고정문서 연결, 가입 서버/10/9 문서/테스트를 대조했다. `vibe-domain`은 계약과 인증의 분리에, `vibe-content`는 실제 기능에 맞춘 짧은 검토 문구에 사용했다.
+- 변경 이유/파일: 확정결정01에 사용자 지시, release-v2/02에 공식 비교·채택/제외 범위, `src/pages/legal/review.astro`에 짧은 조건·사례·접힌 동의 연령 참고표, 가입 unit/Chromium 두 파일에13세 후보와 추가 입력 없음 회귀, 시작 문서/단일 작업판에 재개점. 총8개 파일. 실제 가입 컴포넌트·정책 상수·고정10/9 문서·schema 변경 없음.
+- `node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs`: **18/18 PASS, skip0**. KR14·합성 PH/TH/US/GB/FR/DE13, 주입된 상향값·국가누락, 기존 서버/소유자/문서·시각 경계. 전체 unit suite 재실행은 아님.
+- `node scripts/run-simple-signup-e2e.mjs`: 첫 실행은 로컬 서버 준비 시간초과로 테스트 시작 전 실패. 재실행은8PASS/1FAIL; 실패 snapshot은 첫 화면의 로딩 버튼 `준비 중…`였고, 기존 검사가 준비 완료 전에 `Google로 계속`을 찾았다. 준비 상태(국가 선택 활성)를 명시적으로 기다리게 테스트만 보완한 최종 재실행 **9/9 PASS, skip0**. 합성Google/API이며 실제 hosted 가입 검증과 구분. 실패를 PASS 수에 합산하지 않는다.
+- 화면: 고정 문서 링크/본문 불변, 검토본 동의 입력 없음, FR13 후보에서 필드3개/약관체크1개·DOB원문 미전송 확인. 검토본320/390/1280px 가로넘침0,320/1280 이미지 직접 확인. 산출물은 로컬 `C:\web\.moemoa-ui-test-results\test-results\simple-signup-revision-rev-5978d--documents-linked-by-signup-chromium\signup-candidate-{320,1280}.png`; 개인정보가 아닌 합성/검토 문구이며 Git 미포함.
+- `npm run build`: **27 pages + postbuild PASS**. 기존500kB 초과 chunk 경고 유지. `git diff --check` PASS. 의존성 설치/교체 없음. 독립 읽기 검토에서 Pinterest 나이정정 대상을 ‘성인으로 변경’에서 ‘18세 미만으로 등록된 계정의 생일 변경’으로 바로잡았다.
+- 데이터/롤백·보안: DB·국가 row·flags·계정·기존 영수증·개인 이미지·analytics/log 변경0. 외부 문의/유료 계약/새 인증0. 이 소스 변경만 선택적으로 되돌릴 수 있고 별도 데이터 복원이 필요하지 않다.
+- 남는 위험/다음 승인 경계: 지역 조건과 최종 고지·정책의 실제 활성 버전 마감은 별개. 경쟁사 자료를 전체 적법성 승인으로 취급하지 않는다. 기존 PH/TH 적용 판단·구체적인 지역 예외·보존/국외 이전 잔여를 전원 인증이나 법률의견서 제출 의무로 확대하지 않는다. 다음1개는 이 최소 후보를 기준으로 실제 적용 문서/정책과 지역 예외를 함께 마감해 테스트 환경 적용 준비; hosted/운영 반영은 별도 승인 범위.
+
 ## 2026-10-10 사용자 요청 종료 인계
 
 - 범위: 이번 소스/로컬 검증을 마감하고 기록·Git 동기화를 확인한 뒤 Windows 정상 종료. 추가 법률 확정·운영 배포·새 DB 적용을 완료했다고 표시하지 않는다.

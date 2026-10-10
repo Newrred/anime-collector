@@ -1,7 +1,7 @@
 name: Service quality
 on:
   push:
-    branches: [master, codex/phone-test]
+    branches: [master, codex/phone-test, codex/simple-signup-preview]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -21,6 +21,8 @@ jobs:
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/card-classification/run-local-postgres.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/private-images/run-retirement-compat.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-admission-local.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-receipts-local.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-public-signup-local.sh
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20

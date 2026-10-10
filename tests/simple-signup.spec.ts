@@ -1,5 +1,7 @@
 import {test,expect} from '@playwright/test';
 test.skip(process.env.MOEMOA_SIMPLE_SIGNUP_E2E !== '1', 'Run with scripts/run-simple-signup-e2e.mjs (isolated mock backend).');
+// Synthetic mock policy only: these values do not activate countries or assert legal eligibility.
+// In particular, FR15/DE16 are injected exceptions, not automatic GDPR signup thresholds.
 const policy={enabled:true,version:'simple-signup-2026-10-09',termsVersion:'terms-2026-10-09-draft',privacyVersion:'privacy-2026-10-09-draft',countries:[{country:'KR',minimumAge:14},{country:'PH',minimumAge:13},{country:'TH',minimumAge:13},{country:'US',minimumAge:13},{country:'GB',minimumAge:13},{country:'FR',minimumAge:15},{country:'DE',minimumAge:16}]};
 const account='11111111-1111-4111-8111-111111111111';
 const token=[{alg:'HS256',typ:'JWT'},{sub:account,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600},'signature'].map(x=>Buffer.from(typeof x==='string'?x:JSON.stringify(x)).toString('base64url')).join('.');
@@ -29,13 +31,40 @@ async function fill(page:any,country='KR',dob='2000-10-09') {
  await page.getByRole('checkbox').check();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
 }
+
+test('new PH test documents keep one explicit checkbox, correct versions and mobile layout',async({page},info)=>{
+ const signupPolicy={...policy,version:'simple-signup-2026-10-10-test',termsVersion:'terms-2026-10-10-test',privacyVersion:'privacy-2026-10-10-test'};
+ const calls=await mockBackend(page,{signupPolicy});await page.setViewportSize({width:320,height:780});
+ await page.goto('/auth/start/');await fill(page,'PH');
+ const form=page.locator('.signup-panel form');
+ await expect(form.getByRole('checkbox')).toHaveCount(1);await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await expect(form.locator('.signup-consent')).toContainText('가입 연령 정보 처리');
+ await expect(form.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/legal/terms-2026-10-10-test/');
+ await expect(form.getByRole('link',{name:'가입 연령 정보 처리',exact:true})).toHaveAttribute('href','/legal/privacy-2026-10-10-test/#age-processing');
+ await expect(form.getByText('테스트용 가입 문서입니다.',{exact:false})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:info.outputPath('signup-ph-new-documents-320.png'),fullPage:true});
+ await page.selectOption('#signup-country','KR');await expect(page.getByRole('checkbox')).not.toBeChecked();
+ await expect(form.locator('#signup-age-processing')).toHaveCount(0);
+ await fill(page,'PH');await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
+ const value=JSON.parse(calls.find(c=>c.path==='start').body).declaration;
+ expect(value).toMatchObject({country:'PH',accepted:true,policyVersion:signupPolicy.version,termsVersion:signupPolicy.termsVersion,privacyVersion:signupPolicy.privacyVersion});
+ expect(JSON.stringify(value)).not.toContain('2000-10-09');
+ for(const name of ['terms','privacy']) {
+  await page.goto(`/legal/${name}-2026-10-10-test/`);
+  await expect(page.getByText('테스트용 가입 문서 · 운영 미적용',{exact:true})).toBeVisible();
+  await expect(page.locator('input,select,textarea')).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+});
 test('below-age and missing terms stay before Google; Korean and English layouts fit mobile',async({page},info)=>{
  const calls=await mockBackend(page);await page.setViewportSize({width:390,height:844});
  await page.goto('/auth/start/');
+ // Wait for the mocked policy and initial client hydration, not the loading button label.
+ await expect(page.locator('#signup-country')).toBeEnabled({timeout:15000});
  await expect(page.locator('#signup-birthday')).toHaveValue('');
  await expect(page.getByRole('checkbox')).not.toBeChecked();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeDisabled();
- await expect(page.locator('#signup-country')).toBeEnabled();
  for(const country of ['KR','PH','TH','US','GB']) {
   await page.selectOption('#signup-country',country);
   await expect(page.locator('#signup-birthday-help')).not.toContainText(/\d+\s*세|age\s*\d+/);
@@ -51,6 +80,37 @@ test('below-age and missing terms stay before Google; Korean and English layouts
  await expect(page.locator('#signup-birthday-help')).not.toContainText(/age\s*\d+/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('signup-mobile.png'),fullPage:true});
+});
+
+test('synthetic FR13 policy keeps one terms checkbox and starts Google without DOB or extra verification fields',async({page})=>{
+ // This mock checks policy-driven behavior, not whether FR13 may be enabled in production.
+ const signupPolicy={...policy,countries:policy.countries.map(row=>row.country==='FR'?{...row,minimumAge:13}:row)};
+ const fixedTime=new Date('2026-10-09T12:00:00Z');
+ await page.clock.setFixedTime(fixedTime);
+ const calls=await mockBackend(page,{signupPolicy});await page.goto('/auth/start/?next=/archive/');
+ const form=page.locator('.signup-panel form');
+ await expect(form.getByRole('checkbox')).toHaveCount(1);
+ // Exact field inventory also rejects new minor/guardian/verification inputs of any type.
+ await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await expect(form.locator('select')).toHaveCount(1);
+ await expect(form.locator('input[type="date"]')).toHaveCount(1);
+ await expect(form.locator('input[type="email"],input[type="file"],input[type="tel"],input[type="password"]')).toHaveCount(0);
+ await fill(page,'FR','2014-10-01');
+ await page.getByRole('button',{name:'Google로 계속'}).click();
+ await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
+ expect(calls.filter(c=>c.path==='start')).toHaveLength(0);
+ await page.fill('#signup-birthday','2013-10-01');
+ await expect(form.getByRole('checkbox')).toHaveCount(1);
+ await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await page.getByRole('button',{name:'Google로 계속'}).click();
+ await expect(page).toHaveURL(/accounts.google.com/);
+ const starts=calls.filter(c=>c.path==='start');expect(starts).toHaveLength(1);
+ const payload=JSON.parse(starts[0].body);
+ expect(Object.keys(payload).sort()).toEqual(['declaration','next']);
+ expect(Object.keys(payload.declaration).sort()).toEqual(['accepted','age','country','createdAt','declaredOn','policyVersion','privacyVersion','termsVersion','version']);
+ expect(payload).toMatchObject({declaration:{version:1,country:'FR',age:13,accepted:true,createdAt:fixedTime.getTime(),policyVersion:policy.version,termsVersion:policy.termsVersion,privacyVersion:policy.privacyVersion},next:'/archive/'});
+ expect(JSON.stringify(starts)).not.toContain('2013-10-01');
+ expect(JSON.stringify(starts)).not.toContain('2014-10-01');
 });
 
 test('country availability is shown before DOB; changing country clears details and consent',async({page})=>{
@@ -102,12 +162,39 @@ test('revision review cannot collect acceptance or replace the documents linked 
  await expect(page.locator('#quick-privacy a')).toHaveAttribute('href','mailto:godburgundy@gmail.com');
  for(const region of ['KR','PH','TH','US','EUROPE']) await expect(page.locator(`#region-${region}`)).toHaveCount(1);
  await expect(page.locator('#regions')).toContainText('not a finalized availability list or an acceptance form');
+ await expect(page.locator('#signup-candidate')).toContainText('Keep one terms checkbox');
+ await expect(page.locator('#signup-candidate')).toContainText('not a change to current availability');
+ await expect(page.locator('#terms')).toContainText('You must be at least 13');
+ await expect(page.locator('#terms')).toContainText('or 14 in Korea');
+ await expect(page.locator('#terms')).toContainText('If the law requires parental permission');
+ await expect(page.locator('#terms')).toContainText('무료');
+ await expect(page.locator('#terms')).toContainText('미성년자');
+ const ageCandidate=page.locator('#age-processing-candidate');
+ await expect(ageCandidate).toContainText('This wording is not effective');
+ await expect(ageCandidate).toContainText('This page collects no consent');
+ await expect(ageCandidate).toContainText('이용약관과 위 가입 연령 정보 처리에 동의합니다');
+ await expect(ageCandidate).toContainText('10 minutes');
+ await expect(ageCandidate).toContainText('5 minutes');
+ await expect(ageCandidate).toContainText('2 minutes');
+ await expect(ageCandidate).toContainText('permitted device-only use remains available');
+ await expect(ageCandidate.locator('a[href="#retention"]')).toHaveCount(2);
+ await expect(page.locator('#privacy')).toContainText('Providers’ essential access logs are separate');
+ for(const name of ['Pinterest','Instagram','TikTok']) await expect(page.locator('#service-examples').getByRole('heading',{name,exact:true})).toBeVisible();
+ await expect(page.locator('#service-examples')).toContainText('current full terms were inaccessible');
+ await expect(page.locator('#service-examples')).toContainText('2026-11-12');
+ await expect(page.locator('#age-reference')).not.toHaveAttribute('open','');
  await expect(page.locator('#age-reference')).toContainText('Denmark (DK)');
  await expect(page.locator('#age-reference')).toContainText('Slovenia (SI)');
  await expect(page.locator('#age-reference')).toContainText('They are not MOEMOA availability rules');
  expect(await page.locator('form,input').count()).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:info.outputPath('legal-review-mobile.png')});
+ for(const width of [320,1280]) {
+  await page.setViewportSize({width,height:900});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.locator('#signup-candidate').screenshot({path:info.outputPath(`signup-candidate-${width}.png`)});
+  await ageCandidate.screenshot({path:info.outputPath(`age-processing-candidate-${width}.png`)});
+ }
  await page.getByRole('link',{name:'10/9 이용약관',exact:true}).click();
  await expect(page).toHaveURL(/\/legal\/terms-2026-10-09-draft\/$/);
  await expect(page.getByText('버전: terms-2026-10-09-draft', {exact:true})).toBeVisible();

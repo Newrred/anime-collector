@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Inspect/prepare/enable/disable ONLY moemoa-test signup, using verified TLS.
+"""Inspect/prepare/stage documents/enable/disable ONLY moemoa-test, using verified TLS.
 
 Enable only after the test Preview allowlist, Google callback and Auth hook are
 verified. Disable preserves accounts/receipts and the expiry cleanup schedule.
 No credentials or row contents are printed. Run with WSL Python.
+The documents action stages the fixed 10/10 test tuple with signup DISABLED.
+Save its previousPolicy output for rollback; do not use it as launch approval.
 """
 import argparse
 import json
@@ -19,7 +21,7 @@ RELEASE = 'MOEMOA_SIMPLE_SIGNUP_TEST_20261010_02'
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['inspect', 'prepare', 'enable', 'disable'])
+    parser.add_argument('action', choices=['inspect', 'prepare', 'documents', 'enable', 'disable'])
     args = parser.parse_args()
     values = {}
     for line in (ROOT / '.env.moemoatest.server.local').read_text(encoding='utf-8-sig').splitlines():
@@ -48,6 +50,19 @@ end$$;""")
     if args.action == 'prepare':
         sql.append("""select cron.schedule('moemoa-simple-signup-purge','17 * * * *',
  'select public.purge_simple_signup_transients();');""")
+    if args.action == 'documents':
+        sql.append("""do $$begin
+ if not exists(select 1 from supabase_migrations.schema_migrations where version='20261010170000')
+ then raise exception 'RECEIPT_MIGRATION_REQUIRED'; end if;
+ if not exists(select 1 from private.simple_signup_policy where singleton and
+  ((policy_version='simple-signup-2026-10-09' and terms_version='terms-2026-10-09-draft' and privacy_version='privacy-2026-10-09-draft') or
+   (policy_version='simple-signup-2026-10-10-test' and terms_version='terms-2026-10-10-test' and privacy_version='privacy-2026-10-10-test')))
+ then raise exception 'UNEXPECTED_EXISTING_POLICY'; end if;
+end$$;
+select jsonb_build_object('previousPolicy',public.get_simple_signup_policy());
+update private.simple_signup_policy set enabled=false,admission_enabled=false,
+ policy_version='simple-signup-2026-10-10-test',terms_version='terms-2026-10-10-test',
+ privacy_version='privacy-2026-10-10-test' where singleton;""")
     if args.action == 'enable':
         sql.append("""do $$begin
  if not exists(select 1 from cron.job where jobname='moemoa-simple-signup-purge' and active)
@@ -70,7 +85,8 @@ commit;""")
         print('FAILED_OR_UNCERTAIN: inspect before retry; database errors withheld')
         return result.returncode
     state = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
-    print(json.dumps(dict(release=RELEASE, target=REF, action=args.action, state=state), ensure_ascii=False))
+    release = 'MOEMOA_SIGNUP_TEST_DOCUMENTS_20261010_03' if args.action == 'documents' else RELEASE
+    print(json.dumps(dict(release=release, target=REF, action=args.action, state=state), ensure_ascii=False))
     return 0
 
 
