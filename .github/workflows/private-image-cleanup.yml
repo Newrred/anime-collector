@@ -6,11 +6,11 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: private-image-cleanup
+  group: ${{ github.ref == 'refs/heads/codex/phone-test' && 'phone-test-private-image-cleanup' || 'private-image-cleanup' }}
   cancel-in-progress: false
 jobs:
   cleanup:
-    if: vars.MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED == 'true'
+    if: github.ref == 'refs/heads/master' && vars.MOEMOA_PRIVATE_IMAGE_CLEANUP_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
@@ -28,3 +28,21 @@ jobs:
           # Manual verification observes only; scheduled maintenance keeps cleanup.
           OBSERVE_ONLY: ${{ github.event_name == 'workflow_dispatch' }}
         run: node scripts/private-image-maintenance.mjs
+  phone-test-cleanup:
+    # This job is manually started on the test branch. It is not a test cron.
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'Newrred/anime-collector' && github.ref == 'refs/heads/codex/phone-test'
+    environment: moemoa-test-cleanup
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Clean retired private images in moemoa-test only
+        env:
+          MOEMOA_TEST_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.MOEMOA_TEST_SUPABASE_SERVICE_ROLE_KEY }}
+        run: node tools/private-images/run-phone-test-cleanup.mjs --apply
