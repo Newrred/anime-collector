@@ -1,5 +1,11 @@
 # 01. 확정 결정과 미정 게이트
 
+## Decision Log — UNPAID-REPRESENTATIVE-AND-ADMIN-GRANT-20261010
+
+- **CONFIRMED / 사용자 / 2026-10-10:** 운영 DB의 지정 계정 서비스 집계·검토된 정책 pause/resume와 본인 수락 조회 권한에 「적용해」. 해당 범위의 action-time 승인을 받은 뒤 적용했다. 다른 사람의 private 열람·강제 탈퇴·공개 활성 권한은 포함하지 않는다.
+- **대표자 선택:** 「비용 없는 현지 개인·단체 위임 방법만 검토」. DataRep 등 유료 대행 문의·계약·결제를 추진하지 않는다. 무보수 방식의 실제 현지 기반·서면 위임·수락·업무 가능성을 확인하고, 실재하지 않는 대표자나 무료 지원기관 수임을 만들어 기록하지 않는다.
+- **실행:** release-v2/01의 현재 ExecPlan, `EU_UK_UNPAID_REPRESENTATIVE_PLAN.md`, `evidence/2026-10-10-service-admin-release.json`. 관리자 기능의 운영 완료와 국가별 신규 가입 정책 활성·실제 대표자 임명은 분리한다.
+
 ## Decision Log — REGIONAL-SIGNUP-AND-ADMIN-PROD-20261010
 
 - **CONFIRMED / 사용자 / 2026-10-10:** 국가별 신규 가입 조건의 남은 부분을 조사해 운영에 적용하고, 사용자가 지정한 기존 Google 계정으로 MOEMOA를 관리하는 관리자 기능을 제공한다. 이번 지시는 검증된 코드·필요한 비파괴 migration·설정의 master Git 운영 반영을 포함한다.

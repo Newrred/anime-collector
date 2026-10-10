@@ -1,0 +1,111 @@
+{
+  "recordedDate": "2026-10-10",
+  "status": "production-admin-and-account-controls-applied-country-signup-not-activated",
+  "sourceCommit": "7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6",
+  "branch": "codex/simple-signup-preview",
+  "previousProductionGitSource": "bae5e796619583b07fac457735c14728b11f6484",
+  "localChecks": {
+    "unit": {"passed": 553, "failed": 0, "skipped": 0},
+    "signupAndAccountBrowser": {"passed": 18},
+    "adminBrowser": {"passed": 15},
+    "adminPostgres": {"passed": 66},
+    "releaseSqlPostgres": {"passed": 15},
+    "buildPages": 32,
+    "firstUnitAttempt": "One Windows ephemeral-port EACCES; isolated 32 and full 553 reruns passed."
+  },
+  "ci": {"runId": 38043746577, "status": "completed", "conclusion": "success", "databaseJob": "success", "uiJob": "success"},
+  "test": {
+    "project": "nmgkhknponvzcwliajyk",
+    "releaseId": "MOEMOA_SERVICE_ADMIN_SCHEMA_TEST_20261010_01",
+    "rollbackRehearsal": "passed",
+    "apply": "passed",
+    "separateReadback": "passed",
+    "preservedTables": 26,
+    "allRowsUnchanged": true,
+    "syncFunctionsUnchanged": true,
+    "signupAndPublicUnchanged": true,
+    "definitionsAndPermissionsMatch": true,
+    "accounts": 2,
+    "receipts": 2,
+    "enabledServiceOperators": 0,
+    "privateStorageObjects": 2,
+    "publicStorageObjects": 3,
+    "adminMigrationInstalled": true,
+    "publicStorageLimit": null
+  },
+  "production": {
+    "project": "okchpyagfucpzpyrfgol",
+    "releaseId": "MOEMOA_SERVICE_ADMIN_SCHEMA_PROD_20261010_01",
+    "operatorReleaseId": "MOEMOA_SERVICE_ADMIN_OPERATOR_PROD_20261010_01",
+    "userActionTimeApproval": "Received for designated service operator and own-consent receipt permission before application",
+    "rollbackRehearsal": "passed",
+    "preservedTables": 26,
+    "allRowsUnchanged": true,
+    "definitionsAndPermissionsMatch": true,
+    "schemaApplied": true,
+    "operatorGranted": true,
+    "separateReadback": "passed",
+    "syncFunctionsUnchanged": true,
+    "signupAndPublicUnchanged": true,
+    "accounts": 3,
+    "receipts": 0,
+    "enabledServiceOperators": 1,
+    "catalogStorageObjects": 4292,
+    "privateStorageObjects": 10,
+    "gitDeploymentCompleted": true,
+    "gitSource": "7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6",
+    "gitBranch": "master",
+    "deploymentId": "5v7G6mx44XK2PfoPeNcLy94LSbzR",
+    "deploymentStatus": "Ready",
+    "domain": "https://www.moemoa.xyz",
+    "buildInfo": {
+      "commit": "7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6",
+      "checkoutCommit": "7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6",
+      "builtAt": "2026-10-10T10:18:15.028Z",
+      "source": "vercel-git",
+      "workingTreeDirty": true,
+      "changedPathInBuildLog": "vercel.json",
+      "deploymentConfigSemanticMatch": true
+    },
+    "liveChecks": {
+      "signedOutAdminShowsOnlyLogin": "passed",
+      "designatedExistingGoogleLoginAndAdminRead": "passed",
+      "accountPageAdminEntryAndOwnReceiptEmptyState": "passed",
+      "accountDeleteControlVisibleButNotInvoked": true,
+      "accountDeleteNoAuthentication": {"status": 401, "error": "AUTH_REQUIRED"},
+      "accountDeleteWrongOrigin": {"status": 400, "error": "INVALID_REQUEST"},
+      "initialSignupResumeDisabled": true,
+      "publicReadsWritesAndReports": "off",
+      "ordinaryAccountLiveLogin": "not repeated; denial covered by SQL and browser regression tests",
+      "productionAccountDeletion": "not performed; existing test-only real deletion evidence retained"
+    },
+    "countrySignupActivated": false,
+    "environmentConfigurationSaved": {
+      "PUBLIC_SERVICE_ADMIN_V1": "1",
+      "PUBLIC_ACCOUNT_PRIVACY_V1": "1",
+      "PUBLIC_ACCOUNT_DELETE_V1": "1",
+      "MOEMOA_ACCOUNT_DELETE_ENABLED": "true"
+    },
+    "environmentScope": "Production only; applied by master Git deployment; no secret values read or changed"
+  },
+  "migrations": [
+    {"version": "20261010170000", "sha256": "d3e50084621457853ceed3d2a31fe3da8e808e5e7497a09bd32e34f3aaf207d0"},
+    {"version": "20261010180000", "sha256": "185ca469af611fa9342fdf0f8e98d7429707a794b35964b0ba4d508deb7be93e"}
+  ],
+  "hostedIssue": {
+    "initialRehearsal": "failed closed; no persistent DB change",
+    "cause": "Windows editor CRLF altered the expected dollar-quoted source while only the stored source was normalized",
+    "fix": "Normalize CRLF to LF on both sides only; preserve strict content, function, ACL and trigger checks",
+    "fixCommit": "7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6"
+  },
+  "unresolved": [
+    "Actual willing EU/EEA and UK representative appointment; user selected unpaid local individual or organization only, no paid outreach or contract",
+    "Vercel Hobby processing-contract scope and PH age-data route; existing Supabase Edge alternative identified but not implemented"
+  ],
+  "representativeDecision": {
+    "paidAgency": "not selected; no inquiry sent, no contract, no payment",
+    "unpaidLocalMandate": "legally available subject to actual establishment, written mandate, acceptance and duties; no app-specific free organization confirmed",
+    "preparation": "EU_UK_UNPAID_REPRESENTATIVE_PLAN.md"
+  },
+  "rollback": "Disable service-admin/account UI flags and operator role if needed; revert application through a reviewed master Git commit. Preserve schema, receipts, audit and user data. No destructive down migration."
+}

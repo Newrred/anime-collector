@@ -42,6 +42,28 @@
 - 유럽 해결 경로: 기존 현지 개인/단체의 실제 서면 위임 또는 DataRep 등 EU+UK 대표자 대행. DataRep Small의 공개 가격은 1,000명 이하/12개월 €150, GDPR 민감정보 옵션 €250이며 실제 수임·인원 산정·세금은 계약 전 확인한다. 대표자 없음 자체를 무기한 보류 계획으로 두지 않는다. 외부 위임·비용·운영자 실제 계약 정보만 사용자 결정 대상이며 아직 계약/결제/문의 전송은 하지 않았다. [공식 근거/대안](02_POLICY_MARKET_RESEARCH.md).
 - 제공처 조건 재검토: 운영 Vercel UI는 실제 Hobby다. 공개 DPA는 Pro/Enterprise 대상이며 민감정보 조항이 PH의 나이를 포함하는지는 확답하지 않는다. PH 법률상 가입 금지와 제공처 계약 불확실성을 구분한다. 기존 Supabase Edge로 가입 start/callback/session 전체를 직접 처리하면 추가 업체·의무 요금·보호자 입력 없이 해당 Vercel 연령 경로를 제거할 수 있다. 다만 OAuth/쿠키/일회 인계 변경의 별도 구현·회귀가 필요하고, 이미지 바이트도 Vercel을 통과하므로 가입 이전 하나를 전체 EU 처리 계약의 해결로 주장하지 않는다. 이 변경은 아직 구현/배포되지 않았다.
 - 현재 외부 변경: 이 통합 후보 시점은 원격 Git/DB/운영 설정 변경 전이다. additive schema 적용과 지정 계정 역할 부여는 분리된 생성 SQL을 사용한다. generator/두 migration은 HEAD와 일치해야 하며 기본 실행은 rollback. 역할 부여 직전 대상·범위 확인은 별도로 받는다. rollback은 flag off/operator 비활성 및 정상 Git 복귀이며 기존 수락·감사·개인 기록은 보존한다.
+- 후속 실행: UI **15/15 PASS**(데스크톱/320px, 일반 계정 거부, 권한 철회·경합, Public off의 moderation 진입). source `5bea905` → CRLF 호환 보강 `7e58e1c`를 simple-signup-preview에 push했다. SQL 편집기가 CRLF로 바꾼 비교값 때문에 test rehearsal이 엄격 검사에서 멈춘 원인을 실제 PostgreSQL로 재현하고, 양쪽 CRLF→LF만 정규화했다. 추가 검증 후 생성 SQL **15 PASS**. 허용 공백/내용 범위를 넓히지 않았다.
+- Hosted 후속: **test schema rollback/apply/별도 readback PASS**, release `MOEMOA_SERVICE_ADMIN_SCHEMA_TEST_20261010_01`, source `7e58e1c`. 26개 테이블 내부 row 해시/개수 및 동기화 함수/기존 signup·Public 설정 보존. 계정2/수락2/private객체2/public객체3/운영자0, 새 admin schema만 설치. **production rollback rehearsal PASS**이나 schema·역할의 실제 적용 전이며, 본인 수락 조회 및 지정 운영자 역할의 브라우저 action-time 확인을 요청했다.
+- 운영 설정은 `PUBLIC_SERVICE_ADMIN_V1=1`, `PUBLIC_ACCOUNT_PRIVACY_V1=1`, `PUBLIC_ACCOUNT_DELETE_V1=1`, `MOEMOA_ACCOUNT_DELETE_ENABLED=true` 네 비밀이 아닌 값을 Production에 저장했다. **새 Git 배포 전이라 운영 앱에 반영 완료된 것은 아니다.** 키 원문 열람/변경0, Public/신규 국가 활성0, 운영 Git은 아직 `bae5e79`. 전체 CI `38043746577`은 DB job SUCCESS/UI job 진행 중인 시점이다. [기계 판독 증거](evidence/2026-10-10-service-admin-release.json).
+
+### 운영 적용 마감 — 사용자 승인 이후
+
+- 사용자 「적용해」를 받은 뒤 운영에 `20261010170000` 본인 receipt 권한과 `20261010180000` admin schema를 적용했다. release `MOEMOA_SERVICE_ADMIN_SCHEMA_PROD_20261010_01`, 지정 verified Google 계정의 operator 연결은 별도 `MOEMOA_SERVICE_ADMIN_OPERATOR_PROD_20261010_01`. 모두 source `7e58e1cf40e1f944cde3ffe4d79dc8496eac66b6`에 결속했다. 26개 기존 table의 내부 row 해시/건수·동기화 함수·기존 signup/Public 보존 PASS, 별도 readback operator1/계정3/receipt0/표지4292/private객체10. 개인 원문·키는 기록하지 않았다.
+- GitHub CI `38043746577` 두 job 전체 SUCCESS 확인 후 `master`를 `bae5e79`에서 `7e58e1c`로 fast-forward push했다. Vercel Git Production `5v7G6mx44XK2PfoPeNcLy94LSbzR` Ready/Source master·7e58e1c/현재 www domain과 실제 `/build-info.json`의 commit·checkoutCommit 일치. build-info dirty=true는 실제 build log의 `M vercel.json` 한 파일이며 config.semanticMatch=true다. 로컬/CLI production 배포0. 후속 기록만의 commit도 Git 배포 후 같은 방식으로 확인한다.
+- 실제 Chrome `/admin/`: 비로그인에는 로그인만 표시 → 지정 기존 Google 계정 로그인 → 계정3/수락0/이미지 정리 대기0·보존용량/공개off 집계 조회 PASS. 최초 정책 미연결 상태에서 Resume 비활성, 위험한 초기 활성·pause 테스트는 운영에서 하지 않았다. `/data/`의 관리자 링크·본인 수락 빈 상태·탈퇴 진입 표시 PASS. **운영 계정을 삭제하지 않았다.** 삭제 API 미인증401 AUTH_REQUIRED, 다른 origin400 INVALID_REQUEST. 일반계정 실제 재로그인/탈퇴는 반복하지 않았고 SQL/UI 회귀 및 기존 test 실제 결과와 구분했다.
+- 사용자 「비용 없는 현지 개인·단체 위임 방법만 검토」로 유료 DataRep 문의 초안을 폐기(미발송)하고 [무보수 현지 위임안](EU_UK_UNPAID_REPRESENTATIVE_PLAN.md)을 준비했다. 무보수 지정은 가능하나 실제 EU/EEA·UK 담당자 수락은 미확보다. 실제 업무/공개 연락처/처리기록과 위임문 초안을 정리했으며 유료 변경·대외 연락·계약0. 공식 근거/가능 대안 두 차례 검토 후 실제 지인·단체의 국가와 수임 가능 여부만 질문했다.
+- 남은 핵심은 **실제 대표자 확보**와 **제공처 처리 범위/PH 연령 처리 경로 해소 및 새 운영 문서·정책 연결**이다. 기존 Supabase Edge로 가입 경로 이전은 기술 설계 후보이며 아직 구현하지 않았다. 관리자 화면 배포를 국가별 신규 가입 또는 Public 출시 완료로 기록하지 않는다.
+
+### 8항 실행 보고 — 관리자/본인 계정 기능 운영 적용 완료
+
+1. **읽은 자료:** 시작/결정/PLANS/02·03·05·06·07·08·09, 기존 가입·수락·탈퇴·이미지/공개/운영 권한 소스와 관련 검사, 지역 공식 자료 및 제공처 계약. 상세 출처는 두 지역 조사 문서에 기록했다.
+2. **가정·남은 질문:** 무료 private archive/KR14·나머지13 목표 유지. 유료 대행은 사용자 지시로 제외. 무보수 현지 대표자는 실제 수락자가 필요하고, Vercel Hobby 계약/PH 연령 경로는 기존 Supabase Edge 대안까지 준비한 상태다. 관리자 적용 승인은 받았고 실제 현지 담당 가능 여부만 미확보다.
+3. **계획:** 본 최상단 ExecPlan과 결정 `REGIONAL-SIGNUP-AND-ADMIN-PROD-20261010`. 초기 배포와 일상 pause/resume을 구분한다.
+4. **변경 파일:** admin feature/components/page/style는 운영 화면, MemoryRouteShell·DataCenter·platformPublication은 안전한 진입/개인 초기화 독립/공개 off 검토 연결, 새 legal 두 문서·routes·registry·SimpleSignup은 고정 정책 후보, migration/operations/관련 tests/CI는 권한·릴리스·회귀 보장, 연구/시작/작업판/evidence는 인계 목적이다. 소스 `5bea905`, CRLF 보강 `7e58e1c`.
+5. **DB·복귀:** test180000/운영170000+180000 및 지정 prod operator1명 적용. source·hash·release ID와 별도 보존/readback PASS. rollback은 UI/역할 비활성 및 Git 복귀이며 개인 데이터·수락·감사 기록 삭제는 하지 않는다.
+6. **검증:** unit553, signup/account UI18, admin UI15, build32, SQL66, generator SQL15 PASS. test/prod schema apply/readback, 지정 기존 Google 로그인/운영 관리자·본인 조회, 삭제API 인증·origin 차단 PASS. CI38043746577 전체 SUCCESS, master/Vercel Git/실제 www7e58e1c 일치. 새 운영 가입/운영 계정 삭제는 검사하지 않았다.
+7. **안전·권리·관찰:** 개인 기록/사진·원문 로그 노출0, credentials 조회0, Public 권리 gate 유지. 좁은 서버 RPC/매요청 역할 확인/세션 격리/변경 충돌/불변 감사. queue0을 cron 성공으로 간주하지 않는다. 새 dependencies0.
+8. **남은 위험·다음 확인:** 관리자 운영 적용은 완료. 실제 무보수 EU/EEA·UK 대표자 위임과 제공처 처리 범위/가입 경로를 해소한 뒤 새 운영 문서·국가 정책을 연결한다. 추가 보호자 입력/유료 계약을 신설하지 않는다. 비활성 국가/문서 후보/테스트를 전체 출시 PASS로 표현하지 않는다.
 
 ## 2026-10-10 W06 — 승인된 테스트 전용 사진 정리 실행 연결
 
