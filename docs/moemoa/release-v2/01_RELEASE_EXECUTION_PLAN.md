@@ -1,5 +1,36 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 — KR·US·TH 첫 가입 활성과 입력·운영 화면 개선
+
+### 1–3. 목적·결정·현재 증거
+
+- 사용자 승인 `FIRST-SIGNUP-KR-US-TH-UI-20261010`: KR14/US13/TH13 새 가입을 먼저 운영하고 불편한 DOB 및 가입/관리자 화면을 개선한다. 현 source1e2b5eb/운영 관리자·receipt/삭제 기능 적용 완료, 새 signup DB enabled/admission=false와10/9 draft 조합이 남아 있다. 시작/결정/02·06·07·09/PLANS와 현재 signup handler/registry/admin SQL·UI·tests를 근거로 실행한다.
+- 현재 native date 입력은 먼 과거 연도 이동이 불편하다. 관리자에는 반복된 설명·문서 버전·내부 대기 지표/사용량 제한12종이 같은 위계로 노출돼 있다. 기존 제품의 선·핑크·산세리프/hero 없음은 보존한다.
+
+### 4–6. 범위·흐름·파일 지도
+
+- 가입: 거주 국가→연/월/일 직접 입력(숫자 키보드·명시 label·자동 날짜 보정 없음)→정확한 불변 문서 수락→Google. 생년월일은 사전값/최소연령 유도 없이 입력한다. 국가/DOB 변경 시 동의 초기화, 실제 날짜·윤년·미래/미달·서버 정책 변경 검증 유지. 기존 계정용 로그인 경로를 별도로 유지한다.
+- 관리자: 주요 현황/새 가입 상태·국가/정리 필요 항목을 앞에 배치하고 문서 버전·처리 대기·전체 한도는 펼쳐보기로 옮긴다. 감사·용량과 실제 파일/정리 성공의 차이는 짧은 정확한 문구로 보존한다. 권한·상태변경·확인·재조회·세션 분리 기능은 그대로다.
+- 소유 파일: `src/components/auth/SimpleSignup.jsx`, 가입 CSS/날짜 helper/관련 unit·UI; `src/components/AdminDashboard.jsx`, `src/styles/admin.css`, admin UI tests; root는 auth/start·authRepo/운영 settings·문서·release evidence 통합, DB 담당은 `tools/identity/`의 명시 KR/US/TH 활성·rollback/readback 도구 및 관련 검사를 담당한다. 기존 accepted 문서 본문은 덮어쓰지 않는다.
+
+### 7–9. 정책·순서·검증
+
+- 정책 데이터 release는 KR14/US13/TH13만 enabled,10/10 production 문서 tuple, admission guard=true와 검토 bundle 연결. 기존 국가 rows는 삭제하지 않고 비활성으로 보존한다. 기존 계정·receipt·사진·동기화 함수/권한·Public 정책 보존. 추가 schema 필요 여부는 현 owner 계약 검사 후 결정한다. 모든 SQL은 version-controlled source/hash/release ID에 결속하고 rollback rehearsal→apply→별도 readback 순서다.
+- M1 UI/문구·DOB 회귀; M2 최초활성/pause/resume·신규 Google우회차단·기존 계정복귀/구문서유지·비허용국가/나이 검사; M3 commit/CI→master Git→Vercel Ready/실제 SHA→운영 정책/API/UI와 설정 확인. 실제 새 약관 수락이 필요하면 사용자에게 해당 마지막 행위만 요청하고 나머지는 계속한다.
+- 명령은 현 package/test runner의 unit·signup/account/admin Chromium·build·관련 PostgreSQL release harness. 320px와 PC 캡처를 한 묶음으로 검사하고 한 번 수정/확인까지, 추가 Safari 반복 검사 없음. 합성/test 결과와 실제 운영 결과를 구분한다.
+
+### 10–14. 안전·관찰·복귀·위험·승인
+
+- 공개기능/UGC 활성·원본 업로드/삭제·새 의존성/유료 서비스0. DOB/메모·이미지·토큰은 로그/analytics에 남기지 않는다. 서버 policy/admission/Google 검증이 authoritative하며 UI만으로 국가를 제한하지 않는다. 중복전송·구정책·직접OAuth 우회를 검사한다.
+- 관찰: 개인정보 없는 결과코드·현재 정책 버전/활성국가·배포SHA·release ID만 기록. signup reset/expiry 예약과 capacity 기존 설정은 보존한다.
+- 복귀: 신규 가입을 pause(enabled=false, admission=true)하고 공개off 유지. 최신 승인 Git 소스로 UI를 되돌리되 과거 수락문서·receipt/audit/개인 데이터는 보존한다. admission을 끄는 rollback은 직접 OAuth 우회를 열 수 있으므로 사용하지 않는다.
+- 위험: 활성 순서 중 구 UI와 새 정책 불일치/legacy 신규OAuth, 날짜 입력의 자동 보정과 연령 오판, 기존 계정 로그인 차단, 관리자 수치 과장. 실제 provider 설정/정책을 대조하고 단계별 readback으로 완화한다. KR·US·TH 승인 범위를 PH/유럽이나 Public으로 확대하지 않는다.
+- 새 사용자의 동의 또는 보안 권한 확대가 실제 필요할 때만 action-time 확인을 요청한다. 기존 Google 운영 설정과 keys는 값 노출 없이 사용하며 불필요한 재발급/수락 재시험을 하지 않는다.
+
+### 15–17. 실행·발견·완료 기록
+
+- 시작: 작업 전 clean1e2b5eb 확인. UI refinement는 impeccable/context의 기존 시스템 유지·최대2회 시각 확인, humanizer의 의미 유지/개발용 표현 제거, vibe-security/ops의 실제 서버 경계·Git 배포 검증을 적용한다. 완료 결과·파일·DB release/rollback·실제검사·남은 조건은 본 절에 누적한다.
+
 ## 2026-10-10 — 국가별 운영 가입 조건과 관리자 화면
 
 ### 1–3. 목적·승인·현재 증거
