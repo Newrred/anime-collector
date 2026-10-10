@@ -1,5 +1,7 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-10 현재 — KR14/US13/TH13 운영 활성·배포 후 확인 완료:** source/master `6a2beff`, CI `38048163986` 전체 SUCCESS, Vercel Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready·실제 www commit/checkoutCommit 일치/source=vercel-git/semanticMatch=true. DB `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS(`2026-10-10T11:38:43.420647+00:00`): signup/admission=true·KR14/TH13/US13·Public off·기존 계정3/수락0와26개 테이블/동기화 보존. 독립 readback·실제 가입/관리자 UI·기존회원 Google 로그인 복귀 PASS. DOB/동의 재입력 없이 기존 계정 연결과 두 동기화 상태 성공, 서비스 관리 링크를 확인했고 새 가입 기록은 생성되지 않았다. 날짜 직접 입력·기존회원 별도 로그인·관리자 UI 개선 배포. 신규 운영 Google 가입 왕복은 미실행/약관 대리 수락0. [이번 보고](2026-10-10-first-signup-ui-release.md)와 아래 현재 위치/작업 카드를 따른다. 아래 날짜별 이전 ‘현재/최신’은 이력이다.
+
 > **2026-10-10 현재 — 서비스 관리자 운영 완료/국가별 가입 잔여 분리:** 사용자 승인 후 운영 receipt/admin schema와 지정 operator1명을 적용했고 source `7e58e1c`의 master Git→Vercel Production Ready→실제 www SHA 일치까지 확인했다. 지정 계정 실제 `/admin/` 로그인·집계, `/data/` 본인 수락 조회/탈퇴 진입과 무인증 삭제401 PASS. 운영 계정·사진 삭제0, 26개 table row/동기화 함수 보존. unit553/UI18+15/DB66/생성SQL15·CI38043746577 전체 SUCCESS. **새 국가 가입 정책/Public 활성은 아직 아님.** 유료 대표자 대행은 사용자 거절로 제외; [무보수 현지 개인·단체안](EU_UK_UNPAID_REPRESENTATIVE_PLAN.md)에 위임 초안·업무 범위를 준비했으나 실제 EU/EEA·UK 수임자는 미확보. PH 단일 동의 후보/추가입력0 유지, Vercel 연령 경로의 Supabase Edge 대안은 미구현. [ExecPlan](01_RELEASE_EXECUTION_PLAN.md)·[증거](evidence/2026-10-10-service-admin-release.json)를 따른다. 아래 날짜별 완료/대기는 당시 기록이다.
 
 > **2026-10-10 최신 W06 마감:** 실제 가입·합성 사진 저장·탈퇴 완료/자동 로그아웃·서버 계정/수락 제거·사진 실제 삭제 및 빈 재실행까지 PASS. test worker source9970120/run38039510540, deleted1→0/failed0. 기존 private객체2/Public3 보존, 삭제된 owner객체0·due0. unit531 PASS. 테스트 전용 수동 시작 작업이며 상시 test cron/운영 가입·탈퇴 활성화/전체 출시 완료는 아니다. 운영/master/UGC 불변. 상세 파일·검증·롤백·잔여는 [ExecPlan](01_RELEASE_EXECUTION_PLAN.md) 및 [집계 근거](evidence/2026-10-10-test-receipts-preview.json)의 `testCleanupCloseout`. 다음 제품 출시 작업은 기존 C02 국가별 조건·최종 활성 고지/정책 마감이며, 이번 합성 계정 재시험을 반복 요구하지 않는다.
@@ -299,6 +301,20 @@
 </details>
 
 ## 현재 위치
+
+| 항목 | 현재 상태 — 2026-10-10 KR/US/TH 첫 활성 |
+|---|---|
+| 승인·범위 | `FIRST-SIGNUP-KR-US-TH-UI-20261010`: 무료 비공개 기록, KR14/US13/TH13. PH·EU/EEA·UK·CH 및 Public은 이번 활성 대상 아님 |
+| 구현·자동검사 | 연/월/일 직접 입력·단일 약관 수락·기존회원 별도 로그인·관리자 화면 개선. unit571/build32, 가입18·관리자17·callback4, PostgreSQL16 신규62개 검사 및 CI38048163986 전체 SUCCESS |
+| Git·배포 | source/master `6a2beff04cdc408787dcf5ed9bf2660a95aa78ae`, Vercel Git Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready, www commit/checkoutCommit/source/semanticMatch 대조 PASS |
+| 운영 DB | ACTIVATE release `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS, enabled/admission=true·KR14/TH13/US13. 26개 테이블/동기화·계정3·수락0 보존. Public schema는 설치돼 있으나 Public flags는 off |
+| 배포 후 확인 | 독립 DB readback·실제 가입/관리자 UI·기존회원 Google 복귀 PASS. DOB/동의 공란 로그인→계정 연결·두 동기화 상태 성공·서비스 관리 링크 확인. 신규 운영 계정 생성은 미실행 |
+| 별도 후속 | EU/EEA·UK 실제 무보수 대표자 수임, PH 처리 경로·조건, 원래 Public 출시·운영 복구/알림 잔여. 이번3개국 가입의 추가 승인 조건으로 확대하지 않음 |
+| 현재 인계 | 요청한3개국 가입/UI 운영 반영 완료. 문서는 codex/simple-signup-preview, 검증 운영 source/master는6a2beff. 다른 PC는 이 구분으로 이어간다. 과거 테스트 계정 가입·사진·탈퇴·정리 재시험을 반복 요청하지 않음 |
+
+### 이전 현재 위치 표 — 9/25~10/9 당시 기록
+
+아래 표는 당시 실행 이력으로 보존한다. 나이·SHA·schema·선행조건 등 현재 상태는 위 표와 현재 작업 카드를 따른다.
 
 | 항목 | 값 |
 |---|---|
@@ -685,13 +701,30 @@
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 만료/복귀/후보 endpoint 조합 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | PRIVATE_WEB_DEPLOYED / PUBLIC_RC_PENDING | 시작751f299 Git/Vercel 일치·CI37902919878 성공. private 사진·classification·작품 sync·삭제 RPC 운영 반영. Public off/schema 미설치. 추가15 migration 로컬 보존13단언 PASS, 운영 적용 없음. Safari 제외. 이번 경보/지원 변경 배포는 최신 마감 기록 참조 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | KR_US_TH_SIGNUP_ACTIVE / POST_DEPLOY_READBACK_UI_PASS / PUBLIC_OFF | 10/10 source/master6a2beff·CI38048163986 전체 SUCCESS·Vercel D5uRPWy778J7MR2spEeLr8JDeeEH Ready/www SHA 대조 PASS. ACTIVATE_PROD_20261010_01 APPLY SUCCESS: signup/admission=true, KR14/TH13/US13. 독립 DB/가입·관리자 UI/기존회원 실제 Google 복귀 PASS. Public schema 설치/flags off이며 전체 공개 출시 미완료. 신규 운영 Google 가입 왕복 미실행. 기존751f299/미설치는 당시 이력 |
 
 ### 작업 수의 변화와 진행률
 
 기본 20개 완료 수와 추가 필수 작업 수를 별도로 표시한다. 보류된 개선은 출시 분모에 넣지 않는다. 추가 작업이 있다고 기존에 검증한 완료 결과를 지우지 않는다. 최종 기준은 task 숫자가 아니라 M완료 계약과 필수 QA다.
 
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
+
+```text
+ID / M: W06/W14/W20 · FIRST-SIGNUP-KR-US-TH-UI-20261010 운영 활성 확인
+이번 활성: KR14/US13/TH13 무료 비공개 기록. PH·EU/EEA·UK·CH는 후속에 남기며 Public은 off.
+완료: 날짜 직접 입력·단일 수락·기존회원 별도 로그인·관리자 UI 개선, unit571/build32·가입18/관리자17/callback4·신규SQL62·CI38048163986 전체 SUCCESS.
+배포: source/master6a2beff, Vercel Production D5uRPWy778J7MR2spEeLr8JDeeEH Ready, www commit/checkoutCommit/source/semanticMatch 일치.
+DB: MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01 APPLY SUCCESS at 2026-10-10T11:38:43.420647+00:00; enabled/admission=true, KR14 TH13 US13, Public off, 계정3/수락0·26개 테이블/동기화 보존.
+배포 후 확인: 독립 readback PASS(revision0deafba52be1503e54b29986b6d210f05e7ae48212d80a08e1d1b0a388ac30e8), 실제 KR/TH/US 입력 활성·PH 차단/10/10 운영 문서·관리자 가입가능 표시 PASS. DOB/동의 공란 기존회원 Google 복귀→계정 연결·두 동기화 성공·관리 링크/새 가입 기록 없음 PASS.
+현재 인계: 요청한3개국 가입/UI 기술 적용·독립 확인 완료. 문서는 codex/simple-signup-preview에 보관하며 검증 운영 source/master6a2beff를 유지한다. 신규 운영 계정 생성 미실행은 아래 검증 범위 한계로 남긴다.
+미검증: 이번 운영 신규 Google 가입 왕복. 사용자 약관 대리 수락/새 계정 생성은 하지 않았다. 이전 테스트 사진 저장·탈퇴·사진 정리 PASS와 혼합하지 않는다.
+별도 후속: EU/UK 무보수 실제 수임자 미확보와 PH 처리 경로·조건. 유료 대행/보호자 이메일/추가 체크/신분증은 신설하지 않는다.
+복귀: 신규 가입을 pause(enabled=false, admission=true)하고 Public off·기존 계정·문서·수락기록을 보존한다.
+Safari 추가 검사/Android/성인 인증은 이번 범위에서 제외한다. 전체 Public 출시 완료나 전 국가 법률 적합성 보증이 아니다.
+```
+
+<details>
+<summary>이전 작업 카드 — 2026-10-10 국가 조사·최소 가입 후보 당시 기록</summary>
 
 ```text
 ID / M: W06/W14·C02/D04 실제3사 사례 기반 최소 가입 후보 (W15/W17/W20 운영 잔여 보존)
@@ -704,6 +737,8 @@ ID / M: W06/W14·C02/D04 실제3사 사례 기반 최소 가입 후보 (W15/W17/
 Safari 추가 검사/Android/성인 인증은 제외. 미실행을 PASS로 표시하지 않음.
 제품 최소 KR14/PH13/TH13 승인(SIGNUP-KR-PH-TH-13-01). 국가별 조건/청소년 공개 보호는 유사 서비스 비교 후 연결. 약관 동의는 법정 책임의 전면 면제가 아님. Public 활성화/전체 출시 완료 아님.
 ```
+
+</details>
 
 이 카드는 적용 시 현재 코드·증거에 맞춰 갱신한다. 이미 W08이 해결돼 있다면 중복 수정하지 않고 관련 실제 검증으로 이동한다. 긴 출력은 기존 evidence를 참조하고 진행판을 또 만들지 않는다.
 
@@ -831,9 +866,9 @@ NA 이유:
 | D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_CANDIDATE_APPLIED_RESTORED | 기본 A/B·키·기존 공개 증거 보존/재요청 금지.10/7 새classification test HTTP12·test/prod 선택 적용만 추가; 기존 테스트 운영 설정 그대로 유지 | 사용자 승인 후 test-general-public-20260927-01의 SQL3개 적용/실제backend28+정리4 PASS. flags off·정책/기존home복원·운영자0·생성객체/예약0 확인. 제품UI/실폰은 별도 잔여 | general-public-hosted JSON / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
-| D04 | 운영주체/정책/권리·연령/지원 | KR14_PH13_TH13_CONFIRMED / US_EUROPE_SCOPE_ADDED / SIMPLE_SIGNUP_LOCAL_CANDIDATE | 10/9 사용자 PH/TH13 유지 및 미국·유럽 출시 범위 추가 확정. 개인 sinong / godburgundy@gmail.com / 하루2~3회. PASS/보호자 메일/KWS·성인 공개 제외. Pinterest/Instagram 공식 정책·TikTok 태국 공식 운영 비교 기록 | test 실제 신규 Google 가입/Hook·영수증 PASS(앞선 add55d3).10/10 보존 실측과 고지 검토본 갱신. 10/10 국가별 공식 근거36개 선택 국가 정리·유럽 동의 기준31개 반영(DK15/SI15). PH 나이정보 근거·TH 계약·CH/미국 주별/유럽 신설 소셜 범위, 수령 법인/국외 이전·지원/로그 기한은 미완료; 운영 가입 미적용. 이전 일괄 미성년자 차단 초안과 구분. 운영자 법정 의무와 이미지 권리 gate 유지 | SIGNUP-KR-PH-TH-13-01 / C02 |
+| D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / RESTORE_PARTIAL | 10/10 Drive 유래 ZIP 원본 SHA 일치, 새 quarantine4308파일/917,084,869bytes AES-GCM·SHA/크기 PASS. 복원 dump PG17 목차 읽기 PASS. 과거 로컬 사진12 decode와 구분 | 사용자: 키 별도 보관 안 함. 전체 DB import/최신 삭제 대조·회전/RPO/RTO·canonical 완전성 미완료. 로컬 pg_cron/supabase_vault 부재, Windows Node rename EPERM 미해결. 운영 변경0 | evidence/2026-10-10-external-backup-recovery.json |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | PRIVATE_WEB_UPDATED / PUBLIC_RC_PENDING | 사용자10/10 출시 지시. a2db3ca master/Vercel Git Production Ready/www SHA 일치. 기존 private 사진·계정 기능 유지 | 신규 간편가입 운영설정·최종고지 미연결, signup API off/Public off. 이번 DB변경0. 전체 공개 출시 완료 아님 | evidence/2026-10-10-production-web-rollout.json |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | KR_US_TH_SIGNUP_APPLIED / POST_DEPLOY_READBACK_UI_PASS / PUBLIC_OFF | 사용자10/10 첫3개국 지시. source/master6a2beff·CI38048163986 SUCCESS·Vercel Production D5uRPWy778J7MR2spEeLr8JDeeEH Ready/www SHA 대조 PASS | Production UI/server flag·Before User Created Hook 연결, ACTIVATE_PROD_20261010_01 APPLY SUCCESS, signup/admission=true. 독립 DB/가입·관리자 UI/기존회원 실제 Google 복귀 PASS. 기존 데이터·동기화·Public off 보존. 실제 신규 Google 왕복과 전체 공개 출시 완료는 아님 | 2026-10-10-first-signup-ui-release.md |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 
@@ -926,6 +961,8 @@ NA 이유:
 실제 종료한 작업부터 `[일시] Wxx / 사용자 결과 / commit / 자동·실환경 증거 / 남은 gate / 다음 W` 한 묶음으로 추가한다. 패키지 작성·문서 읽기를 앱 기능 완료로 계산하지 않는다.
 
 ## 최종 출시 체크
+
+**아래는 원래 전체 Public 출시 체크이며 이번 KR/US/TH 비공개 가입 배포의 상태표가 아니다.** 이번 Git·Vercel·DB 활성과 완료된 독립 확인 결과는 이 문서의 현재 위치/작업 카드에서 관리한다. Public 미완료를 이미 승인된3개국 가입의 재승인 요구로 바꾸지 않는다.
 
 | 조건 | 상태/증거 |
 |---|---|

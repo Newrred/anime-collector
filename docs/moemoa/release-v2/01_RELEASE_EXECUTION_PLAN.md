@@ -4,8 +4,8 @@
 
 ### 1–3. 목적·결정·현재 증거
 
-- 사용자 승인 `FIRST-SIGNUP-KR-US-TH-UI-20261010`: KR14/US13/TH13 새 가입을 먼저 운영하고 불편한 DOB 및 가입/관리자 화면을 개선한다. 현 source1e2b5eb/운영 관리자·receipt/삭제 기능 적용 완료, 새 signup DB enabled/admission=false와10/9 draft 조합이 남아 있다. 시작/결정/02·06·07·09/PLANS와 현재 signup handler/registry/admin SQL·UI·tests를 근거로 실행한다.
-- 현재 native date 입력은 먼 과거 연도 이동이 불편하다. 관리자에는 반복된 설명·문서 버전·내부 대기 지표/사용량 제한12종이 같은 위계로 노출돼 있다. 기존 제품의 선·핑크·산세리프/hero 없음은 보존한다.
+- 사용자 승인 `FIRST-SIGNUP-KR-US-TH-UI-20261010`: KR14/US13/TH13 새 가입을 먼저 운영하고 불편한 DOB 및 가입/관리자 화면을 개선한다. 작업 시작 시 source1e2b5eb/운영 관리자·receipt/삭제 기능은 적용됐고 새 signup DB enabled/admission=false와10/9 draft 조합이 남아 있었다. 시작/결정/02·06·07·09/PLANS와 현재 signup handler/registry/admin SQL·UI·tests를 근거로 실행한다.
+- 시작 당시 native date 입력은 먼 과거 연도 이동이 불편했고 관리자에는 반복된 설명·문서 버전·내부 대기 지표/사용량 제한12종이 같은 위계로 노출돼 있었다. 기존 제품의 선·핑크·산세리프/hero 없음은 보존한다.
 
 ### 4–6. 범위·흐름·파일 지도
 
@@ -31,8 +31,14 @@
 
 - 시작: 작업 전 clean1e2b5eb 확인. UI refinement는 impeccable/context의 기존 시스템 유지·최대2회 시각 확인, humanizer의 의미 유지/개발용 표현 제거, vibe-security/ops의 실제 서버 경계·Git 배포 검증을 적용한다. 완료 결과·파일·DB release/rollback·실제검사·남은 조건은 본 절에 누적한다.
 - 발견: 기존 국가 표에는 활성 열이 없어 행 보존과 비허용 국가 차단을 함께 하려면 additive `20261010190000_simple_signup_country_activation.sql`이 필요하다. `enabled`와 개인정보 없는 append-only release event를 추가하고, 정책 조회/선언/Hook/Auth INSERT/완료/admin bundle에서 같은 활성 조건을 적용한다. 기존 계정 로그인은 새 가입 선언 없이 기존 Supabase OAuth로 분리하되 신규 계정 우회는 서버 admission guard로 계속 차단한다.
-- 구현/로컬: unit570·build32 PASS. 가입18·관리자17·callback4 개별 PASS, 통합 관리자/callback21 PASS. 통합 가입/계정은24 PASS·초기 계정 화면 미표시1 실패 후 해당 검사 독립 재실행1 PASS(동시 개발 서버 초기 로딩, 코드 수정 없음); 최종 CI는 별도 확인한다. PC/320px 두 차례 시각 확인 완료. 새 PostgreSQL16 국가·활성·복구·경합·변조 검사 PASS, 독립 소스 검토에서 기존7함수는 국가 enabled 조건만 추가됨을 확인했다. [8항 보고](2026-10-10-first-signup-ui-release.md).
-- 설정 준비: Production의 가입 UI1/servertrue 저장, 기존 Google keys/callback 보존, Before User Created Hook `public.check_simple_signup_admission` Enabled 연결. 아직 새 Git 배포와 DB stage/activate 전이므로 운영 가입 완료로 기록하지 않는다. 테스트 문서/allowlist는 기존 Preview만 유지한다.
+- 구현/로컬: 최종 unit571·build32 PASS. 가입18·관리자17·callback4 개별 PASS, 통합 관리자/callback21 PASS. 통합 가입/계정은24 PASS·초기 계정 화면 미표시1 실패 후 해당 검사 독립 재실행1 PASS(동시 개발 서버 초기 로딩, 코드 수정 없음). 최종 동일 소스 CI `38048163986` 전체 SUCCESS로 별도 확인했다. PC/320px 두 차례 시각 확인 완료. 새 PostgreSQL16 국가·활성·복구·경합·변조62검사 PASS, 독립 소스 검토에서 기존7함수는 국가 enabled 조건만 추가됨을 확인했다. [8항 보고](2026-10-10-first-signup-ui-release.md).
+- 설정 준비 당시: Production의 가입 UI1/servertrue 저장, 기존 Google keys/callback 보존, Before User Created Hook `public.check_simple_signup_admission` Enabled 연결. 이 시점은 새 Git 배포/DB 활성 전이었다. 테스트 문서/allowlist는 기존 Preview만 유지한다.
+- Git·웹 완료: 검토 소스 `6a2beff04cdc408787dcf5ed9bf2660a95aa78ae`의 CI 전체 SUCCESS 후 master를 fast-forward push했다. Vercel Git Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready, 실제 www build-info의 commit/checkoutCommit 일치·source=vercel-git·semanticMatch=true를 확인했다. 로컬/CLI 빌드를 운영 승격하지 않았다.
+- DB 단계: test schema `MOEMOA_FIRST_SIGNUP_KR_US_TH_SCHEMA_TEST_20261010_01` 및 production stage `MOEMOA_FIRST_SIGNUP_KR_US_TH_STAGE_PROD_20261010_01`은 rollback/apply/독립 readback PASS. 190000 migration SHA256 `996e27fcef2696c9ebcc5912dd637069d49f8bd71986e633b4ea71c83ab0e7a2`를 소스에 결속했다. stage의 signup=false/admission=true는 당시 준비 상태로 보존한다.
+- 운영 활성 적용: `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01`, `2026-10-10T11:38:43.420647+00:00`, APPLY SUCCESS. enabled=true/admission=true·KR14/TH13/US13·10/10 운영 문서, Public off. 기존 계정3/수락0·26개 테이블/동기화 보존, 최초 activate rollback rehearsal PASS. 활성 후 **별도 연결 readback PASS**: revision `0deafba52be1503e54b29986b6d210f05e7ae48212d80a08e1d1b0a388ac30e8`, signup/admission=true·Public off·계정3/수락0 재확인. APPLY 결과와 별도 조회를 구분해 기록했다.
+- 실제 운영 화면/경계: www `/auth/start/`의10/10 운영 문서 링크와 KR/TH/US 입력 활성·PH 불가 안내/입력 비활성 PASS. `/admin/` 한국어 새 UI에서 가입가능 KR14/TH13/US13와 기존 운영자 세션 PASS. production API GET start=405/빈 POST=503 `SIGNUP_DETAILS_EXPIRED` 예상 거부를 확인했고 계정은 만들지 않았다.
+- 기존회원 실제 Google 왕복: DOB/동의 공란 → 로그인 → 기존 지정 Google 계정 선택 → `/data/` 계정 연결·기억/보드 및 작품/감상 동기화 두 상태 성공·서비스 관리 링크 표시 PASS. 새 가입 기록 생성 없음. 신규 가입 선언 경로와 기존회원 복귀를 별도로 확인했다.
+- 이번 완료/인계: 구현·자동검사·Git/Vercel 배포·DB 활성·독립 readback·운영 UI·기존회원 왕복 마감 완료. 완료 문서는 `codex/simple-signup-preview`에 인계하고 검증한 운영 master6a2beff는 유지한다. 다음 PC는 이 보고의 운영 SHA와 최신 작업 문서를 구분해 이어간다. 이번 운영 신규 Google 가입 왕복은 미실행이며 사용자 약관을 대신 수락하지 않았다. 이전 test 계정의 가입·사진 저장·탈퇴·사진 정리 PASS를 새 운영 가입 PASS로 합산하지 않는다. PH·EU/EEA·UK·CH, 무보수 대표자 실제 수임, Public/전체 공개 출시 잔여는 이3개국 활성과 별도다.
 
 ## 2026-10-10 — 국가별 운영 가입 조건과 관리자 화면
 

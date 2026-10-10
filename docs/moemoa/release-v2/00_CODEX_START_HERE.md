@@ -1,5 +1,9 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-10 현재 — KR14/US13/TH13 운영 가입 활성:** `FIRST-SIGNUP-KR-US-TH-UI-20261010` 승인 범위로 `6a2beff`를 master에 push했고 CI `38048163986` 전체 SUCCESS, Vercel Git Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready와 실제 www SHA/checkoutCommit/source·semanticMatch 일치를 확인했다. DB `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS(`2026-10-10T11:38:43.420647+00:00`): signup/admission=true, KR14·TH13·US13, Public off, 기존 계정3·수락0·26개 테이블/동기화 보존. **독립 readback·실제 가입/관리자 화면·기존회원 Google 로그인 복귀 PASS**. DOB/동의 공란에서 기존 계정 로그인→계정 연결·기억/보드와 작품/감상 동기화 성공·서비스 관리 링크를 확인했고 새 가입 기록은 생성되지 않았다. [이번 보고](2026-10-10-first-signup-ui-release.md)·[ExecPlan 최상단](01_RELEASE_EXECUTION_PLAN.md)·[현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)를 우선한다.
+>
+> 날짜 직접 입력·짧은 안내·기존회원 별도 로그인과 관리자 화면 개선은 배포됐다. 이번 운영 신규 Google 가입 왕복은 미실행이며 과거 test 사진 저장/탈퇴/정리 PASS와 구분한다. PH·EU/EEA·UK·CH와 Public은 이번에 활성화하지 않았다. 유료 대표자 대행 대신 [무보수 현지 위임](EU_UK_UNPAID_REPRESENTATIVE_PLAN.md)만 준비했고 실제 수임자는 미확보다. 아래12세·TH미확정·schema미설치·hosted미적용·후보테스트 대기 등은 **각 당시 이력**이며 현재 지시나 KR/US/TH 재승인 요구가 아니다.
+
 > **2026-10-10 C02/W14 국가 재조사·기존 계정 연결:** KR14/PH13/TH13/US13 기존 기준 유지. 공식 근거를36개 선택 국가별로 정리(유럽 동의 기준31개, CH 별도 미확정); DK15/SI15 및 법안·현행법 구분 반영. 개인정보 동의 연령을 가입 최소로 일괄 대입하지 않음. 기존 세션의 공개 작성이 가입 영수증을 확인하지 않던 연결을 기본off migration과 Board/Home/팔로우 복귀 안내로 보완. 이번 로컬 실제SQL15·gateway6·모의 API Chromium4+고지1 PASS, hosted/운영 PASS 아님. 새 migration hosted 미적용·국가 row/flags 변경0. PH 나이정보 근거·TH 계약 적용·CH/미국 주별/유럽 신설 소셜 범위는 잔여. 다음1개는 근거표에 맞춘 최종 가입 정책·고지 버전 후보 결정/테스트 적용. 상세는02 상단과 기존 ExecPlan, `evidence/2026-10-10-regional-public-signup-connection.json`.
 
 > **2026-10-10 C02 국가 조건 후속:** 처리 목적별 검토표와 KR/PH/TH/US/유럽 검토 부록·짧은 개인정보 요약을 준비했다. 유럽 동의 연령을 계정 가입 연령으로 일괄 대입하지 않는다. PH의 나이정보 동의 주체/근거와 TH의 미성년 계약 적용 판단은 여전히 미확정이며, 새 인증·checkbox·차단 정책으로 대체하지 않았다. 검토 화면1개/build27 PASS, 실제 가입/운영 정책 완료 아님. 다음 독립 작업은 W14 공개 보드·미니홈의 기존 계정 처리 연결 대조. 문의 미발송, DB/flags 변경0. 상세는 기존02 맨 위와 ExecPlan을 따른다.
@@ -68,6 +72,8 @@ W08 재시도와 W13 작성자 연결을 수정하고 hosted 공개 흐름을 �
 기본 테스트 환경·키·A/B 계정과 기초 검증은 확보됐다는 최신 인계 근거가 있다. 세션 재개의 접속 확인은 가능하지만, 새 실패나 변경 없이 기본 인프라를 다시 구축하지 않는다. Android는 **이번 실행 제외**이며 최종 배포 채널과 자동 N/A를 뜻하지 않는다. 최신 실행·원복 결과는 03과 2026-09-25-review-apply-public-flow.json을 따른다. 검토 문서 반영 자체와 이번 실제 PASS를 구분하며 배포 승인은 여전히 D06이다.
 
 ## 이번에 고정하는 목표
+
+**이 절은 전체 Public 출시의 원래 목표다.** 현재 승인·적용 범위는 위의 KR/US/TH 무료 비공개 가입이며, 그 운영 완료를 아래 전체 공개 출시 완료로 확대하거나 Public 잔여를 이번 가입 활성의 새 선행조건으로 삼지 않는다.
 
 **개인 기록 + 계정 기반 사용 + 공개 보드 + 공개 미니홈 + 팔로우 + 최소 운영·관리**를 첫 정식 출시의 한 묶음으로 완성한다.
 
