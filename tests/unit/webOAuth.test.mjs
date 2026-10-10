@@ -5,7 +5,25 @@ import {
   buildWebOAuthRedirect,
   parseWebOAuthCallback,
   resolveWebOAuthNext,
+  startWebGoogleOAuth,
 } from "../../src/features/auth/webOAuth.js";
+
+test("existing member OAuth needs no new signup declaration and preserves a safe return page", async () => {
+  const calls = [];
+  const client = { auth: { signInWithOAuth: async options => { calls.push(options); return { error: null }; } } };
+  await startWebGoogleOAuth(client, { rawNext: '/admin/', origin: 'https://www.moemoa.xyz', persistNext: next => calls.push(next) });
+  assert.deepEqual(calls, ['/admin/', { provider: 'google', options: {
+    redirectTo: 'https://www.moemoa.xyz/auth/callback/', queryParams: { prompt: 'select_account' },
+  } }]);
+});
+
+test("existing member OAuth rejects unsafe return destinations and propagates provider failure", async () => {
+  let next;
+  const failure = new Error('provider unavailable');
+  const client = { auth: { signInWithOAuth: async () => ({ error: failure }) } };
+  await assert.rejects(startWebGoogleOAuth(client, { rawNext: 'https://evil.test', origin: 'https://www.moemoa.xyz', persistNext: value => { next = value; } }), failure);
+  assert.equal(next, '/data/');
+});
 
 test("Web OAuth uses the exact allowlisted callback URL and keeps next navigation local", () => {
   assert.equal(buildWebOAuthRedirect({

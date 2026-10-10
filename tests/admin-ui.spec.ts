@@ -10,19 +10,26 @@ function token(id = owner) {
     .map(value => Buffer.from(typeof value === 'string' ? value : JSON.stringify(value)).toString('base64url')).join('.');
 }
 function session(id = owner) { return {access_token: token(id), refresh_token: 'synthetic-refresh', expires_at: Math.floor(Date.now() / 1000) + 3600, expires_in: 3600, token_type: 'bearer', user: user(id)}; }
-async function setup(page: any, {signedIn = true, denied = false, malformed = false, paused = false, ready = true, conflict = false, delayedRead = false, delayedWrite = false, storageMissing = false} = {}) {
+async function setup(page: any, {signedIn = true, denied = false, malformed = false, paused = false, ready = true, conflict = false, delayedRead = false, delayedWrite = false, storageMissing = false, connected = true, detailed = false, locale = 'ko'} = {}) {
   const calls: any[] = [];
   let snapshot: any = adminFixture(), currentUser = user(), accessDenied = denied, unavailable = false;
-  snapshot.signup = {...snapshot.signup, enabled: !paused, canPause: !paused, canResume: paused && ready, readyForResume: ready};
+  snapshot.signup = {...snapshot.signup, enabled: !paused, canPause: !paused, canResume: paused && ready, readyForResume: ready, admissionEnabled: connected,
+    countries: [{country: 'KR', minimumAge: 14}, {country: 'US', minimumAge: 13}, {country: 'TH', minimumAge: 13}]};
   if (storageMissing) snapshot.costs.publicStorageLimitBytes = null;
+  if (detailed) {
+    snapshot.costs.policies = ['SYNC_MEMORY_PRIVATE_TITLES', 'SYNC_MEMORY_CARDS', 'SYNC_MEMORY_VISUAL_ASSETS', 'SYNC_MEMORY_BOARDS',
+      'SYNC_MEMORY_BOARD_CARDS', 'SYNC_USER_DEVICES', 'PUBLIC_PREPARE', 'PUBLIC_PUBLISH', 'FOLLOW_WRITE', 'IMAGE_ATTEMPT', 'IMAGE_DELIVERY', 'IMAGE_DELIVERY_BYTES']
+      .map(scope => ({scope, enabled: true, paused: false, dailyLimit: scope === 'IMAGE_DELIVERY_BYTES' ? 104857600 : 1000, liveLimit: null}));
+    snapshot.costs.usage = [{scope: 'IMAGE_DELIVERY_BYTES', used: 2097152}];
+  }
   let releaseRead: any, releaseWrite: any;
   const readWait = new Promise<void>(resolve => { releaseRead = resolve; });
   const writeWait = new Promise<void>(resolve => { releaseWrite = resolve; });
-  await page.addInitScript(({authSession}: any) => {
+  await page.addInitScript(({authSession, locale}: any) => {
     if (authSession) localStorage.setItem('sb-127-auth-token', JSON.stringify(authSession));
-    localStorage.setItem('ui:locale:v1', JSON.stringify('ko'));
+    localStorage.setItem('ui:locale:v1', JSON.stringify(locale));
     localStorage.setItem('ui:theme:v1', JSON.stringify('light'));
-  }, {authSession: signedIn ? session() : null});
+  }, {authSession: signedIn ? session() : null, locale});
   await page.route('http://127.0.0.1:54399/**', async(route: any) => {
     const request = route.request(), path = new URL(request.url()).pathname;
     calls.push({path, body: request.postData()});
@@ -46,7 +53,7 @@ async function setup(page: any, {signedIn = true, denied = false, malformed = fa
     return route.fulfill({json: []});
   });
   await page.goto('/admin/');
-  await expect(page.getByRole('heading', {name: '서비스 관리', exact: true})).toBeVisible({timeout: 15000});
+  await expect(page.getByRole('heading', {name: locale === 'ko' ? '서비스 관리' : 'Service management', exact: true})).toBeVisible({timeout: 15000});
   return {calls, releaseRead, releaseWrite, deny: () => { accessDenied = true; }, fail: () => { unavailable = true; },
     switchAccount: async() => {
       currentUser = user(otherOwner);
@@ -84,21 +91,53 @@ test('malformed status is not exposed or interpreted as zero', async({page}) => 
 
 test('admin works with Public off, shows linked documents, and fits desktop and 320px', async({page}, info) => {
   await page.setViewportSize({width: 1440, height: 1000});
-  const backend = await setup(page);
+  const backend = await setup(page, {detailed: true});
   await expect(page.getByRole('heading', {name: '계정 현황'})).toBeVisible();
   // The shared navigation may check personal account status; its failed synthetic
   // response must not gate the independent operator dashboard.
   expect(backend.calls.some(call => call.path.endsWith('/get_moemoa_admin_status'))).toBe(true);
   await expect(page.getByRole('link', {name: '콘텐츠 검토로 이동'})).toHaveAttribute('href', '/moderation/');
-  await expect(page.getByRole('link', {name: 'terms-2026-10-10-test', exact: true})).toHaveAttribute('href', '/legal/terms-2026-10-10-test/');
-  await expect(page.locator('.admin-page')).toContainText('대기 0건만으로 자동 정리가 정상 실행됐다고 판단하지 않습니다.');
+  const documents = page.locator('.admin-documents');
+  await expect(documents.locator('summary')).toHaveText('가입 정책·약관 보기');
+  await expect(documents).not.toHaveAttribute('open', '');
+  await expect(page.locator('.admin-countries')).toContainText('미국');
+  await expect(page.locator('.admin-page')).toContainText('대기 0건이 정리 작업의 실행 성공을 뜻하지는 않습니다.');
+  await expect(page.locator('.admin-usage > details')).not.toHaveAttribute('open', '');
+  expect(await page.locator('#admin-images-heading').evaluate(el => el.getBoundingClientRect().top)).toBeLessThan(760);
   await page.screenshot({path: info.outputPath('admin-desktop.png'), fullPage: true});
   await page.setViewportSize({width: 320, height: 780});
-  await page.locator('.admin-page summary').click();
   await expect(page.locator('.admin-countries')).toContainText('만 14세');
-  await expect(page.locator('.admin-countries')).toContainText('필리핀');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({path: info.outputPath('admin-mobile.png'), fullPage: true});
+  await documents.locator('summary').focus(); await page.keyboard.press('Enter');
+  await expect(page.getByRole('link', {name: 'terms-2026-10-10-test', exact: true})).toHaveAttribute('href', '/legal/terms-2026-10-10-test/');
+  await page.locator('.admin-usage summary').focus(); await page.keyboard.press('Enter');
+  await expect(page.locator('.admin-limits tbody tr')).toHaveCount(12);
+  await expect(page.getByRole('row', {name: /사진 전송량/})).toContainText('2 MiB');
+  await expect(page.getByRole('row', {name: /사진 전송량/})).toContainText('100 MiB');
+  await page.locator('.admin-table-scroll').focus(); await expect(page.locator('.admin-table-scroll')).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-mobile.png')});
+  await page.setViewportSize({width: 1440, height: 1000});
+  await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-desktop.png')});
+});
+
+test('English labels keep detailed usage out of the overview and accessible on mobile', async({page}) => {
+  await page.setViewportSize({width: 320, height: 780});
+  await setup(page, {locale: 'en', detailed: true});
+  await expect(page.getByRole('heading', {name: 'Accounts', exact: true})).toBeVisible();
+  await expect(page.locator('.admin-countries')).toContainText('United States');
+  await page.locator('.admin-usage summary').click();
+  await expect(page.getByRole('columnheader', {name: 'Daily limit per account', exact: true})).toBeVisible();
+  await expect(page.getByRole('row', {name: /Image delivery bytes/})).toContainText('2 MiB');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('initial setup is not described as a paused release', async({page}) => {
+  const backend = await setup(page, {paused: true, ready: false, connected: false});
+  await expect(page.locator('.admin-state')).toHaveText('운영 연결 전');
+  await expect(page.getByRole('button', {name: '새 가입 재개', exact: true})).toBeDisabled();
+  expect(backend.calls.filter(call => call.path.endsWith('/set_moemoa_signup_paused'))).toHaveLength(0);
 });
 
 test('pause requires explicit keyboard confirmation and sends the exact revision once', async({page}) => {
@@ -134,6 +173,7 @@ test('unready rollout cannot resume', async({page}) => {
 test('a missing public storage policy is shown as unconfigured without hiding other status', async({page}) => {
   await setup(page, {storageMissing: true});
   await expect(page.getByRole('heading', {name: '계정 현황'})).toBeVisible();
+  await page.getByText('사진·전송 상세', {exact: true}).click();
   await expect(page.locator('.admin-page')).toContainText('한도 미설정');
 });
 

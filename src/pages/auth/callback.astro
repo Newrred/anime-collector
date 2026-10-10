@@ -1,23 +1,18 @@
 ---
-import "../../styles/global.css";
+import "../../styles/simple-signup.css";
 import AuthCallbackClient from "../../components/auth/AuthCallbackClient.jsx";
 const rawBase = String(import.meta.env.BASE_URL || "/");
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 ---
-<html lang="ko" data-theme="dark">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Auth Callback</title>
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>MOEMOA · Google 로그인</title>
   </head>
-  <body>
-    <main class="container page-wrap">
-      <section class="surface-card sync-callback-card">
-        <div class="pageHeader">
-          <h1 class="pageTitle">Google Sign-In</h1>
-          <AuthCallbackClient client:load base={base} />
-        </div>
-      </section>
-    </main>
+  <body class="signup-page">
+    <main><AuthCallbackClient client:load base={base} /></main>
   </body>
 </html>

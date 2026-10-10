@@ -30,6 +30,9 @@
 ### 15–17. 실행·발견·완료 기록
 
 - 시작: 작업 전 clean1e2b5eb 확인. UI refinement는 impeccable/context의 기존 시스템 유지·최대2회 시각 확인, humanizer의 의미 유지/개발용 표현 제거, vibe-security/ops의 실제 서버 경계·Git 배포 검증을 적용한다. 완료 결과·파일·DB release/rollback·실제검사·남은 조건은 본 절에 누적한다.
+- 발견: 기존 국가 표에는 활성 열이 없어 행 보존과 비허용 국가 차단을 함께 하려면 additive `20261010190000_simple_signup_country_activation.sql`이 필요하다. `enabled`와 개인정보 없는 append-only release event를 추가하고, 정책 조회/선언/Hook/Auth INSERT/완료/admin bundle에서 같은 활성 조건을 적용한다. 기존 계정 로그인은 새 가입 선언 없이 기존 Supabase OAuth로 분리하되 신규 계정 우회는 서버 admission guard로 계속 차단한다.
+- 구현/로컬: unit570·build32 PASS. 가입18·관리자17·callback4 개별 PASS, 통합 관리자/callback21 PASS. 통합 가입/계정은24 PASS·초기 계정 화면 미표시1 실패 후 해당 검사 독립 재실행1 PASS(동시 개발 서버 초기 로딩, 코드 수정 없음); 최종 CI는 별도 확인한다. PC/320px 두 차례 시각 확인 완료. 새 PostgreSQL16 국가·활성·복구·경합·변조 검사 PASS, 독립 소스 검토에서 기존7함수는 국가 enabled 조건만 추가됨을 확인했다. [8항 보고](2026-10-10-first-signup-ui-release.md).
+- 설정 준비: Production의 가입 UI1/servertrue 저장, 기존 Google keys/callback 보존, Before User Created Hook `public.check_simple_signup_admission` Enabled 연결. 아직 새 Git 배포와 DB stage/activate 전이므로 운영 가입 완료로 기록하지 않는다. 테스트 문서/allowlist는 기존 Preview만 유지한다.
 
 ## 2026-10-10 — 국가별 운영 가입 조건과 관리자 화면
 

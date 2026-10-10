@@ -1,1 +1,50 @@
  .signup-page{margin:0;background:#fafafa;color:#292929;font-family:Arial,"Noto Sans KR",sans-serif;line-height:1.6}.signup-panel{box-sizing:border-box;width:min(100% - 40px,480px);margin:64px auto;padding:0 0 40px}.signup-heading{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding-bottom:20px;font-weight:700}.signup-heading button{background:none;border:0;color:inherit;text-decoration:underline;min-height:44px;cursor:pointer}.signup-panel h1{font-size:26px;letter-spacing:-.5px;line-height:1.35;margin:32px 0 12px}.signup-panel p{color:#555}.signup-panel form>label:not(.signup-consent){display:block;margin:22px 0 6px;font-weight:600}.signup-panel select,.signup-panel input[type=date]{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:48px;border:1px solid #bbb;border-radius:3px;padding:10px 12px;background:#fff;color:#292929;font:inherit}.signup-hint{font-size:13px}.signup-consent{display:flex;gap:10px;align-items:center;margin-top:26px;min-height:44px}.signup-consent input{width:20px;height:20px;accent-color:#e90073;flex-shrink:0}.signup-panel a{color:inherit;text-underline-offset:3px}.signup-primary{width:100%;min-height:48px;padding:12px;margin-top:18px;background:#e90073;color:white;border:0;border-radius:3px;font:inherit;font-weight:700;cursor:pointer}.signup-primary:disabled{opacity:.55;cursor:wait}.signup-back{display:inline-block;margin-top:24px;min-height:44px}.signup-panel :focus-visible{outline:2px solid #e90073;outline-offset:3px}.signup-panel [role=alert]{color:#a32626}.signup-legal{width:min(100% - 40px,760px)}.signup-legal h2{font-size:18px;margin-top:30px}.signup-legal section{border-bottom:1px solid #ddd;padding-bottom:22px}@media(max-width:480px){.signup-panel{margin-top:28px}.signup-panel h1{font-size:24px}}@media(prefers-color-scheme:dark){.signup-page{background:#191919;color:#eee}.signup-panel p{color:#bbb}.signup-panel input[type=date],.signup-panel select{background:#222;color:#eee;border-color:#666;color-scheme:dark}.signup-heading,.signup-legal section{border-color:#444}.signup-panel [role=alert]{color:#ffa0a0}}
+/* Signup controls stay separate from document and completion layouts. */
+.signup-page.signup-start-page {background:#fff;color:#262326;font-family:"Noto Sans KR","Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light}
+.signup-entry.signup-panel {width:min(100% - 40px,440px);margin:44px auto 0;padding-bottom:28px}
+.signup-entry .signup-heading {padding-bottom:16px;border-color:#e7e3e5;font-size:15px;letter-spacing:.02em}
+.signup-entry .signup-heading button {padding:0 0 0 16px;font:inherit;font-size:13px;font-weight:500;letter-spacing:0;text-underline-offset:4px}
+.signup-entry.signup-panel h1 {margin:28px 0 8px;font-size:25px;font-weight:650;letter-spacing:-.025em;line-height:1.3}
+.signup-entry.signup-panel p {color:#625c60}
+.signup-entry .signup-intro {margin:0 0 28px;font-size:14px;line-height:1.65;text-wrap:pretty}
+.signup-entry.signup-panel form>label:not(.signup-consent) {margin:0 0 8px;font-size:14px;font-weight:600}
+.signup-entry.signup-panel select,.signup-entry .signup-date-fields input {
+ box-sizing:border-box;display:block;width:100%;min-width:0;height:48px;padding:10px 12px;
+ border:1px solid #948a91;border-radius:2px;background:#fff;color:#262326;font:inherit;font-size:16px;line-height:1.4;color-scheme:light;
+ caret-color:#bf005e;transition:border-color 140ms ease,background-color 140ms ease;
+}
+.signup-entry .signup-date-fields input {font-variant-numeric:tabular-nums}
+.signup-entry .signup-date-fields input::placeholder {color:#746c72;opacity:1}
+.signup-entry.signup-panel select:disabled,.signup-entry .signup-date-fields input:disabled {background:#f6f4f5;color:#777078;border-color:#d8d2d6;cursor:not-allowed;opacity:1}
+.signup-entry.signup-panel [aria-invalid=true] {border-color:#a3203e}
+.signup-entry .signup-birthday {min-width:0;padding:0;margin:24px 0 0;border:0}
+.signup-entry .signup-birthday legend {padding:0;margin-bottom:10px;font-size:14px;font-weight:600}
+.signup-entry .signup-date-fields {display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:10px}
+.signup-entry .signup-date-fields>div {min-width:0}
+.signup-entry .signup-date-fields label {display:block;margin-bottom:5px;font-size:12px;line-height:1.5;color:#625c60}
+.signup-entry .signup-hint {margin:10px 0 0;font-size:12px;line-height:1.65;text-wrap:pretty}
+.signup-entry #signup-availability:empty {display:none}
+.signup-entry .signup-agreement {margin-top:24px;padding-top:16px;border-top:1px solid #e7e3e5}
+.signup-entry .signup-consent {margin:0;align-items:center;gap:10px;min-height:44px;font-size:14px;line-height:1.65}
+.signup-entry .signup-consent input {width:18px;height:18px;margin:0;accent-color:#d90067}
+.signup-entry .signup-privacy {margin-top:5px}
+.signup-entry .signup-primary {margin-top:24px;min-height:48px;border-radius:2px;background:#d90067;font-size:14px;font-weight:650;transition:background-color 140ms ease}
+.signup-entry .signup-primary:disabled {background:#f2e8ed;color:#76626c;opacity:1;cursor:not-allowed}
+.signup-entry .signup-primary:not(:disabled):hover {background:#bc0059}
+.signup-entry.signup-panel .signup-error {margin:8px 0 0;color:#a3203e;font-size:13px;line-height:1.6}
+.signup-entry .signup-existing {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;column-gap:6px;margin:14px 0 0;font-size:13px}
+.signup-entry .signup-existing button,.signup-entry .signup-retry {min-height:44px;padding:0 3px;border:0;background:none;color:#262326;font:inherit;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.signup-entry .signup-existing button:disabled {color:#81777d;cursor:wait}
+.signup-entry .signup-back {display:flex;width:fit-content;align-items:center;min-height:44px;margin-top:12px;font-size:13px;color:#625c60}
+.signup-entry.signup-panel :focus-visible {outline:2px solid #bf005e;outline-offset:3px}
+.signup-entry ::selection {background:#f8d5e5;color:#491c31}
+@media (max-width:480px) {
+ .signup-entry.signup-panel {margin-top:20px}
+ .signup-entry.signup-panel h1 {font-size:23px;margin-top:24px}
+ .signup-entry .signup-intro {margin-bottom:24px}
+ .signup-entry .signup-date-fields {gap:8px}
+ .signup-entry .signup-date-fields input {padding:10px}
+}
+@media (prefers-reduced-motion:reduce) {
+ .signup-entry.signup-panel select,.signup-entry .signup-date-fields input,.signup-entry .signup-primary {transition:none}
+}

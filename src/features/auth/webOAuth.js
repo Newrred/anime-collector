@@ -23,6 +23,19 @@ export function buildWebOAuthRedirect({ origin, base = "/" }) {
   return new URL(`${normalizeBase(base)}auth/callback/`, safeOrigin).toString();
 }
 
+export async function startWebGoogleOAuth(client, { rawNext, origin, base = "/", persistNext }) {
+  const next = resolveWebOAuthNext({ rawNext, origin, base });
+  persistNext(next);
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: buildWebOAuthRedirect({ origin, base }),
+      queryParams: { prompt: "select_account" },
+    },
+  });
+  if (error) throw error;
+}
+
 export function resolveWebOAuthNext({ rawNext = "", pendingNext = "", origin, base = "/" }) {
   const safeOrigin = new URL(String(origin || ""));
   const appBase = normalizeBase(base);

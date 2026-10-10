@@ -24,12 +24,85 @@ async function mockBackend(page:any,{failSession=false,signupPolicy=policy}={}) 
  });
  return calls;
 }
+async function fillBirthday(page:any,dob:string) {
+ const [year,month,day]=dob.split('-');
+ for(const [part,value] of Object.entries({year,month,day})) await page.fill(`#signup-birth-${part}`,value);
+}
 async function fill(page:any,country='KR',dob='2000-10-09') {
  await expect(page.locator('#signup-country')).toBeEnabled();
  await page.selectOption('#signup-country',country);
- await page.fill('#signup-birthday',dob);
+ await fillBirthday(page,dob);
  await page.getByRole('checkbox').check();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeEnabled();
+}
+
+test('split birth fields start empty, retain labels and fit 320px without a calendar picker',async({page})=>{
+ await mockBackend(page);await page.setViewportSize({width:320,height:800});await page.goto('/auth/start/');
+ await expect(page.locator('#signup-country')).toBeEnabled();
+ for(const [field,label,length] of [['year','연도',4],['month','월',2],['day','일',2]] as const) {
+  const input=page.getByLabel(label,{exact:true});
+  await expect(input).toHaveValue('');await expect(input).toBeDisabled();
+  await expect(input).toHaveAttribute('type','text');await expect(input).toHaveAttribute('inputmode','numeric');
+  await expect(input).toHaveAttribute('autocomplete',`bday-${field}`);await expect(input).toHaveAttribute('maxlength',String(length));
+ }
+ await page.selectOption('#signup-country','KR');
+ for(const field of ['year','month','day']) await expect(page.locator(`#signup-birth-${field}`)).toBeEnabled();
+ await expect(page.locator('input[type=date]')).toHaveCount(0);
+ await expect(page.getByRole('checkbox')).toHaveCount(1);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('Enter focuses invalid birth parts and agreement, with localized inline errors and no rollover',async({page})=>{
+ const calls=await mockBackend(page);await page.clock.setFixedTime(new Date('2026-10-10T12:00:00Z'));
+ await page.goto('/auth/start/');await expect(page.locator('#signup-country')).toBeEnabled();await page.selectOption('#signup-country','KR');
+ await page.locator('#signup-birth-day').press('Enter');
+ await expect(page.locator('#signup-birth-year')).toBeFocused();
+ await expect(page.locator('#signup-birthday-error')).toContainText('네 자리');
+ await page.fill('#signup-birth-year','2000');await page.locator('#signup-birth-year').press('Enter');
+ await expect(page.locator('#signup-birth-month')).toBeFocused();
+ await fillBirthday(page,'2000-04-31');await page.locator('#signup-birth-day').press('Enter');
+ await expect(page.locator('#signup-birth-day')).toBeFocused();
+ await expect(page.locator('#signup-birth-day')).toHaveValue('31');
+ await expect(page.locator('#signup-birth-day')).toHaveAttribute('aria-invalid','true');
+ await expect(page.locator('#signup-birthday-error')).toContainText('해당 월에 없는 날짜');
+ await page.getByRole('button',{name:'English',exact:true}).click();
+ await expect(page.locator('#signup-birthday-error')).toContainText('That day does not exist');
+ await fillBirthday(page,'2000-02-29');await page.locator('#signup-birth-day').press('Enter');
+ await expect(page.getByRole('checkbox')).toBeFocused();
+ await expect(page.locator('#signup-terms-error')).toContainText('agree to the terms');
+ await expect(page.locator('#signup-birthday-error')).toHaveCount(0);
+ expect(calls.some(c=>c.path==='start')).toBe(false);
+});
+
+test('each birth part and country change clears acceptance; future dates cannot start Google',async({page})=>{
+ const calls=await mockBackend(page);await page.clock.setFixedTime(new Date('2026-10-10T12:00:00Z'));
+ await page.goto('/auth/start/');await fill(page);
+ for(const [field,value] of [['year','2001'],['month','11'],['day','10']]) {
+  await page.fill(`#signup-birth-${field}`,value);await expect(page.getByRole('checkbox')).not.toBeChecked();
+  await page.getByRole('checkbox').check();
+ }
+ await fillBirthday(page,'2027-01-01');await page.locator('#signup-birth-day').press('Enter');
+ await expect(page.locator('#signup-birthday-error')).toContainText('오늘 이후');
+ await expect(page.locator('#signup-birth-year')).toBeFocused();
+ await page.selectOption('#signup-country','US');
+ for(const field of ['year','month','day']) await expect(page.locator(`#signup-birth-${field}`)).toHaveValue('');
+ await expect(page.getByRole('checkbox')).not.toBeChecked();
+ expect(calls.some(c=>c.path==='start')).toBe(false);
+});
+
+for(const existingScenario of ['unavailable-country','paused-policy','failed-policy','blocked-session-storage']) {
+ test(`existing member login bypasses new signup details during ${existingScenario}`,async({page})=>{
+  const calls=await mockBackend(page,{signupPolicy:existingScenario==='paused-policy'?{...policy,enabled:false}:policy});
+  if(existingScenario==='failed-policy')await page.route('**/rest/v1/rpc/get_simple_signup_policy',route=>route.fulfill({status:503,json:{message:'unavailable'}}));
+  if(existingScenario==='blocked-session-storage')await page.addInitScript(()=>Object.defineProperty(window,'sessionStorage',{get(){throw new DOMException('Blocked','SecurityError');}}));
+  await page.goto('/auth/start/?next=/archive/');await expect(page.locator('#signup-country')).toBeEnabled();
+  if(existingScenario==='unavailable-country')await page.selectOption('#signup-country','CH');
+  await expect(page.getByRole('checkbox')).not.toBeChecked();
+  await page.getByRole('button',{name:'로그인',exact:true}).click();await expect(page).toHaveURL(/\/auth\/v1\/authorize\?/);
+  expect(calls.some(c=>c.path==='start')).toBe(false);
+  expect(calls.filter(c=>c.path==='/auth/v1/authorize')).toHaveLength(1);
+  expect(page.url()).not.toMatch(/2000|declaration|birth/i);
+ });
 }
 
 test('production PH teen guidance uses the same one agreement and resets after birthday change',async({page})=>{
@@ -40,11 +113,11 @@ test('production PH teen guidance uses the same one agreement and resets after b
  await page.goto('/auth/start/');await fill(page,'PH','2011-06-01');
  await expect(page.locator('#signup-guardian-notice')).toContainText('보호자와 함께');
  await expect(page.getByRole('checkbox')).toHaveCount(1);
- await expect(page.locator('form input,form select,form textarea')).toHaveCount(3);
- await page.fill('#signup-birthday','2000-06-01');
+ await expect(page.locator('form input,form select,form textarea')).toHaveCount(5);
+ await fillBirthday(page,'2000-06-01');
  await expect(page.getByRole('checkbox')).not.toBeChecked();
  await expect(page.locator('#signup-guardian-notice')).toHaveCount(0);
- await page.fill('#signup-birthday','2011-06-01');await page.getByRole('checkbox').check();
+ await fillBirthday(page,'2011-06-01');await page.getByRole('checkbox').check();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page).toHaveURL(/accounts.google.com/);
  const declaration=JSON.parse(calls.find(c=>c.path==='start').body).declaration;
@@ -58,7 +131,7 @@ test('new PH test documents keep one explicit checkbox, correct versions and mob
  const calls=await mockBackend(page,{signupPolicy});await page.setViewportSize({width:320,height:780});
  await page.goto('/auth/start/');await fill(page,'PH');
  const form=page.locator('.signup-panel form');
- await expect(form.getByRole('checkbox')).toHaveCount(1);await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await expect(form.getByRole('checkbox')).toHaveCount(1);await expect(form.locator('input,select,textarea')).toHaveCount(5);
  await expect(form.locator('.signup-consent')).toContainText('가입 연령 정보 처리');
  await expect(form.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/legal/terms-2026-10-10-test/');
  await expect(form.getByRole('link',{name:'가입 연령 정보 처리',exact:true})).toHaveAttribute('href','/legal/privacy-2026-10-10-test/#age-processing');
@@ -83,7 +156,7 @@ test('below-age and missing terms stay before Google; Korean and English layouts
  await page.goto('/auth/start/');
  // Wait for the mocked policy and initial client hydration, not the loading button label.
  await expect(page.locator('#signup-country')).toBeEnabled({timeout:15000});
- await expect(page.locator('#signup-birthday')).toHaveValue('');
+ await expect(page.locator('#signup-birth-year')).toHaveValue('');
  await expect(page.getByRole('checkbox')).not.toBeChecked();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeDisabled();
  for(const country of ['KR','PH','TH','US','GB']) {
@@ -94,9 +167,9 @@ test('below-age and missing terms stay before Google; Korean and English layouts
  await page.getByRole('button',{name:'Google로 계속'}).click();
  await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
  expect(calls.some(c=>c.path==='start')).toBe(false);
- await page.fill('#signup-birthday','2000-10-09');await page.getByRole('checkbox').uncheck();
+ await fillBirthday(page,'2000-10-09');await page.getByRole('checkbox').uncheck();
  await page.getByRole('button',{name:'Google로 계속'}).click();await expect(page.getByRole('alert')).toContainText('동의');
- await page.getByRole('button',{name:'English',exact:true}).click();await expect(page.getByRole('heading',{level:1})).toContainText('Keep your memories');
+ await page.getByRole('button',{name:'English',exact:true}).click();await expect(page.getByRole('heading',{level:1})).toContainText('Create your account');
  await expect(page.locator('#signup-birthday-help')).toContainText('without sending your full birth date');
  await expect(page.locator('#signup-birthday-help')).not.toContainText(/age\s*\d+/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -112,19 +185,20 @@ test('synthetic FR13 policy keeps one terms checkbox and starts Google without D
  const form=page.locator('.signup-panel form');
  await expect(form.getByRole('checkbox')).toHaveCount(1);
  // Exact field inventory also rejects new minor/guardian/verification inputs of any type.
- await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await expect(form.locator('input,select,textarea')).toHaveCount(5);
  await expect(form.locator('select')).toHaveCount(1);
- await expect(form.locator('input[type="date"]')).toHaveCount(1);
+ await expect(form.locator('input[type="date"]')).toHaveCount(0);
+ await expect(form.locator('input[type="text"]')).toHaveCount(3);
  await expect(form.locator('input[type="email"],input[type="file"],input[type="tel"],input[type="password"]')).toHaveCount(0);
  await fill(page,'FR','2014-10-01');
  await page.getByRole('button',{name:'Google로 계속'}).click();
  await expect(page.getByRole('alert')).toContainText('최소 가입 연령');
  expect(calls.filter(c=>c.path==='start')).toHaveLength(0);
- await page.fill('#signup-birthday','2013-10-01');
+ await fillBirthday(page,'2013-10-01');
  await expect(page.getByRole('checkbox')).not.toBeChecked();
  await page.getByRole('checkbox').check();
  await expect(form.getByRole('checkbox')).toHaveCount(1);
- await expect(form.locator('input,select,textarea')).toHaveCount(3);
+ await expect(form.locator('input,select,textarea')).toHaveCount(5);
  await page.getByRole('button',{name:'Google로 계속'}).click();
  await expect(page).toHaveURL(/accounts.google.com/);
  const starts=calls.filter(c=>c.path==='start');expect(starts).toHaveLength(1);
@@ -139,21 +213,21 @@ test('synthetic FR13 policy keeps one terms checkbox and starts Google without D
 test('country availability is shown before DOB; changing country clears details and consent',async({page})=>{
  const calls=await mockBackend(page);await page.goto('/auth/start/');
  await expect(page.locator('#signup-country')).toBeEnabled();
- await expect(page.locator('#signup-birthday')).toBeDisabled();
+ await expect(page.locator('#signup-birth-year')).toBeDisabled();
  await page.selectOption('#signup-country','CH');
- await expect(page.getByRole('status')).toContainText('이 국가의 가입 기준을 확인 중');
- await expect(page.locator('#signup-birthday')).toBeDisabled();
+ await expect(page.getByRole('status')).toContainText('이 국가에서는 아직 새로 가입할 수 없습니다.');
+ await expect(page.locator('#signup-birth-year')).toBeDisabled();
  await expect(page.getByRole('checkbox')).toBeDisabled();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeDisabled();
  await page.getByRole('button',{name:'English',exact:true}).click();
- await expect(page.getByRole('status')).toContainText('Signup requirements for this country are being reviewed.');
+ await expect(page.getByRole('status')).toContainText('New signup is not available in this country yet.');
  await page.getByRole('button',{name:'한국어',exact:true}).click();
  await fill(page,'KR');
  await page.selectOption('#signup-country','PH');
- await expect(page.locator('#signup-birthday')).toHaveValue('');
+ await expect(page.locator('#signup-birth-year')).toHaveValue('');
  await expect(page.getByRole('checkbox')).not.toBeChecked();
- await expect(page.locator('#signup-birthday')).toBeEnabled();
- await expect(page.getByRole('status')).toBeEmpty();
+ await expect(page.locator('#signup-birth-year')).toBeEnabled();
+ await expect(page.locator('#signup-availability')).toBeEmpty();
  expect(calls.some(c=>c.path==='start')).toBe(false);
  await fill(page,'PH');await page.getByRole('button',{name:'Google로 계속'}).click();
  await expect(page).toHaveURL(/accounts.google.com/);
@@ -161,13 +235,13 @@ test('country availability is shown before DOB; changing country clears details 
 });
 
 for(const scenario of [
- {name:'disabled policy',signupPolicy:{...policy,enabled:false},message:'지금은 새 가입을 준비 중'},
+ {name:'disabled policy',signupPolicy:{...policy,enabled:false},message:'새 가입이 잠시 중단'},
  {name:'changed documents',signupPolicy:{...policy,privacyVersion:'privacy-future'},message:'가입 기준이 변경'},
 ]) test(`${scenario.name} prevents personal input and Google requests`,async({page})=>{
  const calls=await mockBackend(page,{signupPolicy:scenario.signupPolicy});await page.goto('/auth/start/');
  await expect(page.getByRole('status')).toContainText(scenario.message);
  await page.selectOption('#signup-country','KR');
- await expect(page.locator('#signup-birthday')).toBeDisabled();
+ await expect(page.locator('#signup-birth-year')).toBeDisabled();
  await expect(page.getByRole('checkbox')).toBeDisabled();
  await expect(page.getByRole('button',{name:'Google로 계속'})).toBeDisabled();
  expect(calls.some(c=>c.path==='start')).toBe(false);

@@ -6,7 +6,7 @@ import {
   readMockAuthSession,
 } from "./mockAuthStorage.js";
 import {
-  buildWebOAuthRedirect,
+  startWebGoogleOAuth,
   resolveWebOAuthNext,
 } from "../features/auth/webOAuth.js";
 import { Capacitor } from "@capacitor/core";
@@ -83,17 +83,24 @@ export async function startGoogleOAuth(next = "/data/", declaration) {
     if(target.origin!=='https://accounts.google.com'||target.pathname!=='/o/oauth2/v2/auth')throw new Error('Invalid sign-in destination');
     window.location.assign(target.toString());return;
   }
-  persistPendingAuthNext(safeNext);
-  const redirectTo = buildWebOAuthRedirect({
-    origin: window.location.origin,
-    base: basePath(),
-  });
+  return startExistingGoogleOAuth(safeNext);
+}
 
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo, queryParams: { prompt: "select_account" } },
+// New accounts on this OAuth route are rejected by the server admission guard.
+// Existing members must not be sent through a new signup declaration.
+export async function startExistingGoogleOAuth(next = "/data/") {
+  if (!supabase) throw new Error("Supabase env missing");
+  if (typeof window === "undefined") throw new Error("Window unavailable");
+  if (Capacitor.isNativePlatform()) {
+    return startNativeGoogleOAuth({
+      supabase, browser: Browser, persistNext: persistPendingAuthNext,
+      rawNext: next, origin: window.location.origin, base: basePath(),
+    });
+  }
+  return startWebGoogleOAuth(supabase, {
+    rawNext: next, origin: window.location.origin, base: basePath(),
+    persistNext: persistPendingAuthNext,
   });
-  if (error) throw error;
 }
 
 export async function signOutFromCloud() {

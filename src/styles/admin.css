@@ -1,17 +1,21 @@
 .admin-page { max-width: 1120px; padding-bottom: 64px; }
 .admin-page h1 { font-size: 1.75rem; font-weight: 650; margin: 0; letter-spacing: -.025em; }
-.admin-page h2 { font-size: 1.1rem; font-weight: 650; margin: 0 0 16px; }
-.admin-page h3 { font-size: .9375rem; font-weight: 600; margin: 24px 0 12px; }
+.admin-page h2 { font-size: 1.0625rem; font-weight: 650; margin: 0 0 16px; }
+.admin-page h3 { font-size: .875rem; font-weight: 600; margin: 24px 0 12px; }
 .admin-page p { max-width: 72ch; margin: 12px 0; }
-.admin-heading, .admin-toolbar, .admin-section-heading, .admin-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.admin-heading { margin-bottom: 24px; }
-.admin-toolbar { padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
+.admin-heading, .admin-toolbar, .admin-section-heading, .admin-signup-top, .admin-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.admin-heading { margin-bottom: 16px; }
+.admin-toolbar { padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); }
 .admin-toolbar p, .admin-muted { color: var(--text-secondary); font-size: .8125rem; }
 .admin-sections { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; align-items: start; }
-.admin-sections > section { min-width: 0; padding: 28px 0; border-bottom: 1px solid var(--border-subtle); }
+.admin-sections > section { min-width: 0; padding: 24px 0; border-bottom: 1px solid var(--border-subtle); }
+.admin-signup, .admin-usage { grid-column: 1 / -1; }
+.admin-signup .admin-section-heading { justify-content: flex-start; }
+.admin-state { padding: 4px 8px; background: var(--bg-surface-2); }
+.admin-documents { max-width: 640px; }
 .admin-section-heading h2 { margin-bottom: 0; }
 .admin-section-heading strong { font-size: .8125rem; }
-.admin-facts { margin: 16px 0; font-size: .875rem; }
+.admin-facts { margin: 12px 0; font-size: .875rem; }
 .admin-facts > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 8px 0; }
 .admin-facts dt { color: var(--text-secondary); }
 .admin-facts dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -27,11 +31,21 @@
 .admin-confirm p, .admin-message { font-size: .875rem; }
 .admin-message { padding-block: 12px; }
 .admin-page details summary { cursor: pointer; padding: 12px 0; min-height: 44px; font-size: .875rem; }
-.admin-countries, .admin-limits, .admin-audit { list-style: none; margin: 0; padding: 0; }
-.admin-countries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
-.admin-countries li { display: flex; justify-content: space-between; gap: 8px; font-size: .8125rem; }
+.admin-page details summary:hover { color: var(--accent-strong); }
+.admin-countries, .admin-audit { list-style: none; margin: 0; padding: 0; }
+.admin-countries { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); max-width: 640px; gap: 8px 24px; margin-bottom: 8px; }
+.admin-countries li { display: flex; justify-content: space-between; gap: 12px; font-size: .875rem; }
+.admin-countries span { overflow-wrap: anywhere; }
 .admin-countries strong { white-space: nowrap; font-weight: 500; }
-.admin-limits h3 { overflow-wrap: anywhere; }
+.admin-table-scroll { overflow-x: auto; scrollbar-color: var(--text-secondary) var(--bg-surface-2); }
+.admin-limits { width: 100%; min-width: 640px; border-collapse: collapse; font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.admin-limits th, .admin-limits td { padding: 12px; text-align: right; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+.admin-limits thead th { color: var(--text-secondary); font-weight: 500; background: var(--bg-surface-2); }
+.admin-limits th:first-child { text-align: left; padding-left: 0; min-width: 130px; max-width: 240px; overflow-wrap: anywhere; }
+.admin-limits tbody th { font-weight: 500; }
+.admin-limits th:last-child, .admin-limits td:last-child { padding-right: 0; }
+.admin-sections > .admin-usage { padding-block: 8px; }
+.admin-usage > details > summary { font-weight: 600; }
 .admin-audit li { display: grid; gap: 4px; margin-block: 16px; font-size: .875rem; }
 .admin-audit time { color: var(--text-secondary); font-size: .8125rem; }
 .admin-footer { margin-top: 32px; font-size: .875rem; justify-content: flex-end; }
@@ -39,4 +53,7 @@
   .admin-sections { grid-template-columns: minmax(0, 1fr); }
   .admin-countries { grid-template-columns: minmax(0, 1fr); }
   .admin-heading h1 { font-size: 1.5rem; }
+  .admin-signup-top { align-items: flex-start; }
+  .admin-signup .admin-section-heading { min-height: 44px; }
+  .admin-countries { max-width: 360px; }
 }
