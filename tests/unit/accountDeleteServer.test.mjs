@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { Readable } from 'node:stream';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createAccountDeleteHandler } from '../../src/server/accountDelete/handler.js';
 import { createAccountDeleteBackend } from '../../src/server/accountDelete/backend.js';
 
@@ -159,7 +160,7 @@ test('invalid server origin and arbitrary failures are safe, and deletion failur
   }
 });
 
-function sdkFixture({ userPatch = {}, claimsPatch = {}, userError = null, claimsError = null, deleteResult, deleteThrows } = {}) {
+function sdkFixture({ userPatch = {}, claimsPatch = {}, userError = null, claimsError = null, deleteResult, deleteThrows, deleteFetch } = {}) {
   const calls = [], clients = [];
   let live = true;
   const env = { SUPABASE_URL: 'https://fixture.supabase.co', SUPABASE_ANON_KEY: 'fixture-anon', SUPABASE_SERVICE_ROLE_KEY: 'fixture-service' };
@@ -167,6 +168,19 @@ function sdkFixture({ userPatch = {}, claimsPatch = {}, userError = null, claims
     now: () => time,
     createClientImpl(url, key, options) {
       clients.push({ url, key, options });
+      if (key === env.SUPABASE_SERVICE_ROLE_KEY && deleteFetch) {
+        // Use the installed SDK's actual DELETE request/response transform.
+        // Only HTTP and authentication are synthetic; no hosted request is made.
+        return createSupabaseClient(url, key, {
+          ...options,
+          global: { ...options.global, fetch: async (input, init) => {
+            calls.push(['http', init.method, new URL(input).pathname, JSON.parse(init.body)]);
+            const response = await deleteFetch(input, init);
+            if (response.ok) live = false;
+            return response;
+          } },
+        });
+      }
       if (key === env.SUPABASE_SERVICE_ROLE_KEY) return { auth: { admin: { deleteUser: async (id, soft) => {
         calls.push(['deleteUser', id, soft]);
         if (deleteThrows) throw deleteThrows;
@@ -188,6 +202,47 @@ function sdkFixture({ userPatch = {}, claimsPatch = {}, userError = null, claims
   });
   return { backend, calls, clients };
 }
+
+test('installed Auth SDK empty HTTP 200 deletion acknowledgement reaches handler success once', async () => {
+  const h = sdkFixture({ deleteFetch: async () => new Response('{}', {
+    status: 200, headers: { 'Content-Type': 'application/json' },
+  }) });
+  const endpoint = harness({ preview: true, allowedEmailHashes: emailHash, createBackend: () => h.backend });
+  const res = await endpoint.request();
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { deleted: true });
+  assert.deepEqual(h.calls.filter(call => call[0] === 'http'), [
+    ['http', 'DELETE', `/auth/v1/admin/users/${owner}`, { should_soft_delete: false }],
+  ]);
+  // A completed deletion is not retried and no extra lookup dependency is added.
+  assert.equal((await endpoint.request()).statusCode, 401);
+  assert.equal(h.calls.filter(call => call[0] === 'http').length, 1);
+});
+
+test('installed Auth SDK provider and transport failures cannot acknowledge deletion', async t => {
+  for (const status of [401, 403, 500]) {
+    await t.test(`HTTP ${status}`, async () => {
+      const h = sdkFixture({ deleteFetch: async () => new Response(JSON.stringify({
+        code: 'fixture_provider_error', message: 'fixture-private-provider-detail',
+      }), { status, headers: { 'Content-Type': 'application/json', 'X-Supabase-Api-Version': '2024-01-01' } }) });
+      const res = await harness({ createBackend: () => h.backend }).request();
+      assert.equal(res.statusCode, 503);
+      assert.deepEqual(res.body, { error: 'ACCOUNT_DELETE_FAILED' });
+      assert(!JSON.stringify(res).includes('fixture-private-provider-detail'));
+      assert.equal(h.calls.filter(call => call[0] === 'http').length, 1);
+    });
+  }
+  await t.test('transport failure', async t => {
+    // auth-js logs rejected fetch errors itself; suppress only this synthetic failure.
+    t.mock.method(console, 'error', () => {});
+    const h = sdkFixture({ deleteFetch: async () => { throw new TypeError('fixture-network-failure'); } });
+    const res = await harness({ createBackend: () => h.backend }).request();
+    assert.equal(res.statusCode, 503);
+    assert.deepEqual(res.body, { error: 'ACCOUNT_DELETE_FAILED' });
+    assert(!JSON.stringify(res).includes('fixture-network-failure'));
+    assert.equal(h.calls.filter(call => call[0] === 'http').length, 1);
+  });
+});
 
 test('backend validates JWT plus live user, uses server-only hard delete and ignores stale JWT after deletion', async () => {
   const h = sdkFixture();
@@ -221,10 +276,17 @@ test('backend rejects anonymous, expired, forged/mismatched, unverified and miss
 
 test('backend rejects unsuccessful/ambiguous Auth responses without SQL or storage fallback', async () => {
   for (const options of [
+    { deleteResult: null }, { deleteResult: {} },
     { deleteResult: { data: { user: null }, error: { message: 'storage ownership secret' } } },
     { deleteResult: { data: { user: { id: other } }, error: null } },
     { deleteResult: { data: { user: null }, error: null } },
+    ...[undefined, [], '', 'deleted', 0, new Date(), { message: 'ok' },
+      { id: undefined }, Object.create({ id: owner }), Object.create(null)].map(user => ({
+      deleteResult: { data: { user }, error: null },
+    })),
+    ...[undefined, false, 0, ''].map(error => ({ deleteResult: { data: { user: { id: owner } }, error } })),
     { deleteThrows: new Error('response lost secret') },
+    { deleteThrows: new DOMException('fixture-request-timeout', 'TimeoutError') },
   ]) {
     const h = sdkFixture(options);
     await assert.rejects(h.backend.deleteUser(owner), { code: 'ACCOUNT_DELETE_FAILED', message: 'ACCOUNT_DELETE_FAILED' });
@@ -234,6 +296,14 @@ test('backend rejects unsuccessful/ambiguous Auth responses without SQL or stora
   await assert.rejects(h.backend.deleteUser('invalid'), { code: 'ACCOUNT_DELETE_FAILED' });
   assert.deepEqual(h.calls, []);
   assert.throws(() => createAccountDeleteBackend({}), { code: 'ACCOUNT_DELETE_SERVICE_UNAVAILABLE' });
+});
+
+test('backend accepts an empty JSON acknowledgement or the same explicit user only', async () => {
+  for (const user of [{}, { id: owner }]) {
+    const h = sdkFixture({ deleteResult: { data: { user }, error: null } });
+    assert.equal(await h.backend.deleteUser(owner), true);
+    assert.deepEqual(h.calls, [['deleteUser', owner, false]]);
+  }
 });
 
 test('handler and real backend adapter reject stale JWT and forged email claims before administrative deletion', async () => {

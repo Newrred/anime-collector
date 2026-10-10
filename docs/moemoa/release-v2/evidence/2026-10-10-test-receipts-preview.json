@@ -1,7 +1,7 @@
 {
   "date": "2026-10-10",
-  "scope": "C02/W06 test-only Chrome recovery, own receipt RPC and versioned document Preview; no production release or real account deletion",
-  "checkpoint": "NEW_DOCUMENTS_TEST_POLICY_AND_SCREEN_VERIFIED_USER_GOOGLE_HANDOFF_PENDING",
+  "scope": "C02/W06 test-only recovery and real existing-account flow; user-confirmed account deletion committed but completion UI failed; no production release",
+  "checkpoint": "DELETION_ACK_FIX_LOCAL_UNIT_UI_BUILD_PASS_CORRECTED_GIT_PREVIEW_PENDING",
   "followupFiles": [
     "CODEX_START_HERE.md",
     "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
@@ -15,7 +15,8 @@
     "previewBranch": "codex/phone-test",
     "previousPreviewCommit": "927ba88e5956dfcdf7cb0039a0c6413f1b3d2f12",
     "push": "fast-forward; no force push",
-    "followupDocumentationDestination": "codex/simple-signup-preview only; keep tested phone-test source unchanged"
+    "followupDocumentationDestination": "codex/simple-signup-preview; deletion acknowledgement fix is separately planned for existing phone-test Git Preview after regression checks",
+    "postLoginDocumentationCommit": "Not committed yet; incident and subsequent correction outcomes must remain distinct"
   },
   "deployment": {
     "provider": "Vercel Git Preview",
@@ -100,8 +101,8 @@
       "serverAdmission": true
     },
     "countriesUnchanged": { "GB": 13, "KR": 14, "PH": 13, "TH": 13, "US": 13 },
-    "userCountBeforeAndAfter": 3,
-    "receiptCountBeforeAndAfter": 2,
+    "userCountBeforeAndAfterStaging": 3,
+    "receiptCountBeforeAndAfterStaging": 2,
     "transientsAtRecovery": { "admissions": 0, "handoffs": 0 },
     "hourlyPurgeScheduledAtRecovery": true,
     "activationVerified": true,
@@ -120,6 +121,7 @@
     }
   },
   "independentReview": {
+    "phase": "Pre-incident review of original candidate; not proof that the later hosted deletion response contract worked",
     "blockingFindings": 0,
     "focusedCommand": "node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs tests/unit/accountDeleteServer.test.mjs",
     "focusedResult": "33/33 PASS",
@@ -127,27 +129,106 @@
     "scope": "Old 10/9 signup compatibility, new switches default off, local build configuration and migrations not autoapplied; not a production approval"
   },
   "realUserFlow": {
-    "newDocumentGoogleRoundtripRun": false,
-    "accountDeletionRun": false,
-    "existingAccountsApprovedForDisposal": false,
+    "newDocumentGoogleRoundtripRun": true,
+    "existingAccountAcceptanceAndOwnReceiptVerified": true,
+    "newAuthUserCreationVerified": false,
+    "accountDeletionRun": true,
+    "accountDeletionCommittedVerified": true,
+    "automaticCompletionUiPassed": false,
+    "blanketExistingAccountDisposalApproval": false,
     "twoPassReview": "Prior records authorize A/B/C login and signup tests, not deleting their stored data. No separate disposable account or new allowlist hash located in versioned evidence.",
-    "minimumNextUserAction": "Select one existing approved test account whose MOEMOA test records may be deleted; review the documents and sign in with Google directly. Do not press account deletion yet. The Google account itself will not be deleted.",
-    "scopeDistinction": "Using an existing account proves new-version acceptance/deletion, not creation of a new Auth account."
+    "minimumNextUserAction": "None for diagnosis: the user already pressed final deletion; do not request retry or recreate the deleted account.",
+    "scopeDistinction": "Existing-account new-version acceptance and receipt display passed, then real deletion committed but automatic completion UI failed. This is not new Auth account creation or Storage cleanup verification.",
+    "confirmationOpenedByAgent": true,
+    "finalDeletionButtonClickedByAgent": false,
+    "finalDeletionButtonClickedByUser": true
   },
   "actualScreenChecks": {
     "signupRoute": "/auth/start/",
     "newFixedDocumentLinksAndTestLabel": true,
     "phPurposeNoticeAndSingleConsentCheckbox": true,
-    "birthDateEntered": false,
-    "agreementAccepted": false,
-    "signupSubmitted": false,
+    "birthDateEnteredByAgent": false,
+    "agreementAcceptedByAgent": false,
+    "signupSubmittedByAgent": false,
     "countryResetToBlank": true,
     "handoffBrowser": "Chrome",
     "handoffTabId": "1829943907",
     "accountRoute": "/data/#account-privacy",
-    "accountScreenObserved": "Signed out, zero device records and Google button",
-    "authenticatedReceiptUiVerified": false,
-    "requestedAction": "User direct document review and Google login; do not delete account yet."
+    "accountScreenBeforeUserLogin": "Signed out, zero device records and Google button",
+    "authenticatedReceiptUiVerified": true,
+    "accountScreenAfterUserLogin": "Same Chrome tab returned from /auth/start/ to /data/; Account connected and Sign out visible, sync normal, one own receipt links to exact new 10/10-test terms and privacy documents.",
+    "deviceUiSummary": "Six memory/board/title-related displayed counts were zero; not proof that all cloud data is empty.",
+    "requestedAction": "Final deletion was performed directly by the user; no repeat deletion requested.",
+    "accountScreenAfterManualRecovery": "Signed out: Saved on this device and Continue with Google; receipt/delete section absent"
+  },
+  "postLoginReadOnlyVerification": {
+    "targetRef": "nmgkhknponvzcwliajyk",
+    "transaction": "BEGIN REPEATABLE READ READ ONLY; ROLLBACK",
+    "userCount": 3,
+    "receiptCount": 3,
+    "newVersionReceipts": 1,
+    "oldVersionReceipts": 2,
+    "newReceiptsLinkedToRealUsers": 1,
+    "admissions": 0,
+    "handoffs": 0,
+    "newTupleEnabledAndServerAdmissionTrue": true,
+    "countriesUnchanged": true,
+    "emailOrUuidOriginalsRecorded": false,
+    "baselineDistinction": "Recovery and activation had users 3 / receipts 2; the extra new-version receipt follows this user-completed existing-account Google flow."
+  },
+  "deletionCompletionIncident": {
+    "request": { "timeKst": "2026-10-10 16:16:54.308", "method": "POST", "path": "/api/account-delete", "status": 503, "evidence": "Vercel request log" },
+    "ui": "Deletion was not confirmed; sync paused",
+    "postDeletionReadOnlyCounts": { "userCount": 2, "receiptCount": 2, "newVersionReceipts": 0, "oldVersionReceipts": 2 },
+    "result": "Account deletion committed; automatic completion/logout flow FAIL",
+    "causeConfirmed": "Official successful DELETE returns HTTP 200 {}; installed auth-js 2.99.1 _userResponse yields user:{} and error:null, but backend required the deleted user ID and rejected this valid acknowledgement.",
+    "officialContractSource": "https://raw.githubusercontent.com/supabase/auth/master/internal/api/admin.go",
+    "affectedSource": "src/server/accountDelete/backend.js",
+    "actualSupabaseRawResponseCaptured": false,
+    "causeEvidenceBoundary": "Official API implementation plus installed SDK reproduction and committed database deletion; not direct collection of the actual hosted response body.",
+    "deleteTargetTestRefObservedInVercelRuntime": true,
+    "manualRecovery": { "signOutClicks": 1, "signedOutUiVerified": true, "deviceRecordsDeleted": false, "googleAccountSignedOut": false },
+    "repeatDeletionRequests": 0,
+    "accountRecreation": false,
+    "directDatabaseDelete": false,
+    "storageCleanupVerified": false,
+    "plannedCorrection": {
+      "execPlan": "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#2026-10-10-실제-삭제-후-완료-응답-오판--한정-수정-execplan",
+      "files": ["src/server/accountDelete/backend.js", "tests/unit/accountDeleteServer.test.mjs"],
+      "contract": "Accept error===null with an empty plain-object user or the exact verified user ID; preserve failure for error, null, malformed data, another ID or timeout.",
+      "preserved": "JWT/live-user/expected-owner/CSRF/Preview allowlist checks before deletion",
+      "excluded": "Extra getUserById request, post-deletion authentication bypass, automatic retry, further account deletion",
+      "verification": "Installed SDK regression, positive/negative unit cases, existing UI regressions, build/diff, then phone-test Git Preview Ready/Source and CI",
+      "status": "IMPLEMENTED_LOCAL_FULL_UNIT_UI_BUILD_PASS_CORRECTED_GIT_PREVIEW_PENDING",
+      "independentCorrectionReview": {
+        "reviewer": "delete_ack_review",
+        "scope": "backend and handler boundaries",
+        "importantFindings": 0,
+        "accountDeleteServerRerun": "19/19 PASS; overlaps full suite, not additive",
+        "extraCostDependenciesOrDatabaseChanges": false
+      },
+      "localResults": {
+        "installedSdkRegression": "Actual auth-js 2.99.1 with synthetic official HTTP200 {} response: old handler503 reproduced, corrected handler200 passed",
+        "focusedSuite": "signup and accountDelete unit tests",
+        "focusedResult": "40/40 PASS",
+        "uiCommand": "node scripts/run-simple-signup-e2e.mjs",
+        "uiResult": "17/17 PASS",
+        "uiDurationSeconds": 28.3,
+        "uiExitCode": 0,
+        "scope": "Actual installed SDK and Chromium, synthetic Google/Auth/API responses; not a repeat real account deletion",
+        "fullUnitCommand": "npm run test:unit",
+        "fullUnitResult": "517/517 PASS; fail 0; skip 0",
+        "fullUnitDurationSeconds": 11.53,
+        "fullUnitExitCode": 0,
+        "focusedIncludedInFullUnit": true,
+        "buildCommand": "npm run build",
+        "buildResult": "PASS 29 pages",
+        "buildDurationSeconds": 10.63,
+        "buildExitCode": 0,
+        "deploymentResult": "PENDING",
+        "correctedDeploymentCommit": null
+      }
+    }
   },
   "production": {
     "masterCommitObserved": "bae5e796619583b07fac457735c14728b11f6484",
@@ -161,8 +242,9 @@
     "warning": "Source/config rollback cannot restore a completed account deletion."
   },
   "notPerformed": [
-    "New-document real Google signup or existing-account roundtrip",
-    "Actual account deletion or end-to-end Storage cleanup",
+    "New Auth account creation in this new-document test",
+    "Successful automatic completion UI after actual deletion",
+    "End-to-end Storage cleanup",
     "Production deployment, master update or production database changes",
     "New credential generation, secret extraction or allowlist replacement",
     "Public UGC activation or full jurisdictional legal clearance"

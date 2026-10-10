@@ -44,7 +44,15 @@ export function createAccountDeleteBackend(env = process.env, {
         // Hard delete invokes the existing database cascades/retirement triggers.
         // Do not fall back to direct SQL or remove Storage files before Auth succeeds.
         const result = await service.auth.admin.deleteUser(userId, false);
-        if (result.error || result.data?.user?.id !== userId) fail('ACCOUNT_DELETE_FAILED');
+        // Auth acknowledges a committed hard delete with HTTP 200 {}. auth-js
+        // transforms that into user: {}, error: null, not a deleted user object.
+        const user = result?.data?.user;
+        const isJsonObject = user !== null && typeof user === 'object'
+          && !Array.isArray(user) && Object.getPrototypeOf(user) === Object.prototype;
+        if (result?.error !== null || !isJsonObject
+          || (Reflect.ownKeys(user).length !== 0 && (!Object.hasOwn(user, 'id') || user.id !== userId))) {
+          fail('ACCOUNT_DELETE_FAILED');
+        }
         return true;
       } catch {
         // A timeout may follow a committed deletion; it is not a confirmed success.
