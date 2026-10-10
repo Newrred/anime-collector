@@ -50,6 +50,8 @@ jobs:
         run: node scripts/run-simple-signup-e2e.mjs
       - name: Verify service administration and account boundaries
         run: node scripts/run-admin-e2e.mjs
+      - name: Verify account menu and desktop image drop, paste and lifecycle
+        run: node scripts/run-desktop-image-e2e.mjs
       - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-cross-device-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
       - name: Verify signed-in card composer
         run: node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/memory-save-account.spec.ts --project=chromium --workers=1 --reporter=line

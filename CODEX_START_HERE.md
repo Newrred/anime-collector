@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-10 최신 배포·Pro 검토:** 사용자 요청으로 계정 메뉴/데스크톱 이미지 입력35d88ab까지의 운영 반영과 조사 문서 전체 인계를 진행한다. **현재 결과는 [배포 보고](docs/moemoa/release-v2/2026-10-10-latest-production-release.md), 전체 검토 시작점은 [Pro 인덱스](docs/moemoa/release-v2/2026-10-10-pro-review-index.md)**다. 아래 '미배포/미커밋'은 각 작업 당시 기록이다. KR14/US13/TH13·Public off를 유지하며 새 DB 적용은 없다. 최신 master와 실제 `/build-info.json`을 대조한다.
+
 > **2026-10-10 최신 로컬 작업 — 계정 메뉴·데스크톱 이미지 입력 완료:** 계정/데이터 진입점 통합, 이미지 drag/drop·Ctrl+V/⌘V를 새 기억/이미지 교체에 연결했다. unit585·Chromium51·build32 PASS, PC·390/320px 확인. [변경/검증/잔여 보고](docs/moemoa/release-v2/2026-10-10-account-menu-desktop-images.md). 작업 브랜치는 `codex/simple-signup-preview`. **이번 기능은 운영 미배포·DB 미변경**이며 아래 가입 운영 source6a2beff와 구분한다. Mac/Windows 실제 OS 캡처 왕복은 미검증이다.
 
 > **2026-10-10 현재 — 한국·미국·태국 가입 운영 활성:** 사용자 승인 `FIRST-SIGNUP-KR-US-TH-UI-20261010`에 따라 KR14/US13/TH13을 먼저 활성화했다. 검토 소스 `6a2beff04cdc408787dcf5ed9bf2660a95aa78ae`의 CI `38048163986` 전체 SUCCESS → `master` Git push → Vercel Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready 및 실제 www의 `commit/checkoutCommit` 일치·`source=vercel-git`·`semanticMatch=true`를 확인했다. DB 활성 release `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01`은 `2026-10-10T11:38:43.420647+00:00`에 APPLY SUCCESS: `enabled=true/admission=true`, KR14·TH13·US13, Public off, 기존 계정3·수락0 및26개 테이블/동기화 보존. **활성 후 독립 DB 재조회·실제 가입/관리자 화면·기존 계정 Google 로그인 복귀까지 PASS**. 기존회원 로그인에서는 DOB/동의 재입력 없이 계정에 연결되고 두 동기화 상태 성공·서비스 관리 링크를 확인했으며 새 가입 기록은 생성되지 않았다.

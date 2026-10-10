@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **최신 배포·전체 검토(2026-10-10):** [Pro 검토 인덱스](2026-10-10-pro-review-index.md) → [이번 운영 배포 결과](2026-10-10-latest-production-release.md)를 먼저 읽는다. 최신 메뉴/이미지 입력과 이전 가입/관리자·다국가 조사까지 같은 Git 이력에 보존한다. 아래 날짜별 '현재/미배포'는 당시 상태이며 추가 국가·Public 활성 지시가 아니다.
+
 > **2026-10-10 최신 로컬 완료:** 계정 메뉴 통합과 데스크톱 이미지 drop/paste 구현·unit585/Chromium51/build32 PASS. [이번 보고](2026-10-10-account-menu-desktop-images.md)와 ExecPlan 최상단 참고. 운영 배포/DB 변경 없음. 아래 가입 운영 source6a2beff와 혼동하지 않는다.
 
 > **2026-10-10 현재 — KR14/US13/TH13 운영 가입 활성:** `FIRST-SIGNUP-KR-US-TH-UI-20261010` 승인 범위로 `6a2beff`를 master에 push했고 CI `38048163986` 전체 SUCCESS, Vercel Git Production `D5uRPWy778J7MR2spEeLr8JDeeEH` Ready와 실제 www SHA/checkoutCommit/source·semanticMatch 일치를 확인했다. DB `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS(`2026-10-10T11:38:43.420647+00:00`): signup/admission=true, KR14·TH13·US13, Public off, 기존 계정3·수락0·26개 테이블/동기화 보존. **독립 readback·실제 가입/관리자 화면·기존회원 Google 로그인 복귀 PASS**. DOB/동의 공란에서 기존 계정 로그인→계정 연결·기억/보드와 작품/감상 동기화 성공·서비스 관리 링크를 확인했고 새 가입 기록은 생성되지 않았다. [이번 보고](2026-10-10-first-signup-ui-release.md)·[ExecPlan 최상단](01_RELEASE_EXECUTION_PLAN.md)·[현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)를 우선한다.

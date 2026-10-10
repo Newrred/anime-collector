@@ -1,0 +1,16 @@
+{
+  "requestedAt": "2026-10-10",
+  "status": "candidate-prepared-awaiting-ci-and-git-production",
+  "productionBranch": "master",
+  "handoffBranch": "codex/simple-signup-preview",
+  "featureSourceCommit": "35d88ab",
+  "previousProductionCommit": "6a2beff04cdc408787dcf5ed9bf2660a95aa78ae",
+  "databaseChanges": false,
+  "publicUgcEnabledByThisRelease": false,
+  "newCountryActivation": false,
+  "priorLocalVerification": { "source": "35d88ab", "unit": 585, "desktopChromium": 51, "builtPages": 32 },
+  "notVerified": ["Windows/macOS real screenshot clipboard roundtrip", "new production Google signup", "Safari/Firefox physical devices"],
+  "ci": null,
+  "deployment": null,
+  "liveReadOnlySmoke": null
+}

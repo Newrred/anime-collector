@@ -1,5 +1,38 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 — 최신 기능 Git 운영 배포와 Pro 전체 검토 인계
+
+### 1–3. 목적·승인·현재 증거
+
+- 사용자 요청: 최신 변경을 moemoa.xyz에 반영하고 다국가 연령 리서치까지 Git에서 전체 검토 가능하게 한다. 이번 요청은 아래 계정 메뉴/데스크톱 입력 작업의 운영 배포를 명시 승인한다.
+- 시작: clean `codex/simple-signup-preview` 35d88ab, fetch 후 origin/master 6a2beff, 원격 작업 브랜치 cc11aa4. 최신 기능 unit585/Chromium51/build32 PASS, 운영 KR14/US13/TH13 활성은 앞선 release 증거와 구분한다.
+- 필독: CODEX_START_HERE/01/07/08/09/PLANS, 기존 release 결과·quality workflow·입력 runner·build provenance. 운영 점검과 근거 기반 문서 동기화 스킬을 적용한다.
+
+### 4–6. 범위·흐름·변경 지도
+
+- 포함: 기존 기능35d88ab와 문서 전체의 Git 보존, 신규 입력/메뉴 회귀의 CI 연결, 최신 상태·연구·미완료·구형 문서 주의사항의 Pro 인덱스, master Git→Vercel Ready→실제 www SHA 대조.
+- 제외: 신규 기능 설계/국가 확대/Public 활성/DB 적용/의존성 변경/개인 사진 업로드/사용자 동의 대행. 기존 연구를 새 법률 조사·법적 보증으로 표현하지 않는다.
+- 변경: `.github/workflows/quality.yml`, 시작문서/단일 작업판/본 계획, 구형 설정 지도 상단 안내, `2026-10-10-pro-review-index.md`, `2026-10-10-latest-production-release.md` 및 안전한 배포 evidence JSON. 앱 소스는 검증된35d88ab 그대로다.
+
+### 7–9. 데이터·마일스톤·검증
+
+- DB/data migration 없음. 기존10/10 운영 schema/data release를 참조만 하며 재실행하지 않는다.
+- M1: 독립 diff/비밀값 위험/문서 추적 확인 및 인덱스. M2: reviewed candidate commit/push→동일 SHA CI 전체 성공. M3: master fast-forward push→Vercel Git Ready와 www build-info commit/checkoutCommit/source/config 일치 및 읽기 전용 운영 smoke. M4: 실제 증거/인계 문서 Git 보존 및 최종 master 배포 SHA 재확인.
+- 기존 로컬585/51/32 결과는 source35d88ab 결과로 기록하며 새 실행과 합산하지 않는다. CI에는 `node scripts/run-desktop-image-e2e.mjs`를 추가해 새 입력/메뉴51검사를 같은 후보 SHA에서 확인한다. `git diff --check`, 공개 HTTP 및 필요 시 인증 브라우저의 실제 UI를 검사한다. OS 클립보드 실기기/신규 운영 가입은 미검증으로 유지한다.
+
+### 10–14. 안전·관찰·롤백·위험·결정
+
+- Git에는 코드·조사·합성 검증·비식별 운영 증거만 포함한다. env 비밀값/원본/개인 세션/DB dump/ignored cache는 올리지 않는다. 변경 diff 고위험 credential 패턴 독립 검사0건; 포괄 보안 인증을 뜻하지 않는다.
+- analytics/로그 추가 없음. 기존 KR14/US13/TH13, admission=true, Public off와 private upload의 명시 저장 경계를 유지한다.
+- 롤백: 기존 운영6a2beff 앱 소스와의 차이를 검토한 revert commit을 master Git으로 배포한다(강제 push/CLI promote/DB down 없음). 가입 pause가 별도로 필요하면 enabled=false/admission=true를 유지해야 하며 이번엔 정책을 바꾸지 않는다.
+- 위험: CI의 새 검사 누락과 구형 문서의 과거 '현재' 표기. CI 단계 추가와 날짜별 이력/최신 근거 링크로 해소한다. 실제 배포 확인 실패 시 완료라고 보고하지 않는다.
+- 현재 추가 승인 불필요. 정책/권한/파괴 작업으로 범위를 넓히는 새 결정만 별도 요청한다.
+
+### 15–17. 진행·발견·완료 보고
+
+- 사전 점검: master 대비2 commits/33 files, DB/API/flags/dependencies 변경 없음. 독립 관련 unit18 PASS, diff-check PASS. 연구 문서들은 이미 추적되며 docs 내 untracked/ignored0. 신규 입력 회귀가 quality workflow에 없어서 추가한다.
+- 실행/최종 결과는 [운영 배포 보고](2026-10-10-latest-production-release.md), 전체 검토 순서는 [Pro 인덱스](2026-10-10-pro-review-index.md)에 기록한다. 본 항목 작성 시점은 배포 전이다.
+
 ## 2026-10-10 — 계정 메뉴 통합과 데스크톱 이미지 입력
 
 ### 1–3. 목적·결정·현재 증거
