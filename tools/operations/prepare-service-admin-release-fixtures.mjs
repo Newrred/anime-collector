@@ -13,4 +13,6 @@ for(const [name,args] of [
  ['operator-rollback',{action:'operator',mode:'rollback'}],['operator-apply',{action:'operator',mode:'apply'}],
  ['production-guard',{target:'production',expectedPrivateRevision:'PRIVATE_PROD_01',action:'schema',mode:'rollback'}],
 ])writeFileSync(resolve(output,`${name}.sql`),buildRelease({...common,...args}).sql);
+// Match Windows SQL-editor submission, including dollar-quoted expected source.
+writeFileSync(resolve(output,'schema-crlf-rollback.sql'),buildRelease({...common,action:'schema',mode:'rollback'}).sql.replace(/\n/g,'\r\n'));
 process.stdout.write('LOCAL disposable SQL release fixtures prepared. No database connection.\n');

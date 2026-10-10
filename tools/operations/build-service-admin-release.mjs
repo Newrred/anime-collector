@@ -145,7 +145,7 @@ function definitionsCheck(parts){
   const names=f.argNames.length?`array[${f.argNames.map(quote).join(',')}]::text[]`:'null::text[]';
   const publicRpc=f.name.startsWith('public.');
   return `if not exists(select 1 from pg_proc p join pg_language l on l.oid=p.prolang where p.oid=to_regprocedure(${quote(f.signature)})
-   and replace(p.prosrc,chr(13)||chr(10),chr(10))=${block(f.body,'body')}
+   and replace(p.prosrc,chr(13)||chr(10),chr(10))=replace(${block(f.body,'body')},chr(13)||chr(10),chr(10))
    and p.prosecdef=${f.definer} and p.provolatile=${quote(f.volatility)} and l.lanname=${quote(f.language)}
    and p.prorettype=${quote(f.returns)}::regtype and not p.proretset and p.proconfig is not distinct from ${config}
    and p.proargnames is not distinct from ${names}) then raise exception 'MIGRATION_FUNCTION_MISMATCH'; end if;
@@ -189,7 +189,7 @@ export function buildRelease({target,action='inspect',mode='rollback',expectedPr
   select case when cardinality(statements)=1 and name=${quote(p.name)} then statements[1] end into installed
    from supabase_migrations.schema_migrations where version=${quote(p.version)};
   installed:=replace(installed,chr(13)||chr(10),chr(10));
-  if installed is null or regexp_replace(installed,'^-- release[^\\n]*\\n','') is distinct from ${sourceLiteral}
+  if installed is null or regexp_replace(installed,'^-- release[^\\n]*\\n','') is distinct from replace(${sourceLiteral},chr(13)||chr(10),chr(10))
   then raise exception 'EXISTING_MIGRATION_LEDGER_MISMATCH'; end if;
  else
   ${action==='schema'?`execute ${sourceLiteral};

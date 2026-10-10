@@ -41,6 +41,8 @@ run "$fixtures/schema-apply.sql"
 echo 'PASS: generated schema apply installs two exact migrations and ledger entries'
 run "$fixtures/schema-apply.sql"
 echo 'PASS: exact existing ledger and live definitions permit an idempotent recheck'
+run "$fixtures/schema-crlf-rollback.sql"
+echo 'PASS: entire Windows CRLF SQL submission preserves exact source and function checks'
 "${psql[@]}" -c "update supabase_migrations.schema_migrations set statements=array[replace(statements[1],chr(10),chr(13)||chr(10))] where version in ('20261010170000','20261010180000');" >/dev/null
 run "$fixtures/schema-rollback.sql"
 echo 'PASS: Windows editor CRLF-only ledger normalization is accepted'

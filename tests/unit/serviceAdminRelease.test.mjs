@@ -29,6 +29,8 @@ test('service admin schema wraps migrations with canonical ledger and runtime de
  for(const code of ['EXISTING_MIGRATION_LEDGER_MISMATCH','MIGRATION_FUNCTION_MISMATCH','MIGRATION_FUNCTION_ACL_MISMATCH','ADMIN_TABLE_RLS_MISMATCH','ADMIN_TABLE_ACL_MISMATCH','ADMIN_TRIGGER_MISMATCH'])assert.ok(sql.includes(code));
  assert.match(sql,/p\.proargnames is not distinct from/);
  assert.match(sql,/replace\(p\.prosrc,chr\(13\)\|\|chr\(10\),chr\(10\)\)/);
+ assert.match(sql,/replace\(\$body\$/);
+ assert.match(sql,/is distinct from replace\(\$migration_source\$/);
  assert.doesNotMatch(sql,/insert into private\.memory_service_operators\(user_id,enabled\) values\(selected/);
  assert.doesNotMatch(sql,/update private\.simple_signup_policy set enabled=true/);
 });
