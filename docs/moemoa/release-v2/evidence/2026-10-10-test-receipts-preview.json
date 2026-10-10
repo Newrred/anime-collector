@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-10",
+  "scope": "C02/W06 test-only Chrome recovery, own receipt RPC and versioned document Preview; no production release or real account deletion",
+  "checkpoint": "NEW_DOCUMENTS_TEST_POLICY_AND_SCREEN_VERIFIED_USER_GOOGLE_HANDOFF_PENDING",
+  "followupFiles": [
+    "CODEX_START_HERE.md",
+    "docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md",
+    "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md",
+    "docs/moemoa/release-v2/evidence/2026-10-10-test-receipts-preview.json",
+    "tools/identity/verify-simple-signup-receipts-hosted.sql"
+  ],
+  "source": {
+    "commit": "5d921d7ffbcb8d1c6b06b92626b772d435dbf2dd",
+    "workingBranch": "codex/simple-signup-preview",
+    "previewBranch": "codex/phone-test",
+    "previousPreviewCommit": "927ba88e5956dfcdf7cb0039a0c6413f1b3d2f12",
+    "push": "fast-forward; no force push",
+    "followupDocumentationDestination": "codex/simple-signup-preview only; keep tested phone-test source unchanged"
+  },
+  "deployment": {
+    "provider": "Vercel Git Preview",
+    "project": "newrreds-projects/anime-collector",
+    "initialDeploymentId": "FM6vWNfUsKdnC5JC22VLNcjjpc3m",
+    "flagsRedeploymentId": "J7SYULFCcFPKvB7LqQ2TcR46bbHH",
+    "uniqueDeploymentIdentifier": "7ory047j8",
+    "status": "Ready",
+    "durationSeconds": 59,
+    "environment": "Preview",
+    "branchAlias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+    "sourceCommitMatches": true,
+    "buildInfoResponseVerified": false,
+    "buildInfoLimitation": "Browser access to /build-info.json blocked; SHA evidence is Vercel Source plus Git, not a fetched runtime build-info response.",
+    "fixedTestDocumentPagesDisplayed": 2
+  },
+  "ci": {
+    "runId": "38032001992",
+    "jobs": { "verify": "SUCCESS", "publication-contract": "SUCCESS" }
+  },
+  "testTarget": {
+    "name": "moemoa-test",
+    "ref": "nmgkhknponvzcwliajyk",
+    "statusAtRecovery": "Healthy",
+    "regionAtRecovery": "Singapore",
+    "publicClientTargetReadAndMatched": true,
+    "serverUrlSecretValueRead": false,
+    "serverUrlEvidence": "Existing same-branch Secret presence only; original value deliberately not opened.",
+    "authHook": { "name": "public.check_simple_signup_admission", "status": "Enabled", "directlyRead": true },
+    "branchAuthAndCallbackUrlsDirectlyRead": true,
+    "existingCredentialsAndAllowlistChanged": false,
+    "previousPcEnvironmentRequired": false,
+    "newCredentialIssued": false
+  },
+  "receiptMigration": {
+    "version": "20261010170000",
+    "path": "supabase/migrations/20261010170000_simple_signup_receipts.sql",
+    "releaseId": "MOEMOA_SIGNUP_RECEIPTS_TEST_20261010_01",
+    "explicitExecutionTimeUserApproval": true,
+    "applied": true,
+    "sourceCommit": "5d921d7ffbcb8d1c6b06b92626b772d435dbf2dd",
+    "gitSource": { "lineEndings": "LF", "bytes": 1596, "sha256": "d3e50084621457853ceed3d2a31fe3da8e808e5e7497a09bd32e34f3aaf207d0" },
+    "appliedSource": { "lineEndings": "CRLF", "bytes": 1622, "sha256": "38f63718fcb98954923ae75d5f9638806b101e5d142660e29cdfe549d608abda" },
+    "intermediateFailure": "Initial byte-exact hash check failed because SQL editor stored CRLF; no semantic difference was assumed without verification.",
+    "normalization": "CRLF to LF only",
+    "normalizedLedgerAndFunctionBodyMatchGit": true,
+    "verification": {
+      "path": "tools/identity/verify-simple-signup-receipts-hosted.sql",
+      "result": "PASS",
+      "transaction": "REPEATABLE READ READ ONLY; ROLLBACK",
+      "accountsChecked": 3,
+      "receiptCount": 2,
+      "exactOwnProjection": true,
+      "anonAndServiceRoleExecuteDenied": true,
+      "invalidSubjectsRejected": true,
+      "policyPreserved": true,
+      "limitation": "Administrator transaction-local role/claims checks, not real Google or JWT authentication. No account identifiers or receipt values recorded."
+    }
+  },
+  "documentPolicy": {
+    "releaseId": "MOEMOA_SIGNUP_TEST_DOCUMENTS_20261010_03",
+    "stagingApplied": true,
+    "previous": {
+      "version": "simple-signup-2026-10-09",
+      "termsVersion": "terms-2026-10-09-draft",
+      "privacyVersion": "privacy-2026-10-09-draft",
+      "enabled": true,
+      "serverAdmission": true
+    },
+    "staged": {
+      "version": "simple-signup-2026-10-10-test",
+      "termsVersion": "terms-2026-10-10-test",
+      "privacyVersion": "privacy-2026-10-10-test",
+      "enabled": false,
+      "serverAdmission": false
+    },
+    "current": {
+      "version": "simple-signup-2026-10-10-test",
+      "termsVersion": "terms-2026-10-10-test",
+      "privacyVersion": "privacy-2026-10-10-test",
+      "enabled": true,
+      "serverAdmission": true
+    },
+    "countriesUnchanged": { "GB": 13, "KR": 14, "PH": 13, "TH": 13, "US": 13 },
+    "userCountBeforeAndAfter": 3,
+    "receiptCountBeforeAndAfter": 2,
+    "transientsAtRecovery": { "admissions": 0, "handoffs": 0 },
+    "hourlyPurgeScheduledAtRecovery": true,
+    "activationVerified": true,
+    "activationMethod": "Test dashboard ran the configuration helper enable policy update with additional preconditions; no local environment file or CLI credentials used.",
+    "activationGuards": ["both prerequisite migrations", "purge cron command/schedule/username", "new test tuple off/off", "users 3 and receipts 2"],
+    "afterActivation": { "users": 3, "receipts": 2, "admissions": 0, "handoffs": 0, "cleanupScheduled": true }
+  },
+  "newFlags": {
+    "scope": "Preview/codex/phone-test only",
+    "values": {
+      "PUBLIC_SIGNUP_TEST_DOCUMENTS": "1",
+      "MOEMOA_SIGNUP_TEST_DOCUMENTS": "true",
+      "PUBLIC_ACCOUNT_PRIVACY_V1": "1",
+      "PUBLIC_ACCOUNT_DELETE_V1": "1",
+      "MOEMOA_ACCOUNT_DELETE_ENABLED": "true"
+    }
+  },
+  "independentReview": {
+    "blockingFindings": 0,
+    "focusedCommand": "node --test tests/unit/simpleSignup.test.mjs tests/unit/signupServer.test.mjs tests/unit/accountDeleteServer.test.mjs",
+    "focusedResult": "33/33 PASS",
+    "diffCheck": "PASS",
+    "scope": "Old 10/9 signup compatibility, new switches default off, local build configuration and migrations not autoapplied; not a production approval"
+  },
+  "realUserFlow": {
+    "newDocumentGoogleRoundtripRun": false,
+    "accountDeletionRun": false,
+    "existingAccountsApprovedForDisposal": false,
+    "twoPassReview": "Prior records authorize A/B/C login and signup tests, not deleting their stored data. No separate disposable account or new allowlist hash located in versioned evidence.",
+    "minimumNextUserAction": "Select one existing approved test account whose MOEMOA test records may be deleted; review the documents and sign in with Google directly. Do not press account deletion yet. The Google account itself will not be deleted.",
+    "scopeDistinction": "Using an existing account proves new-version acceptance/deletion, not creation of a new Auth account."
+  },
+  "actualScreenChecks": {
+    "signupRoute": "/auth/start/",
+    "newFixedDocumentLinksAndTestLabel": true,
+    "phPurposeNoticeAndSingleConsentCheckbox": true,
+    "birthDateEntered": false,
+    "agreementAccepted": false,
+    "signupSubmitted": false,
+    "countryResetToBlank": true,
+    "handoffBrowser": "Chrome",
+    "handoffTabId": "1829943907",
+    "accountRoute": "/data/#account-privacy",
+    "accountScreenObserved": "Signed out, zero device records and Google button",
+    "authenticatedReceiptUiVerified": false,
+    "requestedAction": "User direct document review and Google login; do not delete account yet."
+  },
+  "production": {
+    "masterCommitObserved": "bae5e796619583b07fac457735c14728b11f6484",
+    "changed": false,
+    "publicUgcChanged": false
+  },
+  "rollback": {
+    "performed": false,
+    "sequence": "Disable test signup/admission and new server/UI flags first; restore recorded prior document tuple and compatible Preview source, then reverify before reopening. Keep existing users, receipts, credentials and allowlist.",
+    "rpc": "Additive read-only RPC may be left unused; no user data rewrite required.",
+    "warning": "Source/config rollback cannot restore a completed account deletion."
+  },
+  "notPerformed": [
+    "New-document real Google signup or existing-account roundtrip",
+    "Actual account deletion or end-to-end Storage cleanup",
+    "Production deployment, master update or production database changes",
+    "New credential generation, secret extraction or allowlist replacement",
+    "Public UGC activation or full jurisdictional legal clearance"
+  ]
+}
