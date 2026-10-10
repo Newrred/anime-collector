@@ -1,6 +1,6 @@
 # CODEX START HERE — MOEMOA
 
-> **2026-10-10 최신 배포·Pro 검토:** 사용자 요청으로 계정 메뉴/데스크톱 이미지 입력35d88ab까지의 운영 반영과 조사 문서 전체 인계를 진행한다. **현재 결과는 [배포 보고](docs/moemoa/release-v2/2026-10-10-latest-production-release.md), 전체 검토 시작점은 [Pro 인덱스](docs/moemoa/release-v2/2026-10-10-pro-review-index.md)**다. 아래 '미배포/미커밋'은 각 작업 당시 기록이다. KR14/US13/TH13·Public off를 유지하며 새 DB 적용은 없다. 최신 master와 실제 `/build-info.json`을 대조한다.
+> **2026-10-10 최신 배포·Pro 검토 완료:** 계정 메뉴/데스크톱 이미지 입력을 포함한 f428c60의 CI38053923871 전체 성공→master Git→Vercel Production Ready→실제 www SHA 일치와 새 메뉴/입력 화면을 확인했다. **[배포 보고](docs/moemoa/release-v2/2026-10-10-latest-production-release.md), [Pro 전체 검토 시작점](docs/moemoa/release-v2/2026-10-10-pro-review-index.md)**에 조사 문서·완료/미완료·검증 근거를 연결했다. 아래 '미배포/미커밋'은 당시 기록이다. KR14/US13/TH13·Public off, 새 DB 적용0. 후속 문서 커밋은 앱 변경 없으며 최신 master와 실제 `/build-info.json`을 대조한다.
 
 > **2026-10-10 최신 로컬 작업 — 계정 메뉴·데스크톱 이미지 입력 완료:** 계정/데이터 진입점 통합, 이미지 drag/drop·Ctrl+V/⌘V를 새 기억/이미지 교체에 연결했다. unit585·Chromium51·build32 PASS, PC·390/320px 확인. [변경/검증/잔여 보고](docs/moemoa/release-v2/2026-10-10-account-menu-desktop-images.md). 작업 브랜치는 `codex/simple-signup-preview`. **이번 기능은 운영 미배포·DB 미변경**이며 아래 가입 운영 source6a2beff와 구분한다. Mac/Windows 실제 OS 캡처 왕복은 미검증이다.
 

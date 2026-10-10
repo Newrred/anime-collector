@@ -31,7 +31,7 @@
 ### 15–17. 진행·발견·완료 보고
 
 - 사전 점검: master 대비2 commits/33 files, DB/API/flags/dependencies 변경 없음. 독립 관련 unit18 PASS, diff-check PASS. 연구 문서들은 이미 추적되며 docs 내 untracked/ignored0. 신규 입력 회귀가 quality workflow에 없어서 추가한다.
-- 실행/최종 결과는 [운영 배포 보고](2026-10-10-latest-production-release.md), 전체 검토 순서는 [Pro 인덱스](2026-10-10-pro-review-index.md)에 기록한다. 본 항목 작성 시점은 배포 전이다.
+- 완료: 후보 f428c60의 CI38053923871 전체 SUCCESS 후 master fast-forward. Vercel Production F1JFNeqm1hp4ryPqizTajQW89WGJ Ready·www 실제 commit/checkout/source/semanticMatch PASS. HTTP8경로200, 실제 새 메뉴/입력 안내·계정 연결/동기화, 일반 계정 관리자 거부, KR/TH/US 입력 활성·PH 비활성/불변 문서 확인. DB/가입/사진/삭제 조작0. [운영 배포 보고](2026-10-10-latest-production-release.md), [Pro 인덱스](2026-10-10-pro-review-index.md). 후속 문서만 Git에 보존하며 앱/설정 변경 없이 최종 master 배포 버전을 대조한다.
 
 ## 2026-10-10 — 계정 메뉴 통합과 데스크톱 이미지 입력
 

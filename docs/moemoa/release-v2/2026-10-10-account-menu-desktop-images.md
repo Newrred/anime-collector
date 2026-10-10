@@ -1,5 +1,7 @@
 # 계정 메뉴 통합 · 데스크톱 이미지 입력
 
+> **후속 운영 반영 완료:** 아래 본문은35d88ab의 로컬 완료 시점 기록이다. 이후 사용자 배포 승인으로 f428c60의 전체 CI 성공·master Git·Vercel Ready·실제 www 소스/새 UI 확인을 마쳤다. [최신 배포 결과](2026-10-10-latest-production-release.md)를 우선한다. DB/국가/Public 조건은 변경하지 않았다.
+
 상태: 로컬 구현·회귀 검증 완료. 운영 배포/DB 변경 없음. 작업 브랜치 `codex/simple-signup-preview`, 시작 소스 `cc11aa4`.
 
 ## 1. 읽은 문서와 코드

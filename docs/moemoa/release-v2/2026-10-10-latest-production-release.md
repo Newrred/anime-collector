@@ -1,6 +1,8 @@
 # 최신 기능 운영 배포 · Pro 검토 인계 (2026-10-10)
 
-상태: **배포 준비/동일 소스 CI 검증 단계**. 이 문구는 실제 Git/Vercel/www 대조 뒤 결과로 갱신한다. 전체 상황은 [Pro 검토 인덱스](2026-10-10-pro-review-index.md)에서 읽는다.
+상태: **최신 기능 운영 배포·확인 완료**. 검증 소스 `f428c605d488628071d95f1f04973d4d6f69d360`, CI 전체 성공 → master Git → Vercel Production Ready → 실제 www SHA 일치. 전체 상황은 [Pro 검토 인덱스](2026-10-10-pro-review-index.md)에서 읽는다.
+
+아래 SHA는 기능 검증 배포본이다. 이 결과를 기록하는 후속 문서 커밋은 앱/설정/DB를 바꾸지 않는다. 최종 문서 포함 master의 정확한 SHA는 `git rev-parse origin/master`와 [실제 build-info](https://www.moemoa.xyz/build-info.json)를 대조한다.
 
 ## 1. 읽은 문서·증거
 
@@ -29,7 +31,12 @@ CODEX_START_HERE, 확정 결정(01), QA/운영(07), phase(08), 변경 보고(09)
 
 - 기능 소스35d88ab 로컬: unit585/585·Chromium51/51·build32 PASS, PC1280/390/320px 확인. 이 결과를 새 CI 결과와 합산하지 않는다.
 - 독립 preflight: 관련 unit18/18, diff-check PASS. 변경 diff의 고위험 credential 패턴6종0건; 포괄적 보안 감사 완료 주장은 아님.
-- 동일 후보 CI, Vercel Git Production Ready, www build-info 및 읽기 전용 smoke: **아직 이번 보고 작성 시점에는 대기**. 결과 JSON은 `evidence/2026-10-10-latest-production-release.json`에 기록한다.
+- 후보 `f428c605d488628071d95f1f04973d4d6f69d360`의 [CI38053923871](https://github.com/Newrred/anime-collector/actions/runs/38053923871) **전체 SUCCESS**(`publication-contract`, `verify`). 기존 unit/catalog/build/가입/관리자·신규 desktop·동기화/보드/서비스워커·사진/모바일/컬렉션/감상 묶음을 같은 소스로 실행했다. 별도 테스트 묶음의 중복 사례를 합산하지 않는다.
+- CI 성공 후 같은 SHA를 master에 fast-forward push했다. Vercel Git Production **F1JFNeqm1hp4ryPqizTajQW89WGJ Ready**(`2026-10-10T13:11:30Z`), source master/f428c60·www 도메인 연결 및 실제 `/build-info.json`의 commit/checkoutCommit 일치, source=vercel-git, semanticMatch=true PASS. [결과 JSON](evidence/2026-10-10-latest-production-release.json).
+- 실제 HTTP: 홈·data·memory/new·record·auth/start·admin·10/10 약관·개인정보 **8경로200**, apex는 www로 정상 연결. HTTP200만으로 인증 기능 PASS라 주장하지 않는다.
+- 실제 로그인 세션 UI: 이미지 입력의 새 끌어놓기/붙여넣기·단축키/20MB 안내, 계정 및 데이터 단일 메뉴→같은 제목의 페이지, 계정 연결/두 동기화 성공 표시 PASS. 실제 계정 식별자·기록·사진은 증거에 담지 않았다. 일반 계정의 `/admin/`은 운영 권한 없음으로 차단됨을 확인했다.
+- 실제 가입 UI: 국가만 선택해 KR/TH/US 생년 입력 활성·PH 비활성,10/10 불변 문서 링크 확인. DOB/동의 제출·계정 생성·사진 선택/저장·삭제0. 관리자 계정의 집계 화면 PASS는 이전 가입 운영 보고의 증거이며 이번에는 일반 계정 거부만 새로 확인했다.
+- build-info의 workingTreeDirty=true 및 공개 vercel.json bytes hash 차이는 숨기지 않았다. Git source SHA는 일치하고 canonical JSON 내용은 동일(semanticMatch=true); 이전 배포와 같은 config hash 조합이다. clean=true로 보고하지 않는다. GitHub는 actions v4 내부 Node20 지원 종료 안내를 표시했지만 작업은 성공했다. 이번에 의존성/actions 버전을 임의 업그레이드하지 않았다.
 
 ## 7. 안전·관찰
 

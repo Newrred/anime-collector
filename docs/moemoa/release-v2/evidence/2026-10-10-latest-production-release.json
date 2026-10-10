@@ -1,6 +1,6 @@
 {
   "requestedAt": "2026-10-10",
-  "status": "candidate-prepared-awaiting-ci-and-git-production",
+  "status": "production-verified",
   "productionBranch": "master",
   "handoffBranch": "codex/simple-signup-preview",
   "featureSourceCommit": "35d88ab",
@@ -10,7 +10,45 @@
   "newCountryActivation": false,
   "priorLocalVerification": { "source": "35d88ab", "unit": 585, "desktopChromium": 51, "builtPages": 32 },
   "notVerified": ["Windows/macOS real screenshot clipboard roundtrip", "new production Google signup", "Safari/Firefox physical devices"],
-  "ci": null,
-  "deployment": null,
-  "liveReadOnlySmoke": null
+  "sourceCommit": "f428c605d488628071d95f1f04973d4d6f69d360",
+  "ci": {
+    "runId": 38053923871,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38053923871",
+    "headSha": "f428c605d488628071d95f1f04973d4d6f69d360",
+    "conclusion": "success",
+    "publicationContract": "success",
+    "verify": "success",
+    "desktopInputStep": "success"
+  },
+  "deployment": {
+    "provider": "vercel-git",
+    "id": "F1JFNeqm1hp4ryPqizTajQW89WGJ",
+    "githubDeploymentId": 6981239639,
+    "environment": "Production",
+    "status": "Ready",
+    "url": "https://anime-collector-li3j201c8-newrreds-projects.vercel.app",
+    "dashboardUrl": "https://vercel.com/newrreds-projects/anime-collector/F1JFNeqm1hp4ryPqizTajQW89WGJ",
+    "canonicalOrigin": "https://www.moemoa.xyz",
+    "buildInfoCommit": "f428c605d488628071d95f1f04973d4d6f69d360",
+    "buildInfoCheckoutCommit": "f428c605d488628071d95f1f04973d4d6f69d360",
+    "builtAt": "2026-10-10T13:10:43.777Z",
+    "readyAt": "2026-10-10T13:11:30Z",
+    "buildInfoSource": "vercel-git",
+    "workingTreeDirty": true,
+    "deploymentConfigSemanticMatch": true,
+    "trackedConfigSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+    "buildConfigSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+    "cliDeploymentOrPromotion": false
+  },
+  "liveReadOnlySmoke": {
+    "http200": ["/", "/data/", "/memory/new/", "/record/", "/auth/start/", "/admin/", "/legal/terms-2026-10-10/", "/legal/privacy-2026-10-10/"],
+    "apexRedirectDestination": "https://www.moemoa.xyz/",
+    "imageInput": "new drop/paste instruction, Ctrl V / Command V, 20MB format hint visible; no image selected or submitted",
+    "accountMenu": "single account-and-data entry; routes to matching page heading; duplicate utilities entry absent",
+    "existingSignedInAccount": "connected; both memory/board and title/watch sync success shown; no new record created by verification",
+    "adminBoundary": "existing ordinary account denied operator access; no administrator mutation performed",
+    "signup": "KR/TH/US birth-year field enabled; PH disabled with unavailable message; no birthday entered or terms accepted",
+    "legalLinks": "immutable terms-2026-10-10 and privacy-2026-10-10"
+  },
+  "documentationFollowup": "Source/deployment above identify the CI-verified feature release. A later docs-only handoff commit records these observations; compare latest master with live build-info for its exact deployment SHA. No app/config/DB changes are part of that followup."
 }

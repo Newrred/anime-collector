@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-10 최신 요청 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력35d88ab와 문서 전체를 배포한다. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
+> **2026-10-10 최신 완료 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력 포함 f428c60의 전체 CI·master Git·Vercel Ready·실제 www 소스/화면 확인 완료. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
 
 > **2026-10-10 최신 로컬 완료 — 계정 메뉴·데스크톱 이미지 입력:** 계정 및 데이터 단일 진입, 파일 드롭·Ctrl+V/⌘V 추가/교체, 문구 정리와 계정 전환/정리 경합 방어. unit585·Chromium51·build32 PASS, PC·390/320px 확인. [8항 보고](2026-10-10-account-menu-desktop-images.md). 운영 미배포·DB 미변경·OS 실기기 캡처 미검증. 아래 가입 운영 적용과 이번 로컬 작업을 구분한다.
 
@@ -310,7 +310,7 @@
 |---|---|
 | 승인·범위 | `FIRST-SIGNUP-KR-US-TH-UI-20261010`: 무료 비공개 기록, KR14/US13/TH13. PH·EU/EEA·UK·CH 및 Public은 이번 활성 대상 아님 |
 | 구현·자동검사 | 연/월/일 직접 입력·단일 약관 수락·기존회원 별도 로그인·관리자 화면 개선. unit571/build32, 가입18·관리자17·callback4, PostgreSQL16 신규62개 검사 및 CI38048163986 전체 SUCCESS |
-| Git·배포 | 기존 가입 운영6a2beff에서 최신 메뉴/입력35d88ab까지 Git 배포 진행. 현재 source/CI/Ready/www 증거는 [최신 배포 보고](2026-10-10-latest-production-release.md)를 따른다 |
+| Git·배포 | 최신 기능 f428c60 CI38053923871 전체 SUCCESS→master Git→Vercel F1JFNeqm1hp4ryPqizTajQW89WGJ Ready/www SHA 일치. 후속 문서는 앱 변경 없이 반영. [최신 배포 보고](2026-10-10-latest-production-release.md) |
 | 운영 DB | ACTIVATE release `MOEMOA_FIRST_SIGNUP_KR_US_TH_ACTIVATE_PROD_20261010_01` APPLY SUCCESS, enabled/admission=true·KR14/TH13/US13. 26개 테이블/동기화·계정3·수락0 보존. Public schema는 설치돼 있으나 Public flags는 off |
 | 배포 후 확인 | 독립 DB readback·실제 가입/관리자 UI·기존회원 Google 복귀 PASS. DOB/동의 공란 로그인→계정 연결·두 동기화 상태 성공·서비스 관리 링크 확인. 신규 운영 계정 생성은 미실행 |
 | 별도 후속 | EU/EEA·UK 실제 무보수 대표자 수임, PH 처리 경로·조건, 원래 Public 출시·운영 복구/알림 잔여. 이번3개국 가입의 추가 승인 조건으로 확대하지 않음 |
@@ -719,7 +719,8 @@ ID / M: 최신35d88ab 기능 운영 반영·Pro 전체 검토 인계 (사용자 
 검증: 기존 로컬 unit585/Chromium51/build32, 독립unit18 PASS. 새 desktop runner를 CI에 추가.
 현재 배포: 2026-10-10-latest-production-release.md와 evidence JSON의 실제 source/CI/Vercel/www 결과가 기준.
 불변: KR14/US13/TH13·Public off. 이번 DB 변경0, 원본/계정 삭제0, 추가 국가 활성0.
-다음: 같은 SHA CI→master Git 배포→실제 배포 확인→Pro 인덱스에서 전체 검토.
+완료: f428c60 CI38053923871 전체 SUCCESS→master Git→Vercel Production Ready→www SHA 일치. 실제 메뉴/입력 안내·계정 연결·일반 계정 admin 거부·국가별 입력/문서 확인.
+다음: Pro 인덱스에서 전체 검토. 후속 문서 커밋의 master/live SHA도 대조하며 새 기능·정책을 추가하지 않음.
 미검증/후속: OS 캡처 실기기, 새 운영 Google 가입, PH/EU/UK/CH 및 Public·D05 잔여. 기존 완료와 혼합하지 않는다.
 ```
 

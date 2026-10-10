@@ -56,7 +56,7 @@
 | --- | --- |
 | 가입 입력·나이 | `src/components/auth/SimpleSignup.jsx`, `src/features/auth/birthDateInput.js`, `simpleSignup.js`, `signupDocuments.js` |
 | Google 왕복·직접 가입 차단 | `src/server/signup/handler.js`, `backend.js`, `security.js`, `api/signup.js`; migration `20261009130000`, `20261009143000`, `20261010190000` |
-| 본인 조회·탈퇴 | `src/server/accountDelete/handler.js`, `src/features/auth/accountPrivacy.js`, `src/components/auth/AccountPrivacyPanel.jsx`; migration `20261010170000` |
+| 본인 조회·탈퇴 | `src/server/accountDelete/handler.js`, `src/features/auth/accountPrivacy.js`, `src/components/data/AccountPrivacyPanel.jsx`; migration `20261010170000` |
 | 관리자 권한·최초 국가 활성 | `src/components/AdminDashboard.jsx`, `src/features/admin/adminService.js`; migration `20261010180000`, `20261010190000`; `tools/identity/build-first-signup-release.mjs` |
 | 메뉴·이미지 입력 | `src/components/TopNavDataMenu.jsx`, `src/components/auth/AuthSheet.jsx`; `src/features/memory/adapters/platform/webImageIntake.js`, `application/imageTransferFiles.js`, `components/useImageFileTransfer.js`, composer/replacement |
 | 동기화·이미지 수명 | `src/hooks/useMemoryAccountSync.js`, `src/hooks/useTitleStateSync.js`, `src/features/memory/application/saveNewMemoryToAccount.js`, `autoSavePrivatePhotos.js`, runtime/private image 경계 |
