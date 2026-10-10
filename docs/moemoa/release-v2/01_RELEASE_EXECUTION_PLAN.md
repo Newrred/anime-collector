@@ -1,5 +1,42 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-10 — 국가별 운영 가입 조건과 관리자 화면
+
+### 1–3. 목적·승인·현재 증거
+
+- 사용자 직접 요청으로 남은 국가별 조건을 조사·정리하여 실제 운영에 적용하고 지정 Google 계정의 서비스 관리 화면을 구축한다(`REGIONAL-SIGNUP-AND-ADMIN-PROD-20261010`). 본 절은 작업 중 발견과 검증 결과를 계속 누적한다.
+- 시작/결정/03·05·06·07·08·09/PLANS, 현재 signup registry·handler·고정 문서·receipt migration 및 기존 moderator/비용 RPC를 읽는다. test9970120의 실제 왕복·정리·unit531/CI PASS와 운영bae5e79를 구분한다. 현재10/10-test 문서는 Production에서 허용되지 않는다.
+- `/moderation/`와 DB moderator는 존재하고 지정 운영자 연결의 과거 근거가 있지만, 가입/서비스 운영 대시보드는 없다. 운영 계정·flags·migration ledger는 적용 직전 조회로 다시 확인한다.
+
+### 4–6. 범위·구조·변경 지도
+
+- 포함: 공식 국가별 재조사/반례 대조, 확정 가능한 운영 정책과 불변 문서/registry/동의 흐름, 기존 계정 조회·탈퇴 코드 반영, `/admin/` 현황·검토된 정책의 pause/resume·콘텐츠 검토 진입, 테스트 및 Git Production 적용.
+- 제외: 무검증 Public/스크린샷/팬아트 활성, 일반사용자 private 기록·사진 열람, 계정 강제삭제 도구, 새 인증 공급자/결제·외부 계약 체결. 정책을 확정할 수 없는 정확한 외부 조건은 완료로 포장하지 않는다.
+- 관리자: 기존 Supabase 세션 → 좁은 RPC → `auth.uid()`에 연결된 별도 service operator 권한. 정책 읽기/안전한 상태변경과 aggregate만 허용한다. 새로운 운영자 추가 UI는 이번에 제공하지 않는다.
+- 파일 지도: `supabase/migrations/*_service_admin.sql`, `tools/operations/*admin*`, `src/features/admin/*`, `src/components/AdminDashboard.jsx`, `src/pages/admin.astro`, 계정 화면 진입점/기존 moderation 연결, 관련 unit/SQL/Playwright. 가입 문서는 새 운영 버전을 추가하고 test/10/9를 수정하지 않는다. 기존 API·registry·가입 검사와 운영 준비 도구/문서를 필요한 범위만 갱신한다.
+
+### 7–9. migration·마일스톤·검증
+
+- additive table/RPC와 불변 policy bundle, 운영자 한 명의 명시 연결. 기존 테이블·레코드/영수증/동기화 함수 보존, test 먼저 적용/권한·경합 검사. committed migration hash와 source SHA를 release ID에 결속한다. 삭제형 down migration은 하지 않는다.
+- M1: 국가별 직접 근거/적용 판단/필수 행동을 확정한다. 부모동의나 법정 대리인 계약이 실제 필요하면 기존 흐름·비용 결정과 충돌 여부를 두 번 검토한 뒤 정확한 안건만 알린다.
+- M2: 관리자 anon/일반계정 거부, 운영자 조회·pause/resume·감사 기록, stale revision/권한철회/로그아웃·계정전환/320px를 검증한다. 가입 pause는 `enabled=false`, **admission_enabled=true 유지**로 직접 OAuth 우회를 막으며, 최초 운영 활성과 일상 pause/resume을 분리한다.
+- M3: 가능한 운영 정책과 고지·계정 기능을 test에서 검증한다. 실제 사용자 약관 수락·Google login은 사용자가 수행하며 기존 가입/삭제 검증을 불필요하게 반복하지 않는다. unresolved 지역 활성은 임의 통과하지 않는다.
+- M4: 운영 사전 조회/백업·보존 검증 → 비파괴 DB 적용/별도 readback → master Git push → Vercel Git Ready/source/실제 www SHA → 운영 일반사용자 거부·관리자 화면·정책/로그인·자동 정리 연결 점검. 공개 UGC는 기존off 유지.
+- 명령: 기존 `npm run test:unit`, `npm run build`, signup UI runner, 기존 SQL admission/receipt와 새 admin harness, 관련 Playwright. unavailable를 PASS로 합산하지 않는다.
+
+### 10–14. 안전·관찰·복귀·결정 경계
+
+- 관리자 화면에는 사용자 이메일/UUID/감상/사진/object key를 나열하지 않고 집계·정책만 반환한다. 권한은 DB에서 매 요청 재검증, private operator/audit table 직접 권한 없음. 상태변경은 row lock·expected revision·고정 action·append-only audit로 보호한다.
+- 현재 receipt 삭제 특성상 누적 탈퇴 수를 추정하지 않는다. DB 정리 대기0을 cron 정상으로 표시하지 않는다. 최근 정리 실행은 별도 Actions 근거/링크로 구분한다. 일반 로그에 비밀값·개인 입력 없음.
+- rollback: 서비스 기능/UI flags off와 신규 가입 pause로 중지하되 admission 차단을 유지한다. 마지막 정상 Git source 복귀; 새 schema/수락·감사 기록은 보존한다. operator 권한만 비활성화 가능. 기존 계정/기기 기록을 삭제하지 않는다.
+- 위험: 테스트 정책을 운영에 복사, 관리자 역할 확장, pause가 가입 우회를 만드는 문제, 오래된 연구를 현행 조건으로 오인하는 문제를 독립 검토한다. 새 의존성/서버/사이트를 만들지 않는다.
+- 필요한 결정: 일반 구현·test·검증된 운영 반영은 이번 요청으로 승인됐다. 실제 비용/외부 계약/필수 신규 동의 흐름 등 기존 결정과 충돌하는 구체 사항만 작업 가능한 나머지와 분리해 보고한다. 브라우저의 보안 권한 확대 확인은 실제 적용 시점에 대상·범위를 제시한다.
+
+### 15–17. 진행·발견·완료 기록
+
+- 시작: 세 병렬 점검으로 PH/TH, KR/US/Europe, 현재 관리자 계약을 대조한다. `vibe-security`의 DB 권한·최소정보 원칙과 `vibe-ops`의 config/실제배포/rollback 검증을 적용한다. 연구/코드/운영 완료를 각각 구분한다.
+- 발견: 기존 admission flag off는 legacy 가입 허용 상태이며 관리자 pause와 같은 의미가 아니다. 신규 운영 제어는 admission guard를 보존해야 한다. 최종 결과·변경 파일·실제 tests/DB/source/잔여는 실행 후 이 절에 기록한다.
+
 ## 2026-10-10 W06 — 승인된 테스트 전용 사진 정리 실행 연결
 
 - **목적/승인:** 위 실제 탈퇴 PASS 이후 남은 합성 사진2개 정리를 위해 사용자가 테스트 전용 연결 추가를 `ㄱ`으로 승인했다. 기존 운영 설정·예약·사진·master는 그대로 둔다. 새 가입/탈퇴 재시험은 요구하지 않는다.
