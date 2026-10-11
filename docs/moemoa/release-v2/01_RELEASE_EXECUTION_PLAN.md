@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
+
+
 > **2026-10-12 W17/D05 실제 읽기진단 완료:** 승인3d14da3 master→Vercel Git/www exactSHA, run38152095001 SUCCESS. 암호화 ledger sequence1 인증·대상 ZIP62,610,483B metadata404 확인, DB/Storage본문/Drive쓰기0·gate false 재확인. 이전 백업 실패 원인은 상세로그 부재로 미확정, 새백업 완료 아님. 다음 최소복구 후보ab05885(운영3d14da3 위4파일)는 지정실패run만 missing 확인→기존기록보존/abandoned append→새증분1회 또는 존재ZIP 검증commit. 로컬36/기본읽기 YAML PASS, 운영 미적용. 다음1개: 정확한 후보의 실패기록 복구·수동1회 승인. 주간예약·삭제·Public변경 제외. 아래 로그는 당시 이력이다.
 
 
@@ -2610,3 +2613,21 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 7. 보호/관측: 실제 진단에서 새 Secret저장/DB조회/Storage본문/Drive쓰기/삭제/예약0. 로그·문서에는 aggregate상태/크기/후보SHA만 기록하고 토큰·본문·개인정보 출력0. 복구 후보는 기존 승인된 GitHub 환경 인증을 재사용하되 다음 실제 실행은 별도 승인 범위이며, 새/변경이미지64MB 제한과 기존 Drive부모사본 재사용을 유지한다.
 8. 남음/다음1개: ab05885의 master4파일 반영 및 실패run20261011145200757에 한정한 종료기록 추가·수동증분1회에 대한 정확한 승인. 승인 전 capture/Drive추가쓰기 없음. 실제 새ZIP보관·외부회수복구·주간예약·독립복구키 보관은 미완료이며 다음 후보가 원인을 해결했다고 단정하지 않는다. 사용자10/11 정확후보별 운영승인 조건에 따라 이 새쓰기만 확인한다.
 실제 진단: https://github.com/Newrred/anime-collector/actions/runs/38152095001
+
+#### 2026-10-12 ab05885 복구 적용·수동1회 진행 승인
+직전 정확후보 ab05885의 복구·수동1회 요청에 사용자 “항상 문서상 계획을 염두에 두며 진행 ㄱ”로 진행 지시. 기존 W17/D05에서 master4파일 반영→지정 실패run20261011145200757 복구 입력으로 수동1회→실제결과/Drive검증→gate off→Vercel exactSHA 확인한다. 기존 인증 재사용, 새 Secret/예약/삭제/DB구조/Public변경 제외. 실패 시 자동 재시도하지 않고 근거와 최소 후속만 기록한다.
+
+#### ab05885 실제 실패 후 최소 HTTP 재현 계획
+run38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN, Stop containers SUCCESS·gate false GET200. 이전 intent 종료/새 ZIP 준비까지 통과한 제어흐름이나 새 원격파일 존재는 미확인. 공식 Drive resumable 308 응답과 Node fetch redirect:error의 충돌을 실제 loopback HTTP로 재현한다. 외부응답/비밀값을 로그에 추가하지 않고 chunk PUT만 manual redirect(자동추적 없음)로 처리하는 최소후보를 검토한다. 신규 실제전송/재시도0, 기존 W17/D05 안에서 회귀와 새후보를 준비한다. 원격실패의 정확원인은 아직 단정하지 않는다. 근거: https://developers.google.com/workspace/drive/api/guides/manage-uploads
+
+#### 2026-10-12 ab05885 실제 실행·HTTP 최소 수정 완료 보고
+1. 문서/근거: AGENTS·CODEX_START_HERE·확정결정·PLANS·기존00~03/증거·runner/Drive/state/workflow·관련tests를 대조, 기존 W17/D05 ExecPlan을 유지했다.
+2. 승인/범위: 직전 후보ab05885 적용·수동1회 요청에 사용자 진행 승인. 실패 후 자동 재실행하지 않았다. 새후보는 별도 정확승인 전 운영미적용이다.
+3. 실제배포: git push origin ab05885461aa1e99bbb116172e3cd7188100da17:refs/heads/master 성공; master-only policy GET200, 활성PATCH204/dispatch204. run38152850345 FAILURE, UPLOAD_ARCHIVE/DRIVE_REQUEST_UNCERTAIN. job114509693876 container정리SUCCESS, gate는 admission성공 뒤 미리false PATCH204/GET200·최종GET200 false. Vercel8C66kDDPR5FYH5aE7UfTQ3zmrjDN 및 www build-info200 exactSHA/source vercel-git/semanticMatch true(workingTreeDirty true 응답 보존).
+4. 실데이터/한계: 승인된 DB/변경이미지 capture·암호화 준비·새intent 저장 이후 업로드 단계에서 실패했다. 정확한 새이미지GET량/ZIP크기/원격실패응답은 이번 요약에 없으므로 추측하지 않는다. Drive connector 검색은2회 빈결과, Chrome에서 정확한 minecrafthong 계정의 기존ZIP2·state1/2/3 및 최신실패ID20261011154922628을 확인. 새ZIP미표시는 UI근거이며 metadata404/최신state 본문인증 PASS 아님.
+5. 로컬변경/검증: drive-backup.mjs의 chunk PUT에만 redirect:manual(자동이동0); 기타요청 redirect:error 유지. native fetch+loopback HTTP의308/Location에서 기존DRIVE_REQUEST_UNCERTAIN FAIL을 재현하고 수정 후 PASS, 실제302미추적·잘못된Range거부 추가. node --test tests/operations/driveBackup.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/weeklyBackupState.test.mjs 39/39 PASS. 운영의 실제원인이 이308이었다는 확정은 아님.
+6. 후보/DB/복귀: d8bf945051854ca60398664de54105a49a4ea2c2은 운영ab05885 부모·업로더1파일/3줄 변경, Git blob hash1/1 일치. 새의존성/DBmigration/서비스UI/Public 변경0. 실패기록은 지우지 않고 최신pending만검증, 롤백은gate off 및 기존abandoned호환parser 유지. 새후보 운영적용0.
+7. 보호/관측: 기존 GitHub환경 인증 재사용, Secret신규저장0·원문로그0·Drive삭제0·주간예약0. 암호화state에는 실패이력 남김. 외부URL Location은 어느응답에서도 추적하지 않으며 synthetic HTTP검사에 실자격/데이터는 사용하지 않았다.
+8. 다음1개: 정확d8bf945 적용 후 최신실패run20261011154922628에 한정해 기존metadata/hash 확인→없을때만 종료이력추가·수동증분1회(기존64MB상한). 스위치off까지 포함하는 별도 승인이 필요하다. W17/D05의 정기외부보관·독립키·회수복구 등은 완료로 바꾸지 않는다.
+실제실행 https://github.com/Newrred/anime-collector/actions/runs/38152850345
+공식308응답 근거 https://developers.google.com/workspace/drive/api/guides/manage-uploads

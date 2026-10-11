@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
+
+
 > **2026-10-12 현재 재개점:** 기존 release-v2/03 현재카드 W17/D05를 따른다. 실제 읽기진단3d14da3/run38152095001 성공, 누락ZIP·보류기록 인증·실행off 확인. 백업성공은 미완료. 최소복구 후보ab05885 로컬36 PASS/운영미적용. 상세·잔여·정확후보 승인범위는 [기존 ExecPlan](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md)과 [단일작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)에 있으며 아래 이전 날짜 요약의 다음작업보다 우선한다.
 
 

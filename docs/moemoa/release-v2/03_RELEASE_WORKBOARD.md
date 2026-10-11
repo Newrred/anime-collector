@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
+
+
 > **2026-10-12 W17/D05 실제 읽기진단 완료:** 승인3d14da3 master→Vercel Git/www exactSHA, run38152095001 SUCCESS. 암호화 ledger sequence1 인증·대상 ZIP62,610,483B metadata404 확인, DB/Storage본문/Drive쓰기0·gate false 재확인. 이전 백업 실패 원인은 상세로그 부재로 미확정, 새백업 완료 아님. 다음 최소복구 후보ab05885(운영3d14da3 위4파일)는 지정실패run만 missing 확인→기존기록보존/abandoned append→새증분1회 또는 존재ZIP 검증commit. 로컬36/기본읽기 YAML PASS, 운영 미적용. 다음1개: 정확한 후보의 실패기록 복구·수동1회 승인. 주간예약·삭제·Public변경 제외. 아래 로그는 당시 이력이다.
 
 
@@ -815,6 +818,21 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+W/M: W17/D05 · M4/M5 UPLOAD_FAILED / HTTP_DEFECT_REPRODUCED_LOCALLY / RUN_GATE_OFF
+문서기준: 주1회 DB·변경이미지/RPO7일/RTO24h 목표, 기존사본 보존·정확후보별 운영승인 유지
+이번실제: ab05885 master Git→Vercel/www exactSHA, 수동38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN
+보존: 기존ZIP2개/state1·2·3 UI확인, 최신실패20261011154922628. 새ZIP 미표시이며 metadata404/본문인증 재확인 아님
+종료: container정리SUCCESS·gate false PATCH204/GET200, 자동재시도·주간예약·삭제·DBschema/Public변경0
+로컬: 실제 loopback HTTP 308+Location에서 기존코드 동일오류 재현→chunk PUT만 redirect:manual 수정, 임의Location추적0
+검증: 관련39 PASS(기존36+신규3; 308성공·302미추적·잘못된Range거부), diff/후보blob1개해시 PASS
+후보: d8bf945051854ca60398664de54105a49a4ea2c2, 운영ab05885 부모·drive-backup.mjs 1파일. 운영미적용
+미완료: 원격오류의 정확원인 확정/새ZIP보관·회수복구·주간예약·독립키. 로컬재현을 실제완료로 확대하지 않음
+다음1개: d8bf945 정확후보 적용·최신실패ID20261011154922628 복구 수동1회 승인 후 실행
+```
+
+<details><summary>이전 카드 — 실제 읽기 진단 완료</summary>
+
+```text
 W/M: W17/D05 · M4/M5 READ_ONLY_INSPECTION_PASS / BACKUP_INCOMPLETE / RUN_GATE_OFF
 문서기준: 주1회 DB·변경이미지 증분 외부보관/RPO7일/RTO24h 목표. 기존사본보존·단일작업판·D06 후보별승인 유지
 이번실제: 3d14da3 master Git→Vercel www exactSHA, read-only run38152095001 SUCCESS. AES-GCM state1 인증·대상 ZIP62610483B metadata404
@@ -825,6 +843,8 @@ W/M: W17/D05 · M4/M5 READ_ONLY_INSPECTION_PASS / BACKUP_INCOMPLETE / RUN_GATE_O
 미완료: 실제ZIP보관·회수복구·주간예약·독립키. 원인해결검증 아직없음; 외부서비스 장애로 단정하지 않음
 다음1개: ab05885 정확후보의 실패기록복구 및 수동증분1회 승인 후 실행·결과/gate off 확인
 ```
+
+</details>
 
 <details><summary>이전 카드 — Drive 연결 후보</summary>
 

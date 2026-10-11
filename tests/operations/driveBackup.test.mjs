@@ -16,7 +16,7 @@ async function fixture(t,size=10){
  const journalPath=join(root,'upload-journal.json'),calls=[];let remote=null,puts=0;
  const meta=()=>({id:fileId,name,mimeType:'application/zip',parents:[folderId],size:String(body.length),sha256Checksum:artifact.sha256,ownedByMe:true,trashed:false,permissions:perms});
  const mock=async(url,options)=>{
-  calls.push({url,method:options.method||'GET'});assert.equal(options.redirect,'error');assert.equal(options.headers.Authorization,'Bearer synthetic-token');
+  calls.push({url,method:options.method||'GET'});assert.equal(options.redirect,options.method==='PUT'?'manual':'error');assert.equal(options.headers.Authorization,'Bearer synthetic-token');
   if(url.includes('/files/'+folderId))return response(folder());
   if(url.includes('generateIds'))return response({ids:[fileId]});
   if(url.includes('/files/'+fileId))return remote?response(remote):response({},404);
@@ -82,3 +82,27 @@ test('parent download accepts browser ZIP MIME and verifies streamed bytes',asyn
 test('corrupt or oversized parent stream is rejected and never treated as verified',async t=>{const f=await fixture(t);f.setRemote(f.meta());for(const body of [Buffer.alloc(f.artifact.bytes,9),Buffer.alloc(f.artifact.bytes+1,3)]){const client=createDriveBackupClient('synthetic-token',async(u,o)=>u.endsWith('?alt=media')?new Response(body):f.mock(u,o));await assert.rejects(client.download({artifact:f.artifact,fileId,path:join(f.root,'bad-'+body.length+'.zip')}),/DOWNLOAD_(HASH|LIMIT)/);}});
 
 test('upload HTTP rejection retains only status code for safe stage diagnostics',async t=>{for(const rejected of ['POST','PUT']){const f=await fixture(t,8*1024*1024+2);await assert.rejects(createDriveBackupClient('synthetic-token',async(u,o)=>o.method===rejected?response({private:'must never appear in error'},403):f.mock(u,o)).upload(f),/^Error: DRIVE_HTTP_403$/);}});
+
+import {createServer} from 'node:http';
+test('real HTTP 308 Location is a chunk acknowledgement, never a redirect to follow',async t=>{
+ const f=await fixture(t,8*1024*1024+2);let wireRequests=0;
+ const server=createServer(async(req,res)=>{wireRequests++;for await(const chunk of req){};res.writeHead(308,{Range:'bytes=0-8388607',Location:'http://127.0.0.1:1/never-follow'});res.end();});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const client=createDriveBackupClient('synthetic-token',async(u,o)=>{
+  if(o.method==='PUT'&&o.headers['Content-Range'].startsWith('bytes 0-'))return fetch('http://127.0.0.1:'+server.address().port+'/',o);
+  return f.mock(u,o);
+ });
+ const result=await client.upload(f);assert.equal(result.status,'REMOTE_METADATA_SHA256_VERIFIED');assert.equal(wireRequests,1);
+});
+
+test('real HTTP 302 upload response never forwards ciphertext or credentials',async t=>{
+ const f=await fixture(t,8*1024*1024+2);let wireRequests=0;
+ const server=createServer(async(req,res)=>{wireRequests++;for await(const chunk of req){};res.writeHead(302,{Location:'http://127.0.0.1:1/never-follow'});res.end();});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));
+ const client=createDriveBackupClient('synthetic-token',async(u,o)=>o.method==='PUT'?fetch('http://127.0.0.1:'+server.address().port+'/',o):f.mock(u,o));
+ await assert.rejects(client.upload(f),/^Error: DRIVE_UPLOAD_UNCERTAIN$/);assert.equal(wireRequests,1);
+});
+test('manual 308 still requires the exact acknowledged byte range',async t=>{
+ const f=await fixture(t,8*1024*1024+2);
+ await assert.rejects(createDriveBackupClient('synthetic-token',async(u,o)=>o.method==='PUT'?response({},308,{range:'bytes=0-12'}):f.mock(u,o)).upload(f),/^Error: DRIVE_UPLOAD_UNCERTAIN$/);
+});

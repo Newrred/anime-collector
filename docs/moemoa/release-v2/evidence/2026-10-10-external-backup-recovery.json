@@ -1050,8 +1050,8 @@
       "tools/operations/run-weekly-backup.mjs",
       "tools/operations/weekly-backup-state.mjs"
     ],
-    "pushed": false,
-    "status": "LOCAL_VERIFIED_PENDING_EXACT_APPROVAL",
+    "pushed": true,
+    "status": "APPLIED_ACTUAL_UPLOAD_FAILED",
     "targetMissingRunId": "20261011145200757",
     "behavior": "Exact pending run only; metadata404 appends authenticated abandoned record without deleting old state, then new incremental capture/upload; existing archive must verify before commit; errors do not abandon.",
     "tests": {
@@ -1076,6 +1076,95 @@
     },
     "rollback": "Keep activation false. Preserve authenticated abandoned state support; do not restore a parser that cannot read the new record type after a recovery write.",
     "unresolved": "Old upload error cannot be reconstructed from generic old log. Retry may expose a provider rejection; no claim of root-cause fix.",
-    "gitBlobHashMatches": 4
+    "gitBlobHashMatches": 4,
+    "appliedRunId": 38152850345,
+    "appliedToMaster": true
+  },
+  "weeklyRecoveryRun20261012": {
+    "status": "ACTUAL_UPLOAD_FAILED",
+    "candidate": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "approval": "User proceed after exact candidate recovery/manual-once request",
+    "runId": 38152850345,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38152850345",
+    "recoverMissingRunId": "20261011145200757",
+    "dispatches": 1,
+    "activationPatch": 204,
+    "gateDisabledAfterJobAdmission": {
+      "patch": 204,
+      "readback": 200,
+      "value": false
+    },
+    "vercelBuild": {
+      "commit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+      "checkoutCommit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+      "builtAt": "2026-10-11T15:49:31.463Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "noSchedule": true,
+    "noExistingCopyDeletion": true,
+    "noSchemaChange": true,
+    "noPublicChange": true,
+    "conclusion": "failure",
+    "summary": {
+      "status": "WEEKLY_BACKUP_INCOMPLETE",
+      "error": "DRIVE_REQUEST_UNCERTAIN",
+      "stage": "UPLOAD_ARCHIVE",
+      "safeToServe": false
+    },
+    "cleanup": "success",
+    "finalGateReadback": {
+      "http": 200,
+      "value": false
+    },
+    "driveUI": {
+      "account": "minecrafthong@gmail.com",
+      "existingFullArchives": 2,
+      "stateSequences": [
+        1,
+        2,
+        3
+      ],
+      "latestStateRunId": "20261011154922628",
+      "newArchiveVisible": false,
+      "cryptographicReadback": false
+    },
+    "rootCauseProven": false
+  },
+  "weeklyHttpFixCandidate20261012": {
+    "base": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "commit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "branch": "refs/heads/codex/weekly-backup-http-20261012",
+    "sourceSha256": {
+      "tools/operations/drive-backup.mjs": "535964f5bd12afe4b76b737217228d230c196ccc96c1ea718536bc9c2d6bbbdc"
+    },
+    "changed": [
+      "tools/operations/drive-backup.mjs"
+    ],
+    "pushed": false,
+    "status": "LOCAL_VERIFIED_PENDING_APPROVAL",
+    "targetPendingRunId": "20261011154922628",
+    "reproduction": {
+      "transport": "loopback HTTP with native Node fetch, synthetic payload",
+      "response": "308 with Range and Location",
+      "before": "DRIVE_REQUEST_UNCERTAIN",
+      "after": "PASS",
+      "provesRemoteCause": false
+    },
+    "tests": {
+      "command": "node --test tests/operations/driveBackup.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/weeklyBackupState.test.mjs",
+      "passed": 39,
+      "realHttp308": true,
+      "realHttp302NeverFollow": true,
+      "incorrectRangeRejected": true
+    },
+    "scope": "Only resumable chunk PUT uses redirect:manual; no response Location is followed. Other calls stay redirect:error.",
+    "source": "https://developers.google.com/workspace/drive/api/guides/manage-uploads",
+    "gitBlobHashMatches": 1
   }
 }

@@ -7,8 +7,8 @@ export const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
 const ID=/^[a-zA-Z0-9_-]{10,200}$/;
 const HASH=/^[a-f0-9]{64}$/;
 const failure=code=>{throw Error(code);};
-async function call(request,url,options={}){
- try{return await request(url,{...options,redirect:'error',signal:AbortSignal.timeout(120000)});}catch{failure('DRIVE_REQUEST_UNCERTAIN');}
+async function call(request,url,options={},resumableChunk=false){
+ try{return await request(url,{...options,redirect:resumableChunk?'manual':'error',signal:AbortSignal.timeout(120000)});}catch{failure('DRIVE_REQUEST_UNCERTAIN');}
 }
 async function json(response){
  if(!response.ok)failure('DRIVE_HTTP_'+response.status);
@@ -80,7 +80,7 @@ export function createDriveBackupClient(token,request=fetch){
      const length=Math.min(chunkSize,a.bytes-offset),body=Buffer.alloc(length);let filled=0;
      while(filled<length){const {bytesRead}=await handle.read(body,filled,length-filled,offset+filled);if(!bytesRead)failure('DRIVE_LOCAL_MISMATCH');filled+=bytesRead;}
      const end=offset+length-1;
-     const response=await call(request,session.href,{method:'PUT',headers:{...headers,'Content-Type':'application/zip','Content-Length':String(length),'Content-Range':'bytes '+offset+'-'+end+'/'+a.bytes},body});
+     const response=await call(request,session.href,{method:'PUT',headers:{...headers,'Content-Type':'application/zip','Content-Length':String(length),'Content-Range':'bytes '+offset+'-'+end+'/'+a.bytes},body},true);
      if(response.status>=400)failure('DRIVE_HTTP_'+response.status);
      if(end+1<a.bytes){if(response.status!==308||response.headers.get('range')!=='bytes=0-'+end)failure('DRIVE_UPLOAD_UNCERTAIN');}
      else if(!response.ok)failure('DRIVE_HTTP_'+response.status);
