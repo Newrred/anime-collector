@@ -106,6 +106,18 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 7. 안전/관측: 운영자 서버권한·case/target revision 유지, 불확실 완료 뒤 같은조치 자동재전송0/재조회 요구, 계정전환 자료제거, reporter/actor 미표시, 로그/analytics에 신고본문/토큰0. KEEP은 가림 해제와 구분, RESTORE는 사용자 철회/삭제를 복원하지 않는 기존 서버계약 유지.
 8. 잔여/다음1개: 정확한 phone-test UI 후보 승인 후 동일 합성 신고에서 operator HIDE/RESTORE·통지/감사→A 카드 비공개 전환·익명 이미지 비노출. 운영/master/DB는 승인 대상 아님. 9f36610 CI는 아직 진행 중이며 새 후보9개 PASS와 구분.
 
+
+### 2026-10-11 승인9746a30 테스트 반영·실제 운영 조치/철회
+
+1. 문서/파일: 위 W13/W14 필독 목록 재사용. 현행 MemoryReportReview/MemoryCardDetail/MemoryImageReplacement/useImageFileTransfer, desktop-image-input/lifecycle 검사와 quality workflow를 추가 대조했다.
+2. 가정/미결: 이번 명시 승인은 phone-test UI만. 운영/DB/역할 변경0. 테스트 원본은 합성24×30이며 개인 사진을 대신 공개하지 않았다. 전체 CI와 직접 이미지 주소의 철회 후 HTTP 상태는 미완료로 구분한다.
+3. 계획: 기존 W08~W14 현재 절의 신고 운영 UI→가림/해제→카드 비공개 흐름. 추가 CI 실패는 기존 W19에서 단일 검사/동일 묶음 재현으로 좁히고 추측으로 제품을 수정하지 않는다.
+4. 변경/반영: git push origin HEAD:refs/heads/codex/phone-test 성공(source9746a307fa74ba60dd55d69db017a1978833ee35). Vercel Preview Ww7s7yJnqc8tFYECBMmpQ5T4e2Qz Ready/Source/alias UI 확인. 이번 추가 제품코드 변경0, 기존00/01/02/03/시작문서와 증거JSON 최신절만 갱신.
+5. DB/롤백: 신규 migration·권한 변경0. 이전 test guard=false 원복을 유지했다. 화면 복귀는 신고 UI 소스 revert로 가능하나 실제 감사/작성자 통지 삭제 및 철회 사본 자동복원은 하지 않는다.
+6. 실제 검증: 합성 신고25447a47… HIDE 저장→새 deployment-origin 익명home unavailable·작성자 통지→RESTORE 저장→익명home24×30 decode→감사 HIDE/RESTORE2건 PASS. A 카드 비공개 저장→익명보드 unavailable/home 전시0→소유자 원본24×30와 합성감상 보존 PASS. 직접 이미지 URL navigation은 ERR_BLOCKED_BY_CLIENT라 서버404 PASS로 계산하지 않는다. 기존 로컬 UI9/build32와 이번 hosted 결과를 구분. git diff --check 실행 결과는 증거/커밋으로 남긴다.
+7. 안전/관측: 현재 사건만 조치, 과거 사건/원본 삭제0. 사유는 합성시험이라고 명시. 기존 계정·권리·정책/쿼터 보존, 토큰/개인본문 일반로그0. 익명차단은 UI에서 확인한 범위만 기재하고 캐시 회수를 보장하지 않는다.
+8. 잔여/다음1개: CI38113872143 SQL계약 success/verify failure — 기존 desktop-image-input.spec.ts:226의 body paste가 false. 직전38113213200 cancelled. 로컬 단일 재현1 PASS, node scripts/run-desktop-image-e2e.mjs 동일 묶음51/51 PASS(exit0, 단일은 중복 합산 안 함). 두 시도에서 재현되지 않아 타이밍 문제로 단정하거나 제품을 추측 수정하지 않는다. 원격 실패 기록은 유지한다. 다음1개는 이 CI 입력 실패 원인 확인/최소 보완. 직접 이미지 철회HTTP, 최종 D03~D06·운영 승인은 별도 잔여.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.

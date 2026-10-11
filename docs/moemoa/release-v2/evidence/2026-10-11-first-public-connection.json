@@ -657,6 +657,69 @@
         "select label included option text: timeout; linked explicit label/id then pass"
       ]
     },
-    "remoteApplied": false
+    "remoteApplied": true,
+    "approval": {
+      "answer": "테스트 화면에 적용",
+      "scope": "phone-test Git deployment only; no DB/production/role changes; synthetic report action and withdrawal",
+      "source": "9746a307fa74ba60dd55d69db017a1978833ee35"
+    },
+    "gitPush": {
+      "branch": "codex/phone-test",
+      "success": true,
+      "productionBranchUnchanged": true
+    },
+    "deployment": {
+      "id": "Ww7s7yJnqc8tFYECBMmpQ5T4e2Qz",
+      "source": "9746a307fa74ba60dd55d69db017a1978833ee35",
+      "environment": "Preview",
+      "ready": true,
+      "sourceAndAliasVerifiedInVercelUi": true,
+      "url": "https://anime-collector-8vhuz5ykw-newrreds-projects.vercel.app"
+    },
+    "hostedVerification": {
+      "reportId": "25447a47-6923-4547-8d19-ca6d88968137",
+      "hideSaved": true,
+      "anonymousHomeUnavailable": true,
+      "ownerNoticeVisible": true,
+      "restoreSaved": true,
+      "anonymousHomeRestoredImage": {
+        "width": 24,
+        "height": 30,
+        "complete": true
+      },
+      "auditActions": [
+        "HIDE",
+        "RESTORE"
+      ],
+      "cardPrivateSaved": true,
+      "anonymousBoardUnavailable": true,
+      "anonymousHomeExhibitions": 0,
+      "ownerOriginalImage": {
+        "width": 24,
+        "height": 30,
+        "complete": true
+      },
+      "ownerSyntheticNotePreserved": true,
+      "directImageHttpAfterWithdrawal": "NOT_VERIFIED: browser top-level navigation blocked by client; not evidence of server denial"
+    },
+    "ci": {
+      "run": 38113872143,
+      "publicationContract": "success",
+      "verify": "failure",
+      "failure": "tests/desktop-image-input.spec.ts:226 immediate body paste expected true, received false",
+      "priorRun38113213200": "cancelled",
+      "localSingleRetest": {
+        "command": "node scripts/run-desktop-image-e2e.mjs --grep \"only visible image management\"",
+        "passed": 1,
+        "exit": 0
+      },
+      "localContextRetest": {
+        "command": "node scripts/run-desktop-image-e2e.mjs",
+        "passed": 51,
+        "exit": 0,
+        "note": "Includes the same failing CI case; single retest is not an extra unique case. Remote failure remains unresolved."
+      }
+    },
+    "followup": "Investigate the CI-only desktop paste failure; no speculative product patch after two local attempts passed."
   }
 }

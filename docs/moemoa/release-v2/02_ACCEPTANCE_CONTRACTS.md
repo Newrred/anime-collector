@@ -1,6 +1,6 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
-> 2026-10-11 test 반영 근거: CARD-PUBLIC-SIMPLE-01 후보52875c6/DB20261011120000을 승인된 moemoa-test·phone-test에 반영했다. 실제 소유자 상태 조회·공개 선택·이미지 표시/동의1개까지 확인. 후속 사용자 직접 게시·새 익명24×30 이미지decode PASS, 미니홈 prepare도 guard=true에서 PASS. 후속 미니홈 직접 게시/보드 작성자링크/익명home decode도 PASS. 10/11 B 직접 가입·내부복귀/follow/목록 재방문/신고/차단·해제도 hosted PASS. 일반신고 운영 UI 누락의 보완 후보는 로컬9개PASS이며 실제 조치·비공개 재전환은 아직 아니므로 기존 C03~C05의 완료 조건을 유지한다. 상세는 단일 작업판/ExecPlan 실행 보고.
+> 2026-10-11 test 반영 근거: CARD-PUBLIC-SIMPLE-01 후보52875c6/DB20261011120000을 승인된 moemoa-test·phone-test에 반영했다. 실제 소유자 상태 조회·공개 선택·이미지 표시/동의1개까지 확인. 후속 사용자 직접 게시·새 익명24×30 이미지decode PASS, 미니홈 prepare도 guard=true에서 PASS. 후속 미니홈 직접 게시/보드 작성자링크/익명home decode도 PASS. 10/11 B 직접 가입·내부복귀/follow/목록 재방문/신고/차단·해제도 hosted PASS. 승인9746a30 phone-test에서 실제 HIDE/RESTORE·익명home 가림/복구·통지/감사, 카드 비공개→보드 unavailable/home 전시0·개인원본 보존 PASS. 직접 이미지 주소 HTTP차단은 브라우저 도구 제한으로 미확인, CI는 기존 입력 검사 실패가 있어 전체 출시 PASS로 확대하지 않는다. 상세는 단일 작업판/ExecPlan 실행 보고.
 
 ## 2026-10-11 첫 Public 마감 계약 보충
 
