@@ -38,6 +38,7 @@ export function createSimpleCardSharing({ cardId, ownerId, runtime, services, sy
           return { published:false };
         }
         if (!consented || !source || bundle.card.id !== cardId || bundle.card.ownerId !== ownerId) fail('REVIEW_REQUIRED');
+        const consentPolicyRevision=services.policyRevision;
         const title=bundle.title.displayTitle.trim().slice(0,80);
         const key=JSON.stringify([bundle.card.sync?.remoteVersion,bundle.asset.id,bundle.asset.sync?.remoteVersion,source.key,rightsBasis,title]);
         if (pending && pending !== key) fail('PREVIEW_CHANGED');
@@ -60,6 +61,7 @@ export function createSimpleCardSharing({ cardId, ownerId, runtime, services, sy
             await checked(controller.upload({cardId,file:source.file,privateRepresentation:source.privateRepresentation,consented,rightsBasis}));
           }
           const s=await checked(controller.prepare({ title,description:'',cards:[{cardId,fields:[]}] }));
+          if (!consentPolicyRevision || s.review?.policyRevision !== consentPolicyRevision) fail('CONSENT_MISMATCH');
           assertSimplePreview(s.review,bundle,title,s.preparedImages?.[cardId]);
           await decodeReview(s.review); await auth();
           pending=key;

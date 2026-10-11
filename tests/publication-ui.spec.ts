@@ -431,11 +431,11 @@ test("anonymous home visit does not auto-follow or fetch an owner graph", async 
   expect(backend.calls.filter((c) => c.name.includes("relationship"))).toEqual([]);
 });
 
-async function adapters(context: BrowserContext) {
-  await context.addInitScript(() => {
+async function adapters(context: BrowserContext, policyRevision = "MOEMOA_PUBLIC_GENERAL_20261011_01") {
+  await context.addInitScript((revision) => {
     localStorage.setItem("ui:locale:v1", JSON.stringify("en"));
     (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__ = {
-      policyRevision: "local-test-policy",
+      policyRevision: revision,
       resolveCover: async () => "/__publication-test/cover.webp",
       client: { rpc(name: string, args: any) {
         let signal: AbortSignal | undefined;
@@ -449,7 +449,7 @@ async function adapters(context: BrowserContext) {
         return query;
       } },
     };
-  });
+  }, policyRevision);
 }
 
 function mockPublication() {
@@ -457,7 +457,7 @@ function mockPublication() {
   const HOME = "55555555-5555-4555-8555-555555555555";
   let state = "PRIVATE", revision = 0, snapshot: any = null, published: any = null;
   const calls: any[] = [];
-  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false, visible: true };
+  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false, visible: true, policyRevision: "MOEMOA_PUBLIC_GENERAL_20261011_01" };
   const attach = async (context: BrowserContext) => {
     await context.route("**/__publication-test/rpc/*", async (route) => {
       const name = new URL(route.request().url()).pathname.split("/").at(-1);
@@ -472,7 +472,7 @@ function mockPublication() {
         home = args.p_selection; homeRevision++;
         homePreview = { nickname: home.nickname, bio: home.bio, entries: home.entries.map((e: any) => ({ publicationId: e.publicationId,
           snapshot: { ...published, cards: e.cardId ? published.cards.filter((c: any) => c.id === e.cardId) : published.cards } })) };
-        data = { id: HOME, revision: homeRevision, reviewHash: HASH, policyRevision: "local-test-policy", snapshot: homePreview };
+        data = { id: HOME, revision: homeRevision, reviewHash: HASH, policyRevision: control.policyRevision, snapshot: homePreview };
         if (control.delay) await new Promise((resolve) => setTimeout(resolve, control.delay));
       }
       if (name === "publish_memory_minihome") {
@@ -499,7 +499,7 @@ function mockPublication() {
                 : { type: "SYSTEM_DESIGN", rendererVersion: 1, patternToken: "cc4499ff" },
               ...(card.fields.includes("note") ? { note: "Selected reflection" } : {}),
             })) };
-          data = { id: PUBLICATION, revision, reviewHash: HASH, policyRevision: "local-test-policy", snapshot };
+          data = { id: PUBLICATION, revision, reviewHash: HASH, policyRevision: control.policyRevision, snapshot };
           if (control.delay) await new Promise((resolve) => setTimeout(resolve, control.delay));
         }
       }
@@ -574,6 +574,7 @@ async function choose(page: Page, note = false) {
 
 async function publishSelected(page: Page) {
   await page.getByRole("button", { name: "Preview selected memories" }).click();
+  await expect(page.getByRole("link", { name: "Public sharing · rights and reporting (new tab)" })).toHaveAttribute("href", "/legal/public-sharing-2026-10-11/#en");
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();
   await page.getByRole("button", { name: "Publish this version" }).click();
   await expect(page.getByRole("link", { name: "Open visitor page" })).toBeVisible();
@@ -590,6 +591,7 @@ test("mini-home explicit representative → preview → fresh visitor → privat
   await page.getByLabel("Display selection", { exact: true }).selectOption(PUBLIC_CARD);
   await page.getByRole("button", { name: "Preview public home", exact: true }).click();
   await expect(page.getByRole("region", { name: "Preview public home", exact: true }).getByText("Selected reflection")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Public sharing · rights and reporting (new tab)" })).toHaveAttribute("href", "/legal/public-sharing-2026-10-11/#en");
   await expect(page.getByRole("button", { name: "Publish public home", exact: true })).toBeDisabled();
   await page.getByLabel("I reviewed this public home", { exact: false }).check();
   await page.getByRole("button", { name: "Publish public home", exact: true }).click();
@@ -954,7 +956,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
     expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);
     expect(uploads[0].headers()['x-moemoa-representation-hash']).toBe(privateHash);
   }
-  expect(uploads[0].headers()["x-moemoa-consent"]).toBe("local-test-policy");
+  expect(uploads[0].headers()["x-moemoa-consent"]).toBe("MOEMOA_PUBLIC_GENERAL_20261011_01");
   expect(uploads[0].headers()['x-moemoa-rights']).toBe('USER_ORIGINAL');
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();
@@ -1035,6 +1037,7 @@ for (const variant of ['desktop','mobile','image']) {
   const form=page.getByRole('form',{name:'Memory visibility'});
   await expect(form.getByRole('radio',{name:'Private',exact:true})).toBeChecked();
   await form.getByRole('radio',{name:'Public',exact:true}).check();
+  await expect(form.getByRole('link',{name:'Public sharing · rights and reporting (new tab)'})).toHaveAttribute('href','/legal/public-sharing-2026-10-11/#en');
   const consent=form.getByRole('checkbox');await expect(consent).toBeEnabled();
   await expect(form.getByRole('button',{name:'Save visibility'})).toBeDisabled();
   expect(mock.calls.some(c=>c.name==='prepare_memory_publication')).toBe(false);
@@ -1057,3 +1060,54 @@ for (const variant of ['desktop','mobile','image']) {
   await expect(form.getByText('Saved as public.',{exact:true})).toBeVisible();
  });
 }
+
+for (const surface of ['board','home']) {
+ test('unknown public policy blocks new '+surface+' consent but preserves withdrawal',async({page,context})=>{
+  await adapters(context);const mock=mockPublication();await mock.attach(context);await seedOwner(page);await choose(page);await publishSelected(page);
+  if(surface==='home'){
+   await page.getByRole('link',{name:'My public home'}).click();
+   await page.getByLabel('Public nickname',{exact:true}).fill('Synthetic home');
+   await page.getByLabel('Display this Board',{exact:true}).check();
+   await page.getByRole('button',{name:'Preview public home',exact:true}).click();
+   await page.getByLabel('I reviewed this public home',{exact:false}).check();
+   await page.getByRole('button',{name:'Publish public home',exact:true}).click();
+   await expect(page.getByRole('link',{name:'Open public home',exact:true})).toBeVisible();
+  }
+  mock.control.policyRevision='UNRECOGNIZED_POLICY';
+  await page.getByRole('button',{name:surface==='home'?'Preview public home':'Review and update public content',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('public notice for this policy version is unavailable');
+  await expect(page.getByRole('button',{name:surface==='home'?'Publish public home':'Publish this version',exact:true})).toBeDisabled();
+  await expect(page.getByLabel(surface==='home'?'I reviewed this public home':'I have reviewed these memories',{exact:false})).toBeDisabled();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:surface==='home'?'Make public home private':'Withdraw this Board',exact:true}).click();
+  await expect.poll(()=>mock.calls.filter(c=>c.name===(surface==='home'?'revoke_memory_minihome':'revoke_memory_publication')).length).toBe(1);
+ });
+}
+test('public notice fixed version renders both languages and legal links at 320px',async({page})=>{
+ await page.setViewportSize({width:320,height:720});
+ await page.goto('/legal/public-sharing-2026-10-11/');
+ await expect(page.locator('.policy-version')).toContainText('MOEMOA_PUBLIC_GENERAL_20261011_01');
+ await expect(page.locator('#ko h1')).toHaveText('선택한 내용을 공개하기 전에');
+ await expect(page.locator('#en h1')).toHaveText('Before you publish');
+ for(const path of ['terms-2026-10-10','privacy-2026-10-10']){
+  const response=await page.request.get('/legal/'+path+'/');expect(response.ok()).toBe(true);
+ }
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:'.cache/public-sharing-notice-320.png',fullPage:true});
+});
+
+test('unknown public policy blocks quick sharing but allows saving as private',async({page,context})=>{
+ await adapters(context,'UNRECOGNIZED_POLICY');const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+ const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
+ await page.goto(href!);await page.getByRole('tab',{name:'Manage',exact:true}).click();
+ const form=page.getByRole('form',{name:'Memory visibility'});
+ await form.getByRole('radio',{name:'Public',exact:true}).check();
+ await expect(form.getByRole('alert')).toContainText('public notice for this policy version is unavailable');
+ await expect(form.getByRole('checkbox')).toBeDisabled();
+ await expect(form.getByRole('button',{name:'Save visibility'})).toBeDisabled();
+ expect(mock.calls.some(c=>c.name==='prepare_memory_publication'||c.name==='publish_memory_publication')).toBe(false);
+ await form.getByRole('radio',{name:'Private',exact:true}).check();
+ await form.getByRole('button',{name:'Save visibility'}).click();
+ await expect(form.getByText('Saved as private.',{exact:true})).toBeVisible();
+ expect(mock.calls.filter(c=>c.name==='make_memory_card_private')).toHaveLength(1);
+});

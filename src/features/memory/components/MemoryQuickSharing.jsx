@@ -1,3 +1,5 @@
+import PublicSharingNotice from './PublicSharingNotice.jsx';
+import { publicSharingNoticeHref } from '../domain/publicSharingPolicy.js';
 import { useEffect, useRef, useState } from 'react';
 import { getPlatformMemoryRuntime } from '../runtime/platformMemoryRuntime.js';
 import { getPlatformMemoryAccountRuntime } from '../runtime/platformMemoryAccountRuntime.js';
@@ -16,6 +18,7 @@ async function decodeBlob(blob) {
 }
 export default function MemoryQuickSharing({card,locale,base,disabled}) {
   const ko=locale==='ko', services=getPublicationServices();
+  const noticeAvailable=Boolean(publicSharingNoticeHref(services.policyRevision,base));
   const [state,set]=useState({loading:true,busy:false,published:null,visible:false,consented:false,source:null,bundle:null,error:null,link:null,done:false});
   const [rights,setRights]=useState('USER_ORIGINAL');
   const active=useRef(null),driver=useRef(null),url=useRef(null),generation=useRef(0);
@@ -63,7 +66,7 @@ export default function MemoryQuickSharing({card,locale,base,disabled}) {
     finally{clearTimeout(timer);if(turn===generation.current){active.current=null;patch({busy:false});}}
   };
   const save=async event=>{
-    event.preventDefault();if(state.busy||disabled)return;
+    event.preventDefault();if(state.busy||disabled||(state.visible&&!noticeAvailable))return;
     patch({busy:true,error:null,done:false});const turn=generation.current;
     try {
       const runtime=await getPlatformMemoryRuntime();await checkOwner();
@@ -101,7 +104,8 @@ export default function MemoryQuickSharing({card,locale,base,disabled}) {
         </select>
         <p>{ko?'애니 캡처·타인의 팬아트는 별도 승인이 필요해요.':'Anime screenshots and other people’s fanart need separate approval.'}</p>
       </details>}
-      <label className="memory-publication__check"><input type="checkbox" checked={state.consented} disabled={state.busy||!state.source||pending} onChange={e=>patch({consented:e.target.checked})}/>
+      <PublicSharingNotice revision={services.policyRevision} locale={locale} base={base}/>
+      <label className="memory-publication__check"><input type="checkbox" checked={state.consented} disabled={state.busy||!state.source||pending||!noticeAvailable} onChange={e=>patch({consented:e.target.checked})}/>
         {serviceVisual?(ko?'표시된 작품명과 이미지의 공개 및 신고·검토·삭제 정책에 동의합니다. 성인용·불법·권리침해 콘텐츠는 공개하지 않습니다.':'I agree to publish the displayed title and visual and to the reporting, review and removal policy. I will not publish adult, illegal or rights-infringing content.'):rights==='USER_ORIGINAL'?(ko?'직접 만든 이미지이며 공개할 권한이 있습니다. 성인용·불법·권리침해 콘텐츠가 아니며, 표시된 내용의 공개 및 신고·검토·삭제 정책에 동의합니다.':'I created this image and may publish it. It contains no adult, illegal or rights-infringing content. I agree to publish the displayed content and to the reporting, review and removal policy.'):(ko?'별도 공개 승인을 받은 이미지입니다. 성인용·불법·권리침해 콘텐츠가 아니며, 표시된 내용의 공개 및 신고·검토·삭제 정책에 동의합니다.':'This image has separate public-use approval. It contains no adult, illegal or rights-infringing content. I agree to publish the displayed content and to the reporting, review and removal policy.')}
       </label>
     </>}
@@ -109,7 +113,7 @@ export default function MemoryQuickSharing({card,locale,base,disabled}) {
     {state.error && <p role="alert">{publicationError(state.error,locale)}</p>}
     <PublicSignupNotice error={state.error} locale={locale} base={base}/>
     {pending && <p>{ko?'게시 결과를 확인 중이에요. 같은 내용으로 다시 시도해 주세요.':'The publication result is unconfirmed. Retry the same content.'}</p>}
-    <button className="btn" type="submit" disabled={disabled||state.busy||state.loading||state.published===null||(state.visible&&(!state.source||!state.consented))}>{state.busy?(ko?'저장 중…':'Saving…'):pending?(ko?'다시 시도':'Retry save'):(ko?'저장':'Save visibility')}</button>
+    <button className="btn" type="submit" disabled={disabled||state.busy||state.loading||state.published===null||(state.visible&&(!state.source||!state.consented||!noticeAvailable))}>{state.busy?(ko?'저장 중…':'Saving…'):pending?(ko?'다시 시도':'Retry save'):(ko?'저장':'Save visibility')}</button>
     {state.done && <p role="status">{state.published?(state.readable?(ko?'공개로 저장했어요.':'Saved as public.'):(ko?'게시 내용을 저장했지만 현재 공개 열람은 제한되어 있어요.':'Publication saved, but public viewing is currently restricted.')):(ko?'비공개로 저장했어요.':'Saved as private.')}</p>}
     {state.link && <a href={state.link} data-astro-reload>{ko?'공개 화면 보기 →':'View public memory →'}</a>}
   </form>;

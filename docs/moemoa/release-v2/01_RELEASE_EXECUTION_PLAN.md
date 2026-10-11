@@ -2104,3 +2104,34 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제명령/결과: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0/readOnly; node tools/operations/build-first-public-candidate.mjs .cache/first-public-preflight.json exit0/20변경runtime파일·migration3·budget2해시. 잘못된target/ledger/누락migration/Public-on/override/paused-quota의6개임시fixture는모두exit1·정해진오류만출력·manifest출력0. node --check와git diff --check PASS. 최초생성의개행/정규식이스케이프구문오류수정후재검증. Git diff a6b6dda..7cd3a82의src/api/DB/scripts/workflows/config/package차이0. GitHub readback phone-test38129338217 SUCCESS·working38129221751 cancelled. 실제 www/build-info.json HTTP200/commit=checkoutCommit=199613b/source=vercel-git. 광범위제품/DB복원재검사0.
 7. 영향/증거범위: 운영/test설정·DB쓰기·배포·발송·결제0, source/rights/원본/개인자료보존. 새사용자행동PASS0. 읽기전용운영대조/후보도구검증만이번PASS, 과거실제A/B·Storage·CI는재조회/재사용증거로분리. 새manifest에키/본문/경로/계정식별자0.
 8. 정확한잔여/다음1개: **D04 기존 일반 공개 고지·권리 조건을 후보 revision에결속**. 그후정확한최종운영승인/기존기능활성순서를진행. 별도복구키·복구인수는D05외부조건, 경보실수신과최종후보이미지HTTP/철회는실행잔여. 코드문제없이테스트만반복하지않으며이번후보준비를전체출시완료로표시하지않는다.
+
+### W14/D04 공개 고지·동의 revision 연결 — 2026-10-11
+
+1. 목적: 카드·보드·미니홈의 공개 동의 한 번에서 실제 고지를 읽고 그 revision으로만 게시하도록 연결한다.
+2. 결정: 일반 공개/별도 권리 승인·기존 국가·가입 약관·단일 작업판 유지.
+3. 근거: QuickSharing은 안내 링크가 없고 simpleCardSharing의 preview는 동의 전 policyRevision과 비교하지 않는다. Board/Home은 review revision을 서버에 전송하지만 실제 안내 링크가 없다.
+4. 범위: 고정 공개 안내, revision registry, 세 화면 연결, 간편 게시 revision 불일치 거부. 가입·새 인증·권리 확대·원격 설정 제외.
+5. 흐름: 알려진 revision의 고정 안내 → 기존 한 체크 → preview policy 일치 → 기존 publish/hash/operation 재사용. 알 수 없는 안내는 새 게시 중단, 비공개 전환 유지.
+6. 파일: legal 고정 페이지, memory domain/공통 안내 및 세 컴포넌트, simpleCardSharing, 관련 unit/browser 검사, 기존00~03/evidence.
+7. DB: 새 migration/원격 쓰기 없음. 기존 consent policy revision 저장 구조 재사용.
+8. 마일스톤: 불일치 재현 → 최소 수정/고지 연결 → 합성 사용자 흐름·build → 기존 후보 기록 보완.
+9. 검증: 정책 불일치/unknown/retry unit, 기존 카드·보드·미니홈 browser 및 고지 모바일 폭, build/diff. 기초DB/실기기 반복 없음.
+10. 보안·권리: 기존 Terms/Privacy 고정본 불변, 원본·비공개 태그 보존, unknown 정책 임의 매핑 금지.
+11. 관측: 새 로그/분석/외부 발송 없음. 기존 operationId/차감/불확실 완료 보존.
+12. 복귀: 이번 파일 Git diff 복귀, DB rollback 불필요. 기존 공개 원격 off 유지.
+13. 위험: 합성 adapter 검사와 hosted/실제 동의는 별도. 새 코드로 이전 CI를 재사용하지 않는다.
+14. 승인: 로컬 준비/작업브랜치 인계 범위. 원격 test/운영은 정확한 새 후보 승인 전 실행하지 않음.
+15. 진행: mandatory 문서·기존 정책/컴포넌트/controller/test 대조 완료.
+16. 발견: 간편 공유는 고지 확인 후 서버 preview가 달라져도 policyRevision 비교 없이 게시 가능해 회귀 검사가 필요하다.
+17. 완료 보고: 아래 실제 명령·결과·잔여를 기록한다.
+
+#### W14/D04 공개 고지 연결 — 이번 실행 8항 보고
+
+1. 읽은 근거: AGENTS·CODEX_START_HERE·최상위 확정결정·PLANS·이미지05·QA07·변경09 및 기존release-v2 00/01/02/03. Terms/Privacy20261010 고정본, platformPublication·simpleCardSharing·publication/minihome controller·세 UI·이미지 준비·기존 unit/Playwright/격리runner를 대조했다. verify-before-claiming 기준 적용.
+2. 가정/미결: 기존 GENERAL-only 권리·신고/이의제기·원본 유지 조건을 연결하는 후보이며 법률 적합성 전체 보증/추가 국가 승인이 아니다. 테스트전용 정책을 새 운영 안내로 자동 매핑하지 않는다.
+3. 계획: 바로 위17항. 기존 W14/D04·W08/W09/Q11에 흡수, 새 진행판 없음.
+4. 파일/이유: src/pages/legal/public-sharing-2026-10-11.astro 한·영 고정 안내, domain/publicSharingPolicy.js 정확한 revision→고정URL, components/PublicSharingNotice.jsx 공통 링크/미확인 안내. MemoryQuickSharing/MemoryPublicationPanel/MemoryMinihome과 CSS 연결. simpleCardSharing.js에 동의 policy와 서버 preview 불일치 거부2줄. tests/unit/simpleCardSharing·publicSharingPolicy 및 tests/publication-ui 보강. 기존00~03/evidence 최신절 갱신.
+5. DB/복귀: 새 migration/원격 DB·설정·master 변경0. 기존 policyRevision/receipt/reviewHash 저장계약 재사용. 파일 Git 복귀만 필요, 원본·사본·quota·operationId·과거 고정 가입약관/개인정보 문서 불변.
+6. 실제 명령: node --test tests/unit/simpleCardSharing.test.mjs 초기10PASS/신규정책불일치1FAIL(실제 게시 허용 재현)→수정 후11PASS. node --test tests/unit/simpleCardSharing.test.mjs tests/unit/publicSharingPolicy.test.mjs 12PASS. node scripts/run-publication-closeout-e2e.mjs 'simple card visibility|image preparation requires|explicit selection|publish retry|mini-home explicit|unknown public policy|public notice fixed' 초기10/11PASS; 모의 Board 응답이 고정 revision을 돌려주는 검사 fixture 오류1개 수정. 이후 'unknown public policy|public notice fixed|simple card visibility' 7/7PASS, 두 실행의 고유 행동검사12개 PASS(17개로 합산하지 않음). node 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build exit0/33페이지+postbuild, git diff --check PASS.
+7. 새 행동/영향: 로컬 모의API Chromium에서 카드1체크 게시/비공개/재게시, 보드·미니홈 고지 링크와 게시/철회, 두 이미지 준비 경로, 불확실 게시 동일operation 재시도 유지. 미확인 정책은 세 화면 새 동의/게시 차단·철회 유지. 안내320px와 카드390px overflow없음/스크린샷 확인. 새 실제Google/hosted/운영/실기기 PASS0. 신규 동의 체크/인증/유료/발송/로그0. 이전 a6b6dda hosted·CI는 이 수정의 PASS가 아니다.
+8. 잔여/다음1개: 고지·동의의 로컬 연결은 완료. 새 소스와 고지해시를 기존 D06 최종후보에 결속해 원격 적용 범위를 준비한다. 기존7cd3a82 manifest는 과거 후보로 보존하며 새 runtime에 green CI를 전용하지 않는다. 정확한 새 test/운영 적용 승인, 최종 배포 이미지HTTP/철회·경보 수신·D05 별도키/복구인수는 미완료. 운영Public off 유지.
