@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W17/D05 최신 로컬 백업 준비:** 현재 운영99테이블·38migration·Public schema를 동일 read-only snapshot으로 수집. 이미지4302개/856,441,465B는 기존 사본 SHA256·ETag 대조 후 전부 재사용(새 이미지GET0). DB·journal·roles·Storage 등을 포함한4309파일/918,359,204B의 AES-GCM 생성·로컬복호화 PASS. 새ZIP920,077,441B·4309파일 인증도 PASS. 이전10/9 DB복구66테이블 PASS와 구분하며 이번99테이블 DB 재가동 PASS는 아님. 일일03:00(+09:00) 로컬 실행 후보는 disabled·미등록, Drive 자동연결/외부업로드/7일정리 미가동. 다음1개: 완성된 새 암호화 사본의 외부 보관과 로컬 일일 실행 후보 적용.
+
+
 > **2026-10-11 W17/D05 실제 백업 DB 복구 완료(격리):** Docker 환경 차단을 해소하고 10/9 운영 dump의66테이블·7확장·16역할을 network none/포트0 로컬DB에 실제 복원했다. 최신 private manifest·card fence 대조/재적용 뒤 소유자RPC5건 성공·타계정5건/익명 거부·카드RLS PASS, operation/source/hash/quota 보존. 검사 후 private off·DB 정지 확인. 과거4308파일 byte검증/합성21검사와 구분한다. 일일암호화·7일보관·RPO/RTO24h 목표는 사용자 확정, 실제 가동은 미완료. 최신 전체 백업·Public권리/철회 복구·독립키는 잔여. 운영쓰기/업로드/키복사0, D06소스56cd0ab·운영199613b 유지. 다음1개: 현재 schema와 변경분을 포함할 백업·회전 실행 후보 정리.
 
 

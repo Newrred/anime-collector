@@ -2291,3 +2291,38 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 남은 조건/다음1개: Docker/확장 차단은 해소했다. 사용자 일일암호화/7일/RPO24h·RTO24h 목표를 확정(RECOVERY-DAILY7-RPO24-RTO24-20261011)했지만 자동실행/외부전송/이전사본삭제는 아직 미가동·별도 적용 범위다. 키 별도보관은 아직 미완료. 다음1개는 현재schema/변경분을 포함할 기존 백업·회전 실행 후보 정리다. 운영Public/DB migration/master Git 배포는 D06 정확한 승인 전 실행하지 않는다.
 
 [최종 검증] node --check 및 Python ast.parse PASS, git diff --check PASS. docker ps -a의 task label5개 모두 exited. git ls-remote에서 master199613b/phone-testa6b6dda 불변 확인. 작업브랜치에만 코드/문서/집계를 인계하며 보호 staging과 기존 unrelated identity SQL은 커밋하지 않는다.
+
+
+### W17/D05 일일 백업 실행 후보 — 2026-10-11 ExecPlan
+
+1. 목적: 확정된 하루1회/7일보관/RPO24h·RTO24h의 실제 실행 후보를 기존 백업 도구 위에 준비한다.
+2. 결정: RECOVERY-DAILY7-RPO24-RTO24-20261011, FREE 유지, 정확한 외부전송/삭제 승인.
+3. 현황: 최신 코드48eeb94,10/9 외부사본 실DB복구PASS. 기존 CLI는 암호화만 담당하고 일일capture/schedule 연결 없음.
+4. 범위: 현재 DB/Storage/journal 일관 snapshot을 로컬로 수집, 검증된 기존bytes 재사용·신규다운로드 소요를 분리, 암호화 후보·실행/보관 계약. 스케줄 등록·Drive업로드·사본삭제·운영쓰기 제외.
+5. 흐름: TLS읽기전용 exporter snapshot 유지→동일 snapshot pg_dump/journal/객체목록→기존bytes hash/원격 metadata대조→기존암호화CLI→닫힌 새 로컬사본. 누락/변경은 완료 거부.
+6. 파일: tools/operations의 capture/prepare 실행기, 경계 검사, 기존 BACKUP_USAGE 및00~03/evidence. 제품/의존성 재작성 없음.
+7. DB: pg_dump/SELECT만, 모든 migration/public flags 유지. role password는 추출하지 않는다.
+8. 단계: 코드경로 확인→capture/재사용 후보 구현→합성 경계와 실제 제한된capture→결과/정확한 적용 잔여 기록.
+9. 검증: snapshot 일치·누락/손상 사본 거부·동일ID/이름변경·기존 출력 덮어쓰기 거부·집계만 로그. 새 전체복구/기본격리검사 반복 없음.
+10. 보안: raw staging은 ignored operator-only, 키 값/사용자문구/객체경로 stdout금지. 키는 기존파일을 암호화 시 로컬 메모리로만 읽고 새 사본에 포함하지 않는다.
+11. 관측: 캡처시각·해시·객체수·신규 다운로드 예정량·암호화 결과만 집계. daily schedule 미가동을 성공으로 쓰지 않는다.
+12. 복귀: 원격변경0. 새 staging 실패 marker 유지, 기존성공본 보존. 신규사본 검증전 과거사본 삭제0.
+13. 위험: 이 PC가 꺼져있으면 로컬daily 목표 미충족. Drive 자동연결 없음은 명시하고 새공급자/유료로 대체하지 않는다.
+14. 결정: 운영목표 확정 재질문0. 실제 스케줄/Drive전송/정리는 구체후보가 준비된 후 시점별 승인.
+15. 진행: 현재 기존일회 capture와 암호화/복원 도구 대조완료.
+16. 발견: 기존 이미지 full 재다운로드는 비용 증가 가능; 동일객체 metadata+hash검증으로 기존bytes를 재사용한다.
+17. 보고: 결과·소스/명령·운영미적용·잔여/다음1개를 같은작업판에 기록한다.
+
+
+#### W17/D05 최신 백업 실행 후보 — 2026-10-11 결과
+
+1. 읽은 근거: CODEX_START_HERE→확정결정01(일일7일/RPO·RTO24h)→PLANS/QA07/변경09→기존release-v2 00~03/evidence/BACKUP_USAGE, 기존암호화CLI·외부사본 verifier·journal·retention 연결 및10/9 일회 Storage capture. verify-before-claiming 기준 적용.
+2. 가정/미결: 확정된 목표의 로컬 준비 범위다. 실제 스케줄/새 외부전송/과거사본삭제는 사용자10/11 exact 승인 이후. 기존Drive 업로드 승인을 이번 새파일로 확대하지 않는다. 이 PC 켜짐·로그인·네트워크 조건과 Drive자동연결 부재가 있다.
+3. 계획: 위 W17/D05 일일 백업 후보 ExecPlan17항. D06앱소스56cd0ab/운영master199613b/phone-testa6b6dda 유지.
+4. 변경 파일: capture-daily-backup.py는 pg_export_snapshot 기반 일관 DB/journal/roles/Storage 수집. prepare-daily-backup.mjs는 검증캐시 재사용·새body GET 상한·기존 AES-GCM 호출/closed 검증. package-daily-backup.py는 encrypted-only ZIP과 기존verifier 연결. run-daily-backup.mjs·disabled XML은 로컬 일일실행 후보. tests/operations/dailyBackup.test.mjs17경계, 기존문서/증거 갱신. 생산 의존성·서비스화면 변경0.
+5. DB/복귀: 운영 TLS verify-full/read-only exporter snapshot을 유지해 실제custom dump와metadata 수집 후 rollback/연결종료.99테이블·38migration·Public schema 포함. schema/data/flags 변경0, 역할 비밀번호 미수집. 예약/업로드 미적용이라 원격원복 없음. 향후 task만 중지/해제, 원본·기존backup·키 보존.
+6. 실제 명령/결과: capture-daily-backup.py --run-id 20261011-01 --mode inspect exit0; --run-id 20261011-02 --mode capture exit0(58,155,281B DBdump). node prepare-daily-backup.mjs 20261011-02 encrypt exit0: 이미지4302/856,441,465B 캐시검증·새GET0,4309파일/918,359,204B 암호화·복호화PASS. package-daily-backup.py --run-id 20261011-02 exit0: ZIP920,077,441B·4309파일 인증PASS, SHA256은evidence. node --test tests/operations/dailyBackup.test.mjs17PASS, Node/Python구문·XML disabled검사·run-daily-backup.mjs --preflight PASS. 전체예약entry point는 실제일일실행 PASS가 아니며 각단계만 실제실행했다. 새로운 다운로드분기는 모의응답검사이며 실제다운로드0.
+7. 영향/관측: Git에는 집계/hash/code만 기록. rawDB/journal/복호화사본은 ignored 보호staging. 기존키는 로컬암호화/검증에만 읽고 파일복사/채팅출력/ZIP포함0. 키별도보관 완료로 치지 않는다. 실제새사용자행동/hostedGoogle/운영PublicPASS0. 이전66테이블 실제DB복구와 이번99테이블capture/byte검증을 분리한다. task 실패exit/이력은 준비됐지만 알림전달검증 아님.
+8. 잔여/다음1개: 새ZIP을 기존Drive 비공개폴더에 보관하고 로컬03시 후보를 활성화하는 exact적용이 다음이다. Drive Desktop미설치/API자동연결없음,7일정리실행·PC밖키보관·현재Public복구 인수는 남긴다. 로컬일일실행만으로 외부RPO24h 충족을 주장하지 않는다. 첫PowerShellwrapper는 실행정책에 막혀 등록하지 않았고 Nodewrapper로 대체해 시스템정책 변경0. 초기JS정규식작성오류는 구문검사에서 수정, 실제암호화 전에해소. 과거Windowsrename EPERM은 이번create/restore에서 재발하지 않았으나 전역해결 주장0.
+
+[최종 확인] 새ZIP 인증 종료·920077441B/hash 기록. 최종 캐시plan4302검증·새GET0 PASS, Windows 예약명 조회0건. git diff --check PASS. 코드/집계만 작업브랜치 인계하며 운영master/Public/phone-test 변경0.

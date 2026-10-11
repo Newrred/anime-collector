@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W17/D05 최신 로컬 백업 준비:** 현재 운영99테이블·38migration·Public schema를 동일 read-only snapshot으로 수집. 이미지4302개/856,441,465B는 기존 사본 SHA256·ETag 대조 후 전부 재사용(새 이미지GET0). DB·journal·roles·Storage 등을 포함한4309파일/918,359,204B의 AES-GCM 생성·로컬복호화 PASS. 새ZIP920,077,441B·4309파일 인증도 PASS. 이전10/9 DB복구66테이블 PASS와 구분하며 이번99테이블 DB 재가동 PASS는 아님. 일일03:00(+09:00) 로컬 실행 후보는 disabled·미등록, Drive 자동연결/외부업로드/7일정리 미가동. 다음1개: 완성된 새 암호화 사본의 외부 보관과 로컬 일일 실행 후보 적용.
+
+
 > **2026-10-11 W17/D05 실제 백업 DB 복구 완료(격리):** Docker 환경 차단을 해소하고 10/9 운영 dump의66테이블·7확장·16역할을 network none/포트0 로컬DB에 실제 복원했다. 최신 private manifest·card fence 대조/재적용 뒤 소유자RPC5건 성공·타계정5건/익명 거부·카드RLS PASS, operation/source/hash/quota 보존. 검사 후 private off·DB 정지 확인. 과거4308파일 byte검증/합성21검사와 구분한다. 일일암호화·7일보관·RPO/RTO24h 목표는 사용자 확정, 실제 가동은 미완료. 최신 전체 백업·Public권리/철회 복구·독립키는 잔여. 운영쓰기/업로드/키복사0, D06소스56cd0ab·운영199613b 유지. 다음1개: 현재 schema와 변경분을 포함할 백업·회전 실행 후보 정리.
 
 
@@ -991,3 +994,20 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### W15/D03 위 초기 한도 후보의 승인 test 실행 후속 · 2026-10-11
 
 사용자a6b6dda승인 후moemoa-test의기존disabled/0에서2000/64MB임시적용. 실제RPC+Storage2종각72B/hash/decode와2GET/144B영속차감,hosted transaction rollback-only 초과거부/원자적소비/관측집계 PASS. 1600/51.2MB 실제서버집계를로컬기존평가기에서경보판정. test의기존public storage budget off 때문에 PUBLIC_BUDGET_UNGUARDED도발생했으며추가활성하지않음. 운영상태로오인금지. 두quota는disabled/0으로원복하고실제소비2/144보존. phone-testflag=true 배포977hd Ready/source·alias확인, false원복후재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias확인. 실제배포handler HTTP429/이미지/철회·알림수신은이번PASS아님. 설정2행과flag만변경, 새migration/이미지/원본/권한/운영변경0.
+
+
+### 2026-10-11 W17/D05 일일 실행 후보의 정확한 범위
+
+| 항목 | 준비된 후보 / 적용 상태 |
+|---|---|
+| 데이터 | 운영 전체 custom dump·38 migration 문맥·역할(비밀번호 제외)·private journal·Storage inventory를 한 exported DB snapshot에서 수집. Public99테이블 schema 포함. 원격 SELECT/GET만 |
+| 이미지 비용 | 검증된 기존 bytes 재사용, 새/바뀐 객체만 GET. 후보 상한 64,000,000B/회·20,000,000B/객체. 운영 quota 변경 아님. 이번 실제 새 GET0 |
+| 암호화 | 기존 AES-GCM 도구와 기존 로컬 키 사용. 새 키/키 외부전송 없음. 키 독립보관은 미완료 |
+| 예약 | Windows MOEMOA-DailyEncryptedBackup 후보, 매일03:00 +09:00·놓친 실행은 다음 사용 시·깨우기off·동시실행off. XML disabled이며 등록0 |
+| 실행기 | capture-daily-backup.py → prepare-daily-backup.mjs → package-daily-backup.py. run-daily-backup.mjs는 독점lock과 오류exit. 기존 PG17/TLS·Node만 사용 |
+| 실패 | 누락/손상/객체변경/예산초과 시 완료 거부, 원본/기존 사본 보존. Task history/nonzero exit는 로컬 기록이며 새 알림 전달 검증 아님 |
+| 외부 보관 | 기존 승인 대상 Google Drive의 MOEMOA encrypted backups 비공개 폴더를 재사용할 후보. 이번 새 사본 업로드는 미실행. Drive Desktop/API 자동연결 없음 |
+| 7일 보관 | 사용자 확정 정책. 새 외부 성공본 확인 후 오래된 완성본만 정리할 후보를 산출해야 함. 실제 삭제/자동정리0, 기존 유일한 외부사본 보존 |
+| 원복 | 예약을 등록한 뒤라면 해당 task만 Disable/Unregister. DB·Public·master·원본·키·기존 백업 변경 없음 |
+
+정확한 소스 확인 후 기존 동일명 task가 없을 때만 등록한다. 등록 XML은 disabled이며 활성화는 별도 승인 범위다. 실행에는 PC 켜짐·사용자 로그인·네트워크가 필요하다. 로컬 일일실행 승인만으로 매일 외부보관/RPO24h가 달성됐다고 표시하지 않는다. 사용자의10/11 지시와 RECOVERY-DAILY7 결정에 따라 새 사본 외부 전송·예약 활성·이전사본 정리는 구체후보의 시점별 승인을 받는다.

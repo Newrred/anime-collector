@@ -222,5 +222,112 @@
       "D06 exact production approval and subsequent operating checks"
     ],
     "next": "Prepare existing W17/D05 current-snapshot backup and rotation execution candidate"
+  },
+  "dailyBackupCandidate20261011": {
+    "date": "2026-10-11",
+    "baselineCommit": "48eeb9466f7c84c491b41bcd6db3d0c6ff476fa7",
+    "dataRelease": "MOEMOA_DAILY_BACKUP_20261011-02",
+    "capture": {
+      "readOnly": true,
+      "mode": "capture",
+      "capturedAt": "2026-10-11T12:42:16.093764+00:00",
+      "sameDatabaseSnapshot": true,
+      "tables": 99,
+      "migrations": 38,
+      "publicSettingsPresent": true,
+      "objects": 4302,
+      "bytes": 856441465,
+      "databaseDumpCreated": true,
+      "dumpSha256": "fc388f247249001fb10a67750d28b362f345849d549159cb8706d0f14a715340",
+      "dumpBytes": 58155281
+    },
+    "localEncryption": {
+      "context": {
+        "project": "okchpyagfucpzpyrfgol",
+        "release": "MOEMOA_DAILY_BACKUP_20261011-02"
+      },
+      "mode": "encrypt",
+      "readOnlyProduction": true,
+      "objects": 4302,
+      "bytes": 856441465,
+      "cacheVerified": 4302,
+      "newDownloadObjects": 0,
+      "newDownloadBytes": 0,
+      "downloadsPerformed": 0,
+      "externalUploads": 0,
+      "oldCopiesDeleted": 0,
+      "scheduleEnabled": false,
+      "safeToServe": false,
+      "encryption": {
+        "files": 4309,
+        "bytes": 918359204
+      },
+      "localByteVerification": {
+        "files": 4309,
+        "bytes": 918359204
+      },
+      "status": "LOCAL_ENCRYPTED_BYTES_VERIFIED",
+      "databaseRestoreThisRun": false
+    },
+    "archive": {
+      "status": "LOCAL_ZIP_AUTHENTICATED",
+      "bytes": 920077441,
+      "sha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "files": 4309,
+      "uploadPerformed": false,
+      "externalRetrievalVerified": false,
+      "scheduleEnabled": false,
+      "retentionDeleted": 0
+    },
+    "finalSourceHashes": {
+      "tools/operations/capture-daily-backup.py": "a71c1150bd847316031e6eae08e0c462db75e148f897ca61b295b34ea728746a",
+      "tools/operations/prepare-daily-backup.mjs": "31daeeca923f98d27fcea3f80e15d0ee479a72bf899f4e2041dc1761ec26cdd6",
+      "tools/operations/package-daily-backup.py": "05452c5f631c2461dcdfb1ef5fdfb3eeba35d4cb7c23e389929273ff2a188a2e",
+      "tools/operations/run-daily-backup.mjs": "117eae1cd21c2102f8e6792aad41d157ea004883c110dd4bc86dbc19205d7fe1",
+      "tools/operations/daily-backup-task.xml": "8fd851cb0a33ed0c331e50ccecf648e57e19bbf4149c0f107d7700442e5e493d",
+      "tests/operations/dailyBackup.test.mjs": "a9b2ad39cee38522d35c2327bebc36b031de750520aa006b49ddda4c1eb6603f"
+    },
+    "validation": {
+      "unitCommand": "node --test tests/operations/dailyBackup.test.mjs",
+      "unitPass": 17,
+      "newDownloadTests": "Synthetic fetch responses; actual new-object GET count zero",
+      "actualPhases": "Same-snapshot capture, old-cache reuse, encryption, local restore, ZIP creation and ZIP authentication executed separately. Whole scheduled entry point preflight only.",
+      "syntax": "Node checks and Python AST passed",
+      "scheduleXml": "Disabled; daily 03:00 +09:00; never registered",
+      "driveDesktopInstalled": false,
+      "driveDesktopRunning": false,
+      "independentKeyStillUnconfirmed": true,
+      "finalCachePlan": {
+        "objects": 4302,
+        "cacheVerified": 4302,
+        "newDownloadBytes": 0,
+        "result": "CACHE_READY_FOR_CAPTURE"
+      },
+      "existingScheduledTaskCount": 0
+    },
+    "productionWrites": 0,
+    "originalDeletes": 0,
+    "newUploads": 0,
+    "retentionDeletes": 0,
+    "approvalCandidate": {
+      "taskName": "MOEMOA-DailyEncryptedBackup",
+      "localSchedule": "03:00 +09:00 daily; interactive session, powered PC and network required; catch-up next available; no wake",
+      "newObjectDownloadLimitBytes": 64000000,
+      "downloadLimitScope": "Local backup candidate guard; no production quota mutation",
+      "oneTimeExternalDestination": "Existing MOEMOA encrypted backups private Google Drive folder",
+      "oneTimeExternalArtifact": "moemoa-production-20261011-02.encrypted.zip",
+      "oneTimeExternalBytes": 920077441,
+      "oneTimeExternalSha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "recurringDriveConnection": "Not configured",
+      "automaticRetentionDeletion": "Not implemented or enabled",
+      "rollback": "Disable/unregister only the new task; preserve database, originals, keys and existing backup copies"
+    },
+    "remaining": [
+      "Exact approval before local schedule activation and this new encrypted archive upload",
+      "Recurring Drive upload authorization/connection and actual seven-day retention execution",
+      "Independent off-PC key custody",
+      "Current Public/entity deletion restore acceptance; prior October 9 restore is distinct"
+    ],
+    "next": "Apply the exact local daily task and new archive external custody candidate after approval"
   }
 }

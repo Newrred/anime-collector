@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {selectCachedObjects} from '../../tools/operations/prepare-daily-backup.mjs';
+const object=()=>({bucket:'memory-private-representations',name:'owner/asset/main.webp',bytes:72,etag:'a'.repeat(32)});
+const cached=()=>({...object(),file:'objects/00001.bin',sha256:'b'.repeat(64)});
+test('same body can be reused without network download',()=>assert.equal(selectCachedObjects([object()],[cached()])[0].cached.sha256,'b'.repeat(64)));
+test('changed etag must fetch a new body',()=>assert.equal(selectCachedObjects([{...object(),etag:'c'.repeat(32)}],[cached()])[0].cached,null));
+test('same size does not override changed identity',()=>assert.equal(selectCachedObjects([{...object(),name:'other/main.webp'}],[cached()])[0].cached,null));
+test('missing object is not silently skipped',()=>assert.equal(selectCachedObjects([object()],[])[0].cached,null));
+test('multipart or missing etag cannot prove reuse',()=>{for(const etag of [null,'a'.repeat(32)+'-2'])assert.equal(selectCachedObjects([{...object(),etag}],[cached()])[0].cached,null);});
+test('unsafe cached path cannot be read',()=>assert.equal(selectCachedObjects([object()],[{...cached(),file:'../secret'}])[0].cached,null));
+test('duplicate live identity rejected',()=>assert.throws(()=>selectCachedObjects([object(),object()],[cached()])));
+test('duplicate prior identity rejected',()=>assert.throws(()=>selectCachedObjects([object()],[cached(),cached()])));
+test('unknown bucket rejected',()=>assert.throws(()=>selectCachedObjects([{...object(),bucket:'unknown'}],[])));
+test('oversize or invalid size rejected',()=>{for(const bytes of [NaN,-1,20000001])assert.throws(()=>selectCachedObjects([{...object(),bytes}],[]));});
+test('traversal object key rejected',()=>assert.throws(()=>selectCachedObjects([{...object(),name:'../x'}],[])));
+test('deleted old object is excluded from new backup',()=>assert.equal(selectCachedObjects([], [cached()]).length,0));
+
+import {downloadBody} from '../../tools/operations/prepare-daily-backup.mjs';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+const synthetic=Buffer.from('synthetic backup bytes');
+const source=()=>({...object(),bytes:synthetic.length,etag:createHash('md5').update(synthetic).digest('hex')});
+const config={SUPABASE_URL:'https://okchpyagfucpzpyrfgol.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'synthetic-test-key'};
+async function temp(t){const p=await mkdtemp(join(tmpdir(),'moemoa-backup-test-'));t.after(()=>rm(p,{recursive:true,force:true}));return join(p,'body.bin');}
+test('bounded GET checks bytes and avoids redirects',async t=>{const path=await temp(t);const result=await downloadBody(source(),path,config,async(url,options)=>{assert.ok(url.startsWith(config.SUPABASE_URL+'/storage/v1/object/authenticated/'));assert.equal(options.redirect,'error');return new Response(synthetic);});assert.equal(result.bytes,synthetic.length);assert.deepEqual(await readFile(path),synthetic);});
+test('same length altered body fails integrity',async t=>{const path=await temp(t);await assert.rejects(downloadBody(source(),path,config,async()=>new Response(Buffer.alloc(synthetic.length))));});
+test('oversize stream fails',async t=>{const path=await temp(t);await assert.rejects(downloadBody(source(),path,config,async()=>new Response(Buffer.alloc(synthetic.length+1))));});
+test('HTTP failure does not produce successful body',async t=>{const path=await temp(t);await assert.rejects(downloadBody(source(),path,config,async()=>new Response('denied',{status:403})));await assert.rejects(readFile(path));});
+test('wrong production target cannot receive credentials',async t=>{const path=await temp(t);let called=false;await assert.rejects(downloadBody(source(),path,{...config,SUPABASE_URL:'https://example.com'},async()=>{called=true;}));assert.equal(called,false);});

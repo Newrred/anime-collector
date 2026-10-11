@@ -157,3 +157,26 @@ The private manifest/card-fence reconciliation preserves operation/source/hash/q
 This October 9 dump predates the Public schema. Success does not verify Public rights/withdrawals, restored entity deletion, current full-schema recovery, original completeness, Auth login, decoded image bytes, or independent key custody. Do not restart serving from it.
 
 User-confirmed operating targets on October 11: daily encrypted backup, seven days of copies, RPO 24 hours/RTO 24 hours. These are goals, not achieved guarantees. Scheduler/Drive transfer/deletion are not enabled by these tools or by that policy confirmation. Preserve the only externally verified copy until a new verified copy and an exact retention execution approval exist.
+
+
+## Daily backup candidate (not enabled)
+
+The October 11 policy is confirmed: one encrypted backup per day, seven days of retained copies, RPO/RTO 24-hour targets. The tools below prepare local copies only; they do not claim those targets are met. The Windows task XML is disabled and has not been registered. Drive for desktop is absent on this host; Drive upload and external receipt checks remain separate.
+
+```text
+wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-daily-backup.py --run-id <new-id> --mode capture
+node tools/operations/prepare-daily-backup.mjs <new-id> encrypt
+wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/package-daily-backup.py --run-id <new-id>
+```
+
+Capture holds a read-only PostgreSQL exported snapshot while pg_dump, role metadata (no role passwords), private deletion journal, migration context and Storage inventory are read from the same snapshot. PostgreSQL 17 and the existing verify-full TLS connection are reused. Output is exclusively created in ignored `.cache/operations-private/daily-backup-<id>`; an existing run is never overwritten. The INCOMPLETE marker describes capture alone; only READY_LOCAL_ONLY and then archive-summary establish the later verified stages. Neither permits serving.
+
+Preparation compares object identity, bytes and provider ETag, checks the cached file SHA-256 and MD5, and reuses the latest completed local ZIP verification cache (or the authenticated October 9 cache). Deleted objects are excluded. New or changed objects use bounded authenticated GETs to the pinned production project with redirects refused; the candidate stops above 64,000,000 new bytes/run or 20,000,000 bytes/object. This is an operator download guard, not a production quota or a promise of free traffic. Storage inventory is reread before and after encryption; drift refuses completion. New-body GET is covered with synthetic responses; no new image GET was needed in the October 11 run.
+
+The existing AES-GCM writer/reader creates and authenticates the local encrypted copy. Packaging includes encrypted UUID bodies, encrypted manifest and nonsecret project/release context only. It verifies the ZIP with the existing Python verifier. No raw database, images or key are packaged outside encryption. The resulting local ZIP is not an externally retrieved/verified copy.
+
+`node tools/operations/run-daily-backup.mjs --preflight` checks local prerequisite paths only. After exact approval, its execution chains the above commands under an exclusive lock. `daily-backup-task.xml` proposes 03:00 +09:00 every day, catch-up on next available session, no wake and no parallel runs. It requires this PC powered on, network available and the owner logged in. A changed host/path, stale lock or failed stage needs operator attention. It cannot meet off-PC RPO while the PC is off. Task history/nonzero exit is local status, not a tested notification delivery.
+
+Retention remains a review step: only superseded completed, externally verified copies older than seven days may be proposed for removal after a fresh external copy succeeds; preserve the latest success and the original sole external copy until replacement is independently verified. No deletion executor is enabled. Encryption outputs and raw/verified staging have separate cleanup needs; do not count unpruned local staging as seven-day retention. Do not put recovery keys on the same Drive.
+
+The known Windows Node rename failure from October 10 did not recur during the October 11 local create/restore. This is observed success for that run, not a universal filesystem fix.
