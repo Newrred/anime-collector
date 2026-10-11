@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W17/D05 실제 백업 DB 복구 완료(격리):** Docker 환경 차단을 해소하고 10/9 운영 dump의66테이블·7확장·16역할을 network none/포트0 로컬DB에 실제 복원했다. 최신 private manifest·card fence 대조/재적용 뒤 소유자RPC5건 성공·타계정5건/익명 거부·카드RLS PASS, operation/source/hash/quota 보존. 검사 후 private off·DB 정지 확인. 과거4308파일 byte검증/합성21검사와 구분한다. 일일암호화·7일보관·RPO/RTO24h 목표는 사용자 확정, 실제 가동은 미완료. 최신 전체 백업·Public권리/철회 복구·독립키는 잔여. 운영쓰기/업로드/키복사0, D06소스56cd0ab·운영199613b 유지. 다음1개: 현재 schema와 변경분을 포함할 백업·회전 실행 후보 정리.
+
+
 > **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
 
 
@@ -13,11 +16,11 @@
 
 ## 2026-10-11 W17/D05 복구 인수의 남은 범위
 
-- 완료 근거: 외부 ZIP/4308파일 인증은10/10, 최신 운영 private metadata 대조6건은10/11. 후자는 실제 DB/RLS 재가동 또는 삭제 replay를 대체하지 않는다. 새 snapshot의 assetType을 포함하여 기존 private_media_source의 USER_IMAGE 조건까지 확인한다.
-- 환경 차단: 사용자 설치 PG17.11에는 pg_cron/supabase_vault가 없고 WSL Docker 연동·Windows engine 초기연결 모두 실패. 확장을 생략하거나 stub로 바꿔 전체복구 PASS를 만들지 않는다.
+- 완료 근거: 외부 ZIP/4308파일 인증은10/10. 10/11 실제10/9 dump66테이블 import와 최신 private manifest/card fence 재적용, 복원된 실제 소유자RPC5건·타계정/익명 차단·카드RLS PASS. private metadata대조21합성검사와 별개 결과다. 이미지 byte검증은 과거 근거 재사용, 이번 decode 없음.
+- 환경 차단 해소: Docker29.3.1을 기존 설치로 복구. 공식 Supabase Postgres17.6 고정digest에서 실제7확장·16역할/25멤버십 복원. 네트워크none/포트0/cron off/private off, 검사 종료 시 컨테이너 정지. 기존IPC 파일은 보존 이동했고 Docker 데이터는 삭제하지 않았다.
 - 독립 복구키:10/11 사용자 ‘아직 별도 보관 안 함’. 키는 이 PC에만 있으며 에이전트가 임의 클라우드로 복사하지 않는다. 키 내용·ID·원본·계정값은 보고에 넣지 않는다.
-- **운영 기준 후보(PROPOSED, 미승인·미가동):** 최소 하루1회 DB+Storage+현재 삭제 journal 암호화 사본, 일일7개 보관, 최신 성공본 확인 후에만7일 초과 사본 정리. RPO24시간/RTO24시간 목표. 현재918.8MB 크기가 같다면7개 약6.43GB(원본 증가/별도 journal 제외). 이미 확보한유일사본은 삭제하지 않는다. 무료 요금제·Drive5TB 안에서 준비 가능하나 자동스케줄/키 별도보관/실제 전체복구 없이는 이 목표를 달성한다고 안내하지 않는다.
-- 재개 조건: 확장을 갖춘 격리 DB에 실제 dump import→현재 계정/원본/삭제·철회/권리 대조→접근권한/이미지 참조 확인. private/Public off 유지, 최신 안전이력이 없으면 서빙 재개 금지.
+- **운영 기준(CONFIRMED 2026-10-11 / 미가동):** 최소 하루1회 DB+Storage+현재 삭제 journal 암호화 사본, 일일7개 보관, 최신 성공본 확인 후에만7일 초과 사본 정리. RPO24시간/RTO24시간 목표. 현재918.8MB 크기가 같다면7개 약6.43GB(원본 증가/별도 journal 제외). 이미 확보한유일사본은 삭제하지 않는다. 무료 요금제·Drive5TB 안에서 준비 가능하나 실제 자동스케줄/키 별도보관/현재 전체복구 인수 없이는 이 목표를 달성한다고 안내하지 않는다.
+- 남은 범위: 10/9 사본에는 이후 Public schema가 없으므로 현재 운영 전체 schema/data의 백업과 Public 권리·철회/복원된 entity 삭제 재적용은 이번 PASS에 포함하지 않는다. 최신 private manifest만 검증한 DB는 서빙 재개 불가. 독립키·회전/RPO/RTO 인수, canonical 완전성은 유지한다. 다음은 기존 도구를 재사용하는 최신 백업·회전 실행 후보이며 새로운 기능 트리는 만들지 않는다.
 
 ## 2026-10-11 D06 최종 후보03 — 적용 범위와 남은 조건
 

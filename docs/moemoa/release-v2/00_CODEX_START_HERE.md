@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W17/D05 실제 백업 DB 복구 완료(격리):** Docker 환경 차단을 해소하고 10/9 운영 dump의66테이블·7확장·16역할을 network none/포트0 로컬DB에 실제 복원했다. 최신 private manifest·card fence 대조/재적용 뒤 소유자RPC5건 성공·타계정5건/익명 거부·카드RLS PASS, operation/source/hash/quota 보존. 검사 후 private off·DB 정지 확인. 과거4308파일 byte검증/합성21검사와 구분한다. 일일암호화·7일보관·RPO/RTO24h 목표는 사용자 확정, 실제 가동은 미완료. 최신 전체 백업·Public권리/철회 복구·독립키는 잔여. 운영쓰기/업로드/키복사0, D06소스56cd0ab·운영199613b 유지. 다음1개: 현재 schema와 변경분을 포함할 백업·회전 실행 후보 정리.
+
+
 > **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
 
 

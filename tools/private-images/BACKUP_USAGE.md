@@ -137,3 +137,23 @@ Run its synthetic boundary tests with:
 ```text
 wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py
 ```
+
+
+## Isolated real-dump rehearsal (Windows Docker + WSL)
+
+The October 11 operator runner is pinned to the authenticated October 9 quarantine and the Supabase Postgres image digest recorded in release-v2 evidence. It is not a general production recovery/deployment command. Read `rehearse-production-restore.mjs` before reuse on another host; it expects the existing protected staging and Docker executable path.
+
+With the existing authorized read-only production connection, choose a NEW run ID for each attempt:
+
+```text
+wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id <new-id>
+node tools/operations/rehearse-production-restore.mjs <new-id>
+```
+
+Capture writes only password-free role metadata and the latest journal to ignored operator-only staging. Run the rehearsal within one hour; an existing container is refused. Docker uses network none, no published ports, cron disabled, a read-only backup mount and ephemeral tmpfs for the restored database. Role memberships and the actual pg_restore dump are imported without removing required extensions.
+
+The private manifest/card-fence reconciliation preserves operation/source/hash/quota fields, then tests actual restored owner RPC access and other-owner/anonymous denial plus card RLS. Probe-only policy changes roll back. Serving remains closed and the container stops at the end. Check `containerStopped=true`; no raw SQL logs or journal may be committed. A stopped tmpfs container is evidence of a rehearsal, not a durable recovery copy.
+
+This October 9 dump predates the Public schema. Success does not verify Public rights/withdrawals, restored entity deletion, current full-schema recovery, original completeness, Auth login, decoded image bytes, or independent key custody. Do not restart serving from it.
+
+User-confirmed operating targets on October 11: daily encrypted backup, seven days of copies, RPO 24 hours/RTO 24 hours. These are goals, not achieved guarantees. Scheduler/Drive transfer/deletion are not enabled by these tools or by that policy confirmation. Preserve the only externally verified copy until a new verified copy and an exact retention execution approval exist.

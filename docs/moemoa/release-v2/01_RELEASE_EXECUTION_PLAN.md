@@ -2268,3 +2268,26 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제명령/결과: wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py →21PASS. wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/inspect-backup-reconciliation.py --quarantine /mnt/e/web/anime/.cache/operations-private/20261009-production/quarantine-external-20261010 →exit0; backup6/latest6, eligible5/backupNotReady1, absentAccounts0/newMedia0. /opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/postgres 있음/필요한 확장2개 없음. Windows docker version/image ls는 engine named pipe 부재로 실패, Start-Process -WindowStyle Hidden 후에도 version 실패.
 7. 영향: 집계만 출력, ID·비밀값·사용자 문구 출력0. 최신 journal은 메모리에서만 대조, 파일저장/외부송신0. 이번 새 사용자행동 PASS0. 공개/삭제/백업 보장 변경0.
 8. 잔여/다음1개: 필요한 확장을 갖춘 로컬 격리DB 환경 복구 후 기존 실제 dump import. 별도키 보관·회전/복구목표는 사용자 인수 잔여. 일일7개/RPO24h·RTO24h는 미확정 후보이며 기존 유일사본 자동삭제 없음. D06 후보56cd0ab/운영Public off 유지.
+
+
+### W17/D05 격리 복구 환경 재개 — 2026-10-11
+
+기존17항 범위 안에서 Docker backend의 시작 실패를 진단했다. 12:13 로그의 직접 원인은 ProgramData 환경값 조회 실패다. 서비스 시작도 권한 오류였으므로 반복하지 않고, 이 작업이 시작하는 숨김 Docker 프로세스에만 기존 C:/ProgramData를 지정한다. OS 전역 설정/운영 공급자/요금 변경 없음. 엔진이 열리면 기존 Supabase PostgreSQL 이미지의 확장 환경을 로컬·네트워크차단·포트미공개로 사용하고, 실제 dump는 읽기전용 입력 및 비공개 로그로만 복구한다. 외부 접근/cron 작업/서빙은 꺼둔다. 전체 import·삭제재적용 미통과를 PASS로 바꾸지 않는다. 진행/결과는 같은D05에 기록한다.
+
+[환경 진단] ProgramData 보완 후 APPDATA 설정파일 경로 오류, 이 두 경로 보완 후 과거 dockerInference 소켓 EACCES로 진행했다. 이번 task가 시작한 PID/start time 확인 후 해당 Docker 프로세스만 중단. 정확히 확인한 C:/Users/hongs/AppData/Local/Docker/run(두 IPC 파일만 존재)을 run.moemoa-recovery-20261011로 보존 이동하고 재시작했다. Docker image/volume/기존DB·설정은 삭제하지 않았다. 새 프로세스에만 정상 Windows 경로를 전달했다.
+
+[격리 실행 상세] Docker29.3.1 정상기동 확인. 공식 supabase/postgres:17.6.1.136을 로컬에 준비한다(공식docker-compose 참조). 새 tools/operations/rehearse-production-restore.mjs는 이름/label로 자기 컨테이너만 제어하고 --network none·미공개포트·listen_addresses=''·cron.launch_active_jobs=off로 실제dump를 복원한다. 서버 역할/멤버십은 비밀번호 없이 읽기전용 추출하여 로컬 역할 구조를 맞춘다. pg_restore --exit-on-error/권한·행수/이미지참조를 집계하고 raw로그는 ignored protected staging에만 둔다. 실행 종료 시 DB를 정지하며 stale정책은 공개/개인이미지 모두off로 닫는다. 복구키복사/운영쓰기/신규 Public 승인 없음.
+
+
+#### W17/D05 실제 DB 복구·접근 경계 — 2026-10-11 실행 보고
+
+1. 읽은 문서/파일: AGENTS, CODEX_START_HERE, 확정01, 기존 release-v2 00~03와 W17/D05/외부백업 evidence, PLANS·QA07/변경09·BACKUP_USAGE 및 기존 journal/retention/복구 코드. 공식 Supabase postgres Dockerfile/compose와 PostgreSQL17 GRANT 문서에서 확장환경·역할 옵션을 대조했다.
+2. 가정/미결: 기존 인증된10/9 외부 회수 사본을 사용한다. 현재 전체DB 사본이나 hosted 서비스 복구가 아니며, Public schema는 당시 사본에 없다. 기존4308파일 인증·합성21검사는 재사용 근거이고 이번 이미지 decode는 하지 않았다.
+3. 계획: 위 W17/D05 기존 ExecPlan의 격리 환경 재개. 새 계획 트리/작업판 없이 진행했다. D06 앱 후보56cd0ab·운영199613b를 복구도구 HEAD로 재지정하지 않는다.
+4. 변경: capture-isolated-recovery-context.py(비밀번호 없는 역할·최신journal 읽기), rehearse-production-restore.mjs(고정이미지·격리import/종료), isolated-private-recovery.sql(manifest/fence 최신 대조), isolated-recovery-access.sql(실제 복원RPC·RLS 검사). 기존00~03/확정결정/evidence/BACKUP_USAGE에 결과·재개법 기록. 앱/의존성 변경0.
+5. DB·복귀: 운영은 TLS verify-full/read-only repeatable-read SELECT만. 실제dump는 network none·포트0·read-only rootfs·tmpfsDB·cron off의 새 local 컨테이너로 import했다. 복원 정책은 즉시off, 접근검사 임시on은 transaction ROLLBACK. 모든 task 컨테이너 정지 확인, 원본백업/운영데이터/사용량 변경0. 기존Docker IPC 디렉터리는 exact path 확인 후 보존 이동했고 user volume/image 삭제0.
+6. 실제 명령/결과: `wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id 20261011-05` exit0/16roles·25memberships·6media/passwordsExported=false. `node tools/operations/rehearse-production-restore.mjs 20261011-05` 결과 IMPORT_PRIVATE_REPLAY_ACCESS_PASS_SERVING_CLOSED: pg_restore single-transaction12.783초,66tables·7extensions·12cards·12assets·6media·2accounts. private READY5/nonREADY1, operation/source/hash/quota 보존. 실제ownerRPC5·타계정5/익명 차단·카드RLS PASS. private off·containerStopped=true. cronRuns37은 복원된 과거 이력이며 신규실행 아님. 최초3회 실패 원인/수정은 evidence에 보존;4회차 성공 후 빈응답/시간/종료 판정 보강을 반영해5회차 재검증. 광범위 제품시험은 반복하지 않았다.
+7. 보안/관측/권리: raw journal/SQL log는 ignored protected staging만, Git에는 집계·코드hash만 기록. 역할 비밀번호·개인본문·원본이미지 출력0·복구키읽기/복사0·외부업로드0. 새 사용자 실제 hosted/Google/실기기 행동PASS0. private manifest 재적용은 Public권리/철회·복원entity삭제·현재서비스 전체복구 PASS로 확대하지 않는다.
+8. 남은 조건/다음1개: Docker/확장 차단은 해소했다. 사용자 일일암호화/7일/RPO24h·RTO24h 목표를 확정(RECOVERY-DAILY7-RPO24-RTO24-20261011)했지만 자동실행/외부전송/이전사본삭제는 아직 미가동·별도 적용 범위다. 키 별도보관은 아직 미완료. 다음1개는 현재schema/변경분을 포함할 기존 백업·회전 실행 후보 정리다. 운영Public/DB migration/master Git 배포는 D06 정확한 승인 전 실행하지 않는다.
+
+[최종 검증] node --check 및 Python ast.parse PASS, git diff --check PASS. docker ps -a의 task label5개 모두 exited. git ls-remote에서 master199613b/phone-testa6b6dda 불변 확인. 작업브랜치에만 코드/문서/집계를 인계하며 보호 staging과 기존 unrelated identity SQL은 커밋하지 않는다.

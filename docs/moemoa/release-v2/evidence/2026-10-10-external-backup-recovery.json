@@ -103,5 +103,124 @@
     "newUserBehaviorPass": 0,
     "next": "Restore an extension-capable local isolated database environment, then import the existing production dump; keep serving disabled.",
     "recoveryKeysReadOrCopied": 0
+  },
+  "isolatedDatabaseRestore20261011": {
+    "date": "2026-10-11",
+    "baselineCommit": "ed06bdcd67b959e9c689764dc947ba415e721f4f",
+    "backupDate": "2026-10-09",
+    "result": {
+      "scope": "Local isolated real production dump",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "network": "none",
+      "publishedPorts": 0,
+      "safeToServe": false,
+      "roles": 16,
+      "memberships": 25,
+      "importSeconds": 12.783,
+      "databaseImportVerified": true,
+      "database": {
+        "cards": 12,
+        "media": 6,
+        "assets": 12,
+        "tables": 66,
+        "version": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+        "accounts": 2,
+        "cronRuns": 37,
+        "cronLaunch": "off",
+        "extensions": [
+          "pg_cron",
+          "pg_stat_statements",
+          "pg_trgm",
+          "pgcrypto",
+          "plpgsql",
+          "supabase_vault",
+          "uuid-ossp"
+        ],
+        "privateEnabled": false,
+        "publicSettingsPresent": false
+      },
+      "privateReplay": {
+        "rows": 6,
+        "ready": 5,
+        "scope": "Private manifests and card fences only; no restored entity deletion or Public rights replay claimed",
+        "nonReady": 1,
+        "operationSourceHashQuotaPreserved": true
+      },
+      "access": {
+        "ownerReads": 5,
+        "anonymousDenied": true,
+        "realRestoredRpc": true,
+        "otherOwnerDenied": 5,
+        "wrongOwnerCardRlsDenied": true,
+        "imageBytesDecodedThisRun": false
+      },
+      "privateAccessRemainsClosed": true,
+      "status": "IMPORT_PRIVATE_REPLAY_ACCESS_PASS_SERVING_CLOSED",
+      "containerStopped": true
+    },
+    "cronRunsMeaning": "37 historical restored rows, not new jobs; cron.launch_active_jobs=off throughout",
+    "commands": [
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id 20261011-05",
+      "node tools/operations/rehearse-production-restore.mjs 20261011-05",
+      "node --check tools/operations/rehearse-production-restore.mjs"
+    ],
+    "sourceSha256": {
+      "tools/operations/capture-isolated-recovery-context.py": "69df823214f824812168b55fb0a3ed939cc02725cc5977635a8cce9ea028844a",
+      "tools/operations/rehearse-production-restore.mjs": "350c905e912d58851f3f7c725244b4ffb0340f288fe961ccc0603139be5d853d",
+      "tools/operations/isolated-private-recovery.sql": "aafa52a9fa68b0404fa2c72b27c1d5b34b1e1431edda3d1f683ee20a69dfd0ce",
+      "tools/operations/isolated-recovery-access.sql": "11f9acd65044fb1089fdf55a0f96841cf1b1d59121ed9d8ba5058febae75acb9"
+    },
+    "earlierAttempts": [
+      {
+        "run": "20261011",
+        "result": "Import failed: pgbouncer excluded by incorrect pg_% prefix filter; fixed to exact pg_ prefix; import transaction rolled back"
+      },
+      {
+        "run": "20261011-02",
+        "result": "Import passed; closing access failed because October 9 dump predates publication settings table"
+      },
+      {
+        "run": "20261011-03",
+        "result": "Import passed; closing-access DO quote syntax failed; corrected to tagged delimiter"
+      },
+      {
+        "run": "20261011-04",
+        "result": "Import/reconciliation/access PASS; then hardened null-manifest mismatch, timestamp and stop-failure checks before final run05"
+      }
+    ],
+    "dockerRepair": {
+      "engine": "29.3.1",
+      "environmentScope": "Only child launch standard Windows directory environment; no global changes",
+      "preservedSocketDirectories": true,
+      "existingDockerDataDeleted": false,
+      "allTaskContainersStopped": true
+    },
+    "productionDatabaseWrites": 0,
+    "newExternalUploads": 0,
+    "keysReadOrCopied": 0,
+    "newHostedGoogleOrDeviceUserBehaviorPass": 0,
+    "previousEvidenceReused": [
+      "Authenticated external ZIP/4308 files from October 10",
+      "21 synthetic metadata boundary checks from preceding turn"
+    ],
+    "policy": {
+      "decision": "RECOVERY-DAILY7-RPO24-RTO24-20261011",
+      "userConfirmed": true,
+      "frequencyHours": 24,
+      "retentionDays": 7,
+      "rpoHours": 24,
+      "rtoHours": 24,
+      "meaning": "Operational targets, not achieved guarantees",
+      "schedulerEnabled": false,
+      "externalUploadOrDeletionApproved": false
+    },
+    "remaining": [
+      "Independent off-PC key custody not completed per user",
+      "Current full schema/data backup and actual schedule/rotation not operational",
+      "October 9 dump predates Public schema; Public rights/withdrawal and restored entity-deletion replay not verified here",
+      "Canonical/original completeness still separate",
+      "D06 exact production approval and subsequent operating checks"
+    ],
+    "next": "Prepare existing W17/D05 current-snapshot backup and rotation execution candidate"
   }
 }
