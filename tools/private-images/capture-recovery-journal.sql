@@ -13,7 +13,7 @@ select jsonb_build_object(
   'snapshot',pg_current_snapshot()::text,
   'accounts',coalesce((select jsonb_agg(id order by id) from auth.users),'[]'::jsonb),
   'cards',coalesce((select jsonb_agg(jsonb_build_object('id',id,'ownerId',user_id,'deletedAt',deleted_at) order by id) from public.memory_cards),'[]'::jsonb),
-  'assets',coalesce((select jsonb_agg(jsonb_build_object('id',id,'ownerId',user_id,'cardId',card_id,'version',version,'current',is_current,'state',state,'deletedAt',deleted_at) order by id) from public.memory_visual_assets),'[]'::jsonb),
+  'assets',coalesce((select jsonb_agg(jsonb_build_object('id',id,'ownerId',user_id,'cardId',card_id,'version',version,'assetType',asset_type,'current',is_current,'state',state,'deletedAt',deleted_at) order by id) from public.memory_visual_assets),'[]'::jsonb),
   'cardFences',coalesce((select jsonb_agg(to_jsonb(f) order by user_id,card_id) from private.memory_publication_delete_fences f),'[]'::jsonb),
   'cancelled',coalesce((select jsonb_agg(to_jsonb(c) order by owner_id,operation_id) from private.memory_private_media_cancelled c),'[]'::jsonb),
   'media',coalesce((select jsonb_agg(to_jsonb(m) order by id) from private.memory_private_media m),'[]'::jsonb)
