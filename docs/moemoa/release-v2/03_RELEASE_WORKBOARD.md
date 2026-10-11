@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시와 B 팔로우/신고/차단/철회는 잔여. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
+> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시→보드 작성자 링크→새 익명home 이미지decode PASS. B 계정은 현재 test auth에 없어 당사자 가입 대기; 팔로우/신고/차단/철회 잔여. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
 
 
 > **2026-10-10 최신 완료 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력 포함 f428c60의 전체 CI·master Git·Vercel Ready·실제 www 소스/화면 확인 완료. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
@@ -734,11 +734,11 @@ W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
 흐름: 카드 공개/비공개→표시 내용 동의1개→저장. 서버 준비/preview/hash 확인은 내부 처리
 이전 로컬: unit69·고유 모의API Chromium13·SQL33·build32 PASS, 새 hosted PASS와 구분
 이번 DB: 승인된20261011120000 rollback리허설→APPLY→독립readback PASS.13table 원문 fingerprint/건수 일치·기존flags/정책/권리/원본 보존
-이번 화면: A 직접 동의/Save→Saved as public→새 익명 origin Sign in to report·24×30 공개 이미지decode PASS. 미니홈 합성 프로필/공개보드1개 preview PASS
+이번 화면: A 직접 동의/Save→Saved as public→새 익명 origin Sign in to report·24×30 공개 이미지decode PASS. 미니홈 직접 게시·보드 작성자링크·익명home decode PASS
 실제 게시: 카드 게시 당시 guard=false(과거 원복 상태), 현재 A receipt 보유. 미니홈 preview는 승인된 enable-existing/guard=true에서 성공. 원본/감상/태그 공개0. 종료 전 --restore exit0/guard=false 확인
 이번 검사: CI38112339835 일반runner env누락1FAIL 보존; workflow의 publication전체를 기존 격리runner로 이동→37/37 로컬PASS. 제품/DB 변경0
-미완료: home 당사자 게시/B follow·재방문·신고/차단/철회, 9f36610의 CI38113213200 완료 확인, D03~D06 실제 잔여
-다음1개: A가 준비된 미니홈의 정책 직접 수락/게시→B follow·내 목록 재방문
+미완료: B auth계정0으로 직접 테스트 가입 대기; B follow·재방문·신고/차단/철회, 9f36610의 CI38113213200 완료 확인, D03~D06 실제 잔여
+다음1개: 준비한 B 직접 테스트 가입→A 미니홈 복귀→follow·내 목록 재방문
 ```
 
 <details><summary>이전 카드 — A hosted preview 후 간소화 요청 전</summary>

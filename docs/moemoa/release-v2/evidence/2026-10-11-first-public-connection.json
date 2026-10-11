@@ -215,7 +215,7 @@
     "Automated user terms acceptance",
     "Production public enablement"
   ],
-  "nextAction": "User directly publishes prepared synthetic home, then B follow and list revisit",
+  "nextAction": "User directly completes missing B test signup; verify return to A public home then explicit follow/list revisit",
   "simpleCardSharing": {
     "decision": "CARD-PUBLIC-SIMPLE-01",
     "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
@@ -497,9 +497,26 @@
       "home": {
         "prepare": "PASS",
         "signupGuardDuringPrepare": true,
-        "publish": "pending-user-direct-consent"
+        "publish": "PASS-user-direct",
+        "homeId": "4006eb40-ec5a-47fc-8a5b-ec2b78e60daa",
+        "boardAuthorLink": "PASS",
+        "anonymousImageDecode": {
+          "width": 24,
+          "height": 30
+        },
+        "signupGuardAtExactPublish": "not-observed-during-user-action"
       },
-      "signupGuardDuringCardPublish": false
+      "signupGuardDuringCardPublish": false,
+      "bFollow": {
+        "status": "blocked-before-follow",
+        "existingGoogleLogin": "access_denied: Complete signup at MOEMOA before creating an account",
+        "readOnlyAuthPresence": {
+          "A": 1,
+          "B": 0
+        },
+        "request": "user direct B signup prepared on canonical phone-test alias",
+        "uniquePreviewAuthRedirect": "rejected login returned configured 127.0.0.1:4321 fallback; canonical alias used for signup"
+      }
     },
     "ci": {
       "runId": 38112339835,
@@ -521,7 +538,8 @@
       "remoteFixVerification": {
         "sourceCommit": "9f3661063b79923b73050629deeef021a6c65dee",
         "runId": 38113213200,
-        "status": "queued-at-last-read",
+        "status": "in_progress",
+        "publicationContract": "success",
         "conclusion": null
       }
     },
@@ -555,6 +573,33 @@
       "exit": 0,
       "signupDeclarationRequired": false,
       "otherPublicFlagsAndPolicyPreserved": true
+    },
+    "followupDeployment": {
+      "sourceCommit": "9f3661063b79923b73050629deeef021a6c65dee",
+      "githubDeploymentId": 6991142681,
+      "state": "success",
+      "url": "https://anime-collector-4z9xyjcxh-newrreds-projects.vercel.app",
+      "verifiedVia": "GitHub deployment status, no new product code"
+    },
+    "guardRestoredBeforeBSignupHandoff": {
+      "exit": 0,
+      "publicSettings": {
+        "singleton": true,
+        "asset_limit": 10,
+        "reads_enabled": true,
+        "images_enabled": true,
+        "writes_enabled": true,
+        "follows_enabled": true,
+        "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "reports_enabled": true,
+        "asset_bytes_limit": 41943040,
+        "minihomes_enabled": true,
+        "report_daily_limit": 10,
+        "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "signup_declaration_required": false,
+        "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+      },
+      "signupDeclarationRequired": false
     }
   }
 }

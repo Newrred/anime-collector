@@ -85,6 +85,8 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 
 - 실행 결과: `node scripts/run-publication-closeout-e2e.mjs ".*"` →37/37 PASS, exit0. 실제 hosted와 모의API를 구분한다. 미니홈은 합성 프로필+신규 공개보드1개로 preview PASS, 당사자 정책 수락/게시 대기. 테스트 guard는 기존 승인 범위로 재활성했으며 인계 시 원복한다. 9f36610을 phone-test만 push했고 CI38113213200은 마지막 조회 queued(원격 PASS 아님). 인계 전 --restore exit0·guard=false 확인, 나머지 공개 설정/정책 보존. 원격 CI 후속 결과는 증거JSON에 기록한다.
 
+- 후속 실제 결과: 사용자 미니홈 직접 게시 완료, 공개 보드 작성자 링크→home 이동·비로그인24×30 이미지decode PASS. B 기존 Google 로그인은 signup 필요 오류; 읽기전용 auth 조회 A1/B0. 정식 phone-test alias에 B 직접 가입+원래home 복귀 URL 준비. 고유 Preview 로그인 오류가 localhost fallback으로 향한 관측은 기록하며 설정을 임의 변경하지 않음. 9f36610 GitHub Preview6991142681 success; CI38113213200 publication-contract success/verify 진행 중.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.
