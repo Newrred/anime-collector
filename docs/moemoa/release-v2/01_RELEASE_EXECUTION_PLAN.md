@@ -2073,3 +2073,34 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 [2026-10-11 18:45 JST] 원복 확인 완료: DB 두quota disabled/0·실제사용량2/144 보존. Preview codex/phone-test sizedflag=false 저장 후 동일a6b6dda 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready·source·canonicalalias 일치. 이전immutable true배포삭제/모두비활성주장0. 증거 .cache/public-budget-flag-restored.png. 기존 운영master199613b·Public·요금미변경. 이번 실행5문서를작업브랜치에commit/push해인계한다.
 
 - CI 후속: 승인a6b6dda의 phone-test38129338217·workingbranch38129221751은최종조회시IN_PROGRESS, 전체SUCCESS를선기록하지않는다. Vercel Ready와CI전체는별도다.
+
+### W15/D06 검증 후보 운영 결속 — 2026-10-11
+
+1. 목적: 검증된 앱·크기 예약·전송 한도를 한 운영 후보 목록에 결속하고, 아직 닫히지 않은 Public 조건을 실행 전 식별한다.
+2. 결정: 단일 작업판, Free 유지, 정확한 운영 후보 승인, 국가/권리 결정 유지.
+3. 근거: 운영199613b, 검증 a6b6dda/작업 HEAD7cd3a82, phone-test CI38129338217 SUCCESS.
+4. 범위: 읽기 전용 운영 preflight, Git 고정 소스/hash manifest, 적용·원복 순서 및 누락 조건. 운영/test 쓰기·발송·결제 제외.
+5. 흐름: 운영 schema/config 조회 → 실제 누락 migration 비교 → 앱/SQL/설정 hash 결속 → 차단/후속1개 기록.
+6. 파일: tools/operations의 read-only preflight 및 candidate manifest 도구, 기존00~03/capacity evidence.
+7. 데이터: 이번 migration 실행0. 필요한 additive migration과 두 quota의 정확한 후보만 기록.
+8. 마일스톤: 현재 운영 차이 확인 → 재현 가능한 후보 산출 → 변경 없는 검증/문서 인계.
+9. 검사: 후보 source/hash/누락 판정/비변경 계약 및 기존 green CI 사용. 기초 DB·A/B·Safari 반복 없음.
+10. 보안: DB read-only transaction, 정책/건수만 출력, 개인 자료/비밀값/원문 오류 미출력.
+11. 관측: 기존 80%/980MB 경보 유지. 실제 수신은 과거 evaluator PASS와 구분.
+12. 복귀: 파일 diff만 되돌림. 향후 운영은 reads/writes 차단 후 한도·앱 복귀, DB additive 구조/사용량 보존.
+13. 위험: 테스트 정책 revision을 운영 승인으로 복사하지 않음. final image HTTP/경보 수신/권리 및 복구 인수 잔여를 숨기지 않음.
+14. 승인: 지금은 후보 준비. 정확한 운영 승인 전 원격 mutation 없음.
+15. 진행: phone-test 전체 CI SUCCESS, 같은 SHA working CI cancelled 확인.
+16. 발견: 운영 대비 앱 변경에는 간편 공개·신고 UI도 포함되어 quota 단독 출시와 구분 필요.
+17. 완료 보고: 아래 실제 결과/명령·다음1개에 누적.
+
+#### W15/D06 운영 후보 결속 — 이번 실행 8항 보고
+
+1. 읽은 문서/소스: AGENTS·start·확정결정01·PLANS·이미지05·QA07·변경09 및 release-v2/00~03, 기존 production/test 적용도구와 publication runtime/QuickSharing, public-image/cleanup/maintenance, 관련 migration을 대조했다. verify-before-claiming 사용.
+2. 가정/미결: 이번은 후보 준비이며 운영 승인/활성 아님. 무료·KR14/US13/TH13·일반 공개/별도권리·Android/Safari 제외 유지. 후보 계정10개/40MiB·신고10회는 기존test값 기반의 제안이며 global20MiB가 우선한다. 새상품/정책확정0.
+3. ExecPlan: 바로 위 기존 W15/D06 17항. 단일작업판 유지.
+4. 파일: tools/operations/inspect-first-public-release.py(운영 읽기전용, apply경로없음), build-first-public-candidate.mjs(고정Git소스+aggregate입력의offline manifest), 기존00~03/current card와capacity evidence 갱신. 앱/DB소스 수정0. manifest는 evidence의 firstPublicProductionCandidate에 보존해 두번째 진행판을 만들지 않았다.
+5. DB/복귀: 실제운영 조회38 migrations·Public off·공개boards/homes/assets0·moderator1·국가3개·global20MiB. 누락20261010160000/11120000/11180000의hash와순서결속. 적용0. 향후reads/writes먼저닫기→정확한quota/flag복귀→Git이전소스배포; additive구조/usage보존. 공개사본자동정리도정확한후보승인대상에포함.
+6. 실제명령/결과: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0/readOnly; node tools/operations/build-first-public-candidate.mjs .cache/first-public-preflight.json exit0/20변경runtime파일·migration3·budget2해시. 잘못된target/ledger/누락migration/Public-on/override/paused-quota의6개임시fixture는모두exit1·정해진오류만출력·manifest출력0. node --check와git diff --check PASS. 최초생성의개행/정규식이스케이프구문오류수정후재검증. Git diff a6b6dda..7cd3a82의src/api/DB/scripts/workflows/config/package차이0. GitHub readback phone-test38129338217 SUCCESS·working38129221751 cancelled. 실제 www/build-info.json HTTP200/commit=checkoutCommit=199613b/source=vercel-git. 광범위제품/DB복원재검사0.
+7. 영향/증거범위: 운영/test설정·DB쓰기·배포·발송·결제0, source/rights/원본/개인자료보존. 새사용자행동PASS0. 읽기전용운영대조/후보도구검증만이번PASS, 과거실제A/B·Storage·CI는재조회/재사용증거로분리. 새manifest에키/본문/경로/계정식별자0.
+8. 정확한잔여/다음1개: **D04 기존 일반 공개 고지·권리 조건을 후보 revision에결속**. 그후정확한최종운영승인/기존기능활성순서를진행. 별도복구키·복구인수는D05외부조건, 경보실수신과최종후보이미지HTTP/철회는실행잔여. 코드문제없이테스트만반복하지않으며이번후보준비를전체출시완료로표시하지않는다.

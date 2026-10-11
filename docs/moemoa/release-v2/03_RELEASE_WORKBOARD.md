@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W15/D06 운영 후보 결속:** 앱 후보7cd3a82는 전체CI SUCCESS a6b6dda와 runtime/config/DB 소스 차이0. 운영 읽기전용 조회에서 migration38개·Public off·3개 누락(20261010160000/11120000/11180000), 운영자1명·KR14/TH13/US13·global20MiB 유지 확인. 기존 capacity evidence의 firstPublicProductionCandidate에 소스/SQL hash·2,000GET/64MB·13개 Vercel 설정·공개 사본 정리·원복순서 결속. 후보 생성 정상1/잘못된 대상·상태 거부6 PASS. 운영/테스트 쓰기0, 새 사용자행동 PASS0. 다음1개: D04의 기존 일반 공개 고지·권리 조건을 후보 policy revision에 결속. 복구 인수/실제경보수신/최종HTTP·정확한운영승인은 잔여.
+
+
 > **2026-10-11 W15/D03 전송 한도 test 검증:** 승인a6b6dda의 전역2,000GET/64MB 두정책 적용, 실제 hosted RPC/Storage full·thumb 각72B 다운로드 및2회/144B 차감 확인. hosted rollback-only 요청2000/2001·64MB/+1·원자적차단 PASS. 실제 집계의80% 경보 판정 PASS(로컬 evaluator, 발송/수신 아님). DB두한도disabled/0 원복·2회/144B 사용량보존·Public/다른정책보존. phone-test true 배포977hd Ready/source·alias 확인, false 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias 확인. 운영/master199613b 유지. 다음1개 최종 운영 후보에 전송한도 변경목록 결속; deployed image HTTP/실제경보수신은 잔여.
 
 
@@ -18,7 +21,7 @@
 - 실제 잔여: W15/D03 정상 공개규모·전송한도/경보 인수, W14/D04 Public 권리·고지의 운영 연결, W16/W17/D05 작은 catalog 게시·복구/별도 복구키·전체DB 복구/운영 목표, W18~W20/D06 같은 최종 후보의 전달·철회 경계와 승인 배포. 기존 기본 DB/A·B 격리/72table 복원은 반복하지 않는다.
 - Android 제외, 추가 Safari/WebKit·실폰 오프라인은 사용자 제외 유지(**미실행/USER_WAIVED**, PASS 아님). 과거 행의 포괄적인 ‘실기기 잔여’는 이를 재요구하는 출시 차단 조건이 아니다.
 - 이번 새 사용자 게시 행동 PASS0. 승인 test DB/배포·실제 Storage 사본2종 다운로드를 수행했다. 운영 관측 CI38126124037은 이번 후속 조회에서 전체 SUCCESS 확인. 새 크기예약 후보의 CI와 구분한다.
-- 다음 행동1개: **검증된 전송한도와 크기 예약을 최종 운영 후보의 D06 변경 목록에 결속**. 운영 한도 활성·배포는 해당 후보 승인 후 실행한다.
+- 다음 행동1개: **D04의 기존 일반 공개 고지·권리 조건을 준비된 후보 policy revision에 결속**. 소스/DB/한도 manifest는 준비됐으며 정확한 운영 승인과 잔여 인수 전 활성하지 않는다.
 
 
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
@@ -750,13 +753,26 @@
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 만료/복귀/후보 endpoint 조합 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | KR_US_TH_SIGNUP_ACTIVE / POST_DEPLOY_READBACK_UI_PASS / PUBLIC_OFF | 운영 master199613b·Vercel Q3xJiujuo Ready·www SHA 일치, 관측workflow38126188717 SUCCESS. KR14/US13/TH13 가입·기존계정 복귀 이전 PASS 유지. 간편 카드 공개/신고 UI는 phone-test806b6b2 범위이며 운영 Public off. 전체 Public 최종 후보/정확한 승인·운영 확인 잔여; 신규 운영 Google 가입은 미실행 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | KR_US_TH_SIGNUP_ACTIVE / POST_DEPLOY_READBACK_UI_PASS / PUBLIC_OFF | 운영 master199613b·Vercel Q3xJiujuo Ready·www SHA 일치, 관측workflow38126188717 SUCCESS. KR14/US13/TH13 가입·기존계정 복귀 이전 PASS 유지. 간편 카드 공개/신고 UI·크기예약은 phone-testa6b6dda/CI SUCCESS 범위이며 운영 Public off. 전체 Public 최종 후보/정확한 승인·운영 확인 잔여; 신규 운영 Google 가입은 미실행 |
 
 ### 작업 수의 변화와 진행률
 
 기본 20개 완료 수와 추가 필수 작업 수를 별도로 표시한다. 보류된 개선은 출시 분모에 넣지 않는다. 추가 작업이 있다고 기존에 검증한 완료 결과를 지우지 않는다. 최종 기준은 task 숫자가 아니라 M완료 계약과 필수 QA다.
 
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
+
+```text
+W/M: W15/W20 · M4/M5 운영 후보 결속 / D03/D06
+후보: 7cd3a8234db86ce4f4fba9f0172719b3f1fa3466; 검증a6b6dda와 runtime/config/DB 동일
+운영: master/www199613b, DB38 migrations, Public off·운영자1·KR14/TH13/US13 유지
+완료: 누락3 migration·source hash·2000GET/64MB·설정13개·정리/관측·적용/원복 순서를 기존 capacity evidence에 결속
+이번 검증: 읽기전용 hosted 설정조회, live build200/exactSHA, 후보 생성 정상/거부6, syntax/diff PASS
+과거 검증: phone-test a6b6dda CI38129338217 전체 SUCCESS, hosted quota/Storage2회144B·경계/원복 PASS. 이번 사용자행동 PASS0
+미완료: Public 고지/revision 운영결속, 별도복구키/복구인수, 실제경보수신, 최종deployed HTTP/철회, 정확한운영승인
+다음1개: D04 일반 공개 고지·권리 조건과 후보 revision 결속(기존 범위 유지)
+```
+
+<details><summary>이전 카드 — 카드 간편 공개 test 완료</summary>
 
 ```text
 W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
@@ -772,6 +788,8 @@ W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
 미완료: 새 수정의 phone-test/운영 반영은 미실행; 직접 이미지 철회HTTP는 브라우저 차단으로 미확인; D03~D06 잔여. 9f36610 CI cancelled
 다음1개: W15/D03의 공개 이미지 용량·방문 전송량·실제 경보 잔여 마감
 ```
+
+</details>
 
 <details><summary>이전 카드 — A hosted preview 후 간소화 요청 전</summary>
 
@@ -964,7 +982,7 @@ NA 이유:
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRODUCTION_OBSERVATION_VERIFIED | Free 유지/private100MB·월500MB/public20MiB. 운영199613b 실제관측38126188717 정상·980MB 경보설정 적용. Public·전송off 유지 | 크기예약 test RPC/Storage206 2종 PASS(배포 handler는 미확인). 임계초과없어 알림실수신미검증. 50GET안은 대체:2,000GET/64MB test차감·경계확인/DB원복. 초기소규모용이며 큰20장3화면/day 한계. 운영활성·수신잔여. 이전provider/test증거보존 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / RESTORE_PARTIAL | 10/10 Drive 유래 ZIP 원본 SHA 일치, 새 quarantine4308파일/917,084,869bytes AES-GCM·SHA/크기 PASS. 복원 dump PG17 목차 읽기 PASS. 과거 로컬 사진12 decode와 구분 | 사용자: 키 별도 보관 안 함. 전체 DB import/최신 삭제 대조·회전/RPO/RTO·canonical 완전성 미완료. 로컬 pg_cron/supabase_vault 부재, Windows Node rename EPERM 미해결. 운영 변경0 | evidence/2026-10-10-external-backup-recovery.json |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | OBSERVATION_199613b_APPLIED / PUBLIC_OFF | 사용자정확한승인199613b master/Git Vercel Q3xJiujuo Ready/www commit일치. DB PUBLIC_CAPACITY_PROD_20261011_01/관측설정3개·수동workflow38126188717 SUCCESS | 집계함수1개/관측만 운영반영; KR14/US13/TH13 가입·Public off/한도보존. 카드간편공개·신고UI 및 전체Public출시 승인은 별도 | evidence/2026-10-11-public-capacity-closeout.json |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | CANDIDATE_7cd3a82_PREPARED / PUBLIC_OFF | 사용자정확한승인199613b master/Git Vercel Q3xJiujuo Ready/www commit일치. DB PUBLIC_CAPACITY_PROD_20261011_01/관측설정3개·수동workflow38126188717 SUCCESS | 집계함수1개/관측만 운영반영; KR14/US13/TH13 가입·Public off/한도보존. 7cd3a82/누락3 migration·한도·설정 manifest 준비. D04/D05 인수·실수신/최종HTTP·정확한Public출시 승인 별도 | evidence/2026-10-11-public-capacity-closeout.json |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 

@@ -1,5 +1,15 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 W15/D06 운영 후보 결속 계약
+
+- 기존 capacity evidence의 firstPublicProductionCandidate는 재현 가능한 후보 manifest다. 적용 승인/운영 PASS가 아니다. source7cd3a82, 테스트a6b6dda와 runtime 차이0/CI38129338217 SUCCESS.
+- 운영 읽기전용 조회:38 migrations, Public6 flags off, policy UNAPPROVED/content·general UNCONFIGURED, asset/report 한도0. 누락3개는 가입 receipt 연결20261010160000→간편공개20261011120000→크기예약20261011180000 순서다. 국가/가입·운영자·global20MiB는 변경하지 않는다.
+- 기존 시험값 계정별10이미지/40MiB·신고10회/일과 새로운 운영용 revision MOEMOA_PUBLIC_GENERAL_20261011_01은 **후보**다. 실제 서비스 전체 저장은 기존20MiB가 우선 제한한다. 테스트전용revision 재사용0, 기존 일반 공개 범위를 확대/축소한 결정0.
+- 두 전송 한도2000/64000000은 정확한 sized 배포 확인 후 적용하고 마지막에Public을연다. 공개 사본 정리에는 Vercel/GitHub의기존 cleanup 두스위치가필요하며 최초활성은정확한승인대상이다. 원본삭제/이력삭제와구분한다.
+- 장애 시 DB reads/writes를 먼저닫고 quota·앱을복귀. additive함수/이력/소비량은보존. 실제DB실행/원격설정변경은이번0.
+- 후보도구는 다른대상·ledger차이·Public on·override·pause에서출력을거부한다. 최신Vercel/GitHub baseline은적용전읽기확인필요. D04고지결속/D05복구인수/경보수신/최종이미지HTTP·철회는잔여.
+
+
 ## 2026-10-11 W15/D03 초기 공개 전송 한도 후보 — 로컬 준비 완료
 
 사용자 정상 공개규모 마감 요청에 따른 **초기 소규모 공개 후보**다. 트래픽 분포 미확보 상태이므로 일반 규모 무제한 운영/PASS를 뜻하지 않는다. 무료 유지·기존 한도/국가/이미지 권리 결정은 자동 변경하지 않는다.

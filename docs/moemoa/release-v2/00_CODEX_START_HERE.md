@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D06 운영 후보 결속:** 앱 후보7cd3a82는 전체CI SUCCESS a6b6dda와 runtime/config/DB 소스 차이0. 운영 읽기전용 조회에서 migration38개·Public off·3개 누락(20261010160000/11120000/11180000), 운영자1명·KR14/TH13/US13·global20MiB 유지 확인. 기존 capacity evidence의 firstPublicProductionCandidate에 소스/SQL hash·2,000GET/64MB·13개 Vercel 설정·공개 사본 정리·원복순서 결속. 후보 생성 정상1/잘못된 대상·상태 거부6 PASS. 운영/테스트 쓰기0, 새 사용자행동 PASS0. 다음1개: D04의 기존 일반 공개 고지·권리 조건을 후보 policy revision에 결속. 복구 인수/실제경보수신/최종HTTP·정확한운영승인은 잔여.
+
+
 > **2026-10-11 W15/D03 전송 한도 test 검증:** 승인a6b6dda의 전역2,000GET/64MB 두정책 적용, 실제 hosted RPC/Storage full·thumb 각72B 다운로드 및2회/144B 차감 확인. hosted rollback-only 요청2000/2001·64MB/+1·원자적차단 PASS. 실제 집계의80% 경보 판정 PASS(로컬 evaluator, 발송/수신 아님). DB두한도disabled/0 원복·2회/144B 사용량보존·Public/다른정책보존. phone-test true 배포977hd Ready/source·alias 확인, false 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias 확인. 운영/master199613b 유지. 다음1개 최종 운영 후보에 전송한도 변경목록 결속; deployed image HTTP/실제경보수신은 잔여.
 
 
