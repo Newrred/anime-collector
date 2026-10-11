@@ -323,11 +323,38 @@
       "rollback": "Disable/unregister only the new task; preserve database, originals, keys and existing backup copies"
     },
     "remaining": [
-      "Exact approval before local schedule activation and this new encrypted archive upload",
-      "Recurring Drive upload authorization/connection and actual seven-day retention execution",
-      "Independent off-PC key custody",
+      "Local schedule activation excluded by the user upload-only selection; recurring Drive connection and seven-day retention not active",
+      "Independent off-PC key custody remains incomplete",
       "Current Public/entity deletion restore acceptance; prior October 9 restore is distinct"
     ],
-    "next": "Apply the exact local daily task and new archive external custody candidate after approval"
+    "next": "Review the existing D05 Public/entity-deletion restore acceptance against the current backup; do not activate scheduling"
+  },
+  "externalUpload20261011": {
+    "date": "2026-10-11",
+    "completedAt": "2026-10-11T12:54:10.799Z",
+    "candidate": "ba49dfcef48d09a202d819a96662a9277f5c3b57",
+    "userSelectedScope": "New encrypted backup upload only; no local schedule registration",
+    "artifact": "moemoa-production-20261011-02.encrypted.zip",
+    "localBytes": 920077441,
+    "localSha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+    "destination": "Existing MOEMOA encrypted backups private Google Drive folder",
+    "browserEvidence": {
+      "accountMatchesApprovedOwner": true,
+      "folderPrivate": true,
+      "uploadCompletedItems": 1,
+      "filenameMatches": true,
+      "displayedSize": "877.5MB",
+      "filePrivate": true,
+      "previousBackupStillPresent": true
+    },
+    "externalDownloadHashVerified": false,
+    "newDatabaseRestore": false,
+    "localScheduleRegistered": false,
+    "recurringDriveConfigured": false,
+    "recoveryKeyUploaded": false,
+    "oldCopiesDeleted": 0,
+    "productionDbWrites": 0,
+    "productionDeployment": false,
+    "screenshot": ".cache/operations-private/daily-backup-20261011-02/drive-upload-complete.jpg"
   }
 }

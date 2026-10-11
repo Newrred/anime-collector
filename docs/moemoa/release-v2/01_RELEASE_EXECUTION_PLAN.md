@@ -2326,3 +2326,16 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 잔여/다음1개: 새ZIP을 기존Drive 비공개폴더에 보관하고 로컬03시 후보를 활성화하는 exact적용이 다음이다. Drive Desktop미설치/API자동연결없음,7일정리실행·PC밖키보관·현재Public복구 인수는 남긴다. 로컬일일실행만으로 외부RPO24h 충족을 주장하지 않는다. 첫PowerShellwrapper는 실행정책에 막혀 등록하지 않았고 Nodewrapper로 대체해 시스템정책 변경0. 초기JS정규식작성오류는 구문검사에서 수정, 실제암호화 전에해소. 과거Windowsrename EPERM은 이번create/restore에서 재발하지 않았으나 전역해결 주장0.
 
 [최종 확인] 새ZIP 인증 종료·920077441B/hash 기록. 최종 캐시plan4302검증·새GET0 PASS, Windows 예약명 조회0건. git diff --check PASS. 코드/집계만 작업브랜치 인계하며 운영master/Public/phone-test 변경0.
+
+[2026-10-11 적용 범위 확정] 사용자 답변 “새 백업 업로드만 진행”에 따라 ba49dfc의 920,077,441B encrypted ZIP 한 개만 기존 minecrafthong@gmail.com의 MOEMOA encrypted backups 비공개 폴더에 업로드한다. 로컬03시 예약 등록/활성화·자동 Drive 연결·기존사본삭제·복구키 업로드는 제외한다. 업로드 UI 완료와 외부 재다운로드/복구 검증을 구분하여 같은 evidence/작업판에 기록한다.
+
+#### W17/D05 승인된 새 백업 업로드 — 2026-10-11 결과
+
+1. 읽은 근거: CODEX_START_HERE/확정01/기존 release-v2 00~03·외부백업 evidence·W17 ExecPlan. computer-use 지침/브라우저 file-uploads 지침, 이전 verify-before-claiming 기준 유지.
+2. 범위: 사용자 ba49dfc 답변은 “새 백업 업로드만 진행”. 03시 예약 등록·Drive 자동 연결·기존사본 삭제·키 전송 제외.
+3. 계획: 기존 W17/D05 ExecPlan의 외부 보관 단계만 수행. 새 계획판·운영 승인 없음.
+4. 변경 파일: 기존00/01/02/03과 external-backup-recovery.json에 이번 승인/실제 업로드 및 남은 인수 기록. 코드·의존성 변경0.
+5. DB/복귀: DB/migration/flags/master/phone-test 변경0. 기존10/9사본 보존, 새 encrypted ZIP만 추가. 클라우드 삭제/공유설정 변경 없음.
+6. 실행/결과: fs.stat 정확파일920077441B 확인. Chrome Drive 기존 승인계정·폴더 비공개 확인→filechooser.setFiles 정확ZIP1개→UI “항목1개 업로드 완료”, 동일파일877.5MB·비공개·기존사본 보존 확인. 스크린샷은 ignored staging의 drive-upload-complete.jpg. git diff --check/JSON parse로 문서 검증. 기존17단위/4309파일 인증/66테이블 실제복구는 이전 근거이고 이번 재실행0. 새 외부 다운로드/hash 및99테이블 복원은 미검증.
+7. 보안/관측: 암호화ZIP만 승인된 기존Drive로 전송. 복구키·plaintext·사용자사진/기록 stdout·Git 포함0. 새 앱 사용자행동 PASS0, 운영 출시PASS로 확대하지 않음.
+8. 잔여/다음1개: 예약은 사용자 선택으로 제외, 자동외부보관·7일정리 미가동·독립키 미보관. D05 전체완료/RPO보장 아님. 다음은 기존 D05의 현재 Public/entity 삭제 복구 인수 조건 대조. D06 source56cd0ab 및 정확한 운영 적용 승인 조건 유지.
