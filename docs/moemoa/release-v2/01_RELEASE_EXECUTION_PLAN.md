@@ -2407,3 +2407,14 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제명령/결과: wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0(13:08:45Z/38migration/Public0·off). node tools/operations/build-first-public-candidate.mjs .cache/d06-recovery-preflight.json exit0. node --test tests/operations/firstPublicCandidate.test.mjs20PASS/0FAIL. Git diff56cd0ab..HEAD runtime/config0, www build-info HTTP200/commit=checkout199613b/source=vercel-git. 기존후보의source/schema/migrations/설정/원복/고지/변경파일 해시동일10필드 대조PASS.
 7. 보안/검증범위: Git증거와운영집계만사용. rawDB/journal/비밀키·개인정보 Git포함0, 새사용자행동PASS0. actual99table/합성56/17unit과 과거CI를 이번재실행으로 합산안함. PowerShell실행기1392는 Node/WSL 대체로작업완료.
 8. 잔여/다음1개: D05 독립키·정기외부보관 운영인수. 예약제외 유지/동일질문반복0. 현재복구도구완료와전체서빙재개인수 구분. 그뒤정확 D06 운영승인·실행후현재소스 HTTP/철회/관측. 이번은 후보준비·증거결속 완료이며전체출시완료아님.
+
+#### W17/D05 정기 외부보관 실행환경 검토 — 2026-10-11
+1. 근거/계획: CODEX_START_HERE→확정RECOVERY-DAILY7→PLANS/변경09→현재작업판/BACKUP_USAGE/run-daily-backup/prepare-daily-backup 및 GitHub maintenance. 기존 W17 운영인수 단계.
+2. 범위/가정: PC예약제외 유지. 일일외부백업 목표와 구동방식승인은 구분. Drive5TB 사용 의향 보존.
+3. 조사: 기존저장소 public/GitHub API200. repository secret 이름조회에서 cleanup용1개, DB백업/Drive연결없음. ghCLI 두경로없어 기존Git인증을 메모리에서 동일GitHub 읽기에사용; 토큰출력/저장0.
+4. 후보: GitHub Linux가 이전Drive encrypted ZIP회수/인증→SHA/ETag같은객체재사용→변경분만Supabase GET→현재DB/journal암호화→Drive 새사본/원격확인. 평문artifact/cache금지. 전용Drive OAuth drive.file/명시선택폴더만, 운영가입OAuth재사용0. 구현/키이동/등록전 실행방식선택질문.
+5. 규모: ZIP920077441B×7=6440542087B(6.44GB), 이미지856441465B 매일전체다운로드×30=25693243950B(25.69GB). 파일크기산술이며월사용료예측아님. 기존사본재사용필요. public standard runner무료/Drive표준API추가요금없음은 공식자료확인; Supabase전송무료보장아님.
+6. 검증: repo/secrets 읽기API200·기존실행코드검토·공식Drive권한/OAuth/스케줄조건대조. 새제품테스트/복구반복0.
+7. 변경/복귀/안전: 기존evidence/작업판/실행기록만갱신. DB/배포/secret저장/업로드/기존사본삭제/키복사0. 원격원복대상없음. 자동가동·독립키PASS아님.
+8. 차단/다음1개: GitHub자동준비 또는 당분간일일수동 실행방식선택. PC예약재요청아님. 자동선택후 전용Drive연결·GitHub비밀설정 후보준비, 실제이동·가동은정확승인필요. 독립키미보관은재질문하지않음.
+공식근거: https://docs.github.com/en/billing/concepts/product-billing/github-actions ; https://developers.google.com/workspace/drive/api/guides/api-specific-auth ; https://developers.google.com/identity/protocols/oauth2 ; https://developers.google.com/workspace/drive/api/guides/limits ; https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule

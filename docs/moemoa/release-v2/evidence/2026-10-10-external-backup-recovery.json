@@ -563,5 +563,45 @@
       "Independent key, recurring external backup/7 day retention, canonical completeness and actual recovery objectives remain"
     ],
     "nextAction": "Bind D05 evidence and remaining acceptance to existing D06 candidate03 without production changes"
+  },
+  "externalBackupExecutionReview20261011": {
+    "scope": "Read-only feasibility review; method awaits user selection",
+    "repository": {
+      "visibility": "public",
+      "readbackStatus": 200,
+      "secretNamesReadOnly": true,
+      "existingCleanupSecretOnly": true,
+      "backupSecretConnectionPresent": false
+    },
+    "localSchedulerExcluded": true,
+    "driveAutomaticConnectionPresent": false,
+    "productionMutations": 0,
+    "secretWrites": 0,
+    "externalUploads": 0,
+    "keyCopied": false,
+    "projection": {
+      "referenceZipBytes": 920077441,
+      "sevenCompleteArchivesBytes": 6440542087,
+      "thirtyFullStorageDownloadsBytes": 25693243950,
+      "assumption": "Unchanged 10/11 sizes; arithmetic, not bill or observed traffic"
+    },
+    "proposedMethod": {
+      "status": "PROPOSED_NOT_SELECTED",
+      "executor": "Existing GitHub Actions standard Linux; no PC schedule",
+      "storage": "Existing private Drive backup folder; encrypted archives only",
+      "auth": "Dedicated Drive OAuth drive.file; explicitly selected folder/archive, no whole-Drive or production-signin client reuse",
+      "secrets": "DB/Storage credentials, encryption key and Drive token need exact destination approval before provisioning",
+      "cache": "Authenticate previous encrypted Drive archive; reuse SHA/ETag-matched bodies; bound new Supabase downloads; no plaintext artifact/cache",
+      "retention": "No deletion until fresh external copy verifies and exact retention approval",
+      "risk": "Schedule may delay or fail; RPO24 is goal, not guaranteed"
+    },
+    "sources": [
+      "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
+      "https://developers.google.com/workspace/drive/api/guides/api-specific-auth",
+      "https://developers.google.com/identity/protocols/oauth2",
+      "https://developers.google.com/workspace/drive/api/guides/limits",
+      "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule"
+    ],
+    "nextAction": "Select GitHub automated preparation or daily manual operation; no secret transfer or activation yet"
   }
 }
