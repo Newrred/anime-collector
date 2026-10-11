@@ -215,7 +215,7 @@
     "Automated user terms acceptance",
     "Production public enablement"
   ],
-  "nextAction": "Approve exact test-only migration20261011120000 and phone-test source candidate, then publish the existing synthetic A card using simplified visibility and verify a fresh anonymous image read.",
+  "nextAction": "After owner accepts the single displayed publication consent and saves, verify actual publication and a fresh anonymous image read; no further signup acceptance request.",
   "simpleCardSharing": {
     "decision": "CARD-PUBLIC-SIMPLE-01",
     "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
@@ -362,7 +362,153 @@
         }
       ]
     },
-    "status": "approved-rehearsed-not-yet-applied",
-    "productionChanged": false
+    "status": "test-db-applied-preview-ready-user-consent-pending",
+    "productionChanged": false,
+    "sourceCommit": "52875c69a4e500255d32b89a6ec11e6f2593a6f2",
+    "applied": {
+      "target": "nmgkhknponvzcwliajyk",
+      "release": "MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01",
+      "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259",
+      "mode": "APPLIED",
+      "checks": [
+        {
+          "counts": {
+            "public.memory_cards": 23,
+            "public.memory_boards": 11,
+            "private.memory_moderators": 1,
+            "public.memory_board_cards": 18,
+            "private.memory_public_cards": 11,
+            "private.memory_publications": 7,
+            "public.memory_visual_assets": 25,
+            "private.memory_public_assets": 16,
+            "private.simple_signup_policy": 1,
+            "private.memory_resource_usage": 0,
+            "private.memory_public_image_rights": 10,
+            "private.memory_publication_settings": 1,
+            "private.memory_representation_public_rights": 6
+          },
+          "preservedTables": 13
+        },
+        {
+          "statusRpc": true,
+          "privacyRpc": true,
+          "prepareArgs": [
+            "p_board_id",
+            "p_expected_revision",
+            "p_selection"
+          ],
+          "publishArgs": [
+            "p_id",
+            "p_expected_revision",
+            "p_review_hash",
+            "p_policy_revision",
+            "p_operation_id"
+          ],
+          "publicSettings": {
+            "singleton": true,
+            "asset_limit": 10,
+            "reads_enabled": true,
+            "images_enabled": true,
+            "writes_enabled": true,
+            "follows_enabled": true,
+            "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "reports_enabled": true,
+            "asset_bytes_limit": 41943040,
+            "minihomes_enabled": true,
+            "report_daily_limit": 10,
+            "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signup_declaration_required": false,
+            "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+          },
+          "releaseRecorded": true,
+          "migrationPresent": true,
+          "legacyPublishedSnapshots": 0
+        }
+      ]
+    },
+    "readback": {
+      "target": "nmgkhknponvzcwliajyk",
+      "release": "MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01",
+      "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259",
+      "mode": "READ_ONLY",
+      "checks": [
+        {
+          "statusRpc": true,
+          "privacyRpc": true,
+          "prepareArgs": [
+            "p_board_id",
+            "p_expected_revision",
+            "p_selection"
+          ],
+          "publishArgs": [
+            "p_id",
+            "p_expected_revision",
+            "p_review_hash",
+            "p_policy_revision",
+            "p_operation_id"
+          ],
+          "publicSettings": {
+            "singleton": true,
+            "asset_limit": 10,
+            "reads_enabled": true,
+            "images_enabled": true,
+            "writes_enabled": true,
+            "follows_enabled": true,
+            "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "reports_enabled": true,
+            "asset_bytes_limit": 41943040,
+            "minihomes_enabled": true,
+            "report_daily_limit": 10,
+            "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signup_declaration_required": false,
+            "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+          },
+          "releaseRecorded": true,
+          "migrationPresent": true,
+          "legacyPublishedSnapshots": 0
+        }
+      ]
+    },
+    "deployment": {
+      "id": "BsAHHqy5a855PNQZtgrpNh4yepZk",
+      "githubDeploymentId": 6991009538,
+      "sourceCommit": "52875c69a4e500255d32b89a6ec11e6f2593a6f2",
+      "branch": "codex/phone-test",
+      "state": "Ready",
+      "alias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+      "verifiedVia": "GitHub deployment success plus Vercel rendered Source/alias/Ready and actual new card UI",
+      "buildInfoVerification": "HTTP redirected to Vercel authentication; browser JSON navigation blocked; not claimed"
+    },
+    "actualHostedUi": {
+      "ownerCardStatus": "Private",
+      "publicChoice": "existing synthetic image decoded; single consent; save disabled before consent",
+      "policyAcceptedByAgent": false,
+      "published": false
+    },
+    "ci": {
+      "runId": 38112339835,
+      "publicationContract": "success",
+      "verify": "in_progress",
+      "conclusion": null
+    },
+    "guardAtHandoff": {
+      "publicSettings": {
+        "singleton": true,
+        "asset_limit": 10,
+        "reads_enabled": true,
+        "images_enabled": true,
+        "writes_enabled": true,
+        "follows_enabled": true,
+        "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "reports_enabled": true,
+        "asset_bytes_limit": 41943040,
+        "minihomes_enabled": true,
+        "report_daily_limit": 10,
+        "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "signup_declaration_required": false,
+        "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+      },
+      "signupDeclarationRequired": false
+    }
   }
 }

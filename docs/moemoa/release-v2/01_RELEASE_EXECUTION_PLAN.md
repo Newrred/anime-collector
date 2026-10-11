@@ -64,6 +64,19 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 - 배포: origin/codex/phone-test9970120이 현재HEAD1878867의 조상임을 fetch 뒤 확인. 검토 후보만 commit하고 phone-test를 fast-forward push; Git SHA/Ready/build-info/실제 카드 UI를 대조한다. 이전 로컬69/13/33/32 PASS와 새 hosted 결과를 분리한다.
 - 복귀: UI는 이전 테스트 소스의 정상 Git revert, additive RPC는 미사용/보존. 삭제·철회된 공개 snapshot 자동복원 없음. 테스트 임시 receipt guard는 검사 종료 시 false 복귀. 동의 당사자 조작은 대행하지 않는다.
 
+### 간소화 테스트 반영 실행 보고 — 2026-10-11
+
+1. 읽은 자료: 기존 AGENTS/시작/확정 결정/PLANS/QA07/보고09, 현재 release-v2 00~03, 해당 migration/controller/간편 UI와 기존 test 적용 도구·Git/quality workflow.
+2. 범위/미결: 사용자 ‘테스트 DB·화면에 적용’ 승인만 실행. 공개 동의 당사자 수행 및 운영/master 별도 승인 유지. 기존 승인된 합성 카드만 조회.
+3. 계획: 위 ‘간소화 후보 테스트 반영 승인 및 실행’ 절. 새 작업판/기능 계획 없음.
+4. 파일/Git: 코드·migration·검사·문서를52875c69a4e500255d32b89a6ec11e6f2593a6f2에 commit, origin/codex/phone-test에 fast-forward push. 새 apply-simple-card-sharing-test.py는 고정 test 대상/CA 검증/후보 SHA/리허설·적용·독립 조회 및 원본 보존 검사 전용. 무관한 기존 untracked 초안3개·__pycache__는 미추가.
+5. DB/복귀: MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01·20261011120000 적용 완료.13개 table fingerprint/건수·기존flags/권리/정책 불변. legacy published snapshot0. 롤백 리허설 뒤 commit하고 새 connection에서 함수/인자/권한/이력 확인. UI revert와 additive RPC 미사용으로 복귀; 원본 삭제·기존 공개 snapshot 자동 복원 없음.
+6. 이번 실제 명령/결과: wsl.exe -- python3 tools/publication-boundary/apply-simple-card-sharing-test.py (READ_ONLY) / --rehearse (ROLLBACK) / --apply (APPLIED) / 무인자 독립readback 모두 exit0. 최초 도구 Python 인용 구문 오류는 DB 실행 전에 수정. git diff --cached --check PASS; staged credential-pattern 검사5종0건(전체 보안감사 아님). Git push HEAD:refs/heads/codex/phone-test 성공; master1878867 불변. Vercel Preview BsAHHqy5a855PNQZtgrpNh4yepZk Ready 및 source52875c6/phone-test alias 일치. 실제 Chrome 카드 상태Private·Public 선택·기존 합성이미지 자동 decode·동의1개/미동의 Save 비활성 PASS. 이전69/13/33/32는 이전 실행이며 반복 합산하지 않음. CI38112339835 publication-contract SUCCESS/verify 진행 중. build-info는 비인증 HTTP가 Vercel 로그인으로 이동하고 브라우저 JSON 이동은 차단되어 직접 payload 일치 PASS로 주장하지 않음; Vercel의 실제 source/alias/Ready와 UI를 근거로 기록.
+7. 보안/관측: 원본·권리·quota·관리자 fence 보존. credential/DB 원문/개인사진 로그0. 사용자 동의/게시 대행0, Save 전 공개 이미지 생성0. 새 UI 표시한 synthetic 시각자료만 Git 제외 cache screenshot 보관. 서버 signup guard를 기존 승인 범위에서 검사 동안 재활성; 종료 전 원복은 아래 추가 기록. 운영DB/국가/정책/역할/요금/master 변경0.
+8. 미완료/다음1개: 동일 A의 최종 체크·Save 결과 후 새 익명 이미지 열람. 새후보 실제 게시/철회·B/home/follow·신고/차단과 D03~D06 잔여는 완료 처리하지 않는다. A의 이미 완료된 가입 약관을 다시 요구하지 않음.
+
+- 종료 확인: prepare-public-signup-test.py --restore exit0, signup guard=false·기존6flags/revision/한도 원복 확인. 새 schema는 보존. 사용자 동의/게시 응답 대기, 실제 Save PASS 아님. 전체 CI verify는 아직 실행 중이므로 완료로 보고하지 않는다. 다음 턴에는 같은 run38112339835 결과만 확인하고 새 전체 검사를 중복 시작하지 않는다.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.
