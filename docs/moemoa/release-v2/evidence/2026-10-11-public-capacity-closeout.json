@@ -108,7 +108,6 @@
   "notVerified": [
     "deployed observe HTTP integration",
     "actual operator notification receipt",
-    "provider billed egress and catalog/API traffic",
     "production budget/config/activation"
   ],
   "priorEvidence": {
@@ -183,5 +182,39 @@
       "publicationContract": "success",
       "verify": "in_progress"
     }
+  },
+  "providerUsageReadOnly": {
+    "supabase": {
+      "url": "https://supabase.com/dashboard/org/jdomtzpoqpyfinazdnpi/usage",
+      "scope": "All projects / organization Free",
+      "period": "2026-09-24 to 2026-10-24",
+      "uncachedEgressGB": 0.972,
+      "uncachedIncludedGB": 5,
+      "cachedEgressGB": 0.086,
+      "cachedIncludedGB": 5,
+      "storagePeriodAverageGB": 0.826,
+      "storageIncludedGB": 1,
+      "databaseSummaryGB": 0.297,
+      "overageShown": false,
+      "refreshLag": "up to 1 hour"
+    },
+    "vercel": {
+      "url": "https://vercel.com/newrreds-projects/anime-collector/usage",
+      "scope": "anime-collector Usage page; supplied team-plan limits; not proof all other projects fit",
+      "periodDisplayed": "Sep 11 01:00 - Oct 11 01:00 / Last 30 Days",
+      "fastDataTransferGB": 1.26,
+      "includedFastDataTransferGB": 100,
+      "fastOriginTransferMB": 4.34,
+      "includedOriginTransferGB": 10,
+      "functionInvocations": 390,
+      "fluidCpuSeconds": 41,
+      "fluidMemoryGBHours": 0.15
+    },
+    "limitations": [
+      "period average storage differs from current SQL object total",
+      "provider egress includes more than public images",
+      "not a traffic forecast or guaranteed free capacity",
+      "no provider settings, billing, alerts or subscriptions changed"
+    ]
   }
 }

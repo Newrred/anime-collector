@@ -153,6 +153,8 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 
 #### 비용·정상 규모의 구체적 한계
 
+- 공급자 실제 UI read-only 확인(2026-10-11): Supabase 조직 All projects/Free/9월24일~10월24일 uncached0.972/5GB·cached0.086/5GB·저장기간평균0.826/1GB·DB요약0.297/0.5GB, 초과없음. 평균/최대1시간 지연 값이므로 현재 SQL856,441,465B와 동일 지표로 취급하지 않는다. Vercel anime-collector Usage/최근30일9월11일01:00~10월11일01:00 Fast Data1.26/100GB·Origin4.34MB/10GB·함수390·CPU41s·memory0.15GBh. 다른프로젝트 합산 여유/무료 지속 보장 아님. 현재는 전송보다 저장 한도에 더 가깝다. 이 실측은 초기 공개 이후 트래픽 예측이 아니며100MiB/day 후보가 한 달 지속되어도 무료라는 뜻이 아니다.
+
 - 합성 gradient/geometric/noise의 full+thumb 저장16,062 /43,200 /1,088,732B, 실제 HTTP 응답은 full14,794 /38,860 /1,062,062B와 thumb1,268 /4,340 /26,670B. 이미지20개 full 방문 계산0.296 /0.777 /21.241MB. 실사용자 분포/실제청구 통계가 아니며 HTTP headers·DB·Auth·표지·Vercel 전송은 별도다.
 - 현행 공개페이지는 full을 읽는다. thumb20개+full1개 비용은 미래 비교 수치일 뿐 현재 최적화 PASS가 아니다. 요청당2MiB 예약이므로20GET은 실제크기와 관계없이40MiB 예산을 쓴다. preview/운영자조회도 포함한다.
 - 전체 저장 후보980,000,000B 경보, 기존 공개20MiB의80%=16,777,216B 경보. 기존 표지+private 최대100MB+public20MiB 합은976,958,521B로1GB 근처다. catalog 증가/비정상 객체를 무시하지 않는다.
