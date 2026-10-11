@@ -18,7 +18,7 @@ export function recoveryAcceptance(e, provenance) {
   independentKeyCopyStored:false,retentionScheduleEnabled:false,readyForProduction:false,
   remaining:[
    {id:'D05_KEY',action:'Store recovery key independently of this PC and backup ZIP; user confirmation still absent.'},
-   {id:'D05_BACKUP_OPERATIONS',action:'Daily external backup and 7-day retention are not active; user excluded local schedule. RPO/RTO24h remain goals, not achieved guarantees.'},
+   {id:'D05_BACKUP_OPERATIONS',action:'Weekly external incremental backup is not active; user excluded local schedule. RPO7d/RTO24h are goals, not achieved guarantees. Preserve every referenced base archive; automatic retention deletion is not enabled.'},
    {id:'D05_RECOVERY_REOPEN',action:'Never reopen restored serving without complete fresh deletion/rights state, current policy/audit and Storage/CDN reconciliation. Current snapshots are not a durable deletion feed; populated Public restore was synthetic.'},
    {id:'W16_CANONICAL',action:'Preserve existing canonical completeness and small catalog publish/restore acceptance; this candidate does not ingest or replace catalog data.'}
   ]

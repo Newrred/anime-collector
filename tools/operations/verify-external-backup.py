@@ -105,7 +105,8 @@ def verify(archive, key_file, output, project, release, expected_sha):
             if size != e['bytes'] or h.hexdigest() != e['hash']:
                 raise ValueError('PLAINTEXT_MISMATCH')
             total += size
-        report = {'archiveSha256Matched': True, 'authenticatedFiles': len(entries), 'bytes': total,
+        requires_parents = 'incremental-snapshot.json' in outputs
+        report = {'requiresParentArchives': requires_parents, 'completeSnapshotReconstructed': not requires_parents, 'archiveSha256Matched': True, 'authenticatedFiles': len(entries), 'bytes': total,
                   'allSha256AndLengthsMatch': True, 'databaseImportVerified': False,
                   'deletionReconciliationVerified': False, 'safeToServe': False}
         (output / 'VERIFIED_BYTES_ONLY.json').write_text(json.dumps(report, indent=2))

@@ -1,5 +1,7 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).
+
 > **2026-10-11 D05 주간 기준 확정:** 사용자 “ㅇㅇ”로 주1회 DB·사용자 이미지 변경분/표지 추가·교체분 백업과 최대7일 손실(RPO)을 확정, 운영 DB 변경 직전 별도 백업. 기존 일일/RPO24h 기준 대체; RTO24h 목표 유지. 서버 동기화는 그대로. 기존 사본 재사용은 구현/과거실행 완료지만 변경분 전용 외부보관·주간자동실행은 미구현/미가동. 기존 사본 삭제0·PC예약제외 유지. 아래 일일/최근7일 회전 로그는 당시 이력이며 현재 자동삭제 지시가 아니다. 다음1개: W17 주간 변경분 보관·복원 연결 후보 준비.
 
 > **2026-10-11 W20/D06 복구 증거 결속 완료:** 기존 후보03 앱56cd0ab/DB3/정책·환경·한도·rollback은 그대로 두고 c04ee39의 D05 결과를 고정 Git commit/evidence SHA256/코드7개 해시로 연결했다. 실제99테이블복원·합성56·RPC/RLS는 과거 실행 근거이며 이번 재실행0. 후보생성/거부20검사 PASS. 운영 readonly 재조회38migration/Public0·off, www199613b 확인. 구형 ‘DB복원 미완료’를 정정; 독립키·정기외부백업/7일보관·복구서빙 인수·canonical완전성은 잔여, 운영승인 아님. 다음1개: 기존 D05의 독립키/정기외부보관 운영 인수. 운영쓰기/배포/새업로드0.
@@ -2436,3 +2438,37 @@ DB migration, 원격 쓰기, 자동 실행, 외부 업로드, 키 이동, 기존
 - 완료: 확정결정·release-v2/00~03의 현재요약/W17/D05/현재카드와 기존 evidence에 주간 기준을 반영. 이전 카드/로그는 보존했다. daily-backup-task.xml의 CalendarTrigger 제거·disabled 유지.
 - 실제 검증: `wsl.exe -- python3 -c <ElementTree XML parse + zero triggers + disabled assertions>` PASS; `git diff --check` PASS. 기존 제품/DB 테스트는 동작 변경 없어 반복하지 않았다. 이번 신규 사용자 행동 PASS0.
 - 데이터/보안/관측: DB migration0, 원격 실행/업로드/삭제/키전송0, 로그에 개인정보 추가0. 기존 full ZIP 생성 도구를 증분 저장 완료로 간주하지 않는다. D06 과거 후보의 RPO24h는 이번 운영 목표로 재사용하지 않으며 운영 적용 전 주간 기준과 잔여를 반영해야 한다.
+
+
+## 2026-10-11 W17/D05 — 주간 증분 암호화·격리 복원 구현
+
+### 목적·승인·현행 근거 (1–3)
+RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지 재다운로드 방지를 외부보관 파일 중복 제거까지 확장한다. 현재 prepare-daily-backup은 검증한 기존 bytes도 전체 ZIP에 넣는다. 기존 encrypted-backup의 AES-GCM/신규출력전용/격리복원을 재사용한다. 외부 실행기/키전송/자동예약/실제전송 승인은 이번 범위가 아니다.
+
+### 범위·흐름·파일 (4–6)
+새 incremental-backup.mjs는 신뢰한 manifest hash와 프로젝트/context로 고정된 기존 전체본→증분 사본을 인증한 뒤, 현재 snapshot의 이미지 bytes 중 변하지 않은 것은 부모 참조만 보관한다. 최신 DB·삭제/공개상태 journal 등 metadata는 매번 포함한다. 삭제 이미지는 현재 목록에서 제외하여 복원 시 부모 잔여를 합집합으로 살리지 않는다. 기존 prepare 도구의 명시적 incremental 모드와 연결하고 로컬 전체 재구성까지 검증한다. tests/operations/incrementalBackup.test.mjs에 실제 합성 AES-GCM 왕복/삭제/부모 누락·변조/다중증분 검사를 둔다.
+
+### 데이터·검증·안전·복귀 (7–14)
+운영 DB/Storage 접근 실행0, 기존 키 사용0. 합성 파일과 임시키만 사용한다. DB migration 없음. 증분은 단독복원 불가: 모든 부모 사본이 필요하며 자동삭제0, 기존 사본 불변. 최대 체인 길이를 제한하고 초과 시 새 기준본 필요 오류로 중단한다. 복원은 새 격리폴더만 만들고 safeToServe=false; 최신 삭제/권리 재적용 계약은 기존대로다. 파일 hash·bytes·부모 manifest·context·path 확인 후에만 완성 출력 표시. 기존 full 모드/과거 backup 포맷 유지, 신규 mode 제거로 rollback. 로그에는 집계만. 명령은 node --test 신규/관련백업테스트, node --check, git diff --check. D06 복구인수 잔여의 구형 daily/RPO24 문구도 weekly/RPO168로 보완한다.
+
+### 진행·완료 (15–17)
+구현 시작: 기존 57d3b6a 이후 승인된 로컬 범위. 자동주기와 외부보관의 실제 가동 PASS로 보고하지 않는다. 결과/제약은 아래에 기록한다.
+
+### 주간 증분 구현 완료 보고
+
+1. 읽은 문서/파일: AGENTS·시작/확정결정/PLANS·QA07/변경통제09·현재00~03, encrypted-backup.mjs, prepare/run/capture/package-daily-backup, verify-external-backup, recovery-acceptance 및 기존 dailyBackup 검사.
+2. 가정/미결: 기존 인증된 전체본+순서대로 모든 증분 사본을 로컬에 확보해야 한다. 외부 실행기 선택/Drive 연결/독립 복구키 보관은 미결. RPO7일은 목표이며 가동 보장 아님.
+3. 계획: 위 기존 W17/D05 주간 증분 절. 신규 계획 트리 없음.
+4. 변경: incremental-backup.mjs 신규(부모 manifest SHA256/project/context 결속, 현재파일목록·hash/크기 검증, 기존 이미지 참조, 새 격리복원); prepare-daily-backup.mjs(incremental 모드/전체복원검증/다음캐시); package-daily-backup.py(증분 ZIP 상태/테스트용 root·key 경로 주입); verify-external-backup.py(증분 단독은 전체snapshot 아님 표시); recovery-acceptance.mjs(현재 주간목표 문구); 신규합성검사2파일; 기존00~03/evidence 최신화.
+5. DB/rollback: migration0/운영쓰기0. 기존 full 포맷과 encrypt 모드 그대로. 신규 증분 모드 사용 중단으로 복귀, 이미 만든 증분이 참조하는 부모는 보존. 키·원본·기존 ZIP 삭제 없음.
+6. 실제 명령/결과: `node --test tests/operations/incrementalBackup.test.mjs tests/operations/dailyBackup.test.mjs` 29 PASS; `node --test tests/operations/incrementalPackage.test.mjs` 1 PASS; `node --test tests/operations/firstPublicCandidate.test.mjs` 20 PASS; `wsl.exe -- python3 -B -m unittest tools/operations/test_verify_external_backup.py` 6 PASS. Node --check 신규/prepare 및 Python AST package/verify, git diff --check PASS. 총56중 신규13은 실제 합성 AES-GCM/ZIP이며 운영데이터 검증 아님. 테스트 작성 도구 호출1회 JS 문자열 오류는 파일 쓰기 전에 실패, 수정 후 검사 실행 정상.
+7. 보안/관측: 키는 테스트 임시값만, 운영 비밀값 조회0/네트워크0. 암호화 metadata에 부모 참조를 담고 로그는 집계·hash만. 최신 목록에서 삭제된 이미지는 부모에서 되살리지 않는다. 생성/복원은 새 경로만, 서비스 활성0. 체인16은 자원경계이며 보관기간/자동삭제 정책 아님.
+8. 미검증/다음 게이트: 기존 production capture→새모드→ZIP 전체실행, 실제Drive 전송/회수, 무인 주간실행은 미검증. 실제 데이터로 전송량·월비용을 새로 측정하지 않았다. 운영 원본에서 변경된 이미지를 받을 수는 있으나 실제 신증분 운영GET은 실행0. 다음1개는 외부 실행환경·Drive 연결 후보 준비. 현재 사용자 결정만으로 비밀값 전송·자동예약·기존사본삭제를 실행하지 않는다.
+
+### 운영자용 로컬 연결(준비된 도구, 이번 운영 실행 아님)
+
+- 기존 `capture-daily-backup.py`의 같은 DB snapshot 수집 결과를 사용한다. 파일명 daily는 과거 도구 호환이며 일일예약은 없다.
+- private 경로의 chain JSON은 오래된 전체본부터 순서대로 `{source, context:{project,release}, manifestSha256}`를 담는다. source는 암호화 `payload/manifest.enc`가 있는 로컬디렉터리, hash는 해당 암호화 manifest의 SHA256이다. 키나 개인 이미지 내용은 넣지 않는다. Git에 올리지 않는다.
+- 명시 실행 형식: `node tools/operations/prepare-daily-backup.mjs <run-id> incremental <private-chain.json>` → 기존 `package-daily-backup.py --run-id <run-id>`. 실행전 실제 대상/권한 검토 필요. 기존 run-daily-backup.mjs는 full 수동 도구이며 주간 scheduler가 아니다.
+- prepare가 전체 chain을 복원해 검증한 후 `READY_LOCAL_ONLY.json`, 재구성된 `verify-quarantine`과 다음번용 `incremental-chain.local.json`을 private 작업폴더에 남긴다. ZIP에는 신규 ciphertext/암호화 index/context만 포함하고 로컬경로나 키/평문을 넣지 않는다.
+- `verify-external-backup.py`로 증분ZIP만 푼 결과는 전체복원 아님. 암호화 사본 전체 chain과 pinned manifest/context를 `restoreIncrementalBackup`에 전달해야 최신파일목록이 재구성된다. 이후 실제DB import·최신삭제/권리/Storage 대조는 기존 복구 절차를 별도로 수행해야 한다.

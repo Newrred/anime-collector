@@ -1,0 +1,34 @@
+// Explicit local integration: existing Python cryptography (WSL on Windows).
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {fileURLToPath} from 'node:url';
+import {execFile} from 'node:child_process';
+import {createEncryptedBackup} from '../../tools/private-images/encrypted-backup.mjs';
+import {createIncrementalBackup,restoreIncrementalBackup,manifestFingerprint} from '../../tools/operations/incremental-backup.mjs';
+const repo=fileURLToPath(new URL('../../',import.meta.url));
+const posix=p=>process.platform==='win32'?'/mnt/'+p[0].toLowerCase()+p.slice(2).replaceAll('\\','/'):p;
+const py=['import importlib.util,json,sys','from pathlib import Path',"spec=importlib.util.spec_from_file_location('package',Path(sys.argv[1])/'tools/operations/package-daily-backup.py')",'m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)',"print(json.dumps(m.package('synthetic',work_root=sys.argv[2],key_file=sys.argv[3])))"].join('\n');
+test('incremental ZIP authenticates but requires parent; full chain restores bytes',async t=>{
+ const temp=await mkdtemp(join(tmpdir(),'moemoa-incremental-package-'));t.after(()=>rm(temp,{recursive:true,force:true}));
+ const key=Buffer.alloc(32,17),keyPath=join(temp,'synthetic.key');await writeFile(keyPath,key.toString('hex'),{mode:0o600});
+ const project='okchpyagfucpzpyrfgol',baseContext={project,release:'synthetic-base'},context={project,release:'MOEMOA_DAILY_BACKUP_synthetic'};
+ const cover=join(temp,'cover');await writeFile(cover,Buffer.alloc(128000,3));const db=join(temp,'db');await writeFile(db,'synthetic DB snapshot');
+ const files=[{name:'objects/00000.bin',path:cover},{name:'database.dump',path:db}];
+ const base=join(temp,'base');await createEncryptedBackup({files,output:base,key,context:baseContext});
+ const previous=[{source:base,context:baseContext,manifestSha256:await manifestFingerprint(base)}];
+ const work=join(temp,'daily-backup-synthetic');await mkdir(work);
+ const result=await createIncrementalBackup({files,previous,output:join(work,'encrypted'),key,context});
+ const chain=[...previous,{source:join(work,'encrypted'),context,manifestSha256:result.manifestSha256}];
+ const verified=await restoreIncrementalBackup({chain,output:join(work,'verify-quarantine'),key});
+ await writeFile(join(work,'READY_LOCAL_ONLY.json'),JSON.stringify({status:'LOCAL_INCREMENTAL_BYTES_VERIFIED',context,encryption:result.encryption,localByteVerification:verified}));
+ const args=['-B','-c',py,posix(repo),posix(temp),posix(keyPath)];
+ const output=await new Promise((yes,no)=>execFile(process.platform==='win32'?'C:/Windows/System32/wsl.exe':'python3',process.platform==='win32'?['--','python3',...args]:args,{windowsHide:true,timeout:30000,maxBuffer:5000},(e,stdout,stderr)=>e?no(Error('SYNTHETIC_PACKAGE_FAILED '+stderr)):yes(stdout)));
+ const summary=JSON.parse(output);assert.equal(summary.status,'LOCAL_INCREMENTAL_ZIP_AUTHENTICATED');assert.equal(summary.requiresParentArchives,true);assert.equal(summary.safeToServe,false);assert.ok(summary.bytes<10000);
+ const proof=JSON.parse(await readFile(join(work,'zip-verification/VERIFIED_BYTES_ONLY.json'),'utf8'));
+ assert.equal(proof.allSha256AndLengthsMatch,true);assert.equal(proof.requiresParentArchives,true);assert.equal(proof.completeSnapshotReconstructed,false);
+ await assert.rejects(readFile(join(work,'zip-verification/payload/objects/00000.bin')));
+ assert.equal((await readFile(join(work,'verify-quarantine/payload/objects/00000.bin'))).length,128000);
+});
