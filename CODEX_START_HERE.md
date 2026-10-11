@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
+
+
 > **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
 
 

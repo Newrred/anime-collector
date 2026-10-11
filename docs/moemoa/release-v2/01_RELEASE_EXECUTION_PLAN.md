@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
+
+
 > **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
 
 
@@ -2631,3 +2634,17 @@ run38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN, Stop container
 8. 다음1개: 정확d8bf945 적용 후 최신실패run20261011154922628에 한정해 기존metadata/hash 확인→없을때만 종료이력추가·수동증분1회(기존64MB상한). 스위치off까지 포함하는 별도 승인이 필요하다. W17/D05의 정기외부보관·독립키·회수복구 등은 완료로 바꾸지 않는다.
 실제실행 https://github.com/Newrred/anime-collector/actions/runs/38152850345
 공식308응답 근거 https://developers.google.com/workspace/drive/api/guides/manage-uploads
+
+#### d8bf945 수동1회 승인 실행
+사용자 ㄱ으로 직전 정확후보 d8bf945 업로더1파일 적용·실패20261011154922628 복구 수동1회 승인. master부모ab05885 일치 확인; 승인코드만 Git배포→한회dispatch→gate off→실제checksum/commit 결과 확인. 예약·삭제·DBschema/Public·새Secret 변경 제외.
+
+#### 2026-10-12 d8bf945 실제 수동 증분 백업 성공 보고
+1. 문서/범위: AGENTS·시작문서·확정결정·기존 W17/D05 ExecPlan/03/증거 및 업로더·runner·workflow·기존39검사 근거를 대조했다. 새로운 계획을 만들지 않고 현행 실패 마감1개를 진행했다.
+2. 승인/가정: 사용자 ㄱ과 후속 '수정 후보 적용·수동1회 승인'은 같은 실행에 대한 승인이다. dispatch는1회이며 별도추가실행0. 국가/정책/비용·주간예약 승인을 확대하지 않았다.
+3. 적용/파일: git push origin d8bf945051854ca60398664de54105a49a4ea2c2:refs/heads/master 성공. 변경은 승인된 tools/operations/drive-backup.mjs 1파일. 이후 기존00~03·확정결정의 구현현황·root시작포인터·backup evidence만 갱신했다. 앱/API/DBschema 변경0.
+4. 실제 명령결과: GitHub master-only policy GET200·gate false 확인→PATCH204 true→dispatch204 (confirm=true, inspect=false, recover_missing_run_id=20261011154922628). run38153533963 SUCCESS/job114511725824 container정리SUCCESS. admission통과 후 gatefalse PATCH204/GET200, 완료후최종GET200 false. Vercel48MUnRtoijGkmYyz8EVtpLjf6waK success 및 www/build-info200 commit/checkoutCommit exactd8bf945/source vercel-git/semanticMatch true(workingTreeDirty true 응답보존).
+5. 결과/검증: WEEKLY_INCREMENTAL_COMMITTED archiveBytes62610505 chainLength2 safeToServefalse oldCopiesDeleted0. 실행기 계약상 기존부모SHA256/AES-GCM/manifest 검증→현재snapshot capture→로컬암호화ZIP인증→원격크기/SHA256검증→암호화완료ledger재조회까지 통과. Chrome의 정확계정/기존비공개폴더에서 새moemoa-production-20261011155929965.encrypted.zip 59.7MB·기존전체2개·state1~6 확인. 새ZIP을 외부에서 다시내려받아격리복원한 PASS는 아니며 실제이미지GET량은 요약에없어 주장하지 않는다.
+6. 기존검사/DB/복귀: 로컬39는 직전실행 결과로 재실행·합산0. 이번검증은 실제workflow/DriveUI/Git/Vercel/gate조회. migration0/예약0/사본삭제0. gateoff 유지하며 완료chain과failed/abandoned 이력을 삭제하지 않는다. 308수정의 실제흐름은 통과했으나 과거실패응답 원문이없어 과거원인을 단정하지 않는다.
+7. 보안·관측: 기존인증재사용·Secret신규저장0, 비밀값/본문로그0. 원격checksum·ledger완료만으로 복원서빙을허용하지 않으며 safeToServefalse 유지. Public/private권한 변경0, runtime임시정리확인. 사용자 별도복구키보관은 여전히미확인이다.
+8. 완료/잔여/다음: 실제 수동증분 외부보관 단계 완료. W17/D05 전체DONE 아님. 다음1개는 새 증분사본 외부회수·격리복구 검증이며 새capture/쓰기/삭제를 포함하지 않는다. 주간스케줄 활성은 별도정확후보승인, 독립키/최신삭제·공개서빙 인수는 기존잔여로 유지한다.
+실행 https://github.com/Newrred/anime-collector/actions/runs/38153533963

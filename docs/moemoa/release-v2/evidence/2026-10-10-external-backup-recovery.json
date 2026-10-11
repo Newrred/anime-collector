@@ -1146,8 +1146,8 @@
     "changed": [
       "tools/operations/drive-backup.mjs"
     ],
-    "pushed": false,
-    "status": "LOCAL_VERIFIED_PENDING_APPROVAL",
+    "pushed": true,
+    "status": "APPLIED_ACTUAL_BACKUP_PASS",
     "targetPendingRunId": "20261011154922628",
     "reproduction": {
       "transport": "loopback HTTP with native Node fetch, synthetic payload",
@@ -1165,6 +1165,88 @@
     },
     "scope": "Only resumable chunk PUT uses redirect:manual; no response Location is followed. Other calls stay redirect:error.",
     "source": "https://developers.google.com/workspace/drive/api/guides/manage-uploads",
-    "gitBlobHashMatches": 1
+    "gitBlobHashMatches": 1,
+    "appliedRunId": 38153533963
+  },
+  "weeklyHttpFixRun20261012": {
+    "status": "ACTUAL_INCREMENTAL_BACKUP_COMMITTED",
+    "candidate": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "userApproval": "Explicit ㄱ after exact candidate/manual-once request",
+    "runId": 38153533963,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38153533963",
+    "dispatches": 1,
+    "recoverMissingRunId": "20261011154922628",
+    "environmentBranch": "master",
+    "gateDisabledAfterAdmission": {
+      "patch": 204,
+      "get": 200,
+      "value": false
+    },
+    "vercelBuild": {
+      "commit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+      "checkoutCommit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+      "builtAt": "2026-10-11T15:59:03.994Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "noSchedule": true,
+    "noDeletion": true,
+    "noSchemaChange": true,
+    "noPublicChange": true,
+    "conclusion": "success",
+    "summary": {
+      "status": "WEEKLY_INCREMENTAL_COMMITTED",
+      "archiveBytes": 62610505,
+      "chainLength": 2,
+      "safeToServe": false,
+      "oldCopiesDeleted": 0
+    },
+    "cleanup": "success",
+    "finalGate": {
+      "get": 200,
+      "value": "false"
+    },
+    "duplicateApproval": "Later explicit async approval confirmed same run; no second dispatch",
+    "driveUI": {
+      "account": "minecrafthong@gmail.com",
+      "newArchive": "moemoa-production-20261011155929965.encrypted.zip",
+      "displaySize": "59.7MB",
+      "existingFullArchivesPreserved": 2,
+      "stateSequences": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "latestCommitRunId": "20261011155929965"
+    },
+    "validation": {
+      "remoteMetadataChecksum": true,
+      "encryptedLedgerCommitReadback": true,
+      "preparedEncryptedZipLocalAuthentication": true,
+      "newArchiveExternalDownloadRestore": false,
+      "productionDatabaseRestore": false
+    },
+    "scope": {
+      "manualExecutions": 1,
+      "scheduleEnabled": false,
+      "oldCopiesDeleted": 0,
+      "schemaChanges": 0,
+      "publicChanges": 0,
+      "newSecrets": 0
+    },
+    "remaining": [
+      "new delta external retrieval and isolated recovery verification",
+      "weekly scheduling exact candidate approval",
+      "operator independent off-PC key custody"
+    ],
+    "nextAction": "Verify newly stored delta through external retrieval and isolated restore under existing W17/D05; no new capture or deletion"
   }
 }

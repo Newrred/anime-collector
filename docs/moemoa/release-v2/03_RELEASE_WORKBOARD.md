@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
+
+
 > **2026-10-12 W17/D05 복구 실행 결과:** 승인ab05885 master Git→Vercel/www exactSHA 확인. 수동run38152850345는 UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN 실패, container정리SUCCESS·gate false GET200. Drive UI 기존ZIP2개/state1·2·3 보존·새ZIP미표시, 최신실패ID20261011154922628. native fetch에서 308+Location 오류를 로컬 재현(운영동일원인 확정 아님), chunk PUT만 자동추적없이 manual 처리하는 1파일 후보d8bf945·관련39 PASS. 후보운영미적용/추가실행0. 다음1개: 정확후보d8bf945로 최신실패기록 복구·수동1회 승인. 주간예약/삭제/Public변경 제외. 아래는 과거 이력이다.
 
 
@@ -818,6 +821,20 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+W/M: W17/D05 · M4/M5 ACTUAL_INCREMENTAL_BACKUP_COMMITTED / RUN_GATE_OFF
+문서기준: 주1회/RPO7일/RTO24h 목표, 기존사본 보존·정확후보별 운영승인 유지
+이번실제: d8bf945 master Git→Vercel48MUnRtoijGkmYyz8EVtpLjf6waK/www exactSHA, run38153533963 SUCCESS
+보관결과: WEEKLY_INCREMENTAL_COMMITTED, ZIP62610505B/chain2/oldCopiesDeleted0. 원격metadata SHA256 및 암호화ledger commit6 재조회 통과
+화면확인: Drive 새moemoa-production-20261011155929965.encrypted.zip 59.7MB, 기존전체ZIP2개/state1~6 보존
+종료: container정리SUCCESS·gate false PATCH204/최종GET200, 예약0·DBschema/Public/새Secret변경0
+검증구분: 관련로컬39 PASS는 선행 결과. 이번 실제한회 성공, 새ZIP외부다운로드복호화/운영DB복원PASS 아님
+미완료: 새 증분 외부회수·격리복구, 주간예약, 독립복구키보관 및 기존복구서빙 인수
+다음1개: 같은 W17/D05 새 증분 사본 외부 회수·격리복구 검증(새capture/삭제 없이)
+```
+
+<details><summary>이전 카드 — HTTP 결함 로컬 재현</summary>
+
+```text
 W/M: W17/D05 · M4/M5 UPLOAD_FAILED / HTTP_DEFECT_REPRODUCED_LOCALLY / RUN_GATE_OFF
 문서기준: 주1회 DB·변경이미지/RPO7일/RTO24h 목표, 기존사본 보존·정확후보별 운영승인 유지
 이번실제: ab05885 master Git→Vercel/www exactSHA, 수동38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN
@@ -829,6 +846,8 @@ W/M: W17/D05 · M4/M5 UPLOAD_FAILED / HTTP_DEFECT_REPRODUCED_LOCALLY / RUN_GATE_
 미완료: 원격오류의 정확원인 확정/새ZIP보관·회수복구·주간예약·독립키. 로컬재현을 실제완료로 확대하지 않음
 다음1개: d8bf945 정확후보 적용·최신실패ID20261011154922628 복구 수동1회 승인 후 실행
 ```
+
+</details>
 
 <details><summary>이전 카드 — 실제 읽기 진단 완료</summary>
 
