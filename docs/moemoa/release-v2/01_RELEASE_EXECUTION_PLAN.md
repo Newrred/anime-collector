@@ -87,6 +87,25 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 
 - 후속 실제 결과: 사용자 미니홈 직접 게시 완료, 공개 보드 작성자 링크→home 이동·비로그인24×30 이미지decode PASS. B 기존 Google 로그인은 signup 필요 오류; 읽기전용 auth 조회 A1/B0. 정식 phone-test alias에 B 직접 가입+원래home 복귀 URL 준비. 고유 Preview 로그인 오류가 localhost fallback으로 향한 관측은 기록하며 설정을 임의 변경하지 않음. 9f36610 GitHub Preview6991142681 success; CI38113213200 publication-contract success/verify 진행 중.
 
+### 2026-10-11 W13/W14 실제 B 완주 및 신고 운영 화면 누락 보완
+
+- B 당사자 가입→A 미니홈 내부복귀→명시follow→내 목록 링크 재방문 PASS(guard=true). 신고25447a47-6923-4547-8d19-ca6d88968137 접수, block→unblock 뒤 follow 자동복원 없음 PASS.
+- 재현: /moderation/에 board/home/content appeals만 있어 REPORT 사건을 볼 수 없음. 기존 list_memory_moderation/review_memory_report/read_memory_moderation_audit RPC는 서버 구현/권한/revision/감사/통지를 갖춤. 서버를 재작성하지 않고 Report 탭·사유·KEEP/HIDE/RESTORE 및 감사 조회만 연결한다. 계정제재/정책변경/자동권한확대 없음.
+- 변경 대상: 기존 gateway/runtime allowlist, MemoryContentReview에 기존 패턴의 신고 패널 연결, 모의API E2E. DB migration 없음. 오류/불확실 완료 시 사유/동의 초기화·대상 재선택 요구, 자동 재시도 금지; 계정 전환 시 기존 useSafetyRequest 취소. 신고본문은 DOM만, analytics/log 없음. 롤백은 이 UI연결 소스 revert.
+- 검증: 신고/CONTENT 분리·pagination·revision전달·HIDE/RESTORE/KEEP·실패확정과 불확실결과 재조회·비운영자거부·계정전환을 관련 E2E로 확인. 이전37 PASS와 새 PASS 분리. 로컬 준비 후 정확한 phone-test 화면 후보 승인 요청; 운영/DB 변경0. 기존 W14에 흡수하고 두번째 진행판을 만들지 않는다.
+
+
+#### 이번 실행 보고 (W13/W14)
+
+1. 읽은 문서/파일: AGENTS·CODEX_START_HERE·확정결정·기존00/01/02/03·UGC/QA 계약, MemorySafety/MemoryContentReview, SupabasePublicationGateway/platformPublication, moderation/content-review SQL, publication-ui.spec.ts.
+2. 가정/미결: B는 당사자가 이번에 직접 생성. 과거 운영자 RPC PASS를 현재 제품 신고 UI PASS로 대체하지 않는다. 일반신고 UI 누락이 실제 operator 조치를 막으며, 첫공개 운영 승인/D03~D06은 별도 미결.
+3. 계획: 본 절의 기존 W13/W14 보완(신규 작업판0).
+4. 변경: MemoryReportReview.jsx 신규 연결 패널, 기존 검토 화면 Reports탭, gateway/runtime의 reviewReport·moderationAudit, 해당 모의API 검사 및 기존 문서 현재절. 제품의 공개/동기화/원본·가입 계약 변경0.
+5. DB/복귀: 신규 migration/원격 schema/권한 변경0. 테스트 guard=true 상태 follow 검증 후 prepare-public-signup-test.py --restore exit0/false 확인. UI는 후보 소스 revert로 복귀.
+6. 실행: run-publication-closeout-e2e.mjs 'general report workspace|moderation workspace' →9/9 PASS(신규5+기존4), 스타일 보완 뒤 HIDE 1개/320px 재검사 PASS(고유수 합산 안 함). node node_modules/astro/astro.js build →32pages/exit0. git diff --check PASS. 초기 전환분기 누락 발견으로 검사 중단, 다음 시도 조치 label 정확매칭 timeout1 뒤 접근성 label 연결 수정; 실패/중단을 PASS로 계산하지 않는다. 실제 hosted B Google복귀/follow/revisit/report/block/unblock은 별도 증거JSON.
+7. 안전/관측: 운영자 서버권한·case/target revision 유지, 불확실 완료 뒤 같은조치 자동재전송0/재조회 요구, 계정전환 자료제거, reporter/actor 미표시, 로그/analytics에 신고본문/토큰0. KEEP은 가림 해제와 구분, RESTORE는 사용자 철회/삭제를 복원하지 않는 기존 서버계약 유지.
+8. 잔여/다음1개: 정확한 phone-test UI 후보 승인 후 동일 합성 신고에서 operator HIDE/RESTORE·통지/감사→A 카드 비공개 전환·익명 이미지 비노출. 운영/master/DB는 승인 대상 아님. 9f36610 CI는 아직 진행 중이며 새 후보9개 PASS와 구분.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.

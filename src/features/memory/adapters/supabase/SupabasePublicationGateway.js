@@ -100,6 +100,11 @@ export class SupabasePublicationGateway {
   openContentReview(kind, id, options) { return this.request('open_memory_content_review', { p_kind: kind, p_id: id }, options); }
   contentReview(id, options) { return this.request('get_memory_content_review', { p_case: id }, options); }
   moderationCases(after = null, options) { return this.request('list_memory_moderation', { p_after: after }, options); }
+  moderationAudit(id, options) { return this.request('read_memory_moderation_audit', { p_case: id }, options); }
+  reviewReport(report, action, reason, options) {
+    return this.request('review_memory_report', { p_id: report.id, p_revision: report.revision,
+      p_target_revision: report.targetRevision, p_action: action, p_reason: reason }, options);
+  }
   resolveContentReview(review, rating, options) {
     return this.request('resolve_memory_content_appeal', { p_case: review.id, p_case_revision: review.caseRevision,
       p_content_revision: review.contentRevision, p_hash: review.reviewHash, p_rating: rating, p_policy: review.policyRevision }, options);

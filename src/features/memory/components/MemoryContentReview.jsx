@@ -5,6 +5,7 @@ import { useSafetyRequest } from './MemorySafety.jsx';
 import { contentReviewUiEnabled, getPublicationServices } from '../runtime/platformPublication.js';
 import { isPublicationId, publicationSnapshot } from '../domain/publicationView.js';
 import PublicBoardSnapshot from './PublicBoardSnapshot.jsx';
+import MemoryReportReview from './MemoryReportReview.jsx';
 
 function checkedReview(value) {
   if (!isPublicationId(value?.id) || !isPublicationId(value.target) || !['board', 'home'].includes(value.kind)
@@ -60,6 +61,7 @@ function Workspace({ userId, ko }) {
   const [review, setReview] = useState(null), [saved, setSaved] = useState(false);
   async function load(kind = mode, after = null) {
     setReview(null); setSaved(false);
+    if (kind === 'reports') { setMode(kind); setRows([]); setNext(null); return; }
     const result = await run(async (gateway, options) => {
       const value = kind === 'appeals' ? await gateway.moderationCases(after, options) : await gateway.pendingContent(kind, after, options);
       if (!Array.isArray(value?.items) || value.items.length > 20 || (value.next !== null && !isPublicationId(value.next))
@@ -84,8 +86,9 @@ function Workspace({ userId, ko }) {
     if (result) { setReview(null); setSaved(true); setRows(old => old.filter(row => row.id !== (mode === 'appeals' ? value.id : value.target))); }
   }
   return <>
-    <nav aria-label={ko ? '검토 목록' : 'Review queues'}>{[['board', ko ? '보드' : 'Boards'], ['home', ko ? '미니홈' : 'Homes'], ['appeals', ko ? '이의 신청' : 'Appeals']].map(([kind, label]) =>
+    <nav aria-label={ko ? '검토 목록' : 'Review queues'}>{[['board', ko ? '보드' : 'Boards'], ['home', ko ? '미니홈' : 'Homes'], ['appeals', ko ? '이의 신청' : 'Appeals'], ['reports', ko ? '신고' : 'Reports']].map(([kind, label]) =>
       <button key={kind} className="btn" disabled={busy} aria-pressed={mode === kind} onClick={() => load(kind)}>{label}</button>)}</nav>
+    {mode === 'reports' ? <MemoryReportReview key={userId} userId={userId} ko={ko} /> : <>
     <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? '목록 새로고침' : 'Refresh review queue'}</button>
     {error && <p role="alert">{ko ? '검토 내용을 확인하지 못했습니다. 권한을 확인하고 목록을 새로고침해 주세요.' : 'Could not complete review. Check your access and refresh the queue.'}</p>}
     {saved && <p role="status">{ko ? '검토 결과를 저장했습니다.' : 'Review decision saved.'}</p>}
@@ -93,6 +96,7 @@ function Workspace({ userId, ko }) {
       {typeof row.label === 'string' ? row.label : (ko ? '이의 신청 검토' : 'Review appeal')}</button></li>)}</ul>
     {next && <button className="btn" disabled={busy} onClick={() => load(mode, next)}>{ko ? '더 보기' : 'More review targets'}</button>}
     {review && <Decision key={`${review.id}:${review.reviewHash}:${review.contentRevision}`} review={review} ko={ko} busy={busy} onSave={save} />}
+    </>}
   </>;
 }
 function Content() {

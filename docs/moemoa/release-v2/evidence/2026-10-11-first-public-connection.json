@@ -215,7 +215,7 @@
     "Automated user terms acceptance",
     "Production public enablement"
   ],
-  "nextAction": "User directly completes missing B test signup; verify return to A public home then explicit follow/list revisit",
+  "nextAction": "Complete local report-action UI verification, then exact test-preview approval before operator action/withdrawal",
   "simpleCardSharing": {
     "decision": "CARD-PUBLIC-SIMPLE-01",
     "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
@@ -601,5 +601,62 @@
       },
       "signupDeclarationRequired": false
     }
+  },
+  "bPublicFlow20261011": {
+    "sourceCommit": "9f3661063b79923b73050629deeef021a6c65dee",
+    "environment": "moemoa-test / phone-test",
+    "userDirectSignup": true,
+    "returnedToExpectedHome": true,
+    "autoFollowBeforeClick": false,
+    "signupGuardDuringFollow": true,
+    "explicitFollow": "PASS",
+    "followingList": "MOEMOA test A",
+    "revisit": "PASS-following-retained",
+    "report": {
+      "id": "25447a47-6923-4547-8d19-ca6d88968137",
+      "category": "OTHER",
+      "syntheticOnly": true,
+      "status": "RECEIVED"
+    },
+    "block": "PASS-unblock-button",
+    "unblock": "PASS-follow-button-no-auto-refollow",
+    "operatorLogin": "A existing moderator route accessible",
+    "operatorIssue": "Report queue/actions missing from current UI; existing server RPCs present",
+    "operatorAction": "NOT_RUN",
+    "withdrawal": "NOT_RUN",
+    "guardAtHandoff": false,
+    "guardRestoreExit": 0
+  },
+  "reportReviewUiCandidate": {
+    "databaseChanges": false,
+    "productionChanges": false,
+    "scope": [
+      "report list and pagination",
+      "KEEP/HIDE/RESTORE with current case/target revisions",
+      "existing audit and author notice contracts",
+      "clear selection after uncertain save; refresh before another action"
+    ],
+    "localVerification": {
+      "e2eUnique": 9,
+      "newCases": 5,
+      "existingCases": 4,
+      "command": "node scripts/run-publication-closeout-e2e.mjs \"general report workspace|moderation workspace\"",
+      "layoutRetest": {
+        "cases": 1,
+        "width": 320,
+        "passed": true,
+        "uniqueAdditionalCases": 0
+      },
+      "build": {
+        "command": "node node_modules/astro/astro.js build",
+        "pages": 32,
+        "exit": 0
+      },
+      "initialFailures": [
+        "tab transition insertion missing: stopped own run",
+        "select label included option text: timeout; linked explicit label/id then pass"
+      ]
+    },
+    "remoteApplied": false
   }
 }

@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시→보드 작성자 링크→새 익명home 이미지decode PASS. B 계정은 현재 test auth에 없어 당사자 가입 대기; 팔로우/신고/차단/철회 잔여. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
+> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시→보드 작성자 링크→새 익명home 이미지decode PASS. B 직접 가입·원래home 복귀·팔로우·내 목록 재방문·신고·차단/해제 PASS(guard=true). 운영자 일반 신고 메뉴 누락을 발견해 기존 RPC 연결 로컬 후보 준비, 조치/철회 hosted는 잔여. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
 
 
 > **2026-10-10 최신 완료 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력 포함 f428c60의 전체 CI·master Git·Vercel Ready·실제 www 소스/화면 확인 완료. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
@@ -711,10 +711,10 @@
 | W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 10/11 간편 카드 공개·사본 자동준비 unit69/고유UI13/SQL33/build32 로컬 PASS. A 수락 확보;52875c6 새 UI/migration test 반영 완료·실제 이미지 확인, 사용자 직접 Save·새 익명 이미지decode PASS. 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
 | W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 10/11 카드 공개/비공개+동의1개 구현/모의API PASS, 52875c6 test Ready·실제 상태/이미지 확인, 실제 Saved as public·새 익명decode PASS. 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
 | W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 10/11 reversible private·다중 보드·원본/다른 카드 보존·기존 preview 무효화·owner lock SQL18 신규 PASS. 기존 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
-| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
+| W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 10/11 실제 사용자 게시·보드 작성자링크·익명home24×30 decode PASS. 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
-| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | 10/11 현재 보드→home·팔로우/재방문·가입오류복귀 모의API UI PASS. 실제 Google 복귀/새 후보 hosted 잔여. R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님; 10/10 기존 계정 가입 확인 연결 후보 SQL15/Chromium4 PASS, hosted 미적용 |
+| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | 10/11 현재 보드→home·팔로우/재방문·가입오류복귀 모의API UI PASS. 10/11 새 B 직접 가입·Google 내부복귀·명시follow/내 목록 재방문 hosted PASS. R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 10/11 실제 신고/차단/해제 PASS. 일반신고 처리 UI 누락 발견→기존 RPC 연결 로컬후보 9개UI PASS/DB0; 후보 test반영과 실제 조치·철회 잔여. 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님; 10/10 기존 계정 가입 확인 연결 후보 SQL15/Chromium4 PASS, hosted 미적용 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 10/10 조회 전용 재확인: 최신 예약 정리 성공·기한 경과 사진0. 물리100MB·계정50MB·월전역500MB 유지.50건 batch 포화 가능성 경보 추가·관련 unit32 PASS(운영 미반영). 이전80MB/월400MB 경보 근거 보존. 실제 임계 알림 수신·공개 자원정책/예산 결속은 D03 잔여. 이전 quota/HTTP 근거 보존 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
@@ -737,8 +737,10 @@ W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
 이번 화면: A 직접 동의/Save→Saved as public→새 익명 origin Sign in to report·24×30 공개 이미지decode PASS. 미니홈 직접 게시·보드 작성자링크·익명home decode PASS
 실제 게시: 카드 게시 당시 guard=false(과거 원복 상태), 현재 A receipt 보유. 미니홈 preview는 승인된 enable-existing/guard=true에서 성공. 원본/감상/태그 공개0. 종료 전 --restore exit0/guard=false 확인
 이번 검사: CI38112339835 일반runner env누락1FAIL 보존; workflow의 publication전체를 기존 격리runner로 이동→37/37 로컬PASS. 제품/DB 변경0
-미완료: B auth계정0으로 직접 테스트 가입 대기; B follow·재방문·신고/차단/철회, 9f36610의 CI38113213200 완료 확인, D03~D06 실제 잔여
-다음1개: 준비한 B 직접 테스트 가입→A 미니홈 복귀→follow·내 목록 재방문
+이번 실제: B 직접 가입→같은home 복귀→명시follow→내 목록 재방문·신고/차단/해제 PASS, 해제 후 자동follow0. guard=true 검증 후 false 원복
+발견/보완: 운영자 일반신고 UI 누락; 기존 REPORT RPC·revision·감사 연결 로컬후보 9개 UI PASS. DB변경0, 원격 미적용
+미완료: 후보 테스트 배포·운영자 조치·철회, 9f36610 CI 완료 확인, D03~D06 잔여
+다음1개: 신고 처리 UI 후보의 정확한 테스트 반영 승인 후 실제 운영자 조치→철회
 ```
 
 <details><summary>이전 카드 — A hosted preview 후 간소화 요청 전</summary>
@@ -979,8 +981,8 @@ NA 이유:
 | Q13 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 Storage+local handler 직접 URL200→404/no-store, 익명 UI unavailable | withdrawal-ui/public-flow JSON | 정확한 후보 CDN/SW·기존 캐시·철회 지연 |
 | Q14 | LOCAL PASS / HOSTED 일부 | stale local 복원+최신 fence2회, hosted 삭제 비부활 일부 | local-stale-recovery JSON + 실제 삭제 로그 | 운영 최신 journal 사본/복원 인계, 실제 관리 차단·기존 캐시 삭제 전파 |
 | Q15 | LOCAL PASS / HOSTED PARTIAL PASS | 10/11 모의API home 비공개·보드 유지 PASS. 과거 hosted: 대표 선택 저장·B,A→A,B 정렬·소개 재게시·익명 이미지2개 decode PASS | w19-minihome-edit JSON | 대표 제외·제품 home 비공개/보드2 유지 PASS; 최종 후보 지원 Web/기기 조합 잔여 |
-| Q16 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 A/B 보드→작성자→팔로우→목록 재방문 | public-flow JSON + author DTO/SQL/UI 회귀 | 만료/로그인 거절·공개 복귀/다기기 조합 |
-| Q17 | LOCAL PASS / HOSTED PARTIAL PASS | B 신고·차단/해제, A moderator live HIDE/RESTORE·통지/감사 | public-flow JSON; owner 철회 뒤 RESTORE로 부활하지 않음 | 이의·공개 쓰기 제한/해제는 Q18 PASS. 삭제/기기 조합 및 운영 담당 인수 잔여 |
+| Q16 | LOCAL PASS / HOSTED PARTIAL PASS | 10/11 새 B Google 가입·home 복귀·명시follow·내 목록 재방문 PASS. 실제 A/B 보드→작성자→팔로우→목록 재방문 | public-flow JSON + author DTO/SQL/UI 회귀 | 만료/로그인 거절·공개 복귀/다기기 조합 |
+| Q17 | LOCAL PASS / HOSTED PARTIAL PASS | 10/11 새 B 신고/차단·해제 PASS, 운영자 일반신고 UI 누락 보완 로컬9개PASS·실제조치 잔여. B 신고·차단/해제, A moderator live HIDE/RESTORE·통지/감사 | public-flow JSON; owner 철회 뒤 RESTORE로 부활하지 않음 | 이의·공개 쓰기 제한/해제는 Q18 PASS. 삭제/기기 조합 및 운영 담당 인수 잔여 |
 | Q18 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 JWT 운영 RPC 제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부 | w19-appeal-restriction JSON | 운영자=owner인 승인 A 테스트; 실제 별도 담당자/지원채널·정책/SLA D04 |
 | Q19 | LOCAL PASS / HOSTED PARTIAL | 실제 handler 병렬 image 준비 성공1/QUOTA1, DB active1/정리0. hosted rollback-only daily/override만료/정지 PASS | w19-rights-quota / w19-current-regression JSON + W15 기존 evidence | 실제 HTTP429·경보 수신/담당 및 D03 운영 수치·예산·후보 결속 |
 | Q20 | PARTIAL_VERIFIED | 과거 hosted5schema72table 복원 보존. 로컬 private main/thumb·최신삭제정보 재적용 및 DB dump/journal/WebP 암호화 격리 복원17PASS, 백업 경로충돌 생성/복원 거부 검증 | 기존 복구 JSON + 9/26 encrypted-backup-and-catalog-repair / backup-path-hardening JSON | 운영 Storage/canonical 외부 사본·지속 journal·키보관·RPO/RTO·실복구 잔여. 플랫폼 전체 복원 아님 |

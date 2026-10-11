@@ -63,6 +63,73 @@ test('existing account signup recovery from follow preserves blocking', async ({
   expect(blocked).toBe(true);
 });
 
+
+for (const action of ['HIDE', 'RESTORE', 'KEEP']) {
+  test('general report workspace saves exact revisions ' + action, async ({page, context}) => {
+    await adapters(context); const backend = mockPublication(); await backend.attach(context); await seedOwner(page);
+    const id = '99999999-9999-4999-8999-999999999999'; let submitted: any = null;
+    await context.route(/\/(list_memory_moderation|read_memory_moderation_audit|review_memory_report)$/, async route => {
+      const name = route.request().url(); let data: any;
+      if (name.endsWith('list_memory_moderation')) data = {items:[{id,reviewType:'REPORT',kind:'home',target:PUBLICATION,category:'OTHER',note:'Synthetic report',status:'APPEALED',revision:3,targetRevision:5,appeals:[{text:'Please review again.'}],reporter:'DO_NOT_RENDER_REPORTER'}],next:null};
+      else if (name.endsWith('read_memory_moderation_audit')) data = [{action:'HIDE',reason:'Previous synthetic action',actor:'DO_NOT_RENDER_ACTOR'}];
+      else {submitted = route.request().postDataJSON(); data={id,status:'CLOSED',revision:4,targetRevision:6};}
+      await route.fulfill({json:{data,error:null}});
+    });
+    await page.goto('/moderation/'); await page.getByRole('button',{name:'Reports',exact:true}).click();
+    await page.getByRole('button',{name:'Report '+id+' · APPEALED',exact:true}).click();
+    await expect(page.getByText('Please review again.',{exact:false})).toBeVisible();
+    await expect(page.getByText('DO_NOT_RENDER_REPORTER')).toHaveCount(0);await expect(page.getByText('DO_NOT_RENDER_ACTOR')).toHaveCount(0);
+    await expect(page.getByRole('link',{name:'Open reported public content'})).toHaveAttribute('href','/public/home/?id='+PUBLICATION);
+    await page.getByLabel('Report action',{exact:true}).selectOption(action);
+    await page.getByLabel('Reason sent to the author').fill('Synthetic moderation decision.');
+    const save=page.getByRole('button',{name:'Save report action',exact:true});await expect(save).toBeDisabled();
+    await page.getByLabel('I reviewed the target, action and reason.',{exact:true}).check();
+    if(action==='HIDE') {
+      await page.screenshot({path:'.cache/report-review-candidate.png',fullPage:true});
+      await page.setViewportSize({width:320,height:760});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+      await page.screenshot({path:'.cache/report-review-mobile.png',fullPage:true});
+    }
+    await save.click();
+    await expect(page.getByRole('status')).toContainText('Action saved.');
+    expect(submitted).toEqual({p_id:id,p_revision:3,p_target_revision:5,p_action:action,p_reason:'Synthetic moderation decision.'});
+    await expect(save).toHaveCount(0);
+    await page.evaluate(async()=>{const {writeMockAuthSession}=await import('/src/repositories/mockAuthStorage.js');writeMockAuthSession(null);});
+    await expect(page.getByText('Action saved.',{exact:false})).toHaveCount(0);
+  });
+}
+
+test('general report workspace pages past content cases and requires fresh selection after uncertain action', async ({page,context})=>{
+  await adapters(context);const backend=mockPublication();await backend.attach(context);await seedOwner(page);
+  const id='99999999-9999-4999-8999-999999999999', cursor='88888888-8888-4888-8888-888888888888';let submissions=0,refreshes=0;
+  await context.route(/\/(list_memory_moderation|read_memory_moderation_audit|review_memory_report)$/,async route=>{
+    const name=route.request().url();const args=route.request().postDataJSON();let data:any=[],error:any=null;
+    if(name.endsWith('list_memory_moderation')) {refreshes++;data=args.p_after===cursor?{items:[{id,reviewType:'REPORT',kind:'board',target:PUBLICATION,category:'OTHER',note:'Selected report',status:'RECEIVED',revision:0,targetRevision:0,appeals:[]}],next:null}:{items:[{id:cursor,reviewType:'CONTENT',status:'APPEALED'}],next:cursor};}
+    else if(name.endsWith('review_memory_report')){submissions++;data=null;error={message:'PUBLICATION_REQUEST_FAILED'};}
+    await route.fulfill({json:{data,error}});
+  });
+  await page.goto('/moderation/');await page.getByRole('button',{name:'Reports',exact:true}).click();
+  await expect(page.getByText('No general reports on this page.')).toBeVisible();
+  await page.getByRole('button',{name:'More reports',exact:true}).click();
+  await page.getByRole('button',{name:'Report '+id+' · RECEIVED',exact:true}).click();
+  await page.getByLabel('Report action',{exact:true}).selectOption('HIDE');await page.getByLabel('Reason sent to the author').fill('Synthetic review');
+  await page.getByLabel('I reviewed the target, action and reason.',{exact:true}).check();
+  await page.getByRole('button',{name:'Save report action',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('Refresh the reports');
+  await expect(page.getByRole('button',{name:'Save report action',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Report '+id+' · RECEIVED',exact:true})).toHaveCount(0);
+  expect(submissions).toBe(1);expect(refreshes).toBe(2);
+  await page.getByRole('button',{name:'Refresh reports',exact:true}).click();await expect(page.getByRole('button',{name:'More reports',exact:true})).toBeVisible();
+});
+
+test('general report workspace does not expose reports when server rejects moderator access',async({page,context})=>{
+  await adapters(context);const backend=mockPublication();await backend.attach(context);await seedOwner(page);
+  await context.route('**/list_memory_moderation',route=>route.fulfill({json:{data:null,error:{message:'MODERATOR_REQUIRED'}}}));
+  await page.goto('/moderation/');await page.getByRole('button',{name:'Reports',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('Could not confirm');
+  await expect(page.getByRole('button',{name:'Save report action',exact:true})).toHaveCount(0);
+});
+
 for (const mode of ['board', 'home', 'appeals']) {
   test(`moderation workspace reviews ${mode} with exact package`, async ({ page, context }) => {
     await adapters(context); const backend=mockPublication(); await backend.attach(context); await seedOwner(page);
