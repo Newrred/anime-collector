@@ -1,5 +1,81 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-11 — 첫 Public 마감 / W08·W09 현행 연결
+
+### 1–3. 목적·결정·기준
+
+FIRST-PUBLIC-LAUNCH-CLOSEOUT-20261011에 따라 현재 로그인 카드/보드에서 선택한 정보와 허용 이미지 준비→preview→게시를 연결한다. 기준 및 HEAD1878867, 로컬 이전6dd270c는 원격으로 fast-forward. 패키지11개 manifest hash 일치. 기존 운영/hosted 증거를 새 PASS로 확대하지 않는다. 필독 AGENTS/시작문서/확정 결정/PLANS/05/07/08/09와 기존 작업판, 패키지00~03. 원래17항과 모든 실행 이력을 보존한다.
+
+### 4–6. 범위·흐름·파일
+
+기존 platformPublication의 익명 reader/인증 writer 분리→SupabasePublicationGateway→createPublicationController/MemoryPublicationPanel→preparePublicImage→api/public-image→publicImages handler/backend를 추적한다. 새 signup receipt·policy·기존 계정 복귀와 충돌한 실패만 수정한다. 재현한 결함: 공개 이미지 backend/client allowlist에 PUBLIC_SIGNUP_REQUIRED/UNAVAILABLE 누락, 보드 RPC와 달리 복귀 안내 소실. 원본/사본 각2오류의 failing test4개로 증명 후 두 allowlist만 보완했다. UI·DB 모델·권리 정책 재작성 없음.
+
+### 7–9. 데이터·순서·검증
+
+이번 로컬 변경에 DB migration 없음. M0 재시작/W DONE 초기화 없음. W08/W09 관련 unit: publicImages/publicationController/publicationGateway. 실제 Chromium publication UI에서 원본/사본 준비·동의·게시·익명 decode·오류 복귀를 모의 API와 명확히 구분하여 확인한다. 현재 signup SQL guard와 최근 country activation을 격리 DB에서 관련 검사한다. 새 로컬 PASS 뒤 유효한 test 설정 snapshot/revision/역할·승인 범위를 확인하고 실제 A/V/B/O 흐름을 연결한다. 범위 밖 test 변경은 정확한 후보만 요청하며 로컬 작업 계속. 기본DB/A-B 격리/72table 복원은 반복하지 않는다.
+
+M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operationId·quota·옛preview·철회. M3 W11~W13: 공개 보드→home→로그인 안전 복귀→명시 follow→내 목록 재방문→해제/차단. M4 W14~W17: operator 신고·이미지 가림·통지·이의, 실측 비용/경보, 기존 catalog release 복귀, retention/키/격리 복원·최신 철회. M5 W18~W20: 같은 source/DB/config/정책 후보와 실제 hosted HTTPS 역할별 흐름→정확한 D06→master Git 배포 SHA/운영 smoke·인수. 현재 W08/W09부터 실행하며 후속 작업을 새 트리로 만들지 않는다.
+
+### 10–14. 안전·관측·복귀·위험·승인
+
+일반 공개 사후 검토 유지, 캡처·타인 팬아트 별도 권리 gate·성인 제외. 새 나라 활성/신원 인증/유료 전환 없음. 로그는 합성 데이터 및 오류코드/상태·집계만, 토큰·개인사진·비공개본문 기록 금지. 실패 확정 전 원본/사본 삭제·operation 교체 금지. 오류 전달 수정은 해당 소스 revert로 복귀 가능, DB 변경 없음. 운영 migration/Public/master push/배포/발송/결제/실데이터 삭제는 이번 포괄 승인에 미포함. D01 현재 test 범위, D03 실측/경보, D04 최초Public 국가·이미지조건, D05 키/DB복원·안전이력, D06 exact후보가 잔여. D02 Web-only 승인 재사용.
+
+### 15–17. 진행·발견·완료
+
+- 이번 실제 결과: 관련 unit59 PASS(최초4 FAIL→수정), Chromium10개 고유 시나리오 PASS(8+이미지2 재검사; 카드 관리→보드 선택을 보강한 기존1개 추가 재검사 PASS), 격리PG16 signup-public SQL15 PASS, build32 PASS. 원본/사본 준비·정확한 preview·게시·새 익명 이미지decode, 같은operation 재시도, signup 복귀·철회/차단 유지 확인.
+- 검사 환경 실패: 임의 dummy Supabase 설정의 DEV mock session 충돌은 빈 Supabase env로 해소. 추가 시험 작성 시 빠진 오류 응답/재시도 단계를 보완했다. build/dev 동시 실행 중 module fetch 실패는 직렬 실행으로 해소. 실제 hosted 실패와 혼합하지 않는다.
+- D01 현재: test 공개6flags true/phone revision/10개·40MiB·신고10/operator1, 현재 signup 정책10/10·receipt0·guard column 없음에서 시작. 사용자가 정확한 test 추가변경 승인. prepare-public-signup-test.py 리허설 ROLLBACK 후 기존 migration20261010160000와 이력/data release MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01 적용, guard=true 별도 readback PASS. 나라·receipt·역할·기존Public flags 변경0. 사용자 수락 대기 전 --restore 실행 성공, guard=false/기존6flags·revision·한도 그대로 readback. additive schema/history는 보존. 재개 시 같은 승인 범위의 --enable-existing 후 검사하고 --restore한다.
+- 실제 Chrome의 기존 phone-test에서 테스트10/10 문서/국가·DOB·약관→Google 화면을 확인해 A 사용자 직접 수락을 요청했다. 기존 배포는 origin/codex/phone-test9970120이며 새 로컬 오류매핑 수정의 hosted 배포 PASS로 취급하지 않는다.
+- 기본 exec 도구 os1392는 Node child_process 경로로 Git 실행 성공하여 우회했다. 저장소 손상이라고 판정하지 않는다. AuthCallbackClient의 EOL-only 변경은 외부 로컬 백업 보존 후 최신 원격 버전을 사용했다.
+- 문서 병합은 구현/출시 완료 증거가 아니다. 이번 hosted는 설정조회·guard schema적용/독립 readback만 PASS. 새 실제 Google/게시·익명 이미지·B/실기기/운영 흐름은 아직 NOT_RUN.
+
+
+### 2026-10-11 A 직접 확인 후 실제 hosted 재개
+
+- A 사용자 현재 test 정책 확인 완료, 독립 조회 latest receipt1. 승인된 --enable-existing 성공, guard=true 아래 합성 PNG24×30 카드1/보드1 생성·계정 저장→카드 공유 진입→사본 선택→공개 이미지 READY→방문자 preview PASS. 개인 이미지 선택/공개0.
+- 기존 preview9970120의 실제 동작이며 새 allowlist 수정은 아직 로컬 전용. 최종 공개 체크에 정책 동의가 포함되어 사용자 직접 게시 조작을 요청했다. 이 단계는 신규가입/권한 미제공 차단이 아니다.
+- 이번 추가 제품 소스/migration0; 위 도구 --enable-existing 및 read-only preflight 실제 성공. 현재 guard=true를 이 승인된 검증에만 유지하고 종료/취소 시 --restore. 이전 false 원복 이력은 위 로그 그대로 보존. 게시/새 익명/B/운영 PASS는 아직 아님. 다음1개: 게시 후 새 익명 실제 이미지 확인.
+
+### 2026-10-11 사용자 후속 — 카드 공개 간소화 (기존 W08/W09/W10)
+
+1–3 목적/결정/근거: CARD-PUBLIC-SIMPLE-01. 실제 기존 preview9970120 화면에서 제목 빈칸인데 이유 없는 disabled 버튼, 이미지 권리/준비/게시 체크 분산을 확인했다. 사용자 '안됨'은 게시 서버 오류로 단정하지 않는다.
+4–6 범위/흐름/파일: MemorySharingSettings의 카드 직접 공개/비공개 폼, 기존 controller/gateway/이미지 준비를 재사용하는 bounded orchestration, 기존 보드 폼의 필수값 안내. 저장 클릭 뒤 선택 카드 전용 board를 내부 연결해 기존 public reader/home/moderation 계약 유지. 소스 제목/이미지 외 private 필드는 기본 제외, 실제 서버 projection 대조 뒤에만 게시한다.
+7 데이터: owner-only 카드 공개상태 조회 및 재게시 가능한 비공개 전환 additive RPC 후보. 기존 revoked/hidden fence를 해제하지 않고 해당 카드의 현재 published snapshot 참조만 제거; 다른 카드·원본·rights·quota 유지. 원격 적용은 미승인/미실행.
+7 추가 경합 검토: 공개 prepare/publish와 비공개 RPC에 동일 owner transaction lock을 적용하여 진행 중 준비가 비공개 스냅샷 점검을 빠져나가지 못하게 한다. 기존 함수 본문은 wrapper 뒤 보존하고 직접 실행 권한은 제거한다.
+8–9 검증: 로컬 카드 public+동의→자동준비→게시/비공개→재게시, 실패/불확실 재시도·다른계정/원본 변경·원본 보존, RPC 소유권/다중 보드/옛 preview 무효화. build와 UI는 직렬 실행.
+10–14 안전/관측/복귀/위험/승인: 명시 저장 전 업로드/공개0; 준비 중 조건 변경·계정 변경 시 게시 중단. 개인 메모/토큰 로그0. 기존 공개한도/권리/정책 유지. rollback은 UI revert와 additive RPC 미사용; 제거된 공개 사본 자동복원 금지. test receipt guard --restore 성공, 실제 hosted loop는 이번 UI 수정 동안 중단. 카드 직접공개 방식을 사용자 승인으로 기록했으므로 재질문하지 않는다. 운영/새 DB 적용은 정확한 후보별 별도.
+15–17 진행/발견/완료: 아래 카드 공개 간소화 보고의 이번 unit69/고유UI13/SQL33/build32 PASS. hosted 후보 미반영, 운영 변경0.
+
+### 이번 카드 공개 간소화 보고 — 2026-10-11
+
+1. 읽은 기준: AGENTS·CODEX_START_HERE·확정 결정·PLANS와 기존 release-v2 00/01/02/03, 제품/UGC/변경관리 문서. 실제 publication controller/gateway/runtime/이미지 API·카드 UI·SQL 계약을 대조했다.
+2. 판단: user가 카드 공개/비공개와 동의 한 번을 명시 요청(CARD-PUBLIC-SIMPLE-01). 기존 hosted 화면의 제목 공란/이유 없는 disabled를 확인했지만 서버 게시 오류는 입증하지 않았다. 이 요청으로 운영 활성 승인을 추정하지 않는다.
+3. 계획: 위 기존 W08/W09/W10 간소화 절을 갱신했다. 새 계획판 없음.
+4. 변경: MemoryQuickSharing/simpleCardSharing으로 공개 선택→이미지 확인→동의1개→저장 연결. 제목/공개 준비/서버 preview는 자동 처리하며 원본/사본·rights·revision/hash·operation을 기존 구현에 위임. 일반 이미지 외 공식표지/기존 디자인은 다른 동의문 사용. 보드 폼은 빈 제목/선택 안내 추가. 공개상태는 실제 reader 기준으로 표시한다.
+5. DB: 20261011120000_simple_card_sharing.sql은 로컬 후보. owner-only 상태/비공개 RPC와 기존 prepare/publish를 감싸는 owner transaction lock. 한 카드의 모든 현재 보드 참조·pending preview를 제거하고 나머지 카드의 유효한 일반 공개 동의는 부분집합으로 유지. 원본·권리·quota·영구 철회/관리자 가림 보존. 원격 적용0. 복귀는 새 UI 사용 중지/소스 revert, additive 함수 보존; 철회 사본 자동복원 금지. 이전 moderator-reviewed legacy snapshot은 재검토가 필요할 수 있으므로 원격 적용 전 일반 사후검토 정책/legacy 존재 여부 확인.
+6. 이번 실행: 관련 node unit69 PASS(새 orchestration10 포함). Chromium12 PASS 후 새 이미지 케이스를 추가한 focused3 PASS(겹친2개 합산 제외, 고유13개). 실제 브라우저지만 auth/RPC/image API는 합성이다. SQL33 PASS(기존 signup15 + 이번 privacy/API16 + 독립2연결 경합2), 격리PG16 전 migration chain. npm run build32/exit0. PC·390px screenshot에서 넘침 없음 확인. SQL fixture의 deferred asset 제약 오류는 transaction 묶음으로 수정 후 PASS; 앱 데이터 실패로 기록하지 않는다. source·log hash는 기존 evidence의 simpleCardSharing에 기록.
+7. 안전/관측: 명시 동의·저장 전 upload/publish0, 메모·태그 제외, source 변경/불확실 요청/계정 변경 방어. 개인 데이터/토큰/analytics 추가0. test receipt guard는 이 턴 --restore로 false 원복; 기존6flags/revision/10개·40MiB·신고10 유지. 운영/master/배포0.
+8. 미완료/다음: 새 소스·새 migration의 hosted PASS 없음. 다음1개는 정확한 test 후보 승인 후 moemoa-test와 phone-test에만 반영하여 같은 A 합성 카드로 간소화 공개→새 익명 이미지 확인. A의 가입 정책 재수락을 다시 요구하지 않는다. B/home/follow/report/block/withdraw와 D03~D06의 실제 잔여는 보존.
+
+### 2026-10-11 간소화 후보 테스트 반영 승인 및 실행
+
+- 사용자 ‘테스트 DB·화면에 적용’으로 migration20261011120000(SHA256 e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259) 및 phone-test Git 배포 승인. 기존 W08/W09/W10만 계속하며 운영/master는 제외한다.
+- 순서: 고정 test 대상·후보 hash 확인 → 정책/기존 snapshot·함수/역할·원본 집계 preflight → transaction rollback 리허설 → version-controlled release로 적용 → 독립 readback. 설정·원본 집계 변화 시 rollback, 불확실 응답은 이력 확인 후 판단.
+- 배포: origin/codex/phone-test9970120이 현재HEAD1878867의 조상임을 fetch 뒤 확인. 검토 후보만 commit하고 phone-test를 fast-forward push; Git SHA/Ready/build-info/실제 카드 UI를 대조한다. 이전 로컬69/13/33/32 PASS와 새 hosted 결과를 분리한다.
+- 복귀: UI는 이전 테스트 소스의 정상 Git revert, additive RPC는 미사용/보존. 삭제·철회된 공개 snapshot 자동복원 없음. 테스트 임시 receipt guard는 검사 종료 시 false 복귀. 동의 당사자 조작은 대행하지 않는다.
+
+### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
+
+1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.
+2. 가정/미결: 기존10/10 완료와9970120 phone Preview는 과거 후보다. 새 로컬 수정의 실제 hosted 적용·현재 정책 A/B 직접 수락·공개 한 바퀴는 아직 미완료다. 사용자 직접 약관 수락을 대행하지 않는다.
+3. 계획: 본 문서 최상단17항의 W08/W09 마감. 새 W/계획판 없음.
+4. 변경: backend/client 두 allowlist와 HTTP/Chromium 회귀, 재현 runner, 고정 test DB 준비/원복 도구. 시작/결정/기존00~03 현재절·W/D/Q만 갱신하고 과거 로그 보존. 앱의 원본/사본/권리/review/operation 알고리즘 재작성0.
+5. 데이터: 신규 migration 작성0. 승인 후 기존20261010160000을 test에만 release MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01로 적용. 임시 guard=true 확인 후 false 원복, additive schema/history는 유지. 운영DB0. 앱 복귀는 두 파일의 소스 revert, test 재개/원복은 prepare-public-signup-test.py --enable-existing / --restore.
+6. 실행: node --test publicImages/publicationController/publicationGateway 59 PASS; run-public-signup-local.sh 격리SQL15 PASS; 실제 Chromium 모의API10개 고유흐름 PASS(카드 진입1개 보강 재검사는 중복 합산 안 함); npm run build32/exit0; Python AST·git diff --check PASS. 실제 명령/실패·재검사 구분은 [집계 근거](evidence/2026-10-11-first-public-connection.json). 새 반복 runner는 scripts/run-publication-closeout-e2e.mjs이며 build와 직렬 실행한다.
+7. 안전/관측: 로그·증거에 토큰/개인사진/비공개본문/DB dump0, analytics 추가0. signup 오류 거부 시 handler 후속 storage 동작0 및 같은operation 재시도 검사. 계정/약관 자동 생성0, 국가/권리/무료 정책·기존 test Public flags 불변.
+8. 남은 조건/다음1개: A 본인이 Chrome test 화면에서 현재10/10 정책 확인→기존 계정 Google 복귀. 그 후 승인된 test guard 재활성 아래 A 게시→익명 이미지→home→B follow/revisit→신고/차단/철회. 새 로컬 소스 Preview 반영과9970120의 결과는 별도 축으로 기록한다. D03/D04/D05 및 최종 후보 D06·운영/master 배포 승인 잔여는 축소하지 않는다.
+
+
 ## 2026-10-10 — 최신 기능 Git 운영 배포와 Pro 전체 검토 인계
 
 ### 1–3. 목적·승인·현재 증거

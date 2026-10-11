@@ -1,0 +1,368 @@
+{
+  "date": "2026-10-11",
+  "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
+  "work": "W08/W09 current public connection; W13 local recheck",
+  "package": {
+    "name": "MOEMOA_FIRST_PUBLIC_RELEASE_2026-10-11.zip",
+    "manifestFilesVerified": 11,
+    "historicalEvidencePreserved": true
+  },
+  "sourceFilesSha256": {
+    "src/features/memory/application/preparePublicImage.js": "d638f5ad826359e206c2b2116878f638bf5619327db6c6a3c60f1707f7f5a6c4",
+    "src/server/publicImages/supabaseImageBackend.js": "d013061ffee2479cd2209c78f30272a93c040cf9de0b1ffaac52222e9b88fb5a",
+    "tests/unit/publicImages.test.mjs": "03391513c4e3439ee921c02c12c4f3b7f71cd741dabd14f6083ce3eff601d079",
+    "tests/publication-ui.spec.ts": "3d55161b31dee6113d94b73d5b2fbde02a2024638a6fdd54534ef4c47509555d",
+    "scripts/run-publication-closeout-e2e.mjs": "3778e8603cf2d19a85fafcce653c754c3cb39d7b7cdf7407cc2f71085b1507f6",
+    "tools/identity/prepare-public-signup-test.py": "b676966197ece11ab1929b553c135c9102a0ea845337a889913a4e9e52d6db74"
+  },
+  "defect": {
+    "code": "PUBLIC_SIGNUP_REQUIRED / PUBLIC_SIGNUP_UNAVAILABLE lost at public-image backend and client allowlists",
+    "red": 4,
+    "fix": "Preserve only these safe codes; 403 and 503 respectively; use existing recovery UI",
+    "scope": "No source/representation/operation/quota/review/rights logic changed"
+  },
+  "local": {
+    "unit": {
+      "command": "node --test tests/unit/publicImages.test.mjs tests/unit/publicationController.test.mjs tests/unit/publicationGateway.test.mjs",
+      "passed": 59,
+      "failed": 0
+    },
+    "sql": {
+      "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh",
+      "passed": 15,
+      "scope": "Disposable socket-only PG16, not hosted"
+    },
+    "browser": {
+      "uniqueScenariosPassed": 10,
+      "runs": [
+        {
+          "command": "node .cache/run-public-closeout.mjs",
+          "passed": 8,
+          "failed": 2,
+          "reason": "New retry fixture initially omitted error responses; fixed"
+        },
+        {
+          "command": "node .cache/run-public-closeout-images.mjs",
+          "passed": 0,
+          "failed": 2,
+          "reason": "Build/dev shared cache module loading failure; serialized"
+        },
+        {
+          "command": "node .cache/run-public-closeout-images.mjs",
+          "passed": 2,
+          "failed": 0,
+          "log": ".cache/public-closeout-ui-images-serial.log"
+        },
+        {
+          "command": "node .cache/run-public-closeout-card.mjs",
+          "passed": 1,
+          "failed": 0,
+          "repeatOfExistingScenario": true
+        }
+      ],
+      "reproducibleCombinedRunner": "node scripts/run-publication-closeout-e2e.mjs",
+      "combinedRunnerNotRerun": true,
+      "scope": "Real Chromium UI; synthetic auth/RPC/image API, fresh anonymous context actually decoded 24px WebP; no actual Google"
+    },
+    "build": {
+      "command": "npm run build",
+      "exit": 0,
+      "pages": 32
+    }
+  },
+  "newBehaviorsVerified": [
+    "Card Manage → Sharing settings → Board → explicit selection → exact preview → publish → anonymous visitor → withdrawal",
+    "Original and private representation: signup required recovery link preserves next, unavailable policy blocks without recovery link, repeated preparation retains operation ID, consent remains explicit",
+    "Public board → author home; follow/list revisit; blocking removes follow and unblock does not auto-follow",
+    "Board/home receipt error retains withdrawal; follow receipt error retains blocking"
+  ],
+  "harnessFailures": [
+    "Initial dummy Supabase client INITIAL_SESSION null conflicted with synthetic mock auth; isolated runner uses blank Supabase credentials",
+    "Fixture insertion omission corrected; source bug had already been reproduced independently by four failing HTTP tests",
+    "Astro dev/build overlap caused module fetch errors; sequential rerun passed"
+  ],
+  "hosted": {
+    "target": "nmgkhknponvzcwliajyk",
+    "approval": "User explicitly approved test DB migration20261010160000 and temporary receipt guard in this session",
+    "rehearsal": {
+      "release": "MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01",
+      "target": "nmgkhknponvzcwliajyk",
+      "mode": "REHEARSED_ROLLED_BACK",
+      "migrations": [
+        {
+          "version": "20261010160000",
+          "sha256": "67ee3b3d1acd8867cc3bce669d91c6e6c3d799566e291fe2a0d855331463cb20"
+        }
+      ],
+      "checks": "{\"previousPublicSettings\": {\"singleton\": true, \"asset_limit\": 10, \"reads_enabled\": true, \"images_enabled\": true, \"writes_enabled\": true, \"follows_enabled\": true, \"policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"reports_enabled\": true, \"asset_bytes_limit\": 41943040, \"minihomes_enabled\": true, \"report_daily_limit\": 10, \"content_policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"general_publication_policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\"}}\n{\"limits\": [10, 41943040, 10], \"policyRevision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"signupDeclarationRequired\": true}"
+    },
+    "applied": {
+      "release": "MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01",
+      "target": "nmgkhknponvzcwliajyk",
+      "mode": "APPLIED_TEST_RECEIPT_GUARD",
+      "migrations": [
+        {
+          "version": "20261010160000",
+          "sha256": "67ee3b3d1acd8867cc3bce669d91c6e6c3d799566e291fe2a0d855331463cb20"
+        }
+      ],
+      "checks": "{\"previousPublicSettings\": {\"singleton\": true, \"asset_limit\": 10, \"reads_enabled\": true, \"images_enabled\": true, \"writes_enabled\": true, \"follows_enabled\": true, \"policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"reports_enabled\": true, \"asset_bytes_limit\": 41943040, \"minihomes_enabled\": true, \"report_daily_limit\": 10, \"content_policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"general_publication_policy_revision\": \"TEST_ONLY_PHONE_WEB_20260927_01\"}}\n{\"limits\": [10, 41943040, 10], \"policyRevision\": \"TEST_ONLY_PHONE_WEB_20260927_01\", \"signupDeclarationRequired\": true}"
+    },
+    "independentReadback": {
+      "at": "2026-10-11T03:17:08.576971+00:00",
+      "signupGuardInstalled": true,
+      "signupDeclarationRequired": true,
+      "writerHash": "6ccbd32a8d13cc08631a0f7edd83b45c",
+      "activePolicyReceipts": 0,
+      "moderators": 1
+    },
+    "restored": {
+      "restored": true,
+      "publicSettings": {
+        "singleton": true,
+        "asset_limit": 10,
+        "reads_enabled": true,
+        "images_enabled": true,
+        "writes_enabled": true,
+        "follows_enabled": true,
+        "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "reports_enabled": true,
+        "asset_bytes_limit": 41943040,
+        "minihomes_enabled": true,
+        "report_daily_limit": 10,
+        "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "signup_declaration_required": false,
+        "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+      }
+    },
+    "userHandoff": {
+      "browser": "Chrome",
+      "url": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app/auth/start/?next=%2Fboards%2F",
+      "policy": "simple-signup-2026-10-10-test",
+      "terms": "terms-2026-10-10-test",
+      "privacy": "privacy-2026-10-10-test",
+      "actualAcceptance": "USER_CONFIRMED_A; latest-policy receipt count 1 independently read",
+      "delegatedAcceptance": false,
+      "previewBranchCommit": "9970120",
+      "newLocalFixDeployed": false
+    },
+    "actualPublishLoop": "PAUSED_AFTER_USER_REQUESTED_SIMPLE_CARD_VISIBILITY; no completed hosted publication",
+    "currentRun": {
+      "at": "2026-10-11T03:40:29.975Z",
+      "previewSource": "9970120",
+      "localErrorMappingFixDeployed": false,
+      "guardEnabled": {
+        "publicSettings": {
+          "singleton": true,
+          "asset_limit": 10,
+          "reads_enabled": true,
+          "images_enabled": true,
+          "writes_enabled": true,
+          "follows_enabled": true,
+          "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "reports_enabled": true,
+          "asset_bytes_limit": 41943040,
+          "minihomes_enabled": true,
+          "report_daily_limit": 10,
+          "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "signup_declaration_required": true,
+          "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+        },
+        "signupDeclarationRequired": true
+      },
+      "cardId": "038b2ec0-6082-4c14-a457-9c4c9ddd41b9",
+      "boardId": "c0dba00b-d0ea-4a11-aabc-b60242a3a866",
+      "fixture": {
+        "type": "generated solid-color PNG",
+        "width": 24,
+        "height": 30,
+        "personalData": false
+      },
+      "passed": [
+        "A existing Google session after user policy confirmation; current receipts 0 to 1",
+        "Synthetic card saved to account; archive count 3 to 4",
+        "Card Manage > Sharing settings > Board sharing > new Board > explicit card selection",
+        "Synced private representation selected and decoded; public preparation READY",
+        "Actual hosted visitor preview contains only selected synthetic card; optional reflection excluded"
+      ],
+      "pending": [
+        "User final publish acknowledgement",
+        "Fresh anonymous image read",
+        "Public home and B follow/revisit",
+        "Report/block/operator/withdraw"
+      ],
+      "screenshot": ".cache/public-closeout-hosted-preview.png"
+    },
+    "latestState": {
+      "guardRestored": true,
+      "signupDeclarationRequired": false,
+      "existingPublicFlagsPolicyQuotasUnchanged": true,
+      "newMigrationApplied": false,
+      "newUiDeployed": false,
+      "reason": "User reported old flow not working and explicitly requested Public/Private plus one consent; --restore succeeded during this turn"
+    }
+  },
+  "production": {
+    "changes": 0,
+    "masterPush": false,
+    "deployment": false
+  },
+  "exclusions": [
+    "Android",
+    "Extra Safari device tests",
+    "New identity verification",
+    "Paid changes",
+    "Automated user terms acceptance",
+    "Production public enablement"
+  ],
+  "nextAction": "Approve exact test-only migration20261011120000 and phone-test source candidate, then publish the existing synthetic A card using simplified visibility and verify a fresh anonymous image read.",
+  "simpleCardSharing": {
+    "decision": "CARD-PUBLIC-SIMPLE-01",
+    "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
+    "localUncommitted": true,
+    "sourceFilesSha256": {
+      "src/features/memory/components/MemoryQuickSharing.jsx": "f65bd54779eacf87565d21db15893aac9cd1859bae68fb82b642b113b99a893a",
+      "src/features/memory/application/simpleCardSharing.js": "21d876d94a5ddc9c7c3e77b99b1a3e35b6581a1b6ee56c9b81d6ad025705f487",
+      "src/features/memory/components/MemorySharingSettings.jsx": "c40b31bec0ddafa7cb7a2c9bb5bb51dff378784e70156cc829d27857382ba212",
+      "src/features/memory/components/MemoryPublicationPanel.jsx": "b07f954c74d97c42d9fd3fbd414a67aad682f5647ea090dcc2bbf4a46c9e1cfe",
+      "src/features/memory/components/memory-publication.css": "d0f2d8a7dc88e3050391c06cc1358ba78c20c3c0b42250ba537bfc2c6a8a2649",
+      "src/features/memory/application/createPublicationController.js": "31b503ad73fc991cdc85b250ade8a79a08c27ab4e53c8ab03ed46462d404e103",
+      "src/features/memory/adapters/supabase/SupabasePublicationGateway.js": "15badc9463f47f5db2c5e8c3065ac8b7b777cea64c5a8d439f916255ea46c7ec",
+      "src/features/memory/runtime/platformPublication.js": "a9d4ef21f7d77b4eb0787a563ac8ec1669c4b9ed0c00dd182ff1e769f4fff442",
+      "supabase/migrations/20261011120000_simple_card_sharing.sql": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259",
+      "tests/unit/simpleCardSharing.test.mjs": "755468d3cbf65cbb9a6b90f31607137726b1a1127e82d5205fbc5a6c470a0bc7",
+      "tests/publication-ui.spec.ts": "1020d940ff73ff8733c89d8fd3cce2cdf4dce368f36b63c86fa6bd9509cf1de5",
+      "tools/publication-boundary/simple-card-sharing-contract.sql": "b7fcf92d9bb7fe8ef1bb45c77dbcaadea14e6db430b68696375623d23c035270",
+      "tools/identity/run-public-signup-local.sh": "40f8a67911a3257a7ca8ce65aeb0970161d714091450c757f71a0d52d3581b2f",
+      "scripts/run-publication-closeout-e2e.mjs": "0835316a7c5b45ca7d0820339738fc60891a5f1c5953de8d031acf82d95946ed"
+    },
+    "observedOldUi": "Empty public title left preview disabled; no server publish failure proven",
+    "tests": {
+      "unit": {
+        "command": "node --test tests/unit/simpleCardSharing.test.mjs tests/unit/publicationController.test.mjs tests/unit/publicationGateway.test.mjs tests/unit/publicImages.test.mjs",
+        "passed": 69,
+        "failed": 0,
+        "newScenarios": 10
+      },
+      "ui": {
+        "command": "node scripts/run-publication-closeout-e2e.mjs",
+        "passed": 12,
+        "failed": 0,
+        "followupCommand": "node scripts/run-publication-closeout-e2e.mjs \"simple card visibility\"",
+        "followupPassed": 3,
+        "uniqueTotal": 13,
+        "scope": "Real Chromium with synthetic auth/RPC/image endpoints; desktop and 390px; one consent save, private, fresh-consent republish; private rendition POST has ID/hash and no original body"
+      },
+      "sql": {
+        "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh",
+        "passed": 33,
+        "priorSignupAssertions": 15,
+        "newPrivacyApiAssertions": 16,
+        "independentConnectionLocks": 2,
+        "scope": "Disposable PG16 all current migrations. No hosted changes."
+      },
+      "build": {
+        "command": "npm run build",
+        "exit": 0,
+        "pages": 32
+      }
+    },
+    "logs": {
+      ".cache/simple-sharing-unit.log": "3d7be351abe885dbea6baa35c69cc15920f17d2ea733db72d9c9e612b11ae1b4",
+      ".cache/simple-sharing-e2e.log": "00096d02c719cbf61dbb5370d283936f1277c91abc1477f667c462ca72aca6f8",
+      ".cache/simple-sharing-e2e-focused.log": "54bb8022f4b36e4ad542d8adc8d399d4fba0cd169c091fc0c6fc7955dcfc41f5",
+      ".cache/simple-sharing-sql.log": "305032cd9a02e8803e68546e507d6c5c481f312955bce7e6c39bfce0e68f35e1",
+      ".cache/simple-sharing-build.log": "ad27c66dcfa0c0ca87a4be723c0d76411a96511ea90b27328e03eb90d0793531"
+    },
+    "screenshots": [
+      ".cache/simple-card-visibility-desktop.png",
+      ".cache/simple-card-visibility-mobile.png",
+      ".cache/simple-card-visibility-image.png"
+    ],
+    "database": {
+      "candidate": "20261011120000",
+      "hostedApplied": false,
+      "productionApplied": false,
+      "rollback": "Revert UI; additive RPC/wrappers may remain unused. Do not restore withdrawn snapshots automatically.",
+      "preflight": "Verify general postmoderation policy and legacy reviewed snapshots; legacy non-general-consent Boards may need fresh review after subset removal."
+    },
+    "boundaries": [
+      "One-card placement reuses a deterministic private Board; appears in Board management",
+      "No memo/tag fields published",
+      "Private removes current placements, does not revoke source rights or retire original",
+      "Existing operation IDs retained on ambiguous publication; fresh source requires new consent",
+      "No production deployment or policy activation"
+    ],
+    "firstFixtureFailure": "Deferred complete-card asset constraint required transaction around synthetic card+asset inserts; fixed and rerun"
+  },
+  "simpleCardSharingTestRelease": {
+    "approval": "테스트 DB·화면에 적용",
+    "approvedMigrationSha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259",
+    "target": "nmgkhknponvzcwliajyk",
+    "branch": "codex/phone-test",
+    "releaseId": "MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01",
+    "rehearsal": {
+      "target": "nmgkhknponvzcwliajyk",
+      "release": "MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01",
+      "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259",
+      "mode": "REHEARSED_ROLLED_BACK",
+      "checks": [
+        {
+          "counts": {
+            "public.memory_cards": 23,
+            "public.memory_boards": 11,
+            "private.memory_moderators": 1,
+            "public.memory_board_cards": 18,
+            "private.memory_public_cards": 11,
+            "private.memory_publications": 7,
+            "public.memory_visual_assets": 25,
+            "private.memory_public_assets": 16,
+            "private.simple_signup_policy": 1,
+            "private.memory_resource_usage": 0,
+            "private.memory_public_image_rights": 10,
+            "private.memory_publication_settings": 1,
+            "private.memory_representation_public_rights": 6
+          },
+          "preservedTables": 13
+        },
+        {
+          "statusRpc": true,
+          "privacyRpc": true,
+          "prepareArgs": [
+            "p_board_id",
+            "p_expected_revision",
+            "p_selection"
+          ],
+          "publishArgs": [
+            "p_id",
+            "p_expected_revision",
+            "p_review_hash",
+            "p_policy_revision",
+            "p_operation_id"
+          ],
+          "publicSettings": {
+            "singleton": true,
+            "asset_limit": 10,
+            "reads_enabled": true,
+            "images_enabled": true,
+            "writes_enabled": true,
+            "follows_enabled": true,
+            "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "reports_enabled": true,
+            "asset_bytes_limit": 41943040,
+            "minihomes_enabled": true,
+            "report_daily_limit": 10,
+            "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signup_declaration_required": false,
+            "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+          },
+          "releaseRecorded": true,
+          "migrationPresent": true,
+          "legacyPublishedSnapshots": 0
+        }
+      ]
+    },
+    "status": "approved-rehearsed-not-yet-applied",
+    "productionChanged": false
+  }
+}

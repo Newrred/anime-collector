@@ -3,7 +3,7 @@ import { PublicImageError } from "./processImage.js";
 import { authenticateVerifiedSession } from '../identity/authenticateIdentitySession.js';
 
 export const IMAGE_BUCKET = "memory-public-derivatives";
-const SAFE = new Set(["AUTH_REQUIRED","PUBLICATION_DISABLED","PUBLIC_IMAGE_DISABLED","CONSENT_MISMATCH",
+const SAFE = new Set(["PUBLIC_SIGNUP_REQUIRED","PUBLIC_SIGNUP_UNAVAILABLE","AUTH_REQUIRED","PUBLICATION_DISABLED","PUBLIC_IMAGE_DISABLED","CONSENT_MISMATCH",
   "ELIGIBILITY_REQUIRED","ELIGIBILITY_EXPIRED","ELIGIBILITY_POLICY_CHANGED","ELIGIBILITY_POLICY_UNAVAILABLE",
   "PUBLICATION_RESTRICTED","PUBLIC_VISUAL_NOT_READY","IMAGE_RIGHTS_REQUIRED","OPERATION_MISMATCH","SOURCE_IMAGE_MISMATCH",
   "ASSET_OPERATION_UNAVAILABLE","IMAGE_QUOTA_EXCEEDED","ASSET_IN_USE","NOT_FOUND","RATE_LIMITED",
@@ -13,8 +13,8 @@ export async function rpc(client, name, args) {
   if (error) {
     const code=SAFE.has(error.message) ? error.message : "IMAGE_SERVICE_FAILED";
     const status=code==='RATE_LIMITED' ? 429
-      : ['MODERATOR_REQUIRED','ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code) ? 403
-      : code==='ELIGIBILITY_POLICY_UNAVAILABLE' ? 503 : 409;
+      : ['PUBLIC_SIGNUP_REQUIRED','MODERATOR_REQUIRED','ELIGIBILITY_REQUIRED','ELIGIBILITY_EXPIRED'].includes(code) ? 403
+      : ['PUBLIC_SIGNUP_UNAVAILABLE','ELIGIBILITY_POLICY_UNAVAILABLE'].includes(code) ? 503 : 409;
     throw new PublicImageError(code,status);
   }
   return data;

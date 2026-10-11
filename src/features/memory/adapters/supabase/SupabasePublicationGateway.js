@@ -69,6 +69,9 @@ export class SupabasePublicationGateway {
     return this.request("retire_memory_card_publications", { p_card_id: cardId }, options);
   }
 
+  cardSharing(cardId, options) { return this.request("get_memory_card_sharing", { p_card_id: cardId }, options); }
+  makeCardPrivate(cardId, options) { return this.request("make_memory_card_private", { p_card_id: cardId }, options); }
+
   read(id, options) {
     return this.request("read_memory_publication", { p_id: id }, options);
   }

@@ -1,5 +1,30 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 첫 Public 마감 계약 보충
+
+- CARD-PUBLIC-SIMPLE-01: 한 카드 공개는 공개/비공개 선택+동의1개+저장. 제목/이미지 외 비공개 감상·태그는 제외하고, 내부 prepare→정확한 projection/실제 이미지 확인→동일 review 게시로 기존 경계를 유지한다. 비공개는 모든 현재 공개 위치에서 해당 카드만 내리며 영구 retirement와 구분한다. 신규 동의 재게시 가능, 관리자 가림/영구삭제는 해제하지 않는다. 동시 prepare/publish는 owner lock으로 비공개와 직렬화. 일반 사후검토의 유효한 기존 동의는 카드 제거 부분집합에만 승계, moderator 판정 기록은 변경하지 않는다. 새 기능의 로컬 검증은 hosted/운영 PASS가 아니다.
+
+- C02~C04/Q08~Q11: 현재 계정의 명시 선택→원본 또는 정확한 ID/hash/sourceVersion의 private 사본→실제 preview→동의 게시. 전체 private bundle 전송 금지. revision/reviewHash/policyRevision/operationId 유지. 옛 preview·미준비 이미지 게시 거부. 불확실 완료는 같은 operation 재시도, quota는 확정 정리 뒤 반환. signup 오류는 같은 계정의 기존 가입 화면으로 복귀하며 임의 영수증 생성 금지.
+- 공개 네 기능 필수: 보드의 선택 snapshot, home의 선택 공개보드, 명시 follow·내 목록 재방문·해제, 새 익명 reader의 실제 이미지 decode. DOM/img태그·작성자blob·HTTP200만으로 PASS 아님.
+- C05/Q12: 보드 철회·카드 전체 철회·카드 삭제·home 철회·moderator 가림의 범위를 구분. 성공 이후 새 요청의 이미지/전시 비노출·private 원본 보존. 이미 다운로드된 자료 회수를 보장하지 않는다. 운영자 복원으로 사용자 철회/삭제 부활 금지.
+- C06/C07/W11~W13: 보드→작성자home→B의 로그인/가입 내부복귀→명시follow→내 목록 재방문→해제. 로그인·차단해제 후 자동follow 금지. 차단이 익명 공개까지 절대 숨김이라고 안내하지 않는다.
+- C08/W14: 실제 moderation 역할과 service admin 구분. 신고→가림(본문/이미지/home)→통지→이의→감사, 신고자 비노출. 일반 사후검토 원칙 유지.
+- 실제 hosted 한 바퀴: A/V/B/O, 합성카드3·보드2·카드1 중복참조, 공개/비공개 표식. A 저장/게시→새익명decode→home→B 복귀/follow/목록→신고/차단/O조치→철회/정리. 유효 기존 근거 재사용. 새 계정·약관 수락·개인 사진 선택은 당사자만.
+- source/origin/DB release/config·정책 fingerprint/역할·실물여부/명령·최초실패·실제결과·미확인 기록. 토큰/개인메모/개인사진 사본 제외. 로컬 모의API·Google과 hosted/실기기/운영은 별도. Android·기존 제외 Safari 추가검사 부활 금지.
+
+### D03~D06 마감 조건
+
+| 항목 | 남은 조건 |
+|---|---|
+| D03/W15 | 무료 유지. 실제 저장여유·main/thumb 추가bytes·방문전송량·예약/실패/정리대기·실제경보. 이전20MiB 보호값은 수용규모 보증 아님 |
+| D04 국가 | KR14/US13/TH13 비공개가입 승인≠Public 승인. PH/EU/EEA/UK/CH 목표 임의삭제 금지. 최초Public 국가집합/목적별 조건·실제대표자·고지 잔여만 마감. 전원인증/보호자메일/유료문의 부활 금지 |
+| D04 이미지 | SELF_DECLARED/TRUSTED 구분. 공식표지 공개허용범위, 캡처/타인팬아트 별도gate, 성인제외. 합성PASS≠권리PASS |
+| D05/W17 | 과거4308파일복호화 재사용. 독립키·격리DB/RLS/이미지참조·decode·최신삭제/철회fence·RPO/RTO/회전 인수 잔여. Public off복구, 최신안전이력 없으면 재개금지 |
+| D06/W20 | 같은source/DB/정책/config·네기능·hosted역할/이미지/철회·국가/권리승인·운영diff/rollback. 기존후보기의 FIRST_PUBLIC_RELEASE 필수증거 검사 연결, mock-only/Public-off 완료 거부. Android N/A는 D02 |
+
+최종 FIRST_PUBLIC_RELEASE_DONE은 운영가입/저장/이미지/home/follow재방문·철회·operator/경보/정리/복구 인수와 동일 Git 배포 SHA까지 포함한다. P0/P1 미해결 출시금지. P2·D+1/첫주관찰·신규기능은 기존후속에 분리. 이 절은 계약이며 실행PASS가 아니다.
+
+
 ## 2026-10-10 C02/W06 — 새 문서 수락·자기 기록·탈퇴의 구현 경계
 
 - 새 `simple-signup-2026-10-10-test` + `terms-2026-10-10-test` + `privacy-2026-10-10-test` 묶음은 Preview와 명시 test 허용에서만 가입에 사용한다.10/9 원문·별칭·기록은 그대로이며 기존 기록을 PH 민감정보 동의로 재해석하지 않는다. 새 체크1개는 PH에서 정확한 연령 처리 고지와 약관을 함께 표시하고, 추가 필드/보호자 인증은 없다.

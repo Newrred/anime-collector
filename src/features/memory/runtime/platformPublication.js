@@ -31,7 +31,7 @@ export function getPublicationServices() {
     enabled: publicationUiEnabled() && Boolean(client),
     policyRevision: test?.policyRevision || env.PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION || "",
     reader: client ? new SupabasePublicationGateway(client) : null,
-    gateway: Object.fromEntries(["get", "prepare", "publish", "revoke", "revokeCard", "retireCard", "getHome", "listHomeBoards", "prepareHome", "publishHome", "revokeHome", "relationship", "setRelationship", "relationships", "report", "safety", "appeal", "pendingContent", "openContentReview", "contentReview", "moderationCases", "resolveContentReview"].map((method) => [method,
+    gateway: Object.fromEntries(["cardSharing", "makeCardPrivate", "get", "prepare", "publish", "revoke", "revokeCard", "retireCard", "getHome", "listHomeBoards", "prepareHome", "publishHome", "revokeHome", "relationship", "setRelationship", "relationships", "report", "safety", "appeal", "pendingContent", "openContentReview", "contentReview", "moderationCases", "resolveContentReview"].map((method) => [method,
       async (...args) => (await getWriter())[method](...args)])),
     async getSession() {
       const { getAuthSession } = await import("../../../repositories/authRepo.js");

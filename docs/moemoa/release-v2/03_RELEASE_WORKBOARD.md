@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 현재 — W08/W09/W10 카드 공개 간소화:** 사용자 요청에 따라 공개/비공개+동의1개+저장으로 로컬 구현. 이번 unit69·고유 모의API Chromium13·격리SQL33·build32 PASS. 합성 이미지의 자동 사본 준비→게시→비공개→재게시, 다중 보드/옛 preview/동시 게시 차단 확인. A 가입 확인·hosted9970120 이미지준비/preview는 과거 실행 근거이며 최종 게시 미완료. test guard=false 원복, 운영/master 변경0. 새 migration20261011120000와 새 UI는 원격 미적용. 다음1개: 정확한 test 후보 승인 후 반영→동일 A 합성 카드의 간편 게시/새 익명 열람. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
+
+
 > **2026-10-10 최신 완료 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력 포함 f428c60의 전체 CI·master Git·Vercel Ready·실제 www 소스/화면 확인 완료. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
 
 > **2026-10-10 최신 로컬 완료 — 계정 메뉴·데스크톱 이미지 입력:** 계정 및 데이터 단일 진입, 파일 드롭·Ctrl+V/⌘V 추가/교체, 문구 정리와 계정 전환/정리 경합 방어. unit585·Chromium51·build32 PASS, PC·390/320px 확인. [8항 보고](2026-10-10-account-menu-desktop-images.md). 운영 미배포·DB 미변경·OS 실기기 캡처 미검증. 아래 가입 운영 적용과 이번 로컬 작업을 구분한다.
@@ -305,6 +308,18 @@
 </details>
 
 ## 현재 위치
+
+| 항목 | 현재 상태 — 2026-10-11 |
+|---|---|
+| 목표 | 공개 보드·미니홈·팔로우·공개 이미지 포함 첫 정식 Web 출시 |
+| 기준 | HEAD1878867·원격동일. 과거 완료근거 보존 |
+| 현재 | W08/W09 공개선택·이미지준비·preview·게시·가입오류복귀 |
+| 운영 | 과거 KR14/US13/TH13 비공개가입 활성·Public off, 이번변경0 |
+| 잔여 | D01 A 수락 완료·guard 재활성·실제 사본/preview PASS·최종 게시 대기, D03 실측/경보, D04 Public국가/이미지, D05 복구, D06 exact후보 |
+| 후속 | W10·W11~W13→W14~W17→W18~W20. 번호/단일작업판 유지 |
+| 다음1개 | 합성 보드 최종 게시 확인 후 새 익명 실제 이미지 열람 |
+
+### 이전 현재 위치 — 2026-10-10 운영 인계
 
 | 항목 | 현재 상태 — 2026-10-10 KR/US/TH 첫 활성 |
 |---|---|
@@ -693,12 +708,12 @@
 | W05 | M1 | 계정 동기화 완료·재개 계약 | C02 | W03 로컬 검증 | DONE | 로컬 sync 계약 구현·unit269/browser26/build PASS; 실제 A/B·기기 및 서버 한도는 W06/W15/W19 |
 | W06 | M1 | 계정 격리·승격·private 이미지 연동 | C01,C02,C10 | W04, W05 | DOING | 실제 private HTTP/Auth/Storage 및 원본 없는 두 제품 UI origin Archive/detail/Board 왕복 PASS. 기존 로컬 재시도/계정격리 근거 보존. 10/7 새 카드 classification test HTTP12 및 prod rollback-only RPC/선택 migration 적용 PASS. 새 tags 저장/pull/conflict/승격/구client 보존·익명/owner 경계 확인. 실휴대폰↔PC·교체 quota·private bytes 복구·최종 환경 만료/지원 조합 잔여. 기본 A/B·키·72table 복원 반복 금지 |
 | W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | VERIFY | hosted 실제 A 게시·익명 읽기 및 소유자 RPC 철회 PASS. 운영 Public은 off. 전체 역할·갱신/기존 캐시/기기 조합은 W19 잔여 |
-| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
-| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
-| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
+| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 10/11 간편 카드 공개·사본 자동준비 unit69/고유UI13/SQL33/build32 로컬 PASS. A 수락 확보; 새 UI/migration hosted 반영 잔여. 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
+| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 10/11 카드 공개/비공개+동의1개 구현/모의API PASS, 현재 새 hosted 후보는 미반영. 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
+| W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 10/11 reversible private·다중 보드·원본/다른 카드 보존·기존 preview 무효화·owner lock SQL18 신규 PASS. 기존 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
 | W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
-| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
+| W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | 10/11 현재 보드→home·팔로우/재방문·가입오류복귀 모의API UI PASS. 실제 Google 복귀/새 후보 hosted 잔여. R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
 | W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님; 10/10 기존 계정 가입 확인 연결 후보 SQL15/Chromium4 PASS, hosted 미적용 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 10/10 조회 전용 재확인: 최신 예약 정리 성공·기한 경과 사진0. 물리100MB·계정50MB·월전역500MB 유지.50건 batch 포화 가능성 경보 추가·관련 unit32 PASS(운영 미반영). 이전80MB/월400MB 경보 근거 보존. 실제 임계 알림 수신·공개 자원정책/예산 결속은 D03 잔여. 이전 quota/HTTP 근거 보존 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
@@ -714,6 +729,34 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
+기준: HEAD1878867 + 현재 미커밋 diff, 기존 단일 작업판
+흐름: 카드 공개/비공개→표시 내용 동의1개→저장. 서버 준비/preview/hash 확인은 내부에서 수행
+이번: unit69·고유 모의API Chromium13·SQL33·build32 PASS. 원본/다른 카드/권리 보존, 모호한 완료 같은 operation, owner별 동시성 확인
+원격: A 현재 test 가입 receipt1, 이전9970120 합성 사본 준비/preview PASS. 게시 미완료. guard=false 원복; 공개6flags/revision/한도 불변
+후보: migration20261011120000 + MemoryQuickSharing/simpleCardSharing·기존 controller/gateway/UI 보완. 원격 적용·운영/master/배포0
+남은조건: 새후보 hosted 공개·익명 이미지, A/V/B/home/follow/신고/차단/철회 및 기존 D03~D06
+다음1개: 정확한 test 후보 승인 후 moemoa-test/phone-test 반영→같은 A 합성 카드의 간편 게시/익명 열람
+```
+
+<details><summary>이전 카드 — A hosted preview 후 간소화 요청 전</summary>
+
+```text
+W/M: W08/W09 · M2 첫 Public 현행 연결 (W06/W07, C02~C04, Q08~Q11)
+기준: HEAD1878867 / FIRST_PUBLIC_RELEASE_2026-10-11 / 최신 원격 동일
+목표: 현재 계정/카드/보드→명시선택→원본/사본준비→preview→게시·가입오류복귀
+발견/수정: 이미지 backend/client의 PUBLIC_SIGNUP_REQUIRED/UNAVAILABLE 매핑 누락 재현4 FAIL→59 unit PASS. 원본/사본에 같은 복귀 안내 적용
+검증: unit59·Chromium10개(8+수정 후 이미지2)·격리SQL15·build32 PASS. 카드 관리→보드 선택을 보강한 기존1개도 재검사 PASS. 과거hosted는 이번PASS 아님
+원격: test guard migration 적용 후 원복 이력 보존. A 직접 수락·receipt1 확인 후 승인된 guard=true 재활성. PHONE_WEB_20260927_01·공개6flags/한도/operator 유지. 실제 합성 카드1/보드1·동기화 사본 공개 준비 READY·preview PASS. 운영/master 변경0
+남은조건: 현재후보 hosted 이미지/게시/철회, W11~W13 A/V/B 완주
+다음1개: 사용자 최종 공개 확인→게시 후 새 익명 이미지 열람. guard=true는 승인된 실검증 동안 유지, 종료/취소 시 --restore. 실제 Preview9970120과 새 로컬 수정 미배포를 구분
+```
+
+</details>
+
+<details><summary>이전 작업 카드 — 2026-10-10 Pro 인계 완료</summary>
+
+```text
 ID / M: 최신35d88ab 기능 운영 반영·Pro 전체 검토 인계 (사용자 명시 요청 2026-10-10)
 범위: 계정/데이터 메뉴 통합, 이미지 drop/paste와 교체, 기존 가입·관리자·조사 문서 전체 Git 보존.
 검증: 기존 로컬 unit585/Chromium51/build32, 독립unit18 PASS. 새 desktop runner를 CI에 추가.
@@ -723,6 +766,8 @@ ID / M: 최신35d88ab 기능 운영 반영·Pro 전체 검토 인계 (사용자 
 다음: Pro 인덱스에서 전체 검토. 후속 문서 커밋의 master/live SHA도 대조하며 새 기능·정책을 추가하지 않음.
 미검증/후속: OS 캡처 실기기, 새 운영 Google 가입, PH/EU/UK/CH 및 Public·D05 잔여. 기존 완료와 혼합하지 않는다.
 ```
+
+</details>
 
 ### 이전 작업 카드 — 3개국 가입 활성 직후
 
@@ -880,7 +925,7 @@ NA 이유:
 
 | ID | 필요한 결정 | 상태 | 현재 기본안/대기 중 행동 | 마지막 필요 시점 | 실제 승인/증거 |
 |---|---|---|---|---|---|
-| D01 | 격리 환경·테스트 계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_CANDIDATE_APPLIED_RESTORED | 기본 A/B·키·기존 공개 증거 보존/재요청 금지.10/7 새classification test HTTP12·test/prod 선택 적용만 추가; 기존 테스트 운영 설정 그대로 유지 | 사용자 승인 후 test-general-public-20260927-01의 SQL3개 적용/실제backend28+정리4 PASS. flags off·정책/기존home복원·운영자0·생성객체/예약0 확인. 제품UI/실폰은 별도 잔여 | general-public-hosted JSON / 운영 승인 아님 |
+| D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 이 턴 guard=false 원복. 신규20261011120000와 간소화 UI 원격 미적용, 정확한 test 후보 승인 필요. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
@@ -927,11 +972,11 @@ NA 이유:
 | Q08 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 합성1카드 명시 선택·미동의 기본 필드 제외 게시 | public-flow JSON + 기존 publication-ui/SQL | private 다수 중 미선택 자료 전체 비노출의 hosted 비교 |
 | Q09 | HOSTED PARTIAL PASS | 실제 Storage+loopback 제품 handler, 새 익명 origin | 9/25 public-flow JSON: WebP16x16/60bytes·no-store·철회404 | 후보 Vercel/CDN·복수 위치/기기 (제품 UI 철회는 w19-withdrawal-ui JSON PASS) |
 | Q10 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 private HTTP·제품 UI 두 origin 왕복, 작은 교체 quota 거부→정리→동일operation 회복, 사본별 권리 공개 준비/게시·익명 열람 검증. 이번 UI 철회는 도구 제한으로 미검증 | 9/26 private-image-hosted-ui / private-replacement-quota / private-cleanup-hosted / private-source-public-ui JSON | 최종 후보/실휴대폰·새 연령 경계는 미검증, 운영 활성 승인 잔여 |
-| Q11 | LOCAL PASS / HOSTED PARTIAL PASS | 원본 title/version 변경 후 PREVIEW_CHANGED; 새 prepare 후 구 revision CONFLICT; 실패 전후 anon hash 동일; 최신 검토만 게시 성공; 동시 동일 operation revision1회/서로 다른 operation 하나 충돌; policy 변경 CONSENT_MISMATCH/새 동의 성공; 이미지 권리 철회 게시거부/이미지404 | w19-preview-consent / w19-concurrent-publish / w19-policy-consent / w19-rights-quota JSON + 기존 SQL races | 최종 후보 결속·진단 RPC와 제품 UI 조합 구분 |
+| Q11 | LOCAL PASS / HOSTED PARTIAL PASS | 10/11 모의API 동일operation 재시도·stale review 새 동의 PASS. 과거 hosted: 원본 title/version 변경 후 PREVIEW_CHANGED; 새 prepare 후 구 revision CONFLICT; 실패 전후 anon hash 동일; 최신 검토만 게시 성공; 동시 동일 operation revision1회/서로 다른 operation 하나 충돌; policy 변경 CONSENT_MISMATCH/새 동의 성공; 이미지 권리 철회 게시거부/이미지404 | w19-preview-consent / w19-concurrent-publish / w19-policy-consent / w19-rights-quota JSON + 기존 SQL races | 최종 후보 결속·진단 RPC와 제품 UI 조합 구분 |
 | Q12 | LOCAL PASS / HOSTED PARTIAL PASS | 보드 철회→home 전시0, 동일 카드 보드2개 전시·정리·원본 보존 | withdrawal-ui/minihome-edit JSON | 다중 공개 위치 중 하나/전체 철회의 hosted 경계 비교 |
 | Q13 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 Storage+local handler 직접 URL200→404/no-store, 익명 UI unavailable | withdrawal-ui/public-flow JSON | 정확한 후보 CDN/SW·기존 캐시·철회 지연 |
 | Q14 | LOCAL PASS / HOSTED 일부 | stale local 복원+최신 fence2회, hosted 삭제 비부활 일부 | local-stale-recovery JSON + 실제 삭제 로그 | 운영 최신 journal 사본/복원 인계, 실제 관리 차단·기존 캐시 삭제 전파 |
-| Q15 | LOCAL PASS / HOSTED PARTIAL PASS | 대표 선택 저장·B,A→A,B 정렬·소개 재게시·익명 이미지2개 decode PASS | w19-minihome-edit JSON | 대표 제외·제품 home 비공개/보드2 유지 PASS; 최종 후보 지원 Web/기기 조합 잔여 |
+| Q15 | LOCAL PASS / HOSTED PARTIAL PASS | 10/11 모의API home 비공개·보드 유지 PASS. 과거 hosted: 대표 선택 저장·B,A→A,B 정렬·소개 재게시·익명 이미지2개 decode PASS | w19-minihome-edit JSON | 대표 제외·제품 home 비공개/보드2 유지 PASS; 최종 후보 지원 Web/기기 조합 잔여 |
 | Q16 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 A/B 보드→작성자→팔로우→목록 재방문 | public-flow JSON + author DTO/SQL/UI 회귀 | 만료/로그인 거절·공개 복귀/다기기 조합 |
 | Q17 | LOCAL PASS / HOSTED PARTIAL PASS | B 신고·차단/해제, A moderator live HIDE/RESTORE·통지/감사 | public-flow JSON; owner 철회 뒤 RESTORE로 부활하지 않음 | 이의·공개 쓰기 제한/해제는 Q18 PASS. 삭제/기기 조합 및 운영 담당 인수 잔여 |
 | Q18 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 JWT 운영 RPC 제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부 | w19-appeal-restriction JSON | 운영자=owner인 승인 A 테스트; 실제 별도 담당자/지원채널·정책/SLA D04 |

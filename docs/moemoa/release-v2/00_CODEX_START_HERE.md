@@ -1,5 +1,17 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+## 2026-10-11 첫 Public 출시 마감 — 현재 진입점
+
+첨부 FIRST_PUBLIC_RELEASE 패키지 README→merge/00→01→02를 현행 기준 18788670dd877d5d93344be76651583acc51f52c에 대조했다. 이 PC의 이전6dd270c는 원격1878867로 fast-forward했다. 기존 로컬 초안은 보존했다. 패키지 MANIFEST의11개 해시는 일치한다.
+
+- 목표: 공개 보드·미니홈·팔로우·공개 이미지 필수. 현재 KR14/US13/TH13 비공개 가입 활성과 Public off는 과거 운영 증거이며 전체 출시 완료가 아니다.
+- 현재 작업: **W08/W09/W10 카드 공개/비공개+동의1개+저장** 로컬 구현·unit69/고유UI13/SQL33/build32 PASS. 사용자 CARD-PUBLIC-SIMPLE-01에 따른 좁은 개선이며 신규 migration20261011120000/소스 hosted 미반영. test guard=false 원복. 다음은 정확한 test 후보 승인→간편 게시/익명 이미지 확인. 실제 파일과 기존 controller/UI/tests를 사용한다. 재작성·새 계획판·전면 디자인 금지.
+- 다음 순서: W10 철회 및 W11~W13 사용자 간 완주→W14~W17 운영/정책 잔여→W18~W20 같은 후보/운영 확인. W06 신규 운영 Google 수락은 당사자만 수행한다.
+- Android·추가 Safari 전수검사·성인/결제/광고/DM/추천 기능 제외 유지. 국가·권리·비용 범위 임의 축소/확대 금지.
+- 운영 migration/활성/master push/배포/외부 발송·결제·실데이터 삭제는 정확한 후보별 승인. 과거 test 승인·원복 근거는 현재 정책/revision/설정과 대조해야 한다.
+- 실행 계획은 [01](01_RELEASE_EXECUTION_PLAN.md), 계약은 [02](02_ACCEPTANCE_CONTRACTS.md), 현재 결과와 다음 행동의 원장은 [03](03_RELEASE_WORKBOARD.md) 하나다. 아래 날짜별 최신/다음은 당시 이력이다.
+
+
 > **최신 운영 배포·전체 검토 인계 완료(2026-10-10):** f428c60의 전체 CI·master Git·Vercel Production Ready·실제 www 소스/새 UI 확인을 마쳤다. [Pro 검토 인덱스](2026-10-10-pro-review-index.md) → [이번 운영 배포 결과](2026-10-10-latest-production-release.md)를 먼저 읽는다. 최신 메뉴/이미지 입력과 이전 가입/관리자·다국가 조사까지 같은 Git 이력에 보존한다. 아래 날짜별 '현재/미배포'는 당시 상태이며 추가 국가·Public 활성 지시가 아니다.
 
 > **2026-10-10 최신 로컬 완료:** 계정 메뉴 통합과 데스크톱 이미지 drop/paste 구현·unit585/Chromium51/build32 PASS. [이번 보고](2026-10-10-account-menu-desktop-images.md)와 ExecPlan 최상단 참고. 운영 배포/DB 변경 없음. 아래 가입 운영 source6a2beff와 혼동하지 않는다.

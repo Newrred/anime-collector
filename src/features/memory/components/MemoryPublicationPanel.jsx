@@ -153,6 +153,7 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
             </div>
           </li>;
         })}</ol>
+        {(!title.trim() || !Object.keys(selection).length) && <p role="status">{!title.trim() ? (locale === "ko" ? "공개 제목을 입력해 주세요." : "Enter a public title to continue.") : (locale === "ko" ? "공개할 기억을 선택해 주세요." : "Select a memory to continue.")}</p>}
         <button type="submit" className="btn" disabled={!title.trim() || !Object.keys(selection).length}>{publication?.hasPublished ? copy.update : copy.preview}</button>
       </fieldset>
     </form>}

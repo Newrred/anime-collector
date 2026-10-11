@@ -417,6 +417,8 @@ function mockPublication() {
         if (control.readError) error = { message: "network failure" };
         else data = homePublished ? { id: HOME, ...homePublished, entries: published?.cards.length ? homePublished.entries : [] } : null;
       }
+      if (name === "get_memory_card_sharing") data = {published:Boolean(published),visible:Boolean(published)&&control.visible,restricted:false};
+      if (name === "make_memory_card_private") { published=null;state="REVOKED";revision++;data={published:false}; }
       if (name === "get_memory_publication") data = revision ? { id: PUBLICATION, revision, state, hasPublished: Boolean(published), sourceChanged: control.sourceChanged, visible: control.visible } : null;
       if (name === "prepare_memory_publication") {
         if (args.p_expected_revision !== revision) error = { message: "PUBLICATION_CONFLICT" };
@@ -436,7 +438,7 @@ function mockPublication() {
       }
       if (name === "publish_memory_publication") {
         if (control.publishError) error = { message: control.publishError };
-        else { state = "PUBLISHED"; revision++; published = snapshot; data = { id: PUBLICATION, revision, state }; }
+        else { state = "PUBLISHED"; revision++; published = snapshot; data = { id: PUBLICATION, revision, state, visible:control.visible }; }
       }
       if (name === "read_memory_publication") {
         if (control.readError) error = { message: "private upstream detail" };
@@ -684,7 +686,7 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
   await expect(page.getByRole("heading", { name: "Shared memory" })).toBeVisible();
   mock.control.revokeError = false;
   await page.getByRole("tab", { name: "Manage", exact: true }).click();
-  await page.getByText("Sharing settings", { exact: true }).click();
+  await page.getByText("Board and home settings", { exact: true }).click();
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Stop sharing this memory everywhere" }).click();
   await expect(page.getByText("Sharing of this memory has stopped everywhere.", { exact: false })).toBeVisible();
@@ -698,7 +700,15 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
 });
 
 test("explicit selection → exact public preview → fresh anonymous context → Board withdrawal", async ({ page, context, browser }) => {
-  const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page); await choose(page, true);
+  const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page);
+  await page.locator('.memory-boards__cards li').filter({ hasText: 'Shared memory' }).getByRole('link').first().click();
+  await page.getByRole('tab', { name: 'Manage', exact: true }).click();
+  await page.locator('summary').filter({ hasText: 'Board and home settings' }).click();
+  await expect(page.getByRole('region', { name: 'Visibility', exact: true })).toContainText('Original is private');
+  await page.getByRole('link', { name: 'Board sharing →', exact: true }).click();
+  await page.getByRole('link', { name: 'PRIVATE BOARD NAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Share selected memories' }).click();
+  await choose(page, true);
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   const preview = page.getByRole("region", { name: "Visitor preview" });
   await expect(preview.getByText("Selected reflection")).toBeVisible();
@@ -821,6 +831,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   const png = await sharp({ create: { width: 24, height: 30, channels: 3, background: "#cc7799" } }).png().toBuffer();
   const webp = await sharp(png).webp().toBuffer();
   const uploads: any[] = [], reads: any[] = [];
+  let imageError = "PUBLIC_SIGNUP_REQUIRED";
   const privateHash = createHash('sha256').update(webp).digest('hex');
   await context.route('**/api/private-image**', async route => {
     expect(route.request().method()).toBe('GET');
@@ -836,6 +847,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   });
   await context.route("**/api/public-image", async (route) => {
     uploads.push(route.request());
+    if (imageError) return route.fulfill({ status: imageError === "PUBLIC_SIGNUP_REQUIRED" ? 403 : 503, json: { error: imageError } });
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ id: IMAGE, state: "READY" }) });
   });
   await page.reload(); await page.getByRole("button", { name: "Share selected memories" }).click(); await choose(page);
@@ -854,8 +866,23 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   await page.getByLabel(usePrivate ? 'I agree to use this selected image' : "I agree to upload this selected image", { exact: false }).check();
   await page.screenshot({path:`.cache/self-declared-rights-${usePrivate ? 'private' : 'original'}.png`});
   await page.getByRole("button", { name: "Prepare selected image" }).click();
+  await expect(page.getByRole('alert')).toContainText('country, age and terms');
+  const recovery = page.getByRole('link', { name: 'Review signup details for this account' });
+  const recoveryUrl = new URL(await recovery.getAttribute('href') || '', page.url());
+  const boardUrl = new URL(page.url());
+  expect(recoveryUrl.pathname).toBe('/auth/start/');
+  expect(recoveryUrl.searchParams.get('next')).toBe(boardUrl.pathname + boardUrl.search);
+  await expect(page.getByText('The selected image copy is ready.', { exact: false })).toHaveCount(0);
+  imageError = 'PUBLIC_SIGNUP_UNAVAILABLE';
+  await page.getByRole('button', { name: 'Prepare selected image' }).click();
+  await expect(page.getByRole('alert')).toContainText('unavailable');
+  await expect(recovery).toHaveCount(0);
+  imageError = '';
+  await page.getByRole('button', { name: 'Prepare selected image' }).click();
   await expect(page.getByText("The selected image copy is ready.", { exact: false })).toBeVisible();
-  expect(uploads).toHaveLength(1); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
+  expect(new Set(uploads.map(request => request.headers()['x-moemoa-operation'])).size).toBe(1);
+  expect(uploads[0].headers()['x-moemoa-operation']).toBeTruthy();
+  expect(uploads).toHaveLength(3); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
   if (usePrivate) {
     expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);
     expect(uploads[0].headers()['x-moemoa-representation-hash']).toBe(privateHash);
@@ -894,3 +921,72 @@ test("account switch removes an in-flight owner preview and never sends publish"
   await expect(page.getByRole("region", { name: "Visitor preview" })).toHaveCount(0);
   expect(mock.calls.filter((call) => call.name === "publish_memory_publication")).toHaveLength(0);
 });
+
+for (const variant of ['desktop','mobile','image']) {
+ const mobile=variant==='mobile',imageCase=variant==='image';
+ test(`simple card visibility saves with one consent and remains reversible ${variant}`,async({page,context})=>{
+  if(mobile)await page.setViewportSize({width:390,height:844});
+  await adapters(context);const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+  const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
+  const cardId=new URL(href!,page.url()).searchParams.get('id')!;
+  await page.evaluate(async(cardId)=>{
+   const {getPlatformMemoryRuntime}=await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+   const {cardSharingBoardId}=await import('/src/features/memory/application/simpleCardSharing.js');
+   const runtime=await getPlatformMemoryRuntime(),id=await cardSharingBoardId(cardId);
+   await runtime.createBoard({id,title:'Shared memory'});await runtime.addCardToBoard(id,cardId);
+   const {IndexedDbMemoryRepository}=await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
+   const repo=await IndexedDbMemoryRepository.open();
+   const tx=repo.database.transaction(['memory_boards','memory_board_cards'],'readwrite');
+   for(const name of ['memory_boards','memory_board_cards']){const store=tx.objectStore(name),req=store.getAll();req.onsuccess=()=>req.result.forEach((row:any)=>store.put({...row,sync:{...row.sync,syncState:'SYNCED',remoteVersion:1}}));}
+   await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=reject;});
+  },cardId);
+
+  const uploads:any[]=[];
+  if(imageCase){
+    mock.control.image=true;
+    const bytes=await sharp({create:{width:24,height:30,channels:3,background:'#66aa99'}}).webp().toBuffer();
+    const hash=createHash('sha256').update(bytes).digest('hex');
+    await context.route('**/api/private-image**',async route=>{
+      if(route.request().url().includes('policy=1'))return route.fulfill({json:{revision:'PRIVATE_TEST',quotaBytes:50000000,usedBytes:bytes.length*2,mainMaxBytes:1000000,transportBodyMaxBytes:1500000,
+        representation:{id:IMAGE,state:'READY',sourceVersion:1,mainHash:hash,mainBytes:bytes.length,thumbnailHash:hash,thumbnailBytes:bytes.length}}});
+      return route.fulfill({contentType:'image/webp',body:bytes});
+    });
+    await context.route('**/api/public-image?*',route=>route.fulfill({contentType:'image/webp',body:bytes}));
+    await context.route('**/api/public-image',async route=>{
+      uploads.push(route.request());await route.fulfill({json:{id:IMAGE,state:'READY'}});
+    });
+    await page.evaluate(async(cardId)=>{
+      const {getPlatformMemoryRuntime}=await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+      const runtime=await getPlatformMemoryRuntime(),bundle=await runtime.getCard(cardId);
+      const {IndexedDbMemoryRepository}=await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
+      const repo=await IndexedDbMemoryRepository.open(),tx=repo.database.transaction('visual_assets','readwrite');
+      tx.objectStore('visual_assets').put({...bundle.asset,imageType:'USER_ORIGINAL',designSpec:null,localRef:null,checksumSha256:'b'.repeat(64)});
+      await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=reject;});
+    },cardId);
+  }
+  await page.goto(href!);await page.getByRole('tab',{name:'Manage',exact:true}).click();
+  const form=page.getByRole('form',{name:'Memory visibility'});
+  await expect(form.getByRole('radio',{name:'Private',exact:true})).toBeChecked();
+  await form.getByRole('radio',{name:'Public',exact:true}).check();
+  const consent=form.getByRole('checkbox');await expect(consent).toBeEnabled();
+  await expect(form.getByRole('button',{name:'Save visibility'})).toBeDisabled();
+  expect(mock.calls.some(c=>c.name==='prepare_memory_publication')).toBe(false);
+  expect(uploads).toHaveLength(0);
+  await consent.check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as public.',{exact:true})).toBeVisible();
+  if(imageCase){expect(uploads).toHaveLength(1);expect(uploads[0].postDataBuffer()).toBeNull();expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);}
+  const prepared=mock.calls.filter(c=>c.name==='prepare_memory_publication');expect(prepared).toHaveLength(1);
+  expect(prepared[0].args.p_selection).toEqual({title:'Shared memory',description:'',cards:[{cardId,fields:[]}]});
+  expect(await form.getByRole('checkbox').count()).toBe(1);
+  await page.screenshot({path:`.cache/simple-card-visibility-${variant}.png`,fullPage:true});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await form.getByRole('radio',{name:'Private',exact:true}).check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as private.',{exact:true})).toBeVisible();
+  expect(mock.calls.filter(c=>c.name==='make_memory_card_private')).toHaveLength(1);
+  expect(mock.calls.some(c=>c.name==='retire_memory_card_publications')).toBe(false);
+  await form.getByRole('radio',{name:'Public',exact:true}).check();await expect(form.getByRole('checkbox')).toBeEnabled();
+  await expect(form.getByRole('checkbox')).not.toBeChecked();
+  await form.getByRole('checkbox').check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as public.',{exact:true})).toBeVisible();
+ });
+}
