@@ -1,5 +1,7 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 D05 주간 기준 확정:** 사용자 “ㅇㅇ”로 주1회 DB·사용자 이미지 변경분/표지 추가·교체분 백업과 최대7일 손실(RPO)을 확정, 운영 DB 변경 직전 별도 백업. 기존 일일/RPO24h 기준 대체; RTO24h 목표 유지. 서버 동기화는 그대로. 기존 사본 재사용은 구현/과거실행 완료지만 변경분 전용 외부보관·주간자동실행은 미구현/미가동. 기존 사본 삭제0·PC예약제외 유지. 아래 일일/최근7일 회전 로그는 당시 이력이며 현재 자동삭제 지시가 아니다. 다음1개: W17 주간 변경분 보관·복원 연결 후보 준비.
+
 > **2026-10-11 W20/D06 복구 증거 결속 완료:** 기존 후보03 앱56cd0ab/DB3/정책·환경·한도·rollback은 그대로 두고 c04ee39의 D05 결과를 고정 Git commit/evidence SHA256/코드7개 해시로 연결했다. 실제99테이블복원·합성56·RPC/RLS는 과거 실행 근거이며 이번 재실행0. 후보생성/거부20검사 PASS. 운영 readonly 재조회38migration/Public0·off, www199613b 확인. 구형 ‘DB복원 미완료’를 정정; 독립키·정기외부백업/7일보관·복구서빙 인수·canonical완전성은 잔여, 운영승인 아님. 다음1개: 기존 D05의 독립키/정기외부보관 운영 인수. 운영쓰기/배포/새업로드0.
 
 
@@ -2418,3 +2420,19 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 7. 변경/복귀/안전: 기존evidence/작업판/실행기록만갱신. DB/배포/secret저장/업로드/기존사본삭제/키복사0. 원격원복대상없음. 자동가동·독립키PASS아님.
 8. 차단/다음1개: GitHub자동준비 또는 당분간일일수동 실행방식선택. PC예약재요청아님. 자동선택후 전용Drive연결·GitHub비밀설정 후보준비, 실제이동·가동은정확승인필요. 독립키미보관은재질문하지않음.
 공식근거: https://docs.github.com/en/billing/concepts/product-billing/github-actions ; https://developers.google.com/workspace/drive/api/guides/api-specific-auth ; https://developers.google.com/identity/protocols/oauth2 ; https://developers.google.com/workspace/drive/api/guides/limits ; https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule
+
+
+## 2026-10-11 W17/D05 — 주 1회 변경분 백업 기준 반영
+
+### 목적·승인·범위 (1–6)
+사용자는 매일 전체 백업의 비용을 줄이기 위해 주 1회 DB/사용자 이미지 변경분 및 표지 추가·교체분 보관, 운영 DB 변경 직전 별도 백업, 최대 7일 데이터 손실을 제안받고 “ㅇㅇ”로 확정했다. RECOVERY-WEEKLY-RPO7D-20261011을 적용한다. 기존 일일/RPO24h 결정을 대체하며 RTO24h 목표는 유지한다. 사용자 클라우드 동기화 주기는 바꾸지 않는다. 기존 단일 W17/D05에서 결정·00/01/02/03·집계 증거를 갱신하고 미등록 일일 PC 예약 XML의 trigger를 제거한다.
+
+### 데이터·검증·안전·복귀 (7–14)
+DB migration, 원격 쓰기, 자동 실행, 외부 업로드, 키 이동, 기존 사본 삭제는 없다. 기존 prepare-daily-backup의 이미지 재사용 구현/파일명과 과거 실제 PASS를 보존한다. 이 도구는 여전히 전체 암호화 ZIP을 생성하므로 변경분 전용 외부보관 구현 완료로 보고하지 않는다. XML은 실행 trigger 없음/disabled임을 확인하고 git diff --check를 실행한다. 코드 재작성·기존 복구 테스트 반복 없음. XML·문서는 해당 diff로 복귀 가능하나 일일 정책 재도입은 새 사용자 결정 필요. 신규 외부 실행기/Drive 연결과 증분 사본의 부모 보존·삭제 반영은 다음 후보에서 다룬다. 과거 7일 자동정리는 실행되지 않았고, 주간 기준에서 복구 기준본/참조 이미지를 지울 수 있으므로 자동삭제를 활성화하지 않는다. 주간 RPO는 정상 실행 시 목표이며 현재 보장이 아니다. 최신 삭제/철회 상태 없이 서비스 복구를 재개하지 않는 계약 유지.
+
+### 진행·완료 보고 (15–17)
+필독: AGENTS, CODEX_START_HERE, 확정 결정, PLANS, QA07, 변경통제09, 기존 release-v2/01~03; 코드: prepare/run/capture-daily-backup, daily-backup-task.xml, dailyBackup.test. 현재 git03f2e52, 미등록/비활성 PC 후보와 외부 실행방식 미결을 확인했다. 결정/계약 반영 뒤 실제 변경 및 검증 결과를 이 절에 추가한다. 다음 행동 하나: 기존 W17에서 주간 변경분 보관과 복원 연결 후보 준비(실행환경 선택·키전송/자동가동은 별도).
+
+- 완료: 확정결정·release-v2/00~03의 현재요약/W17/D05/현재카드와 기존 evidence에 주간 기준을 반영. 이전 카드/로그는 보존했다. daily-backup-task.xml의 CalendarTrigger 제거·disabled 유지.
+- 실제 검증: `wsl.exe -- python3 -c <ElementTree XML parse + zero triggers + disabled assertions>` PASS; `git diff --check` PASS. 기존 제품/DB 테스트는 동작 변경 없어 반복하지 않았다. 이번 신규 사용자 행동 PASS0.
+- 데이터/보안/관측: DB migration0, 원격 실행/업로드/삭제/키전송0, 로그에 개인정보 추가0. 기존 full ZIP 생성 도구를 증분 저장 완료로 간주하지 않는다. D06 과거 후보의 RPO24h는 이번 운영 목표로 재사용하지 않으며 운영 적용 전 주간 기준과 잔여를 반영해야 한다.

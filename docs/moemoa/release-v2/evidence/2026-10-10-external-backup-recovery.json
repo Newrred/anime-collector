@@ -603,5 +603,29 @@
       "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule"
     ],
     "nextAction": "Select GitHub automated preparation or daily manual operation; no secret transfer or activation yet"
+  },
+  "weeklyBackupDecision20261011": {
+    "status": "USER_CONFIRMED_NOT_ACTIVATED",
+    "decision": "RECOVERY-WEEKLY-RPO7D-20261011",
+    "approval": "User answered ㅇㅇ to weekly backups and maximum seven-day data loss",
+    "cadenceDays": 7,
+    "rpoHours": 168,
+    "rtoHours": 24,
+    "preProductionDatabaseChangeBackup": true,
+    "catalog": "Preserve prior bodies; added or replaced only",
+    "privateImages": "Weekly new or changed server bodies; sync unchanged",
+    "database": "Weekly snapshot",
+    "currentImplementation": "Local image download reuse exists; encrypt/package still emits full archive",
+    "incrementalExternalStorageImplemented": false,
+    "automaticScheduleEnabled": false,
+    "pcSchedulerExcluded": true,
+    "legacyDailyXmlTriggersRemoved": true,
+    "retention": "No deletion enabled; preserve referenced base bodies; weekly restore-point retention not newly chosen",
+    "externalExecutorSelected": false,
+    "newUpload": false,
+    "secretTransfer": false,
+    "productionMutation": false,
+    "pastEvidence": "4302 cached image bodies reused, zero new image GETs; not rerun this turn",
+    "nextAction": "Prepare weekly incremental storage and restore candidate within existing W17"
   }
 }
