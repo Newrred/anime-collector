@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-12 W17/D05 수동 운영 실행 결과:** 승인 d668723 master 적용·GitHub 비밀설정4개 저장·Vercel Git SHA 확인 완료. 수동 run38148877139는 WEEKLY_OPERATION_FAILED로 실패하여 실행 gate false(PATCH204/GET200)로 종료했다. Drive에는 기존ZIP2개와 새암호화 state1개(1KB)가 보이고 새ZIP은 미표시다. 진행기록 본문 인증/실패 원인/전송량은 아직 미확정, 새백업 성공 아님. 주간예약·삭제·DB구조·Public변경0. 로컬 진단후보3d14da3(2파일): 안전오류/단계와 읽기전용 상태검사7 PASS, 기본읽기·manual YAML PASS. 다음1개: 이 후보를 반영해 DB/Storage본문/Drive쓰기 없이 보류상태를 확인. 아래 완료/대기 문구는 당시 이력이다.
+
+
 > **2026-10-11 W17/D05 주간 실행기 로컬 후보 완료:** 고정 PC 경로를 분리하고 Drive 부모ZIP SHA256/AES-GCM/manifest 검증→증분 준비→암호화 intent/commit 연결. 합성 기존128KB 이미지 재저장 없이15KB 미만 delta·삭제이미지 제외 복원·업로드 직후 중단 재개(중복0) PASS. 관련 Node57개/명령계약 Python2개·비활성 workflow 구조 PASS(합성/모의, 실제GitHub/운영 실행 아님). 백업파일만 운영199613b 위에 얹은 로컬 후보 d668723; 운영/master 불변. Drive인증은 이전 실제완료, DB/Storage/복구키 이동·수동전송·예약은 미실행. 다음1개: 정확한 d668723 수동1회 후보 및 지정GitHub 비밀설정 승인.
 
 
@@ -2570,3 +2573,19 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 7. 외부변경/개인정보: 이번 credential전송/운영접속/업로드/예약0. future runner는 DB·서버이미지를 GitHub 임시환경에서 처리해 암호화 ZIP/상태만 Drive에 쓴다. 평문·키/토큰 artifacts/cache/logs0, 정상종료 임시dir 정리. 전체DB+새변경이미지64MB 상한은 유지. 이전표지는 Supabase에서 다시 받지 않지만 Drive부모ZIP(첫회 약920MB)→GitHub 다운로드는 발생한다.
 8. 잔여/다음승인: 정확한 d668723의 backup-only master Git 반영(자동 Vercel 빌드 가능, 앱소스불변), moemoa-backup 환경의 운영DB URL/Storage key/CA/복구키 저장, 운영DB/변경이미지 수동1회 capture·Drive 암호화delta/state 추가를 승인받은 뒤 적용한다. 주간cron/키독립보관/실제외부회수복구는 아직 미완료. 자동회전·유료변경·Public 활성은 포함하지 않는다.
 공식 실행환경 참고: https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/run-jobs-in-a-container , https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency .
+
+#### d668723 수동 운영 실행 승인
+사용자가 정확한 후보 적용·수동1회를 승인했다. 승인된 네 backup secrets만 moemoa-backup 환경에 저장하고, master-only policy 확인→exact candidate fast-forward push→workflow_dispatch 1회→결과/Drive checksum/Vercel Git SHA 확인→실행 gate off 순서로 진행한다. 주간 예약·사본 삭제·DB 구조·Public 변경은 제외한다. 중단/실패는 실제 단계까지만 기록하고 새 후보를 임의 배포하지 않는다.
+
+#### 수동1회 실패 후 최소 진단 보완 계획
+실제 run38148877139는 WEEKLY_OPERATION_FAILED로 종료했다. 실행 gate false(PATCH204), 예약 없음. Drive UI에서 기존ZIP2개+새state sequence1 하나/새ZIP 미표시를 확인했다. 상세오류를 모두 가린 현행 로그로 원인 단정 불가. 원문오류 대신 고정 stage와 안전한 코드만 출력하고 --inspect-state 읽기전용 모드로 암호화진행기록/보류ZIP 상태를 확인하는 로컬 후보를 준비한다. 이 모드는 DB접속·Storage본문·Drive쓰기 없이 OAuth/지정폴더 metadata/state 읽기만 수행한다. 관련 실패/비밀값차단/미완료상태검사를 실행하고 운영 적용은 새 정확후보 승인 전 금지한다. 미완료 intent 삭제·새백업 우회 실행은 하지 않는다.
+
+#### 2026-10-12 수동 실행 및 진단 후보 보고
+1. 읽음/계획: 기존 AGENTS·시작문서·확정결정·PLANS·07/09·release-v2 00~03·백업 evidence/runner/Drive/state/workflow/tests, 위 W17/D05 ExecPlan 후속.
+2. 승인/미결: 사용자가 d668723 적용·수동1회 승인. 실제 오류는 일반 코드만 남아 원인 미상이며 외부서비스 장애로 단정하지 않는다. Drive state1 생성으로 파일준비 이후 도달했을 가능성이 있지만 본문 인증은 아직 안 됐다.
+3. 적용파일: 승인 후보13개 backup tools/workflow만 master199613b→d668723. 앱/API·DBmigration 0. 이후 로컬 runner의 안전한 오류코드/단계와 --inspect-state, workflow 기본읽기 입력, 관련test·기존00~03/evidence만 수정. 새 후보3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0는 운영d668723 부모·2파일·로컬만.
+4. 실제 명령/결과: GitHub environment/branch/secrets/publickey GET200(master-only); 4개 sealed-box PUT201/readback200; 활성변수POST201. git push origin d668723bc5321018079b0a74b247ac7b0793ed74:refs/heads/master 성공. POST workflow dispatch204 1회; run38148877139 FAILURE(WEEKLY_OPERATION_FAILED), Stop containers SUCCESS. 실행변수PATCH204→GET200 false. git ls-remote master d668723; Vercel status success·www build-info200 commit/checkoutCommit 일치/source vercel-git/semanticMatch true(workingTreeDirty true는 출력 그대로 보존).
+5. 이번 검증: node --test tests/operations/weeklyBackup.test.mjs 7/7 PASS(합성기존4+진단3), WSL python yaml manual-only/inspect_only기본true PASS, git diff --check PASS. 과거Node57/Python2는 별도이며 이번 실제백업 성공으로 합산하지 않는다.
+6. 보안/DB/복귀: 비밀값은 메모리→GitHub 공개키암호화로 지정환경에만 저장, 로그/문서/commit 미포함. DB구조/원본/공개권한 변경없음. 기존사본삭제0·주간예약0. 원복으로 gate off 완료, 계정접속설정은 승인범위로 남김. 실패 job 임시컨테이너 종료 확인.
+7. 외부보관: Chrome에서 지정비공개 Drive폴더의 기존ZIP2개와 새 moemoa-weekly-state-1-20261011145200757.enc(1KB), 새ZIP미표시 확인. 진행파일 다운로드는 Chrome 차단으로 미회수, 우회하지 않음. 새ZIP 보관·전송량·외부복구 PASS 없음.
+8. 다음1개/승인: 3d14da3의 읽기전용 진단만 master 적용 후 confirm_backup=true/inspect_only=true 1회, 기존설정으로 ledger 인증·대상ZIP metadata 상태만 읽고 gate off. DB접속/Storage본문/새백업/Drive쓰기/삭제/예약 없음. 10/11의 정확후보별 운영승인 조건에 따라 새 적용만 승인 필요. 실제업로드 재개/미완료intent 처리·주간예약·독립키는 잔여.

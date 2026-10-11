@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-12 W17/D05 수동 운영 실행 결과:** 승인 d668723 master 적용·GitHub 비밀설정4개 저장·Vercel Git SHA 확인 완료. 수동 run38148877139는 WEEKLY_OPERATION_FAILED로 실패하여 실행 gate false(PATCH204/GET200)로 종료했다. Drive에는 기존ZIP2개와 새암호화 state1개(1KB)가 보이고 새ZIP은 미표시다. 진행기록 본문 인증/실패 원인/전송량은 아직 미확정, 새백업 성공 아님. 주간예약·삭제·DB구조·Public변경0. 로컬 진단후보3d14da3(2파일): 안전오류/단계와 읽기전용 상태검사7 PASS, 기본읽기·manual YAML PASS. 다음1개: 이 후보를 반영해 DB/Storage본문/Drive쓰기 없이 보류상태를 확인. 아래 완료/대기 문구는 당시 이력이다.
+
+
 > **2026-10-11 W17/D05 주간 실행기 로컬 후보 완료:** 고정 PC 경로를 분리하고 Drive 부모ZIP SHA256/AES-GCM/manifest 검증→증분 준비→암호화 intent/commit 연결. 합성 기존128KB 이미지 재저장 없이15KB 미만 delta·삭제이미지 제외 복원·업로드 직후 중단 재개(중복0) PASS. 관련 Node57개/명령계약 Python2개·비활성 workflow 구조 PASS(합성/모의, 실제GitHub/운영 실행 아님). 백업파일만 운영199613b 위에 얹은 로컬 후보 d668723; 운영/master 불변. Drive인증은 이전 실제완료, DB/Storage/복구키 이동·수동전송·예약은 미실행. 다음1개: 정확한 d668723 수동1회 후보 및 지정GitHub 비밀설정 승인.
 
 

@@ -8,6 +8,11 @@ on:
         required: true
         type: boolean
         default: false
+      inspect_only:
+        description: Read authenticated checkpoint and archive metadata only; no backup capture or upload
+        required: true
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -43,6 +48,7 @@ jobs:
           pg_dump --version
       - name: Capture encrypted delta and commit authenticated checkpoint
         env:
+          BACKUP_MODE: ${{ inputs.inspect_only && '--inspect-state' || '--run' }}
           MOEMOA_BACKUP_RUN_ENABLED: "true"
           MOEMOA_BACKUP_DRIVE_CLIENT_ID: ${{ vars.MOEMOA_BACKUP_DRIVE_CLIENT_ID }}
           MOEMOA_BACKUP_DRIVE_FOLDER_ID: ${{ vars.MOEMOA_BACKUP_DRIVE_FOLDER_ID }}
@@ -56,5 +62,5 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          node tools/operations/run-weekly-backup.mjs --run
+          node tools/operations/run-weekly-backup.mjs "$BACKUP_MODE"
 # Never add upload-artifact/actions-cache for staging, credentials or backup payloads.

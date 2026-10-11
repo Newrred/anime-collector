@@ -10,6 +10,21 @@ import {restoreIncrementalBackup,manifestFingerprint} from './incremental-backup
 import {prepare} from './prepare-daily-backup.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const REQUIRED=['MOEMOA_BACKUP_DRIVE_CLIENT_ID','MOEMOA_BACKUP_DRIVE_CLIENT_SECRET','MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN','MOEMOA_BACKUP_DRIVE_FOLDER_ID','SUPABASE_URL','SUPABASE_DB_URL','SUPABASE_SERVICE_ROLE_KEY','MOEMOA_BACKUP_CA_PEM','MOEMOA_BACKUP_RECOVERY_KEY'];
+const SAFE_ERRORS=new Set(["DRIVE_ARTIFACT_INVALID","DRIVE_CREDENTIALS_MISSING","DRIVE_DOWNLOAD_FAILED","DRIVE_DOWNLOAD_HASH","DRIVE_DOWNLOAD_LIMIT","DRIVE_DOWNLOAD_WRITE","DRIVE_ID_CONFLICT","DRIVE_ID_INVALID","DRIVE_JOURNAL_INVALID","DRIVE_JOURNAL_MISMATCH","DRIVE_LOCAL_CHANGED","DRIVE_LOCAL_MISMATCH","DRIVE_PACKAGE_UNVERIFIED","DRIVE_PRIVATE_FOLDER_REQUIRED","DRIVE_REMOTE_NOT_VERIFIED","DRIVE_REQUEST_UNCERTAIN","DRIVE_RESPONSE_INVALID","DRIVE_RESPONSE_LIMIT","DRIVE_SCOPE_UNVERIFIED","DRIVE_SESSION_INVALID","DRIVE_TOKEN_MISSING","DRIVE_UPLOAD_UNCERTAIN","WEEKLY_CHAIN_LIMIT_REQUIRES_NEW_BASELINE","WEEKLY_CHILD_FAILED","WEEKLY_CHILD_INVALID","WEEKLY_CLEANUP_PATH","WEEKLY_CONFIG_INVALID","WEEKLY_DISK_BOUND","WEEKLY_EXPLICIT_RUN_REQUIRED","WEEKLY_FOLDER_MISMATCH","WEEKLY_GIT_TARGET_INVALID","WEEKLY_PACKAGE_ID","WEEKLY_PARENT_INVALID","WEEKLY_RUN_ID","WEEKLY_RUN_ID_REUSED","WEEKLY_STATE_FORK","WEEKLY_STATE_HEAD_CHANGED","WEEKLY_STATE_HTTP_FAILED","WEEKLY_STATE_INVALID","WEEKLY_STORAGE_CHANGED"]);
+const SAFE_STAGES=new Set(['AUTH','STATE_READ','PARENT_RESTORE','BUILD_DELTA','RESERVE_ID','SAVE_INTENT','UPLOAD_ARCHIVE','SAVE_COMMIT','VERIFY_PENDING']);
+export function backupFailureSummary(error){
+ const code=typeof error?.message==='string'&& (SAFE_ERRORS.has(error.message)||/^DRIVE_HTTP_[1-5][0-9]{2}$/.test(error.message))?error.message:'WEEKLY_OPERATION_FAILED';
+ return {status:'WEEKLY_BACKUP_INCOMPLETE',error:code,stage:SAFE_STAGES.has(error?.backupStage)?error.backupStage:'UNKNOWN',safeToServe:false};
+}
+async function phase(stage,fn){try{return await fn();}catch(error){const wrapped=new Error(backupFailureSummary(error).error);wrapped.backupStage=SAFE_STAGES.has(error?.backupStage)?error.backupStage:stage;throw wrapped;}}
+export async function inspectWeeklyState({store,drive}){
+ const head=await phase('STATE_READ',()=>store.load());
+ if(head.record?.type!=='intent')return {status:'WEEKLY_STATE_READY',chainLength:head.chain.length,pending:false,remoteWrites:0,databaseReads:0,storageBodyReads:0};
+ const pending=head.record.pending;
+ const metadata=await phase('VERIFY_PENDING',()=>drive.getMetadata(pending.fileId));
+ if(metadata)await phase('VERIFY_PENDING',()=>drive.verifyArtifact(pending,pending.fileId));
+ return {status:metadata?'WEEKLY_PENDING_ARCHIVE_VERIFIED':'WEEKLY_PENDING_ARCHIVE_MISSING',sequence:head.record.sequence,chainLength:head.chain.length,pending:true,archiveBytes:pending.bytes,remoteWrites:0,databaseReads:0,storageBodyReads:0};
+}
 export function weeklyPreflight(env){return {status:'WEEKLY_RUNNER_CANDIDATE',missing:REQUIRED.filter(n=>!env[n]),enabled:env.MOEMOA_BACKUP_RUN_ENABLED==='true',networkRequests:0,cronInstalled:false,retentionDeletion:false};}
 export async function hydrateParents({chain,drive,staging,key,keyFile,python}){
  const previous=[];
@@ -26,26 +41,26 @@ export async function hydrateParents({chain,drive,staging,key,keyFile,python}){
 }
 export async function executeWeekly({store,drive,runId,staging,hydrate,build}){
  if(!/^[a-zA-Z0-9-]{1,60}$/.test(runId))throw Error('WEEKLY_RUN_ID');
- let head=await store.load();
+ let head=await phase('STATE_READ',()=>store.load());
  // A prior upload can have completed before its response/commit was lost.
  // Otherwise stop: do not create a second upload or advance past uncertain state.
  if(head.record?.type==='intent'){
-  await drive.verifyArtifact(head.record.pending,head.record.pending.fileId);
-  await store.append(nextCommit(head),head.hash);
+  await phase('VERIFY_PENDING',()=>drive.verifyArtifact(head.record.pending,head.record.pending.fileId));
+  await phase('SAVE_COMMIT',()=>store.append(nextCommit(head),head.hash));
   return {status:'WEEKLY_PENDING_UPLOAD_COMMITTED',newCapture:false,uploadedThisRun:false,safeToServe:false};
  }
  if(head.chain.length>=16)throw Error('WEEKLY_CHAIN_LIMIT_REQUIRES_NEW_BASELINE');
  if(head.chain.some(d=>d.context.release==='MOEMOA_DAILY_BACKUP_'+runId))throw Error('WEEKLY_RUN_ID_REUSED');
- const parents=await hydrate(head.chain);
- const packageResult=await build(parents),artifact=packageResult.artifact;
+ const parents=await phase('PARENT_RESTORE',()=>hydrate(head.chain));
+ const packageResult=await phase('BUILD_DELTA',()=>build(parents)),artifact=packageResult.artifact;
  if(artifact.name!=='moemoa-production-'+runId+'.encrypted.zip')throw Error('WEEKLY_PACKAGE_ID');
- const fileId=await drive.reserveId();
+ const fileId=await phase('RESERVE_ID',()=>drive.reserveId());
  const pending=descriptor({...artifact,fileId,manifestSha256:packageResult.manifestSha256,context:{project:'okchpyagfucpzpyrfgol',release:'MOEMOA_DAILY_BACKUP_'+runId}});
- head=await store.append(nextIntent(head,pending,runId),head.hash);
+ head=await phase('SAVE_INTENT',()=>store.append(nextIntent(head,pending,runId),head.hash));
  const journalPath=join(staging,'drive-upload-journal.local.json');
  await writeFile(journalPath,JSON.stringify({artifact:{folderId:artifact.folderId,name:artifact.name,bytes:artifact.bytes,sha256:artifact.sha256},fileId}),{flag:'wx',mode:0o600});
- await drive.upload({artifact,journalPath});
- await store.append(nextCommit(head),head.hash);
+ await phase('UPLOAD_ARCHIVE',()=>drive.upload({artifact,journalPath}));
+ await phase('SAVE_COMMIT',()=>store.append(nextCommit(head),head.hash));
  return {status:'WEEKLY_INCREMENTAL_COMMITTED',archiveBytes:artifact.bytes,chainLength:head.chain.length+1,safeToServe:false,oldCopiesDeleted:0};
 }
 async function pythonCommand(args,env){
@@ -53,7 +68,7 @@ async function pythonCommand(args,env){
 }
 export async function main(args,env=process.env){
  if(args.length===1&&args[0]==='--preflight')return weeklyPreflight(env);
- if(args.length!==1||args[0]!=='--run'||env.MOEMOA_BACKUP_RUN_ENABLED!=='true')throw Error('WEEKLY_EXPLICIT_RUN_REQUIRED');
+ if(args.length!==1||!['--run','--inspect-state'].includes(args[0])||env.MOEMOA_BACKUP_RUN_ENABLED!=='true')throw Error('WEEKLY_EXPLICIT_RUN_REQUIRED');
  if(process.platform!=='linux'||weeklyPreflight(env).missing.length||env.SUPABASE_URL!=='https://okchpyagfucpzpyrfgol.supabase.co'||!/^[a-fA-F0-9]{64}$/.test(env.MOEMOA_BACKUP_RECOVERY_KEY))throw Error('WEEKLY_CONFIG_INVALID');
  if(env.GITHUB_ACTIONS==='true'&&(env.GITHUB_REF!=='refs/heads/master'||env.GITHUB_REPOSITORY!=='Newrred/anime-collector'))throw Error('WEEKLY_GIT_TARGET_INVALID');
  const baseline=descriptor(JSON.parse(await readFile(resolve(root,'tools/operations/weekly-backup.baseline.json'),'utf8')));
@@ -64,8 +79,9 @@ export async function main(args,env=process.env){
  const childEnv={PATH:env.PATH,HOME:env.HOME,LANG:'C.UTF-8',MOEMOA_BACKUP_PORTABLE:'true',MOEMOA_BACKUP_WORK_ROOT:staging,MOEMOA_BACKUP_KEY_FILE:keyFile,MOEMOA_BACKUP_CA_FILE:caFile,SUPABASE_DB_URL:env.SUPABASE_DB_URL};
  const python=args=>pythonCommand(args,childEnv);
  try{
-  const token=await refreshDriveToken({clientId:env.MOEMOA_BACKUP_DRIVE_CLIENT_ID,clientSecret:env.MOEMOA_BACKUP_DRIVE_CLIENT_SECRET,refreshToken:env.MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN});
+  const token=await phase('AUTH',()=>refreshDriveToken({clientId:env.MOEMOA_BACKUP_DRIVE_CLIENT_ID,clientSecret:env.MOEMOA_BACKUP_DRIVE_CLIENT_SECRET,refreshToken:env.MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN}));
   const drive=createDriveBackupClient(token),store=createWeeklyStateStore({token,key,baseline});
+  if(args[0]==='--inspect-state')return await inspectWeeklyState({store,drive});
   const runId=new Date().toISOString().replace(/[^0-9]/g,'');
   return await executeWeekly({store,drive,runId,staging,
    hydrate:async chain=>{const disk=await statfs(staging);if(disk.bavail*disk.bsize<chain.reduce((n,d)=>n+d.bytes,0)*6+2000000000)throw Error('WEEKLY_DISK_BOUND');return hydrateParents({chain,drive,staging,key,keyFile,python});},
@@ -80,5 +96,5 @@ export async function main(args,env=process.env){
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{console.log(JSON.stringify(await main(process.argv.slice(2))));}
- catch(e){console.error(JSON.stringify({status:'WEEKLY_BACKUP_INCOMPLETE',error:/^WEEKLY_[A-Z0-9_]+$/.test(e.message)?e.message:'WEEKLY_OPERATION_FAILED',safeToServe:false}));process.exitCode=1;}
+ catch(e){console.error(JSON.stringify(backupFailureSummary(e)));process.exitCode=1;}
 }

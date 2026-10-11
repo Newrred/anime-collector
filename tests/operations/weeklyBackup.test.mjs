@@ -11,7 +11,7 @@ import {manifestFingerprint} from '../../tools/operations/incremental-backup.mjs
 import {prepare} from '../../tools/operations/prepare-daily-backup.mjs';
 import {preparedArtifact} from '../../tools/operations/drive-backup.mjs';
 import {initialHead,nextIntent,sealState,openState,fingerprint,resolveLedger} from '../../tools/operations/weekly-backup-state.mjs';
-import {hydrateParents,executeWeekly,weeklyPreflight,main} from '../../tools/operations/run-weekly-backup.mjs';
+import {hydrateParents,executeWeekly,weeklyPreflight,main,backupFailureSummary,inspectWeeklyState} from '../../tools/operations/run-weekly-backup.mjs';
 const repo=fileURLToPath(new URL('../../',import.meta.url)),project='okchpyagfucpzpyrfgol',folderId='synthetic-folder-01';
 const posix=p=>process.platform==='win32'?'/mnt/'+p[0].toLowerCase()+p.slice(2).replaceAll('\\','/'):p;
 const digest=(b,kind='sha256')=>createHash(kind).update(b).digest('hex');
@@ -47,7 +47,7 @@ async function fixture(t){
 test('real encrypted parent→portable prepare→small delta; restart after upload commits once and excludes deleted image',async t=>{
  const f=await fixture(t),stage=join(f.temp,'runner-one');await mkdir(stage);let loseCommit=true;
  const store={...f.store,append:async(r,h)=>{if(r.type==='commit'&&loseCommit){loseCommit=false;throw Error('SIMULATED_RUNNER_LOSS');}return f.store.append(r,h);}};
- await assert.rejects(executeWeekly({store,drive:f.drive,runId:'delta',staging:stage,hydrate:f.hydrate(stage),build:f.build}),/SIMULATED/);assert.equal(f.uploads(),1);assert.equal(f.rechecks(),2);assert.equal((await f.store.load()).record.type,'intent');
+ await assert.rejects(executeWeekly({store,drive:f.drive,runId:'delta',staging:stage,hydrate:f.hydrate(stage),build:f.build}),e=>e.message==='WEEKLY_OPERATION_FAILED'&&e.backupStage==='SAVE_COMMIT');assert.equal(f.uploads(),1);assert.equal(f.rechecks(),2);assert.equal((await f.store.load()).record.type,'intent');
  const second=join(f.temp,'runner-two');await mkdir(second);const resumed=await executeWeekly({store:f.store,drive:f.drive,runId:'retry',staging:second,hydrate:()=>assert.fail('no parent redownload on completed upload'),build:()=>assert.fail('no recapture')});assert.equal(resumed.status,'WEEKLY_PENDING_UPLOAD_COMMITTED');assert.equal(f.uploads(),1);
  const head=await f.store.load(),restored=await f.hydrate(second)(head.chain);assert.deepEqual(await readFile(join(restored.cachePath,'payload',f.cover.file)),f.body);await assert.rejects(readFile(join(restored.cachePath,'payload/objects/00001.bin')));assert.equal((await readFile(join(restored.cachePath,'payload/database.dump'),'utf8')),'synthetic latest DB without deleted image');
 });
@@ -59,3 +59,19 @@ test('incomplete upload intent stops subsequent runner before new capture/alloca
 test('preflight and ordinary CLI invocation perform no network or secret transfer',async()=>{const p=weeklyPreflight({});assert.equal(p.enabled,false);assert.equal(p.networkRequests,0);assert.equal(p.cronInstalled,false);assert.equal(p.missing.length,9);await assert.rejects(main(['--run'],{}),/EXPLICIT_RUN/);});
 
 test('parent ZIP with a wrong pinned manifest is rejected before it can seed cache',async t=>{const f=await fixture(t),stage=join(f.temp,'bad-parent');await mkdir(stage);await assert.rejects(hydrateParents({chain:[{...f.baseline,manifestSha256:'0'.repeat(64)}],drive:f.drive,staging:stage,key:f.key,keyFile:f.keyFile,python:f.python}),/SYNTHETIC_CHILD_FAILED/);await assert.rejects(readFile(join(stage,'verified-cache/VERIFIED_BYTES_ONLY.json')));});
+
+test('diagnostics disclose fixed codes and stages only, never raw request or key material',()=>{
+ assert.deepEqual(backupFailureSummary(Object.assign(new Error('DRIVE_HTTP_403'),{backupStage:'UPLOAD_ARCHIVE'})),{status:'WEEKLY_BACKUP_INCOMPLETE',error:'DRIVE_HTTP_403',stage:'UPLOAD_ARCHIVE',safeToServe:false});
+ for(const message of ['https://secret.example/?token=private','WEEKLY_SECRET_CREDENTIAL','DRIVE_SECRET_CREDENTIAL']){const report=backupFailureSummary(Object.assign(new Error(message),{backupStage:'PRIVATE_USER_NOTE'}));assert.equal(report.error,'WEEKLY_OPERATION_FAILED');assert.equal(report.stage,'UNKNOWN');assert.ok(!JSON.stringify(report).includes(message));}
+});
+test('inspection authenticates state and reports missing pending ZIP without new capture or writes',async()=>{
+ const calls=[],head={record:{type:'intent',sequence:1,pending:{fileId:'synthetic-pending-1',bytes:123}},chain:[{}]};
+ const store={load:async()=>{calls.push('load');return head;},append:()=>assert.fail('read only')};
+ const drive={getMetadata:async id=>{calls.push(id);return null;},upload:()=>assert.fail('read only'),reserveId:()=>assert.fail('read only')};
+ const report=await inspectWeeklyState({store,drive});assert.equal(report.status,'WEEKLY_PENDING_ARCHIVE_MISSING');assert.equal(report.archiveBytes,123);assert.equal(report.remoteWrites,0);assert.deepEqual(calls,['load','synthetic-pending-1']);
+});
+test('inspection verifies a completed pending ZIP, rejects a mismatch, and never commits it',async()=>{
+ const store={load:async()=>({record:{type:'intent',sequence:1,pending:{fileId:'synthetic-pending-1',bytes:123}},chain:[{}]}),append:()=>assert.fail('read only')};let valid=true,verified=0;
+ const drive={getMetadata:async()=>({}),verifyArtifact:async()=>{verified++;if(!valid)throw Error('DRIVE_REMOTE_NOT_VERIFIED');}};
+ assert.equal((await inspectWeeklyState({store,drive})).status,'WEEKLY_PENDING_ARCHIVE_VERIFIED');valid=false;await assert.rejects(inspectWeeklyState({store,drive}),e=>e.message==='DRIVE_REMOTE_NOT_VERIFIED'&&e.backupStage==='VERIFY_PENDING');assert.equal(verified,2);
+});

@@ -915,5 +915,85 @@
       "Independent off-PC recovery key not confirmed"
     ],
     "nextAction": "Exact d668723 backup-only master/manual workflow candidate approval plus DB/Storage credentials and recovery key transfer to moemoa-backup; manual single capture/upload, not cron"
+  },
+  "weeklyManualExecution20261011": {
+    "candidate": "d668723bc5321018079b0a74b247ac7b0793ed74",
+    "userApproval": "후보 적용·수동 1회 승인",
+    "scope": "backup-only master push; four production backup secrets to moemoa-backup; one manual encrypted incremental Drive backup; no schedule/deletion/schema/Public changes",
+    "status": "FAILED_AFTER_INTENT_OBSERVED",
+    "githubRunId": 38148877139,
+    "githubRunUrl": "https://github.com/Newrred/anime-collector/actions/runs/38148877139",
+    "dispatchStatus": 204,
+    "secretNames": [
+      "MOEMOA_BACKUP_DATABASE_URL",
+      "MOEMOA_BACKUP_STORAGE_KEY",
+      "MOEMOA_BACKUP_CA_PEM",
+      "MOEMOA_BACKUP_RECOVERY_KEY"
+    ],
+    "secretPutStatus": 201,
+    "environmentBranches": [
+      "master"
+    ],
+    "masterPushed": true,
+    "scheduled": false,
+    "activationEnabled": false,
+    "vercelBuild": {
+      "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "checkoutCommit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "builtAt": "2026-10-11T14:51:42.273Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "conclusion": "failure",
+    "error": "WEEKLY_OPERATION_FAILED",
+    "failureStage": "unknown; new sequence-1 state observed; no new ZIP in folder UI",
+    "activationPatchStatus": 204,
+    "activationReadbackStatus": 200,
+    "driveUi": {
+      "observed": "2026-10-12 Asia/Tokyo",
+      "existingZipCount": 2,
+      "newStateName": "moemoa-weekly-state-1-20261011145200757.enc",
+      "newStateDisplayedSize": "1KB",
+      "newZipVisible": false,
+      "folderPrivate": true,
+      "stateContentAuthenticated": false,
+      "downloadBlockedByChrome": true
+    },
+    "manualDispatchCount": 1,
+    "reruns": 0,
+    "archiveUploadPass": false,
+    "workflowCleanup": [
+      {
+        "name": "Stop containers",
+        "result": "success"
+      }
+    ],
+    "nextDiagnosticCandidate": {
+      "base": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "commit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "branch": "refs/heads/codex/weekly-backup-inspect-20261012",
+      "sourceSha256": {
+        "tools/operations/run-weekly-backup.mjs": "c542dfb01fade5ae9f878fc1517b6129bc0afe4f07c3efaa20011e6a08c35c2a",
+        ".github/workflows/moemoa-weekly-backup.yml": "e6465fc5d25484866e3f61ac98d96a82f8a36312489e5912ea18d9e6691981d8"
+      },
+      "changed": [
+        ".github/workflows/moemoa-weekly-backup.yml",
+        "tools/operations/run-weekly-backup.mjs"
+      ],
+      "pushed": false,
+      "mode": "--inspect-state",
+      "remoteWrites": 0,
+      "databaseReads": 0,
+      "storageBodyReads": 0,
+      "localTestsPassed": 7,
+      "yaml": "manual/read-only default PASS",
+      "approvalRequired": true
+    },
+    "previousLocalTestsNotRerun": "Node57 + Python2"
   }
 }
