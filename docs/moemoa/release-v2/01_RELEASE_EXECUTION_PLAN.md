@@ -2648,3 +2648,16 @@ run38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN, Stop container
 7. 보안·관측: 기존인증재사용·Secret신규저장0, 비밀값/본문로그0. 원격checksum·ledger완료만으로 복원서빙을허용하지 않으며 safeToServefalse 유지. Public/private권한 변경0, runtime임시정리확인. 사용자 별도복구키보관은 여전히미확인이다.
 8. 완료/잔여/다음: 실제 수동증분 외부보관 단계 완료. W17/D05 전체DONE 아님. 다음1개는 새 증분사본 외부회수·격리복구 검증이며 새capture/쓰기/삭제를 포함하지 않는다. 주간스케줄 활성은 별도정확후보승인, 독립키/최신삭제·공개서빙 인수는 기존잔여로 유지한다.
 실행 https://github.com/Newrred/anime-collector/actions/runs/38153533963
+
+#### 2026-10-12 외부 증분 회수·격리복구 계획
+사용자 문서상 문제 없으면 진행 지시에 기존 W17/D05 다음단계 수행. 문서상충돌없음: 새capture/Drive쓰기/삭제/예약/master변경 없이 성공run20261011155929965의 ZIP·완료state6 회수→기존 로컬키로state 인증→pinned baseline/ZIP길이·SHA256/context/manifest 인증→기존증분복원→격리DB 검증. 이전 baseline ZIP은 검증 후 재사용하며 외부에서 다시회수했다고 주장하지 않는다. 브라우저 download 이벤트 대기 timeout 뒤 User unavailable로 중단, 현재 다운로드폴더에 대상파일0 확인. 사용자에게 정확두파일 다운로드만 요청하고, 로컬재사용도구/환경 확인을 계속한다. 새workflow/인증/운영변경은 만들지 않는다.
+
+#### 2026-10-12 외부 증분 회수·파일 복원 결과 및 DB 환경 차단
+1. 문서/소스: 시작문서·확정결정·기존 W17/D05·상위 계약을 대조하고 weekly-backup-state, unpack-weekly-parent, verify-external-backup, incremental-backup, capture-isolated-recovery-context, rehearse-production-restore를 재사용했다. 기존 계획과 충돌 없음.
+2. 범위: 사용자의 문서상 문제 없으면 진행 지시 및 두 파일 다운로드 완료로 새 ZIP/state6를 회수. 새 백업 생성·원격 쓰기·예약·운영배포 승인을 확대하지 않았다.
+3. 실제 검증: openState로 완료기록 type commit/sequence6/runId20261011155929965/chain2와 저장소 baseline descriptor 일치. 새 ZIP62,610,505B의 SHA256/길이를 인증된 기록과 대조 PASS. 기존 로컬 전체 ZIP920,077,441B도 고정 SHA256 일치. 이번에는 전체6개 ledger 이력을 재회수하지 않았고 기준 ZIP도 재다운로드하지 않았다.
+4. 실제 복원: WSL Python unpack-weekly-parent 2회 PARENT_ZIP_AUTHENTICATED(전체 requiresParent=false/증분 true). restoreIncrementalBackup 실제4,310파일/918,359,762B 모두 길이·해시 PASS. safeToServe=false. 출력은 ignored .cache/operations-private/external-incremental-20261012 아래이며 사용자 데이터/키는 Git에 넣지 않았다.
+5. DB/환경: 최신 운영 상태 읽기전용 수집 PASS(16roles/25memberships/6media, password export false). 기존 격리복원 소스에서 repo root와 입력 backup 경로 두 상수만 바꾼 로컬 사본 준비·node --check PASS, 로직변경0 및 원본/사본 SHA256은 증거에 결속. Docker engine은 시작 불가: 남은 proxy/누락 process 환경 경로를 정리했으나 기존 dockerInference 소켓 접근 오류 지속. 공식 stop/restart도 실패; 정확한 빈 reparse socket 정리 시도는 실패하여 삭제되지 않았다. Docker만 정지했고 factory reset/재설치/기존 container·volume 삭제 없음. 새DB import/contract/RLS 실행0.
+6. 변경/복귀: 소스·DBmigration·master·Public·원격설정 변경0. 기존 시작포인터/작업판/ExecPlan/증거만 업데이트. 준비된 복원 스크립트는 로컬 격리 입력으로만 사용하며 network none/포트0/권한off/종료 계약 유지.
+7. 보안/관측: 키·복원본문은 로컬 비공개 ignored 경로에만 있고 로그에는 집계만 출력. 새 외부전송/삭제/예약0. 파일 복원 PASS를 DB 복원/서빙 PASS로 승격하지 않는다.
+8. 다음1개: Docker 엔진 기동 후 prepared rehearsal의 20261012-incremental/--current-public 실행. 최신context가1시간을 넘었으면 새runId로 읽기재수집 후 연결. 운영승인은 아직 불필요한 로컬 검증 범위다. 독립키·주간자동화/D06 운영적용은 기존 미완료로 유지.

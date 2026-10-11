@@ -1248,5 +1248,62 @@
       "operator independent off-PC key custody"
     ],
     "nextAction": "Verify newly stored delta through external retrieval and isolated restore under existing W17/D05; no new capture or deletion"
+  },
+  "externalIncrementalRecovery20261012": {
+    "scope": "W17/D05 existing next action; external incremental retrieval and local isolated restore",
+    "runId": "20261011155929965",
+    "userDownloadedFiles": 2,
+    "authenticatedCommit": {
+      "sequence": 6,
+      "type": "commit",
+      "chainLength": 2,
+      "baselinePinMatches": true,
+      "fullLedgerHistoryReplayedThisSession": false
+    },
+    "archive": {
+      "bytes": 62610505,
+      "sha256MatchesAuthenticatedCommit": true
+    },
+    "baseline": {
+      "bytes": 920077441,
+      "sha256MatchesVersionControlledPin": true,
+      "reusedLocalArchive": true,
+      "newExternalRetrieval": false
+    },
+    "bytesRestored": {
+      "status": "LOCAL_INCREMENTAL_BYTES_VERIFIED",
+      "files": 4310,
+      "bytes": 918359762,
+      "allSha256AndLengthsMatch": true
+    },
+    "localRehearsal": {
+      "source": "tools/operations/rehearse-production-restore.mjs",
+      "sourceSha256": "009a9331a11d2d95b339c208e09314b46b2620f5471e76212aed81fe263fc51f",
+      "localSha256": "9c7662ad838be3d884bd1974ada950d7354b1c1adf011d7c4e1c279ce0daa6e6",
+      "substitutions": [
+        "repository root absolute path",
+        "verified incremental backup input path"
+      ],
+      "logicChanged": false
+    },
+    "databaseRestore": "NOT_RUN_DOCKER_ENGINE_UNAVAILABLE",
+    "readOnlyCurrentContextCaptured": true,
+    "productionWrites": 0,
+    "externalWrites": 0,
+    "uploads": 0,
+    "deletions": 0,
+    "schedules": 0,
+    "safeToServe": false,
+    "environment": {
+      "wslPython": "3.12.3",
+      "dockerEngineResponding": false,
+      "error": "Docker Inference manager socket dockerInference cannot be accessed by system",
+      "recoveryAttempts": "Stopped confirmed lingering Docker proxy processes; provided missing process environment paths; official restart/stop failed; Docker-only processes stopped; exact zero-byte reparse socket removal failed; no reset/reinstall/data deletion",
+      "dockerContainerCreated": false
+    },
+    "remaining": [
+      "Start a healthy local Docker engine, refresh read-only current context if older than one hour, then run prepared isolated restore",
+      "Independent recovery-key custody and weekly scheduling remain separate unfinished gates"
+    ]
   }
 }

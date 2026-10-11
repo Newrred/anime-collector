@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 W17/D05 외부 증분 파일 복원 PASS·DB 기동 대기:** 사용자가 Drive의 새 ZIP·state6를 내려받음. 완료기록 AES-GCM/sequence6/runId/chain2·고정기준사본 결속·새ZIP62,610,505B SHA256 확인, 기존920,077,441B 사본 재사용→4,310파일/918,359,762B 전체 길이·해시 복원 PASS. 최신 운영 삭제·공개 상태는 읽기전용 수집. Docker 엔진이 기존 dockerInference 소켓 접근 오류로 시작되지 않아 새 DB import/권한·삭제 replay는 미실행이다. 초기화/재설치/운영쓰기/외부쓰기/삭제/예약0. 다음1개: 로컬 Docker 기동 복구 후 기존 격리복원 실행(1시간 경과 시 최신 상태 재수집). 아래 실제 보관 성공과 과거 DB PASS는 별도 근거다.
+
+
 > **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
 
 
