@@ -673,5 +673,45 @@
     "externalUploads": 0,
     "retentionDeleted": 0,
     "nextAction": "Prepare external executor/Drive connection candidate within W17; user choice and exact credentials transfer approval still required"
+  },
+  "driveConnectionCandidate20261011": {
+    "status": "LOCAL_MOCK_VERIFIED_AUTH_NOT_CONNECTED",
+    "sourceBase": "6fc1b85",
+    "mockTestsPassed": 13,
+    "preflight": {
+      "missing": [
+        "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+        "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+        "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN",
+        "MOEMOA_BACKUP_DRIVE_FOLDER_ID"
+      ],
+      "uploadEnabled": false,
+      "weeklyScheduleEnabled": false,
+      "portableBackupRunnerReady": false,
+      "networkRequests": 0
+    },
+    "actualDrivePass": false,
+    "productionWrites": 0,
+    "externalUploads": 0,
+    "secretsTransferred": 0,
+    "checks": [
+      "exact drive.file",
+      "fixed endpoints/no redirects",
+      "private owner folder",
+      "ciphertext SHA256",
+      "8MiB chunks",
+      "same ID after lost completion",
+      "never overwrite conflicting file",
+      "safe errors",
+      "offline default"
+    ],
+    "remaining": [
+      "Dedicated Google grant including existing folder/archive selection",
+      "Exact GitHub moemoa-backup environment secret transfer approval",
+      "Portable runner and encrypted parent download/hydration",
+      "Durable cross-run chain/upload journals",
+      "Approved real upload and retrieval before enabling weekly schedule"
+    ],
+    "nextAction": "Approve dedicated Drive OAuth connection and storage of only Drive credentials in GitHub environment; no DB/key transfer or scheduled backup activation"
   }
 }

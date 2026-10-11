@@ -1,5 +1,7 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W17/D05 Drive 연결 후보:** 암호화 ZIP 전용 수동 업로더·8MiB resumable·사전할당 file ID 재시도·비공개폴더/원격SHA256 검사 로컬 구현. 모의HTTP13 PASS, preflight는 Drive 설정4개 누락·업로드off·예약off·portable runner 미완료 확인(네트워크0). 실제Drive OAuth/전송 PASS 아님. 주간candidate JSON은 disabled이며 workflow/cron 설치0. 다음1개: 별도 Drive OAuth 연결 및 지정 GitHub 환경의 Drive 인증 저장 승인/당사자 권한허용; DB/복구키 이동·업로드·자동실행은 별도.
+
 > **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).
 
 > **2026-10-11 D05 주간 기준 확정:** 사용자 “ㅇㅇ”로 주1회 DB·사용자 이미지 변경분/표지 추가·교체분 백업과 최대7일 손실(RPO)을 확정, 운영 DB 변경 직전 별도 백업. 기존 일일/RPO24h 기준 대체; RTO24h 목표 유지. 서버 동기화는 그대로. 기존 사본 재사용은 구현/과거실행 완료지만 변경분 전용 외부보관·주간자동실행은 미구현/미가동. 기존 사본 삭제0·PC예약제외 유지. 아래 일일/최근7일 회전 로그는 당시 이력이며 현재 자동삭제 지시가 아니다. 다음1개: W17 주간 변경분 보관·복원 연결 후보 준비.
@@ -801,6 +803,19 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+W/M: W17/D05 · M4/M5 DRIVE_CONNECTION_CANDIDATE / AUTH_NOT_CONNECTED
+이번: 지정 비공개폴더·암호화 ZIP만 추가. 8MiB chunks, 동일fileID 복구, 원격SHA256 metadata 검사. 기존 삭제/덮어쓰기/공유 API0
+검증: 모의 HTTP13 PASS; preflight 실제환경 이름존재검사4개누락·업로드/예약off·네트워크0
+과거: 증분 암호화/격리복원·관련56 PASS는 이전 근거; 이번 실제Drive/Google/운영PASS0
+후보: weekly-backup.candidate.json disabled. GitHub 실행환경은 제안, cron 미설치. 현행capture의 고정 WSL경로 이식·부모사본 다운로드/인증·durable chain 상태 잔여
+남음: Drive전용 OAuth 및 제한파일 권한, GitHub 환경 인증저장 승인, 자동실행/DB·복구키 이동/실전송 별도
+보존: 운영DB/Public/master/키/기존사본/원격설정 변경0
+다음1개: 백업전용 Drive OAuth 연결 및 GitHub moemoa-backup 환경의 Drive 인증 저장(정확한 대상 승인 후)
+```
+
+<details><summary>이전 카드 — 증분 로컬 구현</summary>
+
+```text
 W/M: W17/D05 · M4/M5 LOCAL_INCREMENTAL_VERIFIED / EXTERNAL_AUTOMATION_NOT_ACTIVE
 이번: 변하지 않은 이미지 bytes는 부모참조만; 새/변경 파일·최신DB/journal만 암호화. 최신목록에 없는 부모이미지 복원 제외
 검증: 신규합성 암호화12·ZIP1 PASS; 기존GET17·운영후보20·외부ZIP6 PASS. 운영/Drive 데이터 실행0
@@ -810,6 +825,8 @@ W/M: W17/D05 · M4/M5 LOCAL_INCREMENTAL_VERIFIED / EXTERNAL_AUTOMATION_NOT_ACTIV
 남음: 외부실행환경·Drive자동연결, 독립키·복구서빙 인수. 참조부모 자동삭제0, 16체인 제한은 보관기간 승인 아님
 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외)
 ```
+
+</details>
 
 <details><summary>이전 카드 — 주간 기준 확정</summary>
 

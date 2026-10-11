@@ -1,5 +1,7 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 Drive 연결 후보:** 암호화 ZIP 전용 수동 업로더·8MiB resumable·사전할당 file ID 재시도·비공개폴더/원격SHA256 검사 로컬 구현. 모의HTTP13 PASS, preflight는 Drive 설정4개 누락·업로드off·예약off·portable runner 미완료 확인(네트워크0). 실제Drive OAuth/전송 PASS 아님. 주간candidate JSON은 disabled이며 workflow/cron 설치0. 다음1개: 별도 Drive OAuth 연결 및 지정 GitHub 환경의 Drive 인증 저장 승인/당사자 권한허용; DB/복구키 이동·업로드·자동실행은 별도.
+
 > **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).
 
 > **2026-10-11 D05 주간 기준 확정:** 사용자 “ㅇㅇ”로 주1회 DB·사용자 이미지 변경분/표지 추가·교체분 백업과 최대7일 손실(RPO)을 확정, 운영 DB 변경 직전 별도 백업. 기존 일일/RPO24h 기준 대체; RTO24h 목표 유지. 서버 동기화는 그대로. 기존 사본 재사용은 구현/과거실행 완료지만 변경분 전용 외부보관·주간자동실행은 미구현/미가동. 기존 사본 삭제0·PC예약제외 유지. 아래 일일/최근7일 회전 로그는 당시 이력이며 현재 자동삭제 지시가 아니다. 다음1개: W17 주간 변경분 보관·복원 연결 후보 준비.
@@ -2472,3 +2474,28 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 - 명시 실행 형식: `node tools/operations/prepare-daily-backup.mjs <run-id> incremental <private-chain.json>` → 기존 `package-daily-backup.py --run-id <run-id>`. 실행전 실제 대상/권한 검토 필요. 기존 run-daily-backup.mjs는 full 수동 도구이며 주간 scheduler가 아니다.
 - prepare가 전체 chain을 복원해 검증한 후 `READY_LOCAL_ONLY.json`, 재구성된 `verify-quarantine`과 다음번용 `incremental-chain.local.json`을 private 작업폴더에 남긴다. ZIP에는 신규 ciphertext/암호화 index/context만 포함하고 로컬경로나 키/평문을 넣지 않는다.
 - `verify-external-backup.py`로 증분ZIP만 푼 결과는 전체복원 아님. 암호화 사본 전체 chain과 pinned manifest/context를 `restoreIncrementalBackup`에 전달해야 최신파일목록이 재구성된다. 이후 실제DB import·최신삭제/권리/Storage 대조는 기존 복구 절차를 별도로 수행해야 한다.
+
+
+## 2026-10-11 W17/D05 — Drive 연결·주간 실행 후보 준비
+
+### 목적·현행·범위 (1–6)
+사용자 “ㄱ”로 기존 증분 백업의 다음 연결을 준비한다. 기존 GitHub를 PC 없는 실행기 후보로 두되 아직 실행환경 선택/외부 비밀값 전송·자동실행을 완료 승인으로 해석하지 않는다. 현재 Drive 연결 코드 없음, capture는 WSL/고정경로 의존. 이번 끝점은 암호화 ZIP만 전송하는 Drive adapter·재시도 동일 file ID·권한/무결성검사와 비활성 실행 후보를 검토 가능하게 만드는 것. 신규 전체 개발계획 대신 기존 W17에서 관리한다.
+
+### 구현·안전·검증 (7–14)
+새 drive-backup.mjs: drive.file 제한 OAuth 갱신, 지정 비공개 폴더만 확인, 준비된 암호화 ZIP만 신규 생성/동일 ID 재시도, 기존 사본 덮어쓰기·삭제·공유 API 없음. Drive 응답의 임의호스트/redirect에 인증값을 전송하지 않는다. 업로드 완료 불명확은 성공으로 보고하지 않고 file ID를 남겨 재조회한다. 모의HTTP·합성 파일 검사로 실제Drive PASS와 구분. 비활성 candidate JSON에는 주간 목표/필요한 비밀이름/적용대상/롤백을 기록하고 비밀값0. DB migration/운영변경/실제외부 전송0. OAuth 최초동의·기존 사본의 drive.file 접근 승인·지속가능한 refresh token과 외부키보관은 인수 잔여. 연결을 얻기 전에 공개범위나 전체Drive권한을 확대하지 않는다.
+
+### 진행 (15–17)
+현재 source6fc1b85. 공식 Drive 업로드/scopes/OAuth 문서를 확인했다. 5MB 초과파일은 resumable, drive.file은 앱이 만들거나 사용자가 선택한 파일에 한정된다. 실제 인증 부재를 스텁 성공으로 대체하지 않는다. 아래 결과에 변경·테스트·정확한 다음 인수를 기록한다.
+
+### Drive 연결 후보 완료 보고
+
+1. 문서/코드: 시작·확정결정·PLANS·QA07·변경통제09·작업판·capture/inspect-retention·기존 maintenance workflow를 읽었다. 소스6fc1b85 기준.
+2. 가정/미결: PC예약 제외·GitHub 후보. 브라우저 Drive 로그인은 OAuth refresh token을 대신하지 않는다. drive.file은 기존 웹업로드 파일에 자동 접근하지 않으므로 명시적 폴더/기존파일 선택이 필요.
+3. 계획: 위 W17/D05 Drive 연결 절.
+4. 변경: drive-backup.mjs(고정Google endpoint·정확한drive.file scope·비공개owner폴더·암호화package증거·chunk전송·같은사전할당ID 재시도·원격hash검사), run-drive-backup.mjs(offline기본 preflight, 명시upload+별도flag만 전송), weekly-backup.candidate.json(disabled 실행대상/필요설정/미완료/복귀), driveBackup.test.mjs 및 기존00~03/evidence. production dependency 추가0.
+5. 데이터/복귀: DB migration0·원격설정/업로드/삭제0. 초기flag off 및 cron 미설치 유지로 복귀. 기존 서버·사진·사본 불변.
+6. 명령: `node --test tests/operations/driveBackup.test.mjs` 최종13 PASS. `node tools/operations/run-drive-backup.mjs --preflight` 설정4개 누락/업로드false/예약false/portableRunnerfalse/network0. Node --check 2파일 및 git diff --check PASS. 초기 테스트파일 문자열/치환 문법실패3회 후 복구. 원격hash없음 검사에서 async verify 반환과 finally close의 미처리 rejection을 발견해 return await로 수정, 최종 재실행13 PASS. 실제Drive/Google 인증/업로드 검사는 0. 기존백업56검사는 재실행하지 않음.
+7. 보안/관측: mock값·합성파일만 사용. 토큰·OAuth 응답원문·resumable URL 로그 없음. 다른host/redirect 차단, 미확정 업로드는 journal 유지하고 동일ID 재조회. 원격checksummetadata PASS와 실제 재다운로드인증을 구분. private폴더에 owner1명 외권한 있으면 전송거부. key·평문 dump를 upload artifact로 직접 지정하는 CLI 없음.
+8. 남음/다음: Drive OAuth 실제권한과 token 부재로 연결 미실행. 다음 정확한 범위는 백업전용 Google OAuth(기존사이트 로그인client 불변), drive.file 제한, minecrafthong Drive의 기존 MOEMOA encrypted backups 폴더·기준사본 명시선택, Drive client secret/refresh token을 GitHub Newrred/anime-collector의 moemoa-backup 환경 secrets에 저장. 이번 후보의 이 연결만 승인 요청; 운영DB/Storage/암호화키전송·주간cron·실제백업전송은 포함하지 않는다. OAuth 권한동의는 당사자 조작. 완성주간runner로 표시하지 않는다.
+
+공식 근거: https://developers.google.com/workspace/drive/api/guides/api-specific-auth (drive.file), https://developers.google.com/workspace/drive/api/guides/manage-uploads (resumable, 사전할당ID와409중복방지), https://developers.google.com/identity/protocols/oauth2/web-server (offline refresh), https://developers.google.com/workspace/drive/api/reference/rest/v3/files (sha256Checksum). OAuth external Testing의 장기인증 수명은 실제설정에서 확인해야 하며 무인실행 보장으로 간주하지 않는다.
