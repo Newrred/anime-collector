@@ -2,6 +2,9 @@
 
 ## 2026-10-11 W15/D03 관측 마감 계약
 
+- 운영 후보199613b는 baseline1878867에서 관측10파일만 분리했다. 새 private/public 이미지 공개·간편공개 UI·가입·전송한도 변경은 포함하지 않는다. 정확한 후보에서 unit18/격리PG15 PASS. 기존 운영 maintenance38115426850 성공과 신규 public observer HTTP/알림수신은 다른 증거다. migration20261011160000+관측설정+Git 배포 후 실제 경로를 확인해야 하며, 승인 전 운영 실행0.
+- 무료100MiB/day 예약 한도는 요청당2MiB 기준50GET/day, 20이미지 방문2.5회/day이다. 이를 정상 출시규모 또는 측정 전송량으로 표시하지 않는다. 31일 예약상한3,250,585,600B와 private500,000,000B 외 공식표지/DB/test/기타 트래픽도 별도다. 한도 활성은 이번 관측 후보 밖이다.
+
 - 17:32 JST 후속: 승인된 연결 적용 후 실제 private/public RPC와 로컬 경보 확인, Preview 자동 HTTP는 앱 전단 Vercel SSO302로 차단. flags2개=false 저장·같은806b6b2의5LTK Ready/alias 복구 확인; 브라우저 API 차단 때문에 원복503 직접응답과 실제 알림 수신은 미확인. 기존 아래404/인증설정 부재는 이전 상태다. 과거 immutable 배포까지 비활성이라고 주장하지 않는다.
 
 - 후속 연결 후보: 기존 private observation 함수 설치는 additive이며 호출은 policy.observed_at를 갱신한다. 함수를 읽기전용으로 오인하거나 기존 공개2개 승인에 추가migration을 묶지 않는다. test-only 인증/대상 설정 및 관측 flags만 허용 후보, cleanup·quota·운영 변화 제외. 로컬 적용도구5 PASS와 deployed HTTP/실제 운영자 수신은 구분한다. 동일806b6b2 CI38122228717 전체 SUCCESS 확인.

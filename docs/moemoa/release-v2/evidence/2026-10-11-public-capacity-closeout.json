@@ -115,7 +115,7 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Prepare production D03/D06 candidate using existing production maintenance authentication; retain preview HTTP and operator notification receipt as unverified, do not repeat blocked requests",
+  "next": "Obtain exact production observation-only approval for 199613b; apply migration20261011160000, new observation config and master Git deployment, then observation-only endpoint/workflow verification. Public activation and delivery budget remain separate decisions.",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -350,5 +350,154 @@
     "imagesDeleted": 0,
     "notificationsSent": 0,
     "newUserBehaviorPasses": 0
+  },
+  "productionCandidate": {
+    "release": "MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01",
+    "candidateCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "candidateBranch": "codex/production-observation-20261011",
+    "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
+    "selectedFrom": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "localOnly": true,
+    "approved": false,
+    "productionApplied": false,
+    "files": [
+      {
+        "path": ".github/workflows/private-image-cleanup.yml",
+        "sha256": "fc5e7ba06fe848f7caad0bdfd34a273c61923da7f4c023532cceef24de1995a2"
+      },
+      {
+        "path": "api/private-image-observe.js",
+        "sha256": "d76d72af0dae71f1f106131df0b3ece178c1a9ded55bbaa1043551eaa77c4b84"
+      },
+      {
+        "path": "scripts/private-image-maintenance.mjs",
+        "sha256": "0305c192b9ac5ab399f8f448a09cf2a82ca73400d0df3e640bd338908e424763"
+      },
+      {
+        "path": "src/server/privateImages/observationHandler.js",
+        "sha256": "b43549a02dc0175573dc07e11df1ce05cd5f0dee377a045a5294d8e1fdba2fd2"
+      },
+      {
+        "path": "src/server/publicImages/capacity.js",
+        "sha256": "e3af7cbb969a6b0ae2331ea24ce9a407f1af53d043c29562b08cda310449bc77"
+      },
+      {
+        "path": "supabase/migrations/20261011160000_memory_public_capacity_observation.sql",
+        "sha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601"
+      },
+      {
+        "path": "tests/unit/privateObservation.test.mjs",
+        "sha256": "51303a270185bdefa0aabed5f3632825f4d98fb7f45324ca8f7b59bb84b848c6"
+      },
+      {
+        "path": "tests/unit/publicCapacity.fixture.mjs",
+        "sha256": "0f9f833a592d3ef677c140f9b201f9a648408669e370f37f1fe284b1edb738af"
+      },
+      {
+        "path": "tests/unit/publicCapacity.test.mjs",
+        "sha256": "4099cb6b52476580ce3c86c6b7e66bf9b42ac61faf80d3ab59fbd264c2851779"
+      },
+      {
+        "path": "tests/unit/publicCapacityCli.test.mjs",
+        "sha256": "ee7c5fb9b453164fcabeeed2a8a4ed30e27177c1ab6957588a6bc4fe2436155e"
+      }
+    ],
+    "productionPreflight": {
+      "publicOff": true,
+      "migrations": [
+        "20260819021327",
+        "20260819021408",
+        "20260902054107",
+        "20260902054119",
+        "20260902054132",
+        "20260902055512",
+        "20260902055852",
+        "20260903141500",
+        "20260907193000",
+        "20260923090000",
+        "20260923093000",
+        "20260923182210",
+        "20260923183940",
+        "20260923192300",
+        "20260923213901",
+        "20260924115258",
+        "20260924121214",
+        "20260924193626",
+        "20260924194059",
+        "20260924195510",
+        "20260925152858",
+        "20260925152859",
+        "20260925164126",
+        "20260926140122",
+        "20260927042334",
+        "20260927044435",
+        "20261005090000",
+        "20261007093000",
+        "20261008090000",
+        "20261008093000",
+        "20261009090000",
+        "20261009130000",
+        "20261009143000",
+        "20261010103000",
+        "20261010170000",
+        "20261010180000",
+        "20261010190000"
+      ],
+      "observedAt": "2026-10-11T08:37:58.316165+00:00",
+      "publicPolicy": {
+        "enabled": true,
+        "limitBytes": 20971520
+      },
+      "privatePolicy": {
+        "paused": false,
+        "enabled": true,
+        "approved": true,
+        "physicalBytes": 100000000,
+        "readLimitBytes": 500000000
+      },
+      "publicObservationExists": false,
+      "privateObservationExists": true,
+      "activeGlobalDeliveryOverrides": 0
+    },
+    "currentProductionMaintenance": {
+      "run": 38115426850,
+      "source": "18788670dd877d5d93344be76651583acc51f52c",
+      "event": "schedule",
+      "job": "cleanup",
+      "conclusion": "success",
+      "step": "Clean retired images and refresh observed capacity",
+      "createdAt": "2026-10-11T05:38:17Z",
+      "newPublicObservation": false,
+      "notificationReceiptVerified": false
+    },
+    "verification": {
+      "scope": "isolated export of exact production baseline plus selected 10 files; SQL contract harness copied from 806b6b2; no hosted writes",
+      "unitPassed": 18,
+      "sqlPassed": 15,
+      "diffCheckPassed": true,
+      "newUserBehaviorPasses": 0,
+      "fullFrontendBuildRerun": false,
+      "remoteCi": false
+    },
+    "productionChangeProposal": {
+      "migration": "20261011160000",
+      "migrationSha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601",
+      "vercelProduction": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true"
+      },
+      "githubVariables": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true",
+        "MOEMOA_TOTAL_STORAGE_ALERT_BYTES": "980000000"
+      },
+      "existingCredentials": "reuse existing production maintenance connection; do not read or copy secret values",
+      "manualWorkflow": "master workflow_dispatch: OBSERVE_ONLY=true, no cleanup; GitHub existing failure notifications may occur",
+      "sideEffect": "existing private observer refreshes observed_at",
+      "publicActivation": false,
+      "quotaChanges": false,
+      "privateImageUploads": false,
+      "paidChanges": false,
+      "automaticExternalMessages": false
+    },
+    "rollback": "Set new public observation flags false in Vercel/GitHub and redeploy via Git; preserve existing private observation, additive RPC/history and all image data. Revert candidate code only if needed."
   }
 }

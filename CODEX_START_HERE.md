@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-11 W15/D03 운영 관측 후보 준비 완료:** 운영1878867에 관측 관련10파일만 얹은 독립 후보199613b(로컬 codex/production-observation-20261011), unit18·격리PG15·diff 검사 PASS. 기존 운영 maintenance38115426850 실제 성공, 운영집계856,441,465B/Public off/전송한도off 확인. 새 공개집계RPC1개+관측설정+master Git 배포는 미승인·미실행. 무료100MiB/50GET/day는20장 기준2.5방문/day여서 출시규모 확정 아님. 다음1개: 정확한 후보199613b 운영 관측만 적용 승인 후 실제 HTTP/workflow 확인. 상세는 기존01의 W15 후보 보고와 evidence/2026-10-11-public-capacity-closeout.json.
+
+
 > **2026-10-11 W15/D03 테스트 관측 연결 실행·원복:** 승인된 함수1개/15테이블 보존은 이전 실행 완료. 이번 실제 private/public RPC 정상·전체73,464B·한도off 경보 판정 확인. Preview806b6b2 재배포6Qp Ready 후 자동관측은 Vercel SSO302에 막혀 HTTP/수신 PASS 아님. 관측flags2개=false 저장→동일소스5LTK9cXFnGbNAcdkPfgjEsTNvBGe Ready/alias 복구 확인(503직접 응답은 브라우저 차단으로 미확인). 운영·한도·원본삭제 변경0. 다음1개는 기존 운영 인증을 재사용하는 D03/D06 정확한 후보 마감.
 
 
