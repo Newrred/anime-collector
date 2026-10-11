@@ -665,5 +665,53 @@
       "status": "in_progress",
       "conclusion": null
     }
+  },
+  "normalTrafficCandidateReview": {
+    "date": "2026-10-11",
+    "kind": "arithmetic from current code and prior evidence; no new hosted load test",
+    "assumptions": {
+      "reservationPerGetBytes": 2097152,
+      "imagesPerPage": 20,
+      "days": 31,
+      "privateBudgetBytes": 500000000,
+      "providerAllowanceBytes": 5000000000,
+      "providerAllowanceSource": "prior providerUsageReadOnly / 2026-10-11; not re-fetched this turn",
+      "catalogDbTestOtherIncluded": false
+    },
+    "scenarios": [
+      {
+        "getsPerDay": 50,
+        "twentyImageVisitsPerDay": 2.5,
+        "dailyReservedBytes": 104857600,
+        "month31ReservedBytes": 3250585600,
+        "withPrivateBudgetBytes": 3750585600
+      },
+      {
+        "getsPerDay": 100,
+        "twentyImageVisitsPerDay": 5,
+        "dailyReservedBytes": 209715200,
+        "month31ReservedBytes": 6501171200,
+        "withPrivateBudgetBytes": 7001171200
+      },
+      {
+        "getsPerDay": 200,
+        "twentyImageVisitsPerDay": 10,
+        "dailyReservedBytes": 419430400,
+        "month31ReservedBytes": 13002342400,
+        "withPrivateBudgetBytes": 13502342400
+      }
+    ],
+    "decision": "candidate only; do not activate 50 GET/day as normal general-public scale",
+    "remaining": [
+      "normal public scale / safe transfer-budget candidate",
+      "actual operator alert receipt",
+      "exact Public production release approval"
+    ],
+    "mutations": {
+      "production": 0,
+      "test": 0,
+      "flags": 0,
+      "fees": 0
+    }
   }
 }
