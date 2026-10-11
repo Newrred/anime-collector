@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
+
+
 > **2026-10-11 W17/D05 Drive 연결 후보:** 암호화 ZIP 전용 수동 업로더·8MiB resumable·사전할당 file ID 재시도·비공개폴더/원격SHA256 검사 로컬 구현. 모의HTTP13 PASS, preflight는 Drive 설정4개 누락·업로드off·예약off·portable runner 미완료 확인(네트워크0). 실제Drive OAuth/전송 PASS 아님. 주간candidate JSON은 disabled이며 workflow/cron 설치0. 다음1개: 별도 Drive OAuth 연결 및 지정 GitHub 환경의 Drive 인증 저장 승인/당사자 권한허용; DB/복구키 이동·업로드·자동실행은 별도.
 
 > **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).
@@ -803,6 +806,18 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+W/M: W17/D05 · M4/M5 DRIVE_AUTH_APPROVED / CREDENTIAL_CREATION_HANDOFF
+이번: 후보1d55357의 전용Drive연결·GitHub인증저장 승인. moemoa-backup 환경 생성200, master만허용·Secret0 readback200
+Google: 백업전용 moemoa-backup-drive 생성폼 준비. 반환 http://127.0.0.1:4387/oauth/callback, 기존 로그인client 불변
+차단: 새인증정보 생성/JSON다운로드 사용자 직접 조작 대기; Google동의·drive.file 기존폴더/사본 접근·Secret저장은 미완료
+과거: 모의HTTP13·증분56 PASS는 이전근거. 이번 실제Drive/Google PASS0
+보존: 운영DB/Public/master·DB비밀번호/복구키·기존백업 불변; 새업로드/자동예약0
+다음1개: 전용JSON 확보 후 사용자 Google동의→Drive Client Secret/refresh token만 지정환경 저장
+```
+
+<details><summary>이전 카드 — Drive 연결 후보</summary>
+
+```text
 W/M: W17/D05 · M4/M5 DRIVE_CONNECTION_CANDIDATE / AUTH_NOT_CONNECTED
 이번: 지정 비공개폴더·암호화 ZIP만 추가. 8MiB chunks, 동일fileID 복구, 원격SHA256 metadata 검사. 기존 삭제/덮어쓰기/공유 API0
 검증: 모의 HTTP13 PASS; preflight 실제환경 이름존재검사4개누락·업로드/예약off·네트워크0
@@ -812,6 +827,8 @@ W/M: W17/D05 · M4/M5 DRIVE_CONNECTION_CANDIDATE / AUTH_NOT_CONNECTED
 보존: 운영DB/Public/master/키/기존사본/원격설정 변경0
 다음1개: 백업전용 Drive OAuth 연결 및 GitHub moemoa-backup 환경의 Drive 인증 저장(정확한 대상 승인 후)
 ```
+
+</details>
 
 <details><summary>이전 카드 — 증분 로컬 구현</summary>
 

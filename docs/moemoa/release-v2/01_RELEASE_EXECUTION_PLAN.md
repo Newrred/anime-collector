@@ -1,5 +1,10 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
+
+
+> **2026-10-11 W17/D05 Drive 인증 연결 승인·진행:** 사용자 action-time 승인 후보1d55357: 백업 전용 Google drive.file 연결과 GitHub Newrred/anime-collector의 moemoa-backup 환경에 Client Secret·refresh token만 저장. 별도 클라이언트/기존 폴더·기준 사본 접근을 확인하고 사용자 직접 Google 동의 후 인증만 검증한다. DB 비밀번호·복구키 이동, 업로드, 예약, 운영·master 변경은 제외. 현재 Chrome Cloud에서 기존 운영/테스트 클라이언트를 확인했으며 값을 조회하거나 변경하지 않았다. 결과/차단은 아래 실행 기록 및 기존 evidence에 갱신한다. 인증 실패 시 연결 완료로 기록하지 않고 새 전용 연결만 취소할 수 있게 구분한다.
+
 > **2026-10-11 W17/D05 Drive 연결 후보:** 암호화 ZIP 전용 수동 업로더·8MiB resumable·사전할당 file ID 재시도·비공개폴더/원격SHA256 검사 로컬 구현. 모의HTTP13 PASS, preflight는 Drive 설정4개 누락·업로드off·예약off·portable runner 미완료 확인(네트워크0). 실제Drive OAuth/전송 PASS 아님. 주간candidate JSON은 disabled이며 workflow/cron 설치0. 다음1개: 별도 Drive OAuth 연결 및 지정 GitHub 환경의 Drive 인증 저장 승인/당사자 권한허용; DB/복구키 이동·업로드·자동실행은 별도.
 
 > **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).
@@ -2499,3 +2504,13 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 8. 남음/다음: Drive OAuth 실제권한과 token 부재로 연결 미실행. 다음 정확한 범위는 백업전용 Google OAuth(기존사이트 로그인client 불변), drive.file 제한, minecrafthong Drive의 기존 MOEMOA encrypted backups 폴더·기준사본 명시선택, Drive client secret/refresh token을 GitHub Newrred/anime-collector의 moemoa-backup 환경 secrets에 저장. 이번 후보의 이 연결만 승인 요청; 운영DB/Storage/암호화키전송·주간cron·실제백업전송은 포함하지 않는다. OAuth 권한동의는 당사자 조작. 완성주간runner로 표시하지 않는다.
 
 공식 근거: https://developers.google.com/workspace/drive/api/guides/api-specific-auth (drive.file), https://developers.google.com/workspace/drive/api/guides/manage-uploads (resumable, 사전할당ID와409중복방지), https://developers.google.com/identity/protocols/oauth2/web-server (offline refresh), https://developers.google.com/workspace/drive/api/reference/rest/v3/files (sha256Checksum). OAuth external Testing의 장기인증 수명은 실제설정에서 확인해야 하며 무인실행 보장으로 간주하지 않는다.
+
+### 2026-10-11 Drive 인증 연결 실행 보고
+
+- 읽음: AGENTS/시작문서/확정결정/PLANS/07/09, release-v2 현재 ExecPlan·작업판·기존 backup evidence, drive-backup.mjs.
+- 범위: 사용자 승인1d55357의 인증 연결만. 기존 단일 계획/작업판에 반영; 제품 정책 변경 없음.
+- 실제 명령/결과: GitHub REST GET environment404 → PUT200 → POST master branch policy200 → GET branch policy200(master만), GET secrets200(0개). git status/log 확인.
+- 코드/DB migration 없음. Google 생성폼 입력까지만 완료, client 생성·token교환·Secret전송은 미실행. 이전 모의13/증분56 검사를 이번 PASS로 재사용하지 않음.
+- 보안: 기존 로그인client 키 조회/변경0, GitHub인증은 메모리에서만 같은 GitHub API에 사용. DB비밀번호/복구키 이동0. 새 GitHub 환경에는 Secret/workflow 없음; 기존 환경에 영향 없음.
+- 복귀: 폼 취소는 기존Cloud에 영향 없음. 새 빈GitHub환경은 백업 실행을 켜지 않으며 그대로 두어도 기존운영에 영향 없음.
+- 정확한 차단: 브라우저 규칙의 새 인증정보 최종 생성은 사용자 직접조작. 전용JSON 다운로드 뒤 Google당사자동의·제한파일권한·인증저장 이어감.

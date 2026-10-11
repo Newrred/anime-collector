@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
+
+
 > **2026-10-11 W17/D05 Drive 연결 후보:** 암호화 ZIP 전용 수동 업로더·8MiB resumable·사전할당 file ID 재시도·비공개폴더/원격SHA256 검사 로컬 구현. 모의HTTP13 PASS, preflight는 Drive 설정4개 누락·업로드off·예약off·portable runner 미완료 확인(네트워크0). 실제Drive OAuth/전송 PASS 아님. 주간candidate JSON은 disabled이며 workflow/cron 설치0. 다음1개: 별도 Drive OAuth 연결 및 지정 GitHub 환경의 Drive 인증 저장 승인/당사자 권한허용; DB/복구키 이동·업로드·자동실행은 별도.
 
 > **2026-10-11 W17/D05 주간 증분 로컬 구현:** 기존 AES-GCM에 부모 manifest/context 결속·변경 이미지 파일만 보관·최신 DB/journal 포함·삭제 제외 복원을 연결했다. 실제 합성암호화12+ZIP1, 기존GET17/후보20/외부ZIP6 PASS(총56, 운영데이터 실행0). prepare의 명시 incremental 모드·증분 ZIP 구분·다음 캐시 재사용 연결; 전체 운영 capture→package 실행은 미검증. 이전 사본 없이는 복원 거부, 자동삭제0. 최대16사본 체인은 자원 제한이며 보관기간 결정이 아니다. 주간 자동화/Drive 연결·키 독립보관은 미완료. 다음1개: W17 외부 실행환경·Drive 연결 후보 준비(PC예약 제외).

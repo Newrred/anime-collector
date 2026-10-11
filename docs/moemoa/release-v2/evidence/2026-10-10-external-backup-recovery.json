@@ -713,5 +713,36 @@
       "Approved real upload and retrieval before enabling weekly schedule"
     ],
     "nextAction": "Approve dedicated Drive OAuth connection and storage of only Drive credentials in GitHub environment; no DB/key transfer or scheduled backup activation"
+  },
+  "driveAuthConnectionExecution20261011": {
+    "candidate": "1d5535766f7cd75f511014f561baad1d1f90c134",
+    "approval": "Backup-only Drive connection and storage of Client Secret/refresh token in Newrred/anime-collector environment moemoa-backup",
+    "status": "CREDENTIAL_CREATION_HANDOFF",
+    "github": {
+      "environment": "moemoa-backup",
+      "createHttp": 200,
+      "branchPolicyHttp": 200,
+      "allowedBranches": [
+        "master"
+      ],
+      "policyReadbackHttp": 200,
+      "secretListHttp": 200,
+      "secretCount": 0
+    },
+    "google": {
+      "clientName": "moemoa-backup-drive",
+      "clientCreated": false,
+      "creationFormPrepared": true,
+      "redirectUri": "http://127.0.0.1:4387/oauth/callback",
+      "scopeCandidate": "https://www.googleapis.com/auth/drive.file",
+      "userConsentCompleted": false,
+      "existingFolderAccessVerified": false
+    },
+    "actualDrivePass": false,
+    "secretsTransferred": 0,
+    "uploads": 0,
+    "schedulesInstalled": 0,
+    "productionChanges": 0,
+    "nextAction": "User creates/downloads dedicated OAuth JSON; then authorize drive.file and store Drive-only credentials in approved GitHub environment"
   }
 }
