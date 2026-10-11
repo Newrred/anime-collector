@@ -4,6 +4,7 @@ import { createPrivateImageBackend } from '../src/server/privateImages/supabaseB
 export default createPrivateObservationHandler({
   enabled: process.env.MOEMOA_PRIVATE_IMAGE_OBSERVE_ENABLED === 'true',
   secret: process.env.MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET,
+  publicCapacityEnabled: process.env.MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED === 'true',
   createBackend: () => {
     const project = process.env.MOEMOA_PRIVATE_IMAGE_CLEANUP_PROJECT;
     if (!/^[a-z]{20}$/.test(project || '') || process.env.SUPABASE_URL !== `https://${project}.supabase.co`) {

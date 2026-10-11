@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D03 최신:** 공개 용량 집계·전송 예약 경보 로컬 구현 완료. 운영 read-only 저장856,441,465B(공개0), 공개 예약20MiB 활성·공개 읽기/일일 전송 제한off 확인. 신규18 unit/CLI·격리SQL15·합성3종/실제 local HTTP6·build32 PASS. 실제 전송량과 요청당2MiB 예약을 분리한다. test에는20261010103000이 없어 새 관측20261011160000과 함께 적용 승인 필요. 원격변경0·실제 경보 수신 미검증. 다음1개: 정확한 test-only DB/phone-test 관측 후보 적용 승인 후 observe-only 확인. [8항 보고](01_RELEASE_EXECUTION_PLAN.md#2026-10-11-w15d03--공개-용량전송-예산경보-마감)·[집계 근거](evidence/2026-10-11-public-capacity-closeout.json).
+
+
 ## 2026-10-11 첫 Public 출시 마감 — 현재 진입점
 
 첨부 FIRST_PUBLIC_RELEASE 패키지 README→merge/00→01→02를 현행 기준 18788670dd877d5d93344be76651583acc51f52c에 대조했다. 이 PC의 이전6dd270c는 원격1878867로 fast-forward했다. 기존 로컬 초안은 보존했다. 패키지 MANIFEST의11개 해시는 일치한다.

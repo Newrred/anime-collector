@@ -1,3 +1,4 @@
+import { evaluatePublicCapacity } from '../src/server/publicImages/capacity.js';
 import { appendFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
@@ -50,10 +51,18 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
       publicDeleted = value.deleted;
     } catch { publicCleanupFailed = true; }
   }
-  const capacity = evaluatePrivateCapacity(await call('/api/private-image-observe'), {
+  const observation = await call('/api/private-image-observe');
+  const capacity = evaluatePrivateCapacity(observation, {
     storageAlertBytes: env.STORAGE_ALERT_BYTES ? Number(env.STORAGE_ALERT_BYTES) : 80_000_000,
     readAlertBytes: env.READ_ALERT_BYTES ? Number(env.READ_ALERT_BYTES) : 400_000_000,
   });
+  let publicCapacity;
+  if (env.PUBLIC_OBSERVE_ENABLED === 'true') {
+    try {
+      publicCapacity = evaluatePublicCapacity(observation.publicCapacity, {totalStorageAlertBytes:Number(env.TOTAL_STORAGE_ALERT_BYTES)});
+      capacity.alerts.push(...publicCapacity.alerts);
+    } catch { capacity.alerts.push('PUBLIC_CAPACITY_OBSERVATION_FAILED'); }
+  }
   // A full batch is a possible backlog, not proof that deletion failed. Do not
   // silently increase deletion volume; let the operator inspect remaining work.
   if (!cleanupSkipped && !cleanupFailed && cleanup.deleted === 50) {
@@ -62,7 +71,7 @@ export async function runPrivateMaintenance(env, fetchImpl = fetch) {
   if (publicDeleted === 50) capacity.alerts.push('PUBLIC_CLEANUP_BATCH_LIMIT_REACHED');
   if (publicCleanupFailed) capacity.alerts.push('PUBLIC_CLEANUP_FAILED');
   return { deleted: cleanupSkipped || cleanupFailed ? null : cleanup.deleted, cleanupSkipped, cleanupFailed,
-    publicDeleted, publicCleanupSkipped, publicCleanupFailed, ...capacity };
+    publicDeleted, publicCleanupSkipped, publicCleanupFailed, ...(publicCapacity ? {publicCapacity} : {}), ...capacity };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -72,6 +81,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     if (process.env.GITHUB_STEP_SUMMARY) {
       await appendFile(process.env.GITHUB_STEP_SUMMARY,
         `## Private image capacity\n\nObserved: ${result.observedAt}\n\nStorage/reservations: ${result.storageBytes} bytes (alert ${result.storageAlertBytes})\n\nMonthly reads: ${result.readBytes} bytes (alert ${result.readAlertBytes})\n\nCleanup: ${result.cleanupSkipped ? 'SKIPPED (manual observation)' : result.cleanupFailed ? 'FAILED' : `${result.deleted} retired representations removed`}\n\nAlerts: ${result.alerts.join(', ') || 'none'}\n`);
+    }
+    if (process.env.GITHUB_STEP_SUMMARY && result.publicCapacity) {
+      const p=result.publicCapacity;
+      await appendFile(process.env.GITHUB_STEP_SUMMARY,
+        '\n## Public image capacity\n\nPublic storage/reservations: '+p.publicStorageBytes+' bytes\n\nTotal storage/reservations: '+p.totalReservedOrStoredBytes+' bytes\n\nDaily delivery attempts: '+p.deliveryUsed+' / '+p.deliveryDailyLimit+'\n\nDaily reserved delivery budget (not measured transfer): '+p.deliveryBytesUsed+' / '+p.deliveryBytesDailyLimit+' bytes\n\nPending cleanup: '+p.cleanupPendingCount+'; overdue: '+p.overdueCount+'\n');
     }
     for (const code of [...result.alerts, ...(result.cleanupFailed ? ['PRIVATE_CLEANUP_FAILED'] : [])]) console.error(`::error::${code}`);
     if (result.cleanupFailed || result.alerts.length) process.exitCode = 1;

@@ -31,3 +31,14 @@ test('capacity observation exposes only aggregate results and fails closed', asy
   assert.deepEqual((await call({ enabled: true, secret, createBackend: () => ({ rpc: async () => { throw Error('private details'); } }) })).body,
     { error: 'OBSERVATION_FAILED' });
 });
+
+import { publicSnapshot } from './publicCapacity.fixture.mjs';
+test('public capacity is opt-in, aggregate-only, authenticated, and fails closed on incomplete data',async()=>{
+ const calls=[];
+ const backend={rpc:async name=>{calls.push(name);return name==='observe_memory_public_image_capacity'?publicSnapshot({privatePath:'never-log'}):{observedAt:new Date().toISOString(),storedBytes:0,reservedBytes:0,globalReadBytes:0};}};
+ const opts={enabled:true,secret,publicCapacityEnabled:true,createBackend:()=>backend};
+ const r=await call(opts);assert.equal(r.status,200);assert.deepEqual(calls,['observe_memory_private_image_capacity','observe_memory_public_image_capacity']);assert.equal(JSON.stringify(r.body).includes('never-log'),false);
+ calls.length=0;assert.equal((await call(opts,{headers:{}})).status,401);assert.deepEqual(calls,[]);
+ backend.rpc=async name=>name==='observe_memory_public_image_capacity'?{}:{observedAt:new Date().toISOString(),storedBytes:0,reservedBytes:0,globalReadBytes:0};
+ assert.equal((await call(opts)).status,503);
+});

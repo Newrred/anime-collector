@@ -1,6 +1,7 @@
+import { publicCapacitySnapshot } from '../publicImages/capacity.js';
 import { timingSafeEqual } from 'node:crypto';
 
-export function createPrivateObservationHandler({ enabled = false, secret, createBackend }) {
+export function createPrivateObservationHandler({ enabled = false, secret, createBackend, publicCapacityEnabled = false }) {
   return async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('CDN-Cache-Control', 'no-store');
@@ -14,12 +15,14 @@ export function createPrivateObservationHandler({ enabled = false, secret, creat
       return send(401, { error: 'AUTH_REQUIRED' });
     }
     try {
-      const result = await createBackend().rpc('observe_memory_private_image_capacity', {});
+      const backend = createBackend();
+      const result = await backend.rpc('observe_memory_private_image_capacity', {});
       if (!result?.observedAt || !Number.isSafeInteger(result.storedBytes)
         || !Number.isSafeInteger(result.reservedBytes) || !Number.isSafeInteger(result.globalReadBytes)) {
         return send(503, { error: 'OBSERVATION_FAILED' });
       }
-      return send(200, { observedAt: result.observedAt, storedBytes: result.storedBytes,
+      const publicCapacity = publicCapacityEnabled ? publicCapacitySnapshot(await backend.rpc('observe_memory_public_image_capacity', {})) : undefined;
+      return send(200, { ...(publicCapacityEnabled ? {publicCapacity} : {}), observedAt: result.observedAt, storedBytes: result.storedBytes,
         reservedBytes: result.reservedBytes, globalReadBytes: result.globalReadBytes });
     } catch {
       return send(503, { error: 'OBSERVATION_FAILED' });

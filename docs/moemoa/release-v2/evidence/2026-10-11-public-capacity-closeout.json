@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-11",
+  "scope": "W15/D03 local capacity and alert closeout; remote inspection only",
+  "remoteMutation": false,
+  "production": {
+    "observedAt": "2026-10-11T07:37:49.979709+00:00",
+    "totalStoredBytes": 856441465,
+    "privateStoredBytes": 454464,
+    "publicStoredBytes": 0,
+    "publicReservedBytes": 0,
+    "publicStorageBudgetEnabled": true,
+    "publicStorageLimitBytes": 20971520,
+    "readsEnabled": false,
+    "deliveryEnabled": false,
+    "deliveryBytesEnabled": false,
+    "deliveryDailyLimit": 0,
+    "deliveryBytesDailyLimit": 0,
+    "invalidObjectCount": 0,
+    "overdueCount": 0
+  },
+  "test": {
+    "missingTables": [
+      "private.memory_public_storage_policy"
+    ],
+    "requiredMigrations": [
+      "supabase/migrations/20261010103000_memory_public_global_storage_budget.sql",
+      "supabase/migrations/20261011160000_memory_public_capacity_observation.sql"
+    ]
+  },
+  "migrationSha256": {
+    "supabase/migrations/20261010103000_memory_public_global_storage_budget.sql": "88275a716ae0e0f9da24bee8000c73eed757797b25eb93bf4923bffb8f7e571d",
+    "supabase/migrations/20261011160000_memory_public_capacity_observation.sql": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601"
+  },
+  "measurement": {
+    "httpRequests": 6,
+    "kind": "local synthetic actual encoder output; not hosted traffic or real-user distribution",
+    "rows": [
+      {
+        "fixture": "gradient",
+        "httpPayloadBytes": {
+          "full": 14794,
+          "thumb": 1268
+        },
+        "inputBytes": 51273,
+        "fullBytes": 14794,
+        "thumbBytes": 1268,
+        "storedBytes": 16062,
+        "twentyFullVisitBytes": 295880,
+        "twentyThumbVisitBytes": 25360,
+        "thumbAndFullVisitBytes": 40154,
+        "reservedBudgetPerGet": 2097152
+      },
+      {
+        "fixture": "geometric",
+        "httpPayloadBytes": {
+          "full": 38860,
+          "thumb": 4340
+        },
+        "inputBytes": 18320,
+        "fullBytes": 38860,
+        "thumbBytes": 4340,
+        "storedBytes": 43200,
+        "twentyFullVisitBytes": 777200,
+        "twentyThumbVisitBytes": 86800,
+        "thumbAndFullVisitBytes": 125660,
+        "reservedBudgetPerGet": 2097152
+      },
+      {
+        "fixture": "noise",
+        "httpPayloadBytes": {
+          "full": 1062062,
+          "thumb": 26670
+        },
+        "inputBytes": 1320928,
+        "fullBytes": 1062062,
+        "thumbBytes": 26670,
+        "storedBytes": 1088732,
+        "twentyFullVisitBytes": 21241240,
+        "twentyThumbVisitBytes": 533400,
+        "thumbAndFullVisitBytes": 1595462,
+        "reservedBudgetPerGet": 2097152
+      }
+    ]
+  },
+  "verification": [
+    {
+      "command": "node --test tests/unit/publicCapacity.test.mjs tests/unit/publicCapacityCli.test.mjs tests/unit/privateObservation.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs",
+      "passed": 18,
+      "exit": 0
+    },
+    {
+      "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh",
+      "passed": 15,
+      "exit": 0
+    },
+    {
+      "command": "node tools/operations/measure-public-images.mjs",
+      "fixtures": 3,
+      "httpRequests": 6,
+      "exit": 0
+    },
+    {
+      "command": "node node_modules/astro/astro.js build",
+      "pages": 32,
+      "exit": 0
+    }
+  ],
+  "notVerified": [
+    "hosted candidate RPC and optional observe HTTP",
+    "actual operator notification receipt",
+    "provider billed egress and catalog/API traffic",
+    "production budget/config/activation"
+  ],
+  "priorEvidence": {
+    "ci": "38119402749",
+    "source": "895ccbb",
+    "notRerun": true
+  },
+  "next": "Approve exact test-only migrations and phone-test observation candidate; observe-only, no cleanup, no production change"
+}

@@ -26,6 +26,7 @@ jobs:
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-admission-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-receipts-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-public-signup-local.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-public-capacity-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-service-admin-local.sh
       - run: node tools/operations/prepare-service-admin-release-fixtures.mjs
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-service-admin-release-local.sh

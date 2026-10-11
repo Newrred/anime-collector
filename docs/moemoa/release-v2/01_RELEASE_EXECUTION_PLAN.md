@@ -119,6 +119,38 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 8. 잔여/다음1개: CI38113872143 SQL계약 success/verify failure — 기존 desktop-image-input.spec.ts:226의 body paste가 false. 직전38113213200 cancelled. 로컬 단일 재현1 PASS, node scripts/run-desktop-image-e2e.mjs 동일 묶음51/51 PASS(exit0, 단일은 중복 합산 안 함). 두 시도에서 재현되지 않아 타이밍 문제로 단정하거나 제품을 추측 수정하지 않는다. 원격 실패 기록은 유지한다. 다음1개는 이 CI 입력 실패 원인 확인/최소 보완. 직접 이미지 철회HTTP, 최종 D03~D06·운영 승인은 별도 잔여.
 
 
+## 2026-10-11 W15/D03 — 공개 용량·전송 예산·경보 마감
+
+### 1–3. 목적·결정·현재 증거
+사용자 공개 이미지 용량·전송량·경보 잔여 마감 지시. 무료/기존20MiB 공개예약 한도·원본/operation/철회 보존. 공개 GET handler는 Storage 전 authorize_memory_image_delivery(2MiB)를 호출하고 권한을 다운로드 후 다시 확인한다. 기존 일일 제한을 재작성하지 않는다. private-image-maintenance는 현재 private 집계만 경보에 사용한다.
+### 4–6. 범위·흐름·파일
+현재 운영/test를 읽기 전용 집계하고 실제 processPublicImage로 합성 이미지 full/thumb 크기 측정. service-role 전용 공개 관측 RPC 후보→기존 보호된 observe API의 기본off 옵션→기존 유지 workflow의 기본off 공개 경보 연결. scripts의 evaluator와 tests/unit·격리SQL 계약, 운영 inspect 도구, 기존00/01/02/03·evidence를 갱신한다. 새 계획판·업체·유료의존성 없음.
+### 7–9. 데이터·순서·검증
+additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한도·권한 확대·기존 계정/이미지 삭제 없음. M1 실제 집계/합성 full+thumb 측정; M2 기존 제한·일일계량 의미를 보존한 집계/경보 구현; M3 과거값/누락/경계/정리대기/사용불가 관측·HTTP 인증과 격리PG 테스트; M4 정확한 test/운영 후보·rollback·외부 잔여 기록. 운영 migration/설정/master 배포는 후보별 별도 승인 전 실행하지 않는다.
+### 10–14. 안전·관측·복귀·위험·승인
+원본·개인사진·메모·사용자ID·object path·토큰을 수집/로그하지 않는다. 합계 bytes/count/state와 정책값만 반환한다. 전송 예산 사용량(요청당2MiB 예약)과 실제 전송/플랫폼 청구량을 분리한다. CDN no-store/철회 재검사는 유지. 관측 flag off로 즉시 기존 경로 복귀, 새 RPC는 미사용으로 보존. 경보 임계치는 기존 한도의80%와 전체 저장980MB 후보, 실제 활성/수신은 자동PASS로 기록하지 않는다. 메일 발송·GitHub 이슈 생성/실패 경보 고의발송은 이번 지시로 추정하지 않는다. 공식 Supabase Free1GB/egress5GB 확인(2026-10-11 https://supabase.com/pricing); 조직 전체 실제청구·다른egress 여유 보증은 아님.
+### 15–17. 진행·발견·보고
+기존 W19 CI38119402749 성공은 과거 검증으로 보존한다. 이번 결과는 아래 누적하며 D03 전체 완료는 실제 운영 적용/경보 인수 근거 이후에만 표시한다.
+
+#### W15/D03 이번 실행 보고 · 정확한 적용 후보
+
+1. 읽음: AGENTS, CODEX_START_HERE, 최신 확정 결정, PLANS, QA/운영·변경통제, 기존00~03 및 Public handler/processor/Storage backend, resource controls/global budget, private observation/maintenance/workflow, PublicBoardSnapshot. 검증 스킬 verify-before-claiming 적용.
+2. 사실/가정: 운영 read-only 2026-10-11T07:37:49Z 저장856,441,465B=표지 등855,987,001+비공개454,464+공개0, 공개예약20MiB 활성. Public reads=false·전송 두 정책disabled/limit0. 이미지를 게시하지 않아 공개 실사용0이며 무료 여유/청구 보장은 아니다. test는 기존20261010103000 테이블이 없어 집계 중단→카탈로그 조회로 원인을 확정했다. 사용자 데이터/기본연결/A·B격리 재검사 없음.
+3. 계획: 본 W15/D03 절 M1~M3 로컬 완료, M4 정확한 후보 준비. 기존 ID/과거 로그 보존.
+4. 변경: 신규 migration의 service-only aggregate RPC, src/server/publicImages/capacity.js 숫자/신선도 검증·경보, 기존 observationHandler/API의 기본off 옵션, maintenance/workflow 경보 연결. 로컬SQL 계약/runner·집계 inspect·실제 변환/HTTP 측정·unit/CLI 회귀 및 기존00~03/evidence 최신화. 의존성/이미지처리·게시·동의 알고리즘 변경0.
+5. DB/롤백: 이번 원격 mutation0. **test 후보 MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01**: 기존20261010103000(없는 전역예약 구조를 enabled=false 기본값으로 추가), 새20261011160000(읽기 전용 RPC). 두 파일 해시는 evidence에 고정. 데이터 제거/현재 per-owner quota/게시flags·동의guard 변경0. phone-test에는 이번 관측과 이전 검증된895ccbb의 붙여넣기·검사 수정이 함께 포함된다. test 전용 MOEMOA_PRIVATE_IMAGE_OBSERVE_ENABLED / MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true, 기존 test 전용 target/secret/backend만 재사용; 부족한 연결은 먼저 확인. 검사 뒤 두 관측 flag를 원래 값으로 복구하며 schema는 보존한다. 로컬 maintenance를 OBSERVE_ONLY=true/PUBLIC_OBSERVE_ENABLED=true/TOTAL_STORAGE_ALERT_BYTES=980000000으로 호출. **기존 phone-test workflow_dispatch는 실제 정리 job이므로 이번 관측용으로 실행하지 않는다.** 운영 DB/flags/master/유료/메일·issue 발송 대상 아님. 실패 시 관측off/기존phone-test9746a30 소스 복귀, 삭제 없는 RPC 보존.
+6. 실제 명령/결과: node --test tests/unit/publicCapacity.test.mjs tests/unit/publicCapacityCli.test.mjs tests/unit/privateObservation.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs →18 PASS/exit0. wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh →격리PG15 PASS/exit0(초기13에 유효/만료 override2 보강 후15, 중복 합산 안 함). node tools/operations/measure-public-images.mjs →실제encoder3종·localHTTP6/exit0. node node_modules/astro/astro.js build →32pages/exit0(pre/post npm lifecycle 실행으로 표기하지 않음). git diff --check PASS. inspect-public-capacity.py --target production 읽기집계 exit0; --target test 첫 집계실패 뒤 missingTables 진단exit0. 과거CI38119402749/실제A·B사용자흐름은 재실행하지 않았다.
+7. 안전/관측: 집계에 경로/사용자ID/본문/토큰 없음, unknown metadata를0인 정상으로 숨기지 않음. 원본/operationId/실패예약/quota/철회 후 권한 재확인/no-store 유지. 기존 일일한도·활성override와 일치, 실패 시 실제 CLI exit1/::error::/summary 확인(모의응답). 신규 실제 사용자 행동 PASS0; hosted경보·운영자 수신 PASS0.
+8. 잔여/다음1개: **정확한 test 후보 승인 후 관측 API→observe-only 경보 확인.** 운영 적용/전송 한도·provider 총량·실제 운영자 수신은 D03/D06 잔여다. 전체 출시 완료/운영 경보 활성으로 표시하지 않는다.
+
+#### 비용·정상 규모의 구체적 한계
+
+- 합성 gradient/geometric/noise의 full+thumb 저장16,062 /43,200 /1,088,732B, 실제 HTTP 응답은 full14,794 /38,860 /1,062,062B와 thumb1,268 /4,340 /26,670B. 이미지20개 full 방문 계산0.296 /0.777 /21.241MB. 실사용자 분포/실제청구 통계가 아니며 HTTP headers·DB·Auth·표지·Vercel 전송은 별도다.
+- 현행 공개페이지는 full을 읽는다. thumb20개+full1개 비용은 미래 비교 수치일 뿐 현재 최적화 PASS가 아니다. 요청당2MiB 예약이므로20GET은 실제크기와 관계없이40MiB 예산을 쓴다. preview/운영자조회도 포함한다.
+- 전체 저장 후보980,000,000B 경보, 기존 공개20MiB의80%=16,777,216B 경보. 기존 표지+private 최대100MB+public20MiB 합은976,958,521B로1GB 근처다. catalog 증가/비정상 객체를 무시하지 않는다.
+- 무료 초기 공개 전송 후보는100MiB/day와50requests/day(31일 예약3,250,585,600B). private500MB/month를 더하면3,750,585,600B; nominal5GB 대비 나머지 약1.249GB는 다른요청 여유 후보일 뿐이다. **이미지20개 방문 약2.5회/day 수준으로 매우 제한적**이며 정상 공개 규모 수용을 보증하지 않는다. 활성 결정 전 실제 표지/API 등 provider 총 사용량과 비교해야 한다. 이번에는 설정하지 않았고 더 높은 한도를 임의 승인하지 않는다.
+- Supabase Free 공식가격 확인: https://supabase.com/pricing (2026-10-11). 공개 no-store이므로 cached egress5GB를 본 경로의 무료 여유로 더하지 않는다. Supabase와 Vercel 전송 비용은 서로 다른 공급자 항목이다.
+
 ### 2026-10-11 W19 — CI 붙여넣기 실패 좁히기
 
 - 목적/범위: 기존 desktop-image-input:226 실패를 실제 이미지 관리 열림/붙여넣기 이벤트 경계에서 재현한다. 로컬 단독/묶음 PASS만으로 원격 실패를 닫지 않는다. 현재 MemoryCardDetail의 native details→지연 toggle→React active→paste listener 경계를 검사한다.

@@ -1,0 +1,31 @@
+create function pg_temp.ok(value boolean,label text) returns void language plpgsql as $$begin if value is distinct from true then raise exception 'FAIL: %',label;end if;raise notice 'PASS: %',label;end$$;
+select pg_temp.ok(not has_function_privilege('anon','public.observe_memory_public_image_capacity()','EXECUTE') and not has_function_privilege('authenticated','public.observe_memory_public_image_capacity()','EXECUTE'),'client roles cannot read capacity');
+select pg_temp.ok(has_function_privilege('service_role','public.observe_memory_public_image_capacity()','EXECUTE'),'service role has exact aggregate RPC');
+do $$begin perform public.observe_memory_public_image_capacity();raise exception 'FAIL no role';exception when others then if sqlerrm<>'AUTH_REQUIRED' then raise;end if;end$$;
+select pg_temp.ok(true,'missing verified service role rejected');
+select set_config('request.jwt.claim.role','service_role',false);
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'totalStoredBytes')::bigint=0,'empty object inventory measured as zero');
+insert into storage.objects(bucket_id,name,metadata) values('catalog-covers-preview','synthetic-a','{"size":100}'),('memory-private-representations','synthetic-b','{"size":200}'),('memory-public-derivatives','synthetic-c','{"size":300}');
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'totalStoredBytes')::bigint=600 and (public.observe_memory_public_image_capacity()->>'publicStoredBytes')::bigint=300,'all bucket storage included without object keys');
+insert into private.memory_public_assets(user_id,card_id,source_asset_id,source_version,source_hash,operation_id,policy_revision,state,full_bytes,thumb_bytes,expires_at)
+values(gen_random_uuid(),gen_random_uuid(),gen_random_uuid(),1,repeat('a',64),gen_random_uuid(),'SYNTHETIC','FAILED',80,20,now()-interval '25 hours');
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'publicReservedBytes')::bigint=4194304 and (public.observe_memory_public_image_capacity()->>'fullBytes')::bigint=80 and (public.observe_memory_public_image_capacity()->>'thumbBytes')::bigint=20,'failed reservations retained separately from produced bytes');
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'cleanupPendingCount')::int=1 and (public.observe_memory_public_image_capacity()->>'overdueCount')::int=1,'overdue failed cleanup remains visible');
+update private.memory_public_assets set state='DELETED',reserved_bytes=0;
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'publicReservedBytes')::bigint=0 and (public.observe_memory_public_image_capacity()->>'publicStoredBytes')::bigint=300,'deleted metadata cannot hide remaining physical objects');
+update private.memory_resource_policies set enabled=true,daily_limit=case when scope='IMAGE_DELIVERY' then 10 else 4194304 end where scope in('IMAGE_DELIVERY','IMAGE_DELIVERY_BYTES');
+select public.authorize_memory_image_delivery(2097152);
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'deliveryUsed')::int=1 and (public.observe_memory_public_image_capacity()->>'deliveryBytesUsed')::bigint=2097152,'existing maximum-byte delivery reservation observed exactly');
+select public.authorize_memory_image_delivery(2097152);
+do $$begin perform public.authorize_memory_image_delivery(2097152);raise exception 'FAIL budget';exception when others then if sqlerrm<>'RATE_LIMITED' then raise;end if;end$$;
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'deliveryUsed')::int=2 and (public.observe_memory_public_image_capacity()->>'deliveryBytesUsed')::bigint=4194304,'exhaustion rejects atomically without leaking request budget');
+update private.memory_resource_usage set window_day=current_date-1;
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'deliveryUsed')::int=0,'previous UTC day not counted as current');
+insert into storage.objects(bucket_id,name,metadata) values('memory-public-derivatives','bad-metadata','{}');
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'invalidObjectCount')::int=1,'missing size counted as unknown instead of healthy capacity');
+select pg_temp.ok(public.observe_memory_public_image_capacity()::text not like '%synthetic-%','no object paths in aggregate output');
+
+insert into private.memory_resource_overrides(actor,scope,daily_limit,expires_at,reason) values('00000000-0000-0000-0000-000000000000','IMAGE_DELIVERY',50,now()+interval '1 hour','synthetic');
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'deliveryDailyLimit')::int=50,'active global override matches enforced budget');
+update private.memory_resource_overrides set expires_at=now()-interval '1 second';
+select pg_temp.ok((public.observe_memory_public_image_capacity()->>'deliveryDailyLimit')::int=10,'expired global override falls back to base budget');
