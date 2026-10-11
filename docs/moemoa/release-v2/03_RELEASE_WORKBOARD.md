@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W20/D06 복구 증거 결속 완료:** 기존 후보03 앱56cd0ab/DB3/정책·환경·한도·rollback은 그대로 두고 c04ee39의 D05 결과를 고정 Git commit/evidence SHA256/코드7개 해시로 연결했다. 실제99테이블복원·합성56·RPC/RLS는 과거 실행 근거이며 이번 재실행0. 후보생성/거부20검사 PASS. 운영 readonly 재조회38migration/Public0·off, www199613b 확인. 구형 ‘DB복원 미완료’를 정정; 독립키·정기외부백업/7일보관·복구서빙 인수·canonical완전성은 잔여, 운영승인 아님. 다음1개: 기존 D05의 독립키/정기외부보관 운영 인수. 운영쓰기/배포/새업로드0.
+
+
 > **2026-10-11 W17/D05 공개·삭제 복구 로컬 마감:** 최신10/11 백업99테이블·7확장 실제 격리복원 PASS. 최신 readonly 상태 대조와 공개 철회/홈 철회/카드·asset·board·계정 삭제/권리취소/가림/차단/원본버전 변경 합성56검사 PASS, 삭제된 기록의 재시도 본문12건은 로컬에서만 제거·operation/hash/결과 보존. 실제 ownerRPC5/타계정5·익명·RLS PASS, Public/private off·컨테이너 정지. 실제운영 공개자료0이므로 populated Public/Storage HTTP 복구 PASS 아님. 향후 백업에 같은snapshot 공개journal 포함 연결·읽기수집 PASS; 새암호화/업로드는 안함. 독립키 미보관·정기 외부보관/7일정리 미가동·최신삭제feed 부재는 D05 잔여. 다음1개: D06 후보03에 이 복구 증거와 남은 운영 인수 조건을 결속. 아래 로그는 당시 증거로 보존한다.
 
 
@@ -51,7 +54,7 @@
 - 실제 잔여: W15/D03 정상 공개규모·전송한도/경보 인수, W14/D04 Public 권리·고지의 운영 연결, W16/W17/D05 작은 catalog 게시·별도 복구키·정기외부사본/최신삭제feed·populated Public 복구/운영 목표, W18~W20/D06 같은 최종 후보의 전달·철회 경계와 승인 배포. 기존 기본 DB/A·B 격리/72table 복원은 반복하지 않는다.
 - Android 제외, 추가 Safari/WebKit·실폰 오프라인은 사용자 제외 유지(**미실행/USER_WAIVED**, PASS 아님). 과거 행의 포괄적인 ‘실기기 잔여’는 이를 재요구하는 출시 차단 조건이 아니다.
 - 이번 새 사용자 행동: 새 고지의 직접 동의·게시, 익명 실제 이미지 decode, 비공개 저장·익명 비노출·개인 원본 보존 PASS. 50ecbc9의 두 CI SUCCESS 확인, 테스트 DB·설정·배포 원복 완료. 이전 Storage helper 다운로드와 구분한다.
-- 다음 행동1개: **D06 후보03에 이번99테이블 복구·합성56 증거와 남은 운영 인수 조건을 결속**. 예약은 사용자 선택으로 제외했다. 독립키·정기외부보관·7일정리/최신삭제feed·canonical완전성 미완료를 숨기지 않는다. 운영Public off 유지.
+- 다음 행동1개: **D05의 독립키·정기외부보관 운영 인수**. 후보03 증거결속은 완료했고 복구56/99테이블 기본검사는 반복하지 않는다. 예약은 사용자 제외, 자동Drive/7일정리 미가동·키 미보관 상태. 정확한운영승인과 적용후확인은 별도이며 Public off 유지.
 
 
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
@@ -782,7 +785,7 @@
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 최신99테이블·7확장 실제격리복원, 공개·삭제 합성56/RPC접근 PASS. 삭제 재시도본문12건 로컬정리·ID/hash/quota 보존. 새ZIP 외부보관은 과거UI확인. 독립키/정기외부보관·7일정리·최신삭제feed·canonical완전성 잔여 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 10/11 최종고지50ecbc9의 실제 deployed 익명24×30·카드 비공개/unavailable·원본보존 PASS/원복완료. 만료/복귀·원시옛이미지URL HTTP404·운영후보 조합은 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | CANDIDATE_56cd0ab_BOUND / PUBLIC_OFF | 운영 master/www199613b·38 migrations/Public off 재확인. 후보03 source56cd0ab CI38137032500 SUCCESS/test50ecbc9 runtime동일. DB3·고지hash·환경13/GitHub1·한도/원복 결속, 생성기14 PASS. D05 인수·정확한운영승인·적용후확인 잔여 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | CANDIDATE_56cd0ab_RECOVERY_BOUND / PUBLIC_OFF | 후보03 source56cd0ab/DB3/설정·한도 불변. c04ee39 actual99table/합성56 근거 고정hash결속, 생성·거부20 PASS. 운영199613b·38migration/Public off readonly재확인. D05 운영인수·정확한운영승인·적용후확인 잔여 |
 
 ### 작업 수의 변화와 진행률
 
@@ -1026,7 +1029,7 @@ NA 이유:
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / NOTIFICATION_CHANNEL_USER_ATTESTED | Free 유지·전역Public20MiB. 운영199613b 관측 성공/980MB경보. 초기2000GET/64MB test차감·차단·원복, 실제test 이미지decode/철회 PASS | 10/11 사용자 기존 GitHub 실패알림 실수신 확인. 새 용량경보 발송/수신독립검증 아님. 초기소규모 한계 유지, 운영한도 적용·실사용관측 잔여 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. 139a200 일반 공개 고지/정책 연결 및50ecbc9 실제test 게시/열람/철회·원복 완료(한·영, 체크 추가0). 운영 적용/청소년 공개 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | CURRENT_PUBLIC_DELETE_RESTORE_LOCAL_PASS / OPERATIONS_ACCEPTANCE_PARTIAL | 99테이블 실제복원·최신상태재적용·합성56·ownerRPC/RLS PASS. 일일7일/RPO·RTO24h 목표 확정 | 운영공개자료0: populated Public/HTTP 복구는 미검증. 최신 안전snapshot 없으면 재개금지. 독립키 미보관·예약 사용자제외·정기Drive/7일정리 미가동·canonical완전성 잔여 | evidence/2026-10-10-external-backup-recovery.json publicDeletionRecovery20261011 |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | CANDIDATE_56cd0ab_BOUND / PUBLIC_OFF | 후보03 source56cd0ab·CI38137032500 SUCCESS·test50ecbc9 runtime동일. 운영199613b·38 migrations·Public off 독립readback. DB3/고정고지/환경13·GitHub1/한도/복귀 결속 | 후보 준비 완료·실행 미승인. D05 별도키/복구 인수·정확한 source/DB/설정/master배포 승인 후 적용. D03 기존알림 실수신 사용자확인, 직접 옛이미지HTTP/운영 검증은 적용후 별도 | evidence/2026-10-11-public-capacity-closeout.json |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | CANDIDATE_56cd0ab_RECOVERY_BOUND / PUBLIC_OFF | 후보03 source56cd0ab/CI38137032500·test50ecbc9 동등성 보존, DB3·환경13/GitHub1·한도 불변. 복구 c04ee39/hash7 결속·생성20 PASS, 운영199613b/off 재조회 | 로컬복구 완료를 운영인수로 확대하지 않음. D05 키/정기외부사본/재개 조건·canonical완전성 및 정확후보운영승인 잔여. 적용후 HTTP/철회·관측 별도 | evidence/2026-10-11-public-capacity-closeout.json firstPublicProductionCandidate_03.recoveryBinding20261011 |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 

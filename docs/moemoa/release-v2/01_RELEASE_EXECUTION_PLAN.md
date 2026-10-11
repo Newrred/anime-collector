@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W20/D06 복구 증거 결속 완료:** 기존 후보03 앱56cd0ab/DB3/정책·환경·한도·rollback은 그대로 두고 c04ee39의 D05 결과를 고정 Git commit/evidence SHA256/코드7개 해시로 연결했다. 실제99테이블복원·합성56·RPC/RLS는 과거 실행 근거이며 이번 재실행0. 후보생성/거부20검사 PASS. 운영 readonly 재조회38migration/Public0·off, www199613b 확인. 구형 ‘DB복원 미완료’를 정정; 독립키·정기외부백업/7일보관·복구서빙 인수·canonical완전성은 잔여, 운영승인 아님. 다음1개: 기존 D05의 독립키/정기외부보관 운영 인수. 운영쓰기/배포/새업로드0.
+
+
 > **2026-10-11 W17/D05 공개·삭제 복구 로컬 마감:** 최신10/11 백업99테이블·7확장 실제 격리복원 PASS. 최신 readonly 상태 대조와 공개 철회/홈 철회/카드·asset·board·계정 삭제/권리취소/가림/차단/원본버전 변경 합성56검사 PASS, 삭제된 기록의 재시도 본문12건은 로컬에서만 제거·operation/hash/결과 보존. 실제 ownerRPC5/타계정5·익명·RLS PASS, Public/private off·컨테이너 정지. 실제운영 공개자료0이므로 populated Public/Storage HTTP 복구 PASS 아님. 향후 백업에 같은snapshot 공개journal 포함 연결·읽기수집 PASS; 새암호화/업로드는 안함. 독립키 미보관·정기 외부보관/7일정리 미가동·최신삭제feed 부재는 D05 잔여. 다음1개: D06 후보03에 이 복구 증거와 남은 운영 인수 조건을 결속. 아래 로그는 당시 증거로 보존한다.
 
 
@@ -2375,3 +2378,32 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 잔여/다음1개: 도구의 공개·삭제 격리복구 범위 마감, D05전체 PARTIAL. 최신삭제snapshot을 못얻거나 이후기간이 비면 재개금지(RPO는삭제부활허용아님). 최신audit/긍정승인복원·Storage/CDN·canonical완전성·별도키·정기외부사본 인수 잔여. 다음은 D06 candidate03에 이번증거/남은운영조건 결속. 앱56cd0ab·운영199613b·phone-testa6b6dda 유지.
 
 [최종확인] Python AST/Node --check PASS, git diff --check PASS. 기존17단위검사 PASS. 현재published Public0과 합성56을 분리했고 원격운영변경0·모든격리컨테이너정지를 확인했다. 본문·키·원시journal/덤프는 커밋대상에서 제외했다.
+
+### W20/D06 복구 증거 결속 — 2026-10-11 ExecPlan
+1. 목적: 기존 후보03의 D05 낡은 미완료 문구를 actual99table/합성56 결과로 갱신하고 운영승인과 구분.
+2. 결정: FIRST-PUBLIC/RECOVERY-DAILY7·정확후보별승인·예약제외 유지.
+3. 증거: c04ee39 복구결과, candidate03 소스56cd0ab/운영199613b/test50ecbc9.
+4. 범위: offline 후보생성기·증거 연결/검증·현재문서; 운영쓰기/배포/키복사/자동백업 제외.
+5. 흐름: 고정Git evidence/code hash→결과검증→candidate03의 recoveryAcceptance→미완료조건 분리.
+6. 파일: build-first-public-candidate.mjs, recovery-acceptance.mjs, firstPublicCandidate.test.mjs, 기존00~03/capacity evidence.
+7. DB: schema/data/migration변경0; 운영 aggregate SELECT와 공개build-info만 재대조.
+8. 단계: 기존계약읽기→최소증거결속→모순거부검사→현재문서·작업브랜치인계.
+9. 검증: 기존14검사·복구불완전/접근열림/증거불일치 거부, 생성candidate와 기존DB/설정/앱소스 동일.
+10. 보안: 고정commit의 집계/코드만 사용, rawdump/개인자료/키0.
+11. 관측: 새사용자행동PASS0, 복구/hosted/운영결과분리.
+12. 복귀: offline 변경만이므로 작업커밋 revert, 기존후보/증거보존.
+13. 위험: 로컬복구PASS로 운영자동승인 금지. 출처별 한계 명시.
+14. 결정: 이미결정된국가/백업목표 재질문0. exact운영승인 별도.
+15. 진행: 후보03의 구형D05문구 확인.
+16. 발견: 생성기는 초기고정앱commit만읽어 최신복구증거를 포함하지 않는다.
+17. 보고: 실제명령/결과·미적용·다음1개를 같은문서에 기록.
+
+#### W20/D06 복구 증거 결속 — 실제 결과
+1. 읽은 근거: AGENTS/CODEX_START_HERE/확정01/PLANS/QA07/변경09/기존00~03, candidate03 생성기·14검사·public/backup evidence 및 verify-before-claiming.
+2. 범위/미결: 최신 ㄱ는 앞서제시한 D06증거결속 진행. 운영승인으로 해석하지 않음. 독립키·예약제외·외부보관미가동과 국가/권리기존조건 보존.
+3. 계획: 위 W20/D06 ExecPlan17항 실행. 단일작업판 유지.
+4. 변경: build-first-public-candidate.mjs에 고정복구commit c04ee39·집계hash/code7hash 검증. recovery-acceptance.mjs는 실제결과/합성한계/미완료를 명시하며 준비완료false. tests/operations/firstPublicCandidate.test.mjs에6실패경계 추가. 기존00~03/capacity evidence의 candidate03만 보완, 이전D05문구는 recoveryBinding20261011에 보존. 앱/UI/DB소스 변경0.
+5. DB/복귀: inspect-first-public-release.py는 readonly SELECT만 수행. migration/원격설정/배포/키복사/백업업로드0. offline도구/문서 commit만 revert가능, 기존후보유지.
+6. 실제명령/결과: wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0(13:08:45Z/38migration/Public0·off). node tools/operations/build-first-public-candidate.mjs .cache/d06-recovery-preflight.json exit0. node --test tests/operations/firstPublicCandidate.test.mjs20PASS/0FAIL. Git diff56cd0ab..HEAD runtime/config0, www build-info HTTP200/commit=checkout199613b/source=vercel-git. 기존후보의source/schema/migrations/설정/원복/고지/변경파일 해시동일10필드 대조PASS.
+7. 보안/검증범위: Git증거와운영집계만사용. rawDB/journal/비밀키·개인정보 Git포함0, 새사용자행동PASS0. actual99table/합성56/17unit과 과거CI를 이번재실행으로 합산안함. PowerShell실행기1392는 Node/WSL 대체로작업완료.
+8. 잔여/다음1개: D05 독립키·정기외부보관 운영인수. 예약제외 유지/동일질문반복0. 현재복구도구완료와전체서빙재개인수 구분. 그뒤정확 D06 운영승인·실행후현재소스 HTTP/철회/관측. 이번은 후보준비·증거결속 완료이며전체출시완료아님.

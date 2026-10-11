@@ -4,6 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { recoveryAcceptance } from './recovery-acceptance.mjs';
 const source='56cd0ab9e0ec068e3bd982b1bc60ab18131cb5ab';
 const baseline='199613b139d9fcd085e298a9f03bad94b4e53f5a';
 const tested='50ecbc9e5b393671a129df0ed229fda01ecc4958';
@@ -42,6 +43,15 @@ try {
  const evidence=JSON.parse(raw(evidenceFile));
  const hosted=evidence.publicNoticeTestConnectionExecution;
  if(hosted?.source!==tested||hosted.status!=='HOSTED_PUBLISH_VIEW_WITHDRAW_PASS_RESTORED'||hosted.restoreCompleted!==true||hosted.actualHostedCloseout?.image?.throughDeployedPublicImageHandler!==true||hosted.actualHostedCloseout?.anonymousReload?.imageCount!==0)throw new Error('HOSTED_EVIDENCE_MISMATCH');
+ const recoveryCommit='c04ee391155730523cb02710e6c27dce1aea98d1';
+ const recoveryFile='docs/moemoa/release-v2/evidence/2026-10-10-external-backup-recovery.json';
+ const recoveryRaw=execFileSync('git',['show',recoveryCommit+':'+recoveryFile]);
+ const recovery=JSON.parse(recoveryRaw).publicDeletionRecovery20261011;
+ if(!recovery?.codeSha256||Object.keys(recovery.codeSha256).length!==7)throw Error('RECOVERY_EVIDENCE_MISMATCH');
+ for(const [path,expected] of Object.entries(recovery.codeSha256)){
+  if(!path.startsWith('tools/operations/')||hash(execFileSync('git',['show',recoveryCommit+':'+path]))!==expected)throw Error('RECOVERY_EVIDENCE_MISMATCH');
+ }
+ const recoveryBound=recoveryAcceptance(recovery,{commit:recoveryCommit,file:recoveryFile,sha256:hash(recoveryRaw),key:'publicDeletionRecovery20261011',codeSha256:recovery.codeSha256});
  const noticeFile='src/pages/legal/public-sharing-2026-10-11.astro';
  const manifest={
   release:'MOEMOA_FIRST_PUBLIC_CANDIDATE_20261011_03',status:'CANDIDATE_BOUND_RELEASE_GATES_OPEN',
@@ -51,6 +61,7 @@ try {
   schemaReleaseId:'MOEMOA_FIRST_PUBLIC_SCHEMA_PROD_20261011_03',
   publicNotice:{revision:'MOEMOA_PUBLIC_GENERAL_20261011_01',route:'/legal/public-sharing-2026-10-11/',file:noticeFile,sha256:hash(raw(noticeFile)),locales:['ko','en'],signupDocumentsUnchanged:true,checkboxesAdded:0},
   priorHostedEvidence:{file:evidenceFile,sha256:hash(raw(evidenceFile)),sourceCommit:source,testedCommit:tested,deploymentId:hosted.deploymentId,scope:hosted.actualHostedCloseout,restored:true},
+  recoveryAcceptance:recoveryBound,
   preflight:inventory,preflightSha256:hash(JSON.stringify(inventory)),
   sourceFiles:runtime.map(file=>({file,sha256:hash(raw(file))})),
   migrations:files.map(file=>({file,version:file.split('/').pop().split('_')[0],sha256:hash(raw(file))})),
@@ -71,7 +82,7 @@ try {
   },
   rights:'Existing GENERAL-only consent; self-declared own creation; third-party screenshots/fanart still require separate evidence. No new scope decision.',
   executionOrder:[
-   'Notice/revision and deployed test image/withdrawal binding are verified on testedCommit. Close remaining D05 custody/recovery acceptance; retain operator-attested notification receipt and obtain exact source/schema/config approval.',
+   'Notice/revision and deployed test image/withdrawal binding are verified on testedCommit. Local 99-table restore and 56 synthetic deletion checks are separately verified. Close remaining D05 key custody and backup operations acceptance; retain operator-attested notification receipt and obtain exact source/schema/config approval.',
    'Re-read production Git SHA/config/schema. Stop on drift; do not use this snapshot as a future authorization.',
    'Apply the three versioned migrations in listed order under one guarded transaction, preserving data/settings/usage and recording source/hash/release IDs; keep Public reads/writes off.',
    'Save exact Production environment changes after current-value snapshot, then Git master deployment of approved candidate. Verify Vercel Git SHA and build-info.',
@@ -88,11 +99,11 @@ try {
   ],
   openGates:[
    {id:'D04',condition:'Fixed notice and current-signup receipt binding passed on test. Production activation of existing GENERAL rights and KR14/US13/TH13 needs exact approval; other-region follow-ups are not silently enabled or removed.'},
-   {id:'D05',condition:'Recovery key independent custody and remaining recovery/retention acceptance are not confirmed; do not mark completed.'},
+   {id:'D05',condition:'Local current-backup restore/deletion reconciliation passed (see recoveryAcceptance). Independent key custody, recurring external backup/retention and restored-serving acceptance remain; do not repeat completed baseline checks or mark D05 completed.'},
    {id:'D03/Q19',condition:'Operator confirmed actual existing workflow-failure notification receipt on 2026-10-11. Channel acceptance is user-attested; a new capacity-threshold notification was not sent or independently verified. Six-hour observation is not immediate notification.'},
    {id:'W19/D06',condition:'Test deployed image decode and UI withdrawal passed. Old direct image URL 404 and production source/config post-activation verification remain; do not rerun the full A/B matrix without changed behavior.'}
   ],
   newUserBehaviorPass:0,remoteMutations:0
  };
  console.log(JSON.stringify(manifest,null,2));
-} catch(e){console.error(['STALE_PREFLIGHT','PRESERVED_BASELINE_CHANGED','HOSTED_EVIDENCE_MISMATCH','WRONG_TARGET','BASELINE_CHANGED','MIGRATION_DELTA_CHANGED','PUBLIC_BASELINE_CHANGED','DELIVERY_BASELINE_CHANGED','UNTESTED_RUNTIME_CHANGE','EXPECTED_AGGREGATE_PREFLIGHT_PATH'].includes(e.message)?e.message:'CANDIDATE_BUILD_FAILED_DETAILS_WITHHELD');process.exitCode=1;}
+} catch(e){console.error(['RECOVERY_EVIDENCE_MISMATCH','STALE_PREFLIGHT','PRESERVED_BASELINE_CHANGED','HOSTED_EVIDENCE_MISMATCH','WRONG_TARGET','BASELINE_CHANGED','MIGRATION_DELTA_CHANGED','PUBLIC_BASELINE_CHANGED','DELIVERY_BASELINE_CHANGED','UNTESTED_RUNTIME_CHANGE','EXPECTED_AGGREGATE_PREFLIGHT_PATH'].includes(e.message)?e.message:'CANDIDATE_BUILD_FAILED_DETAILS_WITHHELD');process.exitCode=1;}

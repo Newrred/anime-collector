@@ -3575,7 +3575,7 @@
     },
     "rights": "Existing GENERAL-only consent; self-declared own creation; third-party screenshots/fanart still require separate evidence. No new scope decision.",
     "executionOrder": [
-      "Notice/revision and deployed test image/withdrawal binding are verified on testedCommit. Close remaining D05 custody/recovery acceptance; retain operator-attested notification receipt and obtain exact source/schema/config approval.",
+      "Notice/revision and deployed test image/withdrawal binding are verified on testedCommit. Local 99-table restore and 56 synthetic deletion checks are separately verified. Close remaining D05 key custody and backup operations acceptance; retain operator-attested notification receipt and obtain exact source/schema/config approval.",
       "Re-read production Git SHA/config/schema. Stop on drift; do not use this snapshot as a future authorization.",
       "Apply the three versioned migrations in listed order under one guarded transaction, preserving data/settings/usage and recording source/hash/release IDs; keep Public reads/writes off.",
       "Save exact Production environment changes after current-value snapshot, then Git master deployment of approved candidate. Verify Vercel Git SHA and build-info.",
@@ -3597,7 +3597,7 @@
       },
       {
         "id": "D05",
-        "condition": "Recovery key independent custody and remaining recovery/retention acceptance are not confirmed; do not mark completed."
+        "condition": "Local current-backup restore/deletion reconciliation passed (see recoveryAcceptance). Independent key custody, recurring external backup/retention and restored-serving acceptance remain; do not repeat completed baseline checks or mark D05 completed."
       },
       {
         "id": "D03/Q19",
@@ -3656,12 +3656,14 @@
       },
       {
         "id": "D05/W17",
-        "state": "CUSTODY_AND_RECOVERY_INCOMPLETE",
-        "required": "Independent key copy, remaining production-backup database restore/deletion reconciliation and agreed recovery targets.",
+        "state": "LOCAL_RECOVERY_PASS_OPERATIONS_PARTIAL",
+        "required": "Independent key custody, recurring external backup/7-day retention, and no-reopen-without-current-deletion/policy/Storage reconciliation; canonical completeness remains with W16.",
         "evidence": "2026-10-10-external-backup-recovery.json",
-        "alreadyVerified": "External encrypted archive integrity and 4308 file recovery; do not repeat the 72-table baseline.",
+        "alreadyVerified": "Current 99-table real isolated restore, 56 synthetic Public/deletion checks, owner/other/anonymous RPC and RLS, IDs/hash/quota preserved. Do not repeat these baseline checks.",
         "userConfirmedOn": "2026-10-11",
-        "independentRecoveryKeyCopyStored": false
+        "independentRecoveryKeyCopyStored": false,
+        "evidenceCommit": "c04ee391155730523cb02710e6c27dce1aea98d1",
+        "evidenceKey": "publicDeletionRecovery20261011"
       },
       {
         "id": "D06",
@@ -3688,6 +3690,288 @@
       "independentRecoveryKeyCopyStored": false,
       "newCapacityAlertSent": false,
       "independentlyObservedInbox": false
+    },
+    "recoveryAcceptance": {
+      "state": "LOCAL_RESTORE_VERIFIED_OPERATIONS_PARTIAL",
+      "provenance": {
+        "commit": "c04ee391155730523cb02710e6c27dce1aea98d1",
+        "file": "docs/moemoa/release-v2/evidence/2026-10-10-external-backup-recovery.json",
+        "sha256": "35912e4d3a9b4253a4f217fdc9ade67fb785b3ba73294897e63fe0e8d35e30bf",
+        "key": "publicDeletionRecovery20261011",
+        "codeSha256": {
+          "tools/operations/capture-isolated-recovery-context.py": "298f40c2e2843ed116842133b7b735f7d655d9afecf75245854c0cb752d34bea",
+          "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+          "tools/operations/isolated-public-recovery.sql": "61dd7be144a42e86045de3a4db865dde5fb157088e957d6fdfec4b79ab6d5378",
+          "tools/operations/isolated-public-recovery-contract.sql": "f43d8dc3b43b97e1c6a738f708a041c7f23713bc1270eed0034ca8d5d37cd990",
+          "tools/operations/rehearse-production-restore.mjs": "009a9331a11d2d95b339c208e09314b46b2620f5471e76212aed81fe263fc51f",
+          "tools/operations/capture-daily-backup.py": "f24bacf0a47eff28158e7cf5c499723e3a484536af54fa535dd807c4abf3e978",
+          "tools/operations/prepare-daily-backup.mjs": "29f38f140c36d7c13bfdc3352e6fd28241ec84ec301a9ed2914b777a2c6eefe2"
+        }
+      },
+      "completed": {
+        "databaseTables": 99,
+        "publicDeletionSyntheticChecks": 56,
+        "ownerReads": 5,
+        "otherOwnerDenied": 5,
+        "anonymousDenied": true,
+        "cardRlsDenied": true,
+        "retryBodiesScrubbedLocally": 12,
+        "sourceOperationHashQuotaPreserved": true,
+        "accessClosedAndContainerStopped": true
+      },
+      "notClaimed": {
+        "hostedPublicRestore": true,
+        "storageHttpOrCdnRestore": true,
+        "newEncryptedPublicJournalArchive": true,
+        "productionAuthorization": true
+      },
+      "independentKeyCopyStored": false,
+      "retentionScheduleEnabled": false,
+      "readyForProduction": false,
+      "remaining": [
+        {
+          "id": "D05_KEY",
+          "action": "Store recovery key independently of this PC and backup ZIP; user confirmation still absent."
+        },
+        {
+          "id": "D05_BACKUP_OPERATIONS",
+          "action": "Daily external backup and 7-day retention are not active; user excluded local schedule. RPO/RTO24h remain goals, not achieved guarantees."
+        },
+        {
+          "id": "D05_RECOVERY_REOPEN",
+          "action": "Never reopen restored serving without complete fresh deletion/rights state, current policy/audit and Storage/CDN reconciliation. Current snapshots are not a durable deletion feed; populated Public restore was synthetic."
+        },
+        {
+          "id": "W16_CANONICAL",
+          "action": "Preserve existing canonical completeness and small catalog publish/restore acceptance; this candidate does not ingest or replace catalog data."
+        }
+      ]
+    },
+    "recoveryBinding20261011": {
+      "previousD05Acceptance": {
+        "id": "D05/W17",
+        "state": "CUSTODY_AND_RECOVERY_INCOMPLETE",
+        "required": "Independent key copy, remaining production-backup database restore/deletion reconciliation and agreed recovery targets.",
+        "evidence": "2026-10-10-external-backup-recovery.json",
+        "alreadyVerified": "External encrypted archive integrity and 4308 file recovery; do not repeat the 72-table baseline.",
+        "userConfirmedOn": "2026-10-11",
+        "independentRecoveryKeyCopyStored": false
+      },
+      "readOnlyPreflight": {
+        "target": "okchpyagfucpzpyrfgol",
+        "readOnly": true,
+        "snapshot": {
+          "checkedAt": "2026-10-11T13:08:45.221083+00:00",
+          "functions": {
+            "makePrivate": false,
+            "sharingStatus": false,
+            "sizedDelivery": false
+          },
+          "migrations": [
+            "20260819021327",
+            "20260819021408",
+            "20260902054107",
+            "20260902054119",
+            "20260902054132",
+            "20260902055512",
+            "20260902055852",
+            "20260903141500",
+            "20260907193000",
+            "20260923090000",
+            "20260923093000",
+            "20260923182210",
+            "20260923183940",
+            "20260923192300",
+            "20260923213901",
+            "20260924115258",
+            "20260924121214",
+            "20260924193626",
+            "20260924194059",
+            "20260924195510",
+            "20260925152858",
+            "20260925152859",
+            "20260925164126",
+            "20260926140122",
+            "20260927042334",
+            "20260927044435",
+            "20261005090000",
+            "20261007093000",
+            "20261008090000",
+            "20261008093000",
+            "20261009090000",
+            "20261009130000",
+            "20261009143000",
+            "20261010103000",
+            "20261010170000",
+            "20261010180000",
+            "20261010190000",
+            "20261011160000"
+          ],
+          "publicCounts": {
+            "homes": 0,
+            "assets": 0,
+            "boards": 0
+          },
+          "signupPolicy": {
+            "enabled": true,
+            "termsVersion": "terms-2026-10-10",
+            "policyVersion": "simple-signup-2026-10-10",
+            "privacyVersion": "privacy-2026-10-10",
+            "admissionEnabled": true
+          },
+          "storagePolicy": {
+            "enabled": true,
+            "singleton": true,
+            "max_reserved_bytes": 20971520
+          },
+          "moderatorCount": 1,
+          "enabledCountries": [
+            {
+              "country": "KR",
+              "minimumAge": 14
+            },
+            {
+              "country": "TH",
+              "minimumAge": 13
+            },
+            {
+              "country": "US",
+              "minimumAge": 13
+            }
+          ],
+          "resourcePolicies": [
+            {
+              "scope": "FOLLOW_WRITE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_ATTEMPT",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PREPARE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PUBLISH",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARD_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_USER_DEVICES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            }
+          ],
+          "publicationSettings": {
+            "singleton": true,
+            "asset_limit": 0,
+            "reads_enabled": false,
+            "images_enabled": false,
+            "writes_enabled": false,
+            "follows_enabled": false,
+            "policy_revision": "UNAPPROVED",
+            "reports_enabled": false,
+            "asset_bytes_limit": 0,
+            "minihomes_enabled": false,
+            "report_daily_limit": 0,
+            "content_policy_revision": "UNCONFIGURED",
+            "general_publication_policy_revision": "UNCONFIGURED"
+          },
+          "activeDeliveryOverrides": 0
+        }
+      },
+      "live": {
+        "status": 200,
+        "commit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "checkoutCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "source": "vercel-git"
+      },
+      "immutableCandidateFieldsCompared": [
+        "sourceCommit",
+        "productionBaseline",
+        "testedCommit",
+        "schemaReleaseId",
+        "migrations",
+        "proposedConfiguration",
+        "rollbackOrder",
+        "publicNotice",
+        "sourceFiles"
+      ],
+      "immutableCandidateFieldsUnchanged": true,
+      "verification": {
+        "command": "node --test tests/operations/firstPublicCandidate.test.mjs",
+        "passed": 20,
+        "failed": 0
+      },
+      "sourceOrConfigurationChanged": false,
+      "newUserBehaviorPass": 0,
+      "productionWrites": 0,
+      "testWrites": 0,
+      "productionApproval": false,
+      "nextAction": "Complete D05 independent-key and recurring external-backup operational acceptance; exact D06 rollout approval remains separate."
     }
   }
 }

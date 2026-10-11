@@ -24,6 +24,10 @@ test('final candidate binds exact tested source, fixed notice and restored hoste
  assert.equal(m.priorHostedEvidence.scope.image.throughDeployedPublicImageHandler,true);
  assert.equal(m.priorHostedEvidence.scope.rawImageUrl404Verified,false);
  assert.equal(m.remoteMutations,0);
+ assert.equal(m.recoveryAcceptance.provenance.commit,'c04ee391155730523cb02710e6c27dce1aea98d1');
+ assert.equal(m.recoveryAcceptance.completed.publicDeletionSyntheticChecks,56);
+ assert.equal(m.recoveryAcceptance.readyForProduction,false);
+ assert.equal(m.recoveryAcceptance.remaining.length,4);
  assert.deepEqual(m.migrations.map(x=>x.version),['20261010160000','20261011120000','20261011180000']);
  assert.equal(m.publicNotice.sha256,'72ffbcf83af732bba65c43d77096cd02b47f0c76c55f0d77ebb002b9949dfe5b');
  assert.equal(m.proposedConfiguration.preserve.globalPublicStorageBytes,20971520);
@@ -44,3 +48,14 @@ const invalid=[
  ['paused quota',x=>{x.snapshot.resourcePolicies.find(p=>p.scope==='IMAGE_DELIVERY').paused=true},'DELIVERY_BASELINE_CHANGED'],
 ];
 for(const [name,change,error] of invalid)test('rejects '+name,()=>{const r=candidate(change);assert.equal(r.status,1);assert.equal(r.stderr.trim(),error);assert.equal(r.stdout,'');});
+
+import { recoveryAcceptance } from '../../tools/operations/recovery-acceptance.mjs';
+const recoveryEvidence=JSON.parse(readFileSync(join(root,'docs/moemoa/release-v2/evidence/2026-10-10-external-backup-recovery.json'),'utf8')).publicDeletionRecovery20261011;
+for(const [name,change] of [
+ ['incomplete run',x=>{x.report.status='INCOMPLETE'}],
+ ['serving accidentally open',x=>{x.report.publicAccessRemainsClosed=false}],
+ ['synthetic passed off as hosted',x=>{x.report.publicContract.synthetic=false}],
+ ['unconfirmed key promoted',x=>{x.independentKeyCopyConfirmed=true}],
+ ['container not stopped',x=>{x.report.containerStopped=false}],
+ ['cross-account denial missing',x=>{x.report.access.otherOwnerDenied=0}],
+])test('recovery acceptance rejects '+name,()=>{const e=structuredClone(recoveryEvidence);change(e);assert.throws(()=>recoveryAcceptance(e,{}),/RECOVERY_EVIDENCE_MISMATCH/);});

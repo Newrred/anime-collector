@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W20/D06 복구 증거 결속 완료:** 기존 후보03 앱56cd0ab/DB3/정책·환경·한도·rollback은 그대로 두고 c04ee39의 D05 결과를 고정 Git commit/evidence SHA256/코드7개 해시로 연결했다. 실제99테이블복원·합성56·RPC/RLS는 과거 실행 근거이며 이번 재실행0. 후보생성/거부20검사 PASS. 운영 readonly 재조회38migration/Public0·off, www199613b 확인. 구형 ‘DB복원 미완료’를 정정; 독립키·정기외부백업/7일보관·복구서빙 인수·canonical완전성은 잔여, 운영승인 아님. 다음1개: 기존 D05의 독립키/정기외부보관 운영 인수. 운영쓰기/배포/새업로드0.
+
+
 > **2026-10-11 W17/D05 공개·삭제 복구 로컬 마감:** 최신10/11 백업99테이블·7확장 실제 격리복원 PASS. 최신 readonly 상태 대조와 공개 철회/홈 철회/카드·asset·board·계정 삭제/권리취소/가림/차단/원본버전 변경 합성56검사 PASS, 삭제된 기록의 재시도 본문12건은 로컬에서만 제거·operation/hash/결과 보존. 실제 ownerRPC5/타계정5·익명·RLS PASS, Public/private off·컨테이너 정지. 실제운영 공개자료0이므로 populated Public/Storage HTTP 복구 PASS 아님. 향후 백업에 같은snapshot 공개journal 포함 연결·읽기수집 PASS; 새암호화/업로드는 안함. 독립키 미보관·정기 외부보관/7일정리 미가동·최신삭제feed 부재는 D05 잔여. 다음1개: D06 후보03에 이 복구 증거와 남은 운영 인수 조건을 결속. 아래 로그는 당시 증거로 보존한다.
 
 
@@ -22,6 +25,13 @@
 
 
 
+
+## 2026-10-11 D06 복구 증거 결속 조건
+
+- 후보03의 source56cd0ab/DB3/고정고지/환경·한도·rollback 불변. recoveryAcceptance는 c04ee39의 집계파일 hash와 복구code7개 hash를 검증하여 생성한다. 소스CI38137032500와 실제test 증거는 과거 근거이며 이번CI/hosted 실행 아님.
+- 실제99table/합성56/RPC5·타계정5/익명/RLS/최종off·정지 조건이 맞지 않으면 후보 생성 거부. 로컬합성을 hosted PASS로 바꾸거나 미보관키를 완료로 바꾼 입력도 거부한다. 검사20 PASS.
+- recoveryAcceptance.readyForProduction=false 유지: 독립키와 정기외부보관·7일정리 목표는 미인수. 복구재개시 최신완전삭제상태·정책/감사·Storage/CDN 대조는 필수이고 snapshot은 삭제feed대체물 아님. canonical작업 W16은 별도보존. 이번변경은 신규기능/국가/권리/일정승인0.
+- 운영 readonly13:08:45Z에서38migration·공개자료0/flags off 확인, www SHA199613b. 활성직전 다시대조할 사전조건이지 향후상태보장 아님. 기존 exact source/schema/config/master/public 승인 없이 실행하지 않는다.
 
 ## 2026-10-11 W17/D05 복구 인수의 남은 범위
 
