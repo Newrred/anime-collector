@@ -2534,7 +2534,7 @@
     "candidate": "6c633bdaa29458c16de931ad17137fc455d3bd0d",
     "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
     "approval": "User approved test connection, verification and restore",
-    "status": "TEST_READY_WAITING_PERSONAL_PUBLIC_CONSENT",
+    "status": "HOSTED_PUBLISH_VIEW_WITHDRAW_PASS_RESTORED",
     "appliedReadback": {
       "target": "nmgkhknponvzcwliajyk",
       "readOnly": true,
@@ -2738,8 +2738,14 @@
       "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
     },
     "deploymentId": "G2gqkAKY2WHXDmsb3rux9HcNYyjP",
-    "newUserBehaviorPass": 0,
-    "restoreCompleted": false,
+    "newUserBehaviorPass": [
+      "personal consent and public save",
+      "new anonymous session image decode",
+      "owner private save",
+      "same anonymous Board unavailable after reload",
+      "owner original retained"
+    ],
+    "restoreCompleted": true,
     "productionMutations": 0,
     "deploymentStatus": "Ready",
     "deploymentSourceVerified": true,
@@ -2760,6 +2766,354 @@
       "checkboxChecked": false,
       "saveDisabledBeforeConsent": true
     },
-    "newHostedPublicationPass": 0
+    "newHostedPublicationPass": 1,
+    "personalConsent": {
+      "confirmedBy": "User replied 저장 완료",
+      "agentAcceptedConsent": false
+    },
+    "actualHostedCloseout": {
+      "testedSource": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+      "deploymentId": "G2gqkAKY2WHXDmsb3rux9HcNYyjP",
+      "origin": "https://anime-collector-ld1diyxhz-newrreds-projects.vercel.app",
+      "anonymousSignInToReportVisible": true,
+      "image": {
+        "complete": true,
+        "naturalWidth": 24,
+        "naturalHeight": 30,
+        "throughDeployedPublicImageHandler": true
+      },
+      "ownerPrivateSaveSuccess": true,
+      "anonymousReload": {
+        "message": "This Board is unavailable.",
+        "imageCount": 0
+      },
+      "ownerOriginalAfterWithdrawal": {
+        "complete": true,
+        "naturalWidth": 24,
+        "naturalHeight": 30
+      },
+      "usageBefore": {
+        "requests": 2,
+        "bytes": 144
+      },
+      "usageAfter": {
+        "requests": 4,
+        "bytes": 288
+      },
+      "singlePageRequestAttribution": false,
+      "rawImageUrl404Verified": false,
+      "miniHomeFollowRerun": false
+    },
+    "restoration": {
+      "database": {
+        "target": "nmgkhknponvzcwliajyk",
+        "readOnly": true,
+        "snapshot": {
+          "checkedAt": "2026-10-11T11:46:16.091382+00:00",
+          "functions": {
+            "makePrivate": true,
+            "sharingStatus": true,
+            "sizedDelivery": true
+          },
+          "migrations": [
+            "20260924141253",
+            "20260924141254",
+            "20260924141255",
+            "20260924141256",
+            "20260924141257",
+            "20260924141258",
+            "20260924141259",
+            "20260924141300",
+            "20260924141301",
+            "20260924141302",
+            "20260924141316",
+            "20260924141318",
+            "20260924141320",
+            "20260924141322",
+            "20260924141324",
+            "20260924141326",
+            "20260924141328",
+            "20260924194322",
+            "20260924194325",
+            "20260924195621",
+            "20260925152859",
+            "20260925164126",
+            "20260927053858",
+            "20260927053904",
+            "20260927053914",
+            "20261005090000",
+            "20261007093000",
+            "20261008090000",
+            "20261009130000",
+            "20261009143000",
+            "20261010103000",
+            "20261010160000",
+            "20261010170000",
+            "20261010180000",
+            "20261010190000",
+            "20261011120000",
+            "20261011160000",
+            "20261011180000"
+          ],
+          "publicCounts": {
+            "homes": 1,
+            "assets": 18,
+            "boards": 8
+          },
+          "signupPolicy": {
+            "enabled": true,
+            "termsVersion": "terms-2026-10-10-test",
+            "policyVersion": "simple-signup-2026-10-10-test",
+            "privacyVersion": "privacy-2026-10-10-test",
+            "admissionEnabled": true
+          },
+          "storagePolicy": {
+            "enabled": false,
+            "singleton": true,
+            "max_reserved_bytes": 0
+          },
+          "moderatorCount": 1,
+          "enabledCountries": [
+            {
+              "country": "GB",
+              "minimumAge": 13
+            },
+            {
+              "country": "KR",
+              "minimumAge": 14
+            },
+            {
+              "country": "PH",
+              "minimumAge": 13
+            },
+            {
+              "country": "TH",
+              "minimumAge": 13
+            },
+            {
+              "country": "US",
+              "minimumAge": 13
+            }
+          ],
+          "resourcePolicies": [
+            {
+              "scope": "FOLLOW_WRITE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_ATTEMPT",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PREPARE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PUBLISH",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARD_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_USER_DEVICES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            }
+          ],
+          "publicationSettings": {
+            "singleton": true,
+            "asset_limit": 10,
+            "reads_enabled": true,
+            "images_enabled": true,
+            "writes_enabled": true,
+            "follows_enabled": true,
+            "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "reports_enabled": true,
+            "asset_bytes_limit": 41943040,
+            "minihomes_enabled": true,
+            "report_daily_limit": 10,
+            "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signup_declaration_required": false,
+            "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+          },
+          "activeDeliveryOverrides": 0,
+          "currentDeclarationCount": 2
+        }
+      },
+      "quota": {
+        "target": "moemoa-test",
+        "mode": "rollback",
+        "before": {
+          "usage": [
+            {
+              "day": "2026-10-11",
+              "used": 4,
+              "scope": "IMAGE_DELIVERY"
+            },
+            {
+              "day": "2026-10-11",
+              "used": 288,
+              "scope": "IMAGE_DELIVERY_BYTES"
+            }
+          ],
+          "policies": [
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": true,
+              "live_limit": null,
+              "daily_limit": 2000
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": true,
+              "live_limit": null,
+              "daily_limit": 64000000
+            }
+          ],
+          "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+          "publicSettingsHash": "815a361de3c1646b87894fa9e0e43f90"
+        },
+        "after": {
+          "usage": [
+            {
+              "day": "2026-10-11",
+              "used": 4,
+              "scope": "IMAGE_DELIVERY"
+            },
+            {
+              "day": "2026-10-11",
+              "used": 288,
+              "scope": "IMAGE_DELIVERY_BYTES"
+            }
+          ],
+          "policies": [
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            }
+          ],
+          "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+          "publicSettingsHash": "815a361de3c1646b87894fa9e0e43f90"
+        },
+        "preservedPublic": true,
+        "preservedOtherPolicies": true,
+        "preservedUsage": true
+      },
+      "policy": {
+        "target": "moemoa-test",
+        "mode": "restore",
+        "result": [
+          {
+            "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "contentPolicyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "generalPolicyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signupDeclarationRequired": false
+          }
+        ]
+      },
+      "previewSettings": {
+        "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "sizedDelivery": false,
+        "branch": "codex/phone-test",
+        "saved": true
+      },
+      "gitPhoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+      "deploymentId": "52vdkwQ1pMp8AHEF2rZJRYrSn9Ex",
+      "deploymentStatus": "Ready",
+      "sourceAndAliasVerifiedInVercel": true,
+      "directBuildInfoVerified": false,
+      "directBuildInfoLimitation": "Unauthenticated fetch returned HTML; browser navigation blocked by client. Vercel Ready/source/canonical alias verified."
+    },
+    "ci": [
+      {
+        "runId": "38133989759",
+        "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+        "branch": "codex/phone-test",
+        "conclusion": "success"
+      },
+      {
+        "runId": "38131778423",
+        "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+        "branch": "codex/simple-signup-preview",
+        "conclusion": "success"
+      }
+    ],
+    "screenshots": [
+      "2026-10-11-notice-anonymous-image-pass.png",
+      "2026-10-11-notice-anonymous-withdrawn.png"
+    ]
   }
 }

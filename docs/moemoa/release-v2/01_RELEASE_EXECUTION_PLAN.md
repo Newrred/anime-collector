@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
 > **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
 
 
@@ -2173,3 +2176,17 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 [2026-10-11 승인] 사용자 6c633bd/화면50ecbc9의 test 고지·guard·기존quota·sized Preview 연결, 실제 열람/철회 후 설정·배포 원복 승인. 승인 범위 내 실행을 이어가며 운영/master 변경은 제외한다.
 
 [2026-10-11 실행] 승인6c633bd 고정hash SQL을 test TLS연결로 적용: revision3값+guard=true, quota2000/64000000. usage2/144·다른정책보존, 독립readback일치. Preview 두값 저장→Git phone-test50ecbc9→Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·Source/alias확인. 실제고정한영고지·합성카드미리보기·revision표시·동의체크1개·체크전저장disabled 확인. 사용자직접동의 대기, 실제게시/익명이미지/철회·원복 아직미실행. 운영/master변경0.
+
+
+#### W14/W19/D04 사용자 직접 게시 후 실제 열람·철회 — 2026-10-11 실행 보고
+
+1. 읽은 문서/코드: AGENTS, CODEX_START_HERE, 확정결정01, PLANS, 이미지05, QA07, 변경09, 기존 release-v2 00/01/02/03·capacity evidence와 기존 공개/비공개 UI를 대조했다. verify-before-claiming·computer-use 기준 적용.
+2. 가정/미결: 사용자가 새 고지 체크와 저장을 직접 완료했다. 이번은 합성 카드 한 장의 실제 test 왕복이며 새 미니홈/팔로우 전체 재시험이나 운영 PASS가 아니다. 원본 이미지 보존은 소유자 화면의 실제 decode로 확인했다.
+3. 계획: 위 W14/W19/D04 test 연결의 기존17항을 실행했다. 승인 후보6c633bd/배포소스50ecbc9, 단일 작업판 유지.
+4. 변경 파일: 기존00/01/02/03의 현재 요약·카드·W/D/Q 행과 evidence/2026-10-11-public-capacity-closeout.json만 갱신한다. 앱 코드/의존성 재작성0. 실제 합성 익명 화면의 게시·철회 캡처2개를 evidence에 보존한다.
+5. DB/롤백: 새 migration0. 승인된 임시 정책3revision/가입guard·quota 두값을 exact SQL로 원복했다. 독립 readback에서 baseline 일치, 원본·기존수락2건·실제 usage4GET/288B 보존. Preview 두 환경값을 기존 policy/sized=false로 저장하고 phone-test Git을 이전a6b6dda로 복귀했다. 배포 복원 최종 결과는 아래와 evidence를 따른다. 운영/master199613b 불변.
+6. 실제 명령/결과: Chrome 실제 사용자 게시 후 공개중/revision 표시 → 새 immutable origin 비로그인 Sign in to report 및 /api/public-image 이미지 complete/24×30 PASS → 소유자 비공개/저장 성공 → 같은 익명 페이지 reload/unavailable·img0 PASS → 소유자 원본24×30 PASS. wsl.exe -- python3 /mnt/e/web/anime/.cache/public-budget-approved.py inspect exit0; 사용량2/144→4/288(특정 페이지 하나의 요청수로 단정하지 않음). 같은 runner rollback 및 public-notice-approved.py restore exit0, inspect-public-notice-test.py 독립 읽기 exit0. git push --force-with-lease=refs/heads/codex/phone-test:50ecbc9e5b393671a129df0ed229fda01ecc4958 origin a6b6ddaaadf9487f5f8f3b14064cb794b27826c0:refs/heads/codex/phone-test exit0. ls-remote에서 phone-test a6b6dda/master199613b 확인. 동일50ecbc9 CI38133989759·38131778423 SUCCESS 조회. 이번 앱 변경이 없어 기존 unit/build를 반복하지 않았다.
+7. 보안/관측/권리: 사용자 동의 대리수락0·계정/개인사진/원본 삭제0·운영 쓰기0·외부 알림발송0. usage를 지우지 않았다. 과거 unit12/모의API12/SQL8·이전 A/B/미니홈/신고/조치 PASS와 이번 실제 deployed 이미지/철회를 구분한다. 직접 옛 이미지 URL의 HTTP404는 미확인, 익명 보드에서 비노출은 실제 확인. 추가 Safari/Android는 제외 유지.
+8. 잔여와 다음1개: 새 고지·현재 가입확인·실제 이미지전달·카드 비공개 test 연결을 마감한다. D04 운영정책/국가 잔여, D03 실제 경보 수신, D05 별도 복구키/복구 인수는 그대로 남긴다. 다음은 기존 D06 최종 운영 후보의 변경목록·남은 조건을 한 번에 정리하는 것이다. 이번 test 승인을 운영/Public 활성 승인으로 확대하지 않는다.
+
+[원복 완료] Vercel Preview52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready, Source a6b6dda와 phone-test canonical alias 확인. 직접 build-info 경로는 미인증 HTML/브라우저 차단으로 별도 검증하지 못했으며 이를 live SHA PASS로 적지 않는다. 기존 원격master199613b 유지.

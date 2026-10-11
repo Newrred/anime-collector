@@ -1,8 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
 ## 2026-10-11 W14/W19 test 고지 연결 후보 계약
 
-- 소스50ecbc9/CI38131778423 SUCCESS, 제품139a200과 runtime/config/DB 동일. 새 고지 hosted PASS는 아직 없다.
+- 소스50ecbc9/CI38131778423 SUCCESS, 제품139a200과 runtime/config/DB 동일. 후속 사용자 직접 동의·새 익명 실제 이미지/철회 PASS는 위 최신 실행과 evidence를 따른다.
 - test 설정 네 필드만 변경: 세 policy revision은 MOEMOA_PUBLIC_GENERAL_20261011_01, signup_declaration_required=true. 기존 current signup declaration2건 확인; 재가입·기존수락변조 없음.
 - full row exact baseline·signup 정책/RPC 의존성이 맞을 때만 적용한다. 기본 dry-run, restore도 exact candidate만 허용하며 kill-switch/한도 drift를 덮어쓰지 않는다. 구성 전용 PostgreSQL8 PASS를 실제 게시 PASS로 합산하지 않는다.
 - 승인 범위 후보: 기존2000GET/64MB quota와 phone-test Preview policy/sized=true·Git소스50ecbc9를 함께 연결. 기존 소스a6b6dda·policy·sized=false·quota off/0·guard=false로 복귀하고 실제 사용량/수락/원본은 보존한다. Preview baseline은 적용 전 fresh readback 필수.

@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
 > **2026-10-11 승인 후보 test 적용:** 6c633bd 설정 SQL/화면50ecbc9를 승인 범위에서 적용. test revision3값·guard=true, quota2000GET/64MB 및 Preview sized=true. Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·소스/alias 확인. 실제 고지·합성 미리보기·한 체크/체크전 저장차단 확인. **현재 사용자 직접 공개 동의 대기, 설정·배포는 임시 적용 상태이며 아직 원복하지 않았다.** 다음1개: 사용자 저장 후 익명 이미지·철회 확인→정확한 기존 설정/배포 원복. 운영 변경0.
 
 
