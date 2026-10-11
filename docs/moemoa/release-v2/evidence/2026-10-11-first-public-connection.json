@@ -518,7 +518,12 @@
         "failed": 0,
         "exit": 0
       },
-      "remoteFixVerification": "pending"
+      "remoteFixVerification": {
+        "sourceCommit": "9f3661063b79923b73050629deeef021a6c65dee",
+        "runId": 38113213200,
+        "status": "queued-at-last-read",
+        "conclusion": null
+      }
     },
     "guardAtHandoff": {
       "publicSettings": {
@@ -544,6 +549,12 @@
       "publicChoice": "existing synthetic image decoded; single consent; save disabled before consent",
       "policyAcceptedByAgent": false,
       "published": false
+    },
+    "guardRestoredAfterHomePreview": {
+      "command": "wsl.exe -- python3 /mnt/e/web/anime/tools/identity/prepare-public-signup-test.py --restore",
+      "exit": 0,
+      "signupDeclarationRequired": false,
+      "otherPublicFlagsAndPolicyPreserved": true
     }
   }
 }

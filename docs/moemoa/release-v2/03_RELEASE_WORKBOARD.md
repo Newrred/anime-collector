@@ -735,9 +735,9 @@ W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
 이전 로컬: unit69·고유 모의API Chromium13·SQL33·build32 PASS, 새 hosted PASS와 구분
 이번 DB: 승인된20261011120000 rollback리허설→APPLY→독립readback PASS.13table 원문 fingerprint/건수 일치·기존flags/정책/권리/원본 보존
 이번 화면: A 직접 동의/Save→Saved as public→새 익명 origin Sign in to report·24×30 공개 이미지decode PASS. 미니홈 합성 프로필/공개보드1개 preview PASS
-실제 게시: 카드 게시 당시 guard=false(과거 원복 상태), 현재 A receipt 보유. 미니홈 preview는 승인된 enable-existing/guard=true에서 성공. 원본/감상/태그 공개0. 종료 시 guard 원복
+실제 게시: 카드 게시 당시 guard=false(과거 원복 상태), 현재 A receipt 보유. 미니홈 preview는 승인된 enable-existing/guard=true에서 성공. 원본/감상/태그 공개0. 종료 전 --restore exit0/guard=false 확인
 이번 검사: CI38112339835 일반runner env누락1FAIL 보존; workflow의 publication전체를 기존 격리runner로 이동→37/37 로컬PASS. 제품/DB 변경0
-미완료: home 당사자 게시/B follow·재방문·신고/차단/철회, 수정후 CI, D03~D06 실제 잔여
+미완료: home 당사자 게시/B follow·재방문·신고/차단/철회, 9f36610의 CI38113213200 완료 확인, D03~D06 실제 잔여
 다음1개: A가 준비된 미니홈의 정책 직접 수락/게시→B follow·내 목록 재방문
 ```
 
@@ -927,7 +927,7 @@ NA 이유:
 
 | ID | 필요한 결정 | 상태 | 현재 기본안/대기 중 행동 | 마지막 필요 시점 | 실제 승인/증거 |
 |---|---|---|---|---|---|
-| D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 직전 guard=false 원복; 이번 미니홈 검사에 기존 승인으로 guard=true 재활성, 종료 시 원복. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
+| D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 직전 guard=false 원복; 이번 미니홈 검사에 기존 승인으로 guard=true 재활성, 인계 전 --restore/false 확인. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |

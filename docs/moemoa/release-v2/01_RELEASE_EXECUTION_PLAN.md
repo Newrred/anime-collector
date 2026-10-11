@@ -83,7 +83,7 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 - CI38112339835는 publication-contract 성공, verify의 일반E2E87PASS/1SKIP/1FAIL. 실패는 private-source 이미지를 요구하는 새 case가 두 feature env 없이 일반 runner에서 실행된 것. 로컬 전용 runner는 해당2flag와 비밀값 없는 격리 환경을 명시한다.
 - 좁은 변경: quality workflow의 publication-ui를 일반 묶음에서 빼고 기존 run-publication-closeout-e2e.mjs '.*'로 전체 publication spec을 실행(검사 삭제/skip 추가 없음). 동일 runner 전체 spec 실제 검증→테스트 브랜치 반영/CI 확인. 제품 소스·DB·정책 변경 없음. 복귀는 workflow1파일 revert. 새 기본DB/실기기 반복 검사 없음.
 
-- 실행 결과: `node scripts/run-publication-closeout-e2e.mjs ".*"` →37/37 PASS, exit0. 실제 hosted와 모의API를 구분한다. 미니홈은 합성 프로필+신규 공개보드1개로 preview PASS, 당사자 정책 수락/게시 대기. 테스트 guard는 기존 승인 범위로 재활성했으며 인계 시 원복한다. 원격 CI 재검증 결과는 증거JSON에 기록한다.
+- 실행 결과: `node scripts/run-publication-closeout-e2e.mjs ".*"` →37/37 PASS, exit0. 실제 hosted와 모의API를 구분한다. 미니홈은 합성 프로필+신규 공개보드1개로 preview PASS, 당사자 정책 수락/게시 대기. 테스트 guard는 기존 승인 범위로 재활성했으며 인계 시 원복한다. 9f36610을 phone-test만 push했고 CI38113213200은 마지막 조회 queued(원격 PASS 아님). 인계 전 --restore exit0·guard=false 확인, 나머지 공개 설정/정책 보존. 원격 CI 후속 결과는 증거JSON에 기록한다.
 
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
