@@ -112,3 +112,28 @@ The second command uses disposable local WSL PostgreSQL and generated WebP files
 It also encrypts/restores a real local DB dump and latest journal, checks byte
 identity and decodes restored images. Its generated key is memory-only, so its
 encrypted output is deliberately not a reusable operational backup.
+
+## Read-only production metadata reconciliation
+
+The existing authenticated quarantine can be compared to the current production
+private-media snapshot without database writes or logging journal rows:
+
+```text
+wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/inspect-backup-reconciliation.py --quarantine /mnt/e/web/anime/.cache/operations-private/20261009-production/quarantine-external-20261010
+```
+
+The tool uses the existing local production connection and verify-full TLS, one
+read-only repeatable-read snapshot, and prints counts only. It rejects missing
+collections, duplicate identities, missing source types and stale latest snapshots.
+It compares account/source/card fences, cancellations and exact representation
+identity/hash/length. Eligible rows are candidates for isolated replay only.
+It does not import a database, replay deletions, validate Public rights, establish
+canonical-original completeness, copy images or enable serving. safeToServe is
+always false. The prior byte-verification marker is reused; no new full archive
+authentication is claimed.
+
+Run its synthetic boundary tests with:
+
+```text
+wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py
+```

@@ -61,5 +61,47 @@
     "Drive upload",
     "72-table synthetic restore",
     "Application unit/build/signup checks"
-  ]
+  ],
+  "followup20261011": {
+    "scope": "Read-only latest private-media metadata reconciliation; not database restore/replay",
+    "sourceBase": "18bb238af445b94cbc5cba4f40393bd02d30cd29",
+    "tests": {
+      "command": "wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py",
+      "passed": 21
+    },
+    "actual": {
+      "target": "production",
+      "readOnly": true,
+      "backupCapturedAt": "2026-10-09T09:34:33.175052+00:00",
+      "latestCapturedAt": "2026-10-11T12:12:40.482371+00:00",
+      "backupMedia": 6,
+      "latestMedia": 6,
+      "backupDisposition": {
+        "backupNotReady": 1,
+        "eligibleForIsolatedReplay": 5
+      },
+      "backupAccountsNowAbsent": 0,
+      "latestMediaNotInBackup": 0,
+      "databaseImportVerified": false,
+      "deletionReplayVerified": false,
+      "safeToServe": false
+    },
+    "environment": {
+      "pg17": "/opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/postgres",
+      "missingExtensions": [
+        "pg_cron",
+        "supabase_vault"
+      ],
+      "dockerWslIntegration": false,
+      "dockerEngineInitiallyRunning": false,
+      "dockerDesktopStartAttempted": true,
+      "dockerEngineAfterStart": "UNAVAILABLE_NAMED_PIPE"
+    },
+    "independentKeyCopyUserConfirmed": false,
+    "productionWrites": 0,
+    "externalUploads": 0,
+    "newUserBehaviorPass": 0,
+    "next": "Restore an extension-capable local isolated database environment, then import the existing production dump; keep serving disabled.",
+    "recoveryKeysReadOrCopied": 0
+  }
 }

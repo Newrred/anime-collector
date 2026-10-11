@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
+
+
 > **2026-10-11 D06 최종 운영 후보 정리 완료:** candidate03의 배포 소스56cd0ab·동일SHA CI38137032500 SUCCESS, 실제test50ecbc9와 runtime 차이0. 운영 www/master199613b·38 migrations·Public off를 새로 읽기 확인. 누락3 migration/고정고지hash/Production13설정·GitHub1설정·한도·복귀 순서 결속. 생성기 구형source/미검증 문구 보완 및 상태드리프트 거부14 PASS. 이번 운영/테스트 쓰기·새 사용자행동 PASS0. 기존 GitHub 실패 알림 실수신은 10/11 사용자 확인(새 용량경보 발송 검증 아님). D05 별도키는 사용자 미보관 확인·복구인수 잔여, D06 정확한운영승인·적용 후 W19/W20 운영확인 구분. 다음1개: 기존 W17/D05 복구 인수 마감. 기존 단일 작업판/과거 증거 유지.
 
 
@@ -2230,3 +2233,38 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 [2026-10-11 사용자 인수 확인] 기존 GitHub Actions 실패 알림은 실제 수신한 적 있다고 직접 확인했다. 신규 용량 임계 경보를 보냈거나 메일함을 독립 검증한 것은 아니다. 복구키는 아직 별도 보관하지 않았다고 재확인했다. D03 수신 경로와 D05 키 보관을 각각 USER_ATTESTED / INCOMPLETE로 구분한다.
 
 [실행 환경] 후보 생성 검사는 고정 Git SHA/이력을 읽으므로 shallow checkout의 일반 unit 자동목록과 분리해 tests/operations에 둔다. 전체 이력을 가진 이 저장소에서 위 전용 node --test 명령으로 14항목을 검증했다. 앱 CI/런타임 변경은 없다.
+
+
+### W17/D05 최신 삭제 이력 대조 — 2026-10-11 ExecPlan
+
+1. 목적: 이미 회수한 운영 백업을 그대로 복원할 때 오래된 삭제/계정/원본 상태가 재노출될 수 있는지 실제 최신 집계와 대조한다.
+2. 결정: 기존 D05·원본보호·Public off·무료·정확한 운영승인 유지.
+3. 근거: 외부 ZIP/4308파일 과거 검증 완료. PG17 사용자 설치에는 pg_cron/supabase_vault 없음, WSL Docker 연결 없음/Windows Docker engine 미실행. 전체 import PASS 불가.
+4. 포함/제외: 기존 SQL의 최신 읽기 snapshot, 백업 대비 삭제/계정/버전/manifest 동일성 집계. 운영 쓰기/DB복원 실행/새 백업업로드/키복사/기존 사본삭제 제외.
+5. 흐름: 기존 인증된 quarantine metadata→TLS verify-full 운영 repeatable-read→메모리 내 대조→집계만 출력. 실제 DB replay/서빙 승인은 별도다.
+6. 파일: 기존 capture-recovery-journal.sql의 assetType 누락 보완, tools/operations/inspect-backup-reconciliation.py·합성 계약 검사, 기존00~03/evidence.
+7. DB: SELECT만, schema/설정/데이터 변경0. local DB 환경 두 경로가 막혀 독립 작업으로 이동한다.
+8. 단계: 메타데이터 검증·삭제 경계 검사→실제 snapshot 대조→잔여 명시.
+9. 검증: 계정삭제/카드fence/사본취소/원본교체/동일ID변조/불완전 snapshot 거부, 실제 운영 집계 출력. 72table/4308파일 전체 반복0.
+10. 보안: 비밀값·사용자문구·이메일·원본/ID 출력0, journal stdout 출력0. 보호 staging 외 입력 거부.
+11. 관측: aggregate counts와 날짜만 보관; safeToServe는 항상false.
+12. 원복: 원격변경 없음, 기존 백업·사본 그대로 보존.
+13. 위험: snapshot은 삭제 이벤트의 내구성 보장이 아님; 최신 상태 대조 성공≠DB복원/삭제재적용 성공.
+14. 결정: 키 독립보관은 사용자 수행 잔여, RPO/RTO/회전 미확정은 보존. 새 유료환경/운영작업 승인 요청0.
+15. 진행: 현재 로컬 환경 두 경로 확인, 독립 최신 journal 대조로 이동.
+16. 발견: 기존 snapshot assets에는 asset_type이 없어 실제 private_media_source의 USER_IMAGE 조건을 검증할 수 없다. 최신 snapshot에 그 필드를 추가한다.
+17. 완료보고: 실제명령/집계·실행안한부분·다음행동을 아래에 기록한다.
+
+[2026-10-11 진행] 독립 최신 metadata 대조21검사/실제운영 읽기PASS. 기존 설치된 Docker Desktop을 숨김으로 시작해 확장을 갖춘 로컬 격리 환경 사용 가능 여부를 확인한다. 신규 운영 의존성/요금/외부 데이터 전송 없음. 엔진 미가동이 해결되지 않으면 동일 시도를 반복하지 않는다.
+
+
+#### W17/D05 최신 삭제 대조 — 실행 보고
+
+1. 읽은 문서/파일: CODEX_START_HERE, 확정01, PLANS, QA07/변경09, 기존release-v2 00~03·external-backup evidence, BACKUP_USAGE, capture-recovery-journal.sql, recovery-rehearsal.sh/SQL, encrypted-backup.mjs, inspect-retention.py, private-image-boundary migration. verify-before-claiming 적용.
+2. 가정/미결: 승인된 local quarantine/기존 운영 읽기 연결을 사용. byte검증은 기존 근거 재사용. 최신 metadata 일치는 전체DB복구/삭제replay가 아니며 원격반영 승인 없음.
+3. 계획: 위 기존 W17/D05 ExecPlan 17항. DB환경 두 경로 실패 후 독립작업으로 이동하고 기존Docker 시작도 확인했으나 엔진 없음.
+4. 파일: capture SQL에 assetType 추가(원본USER_IMAGE 경계누락방지), 읽기전용 inspect-backup-reconciliation.py와21검사, BACKUP_USAGE·기존00~03·기존evidence 갱신. 제품화면/런타임 의존성 변경0.
+5. DB/복귀: verify-full TLS·repeatable-read/read-only·15초timeout SELECT만. migration/DB쓰기/원본삭제/서빙활성0. 로컬 설치Docker 시작만 시도, 엔진pipe 없음. 기존백업 보존.
+6. 실제명령/결과: wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py →21PASS. wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/inspect-backup-reconciliation.py --quarantine /mnt/e/web/anime/.cache/operations-private/20261009-production/quarantine-external-20261010 →exit0; backup6/latest6, eligible5/backupNotReady1, absentAccounts0/newMedia0. /opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/postgres 있음/필요한 확장2개 없음. Windows docker version/image ls는 engine named pipe 부재로 실패, Start-Process -WindowStyle Hidden 후에도 version 실패.
+7. 영향: 집계만 출력, ID·비밀값·사용자 문구 출력0. 최신 journal은 메모리에서만 대조, 파일저장/외부송신0. 이번 새 사용자행동 PASS0. 공개/삭제/백업 보장 변경0.
+8. 잔여/다음1개: 필요한 확장을 갖춘 로컬 격리DB 환경 복구 후 기존 실제 dump import. 별도키 보관·회전/복구목표는 사용자 인수 잔여. 일일7개/RPO24h·RTO24h는 미확정 후보이며 기존 유일사본 자동삭제 없음. D06 후보56cd0ab/운영Public off 유지.

@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
+
+
 > **2026-10-11 D06 최종 운영 후보 정리 완료:** candidate03의 배포 소스56cd0ab·동일SHA CI38137032500 SUCCESS, 실제test50ecbc9와 runtime 차이0. 운영 www/master199613b·38 migrations·Public off를 새로 읽기 확인. 누락3 migration/고정고지hash/Production13설정·GitHub1설정·한도·복귀 순서 결속. 생성기 구형source/미검증 문구 보완 및 상태드리프트 거부14 PASS. 이번 운영/테스트 쓰기·새 사용자행동 PASS0. 기존 GitHub 실패 알림 실수신은 10/11 사용자 확인(새 용량경보 발송 검증 아님). D05 별도키는 사용자 미보관 확인·복구인수 잔여, D06 정확한운영승인·적용 후 W19/W20 운영확인 구분. 다음1개: 기존 W17/D05 복구 인수 마감. 기존 단일 작업판/과거 증거 유지.
 
 

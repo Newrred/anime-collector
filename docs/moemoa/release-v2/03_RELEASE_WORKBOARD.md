@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
+
+
 > **2026-10-11 D06 최종 운영 후보 정리 완료:** candidate03의 배포 소스56cd0ab·동일SHA CI38137032500 SUCCESS, 실제test50ecbc9와 runtime 차이0. 운영 www/master199613b·38 migrations·Public off를 새로 읽기 확인. 누락3 migration/고정고지hash/Production13설정·GitHub1설정·한도·복귀 순서 결속. 생성기 구형source/미검증 문구 보완 및 상태드리프트 거부14 PASS. 이번 운영/테스트 쓰기·새 사용자행동 PASS0. 기존 GitHub 실패 알림 실수신은 10/11 사용자 확인(새 용량경보 발송 검증 아님). D05 별도키는 사용자 미보관 확인·복구인수 잔여, D06 정확한운영승인·적용 후 W19/W20 운영확인 구분. 다음1개: 기존 W17/D05 복구 인수 마감. 기존 단일 작업판/과거 증거 유지.
 
 
@@ -36,7 +39,7 @@
 - 실제 잔여: W15/D03 정상 공개규모·전송한도/경보 인수, W14/D04 Public 권리·고지의 운영 연결, W16/W17/D05 작은 catalog 게시·복구/별도 복구키·전체DB 복구/운영 목표, W18~W20/D06 같은 최종 후보의 전달·철회 경계와 승인 배포. 기존 기본 DB/A·B 격리/72table 복원은 반복하지 않는다.
 - Android 제외, 추가 Safari/WebKit·실폰 오프라인은 사용자 제외 유지(**미실행/USER_WAIVED**, PASS 아님). 과거 행의 포괄적인 ‘실기기 잔여’는 이를 재요구하는 출시 차단 조건이 아니다.
 - 이번 새 사용자 행동: 새 고지의 직접 동의·게시, 익명 실제 이미지 decode, 비공개 저장·익명 비노출·개인 원본 보존 PASS. 50ecbc9의 두 CI SUCCESS 확인, 테스트 DB·설정·배포 원복 완료. 이전 Storage helper 다운로드와 구분한다.
-- 다음 행동1개: **기존 W17/D05 별도 복구키·운영 백업 복구 인수 마감**. D06 후보03 준비와 기존 알림 경로 사용자 확인은 완료, 운영 Public off 유지.
+- 다음 행동1개: **확장이 있는 로컬 격리 DB 환경 복구 후 기존 운영 dump import**. 최신 private metadata대조 완료, 독립키·전체복구 인수는 잔여. D06 후보03 준비와 기존알림 수신확인 유지, 운영Public off.
 
 
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
@@ -777,15 +780,14 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-W/M: W20/D06 · M5 최종 운영 후보03 준비 완료 / 운영 적용 미실행
-후보: source56cd0ab / 실제test50ecbc9와 runtime 동일 / CI38137032500 SUCCESS
-운영: master/www199613b ·38 migrations·Public off, 읽기전용 재확인
-완료: DB3개·고지hash·Production13설정/GitHub1설정·2000GET/64MB·원복 순서를 기존manifest에 결속
-이번 검증: 오프라인 후보 생성·잘못된baseline 거부14 PASS; 운영/테스트쓰기0·새 사용자행동PASS0
-과거: 실제test 익명 이미지decode·철회·원본보존과 A/B·미니홈·팔로우·신고/조치 증거 유지
-사용자 인수: 기존 GitHub 실패알림 실수신 확인(새 용량경보 실제발송 아님); 복구키 별도보관 아직 안함
-미완료: D05 복구/키·D06 정확한운영승인·적용 후 W19/W20 확인; D04 미결지역 보존
-다음1개: 기존 W17/D05의 별도키·운영 백업 복구 인수 마감. 기초DB/72table/A·B 반복 없음
+W/M: W17/D05 · M4/M5 복구 인수 PARTIAL
+완료: 기존 외부백업4308파일 검증 재사용; 운영 최신 private metadata6건 읽기 대조(5건 replay검토가능, 1건 백업당시 미READY 제외)
+이번 검증: 삭제/취소/계정/원본버전/manifest/불완전snapshot 21항목 PASS; 실제운영 snapshot 2026-10-11T12:12:40Z
+보존: 원격쓰기0·백업/원본삭제0·복구키읽기/복사0·새업로드0. D06 후보56cd0ab/운영199613b 유지
+차단: PG17 pg_cron/supabase_vault 없음. Docker Desktop 시작 후에도 engine pipe 없음; 같은 환경 시도 반복하지 않음
+미완료: 전체DB import/RLS/삭제replay·Public권리/철회재적용, 키독립보관(사용자 아직안함), 회전/RPO/RTO확정·실제가동
+제안: 하루1회/일일7개/RPO24h·RTO24h는 미승인·미가동 후보; 복구보장 아님
+다음1개: 확장이 있는 로컬 격리 DB 환경 복구 후 실제 운영 dump import. 기초72table·A/B·암호화파일 전체 반복 없음
 ```
 
 <details><summary>이전 카드 — 운영 후보 결속</summary>
@@ -1012,7 +1014,7 @@ NA 이유:
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / NOTIFICATION_CHANNEL_USER_ATTESTED | Free 유지·전역Public20MiB. 운영199613b 관측 성공/980MB경보. 초기2000GET/64MB test차감·차단·원복, 실제test 이미지decode/철회 PASS | 10/11 사용자 기존 GitHub 실패알림 실수신 확인. 새 용량경보 발송/수신독립검증 아님. 초기소규모 한계 유지, 운영한도 적용·실사용관측 잔여 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. 139a200 일반 공개 고지/정책 연결 및50ecbc9 실제test 게시/열람/철회·원복 완료(한·영, 체크 추가0). 운영 적용/청소년 공개 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
-| D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / RESTORE_PARTIAL | 10/10 Drive 유래 ZIP 원본 SHA 일치, 새 quarantine4308파일/917,084,869bytes AES-GCM·SHA/크기 PASS. 복원 dump PG17 목차 읽기 PASS. 과거 로컬 사진12 decode와 구분 | 10/11 사용자 재확인: 키 별도 보관 안 함. 전체 DB import/최신 삭제 대조·회전/RPO/RTO·canonical 완전성 미완료. 로컬 pg_cron/supabase_vault 부재, Windows Node rename EPERM 미해결. 운영 변경0 | evidence/2026-10-10-external-backup-recovery.json |
+| D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / LATEST_PRIVATE_METADATA_COMPARED / RESTORE_PARTIAL | 10/10 Drive ZIP/hash·4308파일 인증·PG17목차 PASS. 10/11 최신운영 private6건 대조:5건 identity동일·1건 backupNotReady제외, 합성21 PASS | 키 별도보관 아직안함. 실제 DB import/RLS·삭제 replay/공개권리 대조 미실행. PG17 확장2종 없음·Docker 엔진 기동후 pipe없음. 일일7개/RPO24h·RTO24h 제안·미가동, canonical/Windowsrename 잔여 | evidence/2026-10-10-external-backup-recovery.json |
 | D06 | SHA·DB/catalog·flags의 운영 적용 | CANDIDATE_56cd0ab_BOUND / PUBLIC_OFF | 후보03 source56cd0ab·CI38137032500 SUCCESS·test50ecbc9 runtime동일. 운영199613b·38 migrations·Public off 독립readback. DB3/고정고지/환경13·GitHub1/한도/복귀 결속 | 후보 준비 완료·실행 미승인. D05 별도키/복구 인수·정확한 source/DB/설정/master배포 승인 후 적용. D03 기존알림 실수신 사용자확인, 직접 옛이미지HTTP/운영 검증은 적용후 별도 | evidence/2026-10-11-public-capacity-closeout.json |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
