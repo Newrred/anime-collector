@@ -5,13 +5,13 @@ import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {execFile} from 'node:child_process';
 import {refreshDriveToken,createDriveBackupClient,preparedArtifact} from './drive-backup.mjs';
-import {descriptor,createWeeklyStateStore,nextIntent,nextCommit} from './weekly-backup-state.mjs';
+import {descriptor,createWeeklyStateStore,nextIntent,nextCommit,nextAbandoned} from './weekly-backup-state.mjs';
 import {restoreIncrementalBackup,manifestFingerprint} from './incremental-backup.mjs';
 import {prepare} from './prepare-daily-backup.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const REQUIRED=['MOEMOA_BACKUP_DRIVE_CLIENT_ID','MOEMOA_BACKUP_DRIVE_CLIENT_SECRET','MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN','MOEMOA_BACKUP_DRIVE_FOLDER_ID','SUPABASE_URL','SUPABASE_DB_URL','SUPABASE_SERVICE_ROLE_KEY','MOEMOA_BACKUP_CA_PEM','MOEMOA_BACKUP_RECOVERY_KEY'];
-const SAFE_ERRORS=new Set(["DRIVE_ARTIFACT_INVALID","DRIVE_CREDENTIALS_MISSING","DRIVE_DOWNLOAD_FAILED","DRIVE_DOWNLOAD_HASH","DRIVE_DOWNLOAD_LIMIT","DRIVE_DOWNLOAD_WRITE","DRIVE_ID_CONFLICT","DRIVE_ID_INVALID","DRIVE_JOURNAL_INVALID","DRIVE_JOURNAL_MISMATCH","DRIVE_LOCAL_CHANGED","DRIVE_LOCAL_MISMATCH","DRIVE_PACKAGE_UNVERIFIED","DRIVE_PRIVATE_FOLDER_REQUIRED","DRIVE_REMOTE_NOT_VERIFIED","DRIVE_REQUEST_UNCERTAIN","DRIVE_RESPONSE_INVALID","DRIVE_RESPONSE_LIMIT","DRIVE_SCOPE_UNVERIFIED","DRIVE_SESSION_INVALID","DRIVE_TOKEN_MISSING","DRIVE_UPLOAD_UNCERTAIN","WEEKLY_CHAIN_LIMIT_REQUIRES_NEW_BASELINE","WEEKLY_CHILD_FAILED","WEEKLY_CHILD_INVALID","WEEKLY_CLEANUP_PATH","WEEKLY_CONFIG_INVALID","WEEKLY_DISK_BOUND","WEEKLY_EXPLICIT_RUN_REQUIRED","WEEKLY_FOLDER_MISMATCH","WEEKLY_GIT_TARGET_INVALID","WEEKLY_PACKAGE_ID","WEEKLY_PARENT_INVALID","WEEKLY_RUN_ID","WEEKLY_RUN_ID_REUSED","WEEKLY_STATE_FORK","WEEKLY_STATE_HEAD_CHANGED","WEEKLY_STATE_HTTP_FAILED","WEEKLY_STATE_INVALID","WEEKLY_STORAGE_CHANGED"]);
-const SAFE_STAGES=new Set(['AUTH','STATE_READ','PARENT_RESTORE','BUILD_DELTA','RESERVE_ID','SAVE_INTENT','UPLOAD_ARCHIVE','SAVE_COMMIT','VERIFY_PENDING']);
+const SAFE_ERRORS=new Set(["WEEKLY_RECOVERY_TARGET_MISMATCH","DRIVE_ARTIFACT_INVALID","DRIVE_CREDENTIALS_MISSING","DRIVE_DOWNLOAD_FAILED","DRIVE_DOWNLOAD_HASH","DRIVE_DOWNLOAD_LIMIT","DRIVE_DOWNLOAD_WRITE","DRIVE_ID_CONFLICT","DRIVE_ID_INVALID","DRIVE_JOURNAL_INVALID","DRIVE_JOURNAL_MISMATCH","DRIVE_LOCAL_CHANGED","DRIVE_LOCAL_MISMATCH","DRIVE_PACKAGE_UNVERIFIED","DRIVE_PRIVATE_FOLDER_REQUIRED","DRIVE_REMOTE_NOT_VERIFIED","DRIVE_REQUEST_UNCERTAIN","DRIVE_RESPONSE_INVALID","DRIVE_RESPONSE_LIMIT","DRIVE_SCOPE_UNVERIFIED","DRIVE_SESSION_INVALID","DRIVE_TOKEN_MISSING","DRIVE_UPLOAD_UNCERTAIN","WEEKLY_CHAIN_LIMIT_REQUIRES_NEW_BASELINE","WEEKLY_CHILD_FAILED","WEEKLY_CHILD_INVALID","WEEKLY_CLEANUP_PATH","WEEKLY_CONFIG_INVALID","WEEKLY_DISK_BOUND","WEEKLY_EXPLICIT_RUN_REQUIRED","WEEKLY_FOLDER_MISMATCH","WEEKLY_GIT_TARGET_INVALID","WEEKLY_PACKAGE_ID","WEEKLY_PARENT_INVALID","WEEKLY_RUN_ID","WEEKLY_RUN_ID_REUSED","WEEKLY_STATE_FORK","WEEKLY_STATE_HEAD_CHANGED","WEEKLY_STATE_HTTP_FAILED","WEEKLY_STATE_INVALID","WEEKLY_STORAGE_CHANGED"]);
+const SAFE_STAGES=new Set(['AUTH','STATE_READ','PARENT_RESTORE','BUILD_DELTA','RESERVE_ID','SAVE_INTENT','UPLOAD_ARCHIVE','SAVE_COMMIT','VERIFY_PENDING','ABANDON_MISSING']);
 export function backupFailureSummary(error){
  const code=typeof error?.message==='string'&& (SAFE_ERRORS.has(error.message)||/^DRIVE_HTTP_[1-5][0-9]{2}$/.test(error.message))?error.message:'WEEKLY_OPERATION_FAILED';
  return {status:'WEEKLY_BACKUP_INCOMPLETE',error:code,stage:SAFE_STAGES.has(error?.backupStage)?error.backupStage:'UNKNOWN',safeToServe:false};
@@ -39,9 +39,14 @@ export async function hydrateParents({chain,drive,staging,key,keyFile,python}){
  await writeFile(join(cachePath,'VERIFIED_BYTES_ONLY.json'),JSON.stringify({allSha256AndLengthsMatch:true,safeToServe:false}),{flag:'wx',mode:0o600});
  return {previous,cachePath};
 }
-export async function executeWeekly({store,drive,runId,staging,hydrate,build}){
+export async function executeWeekly({store,drive,runId,staging,hydrate,build,recoverMissingRunId}){
  if(!/^[a-zA-Z0-9-]{1,60}$/.test(runId))throw Error('WEEKLY_RUN_ID');
  let head=await phase('STATE_READ',()=>store.load());
+ if(recoverMissingRunId!==undefined){
+  if(head.record?.type!=='intent'||head.record.runId!==recoverMissingRunId)throw Error('WEEKLY_RECOVERY_TARGET_MISMATCH');
+  const exists=await phase('VERIFY_PENDING',()=>drive.getMetadata(head.record.pending.fileId));
+  if(!exists)head=await phase('ABANDON_MISSING',()=>store.append(nextAbandoned(head),head.hash));
+ }
  // A prior upload can have completed before its response/commit was lost.
  // Otherwise stop: do not create a second upload or advance past uncertain state.
  if(head.record?.type==='intent'){
@@ -82,8 +87,10 @@ export async function main(args,env=process.env){
   const token=await phase('AUTH',()=>refreshDriveToken({clientId:env.MOEMOA_BACKUP_DRIVE_CLIENT_ID,clientSecret:env.MOEMOA_BACKUP_DRIVE_CLIENT_SECRET,refreshToken:env.MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN}));
   const drive=createDriveBackupClient(token),store=createWeeklyStateStore({token,key,baseline});
   if(args[0]==='--inspect-state')return await inspectWeeklyState({store,drive});
+  const recoverMissingRunId=env.MOEMOA_BACKUP_RECOVER_MISSING_RUN_ID||undefined;
+  if(recoverMissingRunId&&!/^[a-zA-Z0-9-]{1,60}$/.test(recoverMissingRunId))throw Error('WEEKLY_RECOVERY_TARGET_MISMATCH');
   const runId=new Date().toISOString().replace(/[^0-9]/g,'');
-  return await executeWeekly({store,drive,runId,staging,
+  return await executeWeekly({store,drive,runId,staging,recoverMissingRunId,
    hydrate:async chain=>{const disk=await statfs(staging);if(disk.bavail*disk.bsize<chain.reduce((n,d)=>n+d.bytes,0)*6+2000000000)throw Error('WEEKLY_DISK_BOUND');return hydrateParents({chain,drive,staging,key,keyFile,python});},
    build:async({previous,cachePath})=>{
     await python(['tools/operations/capture-daily-backup.py','--run-id',runId,'--mode','capture']);

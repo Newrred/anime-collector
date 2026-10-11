@@ -13,9 +13,9 @@ export function descriptor(d){
 }
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function checked(r,folderId){
- if(!r||r.format!==FORMAT||r.project!==PROJECT||!Number.isInteger(r.sequence)||r.sequence<1||r.sequence>30||!['intent','commit'].includes(r.type)||!hash(r.previous)||!/^[-a-zA-Z0-9]{1,60}$/.test(r.runId)||!Array.isArray(r.chain)||r.chain.length<1||r.chain.length>16)fail();
+ if(!r||r.format!==FORMAT||r.project!==PROJECT||!Number.isInteger(r.sequence)||r.sequence<1||r.sequence>30||!['intent','commit','abandoned'].includes(r.type)||!hash(r.previous)||!/^[-a-zA-Z0-9]{1,60}$/.test(r.runId)||!Array.isArray(r.chain)||r.chain.length<1||r.chain.length>16)fail();
  const chain=r.chain.map(descriptor);if(chain.some(d=>d.folderId!==folderId)||new Set(chain.map(d=>d.fileId)).size!==chain.length||new Set(chain.map(d=>d.manifestSha256)).size!==chain.length||new Set(chain.map(d=>d.context.release)).size!==chain.length)fail();
- const pending=r.type==='intent'?descriptor(r.pending):null;
+ const pending=r.type!=='commit'?descriptor(r.pending):null;
  if(pending&&pending.context.release!=='MOEMOA_DAILY_BACKUP_'+r.runId)fail();
  if(r.type==='commit'&&r.pending!==null||pending&&(chain.length>=16||pending.folderId!==folderId||chain.some(d=>d.fileId===pending.fileId||d.manifestSha256===pending.manifestSha256||d.context.release===pending.context.release)))fail();
  return {format:FORMAT,project:PROJECT,sequence:r.sequence,type:r.type,previous:r.previous,runId:r.runId,chain,pending};
@@ -23,6 +23,7 @@ function checked(r,folderId){
 export function initialHead(baseline){const d=descriptor(baseline);return {hash:fingerprint(Buffer.from(JSON.stringify(d))),record:null,chain:[d]};}
 export function nextIntent(head,pending,runId){if(head.record?.type==='intent')fail();return checked({format:FORMAT,project:PROJECT,sequence:(head.record?.sequence??0)+1,type:'intent',previous:head.hash,runId,chain:head.chain,pending},head.chain[0].folderId);}
 export function nextCommit(head){if(head.record?.type!=='intent')fail();return checked({...head.record,sequence:head.record.sequence+1,type:'commit',previous:head.hash,chain:[...head.chain,head.record.pending],pending:null},head.chain[0].folderId);}
+export function nextAbandoned(head){if(head.record?.type!=='intent')fail();return checked({...head.record,type:'abandoned',sequence:head.record.sequence+1,previous:head.hash},head.chain[0].folderId);}
 export function sealState(record,key,folderId){
  const r=checked(record,folderId);if(!Buffer.isBuffer(key)||key.length!==32)fail();
  const iv=randomBytes(12),c=createCipheriv('aes-256-gcm',key,iv);c.setAAD(Buffer.from(JSON.stringify([FORMAT,PROJECT,folderId])));
@@ -36,7 +37,7 @@ export function resolveLedger(records,baseline){
  let head=initialHead(baseline);
  const ordered=[...records].sort((a,b)=>a.record.sequence-b.record.sequence);
  for(const item of ordered){const r=checked(item.record,baseline.folderId);if(!hash(item.hash)||r.sequence!==(head.record?.sequence??0)+1||r.previous!==head.hash)fail();
-  const expected=r.type==='intent'?nextIntent(head,r.pending,r.runId):nextCommit(head);
+  const expected=r.type==='intent'?nextIntent(head,r.pending,r.runId):r.type==='abandoned'?nextAbandoned(head):nextCommit(head);
   if(!same(r,expected))fail();head={hash:item.hash,record:r,chain:r.chain};
  }
  return head;
@@ -63,7 +64,7 @@ export function createWeeklyStateStore({token,key,baseline,request=fetch}){
  return {load,
   async append(record,expectedHash){
    const current=await load();if(current.hash!==expectedHash)throw Error('WEEKLY_STATE_HEAD_CHANGED');
-   const r=checked(record,pin.folderId),encrypted=sealState(r,key,pin.folderId);if(r.previous!==current.hash||!same(r,r.type==='intent'?nextIntent(current,r.pending,r.runId):nextCommit(current)))fail();
+   const r=checked(record,pin.folderId),encrypted=sealState(r,key,pin.folderId);if(r.previous!==current.hash||!same(r,r.type==='intent'?nextIntent(current,r.pending,r.runId):r.type==='abandoned'?nextAbandoned(current):nextCommit(current)))fail();
    const generated=await obj(API+'/drive/v3/files/generateIds?count=1&space=drive&type=files');if(generated.ids?.length!==1||!id(generated.ids[0]))fail();
    const fileId=generated.ids[0],boundary='moemoa-'+randomBytes(16).toString('hex');
    const meta={id:fileId,name:'moemoa-weekly-state-'+r.sequence+'-'+r.runId+'.enc',parents:[pin.folderId],mimeType:'application/octet-stream',appProperties:{moemoaBackupState:'v1'}};
