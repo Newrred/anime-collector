@@ -149,6 +149,7 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 - git push origin 806b6b2:refs/heads/codex/phone-test 성공. Vercel Preview9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7 Ready·Source806b6b2·기존 phone-test alias 일치. master1878867 유지. 추가 사용자 이미지/권리/가입/동의 조작0.
 - 실제 HTTPS service-role 새 공개RPC 반환: 전체73,464B=private38,608+public34,856, 공개예약34,796B(full26,636+thumb8,160), pending/overdue0. 로컬 evaluator는 test의 공개저장/전송 guards off를 PUBLIC_BUDGET_UNGUARDED로 정확히 경보. 이 값이 운영 경보나 실제 수신 증거는 아니다.
 - **정확한 연결 차단:** test Vercel에 MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET/PROJECT/OBSERVE 설정 없음(UI의 Production 항목과 Preview 항목 구분), 로컬 test env에도 기존 maintenance secret 없음. 기존 private observe RPC는 실제HTTP404, 해당20261008090000은 이번 승인migration2개 밖이다. 그 함수는 private policy.observed_at를 갱신하므로 읽기전용 보충으로 임의 실행하지 않는다. 두 시도로 실패 위치를 좁힌 뒤 신규 public RPC를 독립 확인했으며 동일 실패를 반복하지 않았다. 임시 관측flag는 켜지 않았으므로 복구할 설정변경0. 운영키 재사용/새 비밀키 전송/cleanup호출0.
+- 독립 DB catalog에서도 privateObservationExists=false 확인. 새 CI38122228717은 publication-contract SUCCESS, verify의 공개 회귀 단계까지 통과하고 최종 UI 단계 진행 중이며 전체 SUCCESS로 기록하지 않는다. 기존CI38119402749는 이전 후보의 결과다.
 - 배포 관측API 성공, GitHub 실제 경보수신, 운영 D03 완료로 승격하지 않는다. 다음1개는 **test의 기존20261008090000 및 전용 관측 인증/대상 설정을 포함한 정확한 연결 후보 마감**이다. 공개/비공개 사용자흐름이나 기본DB/A·B격리를 반복하지 않는다.
 
 #### 비용·정상 규모의 구체적 한계

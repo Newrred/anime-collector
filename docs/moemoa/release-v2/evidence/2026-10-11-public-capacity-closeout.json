@@ -180,8 +180,10 @@
     "ci": {
       "id": 38122228717,
       "publicationContract": "success",
-      "verify": "in_progress"
-    }
+      "verify": "in_progress",
+      "note": "At handoff publication-contract succeeded; verify still running, not claimed PASS. Public sharing step completed successfully."
+    },
+    "privateObservationExists": false
   },
   "providerUsageReadOnly": {
     "supabase": {
