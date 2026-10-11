@@ -180,3 +180,12 @@ The existing AES-GCM writer/reader creates and authenticates the local encrypted
 Retention remains a review step: only superseded completed, externally verified copies older than seven days may be proposed for removal after a fresh external copy succeeds; preserve the latest success and the original sole external copy until replacement is independently verified. No deletion executor is enabled. Encryption outputs and raw/verified staging have separate cleanup needs; do not count unpruned local staging as seven-day retention. Do not put recovery keys on the same Drive.
 
 The known Windows Node rename failure from October 10 did not recur during the October 11 local create/restore. This is observed success for that run, not a universal filesystem fix.
+
+### 2026-10-11 현재 Public·삭제 격리복구 (W17/D05)
+
+- capture-isolated-recovery-context.py --run-id <id> --public-state 후 node tools/operations/rehearse-production-restore.mjs <id> --current-public. 최신10/11 로컬검증사본 고정사용. 다른사본을 자동선택하지 않는다.
+- 두 안전journal은 같은 readonly transaction에서 수집·보호staging에 보관. 필수배열·snapshot/time일치·1시간이내를 검증. 소스장애로 최신상태를 확보 못하거나 삭제기간이 비면 중단하고 서빙재개 금지. 백업의 옛journal은 최신삭제기록 대체물이 아니다.
+- 실제dump99테이블 복원 후 전체접근off에서 삭제·보드/홈철회·권리·review·차단을 deny-only재적용. 변경된 공개snapshot 격리. 새동의/감사이력은 만들지 않는다. 이미지state DELETING 격리 시 source/object/hash/operation/예약quota·실제bytes 보존. 삭제entity의 sync retry remoteEntity만 null, 처리ID/hash/결과 보존.
+- network none/포트0/cron off/tmpfs 전용DB만 실행. 합성RPC56검사는 rollback. 최종 Public/private off 및컨테이너정지 확인. 실제Storage/CDN제공·운영재개 검증은 아니다.
+- daily capture는 같은 exported snapshot/transaction의 두journal 수집. encrypt는 결속확인 후 latest-public-state.json도 암호화목록에 포함. 이번은 readonly수집/기존17단위검증이며 새암호화/ZIP/업로드는 미실행. 이전업로드파일 불변.
+- 독립키·정기외부보관/7일정리·최신삭제feed·canonical완전성 인수 전 전체복구/RPO/RTO완료로 표시하지 않는다.

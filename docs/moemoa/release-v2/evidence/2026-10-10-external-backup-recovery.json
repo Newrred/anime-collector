@@ -356,5 +356,212 @@
     "productionDbWrites": 0,
     "productionDeployment": false,
     "screenshot": ".cache/operations-private/daily-backup-20261011-02/drive-upload-complete.jpg"
+  },
+  "publicDeletionRecovery20261011": {
+    "baselineCommit": "402cb3c1a172bc2dbae42aea47abe7510d155444",
+    "scope": "Local isolated current production backup restore; synthetic populated Public checks",
+    "codeSha256": {
+      "tools/operations/capture-isolated-recovery-context.py": "298f40c2e2843ed116842133b7b735f7d655d9afecf75245854c0cb752d34bea",
+      "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+      "tools/operations/isolated-public-recovery.sql": "61dd7be144a42e86045de3a4db865dde5fb157088e957d6fdfec4b79ab6d5378",
+      "tools/operations/isolated-public-recovery-contract.sql": "f43d8dc3b43b97e1c6a738f708a041c7f23713bc1270eed0034ca8d5d37cd990",
+      "tools/operations/rehearse-production-restore.mjs": "009a9331a11d2d95b339c208e09314b46b2620f5471e76212aed81fe263fc51f",
+      "tools/operations/capture-daily-backup.py": "f24bacf0a47eff28158e7cf5c499723e3a484536af54fa535dd807c4abf3e978",
+      "tools/operations/prepare-daily-backup.mjs": "29f38f140c36d7c13bfdc3352e6fd28241ec84ec301a9ed2914b777a2c6eefe2"
+    },
+    "runId": "20261011-public-04",
+    "contextFromRun": "20261011-public-03",
+    "report": {
+      "scope": "Local isolated real production dump",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "network": "none",
+      "publishedPorts": 0,
+      "safeToServe": false,
+      "roles": 16,
+      "memberships": 25,
+      "importSeconds": 13.354,
+      "databaseImportVerified": true,
+      "database": {
+        "cards": 12,
+        "media": 6,
+        "assets": 12,
+        "tables": 99,
+        "version": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+        "accounts": 3,
+        "cronRuns": 81,
+        "cronLaunch": "off",
+        "extensions": [
+          "pg_cron",
+          "pg_stat_statements",
+          "pg_trgm",
+          "pgcrypto",
+          "plpgsql",
+          "supabase_vault",
+          "uuid-ossp"
+        ],
+        "privateEnabled": false,
+        "publicSettingsPresent": true
+      },
+      "privateReplay": {
+        "rows": 6,
+        "ready": 5,
+        "scope": "Private manifests and card fences only; no restored entity deletion or Public rights replay claimed",
+        "nonReady": 1,
+        "operationSourceHashQuotaPreserved": true
+      },
+      "publicReplay": {
+        "scope": "Deny-only quarantine; no new positive consent or moderation audit fabricated",
+        "safeToServe": false,
+        "deletedCards": 0,
+        "deletedAssets": 0,
+        "deletedBoards": 0,
+        "deletedAccounts": 0,
+        "quarantinedHomes": 0,
+        "quarantinedBoards": 0,
+        "quarantinedImages": 0,
+        "scrubbedRetryBodies": 12
+      },
+      "publicContract": {
+        "checks": 56,
+        "labels": [
+          "closed during unchanged",
+          "positive control: synthetic board and home visible through real restored RPC",
+          "positive control: actual image resolver returns synthetic manifest",
+          "operation/source/hash/quota preserved unchanged",
+          "active retry content preserved",
+          "unchanged published snapshot preserved",
+          "unchanged control remains readable",
+          "closed during board-withdraw",
+          "operation/source/hash/quota preserved board-withdraw",
+          "old image access denied board-withdraw",
+          "board content denied board-withdraw",
+          "closed during home-withdraw",
+          "operation/source/hash/quota preserved home-withdraw",
+          "home withdrawal keeps independent board",
+          "closed during card-delete",
+          "operation/source/hash/quota preserved card-delete",
+          "deleted retry preserves operation/hash/result",
+          "deleted retry returns no stale body",
+          "deleted retry rejects changed request",
+          "old image access denied card-delete",
+          "board content denied card-delete",
+          "closed during asset-delete",
+          "operation/source/hash/quota preserved asset-delete",
+          "old image access denied asset-delete",
+          "closed during board-delete",
+          "operation/source/hash/quota preserved board-delete",
+          "old image access denied board-delete",
+          "board content denied board-delete",
+          "closed during account-delete",
+          "operation/source/hash/quota preserved account-delete",
+          "old image access denied account-delete",
+          "board content denied account-delete",
+          "closed during rights-revoke",
+          "operation/source/hash/quota preserved rights-revoke",
+          "old image access denied rights-revoke",
+          "closed during moderator-hide",
+          "operation/source/hash/quota preserved moderator-hide",
+          "old image access denied moderator-hide",
+          "board content denied moderator-hide",
+          "closed during content-block",
+          "operation/source/hash/quota preserved content-block",
+          "old image access denied content-block",
+          "board content denied content-block",
+          "closed during account-restrict",
+          "operation/source/hash/quota preserved account-restrict",
+          "old image access denied account-restrict",
+          "board content denied account-restrict",
+          "closed during source-version",
+          "operation/source/hash/quota preserved source-version",
+          "old image access denied source-version",
+          "closed during unfollow-block",
+          "operation/source/hash/quota preserved unfollow-block",
+          "latest block restored",
+          "reject incomplete",
+          "reject stale",
+          "reject snapshot-mismatch"
+        ],
+        "synthetic": true,
+        "actualRestoredFunctions": true,
+        "externalStorageHttpVerified": false
+      },
+      "access": {
+        "ownerReads": 5,
+        "anonymousDenied": true,
+        "realRestoredRpc": true,
+        "otherOwnerDenied": 5,
+        "wrongOwnerCardRlsDenied": true,
+        "imageBytesDecodedThisRun": false
+      },
+      "privateAccessRemainsClosed": true,
+      "publicAccessRemainsClosed": true,
+      "status": "CURRENT_IMPORT_PUBLIC_REPLAY_CONTRACT_PASS_SERVING_CLOSED",
+      "containerStopped": true
+    },
+    "actualSourcePublicStateCounts": {
+      "homes": 0,
+      "boards": 1,
+      "rights": 0,
+      "reviews": 0,
+      "sanctions": 0,
+      "homeReviews": 0,
+      "publicCards": 0,
+      "publicAssets": 0,
+      "publications": 0,
+      "restrictions": 0,
+      "relationships": 0,
+      "representationRights": 0
+    },
+    "dailyPublicStateCapture": {
+      "readOnly": true,
+      "sameSnapshotAndCapturedAt": true,
+      "tables": 99,
+      "objects": 4302,
+      "databaseDumpCreated": false,
+      "encryptionOrUploadPerformed": false
+    },
+    "commands": [
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id 20261011-public-03 --public-state",
+      "node tools/operations/rehearse-production-restore.mjs 20261011-public-04 --current-public",
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-daily-backup.py --run-id 20261011-public-state-01 --mode inspect",
+      "node --test tests/operations/dailyBackup.test.mjs"
+    ],
+    "unitTests": {
+      "passed": 17,
+      "failed": 0
+    },
+    "attempts": [
+      {
+        "run": "public-01",
+        "result": "SQL fixture dollar substitution failed; fixed replacement callbacks; stopped"
+      },
+      {
+        "run": "public-02",
+        "result": "99 table restore and 52 SQL checks passed before retry-body extension"
+      },
+      {
+        "run": "public-03",
+        "result": "SQL 56 checks passed; extra fixture SELECT prevented JSON parsing; fixed to PERFORM; stopped"
+      },
+      {
+        "run": "public-04",
+        "result": "Final 56 checks and access probes PASS; stopped"
+      }
+    ],
+    "productionMutations": 0,
+    "newUploads": 0,
+    "hostedPublicUserActionPass": 0,
+    "storageHttpVerified": false,
+    "retentionScheduleEnabled": false,
+    "independentKeyCopyConfirmed": false,
+    "limitations": [
+      "Production populated Public data count zero; stale and positive Public cases synthetic",
+      "No Storage bytes/HTTP/CDN recovery tested this run",
+      "Deny-only state is not a durable deletion feed or newer moderation audit/positive consent recovery",
+      "Latest complete matching safety snapshot required before any serving; missing interval forbids restart",
+      "Public journal integration validated by read-only capture; no new encrypted/uploaded archive",
+      "Independent key, recurring external backup/7 day retention, canonical completeness and actual recovery objectives remain"
+    ],
+    "nextAction": "Bind D05 evidence and remaining acceptance to existing D06 candidate03 without production changes"
   }
 }

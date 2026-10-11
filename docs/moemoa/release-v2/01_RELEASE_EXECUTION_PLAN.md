@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 공개·삭제 복구 로컬 마감:** 최신10/11 백업99테이블·7확장 실제 격리복원 PASS. 최신 readonly 상태 대조와 공개 철회/홈 철회/카드·asset·board·계정 삭제/권리취소/가림/차단/원본버전 변경 합성56검사 PASS, 삭제된 기록의 재시도 본문12건은 로컬에서만 제거·operation/hash/결과 보존. 실제 ownerRPC5/타계정5·익명·RLS PASS, Public/private off·컨테이너 정지. 실제운영 공개자료0이므로 populated Public/Storage HTTP 복구 PASS 아님. 향후 백업에 같은snapshot 공개journal 포함 연결·읽기수집 PASS; 새암호화/업로드는 안함. 독립키 미보관·정기 외부보관/7일정리 미가동·최신삭제feed 부재는 D05 잔여. 다음1개: D06 후보03에 이 복구 증거와 남은 운영 인수 조건을 결속. 아래 로그는 당시 증거로 보존한다.
+
+
 > **2026-10-11 W17/D05 최신 삭제 대조:** 외부 회수 백업의 private media6건을 현재 운영 repeatable-read snapshot과 대조했다. 5건의 계정/원본버전/해시/operation 동일·복구심사 대상, 1건은 백업 당시 READY가 아니어서 제외. 누락계정0·백업 이후 추가media0. 삭제/취소/버전변경 등 합성21검사 PASS. 실제 DB import·삭제 replay·공개 권리/철회 재적용 PASS 아님. 운영쓰기/새백업전송/키복사0. D05 별도키·확장 포함 격리DB복구·회전/복구목표 미완료.
 
 
@@ -2339,3 +2342,36 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실행/결과: fs.stat 정확파일920077441B 확인. Chrome Drive 기존 승인계정·폴더 비공개 확인→filechooser.setFiles 정확ZIP1개→UI “항목1개 업로드 완료”, 동일파일877.5MB·비공개·기존사본 보존 확인. 스크린샷은 ignored staging의 drive-upload-complete.jpg. git diff --check/JSON parse로 문서 검증. 기존17단위/4309파일 인증/66테이블 실제복구는 이전 근거이고 이번 재실행0. 새 외부 다운로드/hash 및99테이블 복원은 미검증.
 7. 보안/관측: 암호화ZIP만 승인된 기존Drive로 전송. 복구키·plaintext·사용자사진/기록 stdout·Git 포함0. 새 앱 사용자행동 PASS0, 운영 출시PASS로 확대하지 않음.
 8. 잔여/다음1개: 예약은 사용자 선택으로 제외, 자동외부보관·7일정리 미가동·독립키 미보관. D05 전체완료/RPO보장 아님. 다음은 기존 D05의 현재 Public/entity 삭제 복구 인수 조건 대조. D06 source56cd0ab 및 정확한 운영 적용 승인 조건 유지.
+
+### W17/D05 공개·삭제 상태 복구 마감 — 2026-10-11 ExecPlan
+
+1. 목적: 현재 백업 복원 후 철회·삭제·제재가 재노출되지 않는 복구 인수 경계를 닫는다.
+2. 결정: 기존 FIRST-PUBLIC/RECOVERY-DAILY7, Public off·정확운영승인·예약제외 유지.
+3. 증거: 402cb3c 최신ZIP외부보관. 기존66테이블 runner는 private manifest/card fence만 재적용하며 Public/entity삭제 미지원.
+4. 포함: 현재99테이블 백업을 로컬 격리복원, 최신 readonly 안전snapshot 대조, 누락된 공개/삭제 reconcile과 합성 stale 상태 검사. 제외: 운영쓰기·게시·실데이터삭제·이미지재다운로드·예약·외부전송·배포.
+5. 흐름: 보호staging 최신snapshot→network none/tmpfs 실제dump import→전체flag off→삭제/철회/권리/가림 대조→RPC 검증→종료. 최신안전snapshot 없는 경우 재개금지.
+6. 파일: 기존 capture/restore runner 확장, public 안전snapshot SQL·격리replay/contract, BACKUP_USAGE·기존00~03/evidence.
+7. DB: migration0, 운영 SELECT만. local quarantine 변경만 허용하며 사용자 원본·운영 quota 불변.
+8. 단계: schema 확인→기존계획갱신→최소도구보완→실제복원/합성차등검사→문서인계.
+9. 검증: 변동없음 보존·보드/홈철회·카드/계정삭제·권리철회·가림·operation/hash/quota 보존·중복replay·누락snapshot 거부·최종off/종료.
+10. 보안: 안전snapshot은 ID/상태/지문만 보호staging, 본문/이메일/비밀값 로그0. 실제 data는 Git 제외.
+11. 관측: 집계/상태/코드hash만 evidence. 실제운영Public0과 합성공개행동을 분리.
+12. 복귀: 새 격리container 정지, tmpfs만 사용. 기존백업/원격 untouched.
+13. 위험: 최신snapshot은 내구성 있는 삭제feed가 아님. 장애 후 빠진기간을 완료로 처리하지 않으며 자동공개재개 없음.
+14. 결정: 새 정책질문 없음. 독립키/상시외부보관과 D06운영승인은 별도 미완료 유지.
+15. 진행: private-only replay 공백 확인.
+16. 발견: 과거 합성stale검사는 카드fence만, 새ZIP은 Public schema 포함하지만 실제운영Public자료가 없을 수 있어 합성경계 증거 별도 필요.
+17. 보고: 아래 실제명령/결과/실패/잔여/다음1개를 기록.
+
+#### W17/D05 공개·삭제 복구 마감 — 2026-10-11 실제 결과
+
+1. 읽은 문서/파일: AGENTS→CODEX_START_HERE→확정01→PLANS/QA07/변경09, release-v2 00~03/evidence, BACKUP_USAGE, private journal/recovery/retention·publication migrations와 RPC 계약. verify-before-claiming 적용.
+2. 가정/미결: 현재 운영 공개자료0. 실제dump복원과 공개합성RPC 검사를 구분. 독립키 미보관·예약 제외·정기외부보관/7일정리 미가동 유지.
+3. 계획: 위 기존 W17/D05 ExecPlan17항 실행. 새작업판·제품기능0.
+4. 변경: capture-public-recovery-state.sql/capture-isolated-recovery-context.py는 동일snapshot 공개안전상태 수집. isolated-public-recovery.sql/contract.sql은 철회·삭제·권리·차단 재적용과 source/operation/hash/quota 보존. rehearse-production-restore.mjs --current-public은 최신99테이블사본 사용. daily capture/prepare는 향후암호화목록에 공개journal 포함·snapshot결속. BACKUP_USAGE/00~03/evidence 갱신.
+5. DB/복귀: 운영SELECT/read-only만 수행. migration0·Public/가입/한도/master/phone-test 변경0. local DB는 network none·포트0·cron off·tmpfs, 종료시정지. 삭제 재시도본문12건은 복원된 임시DB에서만 제거. 실제운영/Storage/원본/백업 보존.
+6. 실제명령: capture-isolated-recovery-context.py --run-id 20261011-public-03 --public-state exit0. 같은fresh context를 보호staging public-04에 복사 후 node tools/operations/rehearse-production-restore.mjs 20261011-public-04 --current-public exit0. 99테이블·7확장·16역할 import13.354초; 합성56/RPC owner5·타계정5·익명/RLS PASS; 최종접근off·containerStopped=true. capture-daily-backup.py --run-id 20261011-public-state-01 --mode inspect exit0·두journal snapshot/capturedAt동일. node --test tests/operations/dailyBackup.test.mjs17PASS.
+7. 실패/보안/관측: public-01은 JS replace의 dollar치환오류→callback수정. public-02 52PASS. retrybody 추가후 public-03 SQL56PASS지만 fixture SELECT 출력으로 JSON parse실패→PERFORM수정, public-04 최종통과. 실패로그/정지보존. rawDB/journal은 ignored staging에만, Git에는 집계/hash/code. 과거66테이블/외부4308·새4309byte검증 재실행아님. 이번 hostedGoogle/실기기/운영Public 사용자행동PASS0, 이미지HTTP/decode0.
+8. 잔여/다음1개: 도구의 공개·삭제 격리복구 범위 마감, D05전체 PARTIAL. 최신삭제snapshot을 못얻거나 이후기간이 비면 재개금지(RPO는삭제부활허용아님). 최신audit/긍정승인복원·Storage/CDN·canonical완전성·별도키·정기외부사본 인수 잔여. 다음은 D06 candidate03에 이번증거/남은운영조건 결속. 앱56cd0ab·운영199613b·phone-testa6b6dda 유지.
+
+[최종확인] Python AST/Node --check PASS, git diff --check PASS. 기존17단위검사 PASS. 현재published Public0과 합성56을 분리했고 원격운영변경0·모든격리컨테이너정지를 확인했다. 본문·키·원시journal/덤프는 커밋대상에서 제외했다.

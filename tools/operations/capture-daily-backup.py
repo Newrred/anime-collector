@@ -71,17 +71,20 @@ def capture(run_id, mode):
   inventory=validate_inventory(query(env,INVENTORY,snapshot))
   journal_sql=(ROOT/'tools/private-images/capture-recovery-journal.sql').read_text()
   journal_sql=journal_sql[journal_sql.index('select jsonb_build_object('):journal_sql.rindex('commit;')]
-  journal=query(env,journal_sql,snapshot)
+  public_sql=(ROOT/'tools/operations/capture-public-recovery-state.sql').read_text()
+  public_sql=public_sql[public_sql.index('select jsonb_build_object('):].strip().rstrip(';')
+  paired=query(env,"select jsonb_build_object('private', ("+journal_sql.strip().rstrip(';')+"), 'public', ("+public_sql+"));",snapshot)
+  journal=paired['private'];public_state=paired['public']
   roles=query(env,ROLES,snapshot)
   meta=query(env,"select jsonb_build_object('capturedAt',transaction_timestamp(),'databaseVersion',current_setting('server_version'),'migrations',(select jsonb_agg(version order by version) from supabase_migrations.schema_migrations),'tables',(select count(*) from pg_tables where schemaname not in ('pg_catalog','information_schema')),'publicSettingsPresent',to_regclass('private.memory_publication_settings') is not null);",snapshot)
-  for name,value in [('storage-inventory.json',inventory),('latest-journal.json',journal),('roles.json',roles),('database-context.json',meta)]:
+  for name,value in [('storage-inventory.json',inventory),('latest-journal.json',journal),('latest-public-state.json',public_state),('roles.json',roles),('database-context.json',meta)]:
    (out/name).write_text(json.dumps(value))
   if mode=='capture':
    result=subprocess.run([DUMP,'--format=custom','--no-tablespaces','--snapshot='+snapshot,'--file='+str(out/'database.dump')],env=env,capture_output=True,timeout=600)
    if result.returncode: raise ValueError('DUMP_FAILED')
   keeper.stdin.write('rollback;'+chr(10));keeper.stdin.close();keeper.wait(timeout=15)
   if keeper.returncode: raise ValueError('SNAPSHOT_CLOSED_EARLY')
-  summary={'readOnly':True,'mode':mode,'capturedAt':meta['capturedAt'],'sameDatabaseSnapshot':True,'tables':meta['tables'],'migrations':len(meta['migrations']),'publicSettingsPresent':meta['publicSettingsPresent'],'objects':len(inventory),'bytes':sum(r['bytes'] for r in inventory),'databaseDumpCreated':mode=='capture'}
+  summary={'readOnly':True,'mode':mode,'capturedAt':meta['capturedAt'],'sameDatabaseSnapshot':True,'publicRecoveryStateCaptured':True,'tables':meta['tables'],'migrations':len(meta['migrations']),'publicSettingsPresent':meta['publicSettingsPresent'],'objects':len(inventory),'bytes':sum(r['bytes'] for r in inventory),'databaseDumpCreated':mode=='capture'}
   if mode=='capture':
    with (out/'database.dump').open('rb') as f: summary['dumpSha256']=hashlib.file_digest(f,'sha256').hexdigest()
    summary['dumpBytes']=(out/'database.dump').stat().st_size

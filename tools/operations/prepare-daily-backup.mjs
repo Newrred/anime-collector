@@ -77,6 +77,9 @@ export async function prepare(runId,mode){
  if(prior.complete!==true)throw Error('INCOMPLETE_CACHE');
  const inventory=JSON.parse(await readFile(resolve(work,'storage-inventory.json'),'utf8'));
  const capture=JSON.parse(await readFile(resolve(work,'capture-summary.json'),'utf8'));
+ const journal=JSON.parse(await readFile(resolve(work,'latest-journal.json'),'utf8'));
+ const publicState=JSON.parse(await readFile(resolve(work,'latest-public-state.json'),'utf8'));
+ if(capture.publicRecoveryStateCaptured!==true||journal.format!=='moemoa-private-recovery-journal-v1'||publicState.format!=='moemoa-public-recovery-state-v1'||!journal.snapshot||!journal.capturedAt||journal.snapshot!==publicState.snapshot||journal.capturedAt!==publicState.capturedAt)throw Error('PUBLIC_RECOVERY_STATE_MISMATCH');
  const age=Date.now()-Date.parse(capture.capturedAt);
  if(!Number.isFinite(age)||age< -60000||age>3600000||capture.sameDatabaseSnapshot!==true||capture.objects!==inventory.length)throw Error('STALE_CAPTURE');
  const chosen=selectCachedObjects(inventory,prior.objects);const missing=chosen.filter(o=>!o.cached);
@@ -106,7 +109,7 @@ export async function prepare(runId,mode){
   if(dump.bytes!==capture.dumpBytes||dump.sha256!==capture.dumpSha256)throw Error('DUMP_CHANGED');
   await verifyRemote(runId);
   await writeFile(resolve(work,'storage-download-result.json'),JSON.stringify({complete:true,done:chosen.length,bytes:report.bytes,objects:resultObjects}),{flag:'wx'});
-  for(const name of ['database.dump','latest-journal.json','roles.json','database-context.json','storage-inventory.json','capture-summary.json','storage-download-result.json']) files.push({name,path:resolve(work,name)});
+  for(const name of ['database.dump','latest-journal.json','latest-public-state.json','roles.json','database-context.json','storage-inventory.json','capture-summary.json','storage-download-result.json']) files.push({name,path:resolve(work,name)});
   const ks=await lstat(keyFile);if(!ks.isFile()||ks.isSymbolicLink()||ks.size>128)throw Error('KEY_FILE_INVALID');
   const raw=(await readFile(keyFile,'utf8')).trim();if(!/^[a-fA-F0-9]{64}$/.test(raw))throw Error('KEY_FORMAT');
   const key=Buffer.from(raw,'hex');

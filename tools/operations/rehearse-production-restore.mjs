@@ -5,9 +5,10 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const runId=process.argv[2]||'20261011';
-if(!/^[a-zA-Z0-9-]{1,60}$/.test(runId)||process.argv.length>3)throw Error('INVALID_RUN_ID');
+const publicMode=process.argv[3]==='--current-public';
+if(!/^[a-zA-Z0-9-]{1,60}$/.test(runId)||process.argv.length>4||(process.argv.length===4&&!publicMode))throw Error('INVALID_RUN_ID');
 const work=resolve(root,'.cache/operations-private/isolated-recovery-'+runId);
-const backup=resolve(root,'.cache/operations-private/20261009-production/quarantine-external-20261010');
+const backup=resolve(root,publicMode?'.cache/operations-private/daily-backup-20261011-02/zip-verification':'.cache/operations-private/20261009-production/quarantine-external-20261010');
 const docker='C:/Program Files/Docker/Docker/resources/bin/docker.exe';
 const image='supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00';
 const name='moemoa-recovery-'+runId;
@@ -51,12 +52,27 @@ try{
  const literal=JSON.stringify(current).replaceAll("'","''");
  report.privateReplay=JSON.parse((await sql("CREATE TEMP TABLE latest_context(j jsonb); INSERT INTO latest_context VALUES ('"+literal+"');\n"+await readFile(resolve(root,'tools/operations/isolated-private-recovery.sql'),'utf8'))).trim());
  if(report.privateReplay.operationSourceHashQuotaPreserved!==true)throw Error();
+ if(publicMode){
+ phase='public-reconciliation';
+ const latestPublic=JSON.parse(await readFile(resolve(work,'latest-public-state.json'),'utf8'));
+ const replay=await readFile(resolve(root,'tools/operations/isolated-public-recovery.sql'),'utf8');
+ const publicLiteral=JSON.stringify(latestPublic).replaceAll("'","''");
+ report.publicReplay=JSON.parse((await sql(replay+"SELECT pg_temp.reconcile_public_recovery('"+literal+"','"+publicLiteral+"');")).trim());
+ phase='public-contract';
+ const privateCapture=(await readFile(resolve(root,'tools/private-images/capture-recovery-journal.sql'),'utf8')).split('select jsonb_build_object(')[1].split('commit;')[0];
+ const publicCapture=await readFile(resolve(root,'tools/operations/capture-public-recovery-state.sql'),'utf8');
+ const captures="CREATE FUNCTION pg_temp.capture_private() RETURNS jsonb LANGUAGE sql AS $capture$ select jsonb_build_object("+privateCapture+" $capture$;\nCREATE FUNCTION pg_temp.capture_public() RETURNS jsonb LANGUAGE sql AS $capture$ "+publicCapture+" $capture$;";
+ const contract=(await readFile(resolve(root,'tools/operations/isolated-public-recovery-contract.sql'),'utf8')).replace('-- INCLUDE_CAPTURE_FUNCTIONS',()=>captures).replace('-- INCLUDE_PUBLIC_REPLAY',()=>replay);
+ report.publicContract=JSON.parse((await sql(contract)).trim());
+ }
  phase='access-probes';
  report.access=JSON.parse((await sql(await readFile(resolve(root,'tools/operations/isolated-recovery-access.sql'),'utf8'))).trim());
  phase='final-closed';
  report.privateAccessRemainsClosed=(await sql('SELECT NOT enabled FROM private.memory_private_media_policy;')).trim()==='t';
  if(!report.privateAccessRemainsClosed)throw Error();
- report.status='IMPORT_PRIVATE_REPLAY_ACCESS_PASS_SERVING_CLOSED';
+ if(publicMode)report.publicAccessRemainsClosed=(await sql('SELECT NOT (reads_enabled OR writes_enabled OR images_enabled OR minihomes_enabled OR follows_enabled OR reports_enabled) FROM private.memory_publication_settings;')).trim()==='t';
+ if(publicMode&&!report.publicAccessRemainsClosed)throw Error('PUBLIC_REOPENED');
+ report.status=publicMode?'CURRENT_IMPORT_PUBLIC_REPLAY_CONTRACT_PASS_SERVING_CLOSED':'IMPORT_PRIVATE_REPLAY_ACCESS_PASS_SERVING_CLOSED';
 }catch(e){report.status='INCOMPLETE';report.failedStage=phase;process.exitCode=1;}
 finally{
  if(created){phase='stop';const r=await call(['stop','--time','10',name]);report.containerStopped=r.status===0;if(!report.containerStopped){report.status='INCOMPLETE';report.failedStage='stop';process.exitCode=1;}}
