@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 다른 PC 인수:** 작업 브랜치 `codex/simple-signup-preview`를 fetch/pull한다. [인수 절차](01_RELEASE_EXECUTION_PLAN.md#handoff-20261012)에 현재 W17/D05·완료/미완료·Git 밖 필수 파일·기존 도구 재현 순서를 정리했다. 운영 master는 d8bf945 유지. 다음은 정상 로컬 Docker에서 새 증분 DB 격리복원 검증이며 새백업/운영배포가 아니다. 아래 이전 날짜 재개점보다 이 인수가 우선한다.
+
+
 > **2026-10-12 W17/D05 외부 증분 파일 복원 PASS·DB 기동 대기:** 사용자가 Drive의 새 ZIP·state6를 내려받음. 완료기록 AES-GCM/sequence6/runId/chain2·고정기준사본 결속·새ZIP62,610,505B SHA256 확인, 기존920,077,441B 사본 재사용→4,310파일/918,359,762B 전체 길이·해시 복원 PASS. 최신 운영 삭제·공개 상태는 읽기전용 수집. Docker 엔진이 기존 dockerInference 소켓 접근 오류로 시작되지 않아 새 DB import/권한·삭제 replay는 미실행이다. 초기화/재설치/운영쓰기/외부쓰기/삭제/예약0. 다음1개: 로컬 Docker 기동 복구 후 기존 격리복원 실행(1시간 경과 시 최신 상태 재수집). 아래 실제 보관 성공과 과거 DB PASS는 별도 근거다.
 
 

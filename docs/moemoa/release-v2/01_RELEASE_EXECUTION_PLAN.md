@@ -2661,3 +2661,61 @@ run38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN, Stop container
 6. 변경/복귀: 소스·DBmigration·master·Public·원격설정 변경0. 기존 시작포인터/작업판/ExecPlan/증거만 업데이트. 준비된 복원 스크립트는 로컬 격리 입력으로만 사용하며 network none/포트0/권한off/종료 계약 유지.
 7. 보안/관측: 키·복원본문은 로컬 비공개 ignored 경로에만 있고 로그에는 집계만 출력. 새 외부전송/삭제/예약0. 파일 복원 PASS를 DB 복원/서빙 PASS로 승격하지 않는다.
 8. 다음1개: Docker 엔진 기동 후 prepared rehearsal의 20261012-incremental/--current-public 실행. 최신context가1시간을 넘었으면 새runId로 읽기재수집 후 연결. 운영승인은 아직 불필요한 로컬 검증 범위다. 독립키·주간자동화/D06 운영적용은 기존 미완료로 유지.
+
+#### 2026-10-12 다른 PC 인수 정리 계획
+사용자 Git·문서 업데이트 요청에 따라 현행 W17/D05 재개점·브랜치·운영 기준·로컬 전용 입력과 재현 순서를 기존 ExecPlan/작업판/시작문서에 보완한다. 과거 10/9 문서가 참조하지만 미추적이던 합성 가입 실험 3파일은 내용 검토 후 과거 근거로 보존하며 현행 가입/운영 migration으로 적용하지 않는다. Python 캐시·백업/복원본문·키·환경 파일은 제외. 작업 브랜치만 push하고 원격 SHA 일치·문서 링크·diff·runner 구문을 확인한다. 배포/DB/백업 재실행 없음.
+
+<a id="handoff-20261012"></a>
+## 2026-10-12 다른 PC 인수 — W17/D05 재개
+
+### Git 받기와 현행 기준
+- 저장소: Newrred/anime-collector. 작업 브랜치: `codex/simple-signup-preview`. 인수 직전 증거 커밋: `4cc93b988b5b7a7eaad7dcb5500451bf4ed8d3b8`. 이 절이 포함된 후속 문서 커밋을 받는다.
+- 운영 master는 `d8bf945051854ca60398664de54105a49a4ea2c2`; 이 작업 브랜치를 master에 병합/배포하는 작업은 이번 인수 범위가 아니다. 운영 공개 후보/승인과 백업 검증을 혼동하지 않는다.
+- 다른 PC의 미커밋 변경을 먼저 확인한다. 깨끗한 checkout에서 아래 명령으로 받는다. 충돌/분기 시 reset/clean/강제 push 대신 양쪽 변경을 보존한다.
+
+~~~sh
+git status --short --branch
+git fetch origin
+git switch codex/simple-signup-preview
+# 로컬 브랜치가 없을 때만: git switch --track origin/codex/simple-signup-preview
+git pull --ff-only origin codex/simple-signup-preview
+git log -1 --oneline
+~~~
+
+읽기 순서는 AGENTS → CODEX_START_HERE → 확정결정 → 기존 release-v2/00~03과 이 절이다. 과거 날짜의 '현재/다음' 로그는 당시 이력이며 최상단 인수 포인터가 우선한다. 기존 M/W/C/Q/D 번호를 유지한다.
+
+### 완료와 아직 하지 않은 것
+- 실제 백업 실행38153533963 성공, 증분 ZIP62,610,505B·chain2·원격 해시/완료기록 확인. 최종 관측 당시 실행 gate false, 주간예약 미가동. 재개 시 쓰기 전에 현행 설정을 다시 읽는다.
+- 새 ZIP/state6 외부 회수 → AES-GCM 인증 → 고정 baseline 결속 → 전체+증분 4,310파일/918,359,762B 길이·해시 복원 PASS. 전체 baseline은 기존 로컬 사본 재사용이었다.
+- 새 증분 DB의 실제 import·삭제/권리 replay·RPC/RLS 검사는 아직 미실행. 과거10/11 DB99테이블 복원 PASS를 이번 PASS로 대신하지 않는다.
+- 다음 행동 하나: 정상 Docker 환경에서 새 증분의 격리 DB 복원 검증을 마감한다. 새 백업/Drive 쓰기/주간예약/운영 배포를 먼저 실행하지 않는다.
+
+### Git 밖에 있는 필수 입력
+Git만 받아서는 비공개 복구 검증을 실행할 수 없다. 아래 암호화 사본은 기존 Drive 'MOEMOA encrypted backups' 비공개 폴더에서 받을 수 있지만 복구키는 Drive 백업과 분리해 안전한 경로로 확보해야 한다. 채팅/Git에 키나 복원본문을 넣지 않는다. 이 PC 밖 독립 복구키 보관은 아직 확인되지 않았다.
+
+| 입력 | 기존 위치/확인 기준 |
+| --- | --- |
+| 전체 기준 ZIP | `moemoa-production-20261011-02.encrypted.zip`, 920,077,441B. `tools/operations/weekly-backup.baseline.json`의 hash/context/manifest pin 사용 |
+| 새 증분 ZIP | `moemoa-production-20261011155929965.encrypted.zip`, 62,610,505B. 인증된 state6의 두 번째 descriptor와 대조 |
+| 완료기록 | `moemoa-weekly-state-6-20261011155929965.enc`. type commit/sequence6/runId20261011155929965/chain2/baseline 일치 검증 |
+| 복구키 | 기존 PC `C:/Users/hongs/.moemoa/recovery-keys/moemoa-production-20261009.key`; 키 내용은 Git에 없음 |
+| 최신 상태 읽기용 접속 설정 | 기존 PC `.env.moemoaprod.server.local` 및 `tools/operations/inspect-retention.py`가 요구하는 기존 로컬 설정. 다른 PC에 자동 전달되지 않음 |
+
+기존 PC의 `.cache/operations-private/external-incremental-20261012`(인증·복원 산출물/로컬 rehearsal 사본)과 `.cache/operations-private/isolated-recovery-20261012-incremental`(당시 최신상태)도 Git 밖이다. 그 경로가 다른 PC에 있다고 가정하지 않는다. 복원된 개인 데이터보다 암호화 원본을 받아 재검증하는 방식으로 재개한다.
+
+### 기존 도구로 다시 준비하는 순서
+1. 로컬 Node/Python과 필요한 암호화 모듈, PostgreSQL16 psql, Docker 엔진을 확인한다. 현재 rehearsal은 Windows Docker 경로를 사용하며 다른 OS에서는 경로 조정이 필요하다. 사용 이미지 pin은 tracked rehearsal에 있다. 의존성 설치/업그레이드를 자동 수행하지 않는다.
+2. `weekly-backup-state.mjs`의 `openState`로 state6를 인증하고 위 identity/chain/baseline pin을 검사한다. 전체와 증분 ZIP의 bytes/SHA256을 각 descriptor와 대조한다. 단순히 내려받은 파일 자체의 hash를 '기대값'으로 사용하지 않는다. 이번 검증은 전체 ledger6개를 새로 재조회한 것은 아니다.
+3. `unpack-weekly-parent.py`를 각 ZIP에 실행한다. 필수 인수는 `--archive --key-file --output --project --release --sha256 --manifest-sha256`; project/release/hash는 검증된 descriptor에서 가져온다. 새 ignored staging 경로만 사용한다.
+4. `incremental-backup.mjs`의 `restoreIncrementalBackup({chain,output,key})`로 조립한다. chain의 source는 각 unpack 출력의 `encrypted`, context/manifestSha256은 descriptor값이다. 성공 후에만 output의 `VERIFIED_BYTES_ONLY.json`에 실제 결과와 `allSha256AndLengthsMatch:true`를 기록한다. 기존 출력에 덮어쓰지 않는다.
+5. `capture-isolated-recovery-context.py --run-id <새고유ID> --public-state`로 운영의 최신 삭제·공개 상태를 읽기전용 수집한다. 1시간이 지난 context는 사용하지 않는다. 환경/자격 정보가 없으면 그 조건만 명시하고 운영 설정을 임의 변경하지 않는다.
+6. `rehearse-production-restore.mjs`는 기존 전체 사본 경로가 고정되어 있다. 이번 검증 준비는 이 tracked 파일의 repo root와 backup 입력 두 상수만 실제 로컬 경로로 바꾼 ignored 사본을 사용했다. 다른 PC에서도 원본과 사본의 hash 및 두 치환을 기록하고 나머지 로직을 그대로 보존한다. 기존 PC 사본을 Git에서 찾지 않는다. `node <로컬사본.mjs> <같은새고유ID> --current-public`로 실행한다.
+7. network none/포트0/읽기전용 mount/cron off에서 import → 최신 private/public replay → contract → owner/other/anon/RLS → private/public off → 컨테이너 정지 결과를 확인한다. 결과는 기존 backup evidence/작업판에 집계만 병합하고 `safeToServe:false`를 유지한다.
+
+이 PC 차단은 Docker의 `dockerInference` 기존 소켓 접근 오류다. 일반 exec도 OS1392로 실행이 실패해 Node execFile을 사용했다. 다른 PC에서 이 오류가 재현된다고 가정하지 않는다. Docker 전체 초기화/volume 삭제/재설치는 수행하지 않았다.
+
+### 보존 파일 및 검증 범위
+- 과거 10/9 문서·증거가 참조하던 `tools/identity/run-signup-admission-local.sh`, `signup-admission-candidate.sql`, `signup-admission-contract.sql`을 원문 그대로 Git에 추가했다. 합성 example.test 입력만 포함하며 현행 배포용 migration이 아니다. 과거 승인 기반 후보를 현행 생년월일 가입 절차로 되돌리는 데 쓰지 않는다.
+- 현행 가입 코드는 `supabase/migrations/20261009143000_simple_signup_admission.sql`와 그 후속 tracked 변경을 따른다. 과거 후보3파일은 앱/CI 실행 경로에 연결되지 않은 것을 검색으로 확인했다.
+- 이번 인수 검증: 원격 fetch, 과거3파일 전체 내용/참조 확인, runner `bash -n` exit0, 문서 경로·JSON·git diff 검사. 과거 SQL23+동시성1 PASS를 이번에 재실행한 것은 아니다. 앱 코드·DBmigration·Public·실데이터 변경0.
+- Python `__pycache__`, 자격 정보, 백업/복원본문은 커밋하지 않는다. 주간 자동화·독립키·D06 운영 적용은 기존 미완료/정확후보 승인 범위로 남는다.
