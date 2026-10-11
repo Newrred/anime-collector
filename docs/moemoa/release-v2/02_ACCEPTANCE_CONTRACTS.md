@@ -1,5 +1,14 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 W14/D04 고정 공개 안내·동의 계약
+
+- 후보139a200과 capacity evidence의 firstPublicProductionCandidate_02가 최신이다. 과거7cd3a82 runtime 동등성/CI는 새 소스의 검증으로 재사용하지 않는다.
+- MOEMOA_PUBLIC_GENERAL_20261011_01은 /legal/public-sharing-2026-10-11/ 한·영 고정 안내에만 연결한다. 이전 가입 Terms/Privacy20261010은 불변이며 일반 이미지/별도권리/신고·차단·조치·이의제기/철회 범위를 설명한다. 체크 추가0.
+- 카드 간편 공개는 사용자가 동의한 정책과 서버 preview policy가 다르면 게시 전 CONSENT_MISMATCH. 기존 미확정 결과 재시도는 같은operation을 유지한다. 알려지지 않은 policy는 카드·보드·미니홈의 새 동의/게시를 막되 비공개/철회를 막지 않는다.
+- 로컬 unit12·고유 mocked Chromium12·build33 PASS. 첫 browser10/11의실패는모의Board고정revision fixture를수정, 해당범위7/7PASS. 합산17PASS로표시하지않는다. 320px고지/390px카드폭과한체크유지 확인. 신규실제계정/hosted/운영PASS0.
+- 새DB/migration/원격설정변경0. 원격 적용 시 test-only revision을 운영 고지로 자동 승인하지 않으며, 정확한 revision과 현재 동의는 별도 확인한다. 운영Public 활성은 D06 승인 전0.
+
+
 ## 2026-10-11 W15/D06 운영 후보 결속 계약
 
 - 기존 capacity evidence의 firstPublicProductionCandidate는 재현 가능한 후보 manifest다. 적용 승인/운영 PASS가 아니다. source7cd3a82, 테스트a6b6dda와 runtime 차이0/CI38129338217 SUCCESS.

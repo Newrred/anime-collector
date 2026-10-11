@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W14/D04 공개 고지 연결 완료(로컬):** 후보139a200에 한·영 고정 안내 `/legal/public-sharing-2026-10-11/`와 `MOEMOA_PUBLIC_GENERAL_20261011_01`을 결속. 카드·보드·미니홈 안내 링크/기존 동의1개 유지. 간편 공개의 동의 정책≠서버 preview 정책이면 게시 거부, 미확인 정책은 새 게시만 막고 비공개·철회 유지. 단위12·고유 모의API Chromium12·build33 PASS. 새 hosted/운영 PASS0, DB·원격설정 변경0. 기존 capacity evidence의 firstPublicProductionCandidate_02가 새 소스/고지 hash 기준이며7cd3a82 후보·과거CI는 보존한 이력이다. 다음1개: 이 후보를 테스트 서버의 공개 정책 revision·현재 동의에 연결하는 정확한 적용 준비. 운영 승인/최종HTTP·경보수신/D05 인수는 잔여.
+
+
 > **2026-10-11 W15/D06 운영 후보 결속:** 앱 후보7cd3a82는 전체CI SUCCESS a6b6dda와 runtime/config/DB 소스 차이0. 운영 읽기전용 조회에서 migration38개·Public off·3개 누락(20261010160000/11120000/11180000), 운영자1명·KR14/TH13/US13·global20MiB 유지 확인. 기존 capacity evidence의 firstPublicProductionCandidate에 소스/SQL hash·2,000GET/64MB·13개 Vercel 설정·공개 사본 정리·원복순서 결속. 후보 생성 정상1/잘못된 대상·상태 거부6 PASS. 운영/테스트 쓰기0, 새 사용자행동 PASS0. 다음1개: D04의 기존 일반 공개 고지·권리 조건을 후보 policy revision에 결속. 복구 인수/실제경보수신/최종HTTP·정확한운영승인은 잔여.
 
 
