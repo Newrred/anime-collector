@@ -171,6 +171,13 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 7. 안전/관측: 비밀값/개인 본문 출력0, 테스트 고정target·정확한 SQL해시·중복적용차단 유지. 새 사용자 행동 PASS0. mock5검사는 실제 원격15테이블 보존결과로 표기하지 않는다. 예산경보 판정/배포HTTP/수신을 분리한다.
 8. 다음1개/승인: 추가 migration1개+phone-test 전용 신규maintenance secret 저장·target·관측flags2개·동일806b6b2 Preview 설정 재배포 승인 후 observe-only 검사. 기존10/11 정확한 변경별 승인 조건상 기존2개migration 승인에 추가 함수를 포함하지 않는다. 알림 실제 외부 발송/운영 quota/master 배포는 본 후보에 없다.
 
+#### 관측 연결 승인 후 DB 적용 · 브라우저 인계
+
+- 사용자 ‘테스트 관측 연결 적용’ 승인09e22fa. wsl.exe -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --observation-dependency --apply →exit0, release MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01, preservedTables15/history1/function=true. --observation-dependency 독립조회도exit0/history1. 설치 전후 observed_at=2026-10-10T08:23:17.389028+00:00로 동일; 실제 관측 호출 전이다.
+- Chrome Vercel 환경변수 폼에 target/observe flags2개·빈 secret key를 준비. 기본 Production 선택을 제거하여 codex/phone-test 단독 확인. 아직 Save/설정 재배포0, 관측flags 실제활성0. 운영 secret 조회/복사0.
+- 브라우저 도구의 새 인증값 입력·저장 handoff 규칙에 따라 사용자 입력만 요청했다. 준비한 난수32bytes secret은 Git 밖 C:/Users/hongs/.moemoa/test-observation-20261011.key에 보관하고 icacls로 hongs/SYSTEM만 접근, 상속 제거 완료(exit0). 값은 채팅/로그/Git에 출력하지 않았다. 앞선 ‘파일에 기록하지 않음’ 계획은 사용자 복사 입력을 위해 이 보호된 로컬 파일 보관으로 좁게 수정한다.
+- 사용자 Save 후 동일806b6b2 Preview 재배포, 무인증401와 실제 maintenance OBSERVE_ONLY=true/공개경보 확인, 관측flags 제거/원복 및 동일소스 재배포까지 승인 범위 내에서 이어간다. .cache에 고정test alias·로컬 키파일·observe-only 실행을 준비했고 아직 실행0. 기존 삭제workflow를 호출하지 않는다. 실제 수신/운영 D03는 아직 미검증이다.
+
 #### 비용·정상 규모의 구체적 한계
 
 - 공급자 실제 UI read-only 확인(2026-10-11): Supabase 조직 All projects/Free/9월24일~10월24일 uncached0.972/5GB·cached0.086/5GB·저장기간평균0.826/1GB·DB요약0.297/0.5GB, 초과없음. 평균/최대1시간 지연 값이므로 현재 SQL856,441,465B와 동일 지표로 취급하지 않는다. Vercel anime-collector Usage/최근30일9월11일01:00~10월11일01:00 Fast Data1.26/100GB·Origin4.34MB/10GB·함수390·CPU41s·memory0.15GBh. 다른프로젝트 합산 여유/무료 지속 보장 아님. 현재는 전송보다 저장 한도에 더 가깝다. 이 실측은 초기 공개 이후 트래픽 예측이 아니며100MiB/day 후보가 한 달 지속되어도 무료라는 뜻이 아니다.

@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-11 W15/D03 관측 연결 후보 준비 완료:** 승인806b6b2 CI38122228717 전체 SUCCESS. 추가 후보 MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01은 기존20261008090000 함수1개와 phone-test 전용 관측 인증/대상/flags만 연결한다. test 사전조회 enabled/approved=true·paused=false, 함수 미설치 확인. 적용 도구 안전검사5 PASS; 원격 추가변경0. 현재 배포 관측HTTP·실제 수신은 미검증이며 다음1개는 이 추가 범위 승인 후 적용·observe-only 확인·flags 원복. 운영/master1878867 유지. [보고](01_RELEASE_EXECUTION_PLAN.md)·[근거](evidence/2026-10-11-public-capacity-closeout.json).
+> **2026-10-11 W15/D03 관측 연결 승인·DB 적용 완료:** 사용자09e22fa 후보 승인 후 test 기존20261008090000 설치·15테이블 보존·독립 history1/function 존재 확인. Vercel은 codex/phone-test만 대상으로4개 값 입력창 준비(아직 저장/재배포 전). 새 인증값은 브라우저 규칙에 따라 사용자 직접 입력 대기. 운영/master1878867·phone-test806b6b2 유지. 다음1개는 키 저장 후 동일Preview 재배포→실제 observe-only 검사→임시 flags 원복. 전체 경보/출시 PASS 아님.
 
 
 ## 2026-10-11 첫 Public 출시 마감 — 현재 진입점

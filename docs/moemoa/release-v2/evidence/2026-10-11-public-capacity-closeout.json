@@ -115,7 +115,7 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Approve exact observation connection candidate, then verify deployed observe-only endpoint and restore temporary flags",
+  "next": "After user credential entry, redeploy existing phone-test 806b6b2, verify observe-only endpoint, restore temporary flags",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -225,7 +225,7 @@
     "release": "MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01",
     "migration": "20261008090000",
     "sha256": "dc9f9c4657a404a0150fa5d3d1ac9abd5c81f914d81fb9e53de3c7c6ff7e7779",
-    "applied": false,
+    "applied": true,
     "preflight": {
       "enabled": true,
       "approved": true,
@@ -250,6 +250,17 @@
     ],
     "effects": "Existing private observer updates private policy observed_at after measurement; no cleanup or quota changes",
     "rollback": "Restore/remove observation flags and redeploy identical test source; preserve additive function",
-    "needsExactApproval": true
+    "needsExactApproval": false,
+    "approved": true,
+    "approvedSource": "09e22fa32d28e33d3f4f14ffe5e750f009b43668",
+    "preservedTables": 15,
+    "independentReadback": true,
+    "migrationCount": 1,
+    "privateObservationExists": true,
+    "previewConfigSaved": false,
+    "apiTested": false,
+    "credentialFile": "C:/Users/hongs/.moemoa/test-observation-20261011.key",
+    "credentialAcl": "hongs:F; SYSTEM:F; inheritance removed",
+    "waitingFor": "User enters new test-only credential and saves prepared Vercel form; browser credential handoff rule"
   }
 }
