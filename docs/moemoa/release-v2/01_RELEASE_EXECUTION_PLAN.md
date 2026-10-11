@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
+
+
 ## 2026-10-11 — 첫 Public 마감 / W08·W09 현행 연결
 
 ### 1–3. 목적·결정·기준
@@ -2135,3 +2138,34 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제 명령: node --test tests/unit/simpleCardSharing.test.mjs 초기10PASS/신규정책불일치1FAIL(실제 게시 허용 재현)→수정 후11PASS. node --test tests/unit/simpleCardSharing.test.mjs tests/unit/publicSharingPolicy.test.mjs 12PASS. node scripts/run-publication-closeout-e2e.mjs 'simple card visibility|image preparation requires|explicit selection|publish retry|mini-home explicit|unknown public policy|public notice fixed' 초기10/11PASS; 모의 Board 응답이 고정 revision을 돌려주는 검사 fixture 오류1개 수정. 이후 'unknown public policy|public notice fixed|simple card visibility' 7/7PASS, 두 실행의 고유 행동검사12개 PASS(17개로 합산하지 않음). node 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build exit0/33페이지+postbuild, git diff --check PASS.
 7. 새 행동/영향: 로컬 모의API Chromium에서 카드1체크 게시/비공개/재게시, 보드·미니홈 고지 링크와 게시/철회, 두 이미지 준비 경로, 불확실 게시 동일operation 재시도 유지. 미확인 정책은 세 화면 새 동의/게시 차단·철회 유지. 안내320px와 카드390px overflow없음/스크린샷 확인. 새 실제Google/hosted/운영/실기기 PASS0. 신규 동의 체크/인증/유료/발송/로그0. 이전 a6b6dda hosted·CI는 이 수정의 PASS가 아니다.
 8. 잔여/다음1개: 고지·동의의 로컬 연결은 완료. 새 소스와 고지해시를 기존 D06 최종후보에 결속해 원격 적용 범위를 준비한다. 기존7cd3a82 manifest는 과거 후보로 보존하며 새 runtime에 green CI를 전용하지 않는다. 정확한 새 test/운영 적용 승인, 최종 배포 이미지HTTP/철회·경보 수신·D05 별도키/복구인수는 미완료. 운영Public off 유지.
+
+### W14/W19/D04 새 공개 고지 test 연결 후보 — 2026-10-11
+
+1. 목적: 새 고지 소스50ecbc9/제품139a200을 기존 test 정책과 정확히 연결하고 종료 후 복귀한다.
+2. 결정: 기존 한 체크/일반 공개/단일작업판/정확한대상 승인 유지.
+3. 근거: CI38131778423 SUCCESS; 실제test policy TEST_ONLY_PHONE_WEB_20260927_01 세값, guard=false, 현재가입확인2건,필요RPC3개존재.
+4. 포함: 기존설정4필드의 exact apply/restore SQL과 로컬구성검사, 구체배포/원복목록. 운영/가입/원본/역할/새migration 제외.
+5. 흐름: fresh baseline→승인→test설정4값+기존2000/64MB quota→phone-test 고정소스+policy/sized 환경변수→본인명시동의/실제이미지/철회→정확히원복.
+6. 파일: tools/operations/public-notice-test-config.sql·public-notice-test-fixture.sql·test_public_notice_config.py, 기존00~03/evidence.
+7. DB: 스키마0,정책3revision/가입확인guard만. 이전 quota SQL 재사용. 저장된수락/권리/사용량변경0.
+8. 단계: 읽기전용대조완료→SQL원복/guard준비→격리PG검사→후보commit/정확한test승인요청.
+9. 검사: 최소구성fixture에서정확SQL dry-run/apply/restore/드리프트차단·기타값보존. 기존전체DB·A/B복원재시험0.
+10. 보안: 키/개인자료/receipt원문출력0, target는기존test TLS연결만. 운영원격미실행.
+11. 관측: 실제이미지조회시기존usage증분만,인위적알림전송0.
+12. 복귀: 정책세값/guard는정확한후보일때만원복,quota원복은기존검증SQL,Preview기존policy/sized=false와이전소스a6b6dda확인. 불확실결과는재조회.
+13. 위험: 이전test고지동의를새revision으로간주하지않음. 새공개저장은사용자직접체크. 신규가입불필요.
+14. 승인: 아직없는것은이새revision/검증소스의원격적용뿐. 현재로컬준비후정확한대상으로요청.
+15. 진행: test읽기전용현재정책/현재declaration집계와새CI확인.
+16. 발견: DB누락/가입미완료가아닌설정revision불일치이며재설치로해결하지않음.
+17. 완료보고: 아래실제명령/결과와정확한후보에누적.
+
+#### W14/W19/D04 test 연결 준비 — 이번 실행 8항 보고
+
+1. 읽은 근거: AGENTS·CODEX_START_HERE·확정결정01·PLANS·QA07·변경09, 기존00~03·capacity evidence·publication 설정/가입 연결 SQL·target 검증 연결 도구를 대조했다. 기존 ExecPlan 위17항을 사용한다.
+2. 가정/미결: 기존 현재 가입확인2건을 재사용할 수 있지만 새 공개고지는 당사자가 직접 확인한다. 이번 준비는 운영 Public 승인이나 새 약관 대리 수락이 아니다.
+3. 계획/후보: 배포 소스50ecbc9e5b393671a129df0ed229fda01ecc4958, 제품139a200과 runtime/config/DB diff0. GitHub CI38131778423 전체 SUCCESS를 이번 조회했다. 실행할 새 SQL은 아래 evidence SHA256으로 결속한다.
+4. 파일: public-notice-test-config.sql은 세 revision과 signup_declaration_required 네 값만 적용/원복한다. public-notice-test-fixture.sql/test_public_notice_config.py는 네트워크 없는 임시 PostgreSQL 설정 fixture다. 기존00/01/02/03과 capacity evidence만 최신화, 앱/의존성 변경0.
+5. DB/복귀: 원격 migration/쓰기0. 기본 ROLLBACK, full row baseline과 signup dependency 검사, 정확한 후보에서만 원복. 기존 kill switch나 다른 한도가 바뀌면 중단하며 덮어쓰지 않는다. 향후 승인 시 기존 quota SQL 재사용, 기존 사용량/receipt/원본 보존. Preview 설정과 이전a6b6dda 소스 복귀까지 범위에 포함한다.
+6. 실제 명령/결과: 읽기전용 .cache/inspect-public-notice-test.py 결과 target=test·필요RPC3개·현재가입확인2건·두quota off/0·override0. wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test_public_notice_config.py exit0/8 PASS: 기본dry-run, 정확한4필드, restore dry-run, 전체baseline 복귀, 잘못된원복/한도drift/가입dependency/kill-switch변경 거부. 구성검사이며 실제 게시 서버 모사가 아니다. 기본DB/A·B/72table복원 반복0.
+7. 영향/증거: 이번 새 사용자행동·hosted게시 PASS0, 운영/테스트 원격변경·발송·결제0. 과거 단위12/모의브라우저12/build33 및 실제A/B·quota검증과 구분한다. 개인정보/비밀값/동의본문 출력0.
+8. 잔여/다음1개: 정확한 test 후보 승인 후 고지 revision·가입 guard·기존2000GET/64MB·sized 배포를 함께 연결하여 최종 이미지전달/철회 확인 후 원복. 새 schema·재가입·역할변경 불필요. D05 별도키 보관/전체DB복구는 실제 잔여로 보존하며 이미 확인한 외부 암호화파일 검증을 반복하지 않는다. 운영 승인·실제경보수신은 별도다.

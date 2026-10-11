@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
+
+
 > **2026-10-11 W14/D04 공개 고지 연결 완료(로컬):** 후보139a200에 한·영 고정 안내 `/legal/public-sharing-2026-10-11/`와 `MOEMOA_PUBLIC_GENERAL_20261011_01`을 결속. 카드·보드·미니홈 안내 링크/기존 동의1개 유지. 간편 공개의 동의 정책≠서버 preview 정책이면 게시 거부, 미확인 정책은 새 게시만 막고 비공개·철회 유지. 단위12·고유 모의API Chromium12·build33 PASS. 새 hosted/운영 PASS0, DB·원격설정 변경0. 기존 capacity evidence의 firstPublicProductionCandidate_02가 새 소스/고지 hash 기준이며7cd3a82 후보·과거CI는 보존한 이력이다. 다음1개: 이 후보를 테스트 서버의 공개 정책 revision·현재 동의에 연결하는 정확한 적용 준비. 운영 승인/최종HTTP·경보수신/D05 인수는 잔여.
 
 

@@ -2276,5 +2276,258 @@
     "remoteMutations": 0,
     "supersedesForRelease": "firstPublicProductionCandidate (7cd3a82); preserved as historical evidence",
     "next": "Bind candidate 02 to the test server/current consent under exact approval, then retain D03/D05/D06 final acceptance conditions."
+  },
+  "publicNoticeTestConnectionCandidate": {
+    "status": "LOCAL_CONFIG_VERIFIED_AWAITING_EXACT_TEST_APPROVAL",
+    "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+    "productSource": "139a2006909c23dd8868483867134eb7f43259de",
+    "sourceRuntimeDiff": [],
+    "ci": {
+      "runId": 38131778423,
+      "conclusion": "success",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38131778423"
+    },
+    "readOnlyBaseline": {
+      "target": "nmgkhknponvzcwliajyk",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T10:42:07.420513+00:00",
+        "functions": {
+          "makePrivate": true,
+          "sharingStatus": true,
+          "sizedDelivery": true
+        },
+        "migrations": [
+          "20260924141253",
+          "20260924141254",
+          "20260924141255",
+          "20260924141256",
+          "20260924141257",
+          "20260924141258",
+          "20260924141259",
+          "20260924141300",
+          "20260924141301",
+          "20260924141302",
+          "20260924141316",
+          "20260924141318",
+          "20260924141320",
+          "20260924141322",
+          "20260924141324",
+          "20260924141326",
+          "20260924141328",
+          "20260924194322",
+          "20260924194325",
+          "20260924195621",
+          "20260925152859",
+          "20260925164126",
+          "20260927053858",
+          "20260927053904",
+          "20260927053914",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010160000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011120000",
+          "20261011160000",
+          "20261011180000"
+        ],
+        "publicCounts": {
+          "homes": 1,
+          "assets": 17,
+          "boards": 8
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10-test",
+          "policyVersion": "simple-signup-2026-10-10-test",
+          "privacyVersion": "privacy-2026-10-10-test",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": false,
+          "singleton": true,
+          "max_reserved_bytes": 0
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "GB",
+            "minimumAge": 13
+          },
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "PH",
+            "minimumAge": 13
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 10,
+          "reads_enabled": true,
+          "images_enabled": true,
+          "writes_enabled": true,
+          "follows_enabled": true,
+          "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "reports_enabled": true,
+          "asset_bytes_limit": 41943040,
+          "minihomes_enabled": true,
+          "report_daily_limit": 10,
+          "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "signup_declaration_required": false,
+          "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+        },
+        "activeDeliveryOverrides": 0,
+        "currentDeclarationCount": 2
+      }
+    },
+    "files": [
+      {
+        "path": "tools/operations/public-notice-test-config.sql",
+        "sha256": "a82134ec71cd9fc6886f41e8d093f30f49d131ea2b569f0d25f2d6d8315519e7"
+      },
+      {
+        "path": "tools/operations/public-notice-test-fixture.sql",
+        "sha256": "d738f8225ac0f2bc8e259e4507820fb12cac2c81dd1977c7e048f04e2dd8ad30"
+      },
+      {
+        "path": "tools/operations/test_public_notice_config.py",
+        "sha256": "6fc841d47dbd1cb1568610b59fcd73af8e5d2921b0c4f30ea61872345fa71f49"
+      }
+    ],
+    "changes": {
+      "schema": 0,
+      "publicationSettings": {
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "signup_declaration_required": true
+      },
+      "quota": {
+        "IMAGE_DELIVERY": 2000,
+        "IMAGE_DELIVERY_BYTES": 64000000,
+        "sql": "tools/operations/public-delivery-budget-candidate.sql"
+      },
+      "preview": {
+        "branch": "codex/phone-test",
+        "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED": "true"
+      }
+    },
+    "rollback": {
+      "publicationSettings": "exact full captured baseline; refuse any drift",
+      "quota": "existing exact rollback; preserve actual usage",
+      "preview": "fresh baseline required before writes; previous a6b6ddaaadf9487f5f8f3b14064cb794b27826c0 / TEST_ONLY_PHONE_WEB_20260927_01 / sized=false"
+    },
+    "verification": {
+      "command": "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test_public_notice_config.py",
+      "exitCode": 0,
+      "configOnlyPass": 8,
+      "newHostedUserBehaviorPass": 0,
+      "remoteMutations": 0
+    },
+    "next": "Exact test application approval, then notice/image delivery/withdrawal and restore; no new signup or base DB restore"
   }
 }

@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
+
+
 > **2026-10-11 W14/D04 공개 고지 연결 완료(로컬):** 후보139a200에 한·영 고정 안내 `/legal/public-sharing-2026-10-11/`와 `MOEMOA_PUBLIC_GENERAL_20261011_01`을 결속. 카드·보드·미니홈 안내 링크/기존 동의1개 유지. 간편 공개의 동의 정책≠서버 preview 정책이면 게시 거부, 미확인 정책은 새 게시만 막고 비공개·철회 유지. 단위12·고유 모의API Chromium12·build33 PASS. 새 hosted/운영 PASS0, DB·원격설정 변경0. 기존 capacity evidence의 firstPublicProductionCandidate_02가 새 소스/고지 hash 기준이며7cd3a82 후보·과거CI는 보존한 이력이다. 다음1개: 이 후보를 테스트 서버의 공개 정책 revision·현재 동의에 연결하는 정확한 적용 준비. 운영 승인/최종HTTP·경보수신/D05 인수는 잔여.
 
 
@@ -24,7 +27,7 @@
 - 실제 잔여: W15/D03 정상 공개규모·전송한도/경보 인수, W14/D04 Public 권리·고지의 운영 연결, W16/W17/D05 작은 catalog 게시·복구/별도 복구키·전체DB 복구/운영 목표, W18~W20/D06 같은 최종 후보의 전달·철회 경계와 승인 배포. 기존 기본 DB/A·B 격리/72table 복원은 반복하지 않는다.
 - Android 제외, 추가 Safari/WebKit·실폰 오프라인은 사용자 제외 유지(**미실행/USER_WAIVED**, PASS 아님). 과거 행의 포괄적인 ‘실기기 잔여’는 이를 재요구하는 출시 차단 조건이 아니다.
 - 이번 새 사용자 게시 행동 PASS0. 승인 test DB/배포·실제 Storage 사본2종 다운로드를 수행했다. 운영 관측 CI38126124037은 이번 후속 조회에서 전체 SUCCESS 확인. 새 크기예약 후보의 CI와 구분한다.
-- 다음 행동1개: **후보139a200의 고정 공개 안내·정책 revision을 테스트 서버의 현재 동의에 연결하는 적용 준비**. 원격 변경은 정확한 대상 승인 후, 운영Public은 off 유지.
+- 다음 행동1개: **후보50ecbc9와 고정 설정 SQL의 정확한 test 적용 승인 후 실제 고지·이미지전달·철회 연결 및 원복**. 원격 변경은 정확한 대상 승인 후, 운영Public은 off 유지.
 
 
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
@@ -750,7 +753,7 @@
 | W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 10/11 현재 test 가입 guard 아래 사용자 미니홈 게시·보드 작성자 링크·새 익명home24×30 decode PASS. 과거 선택/재정렬/철회 근거 보존. 새 정책 hosted 미검증 표시는 해소; 최종 운영 후보/공개 활성은 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
 | W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | 10/11 현재 보드→home·팔로우/재방문·가입오류복귀 모의API UI PASS. 10/11 새 B 직접 가입·Google 내부복귀·명시follow/내 목록 재방문 hosted PASS. R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
-| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 10/11 실제 신고/차단/해제·9746a30 HIDE/RESTORE/작성자 통지/감사·카드 비공개 PASS. 20261010160000 test 가입 guard 연결 적용 및 현재 A/B receipt 흐름 확인 완료. 139a200 고정 공개고지·세 화면 연결/정책불일치 거부 로컬PASS. 운영 인수 D04/최종 운영 UI·정책 결속 잔여; 다른 게시물/동일 이미지 전역 차단 범위를 자동 PASS로 확대하지 않음 |
+| W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 10/11 실제 신고/차단/해제·9746a30 HIDE/RESTORE/작성자 통지/감사·카드 비공개 PASS. 20261010160000 test 가입 guard 연결 적용 및 현재 A/B receipt 흐름 확인 완료. 139a200 고정 공개고지·세 화면 연결/정책불일치 거부 로컬PASS. 50ecbc9 CI SUCCESS·test설정 apply/restore8 PASS, 원격연결 미실행. 운영 인수 D04/최종 운영 UI·정책 결속 잔여; 다른 게시물/동일 이미지 전역 차단 범위를 자동 PASS로 확대하지 않음 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 승인199613b 운영집계RPC·설정·master/Vercel/www SHA 확인. 수동관측38126188717 SUCCESS/856,441,465B/public0/삭제호출0·무인증401. 관측경로 완료. 신규 크기예약2fbc test DB/배포·실제 Storage full/thumb72B PASS, flag false 원복. 배포 handler 이미지 열람은 미확인. 2,000GET/64MB 승인test 실제2GET/144B 차감·hosted 경계/경보판정 PASS·DB원복. 실제알림수신·최종HTTP/운영한도 잔여 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
@@ -765,14 +768,13 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-W/M: W14/W08/W09 · M2/M4 공개 고지·동의 연결 / D04/Q11
-후보: 139a2006909c23dd8868483867134eb7f43259de, firstPublicProductionCandidate_02
-완료: 고정 한·영 고지/정확한policy URL·세화면 연결·기존체크1개 유지·preview policy불일치 게시거부
-이번 검증: 단위12·모의API Chromium 고유12·build33, 미확인policy 새게시차단/철회유지
-과거: 실제A/B·전송quota·Storage와a6b6dda CI는 별도 이력, 이번새hosted PASS0
-운영: 이번 DB/migration/설정/배포0, 마지막확인 master199613b/Public off 유지
-미완료: 새후보 hosted 고지/revision/현재동의 연결, 최종이미지HTTP/철회·실제경보수신·별도복구키/복구인수·정확한운영승인
-다음1개: 후보139a200의 테스트 공개정책/revision 연결 적용 준비(정확한대상승인 전원격변경0)
+W/M: W14/W19 · M4/M5 test 고지 연결 / D04/Q11
+후보: 앱50ecbc9e5b393671a129df0ed229fda01ecc4958 / publicNoticeTestConnectionCandidate
+완료: test 현재정책/RPC3개/가입확인2건 읽기전용대조; exact설정4필드 apply/restore 후보
+이번 검증: 격리 설정8 PASS; CI38131778423 SUCCESS 재조회; 원격쓰기0
+과거: 제품139a200 unit12/모의API고유12/build33, a6b6dda 실제quota/Storage·A/B는 각각 별도이력
+미완료: 정확한test 적용승인→고지/최종이미지전달·철회·원복, 경보실수신/D05인수/운영승인
+다음1개: 이 test 후보만 승인받아 실제 연결. 재가입/기초DB/권한설치 반복 불필요
 ```
 
 <details><summary>이전 카드 — 운영 후보 결속</summary>

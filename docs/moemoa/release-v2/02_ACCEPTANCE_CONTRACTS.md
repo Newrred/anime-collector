@@ -1,5 +1,14 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 W14/W19 test 고지 연결 후보 계약
+
+- 소스50ecbc9/CI38131778423 SUCCESS, 제품139a200과 runtime/config/DB 동일. 새 고지 hosted PASS는 아직 없다.
+- test 설정 네 필드만 변경: 세 policy revision은 MOEMOA_PUBLIC_GENERAL_20261011_01, signup_declaration_required=true. 기존 current signup declaration2건 확인; 재가입·기존수락변조 없음.
+- full row exact baseline·signup 정책/RPC 의존성이 맞을 때만 적용한다. 기본 dry-run, restore도 exact candidate만 허용하며 kill-switch/한도 drift를 덮어쓰지 않는다. 구성 전용 PostgreSQL8 PASS를 실제 게시 PASS로 합산하지 않는다.
+- 승인 범위 후보: 기존2000GET/64MB quota와 phone-test Preview policy/sized=true·Git소스50ecbc9를 함께 연결. 기존 소스a6b6dda·policy·sized=false·quota off/0·guard=false로 복귀하고 실제 사용량/수락/원본은 보존한다. Preview baseline은 적용 전 fresh readback 필수.
+- 새 공개동의는 당사자 조작. 실제 이미지전달/철회 이후에만 W19 실행증거를 추가한다. 운영/새schema/계정/키/역할 변경은 이 후보 범위 밖이다.
+
+
 ## 2026-10-11 W14/D04 고정 공개 안내·동의 계약
 
 - 후보139a200과 capacity evidence의 firstPublicProductionCandidate_02가 최신이다. 과거7cd3a82 runtime 동등성/CI는 새 소스의 검증으로 재사용하지 않는다.
