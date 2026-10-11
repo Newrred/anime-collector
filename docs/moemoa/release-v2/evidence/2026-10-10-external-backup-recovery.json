@@ -727,7 +727,8 @@
       ],
       "policyReadbackHttp": 200,
       "secretListHttp": 200,
-      "secretCount": 0
+      "secretCount": 0,
+      "variableCount": 0
     },
     "google": {
       "clientName": "moemoa-backup-drive",
@@ -740,15 +741,17 @@
       "scopeExact": true,
       "oauthAudience": "External / In production",
       "driveApiEnabled": true,
-      "pickerApiEnabled": false,
-      "existingFolderAccessVerified": false
+      "pickerApiEnabled": true,
+      "existingFolderAccessVerified": false,
+      "pickerApiEnabledEvidence": "User confirmation plus Google Cloud console status enabled",
+      "pickerFileConsentCompleted": false
     },
     "actualDrivePass": false,
     "secretsTransferred": 0,
     "uploads": 0,
     "schedulesInstalled": 0,
     "productionChanges": 0,
-    "nextAction": "Complete Google Picker enablement/file selection, then store Drive-only credentials in approved GitHub environment",
+    "nextAction": "User completes pinned folder/baseline file access consent, then verify metadata and store approved Drive credentials",
     "localOAuthTestsPassed": 8,
     "sealedBoxSyntheticRoundtripPassed": true
   }

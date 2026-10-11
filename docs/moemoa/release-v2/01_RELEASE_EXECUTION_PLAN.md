@@ -1,6 +1,6 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
-> **2026-10-11 W17/D05 Google 인증 확인:** 사용자 생성 moemoa-backup-drive·직접 Google동의 후 실제 drive.file token교환/갱신 PASS. 프로젝트는 External/In production, Drive API 사용설정 확인. GitHub moemoa-backup/master전용 환경은 준비됐고 아직 Secret0. 기존 폴더·기준 ZIP 접근은 Google Picker 선택/약관 포함 API활성 직접조작 대기. OAuth 보조기 합성8·libsodium 합성왕복1 PASS, 실제파일접근/인증저장/업로드 완료 아님. 다음1개: Picker 활성/지정항목 선택→Drive 인증만 GitHub저장.
+> **2026-10-11 W17/D05 Google 인증 확인:** 전용 moemoa-backup-drive의 직접 Google동의·실제 drive.file token교환/갱신 PASS. Drive API에 이어 사용자가 Google Picker API를 활성화했고 콘솔의 사용 설정됨을 확인했다. GitHub moemoa-backup/master전용 환경은 준비됐고 Secret0·변수0. 기존 폴더·10/11 기준 ZIP의 지정파일 접근 허용 단계 대기이며 실제파일접근/인증저장/업로드 완료 아님. 과거 OAuth 합성8·libsodium 합성왕복1 PASS 보존. 다음1개: 지정항목 Google 접근 허용→Drive 인증만 GitHub저장.
 
 
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
@@ -2529,3 +2529,6 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 변경: drive-oauth.mjs(일회 localhost OAuth/메모리token만), driveOAuth.test.mjs(합성8), 기존00~03/evidence. 새 의존성/DB 없음. `node --test tests/operations/driveOAuth.test.mjs` 8 PASS, `node --check tools/operations/drive-oauth.mjs` PASS, 기존 WSL libsodium으로 synthetic seal/open 1 PASS. 전체 백업검사 반복하지 않음. GitHub 저장암호화는 기존 libsodium을 사용하며 원문은 stdin/메모리에만 전달할 예정. Google권한·token갱신은 이번 실제PASS, 제한파일 접근/Secret저장/실제업로드는 아직PASS 아님.
 
 참조: https://developers.google.com/workspace/drive/picker/guides/desktop-mobile-picker , https://docs.github.com/en/rest/actions/secrets . 다음은 사용자 Picker API활성 후 제한항목 연결과 Secret readback이다. DB/복구키 이동·예약/업로드는 승인 제외 그대로.
+
+### 2026-10-11 Picker API 활성화 후속
+사용자가 API 사용 설정을 눌렀고 Google Cloud의 picker.googleapis.com 상태가 사용 설정됨인 것을 확인했다. GitHub 환경·branch policy·secrets·variables·public-key GET은 모두200, master만 허용·Secret0·변수0이다. 신규 코드/DB 변경은 없고 기존00/01/02/03 요약·현재카드와 evidence만 갱신했다. git diff --check PASS. 이전 OAuth8/Drive13/증분56 PASS는 재실행하지 않았다. 현재 Google 지정파일 액세스 허용은 당사자 조작 대기이며 폴더/기준 ZIP 접근·인증 저장·주간 실행 완료로 확대하지 않는다. 다음 행동은 지정2항목 접근 허용 후 메타데이터 대조와 승인된 Drive 인증만 GitHub 저장이다.

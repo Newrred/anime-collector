@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-11 W17/D05 Google 인증 확인:** 사용자 생성 moemoa-backup-drive·직접 Google동의 후 실제 drive.file token교환/갱신 PASS. 프로젝트는 External/In production, Drive API 사용설정 확인. GitHub moemoa-backup/master전용 환경은 준비됐고 아직 Secret0. 기존 폴더·기준 ZIP 접근은 Google Picker 선택/약관 포함 API활성 직접조작 대기. OAuth 보조기 합성8·libsodium 합성왕복1 PASS, 실제파일접근/인증저장/업로드 완료 아님. 다음1개: Picker 활성/지정항목 선택→Drive 인증만 GitHub저장.
+> **2026-10-11 W17/D05 Google 인증 확인:** 전용 moemoa-backup-drive의 직접 Google동의·실제 drive.file token교환/갱신 PASS. Drive API에 이어 사용자가 Google Picker API를 활성화했고 콘솔의 사용 설정됨을 확인했다. GitHub moemoa-backup/master전용 환경은 준비됐고 Secret0·변수0. 기존 폴더·10/11 기준 ZIP의 지정파일 접근 허용 단계 대기이며 실제파일접근/인증저장/업로드 완료 아님. 과거 OAuth 합성8·libsodium 합성왕복1 PASS 보존. 다음1개: 지정항목 Google 접근 허용→Drive 인증만 GitHub저장.
 
 
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
@@ -813,10 +813,11 @@ W/M: W17/D05 · M4/M5 GOOGLE_OAUTH_REFRESH_VERIFIED / PICKER_PENDING
 이번: 전용client 생성·직접Google동의·정확한drive.file 토큰교환/갱신 PASS; Drive API활성/External In production 확인
 GitHub: moemoa-backup 환경 생성·master만허용 readback200; Secret저장0
 로컬: 일회 callback state/PKCE/15분/재사용거부/고정endpoint/선택ID 결속 8 PASS, libsodium sealed-box 합성왕복1 PASS
-차단: Google Picker API 약관 포함 사용설정 사용자직접조작 대기; 기존폴더/기준사본 접근·Secret저장은 미완료
+이번 추가: 사용자 Picker API 활성화·콘솔 사용 설정됨 확인; GitHub master전용/Secret0/변수0 readback200
+차단: 지정 백업 폴더·기준 ZIP의 Google 접근 허용 사용자조작 대기; 실제파일접근·Secret저장은 미완료
 과거: 모의HTTP13·증분56 PASS 보존, 이번 파일전송/복구 PASS0
 보존: 운영DB/Public/master·기존로그인client·DB비밀번호/복구키·백업파일 불변; 업로드/자동예약0
-다음1개: Picker 활성/정확한2항목 선택→Drive Client Secret/refresh token만 지정GitHub환경 저장
+다음1개: 정확한2항목 Google 접근 허용→Drive Client Secret/refresh token만 지정GitHub환경 저장
 ```
 
 <details><summary>이전 카드 — Drive 연결 후보</summary>
