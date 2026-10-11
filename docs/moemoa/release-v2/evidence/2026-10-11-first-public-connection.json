@@ -791,7 +791,51 @@
       "command": "node scripts/run-channel-e2e.mjs --grep \"cancel and delete-cancel|management tabs support keyboard\"",
       "passed": 2,
       "exit": 0,
-      "remote": "pending"
+      "remote": {
+        "run": 38119402749,
+        "source": "895ccbb22895198af444cdacd07ed1246c2a6488",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": {
+          "publicationContract": "success",
+          "verify": "success"
+        },
+        "desktopInputPassed": 52,
+        "publicationPassed": 42,
+        "webDesign": {
+          "passed": 80,
+          "skipped": 5,
+          "failed": 0
+        },
+        "artifactUpload": "not run: failure-only step on successful run"
+      }
     }
+  },
+  "maintenanceReadOnlyFollowup": {
+    "run": 38115426850,
+    "job": 114399266043,
+    "source": "18788670dd877d5d93344be76651583acc51f52c",
+    "event": "schedule",
+    "conclusion": "success",
+    "observed": {
+      "deleted": 0,
+      "cleanupSkipped": false,
+      "cleanupFailed": false,
+      "publicDeleted": 0,
+      "publicCleanupSkipped": false,
+      "publicCleanupFailed": false,
+      "observedAt": "2026-10-11T05:38:30.300Z",
+      "storageBytes": 454464,
+      "readBytes": 1054194,
+      "storageAlertBytes": 80000000,
+      "readAlertBytes": 400000000,
+      "alerts": []
+    },
+    "action": "Read existing GitHub execution only; no workflow dispatch or runtime mutation",
+    "limits": [
+      "Zero-item actual scheduled cleanup; not nonempty cleanup proof",
+      "Capacity output covers private media, not catalog plus public storage or public egress",
+      "No alert threshold crossed; delivery and operator receipt not proven"
+    ]
   }
 }

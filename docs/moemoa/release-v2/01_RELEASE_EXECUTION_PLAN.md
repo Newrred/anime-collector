@@ -138,9 +138,13 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 3. 계획: 본 W19 CI 좁히기 절; 새 진행판/기능0.
 4. 파일: MemoryCardDetail.jsx 클릭에서 펼침/활성화 함께 변경(입력 훅·저장 모델 미변경); desktop-image-input.spec.ts 첫입력/즉시닫힘/Enter/Space 회귀1개; quality.yml 격리 증거 폴더 연결. 기존00/01/03/시작·증거JSON 갱신.
 5. DB/복귀: DB/권한/정책/flags 변경0, 원본/티켓/quota 계약 유지. 소스2fbe21f revert로 되돌릴 수 있다.
-6. 명령/결과: 새로운 단일회귀 수정 전1 FAIL→수정 후 기존실패+새회귀2 PASS; run-desktop-image-e2e.mjs 전체52 PASS, build32 Complete, git diff --check PASS. 고유52에 단일2를 추가합산하지 않는다. 원격CI38118471179/2fbe21f는 붙여넣기·SQL·공개 등 앞선 단계 PASS, 최종78 PASS/5 SKIP/2 FAIL(구형 메뉴명 locator). artifact 상대경로도 거부됨. 두 locator 수정 뒤 `node scripts/run-channel-e2e.mjs --grep "cancel and delete-cancel|management tabs support keyboard"` 2 PASS/exit0. 경로는 Node path.resolve로 정규화하며 후속 원격 결과는 별도 기록.
+6. 명령/결과: 새로운 단일회귀 수정 전1 FAIL→수정 후 기존실패+새회귀2 PASS; run-desktop-image-e2e.mjs 전체52 PASS, build32 Complete, git diff --check PASS. 고유52에 단일2를 추가합산하지 않는다. 원격CI38118471179/2fbe21f는 붙여넣기·SQL·공개 등 앞선 단계 PASS, 최종78 PASS/5 SKIP/2 FAIL(구형 메뉴명 locator). artifact 상대경로도 거부됨. 두 locator 수정 뒤 `node scripts/run-channel-e2e.mjs --grep "cancel and delete-cancel|management tabs support keyboard"` 2 PASS/exit0. 경로는 Node path.resolve로 정규화. 후속895ccbb CI38119402749 전체 SUCCESS(입력52·공개42·최종Web80 PASS/기존5 SKIP, SQL계약도 성공).
 7. 안전/관측: 숨긴 영역/다른탭 입력 차단·원본/사전티켓 보존·취소/계정전환 검사를 유지. 합성파일·모의계정만 사용, analytics/로그에 개인이미지/토큰 추가0. 업로드는 두 test-results 폴더만; 저장소/env 폴더 전체 업로드 없음.
-8. 범위/다음: 작업브랜치 codex/simple-signup-preview만 push. master1878867·phone-test9746a30 유지, 새 운영/기존 테스트 alias 반영 없음. 다음1개는 동일 후보의 원격 CI 결과 확인 후 실제 잔여 gate를 갱신하는 것.
+8. 범위/다음: 작업브랜치 codex/simple-signup-preview만 push. master1878867·phone-test9746a30 유지, 새 운영/기존 테스트 alias 반영 없음. 다음1개는 기존 W15/D03의 공개 이미지 용량·방문 전송량·실제 경보 잔여 마감. D04/D05/D06·직접 이미지 철회HTTP 미확인은 유지.
+
+- 기다리는 동안 기존 D03/W15 운영 근거만 읽기로 대조: 예약 실행38115426850/source1878867 성공. 05:38:30Z private 저장/예약454,464bytes·월읽기1,054,194bytes, 경보80MB/400MB 이하. private/public 정리 endpoint 실제 실행·각삭제0/실패0(비어있는 정리), 경보0. 새 실행/삭제/설정변경0. 비어있지 않은 정리·공개 포함 전체용량/egress·실제 경보 수신을 PASS로 승격하지 않는다.
+
+- 최종 Git/CI: 수정2fbe21f와 검사·증거경로 후속895ccbb를 작업브랜치에 push, 원격CI38119402749 SUCCESS. 마지막Web80 PASS/기존5 SKIP이며 skip을 새로 추가하지 않았다. 최종 문서만 별도 commit/push([skip ci])하고 앱·검사·workflow 내용은 검증한895ccbb와 동일하게 유지한다. 실패 artifact는 성공CI에서 실행되지 않아 업로드 성공 증거는 아직 없다.
 
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
