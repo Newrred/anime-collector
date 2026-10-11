@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 D06 최종 운영 후보 정리 완료:** candidate03의 배포 소스56cd0ab·동일SHA CI38137032500 SUCCESS, 실제test50ecbc9와 runtime 차이0. 운영 www/master199613b·38 migrations·Public off를 새로 읽기 확인. 누락3 migration/고정고지hash/Production13설정·GitHub1설정·한도·복귀 순서 결속. 생성기 구형source/미검증 문구 보완 및 상태드리프트 거부14 PASS. 이번 운영/테스트 쓰기·새 사용자행동 PASS0. 기존 GitHub 실패 알림 실수신은 10/11 사용자 확인(새 용량경보 발송 검증 아님). D05 별도키는 사용자 미보관 확인·복구인수 잔여, D06 정확한운영승인·적용 후 W19/W20 운영확인 구분. 다음1개: 기존 W17/D05 복구 인수 마감. 기존 단일 작업판/과거 증거 유지.
+
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
@@ -2190,3 +2193,40 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 잔여와 다음1개: 새 고지·현재 가입확인·실제 이미지전달·카드 비공개 test 연결을 마감한다. D04 운영정책/국가 잔여, D03 실제 경보 수신, D05 별도 복구키/복구 인수는 그대로 남긴다. 다음은 기존 D06 최종 운영 후보의 변경목록·남은 조건을 한 번에 정리하는 것이다. 이번 test 승인을 운영/Public 활성 승인으로 확대하지 않는다.
 
 [원복 완료] Vercel Preview52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready, Source a6b6dda와 phone-test canonical alias 확인. 직접 build-info 경로는 미인증 HTML/브라우저 차단으로 별도 검증하지 못했으며 이를 live SHA PASS로 적지 않는다. 기존 원격master199613b 유지.
+
+
+### W20/D06 최종 운영 후보·잔여 조건 마감 — 2026-10-11
+
+1. 목적: 검증된 Public 네 기능의 실제 운영 변경과 남은 조건을 하나의 기존 후보 manifest로 고정한다.
+2. 결정: FIRST-PUBLIC-LAUNCH-CLOSEOUT, FREE-PLAN-RETAIN, WEB_ONLY와 정확한 운영 승인 유지.
+3. 근거: HEAD56cd0ab/실제test50ecbc9 runtime diff0, 운영199613b·38 migrations·Public off. 이전 생성기는7cd3a82를 출력해 최신 고지/hosted 증거 누락.
+4. 범위: 기존 후보 생성기의 source/증거/현재baseline 검증 갱신, 운영 변경목록·복귀·잔여 책임 정리. 운영쓰기·새 기능·테스트 재배포·새약관/국가 결정 제외.
+5. 흐름: 운영 읽기전용 snapshot→Git 소스/시험근거 대조→오프라인 후보 생성→잘못된 baseline 거부 확인→기존 작업판 최신화.
+6. 파일: tools/operations/build-first-public-candidate.mjs, 기존release-v2 00/01/02/03 및 capacity evidence. Git 이력을 필요로 하는 후보 검사는 tests/operations에서 별도 실행한다.
+7. DB: 기존 누락3 migration과 기존 예산SQL의 hash/순서만 결속. 적용0·신규schema0.
+8. 단계: 최신 읽기전용대조→후보 갱신/검사→미완료 조건 2차 검토→Git 인계.
+9. 검증: source/hash/runtime 동등성·후보 정상 생성과 잘못된target/Public/보존상태/과거근거 거부. 기존DB/A·B/Safari 전수 반복0.
+10. 개인정보/권리: 집계만 기록, 키/개인자료0; 일반 이미지·별도 권리 gate 유지.
+11. 관측: 기존6시간workflow/980MB·전송80% 경보, 실제수신과 evaluator PASS 분리. 알림발송0.
+12. 복귀: Public DB읽기/쓰기 먼저off→정확한예산/환경 복귀→Git master 이전소스; 원본/usage/수락/추가schema보존.
+13. 위험: 후보 생성 완료≠출시승인. D05 별도키/복구인수·실제 경보수신은 근거 없는 PASS 금지.
+14. 결정: 이번 후보준비는 승인됨. 실제 운영3migration·설정·Public 활성·master배포는 exact 후보의 시점별승인 이후.
+15. 진행: 현재 운영 읽기전용 확인 완료.
+16. 발견: 이전 생성기와 candidate02의 구형 미검증 문구가 남아있어 실제근거로 교정한다.
+17. 완료보고: 아래 실제명령/결과/정확한잔여를 기록한다.
+
+
+#### W20/D06 후보03 마감 — 이번 실행 8항 보고
+
+1. 읽은 근거: AGENTS, CODEX_START_HERE, 확정결정01, PLANS, QA07, 변경09, 기존00/01/02/03·capacity/backup evidence; build-first-public-candidate.mjs, inspect-first-public-release.py/inspect-retention.py, 누락3migration, 두budget SQL, private-image-cleanup.yml/private-image-maintenance.mjs.
+2. 가정/미결: 이번은 정확한 운영 후보 준비다. 이미 승인된 KR14/US13/TH13 비공개 가입·일반 이미지/별도권리·무료·Web-only 유지. 실제 경보수신/키별도보관 질문은 필요한 인수 근거이며 새 인증이나 출시 대상 변경 요청이 아니다.
+3. 계획: 위 기존 W20/D06 17항. 후보 source56cd0ab, 실제test50ecbc9와 runtime/config/DB diff0. 같은source CI38137032500 SUCCESS를 새로 확인.
+4. 변경 파일: 기존 후보 생성기의 구형SHA/과거 미검증 문구를 갱신하고 전체 Public flags/정책·가입/국가·20MiB/운영자·24시간 freshness·공개데이터 baseline을 확인한다. tests/operations/firstPublicCandidate.test.mjs는 잘못된 대상/노후 snapshot/보존상태에서 출력 거부를 확인한다. 기존00~03/evidence에 현재 후보03을 추가하고01/02 후보와 실행로그는 보존한다.
+5. DB·복귀: 새schema/migration 작성·실행0. 운영 누락3개와 예산SQL은 기존 검증한 hash를 결속했다. release ID MOEMOA_FIRST_PUBLIC_SCHEMA_PROD_20261011_03 / MOEMOA_FIRST_PUBLIC_CONFIG_PROD_20261011_03. 실행/복귀 순서는02 최신표와manifest. 원본·사용량·수락·계정 변경0.
+6. 실제 명령: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0(12:02:43Z,38 migrations,Public off,boards/homes/assets0). node --check tools/operations/build-first-public-candidate.mjs PASS. node tools/operations/build-first-public-candidate.mjs .cache/d06-production-preflight.json exit0/source56cd0ab/DB3/환경13/고지hash. node --test tests/operations/firstPublicCandidate.test.mjs 14PASS/0FAIL. git diff 50ecbc9..HEAD -- src api supabase scripts .github package.json package-lock.json vercel.json astro.config.mjs 출력0. www/build-info.json HTTP200/commit=checkoutCommit199613b/source=vercel-git/semanticMatch=true; workingTreeDirty=true는 원래 형식차이 표시로 보존. Git ls-remote master199613b·phone-testa6b6dda·작업56cd0ab 확인.
+7. 영향: 이번 새 사용자행동PASS0, 원격쓰기0, 계정/키/원본/외부발송/요금 변경0. 이전 실제test 이미지/철회와 이번 오프라인 후보 검사 구분. 경보는 현재 runner error exit→GitHub notification 경로이며 실제 수신을 자동 추정하지 않았다. 직접 이미지HTTP404/운영 Public 검증 미실행.
+8. 잔여/다음: 후보 생성과 범위 정리는 완료. 1차 저장소 근거 대조 후 2차 기존 승인/더 작은 인수근거를 대조하여 불필요한 신규 테스트·전국가 재동의·재가입을 제외했다. 10/11 사용자 직접 답변으로 기존 GitHub 실패 알림 실수신 경로 인수는 마감(새 용량경보 실제 발송 PASS 아님). 키 별도 보관은 아직 미완료로 재확인. 운영 실행 전 D05 복구 인수와 D06 정확한 승인 필요. 다음 행동1개는 기존 W17/D05의 별도키·운영 백업 복구 잔여를 닫는 것이다. 새 계획/진행판 없이 같은 작업판을 사용한다.
+
+[2026-10-11 사용자 인수 확인] 기존 GitHub Actions 실패 알림은 실제 수신한 적 있다고 직접 확인했다. 신규 용량 임계 경보를 보냈거나 메일함을 독립 검증한 것은 아니다. 복구키는 아직 별도 보관하지 않았다고 재확인했다. D03 수신 경로와 D05 키 보관을 각각 USER_ATTESTED / INCOMPLETE로 구분한다.
+
+[실행 환경] 후보 생성 검사는 고정 Git SHA/이력을 읽으므로 shallow checkout의 일반 unit 자동목록과 분리해 tests/operations에 둔다. 전체 이력을 가진 이 저장소에서 위 전용 node --test 명령으로 14항목을 검증했다. 앱 CI/런타임 변경은 없다.
