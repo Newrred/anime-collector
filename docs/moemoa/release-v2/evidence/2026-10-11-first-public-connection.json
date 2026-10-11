@@ -751,7 +751,25 @@
       "passed": 2,
       "exit": 0
     },
-    "remoteVerification": "pending",
+    "remoteVerification": {
+      "run": 38118471179,
+      "status": "completed",
+      "branch": "codex/simple-signup-preview",
+      "phoneTestUnchanged": "9746a307fa74ba60dd55d69db017a1978833ee35",
+      "productionUnchanged": "18788670dd877d5d93344be76651583acc51f52c",
+      "imageInput": "success",
+      "publicationContract": "success",
+      "publicSharing": "success",
+      "cardComposer": "success",
+      "conclusion": "failure",
+      "webDesign": {
+        "passed": 78,
+        "skipped": 5,
+        "failed": 2,
+        "reason": "Two obsolete public-settings summary locators"
+      },
+      "artifactUpload": "failed: relative .. pattern rejected"
+    },
     "localSuite": {
       "command": "node scripts/run-desktop-image-e2e.mjs",
       "passed": 52,
@@ -763,6 +781,17 @@
       "pages": 32,
       "result": "Complete! build log"
     },
-    "diffCheck": "pass"
+    "diffCheck": "pass",
+    "source": "2fbe21fd4a40e2627b5789ba482f5129ce4566d0",
+    "ciFollowup": {
+      "changes": [
+        "Update two classification selectors to the current Board and home settings summary",
+        "Resolve isolated artifact path before passing it to upload-artifact"
+      ],
+      "command": "node scripts/run-channel-e2e.mjs --grep \"cancel and delete-cancel|management tabs support keyboard\"",
+      "passed": 2,
+      "exit": 0,
+      "remote": "pending"
+    }
   }
 }

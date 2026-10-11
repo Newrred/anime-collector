@@ -128,6 +128,20 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 
 - 실행 증거: 새 회귀는 수정 전 open=true/accepted=false로 FAIL(exit1), summary onClick에서 default native toggle을 막고 React state로 visibility/input activation을 함께 갱신한 후2 PASS. Enter/Space 전환까지 넣은 관련 전체52/52 PASS(exit0). 기존 입력 훅·원본 저장·동기화 변경0. CI 실패가 관찰한 같은 누락 증상을 재현했지만 과거 trace는 업로드 경로 오류로 없어 과거 실행의 타임라인을 재구성했다고 주장하지 않는다.
 
+
+- 원격 후속 발견: CI38118471179는 붙여넣기52/공개/SQL 등 앞선 단계 성공, 최종 Web85항목 중78 PASS/5 SKIP/2 FAIL. 두 실패는 간편공개 도입으로 바뀐 상세 설정 제목을 테스트만 과거 이름으로 찾은 것. 제품 기능은 유지하고 두 locator를 현행 제목으로 갱신한다. artifact action은 상대 `..` 패턴을 거부하므로 Node path.resolve로 고정 결과 폴더의 정규 절대경로만 전달한다. 실패한 두 테스트와 증거 경로 구성을 먼저 검증하고 후속 CI를 확인한다.
+
+#### W19 이번 실행 보고
+
+1. 읽음: AGENTS/시작문서/최신확정결정/PLANS/07 QA/09 변경통제/기존 release-v2 계획·작업판과 MemoryCardDetail, MemoryImageReplacement, useImageFileTransfer, desktop-image-input/lifecycle, isolatedE2eServer, playwright.config, quality.yml.
+2. 미결/가정: 과거 CI trace는0건으로 타임라인 직접 증명 불가. 동일 open=true/paste=false 경계를 재현했고 수정 후 확인하되 과거 CI 원인을 유일한 원인으로 단정하지 않는다. OS 실제 클립보드·실폰은 별도 미검증.
+3. 계획: 본 W19 CI 좁히기 절; 새 진행판/기능0.
+4. 파일: MemoryCardDetail.jsx 클릭에서 펼침/활성화 함께 변경(입력 훅·저장 모델 미변경); desktop-image-input.spec.ts 첫입력/즉시닫힘/Enter/Space 회귀1개; quality.yml 격리 증거 폴더 연결. 기존00/01/03/시작·증거JSON 갱신.
+5. DB/복귀: DB/권한/정책/flags 변경0, 원본/티켓/quota 계약 유지. 소스2fbe21f revert로 되돌릴 수 있다.
+6. 명령/결과: 새로운 단일회귀 수정 전1 FAIL→수정 후 기존실패+새회귀2 PASS; run-desktop-image-e2e.mjs 전체52 PASS, build32 Complete, git diff --check PASS. 고유52에 단일2를 추가합산하지 않는다. 원격CI38118471179/2fbe21f는 붙여넣기·SQL·공개 등 앞선 단계 PASS, 최종78 PASS/5 SKIP/2 FAIL(구형 메뉴명 locator). artifact 상대경로도 거부됨. 두 locator 수정 뒤 `node scripts/run-channel-e2e.mjs --grep "cancel and delete-cancel|management tabs support keyboard"` 2 PASS/exit0. 경로는 Node path.resolve로 정규화하며 후속 원격 결과는 별도 기록.
+7. 안전/관측: 숨긴 영역/다른탭 입력 차단·원본/사전티켓 보존·취소/계정전환 검사를 유지. 합성파일·모의계정만 사용, analytics/로그에 개인이미지/토큰 추가0. 업로드는 두 test-results 폴더만; 저장소/env 폴더 전체 업로드 없음.
+8. 범위/다음: 작업브랜치 codex/simple-signup-preview만 push. master1878867·phone-test9746a30 유지, 새 운영/기존 테스트 alias 반영 없음. 다음1개는 동일 후보의 원격 CI 결과 확인 후 실제 잔여 gate를 갱신하는 것.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.

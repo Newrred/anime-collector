@@ -74,6 +74,10 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4359
       - name: Verify current Web design and watch records
         run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts
+      - name: Resolve isolated test evidence path
+        if: failure()
+        id: evidence
+        run: node -e "require('node:fs').appendFileSync(process.env.GITHUB_OUTPUT, 'isolated=' + require('node:path').resolve(process.env.GITHUB_WORKSPACE, '../.moemoa-ui-test-results/test-results') + '\n')"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -81,7 +85,7 @@ jobs:
           # Isolated UI runners write beside the checkout; keep only test artifacts.
           path: |
             test-results
-            ../.moemoa-ui-test-results/test-results
+            ${{ steps.evidence.outputs.isolated }}
           include-hidden-files: true
           retention-days: 7
 # Production is deployed only by the connected Vercel Git integration.

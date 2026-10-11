@@ -65,7 +65,7 @@ test("cancel and delete-cancel preserve classification, while management is fold
   await page.getByRole("tab", { name: "기억", exact: true }).click();
   await expect(page.locator(".memory-detail__reflection")).toContainText("기존 합성 감상 0");
   await page.getByRole("tab", { name: "관리", exact: true }).click();
-  await page.getByText("공개·비공개 설정", { exact: true }).click();
+  await page.getByText("보드·미니홈 상세 설정", { exact: true }).click();
   await expect(page.getByText("현재 이 환경에서는 공개 게시를 사용할 수 없어요.")).toBeVisible();
 });
 test("actual Title Hub displays catalog characters without needing a saved title", async ({ page }) => {
@@ -231,7 +231,7 @@ test("management tabs support keyboard navigation, and editing keeps dirty draft
   await memory.focus(); await page.keyboard.press("ArrowRight");
   await expect(manage).toBeFocused();
   await expect(manage).toHaveAttribute("aria-selected", "true");
-  await page.getByText("공개·비공개 설정", { exact: true }).click();
+  await page.getByText("보드·미니홈 상세 설정", { exact: true }).click();
   await expect(page.getByText("현재 이 환경에서는 공개 게시를 사용할 수 없어요.")).toBeVisible();
   await manage.focus(); await page.keyboard.press("Home");
   await expect(memory).toBeFocused();
