@@ -717,7 +717,7 @@
   "driveAuthConnectionExecution20261011": {
     "candidate": "1d5535766f7cd75f511014f561baad1d1f90c134",
     "approval": "Backup-only Drive connection and storage of Client Secret/refresh token in Newrred/anime-collector environment moemoa-backup",
-    "status": "CREDENTIAL_CREATION_HANDOFF",
+    "status": "GOOGLE_OAUTH_REFRESH_VERIFIED_PICKER_PENDING",
     "github": {
       "environment": "moemoa-backup",
       "createHttp": 200,
@@ -731,11 +731,16 @@
     },
     "google": {
       "clientName": "moemoa-backup-drive",
-      "clientCreated": false,
-      "creationFormPrepared": true,
+      "clientCreated": true,
+      "clientId": "425036501971-hlrqm1a01g9aqihr5gu947hu3bh048ak.apps.googleusercontent.com",
       "redirectUri": "http://127.0.0.1:4387/oauth/callback",
-      "scopeCandidate": "https://www.googleapis.com/auth/drive.file",
-      "userConsentCompleted": false,
+      "scope": "https://www.googleapis.com/auth/drive.file",
+      "userConsentCompleted": true,
+      "tokenRefreshPassed": true,
+      "scopeExact": true,
+      "oauthAudience": "External / In production",
+      "driveApiEnabled": true,
+      "pickerApiEnabled": false,
       "existingFolderAccessVerified": false
     },
     "actualDrivePass": false,
@@ -743,6 +748,8 @@
     "uploads": 0,
     "schedulesInstalled": 0,
     "productionChanges": 0,
-    "nextAction": "User creates/downloads dedicated OAuth JSON; then authorize drive.file and store Drive-only credentials in approved GitHub environment"
+    "nextAction": "Complete Google Picker enablement/file selection, then store Drive-only credentials in approved GitHub environment",
+    "localOAuthTestsPassed": 8,
+    "sealedBoxSyntheticRoundtripPassed": true
   }
 }

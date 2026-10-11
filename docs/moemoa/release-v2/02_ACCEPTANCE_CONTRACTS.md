@@ -1,5 +1,8 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W17/D05 Google 인증 확인:** 사용자 생성 moemoa-backup-drive·직접 Google동의 후 실제 drive.file token교환/갱신 PASS. 프로젝트는 External/In production, Drive API 사용설정 확인. GitHub moemoa-backup/master전용 환경은 준비됐고 아직 Secret0. 기존 폴더·기준 ZIP 접근은 Google Picker 선택/약관 포함 API활성 직접조작 대기. OAuth 보조기 합성8·libsodium 합성왕복1 PASS, 실제파일접근/인증저장/업로드 완료 아님. 다음1개: Picker 활성/지정항목 선택→Drive 인증만 GitHub저장.
+
+
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
 
 

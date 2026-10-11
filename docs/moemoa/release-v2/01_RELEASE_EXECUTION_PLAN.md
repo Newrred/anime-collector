@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W17/D05 Google 인증 확인:** 사용자 생성 moemoa-backup-drive·직접 Google동의 후 실제 drive.file token교환/갱신 PASS. 프로젝트는 External/In production, Drive API 사용설정 확인. GitHub moemoa-backup/master전용 환경은 준비됐고 아직 Secret0. 기존 폴더·기준 ZIP 접근은 Google Picker 선택/약관 포함 API활성 직접조작 대기. OAuth 보조기 합성8·libsodium 합성왕복1 PASS, 실제파일접근/인증저장/업로드 완료 아님. 다음1개: Picker 활성/지정항목 선택→Drive 인증만 GitHub저장.
+
+
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
 
 
@@ -2514,3 +2517,15 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 - 보안: 기존 로그인client 키 조회/변경0, GitHub인증은 메모리에서만 같은 GitHub API에 사용. DB비밀번호/복구키 이동0. 새 GitHub 환경에는 Secret/workflow 없음; 기존 환경에 영향 없음.
 - 복귀: 폼 취소는 기존Cloud에 영향 없음. 새 빈GitHub환경은 백업 실행을 켜지 않으며 그대로 두어도 기존운영에 영향 없음.
 - 정확한 차단: 브라우저 규칙의 새 인증정보 최종 생성은 사용자 직접조작. 전용JSON 다운로드 뒤 Google당사자동의·제한파일권한·인증저장 이어감.
+
+### Drive 인증 일회 연결 보조기 (사용자 JSON 다운로드 완료 후)
+
+승인된 연결을 위해 tools/operations/drive-oauth.mjs에 loopback 전용 일회 OAuth callback을 준비한다. 고정Google endpoint·정확한 drive.file·state/PKCE·15분 유효기간·중복 callback 거부, code/token/secret은 메모리만 사용하고 응답/로그에 출력하지 않는다. 로컬 합성 callback 검사 뒤 사용자 직접 Google동의를 받는다. 운영 dependency/DB/기존 로그인 변경 없음. 종료 시 서버를 닫고 메모리 인증값을 지운다.
+
+### 후속 실제 Google 인증 결과
+
+사용자 전용client JSON 다운로드 및 Google동의 완료. 운영/테스트client와 다른 clientID를 고정해 읽고 secret내용 미출력. 첫 실제token교환/refresh 성공·drive.file만 확인, 이후 기존파일 권한용 Picker를 준비했다. 첫 refresh 결과는 실행셀 안 임시변수로만 유지되어 GitHub 저장 전 소멸했으므로 이를 저장완료로 보고하지 않는다. 파일선택 세션에서 새 token을 받아 저장할 예정이다. Google 공식 desktop/mobile Picker 흐름은 web client도 지원하며 별도 API key없이 trigger_onepick/file_ids/allow_folder_selection으로 기존폴더와10/11 기준사본2개만 제한한다. Google Picker 화면에 API약관 동의가 명시되어 사용설정 클릭을 사용자에게 인계했다.
+
+변경: drive-oauth.mjs(일회 localhost OAuth/메모리token만), driveOAuth.test.mjs(합성8), 기존00~03/evidence. 새 의존성/DB 없음. `node --test tests/operations/driveOAuth.test.mjs` 8 PASS, `node --check tools/operations/drive-oauth.mjs` PASS, 기존 WSL libsodium으로 synthetic seal/open 1 PASS. 전체 백업검사 반복하지 않음. GitHub 저장암호화는 기존 libsodium을 사용하며 원문은 stdin/메모리에만 전달할 예정. Google권한·token갱신은 이번 실제PASS, 제한파일 접근/Secret저장/실제업로드는 아직PASS 아님.
+
+참조: https://developers.google.com/workspace/drive/picker/guides/desktop-mobile-picker , https://docs.github.com/en/rest/actions/secrets . 다음은 사용자 Picker API활성 후 제한항목 연결과 Secret readback이다. DB/복구키 이동·예약/업로드는 승인 제외 그대로.
