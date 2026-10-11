@@ -143,6 +143,14 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 7. 안전/관측: 집계에 경로/사용자ID/본문/토큰 없음, unknown metadata를0인 정상으로 숨기지 않음. 원본/operationId/실패예약/quota/철회 후 권한 재확인/no-store 유지. 기존 일일한도·활성override와 일치, 실패 시 실제 CLI exit1/::error::/summary 확인(모의응답). 신규 실제 사용자 행동 PASS0; hosted경보·운영자 수신 PASS0.
 8. 잔여/다음1개: **정확한 test 후보 승인 후 관측 API→observe-only 경보 확인.** 운영 적용/전송 한도·provider 총량·실제 운영자 수신은 D03/D06 잔여다. 전체 출시 완료/운영 경보 활성으로 표시하지 않는다.
 
+#### 승인 후 실제 테스트 적용 결과
+
+- 사용자 후보806b6b2의 테스트 DB·관측 배포 승인. tools/operations/apply-test-public-capacity.py는 정확한 두 Git SQL 해시·고정test대상·중복적용 차단·12테이블 내용 해시 보존·원자 트랜잭션을 사용한다. 초기 Python 인용부호 SyntaxError는 DB접속 전 발생, 수정 후 inspect0→apply0→독립inspect0. release MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01/history2 확인. 두 migration만 적용했으며 신규 정책enabled=false 기본값이다.
+- git push origin 806b6b2:refs/heads/codex/phone-test 성공. Vercel Preview9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7 Ready·Source806b6b2·기존 phone-test alias 일치. master1878867 유지. 추가 사용자 이미지/권리/가입/동의 조작0.
+- 실제 HTTPS service-role 새 공개RPC 반환: 전체73,464B=private38,608+public34,856, 공개예약34,796B(full26,636+thumb8,160), pending/overdue0. 로컬 evaluator는 test의 공개저장/전송 guards off를 PUBLIC_BUDGET_UNGUARDED로 정확히 경보. 이 값이 운영 경보나 실제 수신 증거는 아니다.
+- **정확한 연결 차단:** test Vercel에 MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET/PROJECT/OBSERVE 설정 없음(UI의 Production 항목과 Preview 항목 구분), 로컬 test env에도 기존 maintenance secret 없음. 기존 private observe RPC는 실제HTTP404, 해당20261008090000은 이번 승인migration2개 밖이다. 그 함수는 private policy.observed_at를 갱신하므로 읽기전용 보충으로 임의 실행하지 않는다. 두 시도로 실패 위치를 좁힌 뒤 신규 public RPC를 독립 확인했으며 동일 실패를 반복하지 않았다. 임시 관측flag는 켜지 않았으므로 복구할 설정변경0. 운영키 재사용/새 비밀키 전송/cleanup호출0.
+- 배포 관측API 성공, GitHub 실제 경보수신, 운영 D03 완료로 승격하지 않는다. 다음1개는 **test의 기존20261008090000 및 전용 관측 인증/대상 설정을 포함한 정확한 연결 후보 마감**이다. 공개/비공개 사용자흐름이나 기본DB/A·B격리를 반복하지 않는다.
+
 #### 비용·정상 규모의 구체적 한계
 
 - 합성 gradient/geometric/noise의 full+thumb 저장16,062 /43,200 /1,088,732B, 실제 HTTP 응답은 full14,794 /38,860 /1,062,062B와 thumb1,268 /4,340 /26,670B. 이미지20개 full 방문 계산0.296 /0.777 /21.241MB. 실사용자 분포/실제청구 통계가 아니며 HTTP headers·DB·Auth·표지·Vercel 전송은 별도다.

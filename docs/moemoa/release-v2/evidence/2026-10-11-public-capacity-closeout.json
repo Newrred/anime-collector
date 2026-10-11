@@ -1,7 +1,7 @@
 {
   "date": "2026-10-11",
-  "scope": "W15/D03 local capacity and alert closeout; remote inspection only",
-  "remoteMutation": false,
+  "scope": "W15/D03 local verification and explicitly approved test migrations/Preview; production inspection only",
+  "remoteMutation": true,
   "production": {
     "observedAt": "2026-10-11T07:37:49.979709+00:00",
     "totalStoredBytes": 856441465,
@@ -106,7 +106,7 @@
     }
   ],
   "notVerified": [
-    "hosted candidate RPC and optional observe HTTP",
+    "deployed observe HTTP integration",
     "actual operator notification receipt",
     "provider billed egress and catalog/API traffic",
     "production budget/config/activation"
@@ -116,5 +116,72 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Approve exact test-only migrations and phone-test observation candidate; observe-only, no cleanup, no production change"
+  "next": "Prepare exact test observation dependency/credential scope; do not apply production or relabel direct RPC as deployed HTTP success",
+  "approvedTestApplication": {
+    "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
+    "migrations": [
+      "20261010103000",
+      "20261011160000"
+    ],
+    "applied": true,
+    "independentReadback": true,
+    "preservedTables": 12,
+    "publicFlagsAndBudgetsChanged": false,
+    "temporaryObservationFlagsChanged": false,
+    "reasonFlagsNotEnabled": "Test lacks observe API authentication/target config and existing private observation RPC (HTTP404). No production credential reused.",
+    "deployment": {
+      "id": "9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7",
+      "ready": true,
+      "environment": "Preview",
+      "sourceAndAliasVerified": true,
+      "url": "https://anime-collector-fij2m2xh8-newrreds-projects.vercel.app"
+    },
+    "hosted": {
+      "mode": "real hosted public service-role RPC plus local alarm evaluator; not deployed observe API",
+      "target": "test",
+      "result": {
+        "observedAt": "2026-10-11T07:42:12.031Z",
+        "totalStoredBytes": 73464,
+        "privateStoredBytes": 38608,
+        "publicStoredBytes": 34856,
+        "privateReservedBytes": 38608,
+        "invalidObjectCount": 0,
+        "publicReservedBytes": 34796,
+        "fullBytes": 26636,
+        "thumbBytes": 8160,
+        "preparingCount": 0,
+        "failedCount": 0,
+        "cleanupPendingCount": 0,
+        "overdueCount": 0,
+        "publicStorageLimitBytes": 0,
+        "deliveryDailyLimit": 0,
+        "deliveryUsed": 0,
+        "deliveryBytesDailyLimit": 0,
+        "deliveryBytesUsed": 0,
+        "publicStorageBudgetEnabled": false,
+        "readsEnabled": true,
+        "deliveryEnabled": false,
+        "deliveryPaused": false,
+        "deliveryBytesEnabled": false,
+        "deliveryBytesPaused": false,
+        "publicStorageBytes": 34856,
+        "totalReservedOrStoredBytes": 73464,
+        "totalStorageAlertBytes": 980000000,
+        "alerts": [
+          "PUBLIC_BUDGET_UNGUARDED"
+        ]
+      }
+    },
+    "blocked": [
+      "test observe HTTP integration: missing MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET / PROJECT and private observation RPC 20261008090000",
+      "actual operator notification receipt remains unverified"
+    ],
+    "productionMasterUnchanged": "18788670dd877d5d93344be76651583acc51f52c",
+    "ci": {
+      "id": 38122228717,
+      "publicationContract": "success",
+      "verify": "in_progress"
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-11 W15/D03 최신:** 공개 용량 집계·전송 예약 경보 로컬 구현 완료. 운영 read-only 저장856,441,465B(공개0), 공개 예약20MiB 활성·공개 읽기/일일 전송 제한off 확인. 신규18 unit/CLI·격리SQL15·합성3종/실제 local HTTP6·build32 PASS. 실제 전송량과 요청당2MiB 예약을 분리한다. test에는20261010103000이 없어 새 관측20261011160000과 함께 적용 승인 필요. 원격변경0·실제 경보 수신 미검증. 다음1개: 정확한 test-only DB/phone-test 관측 후보 적용 승인 후 observe-only 확인. [8항 보고](01_RELEASE_EXECUTION_PLAN.md#2026-10-11-w15d03--공개-용량전송-예산경보-마감)·[집계 근거](evidence/2026-10-11-public-capacity-closeout.json).
+> **2026-10-11 W15/D03 테스트 반영:** 승인806b6b2를 phone-test Git에 배포, Vercel9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7 Ready/Source·alias 일치. DB20261010103000+20261011160000 적용·독립확인/기존12테이블 보존. 실제 service-role 공개RPC 저장73,464B(공개34,856B)·로컬경보 PUBLIC_BUDGET_UNGUARDED 검출. 기존 test private 관측RPC404와 관측 인증키/대상설정 부재로 배포 관측HTTP는 미검증; flags를 켜지 않아 원복할 변경0. 운영/master1878867·원본·전송한도 불변. 다음1개는 정확한 테스트 관측 연결 후보 준비. [보고](01_RELEASE_EXECUTION_PLAN.md)·[근거](evidence/2026-10-11-public-capacity-closeout.json).
 
 
 ## 2026-10-11 첫 Public 출시 마감 — 현재 진입점
