@@ -717,7 +717,7 @@
   "driveAuthConnectionExecution20261011": {
     "candidate": "1d5535766f7cd75f511014f561baad1d1f90c134",
     "approval": "Backup-only Drive connection and storage of Client Secret/refresh token in Newrred/anime-collector environment moemoa-backup",
-    "status": "GOOGLE_OAUTH_REFRESH_VERIFIED_PICKER_PENDING",
+    "status": "DRIVE_AUTH_CONNECTED_WEEKLY_RUNNER_NOT_ACTIVE",
     "github": {
       "environment": "moemoa-backup",
       "createHttp": 200,
@@ -727,8 +727,54 @@
       ],
       "policyReadbackHttp": 200,
       "secretListHttp": 200,
-      "secretCount": 0,
-      "variableCount": 0
+      "secretCount": 2,
+      "variableCount": 2,
+      "secretWrites": [
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+          "http": 201
+        },
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN",
+          "http": 201
+        }
+      ],
+      "variableWrites": [
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+          "http": 201
+        },
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_FOLDER_ID",
+          "http": 201
+        }
+      ],
+      "finalReadback": [
+        {
+          "path": "/secrets",
+          "http": 200,
+          "names": [
+            "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+            "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN"
+          ]
+        },
+        {
+          "path": "/variables",
+          "http": 200,
+          "names": [
+            "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+            "MOEMOA_BACKUP_DRIVE_FOLDER_ID"
+          ],
+          "valuesMatch": true
+        },
+        {
+          "path": "/deployment-branch-policies",
+          "http": 200,
+          "names": [
+            "branch:master"
+          ]
+        }
+      ]
     },
     "google": {
       "clientName": "moemoa-backup-drive",
@@ -742,17 +788,33 @@
       "oauthAudience": "External / In production",
       "driveApiEnabled": true,
       "pickerApiEnabled": true,
-      "existingFolderAccessVerified": false,
+      "existingFolderAccessVerified": true,
       "pickerApiEnabledEvidence": "User confirmation plus Google Cloud console status enabled",
-      "pickerFileConsentCompleted": false
+      "pickerFileConsentCompleted": true,
+      "exactPickedFileCount": 2,
+      "refreshAfterPickerPassed": true,
+      "refreshTokenExpiryReported": null
     },
-    "actualDrivePass": false,
-    "secretsTransferred": 0,
+    "actualDrivePass": true,
+    "secretsTransferred": 2,
     "uploads": 0,
     "schedulesInstalled": 0,
     "productionChanges": 0,
-    "nextAction": "User completes pinned folder/baseline file access consent, then verify metadata and store approved Drive credentials",
+    "nextAction": "Prepare portable weekly incremental runner and authenticated parent-chain state locally; execution and DB/recovery-key transfer remain excluded",
     "localOAuthTestsPassed": 8,
-    "sealedBoxSyntheticRoundtripPassed": true
+    "sealedBoxSyntheticRoundtripPassed": true,
+    "actualDrivePassScope": "OAuth refresh and designated existing private folder/baseline metadata only",
+    "baselineMetadata": {
+      "http": 200,
+      "name": "moemoa-production-20261011-02.encrypted.zip",
+      "bytes": 920077441,
+      "sha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "privateOwned": true,
+      "parentMatched": true,
+      "externalDownloadVerified": false,
+      "mimeType": "application/x-zip-compressed",
+      "mimeNote": "Existing browser-uploaded ZIP reports application/x-zip-compressed. Metadata size/hash match; future parent downloader must validate ZIP/encrypted manifest bytes rather than rely on MIME alone. New uploader application/zip contract unchanged."
+    },
+    "localCallbackClosed": true
   }
 }

@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-11 W17/D05 Google 인증 확인:** 전용 moemoa-backup-drive의 직접 Google동의·실제 drive.file token교환/갱신 PASS. Drive API에 이어 사용자가 Google Picker API를 활성화했고 콘솔의 사용 설정됨을 확인했다. GitHub moemoa-backup/master전용 환경은 준비됐고 Secret0·변수0. 기존 폴더·10/11 기준 ZIP의 지정파일 접근 허용 단계 대기이며 실제파일접근/인증저장/업로드 완료 아님. 과거 OAuth 합성8·libsodium 합성왕복1 PASS 보존. 다음1개: 지정항목 Google 접근 허용→Drive 인증만 GitHub저장.
+> **2026-10-11 W17/D05 Drive 인증 연결 완료:** 전용 moemoa-backup-drive·drive.file의 실제 Google 동의/지정2항목 선택·token교환/갱신 PASS. 기존 비공개 백업 폴더와 10/11 ZIP metadata200·920077441 bytes/SHA256 기록 일치 확인(파일 다운로드/복원 재검증 아님). 승인된 GitHub moemoa-backup 환경에 Drive Secret2·변수2 저장201 및 readback200, master만 허용. 이번 업로드/주간예약/DB·복구키 이동/운영변경0. 과거 로컬 OAuth8·Drive13·증분56 PASS 보존. 다음1개: 주간 증분 runner의 GitHub 실행환경 이식·부모사본 검증/상태보존을 로컬 후보로 마감.
 
 
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
@@ -797,7 +797,7 @@
 | W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 10/11 실제 신고/차단/해제·9746a30 HIDE/RESTORE/작성자 통지/감사·카드 비공개 PASS. 20261010160000 test 가입 guard 연결 적용 및 현재 A/B receipt 흐름 확인 완료. 139a200 고정 공개고지·세 화면 연결/정책불일치 거부 로컬PASS. 50ecbc9 CI SUCCESS·새 고지/현재 가입확인/실제 게시·익명decode·철회 및 설정/배포 원복 PASS. 운영 인수 D04/최종 운영 UI·정책 결속 잔여; 다른 게시물/동일 이미지 전역 차단 범위를 자동 PASS로 확대하지 않음 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 승인199613b 운영집계RPC·설정·master/Vercel/www SHA 확인. 수동관측38126188717 SUCCESS/856,441,465B/public0/삭제호출0·무인증401. 관측경로 완료. 신규 크기예약2fbc test DB/배포·실제 Storage full/thumb72B PASS, flag false 원복. 후속50ecbc9 실제 deployed 익명 이미지 decode·비공개/원복 PASS. 2,000GET/64MB 승인test 실제2GET/144B 차감·hosted 경계/경보판정 PASS·DB원복. 실제알림수신·옛이미지URL404/운영한도 잔여 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 최신99테이블·7확장 실제격리복원, 공개·삭제 합성56/RPC접근 PASS. 삭제 재시도본문12건 로컬정리·ID/hash/quota 보존. 새ZIP 외부보관은 과거UI확인. 주1회/RPO7일 확정·증분/복원 합성13 PASS; 독립키/주간변경분 외부보관·기준본보존·최신삭제feed·canonical완전성 잔여 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 최신99테이블·7확장 실제격리복원, 공개·삭제 합성56/RPC접근 PASS. 삭제 재시도본문12건 로컬정리·ID/hash/quota 보존. 새ZIP 외부보관은 과거UI확인. 주1회/RPO7일 확정·증분/복원 합성13 PASS, Drive제한권한·기준ZIP metadata 및 GitHub 인증저장 완료; 독립키/주간변경분 외부보관·기준본보존·최신삭제feed·canonical완전성 잔여 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 10/11 최종고지50ecbc9의 실제 deployed 익명24×30·카드 비공개/unavailable·원본보존 PASS/원복완료. 만료/복귀·원시옛이미지URL HTTP404·운영후보 조합은 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
 | W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | CANDIDATE_56cd0ab_RECOVERY_BOUND / PUBLIC_OFF | 후보03 source56cd0ab/DB3/설정·한도 불변. c04ee39 actual99table/합성56 근거 고정hash결속, 생성·거부20 PASS. 운영199613b·38migration/Public off readonly재확인. D05 운영인수·정확한운영승인·적용후확인 잔여 |
@@ -809,15 +809,14 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-W/M: W17/D05 · M4/M5 GOOGLE_OAUTH_REFRESH_VERIFIED / PICKER_PENDING
-이번: 전용client 생성·직접Google동의·정확한drive.file 토큰교환/갱신 PASS; Drive API활성/External In production 확인
-GitHub: moemoa-backup 환경 생성·master만허용 readback200; Secret저장0
-로컬: 일회 callback state/PKCE/15분/재사용거부/고정endpoint/선택ID 결속 8 PASS, libsodium sealed-box 합성왕복1 PASS
-이번 추가: 사용자 Picker API 활성화·콘솔 사용 설정됨 확인; GitHub master전용/Secret0/변수0 readback200
-차단: 지정 백업 폴더·기준 ZIP의 Google 접근 허용 사용자조작 대기; 실제파일접근·Secret저장은 미완료
-과거: 모의HTTP13·증분56 PASS 보존, 이번 파일전송/복구 PASS0
-보존: 운영DB/Public/master·기존로그인client·DB비밀번호/복구키·백업파일 불변; 업로드/자동예약0
-다음1개: 정확한2항목 Google 접근 허용→Drive Client Secret/refresh token만 지정GitHub환경 저장
+W/M: W17/D05 · M4/M5 DRIVE_AUTH_CONNECTED / WEEKLY_RUNNER_NOT_ACTIVE
+이번 실제 PASS: 직접 Google 권한허용·정확한2항목 Picker callback·drive.file token교환/갱신; 비공개 소유폴더 및 기준 ZIP 접근200
+기준 ZIP: 10/11 사본 920077441 bytes·원격SHA256 일치, metadata 확인이며 재다운로드/복구 검증 아님
+GitHub: moemoa-backup에 Drive Client Secret/refresh token2개 및 Client ID/Folder ID 변수2개 저장201·readback200; master만허용
+과거: OAuth 합성8·sealed-box 합성왕복1·Drive 모의HTTP13·증분56 PASS 보존; 이번 재실행 없음
+남음: portable runner·부모사본 다운로드/인증·durable chain 상태·주간 실행/실전송 후보, 독립 복구키 보관
+보존: DB비밀번호/복구키 이동0·백업 업로드0·예약0·운영DB/Public/master/기존로그인client 변경0; 임시 callback 서버 종료
+다음1개: 주간 증분 runner의 GitHub 실행환경 이식·부모사본 검증/상태보존 로컬 후보 마감
 ```
 
 <details><summary>이전 카드 — Drive 연결 후보</summary>
@@ -1104,7 +1103,7 @@ NA 이유:
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / NOTIFICATION_CHANNEL_USER_ATTESTED | Free 유지·전역Public20MiB. 운영199613b 관측 성공/980MB경보. 초기2000GET/64MB test차감·차단·원복, 실제test 이미지decode/철회 PASS | 10/11 사용자 기존 GitHub 실패알림 실수신 확인. 새 용량경보 발송/수신독립검증 아님. 초기소규모 한계 유지, 운영한도 적용·실사용관측 잔여 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. 139a200 일반 공개 고지/정책 연결 및50ecbc9 실제test 게시/열람/철회·원복 완료(한·영, 체크 추가0). 운영 적용/청소년 공개 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
-| D05 | 공개 철회 지연·보존/복구 목표·사본 | CURRENT_PUBLIC_DELETE_RESTORE_LOCAL_PASS / OPERATIONS_ACCEPTANCE_PARTIAL | 99테이블 실제복원·최신상태재적용·합성56·ownerRPC/RLS PASS. 주1회/RPO7일·RTO24h 목표 확정, 증분/복원 합성13 PASS | 운영공개자료0: populated Public/HTTP 복구는 미검증. 최신 안전snapshot 없으면 재개금지. 독립키 미보관·예약 사용자제외·주간Drive/증분보관·안전회전 미가동·canonical완전성 잔여 | evidence/2026-10-10-external-backup-recovery.json publicDeletionRecovery20261011 |
+| D05 | 공개 철회 지연·보존/복구 목표·사본 | CURRENT_PUBLIC_DELETE_RESTORE_LOCAL_PASS / OPERATIONS_ACCEPTANCE_PARTIAL | 99테이블 실제복원·최신상태재적용·합성56·ownerRPC/RLS PASS. 주1회/RPO7일·RTO24h 목표 확정, 증분/복원 합성13 PASS, Drive인증/기준사본 metadata·GitHub저장 실제확인 | 운영공개자료0: populated Public/HTTP 복구는 미검증. 최신 안전snapshot 없으면 재개금지. 독립키 미보관·예약 사용자제외·주간Drive/증분보관·안전회전 미가동·canonical완전성 잔여 | evidence/2026-10-10-external-backup-recovery.json publicDeletionRecovery20261011 |
 | D06 | SHA·DB/catalog·flags의 운영 적용 | CANDIDATE_56cd0ab_RECOVERY_BOUND / PUBLIC_OFF | 후보03 source56cd0ab/CI38137032500·test50ecbc9 동등성 보존, DB3·환경13/GitHub1·한도 불변. 복구 c04ee39/hash7 결속·생성20 PASS, 운영199613b/off 재조회 | 로컬복구 완료를 운영인수로 확대하지 않음. D05 키/정기외부사본/재개 조건·canonical완전성 및 정확후보운영승인 잔여. 적용후 HTTP/철회·관측 별도 | evidence/2026-10-11-public-capacity-closeout.json firstPublicProductionCandidate_03.recoveryBinding20261011 |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
