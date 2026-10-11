@@ -2,6 +2,8 @@
 
 ## 2026-10-11 W15/D03 관측 마감 계약
 
+- 후속 연결 후보: 기존 private observation 함수 설치는 additive이며 호출은 policy.observed_at를 갱신한다. 함수를 읽기전용으로 오인하거나 기존 공개2개 승인에 추가migration을 묶지 않는다. test-only 인증/대상 설정 및 관측 flags만 허용 후보, cleanup·quota·운영 변화 제외. 로컬 적용도구5 PASS와 deployed HTTP/실제 운영자 수신은 구분한다. 동일806b6b2 CI38122228717 전체 SUCCESS 확인.
+
 - 저장량은 Storage 실제 bytes와 미완료/실패 예약 중 큰 값을 영역별로 합산한다. 물리 파일이 남으면 DELETED 메타데이터만으로0 처리하지 않는다. 크기 metadata 누락은 경보다. 관측 반환은 service-role 집계만이며 객체 경로/사용자/본문은 제외한다.
 - 전송 사용량은 기존 authorize의 **UTC 일일 요청 수·요청당2MiB 예약 예산**이다. 실제 파일 bytes·CDN/플랫폼 청구량과 다르며, 활성 global override를 반영한다. 이전날 사용량은0, 오래된/누락 관측은 실패로 취급한다.
 - 신규 경보: 공개저장/요청/예약전송80%, 전체저장980,000,000B 후보, 보호 한도 미설정/의도적 pause, 크기 미상, expires_at 이후24h 지난 미완료 정리. pending 수와 실제 삭제 실패를 동일시하지 않는다.

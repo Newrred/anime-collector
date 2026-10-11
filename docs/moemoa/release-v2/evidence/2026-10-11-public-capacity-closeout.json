@@ -115,7 +115,7 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Prepare exact test observation dependency/credential scope; do not apply production or relabel direct RPC as deployed HTTP success",
+  "next": "Approve exact observation connection candidate, then verify deployed observe-only endpoint and restore temporary flags",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -179,9 +179,11 @@
     "productionMasterUnchanged": "18788670dd877d5d93344be76651583acc51f52c",
     "ci": {
       "id": 38122228717,
+      "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
       "publicationContract": "success",
-      "verify": "in_progress",
-      "note": "At handoff publication-contract succeeded; verify still running, not claimed PASS. Public sharing step completed successfully."
+      "verify": "success",
+      "conclusion": "success",
+      "note": "Read back both completed jobs this follow-up; not a new test rerun."
     },
     "privateObservationExists": false
   },
@@ -218,5 +220,36 @@
       "not a traffic forecast or guaranteed free capacity",
       "no provider settings, billing, alerts or subscriptions changed"
     ]
+  },
+  "observationConnectionCandidate": {
+    "release": "MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01",
+    "migration": "20261008090000",
+    "sha256": "dc9f9c4657a404a0150fa5d3d1ac9abd5c81f914d81fb9e53de3c7c6ff7e7779",
+    "applied": false,
+    "preflight": {
+      "enabled": true,
+      "approved": true,
+      "paused": false,
+      "physicalBytes": 41943040,
+      "readLimitBytes": 83886080,
+      "migrationCount": 0,
+      "privateObservationExists": false,
+      "publicObservationExists": true
+    },
+    "localSafetyTests": {
+      "passed": 5,
+      "exit": 0,
+      "kind": "mock subprocess; no DB mutation"
+    },
+    "previewSource": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "config": [
+      "MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET (new test-only value)",
+      "MOEMOA_PRIVATE_IMAGE_CLEANUP_PROJECT=nmgkhknponvzcwliajyk",
+      "MOEMOA_PRIVATE_IMAGE_OBSERVE_ENABLED=true (temporary)",
+      "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true (temporary)"
+    ],
+    "effects": "Existing private observer updates private policy observed_at after measurement; no cleanup or quota changes",
+    "rollback": "Restore/remove observation flags and redeploy identical test source; preserve additive function",
+    "needsExactApproval": true
   }
 }

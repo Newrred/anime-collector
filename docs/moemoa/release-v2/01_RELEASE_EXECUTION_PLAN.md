@@ -152,6 +152,25 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 - 독립 DB catalog에서도 privateObservationExists=false 확인. 새 CI38122228717은 publication-contract SUCCESS, verify의 공개 회귀 단계까지 통과하고 최종 UI 단계 진행 중이며 전체 SUCCESS로 기록하지 않는다. 기존CI38119402749는 이전 후보의 결과다.
 - 배포 관측API 성공, GitHub 실제 경보수신, 운영 D03 완료로 승격하지 않는다. 다음1개는 **test의 기존20261008090000 및 전용 관측 인증/대상 설정을 포함한 정확한 연결 후보 마감**이다. 공개/비공개 사용자흐름이나 기본DB/A·B격리를 반복하지 않는다.
 
+#### 관측 연결 후보 준비 · 2026-10-11 후속
+
+- 최신 동일 후보806b6b2의 CI38122228717 전체 SUCCESS 확인. 이미 통과한 기본 DB·A/B·브라우저 검사를 반복하지 않는다.
+- 기존 적용 도구에 명시적인 private-observation 후보 모드를 추가한다. 정확한 기존20261008090000 SQL 해시만 허용하고 test 프로젝트에 고정한다. 기본 실행은 읽기 전용 사전 점검, --apply는 별도 후보 승인 이후에만 사용한다. 기존 공개2개 모드는 보존한다.
+- 추가 함수 설치 자체는 기존 데이터/정책를 바꾸지 않는다. 실제 관측 호출은 유효한 private policy의 observed_at만 갱신하므로 이를 부작용 없는 조회로 표기하지 않는다. 기본 구조·정책·카드·원본·예약·operation은 보존한다.
+- 후보 구성: test DB 함수1개 + Vercel Preview codex/phone-test에 새 테스트 전용 maintenance secret/고정 target/관측 flags2개. 기존806b6b2 동일 소스를 Preview에 재배포하여 설정을 반영한다. 관측-only CLI로 실제 endpoint와 인증 실패 경계를 확인하며 cleanup 경로/외부 알림 전송은 실행하지 않는다. 테스트 후 두 관측 flags를 제거/원복하고 Preview에 반영한다. 새 secret은 운영 키와 분리하고 값은 파일/Git/로그에 기록하지 않는다.
+- 검증: 대상·SQL 해시·존재 여부·현재 private policy의 호출 전제조건을 먼저 읽는다. 승인 전 원격 migration/새 secret 전송0. 적용 코드의 구문·기존/추가 후보 분기와 읽기전용 inspect를 확인한다. 실제 deployed HTTP와 운영자 알림 수신은 별도 잔여로 보존한다.
+
+#### 관측 연결 후보 이번 실행 보고
+
+1. 읽음: 현재 시작/확정결정/PLANS/본 계획·작업판·계약, 기존20261008090000 SQL, observation API/backend/handler, maintenance workflow·test cleanup worker, 고정대상 connection/apply 도구. 기존 QA·변경통제 지침 유지.
+2. 사실/미결: test private policy enabled/approved=true·paused=false, physical40MiB/read80MiB; 기존 관측 함수 없음/history0. 원격 관측 API는 아직 미검증. 별도 유지 인증 설정이 필요하며 운영 secret을 재사용하지 않는다.
+3. 계획: 본 W15/D03 ‘관측 연결 후보 준비’. 기존 M/W/Q/D 및 과거 실행 로그 유지.
+4. 변경: apply-test-public-capacity.py에 --observation-dependency 고정 후보 분기·정책 사전조회·15테이블 보존검사 추가. test-capacity-apply.py는 무접속5검사. 기존00/01/02/03·시작문서·evidence의 현행 요약 갱신. 앱 코드/새 의존성 변경 없음.
+5. DB/복귀: 이번 DB변경0. 후보 MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01, SQL20261008090000 LF SHA256 dc9f9c4657a404a0150fa5d3d1ac9abd5c81f914d81fb9e53de3c7c6ff7e7779. 승인 후 apply-test-public-capacity.py --observation-dependency --apply. 함수 설치 때 기존15테이블 보존; 호출 때 observed_at 갱신만 예상. 관측flags off/제거 후 같은Preview소스 재반영으로 접근 차단, additive함수·정상갱신시각은 보존. 그 외 정책/한도/원본/operation 불변.
+6. 이번 실행: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --observation-dependency →read-only exit0, applied=false. wsl.exe -- python3 /mnt/e/web/anime/tools/operations/test-capacity-apply.py →5 PASS/exit0. 첫 검사는 migration 이력 문자열도 실행SQL로 집계해1 FAIL; 검사에서 달러인용 이력문자열 제외, 수정 중구문오류1회 후 정상5 PASS. 실DB mutation은 모두0. GitHub API CI38122228717 verify/publication-contract 전체SUCCESS(806b6b2) 확인. 과거18/SQL15/HTTP6을 이번 재실행으로 합산하지 않는다.
+7. 안전/관측: 비밀값/개인 본문 출력0, 테스트 고정target·정확한 SQL해시·중복적용차단 유지. 새 사용자 행동 PASS0. mock5검사는 실제 원격15테이블 보존결과로 표기하지 않는다. 예산경보 판정/배포HTTP/수신을 분리한다.
+8. 다음1개/승인: 추가 migration1개+phone-test 전용 신규maintenance secret 저장·target·관측flags2개·동일806b6b2 Preview 설정 재배포 승인 후 observe-only 검사. 기존10/11 정확한 변경별 승인 조건상 기존2개migration 승인에 추가 함수를 포함하지 않는다. 알림 실제 외부 발송/운영 quota/master 배포는 본 후보에 없다.
+
 #### 비용·정상 규모의 구체적 한계
 
 - 공급자 실제 UI read-only 확인(2026-10-11): Supabase 조직 All projects/Free/9월24일~10월24일 uncached0.972/5GB·cached0.086/5GB·저장기간평균0.826/1GB·DB요약0.297/0.5GB, 초과없음. 평균/최대1시간 지연 값이므로 현재 SQL856,441,465B와 동일 지표로 취급하지 않는다. Vercel anime-collector Usage/최근30일9월11일01:00~10월11일01:00 Fast Data1.26/100GB·Origin4.34MB/10GB·함수390·CPU41s·memory0.15GBh. 다른프로젝트 합산 여유/무료 지속 보장 아님. 현재는 전송보다 저장 한도에 더 가깝다. 이 실측은 초기 공개 이후 트래픽 예측이 아니며100MiB/day 후보가 한 달 지속되어도 무료라는 뜻이 아니다.

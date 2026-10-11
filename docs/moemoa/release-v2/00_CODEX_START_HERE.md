@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-11 W15/D03 테스트 반영:** 승인806b6b2를 phone-test Git에 배포, Vercel9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7 Ready/Source·alias 일치. DB20261010103000+20261011160000 적용·독립확인/기존12테이블 보존. 실제 service-role 공개RPC 저장73,464B(공개34,856B)·로컬경보 PUBLIC_BUDGET_UNGUARDED 검출. 기존 test private 관측RPC404와 관측 인증키/대상설정 부재로 배포 관측HTTP는 미검증; flags를 켜지 않아 원복할 변경0. 운영/master1878867·원본·전송한도 불변. 다음1개는 정확한 테스트 관측 연결 후보 준비. [보고](01_RELEASE_EXECUTION_PLAN.md)·[근거](evidence/2026-10-11-public-capacity-closeout.json).
+> **2026-10-11 W15/D03 관측 연결 후보 준비 완료:** 승인806b6b2 CI38122228717 전체 SUCCESS. 추가 후보 MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01은 기존20261008090000 함수1개와 phone-test 전용 관측 인증/대상/flags만 연결한다. test 사전조회 enabled/approved=true·paused=false, 함수 미설치 확인. 적용 도구 안전검사5 PASS; 원격 추가변경0. 현재 배포 관측HTTP·실제 수신은 미검증이며 다음1개는 이 추가 범위 승인 후 적용·observe-only 확인·flags 원복. 운영/master1878867 유지. [보고](01_RELEASE_EXECUTION_PLAN.md)·[근거](evidence/2026-10-11-public-capacity-closeout.json).
 
 
 ## 2026-10-11 첫 Public 출시 마감 — 현재 진입점
