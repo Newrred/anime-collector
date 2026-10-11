@@ -2529,5 +2529,237 @@
       "remoteMutations": 0
     },
     "next": "Exact test application approval, then notice/image delivery/withdrawal and restore; no new signup or base DB restore"
+  },
+  "publicNoticeTestConnectionExecution": {
+    "candidate": "6c633bdaa29458c16de931ad17137fc455d3bd0d",
+    "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+    "approval": "User approved test connection, verification and restore",
+    "status": "TEST_READY_WAITING_PERSONAL_PUBLIC_CONSENT",
+    "appliedReadback": {
+      "target": "nmgkhknponvzcwliajyk",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T11:01:13.568857+00:00",
+        "functions": {
+          "makePrivate": true,
+          "sharingStatus": true,
+          "sizedDelivery": true
+        },
+        "migrations": [
+          "20260924141253",
+          "20260924141254",
+          "20260924141255",
+          "20260924141256",
+          "20260924141257",
+          "20260924141258",
+          "20260924141259",
+          "20260924141300",
+          "20260924141301",
+          "20260924141302",
+          "20260924141316",
+          "20260924141318",
+          "20260924141320",
+          "20260924141322",
+          "20260924141324",
+          "20260924141326",
+          "20260924141328",
+          "20260924194322",
+          "20260924194325",
+          "20260924195621",
+          "20260925152859",
+          "20260925164126",
+          "20260927053858",
+          "20260927053904",
+          "20260927053914",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010160000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011120000",
+          "20261011160000",
+          "20261011180000"
+        ],
+        "publicCounts": {
+          "homes": 1,
+          "assets": 17,
+          "boards": 8
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10-test",
+          "policyVersion": "simple-signup-2026-10-10-test",
+          "privacyVersion": "privacy-2026-10-10-test",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": false,
+          "singleton": true,
+          "max_reserved_bytes": 0
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "GB",
+            "minimumAge": 13
+          },
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "PH",
+            "minimumAge": 13
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 10,
+          "reads_enabled": true,
+          "images_enabled": true,
+          "writes_enabled": true,
+          "follows_enabled": true,
+          "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+          "reports_enabled": true,
+          "asset_bytes_limit": 41943040,
+          "minihomes_enabled": true,
+          "report_daily_limit": 10,
+          "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+          "signup_declaration_required": true,
+          "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+        },
+        "activeDeliveryOverrides": 0,
+        "currentDeclarationCount": 2
+      }
+    },
+    "previewBaseline": {
+      "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "sizedDelivery": false,
+      "branch": "codex/phone-test",
+      "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+    },
+    "deploymentId": "G2gqkAKY2WHXDmsb3rux9HcNYyjP",
+    "newUserBehaviorPass": 0,
+    "restoreCompleted": false,
+    "productionMutations": 0,
+    "deploymentStatus": "Ready",
+    "deploymentSourceVerified": true,
+    "canonicalAlias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+    "deployedNotice": {
+      "revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+      "languages": [
+        "ko",
+        "en"
+      ],
+      "fixedTermsPrivacy": "2026-10-10",
+      "checkedBy": "actual Chrome page"
+    },
+    "actualCardUi": {
+      "syntheticImagePreview": true,
+      "policyRevisionVisible": true,
+      "checkboxCount": 1,
+      "checkboxChecked": false,
+      "saveDisabledBeforeConsent": true
+    },
+    "newHostedPublicationPass": 0
   }
 }

@@ -2169,3 +2169,7 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제 명령/결과: 읽기전용 .cache/inspect-public-notice-test.py 결과 target=test·필요RPC3개·현재가입확인2건·두quota off/0·override0. wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test_public_notice_config.py exit0/8 PASS: 기본dry-run, 정확한4필드, restore dry-run, 전체baseline 복귀, 잘못된원복/한도drift/가입dependency/kill-switch변경 거부. 구성검사이며 실제 게시 서버 모사가 아니다. 기본DB/A·B/72table복원 반복0.
 7. 영향/증거: 이번 새 사용자행동·hosted게시 PASS0, 운영/테스트 원격변경·발송·결제0. 과거 단위12/모의브라우저12/build33 및 실제A/B·quota검증과 구분한다. 개인정보/비밀값/동의본문 출력0.
 8. 잔여/다음1개: 정확한 test 후보 승인 후 고지 revision·가입 guard·기존2000GET/64MB·sized 배포를 함께 연결하여 최종 이미지전달/철회 확인 후 원복. 새 schema·재가입·역할변경 불필요. D05 별도키 보관/전체DB복구는 실제 잔여로 보존하며 이미 확인한 외부 암호화파일 검증을 반복하지 않는다. 운영 승인·실제경보수신은 별도다.
+
+[2026-10-11 승인] 사용자 6c633bd/화면50ecbc9의 test 고지·guard·기존quota·sized Preview 연결, 실제 열람/철회 후 설정·배포 원복 승인. 승인 범위 내 실행을 이어가며 운영/master 변경은 제외한다.
+
+[2026-10-11 실행] 승인6c633bd 고정hash SQL을 test TLS연결로 적용: revision3값+guard=true, quota2000/64000000. usage2/144·다른정책보존, 독립readback일치. Preview 두값 저장→Git phone-test50ecbc9→Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·Source/alias확인. 실제고정한영고지·합성카드미리보기·revision표시·동의체크1개·체크전저장disabled 확인. 사용자직접동의 대기, 실제게시/익명이미지/철회·원복 아직미실행. 운영/master변경0.

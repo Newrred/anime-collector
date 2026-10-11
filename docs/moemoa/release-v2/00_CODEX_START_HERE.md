@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 승인 후보 test 적용:** 6c633bd 설정 SQL/화면50ecbc9를 승인 범위에서 적용. test revision3값·guard=true, quota2000GET/64MB 및 Preview sized=true. Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·소스/alias 확인. 실제 고지·합성 미리보기·한 체크/체크전 저장차단 확인. **현재 사용자 직접 공개 동의 대기, 설정·배포는 임시 적용 상태이며 아직 원복하지 않았다.** 다음1개: 사용자 저장 후 익명 이미지·철회 확인→정확한 기존 설정/배포 원복. 운영 변경0.
+
+
 > **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
 
 
