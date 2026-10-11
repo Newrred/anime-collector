@@ -215,7 +215,7 @@
     "Automated user terms acceptance",
     "Production public enablement"
   ],
-  "nextAction": "After owner accepts the single displayed publication consent and saves, verify actual publication and a fresh anonymous image read; no further signup acceptance request.",
+  "nextAction": "User directly publishes prepared synthetic home, then B follow and list revisit",
   "simpleCardSharing": {
     "decision": "CARD-PUBLIC-SIMPLE-01",
     "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
@@ -362,7 +362,7 @@
         }
       ]
     },
-    "status": "test-db-applied-preview-ready-user-consent-pending",
+    "status": "card-published-anonymous-image-pass-home-consent-pending",
     "productionChanged": false,
     "sourceCommit": "52875c69a4e500255d32b89a6ec11e6f2593a6f2",
     "applied": {
@@ -480,16 +480,45 @@
       "buildInfoVerification": "HTTP redirected to Vercel authentication; browser JSON navigation blocked; not claimed"
     },
     "actualHostedUi": {
-      "ownerCardStatus": "Private",
-      "publicChoice": "existing synthetic image decoded; single consent; save disabled before consent",
+      "ownerCardStatus": "Public",
+      "saveResult": "Saved as public.",
+      "published": true,
       "policyAcceptedByAgent": false,
-      "published": false
+      "userReply": "저장 완료",
+      "publicationId": "efc8a066-100c-4590-b30d-07c8731feadd",
+      "anonymous": {
+        "origin": "https://anime-collector-nvi0o1j6p-newrreds-projects.vercel.app",
+        "signedOutEvidence": "Sign in to report",
+        "decoded": true,
+        "naturalWidth": 24,
+        "naturalHeight": 30,
+        "privateReflectionOrTagsVisible": false
+      },
+      "home": {
+        "prepare": "PASS",
+        "signupGuardDuringPrepare": true,
+        "publish": "pending-user-direct-consent"
+      },
+      "signupGuardDuringCardPublish": false
     },
     "ci": {
       "runId": 38112339835,
       "publicationContract": "success",
-      "verify": "in_progress",
-      "conclusion": null
+      "verify": "failure",
+      "broadE2E": {
+        "passed": 87,
+        "skipped": 1,
+        "failed": 1
+      },
+      "cause": "publication private-source fixture executed without two required feature env flags",
+      "fix": "move whole publication spec to existing isolated runner, no tests removed",
+      "localFixVerification": {
+        "command": "node scripts/run-publication-closeout-e2e.mjs \".*\"",
+        "passed": 37,
+        "failed": 0,
+        "exit": 0
+      },
+      "remoteFixVerification": "pending"
     },
     "guardAtHandoff": {
       "publicSettings": {
@@ -509,6 +538,12 @@
         "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
       },
       "signupDeclarationRequired": false
+    },
+    "previousHostedUi": {
+      "ownerCardStatus": "Private",
+      "publicChoice": "existing synthetic image decoded; single consent; save disabled before consent",
+      "policyAcceptedByAgent": false,
+      "published": false
     }
   }
 }

@@ -1,6 +1,6 @@
 # MOEMOA · 단일 출시 작업판
 
-> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 최종 저장·익명 열람은 당사자 공개 동의 대기이며 PASS 아님. 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
+> **2026-10-11 현재 — 카드 공개 간소화 test 반영 완료:** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시와 B 팔로우/신고/차단/철회는 잔여. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변. [근거](evidence/2026-10-11-first-public-connection.json)·[8항 보고](01_RELEASE_EXECUTION_PLAN.md). 아래 기록은 각 실행 당시 증거다.
 
 
 > **2026-10-10 최신 완료 — 전체 Git 인계·운영 반영:** 계정 메뉴/데스크톱 이미지 입력 포함 f428c60의 전체 CI·master Git·Vercel Ready·실제 www 소스/화면 확인 완료. [최신 배포 결과](2026-10-10-latest-production-release.md)와 [Pro 전체 검토 인덱스](2026-10-10-pro-review-index.md)가 이번 상태의 근거다. KR14/US13/TH13·Public off·기존 DB 유지. 과거 결과를 재시험 PASS나 새로운 활성 승인으로 확대하지 않는다.
@@ -708,8 +708,8 @@
 | W05 | M1 | 계정 동기화 완료·재개 계약 | C02 | W03 로컬 검증 | DONE | 로컬 sync 계약 구현·unit269/browser26/build PASS; 실제 A/B·기기 및 서버 한도는 W06/W15/W19 |
 | W06 | M1 | 계정 격리·승격·private 이미지 연동 | C01,C02,C10 | W04, W05 | DOING | 실제 private HTTP/Auth/Storage 및 원본 없는 두 제품 UI origin Archive/detail/Board 왕복 PASS. 기존 로컬 재시도/계정격리 근거 보존. 10/7 새 카드 classification test HTTP12 및 prod rollback-only RPC/선택 migration 적용 PASS. 새 tags 저장/pull/conflict/승격/구client 보존·익명/owner 경계 확인. 실휴대폰↔PC·교체 quota·private bytes 복구·최종 환경 만료/지원 조합 잔여. 기본 A/B·키·72table 복원 반복 금지 |
 | W07 | M2 | 공개 표현·권한·철회 경계 | C03–C05 | W06 로컬 검증 | VERIFY | hosted 실제 A 게시·익명 읽기 및 소유자 RPC 철회 PASS. 운영 Public은 off. 전체 역할·갱신/기존 캐시/기기 조합은 W19 잔여 |
-| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 10/11 간편 카드 공개·사본 자동준비 unit69/고유UI13/SQL33/build32 로컬 PASS. A 수락 확보;52875c6 새 UI/migration test 반영 완료·실제 이미지 확인, 최종 동의/Save 대기. 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
-| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 10/11 카드 공개/비공개+동의1개 구현/모의API PASS, 52875c6 test Ready·실제 상태/이미지 확인, 최종 게시 대기. 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
+| W08 | M2 | private 최적화 사본 및 공개 준비·전달 | C02,C04 | W07 로컬 검증 | DOING | 10/11 간편 카드 공개·사본 자동준비 unit69/고유UI13/SQL33/build32 로컬 PASS. A 수락 확보;52875c6 새 UI/migration test 반영 완료·실제 이미지 확인, 사용자 직접 Save·새 익명 이미지decode PASS. 과거 trusted 근거 보존.9/27 새 SELF_DECLARED 후보3개 test적용·실제 HTTP/Auth/RPC/Storage28+정리4 PASS. 원본/사본96×64 익명열람·사후차단404·원복. 제품UI13+정리4 추가PASS. 실휴대폰/운영 후보/CDN/정책 잔여 |
+| W09 | M2 | 보드 미리보기·게시·방문자 읽기 | C03,C04 | W08 로컬 검증 | VERIFY | 10/11 카드 공개/비공개+동의1개 구현/모의API PASS, 52875c6 test Ready·실제 상태/이미지 확인, 실제 Saved as public·새 익명decode PASS. 9/27 새후보 실제 backend에서 잘못된preview거부·정확한동의게시/visible·익명2이미지·MATURE/직접URL차단·재게시우회거부·철회 PASS. 제품UI+hosted 원본/사본 게시·익명열람·철회 추가PASS. 실기기·운영CDN 잔여 |
 | W10 | M2 | 공개 갱신·철회·삭제·동시성 | C05 | W09 로컬 검증 | VERIFY | 10/11 reversible private·다중 보드·원본/다른 카드 보존·기존 preview 무효화·owner lock SQL18 신규 PASS. 기존 로컬 다중 위치·삭제·동시성 근거 유지. 실제 전달/캐시/철회 및 stale 상태의 공개 비부활만 추가 확인. 기초 stale 복원 결과를 hosted 전체 완료로 확대하지 않음 |
 | W11 | M3 | 공개 미니홈의 선택 전시 | C06 | W10 로컬 검증 | VERIFY | 과거 hosted 근거 보존.9/27 일반 동의로 home/선택 보드 노출, 보드 재분류·철회 후 전시0, home 차단/작성자 visible=false의 로컬 SQL·브라우저 검증. 새 정책의 실제 hosted·지원기기 검증 잔여 |
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
@@ -734,10 +734,11 @@ W/M: W08/W09/W10 · M2 카드 공개 간소화 / CARD-PUBLIC-SIMPLE-01
 흐름: 카드 공개/비공개→표시 내용 동의1개→저장. 서버 준비/preview/hash 확인은 내부 처리
 이전 로컬: unit69·고유 모의API Chromium13·SQL33·build32 PASS, 새 hosted PASS와 구분
 이번 DB: 승인된20261011120000 rollback리허설→APPLY→독립readback PASS.13table 원문 fingerprint/건수 일치·기존flags/정책/권리/원본 보존
-이번 화면: A 로그인 카드 상태Private→Public 선택→기존 합성 사본 자동 decode·제목/동의1개·Save disabled until consent 확인
-실제 게시: 당사자 최종 동의/저장 대기. 원본/개인메모/태그 자동 공개0; 임시 signup guard는 종료 전 false 원복 확인(재개 시 기존 승인 범위에서 enable-existing)
-미완료: 같은후보 실제 Save→익명 이미지 및 A/V/B/home/follow/신고/차단/철회, D03~D06 실제 잔여
-다음1개: A가 열린 화면의 동의1개/Save 수행 후 실제 게시 결과→새 익명 이미지 열람
+이번 화면: A 직접 동의/Save→Saved as public→새 익명 origin Sign in to report·24×30 공개 이미지decode PASS. 미니홈 합성 프로필/공개보드1개 preview PASS
+실제 게시: 카드 게시 당시 guard=false(과거 원복 상태), 현재 A receipt 보유. 미니홈 preview는 승인된 enable-existing/guard=true에서 성공. 원본/감상/태그 공개0. 종료 시 guard 원복
+이번 검사: CI38112339835 일반runner env누락1FAIL 보존; workflow의 publication전체를 기존 격리runner로 이동→37/37 로컬PASS. 제품/DB 변경0
+미완료: home 당사자 게시/B follow·재방문·신고/차단/철회, 수정후 CI, D03~D06 실제 잔여
+다음1개: A가 준비된 미니홈의 정책 직접 수락/게시→B follow·내 목록 재방문
 ```
 
 <details><summary>이전 카드 — A hosted preview 후 간소화 요청 전</summary>
@@ -926,7 +927,7 @@ NA 이유:
 
 | ID | 필요한 결정 | 상태 | 현재 기본안/대기 중 행동 | 마지막 필요 시점 | 실제 승인/증거 |
 |---|---|---|---|---|---|
-| D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 이 턴 guard=false 원복. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
+| D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 직전 guard=false 원복; 이번 미니홈 검사에 기존 승인으로 guard=true 재활성, 종료 시 원복. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRIVATE_LIMITS_ACTIVE | 추가 월5만원 목표/테스트 필요 시 가동 방향 유지. 운영 Free, private50MB·100MB물리·500MB월전역읽기, 기존 예약 성공. 이번80% 경보 구현/검사, 실제 수신·Public 한도·합산 비용 잔여 | 유료/공급자 변경 없음. 정상 실행 성공은 경보 수신 PASS 아님 | TEST-ON-DEMAND-01 / release-closeout evidence |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |

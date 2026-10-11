@@ -77,6 +77,14 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 
 - 종료 확인: prepare-public-signup-test.py --restore exit0, signup guard=false·기존6flags/revision/한도 원복 확인. 새 schema는 보존. 사용자 동의/게시 응답 대기, 실제 Save PASS 아님. 전체 CI verify는 아직 실행 중이므로 완료로 보고하지 않는다. 다음 턴에는 같은 run38112339835 결과만 확인하고 새 전체 검사를 중복 시작하지 않는다.
 
+### 2026-10-11 실제 게시 후 익명 확인 및 CI 실행 설정 보완
+
+- 사용자가 최종 동의/Save 완료. 실제 A UI Saved as public·공개링크, 로그인 저장소가 분리된 신규 deployment origin에서 Sign in to report·실제24×30 이미지 decode 확인. 감상·태그 노출 없음. 앱 가입/공개 동의 대행0.
+- CI38112339835는 publication-contract 성공, verify의 일반E2E87PASS/1SKIP/1FAIL. 실패는 private-source 이미지를 요구하는 새 case가 두 feature env 없이 일반 runner에서 실행된 것. 로컬 전용 runner는 해당2flag와 비밀값 없는 격리 환경을 명시한다.
+- 좁은 변경: quality workflow의 publication-ui를 일반 묶음에서 빼고 기존 run-publication-closeout-e2e.mjs '.*'로 전체 publication spec을 실행(검사 삭제/skip 추가 없음). 동일 runner 전체 spec 실제 검증→테스트 브랜치 반영/CI 확인. 제품 소스·DB·정책 변경 없음. 복귀는 workflow1파일 revert. 새 기본DB/실기기 반복 검사 없음.
+
+- 실행 결과: `node scripts/run-publication-closeout-e2e.mjs ".*"` →37/37 PASS, exit0. 실제 hosted와 모의API를 구분한다. 미니홈은 합성 프로필+신규 공개보드1개로 preview PASS, 당사자 정책 수락/게시 대기. 테스트 guard는 기존 승인 범위로 재활성했으며 인계 시 원복한다. 원격 CI 재검증 결과는 증거JSON에 기록한다.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.

@@ -1,6 +1,6 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
-> 2026-10-11 test 반영 근거: CARD-PUBLIC-SIMPLE-01 후보52875c6/DB20261011120000을 승인된 moemoa-test·phone-test에 반영했다. 실제 소유자 상태 조회·공개 선택·이미지 표시/동의1개까지 확인. 게시·익명 전달·비공개 재전환의 새 hosted PASS는 아직 아니며 기존 C03~C05의 완료 조건을 유지한다. 상세는 단일 작업판/ExecPlan 실행 보고.
+> 2026-10-11 test 반영 근거: CARD-PUBLIC-SIMPLE-01 후보52875c6/DB20261011120000을 승인된 moemoa-test·phone-test에 반영했다. 실제 소유자 상태 조회·공개 선택·이미지 표시/동의1개까지 확인. 후속 사용자 직접 게시·새 익명24×30 이미지decode PASS, 미니홈 prepare도 guard=true에서 PASS. 비공개 재전환·미니홈 게시·B 완주의 새 hosted PASS는 아직 아니며 기존 C03~C05의 완료 조건을 유지한다. 상세는 단일 작업판/ExecPlan 실행 보고.
 
 ## 2026-10-11 첫 Public 마감 계약 보충
 
