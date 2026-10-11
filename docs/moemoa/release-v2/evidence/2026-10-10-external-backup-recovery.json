@@ -816,5 +816,104 @@
       "mimeNote": "Existing browser-uploaded ZIP reports application/x-zip-compressed. Metadata size/hash match; future parent downloader must validate ZIP/encrypted manifest bytes rather than rely on MIME alone. New uploader application/zip contract unchanged."
     },
     "localCallbackClosed": true
+  },
+  "weeklyPortableRunner20261011": {
+    "status": "LOCAL_SYNTHETIC_VERIFIED_EXACT_MANUAL_CANDIDATE_PENDING",
+    "candidate": {
+      "base": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+      "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "branch": "refs/heads/codex/weekly-backup-release-20261011",
+      "sourceSha256": {
+        "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
+        "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
+        "tools/operations/weekly-backup.baseline.json": "e4aa2e0105c68fef36102606b12f0de8fe1b375137446934c9f6a5a0e876390c",
+        "tools/operations/prepare-daily-backup.mjs": "dc7cc4c54af7b3b81cdaedaf19d4be75995bdf7a21e332b31ee15b7fde0b516d",
+        "tools/operations/capture-daily-backup.py": "4c2806a9a16138c4bdc93bf231285a8de5ff25a3135281930fed3388c2e38aa7",
+        "tools/operations/package-daily-backup.py": "e044764d803dc2c61178edb1d63b5e0cb4862df371a22d326bd41fbb02da0ca9",
+        "tools/operations/unpack-weekly-parent.py": "3d1e75d4c56f5aac6bef2ae7938492b989ef92e245329e748435b7e777e2a462",
+        "tools/operations/incremental-backup.mjs": "f6981c621268adcecb4a41a08a1ccde1d96f50ef8b59b7acafc29fa9b8569538",
+        "tools/operations/drive-backup.mjs": "7ab5f14a537974b0857e20d1eb863e1ac87de5b5cf3da3cc57ec03ef62bf76a0",
+        "tools/operations/verify-external-backup.py": "4ea9fa5742c1843f41b987f9bdfa6492712b4b9fbe3daa9e01565f3e3352627a",
+        "tools/operations/inspect-retention.py": "86a673bf0f32570f76942f68dd8cf9a46a674915f05bc6e6d02add0b190a5f8f",
+        "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+        "tools/private-images/encrypted-backup.mjs": "a08684808d1148db49b0d0bae48454f47e11ea9c422bdcea6ec7063d1d0eefa8",
+        "tools/private-images/capture-recovery-journal.sql": "203a5e93dde4b7a2cffa52721f45fd2bf5eab1900286e9c3c975dec4eec172cd",
+        ".github/workflows/moemoa-weekly-backup.yml": "c831663cd5dadb163df54de4fa375c95992b9b72ee291ad84d7efc1809073b8a"
+      },
+      "changed": [
+        ".github/workflows/moemoa-weekly-backup.yml",
+        "tools/operations/capture-daily-backup.py",
+        "tools/operations/capture-public-recovery-state.sql",
+        "tools/operations/drive-backup.mjs",
+        "tools/operations/incremental-backup.mjs",
+        "tools/operations/package-daily-backup.py",
+        "tools/operations/prepare-daily-backup.mjs",
+        "tools/operations/run-weekly-backup.mjs",
+        "tools/operations/unpack-weekly-parent.py",
+        "tools/operations/verify-external-backup.py",
+        "tools/operations/weekly-backup-state.mjs",
+        "tools/operations/weekly-backup.baseline.json",
+        "tools/private-images/capture-recovery-journal.sql"
+      ],
+      "pushed": false
+    },
+    "policy": "RECOVERY-WEEKLY-RPO7D-20261011",
+    "sourceFiles": {
+      "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
+      "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
+      "tools/operations/weekly-backup.baseline.json": "e4aa2e0105c68fef36102606b12f0de8fe1b375137446934c9f6a5a0e876390c",
+      "tools/operations/prepare-daily-backup.mjs": "dc7cc4c54af7b3b81cdaedaf19d4be75995bdf7a21e332b31ee15b7fde0b516d",
+      "tools/operations/capture-daily-backup.py": "4c2806a9a16138c4bdc93bf231285a8de5ff25a3135281930fed3388c2e38aa7",
+      "tools/operations/package-daily-backup.py": "e044764d803dc2c61178edb1d63b5e0cb4862df371a22d326bd41fbb02da0ca9",
+      "tools/operations/unpack-weekly-parent.py": "3d1e75d4c56f5aac6bef2ae7938492b989ef92e245329e748435b7e777e2a462",
+      "tools/operations/incremental-backup.mjs": "f6981c621268adcecb4a41a08a1ccde1d96f50ef8b59b7acafc29fa9b8569538",
+      "tools/operations/drive-backup.mjs": "7ab5f14a537974b0857e20d1eb863e1ac87de5b5cf3da3cc57ec03ef62bf76a0",
+      "tools/operations/verify-external-backup.py": "4ea9fa5742c1843f41b987f9bdfa6492712b4b9fbe3daa9e01565f3e3352627a",
+      "tools/operations/inspect-retention.py": "86a673bf0f32570f76942f68dd8cf9a46a674915f05bc6e6d02add0b190a5f8f",
+      "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+      "tools/private-images/encrypted-backup.mjs": "a08684808d1148db49b0d0bae48454f47e11ea9c422bdcea6ec7063d1d0eefa8",
+      "tools/private-images/capture-recovery-journal.sql": "203a5e93dde4b7a2cffa52721f45fd2bf5eab1900286e9c3c975dec4eec172cd",
+      "tools/operations/weekly-backup.workflow.candidate.yml": "c831663cd5dadb163df54de4fa375c95992b9b72ee291ad84d7efc1809073b8a"
+    },
+    "verification": {
+      "nodeDistinctPass": 57,
+      "pythonMockCapturePass": 2,
+      "workflowYamlStructurePass": true,
+      "offlinePreflightNetworkRequests": 0,
+      "exactCandidateSourceFilesMatched": 15,
+      "commands": [
+        "node --test tests/operations/dailyBackup.test.mjs tests/operations/incrementalBackup.test.mjs tests/operations/incrementalPackage.test.mjs tests/operations/driveBackup.test.mjs tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs (56 before added manifest-pin test)",
+        "node --test tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs (12 after final boundary edits; duplicates excluded)",
+        "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/test_portable_capture.py (2)",
+        "node tools/operations/run-weekly-backup.mjs --preflight",
+        "YAML parse/assert manual-only, pinned image/actions, environment and concurrency",
+        "git diff --check"
+      ],
+      "syntheticBehavior": [
+        "128000-byte unchanged image referenced from parent, delta under15000 bytes",
+        "deleted private image absent from reconstructed latest snapshot",
+        "full encrypted parent ZIP authenticated with pinned manifest before reuse",
+        "crash after archive upload resumes commit without second upload/capture",
+        "incomplete remote upload stops subsequent runner",
+        "ledger fork/wrong key/tampering/shared folder/oversize or corrupt stream rejected"
+      ]
+    },
+    "realProductionCapture": false,
+    "realGitHubExecution": false,
+    "realDriveUploads": 0,
+    "credentialsTransferredThisTask": 0,
+    "scheduleInstalled": false,
+    "retentionDeletes": 0,
+    "databaseMigration": false,
+    "newApplicationDependencies": false,
+    "limitations": [
+      "GitHub container/tool installation not executed; workflow syntax/static structure and local synthetic pipeline only",
+      "Remote state is append-only and authenticated but Drive has no CAS; workflow concurrency required and external writers can cause fail-closed fork",
+      "Ledger suffix deletion by a privileged adversary needs independent anchor to detect rollback",
+      "Incomplete upload requires operator recovery; completed remote archive can be committed after restart",
+      "Maximum16 parent chain stops; no automatic full baseline or retention deletion",
+      "Independent off-PC recovery key not confirmed"
+    ],
+    "nextAction": "Exact d668723 backup-only master/manual workflow candidate approval plus DB/Storage credentials and recovery key transfer to moemoa-backup; manual single capture/upload, not cron"
   }
 }

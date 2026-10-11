@@ -1,6 +1,6 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
-> **2026-10-11 W17/D05 Drive 인증 연결 완료:** 전용 moemoa-backup-drive·drive.file의 실제 Google 동의/지정2항목 선택·token교환/갱신 PASS. 기존 비공개 백업 폴더와 10/11 ZIP metadata200·920077441 bytes/SHA256 기록 일치 확인(파일 다운로드/복원 재검증 아님). 승인된 GitHub moemoa-backup 환경에 Drive Secret2·변수2 저장201 및 readback200, master만 허용. 이번 업로드/주간예약/DB·복구키 이동/운영변경0. 과거 로컬 OAuth8·Drive13·증분56 PASS 보존. 다음1개: 주간 증분 runner의 GitHub 실행환경 이식·부모사본 검증/상태보존을 로컬 후보로 마감.
+> **2026-10-11 W17/D05 주간 실행기 로컬 후보 완료:** 고정 PC 경로를 분리하고 Drive 부모ZIP SHA256/AES-GCM/manifest 검증→증분 준비→암호화 intent/commit 연결. 합성 기존128KB 이미지 재저장 없이15KB 미만 delta·삭제이미지 제외 복원·업로드 직후 중단 재개(중복0) PASS. 관련 Node57개/명령계약 Python2개·비활성 workflow 구조 PASS(합성/모의, 실제GitHub/운영 실행 아님). 백업파일만 운영199613b 위에 얹은 로컬 후보 d668723; 운영/master 불변. Drive인증은 이전 실제완료, DB/Storage/복구키 이동·수동전송·예약은 미실행. 다음1개: 정확한 d668723 수동1회 후보 및 지정GitHub 비밀설정 승인.
 
 
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.
@@ -2544,3 +2544,29 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 8. 남음/다음: 인증 연결은 완료. W17/D05 전체 완료는 아니며 portable runner·인증된 부모사본/chain상태·주간 실행·독립키 보관 잔여. 다음1개는 주간 증분 runner 이식/부모검증/상태보존 로컬 후보 준비. 실제 실행·DB/복구키 전송은 구체 후보 승인 전 수행하지 않는다.
 
 - 실제 metadata 참고: 기존 브라우저 업로드 ZIP의 MIME은 application/x-zip-compressed다. 크기/hash 일치는 확인했으며 새 업로더의 application/zip 계약을 바꿀 이유는 없다. 다음 부모사본 다운로드 후보는 MIME만으로 신뢰하지 않고 ZIP/encrypted manifest bytes 인증을 유지해야 한다.
+
+### 2026-10-11 W17/D05 주간 증분 실행기 이식 ExecPlan (기존 계획 내 후속)
+- 목적/결정: RECOVERY-WEEKLY-RPO7D-20261011, 주1회 DB·변경이미지만 외부보관 후보. 승인된 Drive 인증은 연결 완료이나 DB/Storage credential·복구키 이동/실행/예약 승인은 별도.
+- 현행 근거: capture-daily-backup.py의 WSL/pg_dump 고정경로, prepare-daily-backup.mjs의 키/캐시/verifyRemote 고정경로, run-daily-backup.mjs PC전용. incremental-backup.mjs/Drive 업로더의 검증 계약은 재사용.
+- 범위: Linux 설정 주입, 지정 Drive 부모ZIP bounded GET→SHA256·AES-GCM·manifest 검증→현행 chain 복원, 암호화된 append-only intent/commit 상태로 업로드ID/부모결속 보존, 명시 수동 runner 및 비활성 workflow 후보. 제외: 실제 운영조회/키이동/Drive쓰기/예약/삭제/master.
+- 흐름: pinned baseline 또는 인증된 최신 commit→부모 회수/복원→동일snapshot DB캡처→변경bytes GET→증분 암호화/로컬복원→intent 저장→같은ID 업로드/원격검증→commit 저장. intent 중단은 완료원격만 회수하며 다른 내용 덮어쓰기/자동기준본삭제 금지.
+- 파일 지도: 기존 capture/prepare/package/drive 도구의 설정/다운로드 확장, weekly state/runner 및 안전한 ZIP unpack 보조기, tests/operations 합성통합·실패검사, 기존00/01/02/03/evidence/candidate 갱신. 새 프로덕션 의존성 없음.
+- 마일스톤: (1) 고정경로 없는 합성 capture/prepare/package (2) 실제 암호화ZIP·모의Drive 부모복원/중단상태 왕복 (3) 오프라인 preflight·수동실행 후보와 정확한 잔여 보고.
+- DB/마이그레이션: 없음; PG 읽기전용/TLS verify-full/고정프로젝트/스냅샷 결속 유지.
+- 검증: 신규단위/합성통합으로 손상·공유폴더·경합/fork·미완료 업로드·삭제된 이미지 재등장 방지, 기존 관련테스트만 실행. 실제Google/운영PASS와 구분.
+- 보안/관측: credential env/보호된 임시파일만, 평문/키/토큰 로그·Actions artifact/cache 금지, 암호화상태도 private folder만. 요약은 항목수/상태만. 외부응답·자식stderr 미출력.
+- 복귀: 후보는 off/비등록. 코드 이전으로 되돌려도 기존기준사본 보존. chain최대16에서 중단, 자동회전/새full 정책 임의확정 없음.
+- 위험/완화: Drive에는 CAS가 없어 runner동시실행을 workflow concurrency로 직렬화하고 이력분기 발견시 중단; 외부수동 writer와의 강제배제는 보장하지 않음. 부모다운로드는 Drive에서 발생하며 Supabase 기존이미지 재전송은 억제.
+- 결정/게이트: 로컬 후보를 완성한 뒤 정확한코드/전송범위/새비밀설정/수동1회 영향으로 적용승인 요청; 이번에는 실행하지 않음.
+- 진행: 구현 전 현재 소스·확정결정·단일작업판 대조 완료. 결과/발견/완료보고는 이 절에 이어 기록한다.
+
+#### 주간 실행기 로컬 완료 보고
+1. 문서/소스: AGENTS, CODEX_START_HERE, 확정결정, PLANS, QA운영/변경보고, 기존00/01/02/03·백업증거, capture/prepare/package/Drive/증분 암호화·복원 소스/테스트를 대조했다. 이 절이 기존 ExecPlan 후속이다.
+2. 구현: capture/prepare/package의 기존 PC 기본값은 보존하고 portable 설정만 주입. run-weekly-backup·weekly-backup-state·unpack-weekly-parent와 baseline pin을 추가했다. Drive 다운로드는 private folder/원격hash/stream길이/hash/재조회, 부모 ZIP은 AES-GCM/manifest까지 검증한다. 변경없음은 이전이미지참조, DB/journal은 최신 사본에 포함.
+3. 상태/장애: 암호화 append-only intent에는 업로드ID/내용hash/부모결속, commit에는 확정chain을 기록한다. 완성ZIP 뒤 응답/commit손실은 새 실행에서 중복0 복구; 전송 미완료는 자동덮어쓰기 없이 중단. Drive CAS 부재는 workflow 직렬화·분기거부로 제한하며 별도수동writer/이력suffix삭제에 대한 전역잠금/rollback방어를 과장하지 않는다.
+4. 실제 로컬 검증: 관련 Node57개(17+12+1+15+8+4, 중복실행 제외)·Python 모의DB명령2 PASS. 합성 실제128KB 부모이미지를 다시 넣지 않아 delta15KB미만, 삭제이미지 재등장0, SHA256/AES-GCM 손상·잘못된manifest·공유폴더 거부. YAML 구조검사/manual-only·preflight network0·git diff --check PASS. 실제PG/GitHub실행/Drive전송은 이번0이며 이전 실제OAuth PASS와 구분한다.
+5. 독립 후보: 운영 원격master199613b(ls-remote 일치)를 부모로 로컬 d668723bc5321018079b0a74b247ac7b0793ed74 생성. 변경13파일은 tools 백업경로와 수동workflow만; 검증한 소스15개 Git blob SHA256 일치. 앱/src/api/DBmigration/Public변경0. 후보브랜치는 codex/weekly-backup-release-20261011 로컬만. 현재 작업브랜치에서 문서·테스트와 함께 보관한다.
+6. 환경/대안: PostgreSQL17 이미지/checkout/setup-node는 공식 registry/API로 digest/commit 고정. GitHub 임시컨테이너에 python3-cryptography(기존 도구와 같은 암호화 라이브러리)를 설치하는 후보이며 설치 실행0·앱 의존변경0. PC/WSL 예약 대안은 사용자 제외 조건 때문에 사용하지 않는다. 후보 삭제/활성변수off로 원복 가능, 사본삭제/자동회전0.
+7. 외부변경/개인정보: 이번 credential전송/운영접속/업로드/예약0. future runner는 DB·서버이미지를 GitHub 임시환경에서 처리해 암호화 ZIP/상태만 Drive에 쓴다. 평문·키/토큰 artifacts/cache/logs0, 정상종료 임시dir 정리. 전체DB+새변경이미지64MB 상한은 유지. 이전표지는 Supabase에서 다시 받지 않지만 Drive부모ZIP(첫회 약920MB)→GitHub 다운로드는 발생한다.
+8. 잔여/다음승인: 정확한 d668723의 backup-only master Git 반영(자동 Vercel 빌드 가능, 앱소스불변), moemoa-backup 환경의 운영DB URL/Storage key/CA/복구키 저장, 운영DB/변경이미지 수동1회 capture·Drive 암호화delta/state 추가를 승인받은 뒤 적용한다. 주간cron/키독립보관/실제외부회수복구는 아직 미완료. 자동회전·유료변경·Public 활성은 포함하지 않는다.
+공식 실행환경 참고: https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/run-jobs-in-a-container , https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency .

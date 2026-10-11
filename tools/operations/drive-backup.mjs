@@ -32,9 +32,21 @@ export function createDriveBackupClient(token,request=fetch){
   if(r.status===404)return null;return json(r);
  };
  const folder=async id=>{const f=await get(id);if(!f||f.id!==id||f.mimeType!=='application/vnd.google-apps.folder'||!privateOwned(f)||f.capabilities?.canAddChildren!==true)failure('DRIVE_PRIVATE_FOLDER_REQUIRED');return f;};
- const matches=(f,a,id)=>f&&f.id===id&&f.name===a.name&&privateOwned(f)&&f.mimeType==='application/zip'&&Array.isArray(f.parents)&&f.parents.length===1&&f.parents[0]===a.folderId&&String(f.size)===String(a.bytes)&&f.sha256Checksum===a.sha256;
+ const matches=(f,a,id)=>f&&f.id===id&&f.name===a.name&&privateOwned(f)&&['application/zip','application/x-zip-compressed'].includes(f.mimeType)&&Array.isArray(f.parents)&&f.parents.length===1&&f.parents[0]===a.folderId&&String(f.size)===String(a.bytes)&&f.sha256Checksum===a.sha256;
  const verify=async(a,id)=>{const f=await get(id);if(!matches(f,a,id))failure('DRIVE_REMOTE_NOT_VERIFIED');return {status:'REMOTE_METADATA_SHA256_VERIFIED',fileId:id,bytes:a.bytes,sha256:a.sha256,externalDownloadVerified:false};};
- return {checkFolder:folder,
+ return {checkFolder:folder, getMetadata:get, verifyArtifact:verify,
+  async reserveId(){const d=await json(await call(request,API+'/drive/v3/files/generateIds?count=1&space=drive&type=files',{headers}));if(d.ids?.length!==1||!ID.test(d.ids[0]))failure('DRIVE_ID_INVALID');return d.ids[0];},
+  async download({artifact:a,fileId,path}){
+   if(!a||!ID.test(a.folderId)||!HASH.test(a.sha256)||!Number.isSafeInteger(a.bytes)||a.bytes<1||a.bytes>1300000000)failure('DRIVE_ARTIFACT_INVALID');
+   await folder(a.folderId);await verify(a,fileId);
+   const r=await call(request,API+'/drive/v3/files/'+fileId+'?alt=media',{headers});
+   if(!r.ok||!r.body){await r.body?.cancel();failure('DRIVE_DOWNLOAD_FAILED');}
+   const h=await open(path,'wx',0o600),reader=r.body.getReader(),sha=createHash('sha256');let bytes=0;
+   try{while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.length;if(bytes>a.bytes)failure('DRIVE_DOWNLOAD_LIMIT');sha.update(value);let offset=0;while(offset<value.length){const w=await h.write(value,offset,value.length-offset);if(!w.bytesWritten)failure('DRIVE_DOWNLOAD_WRITE');offset+=w.bytesWritten;}}
+    if(bytes!==a.bytes||sha.digest('hex')!==a.sha256)failure('DRIVE_DOWNLOAD_HASH');
+   }finally{await reader.cancel().catch(()=>{});await h.close();}
+   await verify(a,fileId);return {status:'DOWNLOADED_SHA256_VERIFIED',bytes};
+  },
   async upload({artifact,journalPath}){
    const a=artifact;
    if(!a||!ID.test(a.folderId)||!HASH.test(a.sha256)||!Number.isSafeInteger(a.bytes)||a.bytes<1||a.bytes>1300000000||!/^moemoa-[a-zA-Z0-9-]+[.]encrypted[.]zip$/.test(a.name)||basename(a.path)!==a.name)failure('DRIVE_ARTIFACT_INVALID');

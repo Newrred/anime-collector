@@ -1,6 +1,6 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
-> **2026-10-11 W17/D05 Drive 인증 연결 완료:** 전용 moemoa-backup-drive·drive.file의 실제 Google 동의/지정2항목 선택·token교환/갱신 PASS. 기존 비공개 백업 폴더와 10/11 ZIP metadata200·920077441 bytes/SHA256 기록 일치 확인(파일 다운로드/복원 재검증 아님). 승인된 GitHub moemoa-backup 환경에 Drive Secret2·변수2 저장201 및 readback200, master만 허용. 이번 업로드/주간예약/DB·복구키 이동/운영변경0. 과거 로컬 OAuth8·Drive13·증분56 PASS 보존. 다음1개: 주간 증분 runner의 GitHub 실행환경 이식·부모사본 검증/상태보존을 로컬 후보로 마감.
+> **2026-10-11 W17/D05 주간 실행기 로컬 후보 완료:** 고정 PC 경로를 분리하고 Drive 부모ZIP SHA256/AES-GCM/manifest 검증→증분 준비→암호화 intent/commit 연결. 합성 기존128KB 이미지 재저장 없이15KB 미만 delta·삭제이미지 제외 복원·업로드 직후 중단 재개(중복0) PASS. 관련 Node57개/명령계약 Python2개·비활성 workflow 구조 PASS(합성/모의, 실제GitHub/운영 실행 아님). 백업파일만 운영199613b 위에 얹은 로컬 후보 d668723; 운영/master 불변. Drive인증은 이전 실제완료, DB/Storage/복구키 이동·수동전송·예약은 미실행. 다음1개: 정확한 d668723 수동1회 후보 및 지정GitHub 비밀설정 승인.
 
 
 > **2026-10-11 W17/D05 Drive 인증 연결 진행:** 후보1d55357의 전용 Drive OAuth·GitHub 인증 저장을 사용자 승인. GitHub moemoa-backup 환경 생성200·master branch만 허용 readback200·Secret0 확인. Chrome moemoa-backup-drive 생성 폼(127.0.0.1:4387 반환) 준비, 새 인증정보 생성/JSON 다운로드는 사용자 조작 대기. OAuth/파일 접근·Secret 저장 완료 아님. 운영DB/Public/master·로그인클라이언트·백업파일 불변, 업로드/예약0. 다음1개: 전용 JSON 확보 후 직접 Google 동의→Drive 인증만 지정환경 저장.

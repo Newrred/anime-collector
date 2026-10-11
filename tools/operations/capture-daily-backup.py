@@ -13,9 +13,10 @@ import select
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = ROOT / '.cache/operations-private'
-PSQL = '/usr/lib/postgresql/16/bin/psql'
-DUMP = '/opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/pg_dump'
+PORTABLE = os.environ.get('MOEMOA_BACKUP_PORTABLE') == 'true'
+BASE = Path(os.environ['MOEMOA_BACKUP_WORK_ROOT']) if PORTABLE else ROOT / '.cache/operations-private'
+PSQL = 'psql' if PORTABLE else '/usr/lib/postgresql/16/bin/psql'
+DUMP = 'pg_dump' if PORTABLE else '/opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/pg_dump'
 INVENTORY = """select coalesce(jsonb_agg(jsonb_build_object(
  'bucket',bucket_id,'name',name,'id',id,'version',to_jsonb(o)->>'version',
  'updatedAt',updated_at,'bytes',(metadata->>'size')::bigint,'etag',metadata->>'eTag')
@@ -27,7 +28,11 @@ ROLES = """select jsonb_build_object(
 def connection():
  spec=importlib.util.spec_from_file_location('retention',ROOT/'tools/operations/inspect-retention.py')
  mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
- env=mod.connection('production')
+ env=mod.connection_parameters(os.environ,'production') if PORTABLE else mod.connection('production')
+ if PORTABLE:
+  ca=Path(os.environ['MOEMOA_BACKUP_CA_FILE'])
+  if not ca.is_file() or ca.is_symlink() or not env.get('PGPASSWORD'):raise ValueError('PORTABLE_CONNECTION_INVALID')
+  env['PGSSLROOTCERT']=str(ca.resolve())
  env['PGOPTIONS']='-c default_transaction_read_only=on -c statement_timeout=600000 -c lock_timeout=5000'
  return env
 

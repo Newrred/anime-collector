@@ -1,0 +1,12 @@
+{
+  "fileId": "1QD15UnNTXbE-Eutt_dMKIhc4uumwiS1J",
+  "folderId": "1nxgXQ2ioUYFAQCWz-FscLcdcdUGFIRwa",
+  "name": "moemoa-production-20261011-02.encrypted.zip",
+  "bytes": 920077441,
+  "sha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+  "manifestSha256": "8cb03d3868f952a7cdcad817e6805c683aa4da8ee3020818cb3398fcfa1a5d87",
+  "context": {
+    "project": "okchpyagfucpzpyrfgol",
+    "release": "MOEMOA_DAILY_BACKUP_20261011-02"
+  }
+}

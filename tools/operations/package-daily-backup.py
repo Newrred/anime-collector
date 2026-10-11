@@ -5,6 +5,7 @@ No Drive upload, scheduling, original/key copy or retention deletion.
 import argparse
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import zipfile
@@ -35,5 +36,7 @@ def package(run_id, *, work_root=None, key_file=None):
 
 if __name__=='__main__':
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run-id',required=True);a=p.parse_args()
- try:print(json.dumps(package(a.run_id)))
+ try:
+  portable=os.environ.get('MOEMOA_BACKUP_PORTABLE')=='true'
+  print(json.dumps(package(a.run_id,work_root=os.environ['MOEMOA_BACKUP_WORK_ROOT'] if portable else None,key_file=os.environ['MOEMOA_BACKUP_KEY_FILE'] if portable else None)))
  except Exception:print(json.dumps({'error':'LOCAL_BACKUP_PACKAGE_FAILED','readyForUpload':False}));raise SystemExit(1)

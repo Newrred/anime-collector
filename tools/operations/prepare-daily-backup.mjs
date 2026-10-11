@@ -66,15 +66,25 @@ async function measure(path){
  }finally{await h.close();}
 }
 async function verifyRemote(runId){
+ if(process.env.MOEMOA_BACKUP_PORTABLE==='true'){
+  const result=await new Promise(done=>execFile('python3',['-B',resolve(root,'tools/operations/capture-daily-backup.py'),'--run-id',runId,'--mode','verify'],{windowsHide:true,timeout:60000,maxBuffer:2048},(e,stdout)=>done({e,stdout})));
+  if(result.e||JSON.parse(result.stdout).storageUnchanged!==true)throw Error('STORAGE_RECHECK_FAILED');return;
+ }
  const result=await new Promise(resolveResult=>execFile('wsl.exe',['--','python3','-B','/mnt/e/web/anime/tools/operations/capture-daily-backup.py','--run-id',runId,'--mode','verify'],{windowsHide:true,timeout:60000,maxBuffer:2048},(e,stdout)=>resolveResult({e,stdout})));
  if(result.e)throw Error('STORAGE_RECHECK_FAILED');
  if(JSON.parse(result.stdout).storageUnchanged!==true)throw Error('STORAGE_CHANGED');
 }
-export async function prepare(runId,mode,previous){
+export async function prepare(runId,mode,previous,options={}){
  if(!/^[a-zA-Z0-9-]{1,60}$/.test(runId)||!['plan','encrypt','incremental'].includes(mode))throw Error('INVALID_ARGS');
  if(mode==='incremental'&&(!Array.isArray(previous)||!previous.length))throw Error('BASE_CHAIN_REQUIRED');
- const work=resolve(root,'.cache/operations-private/daily-backup-'+runId);
- const previousCache=await selectCache(work);
+ const portable=process.env.MOEMOA_BACKUP_PORTABLE==='true';
+ const workRoot=options.workRoot??(portable?process.env.MOEMOA_BACKUP_WORK_ROOT:resolve(root,'.cache/operations-private'));
+ const selectedKey=options.keyFile??(portable?process.env.MOEMOA_BACKUP_KEY_FILE:keyFile);
+ if(!workRoot||!selectedKey)throw Error('PORTABLE_CONFIG_REQUIRED');
+ const work=resolve(workRoot,'daily-backup-'+runId);
+ const previousCache=options.cachePath??(portable?process.env.MOEMOA_BACKUP_CACHE_PATH:await selectCache(work));
+ if(!previousCache)throw Error('VERIFIED_CACHE_REQUIRED');
+ const recheck=options.verifyRemote??verifyRemote;
  const proof=JSON.parse(await readFile(resolve(previousCache,'VERIFIED_BYTES_ONLY.json'),'utf8'));
  if(proof.allSha256AndLengthsMatch!==true)throw Error('UNVERIFIED_CACHE');
  const prior=JSON.parse(await readFile(resolve(previousCache,'payload/storage-download-result.json'),'utf8'));
@@ -101,7 +111,7 @@ export async function prepare(runId,mode,previous){
   if(capture.databaseDumpCreated!==true)throw Error('CAPTURE_OR_OBJECTS_MISSING');
   if(report.newDownloadBytes>64000000)throw Error('NEW_DOWNLOAD_BUDGET');
   if(missing.length){
-   const env=parseEnv(await readFile(resolve(root,'.env.moemoaprod.server.local'),'utf8'));
+   const env=options.storageEnv??(portable?process.env:parseEnv(await readFile(resolve(root,'.env.moemoaprod.server.local'),'utf8')));
    await mkdir(resolve(work,'objects'),{recursive:false,mode:0o700});
    for(const row of missing){
     const file='objects/'+String(row.index).padStart(5,'0')+'.bin',path=resolve(work,file);
@@ -111,11 +121,11 @@ export async function prepare(runId,mode,previous){
   }
   const dump=await measure(resolve(work,'database.dump'));
   if(dump.bytes!==capture.dumpBytes||dump.sha256!==capture.dumpSha256)throw Error('DUMP_CHANGED');
-  await verifyRemote(runId);
+  await recheck(runId);
   await writeFile(resolve(work,'storage-download-result.json'),JSON.stringify({complete:true,done:chosen.length,bytes:report.bytes,objects:resultObjects}),{flag:'wx'});
   for(const name of ['database.dump','latest-journal.json','latest-public-state.json','roles.json','database-context.json','storage-inventory.json','capture-summary.json','storage-download-result.json']) files.push({name,path:resolve(work,name)});
-  const ks=await lstat(keyFile);if(!ks.isFile()||ks.isSymbolicLink()||ks.size>128)throw Error('KEY_FILE_INVALID');
-  const raw=(await readFile(keyFile,'utf8')).trim();if(!/^[a-fA-F0-9]{64}$/.test(raw))throw Error('KEY_FORMAT');
+  const ks=await lstat(selectedKey);if(!ks.isFile()||ks.isSymbolicLink()||ks.size>128)throw Error('KEY_FILE_INVALID');
+  const raw=(await readFile(selectedKey,'utf8')).trim();if(!/^[a-fA-F0-9]{64}$/.test(raw))throw Error('KEY_FORMAT');
   const key=Buffer.from(raw,'hex');
   const context={project:'okchpyagfucpzpyrfgol',release:'MOEMOA_DAILY_BACKUP_'+runId};
   try{
@@ -131,7 +141,7 @@ export async function prepare(runId,mode,previous){
     report.encryption=await createEncryptedBackup({files,output:resolve(work,'encrypted'),key,context});
     report.localByteVerification=await restoreEncryptedBackup({source:resolve(work,'encrypted'),output:resolve(work,'verify-quarantine'),key,context});
    }
-   await verifyRemote(runId);
+   await recheck(runId);
    report.status=mode==='incremental'?'LOCAL_INCREMENTAL_BYTES_VERIFIED':'LOCAL_ENCRYPTED_BYTES_VERIFIED';report.databaseRestoreThisRun=false;
    await writeFile(resolve(work,'READY_LOCAL_ONLY.json'),JSON.stringify({context,...report}),{flag:'wx'});
   }finally{key.fill(0);}

@@ -1,9 +1,9 @@
 {
-  "status": "DISABLED_CONNECTION_CANDIDATE",
-  "version": 1,
+  "status": "DISABLED_PORTABLE_RUNNER_LOCALLY_VERIFIED",
+  "version": 2,
   "policy": "RECOVERY-WEEKLY-RPO7D-20261011",
   "enabled": false,
-  "executorProposal": "GitHub Actions standard Linux on Newrred/anime-collector; protected environment moemoa-backup",
+  "executorProposal": "GitHub Actions ubuntu-24.04 with pinned PostgreSQL17 container, Node24.14.1 and Python cryptography; environment moemoa-backup",
   "productionBranch": "master",
   "proposedSchedule": {
     "local": "Sunday 03:00 Asia/Tokyo",
@@ -13,13 +13,14 @@
   "sourceScope": "Encrypted weekly delta ZIP; latest database/journals; changed image bodies only",
   "drive": {
     "scope": "https://www.googleapis.com/auth/drive.file",
-    "destination": "Existing MOEMOA encrypted backups private folder, explicit folder/file authorization required",
+    "destination": "Pinned existing private MOEMOA encrypted backups folder; see weekly-backup.baseline.json",
     "reuseProductionSigninClient": false,
     "overwrite": false,
     "delete": false,
     "share": false,
     "preGeneratedFileId": true,
-    "completion": "Folder privacy and remote SHA256 metadata match; actual download/authentication remains separate"
+    "completion": "Folder privacy and remote SHA256 metadata match; actual download/authentication remains separate",
+    "connectionVerified": true
   },
   "connectionNames": [
     "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
@@ -31,19 +32,19 @@
   "futureRunnerSecrets": {
     "destination": "GitHub environment moemoa-backup ONLY AFTER exact approval; no values provided",
     "needs": [
-      "Dedicated Drive OAuth credentials",
-      "Production read-only DB connection credentials and CA",
-      "Production Storage read credential",
+      "Production DB connection credential (commands read-only, TLS verify-full)",
+      "Production Storage read credential (existing service-role credential requires explicit transfer approval)",
+      "Supabase CA certificate",
       "Backup encryption key"
     ],
-    "configured": false
+    "configured": false,
+    "driveCredentialsConfigured": true
   },
   "futureRunnerRequirements": [
-    "Port fixed Windows/WSL capture, key and cache paths to isolated Linux configuration",
-    "Download and authenticate pinned encrypted parent archives; hydrate cache",
-    "Persist upload ID and committed chain pointer durably across runners",
-    "Never publish private files, tokens, or keys as Actions logs/artifacts/cache",
-    "Run one explicitly approved real backup/retrieval before installing weekly cron"
+    "Approve backup-only production-branch source plus manual workflow installation",
+    "Approve transfer of DB/Storage credentials and recovery key to moemoa-backup environment",
+    "Run one explicitly approved real capture/upload/retrieval before installing weekly cron",
+    "Preserve independent off-PC recovery key and all referenced parent ZIPs"
   ],
   "retention": {
     "enabled": false,
@@ -54,5 +55,64 @@
   "rollback": "Keep upload flag off; no cron installed; preserve prior archives; revoke dedicated OAuth grant if connected",
   "rpoHours": 168,
   "rtoHours": 24,
-  "achieved": false
+  "achieved": false,
+  "implementation": {
+    "runner": "tools/operations/run-weekly-backup.mjs",
+    "offlinePreflight": "node tools/operations/run-weekly-backup.mjs --preflight",
+    "manualCommand": "node tools/operations/run-weekly-backup.mjs --run",
+    "workflowTemplate": "tools/operations/weekly-backup.workflow.candidate.yml",
+    "workflowInstalled": false,
+    "gitSourceFiles": {
+      "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
+      "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
+      "tools/operations/weekly-backup.baseline.json": "e4aa2e0105c68fef36102606b12f0de8fe1b375137446934c9f6a5a0e876390c",
+      "tools/operations/prepare-daily-backup.mjs": "dc7cc4c54af7b3b81cdaedaf19d4be75995bdf7a21e332b31ee15b7fde0b516d",
+      "tools/operations/capture-daily-backup.py": "4c2806a9a16138c4bdc93bf231285a8de5ff25a3135281930fed3388c2e38aa7",
+      "tools/operations/package-daily-backup.py": "e044764d803dc2c61178edb1d63b5e0cb4862df371a22d326bd41fbb02da0ca9",
+      "tools/operations/unpack-weekly-parent.py": "3d1e75d4c56f5aac6bef2ae7938492b989ef92e245329e748435b7e777e2a462",
+      "tools/operations/incremental-backup.mjs": "f6981c621268adcecb4a41a08a1ccde1d96f50ef8b59b7acafc29fa9b8569538",
+      "tools/operations/drive-backup.mjs": "7ab5f14a537974b0857e20d1eb863e1ac87de5b5cf3da3cc57ec03ef62bf76a0",
+      "tools/operations/verify-external-backup.py": "4ea9fa5742c1843f41b987f9bdfa6492712b4b9fbe3daa9e01565f3e3352627a",
+      "tools/operations/inspect-retention.py": "86a673bf0f32570f76942f68dd8cf9a46a674915f05bc6e6d02add0b190a5f8f",
+      "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+      "tools/private-images/encrypted-backup.mjs": "a08684808d1148db49b0d0bae48454f47e11ea9c422bdcea6ec7063d1d0eefa8",
+      "tools/private-images/capture-recovery-journal.sql": "203a5e93dde4b7a2cffa52721f45fd2bf5eab1900286e9c3c975dec4eec172cd",
+      "tools/operations/weekly-backup.workflow.candidate.yml": "c831663cd5dadb163df54de4fa375c95992b9b72ee291ad84d7efc1809073b8a"
+    },
+    "encryptedAppendOnlyState": true,
+    "completedUploadRestartVerified": "synthetic",
+    "incompleteUpload": "fail closed; explicit operator recovery required",
+    "concurrency": "single moemoa-production-backup group, cancel-in-progress false; ledger forks rejected",
+    "antiRollbackLimitation": "A malicious deletion of the ledger suffix cannot be detected without an independent anchor",
+    "newStorageBodyBudgetBytes": 64000000,
+    "parentDownloads": "Drive encrypted parents only; unchanged Supabase image GETs excluded",
+    "newArchiveMaxBytes": 1300000000,
+    "localTests": {
+      "nodeDistinct": 57,
+      "python": 2,
+      "workflowStructure": 1
+    },
+    "actualGitHubBackupExecuted": false,
+    "localReleaseCandidate": {
+      "base": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+      "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "branch": "refs/heads/codex/weekly-backup-release-20261011",
+      "changed": [
+        ".github/workflows/moemoa-weekly-backup.yml",
+        "tools/operations/capture-daily-backup.py",
+        "tools/operations/capture-public-recovery-state.sql",
+        "tools/operations/drive-backup.mjs",
+        "tools/operations/incremental-backup.mjs",
+        "tools/operations/package-daily-backup.py",
+        "tools/operations/prepare-daily-backup.mjs",
+        "tools/operations/run-weekly-backup.mjs",
+        "tools/operations/unpack-weekly-parent.py",
+        "tools/operations/verify-external-backup.py",
+        "tools/operations/weekly-backup-state.mjs",
+        "tools/operations/weekly-backup.baseline.json",
+        "tools/private-images/capture-recovery-journal.sql"
+      ],
+      "pushed": false
+    }
+  }
 }
