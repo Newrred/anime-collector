@@ -2056,3 +2056,20 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실행: wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종38 PASS(기존25+신규13); node --test tests/unit/publicCapacity.test.mjs 7 PASS(기존6+신규1). 초기 AUTH_REQUIRED는 새psql세션 serviceclaim없는fixture였고 수정후통과. git diff --check 및JSONparse/산술검사. 과거2fbc phone-testCI38127347170 SUCCESS, workingbranch38127115769 cancelled를이번조회; 이번신규CI/hosted PASS아님.
 7. 실제동작/영향: 격리DB 실제2000번째허용/2001번째거부,400B full·42B thumb정확차감,64MB+1차단/요청수원자복귀,UTC이월,기본dryrun·롤백시사용량보존,다른정책/Public보존,baseline/pause/activeoverride/drift거부 PASS. 경보정확80%경계 PASS. 신규hosted/사용자게시행동PASS0. 비밀값/실사진/가입/권리/요금/외부발송 변경0.
 8. 잔여/다음1개: **정확한 후보를test의두quota와sized flag에만임시적용→실제차감/차단집계→원복**. 사용자가10/11정한정확한대상승인조건에따라 적용전확인. 원격활성/최종운영배포는미실행. D03 전체DONE로표시하지않고 운영자실수신·W19/D06 최종실제전달/철회와운영승인을유지한다. 과거PASS/실행로그보존, 추가Safari/기초DB/A·B복원반복0.
+
+[2026-10-11 승인] 사용자 후보a6b6dda test두quota·phone-test sizedflag 임시 적용/실제차감·차단검증/원복 승인. 기존조건을재확인하고 승인된SQL고정해시만 실행한다. 경계소진검사는hosted transaction ROLLBACK으로 기존사용량을보존하며 실제사본읽기2회소비는원복시환불하지않는다. 운영변경0.
+
+#### 승인 후보a6b6dda test 적용·검증 후속
+
+1. 문서/계획: 위W15/D03 17항과8항보고·승인범위·정확한Git SQL해시를재대조. 기존test연결검사와RPC/다운로드helper 재사용.
+2. 범위: 승인된test두quota·phone-testflag true/false만. 크기예약 migration이미존재,재적용0. 운영/master199613b/Public/권리정책은범위외.
+3. 파일: 제품코드변경0,기존00~03·capacity JSON에실행/원복증거추가. 실행wrapper .cache/public-budget-approved.py는Git a6b6dda의고정SQL+SHA256대조/검증된test TLS연결만사용; 값출력0.
+4. DB: 두policy만enabled2000/64MB로적용,다른policy/Public설정/usage보존검사. 사본실제읽기로2/144소비. 초과시뮬레이션은table lock·rollback transaction으로영속사용량보존. 원복뒤독립조회disabled/0·usage2/144및설정hash일치.
+5. 명령: wsl.exe -- python3 .cache/public-budget-approved.py inspect/apply/rollback 각각exit0; node .cache/probe-sized-delivery.mjs exit0; wsl.exe -- python3 .cache/public-budget-boundary.py probe exit0. hosted요청2000허용/2001거부·64MB허용/+1거부·요청차감원자적복귀,실제관측1600/51.2MB확인. 기존capacity evaluator로두임계경보확인; 알림전송0/수신미검증. 과거로컬38/7과구분.
+6. 배포: git push origin a6b6ddaaadf9487f5f8f3b14064cb794b27826c0:refs/heads/codex/phone-test 성공. Vercel Previewflag=true 저장→977hdPVfu7Jnzn78aexsfN9najdj Ready/source/canonicalalias일치. flag=false 저장·동일Git소스재배포진행; 완료는아래별도기록. 새 앱HTTP이미지/429/철회는미검증이며기존브라우저차단을반복우회하지않음.
+7. 영향: hostedStorage206/24×30WebP/hash실제확인,UI게시행동PASS0/대리동의0. test기존storagebudgetoff로관측UNGUARDED도정직하게보존. 공개설정/원본/개인정보/키/결제/운영발송변경0.
+8. 다음1개: **검증한크기예약·2000/64MB·경보조건을D06최종운영후보변경목록에결속**. W15의실제수신및W19최종배포이미지전달/철회잔여는유지,이미확인된DB/스토리지계약반복없음.
+
+[2026-10-11 18:45 JST] 원복 확인 완료: DB 두quota disabled/0·실제사용량2/144 보존. Preview codex/phone-test sizedflag=false 저장 후 동일a6b6dda 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready·source·canonicalalias 일치. 이전immutable true배포삭제/모두비활성주장0. 증거 .cache/public-budget-flag-restored.png. 기존 운영master199613b·Public·요금미변경. 이번 실행5문서를작업브랜치에commit/push해인계한다.
+
+- CI 후속: 승인a6b6dda의 phone-test38129338217·workingbranch38129221751은최종조회시IN_PROGRESS, 전체SUCCESS를선기록하지않는다. Vercel Ready와CI전체는별도다.

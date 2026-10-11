@@ -18,7 +18,7 @@
 
 Vercel Hobby 공식 포함량은 전송100GB/origin10GB/함수1M이다. 본 후보의 허용 이미지 요청은32일64,000회지만 **차단·인증실패·다른 API 호출도 함수 사용량**이라 호출 전체 상한으로 주장하지 않는다. 전역quota는 WAF나 사용자별 공평 배분이 아니다. [공식](https://vercel.com/docs/plans/hobby). 기존 무료/비상업 범위와D04 공급자 조건 잔여를 본 전송 계산으로 해결했다고 표시하지 않는다.
 
-실행파일: tools/operations/public-delivery-budget-candidate.sql 및 rollback.sql. 기본 dry-run ROLLBACK, 승인 후 psql apply_delivery_budget=true만 COMMIT. baseline 두행 disabled/0/unpaused 및 active global override 없음이 전제, 변경되면 중단. 새migration0, usage/live_limit/다른정책/Public 보존. 롤백도 정확한후보 일치 검사, 소비량 환불0. 운영 중 원복할 때는 Public reads를 먼저 끄고quota해제; test는 기존비활성 유지.
+실행파일: tools/operations/public-delivery-budget-candidate.sql 및 rollback.sql. 기본 dry-run ROLLBACK, 승인 후 psql apply_delivery_budget=true만 COMMIT. baseline 두행 disabled/0/unpaused 및 active global override 없음이 전제, 변경되면 중단. 새migration0, usage/live_limit/다른정책/Public 보존. 롤백도 정확한후보 일치 검사, 소비량 환불0. 운영 중 원복할 때는 Public reads를 먼저 끄고quota해제; test는 승인 전 quota 상태 복귀.
 
 이번 격리PG38 PASS(기존25+후보13), 경보unit7 PASS(기존6+신규1). 초기 새psql세션 claim누락 AUTH_REQUIRED를 fixture에서수정; 제품권한완화0. 과거phone-test2fbc CI38127347170 전체SUCCESS를 이번read-only조회로확인; simple branch동일SHA CI38127115769 cancelled. 이번hosted 신규PASS0/원격변경0. **다음1개: 이 후보의 test 두quota 임시 적용·sized flag 활성·실제 차감/차단 관측 후 두설정 원복.** 실제경보수신/최종배포 이미지 전달·철회 및 운영 D06은 별도 잔여.
 
@@ -911,3 +911,8 @@ Mock는 빠른 회귀의 도구다. Q05~Q07, Q09, Q12~Q14, Q16~Q22는 해당 권
 사용 범위: DB 백업과 Storage 객체 본문의 복구 차이. 현재 계정의 구독·복원 가용성을 확인한 것은 아님.
 
 Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구현 작업 시 현재 문서를 다시 확인하되, 사용하지 않는 신기능/변경사항을 새 필수 작업으로 만들지 않는다. 이 계획은 API 전체·공급자 설정·법적 정책을 재감사한 문서가 아니다.
+
+
+### W15/D03 위 초기 한도 후보의 승인 test 실행 후속 · 2026-10-11
+
+사용자a6b6dda승인 후moemoa-test의기존disabled/0에서2000/64MB임시적용. 실제RPC+Storage2종각72B/hash/decode와2GET/144B영속차감,hosted transaction rollback-only 초과거부/원자적소비/관측집계 PASS. 1600/51.2MB 실제서버집계를로컬기존평가기에서경보판정. test의기존public storage budget off 때문에 PUBLIC_BUDGET_UNGUARDED도발생했으며추가활성하지않음. 운영상태로오인금지. 두quota는disabled/0으로원복하고실제소비2/144보존. phone-testflag=true 배포977hd Ready/source·alias확인, false원복후재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias확인. 실제배포handler HTTP429/이미지/철회·알림수신은이번PASS아님. 설정2행과flag만변경, 새migration/이미지/원본/권한/운영변경0.

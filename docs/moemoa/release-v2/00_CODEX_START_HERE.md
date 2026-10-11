@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D03 전송 한도 test 검증:** 승인a6b6dda의 전역2,000GET/64MB 두정책 적용, 실제 hosted RPC/Storage full·thumb 각72B 다운로드 및2회/144B 차감 확인. hosted rollback-only 요청2000/2001·64MB/+1·원자적차단 PASS. 실제 집계의80% 경보 판정 PASS(로컬 evaluator, 발송/수신 아님). DB두한도disabled/0 원복·2회/144B 사용량보존·Public/다른정책보존. phone-test true 배포977hd Ready/source·alias 확인, false 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias 확인. 운영/master199613b 유지. 다음1개 최종 운영 후보에 전송한도 변경목록 결속; deployed image HTTP/실제경보수신은 잔여.
+
+
 > **2026-10-11 W15/D03 초기 전송 예산 후보 준비:** 전역2,000GET/UTC일·64,000,000B/일, 80%경보1,600회/51.2MB. 작은 합성full20장 기준82~100화면/일·큰noise3화면(실사용예측 아님). 기본dry-run 적용/원복SQL과격리PG38(신규13)·unit7(신규1) PASS. 소비량/Public/원본보존. test/prod 한도·flag 변경0. 다음1개 정확한후보 test 임시적용/차감·차단확인/원복 승인; 운영D06/실제알림수신 잔여.
 
 

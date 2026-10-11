@@ -974,5 +974,278 @@
       "actual operator alert receipt",
       "D06 exact production approval"
     ]
+  },
+  "initialPublicDeliveryBudgetExecution": {
+    "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "approved": true,
+    "releaseId": "MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01",
+    "target": "moemoa-test + codex/phone-test",
+    "applied": {
+      "target": "moemoa-test",
+      "mode": "apply",
+      "before": {
+        "usage": null,
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "after": {
+        "usage": null,
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "preservedPublic": true,
+      "preservedOtherPolicies": true,
+      "preservedUsage": true
+    },
+    "downloads": {
+      "mode": "actual hosted RPC + actual Storage using production download helper locally; NOT deployed handler",
+      "rows": [
+        {
+          "variant": "full",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        },
+        {
+          "variant": "thumb",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        }
+      ]
+    },
+    "boundary": {
+      "target": "moemoa-test",
+      "mode": "hosted rollback-only boundary",
+      "rows": [
+        {
+          "requestAtLimit": true,
+          "byteNotChargedOnReject": true
+        },
+        {
+          "bytesAtLimit": true,
+          "requestIncrementAtomic": true
+        },
+        {
+          "alarmSnapshot": {
+            "fullBytes": 26636,
+            "observedAt": "2026-10-11T09:43:11.279543+00:00",
+            "thumbBytes": 8160,
+            "failedCount": 0,
+            "deliveryUsed": 1600,
+            "overdueCount": 0,
+            "readsEnabled": true,
+            "deliveryPaused": false,
+            "preparingCount": 0,
+            "deliveryEnabled": true,
+            "totalStoredBytes": 73464,
+            "deliveryBytesUsed": 51200000,
+            "publicStoredBytes": 34856,
+            "deliveryDailyLimit": 2000,
+            "invalidObjectCount": 0,
+            "privateStoredBytes": 38608,
+            "cleanupPendingCount": 0,
+            "deliveryBytesPaused": false,
+            "publicReservedBytes": 34796,
+            "deliveryBytesEnabled": true,
+            "privateReservedBytes": 38608,
+            "deliveryBytesDailyLimit": 64000000,
+            "publicStorageLimitBytes": 0,
+            "publicStorageBudgetEnabled": false
+          }
+        }
+      ],
+      "statePreserved": true,
+      "after": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      }
+    },
+    "alarms": {
+      "mode": "hosted snapshot -> local existing evaluator; no notification sent",
+      "alerts": [
+        "PUBLIC_BUDGET_UNGUARDED",
+        "PUBLIC_DAILY_REQUESTS_NEAR_LIMIT",
+        "PUBLIC_DAILY_RESERVED_BYTES_NEAR_LIMIT"
+      ]
+    },
+    "restored": {
+      "target": "moemoa-test",
+      "mode": "rollback",
+      "before": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "after": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "preservedPublic": true,
+      "preservedOtherPolicies": true,
+      "preservedUsage": true
+    },
+    "activePreview": {
+      "id": "977hdPVfu7Jnzn78aexsfN9najdj",
+      "ready": true,
+      "sourceVerified": true,
+      "canonicalAliasVerified": true
+    },
+    "restorePreview": {
+      "id": "9fCzHFkobV42UoFLCrcN1MNv4hKh",
+      "status": "READY",
+      "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+      "canonicalAliasVerified": true,
+      "flag": false,
+      "screenshot": ".cache/public-budget-flag-restored.png"
+    },
+    "newDeployedImageHandlerPass": false,
+    "newUserPublishingPass": false,
+    "productionChanges": 0,
+    "notes": [
+      "actual source Storage reads performed with local product helper and real test RPC",
+      "boundary used rollback-only transaction; persisted usage is exactly 2 requests / 144 bytes",
+      "PUBLIC_BUDGET_UNGUARDED from pre-existing test public storage budget disabled; preserved, not production state",
+      "no notification sent or receiver verification",
+      "old immutable true preview is not deleted"
+    ],
+    "completedAt": "2026-10-11T18:45:31+09:00"
   }
 }
