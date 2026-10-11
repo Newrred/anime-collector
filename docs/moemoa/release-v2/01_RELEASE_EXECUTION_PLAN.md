@@ -2007,3 +2007,20 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실제명령: node --test tests/unit/{sizedPublicDelivery,publicImages,publicViewerImage}.test.mjs 최종47/47 PASS(초기46 이후경합회귀1추가, 중복합산안함). node --test tests/unit/{publicCapacity,publicCapacityCli,privateObservation,privateMaintenance,publicCleanupMaintenance}.test.mjs 18/18 PASS. wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종25 SQL PASS(기존15+신규10). 초기SQL검사 실패3회: 새psql세션 pg_temp 함수없음→JS replace의달러문자변환→pause기존에러명 PUBLICATION_DISABLED 기대값불일치. 모두검사코드수정후통과, 앱권한을완화하지않음. node --check api/public-image.js·git diff --check PASS. 전체브라우저/build 반복0, 서버GET변경의직접HTTP/DB검사를수행.
 7. 실제행동/보안/관측: 로컬HTTP 공개/ownerpreview/운영자preview/인증viewer4경로·합성Storage206→방문자24×30 WebP decode·429한도·초과/압축/변조차단·다운로드중철회404·flagoff2MiB경로 PASS. 실제계정/hosted/실기기 새PASS0. 크기·hash는 서버DB에서결속, header/path/key원문출력0. 기존관측/원자적한도 재사용, 새유료/발송/운영설정 변경0. 과거운영199613b CI38126124037 전체SUCCESS를 이번읽기로확인했다.
 8. 다음1개/정확한승인후실행: 이 후보를 moemoa-test에 migration1개로추가하고 codex/phone-test GitPreview에배포, 해당Preview의새flag만잠시true로 실제Storage합성사본 full/thumb 전달 확인 후false복귀. 기존권리/공개정책/한도/가입/원본/운영은변경하지않는다. 정상요청수/byte한도활성 및최종운영승인은별도. 새 test변경에대한10/11 정확한후보승인조건을 따른다.
+
+### 2026-10-11 정확한 테스트 후보 승인 및 실행
+
+사용자가 후보 `2fbc14a`의 migration `20261011180000` + phone-test 배포 + 새 sized-delivery flag 임시 활성/원복을 승인했다. 위 17항 계획을 그대로 실행한다. 기존 정책·한도·원본·운영은 변경하지 않는다. 고정 test 연결과 source hash를 검사하는 적용 runner에 이 후보만 추가하고, 12개 기존 데이터/정책 테이블 해시를 transaction 안에서 보존 검증한다. RPC 권한/독립 readback → Git phone-test 배포 → 실제 합성 사본 다운로드 → flag false 재배포 순서. 실패 시 설정을 먼저 원복하고 hosted PASS를 만들지 않는다.
+
+### W15/D03 크기 예약 test 적용 — 이번 실행 8항 보고
+
+1. **읽은 근거:** CODEX_START_HERE, 최상위01 확정결정, PLANS, 기존release-v2/00~03 및 같은 W15 ExecPlan, apply-test-public-capacity.py/test-capacity-apply.py, migration20261011180000, handler/backend/boundedDownload, 기존10/11 first-public/capacity 증거.
+2. **가정·미결:** 사용자 승인2fbc14a의 test-only 범위. 기존 합성카드038b2ec0의24×30 사본만 사용. IMAGE_DELIVERY/IMAGE_DELIVERY_BYTES는 기존 disabled 유지. 배포 handler 이미지 성공/활성한도 차감은 이번 PASS가 아니다.
+3. **계획:** 위 기존 W15 17항 ExecPlan의 승인·적용·Storage확인·flag원복 순서. 새작업판 없음.
+4. **파일:** 적용runner에 --sized-delivery 고정해시 후보/상호배타 옵션/readback 추가, safety test1개 추가(기존5+신규1). 제품 코드는 후보2fbc14a 그대로. 00/01/02/03 최신절과 capacity JSON 갱신, 과거로그 보존.
+5. **DB·롤백:** MOEMOA_SIZED_DELIVERY_TEST_20261011_01, migration20261011180000 hash80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70. 단일transaction 기존12테이블 hash보존, migration1개, postgres/service_role EXECUTE만 독립확인. RPC는 additive로 남기고 flag=false가 기존2MiB 경로로 돌아가는 방법.
+6. **실제명령·결과:** WSL python3 tools/operations/test-capacity-apply.py 6 PASS(첫 문자열삽입 SyntaxError 수정 후 적용 전 통과); apply-test-public-capacity.py --sized-delivery read-only absent→--apply 성공→독립 read-only present. git push origin 2fbc14a78ae3df75b3d608744661be4512ead515:refs/heads/codex/phone-test 성공; Vercel4owhUdT1nes1Z137zmso4mhr2EKA Ready/source/alias 확인. node .cache/probe-sized-delivery.mjs는 실제 test RPC + 실제 Storage를 현재 boundedDownload helper로 호출: full/thumb 각각 reserved72/actual72/206 Content-Range bytes0-71/72·hash·WebP24×30 PASS. 로컬47+18/SQL25는 지난 실행이며 재실행하지 않음.
+7. **보안·개인정보·권리·관측:** 공개상태/정책/한도/원본 변경0, 신규게시0/대리동의0, 운영/master199613b 그대로. 기존 source/identity/operation은 보존. 배포 UI에서 소유자 합성원본과 철회상태만 확인. 직접 이미지 API 탐색은 브라우저 ERR_BLOCKED_BY_CLIENT라 HTTP404나 전달 성공으로 환산하지 않음. 제한을 우회하지 않음.
+8. **잔여·다음:** 새 사용자 게시 행동 PASS0, hosted Storage 사본2종 PASS. W15/D03 정상 요청수·byte 예산과 실제 경보 수신 잔여; W19/D06 정확한 최종 배포의 실제전달/철회 미검증. 다음1개는 기존 D03의 정상공개 요청수·byte 예산 후보 마감. 운영반영은 해당 정확한 후보 승인 필요.
+
+[2026-10-11 18:16 JST] 원복 완료: Preview/codex/phone-test의 sized-delivery=false 저장 확인, 동일2fbc14a 재배포 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready·Source·canonical alias 확인. 이전 immutable true Preview를 삭제하거나 모두 off로 바꿨다는 의미는 아니다. 새사본/원본삭제/한도/정책/운영 변경0. 설정 증거 .cache/sized-delivery-test-restored.png.

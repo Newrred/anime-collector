@@ -61,6 +61,18 @@ class CapacityApplyTests(unittest.TestCase):
         self.assertNotIn(runner.OBSERVATION_RELEASE, sql)
         self.assertEqual(sql.count('EXISTING_DATA_CHANGED'), 12)
 
+    def test_sized_delivery_exact_scope(self):
+        code, conn, execute = self.invoke(['--sized-delivery', '--apply'])
+        self.assertEqual(code, 0)
+        conn.assert_called_once_with('test')
+        sql = execute.call_args.kwargs['input']
+        self.assertEqual(sql.count('insert into supabase_migrations.schema_migrations'), 1)
+        self.assertEqual(sql.count('EXISTING_DATA_CHANGED'), 12)
+        self.assertIn(runner.SIZED_RELEASE, sql)
+        self.assertNotIn('update private.', sql)
+        self.assertNotIn('delete from', sql)
+        self.assertTrue(sql.endswith('commit;'))
+
     def test_changed_candidate_stops_before_connection(self):
         with patch.object(runner, 'OBSERVATION_FILES', {'20261008090000_private_image_observation.sql': 'invalid'}):
             code, conn, execute = self.invoke(['--observation-dependency', '--apply'])

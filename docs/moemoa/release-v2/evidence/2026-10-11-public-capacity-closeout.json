@@ -114,7 +114,7 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Close D03 normal-public traffic/budget choice using current per-request 2MiB reservation, without silently enabling the 50GET/day provisional cap; production observation is deployed and verified.",
+  "next": "D03 normal-public request and byte budget candidate from actual derivative sizes; exact final deployment image/withdrawal path remains W19/D06",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -769,5 +769,124 @@
     ],
     "rollback": "flag false restores existing 2MiB path; additive RPC may remain",
     "next": "exact candidate test-only migration + phone-test flag temporarily true then restore; no limits or production changes"
+  },
+  "sizedDeliveryTestExecution": {
+    "date": "2026-10-11",
+    "approvedSource": "2fbc14a78ae3df75b3d608744661be4512ead515",
+    "approval": "테스트 DB·배포 적용",
+    "target": "moemoa-test / codex/phone-test",
+    "release": "MOEMOA_SIZED_DELIVERY_TEST_20261011_01",
+    "migration": "20261011180000",
+    "migrationSha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70",
+    "applied": true,
+    "independentReadback": true,
+    "preservedTables": 12,
+    "executeGrants": [
+      "postgres",
+      "service_role"
+    ],
+    "anonymousAndAuthenticatedExecute": false,
+    "existingLimitsChanged": false,
+    "productionChanged": false,
+    "publicPolicyChanged": false,
+    "sourceImagesChanged": false,
+    "applicationCodeChangedThisTurn": false,
+    "runnerSafety": {
+      "command": "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test-capacity-apply.py",
+      "passed": 6,
+      "initialFailure": "Test insertion string escaping produced SyntaxError; fixed before apply, all 6 then passed"
+    },
+    "dbCommands": [
+      "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --sized-delivery",
+      "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --sized-delivery --apply",
+      "same read-only command on independent connection"
+    ],
+    "enabledDeployment": {
+      "id": "4owhUdT1nes1Z137zmso4mhr2EKA",
+      "url": "https://anime-collector-d9cx803wt-newrreds-projects.vercel.app",
+      "ready": true,
+      "sourceAndAliasVerified": true,
+      "gitPush": "git push origin 2fbc14a78ae3df75b3d608744661be4512ead515:refs/heads/codex/phone-test"
+    },
+    "hostedDownload": {
+      "mode": "actual hosted RPC + actual Storage using production download helper locally; NOT deployed handler",
+      "rows": [
+        {
+          "variant": "full",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        },
+        {
+          "variant": "thumb",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        }
+      ]
+    },
+    "hostedCommand": "node .cache/probe-sized-delivery.mjs",
+    "deployedHandler": {
+      "imagePass": false,
+      "ownerOriginalVisible": true,
+      "existingSyntheticBoardWithdrawn": true,
+      "directNavigation": "ERR_BLOCKED_BY_CLIENT; no HTTP status inferred",
+      "republished": false,
+      "scope": "No fresh publication or delegated consent"
+    },
+    "quotaCounterPass": false,
+    "quotaReason": "Existing IMAGE_DELIVERY and IMAGE_DELIVERY_BYTES policies disabled; left unchanged",
+    "restoration": {
+      "flag": "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED",
+      "savedValue": false,
+      "environment": "Preview / codex/phone-test only",
+      "deployment": "GVvgy4Zgd1nKLgbbpBxKA18PAMec",
+      "ready": true,
+      "source": "2fbc14a78ae3df75b3d608744661be4512ead515",
+      "screenshot": ".cache/sized-delivery-test-restored.png",
+      "immutablePriorPreviewMayRetainTrue": true,
+      "sourceAndAliasVerified": true,
+      "url": "https://anime-collector-kwcbvlbg1-newrreds-projects.vercel.app"
+    },
+    "newUserPublicationBehaviorPass": 0,
+    "next": "D03 normal-public request and byte budget candidate from actual derivative sizes; exact final deployment image/withdrawal path remains W19/D06",
+    "ci": [
+      {
+        "id": 38127347170,
+        "name": "Service quality",
+        "branch": "codex/phone-test",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 38127115769,
+        "name": "Service quality",
+        "branch": "codex/simple-signup-preview",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
   }
 }

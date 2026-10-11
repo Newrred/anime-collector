@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-11 W15/D03 크기 기반 전송 예약 로컬 후보:** 요청당2MiB 고정 차감 대신 기존DB의 READY 사본/variant/path/hash에 결속된 크기로 예약하는 service-only 함수1개와 bounded Range 다운로드를 준비했다. 새flag 기본off. 이미지/HTTP47·관측18·격리SQL25(신규10) PASS, 실제로컬24×30 decode/철회·초과·변조차단 확인. 운영199613b CI38126124037 전체SUCCESS 후속확인. 실제 Supabase 응답·정상한도/알림수신은 미검증. 다음1개: 정확한 후보의 test DB/phone-test 임시flag 적용 승인 후 실제 Storage 전달 확인·원복. 운영/한도/Public 변경0.
+> **2026-10-11 W15/D03 크기 예약 test 적용:** 승인 후보2fbc14a의 DB20261011180000 적용·독립 readback·12테이블 보존, service-only 권한 확인. phone-test Git 배포4owh Ready/source·alias 일치. 실제 hosted RPC→Storage Range206 full/thumb 각각72B·24×30 WebP·hash 일치 PASS(제품 다운로드 helper를 로컬 실행). 배포 handler 이미지 PASS는 아님: 기존 합성 보드 철회 상태/직접 API 브라우저 차단. 새 게시·약관 대신 수락·한도 변경0. 새flag=false 원복 저장→동일소스 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready/source·alias 일치 확인. 과거 로컬47+18/SQL25와 이번 runner6·hosted2를 구분. 다음1개 D03 정상공개 요청수·byte 예산 후보 마감; W19/D06 최종 후보 실제전달/철회 잔여.
 
 
 > **현재 완료도:** 기존 W20개 중 DONE4·VERIFY9·DOING4·외부조건2·부분 운영반영1. 구현률20%라는 뜻이 아니다. 주요 Public 사용자 왕복은 test에서 확인했고 운영은 개인기능/가입/관측 적용·Public off다. 정확한 잔여는 [단일 작업판의 현재 완료도](03_RELEASE_WORKBOARD.md#2026-10-11-현재-완료도--최신-증거-기준)를 따른다. 아래 날짜별 실행 로그의 과거 다음 작업을 재실행하지 않는다.
