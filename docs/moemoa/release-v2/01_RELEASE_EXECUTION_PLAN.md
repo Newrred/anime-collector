@@ -118,6 +118,16 @@ M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operati
 7. 안전/관측: 현재 사건만 조치, 과거 사건/원본 삭제0. 사유는 합성시험이라고 명시. 기존 계정·권리·정책/쿼터 보존, 토큰/개인본문 일반로그0. 익명차단은 UI에서 확인한 범위만 기재하고 캐시 회수를 보장하지 않는다.
 8. 잔여/다음1개: CI38113872143 SQL계약 success/verify failure — 기존 desktop-image-input.spec.ts:226의 body paste가 false. 직전38113213200 cancelled. 로컬 단일 재현1 PASS, node scripts/run-desktop-image-e2e.mjs 동일 묶음51/51 PASS(exit0, 단일은 중복 합산 안 함). 두 시도에서 재현되지 않아 타이밍 문제로 단정하거나 제품을 추측 수정하지 않는다. 원격 실패 기록은 유지한다. 다음1개는 이 CI 입력 실패 원인 확인/최소 보완. 직접 이미지 철회HTTP, 최종 D03~D06·운영 승인은 별도 잔여.
 
+
+### 2026-10-11 W19 — CI 붙여넣기 실패 좁히기
+
+- 목적/범위: 기존 desktop-image-input:226 실패를 실제 이미지 관리 열림/붙여넣기 이벤트 경계에서 재현한다. 로컬 단독/묶음 PASS만으로 원격 실패를 닫지 않는다. 현재 MemoryCardDetail의 native details→지연 toggle→React active→paste listener 경계를 검사한다.
+- 확인한 결함: isolatedE2eServer는 ../.moemoa-ui-test-results/test-results에 trace를 쓰지만 quality.yml은 test-results만 업로드해 CI38113872143 artifacts가0이다. 고정 경로만 보완하며 일반 로그·비밀파일 업로드 금지.
+- 순서/완료조건: 즉시 펼침/붙여넣기 회귀를 추가해 실패 증명→실제 controlling source 최소수정→닫힘/다른탭/계정 경계와 기존 입력 묶음 확인→같은 후보 CI 결과. 단순 sleep/retry로 실패를 숨기지 않는다.
+- 파일/데이터/안전: MemoryCardDetail/useImageFileTransfer와 desktop-image-input 및 quality.yml만 필요에 따라 수정. DB/원격설정/공개범위/의존성 변경0, 합성 이미지/모의계정만. 소스 revert로 복귀; 실폰/OS 클립보드/운영 PASS와 분리. phone-test/운영 신규 반영은 기존 정확한 후보 승인 범위와 대조한다. 결과는 본 절·기존 작업판에 기록한다.
+
+- 실행 증거: 새 회귀는 수정 전 open=true/accepted=false로 FAIL(exit1), summary onClick에서 default native toggle을 막고 React state로 visibility/input activation을 함께 갱신한 후2 PASS. Enter/Space 전환까지 넣은 관련 전체52/52 PASS(exit0). 기존 입력 훅·원본 저장·동기화 변경0. CI 실패가 관찰한 같은 누락 증상을 재현했지만 과거 trace는 업로드 경로 오류로 없어 과거 실행의 타임라인을 재구성했다고 주장하지 않는다.
+
 ### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
 
 1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.

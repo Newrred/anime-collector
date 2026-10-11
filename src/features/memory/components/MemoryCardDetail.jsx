@@ -414,7 +414,12 @@ function MemoryCardDetailContent({ base }) {
           </section>
           <section id="memory-detail-panel-manage" role="tabpanel" aria-labelledby="memory-detail-tab-manage" hidden={state.detailTab !== "manage"}>
           <MemorySharingSettings card={bundle.card} locale={locale} base={base} disabled={status !== "ready"} />
-          <details className="memory-detail__tools" open={state.imageToolsOpen} onToggle={event => { if (event.currentTarget.open !== state.imageToolsOpen) updateState({ imageToolsOpen: event.currentTarget.open }); }}><summary>{locale === "ko" ? "이미지 변경·관리" : "Change and manage image"}</summary>
+          <details className="memory-detail__tools" open={state.imageToolsOpen} onToggle={event => { if (event.currentTarget.open !== state.imageToolsOpen) updateState({ imageToolsOpen: event.currentTarget.open }); }}><summary onClick={event => {
+            // Native details opens before its queued toggle event. Commit visibility
+            // and input activation together so the first paste is not lost.
+            event.preventDefault();
+            updateState({ imageToolsOpen: !state.imageToolsOpen });
+          }}>{locale === "ko" ? "이미지 변경·관리" : "Change and manage image"}</summary>
             <MemoryPrivateImageSync key={`${bundle.asset.id}:${bundle.asset.sync?.remoteVersion}:${state.photoSyncRevision}`} runtime={runtime} bundle={bundle} locale={locale}
               hasLocalPreview={Boolean(previewDataUrl)} disabled={!['ready', 'private-sync'].includes(status)} onPreview={onPrivatePreview} onBusyChange={onPrivateBusy} />
             {auth.loading ? null : !auth.user ? <div className="memory-detail__replacement"><p>{locale === "ko" ? "로그인한 뒤 이 기기의 카드를 계정으로 가져오면 사진을 추가할 수 있어요." : "After signing in, import this device's card to your account before adding a photo."}</p><button type="button" className="btn btn--subtle" disabled={!auth.configured} onClick={() => auth.signIn(`${base}data/`)}>{locale === "ko" ? "로그인하고 카드 가져오기" : "Sign in and import card"}</button></div>

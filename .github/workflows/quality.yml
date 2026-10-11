@@ -78,7 +78,11 @@ jobs:
         if: failure()
         with:
           name: browser-failure-evidence
-          path: test-results
+          # Isolated UI runners write beside the checkout; keep only test artifacts.
+          path: |
+            test-results
+            ../.moemoa-ui-test-results/test-results
+          include-hidden-files: true
           retention-days: 7
 # Production is deployed only by the connected Vercel Git integration.
 # This workflow does not deploy; requiring this check before merging is a repo setting.

@@ -721,5 +721,48 @@
       }
     },
     "followup": "Investigate the CI-only desktop paste failure; no speculative product patch after two local attempts passed."
+  },
+  "desktopPasteCiFollowup": {
+    "scope": "Existing W19 CI regression; no DB or production changes",
+    "originalFailure": {
+      "run": 38113872143,
+      "file": "tests/desktop-image-input.spec.ts",
+      "line": 226,
+      "expected": true,
+      "received": false,
+      "artifacts": 0
+    },
+    "reproduction": {
+      "command": "node scripts/run-desktop-image-e2e.mjs --grep \"image management accepts the first paste\"",
+      "before": {
+        "exit": 1,
+        "open": true,
+        "accepted": false
+      },
+      "explanation": "Native details opens immediately; React input activation awaited queued toggle. Synthetic browser next-input boundary reproduces the same lost paste symptom."
+    },
+    "changes": [
+      "MemoryCardDetail summary click commits open state and input activation together",
+      "quality workflow includes isolated runner failure artifact directory",
+      "desktop image regression checks immediate open/close and keyboard activation"
+    ],
+    "afterTargeted": {
+      "command": "node scripts/run-desktop-image-e2e.mjs --grep \"image management accepts the first paste|only visible image management\"",
+      "passed": 2,
+      "exit": 0
+    },
+    "remoteVerification": "pending",
+    "localSuite": {
+      "command": "node scripts/run-desktop-image-e2e.mjs",
+      "passed": 52,
+      "exit": 0,
+      "includesTargetedRetests": true
+    },
+    "build": {
+      "command": "node node_modules/astro/astro.js build",
+      "pages": 32,
+      "result": "Complete! build log"
+    },
+    "diffCheck": "pass"
   }
 }
