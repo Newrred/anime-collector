@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
+
+
 > **2026-10-11 W15/D03 운영 관측 후보 준비 완료:** 운영1878867에 관측 관련10파일만 얹은 독립 후보199613b(로컬 codex/production-observation-20261011), unit18·격리PG15·diff 검사 PASS. 기존 운영 maintenance38115426850 실제 성공, 운영집계856,441,465B/Public off/전송한도off 확인. 새 공개집계RPC1개+관측설정+master Git 배포는 미승인·미실행. 무료100MiB/50GET/day는20장 기준2.5방문/day여서 출시규모 확정 아님. 다음1개: 정확한 후보199613b 운영 관측만 적용 승인 후 실제 HTTP/workflow 확인. 상세는 기존01의 W15 후보 보고와 evidence/2026-10-11-public-capacity-closeout.json.
 
 

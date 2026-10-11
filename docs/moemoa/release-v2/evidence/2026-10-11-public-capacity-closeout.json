@@ -106,16 +106,15 @@
     }
   ],
   "notVerified": [
-    "deployed observe HTTP integration",
     "actual operator notification receipt",
-    "production budget/config/activation"
+    "production public delivery budget and Public activation"
   ],
   "priorEvidence": {
     "ci": "38119402749",
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "Obtain exact production observation-only approval for 199613b; apply migration20261011160000, new observation config and master Git deployment, then observation-only endpoint/workflow verification. Public activation and delivery budget remain separate decisions.",
+  "next": "Close D03 normal-public traffic/budget choice using current per-request 2MiB reservation, without silently enabling the 50GET/day provisional cap; production observation is deployed and verified.",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -357,9 +356,9 @@
     "candidateBranch": "codex/production-observation-20261011",
     "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
     "selectedFrom": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
-    "localOnly": true,
-    "approved": false,
-    "productionApplied": false,
+    "localOnly": false,
+    "approved": true,
+    "productionApplied": true,
     "files": [
       {
         "path": ".github/workflows/private-image-cleanup.yml",
@@ -499,5 +498,172 @@
       "automaticExternalMessages": false
     },
     "rollback": "Set new public observation flags false in Vercel/GitHub and redeploy via Git; preserve existing private observation, additive RPC/history and all image data. Revert candidate code only if needed."
+  },
+  "productionObservationExecution": {
+    "release": "MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01",
+    "source": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "migration": "20261011160000",
+    "migrationSha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601",
+    "applied": true,
+    "independentReadback": {
+      "publicOff": true,
+      "migrations": [
+        "20260819021327",
+        "20260819021408",
+        "20260902054107",
+        "20260902054119",
+        "20260902054132",
+        "20260902055512",
+        "20260902055852",
+        "20260903141500",
+        "20260907193000",
+        "20260923090000",
+        "20260923093000",
+        "20260923182210",
+        "20260923183940",
+        "20260923192300",
+        "20260923213901",
+        "20260924115258",
+        "20260924121214",
+        "20260924193626",
+        "20260924194059",
+        "20260924195510",
+        "20260925152858",
+        "20260925152859",
+        "20260925164126",
+        "20260926140122",
+        "20260927042334",
+        "20260927044435",
+        "20261005090000",
+        "20261007093000",
+        "20261008090000",
+        "20261008093000",
+        "20261009090000",
+        "20261009130000",
+        "20261009143000",
+        "20261010103000",
+        "20261010170000",
+        "20261010180000",
+        "20261010190000",
+        "20261011160000"
+      ],
+      "observedAt": "2026-10-11T08:49:23.990013+00:00",
+      "anonExecute": false,
+      "publicPolicy": {
+        "enabled": true,
+        "limitBytes": 20971520
+      },
+      "privatePolicy": {
+        "paused": false,
+        "enabled": true,
+        "approved": true,
+        "physicalBytes": 100000000,
+        "readLimitBytes": 500000000
+      },
+      "serviceExecute": true,
+      "authenticatedExecute": false,
+      "publicSecurityDefiner": true,
+      "publicObservationExists": true,
+      "privateObservationExists": true,
+      "activeGlobalDeliveryOverrides": 0
+    },
+    "vercel": {
+      "id": "Q3xJiujuoDyJ9V8JuyaDpVcVEq5a",
+      "ready": true,
+      "environment": "Production",
+      "gitSourceVerified": true,
+      "domain": "www.moemoa.xyz",
+      "buildInfo": {
+        "commit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "checkoutCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "source": "vercel-git",
+        "semanticMatch": true,
+        "builtAt": "2026-10-11T08:49:08.420Z",
+        "workingTreeDirty": true
+      },
+      "screenshotLocal": ".cache/production-observation-ready-199613b.jpg"
+    },
+    "config": {
+      "vercelProduction": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true"
+      },
+      "githubVariables": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true",
+        "MOEMOA_TOTAL_STORAGE_ALERT_BYTES": "980000000"
+      },
+      "previousValues": "absent",
+      "existingCredentialsReused": true,
+      "maintenanceSecretReadOrCopied": false,
+      "githubGitCredentialUsedInMemory": true
+    },
+    "unauthenticatedHttp": {
+      "status": 401,
+      "cacheControl": "no-store",
+      "error": "AUTH_REQUIRED"
+    },
+    "manualWorkflow": {
+      "id": 38126188717,
+      "job": 114430939190,
+      "event": "workflow_dispatch",
+      "conclusion": "success",
+      "source": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+      "phoneTestJob": "skipped",
+      "result": {
+        "deleted": null,
+        "cleanupSkipped": true,
+        "cleanupFailed": false,
+        "publicDeleted": null,
+        "publicCleanupSkipped": true,
+        "publicCleanupFailed": false,
+        "publicCapacity": {
+          "observedAt": "2026-10-11T08:50:02.717Z",
+          "totalStoredBytes": 856441465,
+          "privateStoredBytes": 454464,
+          "publicStoredBytes": 0,
+          "privateReservedBytes": 454464,
+          "invalidObjectCount": 0,
+          "publicReservedBytes": 0,
+          "fullBytes": 0,
+          "thumbBytes": 0,
+          "preparingCount": 0,
+          "failedCount": 0,
+          "cleanupPendingCount": 0,
+          "overdueCount": 0,
+          "publicStorageLimitBytes": 20971520,
+          "deliveryDailyLimit": 0,
+          "deliveryUsed": 0,
+          "deliveryBytesDailyLimit": 0,
+          "deliveryBytesUsed": 0,
+          "publicStorageBudgetEnabled": true,
+          "readsEnabled": false,
+          "deliveryEnabled": false,
+          "deliveryPaused": false,
+          "deliveryBytesEnabled": false,
+          "deliveryBytesPaused": false,
+          "publicStorageBytes": 0,
+          "totalReservedOrStoredBytes": 856441465,
+          "totalStorageAlertBytes": 980000000,
+          "alerts": []
+        },
+        "observedAt": "2026-10-11T08:50:02.540Z",
+        "storageBytes": 454464,
+        "readBytes": 1054194,
+        "storageAlertBytes": 80000000,
+        "readAlertBytes": 400000000,
+        "alerts": []
+      }
+    },
+    "newPublicDeployedHttpVerified": true,
+    "actualOperatorNotificationReceipt": false,
+    "alertTriggered": false,
+    "publicActivation": false,
+    "quotaChanged": false,
+    "imagesDeleted": 0,
+    "newUserBehaviorPasses": 0,
+    "qualityCi": {
+      "id": 38126124037,
+      "status": "in_progress",
+      "conclusion": null
+    }
   }
 }

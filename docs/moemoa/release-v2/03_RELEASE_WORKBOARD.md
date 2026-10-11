@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
+
+
 > **2026-10-11 W15/D03 운영 관측 후보 준비 완료:** 운영1878867에 관측 관련10파일만 얹은 독립 후보199613b(로컬 codex/production-observation-20261011), unit18·격리PG15·diff 검사 PASS. 기존 운영 maintenance38115426850 실제 성공, 운영집계856,441,465B/Public off/전송한도off 확인. 새 공개집계RPC1개+관측설정+master Git 배포는 미승인·미실행. 무료100MiB/50GET/day는20장 기준2.5방문/day여서 출시규모 확정 아님. 다음1개: 정확한 후보199613b 운영 관측만 적용 승인 후 실제 HTTP/workflow 확인. 상세는 기존01의 W15 후보 보고와 evidence/2026-10-11-public-capacity-closeout.json.
 
 
@@ -721,7 +724,7 @@
 | W12 | M3 | 팔로우·해제·내 목록 | C07 | W07/W11 로컬 검증 | VERIFY | 실제 B 팔로우→내 목록→재방문·차단→해제 후 팔로우 미복원 PASS. 최종 관계 false/false. 만료·동시 기기 조합 잔여 |
 | W13 | M3 | 공유 링크·로그인 복귀·재방문 | C06,C07,C11 | W11, W12 로컬 검증 | VERIFY | 10/11 현재 보드→home·팔로우/재방문·가입오류복귀 모의API UI PASS. 10/11 새 B 직접 가입·Google 내부복귀·명시follow/내 목록 재방문 hosted PASS. R0925-U01 수정·실제 보드→공개 작성자 미니홈→B 팔로우/재방문 PASS. 공개 home ID/닉네임만 전달하며 숨김 링크 null PASS. 로그인 거절/만료·공개 복귀 잔여 |
 | W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | 10/11 실제 신고/차단/해제 PASS. 일반신고 처리 UI 누락 발견→기존 RPC 연결 로컬후보 9개UI PASS/DB0; 9746a30 test반영·실제 HIDE/RESTORE/통지/감사·카드 비공개 전환 PASS. 기존 hosted 근거 보존.9/27 신고 없는 공개본 검토·MATURE/BLOCKED 본문/이미지 차단·동일 대상 제목 수정/재게시 거부·성인 공개 불가 통지를 로컬 SQL/기존 browser로 검증. 새 정책 hosted D01/운영 인수 D04, 다른 게시물/동일 이미지 전역 차단 범위는 별도이며 전체 완료 아님; 10/10 기존 계정 가입 확인 연결 후보 SQL15/Chromium4 PASS, hosted 미적용 |
-| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 이전 test RPC·원복/CI 증거 보존. 이번 운영기준 독립 관측199613b unit18·격리PG15 PASS/10파일; 운영기존 maintenance38115426850 실제 성공. 새 운영RPC/설정/배포 미승인. Preview HTTP SSO302·실제수신·전송한도는 잔여 |
+| W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | DOING | 승인199613b 운영집계RPC·설정·master/Vercel/www SHA 확인. 수동관측38126188717 SUCCESS/856,441,465B/public0/삭제호출0·무인증401. 관측경로 완료, 실제알림수신·정상공개규모/전송한도 잔여 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | BLOCKED_EXTERNAL | catalog/전환 로컬 검사 근거 유지. 실제 canonical·표지 파일·작은 후보 승인 게시→복구와 설정/담당 인계 D05/D06 잔여. 기초 DB 연결 재구축 없음 |
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | DOING | 10/10 외부 Drive 사본 SHA 일치·격리4308파일 인증/해시/크기 복구 PASS, dump 목차 읽기 PASS. 별도 키 미보관 사용자 확인. 실제 DB import/최신 삭제 대조·회전/복구 목표·경보 수신 잔여. 과거72table·사진12 decode 증거 보존, 전체 운영 복구 PASS 아님 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
@@ -937,10 +940,10 @@ NA 이유:
 |---|---|---|---|---|---|
 | D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_RECEIPT_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A 현재receipt1 | 기존20261010160000 test 적용/이력 보존. 직전 guard=false 원복; 이번 미니홈 검사에 기존 승인으로 guard=true 재활성, 인계 전 --restore/false 확인. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | 사용자 9/25 확정. Android는 Web 출시·개선 후 후속; 코드 보존/첫 후보 NOT_APPLICABLE. Web 검사·D03~D06 유지 | 최종 후보에 승인 evidence·HEAD 결속 필요 | evidence/2026-09-25-d02-web-only.json / RELEASE-CHANNEL-WEB-FIRST-01 |
-| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRODUCTION_OBSERVATION_CANDIDATE_READY | Free 유지·private100MB/월500MB·공개20MiB. 운영856,441,465B·활성global override0·전송off. 관측199613b 로컬18/SQL15 PASS·980MB/공개80% 경보 후보 | 기존 운영작업 성공은 신규 공개관측/알림수신 PASS 아님. 100MiB/50GET 하루 후보는20장 기준2.5방문에 불과, 자동 확정 금지. 운영 적용 승인·신규HTTP/실수신·정상규모/전송한도 잔여 | evidence/2026-10-11-public-capacity-closeout.json |
+| D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / PRODUCTION_OBSERVATION_VERIFIED | Free 유지/private100MB·월500MB/public20MiB. 운영199613b 실제관측38126188717 정상·980MB 경보설정 적용. Public·전송off 유지 | 임계초과없어 알림실수신미검증. 잠정50GET/day=20장기준2.5방문/day, 자동확정금지. 정상공개규모·전송한도잔여. 이전provider/test증거보존 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. Public 권리/청소년 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | EXTERNAL_BYTES_VERIFIED / RESTORE_PARTIAL | 10/10 Drive 유래 ZIP 원본 SHA 일치, 새 quarantine4308파일/917,084,869bytes AES-GCM·SHA/크기 PASS. 복원 dump PG17 목차 읽기 PASS. 과거 로컬 사진12 decode와 구분 | 사용자: 키 별도 보관 안 함. 전체 DB import/최신 삭제 대조·회전/RPO/RTO·canonical 완전성 미완료. 로컬 pg_cron/supabase_vault 부재, Windows Node rename EPERM 미해결. 운영 변경0 | evidence/2026-10-10-external-backup-recovery.json |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | PRODUCTION_1878867 / PUBLIC_OFF / OBSERVATION_199613b_PENDING | 현재 운영master1878867·기존 가입 KR14/US13/TH13·Public off 유지. 과거 가입/실제 UI 증거는 기존 보고 보존 | 이번 정확한 독립후보199613b 관측10파일+20261011160000 RPC+Vercel public-observe/GitHub observe·980MB 설정, 공개/한도/가입 변경0. 명시 승인 전 운영DB/master push/배포/workflow 실행0. 전체 Public 출시는 별도 | evidence/2026-10-11-public-capacity-closeout.json |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | OBSERVATION_199613b_APPLIED / PUBLIC_OFF | 사용자정확한승인199613b master/Git Vercel Q3xJiujuo Ready/www commit일치. DB PUBLIC_CAPACITY_PROD_20261011_01/관측설정3개·수동workflow38126188717 SUCCESS | 집계함수1개/관측만 운영반영; KR14/US13/TH13 가입·Public off/한도보존. 카드간편공개·신고UI 및 전체Public출시 승인은 별도 | evidence/2026-10-11-public-capacity-closeout.json |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 
