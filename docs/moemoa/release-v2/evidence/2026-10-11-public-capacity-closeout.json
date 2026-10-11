@@ -115,7 +115,7 @@
     "source": "895ccbb",
     "notRerun": true
   },
-  "next": "After user credential entry, redeploy existing phone-test 806b6b2, verify observe-only endpoint, restore temporary flags",
+  "next": "Prepare production D03/D06 candidate using existing production maintenance authentication; retain preview HTTP and operator notification receipt as unverified, do not repeat blocked requests",
   "approvedTestApplication": {
     "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
     "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
@@ -257,10 +257,98 @@
     "independentReadback": true,
     "migrationCount": 1,
     "privateObservationExists": true,
-    "previewConfigSaved": false,
-    "apiTested": false,
+    "previewConfigSaved": true,
+    "apiTested": true,
     "credentialFile": "C:/Users/hongs/.moemoa/test-observation-20261011.key",
     "credentialAcl": "hongs:F; SYSTEM:F; inheritance removed",
-    "waitingFor": "User enters new test-only credential and saves prepared Vercel form; browser credential handoff rule"
+    "waitingFor": null,
+    "apiPassed": false
+  },
+  "observationConnectionExecution": {
+    "date": "2026-10-11",
+    "approvedSource": "09e22fa",
+    "previewSource": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "enabledDeployment": {
+      "id": "6QpW4mwBT6k4cQ6pgnGz9vC7rojc",
+      "ready": true,
+      "sourceAndAliasVerified": true
+    },
+    "deployedHttp": {
+      "attempted": true,
+      "passed": false,
+      "status": 302,
+      "locationOrigin": "https://vercel.com/sso-api",
+      "reason": "Vercel deployment authentication precedes application bearer authentication",
+      "observeCliRan": false,
+      "authorization401Verified": false,
+      "cleanupRequests": 0
+    },
+    "hostedDatabaseAndLocalEvaluator": {
+      "mode": "real hosted public service-role RPC plus local alarm evaluator; not deployed observe API",
+      "target": "test",
+      "privateResult": {
+        "observedAt": "2026-10-11T08:30:00.204862+00:00",
+        "storedBytes": 38608,
+        "reservedBytes": 38608,
+        "globalReadBytes": 64864
+      },
+      "result": {
+        "observedAt": "2026-10-11T08:30:00.419Z",
+        "totalStoredBytes": 73464,
+        "privateStoredBytes": 38608,
+        "publicStoredBytes": 34856,
+        "privateReservedBytes": 38608,
+        "invalidObjectCount": 0,
+        "publicReservedBytes": 34796,
+        "fullBytes": 26636,
+        "thumbBytes": 8160,
+        "preparingCount": 0,
+        "failedCount": 0,
+        "cleanupPendingCount": 0,
+        "overdueCount": 0,
+        "publicStorageLimitBytes": 0,
+        "deliveryDailyLimit": 0,
+        "deliveryUsed": 0,
+        "deliveryBytesDailyLimit": 0,
+        "deliveryBytesUsed": 0,
+        "publicStorageBudgetEnabled": false,
+        "readsEnabled": true,
+        "deliveryEnabled": false,
+        "deliveryPaused": false,
+        "deliveryBytesEnabled": false,
+        "deliveryBytesPaused": false,
+        "publicStorageBytes": 34856,
+        "totalReservedOrStoredBytes": 73464,
+        "totalStorageAlertBytes": 980000000,
+        "alerts": [
+          "PUBLIC_BUDGET_UNGUARDED"
+        ]
+      }
+    },
+    "policyReadback": {
+      "observedAt": "2026-10-11T08:30:00.204862+00:00",
+      "enabled": true,
+      "approved": true,
+      "paused": false,
+      "physicalBytes": 41943040,
+      "readLimitBytes": 83886080
+    },
+    "rollback": {
+      "privateObserveFlag": false,
+      "publicObserveFlag": false,
+      "flagsSavedSuccessfully": true,
+      "deploymentId": "5LTK9cXFnGbNAcdkPfgjEsTNvBGe",
+      "deploymentUrl": "https://anime-collector-c772hgdqg-newrreds-projects.vercel.app",
+      "ready": true,
+      "sourceAndAliasVerified": true,
+      "runtimeDisabledResponseVerified": false,
+      "runtimeVerificationBlock": "Browser net::ERR_BLOCKED_BY_CLIENT on API URL; no bypass attempted",
+      "note": "Current phone-test alias rebuilt with flags false. Historical immutable deployment 6Qp remains; not claimed deleted or disabled. Existing Vercel protection and test bearer remain required."
+    },
+    "productionChanged": false,
+    "limitsChanged": false,
+    "imagesDeleted": 0,
+    "notificationsSent": 0,
+    "newUserBehaviorPasses": 0
   }
 }

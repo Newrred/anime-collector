@@ -178,6 +178,17 @@ additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한�
 - 브라우저 도구의 새 인증값 입력·저장 handoff 규칙에 따라 사용자 입력만 요청했다. 준비한 난수32bytes secret은 Git 밖 C:/Users/hongs/.moemoa/test-observation-20261011.key에 보관하고 icacls로 hongs/SYSTEM만 접근, 상속 제거 완료(exit0). 값은 채팅/로그/Git에 출력하지 않았다. 앞선 ‘파일에 기록하지 않음’ 계획은 사용자 복사 입력을 위해 이 보호된 로컬 파일 보관으로 좁게 수정한다.
 - 사용자 Save 후 동일806b6b2 Preview 재배포, 무인증401와 실제 maintenance OBSERVE_ONLY=true/공개경보 확인, 관측flags 제거/원복 및 동일소스 재배포까지 승인 범위 내에서 이어간다. .cache에 고정test alias·로컬 키파일·observe-only 실행을 준비했고 아직 실행0. 기존 삭제workflow를 호출하지 않는다. 실제 수신/운영 D03는 아직 미검증이다.
 
+#### 관측 연결 실행·원복 결과 · 2026-10-11 17:32 JST
+
+1. 읽음/계획: 위 승인된 W15/D03 관측 연결 절·시작문서/현재 작업판, api/private-image-observe.js·observationHandler·scripts/private-image-maintenance.mjs의 기존 실행계약을 따른다. 새 계획/제품 결정 없음.
+2. 실제 설정/배포: 사용자 새키 저장 후 Vercel UI에서4개 변수 모두 Preview/codex/phone-test 단독 확인. 동일 Git 소스806b6b2를 재배포한6QpW4mwBT6k4cQ6pgnGz9vC7rojc Ready·Source·alias 일치. 기본 Production 재배포 제안은 취소하고 정확한 test 상세에서 실행했다.
+3. 실제 실패/외부 경계: node .cache/run-hosted-capacity-observe.mjs →exit1, 첫 무인증 요청이401 대신302(Vercel SSO)로 끝나 유지 CLI는 미실행. 고정alias GET redirect:manual 진단에서302/location origin https://vercel.com/sso-api 확인. 관측 HTTP의 성공/실패를 앱 문제로 단정하지 않는다. 기존 저장소에 자동화용 protection 인증 연결 없음. 보호 해제·쿠키 추출·임의 인증우회 없이 해당 검사를 중단했다.
+4. 독립 hosted 확인: node .cache/probe-connected-capacity-rpc.mjs →exit0. 실제 test private RPC observedAt=2026-10-11T08:30:00.204862Z, 저장/예약38,608B·월read64,864B. 실제 public RPC 전체73,464B/공개34,856B·미정리0, 로컬 evaluator PUBLIC_BUDGET_UNGUARDED. 새 함수의 실제 호출 PASS이며 배포 API/CLI/알림 수신 PASS는 아니다. 과거 A/B·18unit/15SQL/6HTTP를 반복하지 않았다.
+5. DB/원복: --observation-dependency 독립 read-only 검사exit0/history1/function=true, observed_at가 위 실제 호출시각과 일치, enabled/approved=true·paused=false·physical40MiB/read80MiB 유지. 관측flags2개를 false로 저장하고 동일806b6b2 재배포5LTK9cXFnGbNAcdkPfgjEsTNvBGe Ready·Source/alias 일치. 저장 전 함수와 새 test 전용키/target은 보존. 원복 후 API 화면은 브라우저 net::ERR_BLOCKED_BY_CLIENT로 접근이 거부되어503 응답 자체는 미확인. 추가우회0. **현재alias의 false설정/재배포를 확인한 것이며 과거 immutable 배포6Qp의 삭제/비활성까지 주장하지 않는다.**
+6. 변경 파일/명령: 이번 앱 코드·SQL 추가수정0. 기존00/01/02/03·시작/evidence에 위 결과 갱신. git diff --check, 작업브랜치 commit/push로 기록한다. remote refs에서 master1878867·phone-test806b6b2 그대로 확인. 이전008263d는 이전 함수 설치/인계 기록이다.
+7. 안전/권리/관측: 운영·Public 범위·전송/quota 정책 변경0, 이미지/원본삭제0, cleanup endpoint 호출0, 메일/이슈/자동알림 발송0. 새키/사용자본문 로그0. test의 한도off 경보를 억지로 없애려 한도를 변경하지 않았다. 실제 사용자행동 신규PASS0.
+8. 미완료/다음1개: 배포 Preview의 자동 관측은 Vercel SSO 인증 경계 때문에 미확인, 실제 운영자 알림 수신과 운영 예산·Public 활성은 잔여다. 이 막힌 경로를 반복하기보다 **기존 운영 유지관리 인증 경로를 재사용하는 D03/D06 정확한 운영 후보 마감**으로 이어간다. 후보 준비만으로 운영 migration/master push/활성/알림 발송을 승인받았다고 해석하지 않는다.
+
 #### 비용·정상 규모의 구체적 한계
 
 - 공급자 실제 UI read-only 확인(2026-10-11): Supabase 조직 All projects/Free/9월24일~10월24일 uncached0.972/5GB·cached0.086/5GB·저장기간평균0.826/1GB·DB요약0.297/0.5GB, 초과없음. 평균/최대1시간 지연 값이므로 현재 SQL856,441,465B와 동일 지표로 취급하지 않는다. Vercel anime-collector Usage/최근30일9월11일01:00~10월11일01:00 Fast Data1.26/100GB·Origin4.34MB/10GB·함수390·CPU41s·memory0.15GBh. 다른프로젝트 합산 여유/무료 지속 보장 아님. 현재는 전송보다 저장 한도에 더 가깝다. 이 실측은 초기 공개 이후 트래픽 예측이 아니며100MiB/day 후보가 한 달 지속되어도 무료라는 뜻이 아니다.

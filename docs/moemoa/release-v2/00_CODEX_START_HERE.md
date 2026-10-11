@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-11 W15/D03 관측 연결 승인·DB 적용 완료:** 사용자09e22fa 후보 승인 후 test 기존20261008090000 설치·15테이블 보존·독립 history1/function 존재 확인. Vercel은 codex/phone-test만 대상으로4개 값 입력창 준비(아직 저장/재배포 전). 새 인증값은 브라우저 규칙에 따라 사용자 직접 입력 대기. 운영/master1878867·phone-test806b6b2 유지. 다음1개는 키 저장 후 동일Preview 재배포→실제 observe-only 검사→임시 flags 원복. 전체 경보/출시 PASS 아님.
+> **2026-10-11 W15/D03 테스트 관측 연결 실행·원복:** 승인된 함수1개/15테이블 보존은 이전 실행 완료. 이번 실제 private/public RPC 정상·전체73,464B·한도off 경보 판정 확인. Preview806b6b2 재배포6Qp Ready 후 자동관측은 Vercel SSO302에 막혀 HTTP/수신 PASS 아님. 관측flags2개=false 저장→동일소스5LTK9cXFnGbNAcdkPfgjEsTNvBGe Ready/alias 복구 확인(503직접 응답은 브라우저 차단으로 미확인). 운영·한도·원본삭제 변경0. 다음1개는 기존 운영 인증을 재사용하는 D03/D06 정확한 후보 마감.
 
 
 ## 2026-10-11 첫 Public 출시 마감 — 현재 진입점

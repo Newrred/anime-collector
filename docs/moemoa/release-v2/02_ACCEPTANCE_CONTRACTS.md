@@ -2,6 +2,8 @@
 
 ## 2026-10-11 W15/D03 관측 마감 계약
 
+- 17:32 JST 후속: 승인된 연결 적용 후 실제 private/public RPC와 로컬 경보 확인, Preview 자동 HTTP는 앱 전단 Vercel SSO302로 차단. flags2개=false 저장·같은806b6b2의5LTK Ready/alias 복구 확인; 브라우저 API 차단 때문에 원복503 직접응답과 실제 알림 수신은 미확인. 기존 아래404/인증설정 부재는 이전 상태다. 과거 immutable 배포까지 비활성이라고 주장하지 않는다.
+
 - 후속 연결 후보: 기존 private observation 함수 설치는 additive이며 호출은 policy.observed_at를 갱신한다. 함수를 읽기전용으로 오인하거나 기존 공개2개 승인에 추가migration을 묶지 않는다. test-only 인증/대상 설정 및 관측 flags만 허용 후보, cleanup·quota·운영 변화 제외. 로컬 적용도구5 PASS와 deployed HTTP/실제 운영자 수신은 구분한다. 동일806b6b2 CI38122228717 전체 SUCCESS 확인.
 
 - 저장량은 Storage 실제 bytes와 미완료/실패 예약 중 큰 값을 영역별로 합산한다. 물리 파일이 남으면 DELETED 메타데이터만으로0 처리하지 않는다. 크기 metadata 누락은 경보다. 관측 반환은 service-role 집계만이며 객체 경로/사용자/본문은 제외한다.
