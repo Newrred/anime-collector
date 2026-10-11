@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D03 초기 전송 예산 후보 준비:** 전역2,000GET/UTC일·64,000,000B/일, 80%경보1,600회/51.2MB. 작은 합성full20장 기준82~100화면/일·큰noise3화면(실사용예측 아님). 기본dry-run 적용/원복SQL과격리PG38(신규13)·unit7(신규1) PASS. 소비량/Public/원본보존. test/prod 한도·flag 변경0. 다음1개 정확한후보 test 임시적용/차감·차단확인/원복 승인; 운영D06/실제알림수신 잔여.
+
+
 > **2026-10-11 W15/D03 크기 예약 test 적용:** 승인 후보2fbc14a의 DB20261011180000 적용·독립 readback·12테이블 보존, service-only 권한 확인. phone-test Git 배포4owh Ready/source·alias 일치. 실제 hosted RPC→Storage Range206 full/thumb 각각72B·24×30 WebP·hash 일치 PASS(제품 다운로드 helper를 로컬 실행). 배포 handler 이미지 PASS는 아님: 기존 합성 보드 철회 상태/직접 API 브라우저 차단. 새 게시·약관 대신 수락·한도 변경0. 새flag=false 원복 저장→동일소스 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready/source·alias 일치 확인. 과거 로컬47+18/SQL25와 이번 runner6·hosted2를 구분. 다음1개 D03 정상공개 요청수·byte 예산 후보 마감; W19/D06 최종 후보 실제전달/철회 잔여.
 
 

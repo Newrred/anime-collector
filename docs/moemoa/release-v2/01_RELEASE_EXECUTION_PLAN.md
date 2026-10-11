@@ -2024,3 +2024,35 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. **잔여·다음:** 새 사용자 게시 행동 PASS0, hosted Storage 사본2종 PASS. W15/D03 정상 요청수·byte 예산과 실제 경보 수신 잔여; W19/D06 정확한 최종 배포의 실제전달/철회 미검증. 다음1개는 기존 D03의 정상공개 요청수·byte 예산 후보 마감. 운영반영은 해당 정확한 후보 승인 필요.
 
 [2026-10-11 18:16 JST] 원복 완료: Preview/codex/phone-test의 sized-delivery=false 저장 확인, 동일2fbc14a 재배포 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready·Source·canonical alias 확인. 이전 immutable true Preview를 삭제하거나 모두 off로 바꿨다는 의미는 아니다. 새사본/원본삭제/한도/정책/운영 변경0. 설정 증거 .cache/sized-delivery-test-restored.png.
+
+
+### W15/D03 무료 공개 전송 한도 마감 ExecPlan · 2026-10-11
+
+1. 목적: 기존 50GET/day 후보를 대체할 초기 소규모 전체공개 예산을 실행 가능한 설정 후보로 준비한다. 트래픽 규모가 미정이므로 무제한/일반 서비스 전체규모 충족을 주장하지 않는다.
+2. 확정 결정: 무료 유지, Public 운영 off, 정확한 test/prod 후보별 승인, Android/Safari 추가검사 제외 유지.
+3. 현재 근거: resource_controls.sql의 전역 요청·byte 원자적 소비, 20261011180000의 서버 사본 크기 예약, capacity.js 80% 경보, 기존 합성 full/thumb 측정과 실제 test Range206 근거.
+4. 범위: 2,000GET/day·64,000,000B/day 후보 SQL·기본 dry-run·조건부 원복·실제 격리PG 한도 경계 검사. 앱/UI/이미지 정책/공급자/원격 변경 제외.
+5. 흐름: sized-delivery 활성·정확한 배포 확인을 전제 → 현재 두 정책 disabled/0·pause/override 없음 확인 → 두 limit만 설정 → 관측·429 확인 → test 원복. 기존 권한 재검사/원본/공개 flag 유지.
+6. 파일: tools/operations/public-delivery-budget-{candidate,rollback,contract}.sql 및 기존 run-public-capacity-local.sh, 기존00~03와 capacity evidence.
+7. 데이터: 새 schema/migration 없음. 기존 정책2행만 승인 후 변경 가능; 사용량/counter/다른 정책은 보존. SQL 기본 ROLLBACK, 명시적 psql apply 변수에서만 COMMIT.
+8. 마일스톤: 설정·원복 guard 준비 → 실제 PG request/byte/UTC/override 경계·원복 보존 확인 → 산술·관측 후보와 단일 작업판 갱신.
+9. 검증: disposable PG runner, 기존 capacity evaluator의 정확한80% 경계, diff/JSON 검사. hosted/Google/Safari·기본DB 재시험 없음.
+10. 보안: global override가 있으면 중단, client bytes 불신·service-only 유지. 사진/키/본문 로그 없음.
+11. 관측: 1,600GET·51,200,000B에서 기존 경보. 6시간 관측은 즉시 알림/UTC reset 직전 검출을 보장하지 않음. 실제 수신 잔여 유지.
+12. 롤백: baseline disabled/0인 경우에만 적용. 후보와 일치하는 두 행만 disabled/0으로 복귀, live_limit·usage 보존. Public은 건드리지 않고 test 종료 시 flag false 복귀. 운영 장애에서 Public을 켠 채 한도부터 제거하지 않는다.
+13. 위험: DB/Auth/catalog/test/실패 응답과 공급자 과금은 별도. 31일 billing cycle과 UTC window 불일치에 대비32일분2.048GB+private 최대3달력월1.5GB, 나머지1.452GB는 다른 트래픽 여유이며 총과금 hard cap 아님. 큰 이미지20장은 하루3화면 정도일 수 있음. 전역한도는 사용자별 공평배분/DoS 방어 아님.
+14. 결정: 지금은 후보 준비 승인. 새 test 한도2행/flag 임시 변경 및 운영 적용은 정확한 후보 확인 후; 이미 승인한 크기RPC 재승인 요구 없음.
+15. 진행: 공식 Supabase 문서에서 uncached5GB/cached5GB 별도·조직/서비스 공유 확인. 초기2000/64MB 추천값 선택.
+16. 발견: 기존 public grid가 full 요청이므로 thumb 기준을 실제 방문량으로 계산하지 않는다. 합성3종은 사용자 분포가 아님.
+17. 완료 보고: 아래 실행 결과에 파일·실제 명령·PASS 범위·잔여·다음1개를 기록한다.
+
+#### W15/D03 초기 공개 한도 후보 — 이번 실행 8항 보고
+
+1. 문서/소스: mandatory AGENTS/start/확정결정/PLANS/QA07/변경09, 기존00~03·capacity JSON, resource_controls·private_image_boundary·sized SQL, handler/backend·capacity evaluator·로컬runner/계약을 대조했다. verify-before-claiming 적용.
+2. 가정/미결: 무료 초기 소규모 후보2000GET/64MB다. 합성사진 분포로 정상실사용 평균을 주장하지 않는다. 공급자와UTC reset 경계가 달라32daily/최대3calendar-month 구간으로 보수 계산. 실제알림수신/최종배포전달 잔여.
+3. 계획: 바로 위 기존 W15 17항. 새작업판/새W 없음.
+4. 변경: 적용·원복 SQL2개(기본dry-run, baseline/override/drift guard, lock5s/statement30s), 실제 DB 계약1개/기존runner에연결, 기존 publicCapacity unit1개. 기존00/01/02/03·capacity JSON 갱신. 앱동작/의존성/새인증 변경0.
+5. DB/복귀: 새schema/migration0/원격DB0. release ID MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01 후보. 승인 후에만 두정책enabled/daily_limit변경. 사용량/live_limit/원본/다른정책보존, 정확한후보만 원복 가능. 운영롤백은Public reads 먼저차단.
+6. 실행: wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종38 PASS(기존25+신규13); node --test tests/unit/publicCapacity.test.mjs 7 PASS(기존6+신규1). 초기 AUTH_REQUIRED는 새psql세션 serviceclaim없는fixture였고 수정후통과. git diff --check 및JSONparse/산술검사. 과거2fbc phone-testCI38127347170 SUCCESS, workingbranch38127115769 cancelled를이번조회; 이번신규CI/hosted PASS아님.
+7. 실제동작/영향: 격리DB 실제2000번째허용/2001번째거부,400B full·42B thumb정확차감,64MB+1차단/요청수원자복귀,UTC이월,기본dryrun·롤백시사용량보존,다른정책/Public보존,baseline/pause/activeoverride/drift거부 PASS. 경보정확80%경계 PASS. 신규hosted/사용자게시행동PASS0. 비밀값/실사진/가입/권리/요금/외부발송 변경0.
+8. 잔여/다음1개: **정확한 후보를test의두quota와sized flag에만임시적용→실제차감/차단집계→원복**. 사용자가10/11정한정확한대상승인조건에따라 적용전확인. 원격활성/최종운영배포는미실행. D03 전체DONE로표시하지않고 운영자실수신·W19/D06 최종실제전달/철회와운영승인을유지한다. 과거PASS/실행로그보존, 추가Safari/기초DB/A·B복원반복0.

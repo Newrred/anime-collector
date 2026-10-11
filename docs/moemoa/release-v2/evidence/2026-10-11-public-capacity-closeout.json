@@ -888,5 +888,91 @@
         "conclusion": null
       }
     ]
+  },
+  "initialPublicDeliveryBudgetCandidate": {
+    "date": "2026-10-11",
+    "status": "LOCAL_VERIFIED_NOT_APPLIED",
+    "releaseId": "MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01",
+    "dailyRequests": 2000,
+    "dailyReservedBytes": 64000000,
+    "reset": "UTC day; 09:00 KST/JST",
+    "scope": "global public image delivery including preview; not per-account",
+    "alarm": {
+      "requests": 1600,
+      "reservedBytes": 51200000,
+      "existingObservationIntervalHours": 6,
+      "actualReceiptVerified": false
+    },
+    "budget": {
+      "maxDailyWindowsPer31DayInterval": 32,
+      "publicReservedBytes": 2048000000,
+      "privateUtcCalendarMonthBudgetBytes": 500000000,
+      "conservativeCalendarMonthWindows": 3,
+      "conservativePrivateBytes": 1500000000,
+      "combinedImageReservationsBytes": 3548000000,
+      "uncachedProviderAllowanceBytes": 5000000000,
+      "otherTrafficHeadroomBytes": 1452000000,
+      "totalProviderUsageEnforced": false
+    },
+    "scenarios": [
+      {
+        "fixture": "gradient",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 295880,
+        "maxWholePagesPerDay": 100
+      },
+      {
+        "fixture": "geometric",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 777200,
+        "maxWholePagesPerDay": 82
+      },
+      {
+        "fixture": "noise",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 21241240,
+        "maxWholePagesPerDay": 3
+      }
+    ],
+    "verification": {
+      "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh",
+      "sqlPasses": 38,
+      "newSqlPasses": 13,
+      "unitCommand": "node --test tests/unit/publicCapacity.test.mjs",
+      "unitPasses": 7,
+      "newUnitPasses": 1,
+      "initialFailure": "new psql fixture session missing service_role claim; corrected fixture, no app authorization change",
+      "pastPhoneTestCi": {
+        "run": "38127347170",
+        "source": "2fbc14a78ae3df75b3d608744661be4512ead515",
+        "conclusion": "success"
+      },
+      "pastWorkingBranchCi": {
+        "run": "38127115769",
+        "conclusion": "cancelled"
+      },
+      "newHostedPasses": 0,
+      "newUserBehaviorPasses": 0
+    },
+    "files": {
+      "tools/operations/public-delivery-budget-candidate.sql": "ec5a1709e809037d76ce0cacaa9705fd451b60c56782f4fd5a52d2d3a156273d",
+      "tools/operations/public-delivery-budget-rollback.sql": "55dd656c4465036a1e0e3fdae506ecd34cc9e8bfe66f77be6b108f0d3e97da5b"
+    },
+    "sources": [
+      "https://supabase.com/docs/guides/platform/manage-your-usage/egress",
+      "https://vercel.com/docs/plans/hobby"
+    ],
+    "mutations": {
+      "test": 0,
+      "production": 0,
+      "flags": 0,
+      "fees": 0
+    },
+    "remaining": [
+      "exact candidate test activation and restore",
+      "deployed image HTTP delivery/429/withdrawal in final candidate",
+      "actual operator alert receipt",
+      "D06 exact production approval"
+    ]
   }
 }

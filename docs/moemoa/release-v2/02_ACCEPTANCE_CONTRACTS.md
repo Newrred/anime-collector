@@ -1,5 +1,28 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 W15/D03 초기 공개 전송 한도 후보 — 로컬 준비 완료
+
+사용자 정상 공개규모 마감 요청에 따른 **초기 소규모 공개 후보**다. 트래픽 분포 미확보 상태이므로 일반 규모 무제한 운영/PASS를 뜻하지 않는다. 무료 유지·기존 한도/국가/이미지 권리 결정은 자동 변경하지 않는다.
+
+| 대상 | 후보 및 사용자 영향 |
+| --- | --- |
+| 전역 IMAGE_DELIVERY | 2,000 GET/UTC일, 계정별이 아님. preview/관리자/재시도도 같은 예산 |
+| 전역 IMAGE_DELIVERY_BYTES | 64,000,000B/UTC일(64MB, 64MiB 아님), 서버 사본 크기 선예약; 실패 예약도 보존 |
+| 관측 경보 | 기존 평가기에 1,600회 또는51,200,000B부터 경보. 6시간 예약관측/하루2~3회 담당 확인; 즉시 통지·수신 보장 아님 |
+| 초과 | 새 공개사본 GET은 기존429; 원본/카드 삭제 없음. UTC00:00(한국/일본09:00) 다음 요청에서 새 일자 계산 |
+| 전제 | 20261011180000 RPC + 검증한 sized-delivery 배포flag=true. false 경로는 요청당2MiB라 동일64MB로30GET밖에 못 함 |
+
+**과거 실제 합성 인코더 측정값**을 현재 full20장 화면에 대입: gradient295,880B/화면→최대100화면/일(요청 제한), geometric777,200B→82화면, noise21,241,240B→3화면. 실제 사용자 평균/고유 방문자/hosted 부하검사 결과가 아니다. 현재 PublicBoardSnapshot은full을 쓰므로thumb 절감량을 이 계산에 넣지 않았다.
+
+예산 산술:31일 길이의 공급자 기간은UTC daily window32개와 겹칠 수 있어 공개2.048GB를 확보한다. private 월500MB는 **UTC 달력월** 기준이다. 단순 같은월 합산은2.548GB지만 공급자 기간과 동일하지 않다. 임의31일 구간이 최대3개 달력월과 겹치는 보수적인 경우까지 private1.5GB를 잡으면 합계3.548GB/나머지1.452GB다. 후자는catalog·DB/Auth·test·실패/프로토콜·기타 트래픽 여유이며 강제 총량 제한이 아니다. 실제 provider 사용량은 조직 전체 화면에서 계속 확인한다. 무료 한도는uncached5GB/cached5GB 별도이므로 합쳐10GB로 계산하지 않는다. [Supabase 공식](https://supabase.com/docs/guides/platform/manage-your-usage/egress) (2026-10-11 열람).
+
+Vercel Hobby 공식 포함량은 전송100GB/origin10GB/함수1M이다. 본 후보의 허용 이미지 요청은32일64,000회지만 **차단·인증실패·다른 API 호출도 함수 사용량**이라 호출 전체 상한으로 주장하지 않는다. 전역quota는 WAF나 사용자별 공평 배분이 아니다. [공식](https://vercel.com/docs/plans/hobby). 기존 무료/비상업 범위와D04 공급자 조건 잔여를 본 전송 계산으로 해결했다고 표시하지 않는다.
+
+실행파일: tools/operations/public-delivery-budget-candidate.sql 및 rollback.sql. 기본 dry-run ROLLBACK, 승인 후 psql apply_delivery_budget=true만 COMMIT. baseline 두행 disabled/0/unpaused 및 active global override 없음이 전제, 변경되면 중단. 새migration0, usage/live_limit/다른정책/Public 보존. 롤백도 정확한후보 일치 검사, 소비량 환불0. 운영 중 원복할 때는 Public reads를 먼저 끄고quota해제; test는 기존비활성 유지.
+
+이번 격리PG38 PASS(기존25+후보13), 경보unit7 PASS(기존6+신규1). 초기 새psql세션 claim누락 AUTH_REQUIRED를 fixture에서수정; 제품권한완화0. 과거phone-test2fbc CI38127347170 전체SUCCESS를 이번read-only조회로확인; simple branch동일SHA CI38127115769 cancelled. 이번hosted 신규PASS0/원격변경0. **다음1개: 이 후보의 test 두quota 임시 적용·sized flag 활성·실제 차감/차단 관측 후 두설정 원복.** 실제경보수신/최종배포 이미지 전달·철회 및 운영 D06은 별도 잔여.
+
+
 ## 2026-10-11 W15 사본 크기 예약 후보 계약 — 로컬·test Storage 검증
 
 - 새 flag MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED 기본false. 현재 운영은2MiB 선예약 경로를 유지하며 아래 새크기 계약은 승인2fbc14a test DB/phone-test에만 적용했으며 검사 후 test flag=false로 원복한다. 운영 미적용.

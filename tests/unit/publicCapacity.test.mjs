@@ -34,3 +34,9 @@ test('missing public report raises alarm while retaining existing private result
  const result=await runPrivateMaintenance({CLEANUP_ORIGIN:'https://example.test',CLEANUP_SECRET:'s'.repeat(32),OBSERVE_ONLY:'true',PUBLIC_OBSERVE_ENABLED:'true',TOTAL_STORAGE_ALERT_BYTES:'980000000'},async()=>({ok:true,json:async()=>({observedAt:new Date().toISOString(),storedBytes:1,reservedBytes:1,globalReadBytes:1})}));
  assert.equal(result.storageBytes,1);assert.deepEqual(result.alerts,['PUBLIC_CAPACITY_OBSERVATION_FAILED']);
 });
+
+test('initial free public budget alarms at 1600 requests and 51.2MB, not one unit earlier',()=>{
+ const budget={deliveryDailyLimit:2000,deliveryBytesDailyLimit:64000000};
+ assert.deepEqual(evaluatePublicCapacity(snapshot({...budget,deliveryUsed:1599,deliveryBytesUsed:51199999}),options).alerts,[]);
+ assert.deepEqual(evaluatePublicCapacity(snapshot({...budget,deliveryUsed:1600,deliveryBytesUsed:51200000}),options).alerts,['PUBLIC_DAILY_REQUESTS_NEAR_LIMIT','PUBLIC_DAILY_RESERVED_BYTES_NEAR_LIMIT']);
+});
