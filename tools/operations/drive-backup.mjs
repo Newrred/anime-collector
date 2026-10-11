@@ -72,7 +72,7 @@ export function createDriveBackupClient(token,request=fetch){
     if(found){if(!matches(found,a,id))failure('DRIVE_ID_CONFLICT');return await verify(a,id);}
     const start=await call(request,API+'/upload/drive/v3/files?uploadType=resumable',{method:'POST',headers:{...headers,'Content-Type':'application/json','X-Upload-Content-Type':'application/zip','X-Upload-Content-Length':String(a.bytes)},body:JSON.stringify({id,name:a.name,parents:[a.folderId],mimeType:'application/zip'})});
     if(start.status===409)return await verify(a,id);
-    if(!start.ok)failure('DRIVE_UPLOAD_UNCERTAIN');
+    if(!start.ok)failure('DRIVE_HTTP_'+start.status);
     let session;try{session=new URL(start.headers.get('location'));}catch{failure('DRIVE_SESSION_INVALID');}
     if(session.origin!==API||session.pathname!=='/upload/drive/v3/files'||session.username||session.password||session.hash||!session.searchParams.get('upload_id'))failure('DRIVE_SESSION_INVALID');
     const chunkSize=8*1024*1024;
@@ -81,8 +81,9 @@ export function createDriveBackupClient(token,request=fetch){
      while(filled<length){const {bytesRead}=await handle.read(body,filled,length-filled,offset+filled);if(!bytesRead)failure('DRIVE_LOCAL_MISMATCH');filled+=bytesRead;}
      const end=offset+length-1;
      const response=await call(request,session.href,{method:'PUT',headers:{...headers,'Content-Type':'application/zip','Content-Length':String(length),'Content-Range':'bytes '+offset+'-'+end+'/'+a.bytes},body});
+     if(response.status>=400)failure('DRIVE_HTTP_'+response.status);
      if(end+1<a.bytes){if(response.status!==308||response.headers.get('range')!=='bytes=0-'+end)failure('DRIVE_UPLOAD_UNCERTAIN');}
-     else if(!response.ok)failure('DRIVE_UPLOAD_UNCERTAIN');
+     else if(!response.ok)failure('DRIVE_HTTP_'+response.status);
      offset=end+1;
     }
     const after=await handle.stat();if(after.size!==stat.size||after.mtimeMs!==stat.mtimeMs)failure('DRIVE_LOCAL_CHANGED');

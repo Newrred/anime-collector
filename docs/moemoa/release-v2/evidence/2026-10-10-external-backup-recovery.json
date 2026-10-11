@@ -995,5 +995,87 @@
       "approvalRequired": true
     },
     "previousLocalTestsNotRerun": "Node57 + Python2"
+  },
+  "weeklyReadOnlyInspection20261012": {
+    "status": "ACTUAL_READ_ONLY_PASS",
+    "candidate": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+    "approval": "User instructed proceeding with the documented plan after exact candidate request",
+    "githubRunId": 38152095001,
+    "githubRunUrl": "https://github.com/Newrred/anime-collector/actions/runs/38152095001",
+    "conclusion": "success",
+    "dispatches": 1,
+    "result": {
+      "status": "WEEKLY_PENDING_ARCHIVE_MISSING",
+      "sequence": 1,
+      "chainLength": 1,
+      "pending": true,
+      "archiveBytes": 62610483,
+      "remoteWrites": 0,
+      "databaseReads": 0,
+      "storageBodyReads": 0
+    },
+    "activationAfter": false,
+    "activationPatchStatus": 204,
+    "activationReadbackStatus": 200,
+    "vercelBuild": {
+      "commit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "checkoutCommit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "builtAt": "2026-10-11T15:38:29.468Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "archiveBackupComplete": false,
+    "rootCauseConfirmed": false,
+    "meaning": "Authenticated sequence-1 intent refers to 62,610,483-byte archive; metadata404. No database access, image body reads or Drive writes in this inspection.",
+    "previousEvidenceNotRerun": "Initial backup FAILURE; previous Node57/Python2 and local diagnostic7 remain historical evidence"
+  },
+  "weeklyMissingRecoveryCandidate20261012": {
+    "base": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+    "commit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "branch": "refs/heads/codex/weekly-backup-recovery-20261012",
+    "sourceSha256": {
+      "tools/operations/run-weekly-backup.mjs": "10eacf4b8a9545ab46e463e425a92c286d68b50472d89508948eefcdfb823cc1",
+      "tools/operations/weekly-backup-state.mjs": "a8f6a837525cc8276b4375cb6f5d73062d3c803df6b791a9948f394aaa4aa61c",
+      "tools/operations/drive-backup.mjs": "1ee7e5ee1cc98d927bcbe32eddc3291ac21e13c299ce6890b807322fd4408f54",
+      ".github/workflows/moemoa-weekly-backup.yml": "4902eb70b78f991ae63d04a669ae1af90c8a40d948f882307c87eb111fafe878"
+    },
+    "changed": [
+      ".github/workflows/moemoa-weekly-backup.yml",
+      "tools/operations/drive-backup.mjs",
+      "tools/operations/run-weekly-backup.mjs",
+      "tools/operations/weekly-backup-state.mjs"
+    ],
+    "pushed": false,
+    "status": "LOCAL_VERIFIED_PENDING_EXACT_APPROVAL",
+    "targetMissingRunId": "20261011145200757",
+    "behavior": "Exact pending run only; metadata404 appends authenticated abandoned record without deleting old state, then new incremental capture/upload; existing archive must verify before commit; errors do not abandon.",
+    "tests": {
+      "command": "node --test tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/driveBackup.test.mjs",
+      "passed": 36,
+      "failed": 0,
+      "synthetic": true,
+      "realUpload": false,
+      "yaml": "manual only; inspect default true; recovery ID empty by default",
+      "diffCheck": "PASS"
+    },
+    "scope": {
+      "masterFiles": 4,
+      "productionDatabase": "read-only snapshot on approved retry",
+      "maxNewImageBytes": 64000000,
+      "drive": "reuse pinned parent ZIP; append encrypted recovery state and new delta; no deletion",
+      "schedule": false,
+      "appChanges": false,
+      "dbSchemaChanges": false,
+      "publicChanges": false,
+      "newSecretTransfer": false
+    },
+    "rollback": "Keep activation false. Preserve authenticated abandoned state support; do not restore a parser that cannot read the new record type after a recovery write.",
+    "unresolved": "Old upload error cannot be reconstructed from generic old log. Retry may expose a provider rejection; no claim of root-cause fix.",
+    "gitBlobHashMatches": 4
   }
 }

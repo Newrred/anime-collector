@@ -44,8 +44,8 @@ test('upload verifies private folder, ciphertext checksum and remote result; rep
  const journal=await readFile(f.journalPath,'utf8');assert.ok(!journal.includes('synthetic-token'));assert.equal(JSON.parse(journal).fileId,fileId);
  assert.ok(f.calls.every(c=>!['DELETE','PATCH'].includes(c.method)));
 });
-test('large upload is bounded into 8MiB chunks with acknowledged ranges',async t=>{
- const f=await fixture(t,8*1024*1024+2);await createDriveBackupClient('synthetic-token',f.mock).upload(f);assert.equal(f.puts(),2);
+test('observed 62.6MB archive uploads in eight bounded chunks and verifies checksum',async t=>{
+ const f=await fixture(t,62610483);await createDriveBackupClient('synthetic-token',f.mock).upload(f);assert.equal(f.puts(),8);
 });
 test('response lost after completed upload leaves journal and recovers without duplicate',async t=>{
  const f=await fixture(t);let first=true;
@@ -80,3 +80,5 @@ test('preflight is offline and disabled by default; invocation cannot upload acc
 
 test('parent download accepts browser ZIP MIME and verifies streamed bytes',async t=>{const f=await fixture(t);f.setRemote({...f.meta(),mimeType:'application/x-zip-compressed'});const client=createDriveBackupClient('synthetic-token',async(u,o)=>u.endsWith('?alt=media')?new Response(await readFile(f.artifact.path)):f.mock(u,o));const out=join(f.root,'download.zip');await client.download({artifact:f.artifact,fileId,path:out});assert.deepEqual(await readFile(out),await readFile(f.artifact.path));});
 test('corrupt or oversized parent stream is rejected and never treated as verified',async t=>{const f=await fixture(t);f.setRemote(f.meta());for(const body of [Buffer.alloc(f.artifact.bytes,9),Buffer.alloc(f.artifact.bytes+1,3)]){const client=createDriveBackupClient('synthetic-token',async(u,o)=>u.endsWith('?alt=media')?new Response(body):f.mock(u,o));await assert.rejects(client.download({artifact:f.artifact,fileId,path:join(f.root,'bad-'+body.length+'.zip')}),/DOWNLOAD_(HASH|LIMIT)/);}});
+
+test('upload HTTP rejection retains only status code for safe stage diagnostics',async t=>{for(const rejected of ['POST','PUT']){const f=await fixture(t,8*1024*1024+2);await assert.rejects(createDriveBackupClient('synthetic-token',async(u,o)=>o.method===rejected?response({private:'must never appear in error'},403):f.mock(u,o)).upload(f),/^Error: DRIVE_HTTP_403$/);}});

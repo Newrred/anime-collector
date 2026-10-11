@@ -1,5 +1,8 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-12 W17/D05 실제 읽기진단 완료:** 승인3d14da3 master→Vercel Git/www exactSHA, run38152095001 SUCCESS. 암호화 ledger sequence1 인증·대상 ZIP62,610,483B metadata404 확인, DB/Storage본문/Drive쓰기0·gate false 재확인. 이전 백업 실패 원인은 상세로그 부재로 미확정, 새백업 완료 아님. 다음 최소복구 후보ab05885(운영3d14da3 위4파일)는 지정실패run만 missing 확인→기존기록보존/abandoned append→새증분1회 또는 존재ZIP 검증commit. 로컬36/기본읽기 YAML PASS, 운영 미적용. 다음1개: 정확한 후보의 실패기록 복구·수동1회 승인. 주간예약·삭제·Public변경 제외. 아래 로그는 당시 이력이다.
+
+
 > **2026-10-12 W17/D05 수동 운영 실행 결과:** 승인 d668723 master 적용·GitHub 비밀설정4개 저장·Vercel Git SHA 확인 완료. 수동 run38148877139는 WEEKLY_OPERATION_FAILED로 실패하여 실행 gate false(PATCH204/GET200)로 종료했다. Drive에는 기존ZIP2개와 새암호화 state1개(1KB)가 보이고 새ZIP은 미표시다. 진행기록 본문 인증/실패 원인/전송량은 아직 미확정, 새백업 성공 아님. 주간예약·삭제·DB구조·Public변경0. 로컬 진단후보3d14da3(2파일): 안전오류/단계와 읽기전용 상태검사7 PASS, 기본읽기·manual YAML PASS. 다음1개: 이 후보를 반영해 DB/Storage본문/Drive쓰기 없이 보류상태를 확인. 아래 완료/대기 문구는 당시 이력이다.
 
 
@@ -2589,3 +2592,21 @@ RECOVERY-WEEKLY-RPO7D-20261011과 사용자 “ㄱ”에 따라 기존 이미지
 6. 보안/DB/복귀: 비밀값은 메모리→GitHub 공개키암호화로 지정환경에만 저장, 로그/문서/commit 미포함. DB구조/원본/공개권한 변경없음. 기존사본삭제0·주간예약0. 원복으로 gate off 완료, 계정접속설정은 승인범위로 남김. 실패 job 임시컨테이너 종료 확인.
 7. 외부보관: Chrome에서 지정비공개 Drive폴더의 기존ZIP2개와 새 moemoa-weekly-state-1-20261011145200757.enc(1KB), 새ZIP미표시 확인. 진행파일 다운로드는 Chrome 차단으로 미회수, 우회하지 않음. 새ZIP 보관·전송량·외부복구 PASS 없음.
 8. 다음1개/승인: 3d14da3의 읽기전용 진단만 master 적용 후 confirm_backup=true/inspect_only=true 1회, 기존설정으로 ledger 인증·대상ZIP metadata 상태만 읽고 gate off. DB접속/Storage본문/새백업/Drive쓰기/삭제/예약 없음. 10/11의 정확후보별 운영승인 조건에 따라 새 적용만 승인 필요. 실제업로드 재개/미완료intent 처리·주간예약·독립키는 잔여.
+
+#### 2026-10-12 읽기전용 진단 재개 승인
+사용자 “항상 문서상 계획을 염두에 두며 진행 ㄱ”에 따라 직전 구체 후보3d14da3의 읽기전용 적용을 진행한다. 기존 W17/D05 범위, DB접속·본문전송·Drive쓰기·예약·삭제 제외. exact master 확인→후보push→inspect_only=true 수동1회→gate off→실제결과를 단일작업판에 기록한다.
+
+#### 2026-10-12 실제 진단 결과 및 W17 최소 복구 후보 계획
+3d14da3 read-only run38152095001 SUCCESS: AES-GCM ledger sequence1 인증, pending ZIP62610483B metadata404. DB/Storage본문/Drive쓰기0. gate false 재조회200 및 www Git SHA일치. 원인상세는 과거실행 로그 부족으로 불명이며 크기62610483B 합성8chunk 전송1 PASS로 크기결함 재현안됨. 기존 진행기록삭제/기준ZIP변경 없이 명시된 실패runId만 복구하는 후보: ZIP 존재시 hash검증 후commit, 404시 기존intent에 결속한 abandoned record를append하고 새capture1회 진행. 기본 --run은 여전히 incomplete거부; 잘못된runId/403/손상/경합은 중단. 실행기·상태기록·전송오류코드·workflow 입력만 최소수정하고 로컬 상태전이/재시도/비밀값보호 검사. 운영적용/새capture·Drive쓰기는 정확후보별 승인 전 수행하지 않는다.
+
+
+#### 2026-10-12 실제 읽기 진단 완료·최소 복구 후보 보고
+1. 읽음/계획: AGENTS, CODEX_START_HERE, 확정결정, PLANS, 07/09, release-v2 00/01/02/03 및 백업 evidence, Drive/state/runner/workflow와 관련 테스트. 위 W17/D05 ExecPlan의 실패 마감 단계이며 새 작업판·제품 범위를 만들지 않았다.
+2. 승인/미결: 직전 구체 진단 후보3d14da3에 대한 사용자 진행 지시로 읽기 진단만 실행했다. ZIP 준비 이후 외부보관 미완료를 확인했지만 과거 일반 오류 로그로 실제 provider 실패 원인은 아직 미상이다. 다음 후보의 로컬 PASS를 운영 백업 성공으로 취급하지 않는다.
+3. 실제 적용/명령: git push origin 3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0:refs/heads/master 성공. master-only 환경 확인, 활성 PATCH204, inspect_only=true dispatch204 1회. run38152095001 SUCCESS; 인증된 state sequence1/chain1/pending ZIP62610483B metadata404. DB접속·Storage본문·Drive쓰기0. 종료 후 gate PATCH204/GET200 false. Vercel status success 및 www build-info200 commit/checkoutCommit exact3d14da3, source vercel-git/semanticMatch true. workingTreeDirty true 응답은 그대로 보존한다.
+4. 로컬 변경: run-weekly-backup.mjs에 exact 실패runId 일치·metadata404일 때만 abandoned append 후 새 capture; ZIP 존재 시 기존 hash검증/commit 재사용. weekly-backup-state.mjs에 원본intent/pending/chain을 보존하는 인증된 abandoned 전이. drive-backup.mjs에 응답본문 없는 안전한 HTTP 오류코드. workflow 후보는 명시 recovery ID 입력(기본 빈값), inspect_only 기본 true 유지. tests3개 및 기존00~03/evidence/시작포인터 갱신. 기존 코드 전면 재작성·새 의존성 없음.
+5. 후보/DB/복귀: ab05885461aa1e99bbb116172e3cd7188100da17은 운영3d14da3 부모의 backup4파일만 포함하고 Git blob SHA256 4/4 일치. 아직 운영에 적용하지 않았다. DB migration/공개권한/앱 변경0. 적용 후 중단 시 실행gate off, 모든 ZIP/state 보존. abandoned가 실제 추가된 뒤에는 이를 읽는 호환 parser를 유지해야 하므로 무조건 이전 parser로 되돌리거나 ledger를 지우면 안 된다.
+6. 검사: node --test tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/driveBackup.test.mjs 36/36 PASS. 정상전이·잘못된runId·403·손상/불일치·existingZIPcommit·missingZIP명시복구·62610483B 합성8chunk 및 safeHTTP오류 검사 포함. WSL Python YAML manual-only/inspect_only=true/recovery ID 빈값 PASS, git diff --check PASS. 선행35개/단일1개 및 과거57/Python2/진단7은 중복 합산하지 않는다.
+7. 보호/관측: 실제 진단에서 새 Secret저장/DB조회/Storage본문/Drive쓰기/삭제/예약0. 로그·문서에는 aggregate상태/크기/후보SHA만 기록하고 토큰·본문·개인정보 출력0. 복구 후보는 기존 승인된 GitHub 환경 인증을 재사용하되 다음 실제 실행은 별도 승인 범위이며, 새/변경이미지64MB 제한과 기존 Drive부모사본 재사용을 유지한다.
+8. 남음/다음1개: ab05885의 master4파일 반영 및 실패run20261011145200757에 한정한 종료기록 추가·수동증분1회에 대한 정확한 승인. 승인 전 capture/Drive추가쓰기 없음. 실제 새ZIP보관·외부회수복구·주간예약·독립복구키 보관은 미완료이며 다음 후보가 원인을 해결했다고 단정하지 않는다. 사용자10/11 정확후보별 운영승인 조건에 따라 이 새쓰기만 확인한다.
+실제 진단: https://github.com/Newrred/anime-collector/actions/runs/38152095001

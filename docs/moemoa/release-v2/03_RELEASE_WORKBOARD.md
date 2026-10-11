@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 W17/D05 실제 읽기진단 완료:** 승인3d14da3 master→Vercel Git/www exactSHA, run38152095001 SUCCESS. 암호화 ledger sequence1 인증·대상 ZIP62,610,483B metadata404 확인, DB/Storage본문/Drive쓰기0·gate false 재확인. 이전 백업 실패 원인은 상세로그 부재로 미확정, 새백업 완료 아님. 다음 최소복구 후보ab05885(운영3d14da3 위4파일)는 지정실패run만 missing 확인→기존기록보존/abandoned append→새증분1회 또는 존재ZIP 검증commit. 로컬36/기본읽기 YAML PASS, 운영 미적용. 다음1개: 정확한 후보의 실패기록 복구·수동1회 승인. 주간예약·삭제·Public변경 제외. 아래 로그는 당시 이력이다.
+
+
 > **2026-10-12 W17/D05 수동 운영 실행 결과:** 승인 d668723 master 적용·GitHub 비밀설정4개 저장·Vercel Git SHA 확인 완료. 수동 run38148877139는 WEEKLY_OPERATION_FAILED로 실패하여 실행 gate false(PATCH204/GET200)로 종료했다. Drive에는 기존ZIP2개와 새암호화 state1개(1KB)가 보이고 새ZIP은 미표시다. 진행기록 본문 인증/실패 원인/전송량은 아직 미확정, 새백업 성공 아님. 주간예약·삭제·DB구조·Public변경0. 로컬 진단후보3d14da3(2파일): 안전오류/단계와 읽기전용 상태검사7 PASS, 기본읽기·manual YAML PASS. 다음1개: 이 후보를 반영해 DB/Storage본문/Drive쓰기 없이 보류상태를 확인. 아래 완료/대기 문구는 당시 이력이다.
 
 
@@ -812,15 +815,15 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-W/M: W17/D05 · M4/M5 MANUAL_RUN_FAILED / RUN_GATE_OFF
-이번: d668723 backup-only master 적용, 환경Secret4개 저장201/readback200, 수동run38148877139 1회 failure
-이번 실제PASS: GitHub master-only 환경/인증저장·컨테이너/도구 준비, Vercel www commit/checkoutCommit d668723 일치
-실패: WEEKLY_OPERATION_FAILED 원인 미상. Drive 비공개폴더 기존ZIP2+신규state1(1KB) 관찰, 새ZIP 미표시; 본문미회수/인증안됨
-안전조치: 실행 gate false 확인, 컨테이너 종료 success, 재실행0·예약0·기존사본삭제0·DB구조/Public변경0
-이전PASS: 관련Node57/Python2·Drive OAuth/metadata. 이번 전체백업/외부회수복구 PASS로 확대하지 않음
-로컬후보: 3d14da3 (운영d668723 부모), run-weekly-backup와manual workflow 2파일. 오류code/단계와읽기전용 --inspect-state. 관련7/YAML PASS
-미완료: 신규ZIP 보관·진행기록과 업로드상태 인증·실제외부회수복구·주간예약·독립키. 외부 서비스 원인으로 단정할 근거 없음
-다음1개: 3d14da3 읽기전용 진단 운영후보 적용승인 후 보류상태/대상ZIP metadata 확인
+W/M: W17/D05 · M4/M5 READ_ONLY_INSPECTION_PASS / BACKUP_INCOMPLETE / RUN_GATE_OFF
+문서기준: 주1회 DB·변경이미지 증분 외부보관/RPO7일/RTO24h 목표. 기존사본보존·단일작업판·D06 후보별승인 유지
+이번실제: 3d14da3 master Git→Vercel www exactSHA, read-only run38152095001 SUCCESS. AES-GCM state1 인증·대상 ZIP62610483B metadata404
+영향: DB접속0·Storage본문0·Drive쓰기0·예약0·삭제0, 실행변수false PATCH204/GET200 확인
+과거: d668723 수동백업 FAILURE/상세원인 미상. 과거Node57/Python2/진단7은 이번백업 성공으로 합산하지 않음
+로컬후보: ab05885 (운영3d14da3 부모4파일). exact failed run20261011145200757 missing만 기존intent보존/abandoned append→새capture1회; 이미있으면hash검증commit
+검증: 관련Node36 PASS(합성회귀 포함; 선행35/단일1 중복합산안함), manual/inspect기본true/recoveryID기본빈값 YAML·diff PASS
+미완료: 실제ZIP보관·회수복구·주간예약·독립키. 원인해결검증 아직없음; 외부서비스 장애로 단정하지 않음
+다음1개: ab05885 정확후보의 실패기록복구 및 수동증분1회 승인 후 실행·결과/gate off 확인
 ```
 
 <details><summary>이전 카드 — Drive 연결 후보</summary>

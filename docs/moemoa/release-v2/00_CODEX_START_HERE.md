@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-12 W17/D05 실제 읽기진단 완료:** 승인3d14da3 master→Vercel Git/www exactSHA, run38152095001 SUCCESS. 암호화 ledger sequence1 인증·대상 ZIP62,610,483B metadata404 확인, DB/Storage본문/Drive쓰기0·gate false 재확인. 이전 백업 실패 원인은 상세로그 부재로 미확정, 새백업 완료 아님. 다음 최소복구 후보ab05885(운영3d14da3 위4파일)는 지정실패run만 missing 확인→기존기록보존/abandoned append→새증분1회 또는 존재ZIP 검증commit. 로컬36/기본읽기 YAML PASS, 운영 미적용. 다음1개: 정확한 후보의 실패기록 복구·수동1회 승인. 주간예약·삭제·Public변경 제외. 아래 로그는 당시 이력이다.
+
+
 > **2026-10-12 W17/D05 수동 운영 실행 결과:** 승인 d668723 master 적용·GitHub 비밀설정4개 저장·Vercel Git SHA 확인 완료. 수동 run38148877139는 WEEKLY_OPERATION_FAILED로 실패하여 실행 gate false(PATCH204/GET200)로 종료했다. Drive에는 기존ZIP2개와 새암호화 state1개(1KB)가 보이고 새ZIP은 미표시다. 진행기록 본문 인증/실패 원인/전송량은 아직 미확정, 새백업 성공 아님. 주간예약·삭제·DB구조·Public변경0. 로컬 진단후보3d14da3(2파일): 안전오류/단계와 읽기전용 상태검사7 PASS, 기본읽기·manual YAML PASS. 다음1개: 이 후보를 반영해 DB/Storage본문/Drive쓰기 없이 보류상태를 확인. 아래 완료/대기 문구는 당시 이력이다.
 
 

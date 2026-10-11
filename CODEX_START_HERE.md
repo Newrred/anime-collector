@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 현재 재개점:** 기존 release-v2/03 현재카드 W17/D05를 따른다. 실제 읽기진단3d14da3/run38152095001 성공, 누락ZIP·보류기록 인증·실행off 확인. 백업성공은 미완료. 최소복구 후보ab05885 로컬36 PASS/운영미적용. 상세·잔여·정확후보 승인범위는 [기존 ExecPlan](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md)과 [단일작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)에 있으며 아래 이전 날짜 요약의 다음작업보다 우선한다.
+
+
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
 
 
