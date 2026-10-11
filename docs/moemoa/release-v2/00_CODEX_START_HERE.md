@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W15/D03 크기 기반 전송 예약 로컬 후보:** 요청당2MiB 고정 차감 대신 기존DB의 READY 사본/variant/path/hash에 결속된 크기로 예약하는 service-only 함수1개와 bounded Range 다운로드를 준비했다. 새flag 기본off. 이미지/HTTP47·관측18·격리SQL25(신규10) PASS, 실제로컬24×30 decode/철회·초과·변조차단 확인. 운영199613b CI38126124037 전체SUCCESS 후속확인. 실제 Supabase 응답·정상한도/알림수신은 미검증. 다음1개: 정확한 후보의 test DB/phone-test 임시flag 적용 승인 후 실제 Storage 전달 확인·원복. 운영/한도/Public 변경0.
+
+
 > **현재 완료도:** 기존 W20개 중 DONE4·VERIFY9·DOING4·외부조건2·부분 운영반영1. 구현률20%라는 뜻이 아니다. 주요 Public 사용자 왕복은 test에서 확인했고 운영은 개인기능/가입/관측 적용·Public off다. 정확한 잔여는 [단일 작업판의 현재 완료도](03_RELEASE_WORKBOARD.md#2026-10-11-현재-완료도--최신-증거-기준)를 따른다. 아래 날짜별 실행 로그의 과거 다음 작업을 재실행하지 않는다.
 
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.

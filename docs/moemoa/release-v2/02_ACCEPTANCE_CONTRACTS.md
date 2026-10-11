@@ -1,5 +1,14 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-11 W15 사본 크기 예약 후보 계약 — 로컬만
+
+- 새 flag MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED 기본false. 현재 운영은2MiB 선예약 경로를 유지하며 아래 새크기 계약은 미배포 후보에만 적용한다.
+- 기존 권한 resolve 후 service-only authorize_memory_sized_image_delivery가 asset READY·variant·path·hash·저장된 bytes를 대조한다. 임의 client bytes를 받지 않고 기존 요청수+bytes 한도를 한 트랜잭션에서 소비한다.
+- Storage GET에 Range를 제한하고 Content-Length/Content-Range 전체크기·stream누적량·정확한 길이/hash를 검증한다. 권한은 다운로드 뒤 다시 확인하며 no-store와 비공개 버킷을 유지한다. 잘못된 응답은503, 철회는404. 실패분 예약은 환불하지 않으며 일반 download 우회 없음.
+- 실제로컬 HTTP+합성Storage/DB격리 검사 PASS와 hosted응답 PASS를 구분한다. upstream 과전송/헤더·DB·provider비용 전체를 정확히 정산하는 함수가 아니다. 일일 요청수 한도를 그대로50으로 두면 크기 차감만 바꿔도50회 상한은 유지된다. 정상 요청수/byte 한도 결정은 별도 D03 잔여다.
+- 이전 합성20장 측정값으로 신규예약295,880/777,200/21,241,240B(이전모두41,943,040B) 산술. 새사용자 분포/실제청구절감률 주장금지. 코드/SQL/실제 명령은 기존01의 같은 W15 절과 capacity evidence를 따른다.
+
+
 ## 2026-10-11 W15/D03 관측 마감 계약
 
 ### W15/D03 정상 공개규모 후보 대조 · 2026-10-11

@@ -18,5 +18,6 @@ for migration in "$root"/supabase/migrations/*.sql; do
  "${psql[@]}" -f "$migration" >> "$work/setup.log" 2>&1 || { tail -35 "$work/setup.log"; exit 1; }
 done
 "${psql[@]}" -f "$root/tools/operations/public-capacity-contract.sql" > "$work/result.log" 2>&1 || { cat "$work/result.log"; exit 1; }
+"${psql[@]}" -f "$root/tools/operations/sized-image-delivery-contract.sql" >> "$work/result.log" 2>&1 || { cat "$work/result.log"; exit 1; }
 grep "PASS:" "$work/result.log"
 echo "LOCAL aggregate/authorization contract only; no remote mutation."

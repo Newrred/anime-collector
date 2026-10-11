@@ -1975,3 +1975,35 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 6. 실행/결과: Git status/diff --check, GitHub API38126124037 및 jobs 읽기. W ID20개 고유/상태4·9·4·2·1 확인, JSON parse/31일 예약산술3개 대조 PASS. 초기 상태 집계가 설명 열을 선택해 잘못 출력된 것을 status열6으로 바로잡고 기대 개수를 검증했다. 새 제품 테스트0/새 사용자행동 PASS0. CI는 SQL SUCCESS·마지막 Web단계 진행 중, 새 전체PASS 주장0.
 7. 보안/관측: 비밀값/개인자료 조회·출력·외부발송0, 원본·Public·요금 변경0. 과거 관측SUCCESS와 실제 경보 수신 미검증을 분리했다.
 8. 실제 잔여/다음1개: 현재2MiB 선예약으로50GET/day는20장 기준2.5회에 불과하다. 무료 전체공개 정상규모로 확정하지 않고, 기존 W15에서 실제 전송량에 더 가까운 안전 예약 후보의 최소 변경 범위를 확인한다. 활성/운영 반영은 정확한 후보 승인 이후. 별도 복구키 미보관/전체DB 확장환경·최종 Public 정책/배포 승인은 기존 D03~D06에 유지한다.
+
+
+#### W15/D03 사본 크기 기반 전송 예약 후보 — 2026-10-11
+
+1. 목적: 작은 공개 이미지에도2MiB가 차감되는 과대 예약을 줄이는 로컬 후보. 실제 과금/무제한 무료 열람을 보장하지 않는다.
+2. 결정: 무료 유지, Public off, 원본/operationId/권리/철회 보존. 새정책/한도/운영승인은 별도.
+3. 근거: handler.js:141의 고정예약, DB memory_public_assets full_bytes/thumb_bytes·hash·prefix, Supabase storage-js download의 기존 /storage/v1/object 경로.
+4. 범위: 서버 GET·크기예약 RPC·bounded Storage GET·회귀검사. UI/목록품질/사본재생성/새공급자/의존성/실데이터 제외.
+5. 흐름: 기존 resolve 권한확인 → service-only RPC가 READY asset/variant/path/hash를 대조하고 저장된 크기로 기존 원자적 quota 소비 → Range GET/Content-Length/Content-Range/stream 상한·정확한 길이/해시 확인 → 기존 resolve 재검사 → no-store 응답. 실패 예약은 환불하지 않아 재시도 초과 사용을 막는다.
+6. 지도: api/public-image.js, publicImages handler/backend와 boundedDownload.js, migration20261011180000, 관련 unit·SQL 계약/기존 local runner, 기존00/01/02/03·capacity evidence.
+7. 데이터: additive service-only 함수1개, 기존원본/정책/이력 수정0. 과거 resolver들을 재작성하지 않는다.
+8. 마일스톤: M1 정확한 크기/old-path/오류 단위, M2 실제격리SQL atomic quota, M3 실제loopback HTTP/stream·철회 결과 및 예산 비교.
+9. 검사: 기존 publicImages/publicViewer/관측 관련검사+새 bounded/handler 검사, 기존격리 PG runner의 새계약. 광범위 Safari/기초DB/백업 반복 없음.
+10. 보안: client 크기를 믿지 않음, hash/path/READY DB결속, Range/길이초과중단·리다이렉트금지·20초timeout·권한재검사 유지. 경로/사진/계정/키 로그0.
+11. 관측: 기존사용량 RPC/경보를 재사용. bytes는 성공분 실측 정산이 아니라 다운로드 전 예약이며 실패분도 남긴다. 공급자전체egress는 별도다.
+12. 복귀: 새 MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED 기본false, false로 기존2MiB 경로. additive 함수는 남길 수 있음. 기존한도활성/변경0.
+13. 위험: 실제 Storage Range/길이 응답은 hosted 승인 후 확인 필요. 실패 시 기존무제한download로 fallback하지 않음. 서비스 응답/전송중 취소에도 upstream 전송량을 정확히 보장하지는 않음.
+14. 결정: 이번 로컬범위 진행, 테스트 적용은 정확한후보 승인 후. 정상요청수/byte한도는 후속후보이며 임의활성0.
+15. 진행: 현재운영199613b CI38126124037 전체SUCCESS를 이번 읽기로 확인.
+16. 발견/변경: metadata를 기존 resolver4개에 추가하는 대신 service-only예약함수1개로 모아 권한조회/저장모델 유지.
+17. 실제 결과는 아래 누적한다.
+
+##### 이번 로컬 실행 결과·8항 보고
+
+1. 읽은 기준: AGENTS/CODEX_START_HERE/확정결정01/PLANS/이미지05/QA07/변경09·기존release-v2 00~03·capacity evidence. handler/backend/processImage, 기존SQL resolver/complete/consume/observer, installed storage-js의download 경로, 기존 unit/SQL runner/CI를 대조했다.
+2. 가정/미결: 현재 후보는 실제파일 크기 선예약이며 과금정산이 아니다. 서버사본 다운로드 실패도 이미 시도한예약은 보존한다. 요청수는 별도한도. 실제Supabase Range/Content-Length·알림수신·운영공개/정상규모 잔여. 이전기본DB/A·B/Safari 검사를 반복하지 않았다.
+3. ExecPlan: 바로 위 W15/D03 사본크기 기반 예약 후보17항. 기존 단일작업판/ID 유지.
+4. 파일/이유: api/public-image.js 새flag defaultoff, handler.js의 선택적 DB크기예약+404철회/길이확인, supabaseImageBackend.js의 getSized, boundedDownload.js의 Range/헤더/stream 중단. 신규 migration 함수1개, tests/unit/sizedPublicDelivery.test.mjs, tools/operations/sized-image-delivery-contract.sql 및 기존 runner에 CI연결. 기존00/01/02/03·capacity JSON 최신절/증거 갱신. 새의존성/UI/원본/operationId 변경0.
+5. DB/복귀: 20261011180000_memory_sized_image_delivery.sql은 service-only additive 함수1개, 정책/데이터/권한범위 확장0. 격리DB에만적용. 실제 test/prod 미적용. flag=false로구경로복귀; 함수는남겨도호출없음. 한도변경/Public활성 없음.
+6. 실제명령: node --test tests/unit/{sizedPublicDelivery,publicImages,publicViewerImage}.test.mjs 최종47/47 PASS(초기46 이후경합회귀1추가, 중복합산안함). node --test tests/unit/{publicCapacity,publicCapacityCli,privateObservation,privateMaintenance,publicCleanupMaintenance}.test.mjs 18/18 PASS. wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종25 SQL PASS(기존15+신규10). 초기SQL검사 실패3회: 새psql세션 pg_temp 함수없음→JS replace의달러문자변환→pause기존에러명 PUBLICATION_DISABLED 기대값불일치. 모두검사코드수정후통과, 앱권한을완화하지않음. node --check api/public-image.js·git diff --check PASS. 전체브라우저/build 반복0, 서버GET변경의직접HTTP/DB검사를수행.
+7. 실제행동/보안/관측: 로컬HTTP 공개/ownerpreview/운영자preview/인증viewer4경로·합성Storage206→방문자24×30 WebP decode·429한도·초과/압축/변조차단·다운로드중철회404·flagoff2MiB경로 PASS. 실제계정/hosted/실기기 새PASS0. 크기·hash는 서버DB에서결속, header/path/key원문출력0. 기존관측/원자적한도 재사용, 새유료/발송/운영설정 변경0. 과거운영199613b CI38126124037 전체SUCCESS를 이번읽기로확인했다.
+8. 다음1개/정확한승인후실행: 이 후보를 moemoa-test에 migration1개로추가하고 codex/phone-test GitPreview에배포, 해당Preview의새flag만잠시true로 실제Storage합성사본 full/thumb 전달 확인 후false복귀. 기존권리/공개정책/한도/가입/원본/운영은변경하지않는다. 정상요청수/byte한도활성 및최종운영승인은별도. 새 test변경에대한10/11 정확한후보승인조건을 따른다.

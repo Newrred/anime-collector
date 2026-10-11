@@ -662,8 +662,10 @@
     "newUserBehaviorPasses": 0,
     "qualityCi": {
       "id": 38126124037,
-      "status": "in_progress",
-      "conclusion": null
+      "status": "completed",
+      "conclusion": "success",
+      "runId": 38126124037,
+      "verifiedAt": "2026-10-11T09:04:22.005Z"
     }
   },
   "normalTrafficCandidateReview": {
@@ -713,5 +715,59 @@
       "flags": 0,
       "fees": 0
     }
+  },
+  "sizedDeliveryLocalCandidate": {
+    "date": "2026-10-11",
+    "scope": "W15/D03 local candidate only; no remote mutation",
+    "migration": "20261011180000_memory_sized_image_delivery.sql",
+    "migrationSha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70",
+    "flag": "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED",
+    "defaultEnabled": false,
+    "localResults": {
+      "imageHandlerAndDownload": 47,
+      "observationRegression": 18,
+      "sqlContracts": 25,
+      "newSqlAssertions": 10,
+      "newHttpStreamTests": 9,
+      "realLocalHttp": "synthetic Storage Range 206 → actual handler → 24x30 WebP decode",
+      "apiSyntax": true
+    },
+    "initialFailures": [
+      "SQL test reused pg_temp.ok across sessions",
+      "JS replace escaped SQL dollar delimiters",
+      "pause expected RATE_LIMITED instead of existing PUBLICATION_DISABLED"
+    ],
+    "budgetRows": [
+      {
+        "fixture": "gradient",
+        "twentyFullBytes": 295880,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 295880,
+        "ratio": 141.76
+      },
+      {
+        "fixture": "geometric",
+        "twentyFullBytes": 777200,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 777200,
+        "ratio": 53.97
+      },
+      {
+        "fixture": "noise",
+        "twentyFullBytes": 21241240,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 21241240,
+        "ratio": 1.97
+      }
+    ],
+    "budgetKind": "arithmetic using prior measured synthetic fixtures; not new hosted traffic or invoice",
+    "remoteApplied": false,
+    "notVerified": [
+      "actual Supabase Range/content-length responses",
+      "final public traffic limits",
+      "operator alert receipt"
+    ],
+    "rollback": "flag false restores existing 2MiB path; additive RPC may remain",
+    "next": "exact candidate test-only migration + phone-test flag temporarily true then restore; no limits or production changes"
   }
 }

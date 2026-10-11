@@ -27,7 +27,7 @@ async function inputBytes(req) {
   return Buffer.concat(chunks);
 }
 
-export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=false, moderationPreviewsEnabled=false, authenticatedViewersEnabled=false, createBackend, allowedOrigins=[], transform=processPublicImage }) {
+export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=false, moderationPreviewsEnabled=false, authenticatedViewersEnabled=false, sizedDeliveryEnabled=false, createBackend, allowedOrigins=[], transform=processPublicImage }) {
   return async (req,res) => {
     res.setHeader("Cache-Control","no-store, max-age=0");
     res.setHeader("CDN-Cache-Control","no-store");
@@ -137,9 +137,22 @@ export function createPublicImageHandler({ enabled=false, privateSourcesEnabled=
       const reference=await resolve();
       if(!reference) throw new PublicImageError("NOT_FOUND",404);
       if(!SAFE_PATH.test(reference.path)) throw new PublicImageError("IMAGE_SERVICE_FAILED",503);
-      // Reserve the maximum permitted response size before touching Storage.
-      await backend.rpc("authorize_memory_image_delivery",{p_bytes:OUTPUT_LIMIT});
-      const bytes=await backend.get(reference.path);
+      // Reserve before Storage. New mode trusts only DB-bound bytes, never client metadata.
+      let reservedBytes = OUTPUT_LIMIT;
+      if (sizedDeliveryEnabled) {
+        try {
+          reservedBytes = await backend.rpc('authorize_memory_sized_image_delivery', {
+            p_asset_id: asset, p_variant: variant, p_path: reference.path, p_hash: reference.hash,
+          });
+        } catch (error) {
+          if (error?.code === 'NOT_FOUND') throw new PublicImageError('NOT_FOUND',404);
+          throw error;
+        }
+        if (!Number.isSafeInteger(reservedBytes) || reservedBytes < 1 || reservedBytes > OUTPUT_LIMIT)
+          throw new PublicImageError('IMAGE_SERVICE_FAILED',503);
+      } else await backend.rpc('authorize_memory_image_delivery',{p_bytes:OUTPUT_LIMIT});
+      const bytes = sizedDeliveryEnabled ? await backend.getSized(reference.path, reservedBytes) : await backend.get(reference.path);
+      if (sizedDeliveryEnabled && bytes.length !== reservedBytes) throw new PublicImageError('IMAGE_SERVICE_FAILED',503);
       if(bytes.length>OUTPUT_LIMIT || imageHash(bytes)!==reference.hash) throw new PublicImageError("IMAGE_SERVICE_FAILED",503);
       const latest=await resolve();
       if(!latest || latest.path!==reference.path || latest.hash!==reference.hash) throw new PublicImageError("NOT_FOUND",404);

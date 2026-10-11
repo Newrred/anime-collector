@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { PublicImageError } from "./processImage.js";
 import { authenticateVerifiedSession } from '../identity/authenticateIdentitySession.js';
 
+import { downloadSizedImage } from './boundedDownload.js';
+
 export const IMAGE_BUCKET = "memory-public-derivatives";
 const SAFE = new Set(["PUBLIC_SIGNUP_REQUIRED","PUBLIC_SIGNUP_UNAVAILABLE","AUTH_REQUIRED","PUBLICATION_DISABLED","PUBLIC_IMAGE_DISABLED","CONSENT_MISMATCH",
   "ELIGIBILITY_REQUIRED","ELIGIBILITY_EXPIRED","ELIGIBILITY_POLICY_CHANGED","ELIGIBILITY_POLICY_UNAVAILABLE",
@@ -52,6 +54,7 @@ export function createSupabaseImageBackend(env = process.env) {
     rpc:(name,args)=>rpc(service,name,args),
     async put(path,bytes) { const { error }=await bucket.upload(path,bytes,{contentType:"image/webp",upsert:false,cacheControl:"0"}); if(error) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); },
     async get(path) { const {data,error}=await bucket.download(path); if(error || !data) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); return Buffer.from(await data.arrayBuffer()); },
+    getSized: (path, bytes) => downloadSizedImage({ url, key, path, bytes, signal }),
     async getPrivate(path) { const {data,error}=await service.storage.from('memory-private-representations').download(path); if(error || !data) throw new PublicImageError('IMAGE_STORAGE_FAILED',503); return Buffer.from(await data.arrayBuffer()); },
     async remove(paths) { const {error}=await bucket.remove(paths); if(error) throw new PublicImageError("IMAGE_STORAGE_FAILED",503); },
   };
