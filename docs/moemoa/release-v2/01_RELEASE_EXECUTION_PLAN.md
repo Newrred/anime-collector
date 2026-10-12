@@ -20,6 +20,9 @@
 
 ### 15–17. 진행·발견·완료
 
+- 운영 후속: 사용자 exact ea8f388 전체승인. 직전백업38193002483 성공/chain3/사본삭제0, manual gate false. 승인DB3/41migration·Vercel12변수 추가(기존cleanup true 유지)→master Git→Vercel READY/www exactSHA/masterCI38193447190 SUCCESS. 전달2000/64MB·Public정책 활성 independent readback PASS. 주간일요일03:00 설치/weekly gate true, 현재가입·국가·20MiB 원본/usage 보존. 암호화 catalogZIP162,670,421B Drive 비공개 보관→신규회수 동일SHA/AES-GCM PASS. HTTP13·observe-only38193643098·기존Google계정/두sync PASS. 현재 기존계정의 최신가입확인 기록이 없고 합성24x30 test는 권리확인 전 미저장/미게시라 실제 운영 공개·decode/철회/old URL는 대기. 전체첫출시인수를 아직완료로 세지 않는다. exact 운영승인을 다시 묻지 않고 당사자 권리/약관은 행동 시점 확인을 따른다.
+
+
 계획 작성. 오래된 미완료 문구와 실제 운영완료를 분리하고, 반복검사 대신 남은 운영인수와 최종후보를 구체화한다. 결과는 이 절에 누적한다.
 
 - 완료: 사용자 직접 복구키 독립보관 확인; 관련 Node48검사 PASS(주간 admission8 포함). 최종 공개/주간 결합 후보ea8f388의 전체 GitHub CI38191194150 SUCCESS. 최신4292 reviewed release hash/199source 재계산·표지4292/855,987,001B의 인증백업 결속 PASS. metadata 59661파일/772264453B 원본→ZIP 162669485B·각entry hash→AES-GCM 복호화 동일해시→암호화 전송ZIP 검증 PASS. 실제 백업 DB4표 전체필드 일치·이전release 전환/복귀·lost-response 재시도 PASS, 전체transaction rollback·접근off·컨테이너정지. 기존 app runtime·운영 수동백업 보존. 새 원격 카탈로그 게시 및 전체 raw source history 완전성은 주장하지 않음.

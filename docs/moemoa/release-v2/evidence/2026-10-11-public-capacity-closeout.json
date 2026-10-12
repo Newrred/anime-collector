@@ -4399,5 +4399,299 @@
         }
       ]
     }
+  },
+  "firstPublicProductionApplication_04": {
+    "date": "2026-10-12",
+    "status": "PRODUCTION_GIT_SCHEMA_CONFIG_PUBLIC_ENABLED_FINAL_USER_PUBLICATION_FLOW_PENDING",
+    "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+    "productionUrl": "https://www.moemoa.xyz",
+    "userApproval": {
+      "answer": "전체 적용 승인",
+      "exactSource": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "date": "2026-10-12"
+    },
+    "deployment": {
+      "id": "dpl_8HQGQjNhLTmXztf9J3e6K1oDxnc8",
+      "target": "production",
+      "state": "READY",
+      "branch": "master",
+      "buildInfoCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "checkoutCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "source": "vercel-git"
+    },
+    "exactMasterCi": {
+      "conclusion": "success",
+      "headSha": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "status": "completed",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38193447190"
+    },
+    "preSchemaBackup": {
+      "run": 38193002483,
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38193002483",
+      "source": "d8bf945051854ca60398664de54105a49a4ea2c2",
+      "result": {
+        "status": "WEEKLY_INCREMENTAL_COMMITTED",
+        "archiveBytes": 62610727,
+        "chainLength": 3,
+        "safeToServe": false,
+        "oldCopiesDeleted": 0
+      },
+      "gateReturnedFalse": true,
+      "newRetrievalAndRestoreOfThisPreSchemaArchiveClaimed": false
+    },
+    "database": {
+      "migrations": 41,
+      "addedVersions": [
+        "20261010160000",
+        "20261011120000",
+        "20261011180000"
+      ],
+      "schemaReleaseId": "MOEMOA_FIRST_PUBLIC_SCHEMA_PROD_20261012_04",
+      "configReleaseId": "MOEMOA_FIRST_PUBLIC_CONFIG_PROD_20261012_04",
+      "publicationSettings": {
+        "singleton": true,
+        "asset_limit": 10,
+        "reads_enabled": true,
+        "images_enabled": true,
+        "writes_enabled": true,
+        "follows_enabled": true,
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "reports_enabled": true,
+        "asset_bytes_limit": 41943040,
+        "minihomes_enabled": true,
+        "report_daily_limit": 10,
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "signup_declaration_required": true,
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+      },
+      "storagePolicy": {
+        "enabled": true,
+        "singleton": true,
+        "max_reserved_bytes": 20971520
+      },
+      "deliveryPolicies": [
+        {
+          "scope": "IMAGE_DELIVERY",
+          "paused": false,
+          "enabled": true,
+          "live_limit": null,
+          "daily_limit": 2000
+        },
+        {
+          "scope": "IMAGE_DELIVERY_BYTES",
+          "paused": false,
+          "enabled": true,
+          "live_limit": null,
+          "daily_limit": 64000000
+        }
+      ],
+      "signupPolicy": {
+        "enabled": true,
+        "termsVersion": "terms-2026-10-10",
+        "policyVersion": "simple-signup-2026-10-10",
+        "privacyVersion": "privacy-2026-10-10",
+        "admissionEnabled": true
+      },
+      "countries": [
+        {
+          "country": "KR",
+          "minimumAge": 14
+        },
+        {
+          "country": "TH",
+          "minimumAge": 13
+        },
+        {
+          "country": "US",
+          "minimumAge": 13
+        }
+      ],
+      "moderatorCount": 1
+    },
+    "environment": {
+      "desiredValuesVerified": 13,
+      "newProductionVariables": 12,
+      "existingCleanupEnabledPreserved": true,
+      "credentialChanges": 0,
+      "previewChanges": 0
+    },
+    "weeklyBackup": {
+      "installedOnMaster": true,
+      "schedule": "Sunday 03:00 Asia/Seoul",
+      "utcCron": "0 18 * * 6",
+      "environment": "moemoa-backup",
+      "weeklyGate": true,
+      "manualGate": false,
+      "futureScheduledRunObserved": false,
+      "automaticDeletion": false,
+      "rpo7dRto24h": "Goals; not asserted guarantees"
+    },
+    "catalogExternalPreservation": {
+      "fileId": "1IBM5fXWqly3cm_I7yqm-UqfnRi2xdkLi",
+      "url": "https://drive.google.com/file/d/1IBM5fXWqly3cm_I7yqm-UqfnRi2xdkLi/view?usp=drivesdk",
+      "parentFolder": "1nxgXQ2ioUYFAQCWz-FscLcdcdUGFIRwa",
+      "privateOwnerOnlyVerified": true,
+      "bytes": 162670421,
+      "sha256": "8bec1255787e4947b8a3380af408cb31b657294e2959ed28772fb4fbb8f39ae5",
+      "newRetrieval": true,
+      "aesGcmAuthenticated": true,
+      "keyIncluded": false,
+      "operationalSnapshotFiles": 59661,
+      "fullIngestionHistoryCompletenessClaimed": false,
+      "priorCatalogBackupContentTransitionVerified": true
+    },
+    "httpSmoke": {
+      "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "production": true,
+      "checks": [
+        {
+          "path": "/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/archive/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/titles/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/record/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/boards/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/auth/start/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true
+        },
+        {
+          "path": "/legal/public-sharing-2026-10-11/",
+          "method": "GET",
+          "expected": 200,
+          "status": 200,
+          "pass": true,
+          "noticeRevisionPresent": true
+        },
+        {
+          "path": "/api/public-image?asset=00000000-0000-0000-0000-000000000000&publication=00000000-0000-0000-0000-000000000000&variant=thumb",
+          "method": "GET",
+          "expected": 404,
+          "status": 404,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "noStore": true
+        },
+        {
+          "path": "/api/public-image?asset=00000000-0000-0000-0000-000000000000&preview=1&variant=thumb",
+          "method": "GET",
+          "expected": 401,
+          "status": 401,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "noStore": true
+        },
+        {
+          "path": "/api/public-image",
+          "method": "POST",
+          "expected": 400,
+          "status": 400,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "noStore": true
+        },
+        {
+          "path": "/api/public-image",
+          "method": "POST",
+          "expected": 401,
+          "status": 401,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "noStore": true
+        },
+        {
+          "path": "/api/public-image",
+          "method": "OPTIONS",
+          "expected": 204,
+          "status": 204,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": null,
+          "noStore": true
+        },
+        {
+          "path": "/api/public-image?asset=00000000-0000-0000-0000-000000000000&publication=00000000-0000-0000-0000-000000000000",
+          "method": "GET",
+          "expected": 403,
+          "status": 403,
+          "pass": true,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "noStore": true
+        }
+      ],
+      "publicContentDecodeOrWithdrawalVerified": false,
+      "syntheticPublicationCreated": false,
+      "status": "DEPLOYED_HTTP_ROUTES_AUTH_ORIGIN_NO_STORE_PASS"
+    },
+    "observation": {
+      "run": {
+        "conclusion": "success",
+        "headSha": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "status": "completed",
+        "url": "https://github.com/Newrred/anime-collector/actions/runs/38193643098"
+      },
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38193643098",
+      "manualObserveOnly": true,
+      "newCleanupExecuted": false,
+      "alerts": [],
+      "newCapacityThresholdAlertDeliveryClaimed": false
+    },
+    "browser": {
+      "existingGoogleLoginAndBothSyncStatusesPass": true,
+      "oldUserRecordsModifiedForPublishing": false,
+      "synthetic24x30FixturePrepared": true,
+      "fixtureNotSavedOrPublished": true,
+      "currentSignupReceiptAbsentForThisExistingAccount": true,
+      "rightsConsentAndCurrentSignupNeedDirectUserConfirmation": true,
+      "publicContentImageDecodeAndWithdrawalPending": true
+    },
+    "rollback": [
+      "Immediately disable publication reads/writes in DB to stop public exposure; retain reports/moderator access and private data.",
+      "Keep delivery limits until public reads are closed. Revert only exact changed config, never usage counters or rights/consent evidence.",
+      "Use versioned budget rollback only if active settings exactly match the candidate; preserve additive functions/migration history.",
+      "Restore Production environment baseline and deploy approved prior source through Git master; no CLI production promotion or destructive down migration.",
+      "Disable MOEMOA_BACKUP_WEEKLY_ENABLED and restore prior manual-only workflow. Preserve all ZIP/state/parent files, the independent recovery key and encrypted catalog-input archive; no automatic retention deletion."
+    ],
+    "remaining": [
+      "User-authorized synthetic card personal-use confirmation, current signup confirmation and public policy consent",
+      "On this exact production source: actual public image decode, board/home/follow/report/moderation and UI withdrawal/old-image-URL denial; no old private records published",
+      "First future scheduled backup observation and continued capacity monitoring; restored serving stays separately closed until fresh safety state reconciliation"
+    ]
   }
 }

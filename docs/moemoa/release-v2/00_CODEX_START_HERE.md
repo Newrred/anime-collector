@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-12 운영 공개 적용 완료·마지막 사용자 게시 검증 대기:** 사용자 exact후보 “전체 적용 승인”으로 ea8f388을 master Git→Vercel READY→www 동일SHA로 적용, master CI38193447190 SUCCESS. 직전 증분 백업38193002483 SUCCESS/chain3·사본삭제0·manual gate false. DB3 추가/41migration·Public/미니홈/팔로우/신고·현재가입확인·고정정책 활성/독립 readback PASS; 전달2000회64MB/일·전역20MiB 유지. 일요일03:00 주간workflow 설치/별도gate true·향후 예약실행 성공/RPO 보장 주장 안함. 카탈로그 암호화 ZIP Drive 비공개 보관→새회수 SHA/AES-GCM PASS. HTTP13·기존Google 로그인/두 sync·운영 observe-only38193643098 PASS. 새권리동의/현재가입확인 및 실제 운영 게시·이미지 decode/철회/old URL 검증은 대기라 W19/W20 전체 DONE/첫출시 최종인수를 주장하지 않는다. 기존 사용자 사진/비공개자료 자동공개0. [현재 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionApplication_04를 따른다.
+
+
 > **2026-10-12 최종 검토 후보 준비 완료:** `ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4`의 CI38191194150 전체 SUCCESS. 기존 Public 앱·운영 백업을 결합하고 주간 예약의 별도 차단변수/8검사를 추가했다. 사용자가 복구키 독립보관을 직접 확인. ACTIVE4292 카탈로그 생성자료·표지4292의 인증백업 결속과 59,661개 metadata ZIP/AES-GCM 왕복검증 PASS. 실제 백업 DB의 승인된4표 전체필드 일치·이전release 전환/복귀/같은 요청 재시도 PASS, transaction rollback·접근off·컨테이너정지 확인. 전체 ingestion workspace/history 보존을 주장하지 않는다. 외부 카탈로그 업로드·운영 master/DB/Public/예약 적용0. 정확한 후보 승인→암호화 자료 외부보관/회수확인→주간운영 적용→D06 운영 적용과 배포 후 확인이 다음이다. 기존 완료 검사를 반복하거나 새 원격 catalog 게시/복구 serving 완료로 확대하지 않는다.
 
 > **2026-10-12 이 PC 증분 DB 복원 검증 완료:** 새로 받은 full/delta/state6·4,310파일 검증에 이어99테이블/7확장 실제 격리복원·최신 read-only 삭제/공개 replay·56합성계약·owner5/타계정거부5·익명/RLS PASS. network none/포트0/cron off·private/public off·컨테이너정지 확인. [인수 결과](01_RELEASE_EXECUTION_PLAN.md#handoff-20261012)와 [backup evidence](evidence/2026-10-10-external-backup-recovery.json)의 `thisPcIncrementalDatabaseRecovery20261012`를 우선한다. 운영쓰기·배포·Drive쓰기·예약0, `safeToServe:false`. 독립키/주간운영 인수 및 D06 승인·실제 serving 검증은 잔여이며 아래 DB복원 대기는 당시 이력이다.

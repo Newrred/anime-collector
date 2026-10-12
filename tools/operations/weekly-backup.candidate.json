@@ -1,14 +1,14 @@
 {
-  "status": "WEEKLY_SCHEDULE_PREPARED_PENDING_EXACT_APPROVAL",
+  "status": "EXACT_APPROVED_WEEKLY_SCHEDULE_INSTALLED_ENABLED",
   "version": 3,
   "policy": "RECOVERY-WEEKLY-RPO7D-20261011",
-  "enabled": false,
+  "enabled": true,
   "executorProposal": "GitHub Actions ubuntu-24.04 with pinned PostgreSQL17 container, Node24.14.1 and Python cryptography; environment moemoa-backup",
   "productionBranch": "master",
   "proposedSchedule": {
     "local": "Sunday 03:00 Asia/Seoul",
     "utcCron": "0 18 * * 6",
-    "installed": false,
+    "installed": true,
     "candidateFile": "tools/operations/weekly-backup.schedule.candidate.yml"
   },
   "sourceScope": "Encrypted weekly delta ZIP; latest database/journals; changed image bodies only",
@@ -43,9 +43,7 @@
     "verifiedBy": "GitHub environment secret names and successful manual run38153533963; values not read"
   },
   "futureRunnerRequirements": [
-    "Approve exact weekly workflow/master source and separate weekly gate activation",
-    "Preserve existing authenticated parents; no automatic deletion",
-    "Verify installed default-branch workflow and observe first scheduled run without asserting a future guarantee"
+    "Observe first future scheduled run and retain existing parent archives; never infer achieved RPO/RTO from cron installation"
   ],
   "retention": {
     "enabled": false,
@@ -124,10 +122,10 @@
     "environment": "moemoa-backup",
     "weeklyVariable": "MOEMOA_BACKUP_WEEKLY_ENABLED",
     "desiredValue": "true",
-    "currentValue": "absent/disabled",
+    "currentValue": "true",
     "existingManualVariable": "MOEMOA_BACKUP_RUN_ENABLED",
     "existingManualValue": "false",
-    "installed": false,
+    "installed": true,
     "manualWorkflowPreservedFrom": "d8bf945051854ca60398664de54105a49a4ea2c2",
     "variableResolution": "Environment-scoped gate is evaluated in the first job step after environment selection"
   },
@@ -151,6 +149,6 @@
       "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
       "url": "https://github.com/Newrred/anime-collector/actions/runs/38191194150"
     },
-    "productionApplied": false
+    "productionApplied": true
   }
 }
