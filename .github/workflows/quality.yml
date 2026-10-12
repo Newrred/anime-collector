@@ -42,6 +42,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Verify weekly backup schedule admission (synthetic only)
+        run: node --test tests/operations/weeklySchedule.test.mjs
       # Catalog image decode tests also require a real browser.
       - run: npx playwright install --with-deps chromium
       - run: npm run test:unit
