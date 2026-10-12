@@ -57,3 +57,6 @@ Invoke-RestMethod https://www.moemoa.xyz/build-info.json
 Git master에 개선본 cafcd2a를 force 없이 반영했다. Vercel Production `dpl_FL7SBpiDdBVRhWmkdi24y6DvQego` READY, source=Git/master/cafcd2a, www의 commit/checkoutCommit=cafcd2a·source=vercel-git·semanticMatch=true를 확인했다. build log의 변경 경로는 `vercel.json` 하나이며 기존 배포와 같은 설정 hash/semanticMatch를 유지한다. `workingTreeDirty=true`를 깨끗한 build로 보고하지 않는다.
 
 실제 운영 `/`, `/titles/`, `/minihome/`, `/data/`, `/help/`, `/terms/`, `/privacy/`, `/admin/` HTTP200. 브라우저에서 작업별 도움말 펼침과 데이터 작업 메뉴를 읽기 확인했다. 개인 자료 변경은 없다. 인계 후속 commit은 문서만 변경하고 앱·API·DB·환경·의존성은 개선본과 동일함을 확인한 뒤 전체 CI와 Git 운영 배포를 진행한다. 최종 운영 commit은 위의 live 조회 절차로 확인한다.
+
+## 기존 PC 수신 확인 (2026-10-12)
+E:/web/anime에서 origin/master b0541ff를 수신하고 codex/continue-after-arena-20261012를 만들었다. 이전 simple-signup-preview053d188·로컬 환경/키/개인 파일 보존. package/lock 변화0로 설치/업그레이드 없이 Node24.14.1·기존 의존성 사용. 로컬 전용 .env.development.local은 test account/publication client 및 기존 production catalog 공개 읽기 연결이며 Git 제외. 서버 http://127.0.0.1:4363/ 실행/6경로 HTTP200·실제 검색→catalog 결과 표시 확인. 당시 www commit/checkoutCommit=b0541ff/source vercel-git. 서버 API/Google·게시·DB복구 검증과 구분한다. 새 DB/운영 배포 없음. 상세는 개선 ExecPlan19절.

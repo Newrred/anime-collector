@@ -114,3 +114,14 @@
 롤백: 필요할 때 배포 전 기준33de5b4 이후의 개선 앱 변경을 검토된 revert commit으로 되돌리고 동일 Git master 경로와 CI/운영 SHA 확인을 따른다. force push·CLI promote·DB 복원·원본 이미지 변경은 없다.
 
 - 18절 실행: cafcd2a의 force 없는 master 반영 완료. Vercel Production FL7SBpiDdBVRhWmkdi24y6DvQego READY/www commit·checkoutCommit=cafcd2a/source=vercel-git/semanticMatch=true 확인. 8경로 HTTP200, 도움말/데이터 작업 메뉴 읽기 확인. 기존 vercel.json만 build 시 정규화되며 dirty=true/두 hash는 이전 운영과 같다. 원본 자료·DB·설정 변경0. portable 인계 문서와 현행 시작/진행판에 기록했으며 후속 문서 commit의 전체 CI→master→최종 운영 SHA 확인을 계속한다.
+
+## 19. 기존 PC 재개 환경 준비 (2026-10-12)
+사용자 요청은 다른 PC 최신 작업을 이 PC에 업데이트하고 이어갈 개발 환경 준비다. 기존 simple-signup-preview053d188과 로컬 개인/환경 파일을 보존하고 master를 origin/master b0541ff로 fast-forward, 새 codex/continue-after-arena-20261012 브랜치를 만들었다. 앱/lock 변경 없이 기존 Node24.14.1·의존성을 사용한다. ignored .env.development.local에 기존 test의 공개 client 변수와 기존 production catalog 읽기 설정을 연결하고 localhost4363을 기동한다. 원격 DB/정책/Secret/운영 배포 변경 없이 실제 local HTTP/UI와 Git 기준을 확인한다. 서버 API/실제 Google 왕복은 별도 환경의 검증이며 로컬 Astro 화면 기동만으로 성공을 주장하지 않는다.
+
+### 19절 실제 준비 결과
+- 읽은 문서/소스: AGENTS, 시작/확정결정, 최신 운영 인수, 이 ExecPlan, 기존 작업판, PLANS·QA07·보고09, package/lock·supabaseClient/platformPublication. 원격 master b0541ff의 최신 방향을 우선했다.
+- Git: fetch 성공, 로컬 master8fb4b49→b0541ff fast-forward, 기존053d188 작업브랜치 보존, 새 codex/continue-after-arena-20261012. 원격 master와 준비 기준 SHA 일치. 실제 www/build-info HTTP200·commit/checkoutCommit=b0541ff·source vercel-git 확인(semanticMatch의 위치는 이번 요약에서 검증하지 않음).
+- 환경: Node24.14.1/npm11.11.0, package/lock은 기존053d188 대비 차이0·기존 astro5.17.2 의존성 재사용. npm ci/업그레이드0. 로컬 제외 .env.development.local 새로 작성: 기존 test의 PUBLIC_ client 설정, 기존 prod catalog 공개 읽기, PUBLIC_SITE_URL localhost4363. 두 키는 sb_publishable 형식 확인, 서비스 비밀값은 넣지 않음.
+- 실행/증거: node node_modules/astro/astro.js dev --host 127.0.0.1 --port4363, 프로세스22292/ready 로그 확인. 최초 즉시 요청은 기동 전 실패했고 ready 뒤 /·titles·archive·data·help·minihome HTTP200. 실제 앱 Collection 표시·검색 펼치기·Frieren 입력→실제 catalog 후보 표시→닫기·Titles 이동 확인. 별도 개인 기록 저장/원격 게시·삭제·동의 없음.
+- 파일/DB/복귀: tracked 변경은 이 계획과 기존 인수문서의 로컬 재개 기록만. DBmigration/원격설정/운영push/배포0, ignored env와 로그는 Git 제외. 로컬 연결을 되돌리려면 이번 .env.development.local을 안전하게 보관/제거하고 서버만 재시작하며 기존 .env.local/test/prod 원본은 보존한다.
+- 보안/한계/다음: 운영 DB/복구키/CA 파일 존재만 확인(값 출력0), 로컬 화면 연결 범위만 실제 검증. Google OAuth·Vercel 서버 API·Public 게시·Docker 복구·기존astro check370오류를 PASS로 바꾸지 않음. 다음은 최신 운영 기준 위에서 사용자 요청한 수정 또는 기존 작업판의 잔여를 한 항목씩 실행한다. 추가 준비 키 없음.
