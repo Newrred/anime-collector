@@ -1,5 +1,13 @@
 # 01. 확정 결정과 미정 게이트
 
+## Decision Log — COLLECTION-HOME-REALIGNMENT-20261013
+
+- CONFIRMED: 사용자 첨부 MOEMOA_COLLECTION_HOME_REALIGNMENT_2026-10-13.zip에 대해 “작업 진행해줘”. 컬렉션을 개인 미니홈의 중심으로, 기존 작품 선반과 이미지 보드를 두 유형의 묶음으로 구성하는 로컬 구현 승인. 기존 별도 공간 유지 제안을 대체한다.
+- 기존 shelfId/boardId/cardId/homeId·감상 기록·표지 뒤 실제기억/PC옆·모바일아래 펼침과 private/public 경계 유지. 과거 취소한 여러 실험 레이아웃/컬렉션을 작품 탭으로 이동하는 제안은 재개하지 않는다.
+- 기본안: 제목/승인 표지만 작품 선반 공개, 개인 평점/감상/태그/기억은 자동 포함하지 않음. 편집 저장과 공개 게시 별도, 새로운 typed source 계약은 기존 서버 위 additive 후보로 준비. 원격 적용/공개 범위 활성/master 배포는 정확후보 승인이 필요하다.
+- 원문은 references/collection-home-realignment-20261013, 실행은 기존 release-v2/01의 W18 교정 절과 단일03. 기존 완료 결과를 취소하지 않고 새 관계의 수용 조건을 추가한다.
+
+
 > **2026-10-11 CARD-PUBLIC-SIMPLE-01 · 사용자 확정:** 이미지 한 장 공개에 보드 생성/파일 재선택/준비/별도 preview 화면을 요구하지 않는다. 카드의 공개·비공개 선택과 권리·일반 콘텐츠·게시 동의 1개, 저장으로 정리한다. 서버의 정확한 사본/hash/revision/정책/신고/철회 검증은 내부에서 유지한다. 비공개 전환은 현재 공개 사본을 모든 전시에서 제거하되 원본은 보존하며 새 명시 동의로 재게시할 수 있다. 기존 영구 삭제/운영자 가림 fence는 해제하지 않는다. 기존 W08/W09/W10에 흡수, 운영 migration/배포 승인은 별도.
 
 ## Decision Log — FIRST-PUBLIC-LAUNCH-CLOSEOUT-20261011

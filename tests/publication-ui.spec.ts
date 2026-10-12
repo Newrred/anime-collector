@@ -636,6 +636,7 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
 
 test("explicit selection → exact public preview → fresh anonymous context → Board withdrawal", async ({ page, context, browser }) => {
   const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page);
+  await page.getByRole("button", { name: "Close sharing", exact: true }).click();
   await page.locator('.memory-boards__cards li').filter({ hasText: 'Shared memory' }).getByRole('link').first().click();
   await page.getByRole('tab', { name: 'Manage', exact: true }).click();
   await page.locator('summary').filter({ hasText: 'Board and home settings' }).click();

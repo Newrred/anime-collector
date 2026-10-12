@@ -2190,3 +2190,54 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 잔여와 다음1개: 새 고지·현재 가입확인·실제 이미지전달·카드 비공개 test 연결을 마감한다. D04 운영정책/국가 잔여, D03 실제 경보 수신, D05 별도 복구키/복구 인수는 그대로 남긴다. 다음은 기존 D06 최종 운영 후보의 변경목록·남은 조건을 한 번에 정리하는 것이다. 이번 test 승인을 운영/Public 활성 승인으로 확대하지 않는다.
 
 [원복 완료] Vercel Preview52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready, Source a6b6dda와 phone-test canonical alias 확인. 직접 build-info 경로는 미인증 HTML/브라우저 차단으로 별도 검증하지 못했으며 이를 live SHA PASS로 적지 않는다. 기존 원격master199613b 유지.
+
+## 2026-10-13 W18 컬렉션·미니홈 관계 교정 ExecPlan
+
+### 1. 목적
+한 컬렉션에서 기존 작품 선반과 이미지 보드를 선택/편집하고, 명시한 내용을 같은 구조의 공개 컬렉션으로 보여준다.
+### 2. 결정
+COLLECTION-HOME-REALIGNMENT-20261013 및 첨부01/02 계약. 이번 사용자 실행 지시는 로컬 구현/합성 검증 범위이며 원격 변경은 별도.
+### 3. 현재
+b0541ff + 로컬 인수 ba862d1. bookshelf shelves만 정규화·sync, board membership 별도, minihome entries는 publication만. selection hydration 유실을 코드 확인.
+### 4. 범위
+Owner Collection shell·typed layout·기존 Board embedding, 공개 설정 작업 canvas, hydration, typed title-shelf public 후보/동기화·구 writer 보호·호환URL. 기존 이미지 전달/신고/팔로우/권리 엔진 재사용.
+### 5. 설계
+bookshelf payload에 additive collection layout(version/sections 참조) 보존해 기존 title sync/backup 경로 사용. membership 복제 없음. title shelf 공개는 서버 bookshelf row·title row·승인 cover revision 대조, public DTO allowlist, private preload 금지. owner/visitor 데이터 공급자 별도.
+### 6. 파일
+BookshelfView/settings/Editor, MemoryBoardView embedding, Minihome controller/status/editor/snapshot, PublicationPanel hydration/layout, 기존 titleStateSync, public reader, 관련 migration/계약 tests/CSS/문구. 변경 필요 파일만 수정.
+### 7. migration
+로컬 additive candidate. 기존 shelf/board/card/home 삭제/ID 재생성 없음. typed source feature 기본off·legacy writer가 typed entries/layout을 누락 저장하면 거부. 운영/test DB 적용0.
+### 8. 체크포인트
+W18 두 유형 실제 owner 장면 → W06 version/layout 저장/sync/backup → W07/09/10/11 표지-only 선반의 prepare/publish/read/철회 → W12/13/14 관계/호환 → W19 로컬 SQL/실제 UI/PC·mobile 검증. 새 작업판/새 M 트리 없음.
+### 9. 검사
+수정 계약의 unit/격리SQL 및 실제 Chromium owner 두묶음·reload/cancel·관계경로·title-only 공개·기존 public 회귀. 개인 데이터0 합성 fixture. 1440/390/320 검수. 변경 없던99테이블 복구/국가/인증 기반 재시험0.
+### 10. 보안
+Private original/public projection 분리, 제목/표지만, old homeId/follow대상 유지. source/owner/version/hash/policy/cover 권리 재검증. 비공개 count/이름/감상 미노출.
+### 11. 관측
+상태/오류/집계만, 개인 본문/keys/토큰 로그0. 구현/합성/hosted/시각 결과 분리.
+### 12. 복귀
+UI commit revert·flag off, 원본 보존. 새typeddata 존재 뒤 구writer로 저장 금지. 삭제down migration 없음.
+### 13. 위험
+legacy normalize data손실·sync/backup roundtrip·새public타입권리·늦은load/draft덮기·내부1카드board자동전시를 계약으로 차단.
+### 14. 결정
+이번 목표와 기본안으로 local 진행. 정확한 원격migration/flag/deploy는 reviewable 후보/영향 준비 후 요청.
+### 15. 진행
+ZIP CRC/8sha검증 PASS, 첨부01/02와 현재코드 대조 완료. 첫 구현은 실제 source 참조2종 화면.
+### 16. 발견
+모든 board를 자동 배치하지 않고 사용자 선택으로 추가. 기존 title entity 저장/source보다 client titleKeys를 public사실로 신뢰하지 않는다.
+### 17. 완료보고
+실제 source/test/시각/DB후보·롤백·남은게이트를 이 절과 기존03에 기록한다. 원격 미실행을 명확히 표시한다.
+
+
+#### 2026-10-13 W18 로컬 구현·검증 보고
+
+1. 문서/근거: AGENTS.md, CODEX_START_HERE.md, 확정결정01, PLANS.md와 기존 release-v2 00/01/02/03, 첨부 README/01/02를 대조했다. 소스 근거: BookshelfView.jsx 24–105, bookshelfSettings.js 1–39, MemoryMinihome.jsx 39–136, MemoryPublicationPanel.jsx 87–198, minihomeView.js 3–69, titleStateSync.js 28–118 및 새 migration. Supabase/verify-before-claiming 기준 적용. 공식 RLS 문서 https://supabase.com/docs/guides/database/postgres/row-level-security 와 changelog.md도 확인했다.
+2. 가정/미결: 첨부 목표의 로컬 구현을 사용자 ‘작업 진행해줘’로 실행했다. 새 공개 선반의 기본안은 작품명·승인 표지만이다. 원격 Public 범위 승인으로 확대하지 않았다. 실제 새 typed 계약의 hosted A/B/익명·운영 PASS는 아직 없다.
+3. 계획: 이 문서의 마지막 W18 ExecPlan 및 기존03 현재 카드. 기존 owner 선반/보드/카드 ID·N:M membership·homeId·팔로우 대상·구URL 보존, 취소했던 실험적 Collection 레이아웃/작품 탭 이동은 재개하지 않았다.
+4. 변경: CollectionGroups/Profile과 공통 CollectionGroupTabs로 작품 선반과 명시 연결한 이미지 보드를 같은 Collection에 진열·선택·순서 변경·원본 유지 분리했다. BoardContent의 명령/미리보기를 재사용했다. Minihome/Board 공유 입력은 기존 선택·순서를 복원하고 동의·게시 operation은 복원하지 않는다. 공유는 별도 폭/작업 모드이며 갤러리를 숨긴다. 작업 중·미저장 상태의 묶음 이동을 보호한다. 타입별 public DTO·승인 표지 renderer·24개씩 로딩/기존 보드 3개 지연 미리보기를 추가했다. 의존성·작품/감상/사진 저장 엔진 교체0.
+5. DB/복귀: CLI 생성 20261012160330_collection_home_sections.sql 후보는 collection_home_enabled 기본false, typed source builder/owner choices, 구 writer 보호 trigger2개 및 owner Board 선택 복원 wrapper다. 기존 prepare/publish/read/신고/가입/권리/한도 엔진을 유지한다. 기존 게시 rows는 draft를 지우므로 실제 published_snapshot의 선택된 필드와 public card→원본 card 매핑만 복원한다. 새 title shelf는 현재 bookshelf version과 승인 catalog title/cover를 결속한다. private source version이 바뀌면 기존 선반 전시는 재확인 전 표시하지 않는다. 원격 적용0. 복귀는 flag off·UI commit revert, 새 typed payload에 대한 구 writer 거절은 유지, 삭제 down migration0.
+6. 실행/결과: node --test collectionHome/minihome/channelService/titleStateSync/memoryBoard 22 PASS. 전용 loopback runner의 Collection/선반 편집 4 PASS, 기존 public 대표 7 PASS(실제 공유 종료로 gallery에 복귀하는 검사1 수정 후 재실행 포함), 작성자/팔로우/차단/익명3 PASS. 고유 Chromium14 PASS, 기존 private-copy 조건1 SKIP(실환경 PASS로 사용하지 않음). 1440/390/320 넘침0, 합성 owner/visitor/preview 캡처 보존. isolated PostgreSQL 새 계약25 PASS, 기존 publication/postmoderation/self-declaration/image 51/33/28/31 PASS + prepare race PASS. npm run build 33 pages PASS; git diff --check PASS. 초기 일반 runner가 이 PC의 실제 Supabase dev 설정을 상속해 mock 로그인 검사가 실패한 것은 분리 기록하고, 비밀값/실계정 연결 없는 전용 runner로 교정했다. 새로운 표지 실패→게시 차단→재미리보기→동의 초기화도 직접 검사했다.
+7. 보안/권리/관측: private 원본/평점/상태/감상/태그/private count를 public 제목 선반 DTO에 넣지 않는다. 가짜 Memory0, 내부 간편공유 보드 자동 연결0, 사용자 동의 대리 수락0, 개인사진 업로드0, 원본 삭제0, 요금·국가·권리 확대0, 외부 발송0. 로그/캡처는 합성 fixture뿐이며 실제 사용자 토큰/사본/노트를 넣지 않았다. 계정 layout은 기존 bookshelf sync entity로 DB 백업 대상에 포함된다. 로컬 Memory metadata JSON에 선반이 포함된다고 주장하지 않는다.
+8. 남은 게이트/다음1개: exact 후보의 테스트 DB migration/default-off 적용을 승인받고, 새 타입의 hosted 인수로 이어간다. moemoa-test를 읽기전용 확인한 결과 새 migration 없음·계정 bookshelf source0·active catalog0이며 기존 reads/writes/minihomes/follows=true, 정책3값 TEST_ONLY_PHONE_WEB_20260927_01이다. 이 고지는 새 UI의 고정 공개 고지와 다르므로, 카탈로그/선반 자료와 policy/flag 후보를 준비·승인 없이 임의 활성하지 않는다. 운영 DB/master/배포/Public 활성은 별도이며 전체 출시 완료로 올리지 않는다.
+
+검증 증거는 evidence/2026-10-13-collection-home/에 보존한다. 기존 작업판·완료 이력·보류 항목은 유지한다.

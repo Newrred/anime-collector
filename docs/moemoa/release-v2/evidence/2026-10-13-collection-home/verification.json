@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-13",
+  "scope": "LOCAL_SYNTHETIC_COLLECTION_HOME_20261013",
+  "baseGitCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+  "attachmentSha256": "70d2a54406566e0ea62917bc822a45b0bd09efd8d8b51a474c2b0e697880a1d4",
+  "migration": {
+    "path": "supabase/migrations/20261012160330_collection_home_sections.sql",
+    "sha256": "8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68",
+    "remoteApplied": false,
+    "defaultEnabled": false
+  },
+  "verification": {
+    "unit": {
+      "passed": 22
+    },
+    "chromium": {
+      "uniquePassed": 14,
+      "conditionalSkipped": 1,
+      "newTypedHome": true,
+      "source": "isolated-loopback-mocked-Supabase"
+    },
+    "postgres": {
+      "newContractPassed": 25,
+      "legacy": [
+        51,
+        33,
+        28,
+        31
+      ],
+      "prepareRace": true,
+      "source": "isolated-PostgreSQL16-synthetic-Auth-and-Storage"
+    },
+    "build": {
+      "pages": 33,
+      "passed": true
+    },
+    "widths": [
+      1440,
+      390,
+      320
+    ],
+    "hostedTypedHome": false,
+    "google": false,
+    "physicalDevice": false,
+    "production": false
+  },
+  "testReadOnly": {
+    "project": "moemoa-test",
+    "ref": "nmgkhknponvzcwliajyk",
+    "collectionMigrationPresent": false,
+    "shelfSources": 0,
+    "activeCatalogs": 0,
+    "reads": true,
+    "writes": true,
+    "minihomes": true,
+    "follows": true,
+    "policyRevisions": [
+      "TEST_ONLY_PHONE_WEB_20260927_01",
+      "TEST_ONLY_PHONE_WEB_20260927_01",
+      "TEST_ONLY_PHONE_WEB_20260927_01"
+    ],
+    "remoteMutation": false
+  },
+  "preserved": [
+    "homeId",
+    "boardId",
+    "cardId",
+    "shelfId",
+    "N:M memberships",
+    "watch records",
+    "legacy public URLs",
+    "follow targets",
+    "private originals"
+  ],
+  "nextAction": "Approve the exact test migration candidate with its new type remaining off; prepare scoped hosted source/policy configuration separately."
+}

@@ -1,0 +1,57 @@
+Visual test server: http://127.0.0.1:8436
+02:02:13 [moemoa-development-catalog] Development catalog is disabled (workspace not configured).
+02:02:13 [types] Generated 1ms
+02:02:13 [content] Syncing content
+02:02:13 [content] Astro config changed
+02:02:13 [content] Clearing content store
+02:02:14 [content] Synced content
+
+ astro  v5.17.2 ready in 1372 ms
+
+┃ Local    http://127.0.0.1:8436/
+
+02:02:15 watching for file changes...
+02:02:40 [200] / 101ms
+02:02:40 [200] / 103ms
+02:02:40 [200] / 104ms
+02:02:40 [200] / 105ms
+02:02:40 [200] / 105ms
+02:02:40 [200] / 106ms
+02:02:40 [200] / 107ms
+02:02:40 [200] / 107ms
+02:02:40 [200] / 108ms
+02:02:40 [200] / 108ms
+02:02:40 [200] / 109ms
+02:02:40 [200] / 110ms
+02:02:40 [200] / 110ms
+02:02:40 [200] / 111ms
+02:02:40 [200] / 111ms
+02:02:40 [200] / 112ms
+02:02:40 [200] / 112ms
+02:02:40 [200] / 113ms
+02:02:40 [200] / 113ms
+02:02:40 [200] / 114ms
+02:02:40 [200] / 2ms
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › tests\bookshelf-editor.spec.ts:24:1 › shelf editor keeps title selections independent through search, shelf switching, cancel and reload
+02:02:43 [200] / 2ms
+02:02:45 [200] / 3ms
+02:02:46 [200] / 2ms
+02:02:47 [200] / 4ms
+02:02:47 [200] / 3ms
+[2/4] [chromium] › tests\bookshelf-editor.spec.ts:92:1 › shelf editor retains staged selections after storage failure and can discard them
+02:02:48 [200] / 2ms
+02:02:48 [200] / 3ms
+02:02:49 [200] / 2ms
+[3/4] [chromium] › tests\collection-home.spec.ts:8:1 › one owner Collection renders an existing shelf and explicitly connected Board; unlink keeps originals
+02:02:50 [200] / 2ms
+02:02:50 [200] / 3ms
+02:02:52 [200] / 3ms
+[4/4] [chromium] › tests\collection-home.spec.ts:65:1 › typed public shelf hydrates, needs fresh consent, publishes, and visitor never loads private sources
+02:02:53 [200] / 3ms
+02:02:54 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+02:02:54 [200] /public/home/ 3ms
+  4 passed (13.4s)

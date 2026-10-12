@@ -1,0 +1,30 @@
+✔ bookshelf settings cannot appear under a different local or account owner (3.9335ms)
+✔ malformed or oversized shelf preferences stay bounded and never affect title records (1.8826ms)
+✔ archive facets require the actual title binding and all conditions on the same character (1.084ms)
+✔ typed layout retains existing IDs, backup JSON roundtrip and rejects newer-client data loss (16.5962ms)
+✔ malformed stored collection cannot be silently overwritten (0.5833ms)
+✔ public title shelf allows Memory0 catalog titles and strips all private metadata (2.3042ms)
+✔ owner draft survives controller load without restoring consent or a publish operation (5.168ms)
+✔ private board normalizes bounded editable fields (5.1513ms)
+✔ board rejects empty or overlong text (1.9664ms)
+✔ position keys remain lexicographically ordered and bounded (1.9276ms)
+✔ board membership is private, owner-scoped, and independently tombstoned (0.5065ms)
+✔ mini-home public DTO strips account/private extras and rejects duplicate entries (6.3241ms)
+✔ mini-home requires fresh consent and all visuals, retries preserve operation (4.2965ms)
+✔ cancelled or account-switched late preview never becomes publishable (17.3424ms)
+✔ stale preview rejection clears review and private transition uses latest revision (1.3444ms)
+✔ choice pagination appends public DTOs and recovered draft never becomes consented (1.4755ms)
+✔ first account sync uploads local titles while an empty phone downloads them (16.6486ms)
+✔ catalog-only titles and watch logs receive distinct stable identities (1.0917ms)
+✔ duplicate title identities stop sync before either copy can be overwritten (0.6182ms)
+✔ a stale empty device cannot delete the server title without a baseline (0.2794ms)
+✔ explicit local deletion creates a tombstone only from an acknowledged baseline (0.5541ms)
+✔ simultaneous edits to the same title do not overwrite either version (0.3921ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 427.0299

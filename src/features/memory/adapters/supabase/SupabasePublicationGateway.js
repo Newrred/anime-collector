@@ -1,7 +1,7 @@
 // Explicit publication operations only; never receives an entire private card/board bundle.
 const SAFE_ERRORS = new Set([
   "PUBLIC_SIGNUP_REQUIRED", "PUBLIC_SIGNUP_UNAVAILABLE",
-  "AUTH_REQUIRED", "PUBLICATION_DISABLED", "PUBLICATION_RESTRICTED", "INVALID_SELECTION",
+  "COLLECTION_CLIENT_UPDATE_REQUIRED", "AUTH_REQUIRED", "PUBLICATION_DISABLED", "PUBLICATION_RESTRICTED", "INVALID_SELECTION",
   "DUPLICATE_CARD", "NOT_FOUND", "PUBLIC_VISUAL_NOT_READY", "PUBLICATION_CONFLICT",
   "INVALID_OPERATION", "OPERATION_MISMATCH", "CONSENT_MISMATCH", "PREVIEW_CHANGED",
   "RATE_LIMITED", "MODERATOR_REQUIRED", "CONTENT_POLICY_CHANGED", "CONTENT_REVIEW_REQUIRED",
@@ -81,6 +81,7 @@ export class SupabasePublicationGateway {
 
   getHome(options) { return this.request("get_memory_minihome", {}, options); }
   listHomeBoards(after, options) { return this.request("list_memory_minihome_boards", { p_after: after }, options); }
+  listHomeShelves(options) { return this.request("list_memory_minihome_shelves", {}, options); }
   prepareHome(revision, selection, options) {
     return this.request("prepare_memory_minihome", { p_expected_revision: revision, p_selection: selection }, options);
   }

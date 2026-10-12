@@ -1,0 +1,232 @@
+
+> d-anime-site@0.0.1 prebuild
+> node scripts/write-build-info.mjs
+
+Build provenance changed paths: M docs/moemoa/01_CONFIRMED_DECISIONS_AND_OPEN_GATES.md
+ M docs/moemoa/release-v2/00_CODEX_START_HERE.md
+ M docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md
+ M docs/moemoa/release-v2/02_ACCEPTANCE_CONTRACTS.md
+ M docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md
+ M src/components/collection/ChannelHeader.jsx
+ M src/features/bookshelf/BookshelfView.jsx
+ M src/features/bookshelf/bookshelfSettings.js
+ M src/features/memory/adapters/supabase/SupabasePublicationGateway.js
+ M src/features/memory/application/createMinihomeController.js
+ M src/features/memory/application/createPublicationController.js
+ M src/features/memory/components/BoardCollectionGrid.tsx
+ M src/features/memory/components/MemoryBoardView.jsx
+ M src/features/memory/components/MemoryMinihome.jsx
+ M src/features/memory/components/MemoryPublicationPanel.jsx
+ M src/features/memory/components/MinihomeSnapshot.jsx
+ M src/features/memory/components/memory-publication.css
+ M src/features/memory/components/publicationCopy.js
+ M src/features/memory/domain/minihomeView.js
+ M src/features/memory/runtime/platformPublication.js
+ M src/features/titles/application/titleStateSync.js
+ M tests/publication-ui.spec.ts
+ M tests/unit/channelService.test.mjs
+?? docs/moemoa/references/collection-home-realignment-20261013/
+?? docs/moemoa/release-v2/evidence/2026-10-13-collection-home/
+?? scripts/run-collection-home-e2e.mjs
+?? src/components/collection/CollectionGroupTabs.jsx
+?? src/features/bookshelf/CollectionGroups.jsx
+?? src/features/bookshelf/CollectionProfile.jsx
+?? src/features/bookshelf/collection-home.css
+?? src/features/memory/components/PublicTitleShelf.jsx
+?? supabase/migrations/20261012160330_collection_home_sections.sql
+?? tests/collection-home.spec.ts
+?? tests/unit/collectionHome.test.mjs
+?? tools/operations/__pycache__/
+?? tools/publication-boundary/collection-home-contract.sql
+?? tools/publication-boundary/run-collection-home.sh
+
+> d-anime-site@0.0.1 build
+> astro build
+
+02:04:42 [vite] Re-optimizing dependencies because vite config has changed
+02:04:43 [content] Syncing content
+02:04:43 [content] Synced content
+02:04:43 [types] Generated 339ms
+02:04:43 [build] output: "static"
+02:04:43 [build] mode: "static"
+02:04:43 [build] directory: E:\web\anime\dist\
+02:04:43 [build] Collecting build info...
+02:04:43 [build] ✓ Completed in 378ms.
+02:04:43 [build] Building static entrypoints...
+02:04:44 [vite] ✓ built in 1.54s
+02:04:44 [build] ✓ Completed in 1.62s.
+
+ building client (vite)
+02:04:44 [vite] transforming...
+02:04:47 [vite] ✓ 381 modules transformed.
+02:04:47 [vite] rendering chunks...
+02:04:47 [vite] computing gzip size...
+02:04:48 [vite] dist/_astro/TitlePosterTile.AWmmG5HJ.css                                       5.90 kB │ gzip:   1.53 kB
+02:04:48 [vite] dist/_astro/TopNavDataMenu.BvGONrMz.css                                        6.02 kB │ gzip:   1.57 kB
+02:04:48 [vite] dist/_astro/MemoryCardComposer._Es0pl_G.css                                    6.39 kB │ gzip:   1.59 kB
+02:04:48 [vite] dist/_astro/MemoryBoardView.C0l6qkQj.css                                       9.55 kB │ gzip:   2.06 kB
+02:04:48 [vite] dist/_astro/MemoryCardDetail.Dou3FOV2.css                                     10.83 kB │ gzip:   2.39 kB
+02:04:48 [vite] dist/_astro/title-hub.CsUM8CIO.css                                            11.25 kB │ gzip:   2.41 kB
+02:04:48 [vite] dist/_astro/memory-publication.YdFKxETN.css                                   20.01 kB │ gzip:   3.62 kB
+02:04:48 [vite] dist/_astro/BaseLayout.astro_astro_type_script_index_0_lang.BMol58Ze.js        0.13 kB │ gzip:   0.13 kB
+02:04:48 [vite] dist/_astro/titleCollectionPreference.Ba221HFR.js                              0.30 kB │ gzip:   0.23 kB
+02:04:48 [vite] dist/_astro/web.DC7pMrpW.js                                                    0.38 kB │ gzip:   0.25 kB
+02:04:48 [vite] dist/_astro/retirePublicationBeforeDelete.CRcqlAss.js                          0.40 kB │ gzip:   0.29 kB
+02:04:48 [vite] dist/_astro/firstMemoryViewSuggestion.DmALLVCm.js                              0.67 kB │ gzip:   0.40 kB
+02:04:48 [vite] dist/_astro/useAuthSession.Dcf1c5i0.js                                         0.72 kB │ gzip:   0.46 kB
+02:04:48 [vite] dist/_astro/jsx-runtime.D_zvdyIk.js                                            0.73 kB │ gzip:   0.46 kB
+02:04:48 [vite] dist/_astro/titleCharacters.C37ojrE5.js                                        0.76 kB │ gzip:   0.49 kB
+02:04:48 [vite] dist/_astro/BaseLayout.astro_astro_type_script_index_1_lang.DJV0bvVm.js        0.81 kB │ gzip:   0.49 kB
+02:04:48 [vite] dist/_astro/web._cGz47Ka.js                                                    0.84 kB │ gzip:   0.40 kB
+02:04:48 [vite] dist/_astro/PublicSharingNotice.CoTSuYnk.js                                    0.89 kB │ gzip:   0.66 kB
+02:04:48 [vite] dist/_astro/catalogTitleQuality.CX2u2t1i.js                                    1.02 kB │ gzip:   0.67 kB
+02:04:48 [vite] dist/_astro/useUiPreferences.DjNVTDh9.js                                       1.05 kB │ gzip:   0.56 kB
+02:04:48 [vite] dist/_astro/preload-helper.BlTxHScW.js                                         1.11 kB │ gzip:   0.65 kB
+02:04:48 [vite] dist/_astro/PublicSignupNotice.Cqb7jw91.js                                     1.12 kB │ gzip:   0.74 kB
+02:04:48 [vite] dist/_astro/MemoryMinihome.ByoikRWh.js                                         1.13 kB │ gzip:   0.55 kB
+02:04:48 [vite] dist/_astro/MemoryBoardView.C_0tTU80.js                                        1.15 kB │ gzip:   0.57 kB
+02:04:48 [vite] dist/_astro/TaskSections.LLlMt-CN.js                                           1.16 kB │ gzip:   0.57 kB
+02:04:48 [vite] dist/_astro/useUnsavedNavigation.CcLBzwGL.js                                   1.35 kB │ gzip:   0.69 kB
+02:04:48 [vite] dist/_astro/LegacyLibraryRoute.B8LZaW0u.js                                     1.39 kB │ gzip:   0.70 kB
+02:04:48 [vite] dist/_astro/memoryCardNavigation.CM-n-Xkd.js                                   1.56 kB │ gzip:   0.77 kB
+02:04:48 [vite] dist/_astro/SignupComplete.DUQT0fq4.js                                         1.61 kB │ gzip:   0.97 kB
+02:04:48 [vite] dist/_astro/ChannelHeader.BnL7p6VB.js                                          1.65 kB │ gzip:   0.80 kB
+02:04:48 [vite] dist/_astro/PublicLinkCopy.CJ_OCTGS.js                                         1.66 kB │ gzip:   0.99 kB
+02:04:48 [vite] dist/_astro/MemoryVisual.Dwq1hYAc.js                                           1.77 kB │ gzip:   0.83 kB
+02:04:48 [vite] dist/_astro/MemoryRouteShell.EBXumKo9.js                                       1.86 kB │ gzip:   1.12 kB
+02:04:48 [vite] dist/_astro/catalogCoverReference.Ck0UyaMl.js                                  2.14 kB │ gzip:   0.87 kB
+02:04:48 [vite] dist/_astro/characterPinRepo.D9YRDKYC.js                                       2.14 kB │ gzip:   0.80 kB
+02:04:48 [vite] dist/_astro/titleNavigation.C48jasxd.js                                        2.32 kB │ gzip:   0.99 kB
+02:04:48 [vite] dist/_astro/TitleCover.BcvFQCG7.js                                             2.34 kB │ gzip:   1.19 kB
+02:04:48 [vite] dist/_astro/PublicBoardSnapshot.CZnwwK6a.js                                    2.96 kB │ gzip:   1.33 kB
+02:04:48 [vite] dist/_astro/AuthCallbackClient.C3NsaFwm.js                                     3.16 kB │ gzip:   1.58 kB
+02:04:48 [vite] dist/_astro/useMemoryReturnNavigation.CMxGyg4A.js                              3.18 kB │ gzip:   1.22 kB
+02:04:48 [vite] dist/_astro/catalogConsumer.CNfdNoGE.js                                        3.19 kB │ gzip:   1.48 kB
+02:04:48 [vite] dist/_astro/PrivateMemoryCardPreview.DzvBQDrg.js                               3.28 kB │ gzip:   1.64 kB
+02:04:48 [vite] dist/_astro/PublicMinihome.BIfOnIW6.js                                         3.30 kB │ gzip:   1.55 kB
+02:04:48 [vite] dist/_astro/TitleCharacters.XhMxoGcf.js                                        3.32 kB │ gzip:   1.49 kB
+02:04:48 [vite] dist/_astro/PublicMemoryBoard.CCcCSKtj.js                                      3.50 kB │ gzip:   1.61 kB
+02:04:48 [vite] dist/_astro/supabaseCatalogTitleResolver.ELIXFdWH.js                           3.64 kB │ gzip:   1.77 kB
+02:04:48 [vite] dist/_astro/minihomeView.DNvoUWiT.js                                           3.80 kB │ gzip:   1.25 kB
+02:04:48 [vite] dist/_astro/index.UCiZe19v.js                                                  3.89 kB │ gzip:   1.52 kB
+02:04:48 [vite] dist/_astro/TitlePosterTile.C5Gv514k.js                                        4.07 kB │ gzip:   1.39 kB
+02:04:48 [vite] dist/_astro/ImageInputHint.DNcui7Pb.js                                         4.96 kB │ gzip:   2.24 kB
+02:04:48 [vite] dist/_astro/CatalogDetail.C6-ASaaW.js                                          4.97 kB │ gzip:   1.97 kB
+02:04:48 [vite] dist/_astro/platformTitleResolver.BGr0n9wM.js                                  5.08 kB │ gzip:   2.14 kB
+02:04:48 [vite] dist/_astro/AdminDashboard.DeQ5dd6O.js                                         5.50 kB │ gzip:   2.55 kB
+02:04:48 [vite] dist/_astro/PublicProfilePage.BZEmsffV.js                                      5.76 kB │ gzip:   2.11 kB
+02:04:48 [vite] dist/_astro/HelpCenter.sf3U0QTD.js                                             5.86 kB │ gzip:   2.16 kB
+02:04:48 [vite] dist/_astro/simpleSignup.lugwlTCp.js                                           5.89 kB │ gzip:   2.64 kB
+02:04:48 [vite] dist/_astro/RecordStart.DhjodVkh.js                                            6.24 kB │ gzip:   2.78 kB
+02:04:48 [vite] dist/_astro/catalogRepository.2jSdHb7H.js                                      7.03 kB │ gzip:   2.55 kB
+02:04:48 [vite] dist/_astro/authRepo.6VCX8mfR.js                                               7.51 kB │ gzip:   3.01 kB
+02:04:48 [vite] dist/_astro/index.DiEladB3.js                                                  7.85 kB │ gzip:   3.05 kB
+02:04:48 [vite] dist/_astro/createPublicationController.JgA4-s4u.js                            8.07 kB │ gzip:   3.23 kB
+02:04:48 [vite] dist/_astro/index.B8vh4tkU.js                                                  8.21 kB │ gzip:   3.36 kB
+02:04:48 [vite] dist/_astro/PublicPageHeading.yzE6htaT.js                                      8.36 kB │ gzip:   3.70 kB
+02:04:48 [vite] dist/_astro/platformPublication.C4lwahZS.js                                    9.99 kB │ gzip:   3.24 kB
+02:04:48 [vite] dist/_astro/SimpleSignup.Bln-9jWt.js                                          10.82 kB │ gzip:   4.57 kB
+02:04:48 [vite] dist/_astro/platformPrivateImages.BwHcGFZ7.js                                 10.88 kB │ gzip:   4.38 kB
+02:04:48 [vite] dist/_astro/TitleCollectionView.C20jYAXD.js                                   11.40 kB │ gzip:   4.66 kB
+02:04:48 [vite] dist/_astro/MemoryRelationships.D1SF4qrX.js                                   12.01 kB │ gzip:   4.98 kB
+02:04:48 [vite] dist/_astro/ArchiveView.WLGgPJ_J.js                                           12.71 kB │ gzip:   4.81 kB
+02:04:48 [vite] dist/_astro/MemoryContentReview.WRp1swT1.js                                   13.57 kB │ gzip:   5.14 kB
+02:04:48 [vite] dist/_astro/memory-publication.C0S2YdTk.js                                    13.64 kB │ gzip:   5.45 kB
+02:04:48 [vite] dist/_astro/MemoryMinihome.BADOCrtd.js                                        14.61 kB │ gzip:   5.54 kB
+02:04:48 [vite] dist/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CDGfc0hd.js     15.36 kB │ gzip:   5.28 kB
+02:04:48 [vite] dist/_astro/TierBoard.DNnAShlJ.js                                             17.83 kB │ gzip:   5.84 kB
+02:04:48 [vite] dist/_astro/backupRepo.-Ox57Hj-.js                                            19.41 kB │ gzip:   6.21 kB
+02:04:48 [vite] dist/_astro/MemoryCardComposer.C6tcQzpI.js                                    21.02 kB │ gzip:   6.66 kB
+02:04:48 [vite] dist/_astro/BookshelfView.DGL_B07-.js                                         21.53 kB │ gzip:   7.63 kB
+02:04:48 [vite] dist/_astro/MemoryBoardView.CTVJHBM6.js                                       22.92 kB │ gzip:   7.27 kB
+02:04:48 [vite] dist/_astro/title-hub.XukcBYH-.js                                             23.93 kB │ gzip:   7.45 kB
+02:04:48 [vite] dist/_astro/ShowcaseGrid.BtiFtWag.js                                          24.24 kB │ gzip:   7.24 kB
+02:04:48 [vite] dist/_astro/ProfileCenter.BEA9UC_1.js                                         26.88 kB │ gzip:   9.14 kB
+02:04:48 [vite] dist/_astro/TitleHub.B2MF7qcK.js                                              27.89 kB │ gzip:   9.61 kB
+02:04:48 [vite] dist/_astro/DataCenter.W2RksKl1.js                                            32.15 kB │ gzip:  10.26 kB
+02:04:48 [vite] dist/_astro/MemoryCardDetail.BPG8jNrJ.js                                      50.20 kB │ gzip:  16.23 kB
+02:04:48 [vite] dist/_astro/Library.BQrnwuFN.js                                               59.07 kB │ gzip:  18.45 kB
+02:04:48 [vite] dist/_astro/index.hwi2RHdP.js                                                173.32 kB │ gzip:  45.88 kB
+02:04:48 [vite] dist/_astro/client.i8_f7Fkk.js                                               182.74 kB │ gzip:  57.60 kB
+02:04:48 [vite] dist/_astro/TopNavDataMenu.BxZPB7PK.js                                     1,046.06 kB │ gzip: 377.37 kB
+02:04:48 [WARN] [vite]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+02:04:48 [vite] ✓ built in 3.18s
+
+ generating static routes
+02:04:48 ▶ src/pages/admin.astro
+02:04:48   └─ /admin/index.html (+11ms)
+02:04:48 ▶ src/pages/archive.astro
+02:04:48   └─ /archive/index.html (+2ms)
+02:04:48 ▶ src/pages/auth/callback.astro
+02:04:48   └─ /auth/callback/index.html (+10ms)
+02:04:48 ▶ src/pages/auth/complete.astro
+02:04:48   └─ /auth/complete/index.html (+3ms)
+02:04:48 ▶ src/pages/auth/start.astro
+02:04:48   └─ /auth/start/index.html (+6ms)
+02:04:48 ▶ src/pages/boards.astro
+02:04:48   └─ /boards/index.html (+2ms)
+02:04:48 ▶ src/pages/catalog/detail.astro
+02:04:48   └─ /catalog/detail/index.html (+2ms)
+02:04:48 ▶ src/pages/data.astro
+02:04:48   └─ /data/index.html (+2ms)
+02:04:48 ▶ src/pages/help.astro
+02:04:48   └─ /help/index.html (+2ms)
+02:04:48 ▶ src/pages/legal/privacy-2026-10-09-draft.astro
+02:04:48   └─ /legal/privacy-2026-10-09-draft/index.html (+2ms)
+02:04:48 ▶ src/pages/legal/privacy-2026-10-10.astro
+02:04:48   └─ /legal/privacy-2026-10-10/index.html (+1ms)
+02:04:48 ▶ src/pages/legal/privacy-2026-10-10-test.astro
+02:04:48   └─ /legal/privacy-2026-10-10-test/index.html (+1ms)
+02:04:48 ▶ src/pages/legal/public-sharing-2026-10-11.astro
+02:04:48   └─ /legal/public-sharing-2026-10-11/index.html (+1ms)
+02:04:48 ▶ src/pages/legal/review.astro
+02:04:48   └─ /legal/review/index.html (+2ms)
+02:04:48 ▶ src/pages/legal/terms-2026-10-09-draft.astro
+02:04:48   └─ /legal/terms-2026-10-09-draft/index.html (+12ms)
+02:04:48 ▶ src/pages/legal/terms-2026-10-10.astro
+02:04:48   └─ /legal/terms-2026-10-10/index.html (+5ms)
+02:04:48 ▶ src/pages/legal/terms-2026-10-10-test.astro
+02:04:48   └─ /legal/terms-2026-10-10-test/index.html (+3ms)
+02:04:48 ▶ src/pages/library.astro
+02:04:48   └─ /library/index.html (+2ms)
+02:04:48 ▶ src/pages/memory/card.astro
+02:04:48   └─ /memory/card/index.html (+2ms)
+02:04:48 ▶ src/pages/memory/new.astro
+02:04:48   └─ /memory/new/index.html (+2ms)
+02:04:48 ▶ src/pages/minihome.astro
+02:04:48   └─ /minihome/index.html (+2ms)
+02:04:48 ▶ src/pages/moderation.astro
+02:04:48   └─ /moderation/index.html (+2ms)
+02:04:48 ▶ src/pages/privacy.astro
+02:04:48   └─ /privacy/index.html (+2ms)
+02:04:48 ▶ src/pages/profile.astro
+02:04:48   └─ /profile/index.html (+2ms)
+02:04:48 ▶ src/pages/public/board.astro
+02:04:48   └─ /public/board/index.html (+2ms)
+02:04:48 ▶ src/pages/public/home.astro
+02:04:48   └─ /public/home/index.html (+1ms)
+02:04:48 ▶ src/pages/record.astro
+02:04:48   └─ /record/index.html (+1ms)
+02:04:48 ▶ src/pages/terms.astro
+02:04:48   └─ /terms/index.html (+1ms)
+02:04:48 ▶ src/pages/tier.astro
+02:04:48   └─ /tier/index.html (+2ms)
+02:04:48 ▶ src/pages/title.astro
+02:04:48   └─ /title/index.html (+2ms)
+02:04:48 ▶ src/pages/titles.astro
+02:04:48   └─ /titles/index.html (+1ms)
+02:04:48 ▶ src/pages/u.astro
+02:04:48   └─ /u/index.html (+1ms)
+02:04:48 ▶ src/pages/index.astro
+02:04:48   └─ /index.html (+2ms)
+02:04:48 ✓ Completed in 245ms.
+
+02:04:48 [build] 33 page(s) built in 5.49s
+02:04:48 [build] Complete!
+
+> d-anime-site@0.0.1 postbuild
+> node scripts/finalize-service-worker.mjs

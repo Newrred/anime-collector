@@ -8,9 +8,9 @@ import "./board-collection-grid.css";
 type BoardSummary = { id: string; title: string; description?: string; cardCount: number; updatedAt?: string };
 type Runtime = Awaited<ReturnType<typeof getPlatformMemoryRuntime>>;
 type Preview = { bundle: Parameters<typeof loadMemoryVisual>[0]; visual: Awaited<ReturnType<typeof loadMemoryVisual>> };
-type Props = { boards: BoardSummary[]; runtime: Runtime; base?: string; locale?: string };
+type Props = { boards: BoardSummary[]; runtime: Runtime; base?: string; locale?: string; collection?: boolean };
 
-function BoardCollectionTile({ board, runtime, base, locale }: Omit<Props, "boards"> & { board: BoardSummary }) {
+function BoardCollectionTile({ board, runtime, base, locale, collection }: Omit<Props, "boards"> & { board: BoardSummary }) {
   const element = useRef<HTMLAnchorElement>(null);
   const [preview, setPreview] = useState<{ id: string; items: Preview[] } | null>(null);
   useEffect(() => {
@@ -37,7 +37,7 @@ function BoardCollectionTile({ board, runtime, base, locale }: Omit<Props, "boar
   }, [board.id, board.updatedAt, board.cardCount, runtime]);
   const items = preview?.id === board.id ? preview.items : [];
   return (
-    <a ref={element} className="board-collection" href={`${base}boards/?id=${encodeURIComponent(board.id)}`} data-astro-reload aria-label={board.title}>
+    <a ref={element} className="board-collection" href={collection ? `${base}?section=${encodeURIComponent(`MEMORY_BOARD:${board.id}`)}` : `${base}boards/?id=${encodeURIComponent(board.id)}`} data-astro-reload aria-label={board.title}>
       <div className={`board-collection__cover${items.length ? "" : " is-empty"}`}>
         {items.length ? Array.from({ length: 3 }, (_, index) => {
           const item = items[index];
@@ -60,8 +60,8 @@ function BoardCollectionTile({ board, runtime, base, locale }: Omit<Props, "boar
   );
 }
 
-export default function BoardCollectionGrid({ boards, runtime, base = "/", locale = "ko" }: Props) {
+export default function BoardCollectionGrid({ boards, runtime, base = "/", locale = "ko", collection = false }: Props) {
   return <div className="board-collection-grid">
-    {boards.map((board) => <BoardCollectionTile key={board.id} board={board} runtime={runtime} base={base} locale={locale} />)}
+    {boards.map((board) => <BoardCollectionTile key={board.id} board={board} runtime={runtime} base={base} locale={locale} collection={collection} />)}
   </div>;
 }

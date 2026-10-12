@@ -1,5 +1,10 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 컬렉션·미니홈 교정: 기존 선반·보드를 참조하는 두 유형 Collection, 공개 설정 작업 모드, 선택 복원, Memory0 작품 선반의 서버 공개 후보를 로컬 구현했다. 현행 기준 b0541ff/로컬 인수 ba862d1 이후이며 기존 ID·원본·공개 링크를 유지한다. 단일 현재 상태/다음 행동은 03의 기존 현재 작업 카드, 세부 설계는 01의 마지막 W18 ExecPlan, 새 수용 계약은 02의 Collection/Home v2 절을 따른다. 테스트/운영 DB·Public 활성·master push·배포는 미실행이며 exact 후보 승인 대기다.**
+
+
+<details><summary>교정 전 시작 문서의 2026-10-11 최신 요약 — 당시 이력 보존</summary>
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
@@ -233,3 +238,5 @@ M0가 이미 끝났으면 전체 감사를 반복하지 마세요.
 ## 저장소 이관 상태 (2026-09-23)
 
 2026-09-23에 M0를 마쳤고 당시 다음 작업은 W03이었다. 이 문장은 과거 이관 기록이다. 현재 재개점과 다음 작업은 `03_RELEASE_WORKBOARD.md`의 최신 표를 따른다. `SHA256SUMS.txt`는 전달받은 원본 ZIP 검증용이며, 진행 중 갱신된 문서의 현재 checksum이 아니다. 원본은 사용자 Downloads ZIP에 보존한다.
+
+</details>

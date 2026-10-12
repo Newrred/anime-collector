@@ -779,6 +779,20 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W18 컬렉션·미니홈 관계 교정 / 영향 W06·W07·W09·W10·W11·W19
+이번에 닫은 사용자 행동: 기존 작품 선반1 + 명시 연결한 이미지 보드1의 진열·재진입·연결 해제(원본 보존), Memory0 제목/승인 표지의 공개 후보.
+기준: 원격 master b0541ff / 로컬 인수 ba862d1 이후. 기존 homeId/boardId/cardId/shelfId·감상 기록·표지 옆 펼침 유지.
+이번 변경: versioned source-ref layout, 공통 묶음 메뉴, 기존 Board embedding, 별도 Sharing canvas, owner selection 복원, typed title-only public DTO/DB 후보.
+직접 검증: unit22 PASS, 고유 Chromium14 PASS/조건1 SKIP, 새 isolated SQL25 PASS, 기존 SQL51/33/28/31 및 prepare race PASS, build33 PASS, diff check PASS. PC1440/phone390/320 합성 캡처/evidence 보존.
+실환경 구분: 이번 hosted typed 공개·Google·실기기·운영 PASS0. 기존 exact-candidate 인수는 과거 증거로만 재사용.
+원격 읽기 확인: moemoa-test 새 migration 없음, bookshelf source0/catalog active0, 기존 정책3값 TEST_ONLY_PHONE_WEB_20260927_01. 쓰기0.
+차단: 새 DB/공개 범위/배포 exact 승인 없음. 새 타입 flag 기본off, 운영/master 변경0.
+다음 행동 하나: 로컬 후보의 테스트 DB migration(default-off) exact 승인 → 새 타입 hosted 인수 자료/설정 결속.
+```
+
+<details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>
+
+```text
 W/M: W14/W19 · M4/M5 test 고지·실제 이미지·철회 마감 / D04/Q11
 후보: 승인6c633bd / 실제 배포50ecbc9 / G2gqkAKY2WHXDmsb3rux9HcNYyjP
 완료: 사용자 직접 동의/저장→새 익명24×30 decode→비공개 저장→익명 unavailable/img0·개인 원본 유지
@@ -788,6 +802,9 @@ W/M: W14/W19 · M4/M5 test 고지·실제 이미지·철회 마감 / D04/Q11
 미완료: 원시 옛이미지 URL HTTP404·운영 적용, 실제 경보수신/D05 복구인수·별도키, D04 지역/권리 잔여
 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 추가 동의/재가입/기초DB 반복 없음
 ```
+
+</details>
+
 
 <details><summary>이전 카드 — 운영 후보 결속</summary>
 

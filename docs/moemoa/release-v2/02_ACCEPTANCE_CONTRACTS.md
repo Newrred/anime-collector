@@ -947,3 +947,25 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### W15/D03 위 초기 한도 후보의 승인 test 실행 후속 · 2026-10-11
 
 사용자a6b6dda승인 후moemoa-test의기존disabled/0에서2000/64MB임시적용. 실제RPC+Storage2종각72B/hash/decode와2GET/144B영속차감,hosted transaction rollback-only 초과거부/원자적소비/관측집계 PASS. 1600/51.2MB 실제서버집계를로컬기존평가기에서경보판정. test의기존public storage budget off 때문에 PUBLIC_BUDGET_UNGUARDED도발생했으며추가활성하지않음. 운영상태로오인금지. 두quota는disabled/0으로원복하고실제소비2/144보존. phone-testflag=true 배포977hd Ready/source·alias확인, false원복후재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias확인. 실제배포handler HTTP429/이미지/철회·알림수신은이번PASS아님. 설정2행과flag만변경, 새migration/이미지/원본/권한/운영변경0.
+## 2026-10-13 W18 Collection/Home v2 수용 계약
+
+기존 W/Q/D 번호를 유지한다. 첨부 계약은 `../references/collection-home-realignment-20261013/02_CODEX_EXECUTION_NOTE.md`이며 구현은 현행 HEAD 이후 후보를 따른다. 아래는 이번 변경의 수용 조건이고 과거 hosted PASS를 새 기능 PASS로 올리지 않는다.
+
+| 기존 영역 | 이번 계약 | 구현/검사 |
+|---|---|---|
+| W18/Q24 | 한 owner 컬렉션에 기존 작품 선반 + 명시 연결한 이미지 보드, 연결 제거는 원본 삭제 아님 | BookshelfView / CollectionGroups / collection-home.spec.ts |
+| W06/Q05/Q20 | bookshelf payload의 `layoutVersion:1, sections:[{kind,sourceId}]`; 기존 shelves/IDs 유지, JSON·title sync 경로 보존 | bookshelfSettings / titleStateSync / collectionHome.test.mjs |
+| W07/W11/Q08/Q15 | home `schemaVersion:2` entries의 TITLE_SHELF와 MEMORY_BOARD 구분; Memory0 작품은 catalog title + 승인 cover만, 가짜 Memory0 | minihomeView / MinihomeSnapshot / collection-home-contract.sql |
+| W09/Q11 | sourceVersion·선택한 anime/cover/catalogTitle·정책·hash 재대조; private source 변경 후 전시 재확인, 원본 추가가 자동 공개되지 않음 | 기존 prepare/publish RPC + 새 private builder |
+| W10/Q09/Q14 | 권리 철회·가림·기존 home 철회 유지, home 비공개는 독립 board 공개를 철회하지 않음 | 같은 homeId/publicationId 및 기존 reader/withdrawal |
+| W18/Q02/Q03 | owner selection 복원, 늦은 load는 입력을 덮지 않음, 동의/게시 operation 복원0, 공유 작업 canvas와 갤러리 분리 | MinihomeEditor / PublicationEditor |
+| W12/W13/W14 | 기존 작성자 링크·팔로우·재방문·차단·신고 엔진 재사용, 익명은 owner source RPC를 호출하지 않음 | 기존 publication-ui 대표 회귀 + 새 방문자 흐름 |
+| W19/W20/Q23 | unknown layout/type/version 거절 및 구 writer의 typed payload 누락·삭제 방지 | additive migration의 두 trigger + 실제 isolated PostgreSQL |
+
+공개 선반 선택은 `{kind:"TITLE_SHELF", sourceId, sourceVersion, title, titles:[{titleKey,animeId,revisionId,catalogTitle}]}`이다. client 값만으로 public payload를 만들지 않고 서버가 본인 bookshelf row와 현재 승인 카탈로그를 대조한다. 공개 sectionId는 owner/source의 안정적인 hash이며 원본 shelfId를 노출하지 않는다. 공개 응답에는 private 선반 이름·sourceVersion·titleKey·평점·상태·감상·태그·private Memory count가 없다. 선반/배치의 계정 서버 version이 바뀌면 이전 선반 전시는 표시하지 않으며, owner가 현재 버전을 선택해 재미리보기·동의해야 한다.
+
+신규 타입은 DB `collection_home_enabled=false`, 앱 `PUBLIC_MEMORY_COLLECTION_HOME_V1` 미설정이 기본값이다. 기존 Public feature flags·가입 확인·policy revision·이미지 한도는 재사용하며 이번 후보로 켜지지 않는다. 기존 `/boards/?id`, `/minihome/#following`, `/public/home/?id`, `/public/board/?id`는 유지한다. `/?section=TITLE_SHELF:<id>` / `MEMORY_BOARD:<id>`와 `/?panel=sharing|following|safety`가 새 Collection 진입이다.
+
+백업 범위: 계정 layout은 기존 `user_title_sync_entities` bookshelf payload에 포함되어 기존 운영 DB 백업 대상 안에 있다. 로컬 Memory metadata JSON은 이전과 같이 Memory/Card/Board 대상이고 선반을 포함한다고 주장하지 않는다. 새 백업 플랫폼·전체99테이블 복구 재시험은 이번에 추가하지 않는다.
+
+롤백은 새 타입 flag off와 UI source 복귀로 제한한다. typed 데이터가 존재하면 구 writer 누락 저장을 계속 거절하며 삭제 down migration을 하지 않는다. 새 source 계약의 hosted A/B/익명 및 운영 인수는 exact 후보 적용 후 별도 결과가 필요하다.

@@ -1,0 +1,269 @@
+Visual test server: http://127.0.0.1:6795
+01:26:54 [moemoa-development-catalog] Development catalog is disabled (workspace not configured).
+01:26:54 [types] Generated 1ms
+01:26:54 [content] Syncing content
+01:26:54 [content] Astro config changed
+01:26:54 [content] Clearing content store
+01:26:55 [content] Synced content
+
+ astro  v5.17.2 ready in 968 ms
+
+┃ Local    http://127.0.0.1:6795/
+
+01:26:55 watching for file changes...
+01:27:29 [200] / 117ms
+01:27:29 [200] / 119ms
+01:27:29 [200] / 120ms
+01:27:29 [200] / 121ms
+01:27:29 [200] / 121ms
+01:27:29 [200] / 122ms
+01:27:29 [200] / 123ms
+01:27:29 [200] / 125ms
+01:27:29 [200] / 126ms
+01:27:29 [200] / 126ms
+01:27:29 [200] / 127ms
+01:27:29 [200] / 128ms
+01:27:29 [200] / 129ms
+01:27:29 [200] / 130ms
+01:27:29 [200] / 130ms
+01:27:29 [200] / 131ms
+01:27:29 [200] / 131ms
+01:27:29 [200] / 132ms
+01:27:29 [200] / 132ms
+01:27:29 [200] / 133ms
+01:27:29 [200] / 134ms
+01:27:29 [200] / 135ms
+01:27:29 [200] / 135ms
+01:27:29 [200] / 136ms
+01:27:29 [200] / 137ms
+01:27:29 [200] / 137ms
+01:27:29 [200] / 138ms
+
+Running 8 tests using 1 worker
+
+[1/8] [chromium] › tests\publication-ui.spec.ts:448:1 › mini-home explicit representative → preview → fresh visitor → private without withdrawing Board
+01:27:32 [200] / 2ms
+01:27:33 [200] /boards/ 6ms
+01:27:34 [200] /boards/ 3ms
+01:27:35 [200] /boards/ 4ms
+01:27:36 [200] /minihome/ 3ms
+01:27:37 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:27:37 [200] /public/home/ 3ms
+01:27:37 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:27:37 [200] /public/home/ 2ms
+01:27:38 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:27:38 [200] /public/home/ 2ms
+01:27:38 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:27:38 [200] /public/board/ 4ms
+[2/8] [chromium] › tests\publication-ui.spec.ts:487:1 › mini-home cancellation, stale consent, account change and empty state are safe
+01:27:38 [200] / 3ms
+01:27:39 [200] /boards/ 3ms
+01:27:39 [200] /boards/ 3ms
+01:27:40 [200] /boards/ 3ms
+01:27:41 [200] /minihome/ 2ms
+01:27:41 [200] /boards/ 2ms
+01:27:41 [200] /boards/ 4ms
+01:27:42 [200] /minihome/ 2ms
+[3/8] [chromium] › tests\publication-ui.spec.ts:515:1 › mini-home selected Board order is explicit and Korean editor fits 320px
+01:27:45 [200] / 3ms
+01:27:46 [200] /boards/ 2ms
+01:27:46 [200] /boards/ 3ms
+01:27:47 [200] /boards/ 2ms
+01:27:48 [200] /minihome/ 3ms
+01:27:49 [200] /minihome/ 3ms
+[4/8] [chromium] › tests\publication-ui.spec.ts:637:1 › explicit selection → exact public preview → fresh anonymous context → Board withdrawal
+01:27:50 [200] / 3ms
+01:27:51 [200] /boards/ 6ms
+01:27:51 [200] /boards/ 3ms
+01:27:52 [200] /boards/ 2ms
+  1) [chromium] › tests\publication-ui.spec.ts:637:1 › explicit selection → exact public preview → fresh anonymous context → Board withdrawal
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('.memory-boards__cards li').filter({ hasText: 'Shared memory' }).getByRole('link').first()
+
+
+      637 | test("explicit selection → exact public preview → fresh anonymous context → Board withdrawal", async ({ page, context, browser }) => {
+      638 |   const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page);
+    > 639 |   await page.locator('.memory-boards__cards li').filter({ hasText: 'Shared memory' }).getByRole('link').first().click();
+          |                                                                                                                 ^
+      640 |   await page.getByRole('tab', { name: 'Manage', exact: true }).click();
+      641 |   await page.locator('summary').filter({ hasText: 'Board and home settings' }).click();
+      642 |   await expect(page.getByRole('region', { name: 'Visibility', exact: true })).toContainText('Original is private');
+        at E:\web\anime\tests\publication-ui.spec.ts:639:113
+
+    Error Context: ..\.moemoa-ui-test-results\test-results\publication-ui-explicit-se-86f62--context-→-Board-withdrawal-chromium\error-context.md
+
+
+[5/8] [chromium] › tests\publication-ui.spec.ts:689:1 › publish retry preserves operation and stale review requires fresh consent
+01:28:22 [200] / 4ms
+01:28:22 [200] /boards/ 3ms
+01:28:23 [200] /boards/ 3ms
+01:28:24 [200] /boards/ 3ms
+[6/8] [chromium] › tests\publication-ui.spec.ts:735:1 › failed preview image blocks posting; retry loads actual cover bytes
+01:28:25 [200] / 2ms
+01:28:25 [200] /boards/ 2ms
+01:28:26 [200] /boards/ 3ms
+01:28:27 [200] /boards/ 2ms
+[7/8] [chromium] › tests\publication-ui.spec.ts:750:41 › image preparation requires explicit original-file consent and authenticated derivative preview
+01:28:28 [200] / 2ms
+01:28:28 [200] /boards/ 2ms
+01:28:28 [200] /boards/ 3ms
+01:28:29 [200] /boards/ 2ms
+01:28:30 [200] /boards/ 2ms
+01:28:31 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:28:31 [200] /public/board/ 3ms
+[8/8] [chromium] › tests\publication-ui.spec.ts:750:41 › image preparation requires explicit private-copy consent and authenticated derivative preview
+  1 failed
+    [chromium] › tests\publication-ui.spec.ts:637:1 › explicit selection → exact public preview → fresh anonymous context → Board withdrawal
+  1 skipped
+  6 passed (1.0m)
+
+FIXED READ/SHARING SEPARATION RETEST
+Visual test server: http://127.0.0.1:12441
+01:31:30 [moemoa-development-catalog] Development catalog is disabled (workspace not configured).
+01:31:30 [types] Generated 1ms
+01:31:30 [content] Syncing content
+01:31:30 [content] Astro config changed
+01:31:30 [content] Clearing content store
+01:31:31 [content] Synced content
+
+ astro  v5.17.2 ready in 1992 ms
+
+┃ Local    http://127.0.0.1:12441/
+
+01:31:32 watching for file changes...
+01:32:07 [200] / 103ms
+01:32:07 [200] / 105ms
+01:32:07 [200] / 106ms
+01:32:07 [200] / 106ms
+01:32:07 [200] / 107ms
+01:32:07 [200] / 107ms
+01:32:07 [200] / 108ms
+01:32:07 [200] / 109ms
+01:32:07 [200] / 110ms
+01:32:07 [200] / 111ms
+01:32:07 [200] / 112ms
+01:32:07 [200] / 112ms
+01:32:07 [200] / 113ms
+01:32:07 [200] / 113ms
+01:32:07 [200] / 114ms
+01:32:07 [200] / 115ms
+01:32:07 [200] / 115ms
+01:32:07 [200] / 116ms
+01:32:07 [200] / 116ms
+01:32:07 [200] / 117ms
+01:32:07 [200] / 117ms
+01:32:07 [200] / 118ms
+01:32:07 [200] / 118ms
+01:32:07 [200] / 119ms
+01:32:07 [200] / 119ms
+01:32:07 [200] / 120ms
+01:32:07 [200] / 120ms
+01:32:07 [200] / 121ms
+01:32:07 [200] / 2ms
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › tests\publication-ui.spec.ts:637:1 › explicit selection → exact public preview → fresh anonymous context → Board withdrawal
+01:32:11 [200] / 2ms
+01:32:12 [200] /boards/ 4ms
+01:32:13 [200] /boards/ 3ms
+01:32:14 [200] /boards/ 3ms
+01:32:15 [200] /memory/card/ 4ms
+01:32:16 [200] /boards/ 5ms
+01:32:17 [200] /boards/ 3ms
+01:32:18 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:32:18 [200] /public/board/ 4ms
+01:32:19 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:32:19 [200] /public/board/ 3ms
+  1 passed (10.3s)
+
+SOCIAL REGRESSION
+Visual test server: http://127.0.0.1:12687
+01:36:48 [moemoa-development-catalog] Development catalog is disabled (workspace not configured).
+01:36:48 [types] Generated 1ms
+01:36:48 [content] Syncing content
+01:36:48 [content] Astro config changed
+01:36:48 [content] Clearing content store
+01:36:49 [content] Synced content
+01:36:49 [vite] Re-optimizing dependencies because vite config has changed
+
+ astro  v5.17.2 ready in 1812 ms
+
+┃ Local    http://127.0.0.1:12687/
+
+01:36:50 watching for file changes...
+01:37:17 [200] / 89ms
+01:37:17 [200] / 91ms
+01:37:17 [200] / 92ms
+01:37:17 [200] / 92ms
+01:37:17 [200] / 93ms
+01:37:17 [200] / 94ms
+01:37:17 [200] / 94ms
+01:37:17 [200] / 95ms
+01:37:17 [200] / 95ms
+01:37:17 [200] / 96ms
+01:37:17 [200] / 96ms
+01:37:17 [200] / 97ms
+01:37:17 [200] / 97ms
+01:37:17 [200] / 98ms
+01:37:17 [200] / 98ms
+01:37:17 [200] / 99ms
+01:37:17 [200] / 100ms
+01:37:17 [200] / 101ms
+01:37:17 [200] / 102ms
+01:37:17 [200] / 102ms
+01:37:17 [200] / 103ms
+01:37:17 [200] / 103ms
+01:37:18 [200] / 3ms
+
+Running 3 tests using 1 worker
+
+[1/3] [chromium] › tests\publication-ui.spec.ts:227:1 › shared board opens the public author home and omits withdrawn author links
+01:37:21 [200] / 2ms
+01:37:22 [200] /boards/ 7ms
+01:37:22 [200] /boards/ 3ms
+01:37:23 [200] /boards/ 3ms
+01:37:24 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:37:24 [200] /public/board/ 3ms
+01:37:24 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:37:24 [200] /public/home/ 3ms
+01:37:25 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/board/?id=22222222-2222-4222-8222-222222222222, use /board/?id=22222222-2222-4222-8222-222222222222.
+01:37:25 [200] /public/board/ 2ms
+[2/3] [chromium] › tests\publication-ui.spec.ts:405:1 › relationships follow, revisit, block and unblock without automatic restore
+01:37:25 [200] / 3ms
+01:37:25 [200] /boards/ 3ms
+01:37:26 [200] /boards/ 2ms
+01:37:26 [200] /boards/ 2ms
+01:37:27 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:37:27 [200] /public/home/ 2ms
+01:37:27 [200] /minihome/ 2ms
+01:37:27 [200] /minihome/ 4ms
+01:37:27 [200] /minihome/ 5ms
+01:37:28 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:37:28 [200] /public/home/ 2ms
+01:37:28 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:37:28 [200] /public/home/ 2ms
+01:37:29 [200] /minihome/ 2ms
+01:37:29 [200] /minihome/ 2ms
+[3/3] [chromium] › tests\publication-ui.spec.ts:441:1 › anonymous home visit does not auto-follow or fetch an owner graph
+01:37:29 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+01:37:29 [200] /public/home/ 2ms
+  3 passed (10.9s)

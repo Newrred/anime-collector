@@ -15,7 +15,7 @@ test("bookshelf settings cannot appear under a different local or account owner"
 });
 
 test("malformed or oversized shelf preferences stay bounded and never affect title records", () => {
-  assert.deepEqual(readBookshelf("guest", { getItem: () => "broken" }), { shelves: [] });
+  assert.deepEqual(readBookshelf("guest", { getItem: () => "broken" }), { shelves: [], loadError: "COLLECTION_READ_FAILED" });
   const normalized = normalizeBookshelf({ shelves: [{ id: "all", name: "invalid" }, { id: "x", name: "  one  ", titleKeys: ["", "a", "a", 2] }, { id: "x", name: "duplicate" }] });
   assert.deepEqual(normalized, { shelves: [{ id: "x", name: "one", titleKeys: ["a"] }] });
   assert.equal(normalizeBookshelf({ shelves: Array.from({ length: 40 }, (_, i) => ({ id: String(i), name: "x" })) }).shelves.length, 20);
