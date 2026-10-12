@@ -971,3 +971,5 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 롤백은 새 타입 flag off와 UI source 복귀로 제한한다. typed 데이터가 존재하면 구 writer 누락 저장을 계속 거절하며 삭제 down migration을 하지 않는다. 새 source 계약의 hosted A/B/익명 및 운영 인수는 exact 후보 적용 후 별도 결과가 필요하다.
 
 [2026-10-13 테스트 구조 인수] 후보5f791db/TEST_COLLECTION_HOME_STRUCTURE_20261013 적용 및36table·기존설정 보존/새타입off·RPC disabled·ACL PASS. 새 타입 hosted 게시/방문자 인수는 미완료이며 source/policy/flag/배포 exact 후보를 별도로 준비한다.
+
+[2026-10-13 W18 연결 후보 준비] 기존 승인public catalog Steins;Gate1작품/1인물page/89,300B 표본·원출처/권리/immutable cover 보존, owner test source 원자적guard·Memory0/정책5field exact apply/restore·API 기본rollback 신규격리PG17 PASS. app5f791db는불변, 새remote쓰기/typed게시0. 실제자료/설정/배포승인과 본인게시동의/새익명방문자 인수는 잔여다.

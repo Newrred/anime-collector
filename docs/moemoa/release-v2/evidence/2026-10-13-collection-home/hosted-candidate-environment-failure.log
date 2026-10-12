@@ -1,0 +1,32 @@
+PASS wrong target marker refused
+PASS fixture defaults to rollback without data changes
+PASS existing owner shelf blocks fixture atomically
+PASS one title and shelf created without fake Memory
+PASS immutable cover ID, checksum, source and permission metadata preserved
+PASS catalog sample bounded to one title and one people page
+PASS repeat seed refuses existing catalog instead of overwriting
+PASS configuration defaults to rollback
+PASS only five approved settings change
+PASS actual owner RPC yields one approved Memory0 title
+PASS restore defaults to rollback
+PASS restore refuses to overwrite changed kill switch
+PASS exact previous settings restored
+PASS restore keeps original test source and copied cover
+PASS wrong restore state refused
+PASS disabled signup dependency refuses activation
+
+Traceback (most recent call last):
+  File "/mnt/e/web/anime/tools/operations/collection-home-test/test_candidate.py", line 83, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/mnt/e/web/anime/tools/operations/collection-home-test/test_candidate.py", line 77, in main
+    rendered=subprocess.run(['node',str(HERE/'render-sql.mjs'),'config'],capture_output=True,text=True,timeout=30)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'node'

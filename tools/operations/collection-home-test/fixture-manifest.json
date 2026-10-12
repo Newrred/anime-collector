@@ -1,0 +1,38 @@
+{
+  "dataReleaseId": "TEST_COLLECTION_HOME_FIXTURE_20261013",
+  "targetProject": "nmgkhknponvzcwliajyk",
+  "sourceProject": "okchpyagfucpzpyrfgol",
+  "sourceRelease": "catalog-people-b05fefa545fcce9864eb476f",
+  "sourceReleaseHash": "b05fefa545fcce9864eb476f75437383c7d912ffdd98ad692968be4ec150a740",
+  "sourceSnapshotSha256": "1abf89e0097629f6260afb56b1b1ecfc9122c2087300138059b55f0eabc39499",
+  "sourceRows": {
+    "asset": "67bbb510448e39005e270db7fbc97f49a05cd055c32effa62159e4670a045c25",
+    "search": "a7392e00423fcc09b3e1c2722e8b8a37d2405142375c0db5cc970a9dd8e9b38a",
+    "detail": "c32365058b367400fab32b9797d6e7d8c09e648e3fd4f87df5fa5de31a558064",
+    "people": [
+      "5ea1ef60723d995bce806868d6769216f4df0b3ae2be3f316f4b05b097e6f342"
+    ]
+  },
+  "sourcePermission": {
+    "evidence": "decision:CATALOG-PROD-01:2026-09-03",
+    "verifiedAt": "2026-09-03T00:00:00+00:00",
+    "provider": "ANILIST"
+  },
+  "targetRelease": "collection-home-test-20261013",
+  "targetRows": 1,
+  "peoplePages": 1,
+  "cover": {
+    "bucket": "catalog-covers-preview",
+    "objectPath": "covers/anime-cd272261-e80e-44ef-8a46-7a144b9a57e2/4feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f.jpg",
+    "bytes": 89300,
+    "sha256": "4feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f",
+    "width": 460,
+    "height": 667,
+    "mime": "image/jpeg"
+  },
+  "fixtureSha256": "02057ac9a75b17b6b956e667bbd887ed237138a98716274b84f2fc0c1f0449a1",
+  "schemaChange": false,
+  "fakeMemoryCreated": false,
+  "privateRecordOverwrite": false,
+  "restore": "Restore settings/client/source SHA exactly. Keep copied catalog, cover and owner test shelf; never remove original or changed user rows."
+}

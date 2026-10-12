@@ -2254,3 +2254,36 @@ ZIP CRC/8sha검증 PASS, 첨부01/02와 현재코드 대조 완료. 첫 구현�
 Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN4, 인증된 SECURITY DEFINER RPC WARN59(이번 새 shelf RPC 포함), 기존 leaked-password WARN1을 보고했다. 권한 경고를 없애려고 owner RPC를 익명으로 넓히거나 기존 정책을 수정하지 않았다. [SECURITY DEFINER 점검 기준](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). 전체 advisors green으로 주장하지 않는다.
 
 원본·정책·flag·사용량·클라이언트 배포·운영 변경0, 새 타입off 유지. 되돌릴 때도 원본/typed data를 삭제하지 않고 flagoff/UI복귀를 사용한다. 다음1개는 최소 합성 선반/catalog 자료와 고지·flag/배포·원복의 정확한 hosted 후보 준비다. 현재 source0/catalog0 및 고정고지와 기존 TEST_ONLY 정책 불일치는 남은 연결 조건이다.
+
+
+### W18 hosted 연결 후보 준비 — 2026-10-13 ExecPlan
+
+1. 목적: 같은 Collection의 Memory0 작품 선반과 기존 보드를 실제 테스트 화면에서 선택·미리보기·게시·익명 열람·철회할 수 있는 정확한 연결 후보를 준비한다.
+2. 결정: COLLECTION-HOME-REALIGNMENT-20261013, 기존 일반 공개/가입 고지·한 체크, 원본/ID·N:M 유지.
+3. 현재: 후보5f791db의 구조만 moemoa-test 적용, 새 타입off. source/catalog0, TEST_ONLY 정책, phone-test 원격a6b6dda/운영b0541ff.
+4. 범위: 최소 카탈로그 표본1·테스트 선반1의 버전관리 데이터 후보, 정책5필드와 phone-test 환경/소스의 exact 적용·원복 manifest. 운영/신규인증/전체catalog/이미지 규제 확대 제외.
+5. 흐름: 읽기전용 baseline → bounded public catalog 표본/표지 provenance 보존 → test fixture/config guard → 로컬 SQL dry-run/apply/restore 검증 → 한 번의 정확한 테스트 적용 승인 → 당사자 공개동의 → hosted 인수 → 설정/화면 원복.
+6. 파일: tools/operations/collection-home-test-* 및 기존 release-v2 00/01/02/03/evidence. 앱·인증 엔진은 발견된 실패만 최소 변경.
+7. DB: 새 schema0. 기존 empty test catalog에 source release·asset/search/cover의 표본만, A 계정 bookshelf가 없을 때만 테스트 선반 생성. 삭제0/실기록 덮어쓰기0.
+8. 마일스톤: 실제 test source/env 확인 → 최소 데이터와 정책 후보 → 격리SQL/rollout 검증 → 정확후보 결속.
+9. 검사: production target/정책drift/이미 있는 source를 차단, 기본ROLLBACK/explicit apply/restore/개인자료 보존/캐시 없는 title shelf RPC. 기존 전체DB/Google 기초 재검사0.
+10. 보안: 키 값/본인 DOB/토큰/private 사본/개인노트 문서0; public catalog만 표본 읽기. 동의/receipt는 대신 만들지 않는다.
+11. 관측: count/hash/동작결과만, raw private 자료 로그0. 자료크기·전송량 최대 한 표지150KB를 후보에 기록.
+12. 롤백: 새타입off·정책exact baseline·phone-test 이전 SHA와 env값 복귀. 만든 테스트 카탈로그/선반은 삭제하지 않고 retained/inactive로 두며 원본 유지. 사용자 변경된 source를 되돌려 덮지 않는다.
+13. 위험: catalog_assets는 외부 source enum을 제한하므로 합성표지를 외부import로 위장하지 않는다. 기존 승인 공개catalog 표본만 원출처/권리 metadata와 함께 사용한다. source version/정책/branch drift 시 중단.
+14. 결정: 준비는 이번 ㄱㄱ 지시로 진행. 실제 test자료쓰기·flag/고지 변경·Git phone-test push/배포는 이전 구조승인에 포함되지 않아 exact 후보별 확인.
+15. 진행: 읽기전용 대상/구조/설정/계정현재receipt와 기존 Preview 환경 이름 확인.
+16. 발견: test catalog 없음, 기존 config tool은 새collection 열을 포함하지 않아 그대로 적용 불가. 작은 독립 wrapper를 준비해 다른값 덮어쓰기 방지.
+17. 보고: 실제 준비/명령/원복/승인조건을 이 절과 현재 카드에 기록.
+
+
+#### W18 hosted 연결 후보 준비 — 이번 실행 8항 보고
+
+1. 읽은 문서/소스: CODEX_START_HERE·확정01·AGENTS·PLANS·제품02/카탈로그04/이미지05/QA07/변경09, 첨부 실행02 및 기존release-v2 00/01/02/03을 대조. source 근거: catalogCoverReference.js 16–47, catalogSupabaseClient.js 3–26, titleStateSync.js 22–119, 20261007093000_title_state_sync.sql, 20260903141500_catalog_cover_memory_assets.sql, 기존public-notice-test-config/fixture/runner 및 현재 Collection controller/UI. verify-before-claiming·Supabase·Vercel env-vars/deployments-cicd 적용.
+2. 가정/미결: 이번 ㄱㄱ는 다음 exact 연결 후보 준비 지시다. 테스트 구조만 적용한 승인을 fixture/고지/flag/화면 배포에 확장하지 않았다. A의 새 현재 가입 확인2건은 읽기전용 존재만 확인했으며 새 수락/Google 재가입을 요구하지 않는다. 실제 게시 동의는 본인이 직접 한다.
+3. 계획: 바로 위 W18 hosted 연결17항. 기존W18/관련W06·W09·W11·W19 유지, 새 작업판0.
+4. 파일/이유: tools/operations/collection-home-test/ 아래 공개 catalog-source.json·prepare.mjs·생성fixture.sql/manifest·config.sql·render-sql.mjs·test_candidate.py·rollout-manifest.json/README를 추가했다. 실제 source/provider 제한 때문에 합성 표지를 ANILIST import로 위장하는 대신 기존 승인된 공개 Steins;Gate1작품/상세1개/인물1page/표지89,300B를 provenance/hash/권리 그대로 테스트에 복사하는 후보로 정했다. .gitattributes LF 규칙으로 SQL/hash를 다른PC에서도 재현한다. 원본 앱5f791db 이후 src/schema/env.production/lock 변경0.
+5. 데이터/복귀: 새migration0·원격쓰기0. fixture는 기존catalog/owner bookshelf가 있으면 원자적으로 중단, 작품title row는 없을 때만 추가한다. Memory/WatchLog/receipt0. target 검증은 실제 연결 project ID를 먼저 확인하며 SQLmarker만으로 신원을 증명한다고 주장하지 않는다. 임시설정은 collection_home_enabled/signup_declaration_required/세policy revision의5개만 exact baseline 대조 뒤 변경. restore도 drift/kill switch 변경이면 중단. 복사한 공개catalog·표지·test선반/저장작품은 남기고 원본삭제0. phone-test env4개와 새source를 복귀, 운영/master0.
+6. 실제 검증: prepare.mjs source/FK/ref/hash allowlist→fixture 재생성 같은hash PASS. public catalog 표지1GET·89,300B·sha2564feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f·실제JPEG460×667 decode/metadata일치 PASS. 격리PG16 전체현행migration 후 후보17 PASS: 잘못된대상/defaultrollback/기존source차단/Memory0/권리원본보존/표본상한/반복apply거부/정확5필드/RPC/restore dryrun/drift/복귀/자료보존/의존성/APIrenderer 기본rollback. renderer 별도production대상거부·restore기본rollback PASS. 최초 timestamp+00/+00:00 문자열 비교 실패는 동일 instant 비교로 보완, WSL Node 미설치 실패는 기존 Windows Node의 렌더 bytes를 사용해 해결·의존성 설치0. 실패와 최종로그를 evidence에 보존했다. 기존app의22unit/14Chromium/build33은5f791db 이력으로 분리, 이번새 hosted/UI PASS0. gitdiff/diffcheck 결과 및 exact 후보는 후속 결속한다.
+7. 개인정보/권리/관측: source는 서비스의 기존 공개catalog facts/표지뿐이다. 개인이미지/노트/DOB/token/server키 문서0, plaintext secret 출력0. Vercel에서는 승인된public config key6개만 값을 읽어 대상URL/test flags/policy를 확인했다. server Secrets는 이동/교체하지 않는다. signed-in SECURITY DEFINER 경고의 이전판단 유지, 권리/국가/요금0. 기준원격 masterb0541ff/phone-testa6b6dda 유지. 이전Preview metadata 조회404/목록0은 실제browser HTTP404로 표시하지 않으며 필요시정확이전GitSHA 재빌드가복귀경로다.
+8. 잔여/다음1개: exact 후보로 test자료89KB/fixture+설정5+Preview값4+phone-test Git 배포→새타입실제public 인수→설정/env/source 원복의 단일 승인 범위를 준비했다. 운영/새회원/대신동의/삭제/유료는 제외. 사용자 승인 후 읽기전용 baseline 재대조로 이어간다.

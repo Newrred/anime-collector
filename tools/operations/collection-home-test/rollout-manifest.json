@@ -1,0 +1,102 @@
+{
+  "scope": "TEST_ONLY_COLLECTION_HOME_CONNECT_20261013",
+  "appSourceCommit": "5f791db0a4a780e7420011d07a5c20bc1d99fde9",
+  "remoteGitBaseline": {
+    "master": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "branch": "codex/phone-test",
+    "fastForwardFromBaseline": true
+  },
+  "vercel": {
+    "projectId": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+    "teamId": "team_5qSBpZUQpNl41SJvHZBfsJGx",
+    "target": "preview",
+    "canonicalAlias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+    "previousDeploymentLookup": "connector 404; rebuild the recorded previous Git SHA with restored settings if needed",
+    "environmentChanges": [
+      {
+        "key": "PUBLIC_MEMORY_COLLECTION_HOME_V1",
+        "beforeBranchOverride": null,
+        "after": "1"
+      },
+      {
+        "key": "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION",
+        "beforeBranchOverride": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "after": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+      },
+      {
+        "key": "PUBLIC_CATALOG_SUPABASE_URL",
+        "beforeBranchOverride": null,
+        "inheritedBefore": "https://okchpyagfucpzpyrfgol.supabase.co",
+        "after": "https://nmgkhknponvzcwliajyk.supabase.co"
+      },
+      {
+        "key": "PUBLIC_CATALOG_SUPABASE_ANON_KEY",
+        "beforeBranchOverride": null,
+        "afterSource": "Reuse existing codex/phone-test PUBLIC_SUPABASE_ANON_KEY; public client key only, never service role."
+      }
+    ],
+    "unchanged": [
+      "Google OAuth client/secret/callback",
+      "signup test documents",
+      "existing public/moderation/follow flags",
+      "image delivery/cleanup/quota settings",
+      "production env"
+    ],
+    "titleStateSync": "existing .env.production PUBLIC_TITLE_STATE_SYNC_V1=1"
+  },
+  "database": {
+    "project": "moemoa-test",
+    "ref": "nmgkhknponvzcwliajyk",
+    "newSchema": false,
+    "fixtureSha256": "02057ac9a75b17b6b956e667bbd887ed237138a98716274b84f2fc0c1f0449a1",
+    "configSha256": "6c255537bdce968b7ca0e4127389bb76efc388bca3e79820877ca786c75689fc",
+    "fieldsChanged": [
+      "collection_home_enabled",
+      "signup_declaration_required",
+      "policy_revision",
+      "content_policy_revision",
+      "general_publication_policy_revision"
+    ],
+    "newOwnerData": "Resolve approved A email at execution; bookshelf must not exist. Add one test shelf and one saved-title entity only if missing. No Memory/WatchLog/receipt generated."
+  },
+  "storage": {
+    "bucket": "catalog-covers-preview",
+    "objectPath": "covers/anime-cd272261-e80e-44ef-8a46-7a144b9a57e2/4feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f.jpg",
+    "bytes": 89300,
+    "sha256": "4feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f",
+    "width": 460,
+    "height": 667,
+    "mime": "image/jpeg",
+    "action": "Upload one existing approved public cover to test catalog-covers-preview; exact checksum, no upsert or overwrite.",
+    "localPreparedPath": ".cache/collection-home-hosted/catalog-cover.jpg",
+    "newCredentials": false
+  },
+  "restore": [
+    "Revoke only the newly reviewed test home through existing owner controls if published; do not delete originals.",
+    "Restore exactly the five database fields; refuse drift/changed kill switch.",
+    "Remove the three newly added branch env overrides; restore previous public policy value.",
+    "Restore phone-test ref to previous exact SHA using an exact lease; trigger and verify Git rebuild.",
+    "Retain copied public catalog/cover and owner test fixture; no data deletion."
+  ],
+  "manualActions": [
+    "User reviews actual public preview and explicitly confirms publication; no automatic agreement or new signup."
+  ],
+  "acceptance": [
+    "actual owner Collection with one shelf/title Memory0",
+    "saved selection re-entry",
+    "public preview cover decoded before publish",
+    "new anonymous visitor DTO/image and canonical Title Hub link",
+    "source changed stale preview denied",
+    "home withdrawal leaves original title/shelf and any independent Board intact",
+    "settings and test Git/env restored"
+  ],
+  "limits": {
+    "catalogTitles": 1,
+    "peoplePages": 1,
+    "storageUploadBytes": 89300,
+    "newMemoryCards": 0,
+    "productionMutations": 0
+  },
+  "remoteApplied": false
+}

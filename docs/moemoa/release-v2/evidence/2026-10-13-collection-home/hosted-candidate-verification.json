@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-13",
+  "scope": "TEST_ONLY_CANDIDATE_PREPARED",
+  "sourceApp": "5f791db0a4a780e7420011d07a5c20bc1d99fde9",
+  "sqlPassed": 17,
+  "defaultDryRun": true,
+  "remoteMutations": 0,
+  "hostedPublishVerified": false,
+  "publicCatalogReadOnlySample": {
+    "titles": 1,
+    "peoplePages": 1,
+    "bytes": 89300,
+    "sha256": "4feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f",
+    "decode": {
+      "format": "jpeg",
+      "width": 460,
+      "height": 667
+    },
+    "provenancePreserved": true
+  },
+  "previousSourceGit": {
+    "master": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+  },
+  "tools": "tools/operations/collection-home-test/rollout-manifest.json",
+  "requiredApproval": "Exact test fixture/upload, settings5, Preview env4 and Git deployment plus restore; no production, signup, agreement or deletion."
+}

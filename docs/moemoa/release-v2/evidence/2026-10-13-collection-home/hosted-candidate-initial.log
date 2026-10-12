@@ -1,0 +1,13 @@
+PASS wrong target marker refused
+PASS fixture defaults to rollback without data changes
+PASS existing owner shelf blocks fixture atomically
+PASS one title and shelf created without fake Memory
+
+Traceback (most recent call last):
+  File "/mnt/e/web/anime/tools/operations/collection-home-test/test_candidate.py", line 75, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/mnt/e/web/anime/tools/operations/collection-home-test/test_candidate.py", line 55, in main
+    assert got==src['cover'];ok('immutable cover ID, checksum, source and permission metadata preserved')
+           ^^^^^^^^^^^^^^^^^
+AssertionError

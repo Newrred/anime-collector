@@ -1,0 +1,18 @@
+PASS wrong target marker refused
+PASS fixture defaults to rollback without data changes
+PASS existing owner shelf blocks fixture atomically
+PASS one title and shelf created without fake Memory
+PASS immutable cover ID, checksum, source and permission metadata preserved
+PASS catalog sample bounded to one title and one people page
+PASS repeat seed refuses existing catalog instead of overwriting
+PASS configuration defaults to rollback
+PASS only five approved settings change
+PASS actual owner RPC yields one approved Memory0 title
+PASS restore defaults to rollback
+PASS restore refuses to overwrite changed kill switch
+PASS exact previous settings restored
+PASS restore keeps original test source and copied cover
+PASS wrong restore state refused
+PASS disabled signup dependency refuses activation
+PASS SQL API renderer executes a default rollback, no psql directives
+LOCAL_CANDIDATE_REHEARSAL: 17 PASS; remote writes=0

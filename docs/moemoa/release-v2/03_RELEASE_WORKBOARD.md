@@ -787,7 +787,8 @@
 실환경 구분: 이번 hosted typed 공개·Google·실기기·운영 PASS0. 기존 exact-candidate 인수는 과거 증거로만 재사용.
 원격 구조 확인: 사용자 exact 승인으로 moemoa-test에 후보5f791db의 구조만 적용. 원격 이력20261012172036 ↔ 로컬20261012160330/동일 SQL hash를 evidence에 결속. 기존36table 내용·이전설정 보존, 새타입off/RPC disabled 및 함수 ACL 확인. bookshelf source0/catalog active0·기존 정책3값은 유지.
 조건: 테스트 구조 적용은 완료. 새 타입 hosted 자료/공개 고지/flag·화면 배포 범위는 아직 미적용/미승인. 운영/master 변경0.
-다음 행동 하나: 기존 moemoa-test용 합성 선반/승인 catalog 최소자료·고지/flag·테스트 화면의 정확한 적용/원복 후보 준비.
+연결 후보 준비: 기존 승인 공개 Steins;Gate1작품/상세1개/인물1page/표지89,300B + A test 선반/저장작품(없을 때만) + settings5/Preview값4/phone-test Git 후보. 로컬PG17/표지hash·JPEG460×667 및원복 PASS. 실제새타입게시0/이번원격쓰기0.
+다음 행동 하나: exact test 연결·인수·원복 후보 승인 후 baseline 재대조/실행.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>
