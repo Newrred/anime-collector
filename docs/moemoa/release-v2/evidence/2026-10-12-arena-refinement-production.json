@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-12",
+  "authorization": "User: 운영 반영 후 다른 pc에서 작업 이어갈 수 있도록 git업데이트 ㄱ",
+  "baseline": "33de5b4c985e009d14c8ecec6158c4511af946a2",
+  "appCommit": "cafcd2a03c4c2641fa0e18548defb4469776edd6",
+  "quality": {
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38223832158",
+    "headSha": "cafcd2a03c4c2641fa0e18548defb4469776edd6",
+    "conclusion": "success"
+  },
+  "production": {
+    "deploymentId": "dpl_FL7SBpiDdBVRhWmkdi24y6DvQego",
+    "projectId": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+    "target": "production",
+    "state": "READY",
+    "source": "git",
+    "branch": "master",
+    "url": "https://www.moemoa.xyz",
+    "commit": "cafcd2a03c4c2641fa0e18548defb4469776edd6",
+    "checkoutCommit": "cafcd2a03c4c2641fa0e18548defb4469776edd6",
+    "sourceBuildInfo": "vercel-git",
+    "configurationSemanticMatch": true,
+    "workingTreeDirty": true,
+    "dirtyPathsFromBuildLog": [
+      "vercel.json"
+    ],
+    "trackedConfigHash": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+    "buildConfigHash": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d"
+  },
+  "readOnlyChecks": {
+    "http200": [
+      "/",
+      "/titles/",
+      "/minihome/",
+      "/data/",
+      "/help/",
+      "/terms/",
+      "/privacy/",
+      "/admin/"
+    ],
+    "browser": [
+      "Help task disclosures",
+      "Account and data task navigation; no horizontal overflow"
+    ]
+  },
+  "scope": {
+    "databaseChanges": 0,
+    "apiChanges": 0,
+    "environmentChanges": 0,
+    "permissionChanges": 0,
+    "dependencyChanges": 0,
+    "productionUserWrites": 0
+  },
+  "handoff": {
+    "document": "docs/moemoa/operations/2026-10-12-arena-refinement-handoff.md",
+    "startFrom": "latest origin/master; preserve any previous local branch or uncommitted work",
+    "followup": "Documentation-only commit; app blobs must match cafcd2a. Final Git/Vercel/www SHA verified externally after CI and master push to avoid recursive evidence commits."
+  },
+  "limitations": [
+    "Existing astro check 370 errors and React Doctor 302 diagnostics remain",
+    "Synthetic local comparison does not prove every real user or device flow",
+    "Other PC execution not performed on this PC"
+  ],
+  "rollback": "Reviewed revert of the application changes after baseline via Git master and CI; no DB or user-image restoration required."
+}

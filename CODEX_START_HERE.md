@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 최신 재개 — 전체 디자인 개선 운영 반영·Git 인계:** 사용자 승인으로 검수17항목 개선본 `cafcd2a03c4c2641fa0e18548defb4469776edd6`을 master Git에 반영했다. 정확 후보의 전체 CI38223832158 SUCCESS, Vercel Production `dpl_FL7SBpiDdBVRhWmkdi24y6DvQego` READY와 실제 www의 commit/checkoutCommit/source 일치 확인. 이번 인계 commit은 문서만 변경하며 앱은 cafcd2a와 같다. 최신 master와 운영 SHA는 [다른 PC 재개 안내](docs/moemoa/operations/2026-10-12-arena-refinement-handoff.md)의 조회 절차로 확인한다. **새 작업은 최신 origin/master에서 시작한다.** 기존 작업/개인 파일은 보존하고 과거 개발 브랜치 전체를 master에 합치지 않는다. DB/API/환경/권한/의존성 변경0. 기존 astro check370오류는 남아 있다. 아래 날짜별 ‘현재/최신/승인 대기’는 당시 기록이다.
+
 > **2026-10-12 Are.na 디자인 운영 반영 승인·운영 기준 결속:** 사용자가 검증된 디자인 원본 3feebbbe6c50cd0a634d52f7a96cae4bd4250b16의 운영 배포를 승인했다. 공개 board/home·미니홈 편집/동의·팔로우/신고·운영 검토·가입/완료·관리 표현을 통일한다. 로컬 Chromium 고유93 PASS·build33 PASS·원본 CI38206527814 SUCCESS, React Doctor 신규0/점수회귀0. 운영 master ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4와 검토 브랜치 이력이 갈라져 전체 브랜치 병합은 하지 않는다. 승인된 단일 디자인 patch만 운영 기준에 옮기고 13개 UI 파일/테스트의 원본 일치와 backend/tools/workflow/DB/환경/권한/lock 변경0을 확인한 후 새 Git commit의 CI→master→Vercel READY→www 동일SHA를 검증한다. 이전 백업 도구 변경은 이 release에 포함하지 않는다. 운영 결과는 외부 인수 기록으로 남겨 승인 후보를 불필요하게 변경하지 않는다. [계획](docs/moemoa/plans/2026-10-03-interface-rebuild.md) 32차 및 [근거](docs/moemoa/release-v2/evidence/2026-10-12-are-na-public-ui.json).
 
 

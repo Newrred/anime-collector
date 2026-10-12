@@ -1,5 +1,7 @@
 # 00. 세션 인수인계와 프로젝트 맥락
 
+> **2026-10-12 재개 기준:** 전체 디자인 검수17항목의 개선본 cafcd2a가 사용자 승인으로 master Git→Vercel READY→www 동일SHA 확인 완료. 이번 인계 후속은 문서만이며 새 작업은 최신 origin/master 기준이다. [최신 다른 PC 인계](operations/2026-10-12-arena-refinement-handoff.md) 및 실제 Git/build-info 조회를 먼저 확인한다. 기존 코드·데이터·공개/권리 결정은 유지하며 별도 정적 오류370개와 다른 출시 잔여를 완료 처리하지 않는다.
+
 > **문서 상태: `CURRENT_CONTEXT`**
 > 제품 맥락은 이 문서를 사용하되, 구현 사실은 repository code/tests/config와 `reports/repository-audit.md`가 우선한다.
 

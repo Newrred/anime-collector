@@ -48,3 +48,7 @@
 새 의존성, DB·schema·API·RLS·권한·국가·공개 환경 설정 변경0. 기존 고정 legal 문서 본문 변경0. 실계정 자료 쓰기·게시·신고·가입 동의·삭제0. 테스트는 격리된 로컬 합성 자료로 실행한다. analytics 추가0. 개인정보·권리·정책 동의와 공개 이미지 사전 준비는 필수 단계로 유지한다.
 
 되돌리기는 개선 presentation commit을 revert하는 방식이며 데이터 복원 작업은 없다. 기준 checkout을 별도 보존했다. 운영 반영 시에는 검증된 정확 후보의 승인이 필요하다. 예약 작업·복구·공개 기능 출시 상태를 이번 디자인 작업의 결과로 확대하지 않는다. 최신 현행 문서 버전이 바뀌면 기본 약관 진입점도 해당 배포에서 다시 검토해야 한다.
+
+### 2026-10-12 운영·인계 후속
+
+사용자가 운영 반영·다른 PC Git 인계를 승인했다. 정확한 앱 후보 cafcd2a의 전체 CI38223832158 SUCCESS, force 없는 master push, Vercel Production FL7SBpiDdBVRhWmkdi24y6DvQego READY, 실제 www의 commit/checkoutCommit/source/config 의미 일치 확인. 운영8경로 HTTP200과 브라우저의 도움말/데이터 작업 메뉴를 읽기 검수했다. 공개·전체 채널의 최종 로컬 결과는 각각54 PASS,88 PASS/기존5skip이다. 앱/DB/API/환경/권한/의존성·개인 자료 변경0인 문서 인계 후속을 준비했다. 최신 기준과 portable 재개·롤백은 [다른 PC 안내](../operations/2026-10-12-arena-refinement-handoff.md), [운영 근거](../release-v2/evidence/2026-10-12-arena-refinement-production.json)를 따른다. 최종 문서 후속 SHA는 live Git/build-info 조회로 확인한다.

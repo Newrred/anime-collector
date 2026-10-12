@@ -100,3 +100,17 @@
 ## 17. 완료 보고
 
 완료 후 검수17항목의 실제 변경·검증·비교 자료·한계를 연결하고, 사용자에게 비교 gallery와 핵심 차이를 전달한다.
+
+## 18. 사용자 승인 운영 반영·Git 인계 (2026-10-12)
+
+사용자 요청: “운영 반영 후 다른 pc에서 작업 이어갈 수 있도록 git업데이트 ㄱ”. 검증된 개선본 cafcd2a03c4c2641fa0e18548defb4469776edd6의 Git 운영 반영과 다른 PC 인계 기록을 승인했다. 별도 DB·환경·데이터·권한 변경은 없다.
+
+1. 현재 origin/master=33de5b4와 운영 build-info/Vercel Git source 일치, 개선본 전체 CI38223832158 SUCCESS 및 fast-forward 관계를 재확인한다.
+2. 개선본을 force 없이 master에 push한다. 연결된 Vercel Production READY, source SHA, 실제 www build-info의 commit/checkoutCommit/source/config 의미 일치를 확인한다.
+3. 공개 가능한 비로그인 운영 화면의 변경을 읽기만 검수한다. 실계정 게시·신고·삭제·동의·가입 정보 변경은 실행하지 않는다.
+4. 실제 배포 결과와 portable 재개 절차를 현행 시작 문서/진행판/인계 문서에 기록한다. 문서만의 후속 commit에서 앱/API/DB/환경/의존성 변경0을 확인하고 CI 통과 뒤 master에 반영, 최종 Vercel/www와 Git 동일SHA를 확인한다.
+5. 로컬 원래 작업 브랜치·미커밋 파일·비교 gallery/ZIP은 보존한다. 다른 PC는 최신 origin/master에서 새 작업 브랜치를 만들어 진행한다.
+
+롤백: 필요할 때 배포 전 기준33de5b4 이후의 개선 앱 변경을 검토된 revert commit으로 되돌리고 동일 Git master 경로와 CI/운영 SHA 확인을 따른다. force push·CLI promote·DB 복원·원본 이미지 변경은 없다.
+
+- 18절 실행: cafcd2a의 force 없는 master 반영 완료. Vercel Production FL7SBpiDdBVRhWmkdi24y6DvQego READY/www commit·checkoutCommit=cafcd2a/source=vercel-git/semanticMatch=true 확인. 8경로 HTTP200, 도움말/데이터 작업 메뉴 읽기 확인. 기존 vercel.json만 build 시 정규화되며 dirty=true/두 hash는 이전 운영과 같다. 원본 자료·DB·설정 변경0. portable 인계 문서와 현행 시작/진행판에 기록했으며 후속 문서 commit의 전체 CI→master→최종 운영 SHA 확인을 계속한다.
