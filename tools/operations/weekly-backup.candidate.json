@@ -1,14 +1,15 @@
 {
-  "status": "DISABLED_PORTABLE_RUNNER_LOCALLY_VERIFIED",
-  "version": 2,
+  "status": "WEEKLY_SCHEDULE_PREPARED_PENDING_EXACT_APPROVAL",
+  "version": 3,
   "policy": "RECOVERY-WEEKLY-RPO7D-20261011",
   "enabled": false,
   "executorProposal": "GitHub Actions ubuntu-24.04 with pinned PostgreSQL17 container, Node24.14.1 and Python cryptography; environment moemoa-backup",
   "productionBranch": "master",
   "proposedSchedule": {
-    "local": "Sunday 03:00 Asia/Tokyo",
+    "local": "Sunday 03:00 Asia/Seoul",
     "utcCron": "0 18 * * 6",
-    "installed": false
+    "installed": false,
+    "candidateFile": "tools/operations/weekly-backup.schedule.candidate.yml"
   },
   "sourceScope": "Encrypted weekly delta ZIP; latest database/journals; changed image bodies only",
   "drive": {
@@ -37,14 +38,14 @@
       "Supabase CA certificate",
       "Backup encryption key"
     ],
-    "configured": false,
-    "driveCredentialsConfigured": true
+    "configured": true,
+    "driveCredentialsConfigured": true,
+    "verifiedBy": "GitHub environment secret names and successful manual run38153533963; values not read"
   },
   "futureRunnerRequirements": [
-    "Approve backup-only production-branch source plus manual workflow installation",
-    "Approve transfer of DB/Storage credentials and recovery key to moemoa-backup environment",
-    "Run one explicitly approved real capture/upload/retrieval before installing weekly cron",
-    "Preserve independent off-PC recovery key and all referenced parent ZIPs"
+    "Approve exact weekly workflow/master source and separate weekly gate activation",
+    "Preserve existing authenticated parents; no automatic deletion",
+    "Verify installed default-branch workflow and observe first scheduled run without asserting a future guarantee"
   ],
   "retention": {
     "enabled": false,
@@ -52,7 +53,7 @@
     "maxChain": 16,
     "maxChainIsRetentionPolicy": false
   },
-  "rollback": "Keep upload flag off; no cron installed; preserve prior archives; revoke dedicated OAuth grant if connected",
+  "rollback": "Disable MOEMOA_BACKUP_WEEKLY_ENABLED and restore existing manual-only workflow; preserve every ZIP/state/parent and usage data",
   "rpoHours": 168,
   "rtoHours": 24,
   "achieved": false,
@@ -60,8 +61,8 @@
     "runner": "tools/operations/run-weekly-backup.mjs",
     "offlinePreflight": "node tools/operations/run-weekly-backup.mjs --preflight",
     "manualCommand": "node tools/operations/run-weekly-backup.mjs --run",
-    "workflowTemplate": "tools/operations/weekly-backup.workflow.candidate.yml",
-    "workflowInstalled": false,
+    "workflowTemplate": "tools/operations/weekly-backup.schedule.candidate.yml",
+    "workflowInstalled": true,
     "gitSourceFiles": {
       "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
       "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
@@ -92,7 +93,7 @@
       "python": 2,
       "workflowStructure": 1
     },
-    "actualGitHubBackupExecuted": false,
+    "actualGitHubBackupExecuted": true,
     "localReleaseCandidate": {
       "base": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
       "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
@@ -113,6 +114,43 @@
         "tools/private-images/capture-recovery-journal.sql"
       ],
       "pushed": false
-    }
+    },
+    "manualProductionSource": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "actualRun": "https://github.com/Newrred/anime-collector/actions/runs/38153533963",
+    "externalRetrievalAndRestore": "thisPcIncrementalDatabaseRecovery20261012 in tracked backup evidence",
+    "workflowInstallationScope": "Existing manual workflow in production d8bf945; proposed scheduled workflow is only on the reviewed candidate branch, not production master"
+  },
+  "activation": {
+    "environment": "moemoa-backup",
+    "weeklyVariable": "MOEMOA_BACKUP_WEEKLY_ENABLED",
+    "desiredValue": "true",
+    "currentValue": "absent/disabled",
+    "existingManualVariable": "MOEMOA_BACKUP_RUN_ENABLED",
+    "existingManualValue": "false",
+    "installed": false,
+    "manualWorkflowPreservedFrom": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "variableResolution": "Environment-scoped gate is evaluated in the first job step after environment selection"
+  },
+  "keyCustody": {
+    "packageProvided": true,
+    "independentCopyConfirmed": true,
+    "keyContentsRecorded": false
+  },
+  "independentKeyCustody": {
+    "confirmed": true,
+    "basis": "Direct user confirmation 2026-10-12; supplied ZIP stored separately",
+    "artifact": "MOEMOA-RECOVERY-KEY-20261012.zip",
+    "evidence": "docs/moemoa/release-v2/evidence/2026-10-10-external-backup-recovery.json#independentKeyCustody20261012"
+  },
+  "exactCombinedReleaseCandidate": {
+    "commit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+    "branch": "codex/public-release-closeout-20261012",
+    "ci": {
+      "run": 38191194150,
+      "conclusion": "success",
+      "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38191194150"
+    },
+    "productionApplied": false
   }
 }

@@ -1,5 +1,9 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-12 최종 검토 후보 준비 완료:** `ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4`의 CI38191194150 전체 SUCCESS. 기존 Public 앱·운영 백업을 결합하고 주간 예약의 별도 차단변수/8검사를 추가했다. 사용자가 복구키 독립보관을 직접 확인. ACTIVE4292 카탈로그 생성자료·표지4292의 인증백업 결속과 59,661개 metadata ZIP/AES-GCM 왕복검증 PASS. 실제 백업 DB의 승인된4표 전체필드 일치·이전release 전환/복귀/같은 요청 재시도 PASS, transaction rollback·접근off·컨테이너정지 확인. 전체 ingestion workspace/history 보존을 주장하지 않는다. 외부 카탈로그 업로드·운영 master/DB/Public/예약 적용0. 정확한 후보 승인→암호화 자료 외부보관/회수확인→주간운영 적용→D06 운영 적용과 배포 후 확인이 다음이다. 기존 완료 검사를 반복하거나 새 원격 catalog 게시/복구 serving 완료로 확대하지 않는다.
+
+> **2026-10-12 이 PC 증분 DB 복원 검증 완료:** 새로 받은 full/delta/state6·4,310파일 검증에 이어99테이블/7확장 실제 격리복원·최신 read-only 삭제/공개 replay·56합성계약·owner5/타계정거부5·익명/RLS PASS. network none/포트0/cron off·private/public off·컨테이너정지 확인. [인수 결과](01_RELEASE_EXECUTION_PLAN.md#handoff-20261012)와 [backup evidence](evidence/2026-10-10-external-backup-recovery.json)의 `thisPcIncrementalDatabaseRecovery20261012`를 우선한다. 운영쓰기·배포·Drive쓰기·예약0, `safeToServe:false`. 독립키/주간운영 인수 및 D06 승인·실제 serving 검증은 잔여이며 아래 DB복원 대기는 당시 이력이다.
+
 > **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
 
 

@@ -1,5 +1,33 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## 2026-10-12 — 복원 이후 D05 운영 인수와 최종 출시 후보 마감
+
+### 1–3. 목적·승인·현재 근거
+
+사용자 “문서상 계획에 따라 작업 이어서 ㄱ”에 따라 완료된 기본 복원검사를 반복하지 않고 W17/D05 운영 인수→D06 정확후보 준비 순서로 진행한다. 최신 운영d8bf945를 직접 재조회했고 read-only preflight는38 migrations/KR14·TH13·US13 가입활성/Public off를 확인했다. 주간 수동실행38153533963 성공과 GitHub moemoa-backup의6 secret 이름은 확보되어 있다. 기존 candidate의 configured:false는 과거 상태라 수정이 필요하다. 계획 시작 시 독립보관 미확인이었으며, 이후 사용자 “별도 장소에 보관 완료” 직접 답변으로 이 조건을 완료했다.
+
+### 4–6. 범위·구조·파일 지도
+
+복구키+사용안내+비밀값 없는 고정 복구metadata ZIP을 Git 밖 사용자전용 폴더에 만든다(서버 env 제외, 기존키/백업 보존). 기존 weekly candidate JSON/YAML을 실제 수동완료에 맞게 갱신하고 주간 스케줄은 **비활성 후보 파일**로 준비·검증한다. 운영master의 수동workflow를 개발브랜치 병합이 지우지 않도록 확인한다. 최신 read-only preflight에서 기존 최종Public candidate를 재생성·검증하고 W16/canonical 잔여의 실제 증거를 대조한다. 작업판/시작문서는 기존 번호를 유지해 갱신한다.
+
+### 7–9. 데이터·마일스톤·검증
+
+운영쓰기·배포·Public활성·새백업·주간예약 설치·삭제 없음. M1 사용자용 키ZIP의 내부 byte일치/ACL/본문미출력. M2 실제GitHub 이름/실행·원격workflow/current preflight와 후보의 일치. M3 주간 schedule/master gate/concurrency·자격경계·삭제없음 회귀와 D06 candidate drift 검증. M4 정확한 변경/롤백·남은 승인·출시조건을 사용자에게 제시한다. 이미 통과한99테이블/56계약·전수 브라우저를 새 변경 없이 재실행하지 않는다.
+
+### 10–14. 보안·관찰·롤백·위험·결정
+
+키 ZIP은 사용자에게 요청한 로컬 다운로드 파일로만 제공하고 현재 사용자/SYSTEM ACL을 적용한다. key/접속값/본문을 로그나 Git에 넣지 않는다. ZIP 생성은 독립보관 완료가 아니며 사용자 실제이전 확인이 필요하다. 스케줄 후보는 GitHub 환경기존연결을 재사용하되 외부예약 설치는 정확한후보 승인 후다. cron은 주1회 목표/RPO7일, 기존전체·부모ZIP/기록 보존·자동삭제0를 유지한다. 롤백은 새 예약을 비활성화하고 기존수동workflow/사본을 보존하며 데이터·권리를 역삭제하지 않는다. 전체Public 활성과 운영배포는 AGENTS의 명시승인/D06 조건을 따른다.
+
+### 15–17. 진행·발견·완료
+
+계획 작성. 오래된 미완료 문구와 실제 운영완료를 분리하고, 반복검사 대신 남은 운영인수와 최종후보를 구체화한다. 결과는 이 절에 누적한다.
+
+- 완료: 사용자 직접 복구키 독립보관 확인; 관련 Node48검사 PASS(주간 admission8 포함). 최종 공개/주간 결합 후보ea8f388의 전체 GitHub CI38191194150 SUCCESS. 최신4292 reviewed release hash/199source 재계산·표지4292/855,987,001B의 인증백업 결속 PASS. metadata 59661파일/772264453B 원본→ZIP 162669485B·각entry hash→AES-GCM 복호화 동일해시→암호화 전송ZIP 검증 PASS. 실제 백업 DB4표 전체필드 일치·이전release 전환/복귀·lost-response 재시도 PASS, 전체transaction rollback·접근off·컨테이너정지. 기존 app runtime·운영 수동백업 보존. 새 원격 카탈로그 게시 및 전체 raw source history 완전성은 주장하지 않음.
+- 아카이브 발견/범위: 모든 과거 claims 포함 시200,000file bound로 안전중단. partial ZIP을 보존하고 현재 canonical/current/state/manifest/projection/bindings·review/cover metadata·승인ACTIVE의 before/prepared/source records로 새 사본을 만들었다. canonical의 fieldProvenance는 보존하되 historical claim bodies/raw history를 포함하지 않는 운영 복구 snapshot이며 full ingestion workspace 복구 완료로 세지 않는다.
+- 정확후보: [기존 마감 evidence](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionCandidate_04에 source/CI/파일hash/DB3/환경13·일일2000회64MB·전역20MiB·독립키/복구/카탈로그·주간게이트와 원복순서를 결속. 승인 전 운영배포/DB/Public/예약/Drive쓰기0. 실패 시 Public reader/writer/image gate를 먼저 닫고 검증된 이전 Git 소스로 복귀하며 삭제fence·원본·usage·백업부모를 보존.
+
+- 발견: production ACTIVE는 `catalog-people-b05fefa545fcce9864eb476f`/4292개이며 이 PC의 character-audit reviewed before/prepared/source records가 같은 release hash로 보존돼 있다. 기존 full3998 projection은3998개/people4899로 별도 로컬검증 PASS라서 이를 최신4292 전체로 오독하지 않는다. W16의 외부 canonical/체크포인트 인수 준비로 로컬 canonical/current/state/manifests/검토자료와 현재 ACTIVE 생성자료를 보호된 ZIP에 보존하고 기존 AES-GCM 도구로 암호화/복호화·해시 검증한다. 공용 이미지 bytes는 이미검증된 Drive full/delta 사본을 별도로 참조하고 원본을 복제 수집하지 않는다. 새 운영 DB/이미지 capture나 외부 업로드는 없으며 local catalog-input archive만 생성한다.
+
 > **2026-10-12 W17/D05 실제 증분 외부보관 성공:** 승인d8bf945 master Git→Vercel/www exactSHA, 수동run38153533963 SUCCESS/WEEKLY_INCREMENTAL_COMMITTED. 새ZIP62,610,505B·chain2·원격SHA256검증/암호화commit6 readback PASS, Chrome Drive 새59.7MB ZIP/기존전체2개·state1~6 보존 확인. container정리SUCCESS·gate false GET200·예약0·삭제0·DBschema/Public변경0. 이번은 수동1회 보관 성공이며 새사본외부회수복구/주간자동화/독립키 완료 아님. 다음1개: 기존 W17/D05 새 증분 사본 외부 회수·격리복구 검증. 아래 실패·미배포는 과거 이력이다.
 
 
@@ -2667,6 +2695,16 @@ run38152850345 FAILURE: UPLOAD_ARCHIVE / DRIVE_REQUEST_UNCERTAIN, Stop container
 
 <a id="handoff-20261012"></a>
 ## 2026-10-12 다른 PC 인수 — W17/D05 재개
+
+### 2026-10-12 이 PC 실행·완료 결과
+
+- 사용자 `ㄱㄱ`로 직전 안내의 실제 격리 DB 복원 검증을 진행했다. 인계의 고정 Supabase Postgres image digest를 다운로드하고 Ubuntu24.04 공식 패키지의 PostgreSQL16.15 client를 설치했다(기존 production package/lockfile 변경0). Supabase changelog/공식 backup restore와 PostgreSQL pg_restore 문서를 대조했다. 이번은 기존17.6 이미지로 복원하며 운영의 버전/extension 업그레이드는 없다.
+- 새 Drive full/delta/state6를 이 PC에서 인증해4,310파일/918,359,762B 복원한 사본을 사용했다. 기존 `capture-isolated-recovery-context.py`를 수정 없이 WSL에서 실행해 verify-full TLS·repeatable-read/read-only·비밀번호 제외 역할16/membership25와 private/public context를 수집했다. context `2026-10-12T09:40:01.15608+09:00`, run `20261012-thispc-01`; 1시간 freshness 검사를 통과했다. 접속값/개인ID/원본본문 출력0.
+- `rehearse-production-restore.mjs`의 repository root/backup 경로 두 상수만 바꾼 ignored 로컬 사본을 실행했다. 역치환 byte일치·source/local SHA256·Node 구문 검사를 기록했으며 나머지 로직 변경0. source hash `e2cbb6e60959d49550aecbcf056212c12466d1e0f9bb33d2520a46520dc37e53`, local hash `254fe7013dc4c3661f67cee748cc47aff8349a5d5e1c161f6f18df26b4b981a4`다.
+- 실제 새 증분 DB import **99테이블/7확장 PASS**, PostgreSQL17.6, import10.651초. 최신 private manifest/fence replay에서operation/source/hash/quota 보존, public deny-only replay와 폐기된 retry본문12건 정리가 로컬에서만 실행됐다. 합성56계약이 실제 복원 RPC로 통과했다. 기존 운영 Public 자료가 비어 있으므로 populated production Public·Storage HTTP PASS로 확대하지 않는다.
+- 실제 복원 ownerRPC5 PASS/타계정5거부·익명거부/잘못된 owner cardRLS거부 PASS. 관련 security checklist의 소유자/RLS·secret 노출 방지·security definer 접근 검증 경계를 적용했으며 제품 코드/정책을 바꾸지 않았다. 전체 security audit/새 토큰 invalidation 검증은 아니다.
+- 최종 private/public off·컨테이너정지 PASS. 독립 `docker inspect`에서도 exited/network none/PortBindings `{}`/ReadonlyRootfs true·backup mount RW false 확인. `safeToServe:false` 유지, 로컬 mount의 원본 사본/Drive 기존사본 보존. 운영쓰기/Drive쓰기/예약/새백업/배포0.
+- 안전한 집계는 기존 [backup evidence](evidence/2026-10-10-external-backup-recovery.json)의 `thisPcIncrementalDatabaseRecovery20261012`; raw context/log/roles/runner는 ignored 보호 `.cache/operations-private/isolated-recovery-20261012-thispc-01`에만 있다. 실패/원복은 이번 정지 컨테이너를 재개하지 않고 기존 사본·운영을 보존하는 방식이다. DB migration은 없다. 독립key보관/주간예약·운영복구서빙/Storage HTTP·canonical/D06 승인 잔여는 유지한다. 아래 최초 인계의 새 증분 DB 미실행은 당시 상태다.
 
 ### Git 받기와 현행 기준
 - 저장소: Newrred/anime-collector. 작업 브랜치: `codex/simple-signup-preview`. 인수 직전 증거 커밋: `4cc93b988b5b7a7eaad7dcb5500451bf4ed8d3b8`. 이 절이 포함된 후속 문서 커밋을 받는다.

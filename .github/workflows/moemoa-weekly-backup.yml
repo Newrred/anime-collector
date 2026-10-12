@@ -1,0 +1,72 @@
+# Candidate only: outside .github/workflows, no schedule, no execution approval implied.
+name: MOEMOA weekly backup manual candidate
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_backup:
+        description: Run the exact approved encrypted incremental backup
+        required: true
+        type: boolean
+        default: false
+      inspect_only:
+        description: Read authenticated checkpoint and archive metadata only; no backup capture or upload
+        required: true
+        type: boolean
+        default: true
+      recover_missing_run_id:
+        description: Exact failed run ID; only authenticated missing archive may be abandoned; blank by default
+        required: false
+        type: string
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: moemoa-production-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.repository == 'Newrred/anime-collector' && github.ref == 'refs/heads/master' && inputs.confirm_backup
+    runs-on: ubuntu-24.04
+    environment: moemoa-backup
+    timeout-minutes: 60
+    container:
+      image: postgres:17-bookworm@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Require approved environment activation
+        env:
+          BACKUP_ENABLED: ${{ vars.MOEMOA_BACKUP_RUN_ENABLED }}
+        run: test "$BACKUP_ENABLED" = true
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.14.1'
+      - name: Prepare isolated backup tools
+        run: |
+          set -euo pipefail
+          apt-get update -qq
+          apt-get install --no-install-recommends -y python3 python3-cryptography ca-certificates
+          pg_dump --version
+      - name: Capture encrypted delta and commit authenticated checkpoint
+        env:
+          MOEMOA_BACKUP_RECOVER_MISSING_RUN_ID: ${{ inputs.recover_missing_run_id }}
+          BACKUP_MODE: ${{ inputs.inspect_only && '--inspect-state' || '--run' }}
+          MOEMOA_BACKUP_RUN_ENABLED: "true"
+          MOEMOA_BACKUP_DRIVE_CLIENT_ID: ${{ vars.MOEMOA_BACKUP_DRIVE_CLIENT_ID }}
+          MOEMOA_BACKUP_DRIVE_FOLDER_ID: ${{ vars.MOEMOA_BACKUP_DRIVE_FOLDER_ID }}
+          MOEMOA_BACKUP_DRIVE_CLIENT_SECRET: ${{ secrets.MOEMOA_BACKUP_DRIVE_CLIENT_SECRET }}
+          MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN: ${{ secrets.MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN }}
+          SUPABASE_URL: https://okchpyagfucpzpyrfgol.supabase.co
+          SUPABASE_DB_URL: ${{ secrets.MOEMOA_BACKUP_DATABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.MOEMOA_BACKUP_STORAGE_KEY }}
+          MOEMOA_BACKUP_CA_PEM: ${{ secrets.MOEMOA_BACKUP_CA_PEM }}
+          MOEMOA_BACKUP_RECOVERY_KEY: ${{ secrets.MOEMOA_BACKUP_RECOVERY_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          node tools/operations/run-weekly-backup.mjs "$BACKUP_MODE"
+# Never add upload-artifact/actions-cache for staging, credentials or backup payloads.

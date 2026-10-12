@@ -1305,5 +1305,111 @@
       "Start a healthy local Docker engine, refresh read-only current context if older than one hour, then run prepared isolated restore",
       "Independent recovery-key custody and weekly scheduling remain separate unfinished gates"
     ]
+  },
+  "thisPcIncrementalDatabaseRecovery20261012": {
+    "status": "CURRENT_IMPORT_PUBLIC_REPLAY_CONTRACT_PASS_SERVING_CLOSED",
+    "scope": "This PC fresh full/delta/state6 retrieval, incremental DB restore and isolated recovery contracts",
+    "runId": "20261012-thispc-01",
+    "capturedAt": "2026-10-12T00:40:01.15608+00:00",
+    "captureReadOnly": true,
+    "captureTlsVerifyFull": true,
+    "passwordsExported": false,
+    "archives": {
+      "newlyRetrieved": 3,
+      "authenticatedCommitSequence": 6,
+      "baselinePinMatches": true,
+      "fullLedgerHistoryReplayed": false,
+      "filesVerified": 4310,
+      "bytesVerified": 918359762
+    },
+    "runtime": {
+      "client": "PostgreSQL 16.15 on Ubuntu24.04 (local client only)",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "restoredDatabaseVersion": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+      "productionDependenciesChanged": false
+    },
+    "runner": {
+      "source": "tools/operations/rehearse-production-restore.mjs",
+      "sourceSha256": "e2cbb6e60959d49550aecbcf056212c12466d1e0f9bb33d2520a46520dc37e53",
+      "localSha256": "254fe7013dc4c3661f67cee748cc47aff8349a5d5e1c161f6f18df26b4b981a4",
+      "substitutions": [
+        "repository root",
+        "verified incremental backup path"
+      ],
+      "otherLogicMatches": true
+    },
+    "import": {
+      "verified": true,
+      "seconds": 10.651,
+      "tables": 99,
+      "extensions": [
+        "pg_cron",
+        "pg_stat_statements",
+        "pg_trgm",
+        "pgcrypto",
+        "plpgsql",
+        "supabase_vault",
+        "uuid-ossp"
+      ]
+    },
+    "privateReplay": {
+      "operationSourceHashQuotaPreserved": true
+    },
+    "publicReplay": {
+      "denyOnly": true,
+      "scrubbedRetryBodies": 12
+    },
+    "contracts": {
+      "checks": 56,
+      "synthetic": true,
+      "actualRestoredFunctions": true,
+      "populatedProductionPublicVerified": false,
+      "externalStorageHttpVerified": false
+    },
+    "access": {
+      "ownerReads": 5,
+      "anonymousDenied": true,
+      "realRestoredRpc": true,
+      "otherOwnerDenied": 5,
+      "wrongOwnerCardRlsDenied": true,
+      "imageBytesDecodedThisRun": false
+    },
+    "isolation": {
+      "network": "none",
+      "publishedPorts": 0,
+      "readOnlyRootfs": true,
+      "backupReadOnlyMount": true,
+      "cronLaunch": "off",
+      "privateAccessClosed": true,
+      "publicAccessClosed": true,
+      "containerStopped": true,
+      "independentDockerInspectPassed": true
+    },
+    "productionWrites": 0,
+    "externalWrites": 0,
+    "newBackups": 0,
+    "schedules": 0,
+    "deployments": 0,
+    "safeToServe": false,
+    "remaining": [
+      "Independent off-PC recovery-key custody",
+      "Weekly scheduling exact candidate approval",
+      "Recovery serving/Storage HTTP and canonical completeness acceptance",
+      "D06 production candidate approval and release checks"
+    ],
+    "docs": [
+      "https://supabase.com/changelog.md",
+      "https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore",
+      "https://www.postgresql.org/docs/16/app-pgrestore.html"
+    ]
+  },
+  "independentKeyCustody20261012": {
+    "status": "USER_CONFIRMED_INDEPENDENT_STORAGE",
+    "confirmedDate": "2026-10-12",
+    "basis": "Direct user answer: 별도 장소에 보관 완료",
+    "providedArtifact": "MOEMOA-RECOVERY-KEY-20261012.zip",
+    "independentOfThisPcAndBackupDriveFolder": true,
+    "verification": "User-attested; remote device contents not inspected",
+    "keyContentsOrHashRecorded": false
   }
 }
