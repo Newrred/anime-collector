@@ -91,7 +91,10 @@ function Content({ base }) {
   const { locale } = useMemoryRouteUi(), auth = useAuthSession(), copy = minihomeCopy(locale);
   return <main className="page-shell page-shell--wide public-workspace-page">
     <PublicPageHeading title={copy.title} base={`${base}boards/`} breadcrumb={copy.boards} />
-    {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <p>{copy.login} <a href={`${base}data/`}>{locale === 'ko' ? '계정' : 'Account'}</a></p>
+    {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <section>
+      <p>{copy.login} <a href={`${base}data/`}>{locale === 'ko' ? '계정' : 'Account'}</a></p>
+      {globalThis.location?.hash === '#following' && <MemoryRelationships locale={locale} base={base} />}
+    </section>
       : <MinihomeTasks userId={auth.user.id} locale={locale} base={base} />}
   </main>;
 }
