@@ -63,6 +63,73 @@ test('existing account signup recovery from follow preserves blocking', async ({
   expect(blocked).toBe(true);
 });
 
+
+for (const action of ['HIDE', 'RESTORE', 'KEEP']) {
+  test('general report workspace saves exact revisions ' + action, async ({page, context}) => {
+    await adapters(context); const backend = mockPublication(); await backend.attach(context); await seedOwner(page);
+    const id = '99999999-9999-4999-8999-999999999999'; let submitted: any = null;
+    await context.route(/\/(list_memory_moderation|read_memory_moderation_audit|review_memory_report)$/, async route => {
+      const name = route.request().url(); let data: any;
+      if (name.endsWith('list_memory_moderation')) data = {items:[{id,reviewType:'REPORT',kind:'home',target:PUBLICATION,category:'OTHER',note:'Synthetic report',status:'APPEALED',revision:3,targetRevision:5,appeals:[{text:'Please review again.'}],reporter:'DO_NOT_RENDER_REPORTER'}],next:null};
+      else if (name.endsWith('read_memory_moderation_audit')) data = [{action:'HIDE',reason:'Previous synthetic action',actor:'DO_NOT_RENDER_ACTOR'}];
+      else {submitted = route.request().postDataJSON(); data={id,status:'CLOSED',revision:4,targetRevision:6};}
+      await route.fulfill({json:{data,error:null}});
+    });
+    await page.goto('/moderation/'); await page.getByRole('button',{name:'Reports',exact:true}).click();
+    await page.getByRole('button',{name:'Report '+id+' · APPEALED',exact:true}).click();
+    await expect(page.getByText('Please review again.',{exact:false})).toBeVisible();
+    await expect(page.getByText('DO_NOT_RENDER_REPORTER')).toHaveCount(0);await expect(page.getByText('DO_NOT_RENDER_ACTOR')).toHaveCount(0);
+    await expect(page.getByRole('link',{name:'Open reported public content'})).toHaveAttribute('href','/public/home/?id='+PUBLICATION);
+    await page.getByLabel('Report action',{exact:true}).selectOption(action);
+    await page.getByLabel('Reason sent to the author').fill('Synthetic moderation decision.');
+    const save=page.getByRole('button',{name:'Save report action',exact:true});await expect(save).toBeDisabled();
+    await page.getByLabel('I reviewed the target, action and reason.',{exact:true}).check();
+    if(action==='HIDE') {
+      await page.screenshot({path:'.cache/report-review-candidate.png',fullPage:true});
+      await page.setViewportSize({width:320,height:760});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+      await page.screenshot({path:'.cache/report-review-mobile.png',fullPage:true});
+    }
+    await save.click();
+    await expect(page.getByRole('status')).toContainText('Action saved.');
+    expect(submitted).toEqual({p_id:id,p_revision:3,p_target_revision:5,p_action:action,p_reason:'Synthetic moderation decision.'});
+    await expect(save).toHaveCount(0);
+    await page.evaluate(async()=>{const {writeMockAuthSession}=await import('/src/repositories/mockAuthStorage.js');writeMockAuthSession(null);});
+    await expect(page.getByText('Action saved.',{exact:false})).toHaveCount(0);
+  });
+}
+
+test('general report workspace pages past content cases and requires fresh selection after uncertain action', async ({page,context})=>{
+  await adapters(context);const backend=mockPublication();await backend.attach(context);await seedOwner(page);
+  const id='99999999-9999-4999-8999-999999999999', cursor='88888888-8888-4888-8888-888888888888';let submissions=0,refreshes=0;
+  await context.route(/\/(list_memory_moderation|read_memory_moderation_audit|review_memory_report)$/,async route=>{
+    const name=route.request().url();const args=route.request().postDataJSON();let data:any=[],error:any=null;
+    if(name.endsWith('list_memory_moderation')) {refreshes++;data=args.p_after===cursor?{items:[{id,reviewType:'REPORT',kind:'board',target:PUBLICATION,category:'OTHER',note:'Selected report',status:'RECEIVED',revision:0,targetRevision:0,appeals:[]}],next:null}:{items:[{id:cursor,reviewType:'CONTENT',status:'APPEALED'}],next:cursor};}
+    else if(name.endsWith('review_memory_report')){submissions++;data=null;error={message:'PUBLICATION_REQUEST_FAILED'};}
+    await route.fulfill({json:{data,error}});
+  });
+  await page.goto('/moderation/');await page.getByRole('button',{name:'Reports',exact:true}).click();
+  await expect(page.getByText('No general reports on this page.')).toBeVisible();
+  await page.getByRole('button',{name:'More reports',exact:true}).click();
+  await page.getByRole('button',{name:'Report '+id+' · RECEIVED',exact:true}).click();
+  await page.getByLabel('Report action',{exact:true}).selectOption('HIDE');await page.getByLabel('Reason sent to the author').fill('Synthetic review');
+  await page.getByLabel('I reviewed the target, action and reason.',{exact:true}).check();
+  await page.getByRole('button',{name:'Save report action',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('Refresh the reports');
+  await expect(page.getByRole('button',{name:'Save report action',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Report '+id+' · RECEIVED',exact:true})).toHaveCount(0);
+  expect(submissions).toBe(1);expect(refreshes).toBe(2);
+  await page.getByRole('button',{name:'Refresh reports',exact:true}).click();await expect(page.getByRole('button',{name:'More reports',exact:true})).toBeVisible();
+});
+
+test('general report workspace does not expose reports when server rejects moderator access',async({page,context})=>{
+  await adapters(context);const backend=mockPublication();await backend.attach(context);await seedOwner(page);
+  await context.route('**/list_memory_moderation',route=>route.fulfill({json:{data:null,error:{message:'MODERATOR_REQUIRED'}}}));
+  await page.goto('/moderation/');await page.getByRole('button',{name:'Reports',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('Could not confirm');
+  await expect(page.getByRole('button',{name:'Save report action',exact:true})).toHaveCount(0);
+});
+
 for (const mode of ['board', 'home', 'appeals']) {
   test(`moderation workspace reviews ${mode} with exact package`, async ({ page, context }) => {
     await adapters(context); const backend=mockPublication(); await backend.attach(context); await seedOwner(page);
@@ -364,11 +431,11 @@ test("anonymous home visit does not auto-follow or fetch an owner graph", async 
   expect(backend.calls.filter((c) => c.name.includes("relationship"))).toEqual([]);
 });
 
-async function adapters(context: BrowserContext) {
-  await context.addInitScript(() => {
+async function adapters(context: BrowserContext, policyRevision = "MOEMOA_PUBLIC_GENERAL_20261011_01") {
+  await context.addInitScript((revision) => {
     localStorage.setItem("ui:locale:v1", JSON.stringify("en"));
     (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__ = {
-      policyRevision: "local-test-policy",
+      policyRevision: revision,
       resolveCover: async () => "/__publication-test/cover.webp",
       client: { rpc(name: string, args: any) {
         let signal: AbortSignal | undefined;
@@ -382,7 +449,7 @@ async function adapters(context: BrowserContext) {
         return query;
       } },
     };
-  });
+  }, policyRevision);
 }
 
 function mockPublication() {
@@ -390,7 +457,7 @@ function mockPublication() {
   const HOME = "55555555-5555-4555-8555-555555555555";
   let state = "PRIVATE", revision = 0, snapshot: any = null, published: any = null;
   const calls: any[] = [];
-  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false, visible: true };
+  const control = { delay: 0, publishError: "", readError: false, image: false, cover: false, sourceChanged: false, revokeError: false, secondBoard: false, visible: true, policyRevision: "MOEMOA_PUBLIC_GENERAL_20261011_01" };
   const attach = async (context: BrowserContext) => {
     await context.route("**/__publication-test/rpc/*", async (route) => {
       const name = new URL(route.request().url()).pathname.split("/").at(-1);
@@ -405,7 +472,7 @@ function mockPublication() {
         home = args.p_selection; homeRevision++;
         homePreview = { nickname: home.nickname, bio: home.bio, entries: home.entries.map((e: any) => ({ publicationId: e.publicationId,
           snapshot: { ...published, cards: e.cardId ? published.cards.filter((c: any) => c.id === e.cardId) : published.cards } })) };
-        data = { id: HOME, revision: homeRevision, reviewHash: HASH, policyRevision: "local-test-policy", snapshot: homePreview };
+        data = { id: HOME, revision: homeRevision, reviewHash: HASH, policyRevision: control.policyRevision, snapshot: homePreview };
         if (control.delay) await new Promise((resolve) => setTimeout(resolve, control.delay));
       }
       if (name === "publish_memory_minihome") {
@@ -417,6 +484,8 @@ function mockPublication() {
         if (control.readError) error = { message: "network failure" };
         else data = homePublished ? { id: HOME, ...homePublished, entries: published?.cards.length ? homePublished.entries : [] } : null;
       }
+      if (name === "get_memory_card_sharing") data = {published:Boolean(published),visible:Boolean(published)&&control.visible,restricted:false};
+      if (name === "make_memory_card_private") { published=null;state="REVOKED";revision++;data={published:false}; }
       if (name === "get_memory_publication") data = revision ? { id: PUBLICATION, revision, state, hasPublished: Boolean(published), sourceChanged: control.sourceChanged, visible: control.visible } : null;
       if (name === "prepare_memory_publication") {
         if (args.p_expected_revision !== revision) error = { message: "PUBLICATION_CONFLICT" };
@@ -430,13 +499,13 @@ function mockPublication() {
                 : { type: "SYSTEM_DESIGN", rendererVersion: 1, patternToken: "cc4499ff" },
               ...(card.fields.includes("note") ? { note: "Selected reflection" } : {}),
             })) };
-          data = { id: PUBLICATION, revision, reviewHash: HASH, policyRevision: "local-test-policy", snapshot };
+          data = { id: PUBLICATION, revision, reviewHash: HASH, policyRevision: control.policyRevision, snapshot };
           if (control.delay) await new Promise((resolve) => setTimeout(resolve, control.delay));
         }
       }
       if (name === "publish_memory_publication") {
         if (control.publishError) error = { message: control.publishError };
-        else { state = "PUBLISHED"; revision++; published = snapshot; data = { id: PUBLICATION, revision, state }; }
+        else { state = "PUBLISHED"; revision++; published = snapshot; data = { id: PUBLICATION, revision, state, visible:control.visible }; }
       }
       if (name === "read_memory_publication") {
         if (control.readError) error = { message: "private upstream detail" };
@@ -505,6 +574,7 @@ async function choose(page: Page, note = false) {
 
 async function publishSelected(page: Page) {
   await page.getByRole("button", { name: "Preview selected memories" }).click();
+  await expect(page.getByRole("link", { name: "Public sharing · rights and reporting (new tab)" })).toHaveAttribute("href", "/legal/public-sharing-2026-10-11/#en");
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();
   await page.getByRole("button", { name: "Publish this version" }).click();
   await expect(page.getByRole("link", { name: "Open visitor page" })).toBeVisible();
@@ -521,6 +591,7 @@ test("mini-home explicit representative → preview → fresh visitor → privat
   await page.getByLabel("Display selection", { exact: true }).selectOption(PUBLIC_CARD);
   await page.getByRole("button", { name: "Preview public home", exact: true }).click();
   await expect(page.getByRole("region", { name: "Preview public home", exact: true }).getByText("Selected reflection")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Public sharing · rights and reporting (new tab)" })).toHaveAttribute("href", "/legal/public-sharing-2026-10-11/#en");
   await expect(page.getByRole("button", { name: "Publish public home", exact: true })).toBeDisabled();
   await page.getByLabel("I reviewed this public home", { exact: false }).check();
   await page.getByRole("button", { name: "Publish public home", exact: true }).click();
@@ -684,7 +755,7 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
   await expect(page.getByRole("heading", { name: "Shared memory" })).toBeVisible();
   mock.control.revokeError = false;
   await page.getByRole("tab", { name: "Manage", exact: true }).click();
-  await page.getByText("Sharing settings", { exact: true }).click();
+  await page.getByText("Board and home settings", { exact: true }).click();
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Stop sharing this memory everywhere" }).click();
   await expect(page.getByText("Sharing of this memory has stopped everywhere.", { exact: false })).toBeVisible();
@@ -698,7 +769,15 @@ test("failed remote withdrawal preserves a synced original, retry withdraws befo
 });
 
 test("explicit selection → exact public preview → fresh anonymous context → Board withdrawal", async ({ page, context, browser }) => {
-  const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page); await choose(page, true);
+  const mock = mockPublication(); await adapters(context); await mock.attach(context); await seedOwner(page);
+  await page.locator('.memory-boards__cards li').filter({ hasText: 'Shared memory' }).getByRole('link').first().click();
+  await page.getByRole('tab', { name: 'Manage', exact: true }).click();
+  await page.locator('summary').filter({ hasText: 'Board and home settings' }).click();
+  await expect(page.getByRole('region', { name: 'Visibility', exact: true })).toContainText('Original is private');
+  await page.getByRole('link', { name: 'Board sharing →', exact: true }).click();
+  await page.getByRole('link', { name: 'PRIVATE BOARD NAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Share selected memories' }).click();
+  await choose(page, true);
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   const preview = page.getByRole("region", { name: "Visitor preview" });
   await expect(preview.getByText("Selected reflection")).toBeVisible();
@@ -821,6 +900,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   const png = await sharp({ create: { width: 24, height: 30, channels: 3, background: "#cc7799" } }).png().toBuffer();
   const webp = await sharp(png).webp().toBuffer();
   const uploads: any[] = [], reads: any[] = [];
+  let imageError = "PUBLIC_SIGNUP_REQUIRED";
   const privateHash = createHash('sha256').update(webp).digest('hex');
   await context.route('**/api/private-image**', async route => {
     expect(route.request().method()).toBe('GET');
@@ -836,6 +916,7 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   });
   await context.route("**/api/public-image", async (route) => {
     uploads.push(route.request());
+    if (imageError) return route.fulfill({ status: imageError === "PUBLIC_SIGNUP_REQUIRED" ? 403 : 503, json: { error: imageError } });
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ id: IMAGE, state: "READY" }) });
   });
   await page.reload(); await page.getByRole("button", { name: "Share selected memories" }).click(); await choose(page);
@@ -854,13 +935,28 @@ for (const usePrivate of [false, true]) test(`image preparation requires explici
   await page.getByLabel(usePrivate ? 'I agree to use this selected image' : "I agree to upload this selected image", { exact: false }).check();
   await page.screenshot({path:`.cache/self-declared-rights-${usePrivate ? 'private' : 'original'}.png`});
   await page.getByRole("button", { name: "Prepare selected image" }).click();
+  await expect(page.getByRole('alert')).toContainText('country, age and terms');
+  const recovery = page.getByRole('link', { name: 'Review signup details for this account' });
+  const recoveryUrl = new URL(await recovery.getAttribute('href') || '', page.url());
+  const boardUrl = new URL(page.url());
+  expect(recoveryUrl.pathname).toBe('/auth/start/');
+  expect(recoveryUrl.searchParams.get('next')).toBe(boardUrl.pathname + boardUrl.search);
+  await expect(page.getByText('The selected image copy is ready.', { exact: false })).toHaveCount(0);
+  imageError = 'PUBLIC_SIGNUP_UNAVAILABLE';
+  await page.getByRole('button', { name: 'Prepare selected image' }).click();
+  await expect(page.getByRole('alert')).toContainText('unavailable');
+  await expect(recovery).toHaveCount(0);
+  imageError = '';
+  await page.getByRole('button', { name: 'Prepare selected image' }).click();
   await expect(page.getByText("The selected image copy is ready.", { exact: false })).toBeVisible();
-  expect(uploads).toHaveLength(1); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
+  expect(new Set(uploads.map(request => request.headers()['x-moemoa-operation'])).size).toBe(1);
+  expect(uploads[0].headers()['x-moemoa-operation']).toBeTruthy();
+  expect(uploads).toHaveLength(3); expect(uploads[0].postDataBuffer()).toEqual(usePrivate ? null : png);
   if (usePrivate) {
     expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);
     expect(uploads[0].headers()['x-moemoa-representation-hash']).toBe(privateHash);
   }
-  expect(uploads[0].headers()["x-moemoa-consent"]).toBe("local-test-policy");
+  expect(uploads[0].headers()["x-moemoa-consent"]).toBe("MOEMOA_PUBLIC_GENERAL_20261011_01");
   expect(uploads[0].headers()['x-moemoa-rights']).toBe('USER_ORIGINAL');
   await page.getByRole("button", { name: "Preview selected memories" }).click();
   await page.getByLabel("I have reviewed these memories", { exact: false }).check();
@@ -893,4 +989,125 @@ test("account switch removes an in-flight owner preview and never sends publish"
   await page.waitForTimeout(900);
   await expect(page.getByRole("region", { name: "Visitor preview" })).toHaveCount(0);
   expect(mock.calls.filter((call) => call.name === "publish_memory_publication")).toHaveLength(0);
+});
+
+for (const variant of ['desktop','mobile','image']) {
+ const mobile=variant==='mobile',imageCase=variant==='image';
+ test(`simple card visibility saves with one consent and remains reversible ${variant}`,async({page,context})=>{
+  if(mobile)await page.setViewportSize({width:390,height:844});
+  await adapters(context);const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+  const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
+  const cardId=new URL(href!,page.url()).searchParams.get('id')!;
+  await page.evaluate(async(cardId)=>{
+   const {getPlatformMemoryRuntime}=await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+   const {cardSharingBoardId}=await import('/src/features/memory/application/simpleCardSharing.js');
+   const runtime=await getPlatformMemoryRuntime(),id=await cardSharingBoardId(cardId);
+   await runtime.createBoard({id,title:'Shared memory'});await runtime.addCardToBoard(id,cardId);
+   const {IndexedDbMemoryRepository}=await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
+   const repo=await IndexedDbMemoryRepository.open();
+   const tx=repo.database.transaction(['memory_boards','memory_board_cards'],'readwrite');
+   for(const name of ['memory_boards','memory_board_cards']){const store=tx.objectStore(name),req=store.getAll();req.onsuccess=()=>req.result.forEach((row:any)=>store.put({...row,sync:{...row.sync,syncState:'SYNCED',remoteVersion:1}}));}
+   await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=reject;});
+  },cardId);
+
+  const uploads:any[]=[];
+  if(imageCase){
+    mock.control.image=true;
+    const bytes=await sharp({create:{width:24,height:30,channels:3,background:'#66aa99'}}).webp().toBuffer();
+    const hash=createHash('sha256').update(bytes).digest('hex');
+    await context.route('**/api/private-image**',async route=>{
+      if(route.request().url().includes('policy=1'))return route.fulfill({json:{revision:'PRIVATE_TEST',quotaBytes:50000000,usedBytes:bytes.length*2,mainMaxBytes:1000000,transportBodyMaxBytes:1500000,
+        representation:{id:IMAGE,state:'READY',sourceVersion:1,mainHash:hash,mainBytes:bytes.length,thumbnailHash:hash,thumbnailBytes:bytes.length}}});
+      return route.fulfill({contentType:'image/webp',body:bytes});
+    });
+    await context.route('**/api/public-image?*',route=>route.fulfill({contentType:'image/webp',body:bytes}));
+    await context.route('**/api/public-image',async route=>{
+      uploads.push(route.request());await route.fulfill({json:{id:IMAGE,state:'READY'}});
+    });
+    await page.evaluate(async(cardId)=>{
+      const {getPlatformMemoryRuntime}=await import('/src/features/memory/runtime/platformMemoryRuntime.js');
+      const runtime=await getPlatformMemoryRuntime(),bundle=await runtime.getCard(cardId);
+      const {IndexedDbMemoryRepository}=await import('/src/features/memory/adapters/indexeddb/IndexedDbMemoryRepository.js');
+      const repo=await IndexedDbMemoryRepository.open(),tx=repo.database.transaction('visual_assets','readwrite');
+      tx.objectStore('visual_assets').put({...bundle.asset,imageType:'USER_ORIGINAL',designSpec:null,localRef:null,checksumSha256:'b'.repeat(64)});
+      await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=reject;});
+    },cardId);
+  }
+  await page.goto(href!);await page.getByRole('tab',{name:'Manage',exact:true}).click();
+  const form=page.getByRole('form',{name:'Memory visibility'});
+  await expect(form.getByRole('radio',{name:'Private',exact:true})).toBeChecked();
+  await form.getByRole('radio',{name:'Public',exact:true}).check();
+  await expect(form.getByRole('link',{name:'Public sharing · rights and reporting (new tab)'})).toHaveAttribute('href','/legal/public-sharing-2026-10-11/#en');
+  const consent=form.getByRole('checkbox');await expect(consent).toBeEnabled();
+  await expect(form.getByRole('button',{name:'Save visibility'})).toBeDisabled();
+  expect(mock.calls.some(c=>c.name==='prepare_memory_publication')).toBe(false);
+  expect(uploads).toHaveLength(0);
+  await consent.check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as public.',{exact:true})).toBeVisible();
+  if(imageCase){expect(uploads).toHaveLength(1);expect(uploads[0].postDataBuffer()).toBeNull();expect(uploads[0].headers()['x-moemoa-private-representation']).toBe(IMAGE);}
+  const prepared=mock.calls.filter(c=>c.name==='prepare_memory_publication');expect(prepared).toHaveLength(1);
+  expect(prepared[0].args.p_selection).toEqual({title:'Shared memory',description:'',cards:[{cardId,fields:[]}]});
+  expect(await form.getByRole('checkbox').count()).toBe(1);
+  await page.screenshot({path:`.cache/simple-card-visibility-${variant}.png`,fullPage:true});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await form.getByRole('radio',{name:'Private',exact:true}).check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as private.',{exact:true})).toBeVisible();
+  expect(mock.calls.filter(c=>c.name==='make_memory_card_private')).toHaveLength(1);
+  expect(mock.calls.some(c=>c.name==='retire_memory_card_publications')).toBe(false);
+  await form.getByRole('radio',{name:'Public',exact:true}).check();await expect(form.getByRole('checkbox')).toBeEnabled();
+  await expect(form.getByRole('checkbox')).not.toBeChecked();
+  await form.getByRole('checkbox').check();await form.getByRole('button',{name:'Save visibility'}).click();
+  await expect(form.getByText('Saved as public.',{exact:true})).toBeVisible();
+ });
+}
+
+for (const surface of ['board','home']) {
+ test('unknown public policy blocks new '+surface+' consent but preserves withdrawal',async({page,context})=>{
+  await adapters(context);const mock=mockPublication();await mock.attach(context);await seedOwner(page);await choose(page);await publishSelected(page);
+  if(surface==='home'){
+   await page.getByRole('link',{name:'My public home'}).click();
+   await page.getByLabel('Public nickname',{exact:true}).fill('Synthetic home');
+   await page.getByLabel('Display this Board',{exact:true}).check();
+   await page.getByRole('button',{name:'Preview public home',exact:true}).click();
+   await page.getByLabel('I reviewed this public home',{exact:false}).check();
+   await page.getByRole('button',{name:'Publish public home',exact:true}).click();
+   await expect(page.getByRole('link',{name:'Open public home',exact:true})).toBeVisible();
+  }
+  mock.control.policyRevision='UNRECOGNIZED_POLICY';
+  await page.getByRole('button',{name:surface==='home'?'Preview public home':'Review and update public content',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('public notice for this policy version is unavailable');
+  await expect(page.getByRole('button',{name:surface==='home'?'Publish public home':'Publish this version',exact:true})).toBeDisabled();
+  await expect(page.getByLabel(surface==='home'?'I reviewed this public home':'I have reviewed these memories',{exact:false})).toBeDisabled();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:surface==='home'?'Make public home private':'Withdraw this Board',exact:true}).click();
+  await expect.poll(()=>mock.calls.filter(c=>c.name===(surface==='home'?'revoke_memory_minihome':'revoke_memory_publication')).length).toBe(1);
+ });
+}
+test('public notice fixed version renders both languages and legal links at 320px',async({page})=>{
+ await page.setViewportSize({width:320,height:720});
+ await page.goto('/legal/public-sharing-2026-10-11/');
+ await expect(page.locator('.policy-version')).toContainText('MOEMOA_PUBLIC_GENERAL_20261011_01');
+ await expect(page.locator('#ko h1')).toHaveText('선택한 내용을 공개하기 전에');
+ await expect(page.locator('#en h1')).toHaveText('Before you publish');
+ for(const path of ['terms-2026-10-10','privacy-2026-10-10']){
+  const response=await page.request.get('/legal/'+path+'/');expect(response.ok()).toBe(true);
+ }
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:'.cache/public-sharing-notice-320.png',fullPage:true});
+});
+
+test('unknown public policy blocks quick sharing but allows saving as private',async({page,context})=>{
+ await adapters(context,'UNRECOGNIZED_POLICY');const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+ const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
+ await page.goto(href!);await page.getByRole('tab',{name:'Manage',exact:true}).click();
+ const form=page.getByRole('form',{name:'Memory visibility'});
+ await form.getByRole('radio',{name:'Public',exact:true}).check();
+ await expect(form.getByRole('alert')).toContainText('public notice for this policy version is unavailable');
+ await expect(form.getByRole('checkbox')).toBeDisabled();
+ await expect(form.getByRole('button',{name:'Save visibility'})).toBeDisabled();
+ expect(mock.calls.some(c=>c.name==='prepare_memory_publication'||c.name==='publish_memory_publication')).toBe(false);
+ await form.getByRole('radio',{name:'Private',exact:true}).check();
+ await form.getByRole('button',{name:'Save visibility'}).click();
+ await expect(form.getByText('Saved as private.',{exact:true})).toBeVisible();
+ expect(mock.calls.filter(c=>c.name==='make_memory_card_private')).toHaveLength(1);
 });

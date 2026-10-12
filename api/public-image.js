@@ -6,6 +6,7 @@ export default createPublicImageHandler({
   privateSourcesEnabled: process.env.MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED === 'true',
   moderationPreviewsEnabled: process.env.MOEMOA_CONTENT_REVIEW_IMAGE_ENABLED === 'true',
   authenticatedViewersEnabled: process.env.MOEMOA_PUBLIC_IMAGE_VIEWER_ENABLED === 'true',
+  sizedDeliveryEnabled: process.env.MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED === 'true',
   createBackend: () => createSupabaseImageBackend(),
   allowedOrigins: (process.env.MOEMOA_PUBLIC_IMAGE_ALLOWED_ORIGINS || "").split(",").map(x=>x.trim()).filter(Boolean),
 });

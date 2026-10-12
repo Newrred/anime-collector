@@ -1,3 +1,5 @@
+import PublicSharingNotice from './PublicSharingNotice.jsx';
+import { publicSharingNoticeHref } from '../domain/publicSharingPolicy.js';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
@@ -13,7 +15,7 @@ import "./memory-publication.css";
 import { getPlatformMemoryRuntime } from '../runtime/platformMemoryRuntime.js';
 import { privateImageTransfer, privateImageUiEnabled } from '../runtime/platformPrivateImages.js';
 
-function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
+function ImagePreparation({ cardId, controller, copy, policyRevision, busy, locale, base }) {
   const [file, setFile] = useState(null);
   const [consented, setConsented] = useState(false);
   const [rightsBasis, setRightsBasis] = useState('');
@@ -41,7 +43,7 @@ function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
   return <div className="memory-publication__image-preparation">
     <p>{canChoosePrivate ? copy.privateImageHelp : copy.imageHelp}</p>
     {!policyRevision ? <p>{copy.imagePolicyMissing}</p> : <>
-      <p>{copy.policy}: {policyRevision}</p>
+      <PublicSharingNotice revision={policyRevision} locale={locale} base={base} />
       <label>{copy.file}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || loading}
         onChange={(event) => { setFile(event.target.files?.[0] || null); setPrivateChoice(null); setConsented(false); if (objectUrl.current) { URL.revokeObjectURL(objectUrl.current); objectUrl.current = null; } }} /></label>
       {canChoosePrivate && <button type="button" className="btn btn--subtle" disabled={busy || loading} onClick={choosePrivate}>{copy.choosePrivate}</button>}
@@ -52,16 +54,17 @@ function ImagePreparation({ cardId, controller, copy, policyRevision, busy }) {
         <option value="">{copy.rightsChoose}</option><option value="USER_ORIGINAL">{copy.rightsOriginal}</option><option value="EXISTING_APPROVAL">{copy.rightsApproved}</option>
       </select></label>
       {rightsBasis === 'USER_ORIGINAL' && <p>{copy.ownCreationHelp}</p>}
-      <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || loading || (!file && !privateChoice)}
+      <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || loading || (!file && !privateChoice) || !publicSharingNoticeHref(policyRevision, base)}
         onChange={(event) => setConsented(event.target.checked)} />{privateChoice ? copy.privateConsent : copy.imageConsent}</label>
-      <button type="button" className="btn btn--subtle" disabled={busy || loading || (!file && !privateChoice) || !consented || !rightsBasis}
+      <button type="button" className="btn btn--subtle" disabled={busy || loading || (!file && !privateChoice) || !consented || !rightsBasis || !publicSharingNoticeHref(policyRevision, base)}
         onClick={() => controller.upload({ cardId, file, privateRepresentation: privateChoice && {id:privateChoice.id,hash:privateChoice.hash}, consented, rightsBasis })}>{copy.upload}</button>
     </>}
   </div>;
 }
 
-function PublicationReview({ review, controller, services, locale, busy }) {
+function PublicationReview({ review, controller, services, locale, busy, base }) {
   const copy = publicationCopy(locale);
+  const noticeAvailable = Boolean(publicSharingNoticeHref(review.policyRevision, base));
   const [consented, setConsented] = useState(false);
   const [visualsReady, setVisualsReady] = useState(false);
   const heading = useRef(null);
@@ -70,11 +73,11 @@ function PublicationReview({ review, controller, services, locale, busy }) {
     <h3 ref={heading} tabIndex={-1}>{copy.previewTitle}</h3>
     <PublicBoardSnapshot snapshot={review.snapshot} publicationId={review.id} services={services}
       preview locale={locale} onReady={setVisualsReady} />
-    <p>{copy.policy}: {review.policyRevision}</p>
-    <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy}
+    <PublicSharingNotice revision={review.policyRevision} locale={locale} base={base} />
+    <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || !noticeAvailable}
       onChange={(event) => setConsented(event.target.checked)} />{copy.consent}</label>
     <div className="memory-publication__actions">
-      <button type="button" className="btn" disabled={busy || !consented || !visualsReady}
+      <button type="button" className="btn" disabled={busy || !consented || !visualsReady || !noticeAvailable}
         onClick={() => controller.publish({ consented, visualsReady })}>{copy.publish}</button>
       <button type="button" className="btn btn--subtle" disabled={busy} onClick={() => controller.cancel()}>{copy.cancel}</button>
     </div>
@@ -117,7 +120,7 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
     {publication?.state === "REVOKED" && <p role="status">{copy.revoked}</p>}
     {publication && publication.state !== "REVOKED" && <button type="button" className="btn btn--subtle" disabled={state.busy}
       onClick={() => { if (confirm(copy.withdrawConfirm)) controller.revoke(); }}>{copy.withdraw}</button>}
-    {review ? <PublicationReview key={review.reviewHash} review={review} controller={controller} services={services} locale={locale} busy={state.busy} /> : <form onSubmit={(event) => {
+    {review ? <PublicationReview key={review.reviewHash} review={review} controller={controller} services={services} locale={locale} busy={state.busy} base={base} /> : <form onSubmit={(event) => {
       event.preventDefault();
       controller.prepare({ title, description, cards: detail.items.filter((item) => item.bundle.card.id in selection)
         .map((item) => ({ cardId: item.bundle.card.id, fields: selection[item.bundle.card.id] })) });
@@ -149,10 +152,11 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
                   const checked = event.target.checked;
                   setSelection((current) => ({ ...current, [id]: checked ? [...current[id], field] : current[id].filter((value) => value !== field) }));
                 }} />{copy.details[field]}</label>)}</fieldset>}
-              {selected && image && <ImagePreparation cardId={id} controller={controller} copy={copy} policyRevision={services.policyRevision} busy={state.busy} />}
+              {selected && image && <ImagePreparation cardId={id} controller={controller} copy={copy} policyRevision={services.policyRevision} busy={state.busy} locale={locale} base={base} />}
             </div>
           </li>;
         })}</ol>
+        {(!title.trim() || !Object.keys(selection).length) && <p role="status">{!title.trim() ? (locale === "ko" ? "공개 제목을 입력해 주세요." : "Enter a public title to continue.") : (locale === "ko" ? "공개할 기억을 선택해 주세요." : "Select a memory to continue.")}</p>}
         <button type="submit" className="btn" disabled={!title.trim() || !Object.keys(selection).length}>{publication?.hasPublished ? copy.update : copy.preview}</button>
       </fieldset>
     </form>}

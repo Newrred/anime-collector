@@ -1,5 +1,249 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
+> **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
+
+
+## 2026-10-11 — 첫 Public 마감 / W08·W09 현행 연결
+
+### 1–3. 목적·결정·기준
+
+FIRST-PUBLIC-LAUNCH-CLOSEOUT-20261011에 따라 현재 로그인 카드/보드에서 선택한 정보와 허용 이미지 준비→preview→게시를 연결한다. 기준 및 HEAD1878867, 로컬 이전6dd270c는 원격으로 fast-forward. 패키지11개 manifest hash 일치. 기존 운영/hosted 증거를 새 PASS로 확대하지 않는다. 필독 AGENTS/시작문서/확정 결정/PLANS/05/07/08/09와 기존 작업판, 패키지00~03. 원래17항과 모든 실행 이력을 보존한다.
+
+### 4–6. 범위·흐름·파일
+
+기존 platformPublication의 익명 reader/인증 writer 분리→SupabasePublicationGateway→createPublicationController/MemoryPublicationPanel→preparePublicImage→api/public-image→publicImages handler/backend를 추적한다. 새 signup receipt·policy·기존 계정 복귀와 충돌한 실패만 수정한다. 재현한 결함: 공개 이미지 backend/client allowlist에 PUBLIC_SIGNUP_REQUIRED/UNAVAILABLE 누락, 보드 RPC와 달리 복귀 안내 소실. 원본/사본 각2오류의 failing test4개로 증명 후 두 allowlist만 보완했다. UI·DB 모델·권리 정책 재작성 없음.
+
+### 7–9. 데이터·순서·검증
+
+이번 로컬 변경에 DB migration 없음. M0 재시작/W DONE 초기화 없음. W08/W09 관련 unit: publicImages/publicationController/publicationGateway. 실제 Chromium publication UI에서 원본/사본 준비·동의·게시·익명 decode·오류 복귀를 모의 API와 명확히 구분하여 확인한다. 현재 signup SQL guard와 최근 country activation을 격리 DB에서 관련 검사한다. 새 로컬 PASS 뒤 유효한 test 설정 snapshot/revision/역할·승인 범위를 확인하고 실제 A/V/B/O 흐름을 연결한다. 범위 밖 test 변경은 정확한 후보만 요청하며 로컬 작업 계속. 기본DB/A-B 격리/72table 복원은 반복하지 않는다.
+
+M2 W07~W10: 선택 projection·실제 이미지·불확실 완료/같은 operationId·quota·옛preview·철회. M3 W11~W13: 공개 보드→home→로그인 안전 복귀→명시 follow→내 목록 재방문→해제/차단. M4 W14~W17: operator 신고·이미지 가림·통지·이의, 실측 비용/경보, 기존 catalog release 복귀, retention/키/격리 복원·최신 철회. M5 W18~W20: 같은 source/DB/config/정책 후보와 실제 hosted HTTPS 역할별 흐름→정확한 D06→master Git 배포 SHA/운영 smoke·인수. 현재 W08/W09부터 실행하며 후속 작업을 새 트리로 만들지 않는다.
+
+### 10–14. 안전·관측·복귀·위험·승인
+
+일반 공개 사후 검토 유지, 캡처·타인 팬아트 별도 권리 gate·성인 제외. 새 나라 활성/신원 인증/유료 전환 없음. 로그는 합성 데이터 및 오류코드/상태·집계만, 토큰·개인사진·비공개본문 기록 금지. 실패 확정 전 원본/사본 삭제·operation 교체 금지. 오류 전달 수정은 해당 소스 revert로 복귀 가능, DB 변경 없음. 운영 migration/Public/master push/배포/발송/결제/실데이터 삭제는 이번 포괄 승인에 미포함. D01 현재 test 범위, D03 실측/경보, D04 최초Public 국가·이미지조건, D05 키/DB복원·안전이력, D06 exact후보가 잔여. D02 Web-only 승인 재사용.
+
+### 15–17. 진행·발견·완료
+
+- 이번 실제 결과: 관련 unit59 PASS(최초4 FAIL→수정), Chromium10개 고유 시나리오 PASS(8+이미지2 재검사; 카드 관리→보드 선택을 보강한 기존1개 추가 재검사 PASS), 격리PG16 signup-public SQL15 PASS, build32 PASS. 원본/사본 준비·정확한 preview·게시·새 익명 이미지decode, 같은operation 재시도, signup 복귀·철회/차단 유지 확인.
+- 검사 환경 실패: 임의 dummy Supabase 설정의 DEV mock session 충돌은 빈 Supabase env로 해소. 추가 시험 작성 시 빠진 오류 응답/재시도 단계를 보완했다. build/dev 동시 실행 중 module fetch 실패는 직렬 실행으로 해소. 실제 hosted 실패와 혼합하지 않는다.
+- D01 현재: test 공개6flags true/phone revision/10개·40MiB·신고10/operator1, 현재 signup 정책10/10·receipt0·guard column 없음에서 시작. 사용자가 정확한 test 추가변경 승인. prepare-public-signup-test.py 리허설 ROLLBACK 후 기존 migration20261010160000와 이력/data release MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01 적용, guard=true 별도 readback PASS. 나라·receipt·역할·기존Public flags 변경0. 사용자 수락 대기 전 --restore 실행 성공, guard=false/기존6flags·revision·한도 그대로 readback. additive schema/history는 보존. 재개 시 같은 승인 범위의 --enable-existing 후 검사하고 --restore한다.
+- 실제 Chrome의 기존 phone-test에서 테스트10/10 문서/국가·DOB·약관→Google 화면을 확인해 A 사용자 직접 수락을 요청했다. 기존 배포는 origin/codex/phone-test9970120이며 새 로컬 오류매핑 수정의 hosted 배포 PASS로 취급하지 않는다.
+- 기본 exec 도구 os1392는 Node child_process 경로로 Git 실행 성공하여 우회했다. 저장소 손상이라고 판정하지 않는다. AuthCallbackClient의 EOL-only 변경은 외부 로컬 백업 보존 후 최신 원격 버전을 사용했다.
+- 문서 병합은 구현/출시 완료 증거가 아니다. 이번 hosted는 설정조회·guard schema적용/독립 readback만 PASS. 새 실제 Google/게시·익명 이미지·B/실기기/운영 흐름은 아직 NOT_RUN.
+
+
+### 2026-10-11 A 직접 확인 후 실제 hosted 재개
+
+- A 사용자 현재 test 정책 확인 완료, 독립 조회 latest receipt1. 승인된 --enable-existing 성공, guard=true 아래 합성 PNG24×30 카드1/보드1 생성·계정 저장→카드 공유 진입→사본 선택→공개 이미지 READY→방문자 preview PASS. 개인 이미지 선택/공개0.
+- 기존 preview9970120의 실제 동작이며 새 allowlist 수정은 아직 로컬 전용. 최종 공개 체크에 정책 동의가 포함되어 사용자 직접 게시 조작을 요청했다. 이 단계는 신규가입/권한 미제공 차단이 아니다.
+- 이번 추가 제품 소스/migration0; 위 도구 --enable-existing 및 read-only preflight 실제 성공. 현재 guard=true를 이 승인된 검증에만 유지하고 종료/취소 시 --restore. 이전 false 원복 이력은 위 로그 그대로 보존. 게시/새 익명/B/운영 PASS는 아직 아님. 다음1개: 게시 후 새 익명 실제 이미지 확인.
+
+### 2026-10-11 사용자 후속 — 카드 공개 간소화 (기존 W08/W09/W10)
+
+1–3 목적/결정/근거: CARD-PUBLIC-SIMPLE-01. 실제 기존 preview9970120 화면에서 제목 빈칸인데 이유 없는 disabled 버튼, 이미지 권리/준비/게시 체크 분산을 확인했다. 사용자 '안됨'은 게시 서버 오류로 단정하지 않는다.
+4–6 범위/흐름/파일: MemorySharingSettings의 카드 직접 공개/비공개 폼, 기존 controller/gateway/이미지 준비를 재사용하는 bounded orchestration, 기존 보드 폼의 필수값 안내. 저장 클릭 뒤 선택 카드 전용 board를 내부 연결해 기존 public reader/home/moderation 계약 유지. 소스 제목/이미지 외 private 필드는 기본 제외, 실제 서버 projection 대조 뒤에만 게시한다.
+7 데이터: owner-only 카드 공개상태 조회 및 재게시 가능한 비공개 전환 additive RPC 후보. 기존 revoked/hidden fence를 해제하지 않고 해당 카드의 현재 published snapshot 참조만 제거; 다른 카드·원본·rights·quota 유지. 원격 적용은 미승인/미실행.
+7 추가 경합 검토: 공개 prepare/publish와 비공개 RPC에 동일 owner transaction lock을 적용하여 진행 중 준비가 비공개 스냅샷 점검을 빠져나가지 못하게 한다. 기존 함수 본문은 wrapper 뒤 보존하고 직접 실행 권한은 제거한다.
+8–9 검증: 로컬 카드 public+동의→자동준비→게시/비공개→재게시, 실패/불확실 재시도·다른계정/원본 변경·원본 보존, RPC 소유권/다중 보드/옛 preview 무효화. build와 UI는 직렬 실행.
+10–14 안전/관측/복귀/위험/승인: 명시 저장 전 업로드/공개0; 준비 중 조건 변경·계정 변경 시 게시 중단. 개인 메모/토큰 로그0. 기존 공개한도/권리/정책 유지. rollback은 UI revert와 additive RPC 미사용; 제거된 공개 사본 자동복원 금지. test receipt guard --restore 성공, 실제 hosted loop는 이번 UI 수정 동안 중단. 카드 직접공개 방식을 사용자 승인으로 기록했으므로 재질문하지 않는다. 운영/새 DB 적용은 정확한 후보별 별도.
+15–17 진행/발견/완료: 아래 카드 공개 간소화 보고의 이번 unit69/고유UI13/SQL33/build32 PASS. hosted 후보 미반영, 운영 변경0.
+
+### 이번 카드 공개 간소화 보고 — 2026-10-11
+
+1. 읽은 기준: AGENTS·CODEX_START_HERE·확정 결정·PLANS와 기존 release-v2 00/01/02/03, 제품/UGC/변경관리 문서. 실제 publication controller/gateway/runtime/이미지 API·카드 UI·SQL 계약을 대조했다.
+2. 판단: user가 카드 공개/비공개와 동의 한 번을 명시 요청(CARD-PUBLIC-SIMPLE-01). 기존 hosted 화면의 제목 공란/이유 없는 disabled를 확인했지만 서버 게시 오류는 입증하지 않았다. 이 요청으로 운영 활성 승인을 추정하지 않는다.
+3. 계획: 위 기존 W08/W09/W10 간소화 절을 갱신했다. 새 계획판 없음.
+4. 변경: MemoryQuickSharing/simpleCardSharing으로 공개 선택→이미지 확인→동의1개→저장 연결. 제목/공개 준비/서버 preview는 자동 처리하며 원본/사본·rights·revision/hash·operation을 기존 구현에 위임. 일반 이미지 외 공식표지/기존 디자인은 다른 동의문 사용. 보드 폼은 빈 제목/선택 안내 추가. 공개상태는 실제 reader 기준으로 표시한다.
+5. DB: 20261011120000_simple_card_sharing.sql은 로컬 후보. owner-only 상태/비공개 RPC와 기존 prepare/publish를 감싸는 owner transaction lock. 한 카드의 모든 현재 보드 참조·pending preview를 제거하고 나머지 카드의 유효한 일반 공개 동의는 부분집합으로 유지. 원본·권리·quota·영구 철회/관리자 가림 보존. 원격 적용0. 복귀는 새 UI 사용 중지/소스 revert, additive 함수 보존; 철회 사본 자동복원 금지. 이전 moderator-reviewed legacy snapshot은 재검토가 필요할 수 있으므로 원격 적용 전 일반 사후검토 정책/legacy 존재 여부 확인.
+6. 이번 실행: 관련 node unit69 PASS(새 orchestration10 포함). Chromium12 PASS 후 새 이미지 케이스를 추가한 focused3 PASS(겹친2개 합산 제외, 고유13개). 실제 브라우저지만 auth/RPC/image API는 합성이다. SQL33 PASS(기존 signup15 + 이번 privacy/API16 + 독립2연결 경합2), 격리PG16 전 migration chain. npm run build32/exit0. PC·390px screenshot에서 넘침 없음 확인. SQL fixture의 deferred asset 제약 오류는 transaction 묶음으로 수정 후 PASS; 앱 데이터 실패로 기록하지 않는다. source·log hash는 기존 evidence의 simpleCardSharing에 기록.
+7. 안전/관측: 명시 동의·저장 전 upload/publish0, 메모·태그 제외, source 변경/불확실 요청/계정 변경 방어. 개인 데이터/토큰/analytics 추가0. test receipt guard는 이 턴 --restore로 false 원복; 기존6flags/revision/10개·40MiB·신고10 유지. 운영/master/배포0.
+8. 미완료/다음: 새 소스·새 migration의 hosted PASS 없음. 다음1개는 정확한 test 후보 승인 후 moemoa-test와 phone-test에만 반영하여 같은 A 합성 카드로 간소화 공개→새 익명 이미지 확인. A의 가입 정책 재수락을 다시 요구하지 않는다. B/home/follow/report/block/withdraw와 D03~D06의 실제 잔여는 보존.
+
+### 2026-10-11 간소화 후보 테스트 반영 승인 및 실행
+
+- 사용자 ‘테스트 DB·화면에 적용’으로 migration20261011120000(SHA256 e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259) 및 phone-test Git 배포 승인. 기존 W08/W09/W10만 계속하며 운영/master는 제외한다.
+- 순서: 고정 test 대상·후보 hash 확인 → 정책/기존 snapshot·함수/역할·원본 집계 preflight → transaction rollback 리허설 → version-controlled release로 적용 → 독립 readback. 설정·원본 집계 변화 시 rollback, 불확실 응답은 이력 확인 후 판단.
+- 배포: origin/codex/phone-test9970120이 현재HEAD1878867의 조상임을 fetch 뒤 확인. 검토 후보만 commit하고 phone-test를 fast-forward push; Git SHA/Ready/build-info/실제 카드 UI를 대조한다. 이전 로컬69/13/33/32 PASS와 새 hosted 결과를 분리한다.
+- 복귀: UI는 이전 테스트 소스의 정상 Git revert, additive RPC는 미사용/보존. 삭제·철회된 공개 snapshot 자동복원 없음. 테스트 임시 receipt guard는 검사 종료 시 false 복귀. 동의 당사자 조작은 대행하지 않는다.
+
+### 간소화 테스트 반영 실행 보고 — 2026-10-11
+
+1. 읽은 자료: 기존 AGENTS/시작/확정 결정/PLANS/QA07/보고09, 현재 release-v2 00~03, 해당 migration/controller/간편 UI와 기존 test 적용 도구·Git/quality workflow.
+2. 범위/미결: 사용자 ‘테스트 DB·화면에 적용’ 승인만 실행. 공개 동의 당사자 수행 및 운영/master 별도 승인 유지. 기존 승인된 합성 카드만 조회.
+3. 계획: 위 ‘간소화 후보 테스트 반영 승인 및 실행’ 절. 새 작업판/기능 계획 없음.
+4. 파일/Git: 코드·migration·검사·문서를52875c69a4e500255d32b89a6ec11e6f2593a6f2에 commit, origin/codex/phone-test에 fast-forward push. 새 apply-simple-card-sharing-test.py는 고정 test 대상/CA 검증/후보 SHA/리허설·적용·독립 조회 및 원본 보존 검사 전용. 무관한 기존 untracked 초안3개·__pycache__는 미추가.
+5. DB/복귀: MOEMOA_SIMPLE_CARD_SHARING_TEST_20261011_01·20261011120000 적용 완료.13개 table fingerprint/건수·기존flags/권리/정책 불변. legacy published snapshot0. 롤백 리허설 뒤 commit하고 새 connection에서 함수/인자/권한/이력 확인. UI revert와 additive RPC 미사용으로 복귀; 원본 삭제·기존 공개 snapshot 자동 복원 없음.
+6. 이번 실제 명령/결과: wsl.exe -- python3 tools/publication-boundary/apply-simple-card-sharing-test.py (READ_ONLY) / --rehearse (ROLLBACK) / --apply (APPLIED) / 무인자 독립readback 모두 exit0. 최초 도구 Python 인용 구문 오류는 DB 실행 전에 수정. git diff --cached --check PASS; staged credential-pattern 검사5종0건(전체 보안감사 아님). Git push HEAD:refs/heads/codex/phone-test 성공; master1878867 불변. Vercel Preview BsAHHqy5a855PNQZtgrpNh4yepZk Ready 및 source52875c6/phone-test alias 일치. 실제 Chrome 카드 상태Private·Public 선택·기존 합성이미지 자동 decode·동의1개/미동의 Save 비활성 PASS. 이전69/13/33/32는 이전 실행이며 반복 합산하지 않음. CI38112339835 publication-contract SUCCESS/verify 진행 중. build-info는 비인증 HTTP가 Vercel 로그인으로 이동하고 브라우저 JSON 이동은 차단되어 직접 payload 일치 PASS로 주장하지 않음; Vercel의 실제 source/alias/Ready와 UI를 근거로 기록.
+7. 보안/관측: 원본·권리·quota·관리자 fence 보존. credential/DB 원문/개인사진 로그0. 사용자 동의/게시 대행0, Save 전 공개 이미지 생성0. 새 UI 표시한 synthetic 시각자료만 Git 제외 cache screenshot 보관. 서버 signup guard를 기존 승인 범위에서 검사 동안 재활성; 종료 전 원복은 아래 추가 기록. 운영DB/국가/정책/역할/요금/master 변경0.
+8. 미완료/다음1개: 동일 A의 최종 체크·Save 결과 후 새 익명 이미지 열람. 새후보 실제 게시/철회·B/home/follow·신고/차단과 D03~D06 잔여는 완료 처리하지 않는다. A의 이미 완료된 가입 약관을 다시 요구하지 않음.
+
+- 종료 확인: prepare-public-signup-test.py --restore exit0, signup guard=false·기존6flags/revision/한도 원복 확인. 새 schema는 보존. 사용자 동의/게시 응답 대기, 실제 Save PASS 아님. 전체 CI verify는 아직 실행 중이므로 완료로 보고하지 않는다. 다음 턴에는 같은 run38112339835 결과만 확인하고 새 전체 검사를 중복 시작하지 않는다.
+
+### 2026-10-11 실제 게시 후 익명 확인 및 CI 실행 설정 보완
+
+- 사용자가 최종 동의/Save 완료. 실제 A UI Saved as public·공개링크, 로그인 저장소가 분리된 신규 deployment origin에서 Sign in to report·실제24×30 이미지 decode 확인. 감상·태그 노출 없음. 앱 가입/공개 동의 대행0.
+- CI38112339835는 publication-contract 성공, verify의 일반E2E87PASS/1SKIP/1FAIL. 실패는 private-source 이미지를 요구하는 새 case가 두 feature env 없이 일반 runner에서 실행된 것. 로컬 전용 runner는 해당2flag와 비밀값 없는 격리 환경을 명시한다.
+- 좁은 변경: quality workflow의 publication-ui를 일반 묶음에서 빼고 기존 run-publication-closeout-e2e.mjs '.*'로 전체 publication spec을 실행(검사 삭제/skip 추가 없음). 동일 runner 전체 spec 실제 검증→테스트 브랜치 반영/CI 확인. 제품 소스·DB·정책 변경 없음. 복귀는 workflow1파일 revert. 새 기본DB/실기기 반복 검사 없음.
+
+- 실행 결과: `node scripts/run-publication-closeout-e2e.mjs ".*"` →37/37 PASS, exit0. 실제 hosted와 모의API를 구분한다. 미니홈은 합성 프로필+신규 공개보드1개로 preview PASS, 당사자 정책 수락/게시 대기. 테스트 guard는 기존 승인 범위로 재활성했으며 인계 시 원복한다. 9f36610을 phone-test만 push했고 CI38113213200은 마지막 조회 queued(원격 PASS 아님). 인계 전 --restore exit0·guard=false 확인, 나머지 공개 설정/정책 보존. 원격 CI 후속 결과는 증거JSON에 기록한다.
+
+- 후속 실제 결과: 사용자 미니홈 직접 게시 완료, 공개 보드 작성자 링크→home 이동·비로그인24×30 이미지decode PASS. B 기존 Google 로그인은 signup 필요 오류; 읽기전용 auth 조회 A1/B0. 정식 phone-test alias에 B 직접 가입+원래home 복귀 URL 준비. 고유 Preview 로그인 오류가 localhost fallback으로 향한 관측은 기록하며 설정을 임의 변경하지 않음. 9f36610 GitHub Preview6991142681 success; CI38113213200 publication-contract success/verify 진행 중.
+
+### 2026-10-11 W13/W14 실제 B 완주 및 신고 운영 화면 누락 보완
+
+- B 당사자 가입→A 미니홈 내부복귀→명시follow→내 목록 링크 재방문 PASS(guard=true). 신고25447a47-6923-4547-8d19-ca6d88968137 접수, block→unblock 뒤 follow 자동복원 없음 PASS.
+- 재현: /moderation/에 board/home/content appeals만 있어 REPORT 사건을 볼 수 없음. 기존 list_memory_moderation/review_memory_report/read_memory_moderation_audit RPC는 서버 구현/권한/revision/감사/통지를 갖춤. 서버를 재작성하지 않고 Report 탭·사유·KEEP/HIDE/RESTORE 및 감사 조회만 연결한다. 계정제재/정책변경/자동권한확대 없음.
+- 변경 대상: 기존 gateway/runtime allowlist, MemoryContentReview에 기존 패턴의 신고 패널 연결, 모의API E2E. DB migration 없음. 오류/불확실 완료 시 사유/동의 초기화·대상 재선택 요구, 자동 재시도 금지; 계정 전환 시 기존 useSafetyRequest 취소. 신고본문은 DOM만, analytics/log 없음. 롤백은 이 UI연결 소스 revert.
+- 검증: 신고/CONTENT 분리·pagination·revision전달·HIDE/RESTORE/KEEP·실패확정과 불확실결과 재조회·비운영자거부·계정전환을 관련 E2E로 확인. 이전37 PASS와 새 PASS 분리. 로컬 준비 후 정확한 phone-test 화면 후보 승인 요청; 운영/DB 변경0. 기존 W14에 흡수하고 두번째 진행판을 만들지 않는다.
+
+
+#### 이번 실행 보고 (W13/W14)
+
+1. 읽은 문서/파일: AGENTS·CODEX_START_HERE·확정결정·기존00/01/02/03·UGC/QA 계약, MemorySafety/MemoryContentReview, SupabasePublicationGateway/platformPublication, moderation/content-review SQL, publication-ui.spec.ts.
+2. 가정/미결: B는 당사자가 이번에 직접 생성. 과거 운영자 RPC PASS를 현재 제품 신고 UI PASS로 대체하지 않는다. 일반신고 UI 누락이 실제 operator 조치를 막으며, 첫공개 운영 승인/D03~D06은 별도 미결.
+3. 계획: 본 절의 기존 W13/W14 보완(신규 작업판0).
+4. 변경: MemoryReportReview.jsx 신규 연결 패널, 기존 검토 화면 Reports탭, gateway/runtime의 reviewReport·moderationAudit, 해당 모의API 검사 및 기존 문서 현재절. 제품의 공개/동기화/원본·가입 계약 변경0.
+5. DB/복귀: 신규 migration/원격 schema/권한 변경0. 테스트 guard=true 상태 follow 검증 후 prepare-public-signup-test.py --restore exit0/false 확인. UI는 후보 소스 revert로 복귀.
+6. 실행: run-publication-closeout-e2e.mjs 'general report workspace|moderation workspace' →9/9 PASS(신규5+기존4), 스타일 보완 뒤 HIDE 1개/320px 재검사 PASS(고유수 합산 안 함). node node_modules/astro/astro.js build →32pages/exit0. git diff --check PASS. 초기 전환분기 누락 발견으로 검사 중단, 다음 시도 조치 label 정확매칭 timeout1 뒤 접근성 label 연결 수정; 실패/중단을 PASS로 계산하지 않는다. 실제 hosted B Google복귀/follow/revisit/report/block/unblock은 별도 증거JSON.
+7. 안전/관측: 운영자 서버권한·case/target revision 유지, 불확실 완료 뒤 같은조치 자동재전송0/재조회 요구, 계정전환 자료제거, reporter/actor 미표시, 로그/analytics에 신고본문/토큰0. KEEP은 가림 해제와 구분, RESTORE는 사용자 철회/삭제를 복원하지 않는 기존 서버계약 유지.
+8. 잔여/다음1개: 정확한 phone-test UI 후보 승인 후 동일 합성 신고에서 operator HIDE/RESTORE·통지/감사→A 카드 비공개 전환·익명 이미지 비노출. 운영/master/DB는 승인 대상 아님. 9f36610 CI는 아직 진행 중이며 새 후보9개 PASS와 구분.
+
+
+### 2026-10-11 승인9746a30 테스트 반영·실제 운영 조치/철회
+
+1. 문서/파일: 위 W13/W14 필독 목록 재사용. 현행 MemoryReportReview/MemoryCardDetail/MemoryImageReplacement/useImageFileTransfer, desktop-image-input/lifecycle 검사와 quality workflow를 추가 대조했다.
+2. 가정/미결: 이번 명시 승인은 phone-test UI만. 운영/DB/역할 변경0. 테스트 원본은 합성24×30이며 개인 사진을 대신 공개하지 않았다. 전체 CI와 직접 이미지 주소의 철회 후 HTTP 상태는 미완료로 구분한다.
+3. 계획: 기존 W08~W14 현재 절의 신고 운영 UI→가림/해제→카드 비공개 흐름. 추가 CI 실패는 기존 W19에서 단일 검사/동일 묶음 재현으로 좁히고 추측으로 제품을 수정하지 않는다.
+4. 변경/반영: git push origin HEAD:refs/heads/codex/phone-test 성공(source9746a307fa74ba60dd55d69db017a1978833ee35). Vercel Preview Ww7s7yJnqc8tFYECBMmpQ5T4e2Qz Ready/Source/alias UI 확인. 이번 추가 제품코드 변경0, 기존00/01/02/03/시작문서와 증거JSON 최신절만 갱신.
+5. DB/롤백: 신규 migration·권한 변경0. 이전 test guard=false 원복을 유지했다. 화면 복귀는 신고 UI 소스 revert로 가능하나 실제 감사/작성자 통지 삭제 및 철회 사본 자동복원은 하지 않는다.
+6. 실제 검증: 합성 신고25447a47… HIDE 저장→새 deployment-origin 익명home unavailable·작성자 통지→RESTORE 저장→익명home24×30 decode→감사 HIDE/RESTORE2건 PASS. A 카드 비공개 저장→익명보드 unavailable/home 전시0→소유자 원본24×30와 합성감상 보존 PASS. 직접 이미지 URL navigation은 ERR_BLOCKED_BY_CLIENT라 서버404 PASS로 계산하지 않는다. 기존 로컬 UI9/build32와 이번 hosted 결과를 구분. git diff --check 실행 결과는 증거/커밋으로 남긴다.
+7. 안전/관측: 현재 사건만 조치, 과거 사건/원본 삭제0. 사유는 합성시험이라고 명시. 기존 계정·권리·정책/쿼터 보존, 토큰/개인본문 일반로그0. 익명차단은 UI에서 확인한 범위만 기재하고 캐시 회수를 보장하지 않는다.
+8. 잔여/다음1개: CI38113872143 SQL계약 success/verify failure — 기존 desktop-image-input.spec.ts:226의 body paste가 false. 직전38113213200 cancelled. 로컬 단일 재현1 PASS, node scripts/run-desktop-image-e2e.mjs 동일 묶음51/51 PASS(exit0, 단일은 중복 합산 안 함). 두 시도에서 재현되지 않아 타이밍 문제로 단정하거나 제품을 추측 수정하지 않는다. 원격 실패 기록은 유지한다. 다음1개는 이 CI 입력 실패 원인 확인/최소 보완. 직접 이미지 철회HTTP, 최종 D03~D06·운영 승인은 별도 잔여.
+
+
+## 2026-10-11 W15/D03 — 공개 용량·전송 예산·경보 마감
+
+### 1–3. 목적·결정·현재 증거
+사용자 공개 이미지 용량·전송량·경보 잔여 마감 지시. 무료/기존20MiB 공개예약 한도·원본/operation/철회 보존. 공개 GET handler는 Storage 전 authorize_memory_image_delivery(2MiB)를 호출하고 권한을 다운로드 후 다시 확인한다. 기존 일일 제한을 재작성하지 않는다. private-image-maintenance는 현재 private 집계만 경보에 사용한다.
+### 4–6. 범위·흐름·파일
+현재 운영/test를 읽기 전용 집계하고 실제 processPublicImage로 합성 이미지 full/thumb 크기 측정. service-role 전용 공개 관측 RPC 후보→기존 보호된 observe API의 기본off 옵션→기존 유지 workflow의 기본off 공개 경보 연결. scripts의 evaluator와 tests/unit·격리SQL 계약, 운영 inspect 도구, 기존00/01/02/03·evidence를 갱신한다. 새 계획판·업체·유료의존성 없음.
+### 7–9. 데이터·순서·검증
+additive read-only RPC만 migration 후보로 작성. 공개/전송/예약 한도·권한 확대·기존 계정/이미지 삭제 없음. M1 실제 집계/합성 full+thumb 측정; M2 기존 제한·일일계량 의미를 보존한 집계/경보 구현; M3 과거값/누락/경계/정리대기/사용불가 관측·HTTP 인증과 격리PG 테스트; M4 정확한 test/운영 후보·rollback·외부 잔여 기록. 운영 migration/설정/master 배포는 후보별 별도 승인 전 실행하지 않는다.
+### 10–14. 안전·관측·복귀·위험·승인
+원본·개인사진·메모·사용자ID·object path·토큰을 수집/로그하지 않는다. 합계 bytes/count/state와 정책값만 반환한다. 전송 예산 사용량(요청당2MiB 예약)과 실제 전송/플랫폼 청구량을 분리한다. CDN no-store/철회 재검사는 유지. 관측 flag off로 즉시 기존 경로 복귀, 새 RPC는 미사용으로 보존. 경보 임계치는 기존 한도의80%와 전체 저장980MB 후보, 실제 활성/수신은 자동PASS로 기록하지 않는다. 메일 발송·GitHub 이슈 생성/실패 경보 고의발송은 이번 지시로 추정하지 않는다. 공식 Supabase Free1GB/egress5GB 확인(2026-10-11 https://supabase.com/pricing); 조직 전체 실제청구·다른egress 여유 보증은 아님.
+### 15–17. 진행·발견·보고
+기존 W19 CI38119402749 성공은 과거 검증으로 보존한다. 이번 결과는 아래 누적하며 D03 전체 완료는 실제 운영 적용/경보 인수 근거 이후에만 표시한다.
+
+#### W15/D03 이번 실행 보고 · 정확한 적용 후보
+
+1. 읽음: AGENTS, CODEX_START_HERE, 최신 확정 결정, PLANS, QA/운영·변경통제, 기존00~03 및 Public handler/processor/Storage backend, resource controls/global budget, private observation/maintenance/workflow, PublicBoardSnapshot. 검증 스킬 verify-before-claiming 적용.
+2. 사실/가정: 운영 read-only 2026-10-11T07:37:49Z 저장856,441,465B=표지 등855,987,001+비공개454,464+공개0, 공개예약20MiB 활성. Public reads=false·전송 두 정책disabled/limit0. 이미지를 게시하지 않아 공개 실사용0이며 무료 여유/청구 보장은 아니다. test는 기존20261010103000 테이블이 없어 집계 중단→카탈로그 조회로 원인을 확정했다. 사용자 데이터/기본연결/A·B격리 재검사 없음.
+3. 계획: 본 W15/D03 절 M1~M3 로컬 완료, M4 정확한 후보 준비. 기존 ID/과거 로그 보존.
+4. 변경: 신규 migration의 service-only aggregate RPC, src/server/publicImages/capacity.js 숫자/신선도 검증·경보, 기존 observationHandler/API의 기본off 옵션, maintenance/workflow 경보 연결. 로컬SQL 계약/runner·집계 inspect·실제 변환/HTTP 측정·unit/CLI 회귀 및 기존00~03/evidence 최신화. 의존성/이미지처리·게시·동의 알고리즘 변경0.
+5. DB/롤백: 이번 원격 mutation0. **test 후보 MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01**: 기존20261010103000(없는 전역예약 구조를 enabled=false 기본값으로 추가), 새20261011160000(읽기 전용 RPC). 두 파일 해시는 evidence에 고정. 데이터 제거/현재 per-owner quota/게시flags·동의guard 변경0. phone-test에는 이번 관측과 이전 검증된895ccbb의 붙여넣기·검사 수정이 함께 포함된다. test 전용 MOEMOA_PRIVATE_IMAGE_OBSERVE_ENABLED / MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true, 기존 test 전용 target/secret/backend만 재사용; 부족한 연결은 먼저 확인. 검사 뒤 두 관측 flag를 원래 값으로 복구하며 schema는 보존한다. 로컬 maintenance를 OBSERVE_ONLY=true/PUBLIC_OBSERVE_ENABLED=true/TOTAL_STORAGE_ALERT_BYTES=980000000으로 호출. **기존 phone-test workflow_dispatch는 실제 정리 job이므로 이번 관측용으로 실행하지 않는다.** 운영 DB/flags/master/유료/메일·issue 발송 대상 아님. 실패 시 관측off/기존phone-test9746a30 소스 복귀, 삭제 없는 RPC 보존.
+6. 실제 명령/결과: node --test tests/unit/publicCapacity.test.mjs tests/unit/publicCapacityCli.test.mjs tests/unit/privateObservation.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs →18 PASS/exit0. wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh →격리PG15 PASS/exit0(초기13에 유효/만료 override2 보강 후15, 중복 합산 안 함). node tools/operations/measure-public-images.mjs →실제encoder3종·localHTTP6/exit0. node node_modules/astro/astro.js build →32pages/exit0(pre/post npm lifecycle 실행으로 표기하지 않음). git diff --check PASS. inspect-public-capacity.py --target production 읽기집계 exit0; --target test 첫 집계실패 뒤 missingTables 진단exit0. 과거CI38119402749/실제A·B사용자흐름은 재실행하지 않았다.
+7. 안전/관측: 집계에 경로/사용자ID/본문/토큰 없음, unknown metadata를0인 정상으로 숨기지 않음. 원본/operationId/실패예약/quota/철회 후 권한 재확인/no-store 유지. 기존 일일한도·활성override와 일치, 실패 시 실제 CLI exit1/::error::/summary 확인(모의응답). 신규 실제 사용자 행동 PASS0; hosted경보·운영자 수신 PASS0.
+8. 잔여/다음1개: **정확한 test 후보 승인 후 관측 API→observe-only 경보 확인.** 운영 적용/전송 한도·provider 총량·실제 운영자 수신은 D03/D06 잔여다. 전체 출시 완료/운영 경보 활성으로 표시하지 않는다.
+
+#### 승인 후 실제 테스트 적용 결과
+
+- 사용자 후보806b6b2의 테스트 DB·관측 배포 승인. tools/operations/apply-test-public-capacity.py는 정확한 두 Git SQL 해시·고정test대상·중복적용 차단·12테이블 내용 해시 보존·원자 트랜잭션을 사용한다. 초기 Python 인용부호 SyntaxError는 DB접속 전 발생, 수정 후 inspect0→apply0→독립inspect0. release MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01/history2 확인. 두 migration만 적용했으며 신규 정책enabled=false 기본값이다.
+- git push origin 806b6b2:refs/heads/codex/phone-test 성공. Vercel Preview9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7 Ready·Source806b6b2·기존 phone-test alias 일치. master1878867 유지. 추가 사용자 이미지/권리/가입/동의 조작0.
+- 실제 HTTPS service-role 새 공개RPC 반환: 전체73,464B=private38,608+public34,856, 공개예약34,796B(full26,636+thumb8,160), pending/overdue0. 로컬 evaluator는 test의 공개저장/전송 guards off를 PUBLIC_BUDGET_UNGUARDED로 정확히 경보. 이 값이 운영 경보나 실제 수신 증거는 아니다.
+- **정확한 연결 차단:** test Vercel에 MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET/PROJECT/OBSERVE 설정 없음(UI의 Production 항목과 Preview 항목 구분), 로컬 test env에도 기존 maintenance secret 없음. 기존 private observe RPC는 실제HTTP404, 해당20261008090000은 이번 승인migration2개 밖이다. 그 함수는 private policy.observed_at를 갱신하므로 읽기전용 보충으로 임의 실행하지 않는다. 두 시도로 실패 위치를 좁힌 뒤 신규 public RPC를 독립 확인했으며 동일 실패를 반복하지 않았다. 임시 관측flag는 켜지 않았으므로 복구할 설정변경0. 운영키 재사용/새 비밀키 전송/cleanup호출0.
+- 독립 DB catalog에서도 privateObservationExists=false 확인. 새 CI38122228717은 publication-contract SUCCESS, verify의 공개 회귀 단계까지 통과하고 최종 UI 단계 진행 중이며 전체 SUCCESS로 기록하지 않는다. 기존CI38119402749는 이전 후보의 결과다.
+- 배포 관측API 성공, GitHub 실제 경보수신, 운영 D03 완료로 승격하지 않는다. 다음1개는 **test의 기존20261008090000 및 전용 관측 인증/대상 설정을 포함한 정확한 연결 후보 마감**이다. 공개/비공개 사용자흐름이나 기본DB/A·B격리를 반복하지 않는다.
+
+#### 관측 연결 후보 준비 · 2026-10-11 후속
+
+- 최신 동일 후보806b6b2의 CI38122228717 전체 SUCCESS 확인. 이미 통과한 기본 DB·A/B·브라우저 검사를 반복하지 않는다.
+- 기존 적용 도구에 명시적인 private-observation 후보 모드를 추가한다. 정확한 기존20261008090000 SQL 해시만 허용하고 test 프로젝트에 고정한다. 기본 실행은 읽기 전용 사전 점검, --apply는 별도 후보 승인 이후에만 사용한다. 기존 공개2개 모드는 보존한다.
+- 추가 함수 설치 자체는 기존 데이터/정책를 바꾸지 않는다. 실제 관측 호출은 유효한 private policy의 observed_at만 갱신하므로 이를 부작용 없는 조회로 표기하지 않는다. 기본 구조·정책·카드·원본·예약·operation은 보존한다.
+- 후보 구성: test DB 함수1개 + Vercel Preview codex/phone-test에 새 테스트 전용 maintenance secret/고정 target/관측 flags2개. 기존806b6b2 동일 소스를 Preview에 재배포하여 설정을 반영한다. 관측-only CLI로 실제 endpoint와 인증 실패 경계를 확인하며 cleanup 경로/외부 알림 전송은 실행하지 않는다. 테스트 후 두 관측 flags를 제거/원복하고 Preview에 반영한다. 새 secret은 운영 키와 분리하고 값은 파일/Git/로그에 기록하지 않는다.
+- 검증: 대상·SQL 해시·존재 여부·현재 private policy의 호출 전제조건을 먼저 읽는다. 승인 전 원격 migration/새 secret 전송0. 적용 코드의 구문·기존/추가 후보 분기와 읽기전용 inspect를 확인한다. 실제 deployed HTTP와 운영자 알림 수신은 별도 잔여로 보존한다.
+
+#### 관측 연결 후보 이번 실행 보고
+
+1. 읽음: 현재 시작/확정결정/PLANS/본 계획·작업판·계약, 기존20261008090000 SQL, observation API/backend/handler, maintenance workflow·test cleanup worker, 고정대상 connection/apply 도구. 기존 QA·변경통제 지침 유지.
+2. 사실/미결: test private policy enabled/approved=true·paused=false, physical40MiB/read80MiB; 기존 관측 함수 없음/history0. 원격 관측 API는 아직 미검증. 별도 유지 인증 설정이 필요하며 운영 secret을 재사용하지 않는다.
+3. 계획: 본 W15/D03 ‘관측 연결 후보 준비’. 기존 M/W/Q/D 및 과거 실행 로그 유지.
+4. 변경: apply-test-public-capacity.py에 --observation-dependency 고정 후보 분기·정책 사전조회·15테이블 보존검사 추가. test-capacity-apply.py는 무접속5검사. 기존00/01/02/03·시작문서·evidence의 현행 요약 갱신. 앱 코드/새 의존성 변경 없음.
+5. DB/복귀: 이번 DB변경0. 후보 MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01, SQL20261008090000 LF SHA256 dc9f9c4657a404a0150fa5d3d1ac9abd5c81f914d81fb9e53de3c7c6ff7e7779. 승인 후 apply-test-public-capacity.py --observation-dependency --apply. 함수 설치 때 기존15테이블 보존; 호출 때 observed_at 갱신만 예상. 관측flags off/제거 후 같은Preview소스 재반영으로 접근 차단, additive함수·정상갱신시각은 보존. 그 외 정책/한도/원본/operation 불변.
+6. 이번 실행: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --observation-dependency →read-only exit0, applied=false. wsl.exe -- python3 /mnt/e/web/anime/tools/operations/test-capacity-apply.py →5 PASS/exit0. 첫 검사는 migration 이력 문자열도 실행SQL로 집계해1 FAIL; 검사에서 달러인용 이력문자열 제외, 수정 중구문오류1회 후 정상5 PASS. 실DB mutation은 모두0. GitHub API CI38122228717 verify/publication-contract 전체SUCCESS(806b6b2) 확인. 과거18/SQL15/HTTP6을 이번 재실행으로 합산하지 않는다.
+7. 안전/관측: 비밀값/개인 본문 출력0, 테스트 고정target·정확한 SQL해시·중복적용차단 유지. 새 사용자 행동 PASS0. mock5검사는 실제 원격15테이블 보존결과로 표기하지 않는다. 예산경보 판정/배포HTTP/수신을 분리한다.
+8. 다음1개/승인: 추가 migration1개+phone-test 전용 신규maintenance secret 저장·target·관측flags2개·동일806b6b2 Preview 설정 재배포 승인 후 observe-only 검사. 기존10/11 정확한 변경별 승인 조건상 기존2개migration 승인에 추가 함수를 포함하지 않는다. 알림 실제 외부 발송/운영 quota/master 배포는 본 후보에 없다.
+
+#### 관측 연결 승인 후 DB 적용 · 브라우저 인계
+
+- 사용자 ‘테스트 관측 연결 적용’ 승인09e22fa. wsl.exe -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --observation-dependency --apply →exit0, release MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01, preservedTables15/history1/function=true. --observation-dependency 독립조회도exit0/history1. 설치 전후 observed_at=2026-10-10T08:23:17.389028+00:00로 동일; 실제 관측 호출 전이다.
+- Chrome Vercel 환경변수 폼에 target/observe flags2개·빈 secret key를 준비. 기본 Production 선택을 제거하여 codex/phone-test 단독 확인. 아직 Save/설정 재배포0, 관측flags 실제활성0. 운영 secret 조회/복사0.
+- 브라우저 도구의 새 인증값 입력·저장 handoff 규칙에 따라 사용자 입력만 요청했다. 준비한 난수32bytes secret은 Git 밖 C:/Users/hongs/.moemoa/test-observation-20261011.key에 보관하고 icacls로 hongs/SYSTEM만 접근, 상속 제거 완료(exit0). 값은 채팅/로그/Git에 출력하지 않았다. 앞선 ‘파일에 기록하지 않음’ 계획은 사용자 복사 입력을 위해 이 보호된 로컬 파일 보관으로 좁게 수정한다.
+- 사용자 Save 후 동일806b6b2 Preview 재배포, 무인증401와 실제 maintenance OBSERVE_ONLY=true/공개경보 확인, 관측flags 제거/원복 및 동일소스 재배포까지 승인 범위 내에서 이어간다. .cache에 고정test alias·로컬 키파일·observe-only 실행을 준비했고 아직 실행0. 기존 삭제workflow를 호출하지 않는다. 실제 수신/운영 D03는 아직 미검증이다.
+
+#### 관측 연결 실행·원복 결과 · 2026-10-11 17:32 JST
+
+1. 읽음/계획: 위 승인된 W15/D03 관측 연결 절·시작문서/현재 작업판, api/private-image-observe.js·observationHandler·scripts/private-image-maintenance.mjs의 기존 실행계약을 따른다. 새 계획/제품 결정 없음.
+2. 실제 설정/배포: 사용자 새키 저장 후 Vercel UI에서4개 변수 모두 Preview/codex/phone-test 단독 확인. 동일 Git 소스806b6b2를 재배포한6QpW4mwBT6k4cQ6pgnGz9vC7rojc Ready·Source·alias 일치. 기본 Production 재배포 제안은 취소하고 정확한 test 상세에서 실행했다.
+3. 실제 실패/외부 경계: node .cache/run-hosted-capacity-observe.mjs →exit1, 첫 무인증 요청이401 대신302(Vercel SSO)로 끝나 유지 CLI는 미실행. 고정alias GET redirect:manual 진단에서302/location origin https://vercel.com/sso-api 확인. 관측 HTTP의 성공/실패를 앱 문제로 단정하지 않는다. 기존 저장소에 자동화용 protection 인증 연결 없음. 보호 해제·쿠키 추출·임의 인증우회 없이 해당 검사를 중단했다.
+4. 독립 hosted 확인: node .cache/probe-connected-capacity-rpc.mjs →exit0. 실제 test private RPC observedAt=2026-10-11T08:30:00.204862Z, 저장/예약38,608B·월read64,864B. 실제 public RPC 전체73,464B/공개34,856B·미정리0, 로컬 evaluator PUBLIC_BUDGET_UNGUARDED. 새 함수의 실제 호출 PASS이며 배포 API/CLI/알림 수신 PASS는 아니다. 과거 A/B·18unit/15SQL/6HTTP를 반복하지 않았다.
+5. DB/원복: --observation-dependency 독립 read-only 검사exit0/history1/function=true, observed_at가 위 실제 호출시각과 일치, enabled/approved=true·paused=false·physical40MiB/read80MiB 유지. 관측flags2개를 false로 저장하고 동일806b6b2 재배포5LTK9cXFnGbNAcdkPfgjEsTNvBGe Ready·Source/alias 일치. 저장 전 함수와 새 test 전용키/target은 보존. 원복 후 API 화면은 브라우저 net::ERR_BLOCKED_BY_CLIENT로 접근이 거부되어503 응답 자체는 미확인. 추가우회0. **현재alias의 false설정/재배포를 확인한 것이며 과거 immutable 배포6Qp의 삭제/비활성까지 주장하지 않는다.**
+6. 변경 파일/명령: 이번 앱 코드·SQL 추가수정0. 기존00/01/02/03·시작/evidence에 위 결과 갱신. git diff --check, 작업브랜치 commit/push로 기록한다. remote refs에서 master1878867·phone-test806b6b2 그대로 확인. 이전008263d는 이전 함수 설치/인계 기록이다.
+7. 안전/권리/관측: 운영·Public 범위·전송/quota 정책 변경0, 이미지/원본삭제0, cleanup endpoint 호출0, 메일/이슈/자동알림 발송0. 새키/사용자본문 로그0. test의 한도off 경보를 억지로 없애려 한도를 변경하지 않았다. 실제 사용자행동 신규PASS0.
+8. 미완료/다음1개: 배포 Preview의 자동 관측은 Vercel SSO 인증 경계 때문에 미확인, 실제 운영자 알림 수신과 운영 예산·Public 활성은 잔여다. 이 막힌 경로를 반복하기보다 **기존 운영 유지관리 인증 경로를 재사용하는 D03/D06 정확한 운영 후보 마감**으로 이어간다. 후보 준비만으로 운영 migration/master push/활성/알림 발송을 승인받았다고 해석하지 않는다.
+
+#### 비용·정상 규모의 구체적 한계
+
+- 공급자 실제 UI read-only 확인(2026-10-11): Supabase 조직 All projects/Free/9월24일~10월24일 uncached0.972/5GB·cached0.086/5GB·저장기간평균0.826/1GB·DB요약0.297/0.5GB, 초과없음. 평균/최대1시간 지연 값이므로 현재 SQL856,441,465B와 동일 지표로 취급하지 않는다. Vercel anime-collector Usage/최근30일9월11일01:00~10월11일01:00 Fast Data1.26/100GB·Origin4.34MB/10GB·함수390·CPU41s·memory0.15GBh. 다른프로젝트 합산 여유/무료 지속 보장 아님. 현재는 전송보다 저장 한도에 더 가깝다. 이 실측은 초기 공개 이후 트래픽 예측이 아니며100MiB/day 후보가 한 달 지속되어도 무료라는 뜻이 아니다.
+
+- 합성 gradient/geometric/noise의 full+thumb 저장16,062 /43,200 /1,088,732B, 실제 HTTP 응답은 full14,794 /38,860 /1,062,062B와 thumb1,268 /4,340 /26,670B. 이미지20개 full 방문 계산0.296 /0.777 /21.241MB. 실사용자 분포/실제청구 통계가 아니며 HTTP headers·DB·Auth·표지·Vercel 전송은 별도다.
+- 현행 공개페이지는 full을 읽는다. thumb20개+full1개 비용은 미래 비교 수치일 뿐 현재 최적화 PASS가 아니다. 요청당2MiB 예약이므로20GET은 실제크기와 관계없이40MiB 예산을 쓴다. preview/운영자조회도 포함한다.
+- 전체 저장 후보980,000,000B 경보, 기존 공개20MiB의80%=16,777,216B 경보. 기존 표지+private 최대100MB+public20MiB 합은976,958,521B로1GB 근처다. catalog 증가/비정상 객체를 무시하지 않는다.
+- 무료 초기 공개 전송 후보는100MiB/day와50requests/day(31일 예약3,250,585,600B). private500MB/month를 더하면3,750,585,600B; nominal5GB 대비 나머지 약1.249GB는 다른요청 여유 후보일 뿐이다. **이미지20개 방문 약2.5회/day 수준으로 매우 제한적**이며 정상 공개 규모 수용을 보증하지 않는다. 활성 결정 전 실제 표지/API 등 provider 총 사용량과 비교해야 한다. 이번에는 설정하지 않았고 더 높은 한도를 임의 승인하지 않는다.
+- Supabase Free 공식가격 확인: https://supabase.com/pricing (2026-10-11). 공개 no-store이므로 cached egress5GB를 본 경로의 무료 여유로 더하지 않는다. Supabase와 Vercel 전송 비용은 서로 다른 공급자 항목이다.
+
+### 2026-10-11 W19 — CI 붙여넣기 실패 좁히기
+
+- 목적/범위: 기존 desktop-image-input:226 실패를 실제 이미지 관리 열림/붙여넣기 이벤트 경계에서 재현한다. 로컬 단독/묶음 PASS만으로 원격 실패를 닫지 않는다. 현재 MemoryCardDetail의 native details→지연 toggle→React active→paste listener 경계를 검사한다.
+- 확인한 결함: isolatedE2eServer는 ../.moemoa-ui-test-results/test-results에 trace를 쓰지만 quality.yml은 test-results만 업로드해 CI38113872143 artifacts가0이다. 고정 경로만 보완하며 일반 로그·비밀파일 업로드 금지.
+- 순서/완료조건: 즉시 펼침/붙여넣기 회귀를 추가해 실패 증명→실제 controlling source 최소수정→닫힘/다른탭/계정 경계와 기존 입력 묶음 확인→같은 후보 CI 결과. 단순 sleep/retry로 실패를 숨기지 않는다.
+- 파일/데이터/안전: MemoryCardDetail/useImageFileTransfer와 desktop-image-input 및 quality.yml만 필요에 따라 수정. DB/원격설정/공개범위/의존성 변경0, 합성 이미지/모의계정만. 소스 revert로 복귀; 실폰/OS 클립보드/운영 PASS와 분리. phone-test/운영 신규 반영은 기존 정확한 후보 승인 범위와 대조한다. 결과는 본 절·기존 작업판에 기록한다.
+
+- 실행 증거: 새 회귀는 수정 전 open=true/accepted=false로 FAIL(exit1), summary onClick에서 default native toggle을 막고 React state로 visibility/input activation을 함께 갱신한 후2 PASS. Enter/Space 전환까지 넣은 관련 전체52/52 PASS(exit0). 기존 입력 훅·원본 저장·동기화 변경0. CI 실패가 관찰한 같은 누락 증상을 재현했지만 과거 trace는 업로드 경로 오류로 없어 과거 실행의 타임라인을 재구성했다고 주장하지 않는다.
+
+
+- 원격 후속 발견: CI38118471179는 붙여넣기52/공개/SQL 등 앞선 단계 성공, 최종 Web85항목 중78 PASS/5 SKIP/2 FAIL. 두 실패는 간편공개 도입으로 바뀐 상세 설정 제목을 테스트만 과거 이름으로 찾은 것. 제품 기능은 유지하고 두 locator를 현행 제목으로 갱신한다. artifact action은 상대 `..` 패턴을 거부하므로 Node path.resolve로 고정 결과 폴더의 정규 절대경로만 전달한다. 실패한 두 테스트와 증거 경로 구성을 먼저 검증하고 후속 CI를 확인한다.
+
+#### W19 이번 실행 보고
+
+1. 읽음: AGENTS/시작문서/최신확정결정/PLANS/07 QA/09 변경통제/기존 release-v2 계획·작업판과 MemoryCardDetail, MemoryImageReplacement, useImageFileTransfer, desktop-image-input/lifecycle, isolatedE2eServer, playwright.config, quality.yml.
+2. 미결/가정: 과거 CI trace는0건으로 타임라인 직접 증명 불가. 동일 open=true/paste=false 경계를 재현했고 수정 후 확인하되 과거 CI 원인을 유일한 원인으로 단정하지 않는다. OS 실제 클립보드·실폰은 별도 미검증.
+3. 계획: 본 W19 CI 좁히기 절; 새 진행판/기능0.
+4. 파일: MemoryCardDetail.jsx 클릭에서 펼침/활성화 함께 변경(입력 훅·저장 모델 미변경); desktop-image-input.spec.ts 첫입력/즉시닫힘/Enter/Space 회귀1개; quality.yml 격리 증거 폴더 연결. 기존00/01/03/시작·증거JSON 갱신.
+5. DB/복귀: DB/권한/정책/flags 변경0, 원본/티켓/quota 계약 유지. 소스2fbe21f revert로 되돌릴 수 있다.
+6. 명령/결과: 새로운 단일회귀 수정 전1 FAIL→수정 후 기존실패+새회귀2 PASS; run-desktop-image-e2e.mjs 전체52 PASS, build32 Complete, git diff --check PASS. 고유52에 단일2를 추가합산하지 않는다. 원격CI38118471179/2fbe21f는 붙여넣기·SQL·공개 등 앞선 단계 PASS, 최종78 PASS/5 SKIP/2 FAIL(구형 메뉴명 locator). artifact 상대경로도 거부됨. 두 locator 수정 뒤 `node scripts/run-channel-e2e.mjs --grep "cancel and delete-cancel|management tabs support keyboard"` 2 PASS/exit0. 경로는 Node path.resolve로 정규화. 후속895ccbb CI38119402749 전체 SUCCESS(입력52·공개42·최종Web80 PASS/기존5 SKIP, SQL계약도 성공).
+7. 안전/관측: 숨긴 영역/다른탭 입력 차단·원본/사전티켓 보존·취소/계정전환 검사를 유지. 합성파일·모의계정만 사용, analytics/로그에 개인이미지/토큰 추가0. 업로드는 두 test-results 폴더만; 저장소/env 폴더 전체 업로드 없음.
+8. 범위/다음: 작업브랜치 codex/simple-signup-preview만 push. master1878867·phone-test9746a30 유지, 새 운영/기존 테스트 alias 반영 없음. 다음1개는 기존 W15/D03의 공개 이미지 용량·방문 전송량·실제 경보 잔여 마감. D04/D05/D06·직접 이미지 철회HTTP 미확인은 유지.
+
+- 기다리는 동안 기존 D03/W15 운영 근거만 읽기로 대조: 예약 실행38115426850/source1878867 성공. 05:38:30Z private 저장/예약454,464bytes·월읽기1,054,194bytes, 경보80MB/400MB 이하. private/public 정리 endpoint 실제 실행·각삭제0/실패0(비어있는 정리), 경보0. 새 실행/삭제/설정변경0. 비어있지 않은 정리·공개 포함 전체용량/egress·실제 경보 수신을 PASS로 승격하지 않는다.
+
+- 최종 Git/CI: 수정2fbe21f와 검사·증거경로 후속895ccbb를 작업브랜치에 push, 원격CI38119402749 SUCCESS. 마지막Web80 PASS/기존5 SKIP이며 skip을 새로 추가하지 않았다. 최종 문서만 별도 commit/push([skip ci])하고 앱·검사·workflow 내용은 검증한895ccbb와 동일하게 유지한다. 실패 artifact는 성공CI에서 실행되지 않아 업로드 성공 증거는 아직 없다.
+
+### 이전 이미지 오류매핑 구현 보고 — 2026-10-11
+
+1. 읽은 자료: AGENTS.md, CODEX_START_HERE.md, 최상위 확정 결정, PLANS.md, 이미지/UGC·QA/운영·단계/보고 문서, 기존 release-v2 00/01/02/03, 패키지 README→00→01→02/03와 manifest, platformPublication/Gateway/controller/UI/API·해당 테스트.
+2. 가정/미결: 기존10/10 완료와9970120 phone Preview는 과거 후보다. 새 로컬 수정의 실제 hosted 적용·현재 정책 A/B 직접 수락·공개 한 바퀴는 아직 미완료다. 사용자 직접 약관 수락을 대행하지 않는다.
+3. 계획: 본 문서 최상단17항의 W08/W09 마감. 새 W/계획판 없음.
+4. 변경: backend/client 두 allowlist와 HTTP/Chromium 회귀, 재현 runner, 고정 test DB 준비/원복 도구. 시작/결정/기존00~03 현재절·W/D/Q만 갱신하고 과거 로그 보존. 앱의 원본/사본/권리/review/operation 알고리즘 재작성0.
+5. 데이터: 신규 migration 작성0. 승인 후 기존20261010160000을 test에만 release MOEMOA_PUBLIC_SIGNUP_TEST_20261011_01로 적용. 임시 guard=true 확인 후 false 원복, additive schema/history는 유지. 운영DB0. 앱 복귀는 두 파일의 소스 revert, test 재개/원복은 prepare-public-signup-test.py --enable-existing / --restore.
+6. 실행: node --test publicImages/publicationController/publicationGateway 59 PASS; run-public-signup-local.sh 격리SQL15 PASS; 실제 Chromium 모의API10개 고유흐름 PASS(카드 진입1개 보강 재검사는 중복 합산 안 함); npm run build32/exit0; Python AST·git diff --check PASS. 실제 명령/실패·재검사 구분은 [집계 근거](evidence/2026-10-11-first-public-connection.json). 새 반복 runner는 scripts/run-publication-closeout-e2e.mjs이며 build와 직렬 실행한다.
+7. 안전/관측: 로그·증거에 토큰/개인사진/비공개본문/DB dump0, analytics 추가0. signup 오류 거부 시 handler 후속 storage 동작0 및 같은operation 재시도 검사. 계정/약관 자동 생성0, 국가/권리/무료 정책·기존 test Public flags 불변.
+8. 남은 조건/다음1개: A 본인이 Chrome test 화면에서 현재10/10 정책 확인→기존 계정 Google 복귀. 그 후 승인된 test guard 재활성 아래 A 게시→익명 이미지→home→B follow/revisit→신고/차단/철회. 새 로컬 소스 Preview 반영과9970120의 결과는 별도 축으로 기록한다. D03/D04/D05 및 최종 후보 D06·운영/master 배포 승인 잔여는 축소하지 않는다.
+
+
 ## 2026-10-10 — 최신 기능 Git 운영 배포와 Pro 전체 검토 인계
 
 ### 1–3. 목적·승인·현재 증거
@@ -1683,3 +1927,266 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 9. 진행/완료: 아래 실제 명령·결과를 누적한다. 기존 W/단일 작업판만 갱신한다.
 
 10. 완료 보고(로컬 slice): `wsl -u postgres -e bash /mnt/e/web/anime/tools/identity/run-signup-admission-local.sh` 최종 실행 exit0, SQL23조건+실제 동시 세션1조건 PASS. `git diff --check` 통과. 이번 변경은 tools/identity의 후보 SQL/검사/격리 runner 및 기존 문서/증거뿐이며 앱 UI·운영 DB/flags·가입 설정·메일·결제 변경0. 합성 입력만 사용, 개인정보 신규 수집0, 새 의존성0. 기존463 unit/build20/백업4308 PASS는 이전 실행이며 이번에 반복하지 않았다. 공식 hook 계약 검토 및 기존 C02/최상위 결정·PLANS·QA07·보고09·authRepo/identity 후보를 읽었다. 보호자 확인 방식 질문 미응답, 보존/법률 조건 및 실제 Auth 서비스 통합은 미확인. 다음1개: 수동 확인 방식 확정 뒤 접수→검토→승인·철회 연결.
+
+#### W15/D03 운영 관측만 분리한 후보 마감 · 2026-10-11
+
+1–3 목적/기준: 공개 이미지 집계·경보를 현재 운영 소스1878867에 독립 적용할 정확한 D06 후보를 준비한다. 현재 HEAD 전체는49파일이며 카드 공개/UI 변경을 함께 포함하므로 운영 관측만으로 표시하지 않는다. 기존 무료 유지·Public off·정확한 후보별 승인 조건 유지.
+4–6 범위/흐름: 검증된806b6b2에서 관측API/handler/집계 evaluator/maintenance workflow·script/SQL1개와 관련 검사4개만 선택한다. master baseline의 별도 로컬 사본에서 검증하며 운영/master에는 적용하지 않는다. 기존 W15 계획/작업판만 갱신한다.
+7–9 DB/검증: 20261011160000 읽기 집계RPC만 후보. 기존 private observer/공개20MiB 정책/이력·활성override를 읽기 전용으로 점검한다. 분리 후보의 unit18 및 그 후보 migration chain의 격리PG 집계계약을 확인한다. 새 baseline 조합 검증이며 기존 전체 사용자흐름/실기기/기본DB 테스트는 반복하지 않는다.
+10–14 안전/복귀/승인: 공개flags·한도·사용자 데이터·가입·권리·cleanup 동작 불변. 관측 호출은 기존 private observed_at 갱신을 포함한다. 운영 활성 시 기존 production maintenance 인증만 재사용, 비밀값 조회/기록0. 실패 시 새 public-observe flag=false 및 후보 Git revert; additive RPC 보존. 배포HTTP/실수신은 미확인으로 유지한다. 무료100MiB/50GET/day 후보는20장 기준2.5방문/day여서 자동 확정/활성하지 않는다. 운영 migration/master push/관측 설정·수동 workflow 실행은 정확한 최종SHA 승인 이후.
+15–17 진행: 이번 운영 집계856,441,465B/Public0/전송off 재확인. 아래 실행 결과에 새 후보SHA·검사·남은 승인 조건을 기록한다.
+
+#### W15/D03 운영 관측 후보 이번 실행 보고 · 2026-10-11
+
+1. 읽은 문서/소스: AGENTS, CODEX_START_HERE, 확정결정01, PLANS, QA07/변경09, release-v2 00/01/02/03, verify-before-claiming skill. 실제 관측 API/handler/capacity evaluator/maintenance workflow·script·public observer SQL, 기존 production budget/apply-test/inspect 도구와 검사를 대조했다.
+2. 사실/미결: 운영읽기집계856,441,465B·Public off. private observer 존재/유효100MB·월500MB, 공개20MiB guard=true, active global delivery override0, 이력37개/새20261011160000 미적용. 첫 사전조회는 잘못된 read_limit_bytes 컬럼으로 실패(exit1, 원격 write0); 실제 global_read_bytes_per_month로 바로잡아 읽기조회 exit0. 금액·국가·이미지범위 새 결정0.
+3. 계획: 본 문서 W15/D03 ‘운영 관측만 분리한 후보 마감’. 새 작업판/계획 트리 없음.
+4. 변경/후보: codex/production-observation-20261011 **199613b139d9fcd085e298a9f03bad94b4e53f5a**는 운영1878867 단일 부모, 검증된806b6b2의 관측10파일만 선택한 로컬 독립 commit이다. 현재 작업브랜치 전체49파일을 운영에 묶지 않는다. 10파일 목록/정확한SHA256은 evidence.productionCandidate.files. 새로운 런타임 구현/의존성0. 기존00/01/02/03·시작/evidence의 현행 요약만 갱신하고 과거 증거 보존. 무관한 untracked identity 초안3개·__pycache__ 보존.
+5. DB/설정/복귀 후보: **MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01**, 기존 SQL20261011160000 하나(LF SHA25645c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601). 적용 시 고정production·baseline37이력/함수없음·Public off 재확인→transaction/advisory lock→정확한SQL+이력에release/source/hash→commit·PostgREST reload→독립권한/집계 확인. 기존 private20261008090000/공개20MiB migration 재적용 금지. Vercel Production MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true; GitHub MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true/TOTAL_STORAGE 경보 변수 MOEMOA_TOTAL_STORAGE_ALERT_BYTES=980000000. 기존 production 인증/target/private-observe/cleanup설정 재사용·비밀값 읽기/복사0. 새public-observe만 false 원복·Git 배포, 필요시 후보 Git revert; private관측/원본/새additiveRPC는 보존. 이번 실제 운영 migration/config0.
+6. 이번 실행/결과: 운영 inspect-public-capacity.py --target production exit0, 추가 readonly preflight 수정 후exit0. GitHub API38115426850/jobs에서 master1878867의 scheduled cleanup 실제 실행단계SUCCESS 확인(신규 공개관측 아님). git archive199613b를 .cache/production-observation-candidate에 풀고 그 cwd에서 node --test tests/unit/{publicCapacity,publicCapacityCli,privateObservation,privateMaintenance,publicCleanupMaintenance}.test.mjs →18 PASS/exit0. 동일사본에806b6b2의 격리SQL harness/contract2파일만 추가해 wsl.exe -u postgres -- bash /mnt/e/web/anime/.cache/production-observation-candidate/tools/operations/run-public-capacity-local.sh →15 PASS/exit0. 후보에는 간편공개20261011120000이 없으며 이 독립 migration chain에서 집계/권한/override/한도 계약 성공. git diff --check1878867..199613b exit0. 이전806b6b2 전체CI와 실제A/B 흐름은 과거 PASS, 이번 새 사용자행동 PASS0·새 전체build/원격CI 재실행0.
+7. 보안/권리/관측: 새RPC는 service-role aggregate-only, 원본/본문/경로/계정/secret 노출0. endpoint관측은 기존 private observed_at 갱신 포함, 실제정리 호출 없음. 자동 경보는 기존 GitHub 작업의 failure annotation/summary 경로; 운영자 실제 수신·새deployedHTTP PASS 아님. 테스트Preview SSO302를 우회하거나 반복하지 않았다. 운영키 재발급/외부발송/유료변경/Public 활성0.
+8. 잔여/다음1개: **후보199613b의 운영 관측 적용 승인 후 SQL1개·설정·master Git/Vercel exactSHA·수동 observe-only workflow를 확인한다.** 기존10/11 사용자 요구에 따라 정확한 운영 승인 전멈춘다. 기존 workflow_dispatch master는삭제0이고 phone-test는정리job이므로 호출하지 않는다. W15/D03 전체 완료는 아직 아님: 기존 무료100MiB/50GET/day안은20장기준2.5방문/day, 정상공개규모를 충족했다고 확정하지 않았다. 전송한도/실수신과 D04/D05/전체Public D06 잔여는 보존한다.
+
+#### W15/D03 운영 관측 적용 승인 · 2026-10-11
+
+사용자 후보199613b 운영 관측만 적용 승인. 정확한 source/hash·현재master1878867을 확인 후 DB20261011160000+관측설정3개→master Git배포→Ready/exactSHA→master 수동observe-only workflow 순서로 진행한다. Public/전송quota/가입/요금/사용자자료 변경은 제외. 실패 시 새public-observe만 원복하며 실제 삭제 경로는 호출하지 않는다. 이번 실제 결과는 후속 보고에 기록한다.
+
+#### W15/D03 승인 후보 운영 적용 결과 · 2026-10-11
+
+1. 읽은 기준/소스: AGENTS·CODEX_START_HERE·확정결정01·PLANS·QA07/변경09·기존00/01/02/03, 승인된199613b의 관측 API/SQL/workflow 및 기존 connection/관측 적용 계약. verify-before-claiming에 따라 배포SHA·실제HTTP·workflow집계를 별도로 확인했다.
+2. 승인/가정: 사용자 ‘운영 관측만 적용’은199613b/집계함수1개/관측설정3개/master Git배포/삭제없는 수동관측에 한정. Public 활성·전송quota·국가/가입·요금·사진변경은 미포함. 무료한도·알림실수신 잔여는 유지.
+3. ExecPlan: 바로 위 ‘운영 관측 적용 승인’ 및 같은 W15/D03 후보 절. 새 계획판 없음.
+4. 적용 소스: master1878867→**199613b139d9fcd085e298a9f03bad94b4e53f5a** fast-forward push. 관측10파일만 반영, 기존 작업브랜치의 간편공개/신고/UI를 함께 배포하지 않았다. Vercel Git Production **Q3xJiujuoDyJ9V8JuyaDpVcVEq5a** Ready·www alias·source 일치. 실제 www/build-info.json HTTP200 commit/checkoutCommit199613b/source=vercel-git/semanticMatch=true. workingTreeDirty=true도 원문대로 evidence 보존하며 clean build로 표현하지 않는다.
+5. DB/설정/복귀: **MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01**/20261011160000 적용. Git SQL hash 대조→baseline37/함수없음/Public off/dependency guard→transaction·advisory lock→service-role 권한/정책동일성→history source/hash/commit/reload. 별도 connection 이력38·함수있음·anon/authenticated execute=false/service=true·Public off/20MiB/private100MB·월500MB/override0 확인. Vercel Production public-observe=true 저장, GitHub public-observe=true·980000000 변수 write/readback. 원래3설정 없음. 기존 유지보수 인증은 GitHub에 그대로 두며 조회/복사/재발급0; 저장된 Git 인증만 메모리에서 GitHub API에 사용하고 값 출력0. 복귀는 새public-observe flags false+Git재배포, 기존 private 관측 유지·additive RPC/history 보존.
+6. 이번 실제 명령/결과: exec_command os1392→Node child_process로 전환(저장소손상으로 단정하지 않음). wsl.exe -- python3 .cache/production-observation-preflight.py 적용전exit0; .cache/apply-production-observation-approved.py exit0; .cache/production-observation-readback.py 독립권한/정책exit0. 적용스크립트는 Git199613b의 고정 SQL만 사용, 비밀값·DB오류문 출력0. git push origin199613b:refs/heads/master 성공. GitHub기존Git인증을 사용하는 .cache/production-observation-github.cjs inspect/apply/dispatch exit0, 변수독립readback PASS. www/api/private-image-observe 무인증HTTP401/no-store/AUTH_REQUIRED. 실제 **workflow38126188717** master199613b/manual SUCCESS, 관측step SUCCESS·phone-test job SKIPPED. 실제 로그 집계: 전체856,441,465B/private454,464B/public0B, private월read1,054,194B, invalid/overdue0/alerts없음, cleanupSkipped/publicCleanupSkipped=true·deleted/publicDeleted=null. private observed_at08:50:02.540Z·public08:50:02.717Z. 새deployed HTTP 통합 PASS, 기존 Preview302를 우회한 결과가 아니다. 아래CI최종결과는 별도 기록. 이전 로컬18/SQL15/806b 전체CI는 이번재실행 아님.
+7. 보안/관측/사용자행동: 실제 운영집계는 service-only이며 무인증차단 확인. 사용자ID/본문/경로·토큰로그0. 원본·공개전환·한도·계정정책 변경0, 이번정리호출/이미지삭제0. 실제threshold 초과가 없어 alarm전송/운영자수신 검증은 아직0; 정상workflow성공을 수신PASS로 확대하지 않는다. 새사용자행동PASS0. 기존 scheduled maintenance는 기존06h주기를 유지하고 다음 실행부터 새관측설정 사용; 이 턴 scheduled 실행을 새로 입증한 것은 아니다.
+8. 잔여/다음1개: 승인된 운영관측은 적용·실제경로 확인 완료. 다음은 **D03 정상공개규모와 전송한도 후보 마감**. 2MiB/GET·잠정50GET/day의2.5방문/20장 한계 때문에 해당한도를 임의활성하지 않는다. 실제알림수신·D04권리/국가·D05복구키/복원·Public 전체D06 잔여는 보존. Android/Safari전수/기본DB복원 반복 없음.
+
+- Git 인계: 운영199613b를 현재 작업브랜치에 충돌 없이 merge하여 운영 이력을 연결했다(앱소스 추가diff0). 이번6개 문서만 함께 commit/push하며 운영master에 문서추가 배포는 하지 않는다. CI38126124037은 SQL계약SUCCESS·verify 진행 중(입력회귀완료/종합Web진행/확인시실패0), 전체PASS로 선기록하지 않는다. 운영관측workflow38126188717의 실제SUCCESS와 구분한다.
+
+
+#### W15/D03 현재 완료도 대조·전송 예산 후보 — 2026-10-11
+
+- 목적: 사용자 요청에 따라 단일 작업판의 현재 W/M/D/Q 요약을 최신 실제 증거에 맞춘다. 완료율은 가중치가 없어 임의 산출하지 않고 상태별 개수와 운영/테스트 범위를 구분한다.
+- 변경 지도: 기존00 진입점·02 관측 계약·03 현재 행·이 문서와 기존 public-capacity evidence만 수정한다. 과거 실행 로그/완료 증거 보존, 새 작업판/기능/정책 없음.
+- 실행: 현재 Git/CI 읽기 → 오래된 hosted 미실행·외부 사본 미확보 요약 보정 → 요청당2MiB 예약 및 기존 합성 측정값으로 20장 페이지/일일 요청 후보 계산 → 문서 ID/집계/차이 검사. 검증된 앱·SQL 재작성/광범위 테스트 반복 없음.
+- 경계/복귀: 운영 DB/flags/master/요금/발송 변경0. Android와 사용자 제외 Safari/실폰 오프라인은 NOT_RUN/USER_WAIVED이며 PASS가 아니다. 문서 diff만 되돌릴 수 있다. W15 전체 완료에는 정상 사용규모와 한도 선택·실제 알림 인수가 남고, 최종 Public 운영은 정확한 D06 후보 승인 대상이다.
+- 진행 및 실제 결과는 아래 기록한다.
+
+1. 문서/소스: mandatory start/decisions/PLANS/QA07 및 기존00/01/02/03·evidence, publicImages handler/processImage·PublicBoardSnapshot을 읽었다. 첫 Snapshot 경로 추정은 ENOENT, rg --files로 실제 memory/components 경로를 확인했다.
+2. 가정/미결: W상태는 공수 가중치가 없어 퍼센트로 환산하지 않는다. 과거 테스트 PASS는 이번 PASS가 아니다. 운영 Public off/무료 유지·기기 제외 결정 보존.
+3. 계획: 위 W15/D03 현재 완료도 대조·전송 예산 후보 절을 따른다.
+4. 파일: 기존00 진입점·03 최신 요약/M2/M3/M5/W11/W14/W20/D01/Q19/Q20/Q24 행을 보정했다. 02에50/100/200GET/day 예산 후보 산술, 기존 capacity JSON에 근거/가정을 추가했다. 과거 실행 로그와 실제 측정값은 보존했다.
+5. DB/복귀: 앱·SQL·운영/test 설정 변경0. 문서5파일 diff만 복귀 가능; 새로운 migration·의존성 없음.
+6. 실행/결과: Git status/diff --check, GitHub API38126124037 및 jobs 읽기. W ID20개 고유/상태4·9·4·2·1 확인, JSON parse/31일 예약산술3개 대조 PASS. 초기 상태 집계가 설명 열을 선택해 잘못 출력된 것을 status열6으로 바로잡고 기대 개수를 검증했다. 새 제품 테스트0/새 사용자행동 PASS0. CI는 SQL SUCCESS·마지막 Web단계 진행 중, 새 전체PASS 주장0.
+7. 보안/관측: 비밀값/개인자료 조회·출력·외부발송0, 원본·Public·요금 변경0. 과거 관측SUCCESS와 실제 경보 수신 미검증을 분리했다.
+8. 실제 잔여/다음1개: 현재2MiB 선예약으로50GET/day는20장 기준2.5회에 불과하다. 무료 전체공개 정상규모로 확정하지 않고, 기존 W15에서 실제 전송량에 더 가까운 안전 예약 후보의 최소 변경 범위를 확인한다. 활성/운영 반영은 정확한 후보 승인 이후. 별도 복구키 미보관/전체DB 확장환경·최종 Public 정책/배포 승인은 기존 D03~D06에 유지한다.
+
+
+#### W15/D03 사본 크기 기반 전송 예약 후보 — 2026-10-11
+
+1. 목적: 작은 공개 이미지에도2MiB가 차감되는 과대 예약을 줄이는 로컬 후보. 실제 과금/무제한 무료 열람을 보장하지 않는다.
+2. 결정: 무료 유지, Public off, 원본/operationId/권리/철회 보존. 새정책/한도/운영승인은 별도.
+3. 근거: handler.js:141의 고정예약, DB memory_public_assets full_bytes/thumb_bytes·hash·prefix, Supabase storage-js download의 기존 /storage/v1/object 경로.
+4. 범위: 서버 GET·크기예약 RPC·bounded Storage GET·회귀검사. UI/목록품질/사본재생성/새공급자/의존성/실데이터 제외.
+5. 흐름: 기존 resolve 권한확인 → service-only RPC가 READY asset/variant/path/hash를 대조하고 저장된 크기로 기존 원자적 quota 소비 → Range GET/Content-Length/Content-Range/stream 상한·정확한 길이/해시 확인 → 기존 resolve 재검사 → no-store 응답. 실패 예약은 환불하지 않아 재시도 초과 사용을 막는다.
+6. 지도: api/public-image.js, publicImages handler/backend와 boundedDownload.js, migration20261011180000, 관련 unit·SQL 계약/기존 local runner, 기존00/01/02/03·capacity evidence.
+7. 데이터: additive service-only 함수1개, 기존원본/정책/이력 수정0. 과거 resolver들을 재작성하지 않는다.
+8. 마일스톤: M1 정확한 크기/old-path/오류 단위, M2 실제격리SQL atomic quota, M3 실제loopback HTTP/stream·철회 결과 및 예산 비교.
+9. 검사: 기존 publicImages/publicViewer/관측 관련검사+새 bounded/handler 검사, 기존격리 PG runner의 새계약. 광범위 Safari/기초DB/백업 반복 없음.
+10. 보안: client 크기를 믿지 않음, hash/path/READY DB결속, Range/길이초과중단·리다이렉트금지·20초timeout·권한재검사 유지. 경로/사진/계정/키 로그0.
+11. 관측: 기존사용량 RPC/경보를 재사용. bytes는 성공분 실측 정산이 아니라 다운로드 전 예약이며 실패분도 남긴다. 공급자전체egress는 별도다.
+12. 복귀: 새 MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED 기본false, false로 기존2MiB 경로. additive 함수는 남길 수 있음. 기존한도활성/변경0.
+13. 위험: 실제 Storage Range/길이 응답은 hosted 승인 후 확인 필요. 실패 시 기존무제한download로 fallback하지 않음. 서비스 응답/전송중 취소에도 upstream 전송량을 정확히 보장하지는 않음.
+14. 결정: 이번 로컬범위 진행, 테스트 적용은 정확한후보 승인 후. 정상요청수/byte한도는 후속후보이며 임의활성0.
+15. 진행: 현재운영199613b CI38126124037 전체SUCCESS를 이번 읽기로 확인.
+16. 발견/변경: metadata를 기존 resolver4개에 추가하는 대신 service-only예약함수1개로 모아 권한조회/저장모델 유지.
+17. 실제 결과는 아래 누적한다.
+
+##### 이번 로컬 실행 결과·8항 보고
+
+1. 읽은 기준: AGENTS/CODEX_START_HERE/확정결정01/PLANS/이미지05/QA07/변경09·기존release-v2 00~03·capacity evidence. handler/backend/processImage, 기존SQL resolver/complete/consume/observer, installed storage-js의download 경로, 기존 unit/SQL runner/CI를 대조했다.
+2. 가정/미결: 현재 후보는 실제파일 크기 선예약이며 과금정산이 아니다. 서버사본 다운로드 실패도 이미 시도한예약은 보존한다. 요청수는 별도한도. 실제Supabase Range/Content-Length·알림수신·운영공개/정상규모 잔여. 이전기본DB/A·B/Safari 검사를 반복하지 않았다.
+3. ExecPlan: 바로 위 W15/D03 사본크기 기반 예약 후보17항. 기존 단일작업판/ID 유지.
+4. 파일/이유: api/public-image.js 새flag defaultoff, handler.js의 선택적 DB크기예약+404철회/길이확인, supabaseImageBackend.js의 getSized, boundedDownload.js의 Range/헤더/stream 중단. 신규 migration 함수1개, tests/unit/sizedPublicDelivery.test.mjs, tools/operations/sized-image-delivery-contract.sql 및 기존 runner에 CI연결. 기존00/01/02/03·capacity JSON 최신절/증거 갱신. 새의존성/UI/원본/operationId 변경0.
+5. DB/복귀: 20261011180000_memory_sized_image_delivery.sql은 service-only additive 함수1개, 정책/데이터/권한범위 확장0. 격리DB에만적용. 실제 test/prod 미적용. flag=false로구경로복귀; 함수는남겨도호출없음. 한도변경/Public활성 없음.
+6. 실제명령: node --test tests/unit/{sizedPublicDelivery,publicImages,publicViewerImage}.test.mjs 최종47/47 PASS(초기46 이후경합회귀1추가, 중복합산안함). node --test tests/unit/{publicCapacity,publicCapacityCli,privateObservation,privateMaintenance,publicCleanupMaintenance}.test.mjs 18/18 PASS. wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종25 SQL PASS(기존15+신규10). 초기SQL검사 실패3회: 새psql세션 pg_temp 함수없음→JS replace의달러문자변환→pause기존에러명 PUBLICATION_DISABLED 기대값불일치. 모두검사코드수정후통과, 앱권한을완화하지않음. node --check api/public-image.js·git diff --check PASS. 전체브라우저/build 반복0, 서버GET변경의직접HTTP/DB검사를수행.
+7. 실제행동/보안/관측: 로컬HTTP 공개/ownerpreview/운영자preview/인증viewer4경로·합성Storage206→방문자24×30 WebP decode·429한도·초과/압축/변조차단·다운로드중철회404·flagoff2MiB경로 PASS. 실제계정/hosted/실기기 새PASS0. 크기·hash는 서버DB에서결속, header/path/key원문출력0. 기존관측/원자적한도 재사용, 새유료/발송/운영설정 변경0. 과거운영199613b CI38126124037 전체SUCCESS를 이번읽기로확인했다.
+8. 다음1개/정확한승인후실행: 이 후보를 moemoa-test에 migration1개로추가하고 codex/phone-test GitPreview에배포, 해당Preview의새flag만잠시true로 실제Storage합성사본 full/thumb 전달 확인 후false복귀. 기존권리/공개정책/한도/가입/원본/운영은변경하지않는다. 정상요청수/byte한도활성 및최종운영승인은별도. 새 test변경에대한10/11 정확한후보승인조건을 따른다.
+
+### 2026-10-11 정확한 테스트 후보 승인 및 실행
+
+사용자가 후보 `2fbc14a`의 migration `20261011180000` + phone-test 배포 + 새 sized-delivery flag 임시 활성/원복을 승인했다. 위 17항 계획을 그대로 실행한다. 기존 정책·한도·원본·운영은 변경하지 않는다. 고정 test 연결과 source hash를 검사하는 적용 runner에 이 후보만 추가하고, 12개 기존 데이터/정책 테이블 해시를 transaction 안에서 보존 검증한다. RPC 권한/독립 readback → Git phone-test 배포 → 실제 합성 사본 다운로드 → flag false 재배포 순서. 실패 시 설정을 먼저 원복하고 hosted PASS를 만들지 않는다.
+
+### W15/D03 크기 예약 test 적용 — 이번 실행 8항 보고
+
+1. **읽은 근거:** CODEX_START_HERE, 최상위01 확정결정, PLANS, 기존release-v2/00~03 및 같은 W15 ExecPlan, apply-test-public-capacity.py/test-capacity-apply.py, migration20261011180000, handler/backend/boundedDownload, 기존10/11 first-public/capacity 증거.
+2. **가정·미결:** 사용자 승인2fbc14a의 test-only 범위. 기존 합성카드038b2ec0의24×30 사본만 사용. IMAGE_DELIVERY/IMAGE_DELIVERY_BYTES는 기존 disabled 유지. 배포 handler 이미지 성공/활성한도 차감은 이번 PASS가 아니다.
+3. **계획:** 위 기존 W15 17항 ExecPlan의 승인·적용·Storage확인·flag원복 순서. 새작업판 없음.
+4. **파일:** 적용runner에 --sized-delivery 고정해시 후보/상호배타 옵션/readback 추가, safety test1개 추가(기존5+신규1). 제품 코드는 후보2fbc14a 그대로. 00/01/02/03 최신절과 capacity JSON 갱신, 과거로그 보존.
+5. **DB·롤백:** MOEMOA_SIZED_DELIVERY_TEST_20261011_01, migration20261011180000 hash80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70. 단일transaction 기존12테이블 hash보존, migration1개, postgres/service_role EXECUTE만 독립확인. RPC는 additive로 남기고 flag=false가 기존2MiB 경로로 돌아가는 방법.
+6. **실제명령·결과:** WSL python3 tools/operations/test-capacity-apply.py 6 PASS(첫 문자열삽입 SyntaxError 수정 후 적용 전 통과); apply-test-public-capacity.py --sized-delivery read-only absent→--apply 성공→독립 read-only present. git push origin 2fbc14a78ae3df75b3d608744661be4512ead515:refs/heads/codex/phone-test 성공; Vercel4owhUdT1nes1Z137zmso4mhr2EKA Ready/source/alias 확인. node .cache/probe-sized-delivery.mjs는 실제 test RPC + 실제 Storage를 현재 boundedDownload helper로 호출: full/thumb 각각 reserved72/actual72/206 Content-Range bytes0-71/72·hash·WebP24×30 PASS. 로컬47+18/SQL25는 지난 실행이며 재실행하지 않음.
+7. **보안·개인정보·권리·관측:** 공개상태/정책/한도/원본 변경0, 신규게시0/대리동의0, 운영/master199613b 그대로. 기존 source/identity/operation은 보존. 배포 UI에서 소유자 합성원본과 철회상태만 확인. 직접 이미지 API 탐색은 브라우저 ERR_BLOCKED_BY_CLIENT라 HTTP404나 전달 성공으로 환산하지 않음. 제한을 우회하지 않음.
+8. **잔여·다음:** 새 사용자 게시 행동 PASS0, hosted Storage 사본2종 PASS. W15/D03 정상 요청수·byte 예산과 실제 경보 수신 잔여; W19/D06 정확한 최종 배포의 실제전달/철회 미검증. 다음1개는 기존 D03의 정상공개 요청수·byte 예산 후보 마감. 운영반영은 해당 정확한 후보 승인 필요.
+
+[2026-10-11 18:16 JST] 원복 완료: Preview/codex/phone-test의 sized-delivery=false 저장 확인, 동일2fbc14a 재배포 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready·Source·canonical alias 확인. 이전 immutable true Preview를 삭제하거나 모두 off로 바꿨다는 의미는 아니다. 새사본/원본삭제/한도/정책/운영 변경0. 설정 증거 .cache/sized-delivery-test-restored.png.
+
+
+### W15/D03 무료 공개 전송 한도 마감 ExecPlan · 2026-10-11
+
+1. 목적: 기존 50GET/day 후보를 대체할 초기 소규모 전체공개 예산을 실행 가능한 설정 후보로 준비한다. 트래픽 규모가 미정이므로 무제한/일반 서비스 전체규모 충족을 주장하지 않는다.
+2. 확정 결정: 무료 유지, Public 운영 off, 정확한 test/prod 후보별 승인, Android/Safari 추가검사 제외 유지.
+3. 현재 근거: resource_controls.sql의 전역 요청·byte 원자적 소비, 20261011180000의 서버 사본 크기 예약, capacity.js 80% 경보, 기존 합성 full/thumb 측정과 실제 test Range206 근거.
+4. 범위: 2,000GET/day·64,000,000B/day 후보 SQL·기본 dry-run·조건부 원복·실제 격리PG 한도 경계 검사. 앱/UI/이미지 정책/공급자/원격 변경 제외.
+5. 흐름: sized-delivery 활성·정확한 배포 확인을 전제 → 현재 두 정책 disabled/0·pause/override 없음 확인 → 두 limit만 설정 → 관측·429 확인 → test 원복. 기존 권한 재검사/원본/공개 flag 유지.
+6. 파일: tools/operations/public-delivery-budget-{candidate,rollback,contract}.sql 및 기존 run-public-capacity-local.sh, 기존00~03와 capacity evidence.
+7. 데이터: 새 schema/migration 없음. 기존 정책2행만 승인 후 변경 가능; 사용량/counter/다른 정책은 보존. SQL 기본 ROLLBACK, 명시적 psql apply 변수에서만 COMMIT.
+8. 마일스톤: 설정·원복 guard 준비 → 실제 PG request/byte/UTC/override 경계·원복 보존 확인 → 산술·관측 후보와 단일 작업판 갱신.
+9. 검증: disposable PG runner, 기존 capacity evaluator의 정확한80% 경계, diff/JSON 검사. hosted/Google/Safari·기본DB 재시험 없음.
+10. 보안: global override가 있으면 중단, client bytes 불신·service-only 유지. 사진/키/본문 로그 없음.
+11. 관측: 1,600GET·51,200,000B에서 기존 경보. 6시간 관측은 즉시 알림/UTC reset 직전 검출을 보장하지 않음. 실제 수신 잔여 유지.
+12. 롤백: baseline disabled/0인 경우에만 적용. 후보와 일치하는 두 행만 disabled/0으로 복귀, live_limit·usage 보존. Public은 건드리지 않고 test 종료 시 flag false 복귀. 운영 장애에서 Public을 켠 채 한도부터 제거하지 않는다.
+13. 위험: DB/Auth/catalog/test/실패 응답과 공급자 과금은 별도. 31일 billing cycle과 UTC window 불일치에 대비32일분2.048GB+private 최대3달력월1.5GB, 나머지1.452GB는 다른 트래픽 여유이며 총과금 hard cap 아님. 큰 이미지20장은 하루3화면 정도일 수 있음. 전역한도는 사용자별 공평배분/DoS 방어 아님.
+14. 결정: 지금은 후보 준비 승인. 새 test 한도2행/flag 임시 변경 및 운영 적용은 정확한 후보 확인 후; 이미 승인한 크기RPC 재승인 요구 없음.
+15. 진행: 공식 Supabase 문서에서 uncached5GB/cached5GB 별도·조직/서비스 공유 확인. 초기2000/64MB 추천값 선택.
+16. 발견: 기존 public grid가 full 요청이므로 thumb 기준을 실제 방문량으로 계산하지 않는다. 합성3종은 사용자 분포가 아님.
+17. 완료 보고: 아래 실행 결과에 파일·실제 명령·PASS 범위·잔여·다음1개를 기록한다.
+
+#### W15/D03 초기 공개 한도 후보 — 이번 실행 8항 보고
+
+1. 문서/소스: mandatory AGENTS/start/확정결정/PLANS/QA07/변경09, 기존00~03·capacity JSON, resource_controls·private_image_boundary·sized SQL, handler/backend·capacity evaluator·로컬runner/계약을 대조했다. verify-before-claiming 적용.
+2. 가정/미결: 무료 초기 소규모 후보2000GET/64MB다. 합성사진 분포로 정상실사용 평균을 주장하지 않는다. 공급자와UTC reset 경계가 달라32daily/최대3calendar-month 구간으로 보수 계산. 실제알림수신/최종배포전달 잔여.
+3. 계획: 바로 위 기존 W15 17항. 새작업판/새W 없음.
+4. 변경: 적용·원복 SQL2개(기본dry-run, baseline/override/drift guard, lock5s/statement30s), 실제 DB 계약1개/기존runner에연결, 기존 publicCapacity unit1개. 기존00/01/02/03·capacity JSON 갱신. 앱동작/의존성/새인증 변경0.
+5. DB/복귀: 새schema/migration0/원격DB0. release ID MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01 후보. 승인 후에만 두정책enabled/daily_limit변경. 사용량/live_limit/원본/다른정책보존, 정확한후보만 원복 가능. 운영롤백은Public reads 먼저차단.
+6. 실행: wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh 최종38 PASS(기존25+신규13); node --test tests/unit/publicCapacity.test.mjs 7 PASS(기존6+신규1). 초기 AUTH_REQUIRED는 새psql세션 serviceclaim없는fixture였고 수정후통과. git diff --check 및JSONparse/산술검사. 과거2fbc phone-testCI38127347170 SUCCESS, workingbranch38127115769 cancelled를이번조회; 이번신규CI/hosted PASS아님.
+7. 실제동작/영향: 격리DB 실제2000번째허용/2001번째거부,400B full·42B thumb정확차감,64MB+1차단/요청수원자복귀,UTC이월,기본dryrun·롤백시사용량보존,다른정책/Public보존,baseline/pause/activeoverride/drift거부 PASS. 경보정확80%경계 PASS. 신규hosted/사용자게시행동PASS0. 비밀값/실사진/가입/권리/요금/외부발송 변경0.
+8. 잔여/다음1개: **정확한 후보를test의두quota와sized flag에만임시적용→실제차감/차단집계→원복**. 사용자가10/11정한정확한대상승인조건에따라 적용전확인. 원격활성/최종운영배포는미실행. D03 전체DONE로표시하지않고 운영자실수신·W19/D06 최종실제전달/철회와운영승인을유지한다. 과거PASS/실행로그보존, 추가Safari/기초DB/A·B복원반복0.
+
+[2026-10-11 승인] 사용자 후보a6b6dda test두quota·phone-test sizedflag 임시 적용/실제차감·차단검증/원복 승인. 기존조건을재확인하고 승인된SQL고정해시만 실행한다. 경계소진검사는hosted transaction ROLLBACK으로 기존사용량을보존하며 실제사본읽기2회소비는원복시환불하지않는다. 운영변경0.
+
+#### 승인 후보a6b6dda test 적용·검증 후속
+
+1. 문서/계획: 위W15/D03 17항과8항보고·승인범위·정확한Git SQL해시를재대조. 기존test연결검사와RPC/다운로드helper 재사용.
+2. 범위: 승인된test두quota·phone-testflag true/false만. 크기예약 migration이미존재,재적용0. 운영/master199613b/Public/권리정책은범위외.
+3. 파일: 제품코드변경0,기존00~03·capacity JSON에실행/원복증거추가. 실행wrapper .cache/public-budget-approved.py는Git a6b6dda의고정SQL+SHA256대조/검증된test TLS연결만사용; 값출력0.
+4. DB: 두policy만enabled2000/64MB로적용,다른policy/Public설정/usage보존검사. 사본실제읽기로2/144소비. 초과시뮬레이션은table lock·rollback transaction으로영속사용량보존. 원복뒤독립조회disabled/0·usage2/144및설정hash일치.
+5. 명령: wsl.exe -- python3 .cache/public-budget-approved.py inspect/apply/rollback 각각exit0; node .cache/probe-sized-delivery.mjs exit0; wsl.exe -- python3 .cache/public-budget-boundary.py probe exit0. hosted요청2000허용/2001거부·64MB허용/+1거부·요청차감원자적복귀,실제관측1600/51.2MB확인. 기존capacity evaluator로두임계경보확인; 알림전송0/수신미검증. 과거로컬38/7과구분.
+6. 배포: git push origin a6b6ddaaadf9487f5f8f3b14064cb794b27826c0:refs/heads/codex/phone-test 성공. Vercel Previewflag=true 저장→977hdPVfu7Jnzn78aexsfN9najdj Ready/source/canonicalalias일치. flag=false 저장·동일Git소스재배포진행; 완료는아래별도기록. 새 앱HTTP이미지/429/철회는미검증이며기존브라우저차단을반복우회하지않음.
+7. 영향: hostedStorage206/24×30WebP/hash실제확인,UI게시행동PASS0/대리동의0. test기존storagebudgetoff로관측UNGUARDED도정직하게보존. 공개설정/원본/개인정보/키/결제/운영발송변경0.
+8. 다음1개: **검증한크기예약·2000/64MB·경보조건을D06최종운영후보변경목록에결속**. W15의실제수신및W19최종배포이미지전달/철회잔여는유지,이미확인된DB/스토리지계약반복없음.
+
+[2026-10-11 18:45 JST] 원복 확인 완료: DB 두quota disabled/0·실제사용량2/144 보존. Preview codex/phone-test sizedflag=false 저장 후 동일a6b6dda 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready·source·canonicalalias 일치. 이전immutable true배포삭제/모두비활성주장0. 증거 .cache/public-budget-flag-restored.png. 기존 운영master199613b·Public·요금미변경. 이번 실행5문서를작업브랜치에commit/push해인계한다.
+
+- CI 후속: 승인a6b6dda의 phone-test38129338217·workingbranch38129221751은최종조회시IN_PROGRESS, 전체SUCCESS를선기록하지않는다. Vercel Ready와CI전체는별도다.
+
+### W15/D06 검증 후보 운영 결속 — 2026-10-11
+
+1. 목적: 검증된 앱·크기 예약·전송 한도를 한 운영 후보 목록에 결속하고, 아직 닫히지 않은 Public 조건을 실행 전 식별한다.
+2. 결정: 단일 작업판, Free 유지, 정확한 운영 후보 승인, 국가/권리 결정 유지.
+3. 근거: 운영199613b, 검증 a6b6dda/작업 HEAD7cd3a82, phone-test CI38129338217 SUCCESS.
+4. 범위: 읽기 전용 운영 preflight, Git 고정 소스/hash manifest, 적용·원복 순서 및 누락 조건. 운영/test 쓰기·발송·결제 제외.
+5. 흐름: 운영 schema/config 조회 → 실제 누락 migration 비교 → 앱/SQL/설정 hash 결속 → 차단/후속1개 기록.
+6. 파일: tools/operations의 read-only preflight 및 candidate manifest 도구, 기존00~03/capacity evidence.
+7. 데이터: 이번 migration 실행0. 필요한 additive migration과 두 quota의 정확한 후보만 기록.
+8. 마일스톤: 현재 운영 차이 확인 → 재현 가능한 후보 산출 → 변경 없는 검증/문서 인계.
+9. 검사: 후보 source/hash/누락 판정/비변경 계약 및 기존 green CI 사용. 기초 DB·A/B·Safari 반복 없음.
+10. 보안: DB read-only transaction, 정책/건수만 출력, 개인 자료/비밀값/원문 오류 미출력.
+11. 관측: 기존 80%/980MB 경보 유지. 실제 수신은 과거 evaluator PASS와 구분.
+12. 복귀: 파일 diff만 되돌림. 향후 운영은 reads/writes 차단 후 한도·앱 복귀, DB additive 구조/사용량 보존.
+13. 위험: 테스트 정책 revision을 운영 승인으로 복사하지 않음. final image HTTP/경보 수신/권리 및 복구 인수 잔여를 숨기지 않음.
+14. 승인: 지금은 후보 준비. 정확한 운영 승인 전 원격 mutation 없음.
+15. 진행: phone-test 전체 CI SUCCESS, 같은 SHA working CI cancelled 확인.
+16. 발견: 운영 대비 앱 변경에는 간편 공개·신고 UI도 포함되어 quota 단독 출시와 구분 필요.
+17. 완료 보고: 아래 실제 결과/명령·다음1개에 누적.
+
+#### W15/D06 운영 후보 결속 — 이번 실행 8항 보고
+
+1. 읽은 문서/소스: AGENTS·start·확정결정01·PLANS·이미지05·QA07·변경09 및 release-v2/00~03, 기존 production/test 적용도구와 publication runtime/QuickSharing, public-image/cleanup/maintenance, 관련 migration을 대조했다. verify-before-claiming 사용.
+2. 가정/미결: 이번은 후보 준비이며 운영 승인/활성 아님. 무료·KR14/US13/TH13·일반 공개/별도권리·Android/Safari 제외 유지. 후보 계정10개/40MiB·신고10회는 기존test값 기반의 제안이며 global20MiB가 우선한다. 새상품/정책확정0.
+3. ExecPlan: 바로 위 기존 W15/D06 17항. 단일작업판 유지.
+4. 파일: tools/operations/inspect-first-public-release.py(운영 읽기전용, apply경로없음), build-first-public-candidate.mjs(고정Git소스+aggregate입력의offline manifest), 기존00~03/current card와capacity evidence 갱신. 앱/DB소스 수정0. manifest는 evidence의 firstPublicProductionCandidate에 보존해 두번째 진행판을 만들지 않았다.
+5. DB/복귀: 실제운영 조회38 migrations·Public off·공개boards/homes/assets0·moderator1·국가3개·global20MiB. 누락20261010160000/11120000/11180000의hash와순서결속. 적용0. 향후reads/writes먼저닫기→정확한quota/flag복귀→Git이전소스배포; additive구조/usage보존. 공개사본자동정리도정확한후보승인대상에포함.
+6. 실제명령/결과: wsl.exe -- python3 /mnt/e/web/anime/tools/operations/inspect-first-public-release.py exit0/readOnly; node tools/operations/build-first-public-candidate.mjs .cache/first-public-preflight.json exit0/20변경runtime파일·migration3·budget2해시. 잘못된target/ledger/누락migration/Public-on/override/paused-quota의6개임시fixture는모두exit1·정해진오류만출력·manifest출력0. node --check와git diff --check PASS. 최초생성의개행/정규식이스케이프구문오류수정후재검증. Git diff a6b6dda..7cd3a82의src/api/DB/scripts/workflows/config/package차이0. GitHub readback phone-test38129338217 SUCCESS·working38129221751 cancelled. 실제 www/build-info.json HTTP200/commit=checkoutCommit=199613b/source=vercel-git. 광범위제품/DB복원재검사0.
+7. 영향/증거범위: 운영/test설정·DB쓰기·배포·발송·결제0, source/rights/원본/개인자료보존. 새사용자행동PASS0. 읽기전용운영대조/후보도구검증만이번PASS, 과거실제A/B·Storage·CI는재조회/재사용증거로분리. 새manifest에키/본문/경로/계정식별자0.
+8. 정확한잔여/다음1개: **D04 기존 일반 공개 고지·권리 조건을 후보 revision에결속**. 그후정확한최종운영승인/기존기능활성순서를진행. 별도복구키·복구인수는D05외부조건, 경보실수신과최종후보이미지HTTP/철회는실행잔여. 코드문제없이테스트만반복하지않으며이번후보준비를전체출시완료로표시하지않는다.
+
+### W14/D04 공개 고지·동의 revision 연결 — 2026-10-11
+
+1. 목적: 카드·보드·미니홈의 공개 동의 한 번에서 실제 고지를 읽고 그 revision으로만 게시하도록 연결한다.
+2. 결정: 일반 공개/별도 권리 승인·기존 국가·가입 약관·단일 작업판 유지.
+3. 근거: QuickSharing은 안내 링크가 없고 simpleCardSharing의 preview는 동의 전 policyRevision과 비교하지 않는다. Board/Home은 review revision을 서버에 전송하지만 실제 안내 링크가 없다.
+4. 범위: 고정 공개 안내, revision registry, 세 화면 연결, 간편 게시 revision 불일치 거부. 가입·새 인증·권리 확대·원격 설정 제외.
+5. 흐름: 알려진 revision의 고정 안내 → 기존 한 체크 → preview policy 일치 → 기존 publish/hash/operation 재사용. 알 수 없는 안내는 새 게시 중단, 비공개 전환 유지.
+6. 파일: legal 고정 페이지, memory domain/공통 안내 및 세 컴포넌트, simpleCardSharing, 관련 unit/browser 검사, 기존00~03/evidence.
+7. DB: 새 migration/원격 쓰기 없음. 기존 consent policy revision 저장 구조 재사용.
+8. 마일스톤: 불일치 재현 → 최소 수정/고지 연결 → 합성 사용자 흐름·build → 기존 후보 기록 보완.
+9. 검증: 정책 불일치/unknown/retry unit, 기존 카드·보드·미니홈 browser 및 고지 모바일 폭, build/diff. 기초DB/실기기 반복 없음.
+10. 보안·권리: 기존 Terms/Privacy 고정본 불변, 원본·비공개 태그 보존, unknown 정책 임의 매핑 금지.
+11. 관측: 새 로그/분석/외부 발송 없음. 기존 operationId/차감/불확실 완료 보존.
+12. 복귀: 이번 파일 Git diff 복귀, DB rollback 불필요. 기존 공개 원격 off 유지.
+13. 위험: 합성 adapter 검사와 hosted/실제 동의는 별도. 새 코드로 이전 CI를 재사용하지 않는다.
+14. 승인: 로컬 준비/작업브랜치 인계 범위. 원격 test/운영은 정확한 새 후보 승인 전 실행하지 않음.
+15. 진행: mandatory 문서·기존 정책/컴포넌트/controller/test 대조 완료.
+16. 발견: 간편 공유는 고지 확인 후 서버 preview가 달라져도 policyRevision 비교 없이 게시 가능해 회귀 검사가 필요하다.
+17. 완료 보고: 아래 실제 명령·결과·잔여를 기록한다.
+
+#### W14/D04 공개 고지 연결 — 이번 실행 8항 보고
+
+1. 읽은 근거: AGENTS·CODEX_START_HERE·최상위 확정결정·PLANS·이미지05·QA07·변경09 및 기존release-v2 00/01/02/03. Terms/Privacy20261010 고정본, platformPublication·simpleCardSharing·publication/minihome controller·세 UI·이미지 준비·기존 unit/Playwright/격리runner를 대조했다. verify-before-claiming 기준 적용.
+2. 가정/미결: 기존 GENERAL-only 권리·신고/이의제기·원본 유지 조건을 연결하는 후보이며 법률 적합성 전체 보증/추가 국가 승인이 아니다. 테스트전용 정책을 새 운영 안내로 자동 매핑하지 않는다.
+3. 계획: 바로 위17항. 기존 W14/D04·W08/W09/Q11에 흡수, 새 진행판 없음.
+4. 파일/이유: src/pages/legal/public-sharing-2026-10-11.astro 한·영 고정 안내, domain/publicSharingPolicy.js 정확한 revision→고정URL, components/PublicSharingNotice.jsx 공통 링크/미확인 안내. MemoryQuickSharing/MemoryPublicationPanel/MemoryMinihome과 CSS 연결. simpleCardSharing.js에 동의 policy와 서버 preview 불일치 거부2줄. tests/unit/simpleCardSharing·publicSharingPolicy 및 tests/publication-ui 보강. 기존00~03/evidence 최신절 갱신.
+5. DB/복귀: 새 migration/원격 DB·설정·master 변경0. 기존 policyRevision/receipt/reviewHash 저장계약 재사용. 파일 Git 복귀만 필요, 원본·사본·quota·operationId·과거 고정 가입약관/개인정보 문서 불변.
+6. 실제 명령: node --test tests/unit/simpleCardSharing.test.mjs 초기10PASS/신규정책불일치1FAIL(실제 게시 허용 재현)→수정 후11PASS. node --test tests/unit/simpleCardSharing.test.mjs tests/unit/publicSharingPolicy.test.mjs 12PASS. node scripts/run-publication-closeout-e2e.mjs 'simple card visibility|image preparation requires|explicit selection|publish retry|mini-home explicit|unknown public policy|public notice fixed' 초기10/11PASS; 모의 Board 응답이 고정 revision을 돌려주는 검사 fixture 오류1개 수정. 이후 'unknown public policy|public notice fixed|simple card visibility' 7/7PASS, 두 실행의 고유 행동검사12개 PASS(17개로 합산하지 않음). node 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build exit0/33페이지+postbuild, git diff --check PASS.
+7. 새 행동/영향: 로컬 모의API Chromium에서 카드1체크 게시/비공개/재게시, 보드·미니홈 고지 링크와 게시/철회, 두 이미지 준비 경로, 불확실 게시 동일operation 재시도 유지. 미확인 정책은 세 화면 새 동의/게시 차단·철회 유지. 안내320px와 카드390px overflow없음/스크린샷 확인. 새 실제Google/hosted/운영/실기기 PASS0. 신규 동의 체크/인증/유료/발송/로그0. 이전 a6b6dda hosted·CI는 이 수정의 PASS가 아니다.
+8. 잔여/다음1개: 고지·동의의 로컬 연결은 완료. 새 소스와 고지해시를 기존 D06 최종후보에 결속해 원격 적용 범위를 준비한다. 기존7cd3a82 manifest는 과거 후보로 보존하며 새 runtime에 green CI를 전용하지 않는다. 정확한 새 test/운영 적용 승인, 최종 배포 이미지HTTP/철회·경보 수신·D05 별도키/복구인수는 미완료. 운영Public off 유지.
+
+### W14/W19/D04 새 공개 고지 test 연결 후보 — 2026-10-11
+
+1. 목적: 새 고지 소스50ecbc9/제품139a200을 기존 test 정책과 정확히 연결하고 종료 후 복귀한다.
+2. 결정: 기존 한 체크/일반 공개/단일작업판/정확한대상 승인 유지.
+3. 근거: CI38131778423 SUCCESS; 실제test policy TEST_ONLY_PHONE_WEB_20260927_01 세값, guard=false, 현재가입확인2건,필요RPC3개존재.
+4. 포함: 기존설정4필드의 exact apply/restore SQL과 로컬구성검사, 구체배포/원복목록. 운영/가입/원본/역할/새migration 제외.
+5. 흐름: fresh baseline→승인→test설정4값+기존2000/64MB quota→phone-test 고정소스+policy/sized 환경변수→본인명시동의/실제이미지/철회→정확히원복.
+6. 파일: tools/operations/public-notice-test-config.sql·public-notice-test-fixture.sql·test_public_notice_config.py, 기존00~03/evidence.
+7. DB: 스키마0,정책3revision/가입확인guard만. 이전 quota SQL 재사용. 저장된수락/권리/사용량변경0.
+8. 단계: 읽기전용대조완료→SQL원복/guard준비→격리PG검사→후보commit/정확한test승인요청.
+9. 검사: 최소구성fixture에서정확SQL dry-run/apply/restore/드리프트차단·기타값보존. 기존전체DB·A/B복원재시험0.
+10. 보안: 키/개인자료/receipt원문출력0, target는기존test TLS연결만. 운영원격미실행.
+11. 관측: 실제이미지조회시기존usage증분만,인위적알림전송0.
+12. 복귀: 정책세값/guard는정확한후보일때만원복,quota원복은기존검증SQL,Preview기존policy/sized=false와이전소스a6b6dda확인. 불확실결과는재조회.
+13. 위험: 이전test고지동의를새revision으로간주하지않음. 새공개저장은사용자직접체크. 신규가입불필요.
+14. 승인: 아직없는것은이새revision/검증소스의원격적용뿐. 현재로컬준비후정확한대상으로요청.
+15. 진행: test읽기전용현재정책/현재declaration집계와새CI확인.
+16. 발견: DB누락/가입미완료가아닌설정revision불일치이며재설치로해결하지않음.
+17. 완료보고: 아래실제명령/결과와정확한후보에누적.
+
+#### W14/W19/D04 test 연결 준비 — 이번 실행 8항 보고
+
+1. 읽은 근거: AGENTS·CODEX_START_HERE·확정결정01·PLANS·QA07·변경09, 기존00~03·capacity evidence·publication 설정/가입 연결 SQL·target 검증 연결 도구를 대조했다. 기존 ExecPlan 위17항을 사용한다.
+2. 가정/미결: 기존 현재 가입확인2건을 재사용할 수 있지만 새 공개고지는 당사자가 직접 확인한다. 이번 준비는 운영 Public 승인이나 새 약관 대리 수락이 아니다.
+3. 계획/후보: 배포 소스50ecbc9e5b393671a129df0ed229fda01ecc4958, 제품139a200과 runtime/config/DB diff0. GitHub CI38131778423 전체 SUCCESS를 이번 조회했다. 실행할 새 SQL은 아래 evidence SHA256으로 결속한다.
+4. 파일: public-notice-test-config.sql은 세 revision과 signup_declaration_required 네 값만 적용/원복한다. public-notice-test-fixture.sql/test_public_notice_config.py는 네트워크 없는 임시 PostgreSQL 설정 fixture다. 기존00/01/02/03과 capacity evidence만 최신화, 앱/의존성 변경0.
+5. DB/복귀: 원격 migration/쓰기0. 기본 ROLLBACK, full row baseline과 signup dependency 검사, 정확한 후보에서만 원복. 기존 kill switch나 다른 한도가 바뀌면 중단하며 덮어쓰지 않는다. 향후 승인 시 기존 quota SQL 재사용, 기존 사용량/receipt/원본 보존. Preview 설정과 이전a6b6dda 소스 복귀까지 범위에 포함한다.
+6. 실제 명령/결과: 읽기전용 .cache/inspect-public-notice-test.py 결과 target=test·필요RPC3개·현재가입확인2건·두quota off/0·override0. wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test_public_notice_config.py exit0/8 PASS: 기본dry-run, 정확한4필드, restore dry-run, 전체baseline 복귀, 잘못된원복/한도drift/가입dependency/kill-switch변경 거부. 구성검사이며 실제 게시 서버 모사가 아니다. 기본DB/A·B/72table복원 반복0.
+7. 영향/증거: 이번 새 사용자행동·hosted게시 PASS0, 운영/테스트 원격변경·발송·결제0. 과거 단위12/모의브라우저12/build33 및 실제A/B·quota검증과 구분한다. 개인정보/비밀값/동의본문 출력0.
+8. 잔여/다음1개: 정확한 test 후보 승인 후 고지 revision·가입 guard·기존2000GET/64MB·sized 배포를 함께 연결하여 최종 이미지전달/철회 확인 후 원복. 새 schema·재가입·역할변경 불필요. D05 별도키 보관/전체DB복구는 실제 잔여로 보존하며 이미 확인한 외부 암호화파일 검증을 반복하지 않는다. 운영 승인·실제경보수신은 별도다.
+
+[2026-10-11 승인] 사용자 6c633bd/화면50ecbc9의 test 고지·guard·기존quota·sized Preview 연결, 실제 열람/철회 후 설정·배포 원복 승인. 승인 범위 내 실행을 이어가며 운영/master 변경은 제외한다.
+
+[2026-10-11 실행] 승인6c633bd 고정hash SQL을 test TLS연결로 적용: revision3값+guard=true, quota2000/64000000. usage2/144·다른정책보존, 독립readback일치. Preview 두값 저장→Git phone-test50ecbc9→Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·Source/alias확인. 실제고정한영고지·합성카드미리보기·revision표시·동의체크1개·체크전저장disabled 확인. 사용자직접동의 대기, 실제게시/익명이미지/철회·원복 아직미실행. 운영/master변경0.
+
+
+#### W14/W19/D04 사용자 직접 게시 후 실제 열람·철회 — 2026-10-11 실행 보고
+
+1. 읽은 문서/코드: AGENTS, CODEX_START_HERE, 확정결정01, PLANS, 이미지05, QA07, 변경09, 기존 release-v2 00/01/02/03·capacity evidence와 기존 공개/비공개 UI를 대조했다. verify-before-claiming·computer-use 기준 적용.
+2. 가정/미결: 사용자가 새 고지 체크와 저장을 직접 완료했다. 이번은 합성 카드 한 장의 실제 test 왕복이며 새 미니홈/팔로우 전체 재시험이나 운영 PASS가 아니다. 원본 이미지 보존은 소유자 화면의 실제 decode로 확인했다.
+3. 계획: 위 W14/W19/D04 test 연결의 기존17항을 실행했다. 승인 후보6c633bd/배포소스50ecbc9, 단일 작업판 유지.
+4. 변경 파일: 기존00/01/02/03의 현재 요약·카드·W/D/Q 행과 evidence/2026-10-11-public-capacity-closeout.json만 갱신한다. 앱 코드/의존성 재작성0. 실제 합성 익명 화면의 게시·철회 캡처2개를 evidence에 보존한다.
+5. DB/롤백: 새 migration0. 승인된 임시 정책3revision/가입guard·quota 두값을 exact SQL로 원복했다. 독립 readback에서 baseline 일치, 원본·기존수락2건·실제 usage4GET/288B 보존. Preview 두 환경값을 기존 policy/sized=false로 저장하고 phone-test Git을 이전a6b6dda로 복귀했다. 배포 복원 최종 결과는 아래와 evidence를 따른다. 운영/master199613b 불변.
+6. 실제 명령/결과: Chrome 실제 사용자 게시 후 공개중/revision 표시 → 새 immutable origin 비로그인 Sign in to report 및 /api/public-image 이미지 complete/24×30 PASS → 소유자 비공개/저장 성공 → 같은 익명 페이지 reload/unavailable·img0 PASS → 소유자 원본24×30 PASS. wsl.exe -- python3 /mnt/e/web/anime/.cache/public-budget-approved.py inspect exit0; 사용량2/144→4/288(특정 페이지 하나의 요청수로 단정하지 않음). 같은 runner rollback 및 public-notice-approved.py restore exit0, inspect-public-notice-test.py 독립 읽기 exit0. git push --force-with-lease=refs/heads/codex/phone-test:50ecbc9e5b393671a129df0ed229fda01ecc4958 origin a6b6ddaaadf9487f5f8f3b14064cb794b27826c0:refs/heads/codex/phone-test exit0. ls-remote에서 phone-test a6b6dda/master199613b 확인. 동일50ecbc9 CI38133989759·38131778423 SUCCESS 조회. 이번 앱 변경이 없어 기존 unit/build를 반복하지 않았다.
+7. 보안/관측/권리: 사용자 동의 대리수락0·계정/개인사진/원본 삭제0·운영 쓰기0·외부 알림발송0. usage를 지우지 않았다. 과거 unit12/모의API12/SQL8·이전 A/B/미니홈/신고/조치 PASS와 이번 실제 deployed 이미지/철회를 구분한다. 직접 옛 이미지 URL의 HTTP404는 미확인, 익명 보드에서 비노출은 실제 확인. 추가 Safari/Android는 제외 유지.
+8. 잔여와 다음1개: 새 고지·현재 가입확인·실제 이미지전달·카드 비공개 test 연결을 마감한다. D04 운영정책/국가 잔여, D03 실제 경보 수신, D05 별도 복구키/복구 인수는 그대로 남긴다. 다음은 기존 D06 최종 운영 후보의 변경목록·남은 조건을 한 번에 정리하는 것이다. 이번 test 승인을 운영/Public 활성 승인으로 확대하지 않는다.
+
+[원복 완료] Vercel Preview52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready, Source a6b6dda와 phone-test canonical alias 확인. 직접 build-info 경로는 미인증 HTML/브라우저 차단으로 별도 검증하지 못했으며 이를 live SHA PASS로 적지 않는다. 기존 원격master199613b 유지.

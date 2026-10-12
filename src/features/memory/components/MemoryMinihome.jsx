@@ -1,3 +1,5 @@
+import PublicSharingNotice from './PublicSharingNotice.jsx';
+import { publicSharingNoticeHref } from '../domain/publicSharingPolicy.js';
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
@@ -15,12 +17,13 @@ import PublicSignupNotice from "./PublicSignupNotice.jsx";
 import "./memory-publication.css";
 
 function Review({ review, controller, services, locale, busy, base }) {
+  const noticeAvailable = Boolean(publicSharingNoticeHref(review.policyRevision, base));
   const copy = minihomeCopy(locale), [consented, setConsented] = useState(false), [ready, setReady] = useState(false);
   return <>
     <MinihomeSnapshot snapshot={review.snapshot} services={services} locale={locale} preview onReady={setReady} base={base} />
-    <p>{locale === "ko" ? "정책 버전" : "Policy version"}: {review.policyRevision}</p>
-    <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy} onChange={(e) => setConsented(e.target.checked)} />{copy.consent}</label>
-    <button className="btn" disabled={busy || !consented || !ready} onClick={() => controller.publish({ consented, visualsReady: ready })}>{copy.publish}</button>
+    <PublicSharingNotice revision={review.policyRevision} locale={locale} base={base} />
+    <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || !noticeAvailable} onChange={(e) => setConsented(e.target.checked)} />{copy.consent}</label>
+    <button className="btn" disabled={busy || !consented || !ready || !noticeAvailable} onClick={() => controller.publish({ consented, visualsReady: ready })}>{copy.publish}</button>
     <button className="btn btn--subtle" disabled={busy} onClick={() => controller.cancel()}>{copy.cancel}</button>
   </>;
 }

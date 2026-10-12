@@ -26,6 +26,7 @@ jobs:
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-admission-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-simple-signup-receipts-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/identity/run-public-signup-local.sh
+      - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-public-capacity-local.sh
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-service-admin-local.sh
       - run: node tools/operations/prepare-service-admin-release-fixtures.mjs
       - run: PG_BIN=/usr/lib/postgresql/16/bin bash tools/operations/run-service-admin-release-local.sh
@@ -52,7 +53,9 @@ jobs:
         run: node scripts/run-admin-e2e.mjs
       - name: Verify account menu and desktop image drop, paste and lifecycle
         run: node scripts/run-desktop-image-e2e.mjs
-      - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-cross-device-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/publication-ui.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
+      - run: node scripts/run-e2e.mjs tests/service-worker.spec.ts tests/release-editing.spec.ts tests/release-sync.spec.ts tests/memory-account-sync.spec.ts tests/memory-cross-device-sync.spec.ts tests/memory-owner-boundary.spec.ts tests/memory-indexeddb.spec.ts tests/review-improvements.spec.ts tests/service-finishing.spec.ts tests/memory-board.spec.ts tests/title-cross-surface.spec.ts --project=chromium --workers=1 --reporter=line
+      - name: Verify public sharing with isolated private-source fixtures
+        run: node scripts/run-publication-closeout-e2e.mjs ".*"
       - name: Verify signed-in card composer
         run: node scripts/run-e2e.mjs tests/memory-card-composer.spec.ts tests/memory-save-account.spec.ts --project=chromium --workers=1 --reporter=line
         env:
@@ -72,11 +75,19 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4359
       - name: Verify current Web design and watch records
         run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts
+      - name: Resolve isolated test evidence path
+        if: failure()
+        id: evidence
+        run: node -e "require('node:fs').appendFileSync(process.env.GITHUB_OUTPUT, 'isolated=' + require('node:path').resolve(process.env.GITHUB_WORKSPACE, '../.moemoa-ui-test-results/test-results') + '\n')"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: browser-failure-evidence
-          path: test-results
+          # Isolated UI runners write beside the checkout; keep only test artifacts.
+          path: |
+            test-results
+            ${{ steps.evidence.outputs.isolated }}
+          include-hidden-files: true
           retention-days: 7
 # Production is deployed only by the connected Vercel Git integration.
 # This workflow does not deploy; requiring this check before merging is a repo setting.

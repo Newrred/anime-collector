@@ -1,5 +1,52 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
+> **2026-10-11 승인 후보 test 적용:** 6c633bd 설정 SQL/화면50ecbc9를 승인 범위에서 적용. test revision3값·guard=true, quota2000GET/64MB 및 Preview sized=true. Vercel G2gqkAKY2WHXDmsb3rux9HcNYyjP Ready·소스/alias 확인. 실제 고지·합성 미리보기·한 체크/체크전 저장차단 확인. **현재 사용자 직접 공개 동의 대기, 설정·배포는 임시 적용 상태이며 아직 원복하지 않았다.** 다음1개: 사용자 저장 후 익명 이미지·철회 확인→정확한 기존 설정/배포 원복. 운영 변경0.
+
+
+> **2026-10-11 W14/W19/D04 test 연결 준비 완료:** 배포 후보50ecbc9의 전체 CI38131778423 SUCCESS 확인(제품139a200과 runtime 차이0). 실제test 읽기전용 대조: 필요한RPC3개·현재가입확인2건, 재가입/DB재설치 불필요. 고지revision3값·가입guard의 정확한 적용/원복 SQL과 격리 설정검사8 PASS. 새 원격변경/사용자게시PASS0. 다음1개는 정확한 test 후보 승인 후 고지/실제이미지/철회 연결 확인·원복. 운영 Public과 master는 변경하지 않았다.
+
+
+> **2026-10-11 W14/D04 공개 고지 연결 완료(로컬):** 후보139a200에 한·영 고정 안내 `/legal/public-sharing-2026-10-11/`와 `MOEMOA_PUBLIC_GENERAL_20261011_01`을 결속. 카드·보드·미니홈 안내 링크/기존 동의1개 유지. 간편 공개의 동의 정책≠서버 preview 정책이면 게시 거부, 미확인 정책은 새 게시만 막고 비공개·철회 유지. 단위12·고유 모의API Chromium12·build33 PASS. 새 hosted/운영 PASS0, DB·원격설정 변경0. 기존 capacity evidence의 firstPublicProductionCandidate_02가 새 소스/고지 hash 기준이며7cd3a82 후보·과거CI는 보존한 이력이다. 다음1개: 이 후보를 테스트 서버의 공개 정책 revision·현재 동의에 연결하는 정확한 적용 준비. 운영 승인/최종HTTP·경보수신/D05 인수는 잔여.
+
+
+> **2026-10-11 W15/D06 운영 후보 결속:** 앱 후보7cd3a82는 전체CI SUCCESS a6b6dda와 runtime/config/DB 소스 차이0. 운영 읽기전용 조회에서 migration38개·Public off·3개 누락(20261010160000/11120000/11180000), 운영자1명·KR14/TH13/US13·global20MiB 유지 확인. 기존 capacity evidence의 firstPublicProductionCandidate에 소스/SQL hash·2,000GET/64MB·13개 Vercel 설정·공개 사본 정리·원복순서 결속. 후보 생성 정상1/잘못된 대상·상태 거부6 PASS. 운영/테스트 쓰기0, 새 사용자행동 PASS0. 다음1개: D04의 기존 일반 공개 고지·권리 조건을 후보 policy revision에 결속. 복구 인수/실제경보수신/최종HTTP·정확한운영승인은 잔여.
+
+
+> **2026-10-11 W15/D03 전송 한도 test 검증:** 승인a6b6dda의 전역2,000GET/64MB 두정책 적용, 실제 hosted RPC/Storage full·thumb 각72B 다운로드 및2회/144B 차감 확인. hosted rollback-only 요청2000/2001·64MB/+1·원자적차단 PASS. 실제 집계의80% 경보 판정 PASS(로컬 evaluator, 발송/수신 아님). DB두한도disabled/0 원복·2회/144B 사용량보존·Public/다른정책보존. phone-test true 배포977hd Ready/source·alias 확인, false 재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias 확인. 운영/master199613b 유지. 다음1개 최종 운영 후보에 전송한도 변경목록 결속; deployed image HTTP/실제경보수신은 잔여.
+
+
+> **2026-10-11 W15/D03 초기 전송 예산 후보 준비:** 전역2,000GET/UTC일·64,000,000B/일, 80%경보1,600회/51.2MB. 작은 합성full20장 기준82~100화면/일·큰noise3화면(실사용예측 아님). 기본dry-run 적용/원복SQL과격리PG38(신규13)·unit7(신규1) PASS. 소비량/Public/원본보존. test/prod 한도·flag 변경0. 다음1개 정확한후보 test 임시적용/차감·차단확인/원복 승인; 운영D06/실제알림수신 잔여.
+
+
+> **2026-10-11 W15/D03 크기 예약 test 적용:** 승인 후보2fbc14a의 DB20261011180000 적용·독립 readback·12테이블 보존, service-only 권한 확인. phone-test Git 배포4owh Ready/source·alias 일치. 실제 hosted RPC→Storage Range206 full/thumb 각각72B·24×30 WebP·hash 일치 PASS(제품 다운로드 helper를 로컬 실행). 배포 handler 이미지 PASS는 아님: 기존 합성 보드 철회 상태/직접 API 브라우저 차단. 새 게시·약관 대신 수락·한도 변경0. 새flag=false 원복 저장→동일소스 GVvgy4Zgd1nKLgbbpBxKA18PAMec Ready/source·alias 일치 확인. 과거 로컬47+18/SQL25와 이번 runner6·hosted2를 구분. 다음1개 D03 정상공개 요청수·byte 예산 후보 마감; W19/D06 최종 후보 실제전달/철회 잔여.
+
+
+> **현재 완료도:** 기존 W20개 중 DONE4·VERIFY9·DOING4·외부조건2·부분 운영반영1. 구현률20%라는 뜻이 아니다. 주요 Public 사용자 왕복은 test에서 확인했고 운영은 개인기능/가입/관측 적용·Public off다. 정확한 잔여는 [단일 작업판의 현재 완료도](03_RELEASE_WORKBOARD.md#2026-10-11-현재-완료도--최신-증거-기준)를 따른다. 아래 날짜별 실행 로그의 과거 다음 작업을 재실행하지 않는다.
+
+> **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
+
+
+> **2026-10-11 W15/D03 운영 관측 후보 준비 완료:** 운영1878867에 관측 관련10파일만 얹은 독립 후보199613b(로컬 codex/production-observation-20261011), unit18·격리PG15·diff 검사 PASS. 기존 운영 maintenance38115426850 실제 성공, 운영집계856,441,465B/Public off/전송한도off 확인. 새 공개집계RPC1개+관측설정+master Git 배포는 미승인·미실행. 무료100MiB/50GET/day는20장 기준2.5방문/day여서 출시규모 확정 아님. 다음1개: 정확한 후보199613b 운영 관측만 적용 승인 후 실제 HTTP/workflow 확인. 상세는 기존01의 W15 후보 보고와 evidence/2026-10-11-public-capacity-closeout.json.
+
+
+> **2026-10-11 W15/D03 테스트 관측 연결 실행·원복:** 승인된 함수1개/15테이블 보존은 이전 실행 완료. 이번 실제 private/public RPC 정상·전체73,464B·한도off 경보 판정 확인. Preview806b6b2 재배포6Qp Ready 후 자동관측은 Vercel SSO302에 막혀 HTTP/수신 PASS 아님. 관측flags2개=false 저장→동일소스5LTK9cXFnGbNAcdkPfgjEsTNvBGe Ready/alias 복구 확인(503직접 응답은 브라우저 차단으로 미확인). 운영·한도·원본삭제 변경0. 다음1개는 기존 운영 인증을 재사용하는 D03/D06 정확한 후보 마감.
+
+
+## 2026-10-11 첫 Public 출시 마감 — 현재 진입점
+
+첨부 FIRST_PUBLIC_RELEASE 패키지 README→merge/00→01→02를 현행 기준 18788670dd877d5d93344be76651583acc51f52c에 대조했다. 이 PC의 이전6dd270c는 원격1878867로 fast-forward했다. 기존 로컬 초안은 보존했다. 패키지 MANIFEST의11개 해시는 일치한다.
+
+- 목표: 공개 보드·미니홈·팔로우·공개 이미지 필수. 현재 KR14/US13/TH13 비공개 가입 활성과 Public off는 과거 운영 증거이며 전체 출시 완료가 아니다.
+- 현재 작업: **W08/W09/W10 카드 공개 간소화 test 반영 완료.** 사용자 승인 후 test migration20261011120000 적용·독립 readback PASS,13개 테이블 내용/설정 보존. 소스52875c6 phone-test Git→Vercel BsAHHqy5a855PNQZtgrpNh4yepZk Ready/Source·alias 일치. 실제 A 카드의 공개상태 조회→공개 선택→합성 이미지 자동 표시·동의1개 PASS. 사용자 직접 동의/Save 후 Saved as public·공개 링크 및 새 비로그인 deployment-origin에서 실제24×30 이미지 decode PASS. 미니홈 preview PASS(가입 guard=true); 미니홈 직접 게시→보드 작성자 링크→새 익명home 이미지decode PASS. B 직접 가입·원래home 복귀·팔로우·내 목록 재방문·신고·차단/해제 PASS(guard=true). 사용자 승인 후보9746a30을 phone-test Git에 반영, Vercel Ww7s7yJnqc8tFYECBMmpQ5T4e2Qz Ready·Source/alias 일치. 실제 합성 신고 HIDE→새 익명home 비노출→RESTORE→24×30 이미지 재표시·작성자 통지·감사2건 PASS. A 카드 비공개 저장→익명보드 unavailable·home 전시0·개인 원본24×30/감상 보존 PASS. 직접 이미지 URL 검사는 브라우저 차단으로 HTTP404 미확인. 새 DB/권한/운영 변경0, guard=false 유지. CI38113872143 SQL계약 PASS/verify 실패(기존 desktop-image-input:226 붙여넣기), 로컬 단일1·동일묶음51 PASS만으로 해소하지 않음. 10/11 W19 후속: native details의 지연 toggle 전에 붙여넣기가 누락되는 경계를 합성 브라우저에서 FAIL로 재현했다. MemoryCardDetail의 펼침·입력 활성화를 같은 상태 변경으로 수정, 단일회귀2/관련묶음52 PASS(중복 합산 없음). CI 증거 업로드 경로도 수정. 원격CI38118471179에서 붙여넣기·SQL·공개 단계 PASS, 최종 UI2개는 구형 메뉴명 locator로 실패(78 PASS/5 SKIP). 두 locator 수정 후 로컬2 PASS, artifact 상대경로 오류도 정규화 보완. 후속895ccbb CI38119402749 전체 SUCCESS: SQL계약·입력52·공개42·최종Web80 PASS/기존5 SKIP. 실패했던 메뉴명2개는 해결됐다. 증거 경로 보완은 반영됐으나 성공 실행이라 실패 artifact 업로드 자체는 미실행. 운영/master·phone-test9746a30·DB는 유지. CI 환경 누락은 workflow만 보완, 전용 runner 전체37 PASS(모의API). 운영/master1878867 불변.
+- 다음 순서: W10 철회 및 W11~W13 사용자 간 완주→W14~W17 운영/정책 잔여→W18~W20 같은 후보/운영 확인. W06 신규 운영 Google 수락은 당사자만 수행한다.
+- Android·추가 Safari 전수검사·성인/결제/광고/DM/추천 기능 제외 유지. 국가·권리·비용 범위 임의 축소/확대 금지.
+- 운영 migration/활성/master push/배포/외부 발송·결제·실데이터 삭제는 정확한 후보별 승인. 과거 test 승인·원복 근거는 현재 정책/revision/설정과 대조해야 한다.
+- 실행 계획은 [01](01_RELEASE_EXECUTION_PLAN.md), 계약은 [02](02_ACCEPTANCE_CONTRACTS.md), 현재 결과와 다음 행동의 원장은 [03](03_RELEASE_WORKBOARD.md) 하나다. 아래 날짜별 최신/다음은 당시 이력이다.
+
+
 > **최신 운영 배포·전체 검토 인계 완료(2026-10-10):** f428c60의 전체 CI·master Git·Vercel Production Ready·실제 www 소스/새 UI 확인을 마쳤다. [Pro 검토 인덱스](2026-10-10-pro-review-index.md) → [이번 운영 배포 결과](2026-10-10-latest-production-release.md)를 먼저 읽는다. 최신 메뉴/이미지 입력과 이전 가입/관리자·다국가 조사까지 같은 Git 이력에 보존한다. 아래 날짜별 '현재/미배포'는 당시 상태이며 추가 국가·Public 활성 지시가 아니다.
 
 > **2026-10-10 최신 로컬 완료:** 계정 메뉴 통합과 데스크톱 이미지 drop/paste 구현·unit585/Chromium51/build32 PASS. [이번 보고](2026-10-10-account-menu-desktop-images.md)와 ExecPlan 최상단 참고. 운영 배포/DB 변경 없음. 아래 가입 운영 source6a2beff와 혼동하지 않는다.

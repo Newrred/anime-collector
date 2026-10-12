@@ -249,3 +249,42 @@ test('only visible image management accepts paste; replacement drop and cancel p
   expect(await mediaRecords(page, 'assets')).toEqual(originalAssets);
   expect(uploads).toHaveLength(1);
 });
+
+// A native details toggle is queued after the summary click. Dispatch the next
+// input after React's click microtask, before that deferred toggle task.
+// This checks the UI event boundary, not the physical OS clipboard.
+test('image management accepts the first paste when opened and ignores it immediately after closing', async ({ page }) => {
+  const { uploads } = await openComposer(page);
+  await transfer(page.locator('.memory-composer__visual-column'), 'drop', [png]);
+  await expect(page.locator('.memory-composer__preview')).toBeVisible();
+  await savePhoto(page, 'First paste boundary');
+  await expect.poll(() => uploads.length).toBe(1);
+  await page.getByRole('link', { name: 'First paste boundary', exact: true }).click();
+  await page.getByRole('tab', { name: 'Manage', exact: true }).click();
+  const region = page.locator('.memory-detail__replacement');
+  const originalAssets = await mediaRecords(page, 'assets');
+  async function toggleThenPaste() {
+    return page.locator('.memory-detail__tools > summary').evaluate(async (summary, bytes) => {
+      (summary as HTMLElement).click();
+      await Promise.resolve();
+      const data = new DataTransfer();
+      data.items.add(new File([new Uint8Array(bytes)], 'first-paste.jpg', { type: 'image/jpeg' }));
+      const event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true });
+      document.body.dispatchEvent(event);
+      return { open: (summary.parentElement as HTMLDetailsElement).open, accepted: event.defaultPrevented };
+    }, jpeg.bytes);
+  }
+  expect(await toggleThenPaste()).toEqual({ open: true, accepted: true });
+  await expect(region.getByAltText('New image preview')).toBeVisible();
+  const tickets = await mediaRecords(page, 'tickets');
+  expect(tickets).toHaveLength(1);
+  expect(await toggleThenPaste()).toEqual({ open: false, accepted: false });
+  expect(await mediaRecords(page, 'tickets')).toEqual(tickets);
+  expect(await mediaRecords(page, 'assets')).toEqual(originalAssets);
+  expect(uploads).toHaveLength(1);
+  const summary = page.locator('.memory-detail__tools > summary');
+  await summary.press('Enter');
+  await expect(region).toBeVisible();
+  await summary.press('Space');
+  await expect(region).toBeHidden();
+});

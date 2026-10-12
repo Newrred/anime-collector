@@ -144,8 +144,9 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       await check();
       const key = `${asset.id}:${asset.sync.remoteVersion}:${privateRepresentation?.id || 'original'}:${privateRepresentation?.hash || ''}`;
       if (!imageOperations.has(key)) imageOperations.set(key, uuid());
-      const upload = () => prepareImage({ sourceAssetId: asset.id, sourceVersion: asset.sync.remoteVersion, operationId: imageOperations.get(key),
-        accessToken: session.access_token, policyRevision, consented, rightsBasis, readOriginal: () => file, privateRepresentation, signal });
+      let preparedImage;
+      const upload = async () => { preparedImage = await prepareImage({ sourceAssetId: asset.id, sourceVersion: asset.sync.remoteVersion, operationId: imageOperations.get(key),
+        accessToken: session.access_token, policyRevision, consented, rightsBasis, readOriginal: () => file, privateRepresentation, signal }); };
       try { await upload(); }
       catch (error) {
         if (error?.retryable !== true) throw error;
@@ -166,7 +167,7 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
       const latestAsset = latest?.items.find((entry) => entry.bundle.card.id === cardId)?.bundle.asset;
       if (latest?.board.ownerId !== ownerId || latestAsset?.id !== asset.id || !synced(latestAsset)
         || latestAsset.sync.remoteVersion !== asset.sync.remoteVersion) fail("PREVIEW_CHANGED");
-      emit({ review: null, phase: "imageReady" });
+      emit({ review: null, phase: "imageReady", preparedImages: { ...state.preparedImages, [cardId]: preparedImage?.id } });
     }),
     cancel() {
       // Once sent, a publish/revoke cannot be described as cancelled; reload recovers server state.

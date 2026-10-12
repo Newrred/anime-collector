@@ -1,0 +1,3119 @@
+{
+  "date": "2026-10-11",
+  "scope": "W15/D03 local verification and explicitly approved test migrations/Preview; production inspection only",
+  "remoteMutation": true,
+  "production": {
+    "observedAt": "2026-10-11T07:37:49.979709+00:00",
+    "totalStoredBytes": 856441465,
+    "privateStoredBytes": 454464,
+    "publicStoredBytes": 0,
+    "publicReservedBytes": 0,
+    "publicStorageBudgetEnabled": true,
+    "publicStorageLimitBytes": 20971520,
+    "readsEnabled": false,
+    "deliveryEnabled": false,
+    "deliveryBytesEnabled": false,
+    "deliveryDailyLimit": 0,
+    "deliveryBytesDailyLimit": 0,
+    "invalidObjectCount": 0,
+    "overdueCount": 0
+  },
+  "test": {
+    "missingTables": [
+      "private.memory_public_storage_policy"
+    ],
+    "requiredMigrations": [
+      "supabase/migrations/20261010103000_memory_public_global_storage_budget.sql",
+      "supabase/migrations/20261011160000_memory_public_capacity_observation.sql"
+    ]
+  },
+  "migrationSha256": {
+    "supabase/migrations/20261010103000_memory_public_global_storage_budget.sql": "88275a716ae0e0f9da24bee8000c73eed757797b25eb93bf4923bffb8f7e571d",
+    "supabase/migrations/20261011160000_memory_public_capacity_observation.sql": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601"
+  },
+  "measurement": {
+    "httpRequests": 6,
+    "kind": "local synthetic actual encoder output; not hosted traffic or real-user distribution",
+    "rows": [
+      {
+        "fixture": "gradient",
+        "httpPayloadBytes": {
+          "full": 14794,
+          "thumb": 1268
+        },
+        "inputBytes": 51273,
+        "fullBytes": 14794,
+        "thumbBytes": 1268,
+        "storedBytes": 16062,
+        "twentyFullVisitBytes": 295880,
+        "twentyThumbVisitBytes": 25360,
+        "thumbAndFullVisitBytes": 40154,
+        "reservedBudgetPerGet": 2097152
+      },
+      {
+        "fixture": "geometric",
+        "httpPayloadBytes": {
+          "full": 38860,
+          "thumb": 4340
+        },
+        "inputBytes": 18320,
+        "fullBytes": 38860,
+        "thumbBytes": 4340,
+        "storedBytes": 43200,
+        "twentyFullVisitBytes": 777200,
+        "twentyThumbVisitBytes": 86800,
+        "thumbAndFullVisitBytes": 125660,
+        "reservedBudgetPerGet": 2097152
+      },
+      {
+        "fixture": "noise",
+        "httpPayloadBytes": {
+          "full": 1062062,
+          "thumb": 26670
+        },
+        "inputBytes": 1320928,
+        "fullBytes": 1062062,
+        "thumbBytes": 26670,
+        "storedBytes": 1088732,
+        "twentyFullVisitBytes": 21241240,
+        "twentyThumbVisitBytes": 533400,
+        "thumbAndFullVisitBytes": 1595462,
+        "reservedBudgetPerGet": 2097152
+      }
+    ]
+  },
+  "verification": [
+    {
+      "command": "node --test tests/unit/publicCapacity.test.mjs tests/unit/publicCapacityCli.test.mjs tests/unit/privateObservation.test.mjs tests/unit/privateMaintenance.test.mjs tests/unit/publicCleanupMaintenance.test.mjs",
+      "passed": 18,
+      "exit": 0
+    },
+    {
+      "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh",
+      "passed": 15,
+      "exit": 0
+    },
+    {
+      "command": "node tools/operations/measure-public-images.mjs",
+      "fixtures": 3,
+      "httpRequests": 6,
+      "exit": 0
+    },
+    {
+      "command": "node node_modules/astro/astro.js build",
+      "pages": 32,
+      "exit": 0
+    }
+  ],
+  "notVerified": [
+    "actual operator notification receipt",
+    "production public delivery budget and Public activation"
+  ],
+  "priorEvidence": {
+    "ci": "38119402749",
+    "source": "895ccbb",
+    "notRerun": true
+  },
+  "next": "D03 normal-public request and byte budget candidate from actual derivative sizes; exact final deployment image/withdrawal path remains W19/D06",
+  "approvedTestApplication": {
+    "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "release": "MOEMOA_PUBLIC_CAPACITY_TEST_20261011_01",
+    "migrations": [
+      "20261010103000",
+      "20261011160000"
+    ],
+    "applied": true,
+    "independentReadback": true,
+    "preservedTables": 12,
+    "publicFlagsAndBudgetsChanged": false,
+    "temporaryObservationFlagsChanged": false,
+    "reasonFlagsNotEnabled": "Test lacks observe API authentication/target config and existing private observation RPC (HTTP404). No production credential reused.",
+    "deployment": {
+      "id": "9KGvkPqgGf3Sjd2X1Gq4YJpqqLH7",
+      "ready": true,
+      "environment": "Preview",
+      "sourceAndAliasVerified": true,
+      "url": "https://anime-collector-fij2m2xh8-newrreds-projects.vercel.app"
+    },
+    "hosted": {
+      "mode": "real hosted public service-role RPC plus local alarm evaluator; not deployed observe API",
+      "target": "test",
+      "result": {
+        "observedAt": "2026-10-11T07:42:12.031Z",
+        "totalStoredBytes": 73464,
+        "privateStoredBytes": 38608,
+        "publicStoredBytes": 34856,
+        "privateReservedBytes": 38608,
+        "invalidObjectCount": 0,
+        "publicReservedBytes": 34796,
+        "fullBytes": 26636,
+        "thumbBytes": 8160,
+        "preparingCount": 0,
+        "failedCount": 0,
+        "cleanupPendingCount": 0,
+        "overdueCount": 0,
+        "publicStorageLimitBytes": 0,
+        "deliveryDailyLimit": 0,
+        "deliveryUsed": 0,
+        "deliveryBytesDailyLimit": 0,
+        "deliveryBytesUsed": 0,
+        "publicStorageBudgetEnabled": false,
+        "readsEnabled": true,
+        "deliveryEnabled": false,
+        "deliveryPaused": false,
+        "deliveryBytesEnabled": false,
+        "deliveryBytesPaused": false,
+        "publicStorageBytes": 34856,
+        "totalReservedOrStoredBytes": 73464,
+        "totalStorageAlertBytes": 980000000,
+        "alerts": [
+          "PUBLIC_BUDGET_UNGUARDED"
+        ]
+      }
+    },
+    "blocked": [
+      "test observe HTTP integration: missing MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET / PROJECT and private observation RPC 20261008090000",
+      "actual operator notification receipt remains unverified"
+    ],
+    "productionMasterUnchanged": "18788670dd877d5d93344be76651583acc51f52c",
+    "ci": {
+      "id": 38122228717,
+      "source": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+      "publicationContract": "success",
+      "verify": "success",
+      "conclusion": "success",
+      "note": "Read back both completed jobs this follow-up; not a new test rerun."
+    },
+    "privateObservationExists": false
+  },
+  "providerUsageReadOnly": {
+    "supabase": {
+      "url": "https://supabase.com/dashboard/org/jdomtzpoqpyfinazdnpi/usage",
+      "scope": "All projects / organization Free",
+      "period": "2026-09-24 to 2026-10-24",
+      "uncachedEgressGB": 0.972,
+      "uncachedIncludedGB": 5,
+      "cachedEgressGB": 0.086,
+      "cachedIncludedGB": 5,
+      "storagePeriodAverageGB": 0.826,
+      "storageIncludedGB": 1,
+      "databaseSummaryGB": 0.297,
+      "overageShown": false,
+      "refreshLag": "up to 1 hour"
+    },
+    "vercel": {
+      "url": "https://vercel.com/newrreds-projects/anime-collector/usage",
+      "scope": "anime-collector Usage page; supplied team-plan limits; not proof all other projects fit",
+      "periodDisplayed": "Sep 11 01:00 - Oct 11 01:00 / Last 30 Days",
+      "fastDataTransferGB": 1.26,
+      "includedFastDataTransferGB": 100,
+      "fastOriginTransferMB": 4.34,
+      "includedOriginTransferGB": 10,
+      "functionInvocations": 390,
+      "fluidCpuSeconds": 41,
+      "fluidMemoryGBHours": 0.15
+    },
+    "limitations": [
+      "period average storage differs from current SQL object total",
+      "provider egress includes more than public images",
+      "not a traffic forecast or guaranteed free capacity",
+      "no provider settings, billing, alerts or subscriptions changed"
+    ]
+  },
+  "observationConnectionCandidate": {
+    "release": "MOEMOA_OBSERVATION_CONNECTION_TEST_20261011_01",
+    "migration": "20261008090000",
+    "sha256": "dc9f9c4657a404a0150fa5d3d1ac9abd5c81f914d81fb9e53de3c7c6ff7e7779",
+    "applied": true,
+    "preflight": {
+      "enabled": true,
+      "approved": true,
+      "paused": false,
+      "physicalBytes": 41943040,
+      "readLimitBytes": 83886080,
+      "migrationCount": 0,
+      "privateObservationExists": false,
+      "publicObservationExists": true
+    },
+    "localSafetyTests": {
+      "passed": 5,
+      "exit": 0,
+      "kind": "mock subprocess; no DB mutation"
+    },
+    "previewSource": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "config": [
+      "MOEMOA_PRIVATE_IMAGE_CLEANUP_SECRET (new test-only value)",
+      "MOEMOA_PRIVATE_IMAGE_CLEANUP_PROJECT=nmgkhknponvzcwliajyk",
+      "MOEMOA_PRIVATE_IMAGE_OBSERVE_ENABLED=true (temporary)",
+      "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED=true (temporary)"
+    ],
+    "effects": "Existing private observer updates private policy observed_at after measurement; no cleanup or quota changes",
+    "rollback": "Restore/remove observation flags and redeploy identical test source; preserve additive function",
+    "needsExactApproval": false,
+    "approved": true,
+    "approvedSource": "09e22fa32d28e33d3f4f14ffe5e750f009b43668",
+    "preservedTables": 15,
+    "independentReadback": true,
+    "migrationCount": 1,
+    "privateObservationExists": true,
+    "previewConfigSaved": true,
+    "apiTested": true,
+    "credentialFile": "C:/Users/hongs/.moemoa/test-observation-20261011.key",
+    "credentialAcl": "hongs:F; SYSTEM:F; inheritance removed",
+    "waitingFor": null,
+    "apiPassed": false
+  },
+  "observationConnectionExecution": {
+    "date": "2026-10-11",
+    "approvedSource": "09e22fa",
+    "previewSource": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "enabledDeployment": {
+      "id": "6QpW4mwBT6k4cQ6pgnGz9vC7rojc",
+      "ready": true,
+      "sourceAndAliasVerified": true
+    },
+    "deployedHttp": {
+      "attempted": true,
+      "passed": false,
+      "status": 302,
+      "locationOrigin": "https://vercel.com/sso-api",
+      "reason": "Vercel deployment authentication precedes application bearer authentication",
+      "observeCliRan": false,
+      "authorization401Verified": false,
+      "cleanupRequests": 0
+    },
+    "hostedDatabaseAndLocalEvaluator": {
+      "mode": "real hosted public service-role RPC plus local alarm evaluator; not deployed observe API",
+      "target": "test",
+      "privateResult": {
+        "observedAt": "2026-10-11T08:30:00.204862+00:00",
+        "storedBytes": 38608,
+        "reservedBytes": 38608,
+        "globalReadBytes": 64864
+      },
+      "result": {
+        "observedAt": "2026-10-11T08:30:00.419Z",
+        "totalStoredBytes": 73464,
+        "privateStoredBytes": 38608,
+        "publicStoredBytes": 34856,
+        "privateReservedBytes": 38608,
+        "invalidObjectCount": 0,
+        "publicReservedBytes": 34796,
+        "fullBytes": 26636,
+        "thumbBytes": 8160,
+        "preparingCount": 0,
+        "failedCount": 0,
+        "cleanupPendingCount": 0,
+        "overdueCount": 0,
+        "publicStorageLimitBytes": 0,
+        "deliveryDailyLimit": 0,
+        "deliveryUsed": 0,
+        "deliveryBytesDailyLimit": 0,
+        "deliveryBytesUsed": 0,
+        "publicStorageBudgetEnabled": false,
+        "readsEnabled": true,
+        "deliveryEnabled": false,
+        "deliveryPaused": false,
+        "deliveryBytesEnabled": false,
+        "deliveryBytesPaused": false,
+        "publicStorageBytes": 34856,
+        "totalReservedOrStoredBytes": 73464,
+        "totalStorageAlertBytes": 980000000,
+        "alerts": [
+          "PUBLIC_BUDGET_UNGUARDED"
+        ]
+      }
+    },
+    "policyReadback": {
+      "observedAt": "2026-10-11T08:30:00.204862+00:00",
+      "enabled": true,
+      "approved": true,
+      "paused": false,
+      "physicalBytes": 41943040,
+      "readLimitBytes": 83886080
+    },
+    "rollback": {
+      "privateObserveFlag": false,
+      "publicObserveFlag": false,
+      "flagsSavedSuccessfully": true,
+      "deploymentId": "5LTK9cXFnGbNAcdkPfgjEsTNvBGe",
+      "deploymentUrl": "https://anime-collector-c772hgdqg-newrreds-projects.vercel.app",
+      "ready": true,
+      "sourceAndAliasVerified": true,
+      "runtimeDisabledResponseVerified": false,
+      "runtimeVerificationBlock": "Browser net::ERR_BLOCKED_BY_CLIENT on API URL; no bypass attempted",
+      "note": "Current phone-test alias rebuilt with flags false. Historical immutable deployment 6Qp remains; not claimed deleted or disabled. Existing Vercel protection and test bearer remain required."
+    },
+    "productionChanged": false,
+    "limitsChanged": false,
+    "imagesDeleted": 0,
+    "notificationsSent": 0,
+    "newUserBehaviorPasses": 0
+  },
+  "productionCandidate": {
+    "release": "MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01",
+    "candidateCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "candidateBranch": "codex/production-observation-20261011",
+    "baseCommit": "18788670dd877d5d93344be76651583acc51f52c",
+    "selectedFrom": "806b6b2de8b9f524bd77895dda4d2daea3cca60e",
+    "localOnly": false,
+    "approved": true,
+    "productionApplied": true,
+    "files": [
+      {
+        "path": ".github/workflows/private-image-cleanup.yml",
+        "sha256": "fc5e7ba06fe848f7caad0bdfd34a273c61923da7f4c023532cceef24de1995a2"
+      },
+      {
+        "path": "api/private-image-observe.js",
+        "sha256": "d76d72af0dae71f1f106131df0b3ece178c1a9ded55bbaa1043551eaa77c4b84"
+      },
+      {
+        "path": "scripts/private-image-maintenance.mjs",
+        "sha256": "0305c192b9ac5ab399f8f448a09cf2a82ca73400d0df3e640bd338908e424763"
+      },
+      {
+        "path": "src/server/privateImages/observationHandler.js",
+        "sha256": "b43549a02dc0175573dc07e11df1ce05cd5f0dee377a045a5294d8e1fdba2fd2"
+      },
+      {
+        "path": "src/server/publicImages/capacity.js",
+        "sha256": "e3af7cbb969a6b0ae2331ea24ce9a407f1af53d043c29562b08cda310449bc77"
+      },
+      {
+        "path": "supabase/migrations/20261011160000_memory_public_capacity_observation.sql",
+        "sha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601"
+      },
+      {
+        "path": "tests/unit/privateObservation.test.mjs",
+        "sha256": "51303a270185bdefa0aabed5f3632825f4d98fb7f45324ca8f7b59bb84b848c6"
+      },
+      {
+        "path": "tests/unit/publicCapacity.fixture.mjs",
+        "sha256": "0f9f833a592d3ef677c140f9b201f9a648408669e370f37f1fe284b1edb738af"
+      },
+      {
+        "path": "tests/unit/publicCapacity.test.mjs",
+        "sha256": "4099cb6b52476580ce3c86c6b7e66bf9b42ac61faf80d3ab59fbd264c2851779"
+      },
+      {
+        "path": "tests/unit/publicCapacityCli.test.mjs",
+        "sha256": "ee7c5fb9b453164fcabeeed2a8a4ed30e27177c1ab6957588a6bc4fe2436155e"
+      }
+    ],
+    "productionPreflight": {
+      "publicOff": true,
+      "migrations": [
+        "20260819021327",
+        "20260819021408",
+        "20260902054107",
+        "20260902054119",
+        "20260902054132",
+        "20260902055512",
+        "20260902055852",
+        "20260903141500",
+        "20260907193000",
+        "20260923090000",
+        "20260923093000",
+        "20260923182210",
+        "20260923183940",
+        "20260923192300",
+        "20260923213901",
+        "20260924115258",
+        "20260924121214",
+        "20260924193626",
+        "20260924194059",
+        "20260924195510",
+        "20260925152858",
+        "20260925152859",
+        "20260925164126",
+        "20260926140122",
+        "20260927042334",
+        "20260927044435",
+        "20261005090000",
+        "20261007093000",
+        "20261008090000",
+        "20261008093000",
+        "20261009090000",
+        "20261009130000",
+        "20261009143000",
+        "20261010103000",
+        "20261010170000",
+        "20261010180000",
+        "20261010190000"
+      ],
+      "observedAt": "2026-10-11T08:37:58.316165+00:00",
+      "publicPolicy": {
+        "enabled": true,
+        "limitBytes": 20971520
+      },
+      "privatePolicy": {
+        "paused": false,
+        "enabled": true,
+        "approved": true,
+        "physicalBytes": 100000000,
+        "readLimitBytes": 500000000
+      },
+      "publicObservationExists": false,
+      "privateObservationExists": true,
+      "activeGlobalDeliveryOverrides": 0
+    },
+    "currentProductionMaintenance": {
+      "run": 38115426850,
+      "source": "18788670dd877d5d93344be76651583acc51f52c",
+      "event": "schedule",
+      "job": "cleanup",
+      "conclusion": "success",
+      "step": "Clean retired images and refresh observed capacity",
+      "createdAt": "2026-10-11T05:38:17Z",
+      "newPublicObservation": false,
+      "notificationReceiptVerified": false
+    },
+    "verification": {
+      "scope": "isolated export of exact production baseline plus selected 10 files; SQL contract harness copied from 806b6b2; no hosted writes",
+      "unitPassed": 18,
+      "sqlPassed": 15,
+      "diffCheckPassed": true,
+      "newUserBehaviorPasses": 0,
+      "fullFrontendBuildRerun": false,
+      "remoteCi": false
+    },
+    "productionChangeProposal": {
+      "migration": "20261011160000",
+      "migrationSha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601",
+      "vercelProduction": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true"
+      },
+      "githubVariables": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true",
+        "MOEMOA_TOTAL_STORAGE_ALERT_BYTES": "980000000"
+      },
+      "existingCredentials": "reuse existing production maintenance connection; do not read or copy secret values",
+      "manualWorkflow": "master workflow_dispatch: OBSERVE_ONLY=true, no cleanup; GitHub existing failure notifications may occur",
+      "sideEffect": "existing private observer refreshes observed_at",
+      "publicActivation": false,
+      "quotaChanges": false,
+      "privateImageUploads": false,
+      "paidChanges": false,
+      "automaticExternalMessages": false
+    },
+    "rollback": "Set new public observation flags false in Vercel/GitHub and redeploy via Git; preserve existing private observation, additive RPC/history and all image data. Revert candidate code only if needed."
+  },
+  "productionObservationExecution": {
+    "release": "MOEMOA_PUBLIC_CAPACITY_PROD_20261011_01",
+    "source": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "migration": "20261011160000",
+    "migrationSha256": "45c8f7951e9a08d8d7ac8e97674a2fe484d29d7d711c036828856f9165db6601",
+    "applied": true,
+    "independentReadback": {
+      "publicOff": true,
+      "migrations": [
+        "20260819021327",
+        "20260819021408",
+        "20260902054107",
+        "20260902054119",
+        "20260902054132",
+        "20260902055512",
+        "20260902055852",
+        "20260903141500",
+        "20260907193000",
+        "20260923090000",
+        "20260923093000",
+        "20260923182210",
+        "20260923183940",
+        "20260923192300",
+        "20260923213901",
+        "20260924115258",
+        "20260924121214",
+        "20260924193626",
+        "20260924194059",
+        "20260924195510",
+        "20260925152858",
+        "20260925152859",
+        "20260925164126",
+        "20260926140122",
+        "20260927042334",
+        "20260927044435",
+        "20261005090000",
+        "20261007093000",
+        "20261008090000",
+        "20261008093000",
+        "20261009090000",
+        "20261009130000",
+        "20261009143000",
+        "20261010103000",
+        "20261010170000",
+        "20261010180000",
+        "20261010190000",
+        "20261011160000"
+      ],
+      "observedAt": "2026-10-11T08:49:23.990013+00:00",
+      "anonExecute": false,
+      "publicPolicy": {
+        "enabled": true,
+        "limitBytes": 20971520
+      },
+      "privatePolicy": {
+        "paused": false,
+        "enabled": true,
+        "approved": true,
+        "physicalBytes": 100000000,
+        "readLimitBytes": 500000000
+      },
+      "serviceExecute": true,
+      "authenticatedExecute": false,
+      "publicSecurityDefiner": true,
+      "publicObservationExists": true,
+      "privateObservationExists": true,
+      "activeGlobalDeliveryOverrides": 0
+    },
+    "vercel": {
+      "id": "Q3xJiujuoDyJ9V8JuyaDpVcVEq5a",
+      "ready": true,
+      "environment": "Production",
+      "gitSourceVerified": true,
+      "domain": "www.moemoa.xyz",
+      "buildInfo": {
+        "commit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "checkoutCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "source": "vercel-git",
+        "semanticMatch": true,
+        "builtAt": "2026-10-11T08:49:08.420Z",
+        "workingTreeDirty": true
+      },
+      "screenshotLocal": ".cache/production-observation-ready-199613b.jpg"
+    },
+    "config": {
+      "vercelProduction": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true"
+      },
+      "githubVariables": {
+        "MOEMOA_PUBLIC_IMAGE_OBSERVE_ENABLED": "true",
+        "MOEMOA_TOTAL_STORAGE_ALERT_BYTES": "980000000"
+      },
+      "previousValues": "absent",
+      "existingCredentialsReused": true,
+      "maintenanceSecretReadOrCopied": false,
+      "githubGitCredentialUsedInMemory": true
+    },
+    "unauthenticatedHttp": {
+      "status": 401,
+      "cacheControl": "no-store",
+      "error": "AUTH_REQUIRED"
+    },
+    "manualWorkflow": {
+      "id": 38126188717,
+      "job": 114430939190,
+      "event": "workflow_dispatch",
+      "conclusion": "success",
+      "source": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+      "phoneTestJob": "skipped",
+      "result": {
+        "deleted": null,
+        "cleanupSkipped": true,
+        "cleanupFailed": false,
+        "publicDeleted": null,
+        "publicCleanupSkipped": true,
+        "publicCleanupFailed": false,
+        "publicCapacity": {
+          "observedAt": "2026-10-11T08:50:02.717Z",
+          "totalStoredBytes": 856441465,
+          "privateStoredBytes": 454464,
+          "publicStoredBytes": 0,
+          "privateReservedBytes": 454464,
+          "invalidObjectCount": 0,
+          "publicReservedBytes": 0,
+          "fullBytes": 0,
+          "thumbBytes": 0,
+          "preparingCount": 0,
+          "failedCount": 0,
+          "cleanupPendingCount": 0,
+          "overdueCount": 0,
+          "publicStorageLimitBytes": 20971520,
+          "deliveryDailyLimit": 0,
+          "deliveryUsed": 0,
+          "deliveryBytesDailyLimit": 0,
+          "deliveryBytesUsed": 0,
+          "publicStorageBudgetEnabled": true,
+          "readsEnabled": false,
+          "deliveryEnabled": false,
+          "deliveryPaused": false,
+          "deliveryBytesEnabled": false,
+          "deliveryBytesPaused": false,
+          "publicStorageBytes": 0,
+          "totalReservedOrStoredBytes": 856441465,
+          "totalStorageAlertBytes": 980000000,
+          "alerts": []
+        },
+        "observedAt": "2026-10-11T08:50:02.540Z",
+        "storageBytes": 454464,
+        "readBytes": 1054194,
+        "storageAlertBytes": 80000000,
+        "readAlertBytes": 400000000,
+        "alerts": []
+      }
+    },
+    "newPublicDeployedHttpVerified": true,
+    "actualOperatorNotificationReceipt": false,
+    "alertTriggered": false,
+    "publicActivation": false,
+    "quotaChanged": false,
+    "imagesDeleted": 0,
+    "newUserBehaviorPasses": 0,
+    "qualityCi": {
+      "id": 38126124037,
+      "status": "completed",
+      "conclusion": "success",
+      "runId": 38126124037,
+      "verifiedAt": "2026-10-11T09:04:22.005Z"
+    }
+  },
+  "normalTrafficCandidateReview": {
+    "date": "2026-10-11",
+    "kind": "arithmetic from current code and prior evidence; no new hosted load test",
+    "assumptions": {
+      "reservationPerGetBytes": 2097152,
+      "imagesPerPage": 20,
+      "days": 31,
+      "privateBudgetBytes": 500000000,
+      "providerAllowanceBytes": 5000000000,
+      "providerAllowanceSource": "prior providerUsageReadOnly / 2026-10-11; not re-fetched this turn",
+      "catalogDbTestOtherIncluded": false
+    },
+    "scenarios": [
+      {
+        "getsPerDay": 50,
+        "twentyImageVisitsPerDay": 2.5,
+        "dailyReservedBytes": 104857600,
+        "month31ReservedBytes": 3250585600,
+        "withPrivateBudgetBytes": 3750585600
+      },
+      {
+        "getsPerDay": 100,
+        "twentyImageVisitsPerDay": 5,
+        "dailyReservedBytes": 209715200,
+        "month31ReservedBytes": 6501171200,
+        "withPrivateBudgetBytes": 7001171200
+      },
+      {
+        "getsPerDay": 200,
+        "twentyImageVisitsPerDay": 10,
+        "dailyReservedBytes": 419430400,
+        "month31ReservedBytes": 13002342400,
+        "withPrivateBudgetBytes": 13502342400
+      }
+    ],
+    "decision": "candidate only; do not activate 50 GET/day as normal general-public scale",
+    "remaining": [
+      "normal public scale / safe transfer-budget candidate",
+      "actual operator alert receipt",
+      "exact Public production release approval"
+    ],
+    "mutations": {
+      "production": 0,
+      "test": 0,
+      "flags": 0,
+      "fees": 0
+    }
+  },
+  "sizedDeliveryLocalCandidate": {
+    "date": "2026-10-11",
+    "scope": "W15/D03 local candidate only; no remote mutation",
+    "migration": "20261011180000_memory_sized_image_delivery.sql",
+    "migrationSha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70",
+    "flag": "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED",
+    "defaultEnabled": false,
+    "localResults": {
+      "imageHandlerAndDownload": 47,
+      "observationRegression": 18,
+      "sqlContracts": 25,
+      "newSqlAssertions": 10,
+      "newHttpStreamTests": 9,
+      "realLocalHttp": "synthetic Storage Range 206 → actual handler → 24x30 WebP decode",
+      "apiSyntax": true
+    },
+    "initialFailures": [
+      "SQL test reused pg_temp.ok across sessions",
+      "JS replace escaped SQL dollar delimiters",
+      "pause expected RATE_LIMITED instead of existing PUBLICATION_DISABLED"
+    ],
+    "budgetRows": [
+      {
+        "fixture": "gradient",
+        "twentyFullBytes": 295880,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 295880,
+        "ratio": 141.76
+      },
+      {
+        "fixture": "geometric",
+        "twentyFullBytes": 777200,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 777200,
+        "ratio": 53.97
+      },
+      {
+        "fixture": "noise",
+        "twentyFullBytes": 21241240,
+        "oldReservedBytes": 41943040,
+        "candidateReservedBytes": 21241240,
+        "ratio": 1.97
+      }
+    ],
+    "budgetKind": "arithmetic using prior measured synthetic fixtures; not new hosted traffic or invoice",
+    "remoteApplied": false,
+    "notVerified": [
+      "actual Supabase Range/content-length responses",
+      "final public traffic limits",
+      "operator alert receipt"
+    ],
+    "rollback": "flag false restores existing 2MiB path; additive RPC may remain",
+    "next": "exact candidate test-only migration + phone-test flag temporarily true then restore; no limits or production changes"
+  },
+  "sizedDeliveryTestExecution": {
+    "date": "2026-10-11",
+    "approvedSource": "2fbc14a78ae3df75b3d608744661be4512ead515",
+    "approval": "테스트 DB·배포 적용",
+    "target": "moemoa-test / codex/phone-test",
+    "release": "MOEMOA_SIZED_DELIVERY_TEST_20261011_01",
+    "migration": "20261011180000",
+    "migrationSha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70",
+    "applied": true,
+    "independentReadback": true,
+    "preservedTables": 12,
+    "executeGrants": [
+      "postgres",
+      "service_role"
+    ],
+    "anonymousAndAuthenticatedExecute": false,
+    "existingLimitsChanged": false,
+    "productionChanged": false,
+    "publicPolicyChanged": false,
+    "sourceImagesChanged": false,
+    "applicationCodeChangedThisTurn": false,
+    "runnerSafety": {
+      "command": "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test-capacity-apply.py",
+      "passed": 6,
+      "initialFailure": "Test insertion string escaping produced SyntaxError; fixed before apply, all 6 then passed"
+    },
+    "dbCommands": [
+      "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --sized-delivery",
+      "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/apply-test-public-capacity.py --sized-delivery --apply",
+      "same read-only command on independent connection"
+    ],
+    "enabledDeployment": {
+      "id": "4owhUdT1nes1Z137zmso4mhr2EKA",
+      "url": "https://anime-collector-d9cx803wt-newrreds-projects.vercel.app",
+      "ready": true,
+      "sourceAndAliasVerified": true,
+      "gitPush": "git push origin 2fbc14a78ae3df75b3d608744661be4512ead515:refs/heads/codex/phone-test"
+    },
+    "hostedDownload": {
+      "mode": "actual hosted RPC + actual Storage using production download helper locally; NOT deployed handler",
+      "rows": [
+        {
+          "variant": "full",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        },
+        {
+          "variant": "thumb",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        }
+      ]
+    },
+    "hostedCommand": "node .cache/probe-sized-delivery.mjs",
+    "deployedHandler": {
+      "imagePass": false,
+      "ownerOriginalVisible": true,
+      "existingSyntheticBoardWithdrawn": true,
+      "directNavigation": "ERR_BLOCKED_BY_CLIENT; no HTTP status inferred",
+      "republished": false,
+      "scope": "No fresh publication or delegated consent"
+    },
+    "quotaCounterPass": false,
+    "quotaReason": "Existing IMAGE_DELIVERY and IMAGE_DELIVERY_BYTES policies disabled; left unchanged",
+    "restoration": {
+      "flag": "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED",
+      "savedValue": false,
+      "environment": "Preview / codex/phone-test only",
+      "deployment": "GVvgy4Zgd1nKLgbbpBxKA18PAMec",
+      "ready": true,
+      "source": "2fbc14a78ae3df75b3d608744661be4512ead515",
+      "screenshot": ".cache/sized-delivery-test-restored.png",
+      "immutablePriorPreviewMayRetainTrue": true,
+      "sourceAndAliasVerified": true,
+      "url": "https://anime-collector-kwcbvlbg1-newrreds-projects.vercel.app"
+    },
+    "newUserPublicationBehaviorPass": 0,
+    "next": "D03 normal-public request and byte budget candidate from actual derivative sizes; exact final deployment image/withdrawal path remains W19/D06",
+    "ci": [
+      {
+        "id": 38127347170,
+        "name": "Service quality",
+        "branch": "codex/phone-test",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 38127115769,
+        "name": "Service quality",
+        "branch": "codex/simple-signup-preview",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
+  },
+  "initialPublicDeliveryBudgetCandidate": {
+    "date": "2026-10-11",
+    "status": "LOCAL_VERIFIED_NOT_APPLIED",
+    "releaseId": "MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01",
+    "dailyRequests": 2000,
+    "dailyReservedBytes": 64000000,
+    "reset": "UTC day; 09:00 KST/JST",
+    "scope": "global public image delivery including preview; not per-account",
+    "alarm": {
+      "requests": 1600,
+      "reservedBytes": 51200000,
+      "existingObservationIntervalHours": 6,
+      "actualReceiptVerified": false
+    },
+    "budget": {
+      "maxDailyWindowsPer31DayInterval": 32,
+      "publicReservedBytes": 2048000000,
+      "privateUtcCalendarMonthBudgetBytes": 500000000,
+      "conservativeCalendarMonthWindows": 3,
+      "conservativePrivateBytes": 1500000000,
+      "combinedImageReservationsBytes": 3548000000,
+      "uncachedProviderAllowanceBytes": 5000000000,
+      "otherTrafficHeadroomBytes": 1452000000,
+      "totalProviderUsageEnforced": false
+    },
+    "scenarios": [
+      {
+        "fixture": "gradient",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 295880,
+        "maxWholePagesPerDay": 100
+      },
+      {
+        "fixture": "geometric",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 777200,
+        "maxWholePagesPerDay": 82
+      },
+      {
+        "fixture": "noise",
+        "measuredEarlier": true,
+        "twentyFullPageBytes": 21241240,
+        "maxWholePagesPerDay": 3
+      }
+    ],
+    "verification": {
+      "command": "wsl.exe -u postgres -- bash /mnt/e/web/anime/tools/operations/run-public-capacity-local.sh",
+      "sqlPasses": 38,
+      "newSqlPasses": 13,
+      "unitCommand": "node --test tests/unit/publicCapacity.test.mjs",
+      "unitPasses": 7,
+      "newUnitPasses": 1,
+      "initialFailure": "new psql fixture session missing service_role claim; corrected fixture, no app authorization change",
+      "pastPhoneTestCi": {
+        "run": "38127347170",
+        "source": "2fbc14a78ae3df75b3d608744661be4512ead515",
+        "conclusion": "success"
+      },
+      "pastWorkingBranchCi": {
+        "run": "38127115769",
+        "conclusion": "cancelled"
+      },
+      "newHostedPasses": 0,
+      "newUserBehaviorPasses": 0
+    },
+    "files": {
+      "tools/operations/public-delivery-budget-candidate.sql": "ec5a1709e809037d76ce0cacaa9705fd451b60c56782f4fd5a52d2d3a156273d",
+      "tools/operations/public-delivery-budget-rollback.sql": "55dd656c4465036a1e0e3fdae506ecd34cc9e8bfe66f77be6b108f0d3e97da5b"
+    },
+    "sources": [
+      "https://supabase.com/docs/guides/platform/manage-your-usage/egress",
+      "https://vercel.com/docs/plans/hobby"
+    ],
+    "mutations": {
+      "test": 0,
+      "production": 0,
+      "flags": 0,
+      "fees": 0
+    },
+    "remaining": [
+      "exact candidate test activation and restore",
+      "deployed image HTTP delivery/429/withdrawal in final candidate",
+      "actual operator alert receipt",
+      "D06 exact production approval"
+    ]
+  },
+  "initialPublicDeliveryBudgetExecution": {
+    "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "approved": true,
+    "releaseId": "MOEMOA_INITIAL_PUBLIC_DELIVERY_BUDGET_20261011_01",
+    "target": "moemoa-test + codex/phone-test",
+    "applied": {
+      "target": "moemoa-test",
+      "mode": "apply",
+      "before": {
+        "usage": null,
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "after": {
+        "usage": null,
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "preservedPublic": true,
+      "preservedOtherPolicies": true,
+      "preservedUsage": true
+    },
+    "downloads": {
+      "mode": "actual hosted RPC + actual Storage using production download helper locally; NOT deployed handler",
+      "rows": [
+        {
+          "variant": "full",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        },
+        {
+          "variant": "thumb",
+          "reservedBytes": 72,
+          "actualBytes": 72,
+          "hashMatches": true,
+          "image": {
+            "width": 24,
+            "height": 30,
+            "format": "webp"
+          },
+          "response": {
+            "status": 206,
+            "length": "72",
+            "range": "bytes 0-71/72",
+            "encoding": null
+          }
+        }
+      ]
+    },
+    "boundary": {
+      "target": "moemoa-test",
+      "mode": "hosted rollback-only boundary",
+      "rows": [
+        {
+          "requestAtLimit": true,
+          "byteNotChargedOnReject": true
+        },
+        {
+          "bytesAtLimit": true,
+          "requestIncrementAtomic": true
+        },
+        {
+          "alarmSnapshot": {
+            "fullBytes": 26636,
+            "observedAt": "2026-10-11T09:43:11.279543+00:00",
+            "thumbBytes": 8160,
+            "failedCount": 0,
+            "deliveryUsed": 1600,
+            "overdueCount": 0,
+            "readsEnabled": true,
+            "deliveryPaused": false,
+            "preparingCount": 0,
+            "deliveryEnabled": true,
+            "totalStoredBytes": 73464,
+            "deliveryBytesUsed": 51200000,
+            "publicStoredBytes": 34856,
+            "deliveryDailyLimit": 2000,
+            "invalidObjectCount": 0,
+            "privateStoredBytes": 38608,
+            "cleanupPendingCount": 0,
+            "deliveryBytesPaused": false,
+            "publicReservedBytes": 34796,
+            "deliveryBytesEnabled": true,
+            "privateReservedBytes": 38608,
+            "deliveryBytesDailyLimit": 64000000,
+            "publicStorageLimitBytes": 0,
+            "publicStorageBudgetEnabled": false
+          }
+        }
+      ],
+      "statePreserved": true,
+      "after": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      }
+    },
+    "alarms": {
+      "mode": "hosted snapshot -> local existing evaluator; no notification sent",
+      "alerts": [
+        "PUBLIC_BUDGET_UNGUARDED",
+        "PUBLIC_DAILY_REQUESTS_NEAR_LIMIT",
+        "PUBLIC_DAILY_RESERVED_BYTES_NEAR_LIMIT"
+      ]
+    },
+    "restored": {
+      "target": "moemoa-test",
+      "mode": "rollback",
+      "before": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "after": {
+        "usage": [
+          {
+            "day": "2026-10-11",
+            "used": 2,
+            "scope": "IMAGE_DELIVERY"
+          },
+          {
+            "day": "2026-10-11",
+            "used": 144,
+            "scope": "IMAGE_DELIVERY_BYTES"
+          }
+        ],
+        "policies": [
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+        "publicSettingsHash": "7c739dbe6322c61fb2ff945e90d0ad29"
+      },
+      "preservedPublic": true,
+      "preservedOtherPolicies": true,
+      "preservedUsage": true
+    },
+    "activePreview": {
+      "id": "977hdPVfu7Jnzn78aexsfN9najdj",
+      "ready": true,
+      "sourceVerified": true,
+      "canonicalAliasVerified": true
+    },
+    "restorePreview": {
+      "id": "9fCzHFkobV42UoFLCrcN1MNv4hKh",
+      "status": "READY",
+      "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+      "canonicalAliasVerified": true,
+      "flag": false,
+      "screenshot": ".cache/public-budget-flag-restored.png"
+    },
+    "newDeployedImageHandlerPass": false,
+    "newUserPublishingPass": false,
+    "productionChanges": 0,
+    "notes": [
+      "actual source Storage reads performed with local product helper and real test RPC",
+      "boundary used rollback-only transaction; persisted usage is exactly 2 requests / 144 bytes",
+      "PUBLIC_BUDGET_UNGUARDED from pre-existing test public storage budget disabled; preserved, not production state",
+      "no notification sent or receiver verification",
+      "old immutable true preview is not deleted"
+    ],
+    "completedAt": "2026-10-11T18:45:31+09:00"
+  },
+  "firstPublicProductionCandidate": {
+    "release": "MOEMOA_FIRST_PUBLIC_CANDIDATE_20261011_01",
+    "status": "PREPARED_NOT_APPROVED_NOT_APPLIED",
+    "sourceCommit": "7cd3a8234db86ce4f4fba9f0172719b3f1fa3466",
+    "productionBaseline": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "testedCommit": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "testedCi": {
+      "run": 38129338217,
+      "conclusion": "success",
+      "runtimeDiffFromTested": []
+    },
+    "preflight": {
+      "target": "okchpyagfucpzpyrfgol",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T10:03:06.877423+00:00",
+        "functions": {
+          "makePrivate": false,
+          "sharingStatus": false,
+          "sizedDelivery": false
+        },
+        "migrations": [
+          "20260819021327",
+          "20260819021408",
+          "20260902054107",
+          "20260902054119",
+          "20260902054132",
+          "20260902055512",
+          "20260902055852",
+          "20260903141500",
+          "20260907193000",
+          "20260923090000",
+          "20260923093000",
+          "20260923182210",
+          "20260923183940",
+          "20260923192300",
+          "20260923213901",
+          "20260924115258",
+          "20260924121214",
+          "20260924193626",
+          "20260924194059",
+          "20260924195510",
+          "20260925152858",
+          "20260925152859",
+          "20260925164126",
+          "20260926140122",
+          "20260927042334",
+          "20260927044435",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261008093000",
+          "20261009090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011160000"
+        ],
+        "publicCounts": {
+          "homes": 0,
+          "assets": 0,
+          "boards": 0
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10",
+          "policyVersion": "simple-signup-2026-10-10",
+          "privacyVersion": "privacy-2026-10-10",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": true,
+          "singleton": true,
+          "max_reserved_bytes": 20971520
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 0,
+          "reads_enabled": false,
+          "images_enabled": false,
+          "writes_enabled": false,
+          "follows_enabled": false,
+          "policy_revision": "UNAPPROVED",
+          "reports_enabled": false,
+          "asset_bytes_limit": 0,
+          "minihomes_enabled": false,
+          "report_daily_limit": 0,
+          "content_policy_revision": "UNCONFIGURED",
+          "general_publication_policy_revision": "UNCONFIGURED"
+        },
+        "activeDeliveryOverrides": 0
+      }
+    },
+    "preflightSha256": "4974728eb3c1b2fab7f2c20d7614d5fcf67e68db6d89eb054448f348bae085f1",
+    "sourceFiles": [
+      {
+        "file": ".github/workflows/quality.yml",
+        "sha256": "b52d369795ca2c45f55228e2307e2c9e7020108bdbb85fab583dcac2c1f55086"
+      },
+      {
+        "file": "api/public-image.js",
+        "sha256": "5a23fb4599fc0fe830c977c8c71cecf3efa7a98ebe918e56cbe5cabfe8aed400"
+      },
+      {
+        "file": "scripts/run-publication-closeout-e2e.mjs",
+        "sha256": "0835316a7c5b45ca7d0820339738fc60891a5f1c5953de8d031acf82d95946ed"
+      },
+      {
+        "file": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+        "sha256": "cdcf333d7e47f4e3567bd2e791ddcfab78158b26ed7627bda84517e2233d6882"
+      },
+      {
+        "file": "src/features/memory/application/createPublicationController.js",
+        "sha256": "8a40089fce59bd194a8e0d5c85645e52f0ea421fe36378e8fc1d1f6a8c11bc77"
+      },
+      {
+        "file": "src/features/memory/application/preparePublicImage.js",
+        "sha256": "b07f1e8e5b869fecbc483e9182460424b5f53e094ee24f3b03a78ad22294b3ae"
+      },
+      {
+        "file": "src/features/memory/application/simpleCardSharing.js",
+        "sha256": "21d876d94a5ddc9c7c3e77b99b1a3e35b6581a1b6ee56c9b81d6ad025705f487"
+      },
+      {
+        "file": "src/features/memory/components/MemoryCardDetail.jsx",
+        "sha256": "10d1b9cfbaa67a8407cf8d4882e190b7e04fe6cb2f918f21dd4ec1ef3400c650"
+      },
+      {
+        "file": "src/features/memory/components/MemoryContentReview.jsx",
+        "sha256": "7fd75064b27ec31d1fd4a2f44a1ce01a7e434f46a4d85b128ca3ad0c3a1cfdd0"
+      },
+      {
+        "file": "src/features/memory/components/MemoryPublicationPanel.jsx",
+        "sha256": "0d9005dd4de27f4164a783cad5a407319631d8422c04bba4f7d0d0180905a966"
+      },
+      {
+        "file": "src/features/memory/components/MemoryQuickSharing.jsx",
+        "sha256": "f65bd54779eacf87565d21db15893aac9cd1859bae68fb82b642b113b99a893a"
+      },
+      {
+        "file": "src/features/memory/components/MemoryReportReview.jsx",
+        "sha256": "11acf35b73e399e0154b3ae5f378c4f9da60fd2cd0701848727904cddbdd0b70"
+      },
+      {
+        "file": "src/features/memory/components/MemorySharingSettings.jsx",
+        "sha256": "9bf830fac371cac9cced26c06f0397b327669e88ce153942f92942c37e8c847d"
+      },
+      {
+        "file": "src/features/memory/components/memory-publication.css",
+        "sha256": "00caf3f474bc10b0bc10579ef59cc109312dea6da09e73c2400b28bab063c725"
+      },
+      {
+        "file": "src/features/memory/runtime/platformPublication.js",
+        "sha256": "ba1be9e3d4a40f014d7f7a1046cba817d29ce2e6923993e49c74677ad54c7834"
+      },
+      {
+        "file": "src/server/publicImages/boundedDownload.js",
+        "sha256": "cf8b0c7c87ef66ce637c23d0a610ff035cad9ead8e8af4ca101e4394ee1b3d2e"
+      },
+      {
+        "file": "src/server/publicImages/handler.js",
+        "sha256": "ee9cf05b9db81b44617f97acfdcb10b5345b30c1d6c57dc596916bf20a158865"
+      },
+      {
+        "file": "src/server/publicImages/supabaseImageBackend.js",
+        "sha256": "03a19b30ca9c22a6a4ea3b4f37f3b441a731703f70e15378380aa72a02c68134"
+      },
+      {
+        "file": "supabase/migrations/20261011120000_simple_card_sharing.sql",
+        "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259"
+      },
+      {
+        "file": "supabase/migrations/20261011180000_memory_sized_image_delivery.sql",
+        "sha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70"
+      }
+    ],
+    "migrations": [
+      {
+        "file": "supabase/migrations/20261010160000_publication_signup_connection.sql",
+        "version": "20261010160000",
+        "sha256": "67ee3b3d1acd8867cc3bce669d91c6e6c3d799566e291fe2a0d855331463cb20"
+      },
+      {
+        "file": "supabase/migrations/20261011120000_simple_card_sharing.sql",
+        "version": "20261011120000",
+        "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259"
+      },
+      {
+        "file": "supabase/migrations/20261011180000_memory_sized_image_delivery.sql",
+        "version": "20261011180000",
+        "sha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70"
+      }
+    ],
+    "budgetFiles": [
+      {
+        "file": "tools/operations/public-delivery-budget-candidate.sql",
+        "sha256": "ec5a1709e809037d76ce0cacaa9705fd451b60c56782f4fd5a52d2d3a156273d"
+      },
+      {
+        "file": "tools/operations/public-delivery-budget-rollback.sql",
+        "sha256": "55dd656c4465036a1e0e3fdae506ecd34cc9e8bfe66f77be6b108f0d3e97da5b"
+      }
+    ],
+    "proposedConfiguration": {
+      "releaseId": "MOEMOA_FIRST_PUBLIC_CONFIG_PROD_20261011_01",
+      "publication": {
+        "reads_enabled": true,
+        "writes_enabled": true,
+        "images_enabled": true,
+        "minihomes_enabled": true,
+        "follows_enabled": true,
+        "reports_enabled": true,
+        "signup_declaration_required": true,
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "asset_limit": 10,
+        "asset_bytes_limit": 41943040,
+        "report_daily_limit": 10
+      },
+      "limitBasis": "Existing tested per-account 10 assets/40MiB and 10 reports/day, proposed for initial launch; global 20MiB storage remains the tighter shared cap. Not production-approved.",
+      "delivery": {
+        "requestsPerUtcDay": 2000,
+        "reservedBytesPerUtcDay": 64000000,
+        "alertRatio": 0.8
+      },
+      "preserve": {
+        "globalPublicStorageBytes": 20971520,
+        "signup": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10",
+          "policyVersion": "simple-signup-2026-10-10",
+          "privacyVersion": "privacy-2026-10-10",
+          "admissionEnabled": true
+        },
+        "countries": [
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "moderatorCount": 1,
+        "usageCounters": true,
+        "originals": true
+      },
+      "vercelProduction": {
+        "PUBLIC_MEMORY_PUBLICATION_V1": "1",
+        "PUBLIC_MEMORY_MINIHOME_V1": "1",
+        "PUBLIC_MEMORY_FOLLOWS_V1": "1",
+        "PUBLIC_MEMORY_MODERATION_V1": "1",
+        "PUBLIC_MEMORY_CONTENT_REVIEW_V1": "1",
+        "PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1": "1",
+        "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_API_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED": "true",
+        "MOEMOA_CONTENT_REVIEW_IMAGE_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_ALLOWED_ORIGINS": "https://www.moemoa.xyz,https://moemoa.xyz"
+      },
+      "githubRepositoryVariables": {
+        "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED": "true"
+      },
+      "configReadback": "Desired values only; latest Vercel/GitHub non-secret baseline still requires readback before activation.",
+      "keepDisabled": [
+        "PUBLIC_MEMORY_AUTHENTICATED_VIEWER_V1",
+        "MOEMOA_PUBLIC_IMAGE_VIEWER_ENABLED"
+      ],
+      "existingObservation": "Keep current production observation and 980000000-byte storage alert; no new credentials or recipients."
+    },
+    "rights": "Existing GENERAL-only consent; self-declared own creation; third-party screenshots/fanart still require separate evidence. No new scope decision.",
+    "executionOrder": [
+      "Complete D04 operating notice/rights binding and D05 recovery handoff; obtain exact source/schema/config approval.",
+      "Re-read production Git SHA/config/schema. Stop on drift; do not use this snapshot as a future authorization.",
+      "Apply the three versioned migrations in listed order under one guarded transaction, preserving data/settings/usage and recording source/hash/release IDs; keep Public reads/writes off.",
+      "Save exact Production environment changes after current-value snapshot, then Git master deployment of approved candidate. Verify Vercel Git SHA and build-info.",
+      "After deployed sized flag is verified, apply existing budget SQL; independently read back 2000/64000000. Keep Public off on any failure.",
+      "Enable existing scheduled public-derivative cleanup using the same maintenance principal (eligible expired/retired derivatives only; no private originals); preserve audit metadata. Requires exact approval and verified job/API config.",
+      "After rollout gates pass, apply exact approved publication config; current user explicitly reviews and publishes a synthetic card. Check anonymous deployed image/home, follow/list, report/moderation and withdrawal on this same source.",
+      "Observe actual usage and confirm operator alert receipt; distinguish local evaluator from delivered notification. No unsolicited external alert tests."
+    ],
+    "rollbackOrder": [
+      "Immediately disable publication reads/writes in DB to stop public exposure; retain reports/moderator access and private data.",
+      "Keep delivery limits until public reads are closed. Revert only exact changed config, never usage counters or rights/consent evidence.",
+      "Use versioned budget rollback only if active settings exactly match the candidate; preserve additive functions/migration history.",
+      "Restore Production environment baseline and deploy approved prior source through Git master; no CLI production promotion or destructive down migration."
+    ],
+    "openGates": [
+      {
+        "id": "D04",
+        "condition": "Bind final operating Public policy revision and existing GENERAL rights/notice to the exact candidate; TEST_ONLY revision is not production approval."
+      },
+      {
+        "id": "D05",
+        "condition": "Recovery key independent custody and remaining recovery/retention acceptance are not confirmed; do not mark completed."
+      },
+      {
+        "id": "D03/Q19",
+        "condition": "Actual operator alert receipt unverified; existing six-hour observation is not immediate notification."
+      },
+      {
+        "id": "W19/D06",
+        "condition": "Final deployed sized-image HTTP/withdrawal and exact production release approval remain."
+      }
+    ],
+    "newUserBehaviorPass": 0,
+    "remoteMutations": 0,
+    "verification": {
+      "guardCases": [
+        {
+          "name": "wrong-target",
+          "passed": true
+        },
+        {
+          "name": "missing-ledger",
+          "passed": true
+        },
+        {
+          "name": "wrong-migration",
+          "passed": true
+        },
+        {
+          "name": "public-on",
+          "passed": true
+        },
+        {
+          "name": "override",
+          "passed": true
+        },
+        {
+          "name": "paused-quota",
+          "passed": true
+        }
+      ],
+      "liveBuild": {
+        "status": 200,
+        "commit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "source": "vercel-git",
+        "checkoutCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a"
+      },
+      "syntaxCheck": "PASS",
+      "ciReadback": [
+        {
+          "id": 38129338217,
+          "result": "success",
+          "sha": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+        },
+        {
+          "id": 38129221751,
+          "result": "cancelled",
+          "sha": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+        }
+      ]
+    }
+  },
+  "firstPublicProductionCandidate_02": {
+    "release": "MOEMOA_FIRST_PUBLIC_CANDIDATE_20261011_02",
+    "status": "LOCAL_VERIFIED_NOT_APPROVED_NOT_APPLIED",
+    "sourceCommit": "139a2006909c23dd8868483867134eb7f43259de",
+    "productionBaseline": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+    "preflight": {
+      "target": "okchpyagfucpzpyrfgol",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T10:03:06.877423+00:00",
+        "functions": {
+          "makePrivate": false,
+          "sharingStatus": false,
+          "sizedDelivery": false
+        },
+        "migrations": [
+          "20260819021327",
+          "20260819021408",
+          "20260902054107",
+          "20260902054119",
+          "20260902054132",
+          "20260902055512",
+          "20260902055852",
+          "20260903141500",
+          "20260907193000",
+          "20260923090000",
+          "20260923093000",
+          "20260923182210",
+          "20260923183940",
+          "20260923192300",
+          "20260923213901",
+          "20260924115258",
+          "20260924121214",
+          "20260924193626",
+          "20260924194059",
+          "20260924195510",
+          "20260925152858",
+          "20260925152859",
+          "20260925164126",
+          "20260926140122",
+          "20260927042334",
+          "20260927044435",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261008093000",
+          "20261009090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011160000"
+        ],
+        "publicCounts": {
+          "homes": 0,
+          "assets": 0,
+          "boards": 0
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10",
+          "policyVersion": "simple-signup-2026-10-10",
+          "privacyVersion": "privacy-2026-10-10",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": true,
+          "singleton": true,
+          "max_reserved_bytes": 20971520
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 0,
+          "reads_enabled": false,
+          "images_enabled": false,
+          "writes_enabled": false,
+          "follows_enabled": false,
+          "policy_revision": "UNAPPROVED",
+          "reports_enabled": false,
+          "asset_bytes_limit": 0,
+          "minihomes_enabled": false,
+          "report_daily_limit": 0,
+          "content_policy_revision": "UNCONFIGURED",
+          "general_publication_policy_revision": "UNCONFIGURED"
+        },
+        "activeDeliveryOverrides": 0
+      }
+    },
+    "preflightSha256": "4974728eb3c1b2fab7f2c20d7614d5fcf67e68db6d89eb054448f348bae085f1",
+    "sourceFiles": [
+      {
+        "file": ".github/workflows/quality.yml",
+        "sha256": "b52d369795ca2c45f55228e2307e2c9e7020108bdbb85fab583dcac2c1f55086"
+      },
+      {
+        "file": "api/public-image.js",
+        "sha256": "5a23fb4599fc0fe830c977c8c71cecf3efa7a98ebe918e56cbe5cabfe8aed400"
+      },
+      {
+        "file": "scripts/run-publication-closeout-e2e.mjs",
+        "sha256": "0835316a7c5b45ca7d0820339738fc60891a5f1c5953de8d031acf82d95946ed"
+      },
+      {
+        "file": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+        "sha256": "cdcf333d7e47f4e3567bd2e791ddcfab78158b26ed7627bda84517e2233d6882"
+      },
+      {
+        "file": "src/features/memory/application/createPublicationController.js",
+        "sha256": "8a40089fce59bd194a8e0d5c85645e52f0ea421fe36378e8fc1d1f6a8c11bc77"
+      },
+      {
+        "file": "src/features/memory/application/preparePublicImage.js",
+        "sha256": "b07f1e8e5b869fecbc483e9182460424b5f53e094ee24f3b03a78ad22294b3ae"
+      },
+      {
+        "file": "src/features/memory/application/simpleCardSharing.js",
+        "sha256": "a84f6f9a4a27515176b112c73eb262adeee44a1c449f3a68063729436f22d46e"
+      },
+      {
+        "file": "src/features/memory/components/MemoryCardDetail.jsx",
+        "sha256": "10d1b9cfbaa67a8407cf8d4882e190b7e04fe6cb2f918f21dd4ec1ef3400c650"
+      },
+      {
+        "file": "src/features/memory/components/MemoryContentReview.jsx",
+        "sha256": "7fd75064b27ec31d1fd4a2f44a1ce01a7e434f46a4d85b128ca3ad0c3a1cfdd0"
+      },
+      {
+        "file": "src/features/memory/components/MemoryMinihome.jsx",
+        "sha256": "9ffc847ef222c29b573c8ddb93d4cafe45b334cb4b33aac36a7a1f0cc70d2865"
+      },
+      {
+        "file": "src/features/memory/components/MemoryPublicationPanel.jsx",
+        "sha256": "7af3ce3512cad96dfc8e5b3c92635c4290432fb04f52db136b83d1ef443494ea"
+      },
+      {
+        "file": "src/features/memory/components/MemoryQuickSharing.jsx",
+        "sha256": "44914f32e4da1ab785c40cb9f038e8c00d25239877a36301ddc96d9dc26e2698"
+      },
+      {
+        "file": "src/features/memory/components/MemoryReportReview.jsx",
+        "sha256": "11acf35b73e399e0154b3ae5f378c4f9da60fd2cd0701848727904cddbdd0b70"
+      },
+      {
+        "file": "src/features/memory/components/MemorySharingSettings.jsx",
+        "sha256": "9bf830fac371cac9cced26c06f0397b327669e88ce153942f92942c37e8c847d"
+      },
+      {
+        "file": "src/features/memory/components/PublicSharingNotice.jsx",
+        "sha256": "fae1f9012900166122be4f7b3b61d0e32f4afbbc12048f331312fe492341e2d2"
+      },
+      {
+        "file": "src/features/memory/components/memory-publication.css",
+        "sha256": "e5e5c43211f1c8da6273264667f6c00c691bcfc9b7acb5f237d51e8baaa412b9"
+      },
+      {
+        "file": "src/features/memory/domain/publicSharingPolicy.js",
+        "sha256": "cf05ecab56a7ad770fb34b4364a2a303be7627b148af98587769b70b98e5b8ca"
+      },
+      {
+        "file": "src/features/memory/runtime/platformPublication.js",
+        "sha256": "ba1be9e3d4a40f014d7f7a1046cba817d29ce2e6923993e49c74677ad54c7834"
+      },
+      {
+        "file": "src/pages/legal/public-sharing-2026-10-11.astro",
+        "sha256": "72ffbcf83af732bba65c43d77096cd02b47f0c76c55f0d77ebb002b9949dfe5b"
+      },
+      {
+        "file": "src/server/publicImages/boundedDownload.js",
+        "sha256": "cf8b0c7c87ef66ce637c23d0a610ff035cad9ead8e8af4ca101e4394ee1b3d2e"
+      },
+      {
+        "file": "src/server/publicImages/handler.js",
+        "sha256": "ee9cf05b9db81b44617f97acfdcb10b5345b30c1d6c57dc596916bf20a158865"
+      },
+      {
+        "file": "src/server/publicImages/supabaseImageBackend.js",
+        "sha256": "03a19b30ca9c22a6a4ea3b4f37f3b441a731703f70e15378380aa72a02c68134"
+      },
+      {
+        "file": "supabase/migrations/20261011120000_simple_card_sharing.sql",
+        "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259"
+      },
+      {
+        "file": "supabase/migrations/20261011180000_memory_sized_image_delivery.sql",
+        "sha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70"
+      }
+    ],
+    "migrations": [
+      {
+        "file": "supabase/migrations/20261010160000_publication_signup_connection.sql",
+        "version": "20261010160000",
+        "sha256": "67ee3b3d1acd8867cc3bce669d91c6e6c3d799566e291fe2a0d855331463cb20"
+      },
+      {
+        "file": "supabase/migrations/20261011120000_simple_card_sharing.sql",
+        "version": "20261011120000",
+        "sha256": "e153fe7f4d57d44a94dcb30e1dfd5be973bd40e583baf8b65b11a0c40b5b5259"
+      },
+      {
+        "file": "supabase/migrations/20261011180000_memory_sized_image_delivery.sql",
+        "version": "20261011180000",
+        "sha256": "80ab893e9fbb023d1cb8bd50a63b01b7a33f428614bccc361e94110d8b694a70"
+      }
+    ],
+    "budgetFiles": [
+      {
+        "file": "tools/operations/public-delivery-budget-candidate.sql",
+        "sha256": "ec5a1709e809037d76ce0cacaa9705fd451b60c56782f4fd5a52d2d3a156273d"
+      },
+      {
+        "file": "tools/operations/public-delivery-budget-rollback.sql",
+        "sha256": "55dd656c4465036a1e0e3fdae506ecd34cc9e8bfe66f77be6b108f0d3e97da5b"
+      }
+    ],
+    "proposedConfiguration": {
+      "releaseId": "MOEMOA_FIRST_PUBLIC_CONFIG_PROD_20261011_01",
+      "publication": {
+        "reads_enabled": true,
+        "writes_enabled": true,
+        "images_enabled": true,
+        "minihomes_enabled": true,
+        "follows_enabled": true,
+        "reports_enabled": true,
+        "signup_declaration_required": true,
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "asset_limit": 10,
+        "asset_bytes_limit": 41943040,
+        "report_daily_limit": 10
+      },
+      "limitBasis": "Existing tested per-account 10 assets/40MiB and 10 reports/day, proposed for initial launch; global 20MiB storage remains the tighter shared cap. Not production-approved.",
+      "delivery": {
+        "requestsPerUtcDay": 2000,
+        "reservedBytesPerUtcDay": 64000000,
+        "alertRatio": 0.8
+      },
+      "preserve": {
+        "globalPublicStorageBytes": 20971520,
+        "signup": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10",
+          "policyVersion": "simple-signup-2026-10-10",
+          "privacyVersion": "privacy-2026-10-10",
+          "admissionEnabled": true
+        },
+        "countries": [
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "moderatorCount": 1,
+        "usageCounters": true,
+        "originals": true
+      },
+      "vercelProduction": {
+        "PUBLIC_MEMORY_PUBLICATION_V1": "1",
+        "PUBLIC_MEMORY_MINIHOME_V1": "1",
+        "PUBLIC_MEMORY_FOLLOWS_V1": "1",
+        "PUBLIC_MEMORY_MODERATION_V1": "1",
+        "PUBLIC_MEMORY_CONTENT_REVIEW_V1": "1",
+        "PUBLIC_MEMORY_PUBLIC_PRIVATE_SOURCE_V1": "1",
+        "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_API_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_PRIVATE_SOURCE_ENABLED": "true",
+        "MOEMOA_CONTENT_REVIEW_IMAGE_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED": "true",
+        "MOEMOA_PUBLIC_IMAGE_ALLOWED_ORIGINS": "https://www.moemoa.xyz,https://moemoa.xyz"
+      },
+      "githubRepositoryVariables": {
+        "MOEMOA_PUBLIC_IMAGE_CLEANUP_ENABLED": "true"
+      },
+      "configReadback": "Desired values only; latest Vercel/GitHub non-secret baseline still requires readback before activation.",
+      "keepDisabled": [
+        "PUBLIC_MEMORY_AUTHENTICATED_VIEWER_V1",
+        "MOEMOA_PUBLIC_IMAGE_VIEWER_ENABLED"
+      ],
+      "existingObservation": "Keep current production observation and 980000000-byte storage alert; no new credentials or recipients."
+    },
+    "rights": "Existing GENERAL-only consent; self-declared own creation; third-party screenshots/fanart still require separate evidence. No new scope decision.",
+    "executionOrder": [
+      "Use candidate 02 source and fixed notice hash; complete remaining recovery handoff and exact source/schema/config approval. Do not promote predecessor CI as verification of this source.",
+      "Re-read production Git SHA/config/schema. Stop on drift; do not use this snapshot as a future authorization.",
+      "Apply the three versioned migrations in listed order under one guarded transaction, preserving data/settings/usage and recording source/hash/release IDs; keep Public reads/writes off.",
+      "Save exact Production environment changes after current-value snapshot, then Git master deployment of approved candidate. Verify Vercel Git SHA and build-info.",
+      "After deployed sized flag is verified, apply existing budget SQL; independently read back 2000/64000000. Keep Public off on any failure.",
+      "Enable existing scheduled public-derivative cleanup using the same maintenance principal (eligible expired/retired derivatives only; no private originals); preserve audit metadata. Requires exact approval and verified job/API config.",
+      "After rollout gates pass, apply exact approved publication config; current user explicitly reviews and publishes a synthetic card. Check anonymous deployed image/home, follow/list, report/moderation and withdrawal on this same source.",
+      "Observe actual usage and confirm operator alert receipt; distinguish local evaluator from delivered notification. No unsolicited external alert tests."
+    ],
+    "rollbackOrder": [
+      "Immediately disable publication reads/writes in DB to stop public exposure; retain reports/moderator access and private data.",
+      "Keep delivery limits until public reads are closed. Revert only exact changed config, never usage counters or rights/consent evidence.",
+      "Use versioned budget rollback only if active settings exactly match the candidate; preserve additive functions/migration history.",
+      "Restore Production environment baseline and deploy approved prior source through Git master; no CLI production promotion or destructive down migration."
+    ],
+    "openGates": [
+      {
+        "id": "D04",
+        "condition": "D04 notice/revision binding locally complete; exact approved server/frontend revision and current-account consent on the deployed candidate remain unverified. No broader country/rights approval."
+      },
+      {
+        "id": "D05",
+        "condition": "Recovery key independent custody and remaining recovery/retention acceptance are not confirmed; do not mark completed."
+      },
+      {
+        "id": "D03/Q19",
+        "condition": "Actual operator alert receipt unverified; existing six-hour observation is not immediate notification."
+      },
+      {
+        "id": "W19/D06",
+        "condition": "Final deployed sized-image HTTP/withdrawal and exact production release approval remain."
+      }
+    ],
+    "newUserBehaviorPass": 0,
+    "remoteMutations": 0,
+    "verification": {
+      "guardCases": [
+        {
+          "name": "wrong-target",
+          "passed": true
+        },
+        {
+          "name": "missing-ledger",
+          "passed": true
+        },
+        {
+          "name": "wrong-migration",
+          "passed": true
+        },
+        {
+          "name": "public-on",
+          "passed": true
+        },
+        {
+          "name": "override",
+          "passed": true
+        },
+        {
+          "name": "paused-quota",
+          "passed": true
+        }
+      ],
+      "liveBuild": {
+        "status": 200,
+        "commit": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+        "source": "vercel-git",
+        "checkoutCommit": "199613b139d9fcd085e298a9f03bad94b4e53f5a"
+      },
+      "syntaxCheck": "PASS",
+      "ciReadback": [
+        {
+          "id": 38129338217,
+          "result": "success",
+          "sha": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+        },
+        {
+          "id": 38129221751,
+          "result": "cancelled",
+          "sha": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+        }
+      ]
+    },
+    "priorHostedEvidence": {
+      "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+      "ci": {
+        "run": 38129338217,
+        "conclusion": "success",
+        "runtimeDiffFromTested": []
+      },
+      "scope": "Historical predecessor only. This notice/consent runtime has not been deployed or tested hosted."
+    },
+    "preflightFreshness": "Historical read-only baseline from candidate 01; re-read before any remote application.",
+    "publicNotice": {
+      "revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+      "route": "/legal/public-sharing-2026-10-11/",
+      "source": "src/pages/legal/public-sharing-2026-10-11.astro",
+      "sha256": "72ffbcf83af732bba65c43d77096cd02b47f0c76c55f0d77ebb002b9949dfe5b",
+      "locales": [
+        "ko",
+        "en"
+      ],
+      "signupDocumentsUnchanged": true,
+      "checkboxesAdded": 0,
+      "unknownRevision": "Disable new public consent; retain private/withdrawal.",
+      "quickConsent": "Reject different server preview policy before publish; unknown-result retries keep exact operation."
+    },
+    "localVerification": {
+      "sourceCommit": "139a2006909c23dd8868483867134eb7f43259de",
+      "unit": 12,
+      "browserUnique": 12,
+      "browserRuns": [
+        {
+          "passed": 10,
+          "failed": 1,
+          "reason": "Board mock did not propagate changed policy; fixed fixture."
+        },
+        {
+          "passed": 7,
+          "failed": 0
+        }
+      ],
+      "buildPages": 33,
+      "hosted": 0,
+      "realGoogle": 0,
+      "production": 0
+    },
+    "newUserBehaviorPassScope": "Hosted/production only; 12 distinct local mocked browser cases passed separately."
+  },
+  "publicNoticeBinding": {
+    "sourceCommit": "139a2006909c23dd8868483867134eb7f43259de",
+    "notice": {
+      "revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+      "route": "/legal/public-sharing-2026-10-11/",
+      "source": "src/pages/legal/public-sharing-2026-10-11.astro",
+      "sha256": "72ffbcf83af732bba65c43d77096cd02b47f0c76c55f0d77ebb002b9949dfe5b",
+      "locales": [
+        "ko",
+        "en"
+      ],
+      "signupDocumentsUnchanged": true,
+      "checkboxesAdded": 0,
+      "unknownRevision": "Disable new public consent; retain private/withdrawal.",
+      "quickConsent": "Reject different server preview policy before publish; unknown-result retries keep exact operation."
+    },
+    "verification": {
+      "sourceCommit": "139a2006909c23dd8868483867134eb7f43259de",
+      "unit": 12,
+      "browserUnique": 12,
+      "browserRuns": [
+        {
+          "passed": 10,
+          "failed": 1,
+          "reason": "Board mock did not propagate changed policy; fixed fixture."
+        },
+        {
+          "passed": 7,
+          "failed": 0
+        }
+      ],
+      "buildPages": 33,
+      "hosted": 0,
+      "realGoogle": 0,
+      "production": 0
+    },
+    "remoteMutations": 0,
+    "supersedesForRelease": "firstPublicProductionCandidate (7cd3a82); preserved as historical evidence",
+    "next": "Bind candidate 02 to the test server/current consent under exact approval, then retain D03/D05/D06 final acceptance conditions."
+  },
+  "publicNoticeTestConnectionCandidate": {
+    "status": "LOCAL_CONFIG_VERIFIED_AWAITING_EXACT_TEST_APPROVAL",
+    "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+    "productSource": "139a2006909c23dd8868483867134eb7f43259de",
+    "sourceRuntimeDiff": [],
+    "ci": {
+      "runId": 38131778423,
+      "conclusion": "success",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38131778423"
+    },
+    "readOnlyBaseline": {
+      "target": "nmgkhknponvzcwliajyk",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T10:42:07.420513+00:00",
+        "functions": {
+          "makePrivate": true,
+          "sharingStatus": true,
+          "sizedDelivery": true
+        },
+        "migrations": [
+          "20260924141253",
+          "20260924141254",
+          "20260924141255",
+          "20260924141256",
+          "20260924141257",
+          "20260924141258",
+          "20260924141259",
+          "20260924141300",
+          "20260924141301",
+          "20260924141302",
+          "20260924141316",
+          "20260924141318",
+          "20260924141320",
+          "20260924141322",
+          "20260924141324",
+          "20260924141326",
+          "20260924141328",
+          "20260924194322",
+          "20260924194325",
+          "20260924195621",
+          "20260925152859",
+          "20260925164126",
+          "20260927053858",
+          "20260927053904",
+          "20260927053914",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010160000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011120000",
+          "20261011160000",
+          "20261011180000"
+        ],
+        "publicCounts": {
+          "homes": 1,
+          "assets": 17,
+          "boards": 8
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10-test",
+          "policyVersion": "simple-signup-2026-10-10-test",
+          "privacyVersion": "privacy-2026-10-10-test",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": false,
+          "singleton": true,
+          "max_reserved_bytes": 0
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "GB",
+            "minimumAge": 13
+          },
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "PH",
+            "minimumAge": 13
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 10,
+          "reads_enabled": true,
+          "images_enabled": true,
+          "writes_enabled": true,
+          "follows_enabled": true,
+          "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "reports_enabled": true,
+          "asset_bytes_limit": 41943040,
+          "minihomes_enabled": true,
+          "report_daily_limit": 10,
+          "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+          "signup_declaration_required": false,
+          "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+        },
+        "activeDeliveryOverrides": 0,
+        "currentDeclarationCount": 2
+      }
+    },
+    "files": [
+      {
+        "path": "tools/operations/public-notice-test-config.sql",
+        "sha256": "a82134ec71cd9fc6886f41e8d093f30f49d131ea2b569f0d25f2d6d8315519e7"
+      },
+      {
+        "path": "tools/operations/public-notice-test-fixture.sql",
+        "sha256": "d738f8225ac0f2bc8e259e4507820fb12cac2c81dd1977c7e048f04e2dd8ad30"
+      },
+      {
+        "path": "tools/operations/test_public_notice_config.py",
+        "sha256": "6fc841d47dbd1cb1568610b59fcd73af8e5d2921b0c4f30ea61872345fa71f49"
+      }
+    ],
+    "changes": {
+      "schema": 0,
+      "publicationSettings": {
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "signup_declaration_required": true
+      },
+      "quota": {
+        "IMAGE_DELIVERY": 2000,
+        "IMAGE_DELIVERY_BYTES": 64000000,
+        "sql": "tools/operations/public-delivery-budget-candidate.sql"
+      },
+      "preview": {
+        "branch": "codex/phone-test",
+        "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED": "true"
+      }
+    },
+    "rollback": {
+      "publicationSettings": "exact full captured baseline; refuse any drift",
+      "quota": "existing exact rollback; preserve actual usage",
+      "preview": "fresh baseline required before writes; previous a6b6ddaaadf9487f5f8f3b14064cb794b27826c0 / TEST_ONLY_PHONE_WEB_20260927_01 / sized=false"
+    },
+    "verification": {
+      "command": "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/test_public_notice_config.py",
+      "exitCode": 0,
+      "configOnlyPass": 8,
+      "newHostedUserBehaviorPass": 0,
+      "remoteMutations": 0
+    },
+    "next": "Exact test application approval, then notice/image delivery/withdrawal and restore; no new signup or base DB restore"
+  },
+  "publicNoticeTestConnectionExecution": {
+    "candidate": "6c633bdaa29458c16de931ad17137fc455d3bd0d",
+    "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+    "approval": "User approved test connection, verification and restore",
+    "status": "HOSTED_PUBLISH_VIEW_WITHDRAW_PASS_RESTORED",
+    "appliedReadback": {
+      "target": "nmgkhknponvzcwliajyk",
+      "readOnly": true,
+      "snapshot": {
+        "checkedAt": "2026-10-11T11:01:13.568857+00:00",
+        "functions": {
+          "makePrivate": true,
+          "sharingStatus": true,
+          "sizedDelivery": true
+        },
+        "migrations": [
+          "20260924141253",
+          "20260924141254",
+          "20260924141255",
+          "20260924141256",
+          "20260924141257",
+          "20260924141258",
+          "20260924141259",
+          "20260924141300",
+          "20260924141301",
+          "20260924141302",
+          "20260924141316",
+          "20260924141318",
+          "20260924141320",
+          "20260924141322",
+          "20260924141324",
+          "20260924141326",
+          "20260924141328",
+          "20260924194322",
+          "20260924194325",
+          "20260924195621",
+          "20260925152859",
+          "20260925164126",
+          "20260927053858",
+          "20260927053904",
+          "20260927053914",
+          "20261005090000",
+          "20261007093000",
+          "20261008090000",
+          "20261009130000",
+          "20261009143000",
+          "20261010103000",
+          "20261010160000",
+          "20261010170000",
+          "20261010180000",
+          "20261010190000",
+          "20261011120000",
+          "20261011160000",
+          "20261011180000"
+        ],
+        "publicCounts": {
+          "homes": 1,
+          "assets": 17,
+          "boards": 8
+        },
+        "signupPolicy": {
+          "enabled": true,
+          "termsVersion": "terms-2026-10-10-test",
+          "policyVersion": "simple-signup-2026-10-10-test",
+          "privacyVersion": "privacy-2026-10-10-test",
+          "admissionEnabled": true
+        },
+        "storagePolicy": {
+          "enabled": false,
+          "singleton": true,
+          "max_reserved_bytes": 0
+        },
+        "moderatorCount": 1,
+        "enabledCountries": [
+          {
+            "country": "GB",
+            "minimumAge": 13
+          },
+          {
+            "country": "KR",
+            "minimumAge": 14
+          },
+          {
+            "country": "PH",
+            "minimumAge": 13
+          },
+          {
+            "country": "TH",
+            "minimumAge": 13
+          },
+          {
+            "country": "US",
+            "minimumAge": 13
+          }
+        ],
+        "resourcePolicies": [
+          {
+            "scope": "FOLLOW_WRITE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_ATTEMPT",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "IMAGE_DELIVERY",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 2000
+          },
+          {
+            "scope": "IMAGE_DELIVERY_BYTES",
+            "paused": false,
+            "enabled": true,
+            "live_limit": null,
+            "daily_limit": 64000000
+          },
+          {
+            "scope": "PUBLIC_PREPARE",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "PUBLIC_PUBLISH",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARD_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_BOARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_CARDS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          },
+          {
+            "scope": "SYNC_USER_DEVICES",
+            "paused": false,
+            "enabled": false,
+            "live_limit": null,
+            "daily_limit": 0
+          }
+        ],
+        "publicationSettings": {
+          "singleton": true,
+          "asset_limit": 10,
+          "reads_enabled": true,
+          "images_enabled": true,
+          "writes_enabled": true,
+          "follows_enabled": true,
+          "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+          "reports_enabled": true,
+          "asset_bytes_limit": 41943040,
+          "minihomes_enabled": true,
+          "report_daily_limit": 10,
+          "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+          "signup_declaration_required": true,
+          "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+        },
+        "activeDeliveryOverrides": 0,
+        "currentDeclarationCount": 2
+      }
+    },
+    "previewBaseline": {
+      "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "sizedDelivery": false,
+      "branch": "codex/phone-test",
+      "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
+    },
+    "deploymentId": "G2gqkAKY2WHXDmsb3rux9HcNYyjP",
+    "newUserBehaviorPass": [
+      "personal consent and public save",
+      "new anonymous session image decode",
+      "owner private save",
+      "same anonymous Board unavailable after reload",
+      "owner original retained"
+    ],
+    "restoreCompleted": true,
+    "productionMutations": 0,
+    "deploymentStatus": "Ready",
+    "deploymentSourceVerified": true,
+    "canonicalAlias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+    "deployedNotice": {
+      "revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+      "languages": [
+        "ko",
+        "en"
+      ],
+      "fixedTermsPrivacy": "2026-10-10",
+      "checkedBy": "actual Chrome page"
+    },
+    "actualCardUi": {
+      "syntheticImagePreview": true,
+      "policyRevisionVisible": true,
+      "checkboxCount": 1,
+      "checkboxChecked": false,
+      "saveDisabledBeforeConsent": true
+    },
+    "newHostedPublicationPass": 1,
+    "personalConsent": {
+      "confirmedBy": "User replied 저장 완료",
+      "agentAcceptedConsent": false
+    },
+    "actualHostedCloseout": {
+      "testedSource": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+      "deploymentId": "G2gqkAKY2WHXDmsb3rux9HcNYyjP",
+      "origin": "https://anime-collector-ld1diyxhz-newrreds-projects.vercel.app",
+      "anonymousSignInToReportVisible": true,
+      "image": {
+        "complete": true,
+        "naturalWidth": 24,
+        "naturalHeight": 30,
+        "throughDeployedPublicImageHandler": true
+      },
+      "ownerPrivateSaveSuccess": true,
+      "anonymousReload": {
+        "message": "This Board is unavailable.",
+        "imageCount": 0
+      },
+      "ownerOriginalAfterWithdrawal": {
+        "complete": true,
+        "naturalWidth": 24,
+        "naturalHeight": 30
+      },
+      "usageBefore": {
+        "requests": 2,
+        "bytes": 144
+      },
+      "usageAfter": {
+        "requests": 4,
+        "bytes": 288
+      },
+      "singlePageRequestAttribution": false,
+      "rawImageUrl404Verified": false,
+      "miniHomeFollowRerun": false
+    },
+    "restoration": {
+      "database": {
+        "target": "nmgkhknponvzcwliajyk",
+        "readOnly": true,
+        "snapshot": {
+          "checkedAt": "2026-10-11T11:46:16.091382+00:00",
+          "functions": {
+            "makePrivate": true,
+            "sharingStatus": true,
+            "sizedDelivery": true
+          },
+          "migrations": [
+            "20260924141253",
+            "20260924141254",
+            "20260924141255",
+            "20260924141256",
+            "20260924141257",
+            "20260924141258",
+            "20260924141259",
+            "20260924141300",
+            "20260924141301",
+            "20260924141302",
+            "20260924141316",
+            "20260924141318",
+            "20260924141320",
+            "20260924141322",
+            "20260924141324",
+            "20260924141326",
+            "20260924141328",
+            "20260924194322",
+            "20260924194325",
+            "20260924195621",
+            "20260925152859",
+            "20260925164126",
+            "20260927053858",
+            "20260927053904",
+            "20260927053914",
+            "20261005090000",
+            "20261007093000",
+            "20261008090000",
+            "20261009130000",
+            "20261009143000",
+            "20261010103000",
+            "20261010160000",
+            "20261010170000",
+            "20261010180000",
+            "20261010190000",
+            "20261011120000",
+            "20261011160000",
+            "20261011180000"
+          ],
+          "publicCounts": {
+            "homes": 1,
+            "assets": 18,
+            "boards": 8
+          },
+          "signupPolicy": {
+            "enabled": true,
+            "termsVersion": "terms-2026-10-10-test",
+            "policyVersion": "simple-signup-2026-10-10-test",
+            "privacyVersion": "privacy-2026-10-10-test",
+            "admissionEnabled": true
+          },
+          "storagePolicy": {
+            "enabled": false,
+            "singleton": true,
+            "max_reserved_bytes": 0
+          },
+          "moderatorCount": 1,
+          "enabledCountries": [
+            {
+              "country": "GB",
+              "minimumAge": 13
+            },
+            {
+              "country": "KR",
+              "minimumAge": 14
+            },
+            {
+              "country": "PH",
+              "minimumAge": 13
+            },
+            {
+              "country": "TH",
+              "minimumAge": 13
+            },
+            {
+              "country": "US",
+              "minimumAge": 13
+            }
+          ],
+          "resourcePolicies": [
+            {
+              "scope": "FOLLOW_WRITE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_ATTEMPT",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PREPARE",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "PUBLIC_PUBLISH",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARD_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_BOARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_CARDS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_PRIVATE_TITLES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_MEMORY_VISUAL_ASSETS",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "SYNC_USER_DEVICES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            }
+          ],
+          "publicationSettings": {
+            "singleton": true,
+            "asset_limit": 10,
+            "reads_enabled": true,
+            "images_enabled": true,
+            "writes_enabled": true,
+            "follows_enabled": true,
+            "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "reports_enabled": true,
+            "asset_bytes_limit": 41943040,
+            "minihomes_enabled": true,
+            "report_daily_limit": 10,
+            "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signup_declaration_required": false,
+            "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+          },
+          "activeDeliveryOverrides": 0,
+          "currentDeclarationCount": 2
+        }
+      },
+      "quota": {
+        "target": "moemoa-test",
+        "mode": "rollback",
+        "before": {
+          "usage": [
+            {
+              "day": "2026-10-11",
+              "used": 4,
+              "scope": "IMAGE_DELIVERY"
+            },
+            {
+              "day": "2026-10-11",
+              "used": 288,
+              "scope": "IMAGE_DELIVERY_BYTES"
+            }
+          ],
+          "policies": [
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": true,
+              "live_limit": null,
+              "daily_limit": 2000
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": true,
+              "live_limit": null,
+              "daily_limit": 64000000
+            }
+          ],
+          "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+          "publicSettingsHash": "815a361de3c1646b87894fa9e0e43f90"
+        },
+        "after": {
+          "usage": [
+            {
+              "day": "2026-10-11",
+              "used": 4,
+              "scope": "IMAGE_DELIVERY"
+            },
+            {
+              "day": "2026-10-11",
+              "used": 288,
+              "scope": "IMAGE_DELIVERY_BYTES"
+            }
+          ],
+          "policies": [
+            {
+              "scope": "IMAGE_DELIVERY",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            },
+            {
+              "scope": "IMAGE_DELIVERY_BYTES",
+              "paused": false,
+              "enabled": false,
+              "live_limit": null,
+              "daily_limit": 0
+            }
+          ],
+          "otherPoliciesHash": "9ec052edcde43b4a197895fe3dd646ef",
+          "publicSettingsHash": "815a361de3c1646b87894fa9e0e43f90"
+        },
+        "preservedPublic": true,
+        "preservedOtherPolicies": true,
+        "preservedUsage": true
+      },
+      "policy": {
+        "target": "moemoa-test",
+        "mode": "restore",
+        "result": [
+          {
+            "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "contentPolicyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "generalPolicyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+            "signupDeclarationRequired": false
+          }
+        ]
+      },
+      "previewSettings": {
+        "policyRevision": "TEST_ONLY_PHONE_WEB_20260927_01",
+        "sizedDelivery": false,
+        "branch": "codex/phone-test",
+        "saved": true
+      },
+      "gitPhoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+      "deploymentId": "52vdkwQ1pMp8AHEF2rZJRYrSn9Ex",
+      "deploymentStatus": "Ready",
+      "sourceAndAliasVerifiedInVercel": true,
+      "directBuildInfoVerified": false,
+      "directBuildInfoLimitation": "Unauthenticated fetch returned HTML; browser navigation blocked by client. Vercel Ready/source/canonical alias verified."
+    },
+    "ci": [
+      {
+        "runId": "38133989759",
+        "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+        "branch": "codex/phone-test",
+        "conclusion": "success"
+      },
+      {
+        "runId": "38131778423",
+        "source": "50ecbc9e5b393671a129df0ed229fda01ecc4958",
+        "branch": "codex/simple-signup-preview",
+        "conclusion": "success"
+      }
+    ],
+    "screenshots": [
+      "2026-10-11-notice-anonymous-image-pass.png",
+      "2026-10-11-notice-anonymous-withdrawn.png"
+    ]
+  }
+}

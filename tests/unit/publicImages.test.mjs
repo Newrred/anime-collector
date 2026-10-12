@@ -8,6 +8,8 @@ import { prepareSelectedPublicImage } from "../../src/features/memory/applicatio
 import { publicImageUrl,publicDesignStyle } from "../../src/features/memory/domain/publicVisual.js";
 import { processPrivateImage } from '../../src/server/privateImages/processImage.js';
 
+import { rpc as imageRpc } from "../../src/server/publicImages/supabaseImageBackend.js";
+
 const ID="11111111-1111-4111-8111-111111111111", PUB="22222222-2222-4222-8222-222222222222";
 const source=await sharp({create:{width:20,height:30,channels:3,background:"#ab3290"}}).png().toBuffer();
 function harness({enabled=true,failThumb=false,ambiguousComplete=false,revokeDuringRead=false,recoverable=false,privateInput=null,privateSourcesEnabled=false,moderationPreviewsEnabled=false}={}) {
@@ -418,3 +420,28 @@ test("HTTP rejects unknown placement and unsupported image variants without byte
     assert.equal((await fetch(`${base}/api/public-image?publication=${PUB}&asset=${ID}&variant=original`)).status,400);
   });
 });
+
+for (const [code, status] of [['PUBLIC_SIGNUP_REQUIRED', 403], ['PUBLIC_SIGNUP_UNAVAILABLE', 503]]) {
+  for (const privateSource of [false, true]) {
+    test('signup image preparation recovery ' + code + ' private=' + privateSource, async () => {
+      let mutations = 0;
+      const backend = {
+        user: async () => ({ rpc: (name, args) => imageRpc({ rpc: async () => ({ data: null, error: { message: code } }) }, name, args) }),
+        rpc: async () => { mutations++; }, put: async () => { mutations++; },
+        getPrivate: async () => { mutations++; }, remove: async () => { mutations++; },
+      };
+      const h = { handler: createPublicImageHandler({ enabled: true, privateSourcesEnabled: true, createBackend: () => backend }) };
+      await withServer(h, async base => {
+        let observedStatus;
+        await assert.rejects(prepareSelectedPublicImage({ sourceAssetId: ID, sourceVersion: 1, operationId: PUB,
+          accessToken: 'test-token', policyRevision: 'TEST_ONLY', consented: true, rightsBasis: 'USER_ORIGINAL',
+          readOriginal: () => new Blob([source]),
+          ...(privateSource ? { privateRepresentation: { id: PUB, hash: 'a'.repeat(64) } } : {}),
+          fetchImpl: async (url, init) => { const response = await fetch(base + url, init); observedStatus = response.status; return response; },
+        }), error => error.code === code && error.retryable !== true);
+        assert.equal(observedStatus, status);
+      });
+      assert.equal(mutations, 0, 'denied preparation must not write, read a private copy, delete or release quota');
+    });
+  }
+}

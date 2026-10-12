@@ -1,5 +1,129 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+> **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
+
+
+## 2026-10-11 W14/W19 test 고지 연결 후보 계약
+
+- 소스50ecbc9/CI38131778423 SUCCESS, 제품139a200과 runtime/config/DB 동일. 후속 사용자 직접 동의·새 익명 실제 이미지/철회 PASS는 위 최신 실행과 evidence를 따른다.
+- test 설정 네 필드만 변경: 세 policy revision은 MOEMOA_PUBLIC_GENERAL_20261011_01, signup_declaration_required=true. 기존 current signup declaration2건 확인; 재가입·기존수락변조 없음.
+- full row exact baseline·signup 정책/RPC 의존성이 맞을 때만 적용한다. 기본 dry-run, restore도 exact candidate만 허용하며 kill-switch/한도 drift를 덮어쓰지 않는다. 구성 전용 PostgreSQL8 PASS를 실제 게시 PASS로 합산하지 않는다.
+- 승인 범위 후보: 기존2000GET/64MB quota와 phone-test Preview policy/sized=true·Git소스50ecbc9를 함께 연결. 기존 소스a6b6dda·policy·sized=false·quota off/0·guard=false로 복귀하고 실제 사용량/수락/원본은 보존한다. Preview baseline은 적용 전 fresh readback 필수.
+- 새 공개동의는 당사자 조작. 실제 이미지전달/철회 이후에만 W19 실행증거를 추가한다. 운영/새schema/계정/키/역할 변경은 이 후보 범위 밖이다.
+
+
+## 2026-10-11 W14/D04 고정 공개 안내·동의 계약
+
+- 후보139a200과 capacity evidence의 firstPublicProductionCandidate_02가 최신이다. 과거7cd3a82 runtime 동등성/CI는 새 소스의 검증으로 재사용하지 않는다.
+- MOEMOA_PUBLIC_GENERAL_20261011_01은 /legal/public-sharing-2026-10-11/ 한·영 고정 안내에만 연결한다. 이전 가입 Terms/Privacy20261010은 불변이며 일반 이미지/별도권리/신고·차단·조치·이의제기/철회 범위를 설명한다. 체크 추가0.
+- 카드 간편 공개는 사용자가 동의한 정책과 서버 preview policy가 다르면 게시 전 CONSENT_MISMATCH. 기존 미확정 결과 재시도는 같은operation을 유지한다. 알려지지 않은 policy는 카드·보드·미니홈의 새 동의/게시를 막되 비공개/철회를 막지 않는다.
+- 로컬 unit12·고유 mocked Chromium12·build33 PASS. 첫 browser10/11의실패는모의Board고정revision fixture를수정, 해당범위7/7PASS. 합산17PASS로표시하지않는다. 320px고지/390px카드폭과한체크유지 확인. 신규실제계정/hosted/운영PASS0.
+- 새DB/migration/원격설정변경0. 원격 적용 시 test-only revision을 운영 고지로 자동 승인하지 않으며, 정확한 revision과 현재 동의는 별도 확인한다. 운영Public 활성은 D06 승인 전0.
+
+
+## 2026-10-11 W15/D06 운영 후보 결속 계약
+
+- 기존 capacity evidence의 firstPublicProductionCandidate는 재현 가능한 후보 manifest다. 적용 승인/운영 PASS가 아니다. source7cd3a82, 테스트a6b6dda와 runtime 차이0/CI38129338217 SUCCESS.
+- 운영 읽기전용 조회:38 migrations, Public6 flags off, policy UNAPPROVED/content·general UNCONFIGURED, asset/report 한도0. 누락3개는 가입 receipt 연결20261010160000→간편공개20261011120000→크기예약20261011180000 순서다. 국가/가입·운영자·global20MiB는 변경하지 않는다.
+- 기존 시험값 계정별10이미지/40MiB·신고10회/일과 새로운 운영용 revision MOEMOA_PUBLIC_GENERAL_20261011_01은 **후보**다. 실제 서비스 전체 저장은 기존20MiB가 우선 제한한다. 테스트전용revision 재사용0, 기존 일반 공개 범위를 확대/축소한 결정0.
+- 두 전송 한도2000/64000000은 정확한 sized 배포 확인 후 적용하고 마지막에Public을연다. 공개 사본 정리에는 Vercel/GitHub의기존 cleanup 두스위치가필요하며 최초활성은정확한승인대상이다. 원본삭제/이력삭제와구분한다.
+- 장애 시 DB reads/writes를 먼저닫고 quota·앱을복귀. additive함수/이력/소비량은보존. 실제DB실행/원격설정변경은이번0.
+- 후보도구는 다른대상·ledger차이·Public on·override·pause에서출력을거부한다. 최신Vercel/GitHub baseline은적용전읽기확인필요. D04고지결속/D05복구인수/경보수신/최종이미지HTTP·철회는잔여.
+
+
+## 2026-10-11 W15/D03 초기 공개 전송 한도 후보 — 로컬 준비 완료
+
+사용자 정상 공개규모 마감 요청에 따른 **초기 소규모 공개 후보**다. 트래픽 분포 미확보 상태이므로 일반 규모 무제한 운영/PASS를 뜻하지 않는다. 무료 유지·기존 한도/국가/이미지 권리 결정은 자동 변경하지 않는다.
+
+| 대상 | 후보 및 사용자 영향 |
+| --- | --- |
+| 전역 IMAGE_DELIVERY | 2,000 GET/UTC일, 계정별이 아님. preview/관리자/재시도도 같은 예산 |
+| 전역 IMAGE_DELIVERY_BYTES | 64,000,000B/UTC일(64MB, 64MiB 아님), 서버 사본 크기 선예약; 실패 예약도 보존 |
+| 관측 경보 | 기존 평가기에 1,600회 또는51,200,000B부터 경보. 6시간 예약관측/하루2~3회 담당 확인; 즉시 통지·수신 보장 아님 |
+| 초과 | 새 공개사본 GET은 기존429; 원본/카드 삭제 없음. UTC00:00(한국/일본09:00) 다음 요청에서 새 일자 계산 |
+| 전제 | 20261011180000 RPC + 검증한 sized-delivery 배포flag=true. false 경로는 요청당2MiB라 동일64MB로30GET밖에 못 함 |
+
+**과거 실제 합성 인코더 측정값**을 현재 full20장 화면에 대입: gradient295,880B/화면→최대100화면/일(요청 제한), geometric777,200B→82화면, noise21,241,240B→3화면. 실제 사용자 평균/고유 방문자/hosted 부하검사 결과가 아니다. 현재 PublicBoardSnapshot은full을 쓰므로thumb 절감량을 이 계산에 넣지 않았다.
+
+예산 산술:31일 길이의 공급자 기간은UTC daily window32개와 겹칠 수 있어 공개2.048GB를 확보한다. private 월500MB는 **UTC 달력월** 기준이다. 단순 같은월 합산은2.548GB지만 공급자 기간과 동일하지 않다. 임의31일 구간이 최대3개 달력월과 겹치는 보수적인 경우까지 private1.5GB를 잡으면 합계3.548GB/나머지1.452GB다. 후자는catalog·DB/Auth·test·실패/프로토콜·기타 트래픽 여유이며 강제 총량 제한이 아니다. 실제 provider 사용량은 조직 전체 화면에서 계속 확인한다. 무료 한도는uncached5GB/cached5GB 별도이므로 합쳐10GB로 계산하지 않는다. [Supabase 공식](https://supabase.com/docs/guides/platform/manage-your-usage/egress) (2026-10-11 열람).
+
+Vercel Hobby 공식 포함량은 전송100GB/origin10GB/함수1M이다. 본 후보의 허용 이미지 요청은32일64,000회지만 **차단·인증실패·다른 API 호출도 함수 사용량**이라 호출 전체 상한으로 주장하지 않는다. 전역quota는 WAF나 사용자별 공평 배분이 아니다. [공식](https://vercel.com/docs/plans/hobby). 기존 무료/비상업 범위와D04 공급자 조건 잔여를 본 전송 계산으로 해결했다고 표시하지 않는다.
+
+실행파일: tools/operations/public-delivery-budget-candidate.sql 및 rollback.sql. 기본 dry-run ROLLBACK, 승인 후 psql apply_delivery_budget=true만 COMMIT. baseline 두행 disabled/0/unpaused 및 active global override 없음이 전제, 변경되면 중단. 새migration0, usage/live_limit/다른정책/Public 보존. 롤백도 정확한후보 일치 검사, 소비량 환불0. 운영 중 원복할 때는 Public reads를 먼저 끄고quota해제; test는 승인 전 quota 상태 복귀.
+
+이번 격리PG38 PASS(기존25+후보13), 경보unit7 PASS(기존6+신규1). 초기 새psql세션 claim누락 AUTH_REQUIRED를 fixture에서수정; 제품권한완화0. 과거phone-test2fbc CI38127347170 전체SUCCESS를 이번read-only조회로확인; simple branch동일SHA CI38127115769 cancelled. 이번hosted 신규PASS0/원격변경0. **다음1개: 이 후보의 test 두quota 임시 적용·sized flag 활성·실제 차감/차단 관측 후 두설정 원복.** 실제경보수신/최종배포 이미지 전달·철회 및 운영 D06은 별도 잔여.
+
+
+## 2026-10-11 W15 사본 크기 예약 후보 계약 — 로컬·test Storage 검증
+
+- 새 flag MOEMOA_PUBLIC_IMAGE_SIZED_DELIVERY_ENABLED 기본false. 현재 운영은2MiB 선예약 경로를 유지하며 아래 새크기 계약은 승인2fbc14a test DB/phone-test에만 적용했으며 검사 후 test flag=false로 원복한다. 운영 미적용.
+- 기존 권한 resolve 후 service-only authorize_memory_sized_image_delivery가 asset READY·variant·path·hash·저장된 bytes를 대조한다. 임의 client bytes를 받지 않고 기존 요청수+bytes 한도를 한 트랜잭션에서 소비한다.
+- Storage GET에 Range를 제한하고 Content-Length/Content-Range 전체크기·stream누적량·정확한 길이/hash를 검증한다. 권한은 다운로드 뒤 다시 확인하며 no-store와 비공개 버킷을 유지한다. 잘못된 응답은503, 철회는404. 실패분 예약은 환불하지 않으며 일반 download 우회 없음.
+- 실제로컬 HTTP+합성Storage/DB격리 검사 PASS와 hosted응답 PASS를 구분한다. 10/11 이번 실제 test RPC→Storage206 full/thumb72B·hash·24×30 decode는 PASS; 실행 위치는 로컬 제품 helper다. 배포 handler 직접이미지/철회 HTTP와 활성한도 차감 PASS로 확대하지 않는다. upstream 과전송/헤더·DB·provider비용 전체를 정확히 정산하는 함수가 아니다. 일일 요청수 한도를 그대로50으로 두면 크기 차감만 바꿔도50회 상한은 유지된다. 정상 요청수/byte 한도 결정은 별도 D03 잔여다.
+- 이전 합성20장 측정값으로 신규예약295,880/777,200/21,241,240B(이전모두41,943,040B) 산술. 새사용자 분포/실제청구절감률 주장금지. 코드/SQL/실제 명령은 기존01의 같은 W15 절과 capacity evidence를 따른다.
+
+
+## 2026-10-11 W15/D03 관측 마감 계약
+
+### W15/D03 정상 공개규모 후보 대조 · 2026-10-11
+
+현재 구현은 PublicBoardSnapshot.jsx:34에서 full을 요청하고 handler.js:141에서 GET당 OUTPUT_LIMIT=2MiB를 선예약한다. handler.js:32–34는 no-store다. 따라서 실제 작은 이미지 전송량과 보호 한도 차감량은 다르며, CDN 캐시 절감을 현행 비용으로 계산하지 않는다. 안전한 기존 상한 계약을 임의 완화하지 않는다.
+
+| 후보 요청/일 | 20장 화면 열람 환산/일 | 31일 예약 상한 | private 월500MB 포함 |
+| --- | --- | --- | --- |
+| 50 | 2.5 | 3,250,585,600 B | 3,750,585,600 B |
+| 100 | 5 | 6,501,171,200 B | 7,001,171,200 B |
+| 200 | 10 | 13,002,342,400 B | 13,502,342,400 B |
+
+- 위 열람은 이미지20개의 GET20회만 가정한 전역 환산이다. 상세 열람·새로고침·미니홈 중복·owner preview·관리자 요청도 여유분을 소비하므로 실제 방문 허용량 보장이 아니다. 31일 고정 보수 계산이며 USD/과금 청구량이 아니다.
+- 이전10/11 공식 Free uncached5GB 조사 기준으로50GET/day도 공식표지·DB·test·기타 트래픽에 남기는 여유가 약1.249GB뿐이다. 100GET/day 이상은 예약 상한+private만으로5GB를 초과한다. 실제 과금 초과를 단정하는 값이 아니라, 현재 선예약 방식으로 보장 가능한 무료 예산의 한계다.
+- 이전 실제 encoder 합성3종은20장 full 기준295,880 / 777,200 / 21,241,240B였다. 표본은 실제 사용자 분포가 아니며, 새 측정 PASS가 아니다. 모든 경우 한도에는41,943,040B가 잡힌다.
+- 추천 후보: **50GET/day를 정식 전체공개 한도로 바로 켜지 않는다.** 무료 유지 시 좁은 공개 규모 제한 또는 목록 thumb 사용/실제 전송량에 더 가까운 안전 예약 방식 중 하나가 필요하다. 후자는 새 수정 후보이므로 기존 권한·hash·초과파일 보호/철회 계약을 검토한 뒤 최소 범위로 준비한다. thumb만 바꿔도 현재2MiB 예약은 동일해 요청 한도 문제가 자동 해결되지 않는다. 유료 전환은 사용자 무료 유지 결정 때문에 자동 실행하지 않는다.
+- 비용은 대체로 이미지 bytes×열람 횟수에 비례한다. 200장 보관 자체와200장 매방문 전송을 구분하고, 기존 공개20MiB 총량 보호는 유지한다. 저장량 보호·전송 예산·실제 경보 인수는 서로 다른 완료 조건이다.
+
+
+- 승인 후 운영199613b DB/설정/Git배포 완료. www exactSHA·무인증401/no-store, master 수동관측38126188717의 실제publicCapacity/정리SKIPPED PASS. 전체856,441,465B/Public0/alerts없음이다. 아래 미승인/미배포는 당시 기록이며, 실제알림수신과 전송한도/Public활성은 여전히 별도 미완료.
+
+- 운영 후보199613b는 baseline1878867에서 관측10파일만 분리했다. 새 private/public 이미지 공개·간편공개 UI·가입·전송한도 변경은 포함하지 않는다. 정확한 후보에서 unit18/격리PG15 PASS. 기존 운영 maintenance38115426850 성공과 신규 public observer HTTP/알림수신은 다른 증거다. migration20261011160000+관측설정+Git 배포 후 실제 경로를 확인해야 하며, 승인 전 운영 실행0.
+- 무료100MiB/day 예약 한도는 요청당2MiB 기준50GET/day, 20이미지 방문2.5회/day이다. 이를 정상 출시규모 또는 측정 전송량으로 표시하지 않는다. 31일 예약상한3,250,585,600B와 private500,000,000B 외 공식표지/DB/test/기타 트래픽도 별도다. 한도 활성은 이번 관측 후보 밖이다.
+
+- 17:32 JST 후속: 승인된 연결 적용 후 실제 private/public RPC와 로컬 경보 확인, Preview 자동 HTTP는 앱 전단 Vercel SSO302로 차단. flags2개=false 저장·같은806b6b2의5LTK Ready/alias 복구 확인; 브라우저 API 차단 때문에 원복503 직접응답과 실제 알림 수신은 미확인. 기존 아래404/인증설정 부재는 이전 상태다. 과거 immutable 배포까지 비활성이라고 주장하지 않는다.
+
+- 후속 연결 후보: 기존 private observation 함수 설치는 additive이며 호출은 policy.observed_at를 갱신한다. 함수를 읽기전용으로 오인하거나 기존 공개2개 승인에 추가migration을 묶지 않는다. test-only 인증/대상 설정 및 관측 flags만 허용 후보, cleanup·quota·운영 변화 제외. 로컬 적용도구5 PASS와 deployed HTTP/실제 운영자 수신은 구분한다. 동일806b6b2 CI38122228717 전체 SUCCESS 확인.
+
+- 저장량은 Storage 실제 bytes와 미완료/실패 예약 중 큰 값을 영역별로 합산한다. 물리 파일이 남으면 DELETED 메타데이터만으로0 처리하지 않는다. 크기 metadata 누락은 경보다. 관측 반환은 service-role 집계만이며 객체 경로/사용자/본문은 제외한다.
+- 전송 사용량은 기존 authorize의 **UTC 일일 요청 수·요청당2MiB 예약 예산**이다. 실제 파일 bytes·CDN/플랫폼 청구량과 다르며, 활성 global override를 반영한다. 이전날 사용량은0, 오래된/누락 관측은 실패로 취급한다.
+- 신규 경보: 공개저장/요청/예약전송80%, 전체저장980,000,000B 후보, 보호 한도 미설정/의도적 pause, 크기 미상, expires_at 이후24h 지난 미완료 정리. pending 수와 실제 삭제 실패를 동일시하지 않는다.
+- 로컬18·실제 격리PG15·합성 full/thumb HTTP6 PASS. 승인806b6b2 test DB/Preview 적용 후 실제 공개RPC·로컬 경보 판정 PASS. test 기존private 관측RPC404/인증설정 부재로 deployed observe HTTP는 미검증. 실제 GitHub 작업 실행/운영자 수신·provider 총egress는 별도 잔여. PublicBoardSnapshot은 현재 full을 읽으므로 thumb 비용을 현행 방문 비용으로 사용하지 않는다.
+
+
+> 2026-10-11 test 반영 근거: CARD-PUBLIC-SIMPLE-01 후보52875c6/DB20261011120000을 승인된 moemoa-test·phone-test에 반영했다. 실제 소유자 상태 조회·공개 선택·이미지 표시/동의1개까지 확인. 후속 사용자 직접 게시·새 익명24×30 이미지decode PASS, 미니홈 prepare도 guard=true에서 PASS. 후속 미니홈 직접 게시/보드 작성자링크/익명home decode도 PASS. 10/11 B 직접 가입·내부복귀/follow/목록 재방문/신고/차단·해제도 hosted PASS. 승인9746a30 phone-test에서 실제 HIDE/RESTORE·익명home 가림/복구·통지/감사, 카드 비공개→보드 unavailable/home 전시0·개인원본 보존 PASS. 직접 이미지 주소 HTTP차단은 브라우저 도구 제한으로 미확인, 후속895ccbb CI38119402749 전체 SUCCESS(입력52·공개42·최종Web80 PASS/기존5 SKIP). 이는 자동 검사 근거이며 D03~D06 및 직접 이미지 철회HTTP 미확인을 전체 출시 PASS로 확대하지 않는다. 상세는 단일 작업판/ExecPlan 실행 보고.
+
+## 2026-10-11 첫 Public 마감 계약 보충
+
+- CARD-PUBLIC-SIMPLE-01: 한 카드 공개는 공개/비공개 선택+동의1개+저장. 제목/이미지 외 비공개 감상·태그는 제외하고, 내부 prepare→정확한 projection/실제 이미지 확인→동일 review 게시로 기존 경계를 유지한다. 비공개는 모든 현재 공개 위치에서 해당 카드만 내리며 영구 retirement와 구분한다. 신규 동의 재게시 가능, 관리자 가림/영구삭제는 해제하지 않는다. 동시 prepare/publish는 owner lock으로 비공개와 직렬화. 일반 사후검토의 유효한 기존 동의는 카드 제거 부분집합에만 승계, moderator 판정 기록은 변경하지 않는다. 새 기능의 로컬 검증은 hosted/운영 PASS가 아니다.
+
+- C02~C04/Q08~Q11: 현재 계정의 명시 선택→원본 또는 정확한 ID/hash/sourceVersion의 private 사본→실제 preview→동의 게시. 전체 private bundle 전송 금지. revision/reviewHash/policyRevision/operationId 유지. 옛 preview·미준비 이미지 게시 거부. 불확실 완료는 같은 operation 재시도, quota는 확정 정리 뒤 반환. signup 오류는 같은 계정의 기존 가입 화면으로 복귀하며 임의 영수증 생성 금지.
+- 공개 네 기능 필수: 보드의 선택 snapshot, home의 선택 공개보드, 명시 follow·내 목록 재방문·해제, 새 익명 reader의 실제 이미지 decode. DOM/img태그·작성자blob·HTTP200만으로 PASS 아님.
+- C05/Q12: 보드 철회·카드 전체 철회·카드 삭제·home 철회·moderator 가림의 범위를 구분. 성공 이후 새 요청의 이미지/전시 비노출·private 원본 보존. 이미 다운로드된 자료 회수를 보장하지 않는다. 운영자 복원으로 사용자 철회/삭제 부활 금지.
+- C06/C07/W11~W13: 보드→작성자home→B의 로그인/가입 내부복귀→명시follow→내 목록 재방문→해제. 로그인·차단해제 후 자동follow 금지. 차단이 익명 공개까지 절대 숨김이라고 안내하지 않는다.
+- C08/W14: 실제 moderation 역할과 service admin 구분. 신고→가림(본문/이미지/home)→통지→이의→감사, 신고자 비노출. 일반 사후검토 원칙 유지.
+- 실제 hosted 한 바퀴: A/V/B/O, 합성카드3·보드2·카드1 중복참조, 공개/비공개 표식. A 저장/게시→새익명decode→home→B 복귀/follow/목록→신고/차단/O조치→철회/정리. 유효 기존 근거 재사용. 새 계정·약관 수락·개인 사진 선택은 당사자만.
+- source/origin/DB release/config·정책 fingerprint/역할·실물여부/명령·최초실패·실제결과·미확인 기록. 토큰/개인메모/개인사진 사본 제외. 로컬 모의API·Google과 hosted/실기기/운영은 별도. Android·기존 제외 Safari 추가검사 부활 금지.
+
+### D03~D06 마감 조건
+
+| 항목 | 남은 조건 |
+|---|---|
+| D03/W15 | 무료 유지. 실제 저장여유·main/thumb 추가bytes·방문전송량·예약/실패/정리대기·실제경보. 이전20MiB 보호값은 수용규모 보증 아님 |
+| D04 국가 | KR14/US13/TH13 비공개가입 승인≠Public 승인. PH/EU/EEA/UK/CH 목표 임의삭제 금지. 최초Public 국가집합/목적별 조건·실제대표자·고지 잔여만 마감. 전원인증/보호자메일/유료문의 부활 금지 |
+| D04 이미지 | SELF_DECLARED/TRUSTED 구분. 공식표지 공개허용범위, 캡처/타인팬아트 별도gate, 성인제외. 합성PASS≠권리PASS |
+| D05/W17 | 과거4308파일복호화 재사용. 독립키·격리DB/RLS/이미지참조·decode·최신삭제/철회fence·RPO/RTO/회전 인수 잔여. Public off복구, 최신안전이력 없으면 재개금지 |
+| D06/W20 | 같은source/DB/정책/config·네기능·hosted역할/이미지/철회·국가/권리승인·운영diff/rollback. 기존후보기의 FIRST_PUBLIC_RELEASE 필수증거 검사 연결, mock-only/Public-off 완료 거부. Android N/A는 D02 |
+
+최종 FIRST_PUBLIC_RELEASE_DONE은 운영가입/저장/이미지/home/follow재방문·철회·operator/경보/정리/복구 인수와 동일 Git 배포 SHA까지 포함한다. P0/P1 미해결 출시금지. P2·D+1/첫주관찰·신규기능은 기존후속에 분리. 이 절은 계약이며 실행PASS가 아니다.
+
+
 ## 2026-10-10 C02/W06 — 새 문서 수락·자기 기록·탈퇴의 구현 경계
 
 - 새 `simple-signup-2026-10-10-test` + `terms-2026-10-10-test` + `privacy-2026-10-10-test` 묶음은 Preview와 명시 test 허용에서만 가입에 사용한다.10/9 원문·별칭·기록은 그대로이며 기존 기록을 PH 민감정보 동의로 재해석하지 않는다. 새 체크1개는 PH에서 정확한 연령 처리 고지와 약관을 함께 표시하고, 추가 필드/보호자 인증은 없다.
@@ -818,3 +942,8 @@ Mock는 빠른 회귀의 도구다. Q05~Q07, Q09, Q12~Q14, Q16~Q22는 해당 권
 사용 범위: DB 백업과 Storage 객체 본문의 복구 차이. 현재 계정의 구독·복원 가용성을 확인한 것은 아님.
 
 Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구현 작업 시 현재 문서를 다시 확인하되, 사용하지 않는 신기능/변경사항을 새 필수 작업으로 만들지 않는다. 이 계획은 API 전체·공급자 설정·법적 정책을 재감사한 문서가 아니다.
+
+
+### W15/D03 위 초기 한도 후보의 승인 test 실행 후속 · 2026-10-11
+
+사용자a6b6dda승인 후moemoa-test의기존disabled/0에서2000/64MB임시적용. 실제RPC+Storage2종각72B/hash/decode와2GET/144B영속차감,hosted transaction rollback-only 초과거부/원자적소비/관측집계 PASS. 1600/51.2MB 실제서버집계를로컬기존평가기에서경보판정. test의기존public storage budget off 때문에 PUBLIC_BUDGET_UNGUARDED도발생했으며추가활성하지않음. 운영상태로오인금지. 두quota는disabled/0으로원복하고실제소비2/144보존. phone-testflag=true 배포977hd Ready/source·alias확인, false원복후재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias확인. 실제배포handler HTTP429/이미지/철회·알림수신은이번PASS아님. 설정2행과flag만변경, 새migration/이미지/원본/권한/운영변경0.
