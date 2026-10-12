@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 운영 핵심 공개·철회 검증 PASS:** ea8f388 운영에서 사용자 개인사용 권리 승인·직접 현재가입확인·고정정책 테스트 승인 후 합성24×30 카드 1개 저장/공개. 익명 RPC와 무인증 full/thumb 이미지200·decode·비공개 감상 제외 PASS, 실제2GET/150B 차감. 비공개 저장 후 보드 unavailable/img0·익명 RPC null·옛 full/thumb404/no-store·원시 Storage 공개주소400/이미지없음·개인 원본 버전/hash 보존 PASS. 테스트 카드는 현재 비공개이며 기존 사용자 카드 공개0·물리삭제/사용량환급0. 운영 미니홈·다른 계정 팔로우/신고/운영자 처리 검증은 잔여이며 과거 hosted PASS와 구분한다. 운영 적용·키·외부보관 승인은 완료했으므로 반복하지 않는다. 전체 W19/W20 DONE·미래 예약실행·복구 serving PASS는 아직 주장하지 않는다. [최신 근거](docs/moemoa/release-v2/evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionVerification_20261012를 따른다.
+
+
 > **2026-10-12 운영 공개 적용 완료·마지막 사용자 게시 검증 대기:** 사용자 exact후보 “전체 적용 승인”으로 ea8f388을 master Git→Vercel READY→www 동일SHA로 적용, master CI38193447190 SUCCESS. 직전 증분 백업38193002483 SUCCESS/chain3·사본삭제0·manual gate false. DB3 추가/41migration·Public/미니홈/팔로우/신고·현재가입확인·고정정책 활성/독립 readback PASS; 전달2000회64MB/일·전역20MiB 유지. 일요일03:00 주간workflow 설치/별도gate true·향후 예약실행 성공/RPO 보장 주장 안함. 카탈로그 암호화 ZIP Drive 비공개 보관→새회수 SHA/AES-GCM PASS. HTTP13·기존Google 로그인/두 sync·운영 observe-only38193643098 PASS. 새권리동의/현재가입확인 및 실제 운영 게시·이미지 decode/철회/old URL 검증은 대기라 W19/W20 전체 DONE/첫출시 최종인수를 주장하지 않는다. 기존 사용자 사진/비공개자료 자동공개0. [현재 근거](docs/moemoa/release-v2/evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionApplication_04를 따른다.
 
 

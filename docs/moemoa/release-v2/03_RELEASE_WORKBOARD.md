@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 운영 핵심 공개·철회 검증 PASS:** ea8f388 운영에서 사용자 개인사용 권리 승인·직접 현재가입확인·고정정책 테스트 승인 후 합성24×30 카드 1개 저장/공개. 익명 RPC와 무인증 full/thumb 이미지200·decode·비공개 감상 제외 PASS, 실제2GET/150B 차감. 비공개 저장 후 보드 unavailable/img0·익명 RPC null·옛 full/thumb404/no-store·원시 Storage 공개주소400/이미지없음·개인 원본 버전/hash 보존 PASS. 테스트 카드는 현재 비공개이며 기존 사용자 카드 공개0·물리삭제/사용량환급0. 운영 미니홈·다른 계정 팔로우/신고/운영자 처리 검증은 잔여이며 과거 hosted PASS와 구분한다. 운영 적용·키·외부보관 승인은 완료했으므로 반복하지 않는다. 전체 W19/W20 DONE·미래 예약실행·복구 serving PASS는 아직 주장하지 않는다. [최신 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionVerification_20261012를 따른다.
+
+
 > **2026-10-12 운영 공개 적용 완료·마지막 사용자 게시 검증 대기:** 사용자 exact후보 “전체 적용 승인”으로 ea8f388을 master Git→Vercel READY→www 동일SHA로 적용, master CI38193447190 SUCCESS. 직전 증분 백업38193002483 SUCCESS/chain3·사본삭제0·manual gate false. DB3 추가/41migration·Public/미니홈/팔로우/신고·현재가입확인·고정정책 활성/독립 readback PASS; 전달2000회64MB/일·전역20MiB 유지. 일요일03:00 주간workflow 설치/별도gate true·향후 예약실행 성공/RPO 보장 주장 안함. 카탈로그 암호화 ZIP Drive 비공개 보관→새회수 SHA/AES-GCM PASS. HTTP13·기존Google 로그인/두 sync·운영 observe-only38193643098 PASS. 새권리동의/현재가입확인 및 실제 운영 게시·이미지 decode/철회/old URL 검증은 대기라 W19/W20 전체 DONE/첫출시 최종인수를 주장하지 않는다. 기존 사용자 사진/비공개자료 자동공개0. [현재 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionApplication_04를 따른다.
 
 
@@ -423,7 +426,7 @@
 | 카탈로그 | 운영 ACTIVE4292 입력/hash/199source 및 표지4292 백업bytes 결속 PASS. metadata ZIP/AES-GCM 검증, 실제복원 DB4표 전체필드/이전release 전환·복귀 PASS. 외부보관/회수·새 원격 게시 미실행 |
 | 운영 | KR14/US13/TH13 가입 유지, ea8f388 Git/Vercel/www exactSHA·DB41/Public on·일요일03:00 예약 on·카탈로그 Drive 외부회수 인증 PASS |
 | 잔여 | 당사자 권리·현재가입 확인 뒤 실제 운영 게시·decode/철회/old URL·홈/follow/신고 검증. 향후 scheduled 실관찰·복구 serving 인수는 별도이며 임의 재개하지 않음 |
-| 다음1개 | 준비한 합성 테스트 카드의 당사자 권리동의·현재가입확인 후 실제 운영 공개·decode·철회 검증. 정확한 운영승인은 완료했으므로 반복 요청하지 않음 |
+| 다음1개 | 운영 미니홈·다른 계정 팔로우/목록·테스트 신고/운영자 처리. 합성 카드 공개·철회/현재가입확인은 PASS이며 기존 운영승인 반복 없음 |
 
 ### 이전 현재 위치 — 2026-10-10 운영 인계
 
@@ -825,8 +828,8 @@
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | APPROVED_OPERATIONAL_SNAPSHOT_EXTERNAL_RECOVERY_VERIFIED | ACTIVE4292 입력/199source·표지4292 인증bytes·실복원DB4표 전필드/이전release 전환·복귀 PASS. 59,661metadata 암호화 운영snapshot을 Drive 비공개 보관→새회수 SHA/AES-GCM PASS. 새 원격catalog 게시·전체 ingestion history 복구는 주장하지 않음 |
 | W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | OPERATIONS_INSTALLED_MONITORING | 이전 새증분 외부회수/99테이블·7확장/56삭제권리/RPC/RLS PASS·키 독립보관 확인. 운영직전 새증분38193002483 SUCCESS/chain3/사본삭제0. 카탈로그 독립외부사본 회수인증 PASS. 일요일03:00 주간master workflow/weekly gate true·manual false. 미래scheduled 성공/RPO/RTO보장·전체복구serving은 별도/미주장 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/7 현재 Astro route20개(record 포함) build/Chromium96+127·WebKit35의 실제 제한 범위 PASS; 과거19개(추가 moderation 포함), 과거18 route 검사와 구분. viewer Chromium4/분류 화면 일부 근거는 합성 Auth. 게시됨/심사대기 안내·인증 시작/복귀·지원 Web 사람 검증 잔여. route수/build를 UX PASS로 치환하지 않음 |
-| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | VERIFY | hosted 공개 이미지/미니홈/팔로우·신고/차단·운영자 조치·owner RPC 철회 검증. 제품 UI 철회 취소/확인 PASS(사용자 확인창 조작 보조). 10/11 최종고지50ecbc9의 실제 deployed 익명24×30·카드 비공개/unavailable·원본보존 PASS/원복완료. 만료/복귀·원시옛이미지URL HTTP404·운영후보 조합은 미완료. 별도 origin≠물리 기기, Android 제외 및 D02 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | DEPLOYED_ea8f388_PUBLIC_ON_FINAL_USER_FLOW_PENDING | 사용자 exact 전체승인→DB3/41migration·정책/한도 readback→ea8f388 master Git/Vercel READY/www 동일SHA·master CI38193447190 SUCCESS·HTTP13/observe-only38193643098/기존Google 로그인·두sync PASS. 실제 게시·decode·철회/old URL와 홈·follow/moderation 사용자 검증은 대기 |
+| W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | PRODUCTION_CORE_PASS_ROLE_MATRIX_PENDING | 과거 hosted 미니홈/follow/신고/차단/운영자 조치 PASS 보존. 10/12 운영 ea8f388 합성24×30 공개·익명 RPC/무인증 이미지 decode·2GET/150B·비공개 전환·old full/thumb404/Storage 우회거부·원본보존 PASS. 운영 미니홈·다른 계정 follow/신고/운영자 처리는 잔여. 물리기기/Android 제외 유지 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | DEPLOYED_ea8f388_PUBLIC_ON_CORE_PASS_ROLE_MATRIX_PENDING | 사용자 exact 전체승인→DB3/41migration·정책/한도 readback→ea8f388 master Git/Vercel READY/www 동일SHA·CI SUCCESS. HTTP13/관측/Google sync 및 이번 실제 합성 공개·무인증 decode·철회/old URL404 PASS. 운영 홈/follow/신고·검토 검증 잔여 |
 
 ### 작업 수의 변화와 진행률
 
@@ -1164,7 +1167,7 @@ NA 이유:
 | D03 | 예산·정상 규모·quota·경보 | INPUT_PARTIAL / NOTIFICATION_CHANNEL_USER_ATTESTED | Free 유지·전역Public20MiB. 운영199613b 관측 성공/980MB경보. 초기2000GET/64MB test차감·차단·원복, 실제test 이미지decode/철회 PASS | 10/11 사용자 기존 GitHub 실패알림 실수신 확인. 새 용량경보 발송/수신독립검증 아님. 초기소규모 한계 유지, 운영한도 적용·실사용관측 잔여 | evidence/2026-10-11-public-capacity-closeout.json |
 | D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 10/10 사용자 첫3개국 활성 승인, 무료 비공개·단일 약관 수락·추가 인증0. 개인 sinong / godburgundy@gmail.com / 하루2~3회. 기존 운영자1명·본인 수락/탈퇴·관리 기능 유지 | 10/10 고정 운영 문서·KR14/TH13/US13 DB 활성 APPLY SUCCESS. PH·EU/EEA·UK·CH는 이번 미활성; EU/UK 무보수 실제 대표자 수임과 PH 처리 경로 후속. 신규 운영 Google 왕복 미실행. 이전 TH미확정/운영미적용은 당시 이력이며3개국 재승인 요구 아님. 139a200 일반 공개 고지/정책 연결 및50ecbc9 실제test 게시/열람/철회·원복 완료(한·영, 체크 추가0). 운영 적용/청소년 공개 보호 경계는 별도 유지 | FIRST-SIGNUP-KR-US-TH-UI-20261010 / 이번 출시 보고 |
 | D05 | 공개 철회 지연·보존/복구 목표·사본 | LOCAL_RECOVERY_KEY_EXTERNAL_INPUTS_VERIFIED / WEEKLY_INSTALLED | 새증분 실제회수·99테이블/7확장·최신삭제/권리/RPC/RLS PASS. 키 독립보관 확인. 카탈로그 Drive 새회수인증 PASS. 운영직전 새증분38193002483 SUCCESS, 일요일03:00 주간workflow/weekly gate on·manual off/자동삭제0 | 미래scheduled 성공과RPO7일/RTO24h 보장 아님. populated Public/HTTP 복구·지속삭제feed/전체서빙 재개 미검증; 복구접근off·부모사본 보존 | evidence/2026-10-11-public-capacity-closeout.json firstPublicProductionApplication_04 / 기존복구 evidence |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | EXACT_APPROVED_APPLIED / FINAL_USER_FLOW_PENDING | 사용자 전체적용승인. ea8f388 master Git/Vercel READY/www 동일SHA·CI38193447190 SUCCESS. DB3/41·Public정책/설정·2000회64MB/일·20MiB 유지·주간/외부카탈로그 인수·HTTP13/관측/Google동기화 PASS | 같은 exact source의 실제 사용자 게시·이미지 decode/철회/old URL·홈/follow/신고검토 최종 확인. exact 운영승인은 완료해 반복요청 없음. 권리/현재가입 확인은 당사자 행동 | evidence/2026-10-11-public-capacity-closeout.json firstPublicProductionApplication_04 |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | EXACT_APPROVED_APPLIED / CORE_PASS_ROLE_MATRIX_PENDING | ea8f388 master Git/Vercel/www 동일SHA·CI·DB3/41·Public정책/한도·주간/카탈로그 인수 PASS. 사용자 승인 실제 합성 게시·익명 decode·2GET/150B·철회/old URL404·원본보존 PASS | 운영 미니홈·다른 계정 follow/신고/검토 최종 확인. exact 운영/권리/현재가입 승인 완료, 반복요청 없음 | evidence/2026-10-11-public-capacity-closeout.json firstPublicProductionVerification_20261012 |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 

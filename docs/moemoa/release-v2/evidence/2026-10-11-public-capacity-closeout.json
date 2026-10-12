@@ -4692,6 +4692,131 @@
       "User-authorized synthetic card personal-use confirmation, current signup confirmation and public policy consent",
       "On this exact production source: actual public image decode, board/home/follow/report/moderation and UI withdrawal/old-image-URL denial; no old private records published",
       "First future scheduled backup observation and continued capacity monitoring; restored serving stays separately closed until fresh safety state reconciliation"
-    ]
+    ],
+    "latestVerification": {
+      "date": "2026-10-12",
+      "status": "PRODUCTION_CORE_PUBLICATION_READ_WITHDRAWAL_PASS_ROLE_MATRIX_PENDING",
+      "evidenceKey": "firstPublicProductionVerification_20261012"
+    }
+  },
+  "firstPublicProductionVerification_20261012": {
+    "date": "2026-10-12",
+    "status": "PRODUCTION_CORE_PUBLICATION_READ_WITHDRAWAL_PASS_ROLE_MATRIX_PENDING",
+    "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+    "productionUrl": "https://www.moemoa.xyz",
+    "policyRevision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "userApproval": {
+      "personalUseConfirmed": true,
+      "currentSignupCompletedByUserAndIndependentlyVerified": true,
+      "publicPolicyAnswer": "정책 동의·테스트 공개 승인",
+      "syntheticFixtureOnly": true
+    },
+    "fixture": {
+      "newCardsCreated": 1,
+      "width": 24,
+      "height": 30,
+      "syntheticImage": true,
+      "existingCardsModifiedForPublication": false
+    },
+    "publicRead": {
+      "anonymousRpcReadable": true,
+      "privateReflectionLeaked": false,
+      "images": [
+        {
+          "variant": "full",
+          "status": 200,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "image/webp",
+          "bytes": 76,
+          "noBearerOrCookies": true,
+          "width": 24,
+          "height": 30,
+          "sha256": "cc44096813e6ed482ac584b1180f841c1fdcecf0ee7a97bf5b9dcd7ceea8cb1a"
+        },
+        {
+          "variant": "thumb",
+          "status": 200,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "image/webp",
+          "bytes": 74,
+          "noBearerOrCookies": true,
+          "width": 24,
+          "height": 30,
+          "sha256": "cb93a24c1c60b7f823a6d95214f5b6f1d07a5b2a004ce1cef3ff74a165da8ae2"
+        }
+      ],
+      "browserImageDecoded": true
+    },
+    "deliveryAccounting": {
+      "anonymousRequestsDelta": 2,
+      "anonymousBytesDelta": 150,
+      "before": {
+        "requests": 2,
+        "bytes": 152
+      },
+      "after": {
+        "requests": 4,
+        "bytes": 302
+      },
+      "withdrawalRefund": false
+    },
+    "withdrawal": {
+      "ownerUiPrivateSaveConfirmed": true,
+      "publicationState": "REVOKED",
+      "anonymousRpcReturnsNull": true,
+      "publicPageUnavailable": true,
+      "publicPageImageCount": 0,
+      "oldImages": [
+        {
+          "variant": "full",
+          "status": 404,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "bytes": 21,
+          "noBearerOrCookies": true,
+          "noImageBytes": true
+        },
+        {
+          "variant": "thumb",
+          "status": 404,
+          "cacheControl": "no-store, max-age=0",
+          "contentType": "application/json",
+          "bytes": 21,
+          "noBearerOrCookies": true,
+          "noImageBytes": true
+        }
+      ],
+      "privateSourceVersionAndHashPreserved": true,
+      "privateRepresentationReadyAndHashPreserved": true,
+      "derivativeState": "READY",
+      "physicalDerivativeDeletionPerformed": false
+    },
+    "rawStorageBypass": {
+      "bucketPrivate": true,
+      "checks": [
+        {
+          "variant": "full",
+          "status": 400,
+          "contentType": "application/json; charset=utf-8",
+          "noAuthentication": true,
+          "noImageBytes": true
+        },
+        {
+          "variant": "thumb",
+          "status": 400,
+          "contentType": "application/json; charset=utf-8",
+          "noAuthentication": true,
+          "noImageBytes": true
+        }
+      ]
+    },
+    "schemaChanges": 0,
+    "deploymentChanges": 0,
+    "roleChanges": 0,
+    "remaining": [
+      "Production minihome publication/read/withdrawal and different-account follow/list/report/moderator flow; prior hosted test remains separate",
+      "First future scheduled backup observation and ongoing capacity monitoring; new threshold alert delivery and restored public serving are not claimed"
+    ],
+    "publicSafeEvidence": true
   }
 }

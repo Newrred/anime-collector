@@ -20,6 +20,8 @@
 
 ### 15–17. 진행·발견·완료
 
+- 2026-10-12 운영 사용자 검증 후속: 사용자 개인사용 권리 저장 승인·직접 현재가입확인·고정 공개정책 테스트 승인을 실제 합성24×30 카드 1개에 적용했다. 같은 운영 ea8f388에서 공개 보드/익명 RPC·무인증 full/thumb decode·감상 제외 PASS, 실제2GET/150B 차감 확인. 카드 비공개 저장 후 익명 RPC null·보드 unavailable/img0·옛 full/thumb HTTP404/no-store PASS. 별도 원시 Storage 공개주소400/이미지없음·원본 버전/hash/private representation 보존 확인. 다음은 기존 W19의 운영 미니홈·다른 계정 팔로우/신고/운영자 처리이며 계정사용/테스트신고 권한은 사용자에게 확인 중이다. 과거 hosted A/B 검증과 이번 운영 핵심흐름을 구분해 안전한 결과만 기존 evidence·작업판에 기록한다. 추가 DB/schema/배포/삭제·사용량 환급 없음; 최종 전체 인수/미래 scheduled 성공/복구 serving을 주장하지 않는다.
+
 - 운영 후속: 사용자 exact ea8f388 전체승인. 직전백업38193002483 성공/chain3/사본삭제0, manual gate false. 승인DB3/41migration·Vercel12변수 추가(기존cleanup true 유지)→master Git→Vercel READY/www exactSHA/masterCI38193447190 SUCCESS. 전달2000/64MB·Public정책 활성 independent readback PASS. 주간일요일03:00 설치/weekly gate true, 현재가입·국가·20MiB 원본/usage 보존. 암호화 catalogZIP162,670,421B Drive 비공개 보관→신규회수 동일SHA/AES-GCM PASS. HTTP13·observe-only38193643098·기존Google계정/두sync PASS. 현재 기존계정의 최신가입확인 기록이 없고 합성24x30 test는 권리확인 전 미저장/미게시라 실제 운영 공개·decode/철회/old URL는 대기. 전체첫출시인수를 아직완료로 세지 않는다. exact 운영승인을 다시 묻지 않고 당사자 권리/약관은 행동 시점 확인을 따른다.
 
 
