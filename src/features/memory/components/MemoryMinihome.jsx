@@ -75,18 +75,24 @@ function Editor({ userId, locale, base }) {
     {state.busy && !["publishing", "revoking"].includes(state.phase) && <button className="btn btn--subtle" onClick={() => controller.cancel()}>{copy.cancel}</button>}
   </section>;
 }
+function MinihomeTasks({ userId, locale, base }) {
+  const labels = locale === 'ko'
+    ? { nav: '미니홈 메뉴', edit: '미니홈 편집', following: '팔로우', safety: '신고·알림' }
+    : { nav: 'Minihome tasks', edit: 'Edit home', following: 'Following', safety: 'Safety inbox' };
+  return <TaskSections label={labels.nav}>
+    <TaskPanel sectionId="edit" label={labels.edit}>
+    <Editor key={userId} userId={userId} locale={locale} base={base} />
+    </TaskPanel>
+    <TaskPanel sectionId="following" label={labels.following}><MemoryRelationships locale={locale} base={base} /></TaskPanel>
+    <TaskPanel sectionId="safety" label={labels.safety}><MemorySafety locale={locale} base={base} /></TaskPanel>
+    </TaskSections>;
+}
 function Content({ base }) {
   const { locale } = useMemoryRouteUi(), auth = useAuthSession(), copy = minihomeCopy(locale);
   return <main className="page-shell page-shell--wide public-workspace-page">
     <PublicPageHeading title={copy.title} base={`${base}boards/`} breadcrumb={copy.boards} />
-    <TaskSections label={locale === 'ko' ? '미니홈 메뉴' : 'Minihome tasks'}>
-    <TaskPanel sectionId="edit" label={locale === 'ko' ? '미니홈 편집' : 'Edit home'}>
-    {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <p>{copy.login} <a href={`${base}data/`}>{locale === "ko" ? "계정" : "Account"}</a></p>
-      : <Editor key={auth.user.id} userId={auth.user.id} locale={locale} base={base} />}
-    </TaskPanel>
-    <TaskPanel sectionId="following" label={locale === 'ko' ? '팔로우' : 'Following'}><MemoryRelationships locale={locale} base={base} /></TaskPanel>
-    <TaskPanel sectionId="safety" label={locale === 'ko' ? '신고·알림' : 'Safety inbox'}><MemorySafety locale={locale} base={base} /></TaskPanel>
-    </TaskSections>
+    {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <p>{copy.login} <a href={`${base}data/`}>{locale === 'ko' ? '계정' : 'Account'}</a></p>
+      : <MinihomeTasks userId={auth.user.id} locale={locale} base={base} />}
   </main>;
 }
 export default function MemoryMinihome({ base = "/" }) {

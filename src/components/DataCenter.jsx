@@ -285,6 +285,7 @@ export default function DataCenter() {
       <TaskPanel sectionId="backups" label={locale === 'ko' ? '파일 백업' : 'File backups'}><ManualDataTools locale={locale} onChanged={refreshLocalOverview} /></TaskPanel>
       <TaskPanel sectionId="privacy" label={locale === 'ko' ? '개인정보' : 'Privacy'}>
       {!auth.user && <p>{locale === 'ko' ? '로그인하면 계정 자료 내보내기와 삭제를 관리할 수 있습니다.' : 'Sign in to manage account exports and deletion.'}</p>}
+      {auth.user && import.meta.env.PUBLIC_ACCOUNT_PRIVACY_V1 !== '1' && <p>{locale === 'ko' ? '현재 계정 개인정보 관리 기능을 사용할 수 없습니다.' : 'Account privacy controls are currently unavailable.'}</p>}
       {import.meta.env.PUBLIC_ACCOUNT_PRIVACY_V1 === '1' && auth.user?.id && <AccountPrivacyPanel
         key={auth.user.id} user={auth.user} locale={locale} base={base}
         canDelete={import.meta.env.PUBLIC_ACCOUNT_DELETE_V1 === '1'}

@@ -75,3 +75,10 @@ test('moderator access denial does not offer repeated refresh',async({page,conte
   await expect(page.getByRole('alert')).toContainText('This account cannot review public content');
   await expect(page.getByRole('button',{name:'Refresh review queue',exact:true})).toHaveCount(0);
 });
+
+test('a guest home explains sign-in without empty relationship and safety tasks',async({page,context})=>{
+  await adapters(context);await page.goto('/minihome/');
+  await expect(page.getByText('Sign in to choose your public home.',{exact:false})).toBeVisible();
+  await expect(page.getByRole('navigation',{name:'Minihome tasks'})).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'Account',exact:true})).toBeVisible();
+});
