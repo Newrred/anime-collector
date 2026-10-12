@@ -45,7 +45,7 @@ function Workspace({status, ko, base}) {
   return <>
     <div className="admin-toolbar">
       <p>{data ? t(`마지막 확인 ${time(data.checkedAt)}`, `Last checked ${time(data.checkedAt)}`) : t('운영 상태', 'Service status')}</p>
-      <button className="btn btn--subtle" disabled={phase === 'loading'} onClick={() => { setConfirmation(null); refresh(); }}>{t('새로고침', 'Refresh')}</button>
+      {error !== 'ADMIN_REQUIRED' && <button className="btn btn--subtle" disabled={phase === 'loading'} onClick={() => { setConfirmation(null); refresh(); }}>{t('새로고침', 'Refresh')}</button>}
     </div>
     {error && <p className="admin-message" role="alert">{(errorCopy[error] || [
       '상태를 확인하지 못했습니다. 연결을 확인하고 새로고침해 주세요.', 'Could not verify the status. Check your connection and refresh.',

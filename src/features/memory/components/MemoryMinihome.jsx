@@ -16,6 +16,7 @@ import MemorySafety from "./MemorySafety.jsx";
 import PublicSignupNotice from "./PublicSignupNotice.jsx";
 import "./memory-publication.css";
 import PublicPageHeading from './PublicPageHeading.jsx';
+import TaskSections, { TaskPanel } from '../../../components/ui/TaskSections.jsx';
 
 function Review({ review, controller, services, locale, busy, base }) {
   const noticeAvailable = Boolean(publicSharingNoticeHref(review.policyRevision, base));
@@ -47,7 +48,7 @@ function Editor({ userId, locale, base }) {
     {state.home?.published && !state.home.hidden && state.home.visible !== false && <p role="status">{copy.published} <a data-astro-reload href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
     {state.home?.published && !state.home.hidden && state.home.visible !== false && <PublicLinkCopy key={state.home.id} kind="home" id={state.home.id} locale={locale} base={base} />}
     {state.phase === "revoked" && <p role="status">{copy.revoked}</p>}
-    {state.home && <button className="btn btn--subtle" disabled={state.busy} onClick={() => { if (confirm(copy.confirm)) controller.revoke(); }}>{copy.withdraw}</button>}
+    {state.home && <details className="public-management"><summary>{locale === 'ko' ? '공개 관리' : 'Manage sharing'}</summary><button className="btn btn--subtle" disabled={state.busy} onClick={() => { if (confirm(copy.confirm)) controller.revoke(); }}>{copy.withdraw}</button></details>}
     {state.review ? <Review key={state.review.reviewHash} review={state.review} controller={controller} services={services} locale={locale} busy={state.busy} base={base} /> : <form onSubmit={(e) => { e.preventDefault(); controller.prepare({ nickname, bio, entries }); }}>
       <fieldset disabled={state.busy}>
         <label>{copy.nickname}<input required maxLength={60} value={nickname} onChange={(e) => change(() => setNickname(e.target.value))} /></label>
@@ -78,13 +79,14 @@ function Content({ base }) {
   const { locale } = useMemoryRouteUi(), auth = useAuthSession(), copy = minihomeCopy(locale);
   return <main className="page-shell page-shell--wide public-workspace-page">
     <PublicPageHeading title={copy.title} base={`${base}boards/`} breadcrumb={copy.boards} />
-    <div className="public-workspace"><div className="public-workspace__editor">
+    <TaskSections label={locale === 'ko' ? '미니홈 메뉴' : 'Minihome tasks'}>
+    <TaskPanel sectionId="edit" label={locale === 'ko' ? '미니홈 편집' : 'Edit home'}>
     {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <p>{copy.login} <a href={`${base}data/`}>{locale === "ko" ? "계정" : "Account"}</a></p>
       : <Editor key={auth.user.id} userId={auth.user.id} locale={locale} base={base} />}
-    </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '팔로우와 운영 알림' : 'Following and safety inbox'}>
-      <div id="following"><MemoryRelationships locale={locale} base={base} /></div>
-      <MemorySafety locale={locale} base={base} />
-    </aside></div>
+    </TaskPanel>
+    <TaskPanel sectionId="following" label={locale === 'ko' ? '팔로우' : 'Following'}><MemoryRelationships locale={locale} base={base} /></TaskPanel>
+    <TaskPanel sectionId="safety" label={locale === 'ko' ? '신고·알림' : 'Safety inbox'}><MemorySafety locale={locale} base={base} /></TaskPanel>
+    </TaskSections>
   </main>;
 }
 export default function MemoryMinihome({ base = "/" }) {

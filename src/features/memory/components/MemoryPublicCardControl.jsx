@@ -30,9 +30,9 @@ export default function MemoryPublicCardControl({ card, locale, disabled }) {
       if (request.current === abort) request.current = null;
     }
   };
-  return <div>
+  return <details className="public-management"><summary>{locale === 'ko' ? '카드 공개 관리' : 'Manage card sharing'}</summary>
     <button className="btn btn--subtle" type="button" disabled={disabled || state.busy} onClick={stop}>{copy.revokeCard}</button>
     {state.done && <p role="status">{copy.cardRevoked}</p>}
     {state.error && <p role="alert">{publicationError(state.error, locale)}</p>}
-  </div>;
+  </details>;
 }

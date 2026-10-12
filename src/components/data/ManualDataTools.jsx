@@ -240,8 +240,7 @@ export default function ManualDataTools({ locale = "ko", onChanged }) {
     <section id="manual-tools" className="surface-card manual-tools">
       <div className="pageHeader manual-tools__header">
         <h2 className="sectionTitle">{copy.manualToolsTitle}</h2>
-        <p className="sectionLead">{copy.manualToolsLead}</p>
-        <p>{locale === "ko" ? "아래 기존 백업은 서재·티어·시청 기록용입니다. Memory·보드·개인 이미지·외부 ID 없는 저장 작품은 포함하지 않습니다." : "The legacy backup below covers Library, Tier and watch logs. It excludes Memories, Boards, personal images and saved titles without an external ID."}</p>
+        <dl className="backup-scope"><div><dt>{locale === 'ko' ? '포함' : 'Includes'}</dt><dd>{locale === 'ko' ? '기존 서재 · 티어 · 시청 기록 · 캐릭터 핀' : 'Legacy Library · Tier · watch logs · character pins'}</dd></div><div><dt>{locale === 'ko' ? '별도 보관' : 'Keep separately'}</dt><dd>{locale === 'ko' ? '기억과 보드 · 개인 사진 파일 · 외부 ID 없는 저장 작품' : 'Memories and Boards · personal image files · saved titles without an external ID'}</dd></div></dl>
       </div>
 
       <div className="data-menu-tabs seg-toggle-2" data-active-index={tab === "export" ? "0" : "1"}>

@@ -19,7 +19,7 @@ export function useSafetyRequest(userId) {
       const user = (await services.getSession())?.user?.id;
       if (request.signal.aborted || user !== userId) throw new Error("AUTH_REQUIRED");
       return result;
-    } catch (error) { if (current.current === request) setError(error?.code === "RATE_LIMITED" ? "limit" : "failed"); }
+    } catch (error) { if (current.current === request) setError(error?.code === "RATE_LIMITED" ? "limit" : error?.code === 'MODERATOR_REQUIRED' ? 'forbidden' : "failed"); }
     finally { clearTimeout(timer); if (current.current === request) { current.current = null; setBusy(false); } }
   }
   return { run, busy, error };
@@ -56,18 +56,25 @@ function Report({ userId, kind, target, locale, base }) {
   </section>;
 }
 function Notice({ row, userId, ko, base, onAppealed }) {
-  const [text, setText] = useState(""), { run, busy, error } = useSafetyRequest(userId);
+  const [text, setText] = useState(""), [appealOpen, setAppealOpen] = useState(false), { run, busy, error } = useSafetyRequest(userId);
   useUnsavedNavigation(Boolean(text), ko ? "ko" : "en", { busy });
   const actions = { HIDE: ko ? "공개 자료 임시 가림" : "Public content hidden", RESTORE: ko ? "운영 가림 해제" : "Moderation hide removed", KEEP: ko ? "검토 완료" : "Review completed", RESTRICT_ACCOUNT: ko ? "공개 쓰기 제한" : "Public writes restricted", RELEASE_ACCOUNT: ko ? "해당 사건의 쓰기 제한 해제" : "This case's write restriction released", CONTENT_GENERAL: ko ? "일반 공개 콘텐츠로 분류" : "Classified as general content", CONTENT_MATURE: ko ? "성인용 콘텐츠로 공개 불가" : "Adult content cannot be shared publicly", CONTENT_BLOCKED: ko ? "현재 공개 허용 범위에서 제외" : "Outside the current public content policy" };
-  return <li><p>{actions[row.action] || (ko ? "운영 알림" : "Moderation notice")}</p><p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{row.reason}</p>
+  return <li className="safety-notice"><details><summary>{actions[row.action] || (ko ? "운영 알림" : "Moderation notice")}</summary><p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{row.reason}</p>
     <p><a href={`${base}public/${row.targetKind}/?id=${encodeURIComponent(row.targetId)}`}>{row.targetKind === "home" ? (ko ? "대상 미니홈 보기" : "View reported home") : (ko ? "대상 공개 보드 보기" : "View reported Board")}</a></p>
-    {row.appealed ? <p role="status">{ko ? "이의제기를 접수했습니다." : "Appeal received."}</p> : <form onSubmit={async (e) => {
+    {row.appealed ? <p role="status">{ko ? "이의제기를 접수했습니다." : "Appeal received."}</p> : <>
+    <button type="button" className="btn btn--subtle" aria-expanded={appealOpen} disabled={busy} onClick={() => {
+      if (appealOpen && text && !confirm(ko ? '작성한 이의제기를 취소할까요?' : 'Discard this appeal draft?')) return;
+      if (appealOpen) setText('');
+      setAppealOpen(value => !value);
+    }}>{appealOpen ? (ko ? '취소' : 'Cancel appeal') : (ko ? '이의제기 작성' : 'Request appeal')}</button>
+    {appealOpen && <form onSubmit={async (e) => {
       e.preventDefault(); const result = await run(async (gateway, options) => {
         const value = await gateway.appeal(row.id, text, options);
         if (value?.id !== row.id || value.appealed !== true) throw new Error(); return value;
       });
       if (result) { setText(""); onAppealed(row.id); }
-    }}><label>{ko ? "이의제기 사유" : "Appeal reason"}<textarea required maxLength={1000} disabled={busy} value={text} onChange={(e) => setText(e.target.value)} /></label><button className="btn" disabled={busy || !text.trim()}>{ko ? "이의제기 접수" : "Submit appeal"}</button><ErrorMessage error={error} ko={ko} /></form>}
+    }}><label>{ko ? "이의제기 사유" : "Appeal reason"}<textarea required maxLength={1000} disabled={busy} value={text} onChange={(e) => setText(e.target.value)} /></label><button className="btn" disabled={busy || !text.trim()}>{ko ? "이의제기 접수" : "Submit appeal"}</button><ErrorMessage error={error} ko={ko} /></form>}</>}
+    </details>
   </li>;
 }
 function Inbox({ userId, locale, base }) {
@@ -88,7 +95,7 @@ function Inbox({ userId, locale, base }) {
     <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? "알림 새로고침" : "Refresh safety inbox"}</button><ErrorMessage error={error} ko={ko} />
     {data?.items.length === 0 && <p>{ko ? "접수 내역과 알림이 없습니다." : "No reports or notices."}</p>}
     <ul>{data?.items.map((row) => row.type === "NOTICE" ? <Notice key={row.id} row={row} ko={ko} base={base} userId={userId} onAppealed={(id) => setData((d) => ({ ...d, items: d.items.map((r) => r.id === id ? { ...r, appealed: true } : r) }))} />
-      : <li key={row.id}>{ko ? "신고 접수" : "Report receipt"}: {row.id} — {row.status === "CLOSED" ? (ko ? "검토 완료" : "Reviewed") : (ko ? "검토 대기" : "Awaiting review")}</li>)}</ul>
+      : <li key={row.id}><details><summary>{ko ? "신고 접수" : "Report receipt"} · {row.status === "CLOSED" ? (ko ? "검토 완료" : "Reviewed") : (ko ? "검토 대기" : "Awaiting review")}</summary><p>{ko ? '접수 번호' : 'Receipt ID'}: {row.id}</p></details></li>)}</ul>
     {data?.next && <button className="btn btn--subtle" disabled={busy} onClick={() => load(data.next)}>{ko ? "더 보기" : "More safety updates"}</button>}
   </section>;
 }

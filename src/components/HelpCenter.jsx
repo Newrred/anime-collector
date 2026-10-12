@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import TopNavDataMenu from "./TopNavDataMenu.jsx";
 import { useUiPreferences } from "../hooks/useUiPreferences";
 import { getMessageGroup } from "../domain/messages.js";
+import { minihomeUiEnabled } from '../features/memory/runtime/platformPublication.js';
 
 function noticeToneClass(kind) {
   if (kind === "important") return "is-important";
@@ -12,6 +13,9 @@ function noticeToneClass(kind) {
 export default function HelpCenter() {
   const { theme, locale, setTheme, setLocale } = useUiPreferences();
   const copy = getMessageGroup(locale, "helpCenter");
+  const sharingHelp = minihomeUiEnabled()
+    ? (locale === 'ko' ? '가입 확인을 마친 계정에서 공개 보드를 골라 미니홈에 전시할 수 있습니다. 게시 미리보기와 공개 정책을 확인한 뒤 직접 게시합니다. 비공개 기록은 자동 공개하지 않습니다.' : 'Accounts that complete signup verification can display selected public Boards in a Minihome. Review the preview and sharing policy before publishing. Private records stay private until you explicitly share them.')
+    : (locale === 'ko' ? '현재 공개 미니홈 게시를 사용할 수 없습니다. 비공개 기록과 보드는 계속 이용할 수 있습니다.' : 'Publishing a public Minihome is currently unavailable. Private memories and Boards remain available.');
   const [canInstallPwa, setCanInstallPwa] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const copyMessageTimeoutRef = useRef(null);
@@ -88,7 +92,7 @@ export default function HelpCenter() {
           </div>
         </section>
 
-        <section className="surface-card help-center__section">
+        <details className="surface-card help-center__section"><summary>{copy.noticesTitle}</summary>
           <div className="pageHeader">
             <h2 className="sectionTitle">{copy.noticesTitle}</h2>
           </div>
@@ -102,24 +106,26 @@ export default function HelpCenter() {
                   <span className="small help-center__notice-date">{notice.date}</span>
                 </div>
                 <h3 className="help-center__notice-title">{notice.title}</h3>
-                <p className="small help-center__notice-body">{notice.body}</p>
+                <p className="small help-center__notice-body">{notice.id === 'minihome' ? sharingHelp : notice.body}</p>
               </article>
             ))}
           </div>
-        </section>
+        </details>
 
         <section className="surface-card help-center__section">
-          <div className="help-center__grid">
+          <h2 className="sectionTitle">{locale === 'ko' ? '무엇을 하고 싶으세요?' : 'What would you like to do?'}</h2>
+          <div className="help-center__questions">
             {copy.cards.map((card) => (
-              <article key={card.title} className="help-center__card">
-                <h2 className="sectionTitle help-center__card-title">{card.title}</h2>
-                <p className="small help-center__card-body">{card.body}</p>
-              </article>
+              <details key={card.title} className="help-center__card">
+                <summary>{card.title}</summary>
+                <p className="small help-center__card-body">{card.id === 'minihome' ? sharingHelp : card.body}</p>
+                <a href={`${base}${card.href}`}>{locale === 'ko' ? '열기 →' : 'Open →'}</a>
+              </details>
             ))}
           </div>
         </section>
 
-        <section className="surface-card help-center__section">
+        <details className="surface-card help-center__section"><summary>{copy.tipsTitle}</summary>
           <div className="pageHeader">
             <h2 className="sectionTitle">{copy.tipsTitle}</h2>
           </div>
@@ -144,7 +150,7 @@ export default function HelpCenter() {
             </div>
             {copyMessage ? <p className="small help-center__about-copy-message">{copyMessage}</p> : null}
           </div>
-        </section>
+        </details>
       </div>
     </div>
   );

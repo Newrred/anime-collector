@@ -48,6 +48,8 @@ for (const locale of ['ko', 'en'] as const) {
       await expect(page).toHaveURL(/\/data\/$/);
       await expect(page.getByRole('heading', { level: 1, name: labels[locale].account, exact: true })).toBeVisible();
       await expect(page.locator('.sync-card')).toBeVisible();
+      await expect(page.locator('#manual-tools')).toBeHidden();
+      await page.getByRole('button', {name: locale === 'ko' ? '파일 백업' : 'File backups', exact:true}).click();
       await expect(page.locator('#manual-tools')).toBeVisible();
       const current = await openAccountMenu(page, width);
       await expect(current.menu.getByRole('button', { name: labels[locale].account, exact: true }))

@@ -809,13 +809,15 @@ export default function TierBoard() {
             <p className="pageLead">{copy.currentBoardLead}</p>
           </div>
           <div className="tier-summary-card__actions">
-            <button className="btn" onClick={reset}>{copy.reset}</button>
+            <details className="public-management"><summary>{locale === 'ko' ? '주제 관리' : 'Manage topic'}</summary>
+            <button className="btn btn--subtle" onClick={reset}>{copy.reset}</button>
             {activeTopic.id !== DEFAULT_TIER_TOPIC_ID && (
               <button className="btn btn--danger" onClick={deleteCurrentTopic}>
                 <span className="btn__icon"><IconTrash size={14} /></span>
                 <span className="btn__label">{copy.deleteTopic}</span>
               </button>
             )}
+            </details>
           </div>
         </div>
 
@@ -833,7 +835,7 @@ export default function TierBoard() {
           </div>
         </div>
 
-        <div className="tier-summary-card__topic-tools">
+        <details className="tier-summary-card__topic-tools"><summary>{copy.createCustomTopic}</summary>
           <div className="tier-summary-card__topic-creator">
             <div className="tier-summary-card__eyebrow">{copy.createCustomTopic}</div>
             <div className="tier-summary-card__topic-input-row">
@@ -849,7 +851,7 @@ export default function TierBoard() {
               </button>
             </div>
           </div>
-        </div>
+        </details>
       </section>
 
       <section className="surface-card tier-topic-switcher" aria-label={copy.topicLibrary}>

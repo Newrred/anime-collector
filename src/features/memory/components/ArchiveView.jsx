@@ -111,15 +111,15 @@ function ArchiveContent({ base }) {
         <ChannelSection title={locale === "ko" ? "보기" : "View"}><TextChoices label={locale === "ko" ? "기억 보기" : "Memory view"} options={[{ value: "grid", label: locale === "ko" ? "그리드" : "Grid" }, { value: "table", label: locale === "ko" ? "표" : "Table" }]} value={view} onChange={value => { setView(value); const url = new URL(location.href); url.searchParams.set("view", value); history.replaceState(null, "", url); }} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "정렬" : "Sort"} value={sort} onChange={value => updateFilter(query, value)} options={[{ value: "created", label: locale === "ko" ? "최근 작성순" : "Recently created" }, { value: "updated", label: locale === "ko" ? "최근 수정순" : "Recently edited" }]} /></div></ChannelSection>
         <ChannelSection title={locale === "ko" ? "태그" : "Tags"}>
           <TextChoices label={locale === "ko" ? "카드 태그" : "Memory tags"} options={options.memoryTags.map(value => ({ value, label: `#${value}` }))} value={facets.memoryTag} onChange={value => changeFacet("memoryTag", value)} />
-          {!options.memoryTags.length && <p className="channel-hint">{locale === "ko" ? "기억 상세에서 태그를 추가해 보세요." : "Add tags in a memory's detail."}</p>}
-          <p className="channel-hint">{locale === "ko" ? "작품 감상 기록 기준" : "Based on title watch logs"}</p>
+          {!options.memoryTags.length && !options.tags.length && <p className="channel-hint">{locale === "ko" ? "태그 없음" : "No tags yet"}</p>}
+          {options.tags.length > 0 && <p className="channel-hint">{locale === "ko" ? "작품 감상 태그" : "Title watch tags"}</p>}
           <TextChoices label={locale === "ko" ? "포인트 태그" : "Point tags"} options={options.tags.map(value => ({ value, label: formatReasonTagLabel(value, locale) }))} value={facets.tag} onChange={value => changeFacet("tag", value)} />
           <button className="channel-text-button" onClick={clearFacets}>{locale === "ko" ? "전체 보기 ↗" : "Show all ↗"}</button>
         </ChannelSection>
         <ChannelSection title={locale === "ko" ? "캐릭터" : "Characters"}>
           <TextChoices label={locale === "ko" ? "기억의 캐릭터" : "Memory characters"} options={options.memoryCharacters} value={facets.memoryCharacter} onChange={value => changeFacet("memoryCharacter", value)} />
-          {!options.memoryCharacters.length && <p className="channel-hint">{locale === "ko" ? "기억마다 캐릭터를 선택해 보세요." : "Choose characters for individual memories."}</p>}
-          <p className="channel-hint">{locale === "ko" ? "작품 감상 기록 기준" : "Based on title watch logs"}</p>
+          {!options.memoryCharacters.length && !options.characters.length && <p className="channel-hint">{locale === "ko" ? "캐릭터 없음" : "No characters yet"}</p>}
+          {options.characters.length > 0 && <p className="channel-hint">{locale === "ko" ? "작품 감상 캐릭터" : "Title watch characters"}</p>}
           <TextChoices label={locale === "ko" ? "캐릭터" : "Characters"} options={options.characters} value={facets.character} onChange={value => changeFacet("character", value)} />
           <TextChoices label={locale === "ko" ? "캐릭터 감정" : "Character affinity"} options={options.affinities.map(value => ({ value, label: formatAffinityLabel(value, locale) }))} value={facets.affinity} onChange={value => changeFacet("affinity", value)} />
           {logsFailed && <p className="channel-hint">{locale === "ko" ? "감상 기록을 불러오지 못했어요." : "Watch logs unavailable."}</p>}

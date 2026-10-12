@@ -90,10 +90,10 @@ function Workspace({ userId, ko }) {
   }
   return <>
     <nav className="memory-review-tabs" aria-label={ko ? '검토 목록' : 'Review queues'}>{[['board', ko ? '보드' : 'Boards'], ['home', ko ? '미니홈' : 'Homes'], ['appeals', ko ? '이의 신청' : 'Appeals'], ['reports', ko ? '신고' : 'Reports']].map(([kind, label]) =>
-      <button key={kind} className="btn" disabled={busy} aria-pressed={mode === kind} onClick={() => load(kind)}>{label}</button>)}</nav>
+      <button key={kind} className="btn btn--subtle" disabled={busy || error === 'forbidden'} aria-pressed={mode === kind} onClick={() => load(kind)}>{label}</button>)}</nav>
     {mode === 'reports' ? <MemoryReportReview key={userId} userId={userId} ko={ko} /> : <>
-    <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? '목록 새로고침' : 'Refresh review queue'}</button>
-    {error && <p role="alert">{ko ? '검토 내용을 확인하지 못했습니다. 권한을 확인하고 목록을 새로고침해 주세요.' : 'Could not complete review. Check your access and refresh the queue.'}</p>}
+    {error !== 'forbidden' && <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? '목록 새로고침' : 'Refresh review queue'}</button>}
+    {error && <p role="alert">{error === 'forbidden' ? (ko ? '이 계정에는 운영 검토 권한이 없습니다. 계정 메뉴에서 운영자 계정으로 로그인해 주세요.' : 'This account cannot review public content. Sign in to your moderator account from the account menu.') : (ko ? '검토 내용을 확인하지 못했습니다. 연결을 확인하고 목록을 새로고침해 주세요.' : 'Could not complete review. Check your connection and refresh the queue.')}</p>}
     {saved && <p role="status">{ko ? '검토 결과를 저장했습니다.' : 'Review decision saved.'}</p>}
     <ul>{rows.map(row => <li key={row.id}><button className="btn btn--subtle" disabled={busy} onClick={() => open(row)}>
       {typeof row.label === 'string' ? row.label : (ko ? '이의 신청 검토' : 'Review appeal')}</button></li>)}</ul>

@@ -21,7 +21,7 @@ export default function MemoryBackupTools({ locale = "ko" }) {
   };
   return <section className="surface-card manual-tools ui-panel-stack">
     <h2>{ko ? "기억·보드 백업" : "Memory and Board backup"}</h2>
-    <p>{ko ? "기억의 감상·작품 연결·시스템 디자인·공식 표지 참조와 보드를 저장합니다. 개인 이미지 파일, 작품 저장·시청 상태, 기존 서재·티어는 포함하지 않습니다." : "Includes reflections, title links, system designs, official cover references and Boards. Excludes personal image files, saved-title/watch states, legacy Library and Tier."}</p>
+    <dl className="backup-scope"><div><dt>{ko ? '포함' : 'Includes'}</dt><dd>{ko ? '감상 · 작품 연결 · 보드 · 시스템 디자인 · 공식 표지 참조' : 'Reflections · title links · Boards · system designs · official cover references'}</dd></div><div><dt>{ko ? '별도 보관' : 'Keep separately'}</dt><dd>{ko ? '개인 사진 파일 · 저장 작품과 시청 상태 · 기존 서재와 티어' : 'Personal image files · saved titles and watch states · legacy Library and Tier'}</dd></div></dl>
     <button className="btn" disabled={busy} onClick={() => run(async (runtime) => {
       const snapshot = await runtime.exportMemoryBackup();
       const url = URL.createObjectURL(new Blob([JSON.stringify(snapshot)], {type: "application/json"}));

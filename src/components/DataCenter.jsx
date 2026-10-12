@@ -20,6 +20,8 @@ import AccountPrivacyPanel from "./data/AccountPrivacyPanel.jsx";
 import {verifyAccountStillExists} from '../features/auth/accountPrivacy.js';
 import {supabase} from '../lib/supabaseClient.js';
 import AdminEntry from '../features/admin/AdminEntry.jsx';
+import TaskSections, { TaskPanel } from './ui/TaskSections.jsx';
+const DATA_HASH_ALIASES = Object.freeze({ 'account-privacy': 'privacy', 'manual-tools': 'backups' });
 
 function formatBytes(value) {
   const n = Number(value);
@@ -214,10 +216,16 @@ export default function DataCenter() {
         onToggleTheme={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
         onInstallPwa={onClickInstallPwa}
       />
+      <div className="pageHeader"><h1 className="pageTitle">{copy.title}</h1><p className="pageLead">{locale === 'ko' ? '계정, 기기 저장소와 백업을 관리합니다.' : 'Manage your account, device storage and backups.'}</p></div>
+      <TaskSections label={locale === 'ko' ? '계정과 데이터 메뉴' : 'Account and data tasks'} hashAliases={DATA_HASH_ALIASES}>
+      <TaskPanel sectionId="account" label={locale === 'ko' ? '계정·동기화' : 'Account & sync'}>
+        <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} titleSync={titleSync} locale={locale} />
+        <AdminEntry session={auth.session} locale={locale} base={base} />
+      </TaskPanel>
+      <TaskPanel sectionId="device" label={locale === 'ko' ? '이 기기' : 'This device'}>
       <section className="status-panel surface-card">
         <div className="pageHeader">
-          <h1 className="pageTitle">{copy.title}</h1>
-          <p className="pageLead">{copy.lead}</p>
+          <h2 className="sectionTitle">{locale === 'ko' ? '이 기기에 저장된 기록' : 'Records on this device'}</h2>
         </div>
 
         <div className="status-badge-row">
@@ -273,8 +281,10 @@ export default function DataCenter() {
         {message && <div className="small page-feedback">{message}</div>}
         {loading && <div className="small page-feedback">{copy.loading}</div>}
       </section>
-      <MemoryAccountPanel copy={accountCopy} auth={auth} account={account} titleSync={titleSync} locale={locale} />
-      <AdminEntry session={auth.session} locale={locale} base={base} />
+      </TaskPanel>
+      <TaskPanel sectionId="backups" label={locale === 'ko' ? '파일 백업' : 'File backups'}><ManualDataTools locale={locale} onChanged={refreshLocalOverview} /></TaskPanel>
+      <TaskPanel sectionId="privacy" label={locale === 'ko' ? '개인정보' : 'Privacy'}>
+      {!auth.user && <p>{locale === 'ko' ? '로그인하면 계정 자료 내보내기와 삭제를 관리할 수 있습니다.' : 'Sign in to manage account exports and deletion.'}</p>}
       {import.meta.env.PUBLIC_ACCOUNT_PRIVACY_V1 === '1' && auth.user?.id && <AccountPrivacyPanel
         key={auth.user.id} user={auth.user} locale={locale} base={base}
         canDelete={import.meta.env.PUBLIC_ACCOUNT_DELETE_V1 === '1'}
@@ -287,7 +297,8 @@ export default function DataCenter() {
         onDeleted={()=>setDeletedOwner(auth.user.id)}
       />}
       {deletedOwner && !auth.user && <section className="surface-card list-stack" role="status"><h2 className="sectionTitle">{locale==='ko'?'계정을 삭제했습니다':'Account deleted'}</h2><p className="small">{locale==='ko'?'사진 파일은 정리 작업에서 삭제됩니다. 기기에 저장한 사본은 남아 있습니다.':'Photo files will be removed by cleanup. Copies on your devices remain.'}</p></section>}
-      <ManualDataTools locale={locale} onChanged={refreshLocalOverview} />
+      </TaskPanel>
+      </TaskSections>
     </div>
   );
 }

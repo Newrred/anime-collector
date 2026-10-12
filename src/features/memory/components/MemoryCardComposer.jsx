@@ -111,6 +111,13 @@ function MemoryCardComposerContent({ base }) {
     saveCard(event, allowLeave, { includePhoto: Boolean(ticket && photoAccountAvailable) });
   };
   const signInForPhoto = () => auth.signIn(`${window.location.pathname}${window.location.search}`);
+  const titleSelector = <MemoryTitleSelector
+    title={title} titleResults={titleResults} selectedTitleChoice={selectedTitleChoice}
+    titleSearchStatus={titleSearchStatus} remoteTitleStatus={remoteTitleStatus}
+    onTitleChange={changeTitle} onSearch={searchTitles} onSelectTitle={selectTitle}
+    onClearSelected={clearSelectedTitle} copy={copy.titleSelector}
+    requiredLabel={composerCopy.required} completeLabel={composerCopy.done} complete={hasTitle}
+  />;
 
   return (
     <div className="memory-composer page-shell page-shell--wide">
@@ -136,11 +143,10 @@ function MemoryCardComposerContent({ base }) {
             aria-labelledby="memory-image-heading"
             aria-describedby={message ? "memory-composer-error" : undefined}
           >
+            {!ticket && titleSelector}
             <div className="memory-composer__section-head">
               <div>
-                <p className="memory-composer__step-label">{composerCopy.stepVisual}</p>
                 <h2 id="memory-image-heading">{composerCopy.imageHeading}</h2>
-                {status !== "browser" && <p>{composerCopy.imageHelp}</p>}
               </div>
               {ticket ? (
                 <span className="status-badge">
@@ -173,9 +179,7 @@ function MemoryCardComposerContent({ base }) {
             ) : (
               <div className="memory-composer__empty-image">
                 <span className="memory-composer__empty-image-icon" aria-hidden="true"><IconImage size={34} /></span>
-                <p>
-                  {busy ? composerCopy.preparing : composerCopy.noImage}
-                </p>
+                {busy && <p>{composerCopy.preparing}</p>}
                 <small>{composerCopy.chooseTitleForCover}</small>
                 {runtime?.imageIntake.available && photoAccountAvailable ? <button type="button" className="btn" onClick={chooseImage} disabled={busy}>{composerCopy.chooseImage}</button> : null}
                 {!auth.loading && !auth.user && <button type="button" className="btn btn--subtle" disabled={!auth.configured} onClick={signInForPhoto}>{composerCopy.signInForPhoto}</button>}
@@ -229,26 +233,10 @@ function MemoryCardComposerContent({ base }) {
           </section>
 
           <div className="memory-composer__form-column">
-            <MemoryTitleSelector
-              title={title}
-              titleResults={titleResults}
-              selectedTitleChoice={selectedTitleChoice}
-              titleSearchStatus={titleSearchStatus}
-              remoteTitleStatus={remoteTitleStatus}
-              onTitleChange={changeTitle}
-              onSearch={searchTitles}
-              onSelectTitle={selectTitle}
-              onClearSelected={clearSelectedTitle}
-              copy={copy.titleSelector}
-              stepLabel={composerCopy.stepTitle}
-              requiredLabel={composerCopy.required}
-              completeLabel={composerCopy.done}
-              complete={hasTitle}
-            />
+            {ticket && titleSelector}
 
             <section className="memory-composer__reflection-step memory-composer__step-card">
               <div className="memory-composer__step-card-head">
-                <p className="memory-composer__step-label">{composerCopy.stepReflection}</p>
                 <span className={`memory-composer__requirement${catalogCoverSelection ? "" : " is-optional"}`}>
                   {catalogCoverSelection ? composerCopy.required : composerCopy.optional}
                 </span>
@@ -261,7 +249,7 @@ function MemoryCardComposerContent({ base }) {
                   className="textarea"
                   value={note}
                   maxLength={500}
-                  rows={5}
+                  rows={3}
                   onChange={changeNote}
                   placeholder={composerCopy.notePlaceholder}
                 />

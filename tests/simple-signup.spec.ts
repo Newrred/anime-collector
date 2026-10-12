@@ -1,5 +1,9 @@
 import {test,expect} from '@playwright/test';
 test.skip(process.env.MOEMOA_SIMPLE_SIGNUP_E2E !== '1', 'Run with scripts/run-simple-signup-e2e.mjs (isolated mock backend).');
+// Korean assertions select Korean explicitly; signup now follows the app preference.
+test.beforeEach(async({page})=>{
+ await page.addInitScript(()=>{if(localStorage.getItem('ui:locale:v1')===null)localStorage.setItem('ui:locale:v1',JSON.stringify('ko'));});
+});
 // Synthetic mock policy only: these values do not activate countries or assert legal eligibility.
 // In particular, FR15/DE16 are injected exceptions, not automatic GDPR signup thresholds.
 const policy={enabled:true,version:'simple-signup-2026-10-09',termsVersion:'terms-2026-10-09-draft',privacyVersion:'privacy-2026-10-09-draft',countries:[{country:'KR',minimumAge:14},{country:'PH',minimumAge:13},{country:'TH',minimumAge:13},{country:'US',minimumAge:13},{country:'GB',minimumAge:13},{country:'FR',minimumAge:15},{country:'DE',minimumAge:16}]};
@@ -50,6 +54,17 @@ test('split birth fields start empty, retain labels and fit 320px without a cale
  await expect(page.locator('input[type=date]')).toHaveCount(0);
  await expect(page.getByRole('checkbox')).toHaveCount(1);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('signup inherits the chosen language and retains a later language change',async({page})=>{
+ await mockBackend(page);
+ await page.addInitScript(()=>localStorage.setItem('ui:locale:v1',JSON.stringify('en')));
+ await page.goto('/auth/start/');
+ await expect(page.getByRole('heading',{name:'Create your account',exact:true})).toBeVisible();
+ await expect(page.getByLabel('Country of residence',{exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'한국어',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'계정 만들기',exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>localStorage.getItem('ui:locale:v1'))).toBe(JSON.stringify('ko'));
 });
 
 test('Enter focuses invalid birth parts and agreement, with localized inline errors and no rollover',async({page})=>{
@@ -301,8 +316,10 @@ test('revision review cannot collect acceptance or replace the documents linked 
  await page.goto('/legal/privacy-2026-10-09-draft/');
  const archivedPrivacy=await page.locator('main').innerText();
  await page.goto('/privacy/');
- expect(await page.locator('main').innerText()).toBe(archivedPrivacy);
- await expect(page.getByText('버전: privacy-2026-10-09-draft', {exact:true})).toBeVisible();
+ expect(archivedPrivacy).toContain('privacy-2026-10-09-draft');
+ expect(await page.locator('main').innerText()).not.toBe(archivedPrivacy);
+ await expect(page.locator('main')).toContainText('privacy-2026-10-10');
+ await expect(page.locator('main')).not.toContainText('privacy-2026-10-09-draft');
  expect(calls.some(c=>c.path==='start')).toBe(false);
 });
 test('simple Google handoff and completion restore session without DOB or tokens in URLs',async({page},info)=>{

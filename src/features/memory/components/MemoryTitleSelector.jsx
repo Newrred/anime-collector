@@ -19,7 +19,6 @@ export default function MemoryTitleSelector({
   onSelectTitle,
   onClearSelected,
   copy,
-  stepLabel,
   requiredLabel,
   completeLabel,
   complete = false,
@@ -27,14 +26,12 @@ export default function MemoryTitleSelector({
   return (
     <section className={`memory-composer__title-search memory-composer__step-card${complete ? " is-complete" : " is-current"}`}>
       <div className="memory-composer__step-card-head">
-        <p className="memory-composer__step-label">{stepLabel}</p>
         <span className={`memory-composer__requirement${complete ? " is-complete" : ""}`}>
           {complete ? completeLabel : requiredLabel}
         </span>
       </div>
       <div className="memory-composer__field">
         <label id="memory-title-heading" className="memory-composer__step-heading" htmlFor="memory-title-input">{copy.label}</label>
-        <p className="memory-composer__field-help">{copy.helper}</p>
         <div className="memory-composer__title-input-row">
           <input
             id="memory-title-input"

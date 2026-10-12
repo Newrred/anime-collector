@@ -478,9 +478,10 @@ const enMessages = {
       },
       {
         kind: "notice",
-        date: "2026-03-15",
+        id: 'minihome',
+        date: "2026-10-12",
         title: "About public Minihomes",
-        body: "Public sharing is not yet generally available. When enabled, only Boards you explicitly select and publish will appear in your Minihome. Private records and images are never published automatically.",
+        body: "Only Boards you explicitly select and publish appear in your Minihome. Review current availability and the sharing policy before publishing.",
       },
       {
         kind: "update",
@@ -491,16 +492,16 @@ const enMessages = {
     ],
     cards: [
       {
-        title: "Home",
-        body: "Home is where you revisit a record for today, recent memory cards, and your yearly recap. The more you log, the richer this space gets.",
+        id: 'archive', href: 'archive/', title: "Find a memory",
+        body: "Open Memories to browse scenes and reflections. Search by title or a word from your reflection.",
       },
       {
-        title: "Title records",
+        id: 'titles', href: 'titles/', title: "Manage title records",
         body: "My Titles brings your saved titles and Memories together. Open a title to view its Memories or manage watch records.",
       },
       {
-        title: "Minihome",
-        body: "When public sharing is enabled, your Minihome can display Boards you explicitly select and publish. Private records are not added automatically. Public sharing is not yet generally available.",
+        id: 'minihome', href: 'minihome/', title: "Publish a Minihome",
+        body: "Choose published Boards, review the visitor preview and agree to the sharing policy before publishing. Private records are not added automatically.",
       },
     ],
     tipsTitle: "About",

@@ -118,8 +118,8 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
       {publication.sourceChanged && <p>{copy.changed}</p>}
       <a href={publicationLink(publication.id, base)} data-astro-reload>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
     {publication?.state === "REVOKED" && <p role="status">{copy.revoked}</p>}
-    {publication && publication.state !== "REVOKED" && <button type="button" className="btn btn--subtle" disabled={state.busy}
-      onClick={() => { if (confirm(copy.withdrawConfirm)) controller.revoke(); }}>{copy.withdraw}</button>}
+    {publication && publication.state !== "REVOKED" && <details className="public-management"><summary>{locale === 'ko' ? '공개 관리' : 'Manage sharing'}</summary><button type="button" className="btn btn--subtle" disabled={state.busy}
+      onClick={() => { if (confirm(copy.withdrawConfirm)) controller.revoke(); }}>{copy.withdraw}</button></details>}
     {review ? <PublicationReview key={review.reviewHash} review={review} controller={controller} services={services} locale={locale} busy={state.busy} base={base} /> : <form onSubmit={(event) => {
       event.preventDefault();
       controller.prepare({ title, description, cards: detail.items.filter((item) => item.bundle.card.id in selection)
@@ -137,21 +137,21 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
             <MemoryVisual visual={visual} systemCopy={{ fallbackTitle: bundle.title.displayTitle }} missingLabel={copy.missing} />
             <div><h3>{index + 1}. {bundle.title.displayTitle}</h3>
               <p>{bundle.card.note}</p>{bundle.card.watchedAt && <p>{bundle.card.watchedAt.slice(0, 10)}</p>}
-              <button type="button" className="btn btn--subtle" onClick={() => {
+              <details className="public-management"><summary>{locale === 'ko' ? '카드 공개 관리' : 'Manage card sharing'}</summary><button type="button" className="btn btn--subtle" onClick={() => {
                 if (confirm(copy.revokeCardConfirm)) controller.revokeCard(id);
-              }}>{copy.revokeCard}</button>
+              }}>{copy.revokeCard}</button></details>
               <label className="memory-publication__check"><input type="checkbox" checked={selected}
                 onChange={(event) => {
                   controller.cancel();
                   const checked = event.target.checked;
                   setSelection((current) => { const next = { ...current }; if (checked) next[id] = []; else delete next[id]; return next; });
                 }} />{copy.select}</label>
-              {selected && <fieldset><legend>{copy.fields}</legend>{PUBLIC_FIELDS.map((field) => <label key={field} className="memory-publication__check">
+              {selected && <details className="publication-card-options"><summary>{copy.fields} · {selection[id].length}</summary><fieldset><legend className="sr-only">{copy.fields}</legend>{PUBLIC_FIELDS.map((field) => <label key={field} className="memory-publication__check">
                 <input type="checkbox" checked={selection[id].includes(field)} onChange={(event) => {
                   controller.cancel();
                   const checked = event.target.checked;
                   setSelection((current) => ({ ...current, [id]: checked ? [...current[id], field] : current[id].filter((value) => value !== field) }));
-                }} />{copy.details[field]}</label>)}</fieldset>}
+                }} />{copy.details[field]}</label>)}</fieldset></details>}
               {selected && image && <ImagePreparation cardId={id} controller={controller} copy={copy} policyRevision={services.policyRevision} busy={state.busy} locale={locale} base={base} />}
             </div>
           </li>;

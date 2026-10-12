@@ -25,7 +25,7 @@ async function setup(page:any,{receipts=[newReceipt,oldReceipt],failDelete=false
   calls.push({path:'delete',body:route.request().postData(),authorization:route.request().headers().authorization});
   return route.fulfill(failDelete?{status:503,json:{error:'ACCOUNT_DELETE_FAILED'}}:{json:{deleted:true}});
  });
- await page.goto('/data/');await expect(page.locator('#account-privacy')).toBeVisible({timeout:15000});
+ await page.goto('/data/#account-privacy');await expect(page.locator('#account-privacy')).toBeVisible({timeout:15000});
  return calls;
 }
 

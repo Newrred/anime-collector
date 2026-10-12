@@ -1,0 +1,8 @@
+.task-sections { min-width: 0; width: 100%; }
+.task-sections__nav { display: flex; flex-wrap: wrap; gap: 8px 26px; border-bottom: 1px solid var(--border-subtle); margin: 12px 0 24px; }
+.task-sections__nav button { font: inherit; font-size: 14px; color: var(--text-secondary); border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; padding: 10px 0; min-height: 44px; cursor: pointer; }
+.task-sections__nav button[aria-pressed="true"] { color: var(--text-primary); border-color: currentColor; }
+.task-sections__nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.task-sections__panel[hidden] { display: none !important; }
+.task-sections__panel { min-width: 0; }
+.task-sections__panel > * + * { margin-top: 24px; }

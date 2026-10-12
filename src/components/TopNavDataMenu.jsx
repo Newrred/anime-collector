@@ -194,11 +194,11 @@ export default function TopNavDataMenu({
         </a>
         <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} locale={locale} />
 
-      <a className="btn top-nav__memory-action" href={`${base}record/`} aria-label={copy.createMemory} data-astro-reload>
+      {!['memory-new', 'memory-card', 'record-new'].includes(currentRoute) && <a className="btn top-nav__memory-action" href={`${base}record/`} aria-label={copy.createMemory} data-astro-reload>
           <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
           <span className="top-nav__memory-action-short" aria-hidden>{copy.memoryShort}</span>
           <span className="top-nav__memory-action-label">{copy.createMemory}</span>
-        </a>
+      </a>}
 
         <div className="top-nav__search-slot">
           <TopNavGlobalSearch base={base} locale={locale} accountScope={`${auth.session?.user?.id || "guest"}:${account.status}`} />

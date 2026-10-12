@@ -18,6 +18,8 @@ export default function MemoryReportReview({ userId, ko, base = '/' }) {
   const [rows, setRows] = useState([]), [next, setNext] = useState(null), [selected, setSelected] = useState(null);
   const [audit, setAudit] = useState([]), [action, setAction] = useState(''), [reason, setReason] = useState('');
   const [confirmed, setConfirmed] = useState(false), [saved, setSaved] = useState(false);
+  const statuses = { RECEIVED: ko ? '검토 대기' : 'Awaiting review', APPEALED: ko ? '이의 신청' : 'Appealed', CLOSED: ko ? '검토 완료' : 'Reviewed' };
+  const categories = { SAFETY: ko ? '안전' : 'Safety', RIGHTS: ko ? '권리 침해' : 'Rights', COPYRIGHT: ko ? '권리 침해' : 'Copyright', HARASSMENT: ko ? '괴롭힘' : 'Harassment', SPAM: ko ? '스팸' : 'Spam', OTHER: ko ? '기타' : 'Other' };
   const clear = () => { setSelected(null); setAudit([]); setAction(''); setReason(''); setConfirmed(false); };
   async function load(after = null) {
     clear(); setSaved(false);
@@ -52,16 +54,21 @@ export default function MemoryReportReview({ userId, ko, base = '/' }) {
     clear(); setRows([]); setNext(null); setSaved(Boolean(result));
   }
   return <section className="memory-report-review" aria-label={ko ? '신고 처리' : 'Report review'}>
-    <button className="btn" disabled={busy} onClick={() => load()}>{ko ? '신고 목록 새로고침' : 'Refresh reports'}</button>
-    {error && <p role="alert">{ko ? '처리 결과를 확인하지 못했습니다. 목록을 새로고침해 최신 상태를 확인한 뒤 다시 선택해 주세요.' : 'Could not confirm the result. Refresh the reports and select the current case before continuing.'}</p>}
+    {error !== 'forbidden' && <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? '신고 목록 새로고침' : 'Refresh reports'}</button>}
+    {error && <p role="alert">{error === 'forbidden' ? (ko ? '이 계정에는 운영 검토 권한이 없습니다. 운영자 계정으로 로그인해 주세요.' : 'This account cannot review reports. Sign in to your moderator account.') : (ko ? '처리 결과를 확인하지 못했습니다. 목록을 새로고침해 최신 상태를 확인한 뒤 다시 선택해 주세요.' : 'Could not confirm the result. Refresh the reports and select the current case before continuing.')}</p>}
     {saved && <p role="status">{ko ? '조치를 저장했습니다. 목록을 새로고침하면 최신 상태를 확인할 수 있습니다.' : 'Action saved. Refresh reports to see the current state.'}</p>}
     {!rows.length && !busy && !error && !saved && <p>{ko ? '이 페이지에 일반 신고가 없습니다.' : 'No general reports on this page.'}</p>}
-    <ul>{rows.map(row => <li key={row.id}><button className="btn btn--subtle" style={{ maxWidth: '100%', whiteSpace: 'normal', textAlign: 'start', overflowWrap: 'anywhere' }} disabled={busy} onClick={() => open(row)}>{ko ? '신고' : 'Report'} {row.id} · {row.status}</button></li>)}</ul>
+    <ul className="report-case-list">{rows.map(row => <li key={row.id}><button className="report-case" disabled={busy} onClick={() => open(row)}>
+      <strong>{row.kind === 'home' ? (ko ? '미니홈 신고' : 'Home report') : (ko ? '보드 신고' : 'Board report')}</strong>
+      <span>{categories[row.category] || (ko ? '신고' : 'Report')} · {statuses[row.status]}</span>
+      <small>#{row.id.slice(0, 8)}</small>
+    </button></li>)}</ul>
     {next && <button className="btn" disabled={busy} onClick={() => load(next)}>{ko ? '신고 더 보기' : 'More reports'}</button>}
     {selected && <section className="memory-report-detail" aria-label={ko ? '선택한 신고' : 'Selected report'}>
       <div className="memory-report-detail__context">
       <h2>{ko ? '신고 내용' : 'Report details'}</h2>
-      <p>{selected.category} · {selected.status}</p><p style={{ whiteSpace: 'pre-wrap' }}>{selected.note}</p>
+      <p>{categories[selected.category] || selected.category} · {statuses[selected.status]}</p><p style={{ whiteSpace: 'pre-wrap' }}>{selected.note}</p>
+      <details><summary>{ko ? '처리 식별 정보' : 'Case identifiers'}</summary><p>{selected.id}</p><p>{selected.target}</p></details>
       <a href={base + 'public/' + selected.kind + '/?id=' + selected.target} target="_blank" rel="noopener noreferrer">{ko ? '신고된 공개 자료 열기' : 'Open reported public content'}</a>
       {selected.appeals.map((appeal, i) => <p key={i} style={{ whiteSpace: 'pre-wrap' }}>{ko ? '이의 신청: ' : 'Appeal: '}{appeal.text}</p>)}
       <h3>{ko ? '조치 이력' : 'Action history'}</h3>

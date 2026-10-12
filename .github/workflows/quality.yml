@@ -76,7 +76,7 @@ jobs:
           PUBLIC_MEMORY_PRIVATE_IMAGE_SYNC_V1: '1'
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4359
       - name: Verify current Web design and watch records
-        run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts
+        run: node scripts/run-channel-e2e.mjs tests/bookshelf-editor.spec.ts tests/title-collection.spec.ts tests/watch-record-flow.spec.ts tests/library-userflow.spec.ts tests/source-independent-title.spec.ts tests/arena-refinement.spec.ts
       - name: Resolve isolated test evidence path
         if: failure()
         id: evidence

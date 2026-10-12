@@ -44,7 +44,8 @@ export default function PublicMinihome({ base = "/" }) {
     <div className="public-page-layout"><div className="public-page-content">
     {state.status === "ready" ? <MinihomeSnapshot key={retry} snapshot={state.snapshot} services={services} locale={locale} base={base} /> : <p className="public-page-state" role={state.status === "failed" ? "alert" : "status"}>{copy[state.status]}</p>}
     </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '미니홈 관계와 신고' : 'Home relationships and reporting'}>
-    <button className="btn btn--subtle" disabled={state.status === "loading"} onClick={() => setRetry((n) => n + 1)}>{copy.retry}</button>
+    {['failed', 'ready'].includes(state.status) && <button className="btn btn--subtle" onClick={() => setRetry((n) => n + 1)}>{state.status === 'ready' ? (locale === 'ko' ? '새로고침' : 'Refresh') : copy.retry}</button>}
+    {state.status === 'unavailable' && <a href={base}>{locale === 'ko' ? '컬렉션으로 돌아가기 →' : 'Return to Collection →'}</a>}
     {state.status === "ready" && <PublicLinkCopy key={id} kind="home" id={id} locale={locale} base={base} />}
     {minihomeUiEnabled() && isPublicationId(id) && <MemoryRelationships homeId={id} locale={locale} base={base} />}
     {minihomeUiEnabled() && isPublicationId(id) && <MemorySafety kind="home" target={id} locale={locale} base={base} />}

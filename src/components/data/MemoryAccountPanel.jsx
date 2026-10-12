@@ -95,9 +95,9 @@ export default function MemoryAccountPanel({ copy, auth, account, titleSync, loc
         ) : null}
         {account.syncBusy ? <button type="button" className="btn btn--ghost" onClick={account.pauseSync}>{copy.pauseSync}</button> : null}
         {connected ? (
-          <button type="button" className="btn btn--ghost" onClick={auth.signOut} disabled={account.promotionBusy}>
+          <details className="public-management"><summary>{locale === 'ko' ? '계정 관리' : 'Manage account'}</summary><button type="button" className="btn btn--ghost" onClick={auth.signOut} disabled={account.promotionBusy}>
             {copy.signOut}
-          </button>
+          </button></details>
         ) : null}
       </div>
 

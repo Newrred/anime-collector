@@ -160,11 +160,6 @@ function TitleCollectionContent({ base }) {
     else next.add(genre);
     return [...next];
   });
-  const pickGenreFromTag = (genre, event) => {
-    const keepSelection = Boolean(event?.shiftKey || event?.metaKey || event?.ctrlKey);
-    if (keepSelection) toggleGenre(genre);
-    else setGenres((current) => current.length === 1 && current[0] === genre ? [] : [genre]);
-  };
 
   const filterOptions = [
     { value: "ALL", label: copy.filters.ALL },
@@ -197,8 +192,10 @@ function TitleCollectionContent({ base }) {
         <ChannelSection title={locale === "ko" ? "보기" : "View"}><TitleViewModeControl mode={mode} copy={copy} onChange={changeMode} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "작품 정렬" : "Title sort"} value={sort} onChange={changeSort} options={sortOptions} /></div></ChannelSection>
         {albums.length > 0 && <ChannelSection title={locale === "ko" ? "탐색" : "Explore"}>
           <details className="channel-explore"><summary>{locale === "ko" ? "장르" : "Genres"}{genres.length > 0 ? ` · ${genres.length}` : ""}</summary><div className="channel-choices"><button aria-pressed={!genres.length} onClick={clearGenres}>{locale === "ko" ? "전체" : "All"}</button>{genreOptions.map(genre => <button key={genre} aria-pressed={genres.includes(genre)} onClick={() => toggleGenre(genre)}>{formatGenreLabel(genre, locale)}</button>)}</div></details>
+          <details className="channel-explore"><summary>{locale === 'ko' ? '보기 설정' : 'Display settings'}</summary>
           <label className="channel-columns">{locale === "ko" ? "표지 열 수" : "Poster columns"}<input type="range" min="2" max="10" step="1" value={cardsPerRowBase} onChange={e => setCardsPerRowBase(Number(e.target.value))} /><span>{locale === "ko" ? "기준 " + cardsPerRowBase + " · 현재 " + effectiveCols + "열" : "Base " + cardsPerRowBase + " · Current " + effectiveCols + " columns"}</span></label>
           <button className="channel-text-button" onClick={() => setSortDir(value => value === "asc" ? "desc" : "asc")}>{locale === "ko" ? (sortDir === "asc" ? "오름차순 ↑" : "내림차순 ↓") : (sortDir === "asc" ? "Ascending ↑" : "Descending ↓")}</button>
+          </details>
         </ChannelSection>}
       </>} />
 
@@ -222,7 +219,6 @@ function TitleCollectionContent({ base }) {
                   locale={locale}
                   titleKey={album.key}
                   formatGenre={(genre) => formatGenreLabel(genre, locale)}
-                  onPickGenre={pickGenreFromTag}
                 />
               ) : (
                 <TitlePosterTile key={album.key} album={album} href={hrefFor(album)} copy={copy} titleKey={album.key} />

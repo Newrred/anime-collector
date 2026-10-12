@@ -5,6 +5,7 @@ import {resolveWebOAuthNext} from '../../features/auth/webOAuth.js';
 import {TERMS_VERSION,PRIVACY_VERSION,COUNTRIES,ageOnDate,createDeclaration,fetchSignupPolicy,clearPendingSignup,signupAvailability} from '../../features/auth/simpleSignup.js';
 import {parseBirthDateParts} from '../../features/auth/birthDateInput.js';
 import {resolveSignupDocuments,needsAgeProcessingConsent} from '../../features/auth/signupDocuments.js';
+import {useUiPreferences} from '../../hooks/useUiPreferences.js';
 
 const errors={
  COUNTRY_REQUIRED:['거주 국가를 선택해 주세요.','Select your country of residence.'],
@@ -26,7 +27,8 @@ const emptyBirthday=()=>({year:'',month:'',day:''});
 const dateFields=[['year','연도','Year','YYYY',4],['month','월','Month','MM',2],['day','일','Day','DD',2]];
 
 export default function SimpleSignup({base='/',enabled=false,allowTestDocuments=false}) {
- const [lang,setLang]=useState('ko'),[country,setCountry]=useState(''),[birthday,setBirthday]=useState(emptyBirthday);
+ const {locale:lang,setLocale:setLang}=useUiPreferences();
+ const [country,setCountry]=useState(''),[birthday,setBirthday]=useState(emptyBirthday);
  const [accepted,setAccepted]=useState(false),[policy,setPolicy]=useState(null),[loading,setLoading]=useState(true);
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[birthError,setBirthError]=useState(null);
  const countryRef=useRef(null),dateRefs=useRef({}),agreementRef=useRef(null);

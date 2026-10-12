@@ -1,0 +1,65 @@
+/* Are.na reference: quiet tools, ruled metadata, intrinsic visuals, generous gaps. */
+html .title-album-card__genres { grid-column: 1; margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
+html .title-album-card__metadata { display: grid; grid-column: 1; grid-row: 1; gap: 8px; align-content: start; }
+html .title-album-card__previews, html .title-album-card__empty { grid-row: 1; }
+html .title-album-card__previews { display: grid; grid-template-columns: repeat(var(--preview-count), minmax(0, 1fr)); overflow: visible; }
+html .title-album-card__preview { width: 100%; max-width: none; height: clamp(220px, 25vw, 350px); }
+html .title-album-card__preview .memory-visual { height: 100%; }
+html .title-album-card--empty { padding-block: 16px; align-items: center; }
+html .title-album-card__empty { border: 0; padding: 0; min-height: 0; text-align: start; }
+html .title-album-card__add { color: var(--text-secondary); font-size: 13px; text-underline-offset: 4px; }
+html .title-album-card__cue { margin-top: 4px; }
+html .channel-explore { margin-bottom: 10px; }
+html .channel-explore summary, .public-management summary, .publication-card-options summary { cursor: pointer; color: var(--text-secondary); font-size: 13px; min-height: 32px; line-height: 32px; }
+html .public-management > button { margin-top: 8px; }
+html .memory-composer__visual-column > .memory-composer__title-search { border: 0; background: transparent; box-shadow: none; padding: 0 0 18px; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); }
+html .memory-composer__empty-image { min-height: 150px; padding: 18px; gap: 10px; }
+html .memory-composer__empty-image-icon { display: none; }
+html .memory-composer__step-card { border-radius: 0; box-shadow: none; }
+html .memory-composer__step-card-head { min-height: 0; margin-bottom: 8px; justify-content: flex-end; }
+html .memory-composer__section-head { margin-bottom: 12px; }
+html .memory-composer__reflection-step { padding: 18px; }
+html .memory-composer__title-search, html .memory-composer__reflection-step { position: relative; }
+html .memory-composer__title-search .memory-composer__step-card-head, html .memory-composer__reflection-step .memory-composer__step-card-head { position: absolute; top: 0; right: 0; margin: 0; }
+html .memory-composer__field > label { padding-right: 60px; }
+html .memory-composer .memory-composer__reflection-step .textarea { min-height: 104px; height: 112px; }
+html .memory-composer__save-gate { padding: 16px 0; background: transparent; border: 0; border-top: 1px solid var(--border-subtle); }
+html .data-grid > .task-sections { grid-column: 1 / -1; }
+html .data-grid > .pageHeader { grid-column: 1 / -1; }
+html .data-grid .status-panel, html .data-grid .sync-card, html .data-grid .manual-tools, html .help-center .surface-card { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+html .data-grid .pageLead, html .help-center .pageLead { max-width: 60ch; }
+html .help-center { gap: 28px; }
+html .help-center__section > summary { padding: 14px 0; border-block: 1px solid var(--border-subtle); font-size: 14px; cursor: pointer; }
+html .help-center__section[open] > .pageHeader { display: none; }
+html .help-center__questions { display: grid; margin-top: 16px; }
+html .help-center__card { padding: 14px 0; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; background: transparent; }
+html .help-center__card > summary { cursor: pointer; min-height: 28px; }
+html .help-center__notice-list, html .help-center__about { padding-top: 18px; }
+html .backup-scope { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; font-size: 13px; border-block: 1px solid var(--border-subtle); padding-block: 16px; }
+html .backup-scope dt { color: var(--text-secondary); margin-bottom: 6px; }
+html .backup-scope dd { margin: 0; line-height: 1.7; }
+html .safety-notice, html .memory-safety li { list-style: none; border-bottom: 1px solid var(--border-subtle); padding-block: 14px; }
+html .memory-safety ul { padding: 0; }
+html .memory-safety summary { cursor: pointer; min-height: 32px; line-height: 1.6; }
+html .report-case-list { list-style: none; padding: 0; }
+html .report-case { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; text-align: start; padding: 18px 0; border: 0; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-primary); font: inherit; cursor: pointer; }
+html .report-case span { grid-column: 1; font-size: 13px; color: var(--text-secondary); }
+html .report-case small { grid-column: 2; grid-row: 1 / 3; align-self: center; color: var(--text-secondary); }
+@media (max-width: 680px) {
+  html .title-album-card { gap: 14px; }
+  html .title-album-card__metadata { display: contents; }
+  html .title-album-card__genres { grid-row: 2; }
+  html .title-album-card__previews { grid-template-columns: repeat(var(--preview-count), minmax(0, 1fr)); gap: 8px; grid-row: 3; }
+  html .title-album-card__cue { grid-row: 4; }
+  html .title-album-card__preview { height: clamp(150px, 48vw, 220px); }
+  html .title-album-card--empty { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  html .title-album-card--empty .title-album-card__empty { grid-column: 1; grid-row: auto; }
+  html .memory-composer__workspace { gap: 18px; }
+  html .memory-composer__visual-column { padding: 16px; gap: 10px; }
+  html .memory-composer .btn { min-height: 44px; }
+  html .memory-composer__reflection-step { padding: 0 16px; }
+  html .memory-composer__reflection-step .memory-composer__step-card-head { right: 16px; }
+  html .memory-composer__form-column { gap: 16px; }
+  html .memory-composer__empty-image { min-height: 128px; }
+  html .backup-scope { grid-template-columns: minmax(0, 1fr); }
+}

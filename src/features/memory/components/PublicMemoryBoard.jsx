@@ -59,8 +59,9 @@ export default function PublicMemoryBoard({ base = "/" }) {
     {state.status === "ready" && state.author && <a href={minihomeLink(state.author.id, base)} data-astro-reload>
       {locale === "ko" ? `${state.author.nickname}님의 공개 미니홈` : `Visit ${state.author.nickname}'s public home`}
     </a>}
-    {state.status !== "loading" && state.status !== "disabled" && <button type="button" className="btn btn--subtle"
-      onClick={() => setRetry((value) => value + 1)}>{copy.retry}</button>}
+    {['error', 'ready'].includes(state.status) && <button type="button" className="btn btn--subtle"
+      onClick={() => setRetry((value) => value + 1)}>{state.status === 'ready' ? (locale === 'ko' ? '새로고침' : 'Refresh') : copy.retry}</button>}
+    {state.status === 'unavailable' && <a href={base}>{locale === 'ko' ? '컬렉션으로 돌아가기 →' : 'Return to Collection →'}</a>}
     {isPublicationId(id) && <MemorySafety kind="board" target={id} locale={locale} base={base} />}
     </aside></div>
   </main>;
