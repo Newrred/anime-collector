@@ -4695,8 +4695,8 @@
     ],
     "latestVerification": {
       "date": "2026-10-12",
-      "status": "PRODUCTION_CORE_PUBLICATION_READ_WITHDRAWAL_PASS_ROLE_MATRIX_PENDING",
-      "evidenceKey": "firstPublicProductionVerification_20261012"
+      "status": "PRODUCTION_REQUIRED_BOARD_HOME_FOLLOW_REPORT_MODERATION_WITHDRAWAL_ACCEPTED",
+      "evidenceKey": "firstPublicProductionRoleVerification_20261012"
     }
   },
   "firstPublicProductionVerification_20261012": {
@@ -4816,6 +4816,242 @@
     "remaining": [
       "Production minihome publication/read/withdrawal and different-account follow/list/report/moderator flow; prior hosted test remains separate",
       "First future scheduled backup observation and ongoing capacity monitoring; new threshold alert delivery and restored public serving are not claimed"
+    ],
+    "publicSafeEvidence": true,
+    "latestRoleVerification": "firstPublicProductionRoleVerification_20261012"
+  },
+  "firstPublicProductionRoleVerification_20261012": {
+    "date": "2026-10-12",
+    "status": "PRODUCTION_REQUIRED_BOARD_HOME_FOLLOW_REPORT_MODERATION_WITHDRAWAL_ACCEPTED",
+    "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+    "productionUrl": "https://www.moemoa.xyz",
+    "deploymentSource": "vercel-git",
+    "scope": "candidate04 executionOrder: deployed image/home, follow/list, report/moderation and withdrawal on the exact approved source",
+    "userApproval": {
+      "operatorAccountUseAndSyntheticTestReport": true,
+      "operatorSignupUserCompletedAndServerVerified": true,
+      "minihomePolicyRevision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+      "minihomePolicyAnswer": "미니홈 정책 동의·테스트 게시 승인"
+    },
+    "minihome": {
+      "syntheticNickname": true,
+      "bioEmpty": true,
+      "selectedTestCards": 1,
+      "publishedThroughUi": true,
+      "anonymousReadAndImageDecode": true,
+      "privateReflectionExcluded": true,
+      "userCompletedFinalPrivateUi": true,
+      "finalAnonymousReaderNull": true
+    },
+    "follow": {
+      "differentExistingAccount": true,
+      "signupGuardInitiallyDenied": true,
+      "signupCompletedDirectlyByUser": true,
+      "followThroughUiPassed": true,
+      "listAndReloadRevisitPassed": true,
+      "finalFollowing": false,
+      "finalBlocked": false
+    },
+    "moderation": {
+      "syntheticReportsCreated": 1,
+      "category": "OTHER",
+      "realViolationAllegation": false,
+      "existingModeratorRoleUsed": true,
+      "newModeratorRoles": 0,
+      "hideAndRestoreThroughUi": true,
+      "anonymousHiddenHomeEntries": 0,
+      "anonymousRestoredHomeEntries": 1,
+      "hiddenImageStatus": 404,
+      "restoredImageStatus": 200,
+      "restoredImageWidth": 24,
+      "restoredImageHeight": 30,
+      "authorNoticeUiVerified": true,
+      "independentAuthorNoticeActions": [
+        "HIDE",
+        "RESTORE"
+      ],
+      "independentAuditActions": [
+        "HIDE",
+        "RESTORE"
+      ],
+      "finalReportStatus": "CLOSED",
+      "finalPublicationHidden": false
+    },
+    "anonymousProofPhases": {
+      "before": {
+        "date": "2026-10-12",
+        "phase": "before",
+        "status": "ANONYMOUS_ROLE_FLOW_READER_PASS",
+        "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "anonymousCredentialOnly": true,
+        "authenticatedUserCredentialUsed": false,
+        "boardReadable": true,
+        "homeReadable": true,
+        "homeEntries": 1,
+        "privateReflectionLeaked": false,
+        "images": [
+          {
+            "variant": "full",
+            "status": 200,
+            "bytes": 76,
+            "contentType": "image/webp",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "width": 24,
+            "height": 30
+          },
+          {
+            "variant": "thumb",
+            "status": 200,
+            "bytes": 74,
+            "contentType": "image/webp",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "width": 24,
+            "height": 30
+          }
+        ]
+      },
+      "hidden": {
+        "date": "2026-10-12",
+        "phase": "hidden",
+        "status": "ANONYMOUS_ROLE_FLOW_READER_PASS",
+        "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "anonymousCredentialOnly": true,
+        "authenticatedUserCredentialUsed": false,
+        "boardReadable": false,
+        "homeReadable": true,
+        "homeEntries": 0,
+        "privateReflectionLeaked": false,
+        "images": [
+          {
+            "variant": "full",
+            "status": 404,
+            "bytes": 21,
+            "contentType": "application/json",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "noImageBytes": true
+          },
+          {
+            "variant": "thumb",
+            "status": 404,
+            "bytes": 21,
+            "contentType": "application/json",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "noImageBytes": true
+          }
+        ]
+      },
+      "restored": {
+        "date": "2026-10-12",
+        "phase": "restored",
+        "status": "ANONYMOUS_ROLE_FLOW_READER_PASS",
+        "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "anonymousCredentialOnly": true,
+        "authenticatedUserCredentialUsed": false,
+        "boardReadable": true,
+        "homeReadable": true,
+        "homeEntries": 1,
+        "privateReflectionLeaked": false,
+        "images": [
+          {
+            "variant": "full",
+            "status": 200,
+            "bytes": 76,
+            "contentType": "image/webp",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "width": 24,
+            "height": 30
+          },
+          {
+            "variant": "thumb",
+            "status": 200,
+            "bytes": 74,
+            "contentType": "image/webp",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "width": 24,
+            "height": 30
+          }
+        ]
+      },
+      "private": {
+        "date": "2026-10-12",
+        "phase": "private",
+        "status": "ANONYMOUS_ROLE_FLOW_READER_PASS",
+        "sourceCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "anonymousCredentialOnly": true,
+        "authenticatedUserCredentialUsed": false,
+        "boardReadable": false,
+        "homeReadable": false,
+        "homeEntries": 0,
+        "privateReflectionLeaked": false,
+        "images": [
+          {
+            "variant": "full",
+            "status": 404,
+            "bytes": 21,
+            "contentType": "application/json",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "noImageBytes": true
+          },
+          {
+            "variant": "thumb",
+            "status": 404,
+            "bytes": 21,
+            "contentType": "application/json",
+            "cacheControl": "no-store, max-age=0",
+            "noBearerOrCookies": true,
+            "noImageBytes": true
+          }
+        ]
+      }
+    },
+    "finalState": {
+      "publication": "REVOKED",
+      "homePublished": false,
+      "privateCardPresent": true,
+      "privateSourceVersionAndHashPreserved": true,
+      "privateRepresentationReadyAndHashPreserved": true,
+      "publicBucketPrivate": true,
+      "physicalDerivativeDeletionPerformed": false,
+      "derivativeState": "READY",
+      "usageRefundPerformed": false
+    },
+    "capacity": {
+      "observedAt": "2026-10-12T03:41:56.154304+00:00",
+      "dailyRequestsUsed": 18,
+      "dailyImageBytesUsed": 1362,
+      "publicStoredBytes": 300,
+      "publicReservedBytes": 300,
+      "requestDailyLimit": 2000,
+      "imageBytesDailyLimit": 64000000,
+      "globalPublicStorageBytesLimit": 20971520,
+      "paused": false,
+      "invalidObjectCount": 0,
+      "failedCount": 0
+    },
+    "toolLimitation": {
+      "productionBlockConfirmTestPassed": false,
+      "detail": "Browser confirmation control timed out; user could not see the dialog. No applied block was observed. Existing hosted block/unblock proof is preserved separately. Final relationship is unfollowed/unblocked.",
+      "minihomePrivateUiCompletedDirectlyByUser": true
+    },
+    "schemaChanges": 0,
+    "deploymentChanges": 0,
+    "roleChanges": 0,
+    "priorRecoveryAndCiEvidencePreserved": true,
+    "remainingOperationalMonitoring": [
+      "First future Sunday 03:00 Asia/Seoul scheduled backup observation",
+      "Ongoing storage/delivery usage and existing six-hour observation; no new capacity-threshold alert delivery claimed"
+    ],
+    "notClaimed": [
+      "All 24 QA scenarios or physical-device/Android acceptance",
+      "A new production block/unblock pass",
+      "Restored public serving, guaranteed RPO/RTO or complete historical ingestion recovery"
     ],
     "publicSafeEvidence": true
   }

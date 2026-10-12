@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-12 운영 필수 공개 흐름 인수 완료:** 승인 ea8f388/www 동일SHA에서 합성 카드와 미니홈의 공개·익명이미지24×30, 직접가입 후 다른계정 follow/내목록재방문, 테스트신고1→기존운영자 HIDE/RESTORE→익명전시0/1·이미지404/200, 작성자 알림UI2·독립감사2 PASS. 테스트 종료 후 follow해제·사용자직접 미니홈비공개·카드비공개, 익명board/home null·옛full/thumb404/no-store·원본버전/hash 보존 PASS. 최종 report CLOSED/가림false/following=false/blocked=false; 기존사용자 카드공개·새schema/권한/배포·물리삭제0. candidate04의 image/home/follow/list/report/moderation/withdrawal 실행조건은 완료. 차단 확인창은 도구 제한으로 운영 PASS로 세지 않으며 기존 hosted 증거와 구분한다. 전체24QA·물리기기/Android·미래주간실행·새용량경보수신·복구serving/전체ingestionhistory PASS를 주장하지 않는다. 다음은 기존 주간백업/용량 관찰. [최신 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionRoleVerification_20261012를 따른다.
+
+
 > **2026-10-12 운영 핵심 공개·철회 검증 PASS:** ea8f388 운영에서 사용자 개인사용 권리 승인·직접 현재가입확인·고정정책 테스트 승인 후 합성24×30 카드 1개 저장/공개. 익명 RPC와 무인증 full/thumb 이미지200·decode·비공개 감상 제외 PASS, 실제2GET/150B 차감. 비공개 저장 후 보드 unavailable/img0·익명 RPC null·옛 full/thumb404/no-store·원시 Storage 공개주소400/이미지없음·개인 원본 버전/hash 보존 PASS. 테스트 카드는 현재 비공개이며 기존 사용자 카드 공개0·물리삭제/사용량환급0. 운영 미니홈·다른 계정 팔로우/신고/운영자 처리 검증은 잔여이며 과거 hosted PASS와 구분한다. 운영 적용·키·외부보관 승인은 완료했으므로 반복하지 않는다. 전체 W19/W20 DONE·미래 예약실행·복구 serving PASS는 아직 주장하지 않는다. [최신 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionVerification_20261012를 따른다.
 
 
