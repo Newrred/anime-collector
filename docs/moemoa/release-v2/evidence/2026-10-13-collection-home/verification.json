@@ -72,5 +72,7 @@
     "follow targets",
     "private originals"
   ],
-  "nextAction": "Approve the exact test migration candidate with its new type remaining off; prepare scoped hosted source/policy configuration separately."
+  "nextAction": "Approve the exact test migration candidate with its new type remaining off; prepare scoped hosted source/policy configuration separately.",
+  "codeCandidateCommit": "5f791db0a4a780e7420011d07a5c20bc1d99fde9",
+  "artifactTextNormalization": "ANSI terminal controls and trailing whitespace removed from logs; source ZIP hash retained separately."
 }

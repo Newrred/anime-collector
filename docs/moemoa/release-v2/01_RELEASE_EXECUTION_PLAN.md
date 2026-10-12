@@ -2241,3 +2241,5 @@ ZIP CRC/8sha검증 PASS, 첨부01/02와 현재코드 대조 완료. 첫 구현�
 8. 남은 게이트/다음1개: exact 후보의 테스트 DB migration/default-off 적용을 승인받고, 새 타입의 hosted 인수로 이어간다. moemoa-test를 읽기전용 확인한 결과 새 migration 없음·계정 bookshelf source0·active catalog0이며 기존 reads/writes/minihomes/follows=true, 정책3값 TEST_ONLY_PHONE_WEB_20260927_01이다. 이 고지는 새 UI의 고정 공개 고지와 다르므로, 카탈로그/선반 자료와 policy/flag 후보를 준비·승인 없이 임의 활성하지 않는다. 운영 DB/master/배포/Public 활성은 별도이며 전체 출시 완료로 올리지 않는다.
 
 검증 증거는 evidence/2026-10-13-collection-home/에 보존한다. 기존 작업판·완료 이력·보류 항목은 유지한다.
+
+[2026-10-13 인계 결속] 로컬 구현 후보 `5f791db0a4a780e7420011d07a5c20bc1d99fde9`, 브랜치 `codex/continue-after-arena-20261012`. Git push/master/운영/test migration 적용0. 다음 행동은 migration `20261012160330_collection_home_sections.sql`을 moemoa-test에만 기본off로 적용하는 정확한 승인이다. 새 타입의 catalog/source/policy/flag·화면 hosted 연결은 이후 별도 후보로 준비한다.

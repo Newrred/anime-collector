@@ -1366,3 +1366,5 @@ NA 이유:
 - 증거: [W11 검증/source·artifact SHA256](evidence/2026-09-24-w11-validation.json), `.cache/w11-{unit-final,browser-final,sql-final,build-final,routes,react-doctor-final,diff-check}.log`, `.cache/w11-home-320.png`, `.cache/w11-editor-320-ko.png`. W09/W10 evidence는 당시 소스의 역사 기록이다.
 - 진행: 완료 M1/6, 기본 W4/20, 추가 필수0 유지. M3 로컬 W11 결과를 확보했으나 실환경·W12/W13 남음. 다음 W12 팔로우·해제·내 목록은 W07/W11 **로컬** 선행 충족으로 READY이며 외부 게이트를 지우지 않는다.
 - 사용자 최종 확인: 같은 테스트 링크에서 ‘동기화 완료됨’. 관련 회귀 포함 unit400 PASS/build19 PASS. 이번 오류 안내·수리 SQL·기록은 로컬 커밋 보존, Preview 재배포/push 없음. 동기화 복구 완료이며 이미지 사본 전송/공개·철회 실기기 검증은 별도다.
+
+[2026-10-13 인계 결속] 로컬 구현 후보 `5f791db0a4a780e7420011d07a5c20bc1d99fde9`, 브랜치 `codex/continue-after-arena-20261012`. Git push/master/운영/test migration 적용0. 다음 행동은 migration `20261012160330_collection_home_sections.sql`을 moemoa-test에만 기본off로 적용하는 정확한 승인이다. 새 타입의 catalog/source/policy/flag·화면 hosted 연결은 이후 별도 후보로 준비한다.
