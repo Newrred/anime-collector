@@ -17,10 +17,14 @@ test('nested dialogs trap focus, dismiss only the top, and restore the trigger',
     await page.goto('/');
     try {
       await page.evaluate(async ({ harness, attempt }) => (await import(`${harness}?attempt=${attempt}`)).mount(), { harness, attempt });
+      await page.waitForLoadState('networkidle');
+      // Include the first interaction in the retry: optimization may reload
+      // after mount resolves and remove the test-only root.
+      await page.getByRole('button', { name: 'Open sheet', exact: true }).click({timeout:5000});
+      await expect(page.getByRole('dialog', {name:'Quick action'})).toBeVisible();
       break;
     } catch (error) { if (attempt === 2) throw error; }
   }
-  await page.getByRole('button', { name: 'Open sheet', exact: true }).click();
   const sheet = page.getByRole('dialog', { name: 'Quick action' });
   await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
@@ -100,6 +104,7 @@ test('legacy public routes stay closed and failed sign-in has a return action', 
 
 test('backup cancellation allows selecting the same file again', async ({ page }) => {
   await page.goto('/data/');
+  await page.getByRole('button', {name:'File backups',exact:true}).click();
   await page.locator('summary').filter({ hasText: 'Restore backup file' }).click();
   const file = { name: 'sample.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({
     format: 'moemoa-catalog-saved-titles', version: 1, titles: [],
