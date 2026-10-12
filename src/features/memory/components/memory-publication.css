@@ -1,3 +1,5 @@
+@import './public-surface-design.css';
+
 .memory-publication, .public-memory-board, .public-board-snapshot { display: grid; gap: 20px; min-width: 0; overflow-wrap: anywhere; }
 .memory-publication { border-top: 1px solid var(--border-subtle); padding-top: 24px; }
 .memory-publication > header, .memory-publication__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }

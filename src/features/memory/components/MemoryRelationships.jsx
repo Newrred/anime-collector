@@ -45,7 +45,7 @@ function Relationships({ userId, homeId, locale, base }) {
     run(action, id);
   };
   const button = (action, label, id) => <button type="button" className="btn btn--subtle" disabled={busy} onClick={() => act(action, id)}>{label}</button>;
-  return <section aria-label={ko ? "팔로우와 차단" : "Follows and blocks"} aria-busy={busy}>
+  return <section className="memory-relationships" aria-label={ko ? "팔로우와 차단" : "Follows and blocks"} aria-busy={busy}>
     {!homeId && <><h2>{ko ? "내 팔로우 목록" : "My following"}</h2><button className="btn btn--subtle" disabled={busy} onClick={() => setBlocked((v) => !v)}>{blocked ? (ko ? "팔로우 목록" : "Show following") : (ko ? "차단 목록" : "Show blocked")}</button></>}
     {error && <p role="alert">{typeof error === 'string' ? publicationError(error, locale) : ko ? "처리하지 못했습니다. 상태를 새로 확인해 주세요." : "Unable to complete. Refresh to check the current state."}</p>}
     <PublicSignupNotice error={error} locale={locale} base={base} follow />

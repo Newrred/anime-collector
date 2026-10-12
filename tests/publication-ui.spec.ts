@@ -2,6 +2,7 @@ import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { seedSystemDesignCards } from './helpers/memoryVisualFixtures';
 import sharp from "sharp";
 import { createHash } from 'node:crypto';
+import { settleVisualState } from './helpers/visualAssertions';
 
 const USER = "11111111-1111-4111-8111-111111111111";
 const PUBLICATION = "22222222-2222-4222-8222-222222222222";
@@ -1111,3 +1112,77 @@ test('unknown public policy blocks quick sharing but allows saving as private',a
  await expect(form.getByText('Saved as private.',{exact:true})).toBeVisible();
  expect(mock.calls.filter(c=>c.name==='make_memory_card_private')).toHaveLength(1);
 });
+
+for (const width of [1440, 390, 320]) for (const theme of ['light', 'dark']) {
+  test(`Are.na public surfaces keep images and reporting usable at ${width} ${theme}`, async ({ page, context }) => {
+    test.setTimeout(60000);
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await adapters(context);
+    await context.addInitScript(theme => localStorage.setItem('ui:theme:v1', JSON.stringify(theme)), theme);
+    const mock = mockPublication(); mock.control.cover = true; await mock.attach(context);
+    const art = await sharp(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800"><rect width="600" height="800" fill="#bdcbd0"/><circle cx="440" cy="190" r="88" fill="#e8dbbb"/><path d="M0 570L175 360L355 610L470 445L600 610V800H0Z" fill="#597b85"/><path d="M0 695L220 525L420 800H0Z" fill="#344e61"/></svg>')).webp().toBuffer();
+    await context.route('**/__publication-test/cover.webp', route => route.fulfill({ contentType: 'image/webp', body: art }));
+    await context.route('**/__publication-test/rpc/get_memory_relationship', route => route.fulfill({ json: { data: { self: false, following: false, blocked: false }, error: null } }));
+    await context.route('**/__publication-test/rpc/list_memory_relationships', route => route.fulfill({ json: { data: { items: [], next: null }, error: null } }));
+    await seedOwner(page); await choose(page); await publishSelected(page);
+    await page.getByRole('link', { name: 'My public home', exact: true }).click();
+    await page.getByLabel('Public nickname', { exact: true }).fill('A small collection');
+    await page.getByLabel('Display this Board', { exact: true }).check();
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await settleVisualState(page);
+    await page.screenshot({ path: `.cache/arena-public-ui-20261012/editor-${width}-${theme}.png`, fullPage: true, animations: 'disabled' });
+    await page.getByRole('button', { name: 'Preview public home', exact: true }).click();
+    await page.getByLabel('I reviewed this public home', { exact: false }).check();
+    await page.getByRole('button', { name: 'Publish public home', exact: true }).click();
+    await expect(page.getByRole('link', { name: 'Open public home', exact: true })).toBeVisible();
+    for (const surface of ['board', 'home']) {
+      await page.goto(`/public/${surface}/?id=${surface === 'board' ? PUBLICATION : '55555555-5555-4555-8555-555555555555'}`);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      const image = page.getByRole('img', { name: 'Shared memory', exact: true });
+      await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+      const geometry = await image.evaluate((img: HTMLImageElement) => ({ natural: img.naturalWidth / img.naturalHeight, displayed: img.clientWidth / img.clientHeight }));
+      expect(Math.abs(geometry.natural - geometry.displayed)).toBeLessThan(.02);
+      const content = await page.locator('.public-page-content').boundingBox(), tools = await page.locator('.public-page-tools').boundingBox();
+      expect(content && tools).toBeTruthy();
+      if (width > 900) expect(tools!.x).toBeGreaterThan(content!.x + content!.width);
+      else expect(tools!.y).toBeGreaterThanOrEqual(content!.y + content!.height);
+      await page.getByRole('button', { name: 'Report content', exact: true }).click();
+      await page.getByLabel('Report details (optional)', { exact: true }).fill('Synthetic layout check. '.repeat(15));
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const submit = page.getByRole('button', { name: 'Submit report', exact: true });
+      if (width < 641) expect((await submit.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await page.getByRole('textbox', { name: 'Report details (optional)', exact: true }).press('Tab');
+      await expect(submit).toBeFocused();
+      expect(await submit.evaluate(e => getComputedStyle(e).outlineStyle)).not.toBe('none');
+      await settleVisualState(page);
+      await page.screenshot({ path: `.cache/arena-public-ui-20261012/${surface}-${width}-${theme}.png`, fullPage: true, animations: 'disabled' });
+      page.once('dialog', dialog => dialog.accept());
+      await page.getByRole('button', { name: 'Cancel report', exact: true }).click();
+    }
+  });
+}
+
+for (const width of [1440, 320]) {
+  test(`Are.na moderator report layout preserves confirmation at ${width}`, async ({ page, context }) => {
+    await adapters(context); const mock = mockPublication(); await mock.attach(context); await seedOwner(page);
+    await page.setViewportSize({ width, height: 900 });
+    const caseId = '66666666-6666-4666-8666-666666666666';
+    await context.route('**/__publication-test/rpc/list_memory_pending_content', route => route.fulfill({ json: { data: { items: [], next: null }, error: null } }));
+    await context.route('**/__publication-test/rpc/list_memory_moderation', route => route.fulfill({ json: { data: { items: [{ id: caseId, target: PUBLICATION, kind: 'board', reviewType: 'REPORT', status: 'RECEIVED', category: 'OTHER', revision: 0, targetRevision: 0, note: 'Synthetic review fixture. '.repeat(12), appeals: [] }], next: null }, error: null } }));
+    await context.route('**/__publication-test/rpc/read_memory_moderation_audit', route => route.fulfill({ json: { data: [], error: null } }));
+    await page.goto('/moderation/');
+    await page.getByRole('button', { name: 'Reports', exact: true }).click();
+    await page.getByRole('button', { name: `Report ${caseId} · RECEIVED`, exact: true }).click();
+    const save = page.getByRole('button', { name: 'Save report action', exact: true });
+    await expect(save).toBeDisabled();
+    await page.getByLabel('Report action', { exact: true }).selectOption('HIDE');
+    await page.getByLabel('Reason sent to the author', { exact: true }).fill('Synthetic review fixture only.');
+    await expect(save).toBeDisabled();
+    await page.getByLabel('I reviewed the target, action and reason.', { exact: true }).check();
+    await expect(save).toBeEnabled();
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.cache/arena-public-ui-20261012/moderation-${width}.png`, fullPage: true });
+    expect(mock.calls.some(call => call.name === 'review_memory_report')).toBe(false);
+  });
+}

@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 Are.na 새 기능 디자인 로컬 반영·검증 완료:** 실제 채널/블록 상세 재조사→공개 board/home·미니홈 편집/동의·팔로우/신고/운영 알림·운영 검토·가입/완료·admin 갱신/확인 표현을 같은 선/중립 버튼/3px control·이미지/관리열로 통일. 기존 기능50+새 layout/moderation8+가입/admin35=고유 Chromium93 PASS,1440/390/320·light/dark·비율/넘침/키보드/모바일44px 확인, build33 PASS. React Doctor uncached36→36/변경 신규문제0, 전체 기존진단 해소 주장 안함. backend/controller/auth/DB/권한/환경/flags/lock/운영자료 쓰기0. 현재 www/master는 승인 ea8f388이며 새 UI는 검토브랜치 codex/public-ui-arena-20261012에만 반영. [계획](../plans/2026-10-03-interface-rebuild.md) 32차와 [근거](evidence/2026-10-12-are-na-public-ui.json)를 따른다. 정확한 새 후보 CI/운영 승인이 다음 배포 gate.
+
+
 > **2026-10-12 운영 필수 공개 흐름 인수 완료:** 승인 ea8f388/www 동일SHA에서 합성 카드와 미니홈의 공개·익명이미지24×30, 직접가입 후 다른계정 follow/내목록재방문, 테스트신고1→기존운영자 HIDE/RESTORE→익명전시0/1·이미지404/200, 작성자 알림UI2·독립감사2 PASS. 테스트 종료 후 follow해제·사용자직접 미니홈비공개·카드비공개, 익명board/home null·옛full/thumb404/no-store·원본버전/hash 보존 PASS. 최종 report CLOSED/가림false/following=false/blocked=false; 기존사용자 카드공개·새schema/권한/배포·물리삭제0. candidate04의 image/home/follow/list/report/moderation/withdrawal 실행조건은 완료. 차단 확인창은 도구 제한으로 운영 PASS로 세지 않으며 기존 hosted 증거와 구분한다. 전체24QA·물리기기/Android·미래주간실행·새용량경보수신·복구serving/전체ingestionhistory PASS를 주장하지 않는다. 다음은 기존 주간백업/용량 관찰. [최신 근거](evidence/2026-10-11-public-capacity-closeout.json)의 firstPublicProductionRoleVerification_20261012를 따른다.
 
 

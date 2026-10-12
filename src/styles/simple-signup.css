@@ -1,5 +1,6 @@
  .signup-page{margin:0;background:#fafafa;color:#292929;font-family:Arial,"Noto Sans KR",sans-serif;line-height:1.6}.signup-panel{box-sizing:border-box;width:min(100% - 40px,480px);margin:64px auto;padding:0 0 40px}.signup-heading{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding-bottom:20px;font-weight:700}.signup-heading button{background:none;border:0;color:inherit;text-decoration:underline;min-height:44px;cursor:pointer}.signup-panel h1{font-size:26px;letter-spacing:-.5px;line-height:1.35;margin:32px 0 12px}.signup-panel p{color:#555}.signup-panel form>label:not(.signup-consent){display:block;margin:22px 0 6px;font-weight:600}.signup-panel select,.signup-panel input[type=date]{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:48px;border:1px solid #bbb;border-radius:3px;padding:10px 12px;background:#fff;color:#292929;font:inherit}.signup-hint{font-size:13px}.signup-consent{display:flex;gap:10px;align-items:center;margin-top:26px;min-height:44px}.signup-consent input{width:20px;height:20px;accent-color:#e90073;flex-shrink:0}.signup-panel a{color:inherit;text-underline-offset:3px}.signup-primary{width:100%;min-height:48px;padding:12px;margin-top:18px;background:#e90073;color:white;border:0;border-radius:3px;font:inherit;font-weight:700;cursor:pointer}.signup-primary:disabled{opacity:.55;cursor:wait}.signup-back{display:inline-block;margin-top:24px;min-height:44px}.signup-panel :focus-visible{outline:2px solid #e90073;outline-offset:3px}.signup-panel [role=alert]{color:#a32626}.signup-legal{width:min(100% - 40px,760px)}.signup-legal h2{font-size:18px;margin-top:30px}.signup-legal section{border-bottom:1px solid #ddd;padding-bottom:22px}@media(max-width:480px){.signup-panel{margin-top:28px}.signup-panel h1{font-size:24px}}@media(prefers-color-scheme:dark){.signup-page{background:#191919;color:#eee}.signup-panel p{color:#bbb}.signup-panel input[type=date],.signup-panel select{background:#222;color:#eee;border-color:#666;color-scheme:dark}.signup-heading,.signup-legal section{border-color:#444}.signup-panel [role=alert]{color:#ffa0a0}}
 /* Signup controls stay separate from document and completion layouts. */
+/* Channel-style account entry: quiet information rows, one primary action. */
 .signup-page.signup-start-page {background:#fff;color:#262326;font-family:"Noto Sans KR","Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light}
 .signup-entry.signup-panel {width:min(100% - 40px,440px);margin:44px auto 0;padding-bottom:28px}
 .signup-entry .signup-heading {padding-bottom:16px;border-color:#e7e3e5;font-size:15px;letter-spacing:.02em}
@@ -47,4 +48,25 @@
 }
 @media (prefers-reduced-motion:reduce) {
  .signup-entry.signup-panel select,.signup-entry .signup-date-fields input,.signup-entry .signup-primary {transition:none}
+}
+
+.signup-entry.signup-panel { width:min(100% - 40px,480px); margin-top:56px; }
+.signup-entry .signup-heading { border-color:#e5e5e5; letter-spacing:0; font-size:14px; }
+.signup-entry.signup-panel h1 { font-size:28px; line-height:1.3; margin-top:30px; }
+.signup-entry.signup-panel p { color:#666; }
+.signup-entry .signup-intro { max-width:40ch; margin-bottom:30px; }
+.signup-entry.signup-panel select,.signup-entry .signup-date-fields input { border-color:#b4b4b4; border-radius:3px; }
+.signup-entry .signup-date-fields label { color:#666; }
+.signup-entry .signup-agreement { border-color:#e5e5e5; margin-top:28px; }
+.signup-entry .signup-primary { border-radius:3px; }
+.signup-entry .signup-primary:disabled { background:#f3f3f3; color:#737373; }
+.signup-entry .signup-existing { justify-content:flex-start; padding-top:16px; margin-top:20px; border-top:1px solid #e5e5e5; }
+.signup-entry .signup-back { margin-top:8px; }
+.signup-page:not(.signup-start-page) .signup-panel:not(.signup-legal) { margin-top:56px; }
+.signup-page:not(.signup-start-page) .signup-panel:not(.signup-legal) h1 { font-size:28px; line-height:1.3; }
+@media(max-width:480px) {
+ .signup-entry.signup-panel { margin-top:24px; }
+ .signup-entry.signup-panel h1 { font-size:24px; }
+ .signup-page:not(.signup-start-page) .signup-panel:not(.signup-legal) { margin-top:24px; }
+ .signup-page:not(.signup-start-page) .signup-panel:not(.signup-legal) h1 { font-size:24px; }
 }

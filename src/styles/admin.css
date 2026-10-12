@@ -22,12 +22,17 @@
 .admin-page a { color: inherit; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .admin-page a:hover { color: var(--accent-strong); }
 .admin-page .btn { min-height: 44px; }
+.admin-page .admin-toolbar .btn { min-height: 32px; padding: 6px 10px; border: 1px solid var(--border-subtle); border-radius: 3px; background: var(--bg-surface-2); color: var(--text-primary); font-size: 13px; font-weight: 500; }
+.admin-page .admin-toolbar .btn:hover { border-color: var(--border-strong); background: var(--surface-hover, var(--bg-surface-2)); color: var(--text-primary); }
 .admin-page :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .admin-page ::selection { background: var(--accent); color: var(--accent-contrast); }
 .admin-page button:disabled { opacity: .55; cursor: not-allowed; }
 .admin-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .admin-confirm { margin-top: 20px; padding: 16px; background: var(--bg-surface-2); }
+.admin-confirm { padding: 20px 0; background: transparent; border-top: 1px solid var(--border-strong); }
 .admin-confirm h3 { margin-top: 0; }
+.admin-confirm input { border-radius: 3px; }
+@media(max-width:640px) { .admin-page .admin-toolbar .btn { min-height: 44px; } }
 .admin-confirm p, .admin-message { font-size: .875rem; }
 .admin-message { padding-block: 12px; }
 .admin-page details summary { cursor: pointer; padding: 12px 0; min-height: 44px; font-size: .875rem; }

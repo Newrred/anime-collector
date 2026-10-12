@@ -1,5 +1,18 @@
 # MOEMOA interface rebuild ExecPlan
 
+## 32차 — 새 공개 기능의 Are.na 레퍼런스 적용 (2026-10-12)
+
+1. 목적/승인: 사용자 “이번에 새로 생긴 기능, 창, 버튼들의 디자인, 레이아웃을 are.na를 다시 구체적으로 참고해서 적용” 지시. 운영 필수흐름 인수 이후 presentation 작업이며 exact 배포 ea8f388을 변경하지 않는다.
+2. 현재 근거: 기존 `channel-service.css`의 선 디자인과 달리 새 `memory-publication.css`의 8–12px 둥근 틀·큰 버튼·safety hardcoded dark form, 공개 home narrow폭·혼합 작업 배열이 불일치한다. 기존 controller/RPC/동의/철회/원본 접근 계약은 보존한다.
+3. 레퍼런스: 10/12 실제 Are.na `/chase-body/ad_direzione`와 `/block/50278090` 재확인. 1485px 채널 제목28/35px·700, Connect/More약24px·12.5px·radius3·shadow0, 원본비율 이미지·radius0. 상세는 좌측 큰 이미지/우측좁은 정보·얇은 세로선·작은 작업메뉴. 공식 help channels/connections도 대조. 관찰값과 MOEMOA 제안값을 구분하며 외부 작품 이미지/사용자정보를 repo asset으로 복제하지 않는다.
+4. 구조/범위: 공개 board/home은 경로형 heading→실제 이미지/작업·관계·신고 보조열. 미니홈 editor는 게시/선택 주영역과 follow/safety 보조열. 기존 공유설정·신고·운영자 검토·가입/완료 폼과 admin 갱신 버튼/운영 확인 영역은 중립 버튼·3px control·얇은 section divider·상태/빈화면을 적용. NO-HERO/분홍 주요행동/이미지 contain/현재 텍스트와 동의 고지는 유지.
+5. 데이터/보안: schema/환경/flags/RPC/권한/정책/스토리지와 운영 자료 변경0. 합성 fixture와 격리 테스트 서버만 사용; 운영 재게시/신고/사진업로드 없음. 새 사용자 설정키나 가짜 통계/협업/소셜 기능 없음.
+6. 파일/마일스톤: public view/editor/review JSX semantic class/wrapper·공통 CSS·signup CSS 변경. React Doctor baseline 기록 후 isolated browser fixture로 화면/행동·1440/390/320·light/dark, 이미지비율/넘침/키보드/focus/disabled/긴고지를 확인.
+7. 검증: 기존 public viewer/publication UI/current regression/signup 중 영향 회귀·build·React Doctor diff/no score regression·git diff check. CSS mirror 단위검사 대신 실제 layout/공개·신고 회귀를 보완. 통과 후 불필요한 반복 없음.
+8. 롤백/한계: presentation commit revert로 복귀; DB/data rollback 없음. Are.na 비로그인 PC 관찰을 로그인/모바일 전체로 확대하지 않는다. 모바일 터치44px 유지. 코드 변경/검증을 review branch에 보존하며 운영 master는 별도 정확 후보 승인 단계.
+9. 진행: `codex/public-ui-arena-20261012`(인수 b3b4669, runtime ea8f388과 동일)에서 시작. 레퍼런스/합성 QA 이미지와 baseline 로그는 ignored cache에 보관.
+10. 완료/근거: 기존 공개/viewer50·새 layout/moderation8·가입/admin35=고유 Chromium93 PASS, build33 PASS. 새6검사의 초기 포인터 focus/채워진 textarea exact-label selector를 실제 Tab/textbox role로 보완; 이전 실패를 별도 로그로 유지한다. 기본 Windows 검사서버 transporttimeout 이후 loopback/mock 입력만 있는 배경 서버에서 확인, repository CI 변경0. 격리 검사 화면은 실제 운영상태가 아닌 합성자료다. 원본 비율/PC열·모바일적층·3폭·양테마·44px/키보드·동의/권한/철회 회귀를 확인했다. 임시로 복사해둔 SDK sourcemap이 검사 범위에 들어간 cached 오탐은68개 dependency source/61개 설치내용일치로 확인하고 node_modules 아래에 보존·uncached 재검사하여 baseline36→36/신규진단0 확인(전체 기존진단 해소 아님). 상세 file hash/범위/한계는 `../release-v2/evidence/2026-10-12-are-na-public-ui.json`. www/master ea8f388 그대로이며 새운영쓰기/배포/DB/flags/lock/동의고지 변경0. presentation revert로 복귀 가능, 다음은 정확한 검토 후보와 CI 결속이다.
+
 ## 1. 목적과 사용자 결과
 2026-10-03 사용자는 부분 보정이 아닌 화면 구조·레이아웃·폰트·문구·플로우의 전면 개편을 요청했다. 사진과 작품 표지를 모으고 다시 여는 개인 컬렉션을 중심으로 화면을 재구성한다.
 

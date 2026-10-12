@@ -7,6 +7,7 @@ import { isPublicationId, publicationSnapshot, publicationAuthor } from "../doma
 import { minihomeLink } from "../domain/minihomeView.js";
 import PublicBoardSnapshot from "./PublicBoardSnapshot.jsx";
 import { publicationCopy } from "./publicationCopy.js";
+import PublicPageHeading from './PublicPageHeading.jsx';
 
 export default function PublicMemoryBoard({ base = "/" }) {
   const { locale } = useUiPreferences(), copy = publicationCopy(locale);
@@ -48,10 +49,12 @@ export default function PublicMemoryBoard({ base = "/" }) {
     return () => { clearTimeout(timeout); request.abort(); unsubscribeViewer?.(); window.removeEventListener("pageshow", recheck); document.removeEventListener("visibilitychange", recheck); };
   }, [id, retry, services]);
   return <main className="public-memory-board page-shell page-shell--wide">
-    <header><a href={base}>MOEMOA</a><h1>{copy.title}</h1></header>
+    <PublicPageHeading title={copy.title} base={base} />
+    <div className="public-page-layout"><div className="public-page-content">
     {state.status === "ready" ? <PublicBoardSnapshot snapshot={state.snapshot} publicationId={id} services={services} locale={locale} />
-      : <p role={state.status === "error" ? "alert" : "status"}>{state.status === "loading" ? copy.loading
+      : <p className="public-page-state" role={state.status === "error" ? "alert" : "status"}>{state.status === "loading" ? copy.loading
         : state.status === "disabled" ? copy.disabled : state.status === "error" ? copy.failed : copy.unavailable}</p>}
+    </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '공개 보드 관리' : 'Public Board actions'}>
     {state.status === "ready" && <PublicLinkCopy key={id} kind="board" id={id} locale={locale} base={base} />}
     {state.status === "ready" && state.author && <a href={minihomeLink(state.author.id, base)} data-astro-reload>
       {locale === "ko" ? `${state.author.nickname}님의 공개 미니홈` : `Visit ${state.author.nickname}'s public home`}
@@ -59,5 +62,6 @@ export default function PublicMemoryBoard({ base = "/" }) {
     {state.status !== "loading" && state.status !== "disabled" && <button type="button" className="btn btn--subtle"
       onClick={() => setRetry((value) => value + 1)}>{copy.retry}</button>}
     {isPublicationId(id) && <MemorySafety kind="board" target={id} locale={locale} base={base} />}
+    </aside></div>
   </main>;
 }
