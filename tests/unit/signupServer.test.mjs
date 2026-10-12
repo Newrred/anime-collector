@@ -18,7 +18,14 @@ function jwt(payload=claims,header={alg:'RS256',kid:'key1'}) {
 test('authenticated encryption binds purpose and rejects altered bytes and keys',()=>{
  const box=createSealer(key),sealed=box.seal({state:'secret'},'flow');assert.deepEqual(box.open(sealed,'flow'),{state:'secret'});
  assert.throws(()=>box.open(sealed,'session'));assert.throws(()=>createSealer('22'.repeat(32)).open(sealed,'flow'));
- assert.throws(()=>box.open(sealed.slice(0,30)+'A'+sealed.slice(31),'flow'));assert.throws(()=>createSealer('weak'));
+ // Replacing a random character with "A" is sometimes a no-op. Flip a bit
+ // in the IV, authentication tag and ciphertext so each case alters bytes.
+ for(const index of [0,12,28]) {
+  const altered=Buffer.from(sealed,'base64url');altered[index]^=1;
+  assert.notEqual(altered.toString('base64url'),sealed);
+  assert.throws(()=>box.open(altered.toString('base64url'),'flow'));
+ }
+ assert.throws(()=>createSealer('weak'));
 });
 test('Google verification checks cryptographic signature, nonce, issuer, audience, time and verified identity',async()=>{
  let loads=0;
