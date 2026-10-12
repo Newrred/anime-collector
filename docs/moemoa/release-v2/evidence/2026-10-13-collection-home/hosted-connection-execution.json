@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-13",
+  "candidate": "8446753548c5a4596adf27e463c27f66c600cf19",
+  "approval": "test connection, verification and exact settings/source restore",
+  "fixtureApplied": true,
+  "settingsApplied": false,
+  "newTypeTemporarilyEnabled": false,
+  "coverUploadedBytes": 89300,
+  "privateOriginalDeleted": false,
+  "master": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+  "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+  "deploymentId": "dpl_5uZfEuc7Smyi13vniAovDjd6qfrC",
+  "hostedPublished": false,
+  "restorePending": true,
+  "dataHistory": [
+    {
+      "version": "20261012180421",
+      "name": "collection_home_test_fixture_data_20261013"
+    },
+    {
+      "version": "20261012180447",
+      "name": "collection_home_test_config_20261013"
+    },
+    {
+      "version": "20261012181251",
+      "name": "collection_home_test_config_restore_20261013"
+    }
+  ],
+  "settingsRestored": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "collection_home_enabled": false,
+    "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "signup_declaration_required": false,
+    "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+  },
+  "frontendDisabled": true,
+  "environmentRestoreComplete": false,
+  "pendingEnvironmentRemoval": [
+    "PUBLIC_MEMORY_COLLECTION_HOME_V1",
+    "PUBLIC_CATALOG_SUPABASE_URL",
+    "PUBLIC_CATALOG_SUPABASE_ANON_KEY"
+  ],
+  "environmentRemovalReason": "Browser permanent deletion action-time confirmation requested; no response received. Flag set to 0. Existing revision restored.",
+  "hostedPreview": "PUBLICATION_UNAVAILABLE: unavailable saved Board cannot be deselected",
+  "localFix": {
+    "component": "MemoryMinihome.jsx",
+    "behavior": "explicit selection removal, original references retained",
+    "tests": "Chromium 3 PASS (new 1 + previous 2); build 33 pages PASS"
+  },
+  "rollbackDeployment": {
+    "id": "dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN",
+    "url": "https://anime-collector-2l3yme6k0-newrreds-projects.vercel.app",
+    "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "status": "READY",
+    "target": "preview",
+    "alias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
+    "verification": "connector Ready/exact Git source/alias; post-rollback Chrome inspection unavailable"
+  },
+  "sourceRestored": true,
+  "remaining": "Three newly created Preview overrides still require removal action-time confirmation; frontend0/backendfalse, production unchanged.",
+  "safeFrontendReadback": {
+    "key": "PUBLIC_MEMORY_COLLECTION_HOME_V1",
+    "value": "0",
+    "branch": "codex/phone-test"
+  },
+  "safePolicyReadback": {
+    "key": "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION",
+    "value": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "branch": "codex/phone-test"
+  }
+}

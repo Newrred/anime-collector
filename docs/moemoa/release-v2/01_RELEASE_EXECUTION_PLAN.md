@@ -2289,3 +2289,19 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 8. 잔여/다음1개: exact 후보로 test자료89KB/fixture+설정5+Preview값4+phone-test Git 배포→새타입실제public 인수→설정/env/source 원복의 단일 승인 범위를 준비했다. 운영/새회원/대신동의/삭제/유료는 제외. 사용자 승인 후 읽기전용 baseline 재대조로 이어간다.
 
 [후보 결속] exact test 연결·인수·원복 소스 `8446753548c5a4596adf27e463c27f66c600cf19`. fixture SQL SHA25602057ac9a75b17b6b956e667bbd887ed237138a98716274b84f2fc0c1f0449a1/config SHA2566c255537bdce968b7ca0e4127389bb76efc388bca3e79820877ca786c75689fc. master/phone-test 원격ref 불변, 승인 전 실행0.
+
+[2026-10-13 실제 실패·최소 보완 계획] 승인8446753의 test자료/설정/Preview 연결 후 기존 A가 현재 Collection에 실제 선반1·Steins;Gate표지·Memory0을 표시했다. 공유폼은 기존 이름/소개/이전 보드 선택을 복원했다. 이미 열람 불가능한 기존 보드는 후보에서 빠졌지만 선택순서 목록에는 남아있으며 해제 버튼이 없어 새선반 preview도 거부된다. 원본/권리/기존선택을 자동 삭제하지 않고 entry별 명시적 선택해제만 추가한다. mock missing-publication 경로를 FAIL로 재현→해제 후 title-only preview PASS, 기존 hydration/dirty/동의 초기화 보존. 새 UI후보의 원격 배포는8446753 승인에 포함되지 않아 정확히 별도요청하며 기존test설정/env/source를 먼저원복한다.
+
+
+### W18 이번 연결 종료·PC 인계 — 2026-10-13
+
+1. 읽은 자료: 기존 AGENTS/PLANS/START/확정01, 제품02/카탈로그04/이미지05/QA07/변경09와 release-v2 00/01/02/03, 첨부 Collection/Home 계약, 현행 MinihomeEditor/controller 및 collection-home 테스트를 대조했다.
+2. 가정·미결: 승인8446753의 테스트 연결·검사 후 원복만 실행했다. 실제 title-only 공개 게시·익명 인수는 완료되지 않았다. 사용자의 이번 작업 마감·정상 종료 지시에 따라 새 UI 원격 재시도는 다음 PC 작업으로 남긴다.
+3. 계획: 위 W18 hosted 연결 ExecPlan의 실패 최소 수정 및 원복 단계. 신규 작업판/기능 확대0.
+4. 변경: MemoryMinihome.jsx 선택순서 entry에 명시적 ‘선택 해제’를 추가했다(95–101). 사용할 수 없는 옛 보드가 복원됐을 때 원본을 자동 삭제하지 않고 사용자가 현재 draft 참조만 제거한다. 기존 change()가 preview/동의를 초기화한다. tests/collection-home.spec.ts 8–44는 거부→명시해제→새 제목 선반 preview·동의 unchecked·publish0·원본참조 보존을 검증한다.
+5. DB·복귀: 새 UI 수정에 schema 변경0. 승인된 기존 테스트 fixture/config/restore는 apply_migration으로 실행돼 데이터/config 이력3건이 추가됐다(지속 schema 추가0); SQL/hash/매핑은 hosted-connection-execution.json에 기록한다. 새 구조·공개 catalog/표지89,300B·테스트 선반/저장작품은 승인대로 유지, 실제 Memory0. 임시 DB5필드는 baseline 복귀·새 타입false를 독립 읽기로 확인했다. 기존 Preview 정책값과 phone-test Git ref도 이전 값으로 복귀했다. 신규 Preview3값 제거와 이전 Git 배포 재빌드는 별도 원복 진행 상태를 현재 작업 카드/evidence에서 확인한다. 운영master b0541ff/운영DB 변경0.
+6. 실제 결과: 후보8446753 Git 배포 dpl_5uZfEuc7Smyi13vniAovDjd6qfrC READY/exactSHA/별칭 확인. 기존 A 로그인 복귀→실제 선반·승인 표지·Memory0 표시 및 이전 공유 이름/소개/선택 복원 PASS. 사용할 수 없는 옛 보드 참조의 해제 UI가 없어 새 선반 preview는 PUBLICATION_UNAVAILABLE로 거부됐다. 실제 게시/익명/철회 PASS0. 한 줄 수정 후 node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts --project=chromium --workers=1 --reporter=line: 3 PASS(새1+기존2), npm run build: 33 pages PASS. 로그와 실제 실패 화면을 기존 evidence에 보존했다. 앞선22unit/14Chromium/SQL25·17은 이전 후보 결과로 유지한다.
+7. 개인정보·권리·관측: 기존 공개 catalog와 테스트 선반만 연결, 개인사진/새계정/대신동의/권리확대/요금/외부발송/원본삭제0. 복구/운영서버키·OAuth 비밀은 Git에 넣지 않는다. 캡처는 공개 표지와 합성 테스트 공유 설명만 포함한다. 권리/정책 거부를 완화하지 않는다.
+8. 잔여·다음1개: 수정 UI exact 후보를 테스트에만 연결·재검증·원복하는 승인 범위를 다음 PC에서 준비한다. fixture 재실행/DB 재설치/새Google 가입/운영 활성은 필요 없다. 미결 typed 공개·새 익명 인수는 W18 VERIFY로 남긴다.
+
+[2026-10-13 종료 결속] 이전 phone-test a6b6ddaaadf9487f5f8f3b14064cb794b27826c0의 connected Git 재빌드 dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN READY/Preview/exactSHA/canonical alias 확인. Git force-ref 복귀가 자동배포를 만들지 않아 별도 Git-source API로 복구했다. 최초 target=preview API400는 배포 생성0, 공식 API의 target 생략=Preview로 정정 후 생성. DB5필드 전체baseline 일치·새 타입false, frontend flag0·기존 정책 복귀. 새 Preview3override 제거는 action-time 삭제 확인 미응답으로 남아 완전 env 원복 PASS로 올리지 않는다. Chrome 연결 끊김으로 원복 후 live 화면 검사는 미실행; Vercel metadata Ready/source/alias만 PASS. 사용자의 승인 필요시 인계·종료 지시에 따라 남은 정확한 조건을 기록하고 정상 종료한다.

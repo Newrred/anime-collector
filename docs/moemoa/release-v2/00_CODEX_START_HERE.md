@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-13 W18 컬렉션·미니홈 교정: 기존 선반·보드를 참조하는 두 유형 Collection, 공개 설정 작업 모드, 선택 복원, Memory0 작품 선반의 서버 공개 후보를 로컬 구현했다. 현행 기준 b0541ff/로컬 인수 ba862d1 이후이며 기존 ID·원본·공개 링크를 유지한다. 단일 현재 상태/다음 행동은 03의 기존 현재 작업 카드, 세부 설계는 01의 마지막 W18 ExecPlan, 새 수용 계약은 02의 Collection/Home v2 절을 따른다. 사용자 exact 승인 후 테스트 DB 구조만 적용·기존36table/설정 보존 및 새타입off 확인을 완료했다. 실제 새 공개 게시·운영 DB·Public 활성·master push·배포는 미실행이다. 다음1개는 준비·격리PG17검증한 test자료1작품/89KB·설정5·Preview값4·phone-test Git 연결 및 원복의 exact 후보 승인/실행이다.**
+> **2026-10-13 W18 마감/PC 인계:** 승인8446753 테스트 연결에서 실제 선반·표지·Memory0 및 기존 선택 복원 확인. unavailable 옛 보드를 해제할 UI가 없어 새 preview 거부→명시 선택 해제 최소 수정, Chromium3/build33 PASS. 새 타입 실제 게시/익명 인수 미완료. DB 임시5값과 기존 정책/Git ref 원복, 새 frontend flag0; 신규 Preview3설정 영구 제거 승인 미응답으로 보류. 이전 Git 소스의 실제 배포 원복 상태는 03 현재 카드와 evidence/hosted-connection-execution.json을 확인. 운영master b0541ff/운영DB 변경0. 새 수정은 codex/continue-after-arena-20261012 인계 브랜치, 새 phone-test/운영 재배포 미승인. 기존 M/W/Q/D와 이력은 유지한다.**
 
 
 <details><summary>교정 전 시작 문서의 2026-10-11 최신 요약 — 당시 이력 보존</summary>

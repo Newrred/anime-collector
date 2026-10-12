@@ -95,6 +95,7 @@ export function MinihomeEditor({ userId, locale, base, onStateChange }) {
         <ol className="collection-sharing-order">{entries.map((entry, i) => <li key={homeEntryKey(entry)}>
           {entry.kind === "TITLE_SHELF" ? (entry.title || state.shelves.find(s => s.sourceId === entry.sourceId)?.name) : state.boards.find((b) => b.id === entry.publicationId)?.title || (locale === "ko" ? "기존 공개 보드 · 원본 확인 필요" : "Existing public Board · check source")}
           {[-1, 1].map((direction) => <button type="button" className="btn btn--subtle" key={direction} disabled={i + direction < 0 || i + direction >= entries.length} onClick={() => change(() => setEntries((current) => { const next = [...current]; [next[i], next[i + direction]] = [next[i + direction], next[i]]; return next; }))}>{direction < 0 ? copy.up : copy.down}</button>)}
+          <button type="button" className="btn btn--subtle" onClick={() => change(() => setEntries(current => current.filter((_, index) => index !== i)))}>{locale === "ko" ? "선택 해제" : "Remove selection"}</button>
         </li>)}</ol>
         <button type="submit" className="btn" disabled={!nickname.trim() || !entries.length || entries.some(e => e.kind === "TITLE_SHELF" && !e.title.trim())}>{copy.preview}</button>
       </fieldset>

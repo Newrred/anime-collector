@@ -5,6 +5,43 @@ const USER='11111111-1111-4111-8111-111111111111', HOME='55555555-5555-4555-8555
 const animeId='anime:15151515-1515-4151-8151-151515151515', revisionId='asset:'+'c'.repeat(40);
 const cover='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300"%3E%3Crect width="200" height="300" fill="%235f6c91"/%3E%3C/svg%3E';
 
+test('an unavailable saved Board can be explicitly deselected before a fresh title shelf preview',async({page,context})=>{
+ await installAppState(page,{locale:'en'});await adapters(context);
+ const gone='88888888-8888-4888-8888-888888888888';
+ const saved={nickname:'Existing owner',bio:'',entries:[{publicationId:gone}]};
+ let prepared:any=null,rejected=0,publishes=0;
+ await context.addInitScript(({user,cover})=>{
+  localStorage.setItem('moemoa.e2e.mockSession.v1',JSON.stringify({user:{id:user},access_token:'local-test-token'}));
+  (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__.collectionHome=true;
+  (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__.resolveCover=async()=>cover;
+ },{user:USER,cover});
+ await context.route('**/__publication-test/rpc/*',async route=>{
+  const name=route.request().url().split('/').at(-1),args=route.request().postDataJSON();let data:any=null,error:any=null;
+  if(name==='get_memory_minihome')data={id:HOME,revision:4,published:true,visible:false,selection:saved};
+  if(name==='list_memory_minihome_boards')data={boards:[],next:null};
+  if(name==='list_memory_minihome_shelves')data={enabled:true,shelves:[{sourceId:'shelf-a',sourceVersion:1,name:'Archive test',titles:[{titleKey:'ANILIST:1313',animeId,title:'Catalog only title',visual:{type:'CATALOG_COVER',revisionId}}]}]};
+  if(name==='prepare_memory_minihome'){
+   prepared=args.p_selection;
+   if(prepared.entries.some((e:any)=>e.publicationId===gone)){rejected++;error={message:'PUBLICATION_UNAVAILABLE'};}
+   else data={id:HOME,revision:5,reviewHash:'a'.repeat(64),policyRevision:'MOEMOA_PUBLIC_GENERAL_20261011_01',snapshot:{schemaVersion:2,nickname:prepared.nickname,bio:prepared.bio,entries:[{kind:'TITLE_SHELF',sectionId:'shelf:shelf-a',snapshot:{schemaVersion:1,title:prepared.entries[0].title,titles:[{animeId,title:'Catalog only title',visual:{type:'CATALOG_COVER',revisionId}}]}}]}};
+  }
+  if(name==='publish_memory_minihome')publishes++;
+  await route.fulfill({contentType:'application/json',body:JSON.stringify({data,error})});
+ });
+ await page.goto('/?panel=sharing');
+ await expect(page.locator('.collection-sharing-order')).toContainText('Existing public Board · check source');
+ await page.getByLabel('Archive test · 1',{exact:true}).check();
+ await page.getByLabel('Public shelf title',{exact:true}).fill('Title preview');
+ await page.getByRole('button',{name:'Preview public home',exact:true}).click();
+ await expect(page.getByRole('alert')).toBeVisible();expect(rejected).toBe(1);
+ await page.locator('.collection-sharing-order li').filter({hasText:'Existing public Board · check source'}).getByRole('button',{name:'Remove selection',exact:true}).click();
+ await expect(page.getByLabel('Public shelf title',{exact:true})).toHaveValue('Title preview');
+ await page.getByRole('button',{name:'Preview public home',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Title preview',exact:true})).toBeVisible();
+ await expect(page.getByLabel('I reviewed this public home',{exact:false})).not.toBeChecked();
+ expect(prepared.entries).toHaveLength(1);expect(prepared.entries[0].kind).toBe('TITLE_SHELF');expect(publishes).toBe(0);expect(saved.entries[0].publicationId).toBe(gone);
+});
+
 test('one owner Collection renders an existing shelf and explicitly connected Board; unlink keeps originals', async ({ page }) => {
   await installAppState(page,{locale:'ko'});
   await page.route('https://**/*',route=>route.abort());

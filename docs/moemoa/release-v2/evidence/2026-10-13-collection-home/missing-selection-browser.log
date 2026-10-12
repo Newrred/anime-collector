@@ -1,0 +1,58 @@
+Visual test server: http://127.0.0.1:6357
+03:13:55 [moemoa-development-catalog] Development catalog is disabled (workspace not configured).
+03:13:55 [types] Generated 1ms
+03:13:55 [content] Syncing content
+03:13:55 [content] Astro config changed
+03:13:55 [content] Clearing content store
+03:13:56 [content] Synced content
+03:13:56 [vite] Re-optimizing dependencies because vite config has changed
+
+ astro  v5.17.2 ready in 1856 ms
+
+┃ Local    http://127.0.0.1:6357/
+
+03:13:57 watching for file changes...
+03:14:33 [200] / 197ms
+03:14:33 [200] / 202ms
+03:14:33 [200] / 204ms
+03:14:33 [200] / 205ms
+03:14:33 [200] / 206ms
+03:14:33 [200] / 207ms
+03:14:33 [200] / 209ms
+03:14:33 [200] / 211ms
+03:14:33 [200] / 213ms
+03:14:33 [200] / 214ms
+03:14:33 [200] / 215ms
+03:14:33 [200] / 216ms
+03:14:33 [200] / 217ms
+03:14:33 [200] / 218ms
+03:14:33 [200] / 219ms
+03:14:33 [200] / 220ms
+03:14:33 [200] / 221ms
+03:14:33 [200] / 222ms
+03:14:33 [200] / 224ms
+03:14:33 [200] / 225ms
+03:14:33 [200] / 226ms
+03:14:33 [200] / 228ms
+03:14:33 [200] / 231ms
+03:14:33 [200] / 232ms
+03:14:33 [200] / 233ms
+03:14:33 [200] / 234ms
+03:14:33 [200] / 235ms
+03:14:33 [200] / 236ms
+03:14:33 [200] / 237ms
+
+Running 3 tests using 1 worker
+
+[1/3] [chromium] › tests\collection-home.spec.ts:8:1 › an unavailable saved Board can be explicitly deselected before a fresh title shelf preview
+03:14:37 [200] / 2ms
+[2/3] [chromium] › tests\collection-home.spec.ts:45:1 › one owner Collection renders an existing shelf and explicitly connected Board; unlink keeps originals
+03:14:40 [200] / 4ms
+03:14:40 [200] / 3ms
+03:14:42 [200] / 2ms
+[3/3] [chromium] › tests\collection-home.spec.ts:102:1 › typed public shelf hydrates, needs fresh consent, publishes, and visitor never loads private sources
+03:14:43 [200] / 2ms
+03:14:44 [WARN] [vite] Files in the public directory are served at the root path.
+Instead of /public/home/?id=55555555-5555-4555-8555-555555555555, use /home/?id=55555555-5555-4555-8555-555555555555.
+03:14:44 [200] /public/home/ 4ms
+  3 passed (9.9s)

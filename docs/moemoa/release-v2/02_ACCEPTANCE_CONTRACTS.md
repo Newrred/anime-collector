@@ -973,3 +973,5 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 [2026-10-13 테스트 구조 인수] 후보5f791db/TEST_COLLECTION_HOME_STRUCTURE_20261013 적용 및36table·기존설정 보존/새타입off·RPC disabled·ACL PASS. 새 타입 hosted 게시/방문자 인수는 미완료이며 source/policy/flag/배포 exact 후보를 별도로 준비한다.
 
 [2026-10-13 W18 연결 후보 준비] 기존 승인public catalog Steins;Gate1작품/1인물page/89,300B 표본·원출처/권리/immutable cover 보존, owner test source 원자적guard·Memory0/정책5field exact apply/restore·API 기본rollback 신규격리PG17 PASS. app5f791db는불변, 새remote쓰기/typed게시0. 실제자료/설정/배포승인과 본인게시동의/새익명방문자 인수는 잔여다.
+
+[2026-10-13 W18 실제 연결 실패/로컬 보완] 승인8446753은 기존 A 계정 Collection의 실제 선반/승인 표지/Memory0와 공유 선택 복원까지만 PASS. 사용할 수 없는 옛 보드의 참조를 해제할 UI가 없어 preview 거부. 명시 선택 해제 추가 후 모의 Chromium3 PASS(신규1), build33 PASS. 원본 자동 삭제·동의 복원0. 새 타입 hosted 게시/익명 인수는 미완료. 임시 DB5값 baseline/off 원복; 상세 배포/env 원복 상태는 단일 작업 카드와 hosted-connection-execution.json 참조.

@@ -779,16 +779,15 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-현재 W: W18 컬렉션·미니홈 관계 교정 / 영향 W06·W07·W09·W10·W11·W19
-이번에 닫은 사용자 행동: 기존 작품 선반1 + 명시 연결한 이미지 보드1의 진열·재진입·연결 해제(원본 보존), Memory0 제목/승인 표지의 공개 후보.
-기준: 원격 master b0541ff / 로컬 인수 ba862d1 이후. 기존 homeId/boardId/cardId/shelfId·감상 기록·표지 옆 펼침 유지.
-이번 변경: versioned source-ref layout, 공통 묶음 메뉴, 기존 Board embedding, 별도 Sharing canvas, owner selection 복원, typed title-only public DTO/DB 후보.
-직접 검증: unit22 PASS, 고유 Chromium14 PASS/조건1 SKIP, 새 isolated SQL25 PASS, 기존 SQL51/33/28/31 및 prepare race PASS, build33 PASS, diff check PASS. PC1440/phone390/320 합성 캡처/evidence 보존.
-실환경 구분: 이번 hosted typed 공개·Google·실기기·운영 PASS0. 기존 exact-candidate 인수는 과거 증거로만 재사용.
-원격 구조 확인: 사용자 exact 승인으로 moemoa-test에 후보5f791db의 구조만 적용. 원격 이력20261012172036 ↔ 로컬20261012160330/동일 SQL hash를 evidence에 결속. 기존36table 내용·이전설정 보존, 새타입off/RPC disabled 및 함수 ACL 확인. bookshelf source0/catalog active0·기존 정책3값은 유지.
-조건: 테스트 구조 적용은 완료. 새 타입 hosted 자료/공개 고지/flag·화면 배포 범위는 아직 미적용/미승인. 운영/master 변경0.
-연결 후보 준비: exact Git `8446753548c5a4596adf27e463c27f66c600cf19` / 기존 승인 공개 Steins;Gate1작품/상세1개/인물1page/표지89,300B + A test 선반/저장작품(없을 때만) + settings5/Preview값4/phone-test Git 후보. 로컬PG17/표지hash·JPEG460×667 및원복 PASS. 실제새타입게시0/이번원격쓰기0.
-다음 행동 하나: exact test 연결·인수·원복 후보 승인 후 baseline 재대조/실행.
+현재 W: W18 컬렉션·미니홈 관계 교정 / 관련 W06·W09·W11·W19
+완료한 연결: 승인8446753 moemoa-test fixture/설정5/Preview4/Git 배포→기존 A의 실제 선반1·승인 Steins;Gate표지·Memory0 및 공유 선택 복원 확인.
+실제 실패: unavailable 옛 보드 선택이 남는데 해제 UI가 없어 TITLE_SHELF preview도 거부. 새 게시/익명/철회/Google/실기기/운영 PASS0.
+최소 보완: MemoryMinihome.jsx entry별 명시적 선택 해제. draft 참조만 변경·원본/ID/권리 보호, fresh preview/동의 초기화. Chromium3 PASS(신규1+기존2), build33 PASS, diffcheck PASS. 이전 unit22/Chromium14/SQL25·17은 별도 이력.
+원복: DB5값 baseline/off 및 기존 Preview 정책 복귀, phone-test Git a6b6dda 복귀. 새 frontend flag0. 새 Preview3값의 영구 제거는 브라우저 클릭 직전 승인 미응답으로 보류(값/키 노출0). 이전 Git 소스 재빌드 dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN READY/Preview/exactSHA/별칭 확인, env 완전 원복은 미완료.
+보존: test 구조/fixture/catalog표지89KB/선반/저장작품 유지, 기존 Memory·home/board/card/source 원본 삭제0. 데이터/config migration 이력20261012180421/180447/181251은 evidence에 매핑.
+운영: master b0541ff/운영DB/운영Public 변경0. 새 UI 수정은 인계 브랜치에만 저장, phone-test/master 반영0.
+종료: 이번 작업 마감 후 Git 인계·정상 PC 종료 지시. 세부8항 보고와 실행JSON/화면/검증로그는 기존01/evidence.
+다음 행동 하나: Preview 신규3설정 제거 원복 마감 → 수정 UI exact 후보의 test-only 재검증·원복 승인 범위를 준비(자료 재실행/새회원/운영 활성 불필요).
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>
@@ -1369,3 +1368,5 @@ NA 이유:
 - 사용자 최종 확인: 같은 테스트 링크에서 ‘동기화 완료됨’. 관련 회귀 포함 unit400 PASS/build19 PASS. 이번 오류 안내·수리 SQL·기록은 로컬 커밋 보존, Preview 재배포/push 없음. 동기화 복구 완료이며 이미지 사본 전송/공개·철회 실기기 검증은 별도다.
 
 [2026-10-13 인계 결속] 로컬 구현 후보 `5f791db0a4a780e7420011d07a5c20bc1d99fde9`, 브랜치 `codex/continue-after-arena-20261012`. Git push/master/운영/test migration 적용0. 다음 행동은 migration `20261012160330_collection_home_sections.sql`을 moemoa-test에만 기본off로 적용하는 정확한 승인이다. 새 타입의 catalog/source/policy/flag·화면 hosted 연결은 이후 별도 후보로 준비한다.
+
+[2026-10-13 종료 결속] 이전 phone-test a6b6ddaaadf9487f5f8f3b14064cb794b27826c0의 connected Git 재빌드 dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN READY/Preview/exactSHA/canonical alias 확인. Git force-ref 복귀가 자동배포를 만들지 않아 별도 Git-source API로 복구했다. 최초 target=preview API400는 배포 생성0, 공식 API의 target 생략=Preview로 정정 후 생성. DB5필드 전체baseline 일치·새 타입false, frontend flag0·기존 정책 복귀. 새 Preview3override 제거는 action-time 삭제 확인 미응답으로 남아 완전 env 원복 PASS로 올리지 않는다. Chrome 연결 끊김으로 원복 후 live 화면 검사는 미실행; Vercel metadata Ready/source/alias만 PASS. 사용자의 승인 필요시 인계·종료 지시에 따라 남은 정확한 조건을 기록하고 정상 종료한다.
