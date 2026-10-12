@@ -785,9 +785,9 @@
 이번 변경: versioned source-ref layout, 공통 묶음 메뉴, 기존 Board embedding, 별도 Sharing canvas, owner selection 복원, typed title-only public DTO/DB 후보.
 직접 검증: unit22 PASS, 고유 Chromium14 PASS/조건1 SKIP, 새 isolated SQL25 PASS, 기존 SQL51/33/28/31 및 prepare race PASS, build33 PASS, diff check PASS. PC1440/phone390/320 합성 캡처/evidence 보존.
 실환경 구분: 이번 hosted typed 공개·Google·실기기·운영 PASS0. 기존 exact-candidate 인수는 과거 증거로만 재사용.
-원격 읽기 확인: moemoa-test 새 migration 없음, bookshelf source0/catalog active0, 기존 정책3값 TEST_ONLY_PHONE_WEB_20260927_01. 쓰기0.
-차단: 새 DB/공개 범위/배포 exact 승인 없음. 새 타입 flag 기본off, 운영/master 변경0.
-다음 행동 하나: 로컬 후보의 테스트 DB migration(default-off) exact 승인 → 새 타입 hosted 인수 자료/설정 결속.
+원격 구조 확인: 사용자 exact 승인으로 moemoa-test에 후보5f791db의 구조만 적용. 원격 이력20261012172036 ↔ 로컬20261012160330/동일 SQL hash를 evidence에 결속. 기존36table 내용·이전설정 보존, 새타입off/RPC disabled 및 함수 ACL 확인. bookshelf source0/catalog active0·기존 정책3값은 유지.
+조건: 테스트 구조 적용은 완료. 새 타입 hosted 자료/공개 고지/flag·화면 배포 범위는 아직 미적용/미승인. 운영/master 변경0.
+다음 행동 하나: 기존 moemoa-test용 합성 선반/승인 catalog 최소자료·고지/flag·테스트 화면의 정확한 적용/원복 후보 준비.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>

@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-13",
+  "project": "moemoa-test",
+  "ref": "nmgkhknponvzcwliajyk",
+  "approvedCodeCommit": "5f791db0a4a780e7420011d07a5c20bc1d99fde9",
+  "sourceMigration": "20261012160330_collection_home_sections.sql",
+  "sourceSha256": "8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68",
+  "applySuccess": true,
+  "dataReleaseId": "TEST_COLLECTION_HOME_STRUCTURE_20261013",
+  "relationsVerified": 36,
+  "dataUnchanged": true,
+  "changedRelations": [],
+  "previousSettingsUnchanged": true,
+  "collectionHomeEnabled": false,
+  "migration": [
+    {
+      "name": "collection_home_sections",
+      "version": "20261012172036"
+    }
+  ],
+  "functionPrivilegeChecks": {
+    "publicOwnerRpcsAuthenticatedOnly": 2,
+    "privateHelpersNoAnonAuthenticatedServiceExecute": 6,
+    "emptySearchPath": true
+  },
+  "disabledRpc": {
+    "enabled": false,
+    "shelves": []
+  },
+  "advisors": [
+    {
+      "name": "rls_enabled_no_policy",
+      "level": "INFO",
+      "count": 38,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+      "newFunctions": []
+    },
+    {
+      "name": "anon_security_definer_function_executable",
+      "level": "WARN",
+      "count": 4,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "newFunctions": []
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "level": "WARN",
+      "count": 59,
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "newFunctions": [
+        {
+          "name": "get_memory_publication",
+          "schema": "public",
+          "language": "plpgsql",
+          "arguments": "p_board_id uuid",
+          "security_definer": true
+        },
+        {
+          "name": "list_memory_minihome_shelves",
+          "schema": "public",
+          "language": "plpgsql",
+          "arguments": "",
+          "security_definer": true
+        }
+      ]
+    },
+    {
+      "name": "auth_leaked_password_protection",
+      "level": "WARN",
+      "count": 1,
+      "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+      "newFunctions": []
+    }
+  ],
+  "settingsBefore": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "signup_declaration_required": false,
+    "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+  },
+  "settingsAfter": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "collection_home_enabled": false,
+    "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+    "signup_declaration_required": false,
+    "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+  },
+  "productionChanged": false,
+  "screenDeployed": false,
+  "hostedPublishVerified": false,
+  "nextAction": "Prepare exact hosted fixture/catalog/policy/client-flag candidate; activation and deployment require separate approval."
+}

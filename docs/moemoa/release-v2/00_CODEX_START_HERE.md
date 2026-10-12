@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-13 W18 컬렉션·미니홈 교정: 기존 선반·보드를 참조하는 두 유형 Collection, 공개 설정 작업 모드, 선택 복원, Memory0 작품 선반의 서버 공개 후보를 로컬 구현했다. 현행 기준 b0541ff/로컬 인수 ba862d1 이후이며 기존 ID·원본·공개 링크를 유지한다. 단일 현재 상태/다음 행동은 03의 기존 현재 작업 카드, 세부 설계는 01의 마지막 W18 ExecPlan, 새 수용 계약은 02의 Collection/Home v2 절을 따른다. 테스트/운영 DB·Public 활성·master push·배포는 미실행이며 exact 후보 승인 대기다.**
+> **2026-10-13 W18 컬렉션·미니홈 교정: 기존 선반·보드를 참조하는 두 유형 Collection, 공개 설정 작업 모드, 선택 복원, Memory0 작품 선반의 서버 공개 후보를 로컬 구현했다. 현행 기준 b0541ff/로컬 인수 ba862d1 이후이며 기존 ID·원본·공개 링크를 유지한다. 단일 현재 상태/다음 행동은 03의 기존 현재 작업 카드, 세부 설계는 01의 마지막 W18 ExecPlan, 새 수용 계약은 02의 Collection/Home v2 절을 따른다. 사용자 exact 승인 후 테스트 DB 구조만 적용·기존36table/설정 보존 및 새타입off 확인을 완료했다. 실제 새 공개 게시·운영 DB·Public 활성·master push·배포는 미실행이다. 다음1개는 정확한 hosted fixture/catalog/policy/client-flag 후보 준비다.**
 
 
 <details><summary>교정 전 시작 문서의 2026-10-11 최신 요약 — 당시 이력 보존</summary>

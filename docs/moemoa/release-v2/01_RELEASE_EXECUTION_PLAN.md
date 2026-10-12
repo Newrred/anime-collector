@@ -2243,3 +2243,14 @@ ZIP CRC/8sha검증 PASS, 첨부01/02와 현재코드 대조 완료. 첫 구현�
 검증 증거는 evidence/2026-10-13-collection-home/에 보존한다. 기존 작업판·완료 이력·보류 항목은 유지한다.
 
 [2026-10-13 인계 결속] 로컬 구현 후보 `5f791db0a4a780e7420011d07a5c20bc1d99fde9`, 브랜치 `codex/continue-after-arena-20261012`. Git push/master/운영/test migration 적용0. 다음 행동은 migration `20261012160330_collection_home_sections.sql`을 moemoa-test에만 기본off로 적용하는 정확한 승인이다. 새 타입의 catalog/source/policy/flag·화면 hosted 연결은 이후 별도 후보로 준비한다.
+
+
+### 2026-10-13 승인된 테스트 DB 구조 적용 결과
+
+사용자 ‘테스트 DB 구조만 적용’ 승인 후 후보5f791db의 SQL(sha256 8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68)을 moemoa-test/nmgkhknponvzcwliajyk에 apply_migration으로 적용했다. 로컬 파일20261012160330과 연결 도구 생성 원격 이력20261012172036/collection_home_sections의 매핑은 test-structure-application.json에 기록한다. 데이터 release ID는 TEST_COLLECTION_HOME_STRUCTURE_20261013이다.
+
+적용 전후36개 관련 table의 count/내용 fingerprint와 이전 settings 일치, collection_home_enabled=false, owner RPC 2개의 authenticated-only/private helper6개의 anon/authenticated/service EXECUTE 차단 및 빈 search_path를 독립 읽기로 확인했다. 합성 UID의 rollback-only RPC 실행은 enabled=false/shelves=[]를 반환했다. 실제 계정 게시·Google·원격 화면 PASS로 계산하지 않는다.
+
+Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN4, 인증된 SECURITY DEFINER RPC WARN59(이번 새 shelf RPC 포함), 기존 leaked-password WARN1을 보고했다. 권한 경고를 없애려고 owner RPC를 익명으로 넓히거나 기존 정책을 수정하지 않았다. [SECURITY DEFINER 점검 기준](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). 전체 advisors green으로 주장하지 않는다.
+
+원본·정책·flag·사용량·클라이언트 배포·운영 변경0, 새 타입off 유지. 되돌릴 때도 원본/typed data를 삭제하지 않고 flagoff/UI복귀를 사용한다. 다음1개는 최소 합성 선반/catalog 자료와 고지·flag/배포·원복의 정확한 hosted 후보 준비다. 현재 source0/catalog0 및 고정고지와 기존 TEST_ONLY 정책 불일치는 남은 연결 조건이다.

@@ -6,8 +6,10 @@
   "migration": {
     "path": "supabase/migrations/20261012160330_collection_home_sections.sql",
     "sha256": "8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68",
-    "remoteApplied": false,
-    "defaultEnabled": false
+    "remoteApplied": true,
+    "defaultEnabled": false,
+    "remoteScope": "moemoa-test only; default off",
+    "remoteHistoryVersion": "20261012172036"
   },
   "verification": {
     "unit": {
@@ -72,7 +74,8 @@
     "follow targets",
     "private originals"
   ],
-  "nextAction": "Approve the exact test migration candidate with its new type remaining off; prepare scoped hosted source/policy configuration separately.",
+  "nextAction": "Prepare exact hosted fixture/catalog/policy/client-flag candidate; activation and deployment require separate approval.",
   "codeCandidateCommit": "5f791db0a4a780e7420011d07a5c20bc1d99fde9",
-  "artifactTextNormalization": "ANSI terminal controls and trailing whitespace removed from logs; source ZIP hash retained separately."
+  "artifactTextNormalization": "ANSI terminal controls and trailing whitespace removed from logs; source ZIP hash retained separately.",
+  "hostedStructureEvidence": "test-structure-application.json"
 }

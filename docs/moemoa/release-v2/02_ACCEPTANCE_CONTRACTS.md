@@ -969,3 +969,5 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 백업 범위: 계정 layout은 기존 `user_title_sync_entities` bookshelf payload에 포함되어 기존 운영 DB 백업 대상 안에 있다. 로컬 Memory metadata JSON은 이전과 같이 Memory/Card/Board 대상이고 선반을 포함한다고 주장하지 않는다. 새 백업 플랫폼·전체99테이블 복구 재시험은 이번에 추가하지 않는다.
 
 롤백은 새 타입 flag off와 UI source 복귀로 제한한다. typed 데이터가 존재하면 구 writer 누락 저장을 계속 거절하며 삭제 down migration을 하지 않는다. 새 source 계약의 hosted A/B/익명 및 운영 인수는 exact 후보 적용 후 별도 결과가 필요하다.
+
+[2026-10-13 테스트 구조 인수] 후보5f791db/TEST_COLLECTION_HOME_STRUCTURE_20261013 적용 및36table·기존설정 보존/새타입off·RPC disabled·ACL PASS. 새 타입 hosted 게시/방문자 인수는 미완료이며 source/policy/flag/배포 exact 후보를 별도로 준비한다.
