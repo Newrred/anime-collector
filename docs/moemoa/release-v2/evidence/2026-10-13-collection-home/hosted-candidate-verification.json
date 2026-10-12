@@ -23,5 +23,6 @@
     "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0"
   },
   "tools": "tools/operations/collection-home-test/rollout-manifest.json",
-  "requiredApproval": "Exact test fixture/upload, settings5, Preview env4 and Git deployment plus restore; no production, signup, agreement or deletion."
+  "requiredApproval": "Exact test fixture/upload, settings5, Preview env4 and Git deployment plus restore; no production, signup, agreement or deletion.",
+  "candidateGitCommit": "8446753548c5a4596adf27e463c27f66c600cf19"
 }
