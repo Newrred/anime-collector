@@ -1,0 +1,179 @@
+{
+  "date": "2026-10-12",
+  "status": "IMPLEMENTED_LOCAL_QA_VERIFIED_PRODUCTION_UI_NOT_DEPLOYED",
+  "branch": "codex/public-ui-arena-20261012",
+  "baseCommit": "b3b466949c52bd2ed39e97814a1c08a67c5d3186",
+  "currentProductionCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+  "references": [
+    {
+      "url": "https://www.are.na/chase-body/ad_direzione",
+      "surface": "Channel: breadcrumb title, small neutral actions, three information columns, original-ratio images",
+      "observedViewportWidth": 1485,
+      "observedTitlePx": 28,
+      "observedTitleLinePx": 35,
+      "observedActionHeightPx": 24,
+      "observedActionFontPx": 12.5,
+      "observedActionRadiusPx": 3,
+      "imageRadiusPx": 0,
+      "shadows": false
+    },
+    {
+      "url": "https://www.are.na/block/50278090",
+      "surface": "Block detail: large image left, narrow information/actions right, fine dividers and text tabs"
+    },
+    {
+      "url": "https://help.are.na/docs/getting-started/channels",
+      "surface": "Official channel guide"
+    },
+    {
+      "url": "https://help.are.na/docs/getting-started/connections",
+      "surface": "Official connections/dialog guide"
+    }
+  ],
+  "proposal": {
+    "desktopSecondaryControlsMinHeightPx": 32,
+    "mobileControlsMinHeightPx": 44,
+    "controlRadiusPx": 3,
+    "scope": [
+      "Public Board",
+      "Public home",
+      "Home editor and consent preview",
+      "Following, reporting and safety inbox",
+      "Operator content/report review",
+      "Signup and completion",
+      "Admin refresh and confirmation presentation"
+    ],
+    "noHero": true,
+    "pinkPrimaryActionRetained": true,
+    "imageContainAndIntrinsicRatio": true,
+    "sourceImagesCopiedFromArena": false,
+    "newProductFeaturesInvented": false
+  },
+  "appFiles": [
+    {
+      "path": "src/features/memory/components/MemoryContentReview.jsx",
+      "sha256": "ced4bf94f2cc3ff9b4a3f666d6d3569e55ee5515c9da74c3542026dc0a83fb04"
+    },
+    {
+      "path": "src/features/memory/components/MemoryMinihome.jsx",
+      "sha256": "19b3ae016418461db139ea8cc8bc36e6bda8e16b7414e72168e8614c86ec3a3c"
+    },
+    {
+      "path": "src/features/memory/components/MemoryRelationships.jsx",
+      "sha256": "42ce2eacb51085415d8098ad7b8b9c13ec8853291dd424337f8809ae57866f28"
+    },
+    {
+      "path": "src/features/memory/components/MemoryReportReview.jsx",
+      "sha256": "a4ee188291550d51830b9bde8074fffc1a7bed1a5d18295b110cdcaa1d879fa6"
+    },
+    {
+      "path": "src/features/memory/components/MinihomeSnapshot.jsx",
+      "sha256": "7f9969e1efe023189ddab8be3ae5e053cf4cb2b99e59335174e02639c36cf46c"
+    },
+    {
+      "path": "src/features/memory/components/PublicLinkCopy.jsx",
+      "sha256": "86d437fa7e863e1f8e92208b34646ed1474a164943fdfc8994ac44a3a0833413"
+    },
+    {
+      "path": "src/features/memory/components/PublicMemoryBoard.jsx",
+      "sha256": "2af76e9b48413a2d5dd6dfe7958d6c85619cf349d16363260de90f5fd9ab3105"
+    },
+    {
+      "path": "src/features/memory/components/PublicMinihome.jsx",
+      "sha256": "eeae4667bbb416e6260ef18fd6b24e81fdc34d7f812d70c812a97deeff250886"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "3575150f35070d6f4b9d4661793165b573ada6439e9cb9af7b34f1b13ba15019"
+    },
+    {
+      "path": "src/styles/admin.css",
+      "sha256": "8cfd59b3e073f56e64a318bb9d737d77040cb99e080663db38c0741e0df23630"
+    },
+    {
+      "path": "src/styles/simple-signup.css",
+      "sha256": "d77298bc8be1f3b41c3ebaef66f707d9bf1d524e4251e520c4a33bdd85bb56d8"
+    },
+    {
+      "path": "src/features/memory/components/PublicPageHeading.jsx",
+      "sha256": "d86d5ac1cbcc96b3cc165b9634fa7157dddc0ebbca6f00763c28b02f5449e3c3"
+    },
+    {
+      "path": "src/features/memory/components/public-surface-design.css",
+      "sha256": "cc19a2a488417425330d025b97937f7b65838e2588de47b0473a81311d954020"
+    }
+  ],
+  "validation": {
+    "uniqueChromiumScenarios": 93,
+    "publicationAndViewerExisting": 50,
+    "newLayoutAndModeratorScenarios": 8,
+    "accountAndAdmin": 35,
+    "viewportWidths": [
+      1440,
+      390,
+      320
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "layoutChecks": [
+      "No horizontal overflow",
+      "Original image ratio",
+      "Desktop image/action columns and mobile stacking",
+      "44px mobile report action",
+      "Keyboard Tab focus ring",
+      "Moderator action remains disabled until confirmation"
+    ],
+    "buildPages": 33,
+    "reactDoctor": {
+      "baselineScore": 36,
+      "finalUncachedScore": 36,
+      "scoreRegression": false,
+      "changedIssueCount": 0,
+      "matchedPreExistingIssues": 23,
+      "fullRepositoryCleanClaimed": false,
+      "cacheArtifactNote": "Preserved Vite dependency sourcemap briefly caused one cached artifact finding; all 68 source paths were dependency files (61 content-identical). Restored under node_modules, uncached scan returned baseline score and removed the finding. No issue suppression or application secret change."
+    },
+    "initialFailures": [
+      "Standard local server readiness/transport timeouts; local mock checks completed through a Windows background server without changing repository CI",
+      "New cover fixture initially lacked mocked image bytes; added generated synthetic SVG/WebP",
+      "Keyboard test initially used pointer/programmatic focus and exact filled-textarea label; corrected to real Tab and textbox role"
+    ],
+    "newLayoutResults": "6 passed; moderator final 2 passed (not counted twice)",
+    "existingAndModeratorResults": "52 passed; initial six layout focus-check failures retained as earlier evidence",
+    "accountResults": "35 passed",
+    "buildResults": "33 pages complete"
+  },
+  "dataAndPolicy": {
+    "migrations": 0,
+    "apiChanges": 0,
+    "authOrControllerChanges": 0,
+    "environmentOrFeatureFlagChanges": 0,
+    "dependencyManifestChanges": 0,
+    "productionUserWrites": 0,
+    "productionImageUploads": 0,
+    "productionPublicationOrReportActions": 0,
+    "rightsAndSignupTextChanged": false
+  },
+  "rollback": "Revert presentation source; database, user data and feature flags require no reversal.",
+  "productionUiApplied": false,
+  "nextGate": "New source-equivalent production-base SHA CI success, then authorized non-force Git master deployment and READY/www provenance verification.",
+  "evidencePrivacy": "Only code hashes, public reference URLs and synthetic QA summaries. Screenshots and raw local logs stay ignored.",
+  "appFileHashSource": "Staged Git blobs; canonical repository line endings",
+  "productionRepackaging": {
+    "approvedSourceCommit": "3feebbbe6c50cd0a634d52f7a96cae4bd4250b16",
+    "productionBaseCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+    "approval": "User explicitly approved production styling release on 2026-10-12",
+    "sourceCi": "https://github.com/Newrred/anime-collector/actions/runs/38206527814",
+    "sourceCiConclusion": "success",
+    "reason": "Diverged Git histories; carry only the approved single presentation patch onto current production, preserving existing operations tools",
+    "documentationConflicts": [
+      "CODEX_START_HERE.md",
+      "docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md"
+    ],
+    "appFilesMatchApprovedSource": true,
+    "publicationTestMatchesApprovedSource": true,
+    "productionCommitCiRequired": true
+  }
+}

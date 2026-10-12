@@ -1,5 +1,8 @@
 # MOEMOA · 단일 출시 작업판
 
+> **2026-10-12 Are.na 디자인 운영 반영 승인·운영 기준 결속:** 사용자가 검증된 디자인 원본 3feebbbe6c50cd0a634d52f7a96cae4bd4250b16의 운영 배포를 승인했다. 공개 board/home·미니홈 편집/동의·팔로우/신고·운영 검토·가입/완료·관리 표현을 통일한다. 로컬 Chromium 고유93 PASS·build33 PASS·원본 CI38206527814 SUCCESS, React Doctor 신규0/점수회귀0. 운영 master ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4와 검토 브랜치 이력이 갈라져 전체 브랜치 병합은 하지 않는다. 승인된 단일 디자인 patch만 운영 기준에 옮기고 13개 UI 파일/테스트의 원본 일치와 backend/tools/workflow/DB/환경/권한/lock 변경0을 확인한 후 새 Git commit의 CI→master→Vercel READY→www 동일SHA를 검증한다. 이전 백업 도구 변경은 이 release에 포함하지 않는다. 운영 결과는 외부 인수 기록으로 남겨 승인 후보를 불필요하게 변경하지 않는다. [계획](../plans/2026-10-03-interface-rebuild.md) 32차 및 [근거](evidence/2026-10-12-are-na-public-ui.json).
+
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 

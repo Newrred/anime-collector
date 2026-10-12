@@ -6,6 +6,7 @@ import { contentReviewUiEnabled, getPublicationServices } from '../runtime/platf
 import { isPublicationId, publicationSnapshot } from '../domain/publicationView.js';
 import PublicBoardSnapshot from './PublicBoardSnapshot.jsx';
 import MemoryReportReview from './MemoryReportReview.jsx';
+import PublicPageHeading from './PublicPageHeading.jsx';
 
 function checkedReview(value) {
   if (!isPublicationId(value?.id) || !isPublicationId(value.target) || !['board', 'home'].includes(value.kind)
@@ -34,11 +35,13 @@ function Decision({ review, ko, busy, onSave }) {
     const base = getPublicationServices();
     return { ...base, previewImage: (id, signal) => base.contentReviewImage(review, id, signal) };
   }, [review]);
-  return <section aria-label={ko ? '콘텐츠 검토' : 'Content review'}>
+  return <section className="memory-review-decision" aria-label={ko ? '콘텐츠 검토' : 'Content review'}>
+    <div className="memory-review-decision__preview">
     {review.kind === 'board'
       ? <PublicBoardSnapshot snapshot={review.snapshot} publicationId={review.target} services={services} preview locale={ko ? 'ko' : 'en'} onReady={setReady} />
       : <><h2>{review.snapshot.nickname}</h2><p style={{ whiteSpace: 'pre-wrap' }}>{review.snapshot.bio}</p>
         <p>{ko ? '미니홈 이름과 소개를 검토합니다. 연결된 보드는 각각 별도로 검토합니다.' : 'Review this home name and introduction. Linked boards are reviewed separately.'}</p></>}
+    </div>
     <form onSubmit={async e => { e.preventDefault(); if (ready && confirmed && rating) { await onSave(review, rating); setConfirmed(false); } }}>
       <fieldset disabled={busy || review.status === 'CLOSED'}>
         <label htmlFor={ratingId}>{ko ? '공개 분류' : 'Content classification'}</label><select id={ratingId} value={rating} onChange={e => { setRating(e.target.value); setConfirmed(false); }}>
@@ -86,7 +89,7 @@ function Workspace({ userId, ko }) {
     if (result) { setReview(null); setSaved(true); setRows(old => old.filter(row => row.id !== (mode === 'appeals' ? value.id : value.target))); }
   }
   return <>
-    <nav aria-label={ko ? '검토 목록' : 'Review queues'}>{[['board', ko ? '보드' : 'Boards'], ['home', ko ? '미니홈' : 'Homes'], ['appeals', ko ? '이의 신청' : 'Appeals'], ['reports', ko ? '신고' : 'Reports']].map(([kind, label]) =>
+    <nav className="memory-review-tabs" aria-label={ko ? '검토 목록' : 'Review queues'}>{[['board', ko ? '보드' : 'Boards'], ['home', ko ? '미니홈' : 'Homes'], ['appeals', ko ? '이의 신청' : 'Appeals'], ['reports', ko ? '신고' : 'Reports']].map(([kind, label]) =>
       <button key={kind} className="btn" disabled={busy} aria-pressed={mode === kind} onClick={() => load(kind)}>{label}</button>)}</nav>
     {mode === 'reports' ? <MemoryReportReview key={userId} userId={userId} ko={ko} /> : <>
     <button className="btn btn--subtle" disabled={busy} onClick={() => load()}>{ko ? '목록 새로고침' : 'Refresh review queue'}</button>
@@ -99,13 +102,14 @@ function Workspace({ userId, ko }) {
     </>}
   </>;
 }
-function Content() {
+function Content({ base }) {
   const { locale } = useMemoryRouteUi(), auth = useAuthSession(), ko = locale === 'ko';
-  return <main className="page-shell page-shell--narrow"><h1>{ko ? '공개 콘텐츠 검토' : 'Public content review'}</h1>
+  return <main className="page-shell page-shell--wide memory-review-workspace">
+    <PublicPageHeading title={ko ? '공개 콘텐츠 검토' : 'Public content review'} base={`${base}boards/`} breadcrumb={ko ? '보드 관리' : 'Boards'} />
     {!contentReviewUiEnabled() ? <p>{ko ? '검토 도구가 비활성 상태입니다.' : 'Review tools are disabled.'}</p>
       : !auth.user ? <p>{ko ? '운영자 계정으로 로그인해 주세요.' : 'Sign in with your moderator account.'}</p>
       : <Workspace key={auth.user.id} userId={auth.user.id} ko={ko} />}</main>;
 }
 export default function MemoryContentReview({ base = '/' }) {
-  return <MemoryRouteShell base={base} currentRoute="boards"><Content /></MemoryRouteShell>;
+  return <MemoryRouteShell base={base} currentRoute="boards"><Content base={base} /></MemoryRouteShell>;
 }

@@ -15,17 +15,20 @@ import PublicLinkCopy from "./PublicLinkCopy.jsx";
 import MemorySafety from "./MemorySafety.jsx";
 import PublicSignupNotice from "./PublicSignupNotice.jsx";
 import "./memory-publication.css";
+import PublicPageHeading from './PublicPageHeading.jsx';
 
 function Review({ review, controller, services, locale, busy, base }) {
   const noticeAvailable = Boolean(publicSharingNoticeHref(review.policyRevision, base));
   const copy = minihomeCopy(locale), [consented, setConsented] = useState(false), [ready, setReady] = useState(false);
-  return <>
+  return <div className="publication-review">
     <MinihomeSnapshot snapshot={review.snapshot} services={services} locale={locale} preview onReady={setReady} base={base} />
+    <div className="publication-review__consent">
     <PublicSharingNotice revision={review.policyRevision} locale={locale} base={base} />
     <label className="memory-publication__check"><input type="checkbox" checked={consented} disabled={busy || !noticeAvailable} onChange={(e) => setConsented(e.target.checked)} />{copy.consent}</label>
     <button className="btn" disabled={busy || !consented || !ready || !noticeAvailable} onClick={() => controller.publish({ consented, visualsReady: ready })}>{copy.publish}</button>
     <button className="btn btn--subtle" disabled={busy} onClick={() => controller.cancel()}>{copy.cancel}</button>
-  </>;
+    </div>
+  </div>;
 }
 function Editor({ userId, locale, base }) {
   const services = getPublicationServices(), copy = minihomeCopy(locale);
@@ -73,11 +76,15 @@ function Editor({ userId, locale, base }) {
 }
 function Content({ base }) {
   const { locale } = useMemoryRouteUi(), auth = useAuthSession(), copy = minihomeCopy(locale);
-  return <main className="page-shell page-shell--narrow"><h1>{copy.title}</h1><a href={`${base}boards/`}>{copy.boards}</a>
-    <div id="following"><MemoryRelationships locale={locale} base={base} /></div>
-    <MemorySafety locale={locale} base={base} />
+  return <main className="page-shell page-shell--wide public-workspace-page">
+    <PublicPageHeading title={copy.title} base={`${base}boards/`} breadcrumb={copy.boards} />
+    <div className="public-workspace"><div className="public-workspace__editor">
     {!minihomeUiEnabled() ? <p>{copy.disabled}</p> : !auth.user ? <p>{copy.login} <a href={`${base}data/`}>{locale === "ko" ? "계정" : "Account"}</a></p>
       : <Editor key={auth.user.id} userId={auth.user.id} locale={locale} base={base} />}
+    </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '팔로우와 운영 알림' : 'Following and safety inbox'}>
+      <div id="following"><MemoryRelationships locale={locale} base={base} /></div>
+      <MemorySafety locale={locale} base={base} />
+    </aside></div>
   </main>;
 }
 export default function MemoryMinihome({ base = "/" }) {

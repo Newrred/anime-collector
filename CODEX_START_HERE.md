@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 Are.na 디자인 운영 반영 승인·운영 기준 결속:** 사용자가 검증된 디자인 원본 3feebbbe6c50cd0a634d52f7a96cae4bd4250b16의 운영 배포를 승인했다. 공개 board/home·미니홈 편집/동의·팔로우/신고·운영 검토·가입/완료·관리 표현을 통일한다. 로컬 Chromium 고유93 PASS·build33 PASS·원본 CI38206527814 SUCCESS, React Doctor 신규0/점수회귀0. 운영 master ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4와 검토 브랜치 이력이 갈라져 전체 브랜치 병합은 하지 않는다. 승인된 단일 디자인 patch만 운영 기준에 옮기고 13개 UI 파일/테스트의 원본 일치와 backend/tools/workflow/DB/환경/권한/lock 변경0을 확인한 후 새 Git commit의 CI→master→Vercel READY→www 동일SHA를 검증한다. 이전 백업 도구 변경은 이 release에 포함하지 않는다. 운영 결과는 외부 인수 기록으로 남겨 승인 후보를 불필요하게 변경하지 않는다. [계획](docs/moemoa/plans/2026-10-03-interface-rebuild.md) 32차 및 [근거](docs/moemoa/release-v2/evidence/2026-10-12-are-na-public-ui.json).
+
+
 > **2026-10-11 W15/D03 운영 관측 적용 완료:** 사용자 승인199613b를 master Git→Vercel Q3xJiujuo Ready/www exactSHA로 확인. DB20261011160000·관측설정3개 적용, service-only/기존정책 보존. 실제운영수동workflow38126188717 SUCCESS: 전체856,441,465B/public0/경보없음·정리모두SKIPPED; 무인증401. Public·한도·가입·요금 변경0. 실제알림수신은 미검증. 다음1개 D03 정상규모·전송한도 마감; 전체출시 완료와 구분한다.
 
 
