@@ -13,6 +13,12 @@
 9. 진행: `codex/public-ui-arena-20261012`(인수 b3b4669, runtime ea8f388과 동일)에서 시작. 레퍼런스/합성 QA 이미지와 baseline 로그는 ignored cache에 보관.
 10. 완료/근거: 기존 공개/viewer50·새 layout/moderation8·가입/admin35=고유 Chromium93 PASS, build33 PASS. 새6검사의 초기 포인터 focus/채워진 textarea exact-label selector를 실제 Tab/textbox role로 보완; 이전 실패를 별도 로그로 유지한다. 기본 Windows 검사서버 transporttimeout 이후 loopback/mock 입력만 있는 배경 서버에서 확인, repository CI 변경0. 격리 검사 화면은 실제 운영상태가 아닌 합성자료다. 원본 비율/PC열·모바일적층·3폭·양테마·44px/키보드·동의/권한/철회 회귀를 확인했다. 임시로 복사해둔 SDK sourcemap이 검사 범위에 들어간 cached 오탐은68개 dependency source/61개 설치내용일치로 확인하고 node_modules 아래에 보존·uncached 재검사하여 baseline36→36/신규진단0 확인(전체 기존진단 해소 아님). 상세 file hash/범위/한계는 `../release-v2/evidence/2026-10-12-are-na-public-ui.json`. www/master ea8f388 그대로이며 새운영쓰기/배포/DB/flags/lock/동의고지 변경0. presentation revert로 복귀 가능, 다음은 정확한 검토 후보와 CI 결속이다.
 
+### 32차 운영 완료 — 승인 원본 결속/배포 확인
+
+- 승인된 디자인 3feebbb만 운영 ea8f388 위에 이식한 33de5b4를 CI38208686854 SUCCESS→Git master fast-forward→Vercel dpl_6RBKHj9Xa2gE55PHEc3yZRBeG8ju READY(약69초)→www build-info/checkout/config 일치로 확인했다. 분기된 이전 tools 변경을 운영에 섞지 않았으며 UI13파일/publication 테스트는 원본과 byte-identical이다.
+- 운영 anonymous HTTP7·CSS5/새규칙7 PASS, 실제 기존 Chrome 미니홈 1485px 2열/관리열280·제목28,390px1열/관리영역아래/버튼44px/가로넘침0, viewport 복원 PASS. 철회된 합성 board unavailable/이미지0 확인. 모바일 캡처만 CDP timeout이며 실제 DOM측정과 로컬 합성 모바일 캡처를 구분한다. 새 게시/신고/계정확인/업로드/DB·권한·환경·flags 변경은0.
+- 해당 새배포 최근15m error/fatal 로그 matching group0, drains 목록 API404로 상태 미확정이며 지속 모니터링/전체 장애없음 보장은 하지 않는다. 롤백은 Git presentation revert, DB반전 없음. 외부 안전 closeout .tools/arena-ui-production-release-20261012.json과 THIS_PC_HANDOFF에 정확한 source/deploy/CI를 남겼다. 이 인수 문서만 원래 review branch에 기록하며 운영 승인 커밋을 후속 문서 커밋으로 바꾸지 않는다.
+
 ## 1. 목적과 사용자 결과
 2026-10-03 사용자는 부분 보정이 아닌 화면 구조·레이아웃·폰트·문구·플로우의 전면 개편을 요청했다. 사진과 작품 표지를 모으고 다시 여는 개인 컬렉션을 중심으로 화면을 재구성한다.
 

@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-12 Are.na 새 화면 디자인 운영 반영 완료:** 사용자 운영 승인 후 원본 UI 3feebbb의 단일 patch를 운영 ea8f388 위에 옮긴 33de5b4c985e009d14c8ecec6158c4511af946a2를 CI38208686854 전체 SUCCESS→non-force master→Vercel Git READY→www 동일SHA/config semantic match로 확인했다. UI13파일·publication test는 승인 원본과 동일, 기존 백업 도구 차이는 배포에서 제외. 운영 경로7·CSS5/새규칙7 PASS, 실제 Chrome 1485px 제목28/관리열280·390px 적층/44px/넘침없음 확인, viewport 복원. 철회 합성 board unavailable/이미지0, 실제 게시/신고/업로드/DB/권한/환경/flags 변경0. 새 배포 error/fatal 15m 조회는 matching group0이며 전체 가동 보장은 아님; drains API404로 상태 미확정. 기본 작업브랜치에는 이전 handoff/tools가 남아 있으므로 운영 전체 branch push 금지, 다음 배포작업은 현 master에서 시작한다. 정확한 결과는 THIS_PC_HANDOFF.md와 .tools/arena-ui-production-release-20261012.json, UI evidence의 productionRelease를 따른다.
+
+
 > **2026-10-12 Are.na 새 기능 디자인 로컬 반영·검증 완료:** 실제 채널/블록 상세 재조사→공개 board/home·미니홈 편집/동의·팔로우/신고/운영 알림·운영 검토·가입/완료·admin 갱신/확인 표현을 같은 선/중립 버튼/3px control·이미지/관리열로 통일. 기존 기능50+새 layout/moderation8+가입/admin35=고유 Chromium93 PASS,1440/390/320·light/dark·비율/넘침/키보드/모바일44px 확인, build33 PASS. React Doctor uncached36→36/변경 신규문제0, 전체 기존진단 해소 주장 안함. backend/controller/auth/DB/권한/환경/flags/lock/운영자료 쓰기0. 현재 www/master는 승인 ea8f388이며 새 UI는 검토브랜치 codex/public-ui-arena-20261012에만 반영. [계획](docs/moemoa/plans/2026-10-03-interface-rebuild.md) 32차와 [근거](docs/moemoa/release-v2/evidence/2026-10-12-are-na-public-ui.json)를 따른다. 정확한 새 후보 CI/운영 승인이 다음 배포 gate.
 
 

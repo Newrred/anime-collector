@@ -1,9 +1,9 @@
 {
   "date": "2026-10-12",
-  "status": "IMPLEMENTED_LOCAL_QA_VERIFIED_PRODUCTION_UI_NOT_DEPLOYED",
+  "status": "PRODUCTION_READY_HTTP_BROWSER_VERIFIED",
   "branch": "codex/public-ui-arena-20261012",
   "baseCommit": "b3b466949c52bd2ed39e97814a1c08a67c5d3186",
-  "currentProductionCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+  "currentProductionCommit": "33de5b4c985e009d14c8ecec6158c4511af946a2",
   "references": [
     {
       "url": "https://www.are.na/chase-body/ad_direzione",
@@ -157,8 +157,49 @@
     "rightsAndSignupTextChanged": false
   },
   "rollback": "Revert presentation source; database, user data and feature flags require no reversal.",
-  "productionUiApplied": false,
-  "nextGate": "Reviewed exact Git candidate and successful source-bound CI before production master rollout; existing deployment approval for ea8f388 is not reused for a different commit.",
+  "productionUiApplied": true,
+  "nextGate": "This approved styling release is complete. Future production changes start from current master rather than pushing the older handoff branch wholesale.",
   "evidencePrivacy": "Only code hashes, public reference URLs and synthetic QA summaries. Screenshots and raw local logs stay ignored.",
-  "appFileHashSource": "Staged Git blobs; canonical repository line endings"
+  "appFileHashSource": "Staged Git blobs; canonical repository line endings",
+  "previousProductionCommit": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+  "productionRelease": {
+    "approvedPatchSource": "3feebbbe6c50cd0a634d52f7a96cae4bd4250b16",
+    "deployedGitCommit": "33de5b4c985e009d14c8ecec6158c4511af946a2",
+    "sourceCi": {
+      "conclusion": "success",
+      "headSha": "33de5b4c985e009d14c8ecec6158c4511af946a2",
+      "status": "completed",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38208686854"
+    },
+    "releaseStrategy": "Single presentation patch carried onto current production baseline; inherited backup tool differences excluded",
+    "uiSourceFilesMatched": 13,
+    "deployedGitSource": "master",
+    "state": "READY",
+    "url": "https://www.moemoa.xyz",
+    "buildInfoCommitMatches": true,
+    "deploymentConfigSemanticMatch": true,
+    "httpRouteCount": 7,
+    "cssAssetsChecked": 5,
+    "desktopAndMobileResponsiveVerified": true,
+    "revokedSyntheticBoardUnavailable": true,
+    "productionWrites": 0,
+    "observability": {
+      "runtimeErrors": {
+        "deploymentScoped": true,
+        "lookback": "15m",
+        "levels": [
+          "error",
+          "fatal"
+        ],
+        "matchingGroups": 0,
+        "note": "Snapshot only, not an ongoing uptime guarantee"
+      },
+      "drains": {
+        "status": "UNAVAILABLE",
+        "reason": "Vercel connected API GET /v1/drains returned 404; none/active not inferred"
+      },
+      "newMonitoringCreated": false
+    },
+    "closeout": "D:/hong/Web/Anime/.tools/arena-ui-production-release-20261012.json"
+  }
 }
