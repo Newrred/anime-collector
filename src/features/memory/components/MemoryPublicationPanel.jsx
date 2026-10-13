@@ -84,7 +84,7 @@ function PublicationReview({ review, controller, services, locale, busy, base })
   </>;
 }
 
-function PublicationEditor({ detail, runtime, services, locale, base, onClose }) {
+export function PublicationEditor({ detail, runtime, services, locale, base, onClose, onStateChange }) {
   const copy = publicationCopy(locale);
   const controller = useMemo(() => createPublicationController({ boardId: detail.board.id, ownerId: detail.board.ownerId,
     gateway: services.gateway, getSession: services.getSession, getBoard: (id) => runtime.getBoard(id), policyRevision: services.policyRevision,
@@ -93,18 +93,31 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selection, setSelection] = useState({});
-  useUnsavedNavigation(Boolean(title || description || Object.keys(selection).length) && state.phase !== "published", locale, { busy: state.busy });
+  const [activeCard, setActiveCard] = useState("");
+  const touched = useRef(false), baseline = useRef(JSON.stringify({ title: "", description: "", selection: {} }));
+  const dirty = JSON.stringify({ title, description, selection }) !== baseline.current;
+  useEffect(() => { onStateChange?.({ busy:state.busy, dirty:state.phase !== "published" && (dirty || Boolean(state.review)) }); }, [onStateChange,state.busy,state.phase,state.review,dirty]);
+  useUnsavedNavigation(dirty && state.phase !== "published", locale, { busy: state.busy });
+  useEffect(() => {
+    if (touched.current || state.phase !== "selecting") return;
+    const saved = state.publication?.selection;
+    if (saved) {
+      const choices = Object.fromEntries(saved.cards.filter(c => detail.items.some(i => i.bundle.card.id === c.cardId)).map(c => [c.cardId, c.fields]));
+      setTitle(saved.title); setDescription(saved.description); setSelection(choices);
+      baseline.current = JSON.stringify({ title: saved.title, description: saved.description, selection: choices });
+    }
+  }, [state.phase, state.publication, detail.items]);
   useEffect(() => { controller.load(); return () => controller.dispose(); }, [controller]);
   const review = state.review;
   const publication = state.publication;
   const mutating = state.busy && ["publishing", "revoking"].includes(state.phase);
   const close = () => {
     if (mutating) return;
-    if ((title || description || Object.keys(selection).length) && state.phase !== "published"
+    if (dirty && state.phase !== "published"
       && !confirm(locale === "ko" ? "게시하지 않고 공유 화면을 닫을까요?" : "Close sharing without publishing?")) return;
-    controller.cancel(); onClose();
+    touched.current = true; controller.cancel(); onClose();
   };
-  return <section className="memory-publication" aria-label={copy.title} aria-busy={state.busy}>
+  return <section className="memory-publication collection-board-sharing" aria-label={copy.title} aria-busy={state.busy}>
     <header><h2>{copy.title}</h2><button type="button" className="btn btn--subtle" disabled={mutating} onClick={close}>{copy.close}</button></header>
     <p>{copy.intro}</p>
     {state.error && <p role="alert">{publicationError(state.error, locale)}</p>}
@@ -126,8 +139,8 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
         .map((item) => ({ cardId: item.bundle.card.id, fields: selection[item.bundle.card.id] })) });
     }}>
       <fieldset disabled={state.busy}>
-        <label>{copy.publicTitle}<input value={title} maxLength={80} required onChange={(event) => { controller.cancel(); setTitle(event.target.value); }} /></label>
-        <label>{copy.description}<textarea value={description} maxLength={500} rows={3} onChange={(event) => { controller.cancel(); setDescription(event.target.value); }} /></label>
+        <label>{copy.publicTitle}<input value={title} maxLength={80} required onChange={(event) => { touched.current = true; controller.cancel(); setTitle(event.target.value); }} /></label>
+        <label>{copy.description}<textarea value={description} maxLength={500} rows={3} onChange={(event) => { touched.current = true; controller.cancel(); setDescription(event.target.value); }} /></label>
         <p>{copy.included}</p>
         <p>{locale === "ko" ? "공개 미니홈이 있으면 방문자가 이 보드에서 미니홈으로 이동할 수 있습니다." : "If you have a public home, visitors can open it from this board."}</p>
         <ol className="memory-publication__selection">{detail.items.map(({ bundle, visual }, index) => {
@@ -136,23 +149,25 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
           return <li key={id}>
             <MemoryVisual visual={visual} systemCopy={{ fallbackTitle: bundle.title.displayTitle }} missingLabel={copy.missing} />
             <div><h3>{index + 1}. {bundle.title.displayTitle}</h3>
-              <p>{bundle.card.note}</p>{bundle.card.watchedAt && <p>{bundle.card.watchedAt.slice(0, 10)}</p>}
-              <details className="public-management"><summary>{locale === 'ko' ? '카드 공개 관리' : 'Manage card sharing'}</summary><button type="button" className="btn btn--subtle" onClick={() => {
+              <p>{bundle.card.note?.slice(0,120)}</p>{bundle.card.watchedAt && <p>{bundle.card.watchedAt.slice(0, 10)}</p>}
+              {selected && activeCard === id && <details className="public-management"><summary>{locale === 'ko' ? '카드 공개 관리' : 'Manage card sharing'}</summary><button type="button" className="btn btn--subtle" onClick={() => {
                 if (confirm(copy.revokeCardConfirm)) controller.revokeCard(id);
-              }}>{copy.revokeCard}</button></details>
+              }}>{copy.revokeCard}</button></details>}
               <label className="memory-publication__check"><input type="checkbox" checked={selected}
                 onChange={(event) => {
-                  controller.cancel();
+                  touched.current = true; controller.cancel();
                   const checked = event.target.checked;
+                  if (checked) setActiveCard(id);
                   setSelection((current) => { const next = { ...current }; if (checked) next[id] = []; else delete next[id]; return next; });
                 }} />{copy.select}</label>
-              {selected && <details className="publication-card-options"><summary>{copy.fields} · {selection[id].length}</summary><fieldset><legend className="sr-only">{copy.fields}</legend>{PUBLIC_FIELDS.map((field) => <label key={field} className="memory-publication__check">
+              {selected && <button type="button" className="channel-text-button" aria-expanded={activeCard === id} onClick={() => setActiveCard(activeCard === id ? "" : id)}>{locale === "ko" ? "이 기억의 공개 옵션" : "Sharing options for this memory"}</button>}
+              {selected && activeCard === id && <details className="publication-card-options"><summary>{copy.fields} · {selection[id].length}</summary><fieldset><legend className="sr-only">{copy.fields}</legend>{PUBLIC_FIELDS.map((field) => <label key={field} className="memory-publication__check">
                 <input type="checkbox" checked={selection[id].includes(field)} onChange={(event) => {
-                  controller.cancel();
+                  touched.current = true; controller.cancel();
                   const checked = event.target.checked;
                   setSelection((current) => ({ ...current, [id]: checked ? [...current[id], field] : current[id].filter((value) => value !== field) }));
                 }} />{copy.details[field]}</label>)}</fieldset></details>}
-              {selected && image && <ImagePreparation cardId={id} controller={controller} copy={copy} policyRevision={services.policyRevision} busy={state.busy} locale={locale} base={base} />}
+              {selected && activeCard === id && image && <ImagePreparation cardId={id} controller={controller} copy={copy} policyRevision={services.policyRevision} busy={state.busy} locale={locale} base={base} />}
             </div>
           </li>;
         })}</ol>
@@ -164,7 +179,7 @@ function PublicationEditor({ detail, runtime, services, locale, base, onClose })
   </section>;
 }
 
-export default function MemoryPublicationPanel({ detail, runtime, locale, base, disabled = false }) {
+export default function MemoryPublicationPanel({ detail, runtime, locale, base, disabled = false, onOpenChange, onStateChange }) {
   const auth = useAuthSession();
   const [open, setOpen] = useState(false);
   if (!publicationUiEnabled()) return null;
@@ -172,7 +187,7 @@ export default function MemoryPublicationPanel({ detail, runtime, locale, base, 
   if (!services.enabled) return <p>{copy.disabled}</p>;
   if (!auth.user || detail.board.ownerId !== `account:${auth.user.id}`) return <p>{copy.login} <a href={`${base}data/`}>{copy.account}</a></p>;
   if (!open) return <button type="button" className="btn btn--subtle" disabled={disabled}
-    onClick={() => setOpen(true)}>{copy.start}</button>;
+    onClick={() => { setOpen(true); onOpenChange?.(true); }}>{copy.start}</button>;
   return <PublicationEditor key={`${detail.board.id}:${auth.user.id}`} detail={detail} runtime={runtime} services={services}
-    locale={locale} base={base} onClose={() => setOpen(false)} />;
+    locale={locale} base={base} onStateChange={onStateChange} onClose={() => { setOpen(false); onOpenChange?.(false); onStateChange?.({busy:false,dirty:false}); }} />;
 }

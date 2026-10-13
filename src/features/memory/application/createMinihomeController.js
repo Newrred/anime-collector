@@ -1,8 +1,8 @@
 import { isPublicationId, publicationSnapshot } from "../domain/publicationView.js";
-import { minihomeReview, minihomeStatus } from "../domain/minihomeView.js";
+import { minihomeReview, minihomeStatus, titleShelfSnapshot } from "../domain/minihomeView.js";
 const fail = (code) => { throw Object.assign(new Error(code), { code }); };
-export function createMinihomeController({ userId, gateway, getSession, uuid = () => crypto.randomUUID() }) {
-  let state = { busy: false, error: null, review: null, home: null, boards: [], next: null, phase: "loading" };
+export function createMinihomeController({ userId, gateway, getSession, collectionHomeEnabled = false, uuid = () => crypto.randomUUID() }) {
+  let state = { busy: false, error: null, review: null, home: null, boards: [], shelves: [], shelvesEnabled: false, next: null, phase: "loading" };
   let generation = 0, request = null, operation = null, disposed = false;
   const listeners = new Set();
   const emit = (patch) => { state = { ...state, ...patch }; listeners.forEach((fn) => fn()); };
@@ -31,8 +31,18 @@ export function createMinihomeController({ userId, gateway, getSession, uuid = (
   return {
     getSnapshot: () => state, subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     load: () => run("loading", async ({ signal, check }) => {
-      const [home, choices] = await Promise.all([gateway.getHome({ signal }), gateway.listHomeBoards(null, { signal })]);
-      await check(); emit({ home: minihomeStatus(home), ...page(choices), review: null, phase: "selecting" });
+      const [home, choices, shelfChoices] = await Promise.all([gateway.getHome({ signal }), gateway.listHomeBoards(null, { signal }), collectionHomeEnabled ? gateway.listHomeShelves({ signal }) : { enabled: false, shelves: [] }]);
+      if (typeof shelfChoices?.enabled !== "boolean" || !Array.isArray(shelfChoices.shelves) || shelfChoices.shelves.length > 20) fail("PUBLICATION_RESPONSE_INVALID");
+      const shelves = shelfChoices.shelves.map(s => {
+        if (typeof s.sourceId !== "string" || !s.sourceId || s.sourceId.length > 80 || !Number.isSafeInteger(s.sourceVersion) || s.sourceVersion < 1 || typeof s.name !== "string" || s.name.length > 80) fail("PUBLICATION_RESPONSE_INVALID");
+        const snapshot = titleShelfSnapshot({ schemaVersion: 1, title: s.name, titles: s.titles });
+        if (s.excludedCount !== undefined && (!Number.isSafeInteger(s.excludedCount) || s.excludedCount < 0 || s.excludedCount > 300)) fail("PUBLICATION_RESPONSE_INVALID");
+        return { sourceId: s.sourceId, sourceVersion: s.sourceVersion, name: s.name, excludedCount:s.excludedCount || 0, titles: snapshot.titles.map((t,i) => {
+          if (typeof s.titles[i].titleKey !== "string" || !s.titles[i].titleKey || s.titles[i].titleKey.length > 120) fail("PUBLICATION_RESPONSE_INVALID");
+          return { ...t, titleKey: s.titles[i].titleKey };
+        }) };
+      });
+      await check(); emit({ home: minihomeStatus(home), ...page(choices), shelves, shelvesEnabled: shelfChoices.enabled, review: null, phase: "selecting" });
     }),
     more: () => run("loading", async ({ signal, check }) => {
       if (!state.next) return;

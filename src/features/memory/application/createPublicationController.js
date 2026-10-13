@@ -64,7 +64,9 @@ export function createPublicationController({ boardId, ownerId, gateway, getSess
   const validatePublication = (value) => {
     if (value && (!isPublicationId(value.id) || !Number.isSafeInteger(value.revision) || value.revision < 0
       || !["PRIVATE", "PREPARING", "PUBLISHED", "REVOKED"].includes(value.state))) fail("PUBLICATION_RESPONSE_INVALID");
+    const selection = value?.selection == null ? null : selectionFor(value.selection);
     return value ? { id: value.id, revision: value.revision, state: value.state, hidden: Boolean(value.hidden),
+      ...(selection ? { selection } : {}),
       hasPublished: value.hasPublished === true || value.state === "PUBLISHED",
       sourceChanged: value.sourceChanged !== false,
       ...(typeof value.visible === 'boolean' ? { visible: value.visible } : {}) } : null;
