@@ -1,0 +1,81 @@
+{
+  "candidate": "b617817",
+  "target": "nmgkhknponvzcwliajyk",
+  "approval": "User explicitly approved test DB one run with full rollback",
+  "executed": true,
+  "preflight": {
+    "at": "2026-10-13T07:44:20.237964+00:00",
+    "catalog": "collection-home-test-20261013",
+    "homeHash": "7214d159883a97054366cee4905e5676",
+    "settings": {
+      "singleton": true,
+      "asset_limit": 10,
+      "reads_enabled": true,
+      "images_enabled": true,
+      "writes_enabled": true,
+      "follows_enabled": true,
+      "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "reports_enabled": true,
+      "asset_bytes_limit": 41943040,
+      "minihomes_enabled": true,
+      "report_daily_limit": 10,
+      "collection_home_enabled": false,
+      "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "signup_declaration_required": false,
+      "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+    },
+    "boardsHash": "40a7f98303ca8df731ed4755ebf95579",
+    "sourceHash": "20d2689e5944339c35376f1b0e98246e",
+    "builderHash": "9679dadfeb997a94177a7c9928ef1fe5",
+    "catalogHash": "ced96e0d5c7d55fb3c7597ef35c45c2c",
+    "homePrivate": true
+  },
+  "connectionVerified": "test ref in TLS verify-full connection host/user, fixed catalog and home guards",
+  "exitCode": 0,
+  "probePass": true,
+  "postflight": {
+    "at": "2026-10-13T07:44:22.042194+00:00",
+    "catalog": "collection-home-test-20261013",
+    "homeHash": "7214d159883a97054366cee4905e5676",
+    "settings": {
+      "singleton": true,
+      "asset_limit": 10,
+      "reads_enabled": true,
+      "images_enabled": true,
+      "writes_enabled": true,
+      "follows_enabled": true,
+      "policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "reports_enabled": true,
+      "asset_bytes_limit": 41943040,
+      "minihomes_enabled": true,
+      "report_daily_limit": 10,
+      "collection_home_enabled": false,
+      "content_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "signup_declaration_required": false,
+      "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
+    },
+    "boardsHash": "40a7f98303ca8df731ed4755ebf95579",
+    "sourceHash": "20d2689e5944339c35376f1b0e98246e",
+    "builderHash": "9679dadfeb997a94177a7c9928ef1fe5",
+    "catalogHash": "ced96e0d5c7d55fb3c7597ef35c45c2c",
+    "homePrivate": true
+  },
+  "preserved": {
+    "catalog": true,
+    "homeHash": true,
+    "settings": true,
+    "boardsHash": true,
+    "sourceHash": true,
+    "builderHash": true,
+    "catalogHash": true,
+    "homePrivate": true
+  },
+  "rollbackVerified": true,
+  "scope": "Hosted SQL negative path, not browser/Google/anonymous HTTP acceptance",
+  "sqlSha256": "c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e",
+  "probeExecutions": 1,
+  "preflightReadFailures": {
+    "count": 3,
+    "reason": "Read-only inventory SQL missing closing parenthesis; fixed before probe execution"
+  }
+}

@@ -990,3 +990,7 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### 2026-10-13 W18 stale-preview probe 인수
 
 로컬 rollback-only 리허설5 PASS/57테이블 전후 동일. 정확 SQL/대상은 tools/operations/collection-home-test/stale-preview-manifest.json. hosted 실행은 미승인·미실행이며 SQL 거부 경계와 브라우저 새 게시 인수는 구분한다. 정책/동의/가입을 새로 만들지 않는다. 기존 원복 완료 상태를 외부 세션에 보이는 임시 활성로 되돌리지 않고, 트랜잭션 내부 flag/version/preview만 사용 후 무조건 취소한다.
+
+### 2026-10-13 W18 hosted stale-source 경계 마감
+
+정확 승인 b617817로 test DB1회 실행: PREVIEW_CHANGED 거부·visitor builder entries0 PASS. 전체 설정 및 home/source/독립보드/catalog fingerprint의 별도 전후 일치·비공개 상태 유지 PASS. 이는 실제 SQL 함수 경계이며 브라우저/익명 HTTP/새 동의 PASS가 아니다. 원격 persistent write0, 이전 원복 상태 유지. 운영 baseline 대조와 정확 운영 승인은 다음 단계다. 근거: evidence/2026-10-13-collection-home/stale-preview-hosted.json.

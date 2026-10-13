@@ -2370,3 +2370,15 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 6. 검증: wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/collection-home-test/test_stale_probe.py → 5 PASS, exit0, 전체 public/private 일반 테이블57개 fingerprint 동일. 실제 함수 거부·외부 COMMIT 오용에도 내부 원복·잘못된 catalog·변경된 선반 거부·예상 밖 성공 시 실패/원복 확인. 최초 리허설은4개 통과 후 local fault-injection 함수의 인자명 누락으로 중단; 기존 인자명을 유지하도록 runner만 수정해5개 통과. 서비스 코드 수정0, hosted 실행0.
 7. 보안/권리/관측: 기존 test 자료만 사용하며 개인 본문/키/preview hash 출력0. 결과는 고정 PASS/실패 코드와 해시로 제한한다. 정책 revision/가입 guard/권한/한도/Storage/운영 변경0. negative publish가 성공하면 검사를 실패시키며 동의/게시 상태는 커밋하지 않는다.
 8. 다음 행동 하나: 후보 SQL SHA256 c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e의 moemoa-test 1회 실행 승인을 받은 뒤 실제 연결 대상과 baseline을 독립 확인하고 실행·원복을 판정한다. 추가 browser/Preview 설정 변경은 없다. 운영 후보의 해당 조건만 업데이트하고 hosted UI PASS로 확대하지 않는다.
+
+
+#### W18 stale-preview 실제 테스트 DB 실행·원복 결과 (2026-10-13)
+
+1. **근거:** 위 후보 준비에서 읽은 문서/SQL을 그대로 사용했다. 실행 원본은 b617817의 stale-preview-probe.sql, SHA256 c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e. 로컬 접속값 파싱/TLS 대상 검증은 기존 tools/operations/inspect-retention.py:22–48을 재사용했다.
+2. **승인/미결:** 사용자가 후보 b617817의 “테스트 DB 1회 검사·전체 롤백 승인”을 직접 답했다. 이 승인은 운영·배포·새 동의가 아니다. 연결 host/user가 정확한 test ref인지 확인하고 verify-full TLS 및 test catalog/비공개 home을 독립 조회했다.
+3. **계획:** 기존 W18의 source-version 경계 하나를 실행했고 새 작업판을 만들지 않았다.
+4. **변경:** 앱/schema 수정0. 실제 결과는 stale-preview-hosted.json에 비밀값/개인 본문 없이 설정·해시·불리언만 저장하고 기존00/01/02/03, 승인 manifest, 운영 후보 잔여 목록에 연결했다.
+5. **DB/복귀:** 실제 test SQL1회 실행 exit0. 트랜잭션 내부 새flag/preview/선반version은 전부 rollback. 별도 연결로 before/after 설정 전체·home/source/독립보드/catalog fingerprint·builder hash·homePrivate=true 일치. 정책3revision·signup guard=false·collection flag=false 유지. 새 공개·동의/가입 기록·구조·업로드·운영 변경0.
+6. **검증:** stale publish가 정확히 PREVIEW_CHANGED로 실패하고 non-strict visitor builder의 entries가0인 실제 서버 경계 PASS. 로컬5/57테이블 리허설은 앞선 별도 증거다. 사전 읽기 집계 SQL 괄호 누락으로3회 조회가 실패했지만 probe 실행 전이었고, 조회문 수정 후 승인 SQL은1회만 실행했다. 브라우저/Google/실기기/HTTP 이미지 결과로 확대하지 않는다.
+7. **보안/관측:** psql 비밀번호는 로컬 환경으로만 전달하고 출력/문서에 포함하지 않았다. 응답에는 본문/preview hash 없이 metadata와 fingerprint만 남겼다. 키·이미지·동의 추가전송0. SQL negative 호출은 성공을 허용하지 않으며 외부 세션에 공개된 데이터가 없다.
+8. **잔여/다음1개:** W18의 hosted stale-source DB 경계는 마감했다. 기존 테스트 설정/배포를 다시 켜지 않는다. 다음은 동일 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 기준을 읽기전용으로 대조해 정확한 적용·rollback 조건을 확정하는 것이다. 운영 migration/newflag/master Git 배포는 별도 정확 승인 전 실행하지 않는다. 이전 CUA 기반 hosted UI 철회 미검증은 기록으로 유지하며 동일 확인창 검사를 반복하지 않는다.

@@ -1,7 +1,7 @@
 {
   "candidateId": "W18_STALE_PREVIEW_ROLLBACK_20261013",
   "appSourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
-  "status": "LOCAL_REHEARSED_AWAITING_EXACT_TEST_APPROVAL",
+  "status": "APPROVED_EXECUTED_ONCE_ROLLBACK_VERIFIED",
   "targetProject": "nmgkhknponvzcwliajyk",
   "sql": "tools/operations/collection-home-test/stale-preview-probe.sql",
   "sha256": "c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e",
@@ -39,5 +39,12 @@
     "policy revisions",
     "positive publication",
     "browser acceptance"
-  ]
+  ],
+  "hostedResult": {
+    "approvedCommit": "b617817d11d56a347b25496efab1c79bb1e5d5df",
+    "executions": 1,
+    "exitCode": 0,
+    "rollbackVerified": true,
+    "evidence": "docs/moemoa/release-v2/evidence/2026-10-13-collection-home/stale-preview-hosted.json"
+  }
 }

@@ -126,10 +126,16 @@
     "Preserve new schema, selections and layoutVersion data. Do not drop writer guard or downgrade stored layout. An older client may be prevented from saving v2 layout; prefer roll-forward fix."
   ],
   "remaining": [
-    "Hosted source-version change/stale-preview boundary not executed for this candidate; historical local SQL PASS is separate.",
     "Hosted native-confirm owner withdrawal not completed through the earlier CUA transport; server withdrawal and anonymous null were verified. Local native confirmation passed; no app bug reproduced.",
     "Live production schema/flag/catalog baseline must be read before an exact application proposal.",
     "Exact production migration, new flag activation and master push/deployment approval is not granted by this local continuation."
   ],
-  "remoteMutationsThisSession": 0
+  "remoteMutationsThisSession": 0,
+  "hostedStaleSourceBoundary": {
+    "candidate": "b617817",
+    "pass": true,
+    "type": "SQL_NEGATIVE_PATH_WITH_ROLLBACK",
+    "browserAcceptance": false,
+    "evidence": "stale-preview-hosted.json"
+  }
 }

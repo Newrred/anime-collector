@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 stale-preview 실제 서버 경계 마감:** 사용자 승인 b617817의 rollback-only SQL을 moemoa-test에서1회 실행했다. PREVIEW_CHANGED 거부·오래된 선반 projection0 PASS, 별도 전후 조회에서 설정/home/source/독립보드/catalog 보존·homePrivate=true 확인. 공개/동의/구조/배포/운영 변경0. [실제 근거](evidence/2026-10-13-collection-home/stale-preview-hosted.json). 다음은 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 읽기전용 대조이며 새 가입·재게시·같은 확인창 검사는 반복하지 않는다.
+
+
 > **2026-10-13 W18 stale-preview 최소 검사 후보:** 테스트 화면 재배포 없이 DB 트랜잭션 안에서만 선반 version을 바꿔 오래된 preview 게시 거절을 확인하는 rollback-only SQL을 준비했다. 로컬 격리 리허설5 PASS·57테이블 전후 동일, 서비스 코드 변경0. [후보](../../../tools/operations/collection-home-test/stale-preview-manifest.json)의 정확한 테스트 DB 1회 실행 승인이 다음 단계이며 아직 hosted 실행0. 기존 원복 완료·운영40a3dac 후보와 이전 증거 유지.
 
 
