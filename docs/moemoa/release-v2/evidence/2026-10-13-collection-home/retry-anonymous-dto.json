@@ -1,0 +1,14 @@
+{
+  "httpStatus": 200,
+  "topLevelKeys": [
+    "id",
+    "bio",
+    "entries",
+    "nickname",
+    "schemaVersion"
+  ],
+  "privateFields": [],
+  "publicHomeId": "4006eb40-ec5a-47fc-8a5b-ec2b78e60daa",
+  "anonymous": "public client key only, no user access token",
+  "dtoSha256": "097358c7f3f3d5586ed29224d98ec4101e2152be512108692e022561ad99598b"
+}

@@ -1,6 +1,6 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
-> **2026-10-13 W18 마감/PC 인계:** 승인8446753 테스트 연결에서 실제 선반·표지·Memory0 및 기존 선택 복원 확인. unavailable 옛 보드를 해제할 UI가 없어 새 preview 거부→명시 선택 해제 최소 수정, Chromium3/build33 PASS. 새 타입 실제 게시/익명 인수 미완료. DB 임시5값과 기존 정책/Git ref 원복, 새 frontend flag0; 신규 Preview3설정 영구 제거 승인 미응답으로 보류. 이전 Git 소스의 실제 배포 원복 상태는 03 현재 카드와 evidence/hosted-connection-execution.json을 확인. 운영master b0541ff/운영DB 변경0. 새 수정은 codex/continue-after-arena-20261012 인계 브랜치, 새 phone-test/운영 재배포 미승인. 기존 M/W/Q/D와 이력은 유지한다.**
+> **2026-10-13 W18 재개·실제 공개 인수:** 이전8446753의 남은 Preview3override를 사용자 명시 승인 후 제거하고, a6b6dda Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/Preview/소스/별칭으로 원복 마감. 수정40a3dac은 별도 exact 승인으로 test 설정5필드·Preview4값만 임시 연결했다. dpl_F29WgmHX8ahugV96qHyhyRijqMma READY/exactSHA/별칭에서 기존 A의 unavailable 보드 명시 해제→선반 preview→본인 직접 동의·게시→새 익명 origin 미니홈/460×667 승인 표지 decode·작품 Hub/캐릭터/Memory0·Watch0 연결 PASS. A 새로고침 선택 복원·다시 preview의 동의 unchecked, 익명 DTO privateFields0 확인. 기존 Chromium3 재검증 PASS이며 신규고유 테스트0·새 runtime 변경0·이번 build 재실행0. **원복 완료:** 기존 서버 철회 함수로 test 홈1개를 비공개 처리하고 익명 HTTP200/null·화면 unavailable/img0, 원본·표지·독립 보드 fingerprint 보존을 확인했다. DB5필드와 Preview4값은 baseline 복귀, phone-test a6b6dda의 Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/별칭 확인. 브라우저 확인창 조작은 멈춰 UI 철회 PASS로 세지 않는다. 운영master b0541ff/운영DB 변경0. 최신 결과는 [03 현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)와 evidence/2026-10-13-collection-home/retry-execution.json을 따른다. 기존 M/W/Q/D와 과거 실패·완료 증거는 유지한다.
 
 
 <details><summary>교정 전 시작 문서의 2026-10-11 최신 요약 — 당시 이력 보존</summary>

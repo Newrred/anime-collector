@@ -1,0 +1,59 @@
+{
+  "scope": "TEST_ONLY_COLLECTION_HOME_SELECTION_RETRY_20261013",
+  "appSourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "previousApprovedCandidate": "8446753548c5a4596adf27e463c27f66c600cf19",
+  "runtimeDelta": "MemoryMinihome.jsx: one explicit Remove selection button; preserve original Board and invalidate prior preview/consent through existing change().",
+  "baseManifest": "rollout-manifest.json",
+  "requiresExactApproval": true,
+  "remoteGitBaseline": {
+    "master": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "branch": "codex/phone-test"
+  },
+  "database": {
+    "ref": "nmgkhknponvzcwliajyk",
+    "newSchema": false,
+    "newFixtureRows": 0,
+    "fixtureOperation": "REUSE_EXISTING_ONLY; never execute fixture.sql for retry",
+    "configScript": "config.sql",
+    "configSha256": "6c255537bdce968b7ca0e4127389bb76efc388bca3e79820877ca786c75689fc",
+    "temporaryFields": [
+      "collection_home_enabled",
+      "signup_declaration_required",
+      "policy_revision",
+      "content_policy_revision",
+      "general_publication_policy_revision"
+    ],
+    "precondition": "Read actual test project, config full baseline, existing active collection-home-test-20261013 release, existing A source and current receipt. Refuse drift."
+  },
+  "storage": {
+    "newUploads": 0,
+    "action": "Reuse exact previously approved Steins;Gate catalog asset; existing hash/provenance from base manifest. No source changes."
+  },
+  "vercel": {
+    "target": "preview",
+    "projectId": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+    "teamId": "team_5qSBpZUQpNl41SJvHZBfsJGx",
+    "branch": "codex/phone-test",
+    "changes": "Exactly the four existing public config changes in base manifest, after prior three temporary overrides are absent. Reuse existing test public client key; no server/OAuth keys.",
+    "source": "Connected Git build from appSourceCommit; verify Ready, SHA and canonical phone-test alias."
+  },
+  "flow": [
+    "Existing A owner removes unavailable saved Board reference explicitly, leaving original Board intact.",
+    "Select existing title shelf, explicitly enter public shelf title, prepare fresh preview and verify actual cover decode.",
+    "User personally reviews and accepts publication; never simulate agreement or create receipt.",
+    "New anonymous visitor reads catalog title/cover and canonical Title Hub link without owner RPC/private fields.",
+    "Owner re-entry preserves selected source and new consent remains required for changes.",
+    "Withdraw only the newly reviewed test home with current revision; retain shelf/title/cover and independent Boards.",
+    "Restore five DB fields, previous Preview policy, remove three newly added overrides at approved action time, exact-lease phone-test baseline and Git rebuild."
+  ],
+  "abort": "If no new publication, do not withdraw the old home. On source/kill-switch/branch drift, stop the dependent mutation and record exact state; never overwrite newer user data.",
+  "limits": {
+    "newMemoryCards": 0,
+    "newSignups": 0,
+    "newImageUploads": 0,
+    "productionMutations": 0,
+    "privateOriginalDeletions": 0
+  },
+  "remoteApplied": false
+}

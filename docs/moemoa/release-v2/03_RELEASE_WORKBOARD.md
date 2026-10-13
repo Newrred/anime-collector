@@ -780,14 +780,16 @@
 
 ```text
 현재 W: W18 컬렉션·미니홈 관계 교정 / 관련 W06·W09·W11·W19
-완료한 연결: 승인8446753 moemoa-test fixture/설정5/Preview4/Git 배포→기존 A의 실제 선반1·승인 Steins;Gate표지·Memory0 및 공유 선택 복원 확인.
-실제 실패: unavailable 옛 보드 선택이 남는데 해제 UI가 없어 TITLE_SHELF preview도 거부. 새 게시/익명/철회/Google/실기기/운영 PASS0.
-최소 보완: MemoryMinihome.jsx entry별 명시적 선택 해제. draft 참조만 변경·원본/ID/권리 보호, fresh preview/동의 초기화. Chromium3 PASS(신규1+기존2), build33 PASS, diffcheck PASS. 이전 unit22/Chromium14/SQL25·17은 별도 이력.
-원복: DB5값 baseline/off 및 기존 Preview 정책 복귀, phone-test Git a6b6dda 복귀. 새 frontend flag0. 새 Preview3값의 영구 제거는 브라우저 클릭 직전 승인 미응답으로 보류(값/키 노출0). 이전 Git 소스 재빌드 dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN READY/Preview/exactSHA/별칭 확인, env 완전 원복은 미완료.
-보존: test 구조/fixture/catalog표지89KB/선반/저장작품 유지, 기존 Memory·home/board/card/source 원본 삭제0. 데이터/config migration 이력20261012180421/180447/181251은 evidence에 매핑.
-운영: master b0541ff/운영DB/운영Public 변경0. 새 UI 수정은 인계 브랜치에만 저장, phone-test/master 반영0.
-종료: 이번 작업 마감 후 Git 인계·정상 PC 종료 지시. 세부8항 보고와 실행JSON/화면/검증로그는 기존01/evidence.
-다음 행동 하나: Preview 신규3설정 제거 원복 마감 → 수정 UI exact 후보의 test-only 재검증·원복 승인 범위를 준비(자료 재실행/새회원/운영 활성 불필요).
+이번 후보: 40a3dace984a7ed7920ee46e626ab06aa2d042c9. 이번 재개는 이전 PC 종료 지시를 대체하며 새 종료 요청은 없다.
+이전 원복 완료: 승인8446753의 남은 Preview3override를 별도 명시 승인 후 제거/키별 검색0 확인. 기존 DB5값/정책/phone-test a6b6dda와 Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/Preview/exactSHA/canonical alias 확인.
+이번 임시 연결: 수정40a3dac의 별도 exact test 연결·검증·원복 승인→DB5필드/Preview4값 적용. 기존 선반1/catalog/가입확인4건 재사용, fixture/새 이미지 업로드/새 계정/새 구조0. Git Preview dpl_F29WgmHX8ahugV96qHyhyRijqMma READY/exact40a3dac/별칭 확인.
+실제 hosted PASS: 기존 A unavailable 보드 명시 선택 해제→TITLE_SHELF preview/실제460×667 승인 표지 decode→사용자 직접 동의·게시. 새 익명 origin 미니홈/동일 표지 decode·작품 Hub 실제 캐릭터 정보·Memory0/Watch0 연결 확인.
+복원/개인정보 PASS: A 새로고침 후 선반 선택 복원, 다시 preview하면 동의 unchecked. 익명 read_memory_minihome HTTP200/최상위 id,bio,entries,nickname,schemaVersion/privateFields0. retry-anonymous-dto.json은 응답 원문 대신 key/hash만 보관.
+로컬/과거 구분: 이번 Chromium3 모의 재검증 PASS·스크린샷 추가(신규고유0). 기존40a3dac runtime 재사용/이번 build 재실행0. 과거 build33·unit22/Chromium14/SQL25·17 및 최초8446753 preview FAIL은 이전 증거로 보존.
+원복 완료: DB5필드 baseline/off·Preview정책 복귀/이번 새3override 제거/phone-test a6b6dda 복구. Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/canonical alias 확인. 기존 서버 revoke 함수로 test홈1개 철회→익명HTTP200/null·화면 unavailable/img0·원본/표지/독립보드 fingerprint 보존 PASS.
+현재 잔여: 브라우저 확인창 자동 조작이 두 탭에서 멈춰 UI 철회 완주 미검증. 이번 hosted source변경/stale-preview 검사는 미실행(기존 로컬 SQL 근거와 분리). Google 신규가입/실기기/운영 신규 PASS0.
+보존/운영: test 구조/catalog표지89,300B/선반/저장작품 유지, 원본 삭제0. 이전 데이터/config migration 이력20261012180421/180447/181251 유지, 이번 새 migration 이력0. master b0541ff/운영DB/운영Public 변경0.
+다음 행동 하나: W18의 브라우저 철회 확인창 미검증을 자동화 도구 문제/서비스 문제로 구분해 닫고, 그 결과를 기존 운영 후보 조건에 결속한다. 원복 재실행·새 동의·기초 DB/가입 반복은 하지 않는다. 최신 상세는 retry-execution.json 및01의 이번8항 보고.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>

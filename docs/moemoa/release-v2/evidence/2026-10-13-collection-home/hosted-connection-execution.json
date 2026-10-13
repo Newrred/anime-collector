@@ -11,7 +11,7 @@
   "phoneTest": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
   "deploymentId": "dpl_5uZfEuc7Smyi13vniAovDjd6qfrC",
   "hostedPublished": false,
-  "restorePending": true,
+  "restorePending": false,
   "dataHistory": [
     {
       "version": "20261012180421",
@@ -44,13 +44,9 @@
     "general_publication_policy_revision": "TEST_ONLY_PHONE_WEB_20260927_01"
   },
   "frontendDisabled": true,
-  "environmentRestoreComplete": false,
-  "pendingEnvironmentRemoval": [
-    "PUBLIC_MEMORY_COLLECTION_HOME_V1",
-    "PUBLIC_CATALOG_SUPABASE_URL",
-    "PUBLIC_CATALOG_SUPABASE_ANON_KEY"
-  ],
-  "environmentRemovalReason": "Browser permanent deletion action-time confirmation requested; no response received. Flag set to 0. Existing revision restored.",
+  "environmentRestoreComplete": true,
+  "pendingEnvironmentRemoval": [],
+  "environmentRemovalReason": "User approved all three exact Preview overrides; Chrome removed each and verified no results. Rebuilt baseline Git with latest restored settings, Ready dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv. Subsequent approved retry is separately recorded in retry-execution.json.",
   "hostedPreview": "PUBLICATION_UNAVAILABLE: unavailable saved Board cannot be deselected",
   "localFix": {
     "component": "MemoryMinihome.jsx",
@@ -58,16 +54,16 @@
     "tests": "Chromium 3 PASS (new 1 + previous 2); build 33 pages PASS"
   },
   "rollbackDeployment": {
-    "id": "dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN",
-    "url": "https://anime-collector-2l3yme6k0-newrreds-projects.vercel.app",
+    "id": "dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv",
+    "url": "https://anime-collector-pvaren6ky-newrreds-projects.vercel.app",
     "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
     "status": "READY",
     "target": "preview",
     "alias": "https://anime-collector-git-codex-phone-test-newrreds-projects.vercel.app",
-    "verification": "connector Ready/exact Git source/alias; post-rollback Chrome inspection unavailable"
+    "verification": "Chrome Ready/Preview/exact Git source/alias after removing all three overrides; screenshot preserved"
   },
   "sourceRestored": true,
-  "remaining": "Three newly created Preview overrides still require removal action-time confirmation; frontend0/backendfalse, production unchanged.",
+  "remaining": "Original 8446753 configuration/source restore completed. Fixed UI 40a3dac retry is a distinct approved run in retry-execution.json; typed publication remains unverified.",
   "safeFrontendReadback": {
     "key": "PUBLIC_MEMORY_COLLECTION_HOME_V1",
     "value": "0",

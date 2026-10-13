@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-13",
+  "candidate": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "approval": "User approved fixed UI test connection, verification and restore",
+  "oldEnvironmentRestore": {
+    "threeOverridesRemoved": true,
+    "verification": "Chrome each exact key: no results after successful removal",
+    "gitDeployment": "dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv",
+    "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "ready": true,
+    "target": "preview",
+    "canonicalAliasVerified": true
+  },
+  "preflight": {
+    "project": "nmgkhknponvzcwliajyk",
+    "fullSettingsBaselineMatched": true,
+    "activeCatalogRelease": "collection-home-test-20261013",
+    "shelfSourceCount": 1,
+    "declarationCount": 4,
+    "shelfRpcExists": true,
+    "newFixtureRows": 0,
+    "newImageUploads": 0
+  },
+  "database": {
+    "method": "Dashboard SQL, version-controlled config.sql renderer apply:true",
+    "permanentSchemaChanges": 0,
+    "migrationHistoryAdded": 0,
+    "configApplied": true,
+    "collectionHomeEnabled": true,
+    "signupDeclarationRequired": true,
+    "policyRevision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "restored": true,
+    "current": {
+      "collectionHomeEnabled": false,
+      "signupDeclarationRequired": false,
+      "threePolicyRevisions": "TEST_ONLY_PHONE_WEB_20260927_01",
+      "fullBaselineMatched": true
+    }
+  },
+  "environment": {
+    "branch": "codex/phone-test",
+    "target": "preview",
+    "threePublicOverridesCreated": true,
+    "testPublicKeyReused": true,
+    "policyRevisionApplied": true,
+    "restored": true,
+    "restoreEvidence": "User action-time approval; three exact Preview/phone-test overrides removed and each search returned no results; existing policy restored with save success."
+  },
+  "localVerification": {
+    "command": "node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts",
+    "result": "3 PASS; mock RPC and synthetic cover only",
+    "newUniqueTests": 0,
+    "screenshots": [
+      "local-unavailable-selection.png",
+      "local-fresh-title-preview.png"
+    ]
+  },
+  "hostedPublished": true,
+  "deployment": {
+    "id": "dpl_F29WgmHX8ahugV96qHyhyRijqMma",
+    "url": "https://anime-collector-8vm7f1sjh-newrreds-projects.vercel.app",
+    "source": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+    "state": "READY",
+    "target": "preview",
+    "branch": "codex/phone-test",
+    "canonicalAliasVerified": true,
+    "verification": "Chrome Deployment Overview source commit href and domain"
+  },
+  "independentDatabaseReadback": "Full settings match candidate five temporary fields; existing other fields preserved",
+  "restorePending": false,
+  "productionChanged": false,
+  "hosted": {
+    "selectionRemoval": true,
+    "titleShelfPreview": true,
+    "userAcceptedAndPublished": true,
+    "anonymousCoverDecoded": {
+      "width": 460,
+      "height": 667
+    },
+    "anonymousTitleHub": true,
+    "selectionRestoredAfterReload": true,
+    "freshPreviewConsentUnchecked": true,
+    "privateDtoFields": 0,
+    "sourceChangedHostedCheck": false
+  },
+  "withdrawal": {
+    "homeId": "4006eb40-ec5a-47fc-8a5b-ec2b78e60daa",
+    "browserCompleted": false,
+    "browserBlocker": "Native confirm automation focus timeout on two tabs; user reported no visible dialog.",
+    "serverCleanup": true,
+    "method": "Existing revoke_memory_minihome RPC via Dashboard SQL with transaction-local owner context and exact fixture guards",
+    "sql": "tools/operations/collection-home-test/withdraw-retry-home.sql",
+    "privateTitleSourceCatalogAndIndependentBoardsFingerprintPreserved": true,
+    "anonymousHttp": 200,
+    "anonymousResponse": null,
+    "browserUnavailable": true,
+    "browserImageCount": 0
+  },
+  "phoneTestGitRestored": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+  "remaining": [
+    "Browser owner-withdrawal confirmation end-to-end not proven",
+    "Hosted source-change stale-preview case not executed",
+    "Production candidate and approval remain separate"
+  ],
+  "restoredDeployment": {
+    "id": "dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa",
+    "url": "https://anime-collector-53ayxbzbu-newrreds-projects.vercel.app",
+    "source": "a6b6ddaaadf9487f5f8f3b14064cb794b27826c0",
+    "state": "READY",
+    "target": "preview",
+    "canonicalAliasVerified": true,
+    "latestBranchDeployment": true
+  }
+}

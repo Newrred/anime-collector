@@ -5,7 +5,7 @@ const USER='11111111-1111-4111-8111-111111111111', HOME='55555555-5555-4555-8555
 const animeId='anime:15151515-1515-4151-8151-151515151515', revisionId='asset:'+'c'.repeat(40);
 const cover='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300"%3E%3Crect width="200" height="300" fill="%235f6c91"/%3E%3C/svg%3E';
 
-test('an unavailable saved Board can be explicitly deselected before a fresh title shelf preview',async({page,context})=>{
+test('an unavailable saved Board can be explicitly deselected before a fresh title shelf preview',async({page,context},testInfo)=>{
  await installAppState(page,{locale:'en'});await adapters(context);
  const gone='88888888-8888-4888-8888-888888888888';
  const saved={nickname:'Existing owner',bio:'',entries:[{publicationId:gone}]};
@@ -34,11 +34,13 @@ test('an unavailable saved Board can be explicitly deselected before a fresh tit
  await page.getByLabel('Public shelf title',{exact:true}).fill('Title preview');
  await page.getByRole('button',{name:'Preview public home',exact:true}).click();
  await expect(page.getByRole('alert')).toBeVisible();expect(rejected).toBe(1);
+ await page.screenshot({path:testInfo.outputPath('unavailable-selection.png'),fullPage:true});
  await page.locator('.collection-sharing-order li').filter({hasText:'Existing public Board · check source'}).getByRole('button',{name:'Remove selection',exact:true}).click();
  await expect(page.getByLabel('Public shelf title',{exact:true})).toHaveValue('Title preview');
  await page.getByRole('button',{name:'Preview public home',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Title preview',exact:true})).toBeVisible();
  await expect(page.getByLabel('I reviewed this public home',{exact:false})).not.toBeChecked();
+ await page.screenshot({path:testInfo.outputPath('fresh-title-shelf-preview.png'),fullPage:true});
  expect(prepared.entries).toHaveLength(1);expect(prepared.entries[0].kind).toBe('TITLE_SHELF');expect(publishes).toBe(0);expect(saved.entries[0].publicationId).toBe(gone);
 });
 
