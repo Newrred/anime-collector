@@ -1,5 +1,36 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W18/D06 운영 반영 후 잔여 대조 — 2026-10-13
+
+1. **목적:** 컬렉션 운영5d544ad 이후 이미 완료된 배포·공개·복구 작업을 다시 요구하지 않도록 단일 작업판을 실제 증거에 맞춘다.
+2. **확정 결정:** FIRST-PUBLIC-LAUNCH-CLOSEOUT 및 COLLECTION-HOME-REALIGNMENT 유지. 국가·권리·요금 변경 없음.
+3. **현재 근거:** production-retry-candidate.json의 실제 운영 연결 완료와03 표의 과거 PUBLIC_OFF가 충돌한다. 다른 PC의 release-handoff/public-release-closeout Git 이력까지 확인한다.
+4. **범위:** 기존 W/M/D 행과 미완료 근거 대조. 명확한 서비스 결함이 있으면 해당 W의 최소 재현·로컬 수정만 이어간다. 신규 기능·전체 재검사·새 동의·운영 변경 제외.
+5. **흐름:** 현재 Git/배포 읽기→기존 증거의 환경·SHA·완료조건 매핑→이미 충족한 조건 마감→실제 미완료 한 개 선택.
+6. **파일:** 기존00/01/02/03, CODEX_START_HERE, 기존 evidence 위치. 코드 결함은 실제 제어 파일 확인 후 지도 추가.
+7. **데이터:** DB/Storage 변경·업로드·삭제 없음, 사본·키 원문 접근 불필요.
+8. **마일스톤:** 최신 운영 근거 식별, 오래된 상태 교정, 다음 최소 작업의 결과 또는 정확한 외부 조건 기록.
+9. **검증:** Git/read-only API·근거 JSON 대조와 문서 diff/참조 검사. 이미 통과한623/54/4 및 전체CI를 반복하지 않는다.
+10. **개인정보/권리:** 본문·개인이미지·토큰 기록 없음. 합성 재현만 허용, 공개 동의 대신 실행 없음.
+11. **관측:** 증거 SHA·환경·실행ID만 보관. 새 경보/외부 발송 없음.
+12. **복귀:** 문서 patch만 되돌릴 수 있고 과거 로그/완료근거는 유지한다.
+13. **위험:** 분기된 문서를 최신으로 오인하거나 read-only 설정을 실제 기능 인수로 승격하지 않는다.
+14. **결정:** 현재 진행 승인으로 로컬/읽기 작업 수행. 새로운 정확한 운영 후보가 생길 때만 기존 승인 경계 적용.
+15. **진행:** 03의 현재 카드·표가 서로 다른 날짜를 가리키는 것을 확인했다. 이전 운영 실패와 원복도 보존한다.
+16. **발견:** 다른 PC의 Git 이력에 후속 복구/공개출시 근거가 있어, 현재 개발 브랜치 문서만으로 잔여를 확정하지 않는다.
+17. **보고:** 실제 대조 결과·변경·남은 조건·다음 행동 하나를 이 절과 단일03에 기록한다.
+
+## W18/D06 증거 복구 실행 8항 보고 — 2026-10-13
+
+1. **읽은 문서/코드:** AGENTS, CODEX_START_HERE, 확정01, PLANS, release-v2 00/01/02/03, QA07·이미지05·감사03·변경09, `b3b4669`의 기존 복구/용량 JSON과 작업판, `5d544ad` 운영 근거, 주간/유지 workflow. 비공개 사진 관찰은 `titleCollectionService.js`, `PrivateMemoryCardPreview.jsx`, `createPrivateImageTransfer.js`, `MemoryPrivateImageSync.jsx`와 기존 transfer 검사를 별도 추적했다.
+2. **가정/미결:** 문서 병합이 새 실행 PASS를 만드는 것은 아니다. 다른 PC의 동일 공통키+추가키25개만 복구, 최종 source/environment/date를 보존했다. 기존 개인 사진 로딩 실패는 remote THUMB 요청 catch 경로까지 확인했지만 실제 오류코드/원인은 미확정. 기존 코드에 결함을 추정해 수정하지 않았다.
+3. **계획:** 위17항 W18/D06 대조 계획 이행. 추가 제품 기능/새 작업판 없음. W/M/D/Q의 이미 충족한 조건만 닫고 전수 QA·전체 복구 serving 한계를 보존했다.
+4. **변경 파일/이유:** root 시작문서와 기존00~03을 현재 인계 기준으로 맞췄다. 기존 `2026-10-10-external-backup-recovery.json`20키, `2026-10-11-public-capacity-closeout.json`5키 복구. 새 `2026-10-13-release-evidence-reconciliation.json`은 출처SHA/blob/병합전후hash·충돌0·읽기결과만 기록한다. 바뀐 표/현재카드의 원문도03 하단 이력에 보존. 앱/DB/workflow/의존성 변경0.
+5. **DB/복귀:** migration·DB/Storage 쓰기·업로드·삭제0. 기존 ea8f388 첫 공개 적용 및5d544ad 컬렉션 적용을 재실행하지 않음. 문서 patch만 역적용할 수 있으며 다른 PC 브랜치 전체 병합은 하지 않았다.
+6. **검증:** Git source와 JSON 공통키 deep-equal/누락25키 복구/전체 donor와 동등성, 상대 문서 링크·표 ID·diff 검사. 읽기 API로 www commit/checkoutCommit/source=master5d544ad, weekly schedule0/첫 예정10/18, 유지 예약38327869839 및 실제 cleanup 단계SUCCESS 확인. privateImageTransfer 기존 unit12 PASS는 해당 로컬 계약만 확인하며 운영 오류 해결 증거가 아니다. 과거623/54/4·CI/Google/기기·복원 검사는 재실행하지 않았다. 검사 상세는 reconciliation.validation 참조.
+7. **보안/권리/관측:** 토큰/비밀번호/키 내용·개인사진/본문 조회·문서 삽입0. 새 법률 판정·나라 축소·권리/성인/요금 변경0. 알림/메시지 발송·workflow dispatch·환경설정 변경0. 기존 실제 알림 수신 확인과 새 용량 임계 알림 미검증을 분리했다.
+8. **실제 잔여/다음 승인:** 첫 주간 예약·지속 용량 관찰, 새 임계 알림 전달·전체 복구 serving/전체 ingestion history·미실행 QA 조합은 남는다. 현재 요청할 승인 없음. 다음 행동 하나는 **10/18 03:00 JST/KST 이후 기존 주간 schedule 결과 읽기/03 기록**이다. 새 예약/수동 백업 생성 없이, 다음 새 운영 변경 후보가 있을 때 기존 exact 승인 경계를 적용한다. 개인 사진 로딩 관찰은 실제 오류 확인 전 미해결로 유지한다.
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 

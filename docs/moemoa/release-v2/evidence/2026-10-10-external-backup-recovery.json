@@ -61,5 +61,1355 @@
     "Drive upload",
     "72-table synthetic restore",
     "Application unit/build/signup checks"
-  ]
+  ],
+  "followup20261011": {
+    "scope": "Read-only latest private-media metadata reconciliation; not database restore/replay",
+    "sourceBase": "18bb238af445b94cbc5cba4f40393bd02d30cd29",
+    "tests": {
+      "command": "wsl.exe -- python3 -B -m unittest discover -s /mnt/e/web/anime/tools/operations -p test_backup_reconciliation.py",
+      "passed": 21
+    },
+    "actual": {
+      "target": "production",
+      "readOnly": true,
+      "backupCapturedAt": "2026-10-09T09:34:33.175052+00:00",
+      "latestCapturedAt": "2026-10-11T12:12:40.482371+00:00",
+      "backupMedia": 6,
+      "latestMedia": 6,
+      "backupDisposition": {
+        "backupNotReady": 1,
+        "eligibleForIsolatedReplay": 5
+      },
+      "backupAccountsNowAbsent": 0,
+      "latestMediaNotInBackup": 0,
+      "databaseImportVerified": false,
+      "deletionReplayVerified": false,
+      "safeToServe": false
+    },
+    "environment": {
+      "pg17": "/opt/moemoa-pg17/root/usr/lib/postgresql/17/bin/postgres",
+      "missingExtensions": [
+        "pg_cron",
+        "supabase_vault"
+      ],
+      "dockerWslIntegration": false,
+      "dockerEngineInitiallyRunning": false,
+      "dockerDesktopStartAttempted": true,
+      "dockerEngineAfterStart": "UNAVAILABLE_NAMED_PIPE"
+    },
+    "independentKeyCopyUserConfirmed": false,
+    "productionWrites": 0,
+    "externalUploads": 0,
+    "newUserBehaviorPass": 0,
+    "next": "Restore an extension-capable local isolated database environment, then import the existing production dump; keep serving disabled.",
+    "recoveryKeysReadOrCopied": 0
+  },
+  "isolatedDatabaseRestore20261011": {
+    "date": "2026-10-11",
+    "baselineCommit": "ed06bdcd67b959e9c689764dc947ba415e721f4f",
+    "backupDate": "2026-10-09",
+    "result": {
+      "scope": "Local isolated real production dump",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "network": "none",
+      "publishedPorts": 0,
+      "safeToServe": false,
+      "roles": 16,
+      "memberships": 25,
+      "importSeconds": 12.783,
+      "databaseImportVerified": true,
+      "database": {
+        "cards": 12,
+        "media": 6,
+        "assets": 12,
+        "tables": 66,
+        "version": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+        "accounts": 2,
+        "cronRuns": 37,
+        "cronLaunch": "off",
+        "extensions": [
+          "pg_cron",
+          "pg_stat_statements",
+          "pg_trgm",
+          "pgcrypto",
+          "plpgsql",
+          "supabase_vault",
+          "uuid-ossp"
+        ],
+        "privateEnabled": false,
+        "publicSettingsPresent": false
+      },
+      "privateReplay": {
+        "rows": 6,
+        "ready": 5,
+        "scope": "Private manifests and card fences only; no restored entity deletion or Public rights replay claimed",
+        "nonReady": 1,
+        "operationSourceHashQuotaPreserved": true
+      },
+      "access": {
+        "ownerReads": 5,
+        "anonymousDenied": true,
+        "realRestoredRpc": true,
+        "otherOwnerDenied": 5,
+        "wrongOwnerCardRlsDenied": true,
+        "imageBytesDecodedThisRun": false
+      },
+      "privateAccessRemainsClosed": true,
+      "status": "IMPORT_PRIVATE_REPLAY_ACCESS_PASS_SERVING_CLOSED",
+      "containerStopped": true
+    },
+    "cronRunsMeaning": "37 historical restored rows, not new jobs; cron.launch_active_jobs=off throughout",
+    "commands": [
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id 20261011-05",
+      "node tools/operations/rehearse-production-restore.mjs 20261011-05",
+      "node --check tools/operations/rehearse-production-restore.mjs"
+    ],
+    "sourceSha256": {
+      "tools/operations/capture-isolated-recovery-context.py": "69df823214f824812168b55fb0a3ed939cc02725cc5977635a8cce9ea028844a",
+      "tools/operations/rehearse-production-restore.mjs": "350c905e912d58851f3f7c725244b4ffb0340f288fe961ccc0603139be5d853d",
+      "tools/operations/isolated-private-recovery.sql": "aafa52a9fa68b0404fa2c72b27c1d5b34b1e1431edda3d1f683ee20a69dfd0ce",
+      "tools/operations/isolated-recovery-access.sql": "11f9acd65044fb1089fdf55a0f96841cf1b1d59121ed9d8ba5058febae75acb9"
+    },
+    "earlierAttempts": [
+      {
+        "run": "20261011",
+        "result": "Import failed: pgbouncer excluded by incorrect pg_% prefix filter; fixed to exact pg_ prefix; import transaction rolled back"
+      },
+      {
+        "run": "20261011-02",
+        "result": "Import passed; closing access failed because October 9 dump predates publication settings table"
+      },
+      {
+        "run": "20261011-03",
+        "result": "Import passed; closing-access DO quote syntax failed; corrected to tagged delimiter"
+      },
+      {
+        "run": "20261011-04",
+        "result": "Import/reconciliation/access PASS; then hardened null-manifest mismatch, timestamp and stop-failure checks before final run05"
+      }
+    ],
+    "dockerRepair": {
+      "engine": "29.3.1",
+      "environmentScope": "Only child launch standard Windows directory environment; no global changes",
+      "preservedSocketDirectories": true,
+      "existingDockerDataDeleted": false,
+      "allTaskContainersStopped": true
+    },
+    "productionDatabaseWrites": 0,
+    "newExternalUploads": 0,
+    "keysReadOrCopied": 0,
+    "newHostedGoogleOrDeviceUserBehaviorPass": 0,
+    "previousEvidenceReused": [
+      "Authenticated external ZIP/4308 files from October 10",
+      "21 synthetic metadata boundary checks from preceding turn"
+    ],
+    "policy": {
+      "decision": "RECOVERY-DAILY7-RPO24-RTO24-20261011",
+      "userConfirmed": true,
+      "frequencyHours": 24,
+      "retentionDays": 7,
+      "rpoHours": 24,
+      "rtoHours": 24,
+      "meaning": "Operational targets, not achieved guarantees",
+      "schedulerEnabled": false,
+      "externalUploadOrDeletionApproved": false
+    },
+    "remaining": [
+      "Independent off-PC key custody not completed per user",
+      "Current full schema/data backup and actual schedule/rotation not operational",
+      "October 9 dump predates Public schema; Public rights/withdrawal and restored entity-deletion replay not verified here",
+      "Canonical/original completeness still separate",
+      "D06 exact production approval and subsequent operating checks"
+    ],
+    "next": "Prepare existing W17/D05 current-snapshot backup and rotation execution candidate"
+  },
+  "dailyBackupCandidate20261011": {
+    "date": "2026-10-11",
+    "baselineCommit": "48eeb9466f7c84c491b41bcd6db3d0c6ff476fa7",
+    "dataRelease": "MOEMOA_DAILY_BACKUP_20261011-02",
+    "capture": {
+      "readOnly": true,
+      "mode": "capture",
+      "capturedAt": "2026-10-11T12:42:16.093764+00:00",
+      "sameDatabaseSnapshot": true,
+      "tables": 99,
+      "migrations": 38,
+      "publicSettingsPresent": true,
+      "objects": 4302,
+      "bytes": 856441465,
+      "databaseDumpCreated": true,
+      "dumpSha256": "fc388f247249001fb10a67750d28b362f345849d549159cb8706d0f14a715340",
+      "dumpBytes": 58155281
+    },
+    "localEncryption": {
+      "context": {
+        "project": "okchpyagfucpzpyrfgol",
+        "release": "MOEMOA_DAILY_BACKUP_20261011-02"
+      },
+      "mode": "encrypt",
+      "readOnlyProduction": true,
+      "objects": 4302,
+      "bytes": 856441465,
+      "cacheVerified": 4302,
+      "newDownloadObjects": 0,
+      "newDownloadBytes": 0,
+      "downloadsPerformed": 0,
+      "externalUploads": 0,
+      "oldCopiesDeleted": 0,
+      "scheduleEnabled": false,
+      "safeToServe": false,
+      "encryption": {
+        "files": 4309,
+        "bytes": 918359204
+      },
+      "localByteVerification": {
+        "files": 4309,
+        "bytes": 918359204
+      },
+      "status": "LOCAL_ENCRYPTED_BYTES_VERIFIED",
+      "databaseRestoreThisRun": false
+    },
+    "archive": {
+      "status": "LOCAL_ZIP_AUTHENTICATED",
+      "bytes": 920077441,
+      "sha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "files": 4309,
+      "uploadPerformed": false,
+      "externalRetrievalVerified": false,
+      "scheduleEnabled": false,
+      "retentionDeleted": 0
+    },
+    "finalSourceHashes": {
+      "tools/operations/capture-daily-backup.py": "a71c1150bd847316031e6eae08e0c462db75e148f897ca61b295b34ea728746a",
+      "tools/operations/prepare-daily-backup.mjs": "31daeeca923f98d27fcea3f80e15d0ee479a72bf899f4e2041dc1761ec26cdd6",
+      "tools/operations/package-daily-backup.py": "05452c5f631c2461dcdfb1ef5fdfb3eeba35d4cb7c23e389929273ff2a188a2e",
+      "tools/operations/run-daily-backup.mjs": "117eae1cd21c2102f8e6792aad41d157ea004883c110dd4bc86dbc19205d7fe1",
+      "tools/operations/daily-backup-task.xml": "8fd851cb0a33ed0c331e50ccecf648e57e19bbf4149c0f107d7700442e5e493d",
+      "tests/operations/dailyBackup.test.mjs": "a9b2ad39cee38522d35c2327bebc36b031de750520aa006b49ddda4c1eb6603f"
+    },
+    "validation": {
+      "unitCommand": "node --test tests/operations/dailyBackup.test.mjs",
+      "unitPass": 17,
+      "newDownloadTests": "Synthetic fetch responses; actual new-object GET count zero",
+      "actualPhases": "Same-snapshot capture, old-cache reuse, encryption, local restore, ZIP creation and ZIP authentication executed separately. Whole scheduled entry point preflight only.",
+      "syntax": "Node checks and Python AST passed",
+      "scheduleXml": "Disabled; daily 03:00 +09:00; never registered",
+      "driveDesktopInstalled": false,
+      "driveDesktopRunning": false,
+      "independentKeyStillUnconfirmed": true,
+      "finalCachePlan": {
+        "objects": 4302,
+        "cacheVerified": 4302,
+        "newDownloadBytes": 0,
+        "result": "CACHE_READY_FOR_CAPTURE"
+      },
+      "existingScheduledTaskCount": 0
+    },
+    "productionWrites": 0,
+    "originalDeletes": 0,
+    "newUploads": 0,
+    "retentionDeletes": 0,
+    "approvalCandidate": {
+      "taskName": "MOEMOA-DailyEncryptedBackup",
+      "localSchedule": "03:00 +09:00 daily; interactive session, powered PC and network required; catch-up next available; no wake",
+      "newObjectDownloadLimitBytes": 64000000,
+      "downloadLimitScope": "Local backup candidate guard; no production quota mutation",
+      "oneTimeExternalDestination": "Existing MOEMOA encrypted backups private Google Drive folder",
+      "oneTimeExternalArtifact": "moemoa-production-20261011-02.encrypted.zip",
+      "oneTimeExternalBytes": 920077441,
+      "oneTimeExternalSha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "recurringDriveConnection": "Not configured",
+      "automaticRetentionDeletion": "Not implemented or enabled",
+      "rollback": "Disable/unregister only the new task; preserve database, originals, keys and existing backup copies"
+    },
+    "remaining": [
+      "Local schedule activation excluded by the user upload-only selection; recurring Drive connection and seven-day retention not active",
+      "Independent off-PC key custody remains incomplete",
+      "Current Public/entity deletion restore acceptance; prior October 9 restore is distinct"
+    ],
+    "next": "Review the existing D05 Public/entity-deletion restore acceptance against the current backup; do not activate scheduling"
+  },
+  "externalUpload20261011": {
+    "date": "2026-10-11",
+    "completedAt": "2026-10-11T12:54:10.799Z",
+    "candidate": "ba49dfcef48d09a202d819a96662a9277f5c3b57",
+    "userSelectedScope": "New encrypted backup upload only; no local schedule registration",
+    "artifact": "moemoa-production-20261011-02.encrypted.zip",
+    "localBytes": 920077441,
+    "localSha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+    "destination": "Existing MOEMOA encrypted backups private Google Drive folder",
+    "browserEvidence": {
+      "accountMatchesApprovedOwner": true,
+      "folderPrivate": true,
+      "uploadCompletedItems": 1,
+      "filenameMatches": true,
+      "displayedSize": "877.5MB",
+      "filePrivate": true,
+      "previousBackupStillPresent": true
+    },
+    "externalDownloadHashVerified": false,
+    "newDatabaseRestore": false,
+    "localScheduleRegistered": false,
+    "recurringDriveConfigured": false,
+    "recoveryKeyUploaded": false,
+    "oldCopiesDeleted": 0,
+    "productionDbWrites": 0,
+    "productionDeployment": false,
+    "screenshot": ".cache/operations-private/daily-backup-20261011-02/drive-upload-complete.jpg"
+  },
+  "publicDeletionRecovery20261011": {
+    "baselineCommit": "402cb3c1a172bc2dbae42aea47abe7510d155444",
+    "scope": "Local isolated current production backup restore; synthetic populated Public checks",
+    "codeSha256": {
+      "tools/operations/capture-isolated-recovery-context.py": "298f40c2e2843ed116842133b7b735f7d655d9afecf75245854c0cb752d34bea",
+      "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+      "tools/operations/isolated-public-recovery.sql": "61dd7be144a42e86045de3a4db865dde5fb157088e957d6fdfec4b79ab6d5378",
+      "tools/operations/isolated-public-recovery-contract.sql": "f43d8dc3b43b97e1c6a738f708a041c7f23713bc1270eed0034ca8d5d37cd990",
+      "tools/operations/rehearse-production-restore.mjs": "009a9331a11d2d95b339c208e09314b46b2620f5471e76212aed81fe263fc51f",
+      "tools/operations/capture-daily-backup.py": "f24bacf0a47eff28158e7cf5c499723e3a484536af54fa535dd807c4abf3e978",
+      "tools/operations/prepare-daily-backup.mjs": "29f38f140c36d7c13bfdc3352e6fd28241ec84ec301a9ed2914b777a2c6eefe2"
+    },
+    "runId": "20261011-public-04",
+    "contextFromRun": "20261011-public-03",
+    "report": {
+      "scope": "Local isolated real production dump",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "network": "none",
+      "publishedPorts": 0,
+      "safeToServe": false,
+      "roles": 16,
+      "memberships": 25,
+      "importSeconds": 13.354,
+      "databaseImportVerified": true,
+      "database": {
+        "cards": 12,
+        "media": 6,
+        "assets": 12,
+        "tables": 99,
+        "version": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+        "accounts": 3,
+        "cronRuns": 81,
+        "cronLaunch": "off",
+        "extensions": [
+          "pg_cron",
+          "pg_stat_statements",
+          "pg_trgm",
+          "pgcrypto",
+          "plpgsql",
+          "supabase_vault",
+          "uuid-ossp"
+        ],
+        "privateEnabled": false,
+        "publicSettingsPresent": true
+      },
+      "privateReplay": {
+        "rows": 6,
+        "ready": 5,
+        "scope": "Private manifests and card fences only; no restored entity deletion or Public rights replay claimed",
+        "nonReady": 1,
+        "operationSourceHashQuotaPreserved": true
+      },
+      "publicReplay": {
+        "scope": "Deny-only quarantine; no new positive consent or moderation audit fabricated",
+        "safeToServe": false,
+        "deletedCards": 0,
+        "deletedAssets": 0,
+        "deletedBoards": 0,
+        "deletedAccounts": 0,
+        "quarantinedHomes": 0,
+        "quarantinedBoards": 0,
+        "quarantinedImages": 0,
+        "scrubbedRetryBodies": 12
+      },
+      "publicContract": {
+        "checks": 56,
+        "labels": [
+          "closed during unchanged",
+          "positive control: synthetic board and home visible through real restored RPC",
+          "positive control: actual image resolver returns synthetic manifest",
+          "operation/source/hash/quota preserved unchanged",
+          "active retry content preserved",
+          "unchanged published snapshot preserved",
+          "unchanged control remains readable",
+          "closed during board-withdraw",
+          "operation/source/hash/quota preserved board-withdraw",
+          "old image access denied board-withdraw",
+          "board content denied board-withdraw",
+          "closed during home-withdraw",
+          "operation/source/hash/quota preserved home-withdraw",
+          "home withdrawal keeps independent board",
+          "closed during card-delete",
+          "operation/source/hash/quota preserved card-delete",
+          "deleted retry preserves operation/hash/result",
+          "deleted retry returns no stale body",
+          "deleted retry rejects changed request",
+          "old image access denied card-delete",
+          "board content denied card-delete",
+          "closed during asset-delete",
+          "operation/source/hash/quota preserved asset-delete",
+          "old image access denied asset-delete",
+          "closed during board-delete",
+          "operation/source/hash/quota preserved board-delete",
+          "old image access denied board-delete",
+          "board content denied board-delete",
+          "closed during account-delete",
+          "operation/source/hash/quota preserved account-delete",
+          "old image access denied account-delete",
+          "board content denied account-delete",
+          "closed during rights-revoke",
+          "operation/source/hash/quota preserved rights-revoke",
+          "old image access denied rights-revoke",
+          "closed during moderator-hide",
+          "operation/source/hash/quota preserved moderator-hide",
+          "old image access denied moderator-hide",
+          "board content denied moderator-hide",
+          "closed during content-block",
+          "operation/source/hash/quota preserved content-block",
+          "old image access denied content-block",
+          "board content denied content-block",
+          "closed during account-restrict",
+          "operation/source/hash/quota preserved account-restrict",
+          "old image access denied account-restrict",
+          "board content denied account-restrict",
+          "closed during source-version",
+          "operation/source/hash/quota preserved source-version",
+          "old image access denied source-version",
+          "closed during unfollow-block",
+          "operation/source/hash/quota preserved unfollow-block",
+          "latest block restored",
+          "reject incomplete",
+          "reject stale",
+          "reject snapshot-mismatch"
+        ],
+        "synthetic": true,
+        "actualRestoredFunctions": true,
+        "externalStorageHttpVerified": false
+      },
+      "access": {
+        "ownerReads": 5,
+        "anonymousDenied": true,
+        "realRestoredRpc": true,
+        "otherOwnerDenied": 5,
+        "wrongOwnerCardRlsDenied": true,
+        "imageBytesDecodedThisRun": false
+      },
+      "privateAccessRemainsClosed": true,
+      "publicAccessRemainsClosed": true,
+      "status": "CURRENT_IMPORT_PUBLIC_REPLAY_CONTRACT_PASS_SERVING_CLOSED",
+      "containerStopped": true
+    },
+    "actualSourcePublicStateCounts": {
+      "homes": 0,
+      "boards": 1,
+      "rights": 0,
+      "reviews": 0,
+      "sanctions": 0,
+      "homeReviews": 0,
+      "publicCards": 0,
+      "publicAssets": 0,
+      "publications": 0,
+      "restrictions": 0,
+      "relationships": 0,
+      "representationRights": 0
+    },
+    "dailyPublicStateCapture": {
+      "readOnly": true,
+      "sameSnapshotAndCapturedAt": true,
+      "tables": 99,
+      "objects": 4302,
+      "databaseDumpCreated": false,
+      "encryptionOrUploadPerformed": false
+    },
+    "commands": [
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-isolated-recovery-context.py --run-id 20261011-public-03 --public-state",
+      "node tools/operations/rehearse-production-restore.mjs 20261011-public-04 --current-public",
+      "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/capture-daily-backup.py --run-id 20261011-public-state-01 --mode inspect",
+      "node --test tests/operations/dailyBackup.test.mjs"
+    ],
+    "unitTests": {
+      "passed": 17,
+      "failed": 0
+    },
+    "attempts": [
+      {
+        "run": "public-01",
+        "result": "SQL fixture dollar substitution failed; fixed replacement callbacks; stopped"
+      },
+      {
+        "run": "public-02",
+        "result": "99 table restore and 52 SQL checks passed before retry-body extension"
+      },
+      {
+        "run": "public-03",
+        "result": "SQL 56 checks passed; extra fixture SELECT prevented JSON parsing; fixed to PERFORM; stopped"
+      },
+      {
+        "run": "public-04",
+        "result": "Final 56 checks and access probes PASS; stopped"
+      }
+    ],
+    "productionMutations": 0,
+    "newUploads": 0,
+    "hostedPublicUserActionPass": 0,
+    "storageHttpVerified": false,
+    "retentionScheduleEnabled": false,
+    "independentKeyCopyConfirmed": false,
+    "limitations": [
+      "Production populated Public data count zero; stale and positive Public cases synthetic",
+      "No Storage bytes/HTTP/CDN recovery tested this run",
+      "Deny-only state is not a durable deletion feed or newer moderation audit/positive consent recovery",
+      "Latest complete matching safety snapshot required before any serving; missing interval forbids restart",
+      "Public journal integration validated by read-only capture; no new encrypted/uploaded archive",
+      "Independent key, recurring external backup/7 day retention, canonical completeness and actual recovery objectives remain"
+    ],
+    "nextAction": "Bind D05 evidence and remaining acceptance to existing D06 candidate03 without production changes"
+  },
+  "externalBackupExecutionReview20261011": {
+    "scope": "Read-only feasibility review; method awaits user selection",
+    "repository": {
+      "visibility": "public",
+      "readbackStatus": 200,
+      "secretNamesReadOnly": true,
+      "existingCleanupSecretOnly": true,
+      "backupSecretConnectionPresent": false
+    },
+    "localSchedulerExcluded": true,
+    "driveAutomaticConnectionPresent": false,
+    "productionMutations": 0,
+    "secretWrites": 0,
+    "externalUploads": 0,
+    "keyCopied": false,
+    "projection": {
+      "referenceZipBytes": 920077441,
+      "sevenCompleteArchivesBytes": 6440542087,
+      "thirtyFullStorageDownloadsBytes": 25693243950,
+      "assumption": "Unchanged 10/11 sizes; arithmetic, not bill or observed traffic"
+    },
+    "proposedMethod": {
+      "status": "PROPOSED_NOT_SELECTED",
+      "executor": "Existing GitHub Actions standard Linux; no PC schedule",
+      "storage": "Existing private Drive backup folder; encrypted archives only",
+      "auth": "Dedicated Drive OAuth drive.file; explicitly selected folder/archive, no whole-Drive or production-signin client reuse",
+      "secrets": "DB/Storage credentials, encryption key and Drive token need exact destination approval before provisioning",
+      "cache": "Authenticate previous encrypted Drive archive; reuse SHA/ETag-matched bodies; bound new Supabase downloads; no plaintext artifact/cache",
+      "retention": "No deletion until fresh external copy verifies and exact retention approval",
+      "risk": "Schedule may delay or fail; RPO24 is goal, not guaranteed"
+    },
+    "sources": [
+      "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
+      "https://developers.google.com/workspace/drive/api/guides/api-specific-auth",
+      "https://developers.google.com/identity/protocols/oauth2",
+      "https://developers.google.com/workspace/drive/api/guides/limits",
+      "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule"
+    ],
+    "nextAction": "Select GitHub automated preparation or daily manual operation; no secret transfer or activation yet"
+  },
+  "weeklyBackupDecision20261011": {
+    "status": "USER_CONFIRMED_NOT_ACTIVATED",
+    "decision": "RECOVERY-WEEKLY-RPO7D-20261011",
+    "approval": "User answered ㅇㅇ to weekly backups and maximum seven-day data loss",
+    "cadenceDays": 7,
+    "rpoHours": 168,
+    "rtoHours": 24,
+    "preProductionDatabaseChangeBackup": true,
+    "catalog": "Preserve prior bodies; added or replaced only",
+    "privateImages": "Weekly new or changed server bodies; sync unchanged",
+    "database": "Weekly snapshot",
+    "currentImplementation": "Local image download reuse exists; encrypt/package still emits full archive",
+    "incrementalExternalStorageImplemented": false,
+    "automaticScheduleEnabled": false,
+    "pcSchedulerExcluded": true,
+    "legacyDailyXmlTriggersRemoved": true,
+    "retention": "No deletion enabled; preserve referenced base bodies; weekly restore-point retention not newly chosen",
+    "externalExecutorSelected": false,
+    "newUpload": false,
+    "secretTransfer": false,
+    "productionMutation": false,
+    "pastEvidence": "4302 cached image bodies reused, zero new image GETs; not rerun this turn",
+    "nextAction": "Prepare weekly incremental storage and restore candidate within existing W17"
+  },
+  "weeklyIncrementalImplementation20261011": {
+    "status": "LOCAL_SYNTHETIC_INCREMENTAL_AND_ZIP_VERIFIED",
+    "sourceBase": "57d3b6a",
+    "newSyntheticTests": 13,
+    "regressionTests": 43,
+    "totalPass": 56,
+    "scope": "Actual encryption, multi-generation byte reconstruction and ZIP authentication on synthetic files and temporary keys only",
+    "dataPolicy": {
+      "rpoHours": 168,
+      "rtoHours": 24,
+      "scheduleEnabled": false,
+      "referenceChainMax": 16,
+      "chainBoundIsRetentionPolicy": false,
+      "deleteParents": false,
+      "safeToServe": false
+    },
+    "commands": [
+      "node --test tests/operations/incrementalBackup.test.mjs tests/operations/dailyBackup.test.mjs (29 PASS)",
+      "node --test tests/operations/incrementalPackage.test.mjs (1 PASS)",
+      "node --test tests/operations/firstPublicCandidate.test.mjs (20 PASS)",
+      "wsl.exe -- python3 -B -m unittest tools/operations/test_verify_external_backup.py (6 PASS)",
+      "node --check tools/operations/incremental-backup.mjs; node --check tools/operations/prepare-daily-backup.mjs (PASS, separately invoked)",
+      "Python AST parse package/verify (PASS)",
+      "git diff --check (PASS)"
+    ],
+    "demonstrated": [
+      "Unchanged image not in delta ZIP",
+      "Changed files and current DB/journal stored",
+      "Missing current image not resurrected from parent",
+      "Renumbered prior delta image reused",
+      "Missing/wrong/corrupt parents rejected",
+      "Standalone delta ZIP marked requiresParentArchives, not complete snapshot",
+      "Existing output and originals preserved"
+    ],
+    "notVerified": [
+      "Production capture to incremental package end-to-end",
+      "Real Drive incremental upload or retrieval",
+      "Live database or public image serving recovery",
+      "Scheduled weekly execution"
+    ],
+    "productionWrites": 0,
+    "privateDataOrProductionKeyRead": 0,
+    "externalUploads": 0,
+    "retentionDeleted": 0,
+    "nextAction": "Prepare external executor/Drive connection candidate within W17; user choice and exact credentials transfer approval still required"
+  },
+  "driveConnectionCandidate20261011": {
+    "status": "LOCAL_MOCK_VERIFIED_AUTH_NOT_CONNECTED",
+    "sourceBase": "6fc1b85",
+    "mockTestsPassed": 13,
+    "preflight": {
+      "missing": [
+        "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+        "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+        "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN",
+        "MOEMOA_BACKUP_DRIVE_FOLDER_ID"
+      ],
+      "uploadEnabled": false,
+      "weeklyScheduleEnabled": false,
+      "portableBackupRunnerReady": false,
+      "networkRequests": 0
+    },
+    "actualDrivePass": false,
+    "productionWrites": 0,
+    "externalUploads": 0,
+    "secretsTransferred": 0,
+    "checks": [
+      "exact drive.file",
+      "fixed endpoints/no redirects",
+      "private owner folder",
+      "ciphertext SHA256",
+      "8MiB chunks",
+      "same ID after lost completion",
+      "never overwrite conflicting file",
+      "safe errors",
+      "offline default"
+    ],
+    "remaining": [
+      "Dedicated Google grant including existing folder/archive selection",
+      "Exact GitHub moemoa-backup environment secret transfer approval",
+      "Portable runner and encrypted parent download/hydration",
+      "Durable cross-run chain/upload journals",
+      "Approved real upload and retrieval before enabling weekly schedule"
+    ],
+    "nextAction": "Approve dedicated Drive OAuth connection and storage of only Drive credentials in GitHub environment; no DB/key transfer or scheduled backup activation"
+  },
+  "driveAuthConnectionExecution20261011": {
+    "candidate": "1d5535766f7cd75f511014f561baad1d1f90c134",
+    "approval": "Backup-only Drive connection and storage of Client Secret/refresh token in Newrred/anime-collector environment moemoa-backup",
+    "status": "DRIVE_AUTH_CONNECTED_WEEKLY_RUNNER_NOT_ACTIVE",
+    "github": {
+      "environment": "moemoa-backup",
+      "createHttp": 200,
+      "branchPolicyHttp": 200,
+      "allowedBranches": [
+        "master"
+      ],
+      "policyReadbackHttp": 200,
+      "secretListHttp": 200,
+      "secretCount": 2,
+      "variableCount": 2,
+      "secretWrites": [
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+          "http": 201
+        },
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN",
+          "http": 201
+        }
+      ],
+      "variableWrites": [
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+          "http": 201
+        },
+        {
+          "name": "MOEMOA_BACKUP_DRIVE_FOLDER_ID",
+          "http": 201
+        }
+      ],
+      "finalReadback": [
+        {
+          "path": "/secrets",
+          "http": 200,
+          "names": [
+            "MOEMOA_BACKUP_DRIVE_CLIENT_SECRET",
+            "MOEMOA_BACKUP_DRIVE_REFRESH_TOKEN"
+          ]
+        },
+        {
+          "path": "/variables",
+          "http": 200,
+          "names": [
+            "MOEMOA_BACKUP_DRIVE_CLIENT_ID",
+            "MOEMOA_BACKUP_DRIVE_FOLDER_ID"
+          ],
+          "valuesMatch": true
+        },
+        {
+          "path": "/deployment-branch-policies",
+          "http": 200,
+          "names": [
+            "branch:master"
+          ]
+        }
+      ]
+    },
+    "google": {
+      "clientName": "moemoa-backup-drive",
+      "clientCreated": true,
+      "clientId": "425036501971-hlrqm1a01g9aqihr5gu947hu3bh048ak.apps.googleusercontent.com",
+      "redirectUri": "http://127.0.0.1:4387/oauth/callback",
+      "scope": "https://www.googleapis.com/auth/drive.file",
+      "userConsentCompleted": true,
+      "tokenRefreshPassed": true,
+      "scopeExact": true,
+      "oauthAudience": "External / In production",
+      "driveApiEnabled": true,
+      "pickerApiEnabled": true,
+      "existingFolderAccessVerified": true,
+      "pickerApiEnabledEvidence": "User confirmation plus Google Cloud console status enabled",
+      "pickerFileConsentCompleted": true,
+      "exactPickedFileCount": 2,
+      "refreshAfterPickerPassed": true,
+      "refreshTokenExpiryReported": null
+    },
+    "actualDrivePass": true,
+    "secretsTransferred": 2,
+    "uploads": 0,
+    "schedulesInstalled": 0,
+    "productionChanges": 0,
+    "nextAction": "Prepare portable weekly incremental runner and authenticated parent-chain state locally; execution and DB/recovery-key transfer remain excluded",
+    "localOAuthTestsPassed": 8,
+    "sealedBoxSyntheticRoundtripPassed": true,
+    "actualDrivePassScope": "OAuth refresh and designated existing private folder/baseline metadata only",
+    "baselineMetadata": {
+      "http": 200,
+      "name": "moemoa-production-20261011-02.encrypted.zip",
+      "bytes": 920077441,
+      "sha256": "4815f752bd380c134e1a8609c04b5a1547fb2a193cbbe3bbe3d9809f7f72924b",
+      "privateOwned": true,
+      "parentMatched": true,
+      "externalDownloadVerified": false,
+      "mimeType": "application/x-zip-compressed",
+      "mimeNote": "Existing browser-uploaded ZIP reports application/x-zip-compressed. Metadata size/hash match; future parent downloader must validate ZIP/encrypted manifest bytes rather than rely on MIME alone. New uploader application/zip contract unchanged."
+    },
+    "localCallbackClosed": true
+  },
+  "weeklyPortableRunner20261011": {
+    "status": "LOCAL_SYNTHETIC_VERIFIED_EXACT_MANUAL_CANDIDATE_PENDING",
+    "candidate": {
+      "base": "199613b139d9fcd085e298a9f03bad94b4e53f5a",
+      "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "branch": "refs/heads/codex/weekly-backup-release-20261011",
+      "sourceSha256": {
+        "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
+        "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
+        "tools/operations/weekly-backup.baseline.json": "e4aa2e0105c68fef36102606b12f0de8fe1b375137446934c9f6a5a0e876390c",
+        "tools/operations/prepare-daily-backup.mjs": "dc7cc4c54af7b3b81cdaedaf19d4be75995bdf7a21e332b31ee15b7fde0b516d",
+        "tools/operations/capture-daily-backup.py": "4c2806a9a16138c4bdc93bf231285a8de5ff25a3135281930fed3388c2e38aa7",
+        "tools/operations/package-daily-backup.py": "e044764d803dc2c61178edb1d63b5e0cb4862df371a22d326bd41fbb02da0ca9",
+        "tools/operations/unpack-weekly-parent.py": "3d1e75d4c56f5aac6bef2ae7938492b989ef92e245329e748435b7e777e2a462",
+        "tools/operations/incremental-backup.mjs": "f6981c621268adcecb4a41a08a1ccde1d96f50ef8b59b7acafc29fa9b8569538",
+        "tools/operations/drive-backup.mjs": "7ab5f14a537974b0857e20d1eb863e1ac87de5b5cf3da3cc57ec03ef62bf76a0",
+        "tools/operations/verify-external-backup.py": "4ea9fa5742c1843f41b987f9bdfa6492712b4b9fbe3daa9e01565f3e3352627a",
+        "tools/operations/inspect-retention.py": "86a673bf0f32570f76942f68dd8cf9a46a674915f05bc6e6d02add0b190a5f8f",
+        "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+        "tools/private-images/encrypted-backup.mjs": "a08684808d1148db49b0d0bae48454f47e11ea9c422bdcea6ec7063d1d0eefa8",
+        "tools/private-images/capture-recovery-journal.sql": "203a5e93dde4b7a2cffa52721f45fd2bf5eab1900286e9c3c975dec4eec172cd",
+        ".github/workflows/moemoa-weekly-backup.yml": "c831663cd5dadb163df54de4fa375c95992b9b72ee291ad84d7efc1809073b8a"
+      },
+      "changed": [
+        ".github/workflows/moemoa-weekly-backup.yml",
+        "tools/operations/capture-daily-backup.py",
+        "tools/operations/capture-public-recovery-state.sql",
+        "tools/operations/drive-backup.mjs",
+        "tools/operations/incremental-backup.mjs",
+        "tools/operations/package-daily-backup.py",
+        "tools/operations/prepare-daily-backup.mjs",
+        "tools/operations/run-weekly-backup.mjs",
+        "tools/operations/unpack-weekly-parent.py",
+        "tools/operations/verify-external-backup.py",
+        "tools/operations/weekly-backup-state.mjs",
+        "tools/operations/weekly-backup.baseline.json",
+        "tools/private-images/capture-recovery-journal.sql"
+      ],
+      "pushed": false
+    },
+    "policy": "RECOVERY-WEEKLY-RPO7D-20261011",
+    "sourceFiles": {
+      "tools/operations/run-weekly-backup.mjs": "83f37b2dc9ea37687dd0fdbb69dfb2e041630edaa7cb523dd130d830cb84cb72",
+      "tools/operations/weekly-backup-state.mjs": "856b514362c701c1968730038ec61a1af1ea1c5b2dd659b9e1dd19d8855d71f3",
+      "tools/operations/weekly-backup.baseline.json": "e4aa2e0105c68fef36102606b12f0de8fe1b375137446934c9f6a5a0e876390c",
+      "tools/operations/prepare-daily-backup.mjs": "dc7cc4c54af7b3b81cdaedaf19d4be75995bdf7a21e332b31ee15b7fde0b516d",
+      "tools/operations/capture-daily-backup.py": "4c2806a9a16138c4bdc93bf231285a8de5ff25a3135281930fed3388c2e38aa7",
+      "tools/operations/package-daily-backup.py": "e044764d803dc2c61178edb1d63b5e0cb4862df371a22d326bd41fbb02da0ca9",
+      "tools/operations/unpack-weekly-parent.py": "3d1e75d4c56f5aac6bef2ae7938492b989ef92e245329e748435b7e777e2a462",
+      "tools/operations/incremental-backup.mjs": "f6981c621268adcecb4a41a08a1ccde1d96f50ef8b59b7acafc29fa9b8569538",
+      "tools/operations/drive-backup.mjs": "7ab5f14a537974b0857e20d1eb863e1ac87de5b5cf3da3cc57ec03ef62bf76a0",
+      "tools/operations/verify-external-backup.py": "4ea9fa5742c1843f41b987f9bdfa6492712b4b9fbe3daa9e01565f3e3352627a",
+      "tools/operations/inspect-retention.py": "86a673bf0f32570f76942f68dd8cf9a46a674915f05bc6e6d02add0b190a5f8f",
+      "tools/operations/capture-public-recovery-state.sql": "6ccdd5f6bbd9b6896aaa73f913d7e6d3c7f1f499e30695e8bbaba715c75d530f",
+      "tools/private-images/encrypted-backup.mjs": "a08684808d1148db49b0d0bae48454f47e11ea9c422bdcea6ec7063d1d0eefa8",
+      "tools/private-images/capture-recovery-journal.sql": "203a5e93dde4b7a2cffa52721f45fd2bf5eab1900286e9c3c975dec4eec172cd",
+      "tools/operations/weekly-backup.workflow.candidate.yml": "c831663cd5dadb163df54de4fa375c95992b9b72ee291ad84d7efc1809073b8a"
+    },
+    "verification": {
+      "nodeDistinctPass": 57,
+      "pythonMockCapturePass": 2,
+      "workflowYamlStructurePass": true,
+      "offlinePreflightNetworkRequests": 0,
+      "exactCandidateSourceFilesMatched": 15,
+      "commands": [
+        "node --test tests/operations/dailyBackup.test.mjs tests/operations/incrementalBackup.test.mjs tests/operations/incrementalPackage.test.mjs tests/operations/driveBackup.test.mjs tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs (56 before added manifest-pin test)",
+        "node --test tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs (12 after final boundary edits; duplicates excluded)",
+        "wsl.exe -- python3 -B /mnt/e/web/anime/tools/operations/test_portable_capture.py (2)",
+        "node tools/operations/run-weekly-backup.mjs --preflight",
+        "YAML parse/assert manual-only, pinned image/actions, environment and concurrency",
+        "git diff --check"
+      ],
+      "syntheticBehavior": [
+        "128000-byte unchanged image referenced from parent, delta under15000 bytes",
+        "deleted private image absent from reconstructed latest snapshot",
+        "full encrypted parent ZIP authenticated with pinned manifest before reuse",
+        "crash after archive upload resumes commit without second upload/capture",
+        "incomplete remote upload stops subsequent runner",
+        "ledger fork/wrong key/tampering/shared folder/oversize or corrupt stream rejected"
+      ]
+    },
+    "realProductionCapture": false,
+    "realGitHubExecution": false,
+    "realDriveUploads": 0,
+    "credentialsTransferredThisTask": 0,
+    "scheduleInstalled": false,
+    "retentionDeletes": 0,
+    "databaseMigration": false,
+    "newApplicationDependencies": false,
+    "limitations": [
+      "GitHub container/tool installation not executed; workflow syntax/static structure and local synthetic pipeline only",
+      "Remote state is append-only and authenticated but Drive has no CAS; workflow concurrency required and external writers can cause fail-closed fork",
+      "Ledger suffix deletion by a privileged adversary needs independent anchor to detect rollback",
+      "Incomplete upload requires operator recovery; completed remote archive can be committed after restart",
+      "Maximum16 parent chain stops; no automatic full baseline or retention deletion",
+      "Independent off-PC recovery key not confirmed"
+    ],
+    "nextAction": "Exact d668723 backup-only master/manual workflow candidate approval plus DB/Storage credentials and recovery key transfer to moemoa-backup; manual single capture/upload, not cron"
+  },
+  "weeklyManualExecution20261011": {
+    "candidate": "d668723bc5321018079b0a74b247ac7b0793ed74",
+    "userApproval": "후보 적용·수동 1회 승인",
+    "scope": "backup-only master push; four production backup secrets to moemoa-backup; one manual encrypted incremental Drive backup; no schedule/deletion/schema/Public changes",
+    "status": "FAILED_AFTER_INTENT_OBSERVED",
+    "githubRunId": 38148877139,
+    "githubRunUrl": "https://github.com/Newrred/anime-collector/actions/runs/38148877139",
+    "dispatchStatus": 204,
+    "secretNames": [
+      "MOEMOA_BACKUP_DATABASE_URL",
+      "MOEMOA_BACKUP_STORAGE_KEY",
+      "MOEMOA_BACKUP_CA_PEM",
+      "MOEMOA_BACKUP_RECOVERY_KEY"
+    ],
+    "secretPutStatus": 201,
+    "environmentBranches": [
+      "master"
+    ],
+    "masterPushed": true,
+    "scheduled": false,
+    "activationEnabled": false,
+    "vercelBuild": {
+      "commit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "checkoutCommit": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "builtAt": "2026-10-11T14:51:42.273Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "conclusion": "failure",
+    "error": "WEEKLY_OPERATION_FAILED",
+    "failureStage": "unknown; new sequence-1 state observed; no new ZIP in folder UI",
+    "activationPatchStatus": 204,
+    "activationReadbackStatus": 200,
+    "driveUi": {
+      "observed": "2026-10-12 Asia/Tokyo",
+      "existingZipCount": 2,
+      "newStateName": "moemoa-weekly-state-1-20261011145200757.enc",
+      "newStateDisplayedSize": "1KB",
+      "newZipVisible": false,
+      "folderPrivate": true,
+      "stateContentAuthenticated": false,
+      "downloadBlockedByChrome": true
+    },
+    "manualDispatchCount": 1,
+    "reruns": 0,
+    "archiveUploadPass": false,
+    "workflowCleanup": [
+      {
+        "name": "Stop containers",
+        "result": "success"
+      }
+    ],
+    "nextDiagnosticCandidate": {
+      "base": "d668723bc5321018079b0a74b247ac7b0793ed74",
+      "commit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "branch": "refs/heads/codex/weekly-backup-inspect-20261012",
+      "sourceSha256": {
+        "tools/operations/run-weekly-backup.mjs": "c542dfb01fade5ae9f878fc1517b6129bc0afe4f07c3efaa20011e6a08c35c2a",
+        ".github/workflows/moemoa-weekly-backup.yml": "e6465fc5d25484866e3f61ac98d96a82f8a36312489e5912ea18d9e6691981d8"
+      },
+      "changed": [
+        ".github/workflows/moemoa-weekly-backup.yml",
+        "tools/operations/run-weekly-backup.mjs"
+      ],
+      "pushed": false,
+      "mode": "--inspect-state",
+      "remoteWrites": 0,
+      "databaseReads": 0,
+      "storageBodyReads": 0,
+      "localTestsPassed": 7,
+      "yaml": "manual/read-only default PASS",
+      "approvalRequired": true
+    },
+    "previousLocalTestsNotRerun": "Node57 + Python2"
+  },
+  "weeklyReadOnlyInspection20261012": {
+    "status": "ACTUAL_READ_ONLY_PASS",
+    "candidate": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+    "approval": "User instructed proceeding with the documented plan after exact candidate request",
+    "githubRunId": 38152095001,
+    "githubRunUrl": "https://github.com/Newrred/anime-collector/actions/runs/38152095001",
+    "conclusion": "success",
+    "dispatches": 1,
+    "result": {
+      "status": "WEEKLY_PENDING_ARCHIVE_MISSING",
+      "sequence": 1,
+      "chainLength": 1,
+      "pending": true,
+      "archiveBytes": 62610483,
+      "remoteWrites": 0,
+      "databaseReads": 0,
+      "storageBodyReads": 0
+    },
+    "activationAfter": false,
+    "activationPatchStatus": 204,
+    "activationReadbackStatus": 200,
+    "vercelBuild": {
+      "commit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "checkoutCommit": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+      "builtAt": "2026-10-11T15:38:29.468Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "archiveBackupComplete": false,
+    "rootCauseConfirmed": false,
+    "meaning": "Authenticated sequence-1 intent refers to 62,610,483-byte archive; metadata404. No database access, image body reads or Drive writes in this inspection.",
+    "previousEvidenceNotRerun": "Initial backup FAILURE; previous Node57/Python2 and local diagnostic7 remain historical evidence"
+  },
+  "weeklyMissingRecoveryCandidate20261012": {
+    "base": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+    "commit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "branch": "refs/heads/codex/weekly-backup-recovery-20261012",
+    "sourceSha256": {
+      "tools/operations/run-weekly-backup.mjs": "10eacf4b8a9545ab46e463e425a92c286d68b50472d89508948eefcdfb823cc1",
+      "tools/operations/weekly-backup-state.mjs": "a8f6a837525cc8276b4375cb6f5d73062d3c803df6b791a9948f394aaa4aa61c",
+      "tools/operations/drive-backup.mjs": "1ee7e5ee1cc98d927bcbe32eddc3291ac21e13c299ce6890b807322fd4408f54",
+      ".github/workflows/moemoa-weekly-backup.yml": "4902eb70b78f991ae63d04a669ae1af90c8a40d948f882307c87eb111fafe878"
+    },
+    "changed": [
+      ".github/workflows/moemoa-weekly-backup.yml",
+      "tools/operations/drive-backup.mjs",
+      "tools/operations/run-weekly-backup.mjs",
+      "tools/operations/weekly-backup-state.mjs"
+    ],
+    "pushed": true,
+    "status": "APPLIED_ACTUAL_UPLOAD_FAILED",
+    "targetMissingRunId": "20261011145200757",
+    "behavior": "Exact pending run only; metadata404 appends authenticated abandoned record without deleting old state, then new incremental capture/upload; existing archive must verify before commit; errors do not abandon.",
+    "tests": {
+      "command": "node --test tests/operations/weeklyBackupState.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/driveBackup.test.mjs",
+      "passed": 36,
+      "failed": 0,
+      "synthetic": true,
+      "realUpload": false,
+      "yaml": "manual only; inspect default true; recovery ID empty by default",
+      "diffCheck": "PASS"
+    },
+    "scope": {
+      "masterFiles": 4,
+      "productionDatabase": "read-only snapshot on approved retry",
+      "maxNewImageBytes": 64000000,
+      "drive": "reuse pinned parent ZIP; append encrypted recovery state and new delta; no deletion",
+      "schedule": false,
+      "appChanges": false,
+      "dbSchemaChanges": false,
+      "publicChanges": false,
+      "newSecretTransfer": false
+    },
+    "rollback": "Keep activation false. Preserve authenticated abandoned state support; do not restore a parser that cannot read the new record type after a recovery write.",
+    "unresolved": "Old upload error cannot be reconstructed from generic old log. Retry may expose a provider rejection; no claim of root-cause fix.",
+    "gitBlobHashMatches": 4,
+    "appliedRunId": 38152850345,
+    "appliedToMaster": true
+  },
+  "weeklyRecoveryRun20261012": {
+    "status": "ACTUAL_UPLOAD_FAILED",
+    "candidate": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "approval": "User proceed after exact candidate recovery/manual-once request",
+    "runId": 38152850345,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38152850345",
+    "recoverMissingRunId": "20261011145200757",
+    "dispatches": 1,
+    "activationPatch": 204,
+    "gateDisabledAfterJobAdmission": {
+      "patch": 204,
+      "readback": 200,
+      "value": false
+    },
+    "vercelBuild": {
+      "commit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+      "checkoutCommit": "ab05885461aa1e99bbb116172e3cd7188100da17",
+      "builtAt": "2026-10-11T15:49:31.463Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "noSchedule": true,
+    "noExistingCopyDeletion": true,
+    "noSchemaChange": true,
+    "noPublicChange": true,
+    "conclusion": "failure",
+    "summary": {
+      "status": "WEEKLY_BACKUP_INCOMPLETE",
+      "error": "DRIVE_REQUEST_UNCERTAIN",
+      "stage": "UPLOAD_ARCHIVE",
+      "safeToServe": false
+    },
+    "cleanup": "success",
+    "finalGateReadback": {
+      "http": 200,
+      "value": false
+    },
+    "driveUI": {
+      "account": "minecrafthong@gmail.com",
+      "existingFullArchives": 2,
+      "stateSequences": [
+        1,
+        2,
+        3
+      ],
+      "latestStateRunId": "20261011154922628",
+      "newArchiveVisible": false,
+      "cryptographicReadback": false
+    },
+    "rootCauseProven": false
+  },
+  "weeklyHttpFixCandidate20261012": {
+    "base": "ab05885461aa1e99bbb116172e3cd7188100da17",
+    "commit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "branch": "refs/heads/codex/weekly-backup-http-20261012",
+    "sourceSha256": {
+      "tools/operations/drive-backup.mjs": "535964f5bd12afe4b76b737217228d230c196ccc96c1ea718536bc9c2d6bbbdc"
+    },
+    "changed": [
+      "tools/operations/drive-backup.mjs"
+    ],
+    "pushed": true,
+    "status": "APPLIED_ACTUAL_BACKUP_PASS",
+    "targetPendingRunId": "20261011154922628",
+    "reproduction": {
+      "transport": "loopback HTTP with native Node fetch, synthetic payload",
+      "response": "308 with Range and Location",
+      "before": "DRIVE_REQUEST_UNCERTAIN",
+      "after": "PASS",
+      "provesRemoteCause": false
+    },
+    "tests": {
+      "command": "node --test tests/operations/driveBackup.test.mjs tests/operations/weeklyBackup.test.mjs tests/operations/weeklyBackupState.test.mjs",
+      "passed": 39,
+      "realHttp308": true,
+      "realHttp302NeverFollow": true,
+      "incorrectRangeRejected": true
+    },
+    "scope": "Only resumable chunk PUT uses redirect:manual; no response Location is followed. Other calls stay redirect:error.",
+    "source": "https://developers.google.com/workspace/drive/api/guides/manage-uploads",
+    "gitBlobHashMatches": 1,
+    "appliedRunId": 38153533963
+  },
+  "weeklyHttpFixRun20261012": {
+    "status": "ACTUAL_INCREMENTAL_BACKUP_COMMITTED",
+    "candidate": "d8bf945051854ca60398664de54105a49a4ea2c2",
+    "userApproval": "Explicit ㄱ after exact candidate/manual-once request",
+    "runId": 38153533963,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/38153533963",
+    "dispatches": 1,
+    "recoverMissingRunId": "20261011154922628",
+    "environmentBranch": "master",
+    "gateDisabledAfterAdmission": {
+      "patch": 204,
+      "get": 200,
+      "value": false
+    },
+    "vercelBuild": {
+      "commit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+      "checkoutCommit": "d8bf945051854ca60398664de54105a49a4ea2c2",
+      "builtAt": "2026-10-11T15:59:03.994Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "noSchedule": true,
+    "noDeletion": true,
+    "noSchemaChange": true,
+    "noPublicChange": true,
+    "conclusion": "success",
+    "summary": {
+      "status": "WEEKLY_INCREMENTAL_COMMITTED",
+      "archiveBytes": 62610505,
+      "chainLength": 2,
+      "safeToServe": false,
+      "oldCopiesDeleted": 0
+    },
+    "cleanup": "success",
+    "finalGate": {
+      "get": 200,
+      "value": "false"
+    },
+    "duplicateApproval": "Later explicit async approval confirmed same run; no second dispatch",
+    "driveUI": {
+      "account": "minecrafthong@gmail.com",
+      "newArchive": "moemoa-production-20261011155929965.encrypted.zip",
+      "displaySize": "59.7MB",
+      "existingFullArchivesPreserved": 2,
+      "stateSequences": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "latestCommitRunId": "20261011155929965"
+    },
+    "validation": {
+      "remoteMetadataChecksum": true,
+      "encryptedLedgerCommitReadback": true,
+      "preparedEncryptedZipLocalAuthentication": true,
+      "newArchiveExternalDownloadRestore": false,
+      "productionDatabaseRestore": false
+    },
+    "scope": {
+      "manualExecutions": 1,
+      "scheduleEnabled": false,
+      "oldCopiesDeleted": 0,
+      "schemaChanges": 0,
+      "publicChanges": 0,
+      "newSecrets": 0
+    },
+    "remaining": [
+      "new delta external retrieval and isolated recovery verification",
+      "weekly scheduling exact candidate approval",
+      "operator independent off-PC key custody"
+    ],
+    "nextAction": "Verify newly stored delta through external retrieval and isolated restore under existing W17/D05; no new capture or deletion"
+  },
+  "externalIncrementalRecovery20261012": {
+    "scope": "W17/D05 existing next action; external incremental retrieval and local isolated restore",
+    "runId": "20261011155929965",
+    "userDownloadedFiles": 2,
+    "authenticatedCommit": {
+      "sequence": 6,
+      "type": "commit",
+      "chainLength": 2,
+      "baselinePinMatches": true,
+      "fullLedgerHistoryReplayedThisSession": false
+    },
+    "archive": {
+      "bytes": 62610505,
+      "sha256MatchesAuthenticatedCommit": true
+    },
+    "baseline": {
+      "bytes": 920077441,
+      "sha256MatchesVersionControlledPin": true,
+      "reusedLocalArchive": true,
+      "newExternalRetrieval": false
+    },
+    "bytesRestored": {
+      "status": "LOCAL_INCREMENTAL_BYTES_VERIFIED",
+      "files": 4310,
+      "bytes": 918359762,
+      "allSha256AndLengthsMatch": true
+    },
+    "localRehearsal": {
+      "source": "tools/operations/rehearse-production-restore.mjs",
+      "sourceSha256": "009a9331a11d2d95b339c208e09314b46b2620f5471e76212aed81fe263fc51f",
+      "localSha256": "9c7662ad838be3d884bd1974ada950d7354b1c1adf011d7c4e1c279ce0daa6e6",
+      "substitutions": [
+        "repository root absolute path",
+        "verified incremental backup input path"
+      ],
+      "logicChanged": false
+    },
+    "databaseRestore": "NOT_RUN_DOCKER_ENGINE_UNAVAILABLE",
+    "readOnlyCurrentContextCaptured": true,
+    "productionWrites": 0,
+    "externalWrites": 0,
+    "uploads": 0,
+    "deletions": 0,
+    "schedules": 0,
+    "safeToServe": false,
+    "environment": {
+      "wslPython": "3.12.3",
+      "dockerEngineResponding": false,
+      "error": "Docker Inference manager socket dockerInference cannot be accessed by system",
+      "recoveryAttempts": "Stopped confirmed lingering Docker proxy processes; provided missing process environment paths; official restart/stop failed; Docker-only processes stopped; exact zero-byte reparse socket removal failed; no reset/reinstall/data deletion",
+      "dockerContainerCreated": false
+    },
+    "remaining": [
+      "Start a healthy local Docker engine, refresh read-only current context if older than one hour, then run prepared isolated restore",
+      "Independent recovery-key custody and weekly scheduling remain separate unfinished gates"
+    ]
+  },
+  "thisPcIncrementalDatabaseRecovery20261012": {
+    "status": "CURRENT_IMPORT_PUBLIC_REPLAY_CONTRACT_PASS_SERVING_CLOSED",
+    "scope": "This PC fresh full/delta/state6 retrieval, incremental DB restore and isolated recovery contracts",
+    "runId": "20261012-thispc-01",
+    "capturedAt": "2026-10-12T00:40:01.15608+00:00",
+    "captureReadOnly": true,
+    "captureTlsVerifyFull": true,
+    "passwordsExported": false,
+    "archives": {
+      "newlyRetrieved": 3,
+      "authenticatedCommitSequence": 6,
+      "baselinePinMatches": true,
+      "fullLedgerHistoryReplayed": false,
+      "filesVerified": 4310,
+      "bytesVerified": 918359762
+    },
+    "runtime": {
+      "client": "PostgreSQL 16.15 on Ubuntu24.04 (local client only)",
+      "image": "supabase/postgres@sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+      "restoredDatabaseVersion": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+      "productionDependenciesChanged": false
+    },
+    "runner": {
+      "source": "tools/operations/rehearse-production-restore.mjs",
+      "sourceSha256": "e2cbb6e60959d49550aecbcf056212c12466d1e0f9bb33d2520a46520dc37e53",
+      "localSha256": "254fe7013dc4c3661f67cee748cc47aff8349a5d5e1c161f6f18df26b4b981a4",
+      "substitutions": [
+        "repository root",
+        "verified incremental backup path"
+      ],
+      "otherLogicMatches": true
+    },
+    "import": {
+      "verified": true,
+      "seconds": 10.651,
+      "tables": 99,
+      "extensions": [
+        "pg_cron",
+        "pg_stat_statements",
+        "pg_trgm",
+        "pgcrypto",
+        "plpgsql",
+        "supabase_vault",
+        "uuid-ossp"
+      ]
+    },
+    "privateReplay": {
+      "operationSourceHashQuotaPreserved": true
+    },
+    "publicReplay": {
+      "denyOnly": true,
+      "scrubbedRetryBodies": 12
+    },
+    "contracts": {
+      "checks": 56,
+      "synthetic": true,
+      "actualRestoredFunctions": true,
+      "populatedProductionPublicVerified": false,
+      "externalStorageHttpVerified": false
+    },
+    "access": {
+      "ownerReads": 5,
+      "anonymousDenied": true,
+      "realRestoredRpc": true,
+      "otherOwnerDenied": 5,
+      "wrongOwnerCardRlsDenied": true,
+      "imageBytesDecodedThisRun": false
+    },
+    "isolation": {
+      "network": "none",
+      "publishedPorts": 0,
+      "readOnlyRootfs": true,
+      "backupReadOnlyMount": true,
+      "cronLaunch": "off",
+      "privateAccessClosed": true,
+      "publicAccessClosed": true,
+      "containerStopped": true,
+      "independentDockerInspectPassed": true
+    },
+    "productionWrites": 0,
+    "externalWrites": 0,
+    "newBackups": 0,
+    "schedules": 0,
+    "deployments": 0,
+    "safeToServe": false,
+    "remaining": [
+      "Independent off-PC recovery-key custody",
+      "Weekly scheduling exact candidate approval",
+      "Recovery serving/Storage HTTP and canonical completeness acceptance",
+      "D06 production candidate approval and release checks"
+    ],
+    "docs": [
+      "https://supabase.com/changelog.md",
+      "https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore",
+      "https://www.postgresql.org/docs/16/app-pgrestore.html"
+    ]
+  },
+  "independentKeyCustody20261012": {
+    "status": "USER_CONFIRMED_INDEPENDENT_STORAGE",
+    "confirmedDate": "2026-10-12",
+    "basis": "Direct user answer: 별도 장소에 보관 완료",
+    "providedArtifact": "MOEMOA-RECOVERY-KEY-20261012.zip",
+    "independentOfThisPcAndBackupDriveFolder": true,
+    "verification": "User-attested; remote device contents not inspected",
+    "keyContentsOrHashRecorded": false
+  }
 }

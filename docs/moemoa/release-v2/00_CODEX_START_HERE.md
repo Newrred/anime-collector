@@ -1,5 +1,7 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 최신 인계 — 다른 PC 완료 근거 복구:** 첫 Public 필수 운영 흐름은 `ea8f388`에서 인수됐고, 컬렉션 연결은 `5d544ad` 운영 반영 완료다. `b3b4669`에만 남아 있던 증분 복구·키 독립보관·카탈로그 외부 회수·주간 설치·실제 공개/팔로우/신고/철회 증거25키를 기존 JSON2개에 복구했다(공통키 변경0). 현재 W/M/D/Q와 최종 체크의 오래된 Public off/키 미보관/DB 복구 대기를 교정했다. 이번 www/origin master5d544ad 및 예약 유지38327869839 SUCCESS 재확인, 운영 변경0. 첫 주간 예약은 **10/18 03:00 JST/KST**로 아직 실행 전이다. [단일 작업판](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)과 [실행 보고](01_RELEASE_EXECUTION_PLAN.md#w18d06-증거-복구-실행-8항-보고--2026-10-13)를 우선한다. 새 운영 승인·가입·공개 동의·키 보관 재요청 없음. 아래 날짜별 기록은 당시 이력이다.
+
 > **2026-10-13 W18 재적용 완료:** 사용자 exact 승인5d544ad→원격CI38369813151 전체SUCCESS→동일SHA master Git→Vercel9HTFhbbh9 READY/www일치→신규client1/servertrue 활성. 기존 가입/정책/한도 보존·DBmigration 재실행0. 실제 운영 기존계정에서 컬렉션 공개 설정/서버 선반 선택지/460×652 승인 표지 decode 확인. 새 동의·자동게시0. [최종 근거](evidence/2026-10-13-collection-home/production-retry-candidate.json), 기존03 현재카드를 따른다. 아래 중단·승인대기는 과거 이력이다.
 
 > **2026-10-13 W18 운영 적용 중단·Git 원복:** 후보1fef030 승인으로 DB20261012160330 적용/57테이블 보존. 앱bfa1356 Git배포 후 필수CI 단위검사가 실패해 신규서버flag는 켜지 않았다. 운영patch의 기존 테스트계약 누락을 확인했고 f6dba06으로 앱을 이전b0541ff와 같게 복구했다. VercelEbeCWgQQi READY/www동일SHA·CI38367895908 SUCCESS. Production새flag0/서버false, schema·기록 보존. 재적용 후보는 테스트 패키지를 포함하며 새DB실행/재가입/새동의 불필요. [실행 근거](evidence/2026-10-13-collection-home/production-execution.json)와 기존03 현재카드를 따른다. 아래 승인대기/변경0은 이전 시점이다.

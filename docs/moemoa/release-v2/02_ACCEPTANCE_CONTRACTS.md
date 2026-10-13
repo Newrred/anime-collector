@@ -1,5 +1,16 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-13 수용 근거 대조 — 계약 변경 없음
+
+다른 PC `b3b4669`의 누락된 완료 근거를 복구했다. C01~C12의 정의·필수 경계를 줄이지 않고, 같은 실행을 다시 요구하지 않도록 단일 작업판의 실제 인수 상태만 갱신한다.
+
+- **C03~C08/C12:** `ea8f388` 실제 운영 공개 이미지/보드·home·다른 계정 follow/목록 재방문·신고/별도 운영자 HIDE/RESTORE·통지/감사·최종 비공개/old full·thumb404/no-store·원본 보존은 [roleVerification](evidence/2026-10-11-public-capacity-closeout.json)의 마지막20261012절에 완료 근거가 있다. earlier candidate/application의 pending은 당시 시점이다. 운영 block 확인창은 미검증, 기존 hosted와 구분한다.
+- **C09:** 운영2,000GET/64MB/day·public20MiB 및 크기별 실제 차감 완료. 기존 workflow 실패 알림 실수신은 사용자 확인이며 새 용량 임계 알림 전달 증거는 아니다. 이번 예약 유지 성공도 byte 수치나 새 경보 전달 PASS로 확대하지 않는다.
+- **C10:** [복구 근거](evidence/2026-10-10-external-backup-recovery.json)의 외부 증분/99테이블·7확장/최신 삭제권리 replay·RPC/RLS·키 독립보관은 완료. 카탈로그 승인 snapshot/외부 회수와 주간 설치는 capacity application04에 있다. 전체 Public/Storage HTTP serving·전체 ingestion history·RPO/RTO 보장까지 완료한 것은 아니다.
+- **C11/C12:** `5d544ad` exact CI→master→Vercel→www 및 컬렉션 선반/표지 조회 완료. 10/12 디자인 합성 비교와 실제 사용자 조회, 과거 hosted 공개 행동을 서로 바꾸어 쓰지 않는다. 24개 QA 전수/실기기 전체 완료 주장은 없다.
+
+현재 상태/다음 행동은 [03의 단일 작업 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신), 병합 provenance·이번 읽기는 [reconciliation](evidence/2026-10-13-release-evidence-reconciliation.json)을 따른다. 정의 변경·새 국가/권리/요금 결정·원격 쓰기 없음.
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
