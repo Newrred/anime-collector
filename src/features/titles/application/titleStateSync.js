@@ -43,7 +43,7 @@ export function makeTitleSyncLocalMap({ titles = [], watchLogs = [], bookshelf =
     if (entries.has(id)) throw new Error("TITLE_SYNC_DUPLICATE_KEY");
     entries.set(id, { kind: "watch_log", key, payload: log });
   }
-  if (bookshelf?.shelves?.length) entries.set(idFor("bookshelf", "default"), { kind: "bookshelf", key: "default", payload: normalizeBookshelf(bookshelf) });
+  if (bookshelf?.shelves?.length || bookshelf?.layoutVersion === 1) entries.set(idFor("bookshelf", "default"), { kind: "bookshelf", key: "default", payload: normalizeBookshelf(bookshelf) });
   return entries;
 }
 
@@ -87,6 +87,7 @@ export function planTitleSync(localEntries, remoteRows, baseline = {}) {
 async function readLocal(userId) {
   const [titles, watchLogs] = await Promise.all([readTitleLibrary(), readAllWatchLogsPreferred()]);
   const bookshelf = readBookshelf(`account:${userId}`);
+  if (bookshelf.loadError) throw new Error("TITLE_SYNC_INVALID_LOCAL");
   return { titles, watchLogs, bookshelf, entries: makeTitleSyncLocalMap({ titles, watchLogs, bookshelf }) };
 }
 
@@ -109,6 +110,9 @@ function validateRemoteRow(row) {
   if (row.entity_kind === "title" && titleSyncKey(row.payload) !== row.entity_key) throw new Error("TITLE_SYNC_INVALID_REMOTE");
   if (row.entity_kind === "watch_log" && `log:${String(row.payload.id || "")}` !== row.entity_key) throw new Error("TITLE_SYNC_INVALID_REMOTE");
   if (row.entity_kind === "bookshelf" && (row.entity_key !== "default" || !Array.isArray(row.payload.shelves))) throw new Error("TITLE_SYNC_INVALID_REMOTE");
+  if (row.entity_kind === "bookshelf") {
+    try { normalizeBookshelf(row.payload); } catch { throw new Error("TITLE_SYNC_INVALID_REMOTE"); }
+  }
 }
 
 async function readRemote(client, userId) {
