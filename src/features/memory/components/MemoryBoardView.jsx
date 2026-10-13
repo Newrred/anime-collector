@@ -19,10 +19,9 @@ export default function MemoryBoardView({ base = "/" }) {
   );
 }
 
-export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStateChange }) {
+function MemoryBoardContent({ base }) {
   const { copy, locale } = useMemoryRouteUi();
   const boardCopy = copy.boards;
-  const BoardHeading = embedded ? "h2" : "h1";
   const [runtime, setRuntime] = useState(null);
   const [boards, setBoards] = useState([]);
   const [archive, setArchive] = useState([]);
@@ -34,15 +33,10 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
   const actionLock = useRef(false);
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [sharing, setSharing] = useState(false);
-  const [publicationTask, setPublicationTask] = useState({busy:false,dirty:false});
-  const routeBoardId = useMemo(readBoardId, []);
-  const selectedBoardId = boardId ?? routeBoardId;
+  const selectedBoardId = useMemo(readBoardId, []);
   const allowLeave = useUnsavedNavigation(detail
     ? Boolean(editing && (title !== detail.board.title || description !== (detail.board.description || "")))
     : Boolean(title || description), locale, { busy });
-  const draftDirty = detail ? Boolean(editing && (title !== detail.board.title || description !== (detail.board.description || ""))) : Boolean(title || description);
-  useEffect(() => { onTaskStateChange?.({busy:busy || publicationTask.busy,dirty:draftDirty || publicationTask.dirty}); }, [onTaskStateChange,busy,publicationTask,draftDirty]);
   const syncLabel = (entity) => boardCopy.syncStates?.[entity?.sync?.syncState] || "";
 
   const refresh = useCallback(async (activeRuntime, boardId = selectedBoardId, resetEditor = true) => {
@@ -85,7 +79,6 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
     try {
       await action();
       await refresh(runtime, selectedBoardId, success === boardCopy.saved);
-      globalThis.dispatchEvent?.(new CustomEvent("moemoa:collection-boards-updated"));
       setFeedback(success);
       return true;
     } catch (error) {
@@ -122,8 +115,8 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
   };
 
   return (
-    <div className={`memory-boards ${embedded ? "collection-board" : "page-shell page-shell--wide"}${selectedBoardId ? " has-detail" : ""}`} aria-busy={busy}>
-      {!embedded && !detail && <header className="memory-boards__header">
+    <div className={`memory-boards page-shell page-shell--wide${selectedBoardId ? " has-detail" : ""}`} aria-busy={busy}>
+      {!detail && <header className="memory-boards__header">
         <div className="pageHeader">
           <h1 className="pageTitle">{boardCopy.title}</h1>
           {minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
@@ -137,7 +130,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
 
       {status === "ready" && (
         <div className={`memory-boards__layout${selectedBoardId ? " is-detail" : " is-collection"}`}>
-          {!embedded && <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
+          <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
             {detail && <a className="memory-boards__back" href={`${base}boards/`} data-astro-reload>← {boardCopy.title}</a>}
             {detail && minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
             {!selectedBoardId && <div>
@@ -177,7 +170,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
               {detail && <a className="btn btn--subtle" href={`${base}boards/`} data-astro-reload>{boardCopy.newBoard}</a>}
             </form>
             </details>}
-          </aside>}
+          </aside>
 
           <section className="memory-boards__detail" aria-live="polite">
             {!selectedBoardId ? (
@@ -191,8 +184,8 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
             ) : (
               <>
                 <div className="memory-boards__section-heading">
-                  <div><BoardHeading>{detail.board.title}</BoardHeading>{detail.board.description && <p>{detail.board.description}</p>}</div>
-                  <button type="button" className="btn btn--subtle" aria-expanded={editing} disabled={busy || sharing} onClick={() => { setTitle(detail.board.title); setDescription(detail.board.description); setEditing((value) => !value); }}>{editing ? (locale === "ko" ? "취소" : "Cancel") : boardCopy.edit}</button>
+                  <div><h1>{detail.board.title}</h1>{detail.board.description && <p>{detail.board.description}</p>}</div>
+                  <button type="button" className="btn btn--subtle" aria-expanded={editing} disabled={busy} onClick={() => { setTitle(detail.board.title); setDescription(detail.board.description); setEditing((value) => !value); }}>{editing ? (locale === "ko" ? "취소" : "Cancel") : boardCopy.edit}</button>
                 </div>
                 {editing && <form className="memory-boards__edit" onSubmit={saveBoard}>
                     <small>{locale === "ko" ? "이름과 설명은 저장을 눌러 반영해요. 카드 구성은 바로 저장돼요." : "Save your name and description changes. Card arrangement saves as you go."}</small>
@@ -221,7 +214,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                   </div>
                 </form>}
 
-                <section hidden={sharing}>
+                <section>
                   <div className="memory-boards__section-heading">
                     <div><h2>{boardCopy.cardsTitle}</h2>{editing && <p>{boardCopy.reorderHelp}</p>}</div>
                     <span>{boardCopy.cardCount(detail.items.length)}</span>
@@ -262,7 +255,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                   )}
                 </section>
 
-                <details hidden={sharing} className="memory-boards__tools">
+                <details className="memory-boards__tools">
                   <summary>{boardCopy.addTitle}</summary>
                   <div className="memory-boards__add">
                   {availableCards.length === 0 ? <p className="memory-boards__muted">{boardCopy.noAvailable}</p> : (
@@ -280,7 +273,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                   )}
                   </div>
                 </details>
-                <MemoryPublicationPanel onOpenChange={setSharing} onStateChange={setPublicationTask} detail={detail} runtime={runtime} locale={locale} base={base} disabled={busy || editing} />
+                <MemoryPublicationPanel detail={detail} runtime={runtime} locale={locale} base={base} disabled={busy || editing} />
               </>
             )}
           </section>

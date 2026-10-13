@@ -13,7 +13,7 @@ export default function ChannelHeader({ base = "/", title, trail, locale = "ko",
   const [expanded, setExpanded] = useState(false), id = useId();
   return <header className={`channel-header ${expanded ? "is-expanded" : ""} ${extended ? "has-facets" : ""}`}>
     <div className="channel-heading"><h1 aria-label={trail ? `${title} / ${trail}` : title}><a href={base}>MOEMOA</a><span>/</span>{title}{trail ? <><span>/</span>{trail}</> : null}</h1>{actions ? <div className="channel-heading-actions">{actions}</div> : null}</div>
-    {sections && <><div className="channel-metadata" id={id} style={extended ? { "--channel-section-count": sectionColumns } : undefined}>{sections}</div>
-    <button type="button" className="channel-expand" aria-controls={id} aria-expanded={expanded} aria-label={locale === "ko" ? (expanded ? "정보 접기" : "정보와 탐색 펼치기") : (expanded ? "Collapse information" : "Expand information and controls")} onClick={() => setExpanded(!expanded)}>{expanded ? "⌃" : "⌄"}</button></>}
+    <div className="channel-metadata" id={id} style={extended ? { "--channel-section-count": sectionColumns } : undefined}>{sections}</div>
+    <button type="button" className="channel-expand" aria-controls={id} aria-expanded={expanded} aria-label={locale === "ko" ? (expanded ? "정보 접기" : "정보와 탐색 펼치기") : (expanded ? "Collapse information" : "Expand information and controls")} onClick={() => setExpanded(!expanded)}>{expanded ? "⌃" : "⌄"}</button>
   </header>;
 }
