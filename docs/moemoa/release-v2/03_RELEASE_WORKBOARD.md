@@ -787,9 +787,11 @@
 복원/개인정보 PASS: A 새로고침 후 선반 선택 복원, 다시 preview하면 동의 unchecked. 익명 read_memory_minihome HTTP200/최상위 id,bio,entries,nickname,schemaVersion/privateFields0. retry-anonymous-dto.json은 응답 원문 대신 key/hash만 보관.
 로컬/과거 구분: 이번 Chromium3 모의 재검증 PASS·스크린샷 추가(신규고유0). 기존40a3dac runtime 재사용/이번 build 재실행0. 과거 build33·unit22/Chromium14/SQL25·17 및 최초8446753 preview FAIL은 이전 증거로 보존.
 원복 완료: DB5필드 baseline/off·Preview정책 복귀/이번 새3override 제거/phone-test a6b6dda 복구. Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/canonical alias 확인. 기존 서버 revoke 함수로 test홈1개 철회→익명HTTP200/null·화면 unavailable/img0·원본/표지/독립보드 fingerprint 보존 PASS.
-현재 잔여: 브라우저 확인창 자동 조작이 두 탭에서 멈춰 UI 철회 완주 미검증. 이번 hosted source변경/stale-preview 검사는 미실행(기존 로컬 SQL 근거와 분리). Google 신규가입/실기기/운영 신규 PASS0.
+후속 로컬 진단: native confirm 취소/승인·최신 revision·서버 오류 시 거짓 성공 방지와 기존 왕복2 PASS(신규1). 앱 오류 미재현/runtime변경0. 이전 hosted CUA focus timeout과 UI 철회 미검증은 별도로 유지한다.
+현재 잔여: hosted source변경/stale-preview 경계 미실행(기존 로컬 SQL 근거와 분리). Google 신규가입/실기기/운영 신규 PASS0.
+운영 후보 준비: production-candidate.json에 source40a3dac / productionBase b0541ff / 앱21+SQL1 hash·새 flag2개·롤백 결속. 운영 build-info commit/checkoutCommit b0541ff·source vercel-git 확인. 운영 DB/flag 현재 값 미조회·exact 운영 승인 없음.
 보존/운영: test 구조/catalog표지89,300B/선반/저장작품 유지, 원본 삭제0. 이전 데이터/config migration 이력20261012180421/180447/181251 유지, 이번 새 migration 이력0. master b0541ff/운영DB/운영Public 변경0.
-다음 행동 하나: W18의 브라우저 철회 확인창 미검증을 자동화 도구 문제/서비스 문제로 구분해 닫고, 그 결과를 기존 운영 후보 조건에 결속한다. 원복 재실행·새 동의·기초 DB/가입 반복은 하지 않는다. 최신 상세는 retry-execution.json 및01의 이번8항 보고.
+다음 행동 하나: 동일40a3dac의 hosted source-version 변경/stale-preview 경계만 검사하도록 정확한 테스트 범위를 준비한다. 원복 재실행·같은 확인창 반복·새 가입·전체 회귀는 하지 않는다. 새 원격 변경은 대상/영향이 명시된 승인 후 실행한다. 최신 상세는 native-confirm-diagnosis.json·production-candidate.json 및01의 후속8항 보고.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>

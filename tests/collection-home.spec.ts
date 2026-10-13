@@ -5,6 +5,61 @@ const USER='11111111-1111-4111-8111-111111111111', HOME='55555555-5555-4555-8555
 const animeId='anime:15151515-1515-4151-8151-151515151515', revisionId='asset:'+'c'.repeat(40);
 const cover='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300"%3E%3Crect width="200" height="300" fill="%235f6c91"/%3E%3C/svg%3E';
 
+test('typed home native confirmation cancels safely and only reports private after a successful revoke',async({page,context},testInfo)=>{
+ await installAppState(page,{locale:'ko'});await adapters(context);
+ const title={animeId,title:'Catalog only title',visual:{type:'CATALOG_COVER',revisionId}};
+ const selection={schemaVersion:2,nickname:'Synthetic owner',bio:'',entries:[{kind:'TITLE_SHELF',sourceId:'shelf-a',sourceVersion:1,title:'Synthetic shelf',titles:[{titleKey:'ANILIST:1313',animeId,revisionId,catalogTitle:title.title}]}]};
+ let published=true,revision=7,rejectRevoke=true;
+ const revokes:number[]=[],dialogs:string[]=[],unexpectedWrites:string[]=[];
+ await context.addInitScript(({user,cover})=>{
+  localStorage.setItem('ui:locale:v1',JSON.stringify('ko'));
+  localStorage.setItem('moemoa.e2e.mockSession.v1',JSON.stringify({user:{id:user},access_token:'local-test-token'}));
+  (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__.collectionHome=true;
+  (window as any).__MOEMOA_TEST_PUBLICATION_ADAPTERS__.resolveCover=async()=>cover;
+ },{user:USER,cover});
+ await context.route('https://**/*',route=>route.abort());
+ await context.route('**/__publication-test/rpc/*',async route=>{
+  const name=route.request().url().split('/').at(-1)!;let data:any=null,error:any=null;
+  if(name==='get_memory_minihome')data={id:HOME,revision,published,visible:published,selection};
+  if(name==='list_memory_minihome_boards')data={boards:[],next:null};
+  if(name==='list_memory_minihome_shelves')data={enabled:true,shelves:[]};
+  if(name==='revoke_memory_minihome'){
+   revokes.push(route.request().postDataJSON().p_expected_revision);
+   if(rejectRevoke)error={message:'PUBLICATION_CONFLICT'};
+   else {published=false;revision++;data={id:HOME,revision,published:false};}
+  }
+  if(name==='read_memory_minihome')data=published?{id:HOME,schemaVersion:2,nickname:selection.nickname,bio:'',entries:[{kind:'TITLE_SHELF',sectionId:'shelf:a',snapshot:{schemaVersion:1,title:'Synthetic shelf',titles:[title]}}]}:null;
+  if(name==='get_memory_relationship')data={self:true,following:false,blocked:false};
+  if(/^(apply|delete|publish|prepare|make)_/.test(name))unexpectedWrites.push(name);
+  await route.fulfill({contentType:'application/json',body:JSON.stringify({data,error})});
+ });
+ await page.goto('/?panel=sharing');
+ await expect(page.getByRole('link',{name:'공개 미니홈 열기',exact:true})).toBeVisible();
+ await page.locator('.public-management summary').click();
+ const withdraw=page.getByRole('button',{name:'미니홈 비공개로 전환',exact:true});
+ const handleDialog=(accept:boolean)=>page.once('dialog',async dialog=>{
+  expect(dialog.type()).toBe('confirm');dialogs.push(dialog.message());
+  if(accept)await dialog.accept();else await dialog.dismiss();
+ });
+ handleDialog(false);await withdraw.click();
+ await expect(page.getByRole('link',{name:'공개 미니홈 열기',exact:true})).toBeVisible();
+ expect(revokes).toEqual([]);
+ // A different operation can change the revision after the editor initially loads.
+ revision=8;handleDialog(true);await withdraw.click();
+ await expect(page.getByRole('alert')).toBeVisible();
+ await expect(page.getByText('미니홈이 비공개로 전환되었습니다.',{exact:false})).toHaveCount(0);
+ expect(published).toBe(true);expect(revokes).toEqual([8]);
+ rejectRevoke=false;revision=9;handleDialog(true);await withdraw.click();
+ await expect(page.getByText('미니홈이 비공개로 전환되었습니다.',{exact:false})).toBeVisible();
+ await expect(page.getByRole('link',{name:'공개 미니홈 열기',exact:true})).toHaveCount(0);
+ expect(revokes).toEqual([8,9]);expect(dialogs).toEqual(Array(3).fill('미니홈을 비공개로 바꿀까요? 별도로 공개한 보드는 계속 공개됩니다.'));
+ expect(unexpectedWrites).toEqual([]);
+ await page.screenshot({path:testInfo.outputPath('native-confirm-revoked.png'),fullPage:true});
+ await page.goto('/public/home/?id='+HOME);
+ await expect(page.getByText('이 미니홈을 볼 수 없습니다.',{exact:true})).toBeVisible();
+ await expect(page.locator('.public-title-shelf img')).toHaveCount(0);
+});
+
 test('an unavailable saved Board can be explicitly deselected before a fresh title shelf preview',async({page,context},testInfo)=>{
  await installAppState(page,{locale:'en'});await adapters(context);
  const gone='88888888-8888-4888-8888-888888888888';

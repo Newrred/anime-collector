@@ -2319,6 +2319,17 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 
 #### W18 선택 해제 수정의 실제 공개 인수 — 이번 실행 8항 보고 (2026-10-13)
 
+#### W18 확인창 분리 진단·운영 후보 결속 (2026-10-13 후속)
+
+- 기존 W18 17항 계획을 이어간다. 목적은 네이티브 confirm 중단이 제품 경로에서도 재현되는지 좁혀 확인하고 운영 변경 목록을 고정하는 것이다.
+- 현재 근거: `MemoryMinihome.jsx`의 confirm 후 `controller.revoke()` 호출, controller의 최신 revision 재조회, 기존 publication-ui의 미니홈 철회 테스트. 원격 도구는 confirm 이벤트를 감지했지만 focus 명령에서 timeout이 발생했다. 이것만으로 제품 버그 또는 정상 제품이라고 단정하지 않는다.
+- 범위: 기존 미니홈 왕복 테스트1개, TITLE_SHELF 선택을 가진 기존 계정의 실제 Chromium native confirm 취소/승인 및 RPC 실패 경계. 합성 RPC만 사용하며 실제 사용자 게시·DB·설정·Git 배포 변경0. `window.confirm` 대체0.
+- 실행: 테스트를 추가하기 전에 기존 중복 검사를 확인한다. 동일 UI로 취소 시 RPC0·승인 시 현재 revision·성공 표시·익명 비노출을 확인하고, 오류 시 성공 표시가 나오지 않는지 검사한다. 실패가 제품에서 재현되는 경우에만 앱을 최소 수정한다.
+- 후보: origin/master와 현재 소스 차이, 필요한 migration/hash·공개 설정·rollback 및 잔여 hosted 조건을 기존 evidence/작업판에 결속한다. 이번 로컬 결과를 실제 hosted 철회 PASS로 바꾸지 않는다. 새로운 원격 적용은 exact 후보 승인 전 실행하지 않는다.
+- 롤백: 추가 검사/문서만 되돌릴 수 있으며 저장소 사용자 변경은 보존한다. 기존 원격 원복 상태를 반복 변경하지 않는다.
+
+#### 이전 실행 8항 상세
+
 원복 보완(같은 승인 범위): Chrome 확인창 accept가 두 탭에서 멈추고 사용자에게도 확인창이 보이지 않아 UI 철회는 미검증으로 남긴다. 승인된 test 공개홈 `4006eb40-ec5a-47fc-8a5b-ec2b78e60daa`만 기존 `revoke_memory_minihome` 함수로 정리한다. test 카탈로그·정책 baseline·공개 닉네임·TITLE_SHELF 단일 항목을 검사하고 해당 소유자의 transaction-local auth context에서 현재 revision으로 호출한다. 직접 DELETE/새 권한·구조 변경은 없다. 원본/카탈로그/독립 공개보드 fingerprint 보존을 같은 transaction에서 검사하고 익명 null을 별도 조회한다. 이는 서버 정리 결과이며 브라우저 철회 PASS로 합산하지 않는다.
 
 1. **읽은 문서·저장소 근거:** 기존 AGENTS/START/확정01/PLANS와 release-v2 00/01/02/03, Collection/Home 첨부 계약·제품/카탈로그/이미지/QA/변경 기준을 이어 따른다. 명시 선택 해제는 `src/features/memory/components/MemoryMinihome.jsx:95–101`, 새 preview/동의 초기화는 같은 파일28–35·57–68, 서버 준비/게시 경계는 `src/features/memory/application/createMinihomeController.js:52–72`, typed 방문자 renderer는 `src/features/memory/components/MinihomeSnapshot.jsx:11–27`이다. 원격 연결 근거는 `evidence/2026-10-13-collection-home/retry-execution.json`, 익명 DTO 검사는 `retry-anonymous-dto.json`이다. verify-before-claiming에 따라 배포 metadata·실제 브라우저·로컬 모의 결과를 분리한다.
@@ -2329,3 +2340,15 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 6. **실제 명령·결과:** `node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts`: 기존 Chromium3 PASS 재검증(신규고유0, 모의RPC/합성 표지). `tests/collection-home.spec.ts:8–44`의 해제 회귀와104행 이후 typed 공개 모의 계약을 실제 hosted 결과와 구분한다. 기존 build33은 과거 결과이며 이번 재실행0. 실제 Chrome에서 기존 A의 unavailable 보드 선택 해제→선반 preview·승인 JPEG460×667 decode→사용자 직접 체크·미니홈 게시 PASS. 새 익명 origin에서 미니홈·동일 표지 decode·작품 Hub 링크/실제 캐릭터 정보·Memory0/Watch0 연결 PASS. A 새로고침 후 현재 선반 선택 복원·다시 preview 시 동의 unchecked PASS. 사용자 세션 없는 public client 호출 `read_memory_minihome` HTTP200, 최상위 `id,bio,entries,nickname,schemaVersion`과 privateFields0을 확인했다. 새 스크린샷은 retry-hosted-preview.jpg/retry-anonymous-home.jpg/retry-deployment.jpg, DTO 원문은 보관하지 않고 key/hash만 기록한다. 브라우저 철회 확인 조작은 focus timeout으로 미완료다. 서버 정리 후 별도 익명 RPC HTTP200/null 및 실제 화면 unavailable/img0을 확인했다. retry-revoked-server.jpg/retry-anonymous-withdrawn.jpg/retry-db-restored.jpg/retry-env-restored.jpg/retry-restored-deployment.jpg에 근거를 남겼다. git diff --check PASS. 이 결과는 서버 철회/익명 비노출 PASS이며 UI 확인창 완주 PASS가 아니다.
 7. **보안·개인정보·권리·관측:** 실제 인수는 기존 승인 catalog 표지·테스트 선반으로 제한했다. 개인 사진/감상/DOB/토큰/서버키·OAuth 비밀 기록0, raw DTO/private 자료 문서0. 공개 응답에는 원본 source/개인태그/감상/시청정보가 없음을 현재 응답에서 확인했다. 승인 public URL/클라이언트키만 test Preview에 재사용했고 새 Google 권한·키 재발급0. 표지 bytes의 추가 저장 복제0·현재 익명 열람은 실제 네트워크 읽기이며 무비용 보장으로 표현하지 않는다. 이전 일반 공개 고지/권리·정책/hash/신고·철회 경계를 완화하지 않는다.
 8. **남은 위험·다음 행동 하나:** 새 TITLE_SHELF의 실제 게시·익명 전달·기존 계정 복원 인수는 이번 test에서 PASS다. 전체 W18/출시 완료와 운영 PASS는 아직 아니다. 승인된 테스트 연결·게시·익명 인수와 설정/배포 원복은 마감했다. 다음1개는 W18 브라우저 철회 확인창 미검증을 도구 문제/서비스 문제로 구분해 닫고 기존 운영 후보 조건에 결속하는 것이다. 이번 hosted source변경/stale-preview 경우는 미실행이며 과거 로컬 SQL25의 결과와 분리한다. B 팔로우/차단/신고 등 과거 엔진의 기존 PASS를 이번 새 기능의 새 A/B 완주로 합산하지 않으며 전체 SQL/기초 Google/실기기 재검사를 추가하지 않는다. 운영 반영은 후속 정확 후보별 승인 경계로 남긴다.
+
+
+#### W18 확인창 진단·후보 결속 결과 — 이번 실행 8항 보고
+
+1. **읽은 문서·코드:** AGENTS, CODEX_START_HERE, 확정01, PLANS, 이미지05·QA07·변경09, release-v2 00/01/02/03 및 Collection/Home 실행 계약을 대조했다. 실제 확인창은 MemoryMinihome.jsx:66의 confirm→controller.revoke, 최신 revision/오류 처리는 createMinihomeController.js, 서버 연결은 SupabasePublicationGateway.js를 따른다. 기존 publication-ui.spec.ts:448의 미니홈 왕복을 재사용했다.
+2. **가정·미결:** 이번 “ㄱ”는 로컬 진단·후보 준비에 사용했다. 실제 hosted UI 철회 성공으로 간주하지 않았다. 운영 DB/flag 최신 값은 미조회이며 과거 Public off 기록으로 현재를 추정하지 않는다.
+3. **계획:** 위 W18 분리 진단 계획과 단일03 현재 카드. 원래 W18/관련 W06·W09·W11·W19를 유지하며 신규 기능/작업판0.
+4. **변경:** tests/collection-home.spec.ts에 native confirm 취소·오류·성공을 연속 검증하는 테스트1개 추가. 앱 런타임 변경0. 기존00/01/02/03 및 evidence의 진단 JSON·화면·production-candidate.json 갱신. 운영 기준 b0541ff 대비 소스40a3dac의 앱21파일+SQL1개 해시를 고정했고 현재 src/SQL과 동일함을 확인했다.
+5. **DB·롤백:** 이번 DB 적용0. 후보 SQL20261012160330의 SHA256은 8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68. 새 server/client flag만 정확한 승인 후 활성 대상이며 기존 가입/정책/한도/catalog 연결은 보존한다. 롤백은 새 flag 비활성+Git 재배포이며 layoutVersion/선택/구버전 writer 보호는 유지한다. 구버전 화면에서 v2 저장이 거절될 수 있으므로 데이터 다운그레이드 없이 roll-forward를 우선한다.
+6. **검증:** node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts tests/publication-ui.spec.ts --grep "typed home native confirmation|mini-home explicit representative" → exit0, 2 PASS/8.6초(신규1·기존1). window.confirm 대체0, 취소 RPC0, 충돌 시 거짓 성공0, revision8/9 재조회, 성공 후 익명 비노출 PASS. 로컬 합성 RPC 결과이며 hosted PASS가 아니다. git fetch 후 origin/master 및 운영 build-info의 commit/checkoutCommit b0541ff·source vercel-git 확인; semanticMatch 값은 없어 확인하지 못했다. 새 build/광범위 suite 재실행0.
+7. **보안·개인정보·관측:** 합성 자료만 테스트하고 외부 요청 차단. 원본/개인정보/인증값/정책/요금/운영 변경0. 증거는 공개 소스 해시·합성 화면이며 비밀값/응답 원문을 저장하지 않는다. 기존 원복 완료 상태를 다시 변경하지 않았다.
+8. **남은 조건·다음1개:** 서비스 확인창 버그는 재현되지 않았고 이전 CUA focus timeout은 도구 실패 근거다. 실제 hosted UI 철회 미검증은 기록으로 유지하되 같은 확인창 검사를 반복하지 않는다. 다음은 소스40a3dac의 hosted source-version 변경/stale-preview 경계 검사만 준비한다. 기존 테스트 자료·동의는 재사용 가능한 범위만 사용하며 새 동의를 대신 수락하지 않는다. 운영 후보는 PREPARED_NOT_AUTHORIZED_FOR_PRODUCTION: 실제 운영 schema/flag/catalog baseline 및 정확 migration·Public flag·master 배포 승인 전에 실행하지 않는다. 과거 국가·비용·가입 결정을 다시 묻지 않는다.

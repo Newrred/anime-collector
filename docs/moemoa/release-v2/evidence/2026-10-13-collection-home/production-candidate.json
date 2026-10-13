@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "W18_COLLECTION_HOME_20261013_40a3dac",
+  "status": "PREPARED_NOT_AUTHORIZED_FOR_PRODUCTION",
+  "sourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "productionBaseCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+  "observedProduction": {
+    "url": "https://www.moemoa.xyz/build-info.json",
+    "commit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "checkoutCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "source": "vercel-git",
+    "semanticMatch": null,
+    "dbAndFlagsReadThisSession": false
+  },
+  "appAndSchemaEqualToHostedCandidate": true,
+  "files": [
+    {
+      "path": "src/components/collection/ChannelHeader.jsx",
+      "sha256": "db27c861f63e3f0b2981c8f6728bf818b736888a8162858434e1da69f57ebdba"
+    },
+    {
+      "path": "src/components/collection/CollectionGroupTabs.jsx",
+      "sha256": "a623cc55bb824490254810cee125cbe2e3b6b8e68785e72d88e31ec67e55a642"
+    },
+    {
+      "path": "src/features/bookshelf/BookshelfView.jsx",
+      "sha256": "b84cba4545db647bd3272ec43dd87b8115d4169390e763c360135f6199119099"
+    },
+    {
+      "path": "src/features/bookshelf/CollectionGroups.jsx",
+      "sha256": "f0fa9ed4254b843fccced6497cdcd985cb9440dbca058aaf701c2cde09e69b69"
+    },
+    {
+      "path": "src/features/bookshelf/CollectionProfile.jsx",
+      "sha256": "994dc3d72a910945160fc6cd94ad4687dad0768fe390dd4cb6b51f3d1e310436"
+    },
+    {
+      "path": "src/features/bookshelf/bookshelfSettings.js",
+      "sha256": "2eae0c19d12c9235acbedc5f3fb730e9b66c722837296564bb73efb00b636428"
+    },
+    {
+      "path": "src/features/bookshelf/collection-home.css",
+      "sha256": "7fa9307982f29fd0fa987c8ce139379b684f6648e382804b9e3901c1aae53331"
+    },
+    {
+      "path": "src/features/memory/adapters/supabase/SupabasePublicationGateway.js",
+      "sha256": "c958b9c1ab4e7b517815dbecf2b61310a889ca8525fb47b0e897b6bf367e6886"
+    },
+    {
+      "path": "src/features/memory/application/createMinihomeController.js",
+      "sha256": "714a9303655686f2b9bc75d7153bade080f47622ee9153e4b0dbdbb15a50e0a1"
+    },
+    {
+      "path": "src/features/memory/application/createPublicationController.js",
+      "sha256": "d333f07025bb0f505b5b26acab0be154838c863c9dfacb566e16d1b8d36b2b30"
+    },
+    {
+      "path": "src/features/memory/components/BoardCollectionGrid.tsx",
+      "sha256": "4af916d47e29563ab20c69ae4d304915798b79bef13388559c55590e2014b713"
+    },
+    {
+      "path": "src/features/memory/components/MemoryBoardView.jsx",
+      "sha256": "03d78d1b5a9d880f5e83889a2600fde646619b88f34001301ded4b4afba6157e"
+    },
+    {
+      "path": "src/features/memory/components/MemoryMinihome.jsx",
+      "sha256": "eed210abf4188c2ed4266fe322da789de4640d3317928c6937c46cb28fa2e044"
+    },
+    {
+      "path": "src/features/memory/components/MemoryPublicationPanel.jsx",
+      "sha256": "320bcb3afbdb05b3225911a4f46e59bf2658888ff560d7d81b0c6704e57502b5"
+    },
+    {
+      "path": "src/features/memory/components/MinihomeSnapshot.jsx",
+      "sha256": "227b472d3dd8e6766ff9c439a9993c9b3db5057df3b87b5944a5b53f90f1bdbf"
+    },
+    {
+      "path": "src/features/memory/components/PublicTitleShelf.jsx",
+      "sha256": "aba3ce845ae5c69bd6a2eed52f9eb1c7843a5e1c03eda32e51a083f81dde8043"
+    },
+    {
+      "path": "src/features/memory/components/memory-publication.css",
+      "sha256": "196d13bebe196c13e21f15a89343ad7a407da3863674bad390a16a4976a17be5"
+    },
+    {
+      "path": "src/features/memory/components/publicationCopy.js",
+      "sha256": "66e81c83471602d683299e42073f1f41408b5397bbfabed1f0f932aa53565c98"
+    },
+    {
+      "path": "src/features/memory/domain/minihomeView.js",
+      "sha256": "ca3a399872f47ccf0861dde36d932922e1b595e9478a964a15b0de772920970c"
+    },
+    {
+      "path": "src/features/memory/runtime/platformPublication.js",
+      "sha256": "f157a1e2bd18f2626ca40ffd55dbd2b2ce5a386fc2e35f97ae5227a9522dfce8"
+    },
+    {
+      "path": "src/features/titles/application/titleStateSync.js",
+      "sha256": "157f7a639153a29aca9ab3116a145a71835c3c7532826575128d190f06590196"
+    },
+    {
+      "path": "supabase/migrations/20261012160330_collection_home_sections.sql",
+      "sha256": "8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68"
+    }
+  ],
+  "migration": {
+    "path": "supabase/migrations/20261012160330_collection_home_sections.sql",
+    "defaultEnabled": false,
+    "proposedDataReleaseId": "PROD_COLLECTION_HOME_20261013_40a3dac",
+    "appliedToProduction": false
+  },
+  "intendedSettings": {
+    "server": "private.memory_publication_settings.collection_home_enabled=true",
+    "web": "PUBLIC_MEMORY_COLLECTION_HOME_V1=1",
+    "preserve": "Existing Public, signup, consent/policy revisions, quotas and production catalog connection; never copy test catalog overrides"
+  },
+  "scope": "Owner collection joins existing shelves and Boards; explicitly selected approved catalog covers may form TITLE_SHELF public sections. Existing cards, Board membership, home identity and follows remain.",
+  "rollout": [
+    "Read production migration/function/config baseline and resolve approved covers without changing data. Capture non-secret snapshot and rollback values.",
+    "After remaining hosted boundary acceptance and exact production approval, apply version-controlled migration with new flag off and record data release ID; verify privileges and preservation.",
+    "Commit reviewed candidate to master and push connected GitHub repository; verify Vercel Git deployment source SHA. Enable exact approved client/server flag pair only; verify owner/anonymous paths.",
+    "User performs any new public consent/publication; never publish automatically."
+  ],
+  "rollback": [
+    "Set only new server feature flag false, restore captured client flag and redeploy reviewed Git source. Existing Board public controls remain unchanged.",
+    "Preserve new schema, selections and layoutVersion data. Do not drop writer guard or downgrade stored layout. An older client may be prevented from saving v2 layout; prefer roll-forward fix."
+  ],
+  "remaining": [
+    "Hosted source-version change/stale-preview boundary not executed for this candidate; historical local SQL PASS is separate.",
+    "Hosted native-confirm owner withdrawal not completed through the earlier CUA transport; server withdrawal and anonymous null were verified. Local native confirmation passed; no app bug reproduced.",
+    "Live production schema/flag/catalog baseline must be read before an exact application proposal.",
+    "Exact production migration, new flag activation and master push/deployment approval is not granted by this local continuation."
+  ],
+  "remoteMutationsThisSession": 0
+}

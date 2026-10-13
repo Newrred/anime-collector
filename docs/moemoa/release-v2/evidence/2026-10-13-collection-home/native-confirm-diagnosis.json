@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-13",
+  "sourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "type": "LOCAL_CHROMIUM_SYNTHETIC_RPC",
+  "command": "node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts tests/publication-ui.spec.ts --grep \"typed home native confirmation|mini-home explicit representative\"",
+  "exitCode": 0,
+  "passed": 2,
+  "newUniqueTests": 1,
+  "durationSeconds": 8.6,
+  "windowConfirmOverridden": false,
+  "assertions": [
+    "Native confirm cancellation sends no revoke",
+    "Server failure cannot display private success",
+    "Each revoke loads current revision (8 then 9)",
+    "Successful revoke removes owner public link and visitor content",
+    "Existing independent Board remains published in pre-existing round-trip test"
+  ],
+  "runtimeChanges": 0,
+  "hostedUiWithdrawalPass": false,
+  "diagnosis": "No app failure reproduced. Earlier hosted CUA focus timeout is automation evidence, not proof of a successful hosted user click.",
+  "screenshot": "native-confirm-revoked.png"
+}

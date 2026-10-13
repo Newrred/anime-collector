@@ -977,3 +977,12 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 [2026-10-13 W18 실제 연결 실패/로컬 보완] 승인8446753은 기존 A 계정 Collection의 실제 선반/승인 표지/Memory0와 공유 선택 복원까지만 PASS. 사용할 수 없는 옛 보드의 참조를 해제할 UI가 없어 preview 거부. 명시 선택 해제 추가 후 모의 Chromium3 PASS(신규1), build33 PASS. 원본 자동 삭제·동의 복원0. 새 타입 hosted 게시/익명 인수는 미완료. 임시 DB5값 baseline/off 원복; 상세 배포/env 원복 상태는 단일 작업 카드와 hosted-connection-execution.json 참조.
 
 [2026-10-13 W18 수정40a3dac 실제 인수] 이전8446753의 남은 Preview3override 제거를 별도 사용자 승인 후 완료하고, a6b6dda Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/exactSHA/별칭으로 이전 원복을 닫았다. 수정40a3dac은 별도 exact test 승인 후 DB5필드·Preview4값만 임시 연결했으며 fixture/업로드/새구조0이다. 실제 Git Preview dpl_F29WgmHX8ahugV96qHyhyRijqMma에서 기존 A의 unavailable 보드 명시 해제→현재 선반 preview→사용자 직접 동의·게시, 새 익명 origin 미니홈/실제 승인JPEG460×667 decode·작품Hub/캐릭터/Memory0·Watch0 연결 PASS. A 새로고침 선택 복원·재미리보기 동의 unchecked로 W18/Q02/Q03의 해당 부분을 실제 확인했다. 사용자 세션 없는 read_memory_minihome HTTP200 응답은 id,bio,entries,nickname,schemaVersion만 최상위에 포함하고 privateFields0; 원문 대신 key/hash 근거를 retry-anonymous-dto.json에 보존한다. 이번 Chromium3은 기존 모의 검사 재검증이고 신규고유0·runtime변경0·build재실행0이다. **이번 설정/배포 원복은 완료**했다. DB5값 baseline·Preview정책 복귀/새3override 제거·phone-test a6b6dda Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/별칭 확인. 브라우저 확인창 자동 조작은 두 탭에서 멈춰 UI 철회는 미검증이다. 같은 승인 범위의 기존 서버 revoke 함수로 홈1개를 철회하고 익명 HTTP200/null·실제 unavailable/img0 및 원본/표지/독립보드 fingerprint 보존을 확인했다. 이 서버 정리를 UI PASS나 전체 W18 완료로 올리지 않는다. 운영/master b0541ff 불변, 과거 SQL·A/B·신고/차단·실기기 증거와 분리한다. 최신 상태는 단일03과 retry-execution.json이다.
+
+
+### 2026-10-13 W18 native confirm 분리 진단·후보 인수 경계
+
+- 로컬 Chromium 기본 confirm 취소/승인, 최신 revision 조회, PUBLICATION_CONFLICT 시 성공 오표시 방지, 철회 후 owner 링크·익명 내용 비노출 PASS. 새 typed 검사1+기존 미니홈 왕복1=이번2 PASS. 기존 독립 Board 보존 검사도 통과했다.
+- 런타임 변경 없이 통과했으므로 서비스 결함은 재현되지 않았다. hosted CUA focus 명령 timeout은 도구 실패 증거다. 실제 hosted owner UI 철회 완료를 증명하지는 않으며 기존 서버 철회/익명 null PASS와 분리한다.
+- 운영 후보는 앱/SQL40a3dac, 기준 운영 Git/www b0541ff. production-candidate.json의 22파일 해시와 단일 migration, 새 flag2개·롤백 조건을 따른다. 운영DB/flag 현재값 미조회·운영 적용0.
+- 남은 기능 경계는 hosted source 변경 후 stale-preview 게시 거절 및 공개 내용의 비자동 갱신이다. 로컬 SQL25의 기존 PASS를 실제 hosted PASS로 치환하지 않는다. 이 경계에 한정해 다음 실행을 준비하며 신규 가입/전체 회귀/동일 확인창 반복은 요구하지 않는다.
+- 운영 전 실제 baseline 확인과 정확한 DB/flag/master 배포 승인 필요. 이번 continuation은 그 승인으로 재사용하지 않는다.

@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 확인창 진단·운영 후보 준비:** 기본 Chromium 확인창의 취소/승인·최신 revision·서버 오류 경계와 기존 미니홈 왕복, 로컬 합성 RPC 검사 2개 PASS(신규 1개). 서비스 오류는 재현되지 않아 앱 변경0. 이전 hosted CUA focus timeout과 실제 hosted UI 철회 미검증은 구분한다. 운영/www Git 소스 b0541ff와 대조해 앱21파일·migration1개를 [운영 후보](evidence/2026-10-13-collection-home/production-candidate.json)에 고정했다. runtime/schema는 실제 test 검증40a3dac과 동일. 원격 적용0이며 운영 DB/설정 현재 값은 이번에 조회하지 않았다. 다음1개는 동일 후보의 hosted source-version 변경/stale-preview 경계에 한정한 검사 준비다. 새 가입·전체 회귀·같은 확인창 반복 검사는 추가하지 않는다.
+
+
 > **2026-10-13 W18 재개·실제 공개 인수:** 이전8446753의 남은 Preview3override를 사용자 명시 승인 후 제거하고, a6b6dda Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/Preview/소스/별칭으로 원복 마감. 수정40a3dac은 별도 exact 승인으로 test 설정5필드·Preview4값만 임시 연결했다. dpl_F29WgmHX8ahugV96qHyhyRijqMma READY/exactSHA/별칭에서 기존 A의 unavailable 보드 명시 해제→선반 preview→본인 직접 동의·게시→새 익명 origin 미니홈/460×667 승인 표지 decode·작품 Hub/캐릭터/Memory0·Watch0 연결 PASS. A 새로고침 선택 복원·다시 preview의 동의 unchecked, 익명 DTO privateFields0 확인. 기존 Chromium3 재검증 PASS이며 신규고유 테스트0·새 runtime 변경0·이번 build 재실행0. **원복 완료:** 기존 서버 철회 함수로 test 홈1개를 비공개 처리하고 익명 HTTP200/null·화면 unavailable/img0, 원본·표지·독립 보드 fingerprint 보존을 확인했다. DB5필드와 Preview4값은 baseline 복귀, phone-test a6b6dda의 Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/별칭 확인. 브라우저 확인창 조작은 멈춰 UI 철회 PASS로 세지 않는다. 운영master b0541ff/운영DB 변경0. 최신 결과는 [03 현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)와 evidence/2026-10-13-collection-home/retry-execution.json을 따른다. 기존 M/W/Q/D와 과거 실패·완료 증거는 유지한다.
 
 
