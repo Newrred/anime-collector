@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidateId": "W18_COLLECTION_HOME_20261013_40a3dac",
-  "status": "PREPARED_NOT_AUTHORIZED_FOR_PRODUCTION",
+  "status": "BASELINE_VERIFIED_AWAITING_EXACT_PRODUCTION_APPROVAL",
   "sourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
   "productionBaseCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
   "observedProduction": {
@@ -10,7 +10,7 @@
     "checkoutCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
     "source": "vercel-git",
     "semanticMatch": null,
-    "dbAndFlagsReadThisSession": false
+    "dbAndFlagsReadThisSession": true
   },
   "appAndSchemaEqualToHostedCandidate": true,
   "files": [
@@ -116,18 +116,18 @@
   },
   "scope": "Owner collection joins existing shelves and Boards; explicitly selected approved catalog covers may form TITLE_SHELF public sections. Existing cards, Board membership, home identity and follows remain.",
   "rollout": [
-    "Read production migration/function/config baseline and resolve approved covers without changing data. Capture non-secret snapshot and rollback values.",
-    "After remaining hosted boundary acceptance and exact production approval, apply version-controlled migration with new flag off and record data release ID; verify privileges and preservation.",
-    "Commit reviewed candidate to master and push connected GitHub repository; verify Vercel Git deployment source SHA. Enable exact approved client/server flag pair only; verify owner/anonymous paths.",
-    "User performs any new public consent/publication; never publish automatically."
+    "Before any approved mutation, recheck production baseline and candidate file hashes. Abort on drift or required validation failure.",
+    "Apply exactly 20261012160330_collection_home_sections.sql transactionally with collection_home_enabled=false; record version-controlled migration and data release ID PROD_COLLECTION_HOME_20261013_40a3dac; verify data/privileges preservation.",
+    "Set only Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1. Apply reviewed 21-app-file patch and migration to current master via connected GitHub; exclude unrelated development tools/workflows. Verify required checks and Vercel Git Ready/source SHA/www matching.",
+    "Enable only private.memory_publication_settings.collection_home_enabled=true with all previous policy/signup/limits/catalog settings preserved; verify owner choices and anonymous existing home compatibility.",
+    "New public selection requires personal user consent; do not automatically publish or fabricate a receipt."
   ],
   "rollback": [
-    "Set only new server feature flag false, restore captured client flag and redeploy reviewed Git source. Existing Board public controls remain unchanged.",
-    "Preserve new schema, selections and layoutVersion data. Do not drop writer guard or downgrade stored layout. An older client may be prevented from saving v2 layout; prefer roll-forward fix."
+    "Set new server flag false; set new client flag 0 (previous effective behavior was absent/off) and redeploy reviewed Git rollback source. Preserve existing independent public Board/home flags.",
+    "Keep added schema and layoutVersion/selection data with writer protection. Older client may be prevented from saving v2 layout; do not drop guards or downgrade data, prefer roll-forward repair."
   ],
   "remaining": [
     "Hosted native-confirm owner withdrawal not completed through the earlier CUA transport; server withdrawal and anonymous null were verified. Local native confirmation passed; no app bug reproduced.",
-    "Live production schema/flag/catalog baseline must be read before an exact application proposal.",
     "Exact production migration, new flag activation and master push/deployment approval is not granted by this local continuation."
   ],
   "remoteMutationsThisSession": 0,
@@ -137,5 +137,19 @@
     "type": "SQL_NEGATIVE_PATH_WITH_ROLLBACK",
     "browserAcceptance": false,
     "evidence": "stale-preview-hosted.json"
+  },
+  "productionBaselineEvidence": "production-baseline.json",
+  "approvalScope": {
+    "runtimeSource": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+    "appFiles": 21,
+    "migrations": 1,
+    "newSettings": 2,
+    "gitProductionBranch": "master",
+    "productionProject": "okchpyagfucpzpyrfgol",
+    "newUploads": 0,
+    "newAccounts": 0,
+    "automaticPublications": 0,
+    "originalDeletions": 0,
+    "newCharges": 0
   }
 }

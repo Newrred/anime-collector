@@ -789,11 +789,12 @@
 원복 완료: DB5필드 baseline/off·Preview정책 복귀/이번 새3override 제거/phone-test a6b6dda 복구. Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/canonical alias 확인. 기존 서버 revoke 함수로 test홈1개 철회→익명HTTP200/null·화면 unavailable/img0·원본/표지/독립보드 fingerprint 보존 PASS.
 후속 로컬 진단: native confirm 취소/승인·최신 revision·서버 오류 시 거짓 성공 방지와 기존 왕복2 PASS(신규1). 앱 오류 미재현/runtime변경0. 이전 hosted CUA focus timeout과 UI 철회 미검증은 별도로 유지한다.
 후속 hosted 경계 완료: 승인b617817 rollback-only SQL1회 실행/exit0. stale publish PREVIEW_CHANGED·visitor projection0·전후 설정/home/source/독립보드/catalog 동일 PASS. 실제 SQL 결과이며 브라우저 새 게시/HTTP PASS와 구분한다. Google 신규가입/실기기/운영 신규 PASS0.
-운영 후보 준비: production-candidate.json에 source40a3dac / productionBase b0541ff / 앱21+SQL1 hash·새 flag2개·롤백 결속. 운영 build-info commit/checkoutCommit b0541ff·source vercel-git 확인. 운영 DB/flag 현재 값 미조회·exact 운영 승인 없음.
+운영 후보 준비: production-candidate.json에 source40a3dac / productionBase b0541ff / 앱21+SQL1 hash·새 flag2개·롤백 결속. 운영 build-info commit/checkoutCommit b0541ff·source vercel-git 확인. 후속 운영 DB/Vercel read-only 대조 완료·exact 운영 승인 없음.
 보존/운영: test 구조/catalog표지89,300B/선반/저장작품 유지, 원본 삭제0. 이전 데이터/config migration 이력20261012180421/180447/181251 유지, 이번 새 migration 이력0. master b0541ff/운영DB/운영Public 변경0.
 경계 후보 준비 완료: W18_STALE_PREVIEW_ROLLBACK_20261013 / SQL c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e. 새 배포 없이 테스트 DB 트랜잭션 내부 flag1/선반version/preview만 사용 후 무조건 rollback. 로컬5 PASS·57테이블 동일, hosted0.
 후속 승인·실행 완료: b617817 테스트 DB1회·전체롤백 승인→TLS정확대상/자료 확인→서버거부 및 원복 PASS. 원격 persistent write0/기존 원복 상태 유지.
-다음 행동 하나: 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 기준을 읽기전용 대조해 정확 적용/rollback 조건을 확정한다. 운영 migration/newflag/master 배포는 정확 승인 전 실행하지 않는다. 상세는 stale-preview-hosted.json 및01의 실제 실행8항 보고.
+운영 대조 완료: migration41개/누락컬렉션1개, 신규column/RPC 없음. 기존 Public/가입guard/고지 유지·catalog4292/승인cover4292. Vercel 새flag Project/Shared0, 기존publication/minihome1·고지/reader 운영일치. Git/www b0541ff 동일.
+다음 행동 하나: 앱40a3dac의21파일+SQL1개·새flag2개·master Git/Vercel 운영 적용에 대한 정확 승인. 원본삭제/자동게시/테스트설정복사/국가·권리·가입·한도·요금 변경0. 후보와 rollback은 production-candidate.json, 실제기준은 production-baseline.json 및01의 이번8항 보고.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>

@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 운영 기준 대조 완료:** 운영DB read-only 확인: 기존 Public/미니홈 활성·가입guard 유지, 정책3종 일치, catalog/승인cover4292개. 누락migration은 컬렉션20261012160330 한 개뿐. Vercel Production publication/minihome=1·운영 reader URL 확인, 새 Collection flag는 Project/Shared 모두 없음. Git/www b0541ff 일치. 필요한 적용은 앱40a3dac의21파일+SQL1개와 새 server/client flag2개이며 아직 쓰기/배포0. 다음은 이 정확 운영 후보의 명시 승인. [기준 증거](evidence/2026-10-13-collection-home/production-baseline.json), [후보](evidence/2026-10-13-collection-home/production-candidate.json).
+
+
 > **2026-10-13 W18 stale-preview 실제 서버 경계 마감:** 사용자 승인 b617817의 rollback-only SQL을 moemoa-test에서1회 실행했다. PREVIEW_CHANGED 거부·오래된 선반 projection0 PASS, 별도 전후 조회에서 설정/home/source/독립보드/catalog 보존·homePrivate=true 확인. 공개/동의/구조/배포/운영 변경0. [실제 근거](evidence/2026-10-13-collection-home/stale-preview-hosted.json). 다음은 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 읽기전용 대조이며 새 가입·재게시·같은 확인창 검사는 반복하지 않는다.
 
 

@@ -994,3 +994,7 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### 2026-10-13 W18 hosted stale-source 경계 마감
 
 정확 승인 b617817로 test DB1회 실행: PREVIEW_CHANGED 거부·visitor builder entries0 PASS. 전체 설정 및 home/source/독립보드/catalog fingerprint의 별도 전후 일치·비공개 상태 유지 PASS. 이는 실제 SQL 함수 경계이며 브라우저/익명 HTTP/새 동의 PASS가 아니다. 원격 persistent write0, 이전 원복 상태 유지. 운영 baseline 대조와 정확 운영 승인은 다음 단계다. 근거: evidence/2026-10-13-collection-home/stale-preview-hosted.json.
+
+### 2026-10-13 W18 운영 baseline 결속
+
+운영 read-only 및 Vercel UI 대조 완료. 기존 Public/미니홈·정책/가입 조건은 유지하고, 새migration1/앱21파일/신규flag2개만 정확 승인 대상으로 한다. production-baseline.json은 실제운영 기준이며 예전 Public off 로그를 현재값으로 쓰지 않는다. source40a3dac의 기존 hosted/로컬 검증을 유지하고 이번 read-only 조회를 운영 적용 PASS로 표시하지 않는다. schema/data release·Git/Vercel SHA 및 실제 UI는 승인 적용 이후 확인한다.

@@ -2382,3 +2382,19 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 6. **검증:** stale publish가 정확히 PREVIEW_CHANGED로 실패하고 non-strict visitor builder의 entries가0인 실제 서버 경계 PASS. 로컬5/57테이블 리허설은 앞선 별도 증거다. 사전 읽기 집계 SQL 괄호 누락으로3회 조회가 실패했지만 probe 실행 전이었고, 조회문 수정 후 승인 SQL은1회만 실행했다. 브라우저/Google/실기기/HTTP 이미지 결과로 확대하지 않는다.
 7. **보안/관측:** psql 비밀번호는 로컬 환경으로만 전달하고 출력/문서에 포함하지 않았다. 응답에는 본문/preview hash 없이 metadata와 fingerprint만 남겼다. 키·이미지·동의 추가전송0. SQL negative 호출은 성공을 허용하지 않으며 외부 세션에 공개된 데이터가 없다.
 8. **잔여/다음1개:** W18의 hosted stale-source DB 경계는 마감했다. 기존 테스트 설정/배포를 다시 켜지 않는다. 다음은 동일 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 기준을 읽기전용으로 대조해 정확한 적용·rollback 조건을 확정하는 것이다. 운영 migration/newflag/master Git 배포는 별도 정확 승인 전 실행하지 않는다. 이전 CUA 기반 hosted UI 철회 미검증은 기록으로 유지하며 동일 확인창 검사를 반복하지 않는다.
+
+#### W18 운영 기준 읽기전용 대조 — 2026-10-13
+
+기존17항 계획의 운영 후보 결속을 이어간다. TLS 검증된 운영 연결에서 read-only 트랜잭션으로 migration 목록·필수 함수·공개 설정·카탈로그 release/표지 준비 집계·layout 버전 집계만 조회한다. 비공개 본문/키/이미지 다운로드는 하지 않는다. Git 원격과 실제 build-info의 SHA를 대조하고, Vercel의 production 설정은 가능하면 키/비밀값 아닌 flag 상태만 확인한다. 확인되지 않은 설정을 로컬 env 파일로 대신 확정하지 않는다. 결과를 기존 production-candidate.json에 결속하며 차이가 있으면 필요한 변경만 추린다. 코드/DB/원격 설정 변경 없이 정확한 적용/복구 후보를 완성한다.
+
+
+#### W18 운영 기준 대조·정확 적용 범위 확정 — 이번 실행 8항 보고 (2026-10-13)
+
+1. **문서/근거:** 기존 AGENTS·START·확정01·release-v2 계획/계약/현재 카드와 production-candidate.json을 대조했다. 연결은 inspect-retention.py:22–48의 production ref allowlist/TLS verify-full을 재사용했다. 화면 의존성은 platformPublication.js:8–10,35,47–54, migration은20261012160330 원본을 따른다.
+2. **가정/미결:** 이번 “ㄱ”는 운영 read-only 대조이며 migration/flag/master 배포 승인이 아니다. 기존 hosted native-confirm UI 미검증은 제한으로 유지한다. 이번 국가/권리/비용 결정을 다시 열지 않는다.
+3. **계획:** 위 W18 운영 기준 읽기전용 대조와 단일03. 과거의 Public off 기록을 현재 상태로 재사용하지 않는다.
+4. **변경:** 앱/SQL 소스 변경0. production-baseline.json과 production-candidate.json, 기존00/01/02/03에 실제 운영 기준·정확 적용/복귀 범위를 기록했다.
+5. **DB/복귀:** 운영 migration41개이며 로컬과 비교해 누락된 것은20261012160330 한 개뿐이다. 새 collection column/RPC와 rename 대상의 새 이름은 없고 기존 함수는 존재한다. 현재 선반row1개는 layoutVersion 미기입. 운영 Public read/write/image/minihome/follow/report=true, signup guard=true, 정책3종 모두 MOEMOA_PUBLIC_GENERAL_20261011_01. 활성 catalog4292개와 승인 cover4292개 확인. 실제 쓰기0. 후속 승인이 나면 migration 기본off→화면 Git 배포→새 server flag만 활성. 복귀는 새 server flag=false 및 client flag=0 + Git 재배포, 추가 schema/layout/writer 보호는 보존한다.
+6. **검증:** production read-only SQL exit0/transaction_read_only=on, 비공개 본문 없이 schema/설정/집계만 조회. git fetch 후 origin/master 및 www build-info commit/checkoutCommit 모두 b0541ff·source vercel-git 일치. master는40a3dac의 조상이며 후보 src/SQL22파일 동일. Vercel 실제 Project+Shared의 새 PUBLIC_MEMORY_COLLECTION_HOME_V1 검색0; Production publication/minihome=1, 고지revision DB와 일치, PUBLIC_SUPABASE_URL은 운영ref 일치. 비밀키 reveal0. 이번 신규 테스트/build0, 이전 로컬/hosted 증거를 그대로 사용한다.
+7. **보안/개인정보/권리/관측:** private 본문/이미지/토큰 조회·출력0. 보관 값은 운영 flag/고지/카탈로그 집계·function hash·migration 이력이다. 기존 test원복/운영설정/권한/가입/한도/요금 변경0. 표지 재업로드나 테스트 카탈로그 연결 복사가 필요하지 않다.
+8. **정확 적용 후보/다음1개:** 앱40a3dac의 기존 운영 대비21파일+원본migration1개, 서버 collection_home_enabled=true와 Vercel Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1만 추가하는 후보. 이 후보를 검토한 Git commit으로 master에 반영하고 연결 Vercel Git 배포의 source SHA/www를 확인한다. 새 동의·자동 게시·기존기록 삭제 없이 개인 컬렉션/공개 선택 연결을 적용한다. 배포 전 baseline drift 또는 필수 검증 실패 시 쓰기를 중지한다. 다음은 이 명시된 운영 범위의 승인이다. 전체 개발 브랜치 병합이나 다른 tools/workflow 변경을 포함하지 않는다.

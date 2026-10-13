@@ -1,0 +1,251 @@
+{
+  "at": "2026-10-13T07:50:02.406873+00:00",
+  "readOnly": "on",
+  "settings": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "signup_declaration_required": true,
+    "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+  },
+  "functions": {
+    "public.get_memory_publication(uuid)": {
+      "hash": "26ff56f23ebe27f9cab50ddbd574e8c8",
+      "exists": true
+    },
+    "public.list_memory_minihome_shelves()": {
+      "hash": null,
+      "exists": false
+    },
+    "private.build_memory_minihome(uuid,jsonb,boolean)": {
+      "hash": "42f824104157465318513b8ce145f1c8",
+      "exists": true
+    },
+    "private.build_memory_minihome_v1(uuid,jsonb,boolean)": {
+      "hash": null,
+      "exists": false
+    },
+    "private.get_memory_publication_before_collection(uuid)": {
+      "hash": null,
+      "exists": false
+    },
+    "public.apply_title_sync_entity(text,text,jsonb,bigint,boolean,uuid)": {
+      "hash": "be250b93d4e3ff7579428c38462f0893",
+      "exists": true
+    }
+  },
+  "migrations": [
+    {
+      "name": "catalog_preview_read_model",
+      "version": "20260819021327"
+    },
+    {
+      "name": "catalog_preview_foreign_key_indexes",
+      "version": "20260819021408"
+    },
+    {
+      "name": "memory_user_schema",
+      "version": "20260902054107"
+    },
+    {
+      "name": "memory_user_functions",
+      "version": "20260902054119"
+    },
+    {
+      "name": "memory_user_security",
+      "version": "20260902054132"
+    },
+    {
+      "name": "memory_user_retention",
+      "version": "20260902055512"
+    },
+    {
+      "name": "memory_user_foreign_key_indexes",
+      "version": "20260902055852"
+    },
+    {
+      "name": "catalog_cover_memory_assets",
+      "version": "20260903141500"
+    },
+    {
+      "name": "catalog_optional_source_provider",
+      "version": "20260907193000"
+    },
+    {
+      "name": "memory_publication_boundary",
+      "version": "20260923090000"
+    },
+    {
+      "name": "memory_public_images",
+      "version": "20260923093000"
+    },
+    {
+      "name": "memory_publication_source_status",
+      "version": "20260923182210"
+    },
+    {
+      "name": "memory_minihomes",
+      "version": "20260923183940"
+    },
+    {
+      "name": "memory_relationships",
+      "version": "20260923192300"
+    },
+    {
+      "name": "memory_moderation",
+      "version": "20260923213901"
+    },
+    {
+      "name": "memory_resource_controls",
+      "version": "20260924115258"
+    },
+    {
+      "name": "catalog_release_transitions",
+      "version": "20260924121214"
+    },
+    {
+      "name": "memory_image_retry_recovery",
+      "version": "20260924193626"
+    },
+    {
+      "name": "memory_public_board_author",
+      "version": "20260924194059"
+    },
+    {
+      "name": "memory_visual_json_null",
+      "version": "20260924195510"
+    },
+    {
+      "name": "private_image_delete_fence_compat",
+      "version": "20260925152858"
+    },
+    {
+      "name": "memory_private_image_boundary",
+      "version": "20260925152859"
+    },
+    {
+      "name": "private_representation_public_rights",
+      "version": "20260925164126"
+    },
+    {
+      "name": "memory_content_review",
+      "version": "20260926140122"
+    },
+    {
+      "name": "memory_general_postmoderation",
+      "version": "20260927042334"
+    },
+    {
+      "name": "memory_self_declared_image_rights",
+      "version": "20260927044435"
+    },
+    {
+      "name": "memory_card_classification",
+      "version": "20261005090000"
+    },
+    {
+      "name": "title_state_sync",
+      "version": "20261007093000"
+    },
+    {
+      "name": "private_image_observation",
+      "version": "20261008090000"
+    },
+    {
+      "name": "memory_visual_asset_json_null_compat",
+      "version": "20261008093000"
+    },
+    {
+      "name": "private_card_retirement_compat",
+      "version": "20261009090000"
+    },
+    {
+      "name": "simple_signup_declarations",
+      "version": "20261009130000"
+    },
+    {
+      "name": "simple_signup_admission",
+      "version": "20261009143000"
+    },
+    {
+      "name": "memory_public_global_storage_budget",
+      "version": "20261010103000"
+    },
+    {
+      "name": "publication_signup_connection",
+      "version": "20261010160000"
+    },
+    {
+      "name": "simple_signup_receipts",
+      "version": "20261010170000"
+    },
+    {
+      "name": "service_admin",
+      "version": "20261010180000"
+    },
+    {
+      "name": "simple_signup_country_activation",
+      "version": "20261010190000"
+    },
+    {
+      "name": "simple_card_sharing",
+      "version": "20261011120000"
+    },
+    {
+      "name": "memory_public_capacity_observation",
+      "version": "20261011160000"
+    },
+    {
+      "name": "memory_sized_image_delivery",
+      "version": "20261011180000"
+    }
+  ],
+  "layoutCounts": [
+    {
+      "count": 1,
+      "version": null
+    }
+  ],
+  "activeCatalog": "catalog-people-b05fefa545fcce9864eb476f",
+  "collectionColumn": false,
+  "activeCatalogCounts": {
+    "titles": 4292,
+    "approvedCovers": 4292
+  },
+  "target": "okchpyagfucpzpyrfgol",
+  "connection": "TLS verify-full; production host/user allowlist",
+  "vercel": {
+    "observedVia": "Existing authenticated Vercel UI; Project and Shared search; non-secret values only",
+    "project": "newrreds-projects/anime-collector",
+    "target": "Production",
+    "PUBLIC_MEMORY_PUBLICATION_V1": "1",
+    "PUBLIC_MEMORY_MINIHOME_V1": "1",
+    "PUBLIC_MEMORY_PUBLICATION_POLICY_REVISION": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "PUBLIC_SUPABASE_URL": "https://okchpyagfucpzpyrfgol.supabase.co",
+    "PUBLIC_MEMORY_COLLECTION_HOME_V1": {
+      "projectMatches": 0,
+      "sharedMatches": 0
+    },
+    "secretValuesRevealed": 0,
+    "mutations": 0
+  },
+  "gitAndDeployment": {
+    "originMaster": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "wwwCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "wwwCheckoutCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "source": "vercel-git",
+    "masterIsCandidateAncestor": true
+  },
+  "requiredMigrations": [
+    "20261012160330_collection_home_sections.sql"
+  ]
+}
