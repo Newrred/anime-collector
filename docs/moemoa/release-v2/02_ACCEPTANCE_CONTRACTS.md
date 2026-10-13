@@ -998,3 +998,12 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### 2026-10-13 W18 운영 baseline 결속
 
 운영 read-only 및 Vercel UI 대조 완료. 기존 Public/미니홈·정책/가입 조건은 유지하고, 새migration1/앱21파일/신규flag2개만 정확 승인 대상으로 한다. production-baseline.json은 실제운영 기준이며 예전 Public off 로그를 현재값으로 쓰지 않는다. source40a3dac의 기존 hosted/로컬 검증을 유지하고 이번 read-only 조회를 운영 적용 PASS로 표시하지 않는다. schema/data release·Git/Vercel SHA 및 실제 UI는 승인 적용 이후 확인한다.
+
+### 2026-10-13 W18 운영 실패·원복 및 재적용 인수
+
+- 최초 승인1fef030: migration20261012160330 적용/57테이블 데이터 보존·RPC권한 PASS. 앱bfa1356의 Vercel READY만으로 완료하지 않았다. 필수CI 단위검사의 누락된 테스트 계약 실패로 서버 활성0, f6dba06 Git복귀/www SHA확인·CI38367895908 SUCCESS. schema/writer 보호·기록은 보존했다.
+- 수정 후보5d544ad: 앱40a3dac과 동일, 누락 테스트·CI6파일만 보완. 사용자 exact 재적용 승인 수신. 로컬 unit623·공개54·컬렉션4 PASS이며 Google/운영 실제 게시 PASS로 승격하지 않는다. native confirm은 실제 dialog 이벤트를 검증하고 숨겨진 목록은 공유 편집기 닫기 후 접근한다.
+- 원격CI38369813151 성공 전 master/신규flag 활성 금지. 성공한 동일 SHA의 master Git/Vercel READY/www와 신규 server/client 두값 및 기존 정책 보존을 모두 확인해야 이번 운영 적용 완료다. DB 재실행·대신 동의·자동 게시 없음.
+- 운영 published legacyhome0은 호환 실증 PASS가 아니다. 기존 hosted CUA 확인창 중단도 그대로 기록하며, 기존 실제 test 게시/익명읽기와 로컬 dialog 계약을 별도 근거로 유지한다.
+
+후속 승인 실행 완료: exact5d544ad CI38369813151 전체SUCCESS 후master push·Vercel9HTFhbbh9 READY/www동일SHA. 신규client1/servertrue와 기존 settings 보존을 독립 확인했다. 운영 기존계정의 컬렉션 공개설정→서버 선반선택지→승인표지460×652 decode PASS. 이번에는 새동의/게시/익명 신규홈을 만들지 않았으며 기존 test hosted 근거를 재사용한다. migration재실행0·42개유지. 이번 운영연결 인수만 완료, W18 전체 및D05/D06 기타잔여를 자동완료하지 않는다.

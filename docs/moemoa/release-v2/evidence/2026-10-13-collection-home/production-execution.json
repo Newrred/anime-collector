@@ -1,0 +1,298 @@
+{
+  "at": "2026-10-13T08:05:26.707087+00:00",
+  "phase": "RETRY_APPROVED_CI_PASSED_PRODUCTION_ACTIVE",
+  "settings": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "collection_home_enabled": false,
+    "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "signup_declaration_required": true,
+    "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+  },
+  "fingerprints": {
+    "public.memory_cards": {
+      "hash": "4b54b89cff80ffb2854cbe3c9718782f",
+      "count": 13
+    },
+    "public.sync_changes": {
+      "hash": "2ceedf5a32a79216e3c7b8f24dd79dcb",
+      "count": 50
+    },
+    "public.user_devices": {
+      "hash": "829ea156f16a81e049258951672c64a9",
+      "count": 11
+    },
+    "public.memory_boards": {
+      "hash": "b1a2e216b4b735ce8f29dbdea0791a4d",
+      "count": 2
+    },
+    "public.user_profiles": {
+      "hash": "c32140328f7e43692b1ad28edd5bf1e1",
+      "count": 3
+    },
+    "public.catalog_assets": {
+      "hash": "e800752b3292a3cc2235a92019ebd717",
+      "count": 28900
+    },
+    "private.memory_reports": {
+      "hash": "2113f783d77fdfa79137edf677935255",
+      "count": 1
+    },
+    "public.sync_operations": {
+      "hash": "c8f773d83656fd7d888328141ef977ce",
+      "count": 50
+    },
+    "public.catalog_releases": {
+      "hash": "11dbefd41ab818678cc00e2467719e6f",
+      "count": 7
+    },
+    "public.user_preferences": {
+      "hash": "ef45250c2300fd1510db353c7d3e97f4",
+      "count": 3
+    },
+    "private.memory_minihomes": {
+      "hash": "c11e99c77c1a3941c9dd6f8450cb5b32",
+      "count": 1
+    },
+    "private.memory_moderators": {
+      "hash": "7942ecfcf60805b1602de2dd35a0946d",
+      "count": 1
+    },
+    "public.memory_board_cards": {
+      "hash": "9b5092fa1e610bb315015acae6c2b17c",
+      "count": 3
+    },
+    "private.memory_public_cards": {
+      "hash": "b41dc9befb77b287a308b706a5136b35",
+      "count": 1
+    },
+    "private.memory_publications": {
+      "hash": "48fedd90b3c821cc1f28f3f13807619f",
+      "count": 1
+    },
+    "public.catalog_anime_people": {
+      "hash": "3386f2c4212bb8ad02ecf1b0a77b39c3",
+      "count": 34995
+    },
+    "public.catalog_anime_search": {
+      "hash": "d52fd7eff8553d4c7881e45212275a6a",
+      "count": 28900
+    },
+    "public.memory_visual_assets": {
+      "hash": "a13c355588718e80e98223c9f5750690",
+      "count": 13
+    },
+    "private.memory_private_media": {
+      "hash": "be6181df2b66367b0d08382632ffbf56",
+      "count": 7
+    },
+    "private.memory_public_assets": {
+      "hash": "03a7c7725c18be80dbdb68593482ecc5",
+      "count": 2
+    },
+    "private.memory_relationships": {
+      "hash": "2e689f08d6f4a0b3e984f037f269a731",
+      "count": 1
+    },
+    "private.simple_signup_policy": {
+      "hash": "d87ea1b56bd03945684885c82a941f59",
+      "count": 1
+    },
+    "public.catalog_anime_details": {
+      "hash": "2e89659f34d407303f1f9b89debc84a9",
+      "count": 28900
+    },
+    "public.memory_private_titles": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_resource_usage": {
+      "hash": "a9b86d7f0b8c8d3e56b5a2cb561b4201",
+      "count": 2
+    },
+    "public.catalog_active_release": {
+      "hash": "1c2b68cf081d86f43e6f775378b56ff4",
+      "count": 1
+    },
+    "private.memory_content_reviews": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.simple_signup_handoffs": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "public.catalog_cover_revisions": {
+      "hash": "541c9179a87630d2bded593a0c43273e",
+      "count": 4292
+    },
+    "public.user_account_promotions": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_moderation_audit": {
+      "hash": "28062c51ca6618422d88a7d1514549bf",
+      "count": 2
+    },
+    "private.simple_signup_countries": {
+      "hash": "672d80a25f39f9678383af232c924cc6",
+      "count": 5
+    },
+    "public.user_title_sync_entities": {
+      "hash": "bf195f4c29892381015661ccbbacf3b2",
+      "count": 75
+    },
+    "private.memory_account_sanctions": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_resource_policies": {
+      "hash": "5fcc3f2aa9cf9e516327145961b0af1c",
+      "count": 12
+    },
+    "private.memory_service_operators": {
+      "hash": "daff8105ded01ce5da12e7649c47e421",
+      "count": 1
+    },
+    "private.simple_signup_admissions": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_moderation_notices": {
+      "hash": "2aa51ac2202e3945f5d9471b791a14d2",
+      "count": 2
+    },
+    "private.memory_moderation_targets": {
+      "hash": "3eb65561613cab9cb8351aaae68c2aec",
+      "count": 1
+    },
+    "private.memory_resource_overrides": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_private_media_meter": {
+      "hash": "ef1aa2bd73c14b50e713bf5d2f223e1e",
+      "count": 2
+    },
+    "private.memory_public_image_rights": {
+      "hash": "e92755c3ae479670d5566d2077b26cdd",
+      "count": 1
+    },
+    "private.memory_service_admin_audit": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.simple_signup_declarations": {
+      "hash": "c9d997a0aa95148f0ca1cf08d77a5a51",
+      "count": 2
+    },
+    "private.memory_content_review_audit": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_home_content_reviews": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_private_media_policy": {
+      "hash": "5b184ff95843690ae1edb36e8a3705a7",
+      "count": 1
+    },
+    "private.memory_publication_accounts": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_publication_settings": {
+      "hash": "38c85a5c64cfd6134e7006b1892bf823",
+      "count": 1
+    },
+    "private.memory_public_storage_policy": {
+      "hash": "beda7f3d9ce3caa51817730b6621c01a",
+      "count": 1
+    },
+    "private.simple_signup_rollout_events": {
+      "hash": "fc26fbac0d48518a3cea05a20fcdd3c3",
+      "count": 2
+    },
+    "private.memory_signup_release_bundles": {
+      "hash": "f6b0e0d51a8d65881ea6dd89adb06567",
+      "count": 1
+    },
+    "private.memory_signup_runtime_control": {
+      "hash": "5e1527b8447499e2933eb35729fcd7ad",
+      "count": 1
+    },
+    "private.memory_content_review_requests": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_private_media_cancelled": {
+      "hash": "d41d8cd98f00b204e9800998ecf8427e",
+      "count": 0
+    },
+    "private.memory_publication_delete_fences": {
+      "hash": "1d999482c6a70221f5b52a43d0a1f495",
+      "count": 2
+    },
+    "private.memory_representation_public_rights": {
+      "hash": "cdc5ff8a83b7f8f76d9407adc3d22b60",
+      "count": 1
+    }
+  },
+  "dataPreserved": true,
+  "dataReleaseId": "PROD_COLLECTION_HOME_20261013_40a3dac",
+  "tablesPreserved": 57,
+  "migrationVersion": "20261012160330",
+  "ownerRpcAndPrivateHelperPrivileges": "PASS",
+  "migrationSha256": "8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68",
+  "approvedCandidate": "1fef030",
+  "deployment": {
+    "commit": "bfa1356d01152f0f76f908ee2683c6cf0cee1a1e",
+    "id": "dpl_8kGvqxJztWKtBJmpng1cw1i4GWnz",
+    "ready": true,
+    "gitSource": true,
+    "liveShaMatched": true,
+    "qualityRun": 38367369356,
+    "qualityResult": "FAIL_UNIT",
+    "publicActivation": false
+  },
+  "rollback": {
+    "commit": "f6dba06a9f3789313d50dd6769cb404025bdd1c4",
+    "appEqualTo": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+    "id": "dpl_EbeCWgQQiVB6WHHtab5UBJKoTTqK",
+    "ready": true,
+    "gitSource": true,
+    "liveShaMatched": true,
+    "productionEnvValue": "0",
+    "serverFlag": false,
+    "schemaRetained": true,
+    "qualityRun": 38367895908,
+    "qualityResult": "SUCCESS"
+  },
+  "limitations": [
+    "No production user consent/publication performed.",
+    "Existing published legacy home count was zero; SQL equivalence over zero rows is not a positive legacy-home acceptance.",
+    "Browser local worktree run was invalidated by source restoration during execution and is not counted as acceptance."
+  ],
+  "retryCandidate": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "retryResult": {
+    "commit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+    "ci": 38369813151,
+    "ciConclusion": "success",
+    "deploymentId": "dpl_9HTFhbbh9m5hFUpMjSpdFNcbjBLg",
+    "liveShaMatched": true,
+    "clientFlag": "1",
+    "serverFlag": true,
+    "migrationRerun": false,
+    "evidence": "production-retry-candidate.json"
+  }
+}

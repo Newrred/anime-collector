@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "status": "PRODUCTION_APPLIED_VERIFIED",
+  "approval": "User explicitly approved candidate 5d544ad reapplication; CI first, exact master Git deployment, then existing two flags. No migration rerun.",
+  "candidateCommit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "productionBase": "f6dba06a9f3789313d50dd6769cb404025bdd1c4",
+  "approvedRuntimeSource": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "runtimeAndMigrationGitBlobEquality": true,
+  "appFiles": 21,
+  "testAndCiFiles": [
+    ".github/workflows/quality.yml",
+    "scripts/run-collection-home-e2e.mjs",
+    "tests/collection-home.spec.ts",
+    "tests/publication-ui.spec.ts",
+    "tests/unit/channelService.test.mjs",
+    "tests/unit/collectionHome.test.mjs"
+  ],
+  "newMigrations": 0,
+  "settings": [
+    "Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1",
+    "private.memory_publication_settings.collection_home_enabled=true only after CI and deployed source verification"
+  ],
+  "validation": {
+    "unit": {
+      "passed": 623,
+      "source": "isolated exact candidate runtime with restored unit tests"
+    },
+    "publicationChromium": {
+      "passed": 54,
+      "failed": 0,
+      "elapsed": "2.4m",
+      "mockedApi": true
+    },
+    "collectionChromium": {
+      "passed": 4,
+      "failed": 0,
+      "elapsed": "8.9s",
+      "mockedApi": true
+    },
+    "build": {
+      "pages": 33,
+      "unchangedRuntime": true
+    },
+    "remoteCi": {
+      "id": 38369813151,
+      "sha": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "branch": "codex/collection-home-prod-retry",
+      "event": "workflow_dispatch",
+      "conclusion": "success",
+      "url": "https://github.com/Newrred/anime-collector/actions/runs/38369813151",
+      "jobs": [
+        {
+          "name": "publication-contract",
+          "conclusion": "success"
+        },
+        {
+          "name": "verify",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "productionNewPublishing": "NOT_RUN_NO_USER_CONSENT_OR_NEW_PUBLICATION"
+  },
+  "rollout": [
+    "Push exact candidate to its own codex branch and run the existing Service quality workflow there before master.",
+    "Abort on any required failure; do not re-enable flags.",
+    "After CI success set only Production UI flag1, fast-forward master to exact tested SHA and verify connected Vercel Git READY/www SHA.",
+    "Enable only server collection_home_enabled after deployment success; verify owner choices without new consent/publication."
+  ],
+  "rollback": [
+    "Keep or set server flag false and UI flag0.",
+    "Git restore previous app while preserving additive schema and all user records."
+  ],
+  "noChanges": [
+    "No migration rerun",
+    "No new accounts/consent/uploads/publications",
+    "No changes to country/rights/policy/quotas/keys/dependencies/billing"
+  ],
+  "production": {
+    "deploymentId": "dpl_9HTFhbbh9m5hFUpMjSpdFNcbjBLg",
+    "state": "READY",
+    "commit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+    "source": "vercel-git",
+    "liveBuild": {
+      "commit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "checkoutCommit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "builtAt": "2026-10-13T08:49:20.662Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "clientFlag": "1",
+    "serverFlag": true,
+    "independentDbReadback": {
+      "migrationCount": 42,
+      "migrationPresent": true,
+      "previousSettingsPreserved": true
+    },
+    "ownerUi": {
+      "collectionPage": true,
+      "publicSettings": true,
+      "serverShelfChoices": 1,
+      "approvedCoverDecoded": {
+        "width": 460,
+        "height": 652
+      },
+      "newConsent": false,
+      "newPublication": false
+    },
+    "activation": {
+      "at": "2026-10-13T08:50:48.774469+00:00",
+      "settings": {
+        "singleton": true,
+        "asset_limit": 10,
+        "reads_enabled": true,
+        "images_enabled": true,
+        "writes_enabled": true,
+        "follows_enabled": true,
+        "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "reports_enabled": true,
+        "asset_bytes_limit": 41943040,
+        "minihomes_enabled": true,
+        "report_daily_limit": 10,
+        "collection_home_enabled": true,
+        "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+        "signup_declaration_required": true,
+        "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+      },
+      "dataReleaseId": "PROD_COLLECTION_HOME_20261013_40a3dac",
+      "activationCandidate": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "previousSettingsPreserved": true
+    },
+    "screenshot": "production-retry-deployment.jpg"
+  },
+  "observations": [
+    "An unrelated private image on the collection page showed a loading failure. Public shelf approved cover decoded successfully. No private-image repair or mutation was attempted.",
+    "Production published legacy homes count zero; no positive legacy production rendering assertion.",
+    "Transient UI input 01 was corrected to 1 and independently revealed before master push; no deployment consumed 01."
+  ]
+}

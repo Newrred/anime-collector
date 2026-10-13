@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-13T08:50:48.774469+00:00",
+  "settings": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "collection_home_enabled": true,
+    "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "signup_declaration_required": true,
+    "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+  },
+  "dataReleaseId": "PROD_COLLECTION_HOME_20261013_40a3dac",
+  "activationCandidate": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "previousSettingsPreserved": true
+}

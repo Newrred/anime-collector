@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidateId": "W18_COLLECTION_HOME_20261013_40a3dac",
-  "status": "BASELINE_VERIFIED_AWAITING_EXACT_PRODUCTION_APPROVAL",
+  "status": "APPROVED_EXECUTED_THEN_UI_ROLLED_BACK",
   "sourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
   "productionBaseCommit": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
   "observedProduction": {
@@ -107,7 +107,7 @@
     "path": "supabase/migrations/20261012160330_collection_home_sections.sql",
     "defaultEnabled": false,
     "proposedDataReleaseId": "PROD_COLLECTION_HOME_20261013_40a3dac",
-    "appliedToProduction": false
+    "appliedToProduction": true
   },
   "intendedSettings": {
     "server": "private.memory_publication_settings.collection_home_enabled=true",
@@ -128,7 +128,7 @@
   ],
   "remaining": [
     "Hosted native-confirm owner withdrawal not completed through the earlier CUA transport; server withdrawal and anonymous null were verified. Local native confirmation passed; no app bug reproduced.",
-    "Exact production migration, new flag activation and master push/deployment approval is not granted by this local continuation."
+    "Required production unit CI failed because deployment packaging omitted the matching test contract; UI reverted through Git, server flag never activated. Prepare exact retry including tests and CI coverage."
   ],
   "remoteMutationsThisSession": 0,
   "hostedStaleSourceBoundary": {
@@ -151,5 +151,11 @@
     "automaticPublications": 0,
     "originalDeletions": 0,
     "newCharges": 0
-  }
+  },
+  "approval": {
+    "candidate": "1fef030",
+    "answer": "이 후보 운영 적용 승인",
+    "date": "2026-10-13"
+  },
+  "executionEvidence": "production-execution.json"
 }

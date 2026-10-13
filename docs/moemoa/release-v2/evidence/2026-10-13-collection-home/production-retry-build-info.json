@@ -1,0 +1,12 @@
+{
+  "commit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "checkoutCommit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "builtAt": "2026-10-13T08:49:20.662Z",
+  "workingTreeDirty": true,
+  "deploymentConfig": {
+    "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+    "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+    "semanticMatch": true
+  },
+  "source": "vercel-git"
+}

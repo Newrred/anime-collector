@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-13T08:20:24.283328+00:00",
+  "readOnly": "on",
+  "settings": {
+    "singleton": true,
+    "asset_limit": 10,
+    "reads_enabled": true,
+    "images_enabled": true,
+    "writes_enabled": true,
+    "follows_enabled": true,
+    "policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "reports_enabled": true,
+    "asset_bytes_limit": 41943040,
+    "minihomes_enabled": true,
+    "report_daily_limit": 10,
+    "collection_home_enabled": false,
+    "content_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01",
+    "signup_declaration_required": true,
+    "general_publication_policy_revision": "MOEMOA_PUBLIC_GENERAL_20261011_01"
+  },
+  "migrationPresent": true,
+  "authenticatedOwnerRpc": true,
+  "anonymousOwnerRpcDenied": true,
+  "legacyPublishedHomesCompared": 0,
+  "legacyPublishedHomesEquivalent": true,
+  "previousSettingsPreserved": true
+}

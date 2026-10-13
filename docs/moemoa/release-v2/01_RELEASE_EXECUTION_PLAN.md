@@ -2388,7 +2388,30 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 기존17항 계획의 운영 후보 결속을 이어간다. TLS 검증된 운영 연결에서 read-only 트랜잭션으로 migration 목록·필수 함수·공개 설정·카탈로그 release/표지 준비 집계·layout 버전 집계만 조회한다. 비공개 본문/키/이미지 다운로드는 하지 않는다. Git 원격과 실제 build-info의 SHA를 대조하고, Vercel의 production 설정은 가능하면 키/비밀값 아닌 flag 상태만 확인한다. 확인되지 않은 설정을 로컬 env 파일로 대신 확정하지 않는다. 결과를 기존 production-candidate.json에 결속하며 차이가 있으면 필요한 변경만 추린다. 코드/DB/원격 설정 변경 없이 정확한 적용/복구 후보를 완성한다.
 
 
-#### W18 운영 기준 대조·정확 적용 범위 확정 — 이번 실행 8항 보고 (2026-10-13)
+#### W18 승인된 운영 적용 실행 (2026-10-13)
+
+- 사용자 exact 승인: 후보 1fef030(앱40a3dac)의 운영 적용 승인. 21개 앱 파일·migration20261012160330 하나·새 설정2개에 한정한다. 기존 정책/가입/한도/기록과 원본은 보존한다.
+- 실행 순서: baseline/source hash 재확인 → DB migration transaction/default off 및 보존 검사 → Production UI flag1 → origin/master 기반 검토 patch Git 배포 → CI/Vercel READY/www SHA 확인 → 서버 collection_home_enabled만 true → 읽기 검증.
+- data release: PROD_COLLECTION_HOME_20261013_40a3dac. 개발 브랜치 전체를 합치지 않는다. 새 동의·게시·업로드 없이 완료한다.
+- 실패 시: 새 서버 flag off 유지/복귀, UI flag0 및 Git 복구. 추가 schema/writer 보호·사용자 선택 데이터는 삭제하지 않는다. 단계별 실제 결과와 중단 위치를 기존 작업판에 기록한다.
+- 실행 후 발견: 운영 patch에 runtime만 옮기면서 이미 승인 소스에 있던 channelService 오류계약 수정/컬렉션 검사를 누락했다. bfa1356 CI38367369356 unit FAIL→서버 활성0 유지, UIflag0 및 f6dba06 Git복구. 추가 schema는 유지한다. 다음 로컬 수리는 테스트 패키지 복원 및 공유 편집기가 열린 상태에서 숨겨진 원본 목록을 찾는 옛 회귀의 실제 닫기 동선 반영에 한정한다. runtime 변경 없이 실패→수정 검증 후 별도 정확 재적용 후보를 만든다.
+
+#### W18 운영 실패 원복·검사 패키지 보완 — 실행 8항 보고 (2026-10-13)
+
+1. **읽은 문서/파일:** AGENTS, CODEX_START_HERE, 확정01, PLANS, release-v2 00/01/02/03, image05·QA07·변경09, 기존 collection 계약·runtime 및 migration20261012160330, quality.yml·channelService/collectionHome/publication-ui tests, 기존 운영 기준/후보를 대조했다.
+2. **가정/미결:** 사용자 승인1fef030 이후 검사 누락을 발견했고 새5d544ad의 별도 재적용 승인을 받았다. 운영 신규 게시/본인 동의는 이번에 수행하지 않는다. published legacyhome0과 hosted 확인창 UI 미검증을 실제 인수 PASS로 세지 않는다.
+3. **계획:** 이 문서 W18 및 단일03의 현재 카드. 새 후보는 원격CI 선행→동일SHA master Git→Vercel/www→두 설정 확인 순서다.
+4. **변경:** 앱40a3dac의21파일은 그대로다. 테스트/CI6파일을 운영 후보에 함께 포함했다. channelService 오류 반환 계약, 공유 패널 닫기 후 원본카드 접근, native confirm 승인/취소, 컬렉션 전용 CI 실행을 보완했다. 기존00/01/02/03과 evidence만 결과·실패·원복 근거를 갱신한다.
+5. **DB/복귀:** 최초 승인에서20261012160330을 transaction으로 적용하고57테이블 보존·owner/helper 권한을 확인했다. releaseID PROD_COLLECTION_HOME_20261013_40a3dac. 재적용은 migration 재실행0. 실패 시 flag false/0·Git 앱 복귀, additive schema/writer guard·사용자 데이터 보존.
+6. **검사:** build33 PASS, 정확 runtime 격리 unit623 PASS, 공개 Chromium54 PASS, 컬렉션4 PASS. 이전622/623 실행의 임시 포트 오류와49/54 공유패널 테스트 실패, source 교체로 무효화된 실행은 성공에 합산하지 않는다. Git diff --check PASS. CI38369813151은 exact SHA5d544ad의 원격 수동 실행이며 결과는 evidence에 기록한다. 브라우저 모의API 검사와 기존 실제 hosted Google/게시 근거를 구분한다.
+7. **보안/개인정보/권리/관측:** 가입/정책/권리/한도/요금/인증키 변경0, 새 사진·공개 게시0. 비밀은 기존 로컬 연결로만 사용하고 Git/ordinary logs에 노출하지 않았다. 운영 row 원문 대신 해시·집계와 공개 배포정보만 증거에 보관한다. GitHub 실패 이력은 지우지 않는다.
+8. **잔여/다음 승인:** 현재 후보5d544ad는 명시 승인 범위이므로 같은 배포를 재질문하지 않는다. CI 실패·source drift·정책 변경이 발생하면 활성화를 중단하고 정확한 수정 범위만 처리한다. 최종 운영 결과 및 다음 행동 하나는 기존03 현재 카드에 반영한다.
+
+**최종 실제 결과:** CI38369813151 publication-contract/verify 모두SUCCESS, exact5d544ad master push 및 Vercel dpl_9HTFhbbh9m5hFUpMjSpdFNcbjBLg READY/www build-info commit·checkoutCommit·vercel-git/semanticMatch 일치. Production UI값은 저장 후1을 readback하고 배포했으며 DB는 배포 확인 후collection_home_enabled만true로 변경했다. 독립조회에서 기존 settings 동일·migration42 유지. 실제 로그인 운영계정에서 컬렉션→공개설정→작품선반 선택지와 승인표지460×652 decode 확인, 동의/게시/사용자자료변경0. 화면의 다른 비공개 이미지 일부 로딩실패는 관찰로 남기며 이번 공개 표지 인수와 구분한다. 증거: production-retry-ci/build-info/activation 및 production-retry-candidate.json, production-retry-deployment.jpg. 이번 운영 연결만 완료이며 전체 출시잔여는 단일03에서 계속 관리한다.
+
+#### W18 운영 기준 대조·정확 적용 범위 확정 — 이전 실행 8항 보고 (2026-10-13)
+
+> 후속 재적용 승인: 사용자가 `5d544ad`를 명시 승인했다. 같은 앱40a3dac에 기존 테스트·CI6파일을 포함하며 DB 재실행은 없다. codex/collection-home-prod-retry의 exact SHA5d544ad2ca83e847df623b2abfe7bbcaf2158801을 먼저 push하고 기존 Service quality 수동 실행38369813151의 성공을 기다린다. 실패하면 운영f6dba06/새 flag0·false를 유지한다. 성공한 동일 SHA만 master로 fast-forward하고 Vercel Git READY/www 소스를 확인한 다음 서버 flag를 켠다. 상세 결과는 production-retry-candidate.json에 결속한다. 아래 읽기전용 대조 보고는 승인 전 이력이다.
 
 1. **문서/근거:** 기존 AGENTS·START·확정01·release-v2 계획/계약/현재 카드와 production-candidate.json을 대조했다. 연결은 inspect-retention.py:22–48의 production ref allowlist/TLS verify-full을 재사용했다. 화면 의존성은 platformPublication.js:8–10,35,47–54, migration은20261012160330 원본을 따른다.
 2. **가정/미결:** 이번 “ㄱ”는 운영 read-only 대조이며 migration/flag/master 배포 승인이 아니다. 기존 hosted native-confirm UI 미검증은 제한으로 유지한다. 이번 국가/권리/비용 결정을 다시 열지 않는다.

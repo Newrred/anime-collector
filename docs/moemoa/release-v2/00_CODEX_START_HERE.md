@@ -1,5 +1,9 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 재적용 완료:** 사용자 exact 승인5d544ad→원격CI38369813151 전체SUCCESS→동일SHA master Git→Vercel9HTFhbbh9 READY/www일치→신규client1/servertrue 활성. 기존 가입/정책/한도 보존·DBmigration 재실행0. 실제 운영 기존계정에서 컬렉션 공개 설정/서버 선반 선택지/460×652 승인 표지 decode 확인. 새 동의·자동게시0. [최종 근거](evidence/2026-10-13-collection-home/production-retry-candidate.json), 기존03 현재카드를 따른다. 아래 중단·승인대기는 과거 이력이다.
+
+> **2026-10-13 W18 운영 적용 중단·Git 원복:** 후보1fef030 승인으로 DB20261012160330 적용/57테이블 보존. 앱bfa1356 Git배포 후 필수CI 단위검사가 실패해 신규서버flag는 켜지 않았다. 운영patch의 기존 테스트계약 누락을 확인했고 f6dba06으로 앱을 이전b0541ff와 같게 복구했다. VercelEbeCWgQQi READY/www동일SHA·CI38367895908 SUCCESS. Production새flag0/서버false, schema·기록 보존. 재적용 후보는 테스트 패키지를 포함하며 새DB실행/재가입/새동의 불필요. [실행 근거](evidence/2026-10-13-collection-home/production-execution.json)와 기존03 현재카드를 따른다. 아래 승인대기/변경0은 이전 시점이다.
+
 > **2026-10-13 W18 운영 기준 대조 완료:** 운영DB read-only 확인: 기존 Public/미니홈 활성·가입guard 유지, 정책3종 일치, catalog/승인cover4292개. 누락migration은 컬렉션20261012160330 한 개뿐. Vercel Production publication/minihome=1·운영 reader URL 확인, 새 Collection flag는 Project/Shared 모두 없음. Git/www b0541ff 일치. 필요한 적용은 앱40a3dac의21파일+SQL1개와 새 server/client flag2개이며 아직 쓰기/배포0. 다음은 이 정확 운영 후보의 명시 승인. [기준 증거](evidence/2026-10-13-collection-home/production-baseline.json), [후보](evidence/2026-10-13-collection-home/production-candidate.json).
 
 

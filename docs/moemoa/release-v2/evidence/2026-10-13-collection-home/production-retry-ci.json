@@ -1,0 +1,18 @@
+{
+  "id": 38369813151,
+  "sha": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "branch": "codex/collection-home-prod-retry",
+  "event": "workflow_dispatch",
+  "conclusion": "success",
+  "url": "https://github.com/Newrred/anime-collector/actions/runs/38369813151",
+  "jobs": [
+    {
+      "name": "publication-contract",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify",
+      "conclusion": "success"
+    }
+  ]
+}

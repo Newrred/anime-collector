@@ -597,6 +597,12 @@ test("public update needs fresh review, cancelled update keeps previous snapshot
   await page.locator(".memory-publication__selection > li").filter({ hasText: "Shared memory" })
     .getByRole("button", { name: "Stop sharing this memory everywhere" }).click();
   await expect(page.getByText("Sharing of this memory has stopped everywhere.", { exact: false })).toBeVisible();
+  page.once("dialog", async dialog => {
+    expect(dialog.type()).toBe("confirm");
+    expect(dialog.message()).toBe("Close sharing without publishing?");
+    await dialog.accept();
+  });
+  await page.getByRole("button", { name: "Close sharing", exact: true }).click();
   await expect(page.locator(".memory-boards__cards li").filter({ hasText: "Shared memory" })).toBeVisible();
   // Returning to a previously open page must recheck rather than use its old DTO.
   await visitor.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
@@ -863,6 +869,7 @@ for (const variant of ['desktop','mobile','image']) {
  test(`simple card visibility saves with one consent and remains reversible ${variant}`,async({page,context})=>{
   if(mobile)await page.setViewportSize({width:390,height:844});
   await adapters(context);const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+  await page.getByRole('button',{name:'Close sharing',exact:true}).click();
   const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
   const cardId=new URL(href!,page.url()).searchParams.get('id')!;
   await page.evaluate(async(cardId)=>{
@@ -966,6 +973,7 @@ test('public notice fixed version renders both languages and legal links at 320p
 
 test('unknown public policy blocks quick sharing but allows saving as private',async({page,context})=>{
  await adapters(context,'UNRECOGNIZED_POLICY');const mock=mockPublication();await mock.attach(context);await seedOwner(page);
+ await page.getByRole('button',{name:'Close sharing',exact:true}).click();
  const href=await page.locator('.memory-boards__cards li').filter({hasText:'Shared memory'}).getByRole('link').first().getAttribute('href');
  await page.goto(href!);await page.getByRole('tab',{name:'Manage',exact:true}).click();
  const form=page.getByRole('form',{name:'Memory visibility'});

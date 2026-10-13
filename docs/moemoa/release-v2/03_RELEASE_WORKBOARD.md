@@ -780,6 +780,24 @@
 
 ```text
 현재 W: W18 컬렉션·미니홈 관계 교정 / 관련 W06·W09·W11·W19
+운영 승인: 후보1fef030(앱40a3dac) exact 승인 수신. 21앱+SQL1·설정2 범위.
+DB 실행: migration20261012160330 운영 적용, PROD_COLLECTION_HOME_20261013_40a3dac. transaction 내57테이블 데이터 동일·권한 검사 PASS. 신규 서버flag=false 유지.
+앱 실행: b0541ff 기준22파일만 옮긴 bfa1356을 master Git배포. Vercel8kGvqxJzt READY/www동일SHA. CI38367369356 publication-contract SUCCESS·unit FAIL.
+원인/책임: 앱과 함께 있던 channelService 테스트 기대값/컬렉션 검사를 운영 patch에서 누락. 옛 readBookshelf 기대값 실패 로컬재현(2PASS/1FAIL).
+원복: f6dba06 master Git·VercelEbeCWgQQi READY/www동일SHA, 앱은b0541ff와동일. CI38367895908 전체SUCCESS. Production새flag0·DB새flagfalse, 기존정책/가입/한도 유지. DB보호구조는보존.
+후속 로컬: 누락테스트 복원한 unit623 PASS. 공개편집 닫기·실제confirm 동선을 테스트에 반영, 서비스소스변경0. 공개회귀/컬렉션회귀 최종결과는 evidence production-retry-candidate.json 및01 보고에 결속.
+보존/제한: 원본삭제/새이미지/계정/대신동의/게시/국가·권리·비용 변경0. 운영published legacyhome0이라 해당실데이터호환PASS로계산하지않음.
+재적용 완료: 5d544ad exact 승인→Service quality38369813151 전체SUCCESS→동일SHA masterGit→Vercel9HTFhbbh9 READY/www commit·checkoutCommit·source일치. 앱40a3dac 동일+테스트/CI6파일, DB재실행0. 로컬 unit623·공개54·컬렉션4 PASS.
+현재 운영: Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1, DB collection_home_enabled=true. 독립조회에서 migration42개/기존settings 모두동일. releaseID PROD_COLLECTION_HOME_20261013_40a3dac.
+실제 화면: 기존 운영계정 컬렉션→공개설정→서버 작품선반1개/승인표지460×652 decode PASS. 선택/동의/preview저장/게시0. 비공개 이미지 일부의 기존 로딩실패는 별도 관찰로 남기며 본 공개표지 로딩과 혼동하지 않는다.
+범위 마감: 이번 컬렉션·미니홈 연결 운영 적용 완료. W18 전체/전체출시 잔여를 자동으로 DONE 처리하지 않는다.
+다음 행동 하나: 기존 D06·W18 작업판의 잔여 출시 인수 조건을 이번 운영 근거와 대조해 이미 충족한 조건만 닫는다. 신규 기능·같은 가입/동의/확인창 반복 요청 없음.
+```
+
+<details><summary>이전 현재 카드 — 운영 승인 전 기준</summary>
+
+```text
+현재 W: W18 컬렉션·미니홈 관계 교정 / 관련 W06·W09·W11·W19
 이번 후보: 40a3dace984a7ed7920ee46e626ab06aa2d042c9. 이번 재개는 이전 PC 종료 지시를 대체하며 새 종료 요청은 없다.
 이전 원복 완료: 승인8446753의 남은 Preview3override를 별도 명시 승인 후 제거/키별 검색0 확인. 기존 DB5값/정책/phone-test a6b6dda와 Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/Preview/exactSHA/canonical alias 확인.
 이번 임시 연결: 수정40a3dac의 별도 exact test 연결·검증·원복 승인→DB5필드/Preview4값 적용. 기존 선반1/catalog/가입확인4건 재사용, fixture/새 이미지 업로드/새 계정/새 구조0. Git Preview dpl_F29WgmHX8ahugV96qHyhyRijqMma READY/exact40a3dac/별칭 확인.
@@ -796,6 +814,8 @@
 운영 대조 완료: migration41개/누락컬렉션1개, 신규column/RPC 없음. 기존 Public/가입guard/고지 유지·catalog4292/승인cover4292. Vercel 새flag Project/Shared0, 기존publication/minihome1·고지/reader 운영일치. Git/www b0541ff 동일.
 다음 행동 하나: 앱40a3dac의21파일+SQL1개·새flag2개·master Git/Vercel 운영 적용에 대한 정확 승인. 원본삭제/자동게시/테스트설정복사/국가·권리·가입·한도·요금 변경0. 후보와 rollback은 production-candidate.json, 실제기준은 production-baseline.json 및01의 이번8항 보고.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>
 
