@@ -986,3 +986,7 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 - 운영 후보는 앱/SQL40a3dac, 기준 운영 Git/www b0541ff. production-candidate.json의 22파일 해시와 단일 migration, 새 flag2개·롤백 조건을 따른다. 운영DB/flag 현재값 미조회·운영 적용0.
 - 남은 기능 경계는 hosted source 변경 후 stale-preview 게시 거절 및 공개 내용의 비자동 갱신이다. 로컬 SQL25의 기존 PASS를 실제 hosted PASS로 치환하지 않는다. 이 경계에 한정해 다음 실행을 준비하며 신규 가입/전체 회귀/동일 확인창 반복은 요구하지 않는다.
 - 운영 전 실제 baseline 확인과 정확한 DB/flag/master 배포 승인 필요. 이번 continuation은 그 승인으로 재사용하지 않는다.
+
+### 2026-10-13 W18 stale-preview probe 인수
+
+로컬 rollback-only 리허설5 PASS/57테이블 전후 동일. 정확 SQL/대상은 tools/operations/collection-home-test/stale-preview-manifest.json. hosted 실행은 미승인·미실행이며 SQL 거부 경계와 브라우저 새 게시 인수는 구분한다. 정책/동의/가입을 새로 만들지 않는다. 기존 원복 완료 상태를 외부 세션에 보이는 임시 활성로 되돌리지 않고, 트랜잭션 내부 flag/version/preview만 사용 후 무조건 취소한다.

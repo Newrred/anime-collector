@@ -791,7 +791,8 @@
 현재 잔여: hosted source변경/stale-preview 경계 미실행(기존 로컬 SQL 근거와 분리). Google 신규가입/실기기/운영 신규 PASS0.
 운영 후보 준비: production-candidate.json에 source40a3dac / productionBase b0541ff / 앱21+SQL1 hash·새 flag2개·롤백 결속. 운영 build-info commit/checkoutCommit b0541ff·source vercel-git 확인. 운영 DB/flag 현재 값 미조회·exact 운영 승인 없음.
 보존/운영: test 구조/catalog표지89,300B/선반/저장작품 유지, 원본 삭제0. 이전 데이터/config migration 이력20261012180421/180447/181251 유지, 이번 새 migration 이력0. master b0541ff/운영DB/운영Public 변경0.
-다음 행동 하나: 동일40a3dac의 hosted source-version 변경/stale-preview 경계만 검사하도록 정확한 테스트 범위를 준비한다. 원복 재실행·같은 확인창 반복·새 가입·전체 회귀는 하지 않는다. 새 원격 변경은 대상/영향이 명시된 승인 후 실행한다. 최신 상세는 native-confirm-diagnosis.json·production-candidate.json 및01의 후속8항 보고.
+경계 후보 준비 완료: W18_STALE_PREVIEW_ROLLBACK_20261013 / SQL c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e. 새 배포 없이 테스트 DB 트랜잭션 내부 flag1/선반version/preview만 사용 후 무조건 rollback. 로컬5 PASS·57테이블 동일, hosted0.
+다음 행동 하나: 이 정확 후보의 moemoa-test 1회 실행 승인 후 대상/baseline 확인→거부 경계 및 원복 확인. 운영/Preview/새 가입/동의/이미지/성공 게시 변경0. 단일03 유지, 상세는 stale-preview-rehearsal.json과01의 이번8항 보고.
 ```
 
 <details><summary>이전 현재 카드 — 10/11 당시 고지 검증</summary>

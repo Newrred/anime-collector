@@ -1,5 +1,8 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 W18 stale-preview 최소 검사 후보:** 테스트 화면 재배포 없이 DB 트랜잭션 안에서만 선반 version을 바꿔 오래된 preview 게시 거절을 확인하는 rollback-only SQL을 준비했다. 로컬 격리 리허설5 PASS·57테이블 전후 동일, 서비스 코드 변경0. [후보](../../../tools/operations/collection-home-test/stale-preview-manifest.json)의 정확한 테스트 DB 1회 실행 승인이 다음 단계이며 아직 hosted 실행0. 기존 원복 완료·운영40a3dac 후보와 이전 증거 유지.
+
+
 > **2026-10-13 W18 확인창 진단·운영 후보 준비:** 기본 Chromium 확인창의 취소/승인·최신 revision·서버 오류 경계와 기존 미니홈 왕복, 로컬 합성 RPC 검사 2개 PASS(신규 1개). 서비스 오류는 재현되지 않아 앱 변경0. 이전 hosted CUA focus timeout과 실제 hosted UI 철회 미검증은 구분한다. 운영/www Git 소스 b0541ff와 대조해 앱21파일·migration1개를 [운영 후보](evidence/2026-10-13-collection-home/production-candidate.json)에 고정했다. runtime/schema는 실제 test 검증40a3dac과 동일. 원격 적용0이며 운영 DB/설정 현재 값은 이번에 조회하지 않았다. 다음1개는 동일 후보의 hosted source-version 변경/stale-preview 경계에 한정한 검사 준비다. 새 가입·전체 회귀·같은 확인창 반복 검사는 추가하지 않는다.
 
 

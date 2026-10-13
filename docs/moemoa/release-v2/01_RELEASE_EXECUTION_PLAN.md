@@ -2352,3 +2352,21 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 6. **검증:** node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts tests/publication-ui.spec.ts --grep "typed home native confirmation|mini-home explicit representative" → exit0, 2 PASS/8.6초(신규1·기존1). window.confirm 대체0, 취소 RPC0, 충돌 시 거짓 성공0, revision8/9 재조회, 성공 후 익명 비노출 PASS. 로컬 합성 RPC 결과이며 hosted PASS가 아니다. git fetch 후 origin/master 및 운영 build-info의 commit/checkoutCommit b0541ff·source vercel-git 확인; semanticMatch 값은 없어 확인하지 못했다. 새 build/광범위 suite 재실행0.
 7. **보안·개인정보·관측:** 합성 자료만 테스트하고 외부 요청 차단. 원본/개인정보/인증값/정책/요금/운영 변경0. 증거는 공개 소스 해시·합성 화면이며 비밀값/응답 원문을 저장하지 않는다. 기존 원복 완료 상태를 다시 변경하지 않았다.
 8. **남은 조건·다음1개:** 서비스 확인창 버그는 재현되지 않았고 이전 CUA focus timeout은 도구 실패 근거다. 실제 hosted UI 철회 미검증은 기록으로 유지하되 같은 확인창 검사를 반복하지 않는다. 다음은 소스40a3dac의 hosted source-version 변경/stale-preview 경계 검사만 준비한다. 기존 테스트 자료·동의는 재사용 가능한 범위만 사용하며 새 동의를 대신 수락하지 않는다. 운영 후보는 PREPARED_NOT_AUTHORIZED_FOR_PRODUCTION: 실제 운영 schema/flag/catalog baseline 및 정확 migration·Public flag·master 배포 승인 전에 실행하지 않는다. 과거 국가·비용·가입 결정을 다시 묻지 않는다.
+
+#### W18 source-version 경계 검사 준비 — 2026-10-13
+
+기존17항 ExecPlan의 한 경계만 이어간다. 재배포/새 게시 대신 테스트 DB의 rollback-only 트랜잭션으로 실제 함수의 거부 경로를 검사한다. 기존 검증용 home ID·선반 ID·카탈로그 release·비공개 상태·설정 baseline을 검사한 뒤, 트랜잭션 안에서 collection_home_enabled 한 필드만 켜고 현재 승인 표지로 preview를 준비한다. 동일 검증 선반의 version만 증가시킨 뒤 공개 RPC가 정확히 PREVIEW_CHANGED를 반환하는지, 방문자 projection builder가 오래된 선반을 제외하는지 확인한다. 성공 게시·동의 기록 생성은 허용하지 않으며 예상 외 성공은 예외로 전체 취소한다. 내부 subtransaction 강제 rollback과 마지막 ROLLBACK을 모두 사용하고, 변경 가능 테이블의 전후 fingerprint를 대조한다.
+
+새 SQL·격리 리허설만 로컬에서 작성한다. 앱40a3dac·운영 후보는 그대로이며 schema/배포/Storage/회원/정책 revision/한도 변경0. hosted 실행은 정확 후보 승인 후에만 한다. 검증 결과는 DB 거부 경로로 표시하고 브라우저/Google/새 게시 PASS로 확대하지 않는다. 단일03에 후보·리허설·승인 대기를 기록한다.
+
+
+#### W18 stale-preview rollback 검사 후보 — 이번 실행 8항 보고 (2026-10-13)
+
+1. 읽은 문서/근거: AGENTS·START·확정01·PLANS·이미지05·QA07·변경09·release-v2 W18 계획/계약/작업판. 실제 거부 경계는 20260923183940_memory_minihomes.sql:90–111, 후처리 wrapper는 20260927042334_memory_general_postmoderation.sql:44–66, typed source 대조는 20261012160330_collection_home_sections.sql:117–130이다.
+2. 가정/미결: hosted 변경의 정확후보 승인은 아직 없다. “ㄱ”에 따라 실행 가능한 최소 후보를 로컬에서 완성했다. DB 함수 검사는 실제 웹/Google/새 게시 검증과 구분한다.
+3. 계획: 바로 위 W18 source-version 경계 준비 절. 앱 소스40a3dac/운영 후보를 유지하고 기존 W18의 남은 경계만 진행한다.
+4. 변경: tools/operations/collection-home-test/stale-preview-probe.sql과 test_stale_probe.py. DB1회 rollback-only 후보이며 기존 검증 home/shelf/catalog를 재사용한다. 재배포·새 계정·새 이미지·게시 동의를 요구하는 UI 왕복을 반복하지 않는다. manifest/evidence 및 기존00/01/02/03 갱신.
+5. DB/복귀: schema 변경0. 테스트 DB에서만 트랜잭션 내부 collection_home_enabled=true와 검증 선반 version+1·임시 preview를 사용한다. 다른 세션에는 커밋하지 않는다. 성공 게시/수락을 만드는 호출이 아니라 PREVIEW_CHANGED가 필수인 거부 검사이며 예상 외 성공 시 예외로 전부 취소한다. 내부 강제 subtransaction rollback과 외부 ROLLBACK, settings/home/source 전후 fingerprint를 모두 사용한다.
+6. 검증: wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/collection-home-test/test_stale_probe.py → 5 PASS, exit0, 전체 public/private 일반 테이블57개 fingerprint 동일. 실제 함수 거부·외부 COMMIT 오용에도 내부 원복·잘못된 catalog·변경된 선반 거부·예상 밖 성공 시 실패/원복 확인. 최초 리허설은4개 통과 후 local fault-injection 함수의 인자명 누락으로 중단; 기존 인자명을 유지하도록 runner만 수정해5개 통과. 서비스 코드 수정0, hosted 실행0.
+7. 보안/권리/관측: 기존 test 자료만 사용하며 개인 본문/키/preview hash 출력0. 결과는 고정 PASS/실패 코드와 해시로 제한한다. 정책 revision/가입 guard/권한/한도/Storage/운영 변경0. negative publish가 성공하면 검사를 실패시키며 동의/게시 상태는 커밋하지 않는다.
+8. 다음 행동 하나: 후보 SQL SHA256 c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e의 moemoa-test 1회 실행 승인을 받은 뒤 실제 연결 대상과 baseline을 독립 확인하고 실행·원복을 판정한다. 추가 browser/Preview 설정 변경은 없다. 운영 후보의 해당 조건만 업데이트하고 hosted UI PASS로 확대하지 않는다.

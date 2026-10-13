@@ -1,0 +1,43 @@
+{
+  "candidateId": "W18_STALE_PREVIEW_ROLLBACK_20261013",
+  "appSourceCommit": "40a3dace984a7ed7920ee46e626ab06aa2d042c9",
+  "status": "LOCAL_REHEARSED_AWAITING_EXACT_TEST_APPROVAL",
+  "targetProject": "nmgkhknponvzcwliajyk",
+  "sql": "tools/operations/collection-home-test/stale-preview-probe.sql",
+  "sha256": "c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e",
+  "scope": "One SQL negative-publication probe on moemoa-test only; no deployment or committed writes.",
+  "transactionOnlyChanges": [
+    "collection_home_enabled=true",
+    "Existing test home preview prepared from existing approved cover",
+    "Existing test shelf version incremented by one"
+  ],
+  "neverCommitted": [
+    "new publication",
+    "consent acceptance",
+    "settings",
+    "preview",
+    "source version"
+  ],
+  "preflight": [
+    "Independently confirm connected project is moemoa-test/nmgkhknponvzcwliajyk",
+    "Read fixed test catalog, withdrawn home and exact single test shelf; refuse drift",
+    "Do not run original fixture/config/withdraw scripts"
+  ],
+  "rollback": "Forced subtransaction rollback even under outer COMMIT; final ROLLBACK; settings/home/source equality assertions",
+  "localValidation": {
+    "passed": 5,
+    "tablesFingerprinted": 57,
+    "remoteExecuted": false
+  },
+  "exclusions": [
+    "Production",
+    "schema",
+    "Vercel env",
+    "Git remote",
+    "Storage",
+    "account/signup",
+    "policy revisions",
+    "positive publication",
+    "browser acceptance"
+  ]
+}

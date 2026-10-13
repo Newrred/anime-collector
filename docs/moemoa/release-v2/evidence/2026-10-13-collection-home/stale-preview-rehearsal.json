@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-13",
+  "type": "LOCAL_POSTGRESQL_16",
+  "command": "wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/collection-home-test/test_stale_probe.py",
+  "exitCode": 0,
+  "passed": 5,
+  "tablesFingerprinted": 57,
+  "sqlSha256": "c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e",
+  "checks": [
+    "Exact probe rejects PREVIEW_CHANGED and rolls back all tables",
+    "Inner rollback works under outer COMMIT",
+    "Wrong catalog refused",
+    "Changed shelf refused",
+    "Unexpected publication success aborts and rolls back"
+  ],
+  "firstAttempt": "4 passed then local fault-injection function replacement failed due to unnamed arguments; runner corrected; service unchanged",
+  "hostedExecuted": false
+}
