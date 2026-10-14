@@ -29,6 +29,9 @@ DB/Storage/API/auth repository/계정 초기화/공개 controller/권리/환경/
 
 ## 8. 남는 한계와 인계
 
+### 공개 준비 fixture의 안정화
+c6439f3/CI38500772041은core까지성공했고public54는26PASS/28FAIL이었다. 모든실패는shared seedOwner의빈이름기대가이미검토된원본이름draft제안과불일치해서발생했다. 같은환경의local54는빠른loading빈값을읽어PASS했으므로controller준비후이름을기다리게해같은1FAIL을재현했다. fixture를draftName 확인+설명빈칸+기억자동선택0+최종게시버튼0으로보완하고54개전체무재시도PASS를확인했다. 이후기존Public collection 이름입력·freshreview/consent·권리·철회·원본/계정조건은그대로검사한다. 런타임/서버변경은추가하지않는다. 새정확SHA의전체CI가성공하기전에는master배포하지않는다.
+
 ### 후속 검증 — 세 번째 후보 이후
 2c7b651/CI38499379483의desktop52는성공했고 core52 중 board→card click 후동기URL 읽기1개가 실패했다. local Core/Channel126의117PASS/5기존SKIP/4FAIL을대조해 검색label/빈컬렉션/묶음accessible name은현재계약에맞추고, cardURL은완료를기다린뒤 같은ID/returnTo를검사한다. 실제저장·권리·계정코드를완화하지않는다.
 

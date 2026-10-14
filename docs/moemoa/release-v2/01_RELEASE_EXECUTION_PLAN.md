@@ -2571,5 +2571,7 @@ Astro ClientRouter·공통 persisted 메뉴·기존 owner/dirty/busy 보호를 �
 두 번째3f25cac의CI38498579440에서 admin 단계는 성공했다. desktop52 중 discovery의옛/library 검색1개는 canonical /titles soft 교체 전에 입력해 route scope 갱신 때 query가 지워졌다. 세 실패 artifact 모두 최종 My Titles/빈 input을 확인했고 로컬 단일은 빠른 전환에서PASS였다. 기존 case에 canonical fetch 지연을 합성하여 경합을 재현하고 helper가 URL/본문 준비를 확인한 다음 검색하게 한다. 입력/정확AnimeRef/저장1행/Memory0/Native assertion은 유지하며 실제 runtime 변경 없음.
 
 세 번째2c7b651/CI38499379483은desktop52 성공, title-cross-surface의 board→card click 후 동기URL 읽기1개로 실패했다(51PASS/1FAIL). 로컬 Core/Channel126은117PASS/5기존SKIP/4FAIL: 바뀐검색label·컬렉션empty/묶음명2개, 같은URL경합1개, first-Memory안내1개다. 합성 Storage 추적으로 Astro DEV 준비iframe(frame=false)이 first-memory seen을 먼저 쓰고 main이 읽는원인을 확인했다. one-time device-local 안내 소비만top window에서 하게 보완하고 동일unit/browser회귀를 추가한다. 실제여러도메인/동의/DB/원본/계정엔진은변경하지 않는다. 임시 trace 코드 제거, 기존selector/URL assertion은 현재계약에 맞추며 검증조건을줄이지 않는다. 새원본의단위/build/Doctor·기존core전체/필요공개회귀/정확CI로 다시마감한다.
+
+네 번째c6439f3/CI38500772041은core까지성공, publication54에서26PASS/28FAIL이었다. 모두shared seedOwner helper의빈publicTitle 기대가원인이다. 원본7e8bd78의이미검토한 “원본이름을미제출초안으로제안”과낡은assertion이불일치하며 local빠른환경은loading의빈칸을먼저읽어54PASS였다. 공통fixture에서controller준비후초안이름을확인하고 설명빈칸/자동기억선택0/최종게시action0을같이검사한다. 현재명시공개이름/Public collection 선택·freshconsent·철회/원본검사는유지한다. 새로운private metadata자동공개나권리계약변경은없다. 실패후보는master에반영하지않는다.
 ### 17. 완료 보고
 검사·배포 완료 전 SUCCESS로 쓰지 않는다. 결과는 reports/2026-10-14-production-ui-navigation-release.md와 상위 THIS_PC_HANDOFF에 기록한다.
