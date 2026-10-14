@@ -83,6 +83,10 @@ async function memoryCardCount(page: Page) {
 
 async function searchCatalogResult(page: Page, path = "/") {
   await page.goto(path);
+  if (path === "/library/") {
+    await expect(page).toHaveURL(/\/titles\/?$/u);
+    await expect(page.locator(".title-collection h1")).toBeVisible();
+  }
   const search = page.locator(".quick-action__input:visible");
   await search.fill("Cowboy Bebop");
   const row = page.locator(".quick-action-row").filter({
@@ -213,6 +217,10 @@ test("native account settings button opens the packaged Data document", async ({
 
 test("catalog search Library action adds only the Library row and creates no Memory draft", async ({ page }) => {
   await installCatalogSearchFixture(page);
+  await page.route("**/titles/", async route => {
+    if (route.request().resourceType() === "fetch") await new Promise(resolve => setTimeout(resolve, 1000));
+    await route.continue();
+  });
   const row = await searchCatalogResult(page, "/library/");
   await expect(page.locator(".title-collection__grid > *")).toHaveCount(0);
 

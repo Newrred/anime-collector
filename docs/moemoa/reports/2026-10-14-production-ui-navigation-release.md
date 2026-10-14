@@ -22,6 +22,8 @@ DB/Storage/API/auth repository/계정 초기화/공개 controller/권리/환경/
 
 실패 이력: 첫 후보724bf62의CI38498176100에서 SQL/publication-contract SUCCESS, verify의admin3개가 새검색status/관리status의 전역 locator 중복 때문에 strict 오류로 실패했다(18PASS/3FAIL). 동일3개 로컬 FAIL 재현 뒤 scope만 교정했고, 관리자17/OAuth복귀4=21개 전체 무재시도 PASS를 확인했다. 기존30과 다른51개 로컬 browser PASS이며 검토 원본117과 합산하지 않는다. 실패 후보는master에 배포하지 않으며 새SHA 전체CI로 마감한다.
 
+두 번째3f25cac/CI38498579440은 관리자 성공, desktop52 중 옛/library→/titles 준비 전 입력1개가 route scope 갱신 때 지워져 실패했다(51PASS/1FAIL). artifact의최종My Titles/빈input을 확인했고, 로컬 빠른 전환은PASS/합성1초canonicalfetch지연은같은FAIL로 재현했다. 기존helper에서canonicalURL/본문 준비를 확인한 뒤 입력하도록 보완하고 지연회귀를 유지했다. runtime은검토원본과 동일하며 저장1행/정확title/Memory0/Native 조건을 유지한다. 적합한desktop 격리환경52개 무재시도PASS로 마감했다. 후보 로컬30+21+52=103고유이며 과거117/반복실행과 합산하지 않는다. 실패후보2개 운영 배포0.
+
 ## 7. 보안·권리·관측
 새 analytics/키/환경/사진/검색어·private DTO 로그 없음. owner/dirty/busy·새 공개 선택/동의/철회 경계 유지. 실제 계정의 로그인/수락/게시/신고/삭제/설정 변경 없음. 배포 직후 프로젝트 runtime 오류 읽기를 시도하고 결과/도구 제한을 구분해 기록한다.
 
