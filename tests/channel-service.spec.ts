@@ -36,7 +36,7 @@ test.beforeEach(async ({ page }) => {
 test("real shelves persist, unfold beside their cover and preserve card/title/Board identity", async ({ page }) => {
   const cards = await seed(page);
   await page.reload();
-  await expect(page.getByText("아직 진열한 작품이 없어요.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "작품을 첫 선반에 모아 보세요.", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "컬렉션 편집", exact: true }).click();
   await page.getByRole("button", { name: "선반 추가", exact: true }).click();
   await page.getByLabel("선반 이름").fill("오래 머무는 장면들");
@@ -52,7 +52,7 @@ test("real shelves persist, unfold beside their cover and preserve card/title/Bo
   await page.getByRole("button", { name: "취소", exact: true }).click();
   await expect(page.locator(".bookshelf-tile")).toHaveCount(6);
   await page.reload();
-  await expect(page.getByRole("button", { name: "오래 머무는 장면들", exact: true })).toBeVisible();
+  await expect(page.locator(".collection-section-tabs").getByRole("button", { name: /오래 머무는 장면들/ })).toBeVisible();
   expect(await page.locator(".channel-wordmark").evaluate(node => node.getBoundingClientRect().top >= 0)).toBe(true);
   const cover = page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true });
   const coverWidth = await cover.boundingBox();
@@ -87,7 +87,7 @@ test("real shelves persist, unfold beside their cover and preserve card/title/Bo
   await page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true }).click();
   await page.screenshot({ path: `${evidence}/bookshelf-1280.png`, fullPage: true });
   await expand(page);
-  await page.getByRole("button", { name: "오래 머무는 장면들", exact: true }).click();
+  await page.locator(".collection-section-tabs").getByRole("button", { name: /오래 머무는 장면들/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("컬렉션 / 오래 머무는 장면들");
   await page.getByRole("button", { name: "테스트 작품 기억 펼치기", exact: true }).click();
   const href = await film.locator(".title-album-card__identity").getAttribute("href");

@@ -16,6 +16,8 @@ export function recordFirstMemoryViewSuggestion({ cardId, archive }, storage) {
 }
 
 export function consumeFirstMemoryViewSuggestion(archive, storage) {
+  // Preparing frames may render the route before the visible document does.
+  if (typeof window !== "undefined" && window !== window.top) return false;
   try {
     const ownerId = archive?.[0]?.card?.ownerId;
     if (!ownerId) return false;

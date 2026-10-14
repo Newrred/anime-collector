@@ -28,4 +28,10 @@ DB/Storage/API/auth repository/계정 초기화/공개 controller/권리/환경/
 새 analytics/키/환경/사진/검색어·private DTO 로그 없음. owner/dirty/busy·새 공개 선택/동의/철회 경계 유지. 실제 계정의 로그인/수락/게시/신고/삭제/설정 변경 없음. 배포 직후 프로젝트 runtime 오류 읽기를 시도하고 결과/도구 제한을 구분해 기록한다.
 
 ## 8. 남는 한계와 인계
+
+### 후속 검증 — 세 번째 후보 이후
+2c7b651/CI38499379483의desktop52는성공했고 core52 중 board→card click 후동기URL 읽기1개가 실패했다. local Core/Channel126의117PASS/5기존SKIP/4FAIL을대조해 검색label/빈컬렉션/묶음accessible name은현재계약에맞추고, cardURL은완료를기다린뒤 같은ID/returnTo를검사한다. 실제저장·권리·계정코드를완화하지않는다.
+
+합성Storage추적에서Astro DEV 준비iframe(frame=false)이 one-time first-memory seen을먼저기록하는원인을확인했다. application/firstMemoryViewSuggestion.js의소비를top window에한정했다. 검토원본UI와다른runtime은이2행 presentation fence뿐이다. Nodeunit은631PASS로늘었고 iframe→visible소비1회/원본pending보존을검사한다. 임시Storage trace코드는제거했다. 마지막Core/Channel+navigation+collection145개는140PASS/기존5SKIP/FAIL0, source Doctor34→34/536→531·신규rule/file0. 기존103이나원본117과중복합산하지않는다. 전체public54와환경별게이트는새정확SHA의CI로검사한다.
+
 첫 방문·내용 데이터/계정 확인·외부/auth/Native 및 네트워크 실패 fallback은 남는다. 실제 큰 archive/물리기기/Safari·개인 이미지 문제·전체 복구/임계 알림·미실행Q·10/18 첫 백업 관찰은 기존 별도 잔여다. 완료 receipt는 이 PC 상위 .tools/production-ui-navigation-release-20261014.json 및 THIS_PC_HANDOFF에 기록하며 다른 PC에서는 위Git/CI/Vercel/www 절차로 현재 상태를 재조회한다. 추가 UI 운영 승인 대기는 없으며 검사 실패는 먼저 해결하고 반영한다.

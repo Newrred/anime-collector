@@ -8,6 +8,23 @@ function memoryStorage() {
   return { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
 }
 
+test("a preparation frame cannot consume the visible document's first Memory guidance", () => {
+  const storage = memoryStorage(), archive = [bundle()];
+  const original = globalThis.window;
+  try {
+    assert.equal(record({ cardId: "card-1", archive }, storage), true);
+    globalThis.window = { top: {} };
+    assert.equal(consume(archive, storage), false);
+    assert.deepEqual(JSON.parse(storage.getItem("moemoa:titles:first-memory-view:v1:owner-a")), { cardId: "card-1" });
+    const visible = {}; visible.top = visible; globalThis.window = visible;
+    assert.equal(consume(archive, storage), true);
+    assert.equal(consume(archive, storage), false);
+  } finally {
+    if (original === undefined) delete globalThis.window;
+    else globalThis.window = original;
+  }
+});
+
 test("first saved Memory guidance is consumed once per owner without changing the view preference", () => {
   const storage = memoryStorage();
   storage.setItem("moemoa:titles:view:v1", "POSTER");
