@@ -117,7 +117,8 @@ test('one owner Collection renders an existing shelf and explicitly connected Bo
   await page.reload();
   await expect(page.locator('.bookshelf-tile')).toHaveCount(1);
   await expect(page.locator('.collection-groups').getByRole('button',{name:'작품 선반 다시 볼 작품'})).toBeVisible();
-  await page.getByRole('button',{name:'+ 이미지 보드 연결',exact:true}).click();
+  await page.getByRole('button',{name:'+ 묶음 추가',exact:true}).click();
+  await page.getByRole('button',{name:'이미지 보드 연결',exact:true}).click();
   await page.getByLabel('컬렉션에 놓을 이미지 보드').selectOption(sources.boardId);
   await page.getByRole('button',{name:'컬렉션에 연결',exact:true}).click();
   await expect(page.locator('.collection-board .memory-boards__cards li')).toHaveCount(1);
@@ -182,6 +183,8 @@ test('typed public shelf hydrates, needs fresh consent, publishes, and visitor n
  await expect(page.getByLabel('Public nickname',{exact:true})).toHaveValue('Existing owner');
  await expect(page.getByLabel('Public shelf title',{exact:true})).toHaveValue('Public favorites');
  expect(calls.filter(c=>c==='publish_memory_minihome')).toHaveLength(0);
+ for(const width of [1440,390,320]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const tile=await page.locator('.collection-sharing-shelf .public-title-shelf__grid > a').first().boundingBox();expect(tile!.width).toBeGreaterThanOrEqual(120);await page.screenshot({path:`.cache/collection-home-realignment-20261013/sharing-selection-${width}.png`,fullPage:true});}
+ await page.setViewportSize({width:1280,height:900});
  brokenCover=true;
  await page.getByRole('button',{name:'Preview public home',exact:true}).click();
  await expect(page.getByRole('button',{name:'Publish public home',exact:true})).toBeDisabled();

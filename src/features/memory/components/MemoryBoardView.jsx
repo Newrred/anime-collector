@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PrivateMemoryCardPreview from "./PrivateMemoryCardPreview.jsx";
 import BoardCollectionGrid from "./BoardCollectionGrid.tsx";
 import MemoryPublicationPanel from "./MemoryPublicationPanel.jsx";
-import { minihomeUiEnabled } from "../runtime/platformPublication.js";
+import { getPublicationServices, minihomeUiEnabled } from "../runtime/platformPublication.js";
+import CollectionLegacyRedirect from '../../bookshelf/CollectionLegacyRedirect.jsx';
 import { loadMemoryVisual } from "../application/loadMemoryVisual.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
@@ -12,6 +13,7 @@ import "./memory-board.css";
 const readBoardId = () => new URLSearchParams(globalThis.location?.search || "").get("id") || "";
 
 export default function MemoryBoardView({ base = "/" }) {
+  if (getPublicationServices().collectionHomeEnabled) return <CollectionLegacyRedirect kind="boards" base={base} />;
   return (
     <MemoryRouteShell base={base} currentRoute="boards">
       <MemoryBoardContent base={base} />
@@ -137,7 +139,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
 
       {status === "ready" && (
         <div className={`memory-boards__layout${selectedBoardId ? " is-detail" : " is-collection"}`}>
-          {!embedded && <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
+          {(!embedded || !selectedBoardId) && <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
             {detail && <a className="memory-boards__back" href={`${base}boards/`} data-astro-reload>← {boardCopy.title}</a>}
             {detail && minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
             {!selectedBoardId && <div>

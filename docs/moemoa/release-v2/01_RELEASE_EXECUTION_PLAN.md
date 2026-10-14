@@ -2452,3 +2452,44 @@ Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN
 6. **검증:** production read-only SQL exit0/transaction_read_only=on, 비공개 본문 없이 schema/설정/집계만 조회. git fetch 후 origin/master 및 www build-info commit/checkoutCommit 모두 b0541ff·source vercel-git 일치. master는40a3dac의 조상이며 후보 src/SQL22파일 동일. Vercel 실제 Project+Shared의 새 PUBLIC_MEMORY_COLLECTION_HOME_V1 검색0; Production publication/minihome=1, 고지revision DB와 일치, PUBLIC_SUPABASE_URL은 운영ref 일치. 비밀키 reveal0. 이번 신규 테스트/build0, 이전 로컬/hosted 증거를 그대로 사용한다.
 7. **보안/개인정보/권리/관측:** private 본문/이미지/토큰 조회·출력0. 보관 값은 운영 flag/고지/카탈로그 집계·function hash·migration 이력이다. 기존 test원복/운영설정/권한/가입/한도/요금 변경0. 표지 재업로드나 테스트 카탈로그 연결 복사가 필요하지 않다.
 8. **정확 적용 후보/다음1개:** 앱40a3dac의 기존 운영 대비21파일+원본migration1개, 서버 collection_home_enabled=true와 Vercel Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1만 추가하는 후보. 이 후보를 검토한 Git commit으로 master에 반영하고 연결 Vercel Git 배포의 source SHA/www를 확인한다. 새 동의·자동 게시·기존기록 삭제 없이 개인 컬렉션/공개 선택 연결을 적용한다. 배포 전 baseline drift 또는 필수 검증 실패 시 쓰기를 중지한다. 다음은 이 명시된 운영 범위의 승인이다. 전체 개발 브랜치 병합이나 다른 tools/workflow 변경을 포함하지 않는다.
+
+## W18 문서와 실제 화면 대조 후속 ExecPlan — 2026-10-14
+
+### 1. 목적과 사용자 결과
+사용자 “문서랑 실제 화면 차이부터 검수하고, 빠진 부분이나 개선할 부분 있으면 이어서 작업 진행”에 따라10/13 첨부 명세를 현재6e2a412의 실제 컴포넌트/화면과 대조하고 확인된 누락을 수정한다.
+### 2. 관련 확정 결정
+COLLECTION-HOME-REALIGNMENT-20261013과 현재 사용자 지시. 컬렉션=미니홈, 두 종류 묶음, 제목·승인 표지의 공개, 기존 개인 기억 팬·원본/게시 분리·homeId·정책 보존.
+### 3. 현재 상태와 저장소 증거
+현재6e2a412/운영5d544ad의 앱은 동일. typed 공개 계약과 기존 링크/선택 복원은 이미 구현돼 있다. BookshelfView는 query의 group만 초기화하고 shelf는all로 초기화한다. Following/Safety가 changePanel의 dirty/busy 검사를 우회한다. old Shelves 선택과 typed groups가 중복이며 Board 모드에도 작품 검색·개수·뷰가 남는다. 화면 합성 재현 후 검수 결과를 reports/2026-10-14-collection-document-screen-audit.md에 기록한다.
+### 4. 범위
+포함: 문서/화면 대조, 묶음 진입·추가·보기 문맥, 미저장/작업 보호, 공개 선택 배치·초안, 방문자 문맥·시각/키보드·회귀. 제외: 운영 배포/DB·권한·설정·실게시·원본 업로드·국가·Android·전체 정적 경고 정리.
+### 5. 아키텍처와 데이터 흐름
+기존 owner source/참조 layout와 public DTO를 각각 유지한다. 기존 컨트롤러의 version/hash/권리/동의/철회 경계는 변경하지 않는다. 시각 컴포넌트만 공통화하며 public에서 private loader를 호출하지 않는다.
+### 6. 변경 파일 지도
+BookshelfView/CollectionGroups/CollectionProfile/BookshelfEditor, typed tabs/collection-home.css, 필요한 MinihomeEditor/PublicationEditor/PublicMinihome/MinihomeSnapshot, 해당 합성 UI 검사와 기존 보고·진행판. 발견되지 않은 계약은 고치지 않는다.
+### 7. 데이터와 스키마 마이그레이션
+없음. shelfId/boardId/cardId/homeId·membership·개인 저장·백업/동기화 형식 보존. 원격migration/Storage/API 정책 변경0.
+### 8. 마일스톤
+A: 요구사항 표/합성 대표 화면과 실패 재현. B: 확인된 소유자/설정/방문자 차이 수정. C: 같은 합성 자료·폭1440/390/320으로 전후 촬영, 영향 계약 검사/build/품질 확인. D: 검증된 변경을 현재 작업 폴더에 반영하고 인계.
+### 9. 테스트와 검증
+기존 collection-home/bookshelf-editor/publication/minihome/owner/editing 검사와 신규 재현. Query 복귀·선반 신규/취소·두 종류·메뉴 전환 dirty/busy·지연 hydration·필수 동의·잘못된/기존 URL, PC/mobile/키보드/넘침. unit/build와 React Doctor 전후/변경 진단. 동일 실행의 반복을 합산하지 않는다.
+### 10. 보안 개인정보 권리 영향
+합성 자료/별도 브라우저만 저장·게시 mock. 실계정 게시·신고·동의·삭제·사진 입력0. 공개 DTO에 private 기록/묶음 총량 추가0. 새 키·dependency·권한 없음.
+### 11. 관찰 가능성 분석
+추가 analytics 없음. 소스 SHA·합성 시나리오 결과·UI 측정만 기록한다. 개인 본문/이미지·로그인·env는 산출물/Git에 넣지 않는다.
+### 12. 롤백 복구
+이번 presentation/flow patch만 revert. 기준6e2a412와 기존 worktree/개인 환경을 보존한다. DB/개인 원본 복원 없음.
+### 13. 위험과 완화
+접기/탭의 미저장 손실, query의 잘못된 자료 표시, 폭/긴 제목/공유 선택의 혼동. 원본 loader 재사용·정확한 전환 guard·실제 시나리오 재현과 합성 회귀로 확인한다. dev4363과 검증은 별도 checkout/cache를 사용한다.
+### 14. 필요한 사용자 결정
+현재 검수/로컬 보완은 승인됐다. 이미 승인된 관계/동의를 재요청하지 않는다. 새 운영 후보 배포·원격 적용은 이 지시의 실행 범위에 포함하지 않는다.
+### 15. 진행 기록
+기준6e2a412에서 별도 review checkout을 만들고 원본ZIP의 요구사항 및 현재 구현을 읽었다. 이미 구현된 server typed 계약은 중복 작성하지 않는다.
+
+문서와 실제 합성 화면의 차이4개를 수정 전 FAIL로 재현했다. 두 종류 묶음 탐색/추가/순서와 도구, query, dirty/busy, 소개 상태, 옛 경로, 공유 초안/작업 캔버스, 부분 표지 실패·방문자 문맥을 보완했다. 단위626·브라우저 고유83·build33 PASS. 생성물 제외 동일 소스 React Doctor34→34/신규0, 기존 진단은 남는다. 작은 공유 카드의 실제320px 캡처에서 발견한 글자 잘림까지 수정·경계 측정했다. 공유 선택3폭은 같은 합성 fixture의 기준/수정 소스를 각각 다시 촬영했다.
+### 16. 발견 사항과 계획 변경
+소유자 경계는 MemoryRouteShell의 key remount로 이미 보호되고 있어 새 reset 로직을 추가하지 않는다. 기존 selection hydration·homeId 보존도 구현됐다. 새 전체 schema·공개 엔진·백업 체계는 필요 없다.
+### 17. 완료 보고
+검수 요구별 상태·변경/유지 근거·파일/행·실행 결과·합성 화면·실환경 한계를 분리한8항 보고로 마감한다. 현재 W18 작업판과 상위 재개 안내를 갱신한다.
+
+완료 보고: `../reports/2026-10-14-collection-document-screen-audit.md`. 단일03에 로컬 후보와 기존 출시 인수/복구 잔여를 구분했다. 전후9쌍과 추가 합성 장면은 상위 `.tools/collection-review-comparison-20261014/`에 보존하며 개인 환경/키/자료는 포함하지 않는다. 검증된 후보만 주 실행 폴더에 fast-forward하고 상위 THIS_PC_HANDOFF에 실제 commit·4363 실행 대조를 기록한다. 운영/master push·DB/flag 활성·실게시0.

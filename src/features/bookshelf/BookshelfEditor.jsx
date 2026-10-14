@@ -2,9 +2,9 @@ import { useId, useState } from "react";
 import TitleCover from "../titles/components/TitleCover.jsx";
 import { TextChoices } from "../../components/collection/ChannelHeader.jsx";
 
-export default function BookshelfEditor({ draft, setDraft, albums, copy, locale, onCancel, onApply }) {
+export default function BookshelfEditor({ draft, setDraft, albums, copy, locale, onCancel, onApply, initialShelfId }) {
   const ko = locale === "ko", nameId = useId();
-  const [activeId, setActiveId] = useState(draft.shelves[0]?.id || "");
+  const [activeId, setActiveId] = useState(initialShelfId || draft.shelves[0]?.id || "");
   const [query, setQuery] = useState(""), [filter, setFilter] = useState("all");
   const active = draft.shelves.find(row => row.id === activeId) || draft.shelves[0];
   const selected = new Set(active?.titleKeys || []);
