@@ -49,6 +49,7 @@ function startAutoMemorySync(userId, syncNow) {
   globalThis.addEventListener("moemoa:memory-updated", onMutation);
   globalThis.addEventListener("online", onResume);
   globalThis.addEventListener("focus", onResume);
+  document.addEventListener("astro:page-load", onResume);
   return () => {
     active = false;
     if (timer) clearTimeout(timer);
@@ -56,6 +57,7 @@ function startAutoMemorySync(userId, syncNow) {
     globalThis.removeEventListener("moemoa:memory-updated", onMutation);
     globalThis.removeEventListener("online", onResume);
     globalThis.removeEventListener("focus", onResume);
+    document.removeEventListener("astro:page-load", onResume);
   };
 }
 

@@ -1,0 +1,230 @@
+{
+  "date": "2026-10-14",
+  "status": "DEPLOYED_VERIFIED",
+  "authorization": "문제 없으면 지금까지 작업 본 운영으로 업뎃 ㄱㄱ",
+  "baseline": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+  "candidate": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+  "reviewedSource": "0be7c4a6be768d5181a92ef6333c3f4330c66529",
+  "candidateBranch": "codex/production-ui-navigation-20261014",
+  "ciRun": 38504504280,
+  "ciUrl": "https://github.com/Newrred/anime-collector/actions/runs/38504504280",
+  "local": {
+    "unit": 631,
+    "browser": 30,
+    "builtPages": 33,
+    "installExit": 0,
+    "buildExit": 0,
+    "reviewedApplicationSourceIdentical": true,
+    "doctor": {
+      "version": "0.9.11",
+      "scoreBefore": 34,
+      "scoreAfter": 34,
+      "baselineDiagnostics": 536,
+      "candidateDiagnostics": 531,
+      "newRuleFile": 0,
+      "diffWarnings": 1,
+      "diffWarningExistingInBaseline": true,
+      "fullScanExit": 1,
+      "existingDebt": true
+    },
+    "adminAndCallbackBrowser": 21,
+    "totalUniqueCandidateBrowser": 103,
+    "desktopBrowser": 52,
+    "finalCoreChannelCollectionNavigation": {
+      "pass": 140,
+      "skip": 5,
+      "fail": 0
+    },
+    "buildFinalExit": 0,
+    "finalPublication": {
+      "pass": 54,
+      "fail": 0,
+      "retries": 0,
+      "stableDraftDefaults": true
+    },
+    "finalPhotoMobile": {
+      "pass": 41,
+      "fail": 0,
+      "retries": 0
+    },
+    "finalCoreAfterPhotoResume": {
+      "pass": 140,
+      "skip": 5,
+      "fail": 0
+    }
+  },
+  "changes": {
+    "database": 0,
+    "api": 0,
+    "authRepository": 0,
+    "dependencies": 0,
+    "lock": 0,
+    "environment": 0,
+    "flags": 0,
+    "rights": 0,
+    "realData": 0,
+    "analytics": 0
+  },
+  "knownRemaining": [
+    "large private-photo loading diagnosis",
+    "full Public/Storage restore and ingestion history",
+    "physical devices / remaining QA",
+    "capacity threshold actual alarm receipt",
+    "first weekly backup observation after 2026-10-18 03:00 KST"
+  ],
+  "failedCandidates": [
+    {
+      "sha": "724bf6246ed03da0c25c4bb96309e0a13efaa612",
+      "ciRun": 38498176100,
+      "failure": "Three admin test status locators matched header and page statuses",
+      "deployed": false,
+      "localReproduced": 3
+    },
+    {
+      "sha": "3f25cac908a75e07f5184b26834f87734519450c",
+      "ciRun": 38498579440,
+      "failure": "Library search fixture typed before soft redirect settled",
+      "deployed": false,
+      "artifactConfirmed": true,
+      "localFastPass": true,
+      "localDelayedReproduced": true
+    },
+    {
+      "sha": "2c7b651a61c7fc33a6887dd82b88e8940a81e6b8",
+      "ciRun": 38499379483,
+      "failure": "Board-to-card test inspected old URL before soft navigation completed",
+      "deployed": false,
+      "localCoreChannel": {
+        "pass": 117,
+        "skip": 5,
+        "fail": 4
+      },
+      "localFindings": [
+        "stale collection search/empty/group accessible selectors",
+        "same board-to-card URL timing",
+        "DEV preparation iframe consumed one-time Memory guidance"
+      ],
+      "resolved": true
+    },
+    {
+      "sha": "c6439f3dc8014990da2cf789bab5f53334ab5123",
+      "ciRun": 38500772041,
+      "failure": "Shared publication fixture asserted transient empty title instead of the reviewed unsubmitted name draft",
+      "deployed": false,
+      "ciPublication": {
+        "pass": 26,
+        "fail": 28
+      },
+      "localFastPass": 54,
+      "localStableReproduced": 1,
+      "resolved": true
+    },
+    {
+      "sha": "18310f2a7b2d544ed39198f918b5ac605d5e0cc7",
+      "ciRun": 38502561444,
+      "failure": "Authorized private-photo retry did not resume after two transient failures and soft detail navigation",
+      "deployed": false,
+      "composer": {
+        "pass": 20,
+        "fail": 1
+      },
+      "localReproduced": 1,
+      "resolved": true
+    }
+  ],
+  "reproductionProductionBaseline": {
+    "newDocuments": 3,
+    "retainedHeader": 0,
+    "errors": 0
+  },
+  "reviewedRuntimeUnchanged": false,
+  "additionalTestCorrections": [
+    "admin-ui.spec.ts: three status locators scoped to .admin-page",
+    "memory-card-discovery.spec.ts: canonical URL/content readiness and synthetic delayed redirect"
+  ],
+  "runtimeExceptions": [
+    {
+      "file": "src/features/titles/application/firstMemoryViewSuggestion.js",
+      "reason": "Only visible top window may consume one-time device-local guidance",
+      "addedLines": 2,
+      "backendChanges": false
+    },
+    {
+      "file": "src/hooks/useMemoryAccountSync.js",
+      "reason": "Resume existing authorized auto-sync / durable photo intents on astro:page-load; clean up listener on owner/unmount",
+      "addedLines": 2,
+      "serverChanges": false
+    }
+  ],
+  "ci": {
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "jobs": [
+      "publication-contract",
+      "verify"
+    ]
+  },
+  "deployment": {
+    "id": "dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D",
+    "projectId": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+    "teamId": "team_5qSBpZUQpNl41SJvHZBfsJGx",
+    "target": "production",
+    "source": "git",
+    "branch": "master",
+    "commit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "state": "READY",
+    "url": "https://anime-collector-oi9mkw0g2-newrreds-projects.vercel.app",
+    "productionUrl": "https://www.moemoa.xyz",
+    "framework": "astro",
+    "buildDurationSeconds": 59.846
+  },
+  "masterPushed": true,
+  "productionChecks": {
+    "source": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "commitAndCheckoutMatch": true,
+    "sourceKind": "vercel-git",
+    "semanticMatch": true,
+    "beforePrimaryDocuments": 3,
+    "afterPrimaryDocuments": 0,
+    "allAdditionalDocuments": 0,
+    "retainedHeaderForAllSevenSteps": true,
+    "viewports": [
+      1440,
+      390,
+      320
+    ],
+    "overflow": 0,
+    "pageErrors": [],
+    "blockedWrites": 0,
+    "realAccountActions": false,
+    "visualInspected": [
+      1440,
+      320
+    ]
+  },
+  "observability": {
+    "projectAndDeploymentVerified": true,
+    "window": "10m",
+    "levels": [
+      "error",
+      "fatal"
+    ],
+    "group_by": "level",
+    "errorGroups": 0,
+    "toolError": false,
+    "note": "Deployment-scoped grouped log query returned no groups; limited observation window."
+  },
+  "masterAutomaticCI": {
+    "run": 38505717113,
+    "commit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "status": "in_progress",
+    "candidateSameCommitAlreadyPassed": true
+  },
+  "handoff": {
+    "branch": "codex/continue-after-arena-20261012",
+    "applicationAndTestsMatchProduction": true,
+    "preservedDevelopmentTools": 16,
+    "completionPointer": "Upper THIS_PC_HANDOFF.md and annotated release/2026-10-14-ui-navigation tag record final development commit and push."
+  }
+}

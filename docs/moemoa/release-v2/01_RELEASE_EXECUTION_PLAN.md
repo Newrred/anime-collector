@@ -2532,3 +2532,50 @@ ClientRouter 자체는 이미 설치돼 있어 새 라우팅 의존성이 필요
 reports/2026-10-14-navigation-structure-and-stability.md에8항 분석·수정·실제 전후 측정·남은 로딩 범위를 기록한다. 단일03/상위 재개 안내를 갱신하고 전체 사이트를 이미 SPA로 교체했다고 과장하지 않는다.
 
 실행 결과: 실제7e8bd78 주요3회 모두 main-frame 새 문서/메뉴 재생성, 수정 built static의 동일3회는0/동일 메뉴 유지. navigation/편집/원본/공개/계정/디자인의 고유117 PASS, 단위630 PASS, build33 PASS. 최신 navigation7+editing11은 같은 주소 brand·dirty program/Back·준비 중 inert·새 목적지 취소·언어의 다른 root 전달을 확인했다. public responsive6도 마지막 wrapper 뒤 재확인했다. 잘못된 초기 selector/fixture 환경/준비 timeout/static helper404 실행은 별도 실패 이력으로 구분한다. 호환 메뉴 adapter로 큰 부모 페이지의 API를 보존하며 글로벌private cache·세션 엔진/DB/flags·원격 배포 변경0. 최종 소스 품질/로컬 commit·인수는8항 보고와 THIS_PC_HANDOFF에 결속한다.
+## W18 화면·이동 개선 운영 반영 ExecPlan — 2026-10-14
+### 1. 목적과 사용자 결과
+사용자 “문제 없으면 지금까지 작업 본 운영으로 업뎃 ㄱㄱ”에 따라 문서·화면 보완과 이동 안정화를 www에 반영한다.
+### 2. 관련 확정 결정
+기존 무료 Web·컬렉션·일반 공개·권리·원본 보호 유지. 이번 사용자 지시는 검증된 두 UI 수정의 운영 Git 배포 승인이다.
+### 3. 현재 상태와 저장소 증거
+운영 origin/master·www·Vercel Git READY 모두5d544ad. 검토 원본6e2a412..0be7c4a는7e8bd78/0be7c4a 두 commit이다. UI/runtime/tests/workflow의 시작 소스는 운영과 동일함을 비교했다.
+### 4. 범위
+두 검토 patch의58파일 및 필요한 명세/현재 문서만 포함한다. 개발의 별도 운영시험 도구16개를 병합하지 않는다. DB/API/환경/권한/flags/의존성/실자료 변경 없음.
+### 5. 아키텍처·데이터 흐름
+Astro ClientRouter·공통 persisted 메뉴·기존 owner/dirty/busy 보호를 검토 소스 그대로 옮긴다. 서버 계약과 저장/공개/동의 경계 유지.
+### 6. 변경 파일 지도
+원본 diff58파일:src UI/route/hooks/layout, 회귀 tests, quality의 기존 collection 단계, 보고2개/START/기존 계획·작업판. 필요한 첨부 명세3개와 최신 인수 문서·기존 근거 JSON은 코드 변경과 구분한다.
+### 7. 데이터·스키마 마이그레이션
+없음. DB/Storage/원본/정책/설정/한도/사용량/동의 변경0.
+### 8. 마일스톤
+운영 기준 후보→검토 소스 일치/로컬 검사→정확SHA 원격 전체CI SUCCESS→동일master Git push→Vercel Git READY/www exact SHA→실제 화면 읽기 확인→인계.
+### 9. 테스트와 검증
+기존 원본 고유 Chromium117/단위630/build33와 source Doctor34→34/신규0을 유지한다. 후보에서 단위/build/Doctor 및 이동·편집·collection 검사를 하고 GitHub Service quality 두 job 전체를 통과시킨다. www 주요 이동 문서0/동일 메뉴·3폭/예외와 운영 source를 독립 확인한다.
+### 10. 보안·개인정보·권리 영향
+환경·키·개인사진·세션을 Git/로그에 넣지 않는다. 실제 로그인/게시/동의/신고를 대신 수행하지 않는다. 빈 guest 브라우저의 읽기로 화면 확인.
+### 11. 관찰 가능성·분석 이벤트
+새 analytics 없음. CI/deployment/source·합성 측정만 보존. 배포 직후 runtime 오류 조회를 시도하고 지원/읽기 제한은 별도 기록한다.
+### 12. 롤백·복구
+실패 시 master 이동 전에 수정·재검사. 운영 회귀면 승인된 UI patch를 되돌리는 Git commit→동일 배포 절차로5d544ad 앱 동작 복구. DB 복원 없음. master concurrent drift를 덮어쓰지 않는다.
+### 13. 위험과 완화
+원격 CI/운영환경 차이, 내비게이션·공개/계정 경계 회귀는 정확 후보 검사·read-only 실화면으로 확인한다. 개인 이미지/전체 복구·실기기·임계 알림/10월18일 첫 예약은 기존 별도 잔여다.
+### 14. 필요한 사용자 결정
+현재 지시로 이번 UI 운영 배포 승인 충족. 새 DB·정책·국가·한도·게시 동의는 요청/실행하지 않는다.
+### 15. 진행 기록
+2026-10-14: 운영 baseline 독립 조회, 전용 production worktree 생성. 구현 source 변경 전 이 계획을 기록했다.
+### 16. 발견 사항과 계획 변경
+개발 branch 전체 병합 없이 검토 파일 source만 결속한다. 최종 SHA/CI/배포 결과는 외부 receipt에 기록해 후보를 검사 이후 수정하지 않는다.
+
+첫 후보724bf62의CI38498176100에서 publication-contract SUCCESS, verify의 admin3개는 새 공통 메뉴의 검색 status와 관리자 status를 전역 locator가 함께 선택해 strict 오류로 실패했다. 같은3개 로컬 무재시도로 재현했다. 실제 AdminDashboard 동작/권한/쓰기 계약은 변경하지 않고 기존 검사를 .admin-page status로 정확히 한정한다. 새 exact 후보로 전체CI를 다시 실행하며 실패SHA를master에 반영하지 않는다.
+
+두 번째3f25cac의CI38498579440에서 admin 단계는 성공했다. desktop52 중 discovery의옛/library 검색1개는 canonical /titles soft 교체 전에 입력해 route scope 갱신 때 query가 지워졌다. 세 실패 artifact 모두 최종 My Titles/빈 input을 확인했고 로컬 단일은 빠른 전환에서PASS였다. 기존 case에 canonical fetch 지연을 합성하여 경합을 재현하고 helper가 URL/본문 준비를 확인한 다음 검색하게 한다. 입력/정확AnimeRef/저장1행/Memory0/Native assertion은 유지하며 실제 runtime 변경 없음.
+
+세 번째2c7b651/CI38499379483은desktop52 성공, title-cross-surface의 board→card click 후 동기URL 읽기1개로 실패했다(51PASS/1FAIL). 로컬 Core/Channel126은117PASS/5기존SKIP/4FAIL: 바뀐검색label·컬렉션empty/묶음명2개, 같은URL경합1개, first-Memory안내1개다. 합성 Storage 추적으로 Astro DEV 준비iframe(frame=false)이 first-memory seen을 먼저 쓰고 main이 읽는원인을 확인했다. one-time device-local 안내 소비만top window에서 하게 보완하고 동일unit/browser회귀를 추가한다. 실제여러도메인/동의/DB/원본/계정엔진은변경하지 않는다. 임시 trace 코드 제거, 기존selector/URL assertion은 현재계약에 맞추며 검증조건을줄이지 않는다. 새원본의단위/build/Doctor·기존core전체/필요공개회귀/정확CI로 다시마감한다.
+
+네 번째c6439f3/CI38500772041은core까지성공, publication54에서26PASS/28FAIL이었다. 모두shared seedOwner helper의빈publicTitle 기대가원인이다. 원본7e8bd78의이미검토한 “원본이름을미제출초안으로제안”과낡은assertion이불일치하며 local빠른환경은loading의빈칸을먼저읽어54PASS였다. 공통fixture에서controller준비후초안이름을확인하고 설명빈칸/자동기억선택0/최종게시action0을같이검사한다. 현재명시공개이름/Public collection 선택·freshconsent·철회/원본검사는유지한다. 새로운private metadata자동공개나권리계약변경은없다. 실패후보는master에반영하지않는다.
+
+다섯 번째18310f2/CI38502561444는공개54까지성공했다. signed composer21 중두번실패한private photo의상세진입재시도1개가실패(20PASS/1FAIL): durable intent와카드는보존됐지만post2에서멈췄다. 같은1개로컬FAIL 재현. persisted 메뉴의autoSync가새route에서재마운트되지않기때문에기존online/focus/45초간격만남았다. 기존startAutoMemorySync의onResume를astro:page-load에도등록/cleanup해이미사용자Save로승인·기록한queue만기존user/ready/online/visibility/pause/in-flight/owner/sessionfence를거쳐재시도한다. 신규사진선택·공개·권리·SDK/서버/DB변경없음. Supabase현재changelog·getSession공식문서/실제게이트를대조했다. SQL/metadata/photo권한을교체하지않고브라우저전송회귀/계정경계·모바일·quality/빌드를다시검사한다.
+### 17. 완료 보고
+검사·배포 완료 전 SUCCESS로 쓰지 않는다. 결과는 reports/2026-10-14-production-ui-navigation-release.md와 상위 THIS_PC_HANDOFF에 기록한다.
+
+**완료 — 2026-10-14:** 정확source a65f557e84659a0638ee44a8c4a911173dd554b2의quality38504504280 publication-contract/verify 전체SUCCESS 후master Git push. Vercel dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D READY·Git/master·www alias와실제build-info commit/checkoutCommit/source/semanticMatch 일치. guest 주요3회 문서 이동3→0·같은메뉴, Back/Forward·동일주소/계정버튼·1440/390/320·JS예외/넘침0. 실제계정/게시/동의/DB/환경/한도변경0. deployment10분 error/fatal집계는빈결과이며전수역사/상시무오류보장은아니다. failure5후보는master에반영하지않았다. 로컬최종unit631/build33/Chrome core140+기존skip5/사진모바일41/공개54 및sourceDoctor34→34/신규rule-file0은중복합산하지않는다. 기존실사진/복구/물리기기·QA/임계알림/10월18일첫백업관찰잔여를유지한다. source/CI/배포/브라우저·영향·잔여는동일8항보고와evidence/2026-10-14-ui-navigation-release.json, 상위THIS_PC_HANDOFF·릴리스annotation에결속한다. 운영3문서와개발3문서의겹친추가영역은원본개발이력을포함한운영후보본문을보존해해결하며app/tests byte동일·개발tool16보존을확인한다.

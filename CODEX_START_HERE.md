@@ -1,5 +1,9 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-14 운영 완료·이 PC/Git 인계:** 운영 source **a65f557e84659a0638ee44a8c4a911173dd554b2**. 정확 후보 전체 quality38504504280 두 job SUCCESS→master Git→Vercel dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D READY/www exact SHA·source vercel-git·semanticMatch 확인. 실제 guest 메뉴3회 문서 이동3→0, 같은 메뉴·Back/Forward·계정 버튼·1440/390/320·JS예외0 PASS. 준비iframe first 안내와 quiet route의이미승인된사진재시도도보완했다. [완료 근거](docs/moemoa/release-v2/evidence/2026-10-14-ui-navigation-release.json), [8항 보고](docs/moemoa/reports/2026-10-14-production-ui-navigation-release.md)를 우선한다. 현재 실행 폴더의개발branch는기존tool16개를보존하며앱/검사소스는운영과일치한다. 운영/개발전체branch병합은하지않는다. 아래 승인/미배포/후보/CI실패는당시이력이다.
+
+> **2026-10-14 화면·이동 개선 운영 반영 승인:** 사용자 “문제 없으면 지금까지 작업 본 운영으로 업뎃 ㄱㄱ”. 운영5d544ad 기준에 검토7e8bd78/0be7c4a의 UI·회귀 범위만 옮겼다. 개발 도구16개 전체 병합·DB/환경/flags 변경 없음. [운영 후보·확인 절차](docs/moemoa/reports/2026-10-14-production-ui-navigation-release.md), [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)을 우선한다. 아래 로컬/미승인 표시는 당시 이력이다. 현재 원격 master·Service quality·Vercel Git·www build-info를 정확 SHA로 대조해 완료 여부를 확인한다.
+
 > **2026-10-14 내부 이동 안정화:** 활성 링크의 강제 reload와 프로그램 이동을 정리하고 같은 상단 메뉴를 유지했다. 기준의 주요3회 문서 이동→개선 built static0회, 고유 Chromium117/단위630/build33 PASS. [구조 분석·8항 보고](docs/moemoa/reports/2026-10-14-navigation-structure-and-stability.md)와 [단일 작업판 현재 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)를 우선 읽는다. 현재 실행 폴더/확정 commit은 THIS_PC_HANDOFF에 결속한다. 내용의 owner 확인/데이터 읽기·OAuth/Native 경계는 유지하며 운영/DB/환경/실자료 변경0. 아래 문서·화면 보완과 운영 인수는 유지된 이전 결과다.
 
 > **2026-10-14 문서·화면 대조 보완:** 첨부 컬렉션 명세와 실제 화면의 누락을 재현·수정했다. 단위626/고유 Chromium83/build33 PASS, React Doctor 동일 소스 범위34→34/신규0. 현재 로컬 개발 결과와 남는 실제 이미지/출시 범위는 [검수 8항 보고](docs/moemoa/reports/2026-10-14-collection-document-screen-audit.md)와 [단일 작업판 현재 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업--2026-10-14-문서화면-대조-보완)를 우선 읽는다. 현재 실행 폴더/확정 commit은 상위 THIS_PC_HANDOFF에 기록한다. 이번 운영/DB/설정/실자료 변경0. 아래10/13 운영 인수와 백업 잔여는 유지한다.

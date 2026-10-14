@@ -1,5 +1,22 @@
 # MOEMOA · 단일 출시 작업판
 
+## 현재 결과 — 2026-10-14 화면·이동 개선 운영 완료
+
+- 운영 source a65f557e84659a0638ee44a8c4a911173dd554b2. 정확 후보 Service quality38504504280 publication-contract/verify SUCCESS 후 master Git으로반영했다. Vercel dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D READY·www alias·Git/master SHA, 실제 build-info commit/checkoutCommit/source/semanticMatch 대조 완료.
+- 실제 guest 작품→기억→컬렉션 문서 이동3→0·동일메뉴, Back/Forward·동일주소·계정 버튼·1440/390/320·JS예외/넘침0. 합성운영자/실계정행동·실게시/동의변경없음. 짧은배포단위 error/fatal집계빈결과는관찰창만의근거다.
+- 최종local unit631/build33, Core/Channel/navigation/collection140PASS+기존5SKIP, 사진/모바일41PASS, 공개54PASS. 묶음/원본/재실행은중복합산하지않는다. Source Doctor34→34/536→531·신규rule/file0/기존진단잔존. CI에서발견한시험scope/주소/초안준비와실제준비iframe 안내·기존사진재시도를보완한뒤전체성공으로마감했다.
+- DB/API/정책/권한/한도/환경/flags/SDK/의존성/실자료변경0. 인계개발tool16개는개발에서보존하며master에전체병합하지않았다. 원본/queued consent/owner fenc​​e 유지.
+- [완료 근거](evidence/2026-10-14-ui-navigation-release.json), [8항 보고](../reports/2026-10-14-production-ui-navigation-release.md), 기존01 ExecPlan과상위 THIS_PC_HANDOFF를따른다. 다음작업은최신원격확인후진행하며현재UI배포승인을다시묻지않는다. 기존실제개인사진원인·전체복구/임계알림·실기기/미실행QA·10/18첫예약관찰은별도잔여다.
+
+## 현재 작업 — 2026-10-14 화면·이동 개선 운영 반영
+
+사용자가 검증 후 운영 반영을 승인했다. 운영5d544ad 기준에 문서·화면7e8bd78와 이동 안정화0be7c4a의 검토 범위만 결속한 후보를 준비했다. 과거 개발 tool16개는 포함하지 않는다.
+
+- 범위: 컬렉션 묶음/편집·공유·공개 상태·옛 경로 보완, ClientRouter·persisted 메뉴·편집/Back 보호·언어 전달. DB/API/환경/권한/한도/의존성/실자료 변경0.
+- 완료 조건: 정확 후보 원격 Service quality 두 job SUCCESS→동일master Git→Vercel Git READY→www commit/checkoutCommit/source/semanticMatch 및 guest 실제 이동·반응형 확인.
+- 실제 SHA/결과 조회는 [운영 후보 보고](../reports/2026-10-14-production-ui-navigation-release.md), 이 PC 최종 receipt·상위 THIS_PC_HANDOFF를 따른다. 이 문서는 배포 완료 전 작성한 후보 기준이며 아래 날짜별 상태는 당시 이력이다.
+- 기존 개인 이미지 원인·전체 복구·임계 알림·실기기/Q·10/18 03:00 첫 주간 예약 관찰은 유지한다. 새로운 백업/공개/동의 작업 없음.
+
 ## 현재 작업 — 2026-10-14 내부 이동·화면 재구성 안정화
 
 사용자가 탭·버튼 이동 때 전체 페이지가 재구성되는 구조 분석·개선을 요청했다. 기존 ClientRouter를 우회하던 활성 내부 reload40개와 프로그램 이동을 정리하고, 메뉴를 별도 persisted island로 유지했다. 동일주소·이력·언어/테마·dirty/busy/Back·준비 중 재편집·검색 owner scope를 함께 보완했다.

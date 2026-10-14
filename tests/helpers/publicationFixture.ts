@@ -135,7 +135,11 @@ export async function seedOwner(page: Page) {
   }, USER);
   await page.goto(boardUrl);
   await page.getByRole("button", { name: "Share selected memories" }).click();
-  await expect(page.getByLabel("Public title", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Public title", { exact: true })).toHaveValue("PRIVATE BOARD NAME");
+  await expect(page.locator(".memory-publication textarea")).toHaveValue("");
+  expect(await page.getByLabel("Include this memory", { exact: true }).evaluateAll(inputs =>
+    inputs.some(input => (input as HTMLInputElement).checked))).toBe(false);
+  await expect(page.getByRole("button", { name: "Publish this version", exact: true })).toHaveCount(0);
 }
 
 export async function choose(page: Page, note = false) {

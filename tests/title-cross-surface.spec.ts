@@ -84,6 +84,7 @@ test("Bookshelf and Board preserve the same Memory and Title Hub after choosing 
   }, cardId);
   await page.goto(`/boards/?id=${boardId}`);
   await page.locator(".memory-boards__cards").getByRole("link", { name: "A remembered scene" }).click();
+  await expect(page).toHaveURL(new RegExp("/memory/card/\\?id=" + cardId + "(?:&|$)"));
   expect(new URL(page.url()).searchParams.get("id")).toBe(cardId);
   expect(new URL(page.url()).searchParams.get("returnTo")).toBe(`/boards/?id=${boardId}`);
   await page.locator(".memory-detail__title-link").click();
