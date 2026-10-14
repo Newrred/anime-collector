@@ -10,7 +10,7 @@
 기존 release-v2/01의 W18 화면·이동 개선 운영 반영 ExecPlan17항. 운영 전용 checkout에서 준비하고 정확 후보 전체CI가 통과한 뒤 master Git 배포한다.
 
 ## 4. 변경과 목적
-원본58파일의 UI·경로/메뉴·hooks/layout·회귀 검사·quality 단계와 관련 보고/명세/최신 인수 문서만 포함했다. 새 문서/근거 JSON은 이미 검토한 개발 인계의 보존용이다. 별도 운영시험 도구16개 전체 병합 없음. src/tests/workflow는 검토0be7c4a와 blob 단위로 대조한다.
+원본58파일의 UI·경로/메뉴·hooks/layout·회귀 검사·quality 단계와 관련 보고/명세/최신 인수 문서를 포함했다. 새 문서/근거 JSON은 이미 검토한 개발 인계의 보존용이다. 별도 운영시험 도구16개 전체 병합 없음. 검토53개 src/tests/workflow는0be7c4a와 blob 단위로 일치한다. 이후 원격CI에서 발견한 admin-ui 검사3개만 관리자 status 영역으로 한정하며 사용자 동작/권한/쓰기의 assertion은 유지했다.
 
 ## 5. 데이터·복귀
 DB/Storage/API/auth repository/계정 초기화/공개 controller/권리/환경/flags/한도/의존성·lock·실자료 변경0. 회귀는 UI patch의 Git revert→동일CI/Git배포로 복귀한다. DB 복원 없음. 동시master drift는 덮어쓰지 않는다.
@@ -19,6 +19,8 @@ DB/Storage/API/auth repository/계정 초기화/공개 controller/권리/환경/
 검토 원본의 고유 Chromium117/단위630/build33 PASS. 정확 운영 후보에서 단위630 PASS·실제 이동/편집/collection30 PASS·build33/postbuild exit0를 다시 확인했다. source Doctor0.9.11은 기준34→후보34,536→531개·신규rule/file0이며 제외한 개발 도구의 진단과 기존 경고 감소를 구분한다. 운영master 대비diff의PublicTitleShelf 경고1개는 기준에도 같은file/rule로 존재한다. 기존 전체 진단을 해결했다고 주장하지 않는다. 검토 원본의diff0과 이번master 대비diff1을 혼동하지 않는다.
 
 최종 완료 조회: 원격master SHA에 해당하는 GitHub **Service quality** publication-contract/verify 두 job SUCCESS, Vercel Production source git/master·READY·www alias, https://www.moemoa.xyz/build-info.json의 commit=checkoutCommit=master·source=vercel-git·semanticMatch=true. 빈 guest Chromium에서 주요3회 문서 이동0/같은 메뉴·Back/Forward/계정 버튼·1440/390/320·JS예외를 읽기로 확인한다. localhost build를 hosted 성공으로 바꾸어 쓰지 않는다.
+
+실패 이력: 첫 후보724bf62의CI38498176100에서 SQL/publication-contract SUCCESS, verify의admin3개가 새검색status/관리status의 전역 locator 중복 때문에 strict 오류로 실패했다(18PASS/3FAIL). 동일3개 로컬 FAIL 재현 뒤 scope만 교정했고, 관리자17/OAuth복귀4=21개 전체 무재시도 PASS를 확인했다. 기존30과 다른51개 로컬 browser PASS이며 검토 원본117과 합산하지 않는다. 실패 후보는master에 배포하지 않으며 새SHA 전체CI로 마감한다.
 
 ## 7. 보안·권리·관측
 새 analytics/키/환경/사진/검색어·private DTO 로그 없음. owner/dirty/busy·새 공개 선택/동의/철회 경계 유지. 실제 계정의 로그인/수락/게시/신고/삭제/설정 변경 없음. 배포 직후 프로젝트 runtime 오류 읽기를 시도하고 결과/도구 제한을 구분해 기록한다.

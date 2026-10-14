@@ -2565,5 +2565,7 @@ Astro ClientRouter·공통 persisted 메뉴·기존 owner/dirty/busy 보호를 �
 2026-10-14: 운영 baseline 독립 조회, 전용 production worktree 생성. 구현 source 변경 전 이 계획을 기록했다.
 ### 16. 발견 사항과 계획 변경
 개발 branch 전체 병합 없이 검토 파일 source만 결속한다. 최종 SHA/CI/배포 결과는 외부 receipt에 기록해 후보를 검사 이후 수정하지 않는다.
+
+첫 후보724bf62의CI38498176100에서 publication-contract SUCCESS, verify의 admin3개는 새 공통 메뉴의 검색 status와 관리자 status를 전역 locator가 함께 선택해 strict 오류로 실패했다. 같은3개 로컬 무재시도로 재현했다. 실제 AdminDashboard 동작/권한/쓰기 계약은 변경하지 않고 기존 검사를 .admin-page status로 정확히 한정한다. 새 exact 후보로 전체CI를 다시 실행하며 실패SHA를master에 반영하지 않는다.
 ### 17. 완료 보고
 검사·배포 완료 전 SUCCESS로 쓰지 않는다. 결과는 reports/2026-10-14-production-ui-navigation-release.md와 상위 THIS_PC_HANDOFF에 기록한다.

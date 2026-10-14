@@ -149,7 +149,7 @@ test('pause requires explicit keyboard confirmation and sends the exact revision
   expect(backend.calls.filter(call => call.path.endsWith('/set_moemoa_signup_paused'))).toHaveLength(0);
   await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
   await page.keyboard.press('Enter'); await expect(confirm).toBeFocused(); await page.keyboard.press('Enter');
-  await expect(page.getByRole('status')).toContainText('새 가입을 일시중지했습니다');
+  await expect(page.locator('.admin-page').getByRole('status')).toContainText('새 가입을 일시중지했습니다');
   const writes = backend.calls.filter(call => call.path.endsWith('/set_moemoa_signup_paused'));
   expect(writes).toHaveLength(1);
   expect(JSON.parse(writes[0].body)).toEqual({p_expected_revision: 'a'.repeat(64), p_paused: true});
@@ -160,7 +160,7 @@ test('ready paused release resumes only after confirmation', async({page}) => {
   const backend = await setup(page, {paused: true});
   await page.getByRole('button', {name: '새 가입 재개', exact: true}).click();
   await page.getByRole('button', {name: '재개 확인', exact: true}).click();
-  await expect(page.getByRole('status')).toContainText('새 가입을 재개했습니다');
+  await expect(page.locator('.admin-page').getByRole('status')).toContainText('새 가입을 재개했습니다');
   expect(JSON.parse(backend.calls.find(call => call.path.endsWith('/set_moemoa_signup_paused')).body).p_paused).toBe(false);
 });
 
@@ -234,7 +234,7 @@ test('network failure clears the previous data and never prints provider details
 
 test('sign out during a pending request never restores old admin data', async({page}) => {
   const backend = await setup(page, {delayedRead: true});
-  await expect(page.getByRole('status')).toContainText('권한과 운영 상태');
+  await expect(page.locator('.admin-page').getByRole('status')).toContainText('권한과 운영 상태');
   await page.getByRole('button', {name: '로그아웃', exact: true}).click();
   await expect(page.getByRole('button', {name: 'Google로 로그인', exact: true})).toBeVisible();
   const reply = page.waitForResponse(response => response.url().endsWith('/get_moemoa_admin_status'));
