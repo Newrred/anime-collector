@@ -1,5 +1,16 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-13 수용 근거 대조 — 계약 변경 없음
+
+다른 PC `b3b4669`의 누락된 완료 근거를 복구했다. C01~C12의 정의·필수 경계를 줄이지 않고, 같은 실행을 다시 요구하지 않도록 단일 작업판의 실제 인수 상태만 갱신한다.
+
+- **C03~C08/C12:** `ea8f388` 실제 운영 공개 이미지/보드·home·다른 계정 follow/목록 재방문·신고/별도 운영자 HIDE/RESTORE·통지/감사·최종 비공개/old full·thumb404/no-store·원본 보존은 [roleVerification](evidence/2026-10-11-public-capacity-closeout.json)의 마지막20261012절에 완료 근거가 있다. earlier candidate/application의 pending은 당시 시점이다. 운영 block 확인창은 미검증, 기존 hosted와 구분한다.
+- **C09:** 운영2,000GET/64MB/day·public20MiB 및 크기별 실제 차감 완료. 기존 workflow 실패 알림 실수신은 사용자 확인이며 새 용량 임계 알림 전달 증거는 아니다. 이번 예약 유지 성공도 byte 수치나 새 경보 전달 PASS로 확대하지 않는다.
+- **C10:** [복구 근거](evidence/2026-10-10-external-backup-recovery.json)의 외부 증분/99테이블·7확장/최신 삭제권리 replay·RPC/RLS·키 독립보관은 완료. 카탈로그 승인 snapshot/외부 회수와 주간 설치는 capacity application04에 있다. 전체 Public/Storage HTTP serving·전체 ingestion history·RPO/RTO 보장까지 완료한 것은 아니다.
+- **C11/C12:** `5d544ad` exact CI→master→Vercel→www 및 컬렉션 선반/표지 조회 완료. 10/12 디자인 합성 비교와 실제 사용자 조회, 과거 hosted 공개 행동을 서로 바꾸어 쓰지 않는다. 24개 QA 전수/실기기 전체 완료 주장은 없다.
+
+현재 상태/다음 행동은 [03의 단일 작업 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신), 병합 provenance·이번 읽기는 [reconciliation](evidence/2026-10-13-release-evidence-reconciliation.json)을 따른다. 정의 변경·새 국가/권리/요금 결정·원격 쓰기 없음.
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
@@ -947,3 +958,63 @@ Supabase changelog HTML도 확인했다. 제공 기능·SDK·CLI는 실제 구�
 ### W15/D03 위 초기 한도 후보의 승인 test 실행 후속 · 2026-10-11
 
 사용자a6b6dda승인 후moemoa-test의기존disabled/0에서2000/64MB임시적용. 실제RPC+Storage2종각72B/hash/decode와2GET/144B영속차감,hosted transaction rollback-only 초과거부/원자적소비/관측집계 PASS. 1600/51.2MB 실제서버집계를로컬기존평가기에서경보판정. test의기존public storage budget off 때문에 PUBLIC_BUDGET_UNGUARDED도발생했으며추가활성하지않음. 운영상태로오인금지. 두quota는disabled/0으로원복하고실제소비2/144보존. phone-testflag=true 배포977hd Ready/source·alias확인, false원복후재배포9fCzHFkobV42UoFLCrcN1MNv4hKh Ready/source·alias확인. 실제배포handler HTTP429/이미지/철회·알림수신은이번PASS아님. 설정2행과flag만변경, 새migration/이미지/원본/권한/운영변경0.
+## 2026-10-13 W18 Collection/Home v2 수용 계약
+
+기존 W/Q/D 번호를 유지한다. 첨부 계약은 `../references/collection-home-realignment-20261013/02_CODEX_EXECUTION_NOTE.md`이며 구현은 현행 HEAD 이후 후보를 따른다. 아래는 이번 변경의 수용 조건이고 과거 hosted PASS를 새 기능 PASS로 올리지 않는다.
+
+| 기존 영역 | 이번 계약 | 구현/검사 |
+|---|---|---|
+| W18/Q24 | 한 owner 컬렉션에 기존 작품 선반 + 명시 연결한 이미지 보드, 연결 제거는 원본 삭제 아님 | BookshelfView / CollectionGroups / collection-home.spec.ts |
+| W06/Q05/Q20 | bookshelf payload의 `layoutVersion:1, sections:[{kind,sourceId}]`; 기존 shelves/IDs 유지, JSON·title sync 경로 보존 | bookshelfSettings / titleStateSync / collectionHome.test.mjs |
+| W07/W11/Q08/Q15 | home `schemaVersion:2` entries의 TITLE_SHELF와 MEMORY_BOARD 구분; Memory0 작품은 catalog title + 승인 cover만, 가짜 Memory0 | minihomeView / MinihomeSnapshot / collection-home-contract.sql |
+| W09/Q11 | sourceVersion·선택한 anime/cover/catalogTitle·정책·hash 재대조; private source 변경 후 전시 재확인, 원본 추가가 자동 공개되지 않음 | 기존 prepare/publish RPC + 새 private builder |
+| W10/Q09/Q14 | 권리 철회·가림·기존 home 철회 유지, home 비공개는 독립 board 공개를 철회하지 않음 | 같은 homeId/publicationId 및 기존 reader/withdrawal |
+| W18/Q02/Q03 | owner selection 복원, 늦은 load는 입력을 덮지 않음, 동의/게시 operation 복원0, 공유 작업 canvas와 갤러리 분리 | MinihomeEditor / PublicationEditor |
+| W12/W13/W14 | 기존 작성자 링크·팔로우·재방문·차단·신고 엔진 재사용, 익명은 owner source RPC를 호출하지 않음 | 기존 publication-ui 대표 회귀 + 새 방문자 흐름 |
+| W19/W20/Q23 | unknown layout/type/version 거절 및 구 writer의 typed payload 누락·삭제 방지 | additive migration의 두 trigger + 실제 isolated PostgreSQL |
+
+공개 선반 선택은 `{kind:"TITLE_SHELF", sourceId, sourceVersion, title, titles:[{titleKey,animeId,revisionId,catalogTitle}]}`이다. client 값만으로 public payload를 만들지 않고 서버가 본인 bookshelf row와 현재 승인 카탈로그를 대조한다. 공개 sectionId는 owner/source의 안정적인 hash이며 원본 shelfId를 노출하지 않는다. 공개 응답에는 private 선반 이름·sourceVersion·titleKey·평점·상태·감상·태그·private Memory count가 없다. 선반/배치의 계정 서버 version이 바뀌면 이전 선반 전시는 표시하지 않으며, owner가 현재 버전을 선택해 재미리보기·동의해야 한다.
+
+신규 타입은 DB `collection_home_enabled=false`, 앱 `PUBLIC_MEMORY_COLLECTION_HOME_V1` 미설정이 기본값이다. 기존 Public feature flags·가입 확인·policy revision·이미지 한도는 재사용하며 이번 후보로 켜지지 않는다. 기존 `/boards/?id`, `/minihome/#following`, `/public/home/?id`, `/public/board/?id`는 유지한다. `/?section=TITLE_SHELF:<id>` / `MEMORY_BOARD:<id>`와 `/?panel=sharing|following|safety`가 새 Collection 진입이다.
+
+백업 범위: 계정 layout은 기존 `user_title_sync_entities` bookshelf payload에 포함되어 기존 운영 DB 백업 대상 안에 있다. 로컬 Memory metadata JSON은 이전과 같이 Memory/Card/Board 대상이고 선반을 포함한다고 주장하지 않는다. 새 백업 플랫폼·전체99테이블 복구 재시험은 이번에 추가하지 않는다.
+
+롤백은 새 타입 flag off와 UI source 복귀로 제한한다. typed 데이터가 존재하면 구 writer 누락 저장을 계속 거절하며 삭제 down migration을 하지 않는다. 새 source 계약의 hosted A/B/익명 및 운영 인수는 exact 후보 적용 후 별도 결과가 필요하다.
+
+[2026-10-13 테스트 구조 인수] 후보5f791db/TEST_COLLECTION_HOME_STRUCTURE_20261013 적용 및36table·기존설정 보존/새타입off·RPC disabled·ACL PASS. 새 타입 hosted 게시/방문자 인수는 미완료이며 source/policy/flag/배포 exact 후보를 별도로 준비한다.
+
+[2026-10-13 W18 연결 후보 준비] 기존 승인public catalog Steins;Gate1작품/1인물page/89,300B 표본·원출처/권리/immutable cover 보존, owner test source 원자적guard·Memory0/정책5field exact apply/restore·API 기본rollback 신규격리PG17 PASS. app5f791db는불변, 새remote쓰기/typed게시0. 실제자료/설정/배포승인과 본인게시동의/새익명방문자 인수는 잔여다.
+
+[2026-10-13 W18 실제 연결 실패/로컬 보완] 승인8446753은 기존 A 계정 Collection의 실제 선반/승인 표지/Memory0와 공유 선택 복원까지만 PASS. 사용할 수 없는 옛 보드의 참조를 해제할 UI가 없어 preview 거부. 명시 선택 해제 추가 후 모의 Chromium3 PASS(신규1), build33 PASS. 원본 자동 삭제·동의 복원0. 새 타입 hosted 게시/익명 인수는 미완료. 임시 DB5값 baseline/off 원복; 상세 배포/env 원복 상태는 단일 작업 카드와 hosted-connection-execution.json 참조.
+
+[2026-10-13 W18 수정40a3dac 실제 인수] 이전8446753의 남은 Preview3override 제거를 별도 사용자 승인 후 완료하고, a6b6dda Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/exactSHA/별칭으로 이전 원복을 닫았다. 수정40a3dac은 별도 exact test 승인 후 DB5필드·Preview4값만 임시 연결했으며 fixture/업로드/새구조0이다. 실제 Git Preview dpl_F29WgmHX8ahugV96qHyhyRijqMma에서 기존 A의 unavailable 보드 명시 해제→현재 선반 preview→사용자 직접 동의·게시, 새 익명 origin 미니홈/실제 승인JPEG460×667 decode·작품Hub/캐릭터/Memory0·Watch0 연결 PASS. A 새로고침 선택 복원·재미리보기 동의 unchecked로 W18/Q02/Q03의 해당 부분을 실제 확인했다. 사용자 세션 없는 read_memory_minihome HTTP200 응답은 id,bio,entries,nickname,schemaVersion만 최상위에 포함하고 privateFields0; 원문 대신 key/hash 근거를 retry-anonymous-dto.json에 보존한다. 이번 Chromium3은 기존 모의 검사 재검증이고 신규고유0·runtime변경0·build재실행0이다. **이번 설정/배포 원복은 완료**했다. DB5값 baseline·Preview정책 복귀/새3override 제거·phone-test a6b6dda Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/별칭 확인. 브라우저 확인창 자동 조작은 두 탭에서 멈춰 UI 철회는 미검증이다. 같은 승인 범위의 기존 서버 revoke 함수로 홈1개를 철회하고 익명 HTTP200/null·실제 unavailable/img0 및 원본/표지/독립보드 fingerprint 보존을 확인했다. 이 서버 정리를 UI PASS나 전체 W18 완료로 올리지 않는다. 운영/master b0541ff 불변, 과거 SQL·A/B·신고/차단·실기기 증거와 분리한다. 최신 상태는 단일03과 retry-execution.json이다.
+
+
+### 2026-10-13 W18 native confirm 분리 진단·후보 인수 경계
+
+- 로컬 Chromium 기본 confirm 취소/승인, 최신 revision 조회, PUBLICATION_CONFLICT 시 성공 오표시 방지, 철회 후 owner 링크·익명 내용 비노출 PASS. 새 typed 검사1+기존 미니홈 왕복1=이번2 PASS. 기존 독립 Board 보존 검사도 통과했다.
+- 런타임 변경 없이 통과했으므로 서비스 결함은 재현되지 않았다. hosted CUA focus 명령 timeout은 도구 실패 증거다. 실제 hosted owner UI 철회 완료를 증명하지는 않으며 기존 서버 철회/익명 null PASS와 분리한다.
+- 운영 후보는 앱/SQL40a3dac, 기준 운영 Git/www b0541ff. production-candidate.json의 22파일 해시와 단일 migration, 새 flag2개·롤백 조건을 따른다. 운영DB/flag 현재값 미조회·운영 적용0.
+- 남은 기능 경계는 hosted source 변경 후 stale-preview 게시 거절 및 공개 내용의 비자동 갱신이다. 로컬 SQL25의 기존 PASS를 실제 hosted PASS로 치환하지 않는다. 이 경계에 한정해 다음 실행을 준비하며 신규 가입/전체 회귀/동일 확인창 반복은 요구하지 않는다.
+- 운영 전 실제 baseline 확인과 정확한 DB/flag/master 배포 승인 필요. 이번 continuation은 그 승인으로 재사용하지 않는다.
+
+### 2026-10-13 W18 stale-preview probe 인수
+
+로컬 rollback-only 리허설5 PASS/57테이블 전후 동일. 정확 SQL/대상은 tools/operations/collection-home-test/stale-preview-manifest.json. hosted 실행은 미승인·미실행이며 SQL 거부 경계와 브라우저 새 게시 인수는 구분한다. 정책/동의/가입을 새로 만들지 않는다. 기존 원복 완료 상태를 외부 세션에 보이는 임시 활성로 되돌리지 않고, 트랜잭션 내부 flag/version/preview만 사용 후 무조건 취소한다.
+
+### 2026-10-13 W18 hosted stale-source 경계 마감
+
+정확 승인 b617817로 test DB1회 실행: PREVIEW_CHANGED 거부·visitor builder entries0 PASS. 전체 설정 및 home/source/독립보드/catalog fingerprint의 별도 전후 일치·비공개 상태 유지 PASS. 이는 실제 SQL 함수 경계이며 브라우저/익명 HTTP/새 동의 PASS가 아니다. 원격 persistent write0, 이전 원복 상태 유지. 운영 baseline 대조와 정확 운영 승인은 다음 단계다. 근거: evidence/2026-10-13-collection-home/stale-preview-hosted.json.
+
+### 2026-10-13 W18 운영 baseline 결속
+
+운영 read-only 및 Vercel UI 대조 완료. 기존 Public/미니홈·정책/가입 조건은 유지하고, 새migration1/앱21파일/신규flag2개만 정확 승인 대상으로 한다. production-baseline.json은 실제운영 기준이며 예전 Public off 로그를 현재값으로 쓰지 않는다. source40a3dac의 기존 hosted/로컬 검증을 유지하고 이번 read-only 조회를 운영 적용 PASS로 표시하지 않는다. schema/data release·Git/Vercel SHA 및 실제 UI는 승인 적용 이후 확인한다.
+
+### 2026-10-13 W18 운영 실패·원복 및 재적용 인수
+
+- 최초 승인1fef030: migration20261012160330 적용/57테이블 데이터 보존·RPC권한 PASS. 앱bfa1356의 Vercel READY만으로 완료하지 않았다. 필수CI 단위검사의 누락된 테스트 계약 실패로 서버 활성0, f6dba06 Git복귀/www SHA확인·CI38367895908 SUCCESS. schema/writer 보호·기록은 보존했다.
+- 수정 후보5d544ad: 앱40a3dac과 동일, 누락 테스트·CI6파일만 보완. 사용자 exact 재적용 승인 수신. 로컬 unit623·공개54·컬렉션4 PASS이며 Google/운영 실제 게시 PASS로 승격하지 않는다. native confirm은 실제 dialog 이벤트를 검증하고 숨겨진 목록은 공유 편집기 닫기 후 접근한다.
+- 원격CI38369813151 성공 전 master/신규flag 활성 금지. 성공한 동일 SHA의 master Git/Vercel READY/www와 신규 server/client 두값 및 기존 정책 보존을 모두 확인해야 이번 운영 적용 완료다. DB 재실행·대신 동의·자동 게시 없음.
+- 운영 published legacyhome0은 호환 실증 PASS가 아니다. 기존 hosted CUA 확인창 중단도 그대로 기록하며, 기존 실제 test 게시/익명읽기와 로컬 dialog 계약을 별도 근거로 유지한다.
+
+후속 승인 실행 완료: exact5d544ad CI38369813151 전체SUCCESS 후master push·Vercel9HTFhbbh9 READY/www동일SHA. 신규client1/servertrue와 기존 settings 보존을 독립 확인했다. 운영 기존계정의 컬렉션 공개설정→서버 선반선택지→승인표지460×652 decode PASS. 이번에는 새동의/게시/익명 신규홈을 만들지 않았으며 기존 test hosted 근거를 재사용한다. migration재실행0·42개유지. 이번 운영연결 인수만 완료, W18 전체 및D05/D06 기타잔여를 자동완료하지 않는다.

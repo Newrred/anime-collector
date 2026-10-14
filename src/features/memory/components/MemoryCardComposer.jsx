@@ -298,7 +298,7 @@ function MemoryCardComposerContent({ base }) {
           {cloudReason && <small>{composerCopy.pendingReason(cloudReason)}</small>}
           <div className="action-row">
             <button type="button" className="btn" onClick={retryAccountSave}>{composerCopy.retryAccountSave}</button>
-            <a className="btn btn--subtle" href={`${base}memory/card/?id=${encodeURIComponent(savedCardId)}`} data-astro-reload>{composerCopy.viewSavedCard}</a>
+            <a className="btn btn--subtle" href={`${base}memory/card/?id=${encodeURIComponent(savedCardId)}`}>{composerCopy.viewSavedCard}</a>
           </div>
         </div>}
       </form>

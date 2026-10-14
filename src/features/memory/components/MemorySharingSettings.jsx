@@ -13,7 +13,7 @@ export default function MemorySharingSettings({ card, locale, base, disabled }) 
       <p>{ko ? "여러 기억을 함께 공개하려면 보드를 이용하세요. 원본과 카드 태그는 비공개로 보관됩니다." : "Use a Board to share several memories together. Originals and memory tags stay private."}</p>
       {!enabled ? <p>{ko ? "현재 이 환경에서는 공개 게시를 사용할 수 없어요." : "Public publishing is unavailable in this environment."}</p> : !canPublish ? <p>{ko ? "로그인 후 이 기억을 계정에 연동하면 공개를 준비할 수 있어요." : "Sign in and sync this memory to prepare sharing."}</p> : <>
         <p>{ko ? "공개된 사본의 상태는 보드·미니홈에서 확인해 주세요." : "Check Boards and your public home for the status of published copies."}</p>
-        <div className="memory-sharing__links"><a href={`${base}boards/`} data-astro-reload>{ko ? "보드 공개 설정 →" : "Board sharing →"}</a>{minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{ko ? "미니홈 공개 설정 →" : "Public home settings →"}</a>}</div>
+        <div className="memory-sharing__links"><a href={`${base}boards/`}>{ko ? "보드 공개 설정 →" : "Board sharing →"}</a>{minihomeUiEnabled() && <a href={`${base}minihome/`}>{ko ? "미니홈 공개 설정 →" : "Public home settings →"}</a>}</div>
         <MemoryPublicCardControl card={card} locale={locale} disabled={disabled} />
       </>}
     </details>

@@ -11,7 +11,7 @@ test('account menu has one shared data action and keeps the platform-safe destin
   ]);
   assert.equal((sheet.match(/onClick=\{onOpenData\}/g) || []).length, 1);
   assert.doesNotMatch(menu, /href=\{`\$\{base\}data\/`\}/);
-  assert.match(menu, /toPlatformAppHref\(`\$\{base\}data\/`/);
+  assert.match(menu, /navigateWithinApp\(`\$\{base\}data\/`/);
   assert.match(menu, /await auth\.signIn\(`\$\{base\}data\/`\)/);
   assert.match(menu, /await auth\.signOut\(\)/);
   assert.match(menu, /isDataPage=\{currentRoute === "data"\}/);

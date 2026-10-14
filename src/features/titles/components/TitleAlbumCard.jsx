@@ -18,7 +18,7 @@ export default function TitleAlbumCard({ album, href, base, native, copy, locale
   return (
     <article className={`surface-card title-album-card${album.previewMemories.length ? '' : ' title-album-card--empty'}`} data-title-key={titleKey}>
       <div className="title-album-card__metadata">
-      <a className="title-album-card__identity" href={href} data-astro-reload>
+      <a className="title-album-card__identity" href={href}>
         <TitleCover album={album} copy={copy} className="title-album-card__cover" />
         <span className="title-album-card__copy">
           <span className="title-album-card__title">{album.displayTitle}</span>
@@ -36,7 +36,7 @@ export default function TitleAlbumCard({ album, href, base, native, copy, locale
           {album.previewMemories.map((memory, index) => (
             <PrivateMemoryCardPreview key={memory.card.id} bundle={memory} locale={locale} visual={memory.visual} title={album.displayTitle} missingLabel={copy.missingMemory}>
               {({ visual, missingLabel, elementRef }) => (
-                <a ref={elementRef} className="title-album-card__preview" href={`${base}memory/card/?id=${encodeURIComponent(memory.card.id)}`} aria-label={`${album.displayTitle} · ${memory.card.note || copy.latestCue}`} data-astro-reload>
+                <a ref={elementRef} className="title-album-card__preview" href={`${base}memory/card/?id=${encodeURIComponent(memory.card.id)}`} aria-label={`${album.displayTitle} · ${memory.card.note || copy.latestCue}`}>
                   <MemoryVisual
                     visual={visual}
                     fit={memory.sourceKind === "CATALOG_COVER" ? "contain" : "cover"}
@@ -55,7 +55,7 @@ export default function TitleAlbumCard({ album, href, base, native, copy, locale
         </div>
       ) : (
         <div className="title-album-card__empty">
-          {composerHref ? <a className="title-album-card__add" href={composerHref} data-astro-reload>{copy.firstMemory} →</a> : null}
+          {composerHref ? <a className="title-album-card__add" href={composerHref}>{copy.firstMemory} →</a> : null}
         </div>
       )}
     </article>

@@ -10,6 +10,17 @@
 .collection-board-overview > header { display:flex; align-items:baseline; gap:12px; }
 .collection-board-overview h2 { font-size:18px; }
 .collection-group-order { display:flex; gap:16px; margin-top:12px; font-size:12px; }
+.collection-group-add { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+.collection-content-controls { display:flex; align-items:center; flex-wrap:wrap; gap:16px 24px; margin-block:18px 28px; }
+.collection-content-controls .channel-search { width: min(360px,100%); margin:0; }
+.collection-content-controls > small { margin-left:auto; color:var(--text-secondary); }
+.collection-owner-section { margin-block:28px; }
+.collection-owner-section > header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; border-top:1px solid var(--border-subtle); padding-block:16px; }
+.collection-owner-section > header small,.collection-owner-section > header > span { font-size:12px; color:var(--text-secondary); }
+.collection-owner-section > header h2 { margin:4px 0 0; font-size:18px; overflow-wrap:anywhere; }
+.collection-owner-section .bookshelf-grid { margin-top:0; }
+.collection-board-overview.collection-owner-section { border-top:0; padding-top:0; }
+@media(max-width:600px) { .collection-content-controls { gap:12px; } .collection-content-controls .channel-search { width:100%; } .collection-content-controls > small { margin-left:0; width:100%; } .collection-owner-section > header { flex-wrap:wrap; } }
 .collection-groups nav { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
 .collection-groups nav button { background: transparent; color: inherit; border: 1px solid var(--border-color,#ddd); padding: 10px 16px; text-align: left; min-height: 44px; }
 .collection-groups nav button small { display: block; opacity: .6; font-size: 11px; margin-bottom: 4px; }

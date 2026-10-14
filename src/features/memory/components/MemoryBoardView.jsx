@@ -3,15 +3,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PrivateMemoryCardPreview from "./PrivateMemoryCardPreview.jsx";
 import BoardCollectionGrid from "./BoardCollectionGrid.tsx";
 import MemoryPublicationPanel from "./MemoryPublicationPanel.jsx";
-import { minihomeUiEnabled } from "../runtime/platformPublication.js";
+import { getPublicationServices, minihomeUiEnabled } from "../runtime/platformPublication.js";
+import CollectionLegacyRedirect from '../../bookshelf/CollectionLegacyRedirect.jsx';
 import { loadMemoryVisual } from "../application/loadMemoryVisual.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import MemoryRouteShell, { useMemoryRouteUi } from "./MemoryRouteShell.jsx";
 import "./memory-board.css";
+import { navigateWithinApp } from "../../../lib/appNavigation.js";
 
 const readBoardId = () => new URLSearchParams(globalThis.location?.search || "").get("id") || "";
 
 export default function MemoryBoardView({ base = "/" }) {
+  if (getPublicationServices().collectionHomeEnabled) return <CollectionLegacyRedirect kind="boards" base={base} />;
   return (
     <MemoryRouteShell base={base} currentRoute="boards">
       <MemoryBoardContent base={base} />
@@ -104,7 +107,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
     try {
       const board = await runtime.createBoard({ title, description });
       allowLeave();
-      globalThis.location.assign(`${base}boards/?id=${encodeURIComponent(board.id)}`);
+      navigateWithinApp(`${base}boards/?id=${encodeURIComponent(board.id)}`, { base });
     } catch (error) {
       setFeedback(boardCopy.errors?.[error?.code] || boardCopy.actionFailed);
     } finally {
@@ -126,7 +129,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
       {!embedded && !detail && <header className="memory-boards__header">
         <div className="pageHeader">
           <h1 className="pageTitle">{boardCopy.title}</h1>
-          {minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
+          {minihomeUiEnabled() && <a href={`${base}minihome/`}>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
         </div>
         <a className="btn btn--subtle" href={`${base}archive/`}>{boardCopy.archiveLink}</a>
       </header>}
@@ -137,9 +140,9 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
 
       {status === "ready" && (
         <div className={`memory-boards__layout${selectedBoardId ? " is-detail" : " is-collection"}`}>
-          {!embedded && <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
-            {detail && <a className="memory-boards__back" href={`${base}boards/`} data-astro-reload>← {boardCopy.title}</a>}
-            {detail && minihomeUiEnabled() && <a href={`${base}minihome/`} data-astro-reload>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
+          {(!embedded || !selectedBoardId) && <aside className="surface-card memory-boards__sidebar" aria-label={boardCopy.listLabel}>
+            {detail && <a className="memory-boards__back" href={`${base}boards/`}>← {boardCopy.title}</a>}
+            {detail && minihomeUiEnabled() && <a href={`${base}minihome/`}>{locale === "ko" ? "내 공개 미니홈" : "My public home"}</a>}
             {!selectedBoardId && <div>
               <h2>{boardCopy.yourBoards}</h2>
             </div>}
@@ -150,9 +153,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                 {boards.map((board) => (
                   <a
                     key={board.id}
-                    href={`${base}boards/?id=${encodeURIComponent(board.id)}`}
-                    data-astro-reload
-                    className={board.id === selectedBoardId ? "is-active" : ""}
+                    href={`${base}boards/?id=${encodeURIComponent(board.id)}`}                    className={board.id === selectedBoardId ? "is-active" : ""}
                     aria-current={board.id === selectedBoardId ? "page" : undefined}
                   >
                     <strong>{board.title}</strong>
@@ -162,7 +163,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
               </nav>
               </details>
             )}
-            {detail ? <a href={`${base}boards/`} data-astro-reload>{boardCopy.newBoard}</a> : <details className="memory-boards__tools">
+            {detail ? <a href={`${base}boards/`}>{boardCopy.newBoard}</a> : <details className="memory-boards__tools">
               <summary>{boardCopy.createTitle}</summary>
             <form className="memory-boards__form" onSubmit={create}>
               <label>
@@ -174,7 +175,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                 <textarea value={detail ? "" : description} onChange={(event) => setDescription(event.target.value)} maxLength={500} rows={3} disabled={busy || Boolean(detail)} />
               </label>
               <button className="btn" type="submit" disabled={busy || Boolean(detail) || !title.trim()}>{boardCopy.create}</button>
-              {detail && <a className="btn btn--subtle" href={`${base}boards/`} data-astro-reload>{boardCopy.newBoard}</a>}
+              {detail && <a className="btn btn--subtle" href={`${base}boards/`}>{boardCopy.newBoard}</a>}
             </form>
             </details>}
           </aside>}
@@ -186,7 +187,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
             ) : !detail ? (
               <div className="memory-boards__welcome">
                 <h2>{boardCopy.notFound}</h2>
-                <a className="btn" href={`${base}boards/`} data-astro-reload>{boardCopy.backToBoards}</a>
+                <a className="btn" href={`${base}boards/`}>{boardCopy.backToBoards}</a>
               </div>
             ) : (
               <>
@@ -215,7 +216,7 @@ export function MemoryBoardContent({ base, boardId, embedded = false, onTaskStat
                       run(async () => {
                         await runtime.deleteBoard(detail.board.id);
                         allowLeave();
-                        globalThis.location.assign(`${base}boards/`);
+                        navigateWithinApp(`${base}boards/`, { base });
                       }, boardCopy.deleted);
                     }}>{boardCopy.delete}</button>
                   </div>

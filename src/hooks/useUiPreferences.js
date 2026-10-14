@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 import { useStoredState } from "./useStoredState";
+import { writeJson } from "../storage/localJsonStore";
 import {
   applyUiPreferencesToDocument,
   DEFAULT_UI_PREFERENCES,
@@ -30,6 +31,15 @@ export function useUiPreferences() {
   const locale = normalizeUiLocale(localeState);
 
   useEffect(() => {
+    const update = event => {
+      if (event.detail?.theme !== undefined) setThemeState(normalizeUiTheme(event.detail.theme));
+      if (event.detail?.locale !== undefined) setLocaleState(normalizeUiLocale(event.detail.locale));
+    };
+    window.addEventListener("moemoa:ui-preferences-changed", update);
+    return () => window.removeEventListener("moemoa:ui-preferences-changed", update);
+  }, [setThemeState, setLocaleState]);
+
+  useEffect(() => {
     applyUiPreferencesToDocument({ theme, locale });
   }, [theme, locale]);
 
@@ -37,14 +47,16 @@ export function useUiPreferences() {
     theme,
     locale,
     setTheme(nextValue) {
-      setThemeState((currentValue) =>
-        resolveNextValue(nextValue, normalizeUiTheme(currentValue), normalizeUiTheme)
-      );
+      const next = resolveNextValue(nextValue, theme, normalizeUiTheme);
+      writeJson(UI_PREFERENCE_KEYS.theme, next);
+      setThemeState(next);
+      window.dispatchEvent(new CustomEvent("moemoa:ui-preferences-changed", { detail: { theme: next } }));
     },
     setLocale(nextValue) {
-      setLocaleState((currentValue) =>
-        resolveNextValue(nextValue, normalizeUiLocale(currentValue), normalizeUiLocale)
-      );
+      const next = resolveNextValue(nextValue, locale, normalizeUiLocale);
+      writeJson(UI_PREFERENCE_KEYS.locale, next);
+      setLocaleState(next);
+      window.dispatchEvent(new CustomEvent("moemoa:ui-preferences-changed", { detail: { locale: next } }));
     },
   };
 }

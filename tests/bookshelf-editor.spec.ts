@@ -58,7 +58,8 @@ test("shelf editor keeps title selections independent through search, shelf swit
   }
   await page.getByRole("button", { name: "적용", exact: true }).click();
   await page.reload();
-  await expect(page.locator('.bookshelf-tile')).toHaveCount(2);
+  await expect(page.locator('.collection-owner-section').filter({has:page.getByRole('heading',{name:'장면 모음',exact:true})}).locator('.bookshelf-tile')).toHaveCount(2);
+  await expect(page.locator('.collection-owner-section').filter({has:page.getByRole('heading',{name:'다시 볼 작품',exact:true})}).locator('.bookshelf-tile')).toHaveCount(1);
   const saved = await storedShelves(page);
   expect(saved.shelves.map((row: { name: string }) => row.name)).toEqual(["장면 모음", "다시 볼 작품"]);
   expect(saved.shelves[0].titleKeys).toHaveLength(2);

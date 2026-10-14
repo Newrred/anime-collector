@@ -64,15 +64,15 @@ function ArchiveContent({ base }) {
     const url = new URL(window.location.href);
     if (nextQuery) url.searchParams.set("q", nextQuery); else url.searchParams.delete("q");
     if (nextSort !== "created") url.searchParams.set("sort", nextSort); else url.searchParams.delete("sort");
-    window.history.replaceState(null, "", url);
+    window.history.replaceState(history.state, "", url);
   };
   const filtered = filterArchive(items, query, sort).filter(item => matchesArchiveFacets(item, logs, facets));
   const options = archiveFacetOptions(items, logs);
   const changeFacet = (key, value) => {
     const next = { ...facets, [key]: facets[key] === value ? "" : value }; setFacets(next);
-    const url = new URL(location.href); for (const [k, v] of Object.entries(next)) { if (v) url.searchParams.set(k, v); else url.searchParams.delete(k); } history.replaceState(null, "", url);
+    const url = new URL(location.href); for (const [k, v] of Object.entries(next)) { if (v) url.searchParams.set(k, v); else url.searchParams.delete(k); } history.replaceState(history.state, "", url);
   };
-  const clearFacets = () => { setFacets({ tag: "", character: "", affinity: "", memoryTag: "", memoryCharacter: "" }); const url = new URL(location.href); for (const key of ["tag", "character", "affinity", "memoryTag", "memoryCharacter"]) url.searchParams.delete(key); history.replaceState(null, "", url); };
+  const clearFacets = () => { setFacets({ tag: "", character: "", affinity: "", memoryTag: "", memoryCharacter: "" }); const url = new URL(location.href); for (const key of ["tag", "character", "affinity", "memoryTag", "memoryCharacter"]) url.searchParams.delete(key); history.replaceState(history.state, "", url); };
   useCollectionMasonry(grid, `${view}:${filtered.map(item => item.card.id).join(",")}`);
   const [status, setStatus] = useState("loading");
   const [showViewSuggestion, setShowViewSuggestion] = useState(false);
@@ -108,7 +108,7 @@ function ArchiveContent({ base }) {
       <ChannelHeader base={base} title={archiveCopy.title} locale={locale} extended sections={<>
         <ChannelSection title={locale === "ko" ? "정보" : "Info"}><p>{locale === "ko" ? "작품마다 남겨 둔 장면과 짧은 감상." : "Scenes and reflections from your titles."}</p><ChannelFacts rows={[[locale === "ko" ? "기억" : "Memories", items.length], [locale === "ko" ? "작품" : "Titles", new Set(items.map(item => item.title.id)).size]]} /></ChannelSection>
         <ChannelSection title={locale === "ko" ? "찾아보기" : "Browse"}><label className="channel-search">{locale === "ko" ? "기억 찾기" : "Find memories"}<input type="search" value={query} placeholder={locale === "ko" ? "작품명 또는 감상" : "Title or reflection"} onChange={e => updateFilter(e.target.value, sort)} /></label><p role="status">{archiveCopy.count(filtered.length)}</p><button className="channel-text-button" onClick={() => { updateFilter("", "created"); clearFacets(); }}>{locale === "ko" ? "검색 초기화" : "Reset search"}</button></ChannelSection>
-        <ChannelSection title={locale === "ko" ? "보기" : "View"}><TextChoices label={locale === "ko" ? "기억 보기" : "Memory view"} options={[{ value: "grid", label: locale === "ko" ? "그리드" : "Grid" }, { value: "table", label: locale === "ko" ? "표" : "Table" }]} value={view} onChange={value => { setView(value); const url = new URL(location.href); url.searchParams.set("view", value); history.replaceState(null, "", url); }} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "정렬" : "Sort"} value={sort} onChange={value => updateFilter(query, value)} options={[{ value: "created", label: locale === "ko" ? "최근 작성순" : "Recently created" }, { value: "updated", label: locale === "ko" ? "최근 수정순" : "Recently edited" }]} /></div></ChannelSection>
+        <ChannelSection title={locale === "ko" ? "보기" : "View"}><TextChoices label={locale === "ko" ? "기억 보기" : "Memory view"} options={[{ value: "grid", label: locale === "ko" ? "그리드" : "Grid" }, { value: "table", label: locale === "ko" ? "표" : "Table" }]} value={view} onChange={value => { setView(value); const url = new URL(location.href); url.searchParams.set("view", value); history.replaceState(history.state, "", url); }} /><div className="channel-sort"><span>{locale === "ko" ? "정렬" : "Sort"}</span><CollectionSelect label={locale === "ko" ? "정렬" : "Sort"} value={sort} onChange={value => updateFilter(query, value)} options={[{ value: "created", label: locale === "ko" ? "최근 작성순" : "Recently created" }, { value: "updated", label: locale === "ko" ? "최근 수정순" : "Recently edited" }]} /></div></ChannelSection>
         <ChannelSection title={locale === "ko" ? "태그" : "Tags"}>
           <TextChoices label={locale === "ko" ? "카드 태그" : "Memory tags"} options={options.memoryTags.map(value => ({ value, label: `#${value}` }))} value={facets.memoryTag} onChange={value => changeFacet("memoryTag", value)} />
           {!options.memoryTags.length && !options.tags.length && <p className="channel-hint">{locale === "ko" ? "태그 없음" : "No tags yet"}</p>}

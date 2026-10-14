@@ -105,8 +105,12 @@ export function PublicationEditor({ detail, runtime, services, locale, base, onC
       const choices = Object.fromEntries(saved.cards.filter(c => detail.items.some(i => i.bundle.card.id === c.cardId)).map(c => [c.cardId, c.fields]));
       setTitle(saved.title); setDescription(saved.description); setSelection(choices);
       baseline.current = JSON.stringify({ title: saved.title, description: saved.description, selection: choices });
+    } else {
+      const initialTitle = detail.board.title || "";
+      setTitle(initialTitle);
+      baseline.current = JSON.stringify({ title: initialTitle, description: "", selection: {} });
     }
-  }, [state.phase, state.publication, detail.items]);
+  }, [state.phase, state.publication, detail.items, detail.board.title]);
   useEffect(() => { controller.load(); return () => controller.dispose(); }, [controller]);
   const review = state.review;
   const publication = state.publication;
@@ -129,7 +133,7 @@ export function PublicationEditor({ detail, runtime, services, locale, base, onC
     {publication?.hasPublished && !publication.hidden && publication.visible === false && <p role="status">{copy.notVisible}</p>}
     {publication?.hasPublished && !publication.hidden && publication.visible !== false && <div role="status"><p>{copy.published}</p>
       {publication.sourceChanged && <p>{copy.changed}</p>}
-      <a href={publicationLink(publication.id, base)} data-astro-reload>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
+      <a href={publicationLink(publication.id, base)}>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
     {publication?.state === "REVOKED" && <p role="status">{copy.revoked}</p>}
     {publication && publication.state !== "REVOKED" && <details className="public-management"><summary>{locale === 'ko' ? '공개 관리' : 'Manage sharing'}</summary><button type="button" className="btn btn--subtle" disabled={state.busy}
       onClick={() => { if (confirm(copy.withdrawConfirm)) controller.revoke(); }}>{copy.withdraw}</button></details>}
@@ -149,7 +153,7 @@ export function PublicationEditor({ detail, runtime, services, locale, base, onC
           return <li key={id}>
             <MemoryVisual visual={visual} systemCopy={{ fallbackTitle: bundle.title.displayTitle }} missingLabel={copy.missing} />
             <div><h3>{index + 1}. {bundle.title.displayTitle}</h3>
-              <p>{bundle.card.note?.slice(0,120)}</p>{bundle.card.watchedAt && <p>{bundle.card.watchedAt.slice(0, 10)}</p>}
+              {(bundle.card.note || bundle.card.watchedAt) && <div className="publication-owner-reference"><small>{locale === "ko" ? "내 기록 참고 · 공개 여부는 아래 옵션에서 선택" : "Your private reference · choose public fields below"}</small><p>{bundle.card.note?.slice(0,120)}</p>{bundle.card.watchedAt && <p>{bundle.card.watchedAt.slice(0, 10)}</p>}</div>}
               {selected && activeCard === id && <details className="public-management"><summary>{locale === 'ko' ? '카드 공개 관리' : 'Manage card sharing'}</summary><button type="button" className="btn btn--subtle" onClick={() => {
                 if (confirm(copy.revokeCardConfirm)) controller.revokeCard(id);
               }}>{copy.revokeCard}</button></details>}

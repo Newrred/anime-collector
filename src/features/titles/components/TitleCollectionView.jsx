@@ -235,7 +235,7 @@ function TitleCollectionContent({ base }) {
         <section className="surface-card title-collection__empty">
           <h2>{copy.emptyTitle}</h2>
           <p>{copy.emptyBody}</p>
-          <a className="btn" href={`${base}memory/new/`} data-astro-reload>{copy.emptyAction}</a>
+          <a className="btn" href={`${base}memory/new/`}>{copy.emptyAction}</a>
         </section>
       )}
     </div>

@@ -55,19 +55,19 @@ function RecordStartContent({ base }) {
   return <div className="record-start page-shell">
     <header><h1>{ko ? "기억 남기기" : "Add Memory"}</h1><p>{ko ? "작품의 감상을 기록하거나, 오래 남기고 싶은 장면을 저장하세요." : "Record your impressions, or keep a scene you want to remember."}</p></header>
     <div className="record-start__paths"><a className="record-start__path is-active" href="#watch-title-picker" aria-current="true"><strong>{ko ? "감상 기록" : "Watch record"}</strong><span>{ko ? "시청 상태 · 별점 · 정주행 · 감상 이력" : "Status · rating · rewatches · reflections"}</span></a>
-      <a className="record-start__path" href={`${base}memory/new/`} data-astro-reload><strong>{ko ? "장면·이미지 남기기 →" : "Keep a scene or image →"}</strong><span>{ko ? "공식 표지로 남기거나 로그인 후 내 사진 추가" : "Use an official cover, or sign in to add your photo"}</span></a></div>
+      <a className="record-start__path" href={`${base}memory/new/`}><strong>{ko ? "장면·이미지 남기기 →" : "Keep a scene or image →"}</strong><span>{ko ? "공식 표지로 남기거나 로그인 후 내 사진 추가" : "Use an official cover, or sign in to add your photo"}</span></a></div>
     <section id="watch-title-picker"><h2>{ko ? "어떤 작품의 감상을 남길까요?" : "Which title are you recording?"}</h2>
       <label className="record-start__search">{ko ? "작품 찾기" : "Find a title"}<input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={ko ? "내 작품이나 새 작품 검색" : "Search your titles or find a new one"} /></label>
       <h3>{ko ? "내 작품" : "My titles"}</h3>
       {loading ? <p role="status">{ko ? "작품 불러오는 중…" : "Loading titles…"}</p> : error ? <p role="alert">{ko ? "내 작품을 불러오지 못했어요. 다시 열어 주세요." : "Could not load your titles. Please reopen this page."}</p>
         : !local.length ? <p className="watch-record-help">{ko ? "저장한 작품이 없거나 검색과 맞지 않아요. 작품명을 검색해 선택해 주세요." : "No saved title matches. Search by title to get started."}</p> : null}
-      <div className="record-start__titles">{local.map((album) => <a key={album.key} href={recordHref(album)} data-astro-reload><TitleCover album={album} copy={copy.titles} />
+      <div className="record-start__titles">{local.map((album) => <a key={album.key} href={recordHref(album)}><TitleCover album={album} copy={copy.titles} />
         <span><strong>{album.displayTitle}</strong><small>{watchStatusLabel(album.tracking.watchStatus, ko)} · {album.tracking.rating == null ? ko ? "미평가" : "Unrated" : `★ ${album.tracking.rating}`} · {ko ? `재시청 ${album.tracking.rewatchCount || 0}회` : `${album.tracking.rewatchCount || 0} rewatches`}</small></span><span aria-hidden="true">→</span></a>)}</div>
       {query.trim().length >= 2 && <section className="record-start__catalog"><h3>{ko ? "새 작품 찾기" : "Find new titles"}</h3>
         {searching && <p role="status">{ko ? "검색 중…" : "Searching…"}</p>}{searchError && <p role="status">{ko ? "온라인 검색에 연결하지 못했어요. 내 작품은 계속 선택할 수 있어요." : "Online search is unavailable. You can still choose a saved title."}</p>}
         <div className="record-start__titles">{newRemote.map((row) => { const album = { displayTitle: row.displayTitle, titleRef: isWatchCatalogId(row.animeId) ? { kind: "ANIME", animeId: row.animeId } : null,
           anilistId: row.sourceBinding?.provider === "ANILIST" ? Number(row.sourceBinding.externalId) : null, officialCover: row.coverPreviewUrl ? { src: row.coverPreviewUrl } : null };
-          return <a key={row.animeId || album.anilistId} href={recordHref(album)} data-astro-reload><TitleCover album={album} copy={copy.titles} /><span><strong>{row.displayTitle}</strong><small>{ko ? "작품을 선택한 뒤 저장하고 기록하기" : "Choose, save the title, then record"}</small></span><span aria-hidden="true">→</span></a>; })}</div>
+          return <a key={row.animeId || album.anilistId} href={recordHref(album)}><TitleCover album={album} copy={copy.titles} /><span><strong>{row.displayTitle}</strong><small>{ko ? "작품을 선택한 뒤 저장하고 기록하기" : "Choose, save the title, then record"}</small></span><span aria-hidden="true">→</span></a>; })}</div>
         {!searching && !searchError && !newRemote.length && <p className="watch-record-help">{ko ? "새로운 검색 결과가 없어요. 작품명이나 다른 제목으로 찾아 보세요." : "No new matches. Try another title or alias."}</p>}
       </section>}
     </section>

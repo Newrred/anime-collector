@@ -48,9 +48,9 @@ function TitleIdentity({ album, copy, memoryHref, recordHref, locale, busy, edit
         {facts.length ? <p className="title-hub__facts">{facts.join(" · ")}</p> : null}
         {album.isPrivateTitle ? <p className="title-hub__private-notice">{copy.privateNotice}</p> : null}
         <div className="title-hub__actions">
-          {!album.isPrivateTitle && <a className="btn btn--subtle" href={recordHref} data-astro-reload>{locale === "ko" ? "감상 기록 남기기" : "Add watch record"}</a>}
+          {!album.isPrivateTitle && <a className="btn btn--subtle" href={recordHref}>{locale === "ko" ? "감상 기록 남기기" : "Add watch record"}</a>}
           {canAddMemory ? (
-            <a className="btn" href={memoryHref} data-astro-reload>
+            <a className="btn" href={memoryHref}>
               {album.memoryCount ? copy.addMemory : copy.firstMemory}
             </a>
           ) : null}
@@ -132,7 +132,7 @@ function TitleFacts({ album, copy, recordHref, locale, base, service }) {
           <div><dt>{copy.rating}</dt><dd>{album.tracking.rating == null ? "—" : album.tracking.rating}</dd></div>
           <div><dt>{locale === "ko" ? "재시청" : "Rewatches"}</dt><dd>{album.tracking.rewatchCount || 0}</dd></div>
         </dl>
-        {!album.isPrivateTitle && <a href={recordHref} data-astro-reload>{locale === "ko" ? "감상 기록 보기 →" : "View watch records →"}</a>}
+        {!album.isPrivateTitle && <a href={recordHref}>{locale === "ko" ? "감상 기록 보기 →" : "View watch records →"}</a>}
         {!album.watchLogs.length ? <p>{copy.noWatchLogs}</p> : null}
       </section>
     </aside>
@@ -220,7 +220,7 @@ function TitleHubContent({ base }) {
       <section className="surface-card title-hub__state">
         <h1>{status === "error" ? copy.actionFailed : copy.notFound}</h1>
         {status === "error" ? <button className="btn" onClick={() => window.location.reload()}>{locale === "ko" ? "다시 시도" : "Try again"}</button> : null}
-        <a className="btn" href={`${base}titles/`} data-astro-reload>{copy.back}</a>
+        <a className="btn" href={`${base}titles/`}>{copy.back}</a>
       </section>
     </div>
   );
@@ -240,7 +240,7 @@ function TitleHubContent({ base }) {
 
   return (
     <div className="title-hub page-shell">
-      <a className="title-hub__back" href={backHref} data-astro-reload>{copy.back}</a>
+      <a className="title-hub__back" href={backHref}>{copy.back}</a>
       <TitleIdentity album={album} copy={copy} memoryHref={memoryHref} recordHref={recordHref} locale={locale} busy={status === "saving"} editing={watchEditing} onToggleSaved={toggleSaved} />
       {message ? <p className="title-hub__message" role="status">{message}</p> : null}
       {newerRecordNotice && watchEditing ? <p className="title-hub__message" role="status">{locale === "ko"
@@ -249,8 +249,8 @@ function TitleHubContent({ base }) {
       <div className="title-hub__content">
         <div className="title-hub__body">
           <nav className="title-hub__tabs" aria-label={locale === "ko" ? "작품 기록 보기" : "Title records"}>
-            <a href={tabHref("memories")} aria-current={!watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "기억 이미지" : "Memory images"} <small>{album.memoryCount}</small></a>
-            {!album.isPrivateTitle && <a href={tabHref("watch")} aria-current={watchTab ? "page" : undefined} data-astro-reload>{locale === "ko" ? "감상 기록" : "Watch records"} <small>{album.watchLogs.length}</small></a>}
+            <a href={tabHref("memories")} aria-current={!watchTab ? "page" : undefined}>{locale === "ko" ? "기억 이미지" : "Memory images"} <small>{album.memoryCount}</small></a>
+            {!album.isPrivateTitle && <a href={tabHref("watch")} aria-current={watchTab ? "page" : undefined}>{locale === "ko" ? "감상 기록" : "Watch records"} <small>{album.watchLogs.length}</small></a>}
           </nav>
           {watchTab && !album.isPrivateTitle ? <TitleWatchRecords album={album} service={service} locale={locale}
             startWriting={params.get("record") === "new"} busy={status === "saving"} onSaveTitle={toggleSaved}

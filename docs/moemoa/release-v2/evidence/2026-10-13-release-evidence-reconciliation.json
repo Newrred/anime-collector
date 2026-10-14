@@ -1,0 +1,271 @@
+{
+  "date": "2026-10-13",
+  "scope": "W18/D06 existing release evidence reconciliation; no runtime or remote writes",
+  "sourceCommit": "b3b466949c52bd2ed39e97814a1c08a67c5d3186",
+  "sourceBranch": "origin/codex/release-handoff-20261012",
+  "files": [
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-10-10-external-backup-recovery.json",
+      "priorSha256": "c7e36631c6829f312fab8c9d6a9d92c2b4ac0269de102364a83e20ae960eb19d",
+      "sourceBlob": "a9f57a552b789d5ca8a3d01e175cee427b9e85bd",
+      "addedTopLevelKeys": [
+        "followup20261011",
+        "isolatedDatabaseRestore20261011",
+        "dailyBackupCandidate20261011",
+        "externalUpload20261011",
+        "publicDeletionRecovery20261011",
+        "externalBackupExecutionReview20261011",
+        "weeklyBackupDecision20261011",
+        "weeklyIncrementalImplementation20261011",
+        "driveConnectionCandidate20261011",
+        "driveAuthConnectionExecution20261011",
+        "weeklyPortableRunner20261011",
+        "weeklyManualExecution20261011",
+        "weeklyReadOnlyInspection20261012",
+        "weeklyMissingRecoveryCandidate20261012",
+        "weeklyRecoveryRun20261012",
+        "weeklyHttpFixCandidate20261012",
+        "weeklyHttpFixRun20261012",
+        "externalIncrementalRecovery20261012",
+        "thisPcIncrementalDatabaseRecovery20261012",
+        "independentKeyCustody20261012"
+      ],
+      "commonKeysUnchanged": true,
+      "currentOnlyKeys": 0,
+      "conflicts": 0,
+      "mergedSha256": "137c81233f6b793ed78f79f58a5639347e7ae9fac89ba1edc4c0905be4f19c93",
+      "deepEqualToSource": true
+    },
+    {
+      "path": "docs/moemoa/release-v2/evidence/2026-10-11-public-capacity-closeout.json",
+      "priorSha256": "076bf3e3b14a50cebfdacb27b6cea500c4e96d1af5c6f260a26ab6088efaf8e2",
+      "sourceBlob": "cdcb235dc8cd0382ff99caf34efe307082ec3045",
+      "addedTopLevelKeys": [
+        "firstPublicProductionCandidate_03",
+        "firstPublicProductionCandidate_04",
+        "firstPublicProductionApplication_04",
+        "firstPublicProductionVerification_20261012",
+        "firstPublicProductionRoleVerification_20261012"
+      ],
+      "commonKeysUnchanged": true,
+      "currentOnlyKeys": 0,
+      "conflicts": 0,
+      "mergedSha256": "653ab3dfa0c701d2e81df587dc50a42c015606c4c236464cb86cbb37a97d2fb9",
+      "deepEqualToSource": true
+    }
+  ],
+  "historicalValuesPreserved": true,
+  "readOnlyObservation": {
+    "observedAt": "2026-10-13T11:28:34.950228+00:00",
+    "productionBuild": {
+      "commit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "checkoutCommit": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+      "source": "vercel-git"
+    },
+    "productionConfigurationSemanticMatch": true,
+    "originMaster": "5d544ad2ca83e847df623b2abfe7bbcaf2158801",
+    "workflowDefinitions": [
+      {
+        "id": 381337816,
+        "name": "MOEMOA weekly encrypted backup",
+        "path": ".github/workflows/moemoa-weekly-backup.yml",
+        "state": "active"
+      },
+      {
+        "id": 376653995,
+        "name": "Private image maintenance",
+        "path": ".github/workflows/private-image-cleanup.yml",
+        "state": "active"
+      }
+    ],
+    "weeklyScheduledRunCount": 0,
+    "weeklyRecentRuns": [
+      {
+        "id": 38193002483,
+        "name": "MOEMOA weekly backup manual candidate",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "d8bf945051854ca60398664de54105a49a4ea2c2",
+        "created_at": "2026-10-12T01:43:39Z",
+        "updated_at": "2026-10-12T01:48:32Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38193002483"
+      },
+      {
+        "id": 38153533963,
+        "name": "MOEMOA weekly backup manual candidate",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "d8bf945051854ca60398664de54105a49a4ea2c2",
+        "created_at": "2026-10-11T15:58:53Z",
+        "updated_at": "2026-10-11T16:03:13Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38153533963"
+      },
+      {
+        "id": 38152850345,
+        "name": "MOEMOA weekly backup manual candidate",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "failure",
+        "head_sha": "ab05885461aa1e99bbb116172e3cd7188100da17",
+        "created_at": "2026-10-11T15:48:49Z",
+        "updated_at": "2026-10-11T15:52:42Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38152850345"
+      },
+      {
+        "id": 38152095001,
+        "name": "MOEMOA weekly backup manual candidate",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "3d14da32a3a6bf0c95ffc451c3f8749562e2c7e0",
+        "created_at": "2026-10-11T15:38:07Z",
+        "updated_at": "2026-10-11T15:38:54Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38152095001"
+      },
+      {
+        "id": 38148877139,
+        "name": "MOEMOA weekly backup manual candidate",
+        "event": "workflow_dispatch",
+        "status": "completed",
+        "conclusion": "failure",
+        "head_sha": "d668723bc5321018079b0a74b247ac7b0793ed74",
+        "created_at": "2026-10-11T14:51:27Z",
+        "updated_at": "2026-10-11T14:57:06Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38148877139"
+      }
+    ],
+    "nextWeeklyScheduleLocal": "2026-10-18T03:00:00+09:00",
+    "weeklyCron": "0 18 * * 6",
+    "weeklyAbsenceMeaning": "First scheduled execution is not due; manual success is not a scheduled-run PASS.",
+    "maintenanceScheduledRuns": [
+      {
+        "id": 38327869839,
+        "name": "Private image maintenance",
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+        "created_at": "2026-10-13T00:33:55Z",
+        "updated_at": "2026-10-13T00:34:13Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38327869839"
+      },
+      {
+        "id": 38268637444,
+        "name": "Private image maintenance",
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "b0541fffb03c1e828feef21d3e38fa5caa335c07",
+        "created_at": "2026-10-12T15:13:22Z",
+        "updated_at": "2026-10-12T15:13:39Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38268637444"
+      },
+      {
+        "id": 38209546067,
+        "name": "Private image maintenance",
+        "event": "schedule",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "ea8f3883b793f7b0bc0eddd943b02ef080cdd1e4",
+        "created_at": "2026-10-12T05:48:15Z",
+        "updated_at": "2026-10-12T05:48:31Z",
+        "html_url": "https://github.com/Newrred/anime-collector/actions/runs/38209546067"
+      }
+    ],
+    "latestMaintenanceJobs": [
+      {
+        "name": "cleanup",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean retired images and refresh observed capacity",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "name": "phone-test-cleanup",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ],
+    "limitations": [
+      "No new backup or maintenance dispatch.",
+      "No live environment secret or DB setting readback in this session.",
+      "Job success is not independent current byte-count or threshold-notification delivery evidence."
+    ],
+    "remoteMutations": 0,
+    "credentialsRead": 0
+  },
+  "validation": {
+    "restoredTopLevelKeys": 25,
+    "commonKeysUnchanged": true,
+    "deepEqualToHistoricalSource": true,
+    "activeTableIds": {
+      "M": 6,
+      "W": 20,
+      "D": 6,
+      "Q": 24
+    },
+    "addedRelativeFileLinksExist": 10,
+    "runtimeDatabaseWorkflowDependencyChanges": 0,
+    "localExistingPrivateImageTransferTests": {
+      "command": "node --test tests/unit/privateImageTransfer.test.mjs",
+      "passed": 12,
+      "scope": "Existing local transfer contract only; production image error not reproduced or fixed"
+    },
+    "fullSuiteRerun": false,
+    "historicalTablesAndCurrentCardPreserved": true,
+    "gitDiffCheck": "PASS after fixing one trailing space in a Markdown code fence",
+    "review": {
+      "method": "independent read-only evidence review",
+      "findingsResolved": [
+        "Narrowed W06 remaining conditions and retained prior private-byte/quota PASS plus device waiver.",
+        "Distinguished collection server RPC withdrawal/anonymous unavailability from unverified hosted UI confirmation.",
+        "Marked and collapsed original 25-item audit as historical, with current W/D/Q taking precedence."
+      ],
+      "codeChange": false
+    },
+    "addedTextSecretPatternMatches": {
+      "privateKey": 0,
+      "googleOAuthSecret": 0,
+      "googleRefreshToken": 0,
+      "jwt": 0,
+      "githubToken": 0
+    }
+  },
+  "hashScope": "priorSha256/mergedSha256 hash local working-file bytes at merge time; sourceBlob is the stable Git blob identity. Git may normalize checkout line endings."
+}

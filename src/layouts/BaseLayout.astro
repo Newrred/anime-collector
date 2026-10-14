@@ -6,9 +6,12 @@ import "../styles/arena-refinement.css";
 import { ClientRouter } from "astro:transitions";
 import { buildUiPreferenceBootScript } from "../domain/uiPreferences";
 import { THEME_META_COLORS } from "../domain/colorSystem.js";
+import WebNavigation from "../components/WebNavigation.jsx";
+import { appHeaderRoute } from "../domain/appRoutes.js";
 const rawBase = String(import.meta.env.BASE_URL || "/");
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 const isProd = import.meta.env.PROD;
+const headerRoute = appHeaderRoute(Astro.url.pathname, base);
 // Optional page analytics stay disconnected. Signup acceptance is not analytics consent.
 const normalize = (p: string | null | undefined) =>
   (String(p || "").endsWith("/") ? String(p) : `${String(p)}/`);
@@ -41,21 +44,21 @@ const authReturnGuardScript = `
 })();
 `;
 ---
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content={THEME_META_COLORS.dark} />
-    <script is:inline set:html={authReturnGuardScript}></script>
-    <script is:inline set:html={uiPreferenceBootScript}></script>
+    <script is:inline data-astro-rerun set:html={authReturnGuardScript}></script>
+    <script is:inline data-astro-rerun set:html={uiPreferenceBootScript}></script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MOEMOA" />
     <link rel="manifest" href={toBasePath("manifest.webmanifest")} />
     <title>MOEMOA — Anime Journal</title>
+    <ClientRouter fallback="swap" />
   </head>
   <body>
-    <ClientRouter />
     <script>
       import { Capacitor } from "@capacitor/core";
       import { App } from "@capacitor/app";
@@ -78,15 +81,32 @@ const authReturnGuardScript = `
     </script>
     <div class="app-shell">
       <main class="container page-wrap">
-        <slot />
+        {headerRoute !== null && <div class="app-navigation" data-app-navigation>
+          <WebNavigation base={base} currentRoute={headerRoute} client:only="react" transition:persist="app-navigation" />
+        </div>}
+        <div data-app-content><slot /></div>
       </main>
     </div>
     {isProd && <script is:inline type="module" src={toBasePath("register-sw.js")}></script>}
     <script>
       import { Capacitor } from "@capacitor/core";
       import { installNativeAppLinkNavigation } from "../domain/search/memoryCardNavigation.js";
+      import { isSoftAppRoute } from "../domain/appRoutes.js";
+      import { installNavigationLifecycle } from "../lib/navigationLifecycle.js";
+
+      installNavigationLifecycle();
+
+      document.addEventListener("click", event => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+        if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+        const target = new URL(link.href, location.href);
+        if (target.href === location.href && isSoftAppRoute(target.pathname, import.meta.env.BASE_URL)) event.preventDefault();
+      }, true);
 
       installNativeAppLinkNavigation({ native: Capacitor.isNativePlatform() });
     </script>
   </body>
 </html>
+<style>.app-navigation { display: flow-root; }</style>
+<style is:global>.top-nav a[data-navigation-pending] { box-shadow: inset 0 -2px var(--accent); }</style>

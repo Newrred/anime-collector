@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import MemoryRouteShell, { useMemoryRouteUi } from "../memory/components/MemoryRouteShell.jsx";
 import { createTitleCollectionService } from "../titles/application/titleCollectionService.js";
 import { buildTitleHubHref } from "../titles/domain/titleNavigation.js";
-import TitlePosterTile from "../titles/components/TitlePosterTile.jsx";
-import TitleAlbumCard from "../titles/components/TitleAlbumCard.jsx";
-import ChannelHeader, { ChannelFacts, ChannelSection, TextChoices } from "../../components/collection/ChannelHeader.jsx";
+import CollectionTitleShelf from "./CollectionTitleShelf.jsx";
+import ChannelHeader, { TextChoices } from "../../components/collection/ChannelHeader.jsx";
+import { useUnsavedNavigation } from "../../hooks/useUnsavedNavigation.js";
 import { readBookshelf, saveBookshelf } from "./bookshelfSettings.js";
 import BookshelfEditor from "./BookshelfEditor.jsx";
 import CollectionGroups from "./CollectionGroups.jsx";
@@ -24,15 +24,19 @@ export default function BookshelfView({ base = "/" }) {
 function BookshelfContent({ base }) {
   const { locale, copy, ownerKey } = useMemoryRouteUi(), ko = locale === "ko";
   const auth = useAuthSession();
-  const [panel, setPanel] = useState(() => new URLSearchParams(globalThis.location?.search || "").get("panel") || "");
+  const [panel, setPanel] = useState(() => { const value = new URLSearchParams(globalThis.location?.search || "").get("panel"); return ["sharing", "following", "safety", "boards"].includes(value) ? value : ""; });
   const [sharingState, setSharingState] = useState({ busy:false, dirty:false });
-  const changePanel = next => { if (sharingState.busy) return; if (sharingState.dirty && !confirm(ko ? "저장하지 않은 공개 설정이 있습니다. 닫을까요?" : "You have unsaved sharing changes. Close them?")) return; setSharingState({busy:false,dirty:false}); setPanel(next); const url = new URL(location.href); if (next) url.searchParams.set("panel",next); else url.searchParams.delete("panel"); history.replaceState(null,"",url); };
-  const [group, setGroup] = useState(() => new URLSearchParams(globalThis.location?.search || "").get("section") || "all");
+  const changePanel = next => { if (sharingState.busy || draft) return; if (sharingState.dirty && !confirm(ko ? "저장하지 않은 내용이 있습니다. 닫을까요?" : "You have unsaved changes. Close them?")) return; setSharingState({busy:false,dirty:false}); setPanel(next); const url = new URL(location.href); if (next) url.searchParams.set("panel",next); else url.searchParams.delete("panel"); history.replaceState(history.state,"",url); };
+  const [group, setGroup] = useState(() => { const value = new URLSearchParams(globalThis.location?.search || "").get("section") || "all"; return /^(TITLE_SHELF|MEMORY_BOARD):.{1,80}$/.test(value) ? value : "all"; });
   const service = useMemo(() => createTitleCollectionService(), []);
   const [albums, setAlbums] = useState([]), [status, setStatus] = useState("loading");
   const [settings, setSettings] = useState(() => readBookshelf(ownerKey)), [draft, setDraft] = useState(null);
   const remoteChangedWhileEditing = useRef(false);
-  const [shelf, setShelf] = useState("all"), [selected, setSelected] = useState(""), [query, setQuery] = useState(""), [view, setView] = useState("grid"), [message, setMessage] = useState("");
+  const [selected, setSelected] = useState(""), [query, setQuery] = useState(""), [view, setView] = useState("grid"), [message, setMessage] = useState("");
+  const [editorShelf, setEditorShelf] = useState("");
+  const shelf = group.startsWith("TITLE_SHELF:") ? group.slice(12) : "all";
+  const boardSelected = group.startsWith("MEMORY_BOARD:");
+  useUnsavedNavigation(Boolean(draft && JSON.stringify(draft) !== JSON.stringify(settings)), locale);
   const grid = useRef(null);
   const closeSelection = () => {
     grid.current?.querySelector('.bookshelf-cover-trigger[aria-expanded="true"]')?.focus();
@@ -73,33 +77,43 @@ function BookshelfContent({ base }) {
   const visible = albums.filter(album => ids.has(album.key) && album.displayTitle.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
   const hrefFor = album => buildTitleHubHref({ base, titleRef: album.titleRef, anilistId: album.anilistId, title: album.displayTitle });
   const saveLayout = value => { if (sharingState.busy || sharingState.dirty) return false; try { setSettings(saveBookshelf(ownerKey, value)); setMessage(ko ? "컬렉션에 적용했어요." : "Collection saved."); return true; } catch { setMessage(ko ? "저장하지 못했습니다. 기존 설정은 유지됩니다." : "Could not save. Existing settings are preserved."); return false; } };
-  const selectGroup = value => { if (sharingState.busy || sharingState.dirty) return; setGroup(value); setShelf(value.startsWith("TITLE_SHELF:") ? value.slice(12) : "all"); setSelected(""); const url = new URL(location.href); url.searchParams.set("section", value); history.replaceState(null, "", url); };
-  const changeShelf = id => selectGroup(id === "all" ? "all" : "TITLE_SHELF:" + id);
+  const selectGroup = value => { if (sharingState.busy || sharingState.dirty || draft) return; setGroup(value); setSelected(""); const url = new URL(location.href); url.searchParams.set("section", value); history.replaceState(history.state, "", url); };
+  const editCollection = (add = false) => {
+    if (status !== "ready" || settings.loadError || draft || panel || sharingState.busy || sharingState.dirty || (add && (settings.shelves.length >= 20 || (settings.sections?.length || 0) >= 40))) return;
+    const next = structuredClone(settings), id = add ? crypto.randomUUID() : shelf === "all" ? next.shelves[0]?.id : shelf;
+    if (add) next.shelves.push({ id, name: ko ? "새 선반" : "New shelf", titleKeys: [] });
+    setMessage(""); setSelected(""); setEditorShelf(id || ""); remoteChangedWhileEditing.current = false; setDraft(next);
+  };
+  const renderShelf = row => {
+    if (!row) return null;
+    const keys = new Set(row.titleKeys), rows = albums.filter(a => keys.has(a.key) && a.displayTitle.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+    return <section className="collection-owner-section" data-section-kind="TITLE_SHELF"><header><div><small>{ko ? "작품 선반" : "Title shelf"}</small><h2>{row.name}</h2></div><span>{ko ? `작품 ${rows.length}개` : `${rows.length} titles`}</span></header>
+      {rows.length ? <CollectionTitleShelf albums={rows} shelf={row.id} selected={selected} onSelect={setSelected} onClose={closeSelection} hrefFor={hrefFor} base={base} copy={copy.titles} locale={locale} view={view} /> : <p>{query ? (ko ? "이 선반에는 검색 결과가 없습니다." : "No matching titles in this shelf.") : (ko ? "이 선반에 진열할 작품을 골라 주세요." : "Choose titles to display in this shelf.")}</p>}
+    </section>;
+  };
   return <div className="bookshelf-page channel-page">
-    <ChannelHeader base={base} locale={locale} title={ko ? "컬렉션" : "Collection"} trail={shelf === "all" ? "" : model.shelves.find(row => row.id === shelf)?.name}
-      actions={<><button className="btn btn--subtle" disabled={status !== "ready" || Boolean(draft) || Boolean(settings.loadError) || Boolean(panel) || sharingState.busy || sharingState.dirty} onClick={() => { setMessage(""); setSelected(""); remoteChangedWhileEditing.current = false; setDraft(structuredClone(settings)); }}>{ko ? "컬렉션 편집" : "Edit collection"}</button><button className="btn btn--subtle" disabled={Boolean(draft) || sharingState.busy} onClick={() => changePanel(panel === "sharing" ? "" : "sharing")}>{ko ? "공개 설정" : "Sharing"}</button><button className="channel-text-button" onClick={() => setPanel(panel === "following" ? "" : "following")}>{ko ? "팔로우" : "Following"}</button><button className="channel-text-button" onClick={() => setPanel(panel === "safety" ? "" : "safety")}>{ko ? "신고·알림" : "Safety"}</button></>}
-      sections={!panel ? <><ChannelSection title={ko ? "정보" : "Info"}><p>{ko ? "다시 꺼내 보고 싶은 작품과 장면들." : "Titles and moments to revisit."}</p><ChannelFacts rows={[[ko ? "진열한 작품" : "Displayed titles", albums.filter(a => ids.has(a.key)).length], [ko ? "기억" : "Memories", albums.filter(a => ids.has(a.key)).reduce((n, a) => n + a.memoryCount, 0)]]} /><p className="channel-hint">{isTitleStateSyncEnabled && ownerKey.startsWith("account:") ? (ko ? "선반 설정은 계정에 동기화됩니다." : "Shelf settings sync with your account.") : (ko ? "선반 설정은 이 기기에 저장됩니다." : "Shelf settings are saved on this device.")}</p></ChannelSection>
-        <ChannelSection title={ko ? "선반" : "Shelves"}><TextChoices label={ko ? "선반 선택" : "Choose shelf"} options={[{ value: "all", label: ko ? "전체" : "All" }, ...model.shelves.map(row => ({ value: row.id, label: row.name }))]} value={shelf} onChange={changeShelf} /><label className="channel-search">{ko ? "컬렉션 검색" : "Search collection"}<input type="search" value={query} placeholder={ko ? "작품명으로 찾기" : "Find a title"} onChange={e => { setQuery(e.target.value); setSelected(""); }} /></label></ChannelSection>
-        <ChannelSection title={ko ? "보기" : "View"}><TextChoices label={ko ? "컬렉션 보기" : "Collection view"} options={[{ value: "grid", label: ko ? "그리드" : "Grid" }, { value: "table", label: ko ? "표" : "Table" }]} value={view} onChange={next => { setView(next); setSelected(""); }} /><p className="channel-hint">{ko ? "표지 선택 → 기억 펼치기\n작품 이름 → 작품 상세" : "Select a cover for memories; a title for details."}</p><a href={`${base}boards/`}>{ko ? "보드 모아보기 →" : "Browse Boards →"}</a></ChannelSection></> : null} />
-    {!panel && <CollectionProfile key={auth.user?.id || "guest"} userId={auth.user?.id} locale={locale} base={base} />}
+    <ChannelHeader base={base} locale={locale} title={ko ? "컬렉션" : "Collection"} trail={panel || shelf === "all" ? "" : model.shelves.find(row => row.id === shelf)?.name}
+      actions={<><button className="btn btn--subtle" disabled={status !== "ready" || Boolean(draft) || Boolean(settings.loadError) || Boolean(panel) || sharingState.busy || sharingState.dirty} onClick={() => editCollection()}>{ko ? "컬렉션 편집" : "Edit collection"}</button><button className="btn btn--subtle" disabled={Boolean(draft) || sharingState.busy} onClick={() => changePanel(panel === "sharing" ? "" : "sharing")}>{ko ? "공개 설정" : "Sharing"}</button><button className="channel-text-button" disabled={Boolean(draft) || sharingState.busy} onClick={() => changePanel(panel === "following" ? "" : "following")}>{ko ? "팔로우" : "Following"}</button><button className="channel-text-button" disabled={Boolean(draft) || sharingState.busy} onClick={() => changePanel(panel === "safety" ? "" : "safety")}>{ko ? "신고·알림" : "Safety"}</button></>}
+      sections={null} />
+    {!panel && <CollectionProfile key={auth.user?.id || "guest"} userId={auth.user?.id} locale={locale} base={base} onEdit={() => changePanel("sharing")} disabled={Boolean(draft) || sharingState.busy} />}
     {settings.loadError && <p role="alert">{ko ? "컬렉션 설정을 읽지 못했습니다. 기존 데이터를 보존하고 편집을 중단합니다." : "Collection settings could not be read. Editing is paused to preserve your data."}</p>}
-    {!settings.loadError && !draft && !panel && <CollectionGroups disabled={sharingState.busy || sharingState.dirty} settings={settings} ownerKey={ownerKey} locale={locale} selected={group} onSelect={selectGroup} onSave={saveLayout} base={base} />}
-    {panel && <section className="collection-task"><header><h2>{panel === "sharing" ? (ko ? "컬렉션 공개 설정" : "Collection sharing") : panel === "following" ? (ko ? "팔로우" : "Following") : (ko ? "신고·알림" : "Safety")}</h2><button className="btn btn--subtle" disabled={sharingState.busy} onClick={() => changePanel("")}>{ko ? "컬렉션으로 돌아가기" : "Back to collection"}</button></header>{panel === "sharing" ? !minihomeUiEnabled() ? <p>{ko ? "현재 환경에서는 공개 설정이 비활성화되어 있습니다." : "Sharing is disabled in this environment."}</p> : auth.user ? <MinihomeEditor onStateChange={setSharingState} key={auth.user.id} userId={auth.user.id} locale={locale} base={base} /> : <p>{ko ? "공개하려면 로그인해 주세요." : "Sign in to share."}<a href={base + "data/"}>{ko ? "계정" : "Account"}</a></p> : panel === "following" ? <MemoryRelationships locale={locale} base={base} /> : <MemorySafety locale={locale} base={base} />}</section>}
+    {!settings.loadError && !draft && !panel && <CollectionGroups disabled={sharingState.busy || sharingState.dirty} settings={settings} ownerKey={ownerKey} locale={locale} selected={group} onSelect={selectGroup} onSave={saveLayout} onAddShelf={() => editCollection(true)} base={base} />}
+    {panel && <section className="collection-task"><header><h2>{panel === "sharing" ? (ko ? "컬렉션 공개 설정" : "Collection sharing") : panel === "following" ? (ko ? "팔로우" : "Following") : panel === "boards" ? (ko ? "이미지 보드" : "Memory Boards") : (ko ? "신고·알림" : "Safety")}</h2><button className="btn btn--subtle" disabled={sharingState.busy} onClick={() => changePanel("")}>{ko ? "컬렉션으로 돌아가기" : "Back to collection"}</button></header>{panel === "sharing" ? !minihomeUiEnabled() ? <p>{ko ? "현재 환경에서는 공개 설정이 비활성화되어 있습니다." : "Sharing is disabled in this environment."}</p> : auth.user ? <MinihomeEditor onStateChange={setSharingState} key={auth.user.id} userId={auth.user.id} locale={locale} base={base} /> : <p>{ko ? "공개하려면 로그인해 주세요." : "Sign in to share."}<a href={base + "data/"}>{ko ? "계정" : "Account"}</a></p> : panel === "following" ? <MemoryRelationships locale={locale} base={base} /> : panel === "boards" ? <MemoryBoardContent onTaskStateChange={setSharingState} base={base} embedded /> : <MemorySafety locale={locale} base={base} />}</section>}
     {!panel && !draft && group.startsWith("MEMORY_BOARD:") && <MemoryBoardContent onTaskStateChange={setSharingState} key={ownerKey + group} base={base} boardId={group.slice(13)} embedded />}
     {status === "loading" ? <p role="status">{copy.titles.loading}</p> : status === "error" ? <p role="alert">{copy.titles.loadFailed}</p> : null}
-    {draft && <BookshelfEditor draft={draft} setDraft={setDraft} albums={albums} copy={copy.titles} locale={locale}
-      onCancel={() => { setDraft(null); remoteChangedWhileEditing.current = false; setShelf("all"); setMessage(""); }}
-      onApply={() => { if (remoteChangedWhileEditing.current) { setMessage(ko ? "다른 기기에서 컬렉션이 바뀌었습니다. 취소 후 다시 편집해 주세요." : "Collection changed on another device. Cancel and reopen editing."); return; } try { const saved = saveBookshelf(ownerKey, draft); setSettings(saved); setDraft(null); setShelf("all"); setSelected(""); setMessage(ko ? "컬렉션에 적용했어요." : "Collection saved."); } catch { setMessage(ko ? "저장하지 못했어요. 저장 공간을 확인해 주세요." : "Could not save. Check browser storage."); } }} />}
+    {draft && <BookshelfEditor draft={draft} setDraft={setDraft} initialShelfId={editorShelf} albums={albums} copy={copy.titles} locale={locale}
+      onCancel={() => { setDraft(null); remoteChangedWhileEditing.current = false; setMessage(""); }}
+      onApply={() => { if (remoteChangedWhileEditing.current) { setMessage(ko ? "다른 기기에서 컬렉션이 바뀌었습니다. 취소 후 다시 편집해 주세요." : "Collection changed on another device. Cancel and reopen editing."); return; } try { const saved = saveBookshelf(ownerKey, draft); setSettings(saved); setDraft(null); setSelected(""); setMessage(ko ? "컬렉션에 적용했어요." : "Collection saved."); } catch { setMessage(ko ? "저장하지 못했어요. 저장 공간을 확인해 주세요." : "Could not save. Check browser storage."); } }} />}
     {message ? <p role="status">{message}</p> : null}
-    {status === "ready" && !settings.loadError && !draft && !panel && !group.startsWith("MEMORY_BOARD:") && !visible.length ? <section className="channel-empty"><h2>{query ? (ko ? "검색 결과가 없어요." : "No results.") : (ko ? "아직 진열한 작품이 없어요." : "Your shelves are empty.")}</h2><p>{ko ? "컬렉션 편집에서 작품을 골라 주세요." : "Choose titles in Edit collection."}</p><a href={`${base}titles/`}>{ko ? "내 작품 보기 →" : "My titles →"}</a></section> : null}
-    {!settings.loadError && !draft && !panel && !group.startsWith("MEMORY_BOARD:") && view === "table" ? <table className="channel-table"><thead><tr><th>{ko ? "작품" : "Title"}</th><th>{ko ? "기억" : "Memories"}</th></tr></thead><tbody>{visible.map(a => <tr key={a.key}><td><a href={hrefFor(a)}>{a.displayTitle}</a></td><td>{a.memoryCount}</td></tr>)}</tbody></table> : null}
-    {!draft && !panel && !group.startsWith("MEMORY_BOARD:") && view !== "table" ? <section ref={grid} className="bookshelf-grid" aria-label={ko ? "진열한 작품" : "Displayed titles"}>{visible.map(album => <div key={album.key} className={`bookshelf-tile ${album.previewMemories.length ? "has-memories" : ""} ${selected === album.key ? "is-expanded" : ""}`}>
-      <div className="bookshelf-cover-area">
-        <button className="bookshelf-cover-trigger" aria-label={`${album.displayTitle} ${ko ? "기억 펼치기" : "open memories"}`} aria-expanded={selected === album.key} aria-controls={`collection-memories-${album.key}`} onClick={() => selected === album.key ? closeSelection() : setSelected(album.key)}><span>{selected === album.key ? (ko ? "접기 ×" : "Close ×") : (ko ? "기억 보기 ↗" : "Memories ↗")}</span></button>
-        <TitlePosterTile album={album} href={hrefFor(album)} copy={copy.titles} titleKey={album.key} locale={locale} />
-      </div>
-      {selected === album.key ? <div id={`collection-memories-${album.key}`} className="bookshelf-film collection-memory-fan" role="region" aria-label={`${album.displayTitle} · ${copy.titles.memoryCount(album.memoryCount)}`}><button className="film-close btn btn--subtle" onClick={closeSelection}>{ko ? "접기 ×" : "Close ×"}</button><TitleAlbumCard album={album} href={hrefFor(album)} base={base} copy={copy.titles} locale={locale} titleKey={album.key} formatGenre={v => v} />{album.memoryCount > 0 ? <a className="bookshelf-film-more" href={hrefFor(album)}>{ko ? `기억 ${album.memoryCount}개 모두 보기 →` : `View all ${album.memoryCount} memories →`}</a> : null}</div> : null}
-    </div>)}</section> : null}
-    {!draft && !panel && group === "all" && !settings.loadError && <CollectionGroups settings={settings} ownerKey={ownerKey} locale={locale} selected={group} onSelect={selectGroup} onSave={saveLayout} base={base} overview />}
+
+    {!settings.loadError && !draft && !panel && !boardSelected && <div className="collection-content-controls">
+      <label className="channel-search">{ko ? "선반 작품 검색" : "Search shelf titles"}<input type="search" value={query} placeholder={ko ? "작품명으로 찾기" : "Find a title"} onChange={e => { setQuery(e.target.value); setSelected(""); }} /></label>
+      <TextChoices label={ko ? "컬렉션 보기" : "Collection view"} options={[{ value: "grid", label: ko ? "그리드" : "Grid" }, { value: "table", label: ko ? "표" : "Table" }]} value={view} onChange={next => { setView(next); setSelected(""); }} />
+      <small>{ko ? `진열한 작품 ${visible.length}종 · 선반 설정은 ${isTitleStateSyncEnabled && ownerKey.startsWith("account:") ? "계정에 동기화됩니다" : "이 기기에 저장됩니다"}.` : `${visible.length} unique titles · Shelf settings ${isTitleStateSyncEnabled && ownerKey.startsWith("account:") ? "sync with your account" : "stay on this device"}.`}</small>
+    </div>}
+    {status === "ready" && !settings.loadError && !draft && !panel && !boardSelected && !model.shelves.length && !(model.sections || []).some(s => s.kind === "MEMORY_BOARD") && <section className="channel-empty"><h2>{albums.length ? (ko ? "작품을 첫 선반에 모아 보세요." : "Collect your titles in a first shelf.") : (ko ? "아직 컬렉션에 담은 자료가 없어요." : "Your collection is empty.")}</h2><p>{ko ? "작품 선반과 이미지 보드를 골라 컬렉션을 구성하세요." : "Choose title shelves and Memory Boards for your collection."}</p><button type="button" className="btn btn--subtle" onClick={() => editCollection(true)}>{ko ? "작품 선반 만들기" : "Create title shelf"}</button><a href={`${base}titles/`}>{ko ? "내 작품 보기 →" : "My titles →"}</a></section>}
+    {status === "ready" && !settings.loadError && !draft && !panel && !boardSelected && <div ref={grid} className="collection-owner-content">
+      {group === "all" ? <CollectionGroups settings={settings} ownerKey={ownerKey} locale={locale} selected={group} onSelect={selectGroup} onSave={saveLayout} base={base} overview renderShelf={renderShelf} /> : model.shelves.some(s => s.id === shelf) ? renderShelf(model.shelves.find(s => s.id === shelf)) : <section className="channel-empty"><h2>{ko ? "이 선반을 찾을 수 없습니다." : "This shelf is unavailable."}</h2><button type="button" className="btn btn--subtle" onClick={() => selectGroup("all")}>{ko ? "전체 컬렉션 보기" : "View all groups"}</button></section>}
+    </div>}
   </div>;
 }

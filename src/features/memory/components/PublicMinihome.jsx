@@ -40,7 +40,7 @@ export default function PublicMinihome({ base = "/" }) {
     return () => { clearTimeout(timeout); request.abort(); unsubscribeViewer?.(); window.removeEventListener("pageshow", recheck); document.removeEventListener("visibilitychange", recheck); };
   }, [id, retry, services]);
   return <main className="public-memory-board page-shell page-shell--wide">
-    <PublicPageHeading title={copy.visitor} base={base} />
+    <PublicPageHeading title={state.snapshot?.schemaVersion === 2 ? (locale === "ko" ? "공개 컬렉션" : "Public collection") : copy.visitor} base={base} />
     <div className="public-page-layout"><div className="public-page-content">
     {state.status === "ready" ? <MinihomeSnapshot key={retry} snapshot={state.snapshot} services={services} locale={locale} base={base} /> : <p className="public-page-state" role={state.status === "failed" ? "alert" : "status"}>{copy[state.status]}</p>}
     </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '미니홈 관계와 신고' : 'Home relationships and reporting'}>

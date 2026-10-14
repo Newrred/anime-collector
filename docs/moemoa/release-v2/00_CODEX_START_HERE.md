@@ -1,5 +1,28 @@
 # MOEMOA · 첫 정식 출시 실행 패키지 v2
 
+> **2026-10-13 최신 인계 — 다른 PC 완료 근거 복구:** 첫 Public 필수 운영 흐름은 `ea8f388`에서 인수됐고, 컬렉션 연결은 `5d544ad` 운영 반영 완료다. `b3b4669`에만 남아 있던 증분 복구·키 독립보관·카탈로그 외부 회수·주간 설치·실제 공개/팔로우/신고/철회 증거25키를 기존 JSON2개에 복구했다(공통키 변경0). 현재 W/M/D/Q와 최종 체크의 오래된 Public off/키 미보관/DB 복구 대기를 교정했다. 이번 www/origin master5d544ad 및 예약 유지38327869839 SUCCESS 재확인, 운영 변경0. 첫 주간 예약은 **10/18 03:00 JST/KST**로 아직 실행 전이다. [단일 작업판](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)과 [실행 보고](01_RELEASE_EXECUTION_PLAN.md#w18d06-증거-복구-실행-8항-보고--2026-10-13)를 우선한다. 새 운영 승인·가입·공개 동의·키 보관 재요청 없음. 아래 날짜별 기록은 당시 이력이다.
+
+> **2026-10-13 W18 재적용 완료:** 사용자 exact 승인5d544ad→원격CI38369813151 전체SUCCESS→동일SHA master Git→Vercel9HTFhbbh9 READY/www일치→신규client1/servertrue 활성. 기존 가입/정책/한도 보존·DBmigration 재실행0. 실제 운영 기존계정에서 컬렉션 공개 설정/서버 선반 선택지/460×652 승인 표지 decode 확인. 새 동의·자동게시0. [최종 근거](evidence/2026-10-13-collection-home/production-retry-candidate.json), 기존03 현재카드를 따른다. 아래 중단·승인대기는 과거 이력이다.
+
+> **2026-10-13 W18 운영 적용 중단·Git 원복:** 후보1fef030 승인으로 DB20261012160330 적용/57테이블 보존. 앱bfa1356 Git배포 후 필수CI 단위검사가 실패해 신규서버flag는 켜지 않았다. 운영patch의 기존 테스트계약 누락을 확인했고 f6dba06으로 앱을 이전b0541ff와 같게 복구했다. VercelEbeCWgQQi READY/www동일SHA·CI38367895908 SUCCESS. Production새flag0/서버false, schema·기록 보존. 재적용 후보는 테스트 패키지를 포함하며 새DB실행/재가입/새동의 불필요. [실행 근거](evidence/2026-10-13-collection-home/production-execution.json)와 기존03 현재카드를 따른다. 아래 승인대기/변경0은 이전 시점이다.
+
+> **2026-10-13 W18 운영 기준 대조 완료:** 운영DB read-only 확인: 기존 Public/미니홈 활성·가입guard 유지, 정책3종 일치, catalog/승인cover4292개. 누락migration은 컬렉션20261012160330 한 개뿐. Vercel Production publication/minihome=1·운영 reader URL 확인, 새 Collection flag는 Project/Shared 모두 없음. Git/www b0541ff 일치. 필요한 적용은 앱40a3dac의21파일+SQL1개와 새 server/client flag2개이며 아직 쓰기/배포0. 다음은 이 정확 운영 후보의 명시 승인. [기준 증거](evidence/2026-10-13-collection-home/production-baseline.json), [후보](evidence/2026-10-13-collection-home/production-candidate.json).
+
+
+> **2026-10-13 W18 stale-preview 실제 서버 경계 마감:** 사용자 승인 b617817의 rollback-only SQL을 moemoa-test에서1회 실행했다. PREVIEW_CHANGED 거부·오래된 선반 projection0 PASS, 별도 전후 조회에서 설정/home/source/독립보드/catalog 보존·homePrivate=true 확인. 공개/동의/구조/배포/운영 변경0. [실제 근거](evidence/2026-10-13-collection-home/stale-preview-hosted.json). 다음은 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 읽기전용 대조이며 새 가입·재게시·같은 확인창 검사는 반복하지 않는다.
+
+
+> **2026-10-13 W18 stale-preview 최소 검사 후보:** 테스트 화면 재배포 없이 DB 트랜잭션 안에서만 선반 version을 바꿔 오래된 preview 게시 거절을 확인하는 rollback-only SQL을 준비했다. 로컬 격리 리허설5 PASS·57테이블 전후 동일, 서비스 코드 변경0. [후보](../../../tools/operations/collection-home-test/stale-preview-manifest.json)의 정확한 테스트 DB 1회 실행 승인이 다음 단계이며 아직 hosted 실행0. 기존 원복 완료·운영40a3dac 후보와 이전 증거 유지.
+
+
+> **2026-10-13 W18 확인창 진단·운영 후보 준비:** 기본 Chromium 확인창의 취소/승인·최신 revision·서버 오류 경계와 기존 미니홈 왕복, 로컬 합성 RPC 검사 2개 PASS(신규 1개). 서비스 오류는 재현되지 않아 앱 변경0. 이전 hosted CUA focus timeout과 실제 hosted UI 철회 미검증은 구분한다. 운영/www Git 소스 b0541ff와 대조해 앱21파일·migration1개를 [운영 후보](evidence/2026-10-13-collection-home/production-candidate.json)에 고정했다. runtime/schema는 실제 test 검증40a3dac과 동일. 원격 적용0이며 운영 DB/설정 현재 값은 이번에 조회하지 않았다. 다음1개는 동일 후보의 hosted source-version 변경/stale-preview 경계에 한정한 검사 준비다. 새 가입·전체 회귀·같은 확인창 반복 검사는 추가하지 않는다.
+
+
+> **2026-10-13 W18 재개·실제 공개 인수:** 이전8446753의 남은 Preview3override를 사용자 명시 승인 후 제거하고, a6b6dda Git 재빌드 dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv READY/Preview/소스/별칭으로 원복 마감. 수정40a3dac은 별도 exact 승인으로 test 설정5필드·Preview4값만 임시 연결했다. dpl_F29WgmHX8ahugV96qHyhyRijqMma READY/exactSHA/별칭에서 기존 A의 unavailable 보드 명시 해제→선반 preview→본인 직접 동의·게시→새 익명 origin 미니홈/460×667 승인 표지 decode·작품 Hub/캐릭터/Memory0·Watch0 연결 PASS. A 새로고침 선택 복원·다시 preview의 동의 unchecked, 익명 DTO privateFields0 확인. 기존 Chromium3 재검증 PASS이며 신규고유 테스트0·새 runtime 변경0·이번 build 재실행0. **원복 완료:** 기존 서버 철회 함수로 test 홈1개를 비공개 처리하고 익명 HTTP200/null·화면 unavailable/img0, 원본·표지·독립 보드 fingerprint 보존을 확인했다. DB5필드와 Preview4값은 baseline 복귀, phone-test a6b6dda의 Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/exactSHA/별칭 확인. 브라우저 확인창 조작은 멈춰 UI 철회 PASS로 세지 않는다. 운영master b0541ff/운영DB 변경0. 최신 결과는 [03 현재 카드](03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)와 evidence/2026-10-13-collection-home/retry-execution.json을 따른다. 기존 M/W/Q/D와 과거 실패·완료 증거는 유지한다.
+
+
+<details><summary>교정 전 시작 문서의 2026-10-11 최신 요약 — 당시 이력 보존</summary>
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
@@ -233,3 +256,5 @@ M0가 이미 끝났으면 전체 감사를 반복하지 마세요.
 ## 저장소 이관 상태 (2026-09-23)
 
 2026-09-23에 M0를 마쳤고 당시 다음 작업은 W03이었다. 이 문장은 과거 이관 기록이다. 현재 재개점과 다음 작업은 `03_RELEASE_WORKBOARD.md`의 최신 표를 따른다. `SHA256SUMS.txt`는 전달받은 원본 ZIP 검증용이며, 진행 중 갱신된 문서의 현재 checksum이 아니다. 원본은 사용자 Downloads ZIP에 보존한다.
+
+</details>

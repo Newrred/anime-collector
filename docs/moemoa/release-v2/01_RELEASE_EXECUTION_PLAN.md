@@ -1,5 +1,36 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W18/D06 운영 반영 후 잔여 대조 — 2026-10-13
+
+1. **목적:** 컬렉션 운영5d544ad 이후 이미 완료된 배포·공개·복구 작업을 다시 요구하지 않도록 단일 작업판을 실제 증거에 맞춘다.
+2. **확정 결정:** FIRST-PUBLIC-LAUNCH-CLOSEOUT 및 COLLECTION-HOME-REALIGNMENT 유지. 국가·권리·요금 변경 없음.
+3. **현재 근거:** production-retry-candidate.json의 실제 운영 연결 완료와03 표의 과거 PUBLIC_OFF가 충돌한다. 다른 PC의 release-handoff/public-release-closeout Git 이력까지 확인한다.
+4. **범위:** 기존 W/M/D 행과 미완료 근거 대조. 명확한 서비스 결함이 있으면 해당 W의 최소 재현·로컬 수정만 이어간다. 신규 기능·전체 재검사·새 동의·운영 변경 제외.
+5. **흐름:** 현재 Git/배포 읽기→기존 증거의 환경·SHA·완료조건 매핑→이미 충족한 조건 마감→실제 미완료 한 개 선택.
+6. **파일:** 기존00/01/02/03, CODEX_START_HERE, 기존 evidence 위치. 코드 결함은 실제 제어 파일 확인 후 지도 추가.
+7. **데이터:** DB/Storage 변경·업로드·삭제 없음, 사본·키 원문 접근 불필요.
+8. **마일스톤:** 최신 운영 근거 식별, 오래된 상태 교정, 다음 최소 작업의 결과 또는 정확한 외부 조건 기록.
+9. **검증:** Git/read-only API·근거 JSON 대조와 문서 diff/참조 검사. 이미 통과한623/54/4 및 전체CI를 반복하지 않는다.
+10. **개인정보/권리:** 본문·개인이미지·토큰 기록 없음. 합성 재현만 허용, 공개 동의 대신 실행 없음.
+11. **관측:** 증거 SHA·환경·실행ID만 보관. 새 경보/외부 발송 없음.
+12. **복귀:** 문서 patch만 되돌릴 수 있고 과거 로그/완료근거는 유지한다.
+13. **위험:** 분기된 문서를 최신으로 오인하거나 read-only 설정을 실제 기능 인수로 승격하지 않는다.
+14. **결정:** 현재 진행 승인으로 로컬/읽기 작업 수행. 새로운 정확한 운영 후보가 생길 때만 기존 승인 경계 적용.
+15. **진행:** 03의 현재 카드·표가 서로 다른 날짜를 가리키는 것을 확인했다. 이전 운영 실패와 원복도 보존한다.
+16. **발견:** 다른 PC의 Git 이력에 후속 복구/공개출시 근거가 있어, 현재 개발 브랜치 문서만으로 잔여를 확정하지 않는다.
+17. **보고:** 실제 대조 결과·변경·남은 조건·다음 행동 하나를 이 절과 단일03에 기록한다.
+
+## W18/D06 증거 복구 실행 8항 보고 — 2026-10-13
+
+1. **읽은 문서/코드:** AGENTS, CODEX_START_HERE, 확정01, PLANS, release-v2 00/01/02/03, QA07·이미지05·감사03·변경09, `b3b4669`의 기존 복구/용량 JSON과 작업판, `5d544ad` 운영 근거, 주간/유지 workflow. 비공개 사진 관찰은 `titleCollectionService.js`, `PrivateMemoryCardPreview.jsx`, `createPrivateImageTransfer.js`, `MemoryPrivateImageSync.jsx`와 기존 transfer 검사를 별도 추적했다.
+2. **가정/미결:** 문서 병합이 새 실행 PASS를 만드는 것은 아니다. 다른 PC의 동일 공통키+추가키25개만 복구, 최종 source/environment/date를 보존했다. 기존 개인 사진 로딩 실패는 remote THUMB 요청 catch 경로까지 확인했지만 실제 오류코드/원인은 미확정. 기존 코드에 결함을 추정해 수정하지 않았다.
+3. **계획:** 위17항 W18/D06 대조 계획 이행. 추가 제품 기능/새 작업판 없음. W/M/D/Q의 이미 충족한 조건만 닫고 전수 QA·전체 복구 serving 한계를 보존했다.
+4. **변경 파일/이유:** root 시작문서와 기존00~03을 현재 인계 기준으로 맞췄다. 기존 `2026-10-10-external-backup-recovery.json`20키, `2026-10-11-public-capacity-closeout.json`5키 복구. 새 `2026-10-13-release-evidence-reconciliation.json`은 출처SHA/blob/병합전후hash·충돌0·읽기결과만 기록한다. 바뀐 표/현재카드의 원문도03 하단 이력에 보존. 앱/DB/workflow/의존성 변경0.
+5. **DB/복귀:** migration·DB/Storage 쓰기·업로드·삭제0. 기존 ea8f388 첫 공개 적용 및5d544ad 컬렉션 적용을 재실행하지 않음. 문서 patch만 역적용할 수 있으며 다른 PC 브랜치 전체 병합은 하지 않았다.
+6. **검증:** Git source와 JSON 공통키 deep-equal/누락25키 복구/전체 donor와 동등성, 상대 문서 링크·표 ID·diff 검사. 읽기 API로 www commit/checkoutCommit/source=master5d544ad, weekly schedule0/첫 예정10/18, 유지 예약38327869839 및 실제 cleanup 단계SUCCESS 확인. privateImageTransfer 기존 unit12 PASS는 해당 로컬 계약만 확인하며 운영 오류 해결 증거가 아니다. 과거623/54/4·CI/Google/기기·복원 검사는 재실행하지 않았다. 검사 상세는 reconciliation.validation 참조.
+7. **보안/권리/관측:** 토큰/비밀번호/키 내용·개인사진/본문 조회·문서 삽입0. 새 법률 판정·나라 축소·권리/성인/요금 변경0. 알림/메시지 발송·workflow dispatch·환경설정 변경0. 기존 실제 알림 수신 확인과 새 용량 임계 알림 미검증을 분리했다.
+8. **실제 잔여/다음 승인:** 첫 주간 예약·지속 용량 관찰, 새 임계 알림 전달·전체 복구 serving/전체 ingestion history·미실행 QA 조합은 남는다. 현재 요청할 승인 없음. 다음 행동 하나는 **10/18 03:00 JST/KST 이후 기존 주간 schedule 결과 읽기/03 기록**이다. 새 예약/수동 백업 생성 없이, 다음 새 운영 변경 후보가 있을 때 기존 exact 승인 경계를 적용한다. 개인 사진 로딩 관찰은 실제 오류 확인 전 미해결로 유지한다.
+
 > **2026-10-11 W14/W19 test 연결 마감·원복 완료:** 승인6c633bd/화면50ecbc9에서 사용자 직접 동의·저장 후 새 익명 origin의 실제 배포 이미지24×30 decode PASS. 카드 비공개 저장→같은 익명 보드 unavailable/img0·소유자 원본24×30 보존 PASS. 실제 usage2GET/144B→4GET/288B 보존. DB 정책3revision/guard·quota와 Preview 두값·phone-test 소스a6b6dda 원복, Vercel52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready/소스/별칭 확인. 운영/master199613b 불변. 과거 A/B·미니홈·로컬 PASS와 구분한다. 다음1개: 기존 D06 최종 운영 후보의 변경목록·잔여 인수 조건 마감. 아래 날짜별 대기/미원복은 당시 이력이다.
 
 
@@ -2190,3 +2221,349 @@ W09 실행 상세(2026-09-24): 기존 Board에 명시 선택·공개 제목/설�
 8. 잔여와 다음1개: 새 고지·현재 가입확인·실제 이미지전달·카드 비공개 test 연결을 마감한다. D04 운영정책/국가 잔여, D03 실제 경보 수신, D05 별도 복구키/복구 인수는 그대로 남긴다. 다음은 기존 D06 최종 운영 후보의 변경목록·남은 조건을 한 번에 정리하는 것이다. 이번 test 승인을 운영/Public 활성 승인으로 확대하지 않는다.
 
 [원복 완료] Vercel Preview52vdkwQ1pMp8AHEF2rZJRYrSn9Ex Ready, Source a6b6dda와 phone-test canonical alias 확인. 직접 build-info 경로는 미인증 HTML/브라우저 차단으로 별도 검증하지 못했으며 이를 live SHA PASS로 적지 않는다. 기존 원격master199613b 유지.
+
+## 2026-10-13 W18 컬렉션·미니홈 관계 교정 ExecPlan
+
+### 1. 목적
+한 컬렉션에서 기존 작품 선반과 이미지 보드를 선택/편집하고, 명시한 내용을 같은 구조의 공개 컬렉션으로 보여준다.
+### 2. 결정
+COLLECTION-HOME-REALIGNMENT-20261013 및 첨부01/02 계약. 이번 사용자 실행 지시는 로컬 구현/합성 검증 범위이며 원격 변경은 별도.
+### 3. 현재
+b0541ff + 로컬 인수 ba862d1. bookshelf shelves만 정규화·sync, board membership 별도, minihome entries는 publication만. selection hydration 유실을 코드 확인.
+### 4. 범위
+Owner Collection shell·typed layout·기존 Board embedding, 공개 설정 작업 canvas, hydration, typed title-shelf public 후보/동기화·구 writer 보호·호환URL. 기존 이미지 전달/신고/팔로우/권리 엔진 재사용.
+### 5. 설계
+bookshelf payload에 additive collection layout(version/sections 참조) 보존해 기존 title sync/backup 경로 사용. membership 복제 없음. title shelf 공개는 서버 bookshelf row·title row·승인 cover revision 대조, public DTO allowlist, private preload 금지. owner/visitor 데이터 공급자 별도.
+### 6. 파일
+BookshelfView/settings/Editor, MemoryBoardView embedding, Minihome controller/status/editor/snapshot, PublicationPanel hydration/layout, 기존 titleStateSync, public reader, 관련 migration/계약 tests/CSS/문구. 변경 필요 파일만 수정.
+### 7. migration
+로컬 additive candidate. 기존 shelf/board/card/home 삭제/ID 재생성 없음. typed source feature 기본off·legacy writer가 typed entries/layout을 누락 저장하면 거부. 운영/test DB 적용0.
+### 8. 체크포인트
+W18 두 유형 실제 owner 장면 → W06 version/layout 저장/sync/backup → W07/09/10/11 표지-only 선반의 prepare/publish/read/철회 → W12/13/14 관계/호환 → W19 로컬 SQL/실제 UI/PC·mobile 검증. 새 작업판/새 M 트리 없음.
+### 9. 검사
+수정 계약의 unit/격리SQL 및 실제 Chromium owner 두묶음·reload/cancel·관계경로·title-only 공개·기존 public 회귀. 개인 데이터0 합성 fixture. 1440/390/320 검수. 변경 없던99테이블 복구/국가/인증 기반 재시험0.
+### 10. 보안
+Private original/public projection 분리, 제목/표지만, old homeId/follow대상 유지. source/owner/version/hash/policy/cover 권리 재검증. 비공개 count/이름/감상 미노출.
+### 11. 관측
+상태/오류/집계만, 개인 본문/keys/토큰 로그0. 구현/합성/hosted/시각 결과 분리.
+### 12. 복귀
+UI commit revert·flag off, 원본 보존. 새typeddata 존재 뒤 구writer로 저장 금지. 삭제down migration 없음.
+### 13. 위험
+legacy normalize data손실·sync/backup roundtrip·새public타입권리·늦은load/draft덮기·내부1카드board자동전시를 계약으로 차단.
+### 14. 결정
+이번 목표와 기본안으로 local 진행. 정확한 원격migration/flag/deploy는 reviewable 후보/영향 준비 후 요청.
+### 15. 진행
+ZIP CRC/8sha검증 PASS, 첨부01/02와 현재코드 대조 완료. 첫 구현은 실제 source 참조2종 화면.
+### 16. 발견
+모든 board를 자동 배치하지 않고 사용자 선택으로 추가. 기존 title entity 저장/source보다 client titleKeys를 public사실로 신뢰하지 않는다.
+### 17. 완료보고
+실제 source/test/시각/DB후보·롤백·남은게이트를 이 절과 기존03에 기록한다. 원격 미실행을 명확히 표시한다.
+
+
+#### 2026-10-13 W18 로컬 구현·검증 보고
+
+1. 문서/근거: AGENTS.md, CODEX_START_HERE.md, 확정결정01, PLANS.md와 기존 release-v2 00/01/02/03, 첨부 README/01/02를 대조했다. 소스 근거: BookshelfView.jsx 24–105, bookshelfSettings.js 1–39, MemoryMinihome.jsx 39–136, MemoryPublicationPanel.jsx 87–198, minihomeView.js 3–69, titleStateSync.js 28–118 및 새 migration. Supabase/verify-before-claiming 기준 적용. 공식 RLS 문서 https://supabase.com/docs/guides/database/postgres/row-level-security 와 changelog.md도 확인했다.
+2. 가정/미결: 첨부 목표의 로컬 구현을 사용자 ‘작업 진행해줘’로 실행했다. 새 공개 선반의 기본안은 작품명·승인 표지만이다. 원격 Public 범위 승인으로 확대하지 않았다. 실제 새 typed 계약의 hosted A/B/익명·운영 PASS는 아직 없다.
+3. 계획: 이 문서의 마지막 W18 ExecPlan 및 기존03 현재 카드. 기존 owner 선반/보드/카드 ID·N:M membership·homeId·팔로우 대상·구URL 보존, 취소했던 실험적 Collection 레이아웃/작품 탭 이동은 재개하지 않았다.
+4. 변경: CollectionGroups/Profile과 공통 CollectionGroupTabs로 작품 선반과 명시 연결한 이미지 보드를 같은 Collection에 진열·선택·순서 변경·원본 유지 분리했다. BoardContent의 명령/미리보기를 재사용했다. Minihome/Board 공유 입력은 기존 선택·순서를 복원하고 동의·게시 operation은 복원하지 않는다. 공유는 별도 폭/작업 모드이며 갤러리를 숨긴다. 작업 중·미저장 상태의 묶음 이동을 보호한다. 타입별 public DTO·승인 표지 renderer·24개씩 로딩/기존 보드 3개 지연 미리보기를 추가했다. 의존성·작품/감상/사진 저장 엔진 교체0.
+5. DB/복귀: CLI 생성 20261012160330_collection_home_sections.sql 후보는 collection_home_enabled 기본false, typed source builder/owner choices, 구 writer 보호 trigger2개 및 owner Board 선택 복원 wrapper다. 기존 prepare/publish/read/신고/가입/권리/한도 엔진을 유지한다. 기존 게시 rows는 draft를 지우므로 실제 published_snapshot의 선택된 필드와 public card→원본 card 매핑만 복원한다. 새 title shelf는 현재 bookshelf version과 승인 catalog title/cover를 결속한다. private source version이 바뀌면 기존 선반 전시는 재확인 전 표시하지 않는다. 원격 적용0. 복귀는 flag off·UI commit revert, 새 typed payload에 대한 구 writer 거절은 유지, 삭제 down migration0.
+6. 실행/결과: node --test collectionHome/minihome/channelService/titleStateSync/memoryBoard 22 PASS. 전용 loopback runner의 Collection/선반 편집 4 PASS, 기존 public 대표 7 PASS(실제 공유 종료로 gallery에 복귀하는 검사1 수정 후 재실행 포함), 작성자/팔로우/차단/익명3 PASS. 고유 Chromium14 PASS, 기존 private-copy 조건1 SKIP(실환경 PASS로 사용하지 않음). 1440/390/320 넘침0, 합성 owner/visitor/preview 캡처 보존. isolated PostgreSQL 새 계약25 PASS, 기존 publication/postmoderation/self-declaration/image 51/33/28/31 PASS + prepare race PASS. npm run build 33 pages PASS; git diff --check PASS. 초기 일반 runner가 이 PC의 실제 Supabase dev 설정을 상속해 mock 로그인 검사가 실패한 것은 분리 기록하고, 비밀값/실계정 연결 없는 전용 runner로 교정했다. 새로운 표지 실패→게시 차단→재미리보기→동의 초기화도 직접 검사했다.
+7. 보안/권리/관측: private 원본/평점/상태/감상/태그/private count를 public 제목 선반 DTO에 넣지 않는다. 가짜 Memory0, 내부 간편공유 보드 자동 연결0, 사용자 동의 대리 수락0, 개인사진 업로드0, 원본 삭제0, 요금·국가·권리 확대0, 외부 발송0. 로그/캡처는 합성 fixture뿐이며 실제 사용자 토큰/사본/노트를 넣지 않았다. 계정 layout은 기존 bookshelf sync entity로 DB 백업 대상에 포함된다. 로컬 Memory metadata JSON에 선반이 포함된다고 주장하지 않는다.
+8. 남은 게이트/다음1개: exact 후보의 테스트 DB migration/default-off 적용을 승인받고, 새 타입의 hosted 인수로 이어간다. moemoa-test를 읽기전용 확인한 결과 새 migration 없음·계정 bookshelf source0·active catalog0이며 기존 reads/writes/minihomes/follows=true, 정책3값 TEST_ONLY_PHONE_WEB_20260927_01이다. 이 고지는 새 UI의 고정 공개 고지와 다르므로, 카탈로그/선반 자료와 policy/flag 후보를 준비·승인 없이 임의 활성하지 않는다. 운영 DB/master/배포/Public 활성은 별도이며 전체 출시 완료로 올리지 않는다.
+
+검증 증거는 evidence/2026-10-13-collection-home/에 보존한다. 기존 작업판·완료 이력·보류 항목은 유지한다.
+
+[2026-10-13 인계 결속] 로컬 구현 후보 `5f791db0a4a780e7420011d07a5c20bc1d99fde9`, 브랜치 `codex/continue-after-arena-20261012`. Git push/master/운영/test migration 적용0. 다음 행동은 migration `20261012160330_collection_home_sections.sql`을 moemoa-test에만 기본off로 적용하는 정확한 승인이다. 새 타입의 catalog/source/policy/flag·화면 hosted 연결은 이후 별도 후보로 준비한다.
+
+
+### 2026-10-13 승인된 테스트 DB 구조 적용 결과
+
+사용자 ‘테스트 DB 구조만 적용’ 승인 후 후보5f791db의 SQL(sha256 8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68)을 moemoa-test/nmgkhknponvzcwliajyk에 apply_migration으로 적용했다. 로컬 파일20261012160330과 연결 도구 생성 원격 이력20261012172036/collection_home_sections의 매핑은 test-structure-application.json에 기록한다. 데이터 release ID는 TEST_COLLECTION_HOME_STRUCTURE_20261013이다.
+
+적용 전후36개 관련 table의 count/내용 fingerprint와 이전 settings 일치, collection_home_enabled=false, owner RPC 2개의 authenticated-only/private helper6개의 anon/authenticated/service EXECUTE 차단 및 빈 search_path를 독립 읽기로 확인했다. 합성 UID의 rollback-only RPC 실행은 enabled=false/shelves=[]를 반환했다. 실제 계정 게시·Google·원격 화면 PASS로 계산하지 않는다.
+
+Security advisors는 INFO38(private RLS/no policy), 의도된 공개 reader WARN4, 인증된 SECURITY DEFINER RPC WARN59(이번 새 shelf RPC 포함), 기존 leaked-password WARN1을 보고했다. 권한 경고를 없애려고 owner RPC를 익명으로 넓히거나 기존 정책을 수정하지 않았다. [SECURITY DEFINER 점검 기준](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). 전체 advisors green으로 주장하지 않는다.
+
+원본·정책·flag·사용량·클라이언트 배포·운영 변경0, 새 타입off 유지. 되돌릴 때도 원본/typed data를 삭제하지 않고 flagoff/UI복귀를 사용한다. 다음1개는 최소 합성 선반/catalog 자료와 고지·flag/배포·원복의 정확한 hosted 후보 준비다. 현재 source0/catalog0 및 고정고지와 기존 TEST_ONLY 정책 불일치는 남은 연결 조건이다.
+
+
+### W18 hosted 연결 후보 준비 — 2026-10-13 ExecPlan
+
+1. 목적: 같은 Collection의 Memory0 작품 선반과 기존 보드를 실제 테스트 화면에서 선택·미리보기·게시·익명 열람·철회할 수 있는 정확한 연결 후보를 준비한다.
+2. 결정: COLLECTION-HOME-REALIGNMENT-20261013, 기존 일반 공개/가입 고지·한 체크, 원본/ID·N:M 유지.
+3. 현재: 후보5f791db의 구조만 moemoa-test 적용, 새 타입off. source/catalog0, TEST_ONLY 정책, phone-test 원격a6b6dda/운영b0541ff.
+4. 범위: 최소 카탈로그 표본1·테스트 선반1의 버전관리 데이터 후보, 정책5필드와 phone-test 환경/소스의 exact 적용·원복 manifest. 운영/신규인증/전체catalog/이미지 규제 확대 제외.
+5. 흐름: 읽기전용 baseline → bounded public catalog 표본/표지 provenance 보존 → test fixture/config guard → 로컬 SQL dry-run/apply/restore 검증 → 한 번의 정확한 테스트 적용 승인 → 당사자 공개동의 → hosted 인수 → 설정/화면 원복.
+6. 파일: tools/operations/collection-home-test-* 및 기존 release-v2 00/01/02/03/evidence. 앱·인증 엔진은 발견된 실패만 최소 변경.
+7. DB: 새 schema0. 기존 empty test catalog에 source release·asset/search/cover의 표본만, A 계정 bookshelf가 없을 때만 테스트 선반 생성. 삭제0/실기록 덮어쓰기0.
+8. 마일스톤: 실제 test source/env 확인 → 최소 데이터와 정책 후보 → 격리SQL/rollout 검증 → 정확후보 결속.
+9. 검사: production target/정책drift/이미 있는 source를 차단, 기본ROLLBACK/explicit apply/restore/개인자료 보존/캐시 없는 title shelf RPC. 기존 전체DB/Google 기초 재검사0.
+10. 보안: 키 값/본인 DOB/토큰/private 사본/개인노트 문서0; public catalog만 표본 읽기. 동의/receipt는 대신 만들지 않는다.
+11. 관측: count/hash/동작결과만, raw private 자료 로그0. 자료크기·전송량 최대 한 표지150KB를 후보에 기록.
+12. 롤백: 새타입off·정책exact baseline·phone-test 이전 SHA와 env값 복귀. 만든 테스트 카탈로그/선반은 삭제하지 않고 retained/inactive로 두며 원본 유지. 사용자 변경된 source를 되돌려 덮지 않는다.
+13. 위험: catalog_assets는 외부 source enum을 제한하므로 합성표지를 외부import로 위장하지 않는다. 기존 승인 공개catalog 표본만 원출처/권리 metadata와 함께 사용한다. source version/정책/branch drift 시 중단.
+14. 결정: 준비는 이번 ㄱㄱ 지시로 진행. 실제 test자료쓰기·flag/고지 변경·Git phone-test push/배포는 이전 구조승인에 포함되지 않아 exact 후보별 확인.
+15. 진행: 읽기전용 대상/구조/설정/계정현재receipt와 기존 Preview 환경 이름 확인.
+16. 발견: test catalog 없음, 기존 config tool은 새collection 열을 포함하지 않아 그대로 적용 불가. 작은 독립 wrapper를 준비해 다른값 덮어쓰기 방지.
+17. 보고: 실제 준비/명령/원복/승인조건을 이 절과 현재 카드에 기록.
+
+
+#### W18 hosted 연결 후보 준비 — 이번 실행 8항 보고
+
+1. 읽은 문서/소스: CODEX_START_HERE·확정01·AGENTS·PLANS·제품02/카탈로그04/이미지05/QA07/변경09, 첨부 실행02 및 기존release-v2 00/01/02/03을 대조. source 근거: catalogCoverReference.js 16–47, catalogSupabaseClient.js 3–26, titleStateSync.js 22–119, 20261007093000_title_state_sync.sql, 20260903141500_catalog_cover_memory_assets.sql, 기존public-notice-test-config/fixture/runner 및 현재 Collection controller/UI. verify-before-claiming·Supabase·Vercel env-vars/deployments-cicd 적용.
+2. 가정/미결: 이번 ㄱㄱ는 다음 exact 연결 후보 준비 지시다. 테스트 구조만 적용한 승인을 fixture/고지/flag/화면 배포에 확장하지 않았다. A의 새 현재 가입 확인2건은 읽기전용 존재만 확인했으며 새 수락/Google 재가입을 요구하지 않는다. 실제 게시 동의는 본인이 직접 한다.
+3. 계획: 바로 위 W18 hosted 연결17항. 기존W18/관련W06·W09·W11·W19 유지, 새 작업판0.
+4. 파일/이유: tools/operations/collection-home-test/ 아래 공개 catalog-source.json·prepare.mjs·생성fixture.sql/manifest·config.sql·render-sql.mjs·test_candidate.py·rollout-manifest.json/README를 추가했다. 실제 source/provider 제한 때문에 합성 표지를 ANILIST import로 위장하는 대신 기존 승인된 공개 Steins;Gate1작품/상세1개/인물1page/표지89,300B를 provenance/hash/권리 그대로 테스트에 복사하는 후보로 정했다. .gitattributes LF 규칙으로 SQL/hash를 다른PC에서도 재현한다. 원본 앱5f791db 이후 src/schema/env.production/lock 변경0.
+5. 데이터/복귀: 새migration0·원격쓰기0. fixture는 기존catalog/owner bookshelf가 있으면 원자적으로 중단, 작품title row는 없을 때만 추가한다. Memory/WatchLog/receipt0. target 검증은 실제 연결 project ID를 먼저 확인하며 SQLmarker만으로 신원을 증명한다고 주장하지 않는다. 임시설정은 collection_home_enabled/signup_declaration_required/세policy revision의5개만 exact baseline 대조 뒤 변경. restore도 drift/kill switch 변경이면 중단. 복사한 공개catalog·표지·test선반/저장작품은 남기고 원본삭제0. phone-test env4개와 새source를 복귀, 운영/master0.
+6. 실제 검증: prepare.mjs source/FK/ref/hash allowlist→fixture 재생성 같은hash PASS. public catalog 표지1GET·89,300B·sha2564feafa4888573d8de1dc7f2516aee2387ffcd10f9de9ec5150b5e0c04c325e9f·실제JPEG460×667 decode/metadata일치 PASS. 격리PG16 전체현행migration 후 후보17 PASS: 잘못된대상/defaultrollback/기존source차단/Memory0/권리원본보존/표본상한/반복apply거부/정확5필드/RPC/restore dryrun/drift/복귀/자료보존/의존성/APIrenderer 기본rollback. renderer 별도production대상거부·restore기본rollback PASS. 최초 timestamp+00/+00:00 문자열 비교 실패는 동일 instant 비교로 보완, WSL Node 미설치 실패는 기존 Windows Node의 렌더 bytes를 사용해 해결·의존성 설치0. 실패와 최종로그를 evidence에 보존했다. 기존app의22unit/14Chromium/build33은5f791db 이력으로 분리, 이번새 hosted/UI PASS0. gitdiff/diffcheck 결과 및 exact 후보는 후속 결속한다.
+7. 개인정보/권리/관측: source는 서비스의 기존 공개catalog facts/표지뿐이다. 개인이미지/노트/DOB/token/server키 문서0, plaintext secret 출력0. Vercel에서는 승인된public config key6개만 값을 읽어 대상URL/test flags/policy를 확인했다. server Secrets는 이동/교체하지 않는다. signed-in SECURITY DEFINER 경고의 이전판단 유지, 권리/국가/요금0. 기준원격 masterb0541ff/phone-testa6b6dda 유지. 이전Preview metadata 조회404/목록0은 실제browser HTTP404로 표시하지 않으며 필요시정확이전GitSHA 재빌드가복귀경로다.
+8. 잔여/다음1개: exact 후보로 test자료89KB/fixture+설정5+Preview값4+phone-test Git 배포→새타입실제public 인수→설정/env/source 원복의 단일 승인 범위를 준비했다. 운영/새회원/대신동의/삭제/유료는 제외. 사용자 승인 후 읽기전용 baseline 재대조로 이어간다.
+
+[후보 결속] exact test 연결·인수·원복 소스 `8446753548c5a4596adf27e463c27f66c600cf19`. fixture SQL SHA25602057ac9a75b17b6b956e667bbd887ed237138a98716274b84f2fc0c1f0449a1/config SHA2566c255537bdce968b7ca0e4127389bb76efc388bca3e79820877ca786c75689fc. master/phone-test 원격ref 불변, 승인 전 실행0.
+
+[2026-10-13 실제 실패·최소 보완 계획] 승인8446753의 test자료/설정/Preview 연결 후 기존 A가 현재 Collection에 실제 선반1·Steins;Gate표지·Memory0을 표시했다. 공유폼은 기존 이름/소개/이전 보드 선택을 복원했다. 이미 열람 불가능한 기존 보드는 후보에서 빠졌지만 선택순서 목록에는 남아있으며 해제 버튼이 없어 새선반 preview도 거부된다. 원본/권리/기존선택을 자동 삭제하지 않고 entry별 명시적 선택해제만 추가한다. mock missing-publication 경로를 FAIL로 재현→해제 후 title-only preview PASS, 기존 hydration/dirty/동의 초기화 보존. 새 UI후보의 원격 배포는8446753 승인에 포함되지 않아 정확히 별도요청하며 기존test설정/env/source를 먼저원복한다.
+
+
+### W18 이번 연결 종료·PC 인계 — 2026-10-13
+
+1. 읽은 자료: 기존 AGENTS/PLANS/START/확정01, 제품02/카탈로그04/이미지05/QA07/변경09와 release-v2 00/01/02/03, 첨부 Collection/Home 계약, 현행 MinihomeEditor/controller 및 collection-home 테스트를 대조했다.
+2. 가정·미결: 승인8446753의 테스트 연결·검사 후 원복만 실행했다. 실제 title-only 공개 게시·익명 인수는 완료되지 않았다. 사용자의 이번 작업 마감·정상 종료 지시에 따라 새 UI 원격 재시도는 다음 PC 작업으로 남긴다.
+3. 계획: 위 W18 hosted 연결 ExecPlan의 실패 최소 수정 및 원복 단계. 신규 작업판/기능 확대0.
+4. 변경: MemoryMinihome.jsx 선택순서 entry에 명시적 ‘선택 해제’를 추가했다(95–101). 사용할 수 없는 옛 보드가 복원됐을 때 원본을 자동 삭제하지 않고 사용자가 현재 draft 참조만 제거한다. 기존 change()가 preview/동의를 초기화한다. tests/collection-home.spec.ts 8–44는 거부→명시해제→새 제목 선반 preview·동의 unchecked·publish0·원본참조 보존을 검증한다.
+5. DB·복귀: 새 UI 수정에 schema 변경0. 승인된 기존 테스트 fixture/config/restore는 apply_migration으로 실행돼 데이터/config 이력3건이 추가됐다(지속 schema 추가0); SQL/hash/매핑은 hosted-connection-execution.json에 기록한다. 새 구조·공개 catalog/표지89,300B·테스트 선반/저장작품은 승인대로 유지, 실제 Memory0. 임시 DB5필드는 baseline 복귀·새 타입false를 독립 읽기로 확인했다. 기존 Preview 정책값과 phone-test Git ref도 이전 값으로 복귀했다. 신규 Preview3값 제거와 이전 Git 배포 재빌드는 별도 원복 진행 상태를 현재 작업 카드/evidence에서 확인한다. 운영master b0541ff/운영DB 변경0.
+6. 실제 결과: 후보8446753 Git 배포 dpl_5uZfEuc7Smyi13vniAovDjd6qfrC READY/exactSHA/별칭 확인. 기존 A 로그인 복귀→실제 선반·승인 표지·Memory0 표시 및 이전 공유 이름/소개/선택 복원 PASS. 사용할 수 없는 옛 보드 참조의 해제 UI가 없어 새 선반 preview는 PUBLICATION_UNAVAILABLE로 거부됐다. 실제 게시/익명/철회 PASS0. 한 줄 수정 후 node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts --project=chromium --workers=1 --reporter=line: 3 PASS(새1+기존2), npm run build: 33 pages PASS. 로그와 실제 실패 화면을 기존 evidence에 보존했다. 앞선22unit/14Chromium/SQL25·17은 이전 후보 결과로 유지한다.
+7. 개인정보·권리·관측: 기존 공개 catalog와 테스트 선반만 연결, 개인사진/새계정/대신동의/권리확대/요금/외부발송/원본삭제0. 복구/운영서버키·OAuth 비밀은 Git에 넣지 않는다. 캡처는 공개 표지와 합성 테스트 공유 설명만 포함한다. 권리/정책 거부를 완화하지 않는다.
+8. 잔여·다음1개: 수정 UI exact 후보를 테스트에만 연결·재검증·원복하는 승인 범위를 다음 PC에서 준비한다. fixture 재실행/DB 재설치/새Google 가입/운영 활성은 필요 없다. 미결 typed 공개·새 익명 인수는 W18 VERIFY로 남긴다.
+
+[2026-10-13 종료 결속] 이전 phone-test a6b6ddaaadf9487f5f8f3b14064cb794b27826c0의 connected Git 재빌드 dpl_4Lo29TXsMMjSkYdCsnDyq1imJpqN READY/Preview/exactSHA/canonical alias 확인. Git force-ref 복귀가 자동배포를 만들지 않아 별도 Git-source API로 복구했다. 최초 target=preview API400는 배포 생성0, 공식 API의 target 생략=Preview로 정정 후 생성. DB5필드 전체baseline 일치·새 타입false, frontend flag0·기존 정책 복귀. 새 Preview3override 제거는 action-time 삭제 확인 미응답으로 남아 완전 env 원복 PASS로 올리지 않는다. Chrome 연결 끊김으로 원복 후 live 화면 검사는 미실행; Vercel metadata Ready/source/alias만 PASS. 사용자의 승인 필요시 인계·종료 지시에 따라 남은 정확한 조건을 기록하고 정상 종료한다.
+
+### W18 재개 — 선택 해제 수정의 실제 공개 재검증 준비 (2026-10-13)
+
+기존17항 W18 hosted 연결 ExecPlan을 계속한다. 이번 재개는 종료 요청을 대체하며 PC를 다시 종료하지 않는다. 원격 master b0541ff/phone-test a6b6dda/인계40a3dac 일치를 재조회했다. 현재 공개 동의/배포 대상은 그대로이며 새 기능·DB 구조·인증 작업을 늘리지 않는다.
+
+- 사용자 결과: 기존 선택 중 unavailable 보드를 명시 해제하고 같은 제목 선반으로 새 preview에 도달한다. 원본 삭제/권리 거부 완화/자동 동의는 하지 않는다.
+- 준비: 현재 앱은40a3dac이며 승인8446753 대비 runtime 차이는 MemoryMinihome.jsx 선택 해제 버튼1개뿐이다. 기존 Chromium3만 재검증하고 실패/해제 후 화면 증거를 추가한다. 기존 통과 SQL·전체 출시 검사 반복0.
+- 실제 후보: 기존 config.sql 5필드 임시 연결, 기존 fixture/89KB 표지 재사용, Preview4값/phone-test Git source 변경 후 본인 공개 동의→익명 표지/링크→철회→원복. fixture.sql 재실행/새 이미지 업로드/새 계정/migration 구조/운영 변경0.
+- 원복: 이전 승인에서 남은 Preview3override 제거는 브라우저의 영구 삭제 확인 직전 별도 응답이 필요하다. 제거 뒤에도 재검증에서는 같은 테스트 public URL/key만 재사용하며 최종 제거/정책/DB baseline/이전 Git 재빌드까지 결속한다. 모든 public flag와 정책 변경은 정확한 새 후보 승인 이후에만 실행한다.
+- 외부 연결: 이번 세션에 Supabase/Vercel 전용 connector가 노출되지 않아 Chrome 관리 화면을 사용한다. Vercel 기존 로그인과3override 존재를 읽기전용 확인. 도구가 없다는 이유로 기존 키를 재발급하거나 브라우저 인증정보를 추출하지 않는다.
+- 진행/보고: 새 승인 전에는 로컬 증거·정확한 재시도 manifest와 기존03만 갱신한다. 실제 hosted PASS는 원격 실행 뒤에만 추가한다. 다음1개는 이 후보의 테스트 적용·원복 승인이다.
+
+#### W18 선택 해제 수정의 실제 공개 인수 — 이번 실행 8항 보고 (2026-10-13)
+
+#### W18 확인창 분리 진단·운영 후보 결속 (2026-10-13 후속)
+
+- 기존 W18 17항 계획을 이어간다. 목적은 네이티브 confirm 중단이 제품 경로에서도 재현되는지 좁혀 확인하고 운영 변경 목록을 고정하는 것이다.
+- 현재 근거: `MemoryMinihome.jsx`의 confirm 후 `controller.revoke()` 호출, controller의 최신 revision 재조회, 기존 publication-ui의 미니홈 철회 테스트. 원격 도구는 confirm 이벤트를 감지했지만 focus 명령에서 timeout이 발생했다. 이것만으로 제품 버그 또는 정상 제품이라고 단정하지 않는다.
+- 범위: 기존 미니홈 왕복 테스트1개, TITLE_SHELF 선택을 가진 기존 계정의 실제 Chromium native confirm 취소/승인 및 RPC 실패 경계. 합성 RPC만 사용하며 실제 사용자 게시·DB·설정·Git 배포 변경0. `window.confirm` 대체0.
+- 실행: 테스트를 추가하기 전에 기존 중복 검사를 확인한다. 동일 UI로 취소 시 RPC0·승인 시 현재 revision·성공 표시·익명 비노출을 확인하고, 오류 시 성공 표시가 나오지 않는지 검사한다. 실패가 제품에서 재현되는 경우에만 앱을 최소 수정한다.
+- 후보: origin/master와 현재 소스 차이, 필요한 migration/hash·공개 설정·rollback 및 잔여 hosted 조건을 기존 evidence/작업판에 결속한다. 이번 로컬 결과를 실제 hosted 철회 PASS로 바꾸지 않는다. 새로운 원격 적용은 exact 후보 승인 전 실행하지 않는다.
+- 롤백: 추가 검사/문서만 되돌릴 수 있으며 저장소 사용자 변경은 보존한다. 기존 원격 원복 상태를 반복 변경하지 않는다.
+
+#### 이전 실행 8항 상세
+
+원복 보완(같은 승인 범위): Chrome 확인창 accept가 두 탭에서 멈추고 사용자에게도 확인창이 보이지 않아 UI 철회는 미검증으로 남긴다. 승인된 test 공개홈 `4006eb40-ec5a-47fc-8a5b-ec2b78e60daa`만 기존 `revoke_memory_minihome` 함수로 정리한다. test 카탈로그·정책 baseline·공개 닉네임·TITLE_SHELF 단일 항목을 검사하고 해당 소유자의 transaction-local auth context에서 현재 revision으로 호출한다. 직접 DELETE/새 권한·구조 변경은 없다. 원본/카탈로그/독립 공개보드 fingerprint 보존을 같은 transaction에서 검사하고 익명 null을 별도 조회한다. 이는 서버 정리 결과이며 브라우저 철회 PASS로 합산하지 않는다.
+
+1. **읽은 문서·저장소 근거:** 기존 AGENTS/START/확정01/PLANS와 release-v2 00/01/02/03, Collection/Home 첨부 계약·제품/카탈로그/이미지/QA/변경 기준을 이어 따른다. 명시 선택 해제는 `src/features/memory/components/MemoryMinihome.jsx:95–101`, 새 preview/동의 초기화는 같은 파일28–35·57–68, 서버 준비/게시 경계는 `src/features/memory/application/createMinihomeController.js:52–72`, typed 방문자 renderer는 `src/features/memory/components/MinihomeSnapshot.jsx:11–27`이다. 원격 연결 근거는 `evidence/2026-10-13-collection-home/retry-execution.json`, 익명 DTO 검사는 `retry-anonymous-dto.json`이다. verify-before-claiming에 따라 배포 metadata·실제 브라우저·로컬 모의 결과를 분리한다.
+2. **승인·가정·미결:** 사용자 재개 지시는 이전 종료 요청을 대체한다. 먼저 이전8446753의 남은 Preview3override 제거를 별도 명시 승인받아 각 키 제거/검색0을 확인했다. 이후40a3dace984a7ed7920ee46e626ab06aa2d042c9의 test 연결·검증·원복을 별도 exact 승인받았다. 실제 공개 동의는 당사자가 직접 했고 에이전트는 대신 수락하지 않았다. 이번 임시 설정/env/Git 배포 원복은 완료했다. 브라우저 확인창은 두 탭에서 자동 조작이 멈췄고 사용자도 확인창이 없다고 답했다. 같은 승인 범위의 해당 test 홈1개를 기존 서버 revoke 함수로 정리했으며 UI 철회 PASS로 판정하지 않는다.
+3. **계획·범위:** 위 W18 17항 hosted 연결 ExecPlan의 실패 최소 수정 재검증을 계속한다. W18/관련W06·W09·W11·W19와 단일03을 유지한다. 기존 선반·승인 표지·현재 가입확인을 재사용하며 새 fixture/사진 업로드/계정/인증/기능/권리·국가 범위/유료 계약을 추가하지 않는다.
+4. **변경과 이유:** runtime은 검증된40a3dac을 그대로 재사용했고 이번 앱·DB 구조·의존성 변경0이다. 이전 실패에서 추가한 선택 해제 버튼이 실제 저장된 unavailable 보드 참조만 제거하여 새 TITLE_SHELF preview에 도달하는지 확인했다. 이번 문서00/01/02/03과 기존 evidence에 승인 범위·실제 배포/게시/익명/복원·원복 상태를 추가한다. 기존 실패·과거 PASS를 지우거나 새 PASS로 재계산하지 않는다.
+5. **DB·데이터·배포·롤백:** 이전 원복은 a6b6ddaaadf9487f5f8f3b14064cb794b27826c0의 Git 재빌드 `dpl_2q7Cv7o75fEUdYW8mzoETBiCTXPv` READY/Preview/exactSHA/canonical alias까지 확인했다. 이번은 버전관리 `tools/operations/collection-home-test/config.sql:18–37`과 `render-sql.mjs:7–19`를 사용해 test 기존 설정5필드와 Preview4값만 임시 적용했다. 지속 schema·migration 이력·fixture 신규행·이미지 업로드0, 기존 선반1/catalog/가입확인4건 유지. Git Preview `dpl_F29WgmHX8ahugV96qHyhyRijqMma` READY·40a3dac·branch/alias 일치. DB5값 전체 baseline 독립 재조회·기존 Preview정책 복귀·사용자 실행직전 승인 후 새3override 제거/각검색0을 확인했다. test 홈1개는 버전관리 withdraw-retry-home.sql로 기존 revoke 함수를 호출해 비공개 처리했다. transaction-local 소유자 context·exact홈/표본/정책 guards·원본 title entities/카탈로그 assets/독립 publications fingerprint 보존을 검사했다. phone-test exact force-with-lease 복구→기존a6b6dda Git 재빌드 dpl_D6ZsGTaTadxSDCSRVATrQktQWHWa READY/Preview/exactSHA/canonical alias를 확인해 원복을 마감했다. 운영/master b0541ff/운영DB 변경0.
+6. **실제 명령·결과:** `node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts`: 기존 Chromium3 PASS 재검증(신규고유0, 모의RPC/합성 표지). `tests/collection-home.spec.ts:8–44`의 해제 회귀와104행 이후 typed 공개 모의 계약을 실제 hosted 결과와 구분한다. 기존 build33은 과거 결과이며 이번 재실행0. 실제 Chrome에서 기존 A의 unavailable 보드 선택 해제→선반 preview·승인 JPEG460×667 decode→사용자 직접 체크·미니홈 게시 PASS. 새 익명 origin에서 미니홈·동일 표지 decode·작품 Hub 링크/실제 캐릭터 정보·Memory0/Watch0 연결 PASS. A 새로고침 후 현재 선반 선택 복원·다시 preview 시 동의 unchecked PASS. 사용자 세션 없는 public client 호출 `read_memory_minihome` HTTP200, 최상위 `id,bio,entries,nickname,schemaVersion`과 privateFields0을 확인했다. 새 스크린샷은 retry-hosted-preview.jpg/retry-anonymous-home.jpg/retry-deployment.jpg, DTO 원문은 보관하지 않고 key/hash만 기록한다. 브라우저 철회 확인 조작은 focus timeout으로 미완료다. 서버 정리 후 별도 익명 RPC HTTP200/null 및 실제 화면 unavailable/img0을 확인했다. retry-revoked-server.jpg/retry-anonymous-withdrawn.jpg/retry-db-restored.jpg/retry-env-restored.jpg/retry-restored-deployment.jpg에 근거를 남겼다. git diff --check PASS. 이 결과는 서버 철회/익명 비노출 PASS이며 UI 확인창 완주 PASS가 아니다.
+7. **보안·개인정보·권리·관측:** 실제 인수는 기존 승인 catalog 표지·테스트 선반으로 제한했다. 개인 사진/감상/DOB/토큰/서버키·OAuth 비밀 기록0, raw DTO/private 자료 문서0. 공개 응답에는 원본 source/개인태그/감상/시청정보가 없음을 현재 응답에서 확인했다. 승인 public URL/클라이언트키만 test Preview에 재사용했고 새 Google 권한·키 재발급0. 표지 bytes의 추가 저장 복제0·현재 익명 열람은 실제 네트워크 읽기이며 무비용 보장으로 표현하지 않는다. 이전 일반 공개 고지/권리·정책/hash/신고·철회 경계를 완화하지 않는다.
+8. **남은 위험·다음 행동 하나:** 새 TITLE_SHELF의 실제 게시·익명 전달·기존 계정 복원 인수는 이번 test에서 PASS다. 전체 W18/출시 완료와 운영 PASS는 아직 아니다. 승인된 테스트 연결·게시·익명 인수와 설정/배포 원복은 마감했다. 다음1개는 W18 브라우저 철회 확인창 미검증을 도구 문제/서비스 문제로 구분해 닫고 기존 운영 후보 조건에 결속하는 것이다. 이번 hosted source변경/stale-preview 경우는 미실행이며 과거 로컬 SQL25의 결과와 분리한다. B 팔로우/차단/신고 등 과거 엔진의 기존 PASS를 이번 새 기능의 새 A/B 완주로 합산하지 않으며 전체 SQL/기초 Google/실기기 재검사를 추가하지 않는다. 운영 반영은 후속 정확 후보별 승인 경계로 남긴다.
+
+
+#### W18 확인창 진단·후보 결속 결과 — 이번 실행 8항 보고
+
+1. **읽은 문서·코드:** AGENTS, CODEX_START_HERE, 확정01, PLANS, 이미지05·QA07·변경09, release-v2 00/01/02/03 및 Collection/Home 실행 계약을 대조했다. 실제 확인창은 MemoryMinihome.jsx:66의 confirm→controller.revoke, 최신 revision/오류 처리는 createMinihomeController.js, 서버 연결은 SupabasePublicationGateway.js를 따른다. 기존 publication-ui.spec.ts:448의 미니홈 왕복을 재사용했다.
+2. **가정·미결:** 이번 “ㄱ”는 로컬 진단·후보 준비에 사용했다. 실제 hosted UI 철회 성공으로 간주하지 않았다. 운영 DB/flag 최신 값은 미조회이며 과거 Public off 기록으로 현재를 추정하지 않는다.
+3. **계획:** 위 W18 분리 진단 계획과 단일03 현재 카드. 원래 W18/관련 W06·W09·W11·W19를 유지하며 신규 기능/작업판0.
+4. **변경:** tests/collection-home.spec.ts에 native confirm 취소·오류·성공을 연속 검증하는 테스트1개 추가. 앱 런타임 변경0. 기존00/01/02/03 및 evidence의 진단 JSON·화면·production-candidate.json 갱신. 운영 기준 b0541ff 대비 소스40a3dac의 앱21파일+SQL1개 해시를 고정했고 현재 src/SQL과 동일함을 확인했다.
+5. **DB·롤백:** 이번 DB 적용0. 후보 SQL20261012160330의 SHA256은 8b9f896620d857b6fd705b3dc058abfd1e970cd7f4f6adbb570977b7ec829b68. 새 server/client flag만 정확한 승인 후 활성 대상이며 기존 가입/정책/한도/catalog 연결은 보존한다. 롤백은 새 flag 비활성+Git 재배포이며 layoutVersion/선택/구버전 writer 보호는 유지한다. 구버전 화면에서 v2 저장이 거절될 수 있으므로 데이터 다운그레이드 없이 roll-forward를 우선한다.
+6. **검증:** node scripts/run-collection-home-e2e.mjs tests/collection-home.spec.ts tests/publication-ui.spec.ts --grep "typed home native confirmation|mini-home explicit representative" → exit0, 2 PASS/8.6초(신규1·기존1). window.confirm 대체0, 취소 RPC0, 충돌 시 거짓 성공0, revision8/9 재조회, 성공 후 익명 비노출 PASS. 로컬 합성 RPC 결과이며 hosted PASS가 아니다. git fetch 후 origin/master 및 운영 build-info의 commit/checkoutCommit b0541ff·source vercel-git 확인; semanticMatch 값은 없어 확인하지 못했다. 새 build/광범위 suite 재실행0.
+7. **보안·개인정보·관측:** 합성 자료만 테스트하고 외부 요청 차단. 원본/개인정보/인증값/정책/요금/운영 변경0. 증거는 공개 소스 해시·합성 화면이며 비밀값/응답 원문을 저장하지 않는다. 기존 원복 완료 상태를 다시 변경하지 않았다.
+8. **남은 조건·다음1개:** 서비스 확인창 버그는 재현되지 않았고 이전 CUA focus timeout은 도구 실패 근거다. 실제 hosted UI 철회 미검증은 기록으로 유지하되 같은 확인창 검사를 반복하지 않는다. 다음은 소스40a3dac의 hosted source-version 변경/stale-preview 경계 검사만 준비한다. 기존 테스트 자료·동의는 재사용 가능한 범위만 사용하며 새 동의를 대신 수락하지 않는다. 운영 후보는 PREPARED_NOT_AUTHORIZED_FOR_PRODUCTION: 실제 운영 schema/flag/catalog baseline 및 정확 migration·Public flag·master 배포 승인 전에 실행하지 않는다. 과거 국가·비용·가입 결정을 다시 묻지 않는다.
+
+#### W18 source-version 경계 검사 준비 — 2026-10-13
+
+기존17항 ExecPlan의 한 경계만 이어간다. 재배포/새 게시 대신 테스트 DB의 rollback-only 트랜잭션으로 실제 함수의 거부 경로를 검사한다. 기존 검증용 home ID·선반 ID·카탈로그 release·비공개 상태·설정 baseline을 검사한 뒤, 트랜잭션 안에서 collection_home_enabled 한 필드만 켜고 현재 승인 표지로 preview를 준비한다. 동일 검증 선반의 version만 증가시킨 뒤 공개 RPC가 정확히 PREVIEW_CHANGED를 반환하는지, 방문자 projection builder가 오래된 선반을 제외하는지 확인한다. 성공 게시·동의 기록 생성은 허용하지 않으며 예상 외 성공은 예외로 전체 취소한다. 내부 subtransaction 강제 rollback과 마지막 ROLLBACK을 모두 사용하고, 변경 가능 테이블의 전후 fingerprint를 대조한다.
+
+새 SQL·격리 리허설만 로컬에서 작성한다. 앱40a3dac·운영 후보는 그대로이며 schema/배포/Storage/회원/정책 revision/한도 변경0. hosted 실행은 정확 후보 승인 후에만 한다. 검증 결과는 DB 거부 경로로 표시하고 브라우저/Google/새 게시 PASS로 확대하지 않는다. 단일03에 후보·리허설·승인 대기를 기록한다.
+
+
+#### W18 stale-preview rollback 검사 후보 — 이번 실행 8항 보고 (2026-10-13)
+
+1. 읽은 문서/근거: AGENTS·START·확정01·PLANS·이미지05·QA07·변경09·release-v2 W18 계획/계약/작업판. 실제 거부 경계는 20260923183940_memory_minihomes.sql:90–111, 후처리 wrapper는 20260927042334_memory_general_postmoderation.sql:44–66, typed source 대조는 20261012160330_collection_home_sections.sql:117–130이다.
+2. 가정/미결: hosted 변경의 정확후보 승인은 아직 없다. “ㄱ”에 따라 실행 가능한 최소 후보를 로컬에서 완성했다. DB 함수 검사는 실제 웹/Google/새 게시 검증과 구분한다.
+3. 계획: 바로 위 W18 source-version 경계 준비 절. 앱 소스40a3dac/운영 후보를 유지하고 기존 W18의 남은 경계만 진행한다.
+4. 변경: tools/operations/collection-home-test/stale-preview-probe.sql과 test_stale_probe.py. DB1회 rollback-only 후보이며 기존 검증 home/shelf/catalog를 재사용한다. 재배포·새 계정·새 이미지·게시 동의를 요구하는 UI 왕복을 반복하지 않는다. manifest/evidence 및 기존00/01/02/03 갱신.
+5. DB/복귀: schema 변경0. 테스트 DB에서만 트랜잭션 내부 collection_home_enabled=true와 검증 선반 version+1·임시 preview를 사용한다. 다른 세션에는 커밋하지 않는다. 성공 게시/수락을 만드는 호출이 아니라 PREVIEW_CHANGED가 필수인 거부 검사이며 예상 외 성공 시 예외로 전부 취소한다. 내부 강제 subtransaction rollback과 외부 ROLLBACK, settings/home/source 전후 fingerprint를 모두 사용한다.
+6. 검증: wsl.exe -u postgres -- python3 /mnt/e/web/anime/tools/operations/collection-home-test/test_stale_probe.py → 5 PASS, exit0, 전체 public/private 일반 테이블57개 fingerprint 동일. 실제 함수 거부·외부 COMMIT 오용에도 내부 원복·잘못된 catalog·변경된 선반 거부·예상 밖 성공 시 실패/원복 확인. 최초 리허설은4개 통과 후 local fault-injection 함수의 인자명 누락으로 중단; 기존 인자명을 유지하도록 runner만 수정해5개 통과. 서비스 코드 수정0, hosted 실행0.
+7. 보안/권리/관측: 기존 test 자료만 사용하며 개인 본문/키/preview hash 출력0. 결과는 고정 PASS/실패 코드와 해시로 제한한다. 정책 revision/가입 guard/권한/한도/Storage/운영 변경0. negative publish가 성공하면 검사를 실패시키며 동의/게시 상태는 커밋하지 않는다.
+8. 다음 행동 하나: 후보 SQL SHA256 c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e의 moemoa-test 1회 실행 승인을 받은 뒤 실제 연결 대상과 baseline을 독립 확인하고 실행·원복을 판정한다. 추가 browser/Preview 설정 변경은 없다. 운영 후보의 해당 조건만 업데이트하고 hosted UI PASS로 확대하지 않는다.
+
+
+#### W18 stale-preview 실제 테스트 DB 실행·원복 결과 (2026-10-13)
+
+1. **근거:** 위 후보 준비에서 읽은 문서/SQL을 그대로 사용했다. 실행 원본은 b617817의 stale-preview-probe.sql, SHA256 c10b5851726f1fed2b991e6a37c7517d0e1ce33871d73bcf551e9a5d2f7c881e. 로컬 접속값 파싱/TLS 대상 검증은 기존 tools/operations/inspect-retention.py:22–48을 재사용했다.
+2. **승인/미결:** 사용자가 후보 b617817의 “테스트 DB 1회 검사·전체 롤백 승인”을 직접 답했다. 이 승인은 운영·배포·새 동의가 아니다. 연결 host/user가 정확한 test ref인지 확인하고 verify-full TLS 및 test catalog/비공개 home을 독립 조회했다.
+3. **계획:** 기존 W18의 source-version 경계 하나를 실행했고 새 작업판을 만들지 않았다.
+4. **변경:** 앱/schema 수정0. 실제 결과는 stale-preview-hosted.json에 비밀값/개인 본문 없이 설정·해시·불리언만 저장하고 기존00/01/02/03, 승인 manifest, 운영 후보 잔여 목록에 연결했다.
+5. **DB/복귀:** 실제 test SQL1회 실행 exit0. 트랜잭션 내부 새flag/preview/선반version은 전부 rollback. 별도 연결로 before/after 설정 전체·home/source/독립보드/catalog fingerprint·builder hash·homePrivate=true 일치. 정책3revision·signup guard=false·collection flag=false 유지. 새 공개·동의/가입 기록·구조·업로드·운영 변경0.
+6. **검증:** stale publish가 정확히 PREVIEW_CHANGED로 실패하고 non-strict visitor builder의 entries가0인 실제 서버 경계 PASS. 로컬5/57테이블 리허설은 앞선 별도 증거다. 사전 읽기 집계 SQL 괄호 누락으로3회 조회가 실패했지만 probe 실행 전이었고, 조회문 수정 후 승인 SQL은1회만 실행했다. 브라우저/Google/실기기/HTTP 이미지 결과로 확대하지 않는다.
+7. **보안/관측:** psql 비밀번호는 로컬 환경으로만 전달하고 출력/문서에 포함하지 않았다. 응답에는 본문/preview hash 없이 metadata와 fingerprint만 남겼다. 키·이미지·동의 추가전송0. SQL negative 호출은 성공을 허용하지 않으며 외부 세션에 공개된 데이터가 없다.
+8. **잔여/다음1개:** W18의 hosted stale-source DB 경계는 마감했다. 기존 테스트 설정/배포를 다시 켜지 않는다. 다음은 동일 앱40a3dac 운영 후보의 실제 운영 schema/flag/catalog 기준을 읽기전용으로 대조해 정확한 적용·rollback 조건을 확정하는 것이다. 운영 migration/newflag/master Git 배포는 별도 정확 승인 전 실행하지 않는다. 이전 CUA 기반 hosted UI 철회 미검증은 기록으로 유지하며 동일 확인창 검사를 반복하지 않는다.
+
+#### W18 운영 기준 읽기전용 대조 — 2026-10-13
+
+기존17항 계획의 운영 후보 결속을 이어간다. TLS 검증된 운영 연결에서 read-only 트랜잭션으로 migration 목록·필수 함수·공개 설정·카탈로그 release/표지 준비 집계·layout 버전 집계만 조회한다. 비공개 본문/키/이미지 다운로드는 하지 않는다. Git 원격과 실제 build-info의 SHA를 대조하고, Vercel의 production 설정은 가능하면 키/비밀값 아닌 flag 상태만 확인한다. 확인되지 않은 설정을 로컬 env 파일로 대신 확정하지 않는다. 결과를 기존 production-candidate.json에 결속하며 차이가 있으면 필요한 변경만 추린다. 코드/DB/원격 설정 변경 없이 정확한 적용/복구 후보를 완성한다.
+
+
+#### W18 승인된 운영 적용 실행 (2026-10-13)
+
+- 사용자 exact 승인: 후보 1fef030(앱40a3dac)의 운영 적용 승인. 21개 앱 파일·migration20261012160330 하나·새 설정2개에 한정한다. 기존 정책/가입/한도/기록과 원본은 보존한다.
+- 실행 순서: baseline/source hash 재확인 → DB migration transaction/default off 및 보존 검사 → Production UI flag1 → origin/master 기반 검토 patch Git 배포 → CI/Vercel READY/www SHA 확인 → 서버 collection_home_enabled만 true → 읽기 검증.
+- data release: PROD_COLLECTION_HOME_20261013_40a3dac. 개발 브랜치 전체를 합치지 않는다. 새 동의·게시·업로드 없이 완료한다.
+- 실패 시: 새 서버 flag off 유지/복귀, UI flag0 및 Git 복구. 추가 schema/writer 보호·사용자 선택 데이터는 삭제하지 않는다. 단계별 실제 결과와 중단 위치를 기존 작업판에 기록한다.
+- 실행 후 발견: 운영 patch에 runtime만 옮기면서 이미 승인 소스에 있던 channelService 오류계약 수정/컬렉션 검사를 누락했다. bfa1356 CI38367369356 unit FAIL→서버 활성0 유지, UIflag0 및 f6dba06 Git복구. 추가 schema는 유지한다. 다음 로컬 수리는 테스트 패키지 복원 및 공유 편집기가 열린 상태에서 숨겨진 원본 목록을 찾는 옛 회귀의 실제 닫기 동선 반영에 한정한다. runtime 변경 없이 실패→수정 검증 후 별도 정확 재적용 후보를 만든다.
+
+#### W18 운영 실패 원복·검사 패키지 보완 — 실행 8항 보고 (2026-10-13)
+
+1. **읽은 문서/파일:** AGENTS, CODEX_START_HERE, 확정01, PLANS, release-v2 00/01/02/03, image05·QA07·변경09, 기존 collection 계약·runtime 및 migration20261012160330, quality.yml·channelService/collectionHome/publication-ui tests, 기존 운영 기준/후보를 대조했다.
+2. **가정/미결:** 사용자 승인1fef030 이후 검사 누락을 발견했고 새5d544ad의 별도 재적용 승인을 받았다. 운영 신규 게시/본인 동의는 이번에 수행하지 않는다. published legacyhome0과 hosted 확인창 UI 미검증을 실제 인수 PASS로 세지 않는다.
+3. **계획:** 이 문서 W18 및 단일03의 현재 카드. 새 후보는 원격CI 선행→동일SHA master Git→Vercel/www→두 설정 확인 순서다.
+4. **변경:** 앱40a3dac의21파일은 그대로다. 테스트/CI6파일을 운영 후보에 함께 포함했다. channelService 오류 반환 계약, 공유 패널 닫기 후 원본카드 접근, native confirm 승인/취소, 컬렉션 전용 CI 실행을 보완했다. 기존00/01/02/03과 evidence만 결과·실패·원복 근거를 갱신한다.
+5. **DB/복귀:** 최초 승인에서20261012160330을 transaction으로 적용하고57테이블 보존·owner/helper 권한을 확인했다. releaseID PROD_COLLECTION_HOME_20261013_40a3dac. 재적용은 migration 재실행0. 실패 시 flag false/0·Git 앱 복귀, additive schema/writer guard·사용자 데이터 보존.
+6. **검사:** build33 PASS, 정확 runtime 격리 unit623 PASS, 공개 Chromium54 PASS, 컬렉션4 PASS. 이전622/623 실행의 임시 포트 오류와49/54 공유패널 테스트 실패, source 교체로 무효화된 실행은 성공에 합산하지 않는다. Git diff --check PASS. CI38369813151은 exact SHA5d544ad의 원격 수동 실행이며 결과는 evidence에 기록한다. 브라우저 모의API 검사와 기존 실제 hosted Google/게시 근거를 구분한다.
+7. **보안/개인정보/권리/관측:** 가입/정책/권리/한도/요금/인증키 변경0, 새 사진·공개 게시0. 비밀은 기존 로컬 연결로만 사용하고 Git/ordinary logs에 노출하지 않았다. 운영 row 원문 대신 해시·집계와 공개 배포정보만 증거에 보관한다. GitHub 실패 이력은 지우지 않는다.
+8. **잔여/다음 승인:** 현재 후보5d544ad는 명시 승인 범위이므로 같은 배포를 재질문하지 않는다. CI 실패·source drift·정책 변경이 발생하면 활성화를 중단하고 정확한 수정 범위만 처리한다. 최종 운영 결과 및 다음 행동 하나는 기존03 현재 카드에 반영한다.
+
+**최종 실제 결과:** CI38369813151 publication-contract/verify 모두SUCCESS, exact5d544ad master push 및 Vercel dpl_9HTFhbbh9m5hFUpMjSpdFNcbjBLg READY/www build-info commit·checkoutCommit·vercel-git/semanticMatch 일치. Production UI값은 저장 후1을 readback하고 배포했으며 DB는 배포 확인 후collection_home_enabled만true로 변경했다. 독립조회에서 기존 settings 동일·migration42 유지. 실제 로그인 운영계정에서 컬렉션→공개설정→작품선반 선택지와 승인표지460×652 decode 확인, 동의/게시/사용자자료변경0. 화면의 다른 비공개 이미지 일부 로딩실패는 관찰로 남기며 이번 공개 표지 인수와 구분한다. 증거: production-retry-ci/build-info/activation 및 production-retry-candidate.json, production-retry-deployment.jpg. 이번 운영 연결만 완료이며 전체 출시잔여는 단일03에서 계속 관리한다.
+
+#### W18 운영 기준 대조·정확 적용 범위 확정 — 이전 실행 8항 보고 (2026-10-13)
+
+> 후속 재적용 승인: 사용자가 `5d544ad`를 명시 승인했다. 같은 앱40a3dac에 기존 테스트·CI6파일을 포함하며 DB 재실행은 없다. codex/collection-home-prod-retry의 exact SHA5d544ad2ca83e847df623b2abfe7bbcaf2158801을 먼저 push하고 기존 Service quality 수동 실행38369813151의 성공을 기다린다. 실패하면 운영f6dba06/새 flag0·false를 유지한다. 성공한 동일 SHA만 master로 fast-forward하고 Vercel Git READY/www 소스를 확인한 다음 서버 flag를 켠다. 상세 결과는 production-retry-candidate.json에 결속한다. 아래 읽기전용 대조 보고는 승인 전 이력이다.
+
+1. **문서/근거:** 기존 AGENTS·START·확정01·release-v2 계획/계약/현재 카드와 production-candidate.json을 대조했다. 연결은 inspect-retention.py:22–48의 production ref allowlist/TLS verify-full을 재사용했다. 화면 의존성은 platformPublication.js:8–10,35,47–54, migration은20261012160330 원본을 따른다.
+2. **가정/미결:** 이번 “ㄱ”는 운영 read-only 대조이며 migration/flag/master 배포 승인이 아니다. 기존 hosted native-confirm UI 미검증은 제한으로 유지한다. 이번 국가/권리/비용 결정을 다시 열지 않는다.
+3. **계획:** 위 W18 운영 기준 읽기전용 대조와 단일03. 과거의 Public off 기록을 현재 상태로 재사용하지 않는다.
+4. **변경:** 앱/SQL 소스 변경0. production-baseline.json과 production-candidate.json, 기존00/01/02/03에 실제 운영 기준·정확 적용/복귀 범위를 기록했다.
+5. **DB/복귀:** 운영 migration41개이며 로컬과 비교해 누락된 것은20261012160330 한 개뿐이다. 새 collection column/RPC와 rename 대상의 새 이름은 없고 기존 함수는 존재한다. 현재 선반row1개는 layoutVersion 미기입. 운영 Public read/write/image/minihome/follow/report=true, signup guard=true, 정책3종 모두 MOEMOA_PUBLIC_GENERAL_20261011_01. 활성 catalog4292개와 승인 cover4292개 확인. 실제 쓰기0. 후속 승인이 나면 migration 기본off→화면 Git 배포→새 server flag만 활성. 복귀는 새 server flag=false 및 client flag=0 + Git 재배포, 추가 schema/layout/writer 보호는 보존한다.
+6. **검증:** production read-only SQL exit0/transaction_read_only=on, 비공개 본문 없이 schema/설정/집계만 조회. git fetch 후 origin/master 및 www build-info commit/checkoutCommit 모두 b0541ff·source vercel-git 일치. master는40a3dac의 조상이며 후보 src/SQL22파일 동일. Vercel 실제 Project+Shared의 새 PUBLIC_MEMORY_COLLECTION_HOME_V1 검색0; Production publication/minihome=1, 고지revision DB와 일치, PUBLIC_SUPABASE_URL은 운영ref 일치. 비밀키 reveal0. 이번 신규 테스트/build0, 이전 로컬/hosted 증거를 그대로 사용한다.
+7. **보안/개인정보/권리/관측:** private 본문/이미지/토큰 조회·출력0. 보관 값은 운영 flag/고지/카탈로그 집계·function hash·migration 이력이다. 기존 test원복/운영설정/권한/가입/한도/요금 변경0. 표지 재업로드나 테스트 카탈로그 연결 복사가 필요하지 않다.
+8. **정확 적용 후보/다음1개:** 앱40a3dac의 기존 운영 대비21파일+원본migration1개, 서버 collection_home_enabled=true와 Vercel Production PUBLIC_MEMORY_COLLECTION_HOME_V1=1만 추가하는 후보. 이 후보를 검토한 Git commit으로 master에 반영하고 연결 Vercel Git 배포의 source SHA/www를 확인한다. 새 동의·자동 게시·기존기록 삭제 없이 개인 컬렉션/공개 선택 연결을 적용한다. 배포 전 baseline drift 또는 필수 검증 실패 시 쓰기를 중지한다. 다음은 이 명시된 운영 범위의 승인이다. 전체 개발 브랜치 병합이나 다른 tools/workflow 변경을 포함하지 않는다.
+
+## W18 문서와 실제 화면 대조 후속 ExecPlan — 2026-10-14
+
+### 1. 목적과 사용자 결과
+사용자 “문서랑 실제 화면 차이부터 검수하고, 빠진 부분이나 개선할 부분 있으면 이어서 작업 진행”에 따라10/13 첨부 명세를 현재6e2a412의 실제 컴포넌트/화면과 대조하고 확인된 누락을 수정한다.
+### 2. 관련 확정 결정
+COLLECTION-HOME-REALIGNMENT-20261013과 현재 사용자 지시. 컬렉션=미니홈, 두 종류 묶음, 제목·승인 표지의 공개, 기존 개인 기억 팬·원본/게시 분리·homeId·정책 보존.
+### 3. 현재 상태와 저장소 증거
+현재6e2a412/운영5d544ad의 앱은 동일. typed 공개 계약과 기존 링크/선택 복원은 이미 구현돼 있다. BookshelfView는 query의 group만 초기화하고 shelf는all로 초기화한다. Following/Safety가 changePanel의 dirty/busy 검사를 우회한다. old Shelves 선택과 typed groups가 중복이며 Board 모드에도 작품 검색·개수·뷰가 남는다. 화면 합성 재현 후 검수 결과를 reports/2026-10-14-collection-document-screen-audit.md에 기록한다.
+### 4. 범위
+포함: 문서/화면 대조, 묶음 진입·추가·보기 문맥, 미저장/작업 보호, 공개 선택 배치·초안, 방문자 문맥·시각/키보드·회귀. 제외: 운영 배포/DB·권한·설정·실게시·원본 업로드·국가·Android·전체 정적 경고 정리.
+### 5. 아키텍처와 데이터 흐름
+기존 owner source/참조 layout와 public DTO를 각각 유지한다. 기존 컨트롤러의 version/hash/권리/동의/철회 경계는 변경하지 않는다. 시각 컴포넌트만 공통화하며 public에서 private loader를 호출하지 않는다.
+### 6. 변경 파일 지도
+BookshelfView/CollectionGroups/CollectionProfile/BookshelfEditor, typed tabs/collection-home.css, 필요한 MinihomeEditor/PublicationEditor/PublicMinihome/MinihomeSnapshot, 해당 합성 UI 검사와 기존 보고·진행판. 발견되지 않은 계약은 고치지 않는다.
+### 7. 데이터와 스키마 마이그레이션
+없음. shelfId/boardId/cardId/homeId·membership·개인 저장·백업/동기화 형식 보존. 원격migration/Storage/API 정책 변경0.
+### 8. 마일스톤
+A: 요구사항 표/합성 대표 화면과 실패 재현. B: 확인된 소유자/설정/방문자 차이 수정. C: 같은 합성 자료·폭1440/390/320으로 전후 촬영, 영향 계약 검사/build/품질 확인. D: 검증된 변경을 현재 작업 폴더에 반영하고 인계.
+### 9. 테스트와 검증
+기존 collection-home/bookshelf-editor/publication/minihome/owner/editing 검사와 신규 재현. Query 복귀·선반 신규/취소·두 종류·메뉴 전환 dirty/busy·지연 hydration·필수 동의·잘못된/기존 URL, PC/mobile/키보드/넘침. unit/build와 React Doctor 전후/변경 진단. 동일 실행의 반복을 합산하지 않는다.
+### 10. 보안 개인정보 권리 영향
+합성 자료/별도 브라우저만 저장·게시 mock. 실계정 게시·신고·동의·삭제·사진 입력0. 공개 DTO에 private 기록/묶음 총량 추가0. 새 키·dependency·권한 없음.
+### 11. 관찰 가능성 분석
+추가 analytics 없음. 소스 SHA·합성 시나리오 결과·UI 측정만 기록한다. 개인 본문/이미지·로그인·env는 산출물/Git에 넣지 않는다.
+### 12. 롤백 복구
+이번 presentation/flow patch만 revert. 기준6e2a412와 기존 worktree/개인 환경을 보존한다. DB/개인 원본 복원 없음.
+### 13. 위험과 완화
+접기/탭의 미저장 손실, query의 잘못된 자료 표시, 폭/긴 제목/공유 선택의 혼동. 원본 loader 재사용·정확한 전환 guard·실제 시나리오 재현과 합성 회귀로 확인한다. dev4363과 검증은 별도 checkout/cache를 사용한다.
+### 14. 필요한 사용자 결정
+현재 검수/로컬 보완은 승인됐다. 이미 승인된 관계/동의를 재요청하지 않는다. 새 운영 후보 배포·원격 적용은 이 지시의 실행 범위에 포함하지 않는다.
+### 15. 진행 기록
+기준6e2a412에서 별도 review checkout을 만들고 원본ZIP의 요구사항 및 현재 구현을 읽었다. 이미 구현된 server typed 계약은 중복 작성하지 않는다.
+
+문서와 실제 합성 화면의 차이4개를 수정 전 FAIL로 재현했다. 두 종류 묶음 탐색/추가/순서와 도구, query, dirty/busy, 소개 상태, 옛 경로, 공유 초안/작업 캔버스, 부분 표지 실패·방문자 문맥을 보완했다. 단위626·브라우저 고유83·build33 PASS. 생성물 제외 동일 소스 React Doctor34→34/신규0, 기존 진단은 남는다. 작은 공유 카드의 실제320px 캡처에서 발견한 글자 잘림까지 수정·경계 측정했다. 공유 선택3폭은 같은 합성 fixture의 기준/수정 소스를 각각 다시 촬영했다.
+### 16. 발견 사항과 계획 변경
+소유자 경계는 MemoryRouteShell의 key remount로 이미 보호되고 있어 새 reset 로직을 추가하지 않는다. 기존 selection hydration·homeId 보존도 구현됐다. 새 전체 schema·공개 엔진·백업 체계는 필요 없다.
+### 17. 완료 보고
+검수 요구별 상태·변경/유지 근거·파일/행·실행 결과·합성 화면·실환경 한계를 분리한8항 보고로 마감한다. 현재 W18 작업판과 상위 재개 안내를 갱신한다.
+
+완료 보고: `../reports/2026-10-14-collection-document-screen-audit.md`. 단일03에 로컬 후보와 기존 출시 인수/복구 잔여를 구분했다. 전후9쌍과 추가 합성 장면은 상위 `.tools/collection-review-comparison-20261014/`에 보존하며 개인 환경/키/자료는 포함하지 않는다. 검증된 후보만 주 실행 폴더에 fast-forward하고 상위 THIS_PC_HANDOFF에 실제 commit·4363 실행 대조를 기록한다. 운영/master push·DB/flag 활성·실게시0.
+
+## W18 내부 이동·화면 재구성 안정화 ExecPlan — 2026-10-14
+
+### 1. 목적과 사용자 결과
+사용자가 탭·버튼 이동 때 전체 화면이 새로 만들어져 보이는 구조를 분석·개선하도록 요청했다. Web 내부 이동에서 문서/상단 메뉴를 유지하고, 데이터·편집·계정 경계를 지키면서 필요한 내용만 전환한다.
+### 2. 관련 확정 결정
+NO-HERO, 기존 Astro/React·Web/Android 모델, 원본/owner/private/public 및 공유 동의 계약 유지. 이 요청은 로컬 구조 분석·개선이며 운영 배포·권한·자동 업로드 승인이 아니다.
+### 3. 현재 상태와 저장소 증거
+기준7e8bd78. BaseLayout에 ClientRouter가 있으나 주요 메뉴/25파일49행의 data-astro-reload가 내부 이동을 전체 문서 이동으로 만든다. 검색·계정 버튼도 location.assign, 옛 주소는 location.replace를 사용한다. 상단 메뉴가 각 페이지 React root 안에 있고 client:only이므로 root 교체마다 메뉴/계정 확인부터 재마운트된다. 버튼형 TaskSections는 이미 패널을 유지하므로 전체 재작성하지 않는다.
+### 4. 범위
+포함: 내부 이동의 문서/헤더 연속성, 공통 메뉴 분리, 프로그램 이동·동일 주소·이력·테마/언어 재적용, dirty/busy 링크·프로그램·뒤로 이동 보호, 실패/지연·편집/계정/공개 회귀, 구조 보고와 실제 측정. 제외: 프레임워크/의존성 교체, private 자료의 전역 캐시, 서버/DB/로그인·권리 변경, 운영 배포, Android 자체 라우터 교체.
+### 5. 아키텍처·데이터 흐름
+기존 Astro ClientRouter를 사용해 HTML을 준비하는 동안 현재 화면을 유지한다. 기존 공통 메뉴는 독립 persisted island로 분리하고 새 경로 props만 갱신한다. page content·owner fence는 유지/재검증하며 개인 페이지를 통째로 영구 유지하지 않는다. Web 프로그램 이동은 공유 intent→dirty/busy guard→Astro navigate, Native는 기존 packaged index 이동이다.
+### 6. 변경 파일 지도
+BaseLayout, 공통 Navigation wrapper/route helper, TopNavDataMenu·PrimaryNavigationLinks·검색, MemoryRouteShell 및 기존 메뉴를 가진 Data/Help/Tier/Library/Profile roots, 안전한 내부 links와 legacy redirect/보드 작성 이동, useUnsavedNavigation, local query history state, 새 navigation·기존 editing/account/privacy 검사와 단일 작업판/보고.
+### 7. 데이터·스키마 마이그레이션
+없음. 로컬 원본/저장 형식·source ID·동의·실계정/Storage/권한·환경/flags 변경0. deps/lock 변경0.
+### 8. 마일스톤
+A: main-frame 문서 이동·marker/메뉴 재생성·반복 호출을 기준에서 실제 측정. B: 강제 내부 reload·공통 header root 제거와 Web 이동 구현. C: 지연/실패/중복 클릭/동일URL/뒤로·앞으로, 편집 guard/테마·언어·owner/공개 회귀와 build·품질. D: 검토 commit만 이 PC에 반영하고 인계·분석 보고.
+### 9. 테스트와 검증
+문서 marker와 main-frame 요청(DEV의 client-only 준비 iframe과 구분), header DOM 동일성, active route/메뉴/검색·theme/locale, 이동 준비 중 화면 유지, 레이아웃320/390/1440, 링크/프로그램/Back의 dirty 취소·승인/busy 금지, 기존 Save/취소/계정 전환/공개 사본/철회·신고, 초기/재방문·JS 오류/중복 listener·로컬 데이터. Build33/unit/React Doctor 동일 소스 전후·diff; 실제 built static 환경에서도 핵심 이동을 확인한다.
+### 10. 보안·개인정보·권리 영향
+신규 private/session 전역 캐시 없음. 각 content의 owner ready·key와 최신 세션 fence 유지. OAuth/가입은 기존 분리 문서 이동, Native index 경계·정확 공개 사본 유지. 실계정 조작·게시/삭제/동의 대신 합성 환경만 사용한다.
+### 11. 관찰 가능성·분석 이벤트
+추가 analytics0. 합성 route별 document load/header identity/오류만 기록하고 검색어·본문·이미지·세션/키를 로그/Git에 남기지 않는다.
+### 12. 롤백·복구
+이번 navigation patch만 revert. 이전7e8bd78과 비교/브랜치 보존. DB·개인 원본 복원 없음. 운영 master 전체 개발 branch 병합은 하지 않는다.
+### 13. 위험과 완화
+숨겨진 full-reload 가정, listener 누적, 테마 초기화, 이력 state 삭제, unsaved popstate 취소와 Astro의 취소→hard fallback 동작, stale private UI 위험. 설치된 Astro5 소스·공식 문서 대조, 독립 guard와 이력 복귀·대표 실제 flow 검사. 공통 UI만 persist한다.
+### 14. 필요한 사용자 결정
+분석/로컬 개선은 현재 요청으로 승인됐다. 서비스 공급자/데이터 경계를 바꾸지 않는다. 새 운영 반영은 별도 정확 후보 범위로 다룬다.
+### 15. 진행 기록
+actual src·installed Astro5 router와 공식 전환 문서를 대조했다. 별도 stable-navigation checkout을 만든다. 환경 설치 위치를 잘못 지정한 main npm ci는 실행 중 파일 잠금으로 실패했으며, 이 세션의 main 개발 프로세스만 확인·종료 후 같은 lock으로 복구하고4363 재검증한다. 패키지/lock 버전 변경은 없다.
+### 16. 발견 사항과 계획 변경
+ClientRouter 자체는 이미 설치돼 있어 새 라우팅 의존성이 필요 없다. Astro5 before-preparation.preventDefault는 단순 취소가 아니라 hard navigation fallback이므로 dirty 보호에 그대로 사용하지 않는다. 링크는 capture guard, 프로그램은 별도 cancelable intent, Back은 같은 이력 index로 복귀시킨다. private 페이지 cache/세션 초기화 우회는 필요하지 않다.
+### 17. 완료 보고
+reports/2026-10-14-navigation-structure-and-stability.md에8항 분석·수정·실제 전후 측정·남은 로딩 범위를 기록한다. 단일03/상위 재개 안내를 갱신하고 전체 사이트를 이미 SPA로 교체했다고 과장하지 않는다.
+
+실행 결과: 실제7e8bd78 주요3회 모두 main-frame 새 문서/메뉴 재생성, 수정 built static의 동일3회는0/동일 메뉴 유지. navigation/편집/원본/공개/계정/디자인의 고유117 PASS, 단위630 PASS, build33 PASS. 최신 navigation7+editing11은 같은 주소 brand·dirty program/Back·준비 중 inert·새 목적지 취소·언어의 다른 root 전달을 확인했다. public responsive6도 마지막 wrapper 뒤 재확인했다. 잘못된 초기 selector/fixture 환경/준비 timeout/static helper404 실행은 별도 실패 이력으로 구분한다. 호환 메뉴 adapter로 큰 부모 페이지의 API를 보존하며 글로벌private cache·세션 엔진/DB/flags·원격 배포 변경0. 최종 소스 품질/로컬 commit·인수는8항 보고와 THIS_PC_HANDOFF에 결속한다.
+## W18 화면·이동 개선 운영 반영 ExecPlan — 2026-10-14
+### 1. 목적과 사용자 결과
+사용자 “문제 없으면 지금까지 작업 본 운영으로 업뎃 ㄱㄱ”에 따라 문서·화면 보완과 이동 안정화를 www에 반영한다.
+### 2. 관련 확정 결정
+기존 무료 Web·컬렉션·일반 공개·권리·원본 보호 유지. 이번 사용자 지시는 검증된 두 UI 수정의 운영 Git 배포 승인이다.
+### 3. 현재 상태와 저장소 증거
+운영 origin/master·www·Vercel Git READY 모두5d544ad. 검토 원본6e2a412..0be7c4a는7e8bd78/0be7c4a 두 commit이다. UI/runtime/tests/workflow의 시작 소스는 운영과 동일함을 비교했다.
+### 4. 범위
+두 검토 patch의58파일 및 필요한 명세/현재 문서만 포함한다. 개발의 별도 운영시험 도구16개를 병합하지 않는다. DB/API/환경/권한/flags/의존성/실자료 변경 없음.
+### 5. 아키텍처·데이터 흐름
+Astro ClientRouter·공통 persisted 메뉴·기존 owner/dirty/busy 보호를 검토 소스 그대로 옮긴다. 서버 계약과 저장/공개/동의 경계 유지.
+### 6. 변경 파일 지도
+원본 diff58파일:src UI/route/hooks/layout, 회귀 tests, quality의 기존 collection 단계, 보고2개/START/기존 계획·작업판. 필요한 첨부 명세3개와 최신 인수 문서·기존 근거 JSON은 코드 변경과 구분한다.
+### 7. 데이터·스키마 마이그레이션
+없음. DB/Storage/원본/정책/설정/한도/사용량/동의 변경0.
+### 8. 마일스톤
+운영 기준 후보→검토 소스 일치/로컬 검사→정확SHA 원격 전체CI SUCCESS→동일master Git push→Vercel Git READY/www exact SHA→실제 화면 읽기 확인→인계.
+### 9. 테스트와 검증
+기존 원본 고유 Chromium117/단위630/build33와 source Doctor34→34/신규0을 유지한다. 후보에서 단위/build/Doctor 및 이동·편집·collection 검사를 하고 GitHub Service quality 두 job 전체를 통과시킨다. www 주요 이동 문서0/동일 메뉴·3폭/예외와 운영 source를 독립 확인한다.
+### 10. 보안·개인정보·권리 영향
+환경·키·개인사진·세션을 Git/로그에 넣지 않는다. 실제 로그인/게시/동의/신고를 대신 수행하지 않는다. 빈 guest 브라우저의 읽기로 화면 확인.
+### 11. 관찰 가능성·분석 이벤트
+새 analytics 없음. CI/deployment/source·합성 측정만 보존. 배포 직후 runtime 오류 조회를 시도하고 지원/읽기 제한은 별도 기록한다.
+### 12. 롤백·복구
+실패 시 master 이동 전에 수정·재검사. 운영 회귀면 승인된 UI patch를 되돌리는 Git commit→동일 배포 절차로5d544ad 앱 동작 복구. DB 복원 없음. master concurrent drift를 덮어쓰지 않는다.
+### 13. 위험과 완화
+원격 CI/운영환경 차이, 내비게이션·공개/계정 경계 회귀는 정확 후보 검사·read-only 실화면으로 확인한다. 개인 이미지/전체 복구·실기기·임계 알림/10월18일 첫 예약은 기존 별도 잔여다.
+### 14. 필요한 사용자 결정
+현재 지시로 이번 UI 운영 배포 승인 충족. 새 DB·정책·국가·한도·게시 동의는 요청/실행하지 않는다.
+### 15. 진행 기록
+2026-10-14: 운영 baseline 독립 조회, 전용 production worktree 생성. 구현 source 변경 전 이 계획을 기록했다.
+### 16. 발견 사항과 계획 변경
+개발 branch 전체 병합 없이 검토 파일 source만 결속한다. 최종 SHA/CI/배포 결과는 외부 receipt에 기록해 후보를 검사 이후 수정하지 않는다.
+### 17. 완료 보고
+검사·배포 완료 전 SUCCESS로 쓰지 않는다. 결과는 reports/2026-10-14-production-ui-navigation-release.md와 상위 THIS_PC_HANDOFF에 기록한다.
