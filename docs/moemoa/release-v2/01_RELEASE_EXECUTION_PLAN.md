@@ -2493,3 +2493,42 @@ A: 요구사항 표/합성 대표 화면과 실패 재현. B: 확인된 소유�
 검수 요구별 상태·변경/유지 근거·파일/행·실행 결과·합성 화면·실환경 한계를 분리한8항 보고로 마감한다. 현재 W18 작업판과 상위 재개 안내를 갱신한다.
 
 완료 보고: `../reports/2026-10-14-collection-document-screen-audit.md`. 단일03에 로컬 후보와 기존 출시 인수/복구 잔여를 구분했다. 전후9쌍과 추가 합성 장면은 상위 `.tools/collection-review-comparison-20261014/`에 보존하며 개인 환경/키/자료는 포함하지 않는다. 검증된 후보만 주 실행 폴더에 fast-forward하고 상위 THIS_PC_HANDOFF에 실제 commit·4363 실행 대조를 기록한다. 운영/master push·DB/flag 활성·실게시0.
+
+## W18 내부 이동·화면 재구성 안정화 ExecPlan — 2026-10-14
+
+### 1. 목적과 사용자 결과
+사용자가 탭·버튼 이동 때 전체 화면이 새로 만들어져 보이는 구조를 분석·개선하도록 요청했다. Web 내부 이동에서 문서/상단 메뉴를 유지하고, 데이터·편집·계정 경계를 지키면서 필요한 내용만 전환한다.
+### 2. 관련 확정 결정
+NO-HERO, 기존 Astro/React·Web/Android 모델, 원본/owner/private/public 및 공유 동의 계약 유지. 이 요청은 로컬 구조 분석·개선이며 운영 배포·권한·자동 업로드 승인이 아니다.
+### 3. 현재 상태와 저장소 증거
+기준7e8bd78. BaseLayout에 ClientRouter가 있으나 주요 메뉴/25파일49행의 data-astro-reload가 내부 이동을 전체 문서 이동으로 만든다. 검색·계정 버튼도 location.assign, 옛 주소는 location.replace를 사용한다. 상단 메뉴가 각 페이지 React root 안에 있고 client:only이므로 root 교체마다 메뉴/계정 확인부터 재마운트된다. 버튼형 TaskSections는 이미 패널을 유지하므로 전체 재작성하지 않는다.
+### 4. 범위
+포함: 내부 이동의 문서/헤더 연속성, 공통 메뉴 분리, 프로그램 이동·동일 주소·이력·테마/언어 재적용, dirty/busy 링크·프로그램·뒤로 이동 보호, 실패/지연·편집/계정/공개 회귀, 구조 보고와 실제 측정. 제외: 프레임워크/의존성 교체, private 자료의 전역 캐시, 서버/DB/로그인·권리 변경, 운영 배포, Android 자체 라우터 교체.
+### 5. 아키텍처·데이터 흐름
+기존 Astro ClientRouter를 사용해 HTML을 준비하는 동안 현재 화면을 유지한다. 기존 공통 메뉴는 독립 persisted island로 분리하고 새 경로 props만 갱신한다. page content·owner fence는 유지/재검증하며 개인 페이지를 통째로 영구 유지하지 않는다. Web 프로그램 이동은 공유 intent→dirty/busy guard→Astro navigate, Native는 기존 packaged index 이동이다.
+### 6. 변경 파일 지도
+BaseLayout, 공통 Navigation wrapper/route helper, TopNavDataMenu·PrimaryNavigationLinks·검색, MemoryRouteShell 및 기존 메뉴를 가진 Data/Help/Tier/Library/Profile roots, 안전한 내부 links와 legacy redirect/보드 작성 이동, useUnsavedNavigation, local query history state, 새 navigation·기존 editing/account/privacy 검사와 단일 작업판/보고.
+### 7. 데이터·스키마 마이그레이션
+없음. 로컬 원본/저장 형식·source ID·동의·실계정/Storage/권한·환경/flags 변경0. deps/lock 변경0.
+### 8. 마일스톤
+A: main-frame 문서 이동·marker/메뉴 재생성·반복 호출을 기준에서 실제 측정. B: 강제 내부 reload·공통 header root 제거와 Web 이동 구현. C: 지연/실패/중복 클릭/동일URL/뒤로·앞으로, 편집 guard/테마·언어·owner/공개 회귀와 build·품질. D: 검토 commit만 이 PC에 반영하고 인계·분석 보고.
+### 9. 테스트와 검증
+문서 marker와 main-frame 요청(DEV의 client-only 준비 iframe과 구분), header DOM 동일성, active route/메뉴/검색·theme/locale, 이동 준비 중 화면 유지, 레이아웃320/390/1440, 링크/프로그램/Back의 dirty 취소·승인/busy 금지, 기존 Save/취소/계정 전환/공개 사본/철회·신고, 초기/재방문·JS 오류/중복 listener·로컬 데이터. Build33/unit/React Doctor 동일 소스 전후·diff; 실제 built static 환경에서도 핵심 이동을 확인한다.
+### 10. 보안·개인정보·권리 영향
+신규 private/session 전역 캐시 없음. 각 content의 owner ready·key와 최신 세션 fence 유지. OAuth/가입은 기존 분리 문서 이동, Native index 경계·정확 공개 사본 유지. 실계정 조작·게시/삭제/동의 대신 합성 환경만 사용한다.
+### 11. 관찰 가능성·분석 이벤트
+추가 analytics0. 합성 route별 document load/header identity/오류만 기록하고 검색어·본문·이미지·세션/키를 로그/Git에 남기지 않는다.
+### 12. 롤백·복구
+이번 navigation patch만 revert. 이전7e8bd78과 비교/브랜치 보존. DB·개인 원본 복원 없음. 운영 master 전체 개발 branch 병합은 하지 않는다.
+### 13. 위험과 완화
+숨겨진 full-reload 가정, listener 누적, 테마 초기화, 이력 state 삭제, unsaved popstate 취소와 Astro의 취소→hard fallback 동작, stale private UI 위험. 설치된 Astro5 소스·공식 문서 대조, 독립 guard와 이력 복귀·대표 실제 flow 검사. 공통 UI만 persist한다.
+### 14. 필요한 사용자 결정
+분석/로컬 개선은 현재 요청으로 승인됐다. 서비스 공급자/데이터 경계를 바꾸지 않는다. 새 운영 반영은 별도 정확 후보 범위로 다룬다.
+### 15. 진행 기록
+actual src·installed Astro5 router와 공식 전환 문서를 대조했다. 별도 stable-navigation checkout을 만든다. 환경 설치 위치를 잘못 지정한 main npm ci는 실행 중 파일 잠금으로 실패했으며, 이 세션의 main 개발 프로세스만 확인·종료 후 같은 lock으로 복구하고4363 재검증한다. 패키지/lock 버전 변경은 없다.
+### 16. 발견 사항과 계획 변경
+ClientRouter 자체는 이미 설치돼 있어 새 라우팅 의존성이 필요 없다. Astro5 before-preparation.preventDefault는 단순 취소가 아니라 hard navigation fallback이므로 dirty 보호에 그대로 사용하지 않는다. 링크는 capture guard, 프로그램은 별도 cancelable intent, Back은 같은 이력 index로 복귀시킨다. private 페이지 cache/세션 초기화 우회는 필요하지 않다.
+### 17. 완료 보고
+reports/2026-10-14-navigation-structure-and-stability.md에8항 분석·수정·실제 전후 측정·남은 로딩 범위를 기록한다. 단일03/상위 재개 안내를 갱신하고 전체 사이트를 이미 SPA로 교체했다고 과장하지 않는다.
+
+실행 결과: 실제7e8bd78 주요3회 모두 main-frame 새 문서/메뉴 재생성, 수정 built static의 동일3회는0/동일 메뉴 유지. navigation/편집/원본/공개/계정/디자인의 고유117 PASS, 단위630 PASS, build33 PASS. 최신 navigation7+editing11은 같은 주소 brand·dirty program/Back·준비 중 inert·새 목적지 취소·언어의 다른 root 전달을 확인했다. public responsive6도 마지막 wrapper 뒤 재확인했다. 잘못된 초기 selector/fixture 환경/준비 timeout/static helper404 실행은 별도 실패 이력으로 구분한다. 호환 메뉴 adapter로 큰 부모 페이지의 API를 보존하며 글로벌private cache·세션 엔진/DB/flags·원격 배포 변경0. 최종 소스 품질/로컬 commit·인수는8항 보고와 THIS_PC_HANDOFF에 결속한다.

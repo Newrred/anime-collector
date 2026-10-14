@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Capacitor } from "@capacitor/core";
 import { getMessageGroup } from "../domain/messages.js";
-import { toPlatformAppHref } from "../domain/search/memoryCardNavigation.js";
+import { navigateWithinApp } from "../lib/appNavigation.js";
 import { useAuthSession } from "../hooks/useAuthSession.js";
 import { useMemoryAccountSync } from "../hooks/useMemoryAccountSync.js";
 import { useTitleStateSync } from "../hooks/useTitleStateSync.js";
@@ -99,7 +98,13 @@ function MenuTriggers({ copy, theme, localeMenuOpen, dataMenuOpen, panelId, acco
   );
 }
 
-export default function TopNavDataMenu({
+export default function TopNavDataMenu(props) {
+  // Page roots keep their existing interface; the shared island owns the menu.
+  if (!props.shared && typeof document !== "undefined" && document.querySelector("[data-app-navigation]")) return null;
+  return <NavigationContent {...props} />;
+}
+
+function NavigationContent({
   base = "/",
   panelId = "data-menu-panel",
   canInstallPwa = false,
@@ -116,8 +121,16 @@ export default function TopNavDataMenu({
   const menuReturnFocusRef = useRef(null);
   const [dataMenuOpen, setDataMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
+  useEffect(() => {
+    const close = () => { setDataMenuOpen(false); setLocaleMenuOpen(false); };
+    document.addEventListener("astro:after-swap", close);
+    return () => document.removeEventListener("astro:after-swap", close);
+  }, []);
   const auth = useAuthSession(`${base}data/`);
   const account = useMemoryAccountSync({ session: auth.session, authLoading: auth.loading, autoSync: true });
+  const searchReady = !auth.loading && !account.loading
+    && (!account.enabled || !auth.session?.user?.id || account.userId === auth.session.user.id)
+    && ["LOCAL_ONLY", "ACCOUNT_READY", "PROMOTION_AVAILABLE"].includes(account.status);
   useTitleStateSync({ session: auth.session, autoSync: true });
   const accountCopy = getMessageGroup(locale, "memoryAccount");
   const accountTone = accountToneFor(account.status, account.loading, auth.session?.user);
@@ -149,10 +162,7 @@ export default function TopNavDataMenu({
 
   function openDataPage() {
     if (typeof window === "undefined") return;
-    window.location.assign(toPlatformAppHref(`${base}data/`, {
-      native: Capacitor.isNativePlatform(),
-      origin: window.location.origin,
-    }));
+    navigateWithinApp(`${base}data/`, { base });
   }
 
   async function handleInstallPwaClick() {
@@ -194,14 +204,15 @@ export default function TopNavDataMenu({
         </a>
         <PrimaryNavigationLinks base={base} currentRoute={currentRoute} copy={copy} locale={locale} />
 
-      {!['memory-new', 'memory-card', 'record-new'].includes(currentRoute) && <a className="btn top-nav__memory-action" href={`${base}record/`} aria-label={copy.createMemory} data-astro-reload>
+      {!['memory-new', 'memory-card', 'record-new'].includes(currentRoute) && <a className="btn top-nav__memory-action" href={`${base}record/`} aria-label={copy.createMemory}>
           <span className="top-nav__memory-action-plus" aria-hidden>＋</span>
           <span className="top-nav__memory-action-short" aria-hidden>{copy.memoryShort}</span>
           <span className="top-nav__memory-action-label">{copy.createMemory}</span>
       </a>}
 
         <div className="top-nav__search-slot">
-          <TopNavGlobalSearch base={base} locale={locale} accountScope={`${auth.session?.user?.id || "guest"}:${account.status}`} />
+          {searchReady ? <TopNavGlobalSearch key={`${currentRoute}:${auth.session?.user?.id || "guest"}:${account.status}`} base={base} locale={locale} accountScope={`${auth.session?.user?.id || "guest"}:${account.status}`} />
+            : <span role="status">{locale === "ko" ? "검색 준비 중…" : "Preparing search…"}</span>}
         </div>
 
         <div ref={dataMenuRef} className="top-nav__menu">
@@ -341,9 +352,9 @@ export default function TopNavDataMenu({
                     <div className="data-menu-section-title">{copy.moreTitle}</div>
                   </div>
                   <div className="data-menu-utility-grid">
-                    <a href={`${base}titles/`} className="btn btn--subtle data-menu-link" data-astro-reload onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "작품·감상 관리 →" : "Titles and watch records →"}</a>
-                    <a href={`${base}boards/`} className="btn btn--subtle data-menu-link" data-astro-reload aria-current={currentRoute === "boards" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "내 보드 →" : "My Boards →"}</a>
-                    <a href={`${base}tier/`} className="btn btn--subtle data-menu-link" data-astro-reload
+                    <a href={`${base}titles/`} className="btn btn--subtle data-menu-link" onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "작품·감상 관리 →" : "Titles and watch records →"}</a>
+                    <a href={`${base}boards/`} className="btn btn--subtle data-menu-link" aria-current={currentRoute === "boards" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>{locale === "ko" ? "내 보드 →" : "My Boards →"}</a>
+                    <a href={`${base}tier/`} className="btn btn--subtle data-menu-link"
                       aria-current={currentRoute === "tier" ? "page" : undefined} onClick={() => setDataMenuOpen(false)}>
                       <ActionLabel icon={<IconTrophy size={15} />}>{copy.tier}</ActionLabel>
                     </a>

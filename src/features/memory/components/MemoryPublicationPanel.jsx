@@ -133,7 +133,7 @@ export function PublicationEditor({ detail, runtime, services, locale, base, onC
     {publication?.hasPublished && !publication.hidden && publication.visible === false && <p role="status">{copy.notVisible}</p>}
     {publication?.hasPublished && !publication.hidden && publication.visible !== false && <div role="status"><p>{copy.published}</p>
       {publication.sourceChanged && <p>{copy.changed}</p>}
-      <a href={publicationLink(publication.id, base)} data-astro-reload>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
+      <a href={publicationLink(publication.id, base)}>{copy.visit}</a><PublicLinkCopy key={publication.id} kind="board" id={publication.id} locale={locale} base={base} /></div>}
     {publication?.state === "REVOKED" && <p role="status">{copy.revoked}</p>}
     {publication && publication.state !== "REVOKED" && <details className="public-management"><summary>{locale === 'ko' ? '공개 관리' : 'Manage sharing'}</summary><button type="button" className="btn btn--subtle" disabled={state.busy}
       onClick={() => { if (confirm(copy.withdrawConfirm)) controller.revoke(); }}>{copy.withdraw}</button></details>}

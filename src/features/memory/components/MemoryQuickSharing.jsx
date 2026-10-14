@@ -115,6 +115,6 @@ export default function MemoryQuickSharing({card,locale,base,disabled}) {
     {pending && <p>{ko?'게시 결과를 확인 중이에요. 같은 내용으로 다시 시도해 주세요.':'The publication result is unconfirmed. Retry the same content.'}</p>}
     <button className="btn" type="submit" disabled={disabled||state.busy||state.loading||state.published===null||(state.visible&&(!state.source||!state.consented||!noticeAvailable))}>{state.busy?(ko?'저장 중…':'Saving…'):pending?(ko?'다시 시도':'Retry save'):(ko?'저장':'Save visibility')}</button>
     {state.done && <p role="status">{state.published?(state.readable?(ko?'공개로 저장했어요.':'Saved as public.'):(ko?'게시 내용을 저장했지만 현재 공개 열람은 제한되어 있어요.':'Publication saved, but public viewing is currently restricted.')):(ko?'비공개로 저장했어요.':'Saved as private.')}</p>}
-    {state.link && <a href={state.link} data-astro-reload>{ko?'공개 화면 보기 →':'View public memory →'}</a>}
+    {state.link && <a href={state.link}>{ko?'공개 화면 보기 →':'View public memory →'}</a>}
   </form>;
 }

@@ -11,7 +11,7 @@ function Entry({ entry, services, locale, preview, onReady, base }) {
   if (entry.kind === "TITLE_SHELF") return <article className="minihome-snapshot__entry"><PublicTitleShelf snapshot={entry.snapshot} services={services} locale={locale} base={base} onReady={ready} preview={preview} /></article>;
   return <article className="minihome-snapshot__entry">
     <PublicBoardSnapshot snapshot={entry.snapshot} publicationId={entry.publicationId} services={services} locale={locale} preview={preview} onReady={ready} />
-    <a href={publicationLink(entry.publicationId, base)} data-astro-reload>{locale === "ko" ? "공개 보드 열기" : "Open public Board"}</a>
+    <a href={publicationLink(entry.publicationId, base)}>{locale === "ko" ? "공개 보드 열기" : "Open public Board"}</a>
   </article>;
 }
 export default function MinihomeSnapshot({ snapshot, services, locale, preview = false, onReady, base = "/" }) {
@@ -23,7 +23,7 @@ export default function MinihomeSnapshot({ snapshot, services, locale, preview =
   const selectGroup = value => {
     setSelected(value);
     const url = new URL(location.href); if (value === "all") url.searchParams.delete("section"); else url.searchParams.set("section", value);
-    history.replaceState(null, "", url);
+    history.replaceState(history.state, "", url);
   };
   const mark = useCallback((id, value) => setReady((current) => current[id] === value ? current : { ...current, [id]: value }), []);
   const complete = snapshot.entries.length > 0 && snapshot.entries.every((e) => ready[homeEntryKey(e)]);

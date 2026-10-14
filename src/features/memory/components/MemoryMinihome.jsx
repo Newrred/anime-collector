@@ -63,7 +63,7 @@ export function MinihomeEditor({ userId, locale, base, onStateChange }) {
     {state.error && <p role="alert">{state.error === "INVALID_SELECTION" ? services.collectionHomeEnabled ? (locale === "ko" ? "공개할 묶음 1~10개를 선택하고 이름과 선택 내용을 확인해 주세요." : "Choose 1–10 groups and check their names and selected content.") : copy.invalid : publicationError(state.error, locale)} <button className="btn btn--subtle" disabled={state.busy} onClick={() => controller.load()}>{copy.retry}</button></p>}
     <PublicSignupNotice error={state.error} locale={locale} base={base} />
     {state.home?.published && (state.home.hidden || state.home.visible === false) && <p role="status">{copy.notVisible}</p>}
-    {state.home?.published && !state.home.hidden && state.home.visible !== false && <p role="status">{copy.published} <a data-astro-reload href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
+    {state.home?.published && !state.home.hidden && state.home.visible !== false && <p role="status">{copy.published} <a href={minihomeLink(state.home.id, base)}>{copy.visit}</a></p>}
     {state.home?.published && !state.home.hidden && state.home.visible !== false && <PublicLinkCopy key={state.home.id} kind="home" id={state.home.id} locale={locale} base={base} />}
     {state.phase === "revoked" && <p role="status">{copy.revoked}</p>}
     {state.home && <details className="public-management"><summary>{locale === 'ko' ? '공개 관리' : 'Manage sharing'}</summary><button className="btn btn--subtle" disabled={state.busy} onClick={() => { if (confirm(copy.confirm)) controller.revoke(); }}>{copy.withdraw}</button></details>}

@@ -3,8 +3,7 @@ import { useUnsavedNavigation } from "../../../hooks/useUnsavedNavigation.js";
 import { useAuthSession } from "../../../hooks/useAuthSession.js";
 import AddMemoryToBoard from "./AddMemoryToBoard.jsx";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { Capacitor } from "@capacitor/core";
-import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
+import { navigateWithinApp } from "../../../lib/appNavigation.js";
 import MemoryTitleLink from "../../titles/components/MemoryTitleLink.jsx";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import { getPlatformMemoryAccountRuntime } from "../runtime/platformMemoryAccountRuntime.js";
@@ -266,10 +265,7 @@ function MemoryCardDetailContent({ base }) {
     try {
       await runtime.deleteCard(bundle.card.id);
       allowLeave();
-      window.location.assign(toPlatformAppHref(returnHref, {
-        native: Capacitor.isNativePlatform(),
-        origin: window.location.origin,
-      }));
+      navigateWithinApp(returnHref, { base });
     } catch (error) {
       updateState({
         message: { scope: "detail", key: error?.code === "PUBLICATION_WITHDRAWAL_UNCONFIRMED" ? "deleteWithdrawalFailed" : "deleteFailed" },
@@ -313,7 +309,7 @@ function MemoryCardDetailContent({ base }) {
         <section className="surface-card memory-detail__state">
           <h1>{status === "error" ? copy.archive.error : detailCopy.notFound}</h1>
           {status === "error" && <button className="btn" onClick={() => window.location.reload()}>{locale === "ko" ? "다시 시도" : "Try again"}</button>}
-          <a className="btn" href={returnHref} data-astro-reload>{detailCopy.backToArchive}</a>
+          <a className="btn" href={returnHref}>{detailCopy.backToArchive}</a>
         </section>
       </div>
     );

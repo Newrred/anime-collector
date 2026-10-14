@@ -1,11 +1,10 @@
-import { Capacitor } from "@capacitor/core";
-import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
+import { navigateWithinApp } from "../../../lib/appNavigation.js";
 import { writeTitleCollectionViewPreference } from "../application/titleCollectionPreference.js";
 
 export default function FirstMemoryViewSuggestion({ base, copy, onDismiss }) {
   function openMemoryView() {
     writeTitleCollectionViewPreference("MEMORY");
-    window.location.assign(toPlatformAppHref(`${base}titles/`, { native: Capacitor.isNativePlatform() }));
+    navigateWithinApp(`${base}titles/`, { base });
   }
   return (
     <section className="surface-card memory-archive__board-suggestion first-memory-view-suggestion" aria-labelledby="first-memory-view-title">

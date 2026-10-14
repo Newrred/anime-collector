@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-14 내부 이동 안정화:** 활성 링크의 강제 reload와 프로그램 이동을 정리하고 같은 상단 메뉴를 유지했다. 기준의 주요3회 문서 이동→개선 built static0회, 고유 Chromium117/단위630/build33 PASS. [구조 분석·8항 보고](docs/moemoa/reports/2026-10-14-navigation-structure-and-stability.md)와 [단일 작업판 현재 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)를 우선 읽는다. 현재 실행 폴더/확정 commit은 THIS_PC_HANDOFF에 결속한다. 내용의 owner 확인/데이터 읽기·OAuth/Native 경계는 유지하며 운영/DB/환경/실자료 변경0. 아래 문서·화면 보완과 운영 인수는 유지된 이전 결과다.
+
 > **2026-10-14 문서·화면 대조 보완:** 첨부 컬렉션 명세와 실제 화면의 누락을 재현·수정했다. 단위626/고유 Chromium83/build33 PASS, React Doctor 동일 소스 범위34→34/신규0. 현재 로컬 개발 결과와 남는 실제 이미지/출시 범위는 [검수 8항 보고](docs/moemoa/reports/2026-10-14-collection-document-screen-audit.md)와 [단일 작업판 현재 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업--2026-10-14-문서화면-대조-보완)를 우선 읽는다. 현재 실행 폴더/확정 commit은 상위 THIS_PC_HANDOFF에 기록한다. 이번 운영/DB/설정/실자료 변경0. 아래10/13 운영 인수와 백업 잔여는 유지한다.
 
 > **2026-10-13 최신 인계 — 다른 PC 완료 근거 복구:** 첫 Public 필수 운영 흐름은 `ea8f388`에서 인수됐고, 컬렉션 연결은 `5d544ad` 운영 반영 완료다. `b3b4669`에만 남아 있던 증분 복구·키 독립보관·카탈로그 외부 회수·주간 설치·실제 공개/팔로우/신고/철회 증거25키를 기존 JSON2개에 복구했다(공통키 변경0). 현재 W/M/D/Q와 최종 체크의 오래된 Public off/키 미보관/DB 복구 대기를 교정했다. 이번 www/origin master5d544ad 및 예약 유지38327869839 SUCCESS 재확인, 운영 변경0. 첫 주간 예약은 **10/18 03:00 JST/KST**로 아직 실행 전이다. [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)과 [실행 보고](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#w18d06-증거-복구-실행-8항-보고--2026-10-13)를 우선한다. 새 운영 승인·가입·공개 동의·키 보관 재요청 없음. 아래 날짜별 기록은 당시 이력이다.

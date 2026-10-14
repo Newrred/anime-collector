@@ -10,6 +10,7 @@ import { searchRemoteCandidates } from "../../domain/search/quickActionRemote.js
 import { addAnimeFromQuickAction, openLibraryDeepLink } from "../../domain/search/quickActionActions.js";
 import { buildMemoryCardHref } from "../../domain/search/memoryCardNavigation.js";
 import { buildTitleHubHref } from "../../features/titles/domain/titleNavigation.js";
+import { navigateWithinApp } from "../../lib/appNavigation.js";
 import { IconSearch } from "../ui/AppIcons.jsx";
 import QuickActionPanel from "./QuickActionPanel.jsx";
 import GlobalQuickActionSheet from "./GlobalQuickActionSheet.jsx";
@@ -249,7 +250,7 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko", accountS
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    window.location.assign(buildMemoryCardHref({ base, native: Capacitor.isNativePlatform(), row }));
+    navigateWithinApp(buildMemoryCardHref({ base, native: Capacitor.isNativePlatform(), row }), { base });
   }
 
   function handleOpenDetail(animeId) {
@@ -261,20 +262,20 @@ export default function TopNavGlobalSearch({ base = "/", locale = "ko", accountS
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    openLibraryDeepLink({ base, animeId, focus: "quick-log", native: Capacitor.isNativePlatform() });
+    openLibraryDeepLink({ base, animeId, focus: "quick-log", native: Capacitor.isNativePlatform(), locationRef: { origin: location.origin, assign: href => navigateWithinApp(href, { base }) } });
   }
 
   function handleOpenTitle(row) {
     rememberQuery();
     setDesktopOpen(false);
     setMobileOpen(false);
-    window.location.assign(buildTitleHubHref({
+    navigateWithinApp(buildTitleHubHref({
       base,
       native: Capacitor.isNativePlatform(),
       titleRef: row?.catalogAnimeId ? { kind: "ANIME", animeId: row.catalogAnimeId } : row?.titleRef,
       anilistId: row?.id,
       title: row?.title,
-    }));
+    }), { base });
   }
 
   function closeMobileSearch() {

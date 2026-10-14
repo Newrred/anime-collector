@@ -26,7 +26,7 @@ function BookshelfContent({ base }) {
   const auth = useAuthSession();
   const [panel, setPanel] = useState(() => { const value = new URLSearchParams(globalThis.location?.search || "").get("panel"); return ["sharing", "following", "safety", "boards"].includes(value) ? value : ""; });
   const [sharingState, setSharingState] = useState({ busy:false, dirty:false });
-  const changePanel = next => { if (sharingState.busy || draft) return; if (sharingState.dirty && !confirm(ko ? "저장하지 않은 내용이 있습니다. 닫을까요?" : "You have unsaved changes. Close them?")) return; setSharingState({busy:false,dirty:false}); setPanel(next); const url = new URL(location.href); if (next) url.searchParams.set("panel",next); else url.searchParams.delete("panel"); history.replaceState(null,"",url); };
+  const changePanel = next => { if (sharingState.busy || draft) return; if (sharingState.dirty && !confirm(ko ? "저장하지 않은 내용이 있습니다. 닫을까요?" : "You have unsaved changes. Close them?")) return; setSharingState({busy:false,dirty:false}); setPanel(next); const url = new URL(location.href); if (next) url.searchParams.set("panel",next); else url.searchParams.delete("panel"); history.replaceState(history.state,"",url); };
   const [group, setGroup] = useState(() => { const value = new URLSearchParams(globalThis.location?.search || "").get("section") || "all"; return /^(TITLE_SHELF|MEMORY_BOARD):.{1,80}$/.test(value) ? value : "all"; });
   const service = useMemo(() => createTitleCollectionService(), []);
   const [albums, setAlbums] = useState([]), [status, setStatus] = useState("loading");
@@ -77,7 +77,7 @@ function BookshelfContent({ base }) {
   const visible = albums.filter(album => ids.has(album.key) && album.displayTitle.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
   const hrefFor = album => buildTitleHubHref({ base, titleRef: album.titleRef, anilistId: album.anilistId, title: album.displayTitle });
   const saveLayout = value => { if (sharingState.busy || sharingState.dirty) return false; try { setSettings(saveBookshelf(ownerKey, value)); setMessage(ko ? "컬렉션에 적용했어요." : "Collection saved."); return true; } catch { setMessage(ko ? "저장하지 못했습니다. 기존 설정은 유지됩니다." : "Could not save. Existing settings are preserved."); return false; } };
-  const selectGroup = value => { if (sharingState.busy || sharingState.dirty || draft) return; setGroup(value); setSelected(""); const url = new URL(location.href); url.searchParams.set("section", value); history.replaceState(null, "", url); };
+  const selectGroup = value => { if (sharingState.busy || sharingState.dirty || draft) return; setGroup(value); setSelected(""); const url = new URL(location.href); url.searchParams.set("section", value); history.replaceState(history.state, "", url); };
   const editCollection = (add = false) => {
     if (status !== "ready" || settings.loadError || draft || panel || sharingState.busy || sharingState.dirty || (add && (settings.shelves.length >= 20 || (settings.sections?.length || 0) >= 40))) return;
     const next = structuredClone(settings), id = add ? crypto.randomUUID() : shelf === "all" ? next.shelves[0]?.id : shelf;

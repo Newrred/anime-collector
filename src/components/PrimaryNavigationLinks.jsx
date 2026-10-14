@@ -13,9 +13,13 @@ export default function PrimaryNavigationLinks({ base, currentRoute, copy, local
   return (
     <div className={mobile ? "top-nav-mobile-links" : "top-nav__links top-nav__links--routes"}>
       {routes.filter(row => mobile || row.route !== "boards").map(({ path, route, label, Icon }) => (
-        <a key={route} href={`${base}${path}`} data-astro-reload
+        <a key={route} href={`${base}${path}`}
           className={`${linkClass}${activeRoute === route ? " is-active" : ""}`}
-          aria-current={activeRoute === route ? "page" : undefined} onClick={onNavigate}>
+          aria-current={activeRoute === route ? "page" : undefined} onClick={event => {
+            if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+              && new URL(event.currentTarget.href).href === location.href) event.preventDefault();
+            onNavigate?.(event);
+          }}>
           {mobile ? <><span className="data-menu-action-label"><Icon size={17} /><span>{route === "home" ? (locale === "ko" ? "컬렉션" : "Collection") : copy[label]}</span></span><IconArrowRight size={14} /></> : ({ home: locale === "ko" ? "컬렉션" : "Collection", titles: locale === "ko" ? "작품" : "Titles", archive: locale === "ko" ? "기억" : "Memories" }[route] || copy[label])}
         </a>
       ))}

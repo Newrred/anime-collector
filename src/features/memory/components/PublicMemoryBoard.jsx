@@ -56,7 +56,7 @@ export default function PublicMemoryBoard({ base = "/" }) {
         : state.status === "disabled" ? copy.disabled : state.status === "error" ? copy.failed : copy.unavailable}</p>}
     </div><aside className="public-page-tools" aria-label={locale === 'ko' ? '공개 보드 관리' : 'Public Board actions'}>
     {state.status === "ready" && <PublicLinkCopy key={id} kind="board" id={id} locale={locale} base={base} />}
-    {state.status === "ready" && state.author && <a href={minihomeLink(state.author.id, base)} data-astro-reload>
+    {state.status === "ready" && state.author && <a href={minihomeLink(state.author.id, base)}>
       {locale === "ko" ? `${state.author.nickname}님의 공개 미니홈` : `Visit ${state.author.nickname}'s public home`}
     </a>}
     {['error', 'ready'].includes(state.status) && <button type="button" className="btn btn--subtle"

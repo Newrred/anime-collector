@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useRef } from "react";
-import { Capacitor } from "@capacitor/core";
-import { toPlatformAppHref } from "../../../domain/search/memoryCardNavigation.js";
+import { navigateWithinApp } from "../../../lib/appNavigation.js";
 import { getPlatformMemoryRuntime } from "../runtime/platformMemoryRuntime.js";
 import { getPlatformMemoryAccountRuntime } from "../runtime/platformMemoryAccountRuntime.js";
 import { privateImageTransfer, privateImageUiEnabled, isPrivateUserImage, queuePlatformPrivatePhoto, drainPlatformPrivatePhotos } from "../runtime/platformPrivateImages.js";
@@ -319,10 +318,7 @@ export function useMemoryCardComposer({ base = "/", accountUserId = null } = {})
     }
   };
 
-  const openArchive = () => window.location.assign(toPlatformAppHref(`${base}archive/`, {
-    native: Capacitor.isNativePlatform(),
-    origin: window.location.origin,
-  }));
+  const openArchive = () => navigateWithinApp(`${base}archive/`, { base });
 
   const syncSavedCard = async (cardId, options) => {
     if (cloudInFlight.current) return;

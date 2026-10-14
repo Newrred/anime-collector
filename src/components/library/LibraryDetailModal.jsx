@@ -145,7 +145,7 @@ export default function LibraryDetailModal({
               alt={selectedTitle}
             />
             <div className="library-modal-cover-actions">
-              <a className="btn" href={titleHubHref} data-astro-reload>
+              <a className="btn" href={titleHubHref}>
                 {copy.openTitleHub}
               </a>
               <button className="removeBtn" onClick={() => onRemoveAnime(selectedId)}>

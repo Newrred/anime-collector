@@ -61,7 +61,7 @@ export default function TitleRelatedSeries({ album, service, base, locale }) {
       {rows.length ? <ul>{rows.map((row, index) => <li key={row.id || `${row.title}:${index}`}>
         <div><strong>{row.title}</strong><small>{row.relation || formatRelationTypeLabel(row.type, locale)}{row.format ? ` · ${row.format}` : ""}</small></div>
         {row.id && ANIME_FORMATS.has(row.format) ? <div className="title-hub__related-actions">
-          <a href={buildTitleHubHref({ base, anilistId: row.id, title: row.title })} data-astro-reload>{ko ? "작품 보기" : "View title"}</a>
+          <a href={buildTitleHubHref({ base, anilistId: row.id, title: row.title })}>{ko ? "작품 보기" : "View title"}</a>
           <button type="button" className="channel-text-button" disabled={busyId != null}
             onClick={() => add(row)}>{busyId === row.id ? (ko ? "추가 중…" : "Adding…") : (ko ? "내 작품에 추가" : "Add to My Titles")}</button>
         </div> : null}
