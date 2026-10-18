@@ -827,7 +827,32 @@
 
 기본 20개 완료 수와 추가 필수 작업 수를 별도로 표시한다. 보류된 개선은 출시 분모에 넣지 않는다. 추가 작업이 있다고 기존에 검증한 완료 결과를 지우지 않는다. 최종 기준은 task 숫자가 아니라 M완료 계약과 필수 QA다.
 
+## 2026-10-18 이 PC 재개 설정
+
+사용자 지정 `MOEMOA-PC-HANDOFF-20261017.zip`과 Git을 대조해 기존 `E:\web\anime`에서 이어갈 환경을 준비했다. 새 기능이나 출시 작업으로 집계하지 않는다.
+
+1. **읽은 근거:** AGENTS, CODEX_START_HERE, 확정 결정, PLANS, 07/09, 기존 작업판과 10/14 운영 보고, package/lock/Astro 설정, ZIP의 README/THIS_PC_HANDOFF/VERIFICATION/실행 스크립트·manifest.
+2. **기준·가정:** ZIP은 실행 환경 자료이며 앱 소스는 원격 Git이 기준이다. `codex/continue-after-arena-20261012`를 `cc80819516be59782bb59be76359badc67064c3d`까지 fast-forward했다. fetch한 `origin/master`는 `a65f557e84659a0638ee44a8c4a911173dd554b2`; 앱/검사/의존성/DB 소스는 동일하다. 개발 도구16개를 포함한 전체 개발 branch의 운영 병합은 하지 않았다.
+3. **계획:** `.cache/pc-handoff-20261018-plan.md`의 보존→Git 갱신→환경 대조→의존성/빌드→로컬 화면→인계 순서. 앱 구현·schema 변경이 없는 작은 로컬 설정 작업이다.
+4. **변경·보존:** 기존 `codex/collection-scrapbook-20261013 @ 0a9f6b2`와 별도 worktree, `tools/operations/__pycache__/`를 보존했다. ZIP 1,999파일의 길이/SHA256와 Node OpenJS 서명을 확인하고 저장소 밖 `E:\web\.moemoa-pc-handoff-20261018`에 추출했다. ZIP SHA256은 `59b1af04674518f9965f2edad91d754e7189cc48f9231f8f52293151ff7e28fc`. 공개 카탈로그 env 2항목이 기존 로컬 설정과 같아 덮어쓰지 않았다. 저장소 안 변경은 이 기록과 시작 문서뿐이며, 밖에 `MOEMOA-START.cmd`/`MOEMOA-THIS-PC.md`를 준비했다.
+5. **데이터·복귀:** DB/Storage/운영 설정/개인 이미지 변경0. 전역 Node/PATH/의존성 설치 변경0. 복귀는 이 세션의 개발 서버를 종료하고 보존한 이전 branch로 전환하면 된다. 브라우저 개인 기록·로그인 세션은 ZIP/Git으로 이전되지 않는다.
+6. **실제 검증:** 번들 Node24.19.0/npm11.17.0에서 `npm ls --depth=0` exit0, `npm run test:unit` 631 PASS/실패0, `npm run build` 33페이지/postbuild exit0. 로그는 `.cache/pc-handoff-20261018-{dependencies,unit,build}.log`. 개발 서버 첫 화면은 초기 실행에서 timeout됐지만 기존 Node24.14.1로 Astro를 직접 실행한 시작 파일에서 `/` HTTP200·실제 컬렉션 메뉴·공개 작품 검색 결과/표지를 확인했다. 초기 실행 방식/런타임별 차이의 근본 원인은 확정하지 않았으며 패키지 Node 자체 결함으로 기록하지 않는다. 실제 사용한 시작 파일은 `127.0.0.1:4363`/strictPort, 프로세스 범위의 telemetry off/CI/개발 toolbar 숨김만 적용한다.
+7. **보안·권리·관측:** 비밀값 출력/커밋/전송0, env 파일 덮어쓰기0, 원본 업로드/계정 생성/대신 동의/게시0. localhost 읽기 결과를 Google/hosted/실기기/운영 PASS로 승격하지 않는다.
+8. **남는 조건:** 운영 배포·DB 작업·백업 실행은 이번 요청에 포함하지 않았다. 이번 문서 기록은 로컬에만 남기며 push하지 않는다. 새 변경의 원격 적용은 기존 정확 후보 승인 조건을 따른다. 문서상 다음 행동 하나는 아래 W17/D05 예약 실행 결과의 읽기 확인이다.
+
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
+
+```text
+현재 W: W18/D06 10/14 UI·이동 운영 반영 완료 근거 인계; W17/D05는 설치 후 관찰 단계.
+이번 실제 결과: 10/18 E:\web\anime의 개발 소스를 cc80819로 갱신하고 로컬 단위631/build33·화면/작품 검색 확인. 기존 작업/환경 보존.
+운영 기준: fetch한 origin/master a65f557. 10/14 exact Git/Vercel/www 인수 근거는 기존 보고·receipt를 유지하며 이번 새 hosted 검사로 세지 않음.
+복구: 기존 증분 외부 회수·격리 복구/삭제권리·키 독립보관·주간 workflow 설치 완료 근거 유지. 새 백업/예약 변경 없음.
+관측: 최초 예정 2026-10-18 03:00 JST/KST는 지났지만 이번 세션에서는 schedule 실행 결과를 조회하지 않음. 10/13 예약 유지 성공/수동 성공을 예약 성공으로 대체하지 않음.
+제한: 전체24QA/물리기기/전체 복구 serving/전체 ingestion history/새 용량 임계 알림 수신은 PASS 아님. 추가Safari 등 사용자 제외 유지. 개인 이미지 기존 관찰은 별도.
+다음 행동 하나: 기존 GitHub 주간 백업의 10/18 schedule 실행 결과를 읽기로 확인하고 W17/D05에 기록한다. 새 예약·수동 백업·중복 동의 요청 없음.
+```
+
+<details><summary>이전 현재 카드 — 10/13 증거 복구 직후</summary>
 
 ```text
 현재 W: W18/D06 운영 반영 후 증거 대조 완료; W17/D05는 설치 후 관찰 단계.
@@ -839,6 +864,8 @@
 별도 관찰: 기존 개인 이미지 로딩 실패는 원인 미확정. 관련 기존 transfer unit12 PASS, source 변경0. 재업로드/삭제/대신 공개하지 않음.
 다음 행동 하나: 2026-10-18 03:00 JST/KST 이후 기존 GitHub 주간 백업의 schedule 실행 결과를 읽기로 확인하고 W17/D05에 기록한다. 새 예약·수동 백업·중복 동의 요청 없음.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/13 컬렉션 운영 적용 직후</summary>
 
