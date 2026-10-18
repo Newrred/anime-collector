@@ -1,5 +1,10 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 DF-02 운영 대조·후보 인수
+
+- W17/D05/D06: 운영은 기존 함수·service-only/예약 정상, test는 승인 수정 함수. 고아 응답 본문0, 활성 연결38·삭제대기 연결12와30일 초과 entity0을 본문 없이 집계했다. [실제 근거](evidence/2026-10-19-df02-production-candidate.json).
+- 기존 승인 SQL과 새 migration의 함수/ACL 동일, 합성 PostgreSQL15·안전7·동기화26 PASS. operationID/hash/status·활성/최근 본문 보존, 이미 부재한 entity 본문만 null. 함수 복귀는 이미 정리된 본문 복원이 아니다. 운영 쓰기/수동purge/배포0이며 hosted 행동 PASS로 쓰지 않는다.
+
 ## 2026-10-19 법률 고지 운영 인수
 
 - C02/C10·W17/D04/W14: 승인3e1f9f3 exact CI39146108987 두 job→master/Vercel Production/실제 www 동일 SHA. 현재 약관·개인정보·보충 KO/EN와 가입 읽기 링크 실제 화면 확인, 고정 원문3개 raw HTML/본문 불변. [운영 근거](evidence/2026-10-19-legal-service-notices-production.json).

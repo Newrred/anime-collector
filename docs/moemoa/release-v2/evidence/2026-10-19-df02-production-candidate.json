@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "taskIds": [
+    "W17",
+    "D05",
+    "D06"
+  ],
+  "status": "PRODUCTION_READ_ONLY_COMPARED_LOCAL_CANDIDATE_PREPARED_NOT_APPLIED",
+  "productionBase": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+  "production": {
+    "release": "MOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01",
+    "mode": "READ_ONLY",
+    "state": {
+      "at": "2026-10-18T17:38:01.865792+00:00",
+      "job": {
+        "active": true,
+        "schedule": "15 3 * * *",
+        "latestRun": {
+          "ended": "2026-10-18T03:15:00.244525+00:00",
+          "status": "succeeded",
+          "started": "2026-10-18T03:15:00.100441+00:00"
+        },
+        "expectedCommand": true
+      },
+      "impact": {
+        "bodyRows": 50,
+        "orphanBodies": 0,
+        "activeEntityBodies": 38,
+        "deletedEntityBodies": 12,
+        "unknownEntityTypeBodies": 0
+      },
+      "metadata": {
+        "acl": "{postgres=X/postgres,service_role=X/postgres}",
+        "anon": false,
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "public": false,
+        "returns": "jsonb",
+        "arguments": "p_now timestamp with time zone DEFAULT now()",
+        "serviceRole": true,
+        "authenticated": false,
+        "securityDefiner": true
+      },
+      "expiredEntities": {
+        "MEMORY_CARD": 0,
+        "MEMORY_BOARD": 0,
+        "VISUAL_ASSET": 0,
+        "PRIVATE_TITLE": 0,
+        "MEMORY_BOARD_CARD": 0
+      },
+      "baseMigrationPresent": true,
+      "entityTypeConstraint": "CHECK ((entity_type = ANY (ARRAY['PRIVATE_TITLE'::text, 'MEMORY_CARD'::text, 'VISUAL_ASSET'::text, 'MEMORY_BOARD'::text, 'MEMORY_BOARD_CARD'::text])))",
+      "candidateMigrationPresent": false,
+      "target": "production",
+      "readOnly": true,
+      "bodyFingerprint": "1685c42612f6214296cf06258ab37e919244fbf11e5977701ce71f1e49a5ef9a",
+      "originalFunction": true,
+      "approvedTestFunction": false,
+      "metadataSha256": "5c24cef493b342844aeeaef5a02468c8b2b86de072feb3ba2d017eb57818d8ae",
+      "rollbackDefinitionSha256": "a4cf15bedd98d8b9a91a28de90170e7ba4f3f9ddbcb81aad1abbc0de4aa8fb22",
+      "rollbackDefinitionFile": "df02-production-function-a4cf15bedd98d8b9a91a28de90170e7ba4f3f9ddbcb81aad1abbc0de4aa8fb22.sql"
+    }
+  },
+  "test": {
+    "at": "2026-10-18T17:35:55.651871+00:00",
+    "job": {
+      "active": true,
+      "schedule": "15 3 * * *",
+      "latestRun": {
+        "ended": "2026-10-18T03:15:00.438223+00:00",
+        "status": "succeeded",
+        "started": "2026-10-18T03:15:00.229979+00:00"
+      },
+      "expectedCommand": true
+    },
+    "impact": {
+      "orphanBodies": 0,
+      "activeEntityBodies": 26,
+      "deletedEntityBodies": 16,
+      "unknownEntityTypeBodies": 0,
+      "bodyRows": 42
+    },
+    "metadata": {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "anon": false,
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "public": false,
+      "returns": "jsonb",
+      "arguments": "p_now timestamp with time zone DEFAULT now()",
+      "serviceRole": true,
+      "authenticated": false,
+      "securityDefiner": true
+    },
+    "expiredEntities": {
+      "MEMORY_CARD": 0,
+      "MEMORY_BOARD": 0,
+      "VISUAL_ASSET": 0,
+      "PRIVATE_TITLE": 0,
+      "MEMORY_BOARD_CARD": 0
+    },
+    "baseMigrationPresent": false,
+    "entityTypeConstraint": "CHECK ((entity_type = ANY (ARRAY['PRIVATE_TITLE'::text, 'MEMORY_CARD'::text, 'VISUAL_ASSET'::text, 'MEMORY_BOARD'::text, 'MEMORY_BOARD_CARD'::text])))",
+    "candidateMigrationPresent": false,
+    "target": "test",
+    "readOnly": true,
+    "bodyFingerprint": "fa71dc53eabf4fa9bd57558c7de3740177c6fc99eb92010bb4b23f81eea0b32d",
+    "originalFunction": false,
+    "approvedTestFunction": true,
+    "metadataSha256": "5c24cef493b342844aeeaef5a02468c8b2b86de072feb3ba2d017eb57818d8ae"
+  },
+  "liveBuild": {
+    "commit": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+    "checkoutCommit": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+    "builtAt": "2026-10-18T16:56:12.903Z",
+    "workingTreeDirty": true,
+    "deploymentConfig": {
+      "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+      "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+      "semanticMatch": true
+    },
+    "source": "vercel-git"
+  },
+  "sourceFiles": [
+    {
+      "path": "supabase/migrations/20261019090000_memory_retention_response_cleanup.sql",
+      "lfSha256": "6e76373e99adce15cda01cf4d3b31a00bd76134737ede57e1a07def81a24616a"
+    },
+    {
+      "path": "tools/operations/inspect-retention-response.py",
+      "lfSha256": "2ce1141a1197a01a64077a576971ea810c2e579ef08462835e944c66691430cd"
+    },
+    {
+      "path": "tools/operations/apply-production-retention-response.py",
+      "lfSha256": "3023e0e5dae79c53a9fdbb5e8e6be78c1db15def49017725a7b892fa2d451210"
+    },
+    {
+      "path": "tools/operations/test_inspect_retention_response.py",
+      "lfSha256": "f5f01fcf56b56163c671aa759804f9aa5141b7fd8894523a95d5643f153584a1"
+    },
+    {
+      "path": "tools/operations/prepare-retention-response-release-fixture.py",
+      "lfSha256": "0d0196611fefd1e3674c814de449d495cca99aa76d177491e1bf7e1ea2526e05"
+    },
+    {
+      "path": "tools/operations/run-retention-local.sh",
+      "lfSha256": "8c890343be4c18ae6eda8ab369ea294fc5324daebb10b0d52c189af6adfc8a76"
+    }
+  ],
+  "candidate": {
+    "version": "20261019090000",
+    "releaseId": "MOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01",
+    "testedReference": "ebdff448032ec3c314a76aaa331243b1784e6346",
+    "functionBodyAndACLIdenticalToTestedReference": true,
+    "manualPurge": false,
+    "scheduleChanges": 0,
+    "operationIdsOrRowsDeleted": false
+  },
+  "validation": {
+    "localPostgresAssertions": 15,
+    "safetyUnitTests": 7,
+    "initialFailure": "Rollback fixture reconstructed source with LF instead of captured original CRLF definition; production was not accessed. Changed local fixture to restore the captured pg_get_functiondef; exact definition/permissions now pass.",
+    "limits": [
+      "No production DDL, ledger write, purge or payload read",
+      "No hosted data mutation or browser/Google test",
+      "Current zero orphan count is a snapshot; later scheduled cleanup may irreversibly scrub absent-entity bodies",
+      "Function rollback does not restore scrubbed private bodies",
+      "Test old base migration ledger is absent while approved function fingerprint is present; no test history rewrite performed"
+    ],
+    "syncEngineUnitTests": 26
+  },
+  "nextAction": "Exact candidate approval for master Git deployment and function/ledger migration only; existing daily job performs later cleanup"
+}

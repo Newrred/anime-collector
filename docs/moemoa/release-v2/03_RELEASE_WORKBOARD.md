@@ -1,5 +1,9 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-19 DF-02 운영 대조·후보 준비 완료
+
+운영 원본 함수/test 승인 수정본·같은 service-only 권한과 정리 예약을 읽기로 대조했다. 현재 운영 고아본문0·활성 연결38·삭제대기 연결12,30일초과entity0. 기존 SQL 그대로인 migration20261019090000/정확SHA 적용기·복귀 준비, SQL15·안전7·동기화26 PASS. [8항 보고](../reports/2026-10-19-df02-production-candidate.md), [근거](evidence/2026-10-19-df02-production-candidate.json). 운영 쓰기/배포0, 다음은 이 정확 후보 운영 승인이다.
+
 ## 2026-10-19 신고 운영 반영·법률 고지 구현
 
 **후속 법률 고지 운영 완료:** 승인3e1f9f3 exact CI39146108987 두 job SUCCESS→master Git→Vercel6Ekgdu8FU READY/Production/current www→실제 7개 URL와 약관/가입 안내 링크 확인. 고정 원문3개 HTML/본문 동일. [운영 8항 보고](../reports/2026-10-19-legal-service-notices-production.md), [근거](evidence/2026-10-19-legal-service-notices-production.json). 아래 로컬 후보는 이전 이력이다.
@@ -899,16 +903,18 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-현재 W: W09/W14 DF-01 운영 반영 완료; W17/D04·W14 법률 검토 서비스 고지 운영 배포/화면 확인 완료.
+현재 W: W17/D05·D06 DF-02 운영 read-only 대조·최소 후보 준비 완료. DF-01/법률고지 운영 완료 유지.
 운영: master/www3e1f9f3; CI39146108987 두jobPASS; Vercel6Ekgdu8FU READY/Production/Currentwww. 앞선DB20261018090000/releaseMOEMOA_DF01_REPORT_PROD_20261019_01은유지하며 이번DB변경0.
 법률 고지: /terms·/privacy 현재본문, /legal/service-operations-2026-10-19/ 보충 KO/EN, 가입/계정 링크. Vercel 이미지/GitHub 평문/주간증분/수동정리, 일반권리/한국임시조치/조건부TIDA 절차 반영.
 보존: 과거 고정10/10 약관·개인정보/10/11 공개고지, 가입tuple/publicrevision/receipt, KR14/US13/TH13·무료·일반공개. 자동메일/실자료쓰기0.
 검증: exact원격CI 두jobPASS, livecommit/checkoutCommit/sourcevercel-git/semanticMatch확인, HTTP7URL200·고정3원문rawHTML/본문불변, 실제약관→보충안내·가입→현재개인정보링크PASS. 기존로컬Chromium4/build34·중간hydration실패이력은별도보존.
 한계: 실제 Google·로그인receipt읽기·긴급조치/통지·신고UI는 이번 미검증. masterpush가중복실행한동일SHA CI39147243120은앞서통과한필수CI와구분.
 법적 잔여: 공급자별 국외처리 필수표/계약범위·보관종료기준, 저작권 법정수령인/반복침해 종료, 운영자의 긴급접수/기한관리 실제연결.
-기존 잔여: DF-02 운영대조·quota라벨·사진진단·master보호·임계알림·전체복구 serving 유지.
+DF-02 실측: 운영원본함수/test승인함수·같은ACL. 고아본문0/활성38/삭제대기12/30일초과entity0, 기존예약active/최신성공. SQL15·안전7·sync단위26 PASS. 운영DDL/purge/배포0.
+기존 잔여: DF-02 운영적용승인·quota라벨·사진진단·master보호·임계알림·전체복구 serving 유지.
 운영 완료 소스: 3e1f9f3553f9a03d22670ef2edbfe48f8914414b / master, 부모981d13e; 앱8·검사2·문서/참고원문50파일. 앱/검사blob는검증c285ca1과동일. 사용자정확승인수신·실행완료.
-다음 행동 하나: DF-02 기존test-only 동기화응답본문정리의 운영read-only대조·최소후보준비. 법률고지/신고완료승인재요청없음. 새원격후보는정확범위승인경계유지.
+DF-02 후보: supabase/migrations/20261019090000_memory_retention_response_cleanup.sql, releaseMOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01. 기존승인SQL본문/ACL동일. 수동purge없이기존일별정리에서부재entity본문만null, operation행/ID/hash/status/활성·최근본문보존. 이미정리된본문은함수복귀로복원불가.
+다음 행동 하나: DF-02 정확 운영 후보 승인→CI/master Git/Vercel→함수/ledger·독립readback. 법률고지/신고승인재요청없음.
 ```
 
 <details><summary>이전 현재 카드 — 10/19 DF-01 운영 후보 준비 직후</summary>
