@@ -1,5 +1,26 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W09/W14 DF-01 운영 대조·후보 준비 — 2026-10-19
+
+1. **목적/승인:** 사용자 요청에 따라 운영 현행을 읽어 대조하고 신고 오류 수정의 정확한 운영 후보를 준비한다. 운영 쓰기·push·배포 승인이 아니다.
+2. **확정 결정:** 기존 공개 범위·국가/가입·신고 정책·권한·한도·원본 보존 및 정확 후보별 원격 승인 경계를 유지한다.
+3. **근거:** 로컬 a6a63b6 수정/회귀와 test d222587 적용·a9a60f2 완료 기록을 재사용한다. 현재 운영 함수/ledger/Git/live SHA는 새로 조회한다.
+4. **범위:** production metadata read-only, origin/master 갱신 확인, 최소 후보 로컬 구성·검증·복귀 준비·기존 문서 인계. 실제 신규 신고/사용자행 조회·설정 변경·다른 DF 작업 제외.
+5. **흐름:** 운영 기준 조회→검증한 원본과 일치 확인→독립 운영 기준 후보→정확 blob/실행 도구 검증→최종 적용 게이트.
+6. **파일:** migration와 SQL 계약 4파일, 필요 시 운영 전용 적용 도구, 기존01/02/03·시작/운영 안내 및 증거. 개발 브랜치 전체 병합 금지.
+7. **DB:** 이번에는 변경0. 다음 후보의 대상은 submit_memory_report 함수1개와 migration ledger1건이며 별도 data release ID로 결속한다.
+8. **마일스톤:** 운영 read-only snapshot/복귀 정의→현재 master 기준 후보→로컬 검증/독립 검토→후보 SHA와 정확 영향 확정.
+9. **검증:** production 대상 allowlist/TLS, 구·신 body 및 원문 hash, 함수 ACL/owner/security/search_path/default, prerequisite ledger, Git/live 일치. 기존 행동 회귀는 blob가 같은 경우 재사용한다.
+10. **보안:** env/키/원시 SQL 오류/사용자 본문 출력 금지. 설정은 지문만 비교한다. 인증/정책·새 원격 쓰기 없음.
+11. **관측:** 로컬 행동 PASS, hosted metadata PASS, 원격 CI/운영 실행 미실행을 분리한다.
+12. **복귀:** 운영에서 읽은 기존 함수 정의를 ignored cache에 보존한다. 미래 적용은 guard 불일치/commit 전 오류 rollback, 불확실 결과는 읽기부터. Git revert와 DB 복귀는 별개다.
+13. **위험:** 동시 비협조적 DDL과 stale 기준을 무시하지 않는다. 실행 시 기준을 재조회하고 다른 migration/함수 변경은 덮지 않는다.
+14. **결정:** 이번 후보 준비는 승인되어 추가 질문 없이 진행한다. 정확 후보가 완성된 뒤 운영 적용 범위만 확인한다.
+15. **진행:** 운영 15:27 UTC read-only에서 old body724a91fd…b8cf1/수정이력없음·실제 prerequisite·ACL/metadata 확인. 새 운영 helper 기본읽기도15:32 UTC BASELINE_MATCH. 원격master/live a65f557 일치. 운영용 도구 로컬33검사 PASS, 독립검토 차단지적0. 검증된4파일 blob 그대로의 최소 후보를 만든다.
+16. **발견:** 새 codex branch push만으로 quality CI가 시작되지 않아 승인 후 workflow_dispatch/PR exact SHA 검사가 필요하다. 로컬 도구의 Git검사/운영OID·settings는 mock이고 실제SQL transaction/별도readback/rollback은 임시socket에서 실행했다. 첫 backup byte 검사는 테스트의 CRLF 정규화 문제로 실패했으나 제품 변경 없이 rawbytes 비교로 고쳐33항목 재통과했다.
+17. **완료 보고:** 운영 대조·도구·복귀 준비와 최소 후보를 [8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md)/[근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json)에 결속한다. 정확 후보 SHA는 단일 작업판 현재 카드를 따른다. 다음 하나는 이 후보의 정확 운영 적용 승인이다. remote CI/push/DB apply/Vercel 배포·실신고 생성은 미실행이다.
+
+
 ## W18/D06 운영 반영 후 잔여 대조 — 2026-10-13
 
 1. **목적:** 컬렉션 운영5d544ad 이후 이미 완료된 배포·공개·복구 작업을 다시 요구하지 않도록 단일 작업판을 실제 증거에 맞춘다.

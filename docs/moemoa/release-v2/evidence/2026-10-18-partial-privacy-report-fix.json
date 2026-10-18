@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "timezone": "Asia/Tokyo",
+  "scope": "LOCAL_SYNTHETIC_POSTGRESQL_ONLY",
+  "taskIds": [
+    "W09",
+    "W14",
+    "C03",
+    "C05",
+    "Q12",
+    "Q17"
+  ],
+  "defect": "DF-01",
+  "baselineCommit": "a54b149",
+  "candidateCommit": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+  "environment": {
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "execution": "WSL Ubuntu, postgres user",
+    "database": "fresh temporary cluster; Unix socket only; listen_addresses empty; pg_ctl exit trap",
+    "bootstrap": "Synthetic Auth/Storage model; not hosted HTTP",
+    "migrationChain": "All chronological migrations except pg_cron retention; existing resource fixture"
+  },
+  "defectReproduction": {
+    "runner": "tools/identity/run-public-signup-local.sh",
+    "baselineExitCode": 1,
+    "steps": [
+      "publish two synthetic cards with actual prepare/publish RPCs",
+      "make one card private through actual RPC",
+      "anonymous reader returns exactly one remaining public card",
+      "new reporter and new operation submit report"
+    ],
+    "observedFailure": "NOT_FOUND from public.submit_memory_report",
+    "baselineSource": "supabase/migrations/20260923213901_memory_moderation.sql:43-65"
+  },
+  "fix": {
+    "migration": "20261018090000_memory_report_partial_privacy.sql",
+    "function": "public.submit_memory_report(text,uuid,text,uuid,text)",
+    "changedPredicate": "board target id AND (published_operation IS NOT NULL OR (state IN (PUBLISHED,PREPARING) AND published_snapshot IS NOT NULL))",
+    "otherFunctionBodyUnchanged": true,
+    "tablesModified": 0,
+    "dataBackfill": false,
+    "privilegeChange": false,
+    "flagsOrPoliciesChanged": false
+  },
+  "validation": {
+    "currentChain": {
+      "command": "wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh",
+      "exitCode": 0,
+      "signupAssertions": 15,
+      "sharingAssertions": 16,
+      "newReportAssertions": 31,
+      "independentLockAssertions": 2
+    },
+    "publicationRegression": {
+      "command": "wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/publication-boundary/run-local-postgres.sh",
+      "exitCode": 0,
+      "passNotices": 440,
+      "newHistoricalWithdrawalAssertions": 3,
+      "concurrentReportQuota": true,
+      "concurrentModeratorRevisionAudit": true,
+      "log": {
+        "path": ".cache/df01-publication-regression.log",
+        "sha256": "e46ed42514cb2f85d4632db00bf743c74e5212b4b3c08cca928b781f179de482",
+        "bytes": 178977
+      }
+    },
+    "rollbackReapply": {
+      "command": "wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/.cache/df01-rollback-run.sh",
+      "exitCode": 0,
+      "passNotices": 66,
+      "additionalAssertions": 2,
+      "procedure": "Copy existing current-chain runner and final sharing contract into ignored cache. In the same transaction before new-report admission, capture pg_get_functiondef/proacl/proowner/proconfig, restore only previous submit definition from historical migration, verify NOT_FOUND, reapply new migration and compare exact metadata. Continue final contract including isolated no-store assertion, then ROLLBACK and existing two-connection locks.",
+      "checks": [
+        "partial privacy preserves public snapshot without a publish retry token",
+        "anonymous reader still sees only the remaining public card",
+        "anonymous report execution denied",
+        "new reporter has no receipt that could bypass target admission",
+        "restoring the previous function reproduces DF-01 without data changes",
+        "reapplication restores exact function definition, ACL, owner and search path",
+        "new reporter can report the board after partial privacy",
+        "receipt returns no private target or reporter data",
+        "partial-privacy report retry returns the same receipt",
+        "open duplicate does not create another case",
+        "report operation payload cannot change",
+        "another public board cannot admit a nonexistent target",
+        "null report target denied",
+        "reporter cannot read private case table",
+        "report response remains no-store",
+        "retries and failed targets insert no extra reports",
+        "existing receipt retry precedes disabled flag",
+        "new report respects disabled flag",
+        "new partial-privacy report respects daily quota",
+        "re-prepare still has no published operation",
+        "re-preparing a remaining public snapshot stays reportable",
+        "hidden board remains unreadable",
+        "hiding the remaining snapshot does not suppress reporting",
+        "read kill switch remains effective",
+        "public read/write kill switch does not disable reports",
+        "missing identity denied even with authenticated role",
+        "last-card privacy removes snapshot and retry token",
+        "last-card privacy does not admit a new report without publication history",
+        "unpublished private target denied",
+        "first preview without public snapshot denied",
+        "rejected private targets leave no report rows",
+        "report RPC argument contract and definer search path preserved",
+        "report RPC remains authenticated-only with no PUBLIC execute"
+      ],
+      "log": {
+        "path": ".cache/df01-rollback-result.log",
+        "sha256": "44b99cc08607ee6f63288cb4b5d81ff56db06ce120a90ced6e8892c18ebe2c1d",
+        "bytes": 8293
+      },
+      "rehearsalRunner": {
+        "path": ".cache/df01-rollback-run.sh",
+        "sha256": "76e12a751ad82b5e9ad1f881bda0d46daef760b78f1289f6908374ddd47eb840",
+        "bytes": 2882
+      }
+    },
+    "independentReview": {
+      "blockingFindings": 0,
+      "testFinding": "Clear response.headers before submit so reader no-store cannot cause false positive",
+      "findingAddressedAndRerun": true
+    },
+    "sourceComparison": "Only board predicate and its indentation differ from original function; home/idempotency/quota/advisory lock/headers retained",
+    "diffCheck": "PASS",
+    "countsNote": "Do not sum repeated runs/overlapping suites as distinct test coverage."
+  },
+  "sourceFiles": [
+    {
+      "path": "supabase/migrations/20261018090000_memory_report_partial_privacy.sql",
+      "sha256": "145ecdefac5dfc0435e4ef16fc1e3b6ae1354e1e128152c7d7e0af1ce1c51161",
+      "bytes": 2660
+    },
+    {
+      "path": "tools/publication-boundary/simple-card-sharing-contract.sql",
+      "sha256": "dab1a3a6123625cf7dd860d98fbd5650cd37423a2f5c36eac9fe678eb598f14f",
+      "bytes": 7563
+    },
+    {
+      "path": "tools/publication-boundary/partial-privacy-report-contract.sql",
+      "sha256": "9d59e3c93a955009f482e59429eaa070d074dc61fc558b897ec381eda38e978d",
+      "bytes": 9849
+    },
+    {
+      "path": "tools/publication-boundary/moderation-contract.sql",
+      "sha256": "4e9bae8d4abd036057305be3cb2c03eb4e03bd455964aae4908f8fc9fb33f12e",
+      "bytes": 10514
+    },
+    {
+      "path": "tools/identity/run-public-signup-local.sh",
+      "sha256": "40f8a67911a3257a7ca8ce65aeb0970161d714091450c757f71a0d52d3581b2f",
+      "bytes": 2931
+    },
+    {
+      "path": "tools/publication-boundary/run-local-postgres.sh",
+      "sha256": "428367bc1b54a9fc4f5f5f22b4ee755c5f609bd0201459c8d15952d07c1b2a9c",
+      "bytes": 7764
+    }
+  ],
+  "remoteActions": {
+    "hostedDatabase": false,
+    "productionDatabase": false,
+    "google": false,
+    "actualPublicUI": false,
+    "realUserData": false,
+    "gitPush": false,
+    "deployment": false
+  },
+  "nextAction": "Exact approval for applying candidate a6a63b6 migration to moemoa-test only, after inspecting current function/migration history and recording rollback definition. No UI deployment, flags, policy, privilege or source-image changes."
+}

@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "timezone": "Asia/Tokyo",
+  "defect": "DF-01",
+  "taskIds": [
+    "W09",
+    "W14",
+    "C03",
+    "C05",
+    "Q12",
+    "Q17"
+  ],
+  "scope": "PRODUCTION_READ_ONLY_COMPARISON_AND_LOCAL_CANDIDATE_PREPARATION",
+  "authorization": {
+    "userRequest": "운영 상태 대조하고 신고 오류 수정 운영 반영 후보 준비",
+    "productionWritesApproved": false,
+    "pushOrDeployApproved": false
+  },
+  "gitAndLive": {
+    "checked": "2026-10-18T15:27Z",
+    "fetch": "git fetch origin master",
+    "originMaster": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "url": "https://www.moemoa.xyz/build-info.json",
+    "commit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "checkoutCommit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "source": "vercel-git",
+    "builtAt": "2026-10-14T03:20:42.693Z",
+    "workingTreeDirty": true,
+    "deploymentConfigSemanticMatch": true,
+    "vercelManagementApiRechecked": false
+  },
+  "productionObservation": {
+    "at": "2026-10-18T15:27:15.829221+00:00",
+    "fixRecorded": false,
+    "historyHash": "0812c49641a3de42c247d30b5e1222ab",
+    "settingsHash": "5bb899d6667f4fd86fd435abea263480",
+    "relevantLedger": [
+      {
+        "name": "memory_moderation",
+        "version": "20260923213901"
+      },
+      {
+        "name": "simple_card_sharing",
+        "version": "20261011120000"
+      }
+    ],
+    "otherFunctionsHash": "f9771db3a9e45d53ae7341a4a7980c56",
+    "target": "okchpyagfucpzpyrfgol",
+    "readOnly": true,
+    "oldBodyMatches": true,
+    "newBodyMatches": false,
+    "normalizedBodySha256": "724a91fd4fdb97591b449cc55dedbf20b85746023e17f1840312bb6af00b8cf1",
+    "metadataSha256": "aa36896ae2bf60eec8d36749267a86ae5b42f9538664ee2758448b75d49b565d",
+    "authenticatedGranted": true,
+    "anonymousAndPublicDenied": true,
+    "securityDefiner": true,
+    "searchPath": [
+      "search_path=\"\""
+    ],
+    "argumentNames": [
+      "p_kind",
+      "p_target",
+      "p_category",
+      "p_operation",
+      "p_note"
+    ],
+    "argumentDefaults": "''::text",
+    "rollback": {
+      "path": ".cache/df01-production-20261019-rollback.sql",
+      "sha256": "eede81fc8e11861bde71af4f7996865d76d8e7ce5a5f6790d13903f6587ed15a"
+    }
+  },
+  "productionHelperReadOnly": {
+    "command": "wsl.exe -d Ubuntu -e python3 /mnt/e/web/anime/tools/publication-boundary/apply-partial-privacy-report-production.py",
+    "exitCode": 0,
+    "state": "BASELINE_MATCH",
+    "observedAt": "2026-10-18T15:32:00.425765+00:00",
+    "fingerprintsUnchangedFromFirstRead": true,
+    "databaseWrites": false
+  },
+  "candidate": {
+    "branch": "codex/df01-report-production-20261019",
+    "baseCommit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "verifiedSourceCommit": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+    "migration": "20261018090000",
+    "plannedReleaseId": "MOEMOA_DF01_REPORT_PROD_20261019_01",
+    "sqlAndContractFiles": [
+      {
+        "path": "supabase/migrations/20261018090000_memory_report_partial_privacy.sql",
+        "sha256": "145ecdefac5dfc0435e4ef16fc1e3b6ae1354e1e128152c7d7e0af1ce1c51161",
+        "identicalToVerifiedSource": true
+      },
+      {
+        "path": "tools/publication-boundary/partial-privacy-report-contract.sql",
+        "sha256": "9d59e3c93a955009f482e59429eaa070d074dc61fc558b897ec381eda38e978d",
+        "identicalToVerifiedSource": true
+      },
+      {
+        "path": "tools/publication-boundary/simple-card-sharing-contract.sql",
+        "sha256": "32f16c036bab486ddb1427ecc7710576329d11b155a39331f1b79bc206864f6c",
+        "identicalToVerifiedSource": true
+      },
+      {
+        "path": "tools/publication-boundary/moderation-contract.sql",
+        "sha256": "c35331471cc416616dd5337fba8b16db4e12a1e8f0483e43eabd1a6b59a90308",
+        "identicalToVerifiedSource": true
+      }
+    ],
+    "productionTool": {
+      "path": "tools/publication-boundary/apply-partial-privacy-report-production.py",
+      "sha256": "49674db0a2eb2da1e689ad6862aa898de6b97548c96a05112159ac86645b3247",
+      "default": "READ_ONLY",
+      "applyRequires": "--expected-commit full SHA; exact committed migration/runner/connection helper"
+    },
+    "exclude": [
+      "development-only collection tools",
+      "test apply helper",
+      "UI/API",
+      "dependencies",
+      "CI workflow",
+      "data",
+      "policy/flags/quotas"
+    ]
+  },
+  "verification": {
+    "reusedLocalEvidence": "2026-10-18-partial-privacy-report-fix.json",
+    "reusedHostedTestMetadataEvidence": "2026-10-18-partial-privacy-report-test-application.json",
+    "localHelperRehearsal": {
+      "command": "wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/.cache/df01-production-helper-local.sh",
+      "exitCode": 0,
+      "result": {
+        "scope": "LOCAL_SYNTHETIC_SOCKET_ONLY",
+        "assertions": 33,
+        "mocked": [
+          "Git subprocess for source guard tests",
+          "Git result for apply flow",
+          "production metadata/settings pins for local OIDs and settings",
+          "production connection replaced before main"
+        ],
+        "helperSha256": "49674db0a2eb2da1e689ad6862aa898de6b97548c96a05112159ac86645b3247",
+        "before": {
+          "functionBodySha256": "724a91fd4fdb97591b449cc55dedbf20b85746023e17f1840312bb6af00b8cf1",
+          "metadataSha256": "0e13725ef14eda3256e08229c669ed088f6ea14efb86a51eca2076d1df306cff",
+          "settingsHash": "0d50ad1dfc739e576074e5b97b24334d",
+          "otherFunctionsHash": "944dc170f3c58202a57c5ceb2c0ae0e3",
+          "historyHash": "c67ea3d7920e15c69a0668b9513afe91"
+        },
+        "after": {
+          "functionBodySha256": "b7b58512decade4d59ff4c993377778b0089d084023b55c77735bf3c937a7641",
+          "metadataSha256": "0e13725ef14eda3256e08229c669ed088f6ea14efb86a51eca2076d1df306cff",
+          "settingsHash": "0d50ad1dfc739e576074e5b97b24334d",
+          "otherFunctionsHash": "944dc170f3c58202a57c5ceb2c0ae0e3",
+          "historyHash": "c67ea3d7920e15c69a0668b9513afe91"
+        },
+        "sourceCommit": "1111111111111111111111111111111111111111",
+        "hostedConnections": 0
+      },
+      "log": {
+        "path": ".cache\\df01-production-helper-local-result.log",
+        "sha256": "8a696ec246c22575d2b6a61904b2248adebaa0722a4c17abf1a0aecb029dd1b9"
+      },
+      "firstAttempt": "Test backup comparison normalized CRLF; fixed test to compare raw bytes, no product change, rerun passed 33 checks."
+    },
+    "independentReview": "No blocking finding; default read-only, target/TLS, Git pin, exact ledger, atomicity/metadata preservation, unknown outcome and rollback limits checked",
+    "remoteCI": "NOT_RUN",
+    "actualHostedReportUI": "NOT_RUN",
+    "productionApplication": "NOT_RUN"
+  },
+  "rollback": {
+    "source": "Production pg_get_functiondef read only, not copied from test backup",
+    "definition": {
+      "path": ".cache/df01-production-20261019-rollback.sql",
+      "sha256": "eede81fc8e11861bde71af4f7996865d76d8e7ce5a5f6790d13903f6587ed15a"
+    },
+    "beforeCommit": "Any guard/SQL error rolls back function and ledger transaction",
+    "uncertainOutcome": "Read exact body/release ledger first; do not blind retry",
+    "afterCommit": "Guard current new body/metadata and exact release ledger before preparing an exact approved restoration of the previous function; Git revert alone is insufficient",
+    "concurrentDDL": "Release advisory lock does not serialize non-cooperating DDL"
+  },
+  "remoteActions": {
+    "productionReadOnly": true,
+    "userRowsRead": false,
+    "functionOrLedgerWrites": false,
+    "reportRPC": false,
+    "gitPush": false,
+    "deployment": false,
+    "newAuth": false,
+    "imageTransfer": false
+  },
+  "nextAction": "Exact candidate approval, then branch quality CI two jobs -> master Git/Vercel exact SHA -> report function + release ledger migration with independent readback. No policy/flags/user data changes."
+}

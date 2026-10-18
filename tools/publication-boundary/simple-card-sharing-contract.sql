@@ -37,6 +37,7 @@ select pg_temp.ok((public.get_memory_card_sharing('cccccccc-cccc-4ccc-8ccc-00000
 reset role;
 select pg_temp.ok((select count(*)=2 from private.memory_publications where jsonb_array_length(published_snapshot->'cards')=1),'all Board placements remove only selected card');
 select pg_temp.ok((select count(*)=0 from private.memory_publications p cross join lateral jsonb_array_elements(p.published_snapshot->'cards') c join private.memory_public_cards pc on pc.id::text=c->>'id' where pc.card_id='cccccccc-cccc-4ccc-8ccc-000000000001'),'no remaining snapshot exposes private card');
+\ir partial-privacy-report-contract.sql
 set role authenticated;
 select pg_temp.fails($q$select public.publish_memory_publication((current_setting('simple.preview')::jsonb->>'id')::uuid,(current_setting('simple.preview')::jsonb->>'revision')::bigint,current_setting('simple.preview')::jsonb->>'reviewHash','LOCAL_SIMPLE',gen_random_uuid())$q$,'PUBLICATION_CONFLICT','old pending preview cannot re-expose private card');
 select pg_temp.publish_board();

@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-19 DF-01 운영 후보 준비: 운영 함수는 old baseline, fix 이력 없음. 원격 master/www a65f557 일치. 검증한 SQL4파일과 운영 전용 실행 도구만 후보로 구성. 운영 쓰기/배포/원격 CI는 미실행이며 정확 후보 적용 승인 대기. 이전 기록은 보존하며 현재 상태는 이 후속 기록을 따른다.** [범위·8항 보고·복귀](docs/moemoa/reports/2026-10-19-partial-privacy-report-production-candidate.md).
+
 > **2026-10-14 화면·이동 개선 운영 반영 승인:** 사용자 “문제 없으면 지금까지 작업 본 운영으로 업뎃 ㄱㄱ”. 운영5d544ad 기준에 검토7e8bd78/0be7c4a의 UI·회귀 범위만 옮겼다. 개발 도구16개 전체 병합·DB/환경/flags 변경 없음. [운영 후보·확인 절차](docs/moemoa/reports/2026-10-14-production-ui-navigation-release.md), [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)을 우선한다. 아래 로컬/미승인 표시는 당시 이력이다. 현재 원격 master·Service quality·Vercel Git·www build-info를 정확 SHA로 대조해 완료 여부를 확인한다.
 
 > **2026-10-14 내부 이동 안정화:** 활성 링크의 강제 reload와 프로그램 이동을 정리하고 같은 상단 메뉴를 유지했다. 기준의 주요3회 문서 이동→개선 built static0회, 고유 Chromium117/단위630/build33 PASS. [구조 분석·8항 보고](docs/moemoa/reports/2026-10-14-navigation-structure-and-stability.md)와 [단일 작업판 현재 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md)를 우선 읽는다. 현재 실행 폴더/확정 commit은 THIS_PC_HANDOFF에 결속한다. 내용의 owner 확인/데이터 읽기·OAuth/Native 경계는 유지하며 운영/DB/환경/실자료 변경0. 아래 문서·화면 보완과 운영 인수는 유지된 이전 결과다.

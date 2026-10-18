@@ -1,5 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 DF-01 운영 후보 준비
+
+2026-10-19 DF-01 운영 후보 준비: 운영 함수는 old baseline, fix 이력 없음. 원격 master/www a65f557 일치. 검증한 SQL4파일과 운영 전용 실행 도구만 후보로 구성. 운영 쓰기/배포/원격 CI는 미실행이며 정확 후보 적용 승인 대기. 이전 기록은 보존하며 현재 상태는 이 후속 기록을 따른다.
+
+[정확 범위·8항 보고·복귀](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json).
+
 ## 2026-10-13 수용 근거 대조 — 계약 변경 없음
 
 다른 PC `b3b4669`의 누락된 완료 근거를 복구했다. C01~C12의 정의·필수 경계를 줄이지 않고, 같은 실행을 다시 요구하지 않도록 단일 작업판의 실제 인수 상태만 갱신한다.

@@ -1,5 +1,11 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-19 DF-01 운영 후보 준비
+
+2026-10-19 DF-01 운영 후보 준비: 운영 함수는 old baseline, fix 이력 없음. 원격 master/www a65f557 일치. 검증한 SQL4파일과 운영 전용 실행 도구만 후보로 구성. 운영 쓰기/배포/원격 CI는 미실행이며 정확 후보 적용 승인 대기. 이전 기록은 보존하며 현재 상태는 이 후속 기록을 따른다.
+
+[정확 범위·8항 보고·복귀](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json).
+
 ## 현재 작업 — 2026-10-14 화면·이동 개선 운영 반영
 
 사용자가 검증 후 운영 반영을 승인했다. 운영5d544ad 기준에 문서·화면7e8bd78와 이동 안정화0be7c4a의 검토 범위만 결속한 후보를 준비했다. 과거 개발 tool16개는 포함하지 않는다.
@@ -822,6 +828,18 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 DF-01 운영 read-only 대조·최소 후보 준비 완료; 운영 반영 승인 대기.
+후보: 현재 Git commit / codex/df01-report-production-20261019; 원본 SQL a6a63b6, 운영 기준 a65f557.
+실제 근거: 운영 oldbody724a91fd…b8cf1/이력없음, master/www commit 일치. 로컬 행동 회귀와 승인된 test 함수/ACL 인수 재사용.
+변경: migration20261018090000·SQL계약3개·운영전용도구·해당 문서/증거만. UI/API/의존성/가입/권한/flags/한도 변경 없음.
+복귀: 운영 직전 함수 보존·atomic guard·실패시rollback·불명확결과read-only 우선. Git revert만으로DB가 복귀되지 않음.
+한계: 운영apply/hosted새신고/원격CI/master push/Vercel새배포 미실행. 다른 W/D 잔여를 완료로 바꾸지 않음.
+다음 행동 하나: 이 정확 후보 승인 후 branch CI두job→master Git/Vercel exact SHA→production 함수1개/ledger1건 적용·별도readback.
+```
+
+<details><summary>이전 현재 카드 — DF-01 운영 후보 준비 이전</summary>
+
+```text
 현재 W: W18/D06 운영 반영 후 증거 대조 완료; W17/D05는 설치 후 관찰 단계.
 실제 결과: 다른 PC b3b4669의 누락 evidence 25키를 기존 JSON2개에만 병합. 공통키 충돌0/덮어쓰기0, 과거 실패·남은조건 기록 보존.
 운영: ea8f388 첫 Public 필수 흐름 인수 완료 + 5d544ad 컬렉션 연결 완료. 이번 읽기에서 www commit/checkoutCommit/source 및 origin/master 일치.
@@ -831,6 +849,8 @@
 별도 관찰: 기존 개인 이미지 로딩 실패는 원인 미확정. 관련 기존 transfer unit12 PASS, source 변경0. 재업로드/삭제/대신 공개하지 않음.
 다음 행동 하나: 2026-10-18 03:00 JST/KST 이후 기존 GitHub 주간 백업의 schedule 실행 결과를 읽기로 확인하고 W17/D05에 기록한다. 새 예약·수동 백업·중복 동의 요청 없음.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/13 컬렉션 운영 적용 직후</summary>
 
