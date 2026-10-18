@@ -4,6 +4,8 @@
 
 **같은 날 Pro 검토안 대조 보완:** [인수 보고](../reports/2026-10-18-pro-legal-operations-intake.md)에 실제 신고/보존 결함과 정책·자동화 제안을 분리했다. 이번 보완은 내부 문서이며 운영·기존 수락 문서·회원 범위는 그대로다.
 
+**같은 날 신고 결함 로컬 수정:** W09/W14 후보 a6a63b6으로 부분 비공개 후 신규 신고 실패를 재현·수정했고 격리 SQL·함수 복귀 검사를 통과했다. [결과/적용 범위](../release-v2/01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01--실행-8항-보고). 운영에 반영됐다는 뜻은 아니며 현재 운영 SHA는 아래 기존 값이다.
+
 ## 1. 지금 어디까지 됐나
 
 **첫 Public Web 출시는 운영 반영된 상태다.** 남은 표의 VERIFY는 모든 경계 조건까지 검증했다는 뜻으로 DONE을 쓰지 않았기 때문이며, 핵심 기능이 모두 미구현이라는 뜻이 아니다.
@@ -190,4 +192,4 @@ GitHub secrets는 다시 내려받아 읽는 보관함이 아니다. 새 PC는 �
 - 백업/CA 도구: `tools/operations/inspect-retention.py:22–47`, `tools/operations/capture-daily-backup.py:28–36`, `tools/operations/prepare-daily-backup.mjs:110–118`. daily 도구의 존재를 현재 daily 예약으로 읽지 않는다.
 - 앞선 W17/D05 예약 관찰에서는 문서/증거 정리와 로컬 test server env 한 파일의 ACL 제한을 수행했다. 원래 ACL은 ignored `.cache/pc-handoff-20261018-test-server-acl.sddl`에 보존했으며 키 내용은 변경하지 않았다. 뒤이은 Pro 검토안 인수는 내부 문서 정정만 했고 앱·DB·운영 설정·ACL을 추가 변경하지 않았다.
 
-**다음 행동 하나:** W09/W14의 부분 철회 후 남은 공개물에 대한 신규 신고를 격리 DB에서 재현하고 최소 수정한다. W06/W18 개인 사진 진단과 기존 다른 잔여는 보존한다. 새 운영 DB/정책/배포 변경은 정확한 후보와 영향에 대한 승인 범위를 따른다.
+**다음 행동 하나:** 로컬 검증한 W09/W14 후보 a6a63b6의 신고 함수 migration1개를 moemoa-test에 적용하는 정확 승인을 받는다. 적용 전 현행 함수/이력·복귀 정의를 대조한다. UI배포·권한/flags/가입·정책/원본 변경은 포함하지 않는다. W06/W18 개인 사진 진단과 기존 다른 잔여는 보존하며 운영 반영은 별도 정확 후보 절차를 따른다.

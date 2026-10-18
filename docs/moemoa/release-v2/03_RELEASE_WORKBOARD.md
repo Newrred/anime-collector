@@ -1,5 +1,12 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-18 W09/W14 DF-01 로컬 수정 완료
+
+- 사용자 지시대로 문서상 첫 결함을 격리 PostgreSQL16에서 재현했다. 익명 남은1장열람 성공/새신고 NOT_FOUND → 후보 **a6a63b6** 적용 후 새신고 접수 성공.
+- 함수1개 대상 판정만 보완; 테이블/실자료/권한/flags·UI/운영 변경0. 실제 partial privacy가 지운 게시 retry token을 복구하지 않고 남은 공개 snapshot 상태를 인정한다. 최초 private/preview·없는ID·마지막카드제거의 신규 신고는 거절, 일반 철회 후 기존 역사적 신고는 유지한다.
+- 신규31항목, 기존 signup15/sharing16/독립락2, publication runner440 PASS notices. 함수 복귀·재적용2검사 PASS. 같은 검사를 중복 합산하지 않는다. 독립 코드 리뷰의 no-store 테스트 간섭1건 보완 후 PASS.
+- [계획·8항 보고](01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01--실행-8항-보고), [실제 근거](evidence/2026-10-18-partial-privacy-report-fix.json). **다음 하나는 a6a63b6의 함수 migration을 moemoa-test에 적용하는 정확 승인**. 이번 hosted·운영·master push·배포는 미실행이며 DF-02·고지·사진 등 기존 잔여는 그대로다.
+
 ## 2026-10-18 Pro 법적·운영 검토안 인수
 
 - [첨부 대조 보고](../reports/2026-10-18-pro-legal-operations-intake.md)와 [참고 원문/출처 manifest](../references/legal-operations-review-20261018/README.md)를 추가했다. 원본3개·ZIP33개 entry 확인, 텍스트35개 보존. 새 정책/실행 승인으로 자동 채택하지 않는다.
@@ -871,6 +878,19 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 DF-01 로컬 재현·최소 수정·회귀·복귀 검증 완료. hosted 미적용.
+코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; migration 20261018090000_memory_report_partial_privacy.sql.
+이번 실제 결과: 두카드공개→한카드private→익명남은1장→새신고 NOT_FOUND를 기존 함수에서 재현. 수정 후 접수 및 새 경계31항목 PASS.
+회귀/복귀: signup15/sharing16/독립락2, publication440 PASS notices. 이전함수복원→오류재현→새함수/ACL/owner/search_path 정확복구2항목 PASS. 반복 결과 중복 합산 안 함.
+변경 범위: submit_memory_report의 board 대상 predicate1곳; 테이블/실자료/권한/flags/가입/정책/UI/운영 변경0. 코드/문서 로컬 commit, 원격 push0.
+차단/조건: moemoa-test 현행 정의·migration 이력·복귀 후보 대조와 정확 적용 승인이 필요. 이번 hosted/PostgREST/UI/운영 PASS 아님.
+기존 잔여: DF-02 test-only의 운영대조, quota 라벨·고지 후보, W06/W18 사진 진단, master보호·임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 재요구 없음.
+다음 행동 하나: 후보 a6a63b6의 함수 migration1개를 moemoa-test에 적용하는 정확 승인. UI배포/새Public/가입·한도/원본 변경 제외.
+```
+
+<details><summary>이전 현재 카드 — 10/18 Pro 검토안 인수 직후</summary>
+
+```text
 현재 W: W09/W14 부분 철회 후 신규 신고 조건 불일치의 로컬 재현·최소 수정 준비.
 이번 실제 결과: Pro 첨부3개/ZIP33entry/문서3개 추출·현재소스·과거실행 대조. 신고 조건·한도 라벨 불일치 확인. 첨부patch apply --check PASS/미적용.
 보존 결함: DF-02는10/10 로컬12PASS·test-only 적용 완료; 운영 반영과 현재 영향은 미확인. 기존 후보/증거 재사용.
@@ -880,6 +900,8 @@
 기존 잔여: W06/W18 개인사진 원인진단, master보호, 임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 설치 재요구 없음.
 다음 행동 하나: 격리 DB에서 2카드공개→1카드private→남은공개물 새신고를 재현하고 대상인정만 최소수정. 신규원격후보는 정확승인 경계 유지.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/18 예약 관찰·분석 세트 제공 직후</summary>
 

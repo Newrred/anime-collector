@@ -20,6 +20,17 @@
 16. **발견:** 새 runner가 필요하지 않았다. 기존 CI의 `tools/identity/run-public-signup-local.sh`가 시간순 전체 migration과 simple-sharing 계약을 실행하므로 include1줄로 연결했다. 독립 diff 검토에서 헤더 검사의 이전 reader 영향 가능성을 찾아 신규 신고 직전 초기화로 보완했고 재검증했다. 기존 generic revoke는 operation을 보존해 철회 후 신고가 가능하며 이를 축소하지 않는다.
 17. **완료 보고:** DF-01 로컬 재현·SQL 수정·회귀·함수 복귀 검증 완료. 실제 hosted/Google/UI·운영 적용은 미실행이며 다음 하나는 정확 후보의 moemoa-test 함수 적용 승인이다. 세부 근거와 8항 보고는 아래 후속 완료 보고/단일 작업 카드에 결속한다.
 
+### W09/W14 DF-01 — 실행 8항 보고
+
+1. **읽은 문서/파일:** AGENTS·CODEX_START_HERE·확정01·PLANS·감사03·UGC05·설계06·QA07·변경09·기존 release01/02/03·Pro 인수 보고. 실제 [submit 원본 43–65행](../../../supabase/migrations/20260923213901_memory_moderation.sql), [부분 비공개 30–61행](../../../supabase/migrations/20261011120000_simple_card_sharing.sql), publication/mini-home reader·일반 revoke, PublicMemoryBoard의 MemorySafety 연결, 기존 signup/sharing/moderation 계약과 CI를 대조했다.
+2. **가정/미확정:** 사용자가 이번 로컬 재현·수정을 승인했다. 합성 Auth/Storage 모델을 쓴 PostgreSQL 결과이며 실제 hosted schema·PostgREST·UI·Google·운영 적용 확인은 아니다. 이미 공개됐던 일반 철회 대상의 신고 허용을 새 결함으로 취급하지 않는다.
+3. **계획:** 위17항 ExecPlan. 새 작업판/제품 결정/신고 정책을 만들지 않고 W09/W14·C03/C05·Q12/Q17의 빠진 조합을 닫는다.
+4. **변경:** 로컬 코드 후보 `a6a63b687a8f29d748ffa8047a17e6d9f5826ee6`. [새 migration 5–30행](../../../supabase/migrations/20261018090000_memory_report_partial_privacy.sql)은 submit 함수의 board 대상 조건만 변경한다. [새 회귀 계약](../../../tools/publication-boundary/partial-privacy-report-contract.sql)은 실제 두 카드 게시/부분 철회 뒤 실행되며 기존 simple-sharing include1줄로 CI에 연결했다. moderation 계약에 일반 Board/home 철회 신고 보존3검사를 추가했다. 현재 문서/증거는 후속 커밋으로 결속한다.
+5. **DB/복귀:** 테이블/실자료/flags/ACL 변경0, PostgreSQL 임시 cluster에서만 함수 CREATE OR REPLACE. 이전 함수 복원→같은 신규 신고 NOT_FOUND, 새 migration 재적용→정의/ACL/owner/search_path 정확 복구→신고 성공을 검증했다. 기존 migration 전체를 다시 실행하는 복귀 방식은 쓰지 않는다.
+6. **검증/명령:** `wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh` 수정 전 exit1/NOT_FOUND, 수정 후 exit0. signup15·기존sharing16·새신고31·독립세션락2 PASS. `tools/publication-boundary/run-local-postgres.sh` exit0/440 PASS notices: 기존 신고 quota/동시 요청/관리자/권리/철회/복구 포함. ignored `.cache/df01-rollback-run.sh`는 동일 runner/최종 계약에 이전 함수 복귀·재적용2검사만 삽입해 exit0/66 PASS notices. 같은 검사의 재실행을 고유 합계에 더하지 않는다. 비교 스크립트의 첫 assertion은 조건행 공백까지 비교해 실패했고 보정 후 조건 외 본문 동일 PASS; 제품 코드 실패가 아니다. `git diff --check` PASS.
+7. **보안/개인정보/권리/관측:** target ID 괄호·auth·no-store·quota·락·멱등성·home 경로·부여 권한 그대로. report는 id/status만 반환하고 private 본문/owner를 노출하지 않는다. 부분 공개/재준비/숨김/읽기 중단 후 신고는 가능하지만 최초 private/preview만/없는ID/마지막카드제거는 신규 fallback 거절. 기존 general revoke의 역사적 신고 경로 유지. 독립 리뷰의 no-store 테스트 간섭 지적은 신고 직전 header 초기화로 해결·재검증했다. 새 로그/알림/분석 수집·원본 업로드 없음.
+8. **남은 위험/다음 게이트:** 원격/운영 미적용, 전체 프런트나 실제 신고 화면 PASS 주장은 없다. **다음 하나는 후보 a6a63b6의 migration `20261018090000_memory_report_partial_privacy.sql`을 moemoa-test에 적용하는 정확 승인**이다. 대상은 submit 함수1개이며 UI배포·Public 활성·가입/정책/요금·원본 변경을 포함하지 않는다. 적용 전 해당 환경의 현행 함수/이력 대조와 복귀 정의 확보 후 실행한다. 운영은 별도 정확 후보 승인·Git master 추적 절차를 따른다. [실제 근거](evidence/2026-10-18-partial-privacy-report-fix.json).
+
 ## GPT Pro 법적·운영 검토안 인수 — 2026-10-18
 
 1. **목적:** 앞서 제공한 dfa6426 분석 세트에 대한 DOCX·수정안·운영 ZIP을 현행 소스와 완료 증거에 대조하고 실제 결함과 새 제안을 분리한다.

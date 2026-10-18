@@ -1,5 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-18 DF-01 로컬 회귀 인수
+
+- C03/C05/Q12/Q17: 실제 SQL 두 카드 게시→한 카드 비공개→익명 남은1장열람→새 신고자의 새 신고 경로에서 기존 NOT_FOUND를 재현했다. 후보 a6a63b6에서 접수 성공. 기존 receipt 재사용으로 우회한 검사가 아니다.
+- 신규 경계31항목과 기존 signup/sharing/락, publication 회귀 PASS. 최초 비공개·첫 preview·없는 ID·마지막 카드 제거의 거절, no-store·ACL·한도·중복·일반 철회 후 역사적 신고를 유지한다. 기존 함수 복귀/재적용도 검증했다.
+- [실행 근거](evidence/2026-10-18-partial-privacy-report-fix.json). **LOCAL SQL만 완료**, hosted/PostgREST/UI/운영 검증은 잔여다. 24개 QA 전체나 전체 출시 항목을 DONE으로 승격하지 않는다. 다음은 정확 후보의 테스트 DB 적용 승인이다.
+
 ## 2026-10-18 Pro 검토안 인수 — 기존 계약의 빠진 조합
 
 - C03/C05/Q12/Q17: 2카드 공개→1카드 private→남은 공개 snapshot 읽기→**새 신고자·새 operation의 신고**를 함께 재현한다. 현재 정적 불일치는 [인수 보고](../reports/2026-10-18-pro-legal-operations-intake.md)에 있다. 이전 신고의 idempotent 반환을 신규 접수 PASS로 쓰지 않는다. 신고 quota/owner/숨김·철회 대상의 기존 정책은 유지한다.

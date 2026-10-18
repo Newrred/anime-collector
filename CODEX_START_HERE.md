@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-18 DF-01 로컬 수정 완료:** 부분 카드 비공개 후 신규 신고 NOT_FOUND를 PostgreSQL16에서 재현하고 후보 **a6a63b6**으로 보완했다. 남은 공개 snapshot만 신고 대상으로 인정하며 원래 신고/숨김/한도/멱등성/ACL을 보존한다. [계획·8항 보고](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01--실행-8항-보고)와 [검증 근거](docs/moemoa/release-v2/evidence/2026-10-18-partial-privacy-report-fix.json)를 읽는다. **다음 하나는 해당 함수 migration의 moemoa-test 적용 승인**이다. 이번 hosted/UI/운영·master push/배포는 미실행. 아래 인수 당시의 ‘재현 전’은 이력이며 DF-02/사진/법적 고지 등 나머지 잔여는 유지한다.
+
 > **2026-10-18 Pro 법적·운영 검토안 인수:** 첨부3개를 현행 소스·과거 증거와 대조했다. [인수 보고](docs/moemoa/reports/2026-10-18-pro-legal-operations-intake.md)를 읽고 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)에서 이어간다. 부분 철회 후 신규 신고 조건 불일치가 확인돼 **다음 하나는 W09/W14 격리 재현·최소 수정**이다. 응답 본문 정리는 이미test-only 적용됐으며 운영 근거는 잔여; 재작성하지 않는다. W06/W18 사진 진단도 보존한다. 이번은 문서 인수이며 앱/DB/고정 약관/운영 변경0. 새 관리자·자동메일·보관기간·8주 홍보 계획은 미승인 제안으로 분리했다. 아래 예약 완료/사진 우선은 이전 시점 기록이다.
 
 > **2026-10-18 예약 관찰·운영 정리 완료:** 첫 실제 주간 백업39065955924(schedule)와 capture/checkpoint 단계 SUCCESS, 05:15~05:20 JST/KST. 예정03:00보다 늦어 정시 보장으로 읽지 않는다. master/www=`a65f557` 재확인, 정리 예약도 실제 단계 성공. [개발·운영·법적 준비·키 안내](docs/moemoa/operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md)와 [기존 단일 작업 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)를 먼저 읽는다. master protected:false는 운영 보호 후보 잔여, 로컬 test server env ACL만 기존 prod 수준으로 제한했다. 현재 공개 서비스·가입 범위는 유지. 다음 하나는 **W06/W18 기존 개인 사진 로딩 실패의 최소 재현·진단**이며, 완료된 예약 설치/독립키/기본 DB 복구를 다시 요구하지 않는다. 아래 ‘예약 미조회’와 과거 Public off는 당시 이력이다.
