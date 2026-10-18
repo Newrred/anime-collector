@@ -1,5 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 DF-01 운영 후보 인수
+
+- 운영 read-only에서 원본 body/권한·인자/default·SECURITY DEFINER/빈 search_path와 실제 prerequisite ledger를 확인했다. 수정 이력은 없고 원격 master/live는 a65f557이다. 이 조회가 실제 신고 성공을 뜻하지 않는다.
+- 후보는 검증한 a6a63b6의 migration·SQL 계약4파일을 그대로 이식한다. 기존 로컬 행동/복귀 및 test DB metadata 근거를 재사용하고, 운영 전용 실행 도구의 새 검증과 exact blob 대조는 [후보 근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json)에 별도로 기록한다.
+- 실제 운영 인수는 정확 승인 후 candidate CI2job·Git master/Vercel SHA·migration release/별도 readback까지 확인해야 한다. 현재는 **운영 미반영 / remote CI 미실행**이다. [범위·복귀·8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md).
+
 ## 2026-10-18 DF-01 테스트 DB 정의·권한 인수
 
 - 사용자 승인한 test-only migration20261018090000/a6a63b6 반영 및 독립 연결 readback PASS. 현행 함수 정확 baseline 대조, 기존 ACL/owner/인자/default/search_path·설정·다른 함수·기존 migration 이력 보존을 확인했다.

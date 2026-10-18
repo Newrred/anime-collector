@@ -1,5 +1,12 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-19 W09/W14 DF-01 운영 대조·후보 준비
+
+- 정확 운영 후보 `981d13e0eb7a60e6ce86838f821f71c84d1d518b`, `codex/df01-report-production-20261019`. 운영 기준 a65f557 위 최소13파일이며 원격 push/적용 전이다.
+- 운영 원본 함수가 로컬 재현 baseline과 정확히 같고, 수정 migration 이력은 없다. 테스트의 timestamp alias와 달리 운영은 원본 migration version/name으로 기록되어 있다. 새 조회에서 원격 master와 live build-info는 a65f557/source vercel-git 일치.
+- [운영 반영 범위·실행 순서·복귀·8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [읽기/후보 증거](evidence/2026-10-19-partial-privacy-report-production-candidate.json). 기존 검증한 SQL4파일을 현재 master에만 이식하고 운영 전용 도구/관련 문서만 더한다. 개발 브랜치 전체 병합은 하지 않는다.
+- 운영 쓰기·master push·배포·hosted 새 신고는 미실행이다. 정확 후보와 다음 행동은 아래 현재 카드에 기록하며, 이전 테스트 완료와 다른 W/D 잔여는 그대로 보존한다.
+
 ## 2026-10-18 W09/W14 DF-01 테스트 DB 적용 완료
 
 - 사용자의 “이 후보 테스트 DB에만 적용” 승인으로 a6a63b6/SQL20261018090000을 moemoa-test에 반영했다. 함수1개+release 이력1건이며 운영·UI배포·사용자행/원본·설정·권한 변경0.
@@ -885,6 +892,20 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 DF-01 운영 현행 대조·최소 운영 후보 준비 완료. 실제 운영은 old 함수 유지.
+운영 후보: 981d13e0eb7a60e6ce86838f821f71c84d1d518b; branch codex/df01-report-production-20261019; base a65f557e84659a0638ee44a8c4a911173dd554b2.
+포함: 검증 a6a63b6과 동일한 SQL4파일 + 운영전용helper1개 + 관련문서8개 = 13파일. UI/API/의존성/workflow 변경0.
+실제 관측: 2026-10-18 15:27/15:32 UTC production read-only BASELINE_MATCH·fix ledger없음. origin/master와www a65f557 일치.
+검증: 기존local행동/복귀·test DBmetadata 인수 재사용, 신규helper 로컬33 PASS(운영OID/settings·Git mock 분리), 독립리뷰 차단0·정확4blob 일치.
+복귀: .cache/df01-production-20261019-rollback.sql, hash eede81fc…87ed15a. 미래실행 전 원본/metadata 재보관·atomic guard·불명확결과read-only 우선.
+실행 한계: candidate remote CI·push·master Git/Vercel신규배포·production DDL/ledger·실제hosted신고 미실행. 새키/사진/가입/정책/한도 변경 없음.
+기존 잔여: DF-02 운영대조·quota라벨·고지·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 정확 후보 981d13e 승인 후 branch CI두job→master Git/Vercel exact SHA→운영 함수1개/ledger1건 적용·별도readback. 준비 요청을 적용 승인으로 확대하지 않음.
+```
+
+<details><summary>이전 현재 카드 — 10/18 DF-01 테스트 적용 직후</summary>
+
+```text
 현재 W: W09/W14 DF-01 로컬 행동검증 + 승인된 테스트 DB 함수/이력 적용·권한검증 완료.
 코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; 적용도구 d222587; migration20261018090000.
 실제 대상/결과: moemoa-test(nmgkhknponvzcwliajyk), release MOEMOA_DF01_REPORT_TEST_20261018_01. commit/별도readback 2026-10-18 14:35:15 UTC, 추가read-only 14:35:24 UTC PASS.
@@ -894,6 +915,8 @@
 기존 잔여: DF-02 운영대조·quota라벨·고지 후보·사진진단·master보호·임계알림·전체복구 serving 유지.
 다음 행동 하나: 운영 현행 신고 함수/이력 읽기 대조 후 이 수정만의 정확 운영 후보 준비. 운영 변경/master push는 별도 정확 승인.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/18 DF-01 로컬 검증 직후</summary>
 
