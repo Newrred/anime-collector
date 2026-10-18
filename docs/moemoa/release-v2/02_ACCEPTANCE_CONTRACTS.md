@@ -1,5 +1,10 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-18 DF-01 테스트 DB 정의·권한 인수
+
+- 사용자 승인한 test-only migration20261018090000/a6a63b6 반영 및 독립 연결 readback PASS. 현행 함수 정확 baseline 대조, 기존 ACL/owner/인자/default/search_path·설정·다른 함수·기존 migration 이력 보존을 확인했다.
+- [적용 증거](evidence/2026-10-18-partial-privacy-report-test-application.json). 앞선 C03/C05/Q12/Q17 로컬 행동 검증은 유지하며 이번 metadata 검사를 hosted UI/실신고 생성/운영 PASS로 바꾸지 않는다. 다음은 DF-01 운영 현행 읽기 대조와 정확 후보 준비다.
+
 ## 2026-10-18 DF-01 로컬 회귀 인수
 
 - C03/C05/Q12/Q17: 실제 SQL 두 카드 게시→한 카드 비공개→익명 남은1장열람→새 신고자의 새 신고 경로에서 기존 NOT_FOUND를 재현했다. 후보 a6a63b6에서 접수 성공. 기존 receipt 재사용으로 우회한 검사가 아니다.

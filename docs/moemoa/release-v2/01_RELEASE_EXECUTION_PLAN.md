@@ -16,9 +16,20 @@
 12. **복귀:** ignored cache에 사전 함수 정의 보존. commit 전 검사 실패는 transaction rollback. 통신 결과 불확실 시 읽기 점검부터 하고 재실행하지 않는다. commit 후 추가 역변경은 별도 필요가 있을 때 정확 범위를 확인한다.
 13. **위험:** 다른 작업의 선행 함수 변경/이미 적용/연결 대상 오류를 그대로 덮지 않는다. 코드가 승인 SHA와 다르면 실행하지 않는다.
 14. **결정:** 이 정확 test 후보는 승인 완료, 반복 승인 요청 없음. 운영 적용은 이 승인에 포함되지 않는다.
-15. **진행:** 문서·현행 코드·원격 적용 도구 읽기, 독립 preflight/transaction 검토 진행 중.
-16. **발견:** 현행 test env·CA 경로와 대상 검증 helper가 있어 새 인증·브라우저 입력은 요구하지 않는다. 실제 접속 성공 여부는 아직 미검증.
-17. **완료 보고:** 실행 후 실제 적용 이력/권한/정의 결과·잔여 범위를 아래 8항 보고와 기존 작업 카드에 기록한다.
+15. **진행:** 적용 도구 d222587을 격리 PostgreSQL에서 먼저 검증했다. 14:35:15 UTC 실제 moemoa-test commit 후 별도 연결 exact body/이력·권한/owner/인자/default/search_path·설정/다른함수 유지 PASS. 14:35:24 UTC 추가 읽기에서도 CANDIDATE_PRESENT 확인.
+16. **발견:** 최초 read-only prerequisite 거절은 과거 ledger의 적용시각 version(20260924141324)/원본명(20260923213901_memory_moderation) 차이였다. 정확한 관측 alias와 기존 body 해시를 함께 고정했다. 로컬 도구 검사에서 CRLF와 기본값 AST의 문자 위치123→134가 의미 변경 없이 달라지는 점을 찾아, 줄바꿈만 정규화하고 기본값의 실제 표현을 대조했다. 원격 함수 원문/후보는 바꾸지 않았다.
+17. **완료 보고:** 이번 승인 범위인 test-only 함수 적용·정의/권한 readback 완료. 원격 실제 신규 신고 생성·Google/UI·운영 검사는 하지 않았다. 다음 하나는 운영 현행 정의/이력 읽기 대조 후 이 DF-01만의 정확 운영 후보 준비다. 현재 운영 쓰기 승인으로 확대하지 않는다.
+
+### W09/W14 DF-01 테스트 적용 — 실행 8항 보고
+
+1. **읽은 문서/파일:** AGENTS·시작·확정01·PLANS·위 DF-01 계획/8항 보고·기존01/02/03·운영 연결 안내, 승인된 migration과 기존 apply-simple-card-sharing-test/inspect-retention 도구. 앞선 로컬 회귀 결과를 재사용했다.
+2. **가정/미확정:** 이번 사용자 승인은 a6a63b6의 moemoa-test 함수 교체·이력/정의/권한 확인이다. 실제 신고행을 만드는 hosted 기능 검사나 운영 적용까지 승인됐다고 해석하지 않았다. 같은 함수에 비협조적인 동시 DDL이 들어오는 상황까지 직렬화를 보장하지 않는다.
+3. **계획:** 바로 위17항 후속 계획. 예상과 다른 source/ACL·불명확한 이력은 쓰기 전에 중단하고 읽기 확인부터 진행했다.
+4. **변경:** version-controlled 적용 도구 `d222587d7422c593ea897068ba612b6cf5bfcfcd`의 [apply-partial-privacy-report-test.py](../../../tools/publication-boundary/apply-partial-privacy-report-test.py). 기존 연결 helper의 test allowlist/TLS를 재사용하며 원시 오류·키를 출력하지 않는다. 승인 SQL a6a63b6/SHA256145ecdef…1c51161은 불변이다. 기존 문서·작업판·[적용 증거](evidence/2026-10-18-partial-privacy-report-test-application.json)를 후속 갱신한다.
+5. **DB/복귀:** test `nmgkhknponvzcwliajyk`에 function1개와 version20261018090000 이력1건을 단일 transaction으로 반영. release `MOEMOA_DF01_REPORT_TEST_20261018_01`. 사용자행/테이블/flags·권한/원본 변경0. 실제 사전 정의는 ignored `.cache/df01-test-20261018T143513Z-rollback.sql`, SHA256eede81fc…87ed15a에 보존. commit 전 guard 실패는 rollback이며 commit 후 역적용은 필요 시 해당 환경/이력까지 맞춘 정확 범위로 진행한다.
+6. **검증/명령:** `wsl.exe -d Ubuntu -e python3 /mnt/e/web/anime/tools/publication-boundary/apply-partial-privacy-report-test.py` 최초 읽기 PREREQUISITE_MISSING/쓰기0→관측 version/name alias 대조 후 BASELINE_MATCH. 최종 도구의 격리 socket apply/readback PASS(실제 hosted로 세지 않음). 같은 명령 `--apply` exit0/APPLIED_AND_READ_BACK, 추가 무옵션 읽기 exit0/CANDIDATE_PRESENT. old/new 함수 body SHA724a91fd…b8cf1→b7b58512…a7641. metadata SHAa017f676…010e4/설정hash13212612…7949 그대로. 함수 OID/ACL/owner·인자/default·SECURITY DEFINER/search_path, 다른함수·기존 migration 이력 보존 PASS. `git diff --check` PASS.
+7. **보안/개인정보/권리/관측:** 함수/이력 metadata와 설정 지문만 읽었다. 신규 신고/게시/사진/실사용자 row 접근·UI/Google·새 인증/권한·운영 DB·배포·push0. authenticated 실행 허용과 anon/PUBLIC 거절 확인, 다른 기존 role의 ACL은 변경하지 않았다. 코드 리뷰의 baseline pin·오류 allowlist·권한 결과 표현을 보완했다.
+8. **남은 위험/다음 게이트:** test 함수 반영은 완료됐지만 hosted 브라우저 신고 성공을 주장하지 않는다. 로컬 실제 SQL 행동 검증과 hosted 정의/권한 인수를 구분한다. **다음 하나는 운영 현행 함수·이력 읽기 대조 후 DF-01 운영 후보를 준비하는 것**이다. 운영 함수 교체/master push는 별도 정확 후보 승인 전 수행하지 않는다. DF-02/한도라벨/고지/사진 등 다른 잔여는 보존한다.
 
 ## W09/W14 DF-01 부분 비공개 후 신규 신고 — 2026-10-18
 

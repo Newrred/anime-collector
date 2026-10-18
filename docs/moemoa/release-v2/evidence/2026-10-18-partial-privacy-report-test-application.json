@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-18",
+  "scope": "APPROVED_MOEMOA_TEST_FUNCTION_AND_MIGRATION_METADATA_ONLY",
+  "taskIds": [
+    "W09",
+    "W14",
+    "C03",
+    "C05",
+    "Q12",
+    "Q17"
+  ],
+  "approval": {
+    "userAnswer": "이 후보 테스트 DB에만 적용",
+    "candidate": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+    "allowed": "Inspect current function/history; preserve rollback definition; replace report function and verify definition/permissions on moemoa-test only",
+    "excluded": [
+      "production",
+      "UI deployment",
+      "user data writes",
+      "public flags or policy changes",
+      "report RPC execution",
+      "Git push"
+    ]
+  },
+  "tool": {
+    "commit": "d222587d7422c593ea897068ba612b6cf5bfcfcd",
+    "path": "tools/publication-boundary/apply-partial-privacy-report-test.py",
+    "gitBlobSha256": "a1cef98e30fe4dd72f63042da8f34eda7be9a7dbfa6473050bd7b9fa8f5f210c",
+    "default": "read only; target fixed to test; TLS verify-full",
+    "sourceBaselineBodySha256": "724a91fd4fdb97591b449cc55dedbf20b85746023e17f1840312bb6af00b8cf1"
+  },
+  "preflight": {
+    "firstAttempt": "READ_ONLY_PREREQUISITE_MISSING_NO_WRITES",
+    "observedLegacyMigration": {
+      "sourceVersion": "20260923213901",
+      "hostedVersion": "20260924141324",
+      "hostedName": "20260923213901_memory_moderation"
+    },
+    "resolution": "Allow only observed exact version/name alias while retaining pinned exact function body, expected ACL/arguments/default/security checks. Existing history was not rewritten.",
+    "final": "BASELINE_MATCH",
+    "observedAt": "2026-10-18T14:31:11.879636+00:00"
+  },
+  "localToolRehearsal": {
+    "scope": "DISPOSABLE_UNIX_SOCKET_POSTGRESQL_NOT_HOSTED",
+    "connection": "Replaced connection helper with local socket explicitly; no credential reads",
+    "command": "wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/.cache/df01-apply-tool-local.sh",
+    "finalExitCode": 0,
+    "logSha256": "5efadbdef56e1e0c9e774499d6236d2fcb2531ace5e36a74cf586b1d91a3aaa1",
+    "earlierGuardFailures": [
+      "BASELINE_OR_LEDGER_MISMATCH because local psql-loaded original body contained CRLF; compare normalizes CRLF only",
+      "DF01_METADATA_CHANGED because proargdefaults internal AST location moved 123 to 134; compare deparsed default expression and all remaining metadata instead"
+    ],
+    "finalResult": "Actual helper apply transaction plus independent snapshot and repeat read-only snapshot passed"
+  },
+  "applicationCommand": "wsl.exe -d Ubuntu -e python3 /mnt/e/web/anime/tools/publication-boundary/apply-partial-privacy-report-test.py --apply",
+  "applicationExitCode": 0,
+  "application": {
+    "target": "nmgkhknponvzcwliajyk",
+    "candidate": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+    "migration": "20261018090000",
+    "sha256": "145ecdefac5dfc0435e4ef16fc1e3b6ae1354e1e128152c7d7e0af1ce1c51161",
+    "release": "MOEMOA_DF01_REPORT_TEST_20261018_01",
+    "mode": "APPLIED_AND_READ_BACK",
+    "state": "CANDIDATE_PRESENT",
+    "observedAt": "2026-10-18T14:35:15.057186+00:00",
+    "functionBodySha256": "b7b58512decade4d59ff4c993377778b0089d084023b55c77735bf3c937a7641",
+    "metadataSha256": "a017f6764a95a80f7a436733067b641a4827119967dd9e8129283cf8150010e4",
+    "prerequisitesMatch": true,
+    "authenticatedGranted": true,
+    "anonymousAndPublicDenied": true,
+    "settingsHash": "132126122e0602f4ddb74f81720e7949",
+    "rollback": {
+      "path": ".cache/df01-test-20261018T143513Z-rollback.sql",
+      "sha256": "eede81fc8e11861bde71af4f7996865d76d8e7ce5a5f6790d13903f6587ed15a"
+    },
+    "previousFunctionBodySha256": "724a91fd4fdb97591b449cc55dedbf20b85746023e17f1840312bb6af00b8cf1",
+    "exactDefinition": true,
+    "metadataPreserved": true,
+    "settingsPreserved": true,
+    "otherFunctionsPreserved": true,
+    "otherMigrationHistoryPreserved": true,
+    "userDataWrites": false,
+    "productionTouched": false
+  },
+  "additionalReadOnly": {
+    "command": "wsl.exe -d Ubuntu -e python3 /mnt/e/web/anime/tools/publication-boundary/apply-partial-privacy-report-test.py",
+    "exitCode": 0,
+    "state": "CANDIDATE_PRESENT",
+    "observedAt": "2026-10-18T14:35:24.495077+00:00",
+    "functionBodySha256": "b7b58512decade4d59ff4c993377778b0089d084023b55c77735bf3c937a7641",
+    "metadataSha256": "a017f6764a95a80f7a436733067b641a4827119967dd9e8129283cf8150010e4",
+    "settingsHash": "132126122e0602f4ddb74f81720e7949"
+  },
+  "rollback": {
+    "path": ".cache/df01-test-20261018T143513Z-rollback.sql",
+    "sha256": "eede81fc8e11861bde71af4f7996865d76d8e7ce5a5f6790d13903f6587ed15a",
+    "tracked": false,
+    "contents": "Only verified previous function DDL, no credentials or user data",
+    "automaticRollback": "Any transaction guard failure before commit aborts the whole transaction; no blind retry on uncertain outcome",
+    "postCommitRollbackExecuted": false
+  },
+  "independentReview": {
+    "completed": true,
+    "improvementsImplemented": [
+      "Pinned original function body hash",
+      "Fixed error reason allowlist",
+      "Authenticated-granted and anon/PUBLIC-denied wording without claiming exclusion of every other role"
+    ],
+    "limitation": "Release advisory/ledger lock does not serialize unrelated non-cooperating concurrent function DDL; no comprehensive concurrent-DDL guarantee"
+  },
+  "verificationLimits": [
+    "Hosted function/ledger/ACL metadata, not hosted browser report creation",
+    "Prior 31 local report checks retained as local behavior evidence",
+    "No Google flow, UI deployment, private data, production DB, or Git push"
+  ],
+  "nextAction": "Read production function/history and prepare the exact DF-01-only production candidate. Production writes/master push still require separate explicit candidate approval."
+}

@@ -1,5 +1,12 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-18 W09/W14 DF-01 테스트 DB 적용 완료
+
+- 사용자의 “이 후보 테스트 DB에만 적용” 승인으로 a6a63b6/SQL20261018090000을 moemoa-test에 반영했다. 함수1개+release 이력1건이며 운영·UI배포·사용자행/원본·설정·권한 변경0.
+- 실제 14:35:15 UTC commit 이후 별도 연결 readback과 14:35:24 UTC 추가 읽기 PASS. 정확 new body/ledger와 기존 metadata/설정/다른 함수/기존 이력 보존. 과거 이력 version 차이는 정확 name/alias와 기존 body 일치로 대조했고 이력을 재작성하지 않았다.
+- [8항 보고](01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01-테스트-적용--실행-8항-보고), [근거](evidence/2026-10-18-partial-privacy-report-test-application.json). 복귀용 사전 함수 ignored cache 보존. 로컬 도구의 적용/별도읽기도 먼저 검증했다.
+- 이번 승인 범위 완료. hosted 실제 신고 생성·Google/UI·운영 PASS는 아니다. **다음 하나는 운영 현행 함수/이력 읽기 대조 후 DF-01만의 정확 운영 후보 준비**. 다른 W/D 잔여와 기존 완료 근거는 그대로다.
+
 ## 2026-10-18 W09/W14 DF-01 로컬 수정 완료
 
 - 사용자 지시대로 문서상 첫 결함을 격리 PostgreSQL16에서 재현했다. 익명 남은1장열람 성공/새신고 NOT_FOUND → 후보 **a6a63b6** 적용 후 새신고 접수 성공.
@@ -878,6 +885,19 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 DF-01 로컬 행동검증 + 승인된 테스트 DB 함수/이력 적용·권한검증 완료.
+코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; 적용도구 d222587; migration20261018090000.
+실제 대상/결과: moemoa-test(nmgkhknponvzcwliajyk), release MOEMOA_DF01_REPORT_TEST_20261018_01. commit/별도readback 2026-10-18 14:35:15 UTC, 추가read-only 14:35:24 UTC PASS.
+보존: 함수 OID/ACL/owner/인자/default/search_path·설정·다른함수·기존이력 그대로. 실사용자행/원본/운영/화면배포/master push0.
+복귀: .cache/df01-test-20261018T143513Z-rollback.sql; 원격oldbody가 원본정의와 일치하며 해시를 증거에 결속. 백업키/새인증 불필요.
+검증 한계: 로컬31신고경계/기존SQL회귀 PASS와 hosted metadata 인수 구분. 이번 hosted UI/신고행 생성은 미실행.
+기존 잔여: DF-02 운영대조·quota라벨·고지 후보·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 운영 현행 신고 함수/이력 읽기 대조 후 이 수정만의 정확 운영 후보 준비. 운영 변경/master push는 별도 정확 승인.
+```
+
+<details><summary>이전 현재 카드 — 10/18 DF-01 로컬 검증 직후</summary>
+
+```text
 현재 W: W09/W14 DF-01 로컬 재현·최소 수정·회귀·복귀 검증 완료. hosted 미적용.
 코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; migration 20261018090000_memory_report_partial_privacy.sql.
 이번 실제 결과: 두카드공개→한카드private→익명남은1장→새신고 NOT_FOUND를 기존 함수에서 재현. 수정 후 접수 및 새 경계31항목 PASS.
@@ -887,6 +907,8 @@
 기존 잔여: DF-02 test-only의 운영대조, quota 라벨·고지 후보, W06/W18 사진 진단, master보호·임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 재요구 없음.
 다음 행동 하나: 후보 a6a63b6의 함수 migration1개를 moemoa-test에 적용하는 정확 승인. UI배포/새Public/가입·한도/원본 변경 제외.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/18 Pro 검토안 인수 직후</summary>
 

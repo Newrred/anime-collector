@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-18 DF-01 테스트 DB 적용 완료:** 승인 후보 a6a63b6의 `20261018090000`을 **moemoa-test에만** 반영했다. 함수·migration 이력과 별도 연결 readback, 기존 ACL/owner/인자·설정/다른 함수 보존 PASS. [적용 보고](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01-테스트-적용--실행-8항-보고), [근거](docs/moemoa/release-v2/evidence/2026-10-18-partial-privacy-report-test-application.json). 다음 하나는 운영 현행 함수/이력 읽기 대조 후 이 수정만의 정확 운영 후보 준비다. 이번 운영/화면 배포·사용자 데이터 변경0, hosted UI 신고행 생성은 미실행. 아래 ‘테스트 적용 승인 대기’는 이전 상태다.
+
 > **2026-10-18 DF-01 로컬 수정 완료:** 부분 카드 비공개 후 신규 신고 NOT_FOUND를 PostgreSQL16에서 재현하고 후보 **a6a63b6**으로 보완했다. 남은 공개 snapshot만 신고 대상으로 인정하며 원래 신고/숨김/한도/멱등성/ACL을 보존한다. [계획·8항 보고](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01--실행-8항-보고)와 [검증 근거](docs/moemoa/release-v2/evidence/2026-10-18-partial-privacy-report-fix.json)를 읽는다. **다음 하나는 해당 함수 migration의 moemoa-test 적용 승인**이다. 이번 hosted/UI/운영·master push/배포는 미실행. 아래 인수 당시의 ‘재현 전’은 이력이며 DF-02/사진/법적 고지 등 나머지 잔여는 유지한다.
 
 > **2026-10-18 Pro 법적·운영 검토안 인수:** 첨부3개를 현행 소스·과거 증거와 대조했다. [인수 보고](docs/moemoa/reports/2026-10-18-pro-legal-operations-intake.md)를 읽고 [단일 작업판](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)에서 이어간다. 부분 철회 후 신규 신고 조건 불일치가 확인돼 **다음 하나는 W09/W14 격리 재현·최소 수정**이다. 응답 본문 정리는 이미test-only 적용됐으며 운영 근거는 잔여; 재작성하지 않는다. W06/W18 사진 진단도 보존한다. 이번은 문서 인수이며 앱/DB/고정 약관/운영 변경0. 새 관리자·자동메일·보관기간·8주 홍보 계획은 미승인 제안으로 분리했다. 아래 예약 완료/사진 우선은 이전 시점 기록이다.
