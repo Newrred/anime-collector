@@ -1,5 +1,12 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-18 GPT Pro 검토 세트 제공
+
+- 사용자 요청으로 직전 문서/코드 `dfa642661467f5169021de8baf2ebb27e29350a6` 고정 분석 ZIP을 준비했다. 이번 통합 안내·기존00/01/02/03·제품/정책 문서·실제 소스/검사/migration/workflow·핵심 evidence8개 포함. 읽기순서, 복사용 요청문, 코드 지도, source/live 차이, 파일별 manifest를 함께 제공한다.
+- `C:\Users\hongs\Downloads\MOEMOA_GPT_PRO_REVIEW_2026-10-18.zip` — 4,331,607bytes, SHA256 `29593b4f0453fbdf1f5724bba4e828be5e9bd3b7e86c71fbdd4b013ccaca6f6b`. source1,151/전체1,158파일, CRC·manifest SHA/길이·필수 경로 PASS. `.prompt.md`/`.sha256.txt`도 같은 폴더에 제공.
+- 실제 env/비밀키·개인 사진·DB dump/백업 ZIP·원시 로그·바이너리 제외. 비밀값 패턴과 일치한 테스트 문자열은 패키지의 테스트파일1개에만 제거 표시하며 원본은 그대로다. 운영/DB/설정/외부 업로드·Git push 없음.
+- 제품/검증 상태는 아래 current card 그대로다. Pro에게 확정 결함·검증 부족·문서 노후화·조건부 법적 준비를 구분하고 기존 W/C/Q/D로 최소 작업 지시를 돌려달라고 요청하도록 준비했다. 이 포장 작업을 새 출시/검사 PASS로 세지 않는다. [8항 보고](01_RELEASE_EXECUTION_PLAN.md#gpt-pro-검토-세트--실행-8항-보고).
+
 ## 현재 결과 — 2026-10-18 예약 관찰·개발/운영 안내 마감
 
 - 문서상 다음 작업 W17/D05 첫 예약 관찰 완료. GitHub **39065955924 / schedule / SUCCESS**, 실제 `Capture encrypted delta and commit authenticated checkpoint` 단계 SUCCESS(skipped 아님). JST/KST 05:15:40~05:20:18, 예정03:00보다 늦게 시작했다. 미래 정시 실행/복구 보장은 아니다.
@@ -860,6 +867,7 @@
 보안: master API protected:false는 운영 보호 후보 잔여. 로컬 test server env ACL만 현재 사용자/SYSTEM 전용으로 제한; 키 값/원격 권한 변경0.
 복구: 독립 키·외부 증분/격리99테이블·삭제권리 대조는 이미 완료. 첫 schedule 성공 추가. 전체 앱/Storage HTTP serving·최신 chainLength·임계 알림 수신은 미검증.
 안내: operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md에 개발 예상일·운영 루틴·법적 현재/확장 조건·키 최소 범위 정리. 이 PC 실제 키 경로는 E:\web\MOEMOA-KEY-FILES.md(값 없음).
+검토 인계: dfa6426 snapshot의 GPT Pro 분석 ZIP/복사 요청문/manifest 제공 완료. 제품 소스·기존 다음 개발 작업은 그대로 유지.
 제한: 추가Safari/실폰 오프라인 USER_WAIVED 유지. 현재 국가/권리/요금·고정 동의 문서는 바꾸지 않는다. 법적 조건을 일괄 본인인증/보호자 절차로 대체하지 않는다.
 다음 행동 하나: 현재 코드에서 기존 개인 사진 로딩 실패를 최소 재현하고 실패 지점을 특정한다. 재업로드/삭제·새 운영 변경으로 우회하지 않는다.
 ```
