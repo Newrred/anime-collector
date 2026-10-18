@@ -83,4 +83,13 @@ select public.review_memory_report(current_setting('test.boardreport')::uuid,0,0
 select pg_temp.ok(public.read_memory_publication(current_setting('test.board')::uuid) is null,'Board hide closes shared page and image reader dependency');
 select public.review_memory_report(current_setting('test.boardreport')::uuid,1,1,'RESTORE','Board review resolved');
 select pg_temp.ok(public.read_memory_publication(current_setting('test.board')::uuid) is not null,'Board restore preserves existing consent');
+reset role;
+update private.memory_publication_settings set report_daily_limit=5;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+set local role authenticated;
+select public.revoke_memory_publication(current_setting('test.board')::uuid,(public.get_memory_publication('bbbbbbbb-bbbb-4bbb-8bbb-000000000001')->>'revision')::bigint);
+select pg_temp.ok(public.read_memory_publication(current_setting('test.board')::uuid) is null,'generic Board withdrawal stays unreadable');
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+select pg_temp.ok(public.submit_memory_report('board',current_setting('test.board')::uuid,'RIGHTS',gen_random_uuid())->>'status'='RECEIVED','generic Board withdrawal preserves historical reporting');
+select pg_temp.ok(public.submit_memory_report('home',current_setting('test.home')::uuid,'SPAM',gen_random_uuid())->>'status'='RECEIVED','withdrawn home preserves historical reporting');
 rollback;

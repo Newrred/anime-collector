@@ -1,5 +1,25 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W09/W14 DF-01 부분 비공개 후 신규 신고 — 2026-10-18
+
+1. **목적:** 공개 보드의 일부 카드를 비공개로 바꾼 뒤 남은 공개 보드를 새 사용자가 신고할 수 있도록 현행 SQL 결함을 재현하고 최소 수정한다.
+2. **확정 결정:** 일반 Public·원본 비공개·신고/차단/철회·현행 국가/가입/정책과 정확 원격 후보 승인 경계를 유지한다. 사용자가 이번 로컬 재현·수정을 명시 요청했다.
+3. **현재 근거:** 시작 HEAD a54b149. `20260923213901_memory_moderation.sql`의 submit RPC는 board의 published_operation만 검사하지만 `20261011120000_simple_card_sharing.sql`은 일부 카드 제거 후 남은 published_snapshot을 보존하며 operation을 비운다.
+4. **범위:** 해당 대상 판정, additive migration, 기존 SQL 계약 회귀, 기존 문서/증거만 포함. DF-02 retention·새 관리자/메일·법적 문서 게시·실계정/원격/운영/배포는 제외한다.
+5. **흐름:** 합성 두 카드의 prepare→publish→한 카드 make_private→익명 남은 카드 읽기→새 신고자/operation의 submit을 동일 PostgreSQL에서 실행한다.
+6. **파일 지도:** 새 `supabase/migrations/20261018090000_memory_report_partial_privacy.sql`, `tools/publication-boundary/simple-card-sharing-contract.sql` 및 필요 시 같은 폴더의 focused 계약, 기존 `tools/identity/run-public-signup-local.sh`, 이 01/02/03과 근거 파일.
+7. **데이터:** 함수 하나 CREATE OR REPLACE만 계획. 테이블/자료/권한/flags/정책 변경 없음. 초기 migration은 수정하지 않는다.
+8. **마일스톤:** 기존 함수로 NOT_FOUND 재현→최소 조건 보완→같은 경로 성공 및 비공개/한도/멱등성/ACL 유지→독립 diff 검토와 인계.
+9. **검증:** Ubuntu PostgreSQL16의 임시 Unix socket cluster, 현행 migration 전체(retention의 pg_cron 제외), 기존 public-signup/simple-sharing 및 moderation 계약. 새 신고자·새 operation으로 기존 receipt 재사용 오판을 방지한다. 실제 hosted/Google/UI/운영 PASS로 표시하지 않는다.
+10. **보안/개인정보/권리:** id = target AND (기존 operation OR 유효한 공개 snapshot 상태)의 괄호 유지. home·report quota·락·no-store·SECURITY DEFINER/빈 search_path/ACL 보존. 비공개 본문 반환 없음.
+11. **관측:** 합성 PASS/FAIL·명령/해시만 문서화하고 실제 키·사진·본문·운영 DB를 읽지 않는다. 새 알림/예약/분석 이벤트 없음.
+12. **복귀:** 로컬에서 이전 submit 함수 정의로 되돌려 결함 재현, 새 migration 재적용으로 복구를 검증한다. 데이터 손실 없음. 원격 복귀도 함수만 대상으로 별도 정확 승인 시 수행한다.
+13. **위험:** 모든 철회물을 NOT_FOUND로 바꾸면 과거 공개 신고 계약이 깨진다. 기존 operation 경로는 유지하고 최초 preview만 있는 대상/없는 ID/마지막 카드까지 제거된 대상은 새 fallback에서 제외한다.
+14. **결정:** 현재 로컬 작업에는 추가 결정 없음. 원격 test/운영 migration·master push는 검증한 정확 후보를 제시한 후 별도 승인한다.
+15. **진행:** WSL PostgreSQL16에서 수정 전 익명1장열람 성공 뒤 신규 신고 NOT_FOUND 재현(exit1). additive 함수 적용 후 같은 경로 성공. 기존 signup/sharing15+16, 새 경계31, 독립세션락2항목 PASS. 기존 publication runner440개 PASS notice/exit0(중복 합산하지 않음). 함수 복귀·재적용2항목도 추가 통과했다.
+16. **발견:** 새 runner가 필요하지 않았다. 기존 CI의 `tools/identity/run-public-signup-local.sh`가 시간순 전체 migration과 simple-sharing 계약을 실행하므로 include1줄로 연결했다. 독립 diff 검토에서 헤더 검사의 이전 reader 영향 가능성을 찾아 신규 신고 직전 초기화로 보완했고 재검증했다. 기존 generic revoke는 operation을 보존해 철회 후 신고가 가능하며 이를 축소하지 않는다.
+17. **완료 보고:** DF-01 로컬 재현·SQL 수정·회귀·함수 복귀 검증 완료. 실제 hosted/Google/UI·운영 적용은 미실행이며 다음 하나는 정확 후보의 moemoa-test 함수 적용 승인이다. 세부 근거와 8항 보고는 아래 후속 완료 보고/단일 작업 카드에 결속한다.
+
 ## GPT Pro 법적·운영 검토안 인수 — 2026-10-18
 
 1. **목적:** 앞서 제공한 dfa6426 분석 세트에 대한 DOCX·수정안·운영 ZIP을 현행 소스와 완료 증거에 대조하고 실제 결함과 새 제안을 분리한다.
