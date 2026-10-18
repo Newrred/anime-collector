@@ -1,0 +1,89 @@
+{
+  "kind": "daily",
+  "reportId": "2026-10-18-daily",
+  "recipientKey": "operator-primary",
+  "periodStart": "2026-10-17T00:00:00Z",
+  "periodEnd": "2026-10-18T00:00:00Z",
+  "generatedAt": "2026-10-18T00:00:00Z",
+  "timezone": "Asia/Seoul",
+  "adminOrigin": "https://www.moemoa.xyz",
+  "synthetic": true,
+  "cases": [
+    {
+      "id": "OPS-001",
+      "type": "safety",
+      "severity": "P0",
+      "status": "ACTIVE",
+      "legalDueAt": "2026-10-19T23:00:00Z",
+      "internalDueAt": "2026-10-18T11:00:00Z",
+      "legalBasis": "TIDA_3",
+      "remainingCopies": 2,
+      "sourceAt": "2026-10-18T00:00:00Z",
+      "legalDeadlineState": "set"
+    },
+    {
+      "id": "OPS-008",
+      "type": "mail",
+      "severity": "P1",
+      "status": "ACTIVE",
+      "legalDueAt": null,
+      "internalDueAt": "2026-10-18T01:00:00Z",
+      "legalBasis": null,
+      "remainingCopies": null,
+      "sourceAt": "2026-10-17T23:55:00Z",
+      "legalDeadlineState": "not_applicable"
+    }
+  ],
+  "metrics": [
+    {
+      "key": "cases_open",
+      "value": 8,
+      "unit": "count",
+      "scope": "service",
+      "source": "case_registry",
+      "observedAt": "2026-10-17T23:50:00Z",
+      "freshness": "fresh",
+      "coverage": "complete"
+    },
+    {
+      "key": "private_reserved_bytes",
+      "value": 81000000,
+      "unit": "bytes",
+      "scope": "service",
+      "source": "quota_rpc",
+      "observedAt": "2026-10-17T23:50:00Z",
+      "freshness": "fresh",
+      "coverage": "complete"
+    },
+    {
+      "key": "private_observed_bytes",
+      "value": 76000000,
+      "unit": "bytes",
+      "scope": "service",
+      "source": "quota_rpc",
+      "observedAt": "2026-10-17T23:50:00Z",
+      "freshness": "fresh",
+      "coverage": "complete"
+    },
+    {
+      "key": "backup_age_hours",
+      "value": 2,
+      "unit": "hours",
+      "scope": "service",
+      "source": "backup_manifest",
+      "observedAt": "2026-10-17T23:50:00Z",
+      "freshness": "fresh",
+      "coverage": "complete"
+    },
+    {
+      "key": "mail_dead",
+      "value": 1,
+      "unit": "count",
+      "scope": "service",
+      "source": "notification_outbox",
+      "observedAt": "2026-10-17T23:50:00Z",
+      "freshness": "fresh",
+      "coverage": "complete"
+    }
+  ]
+}

@@ -1,5 +1,15 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-18 Pro 법적·운영 검토안 인수
+
+- [첨부 대조 보고](../reports/2026-10-18-pro-legal-operations-intake.md)와 [참고 원문/출처 manifest](../references/legal-operations-review-20261018/README.md)를 추가했다. 원본3개·ZIP33개 entry 확인, 텍스트35개 보존. 새 정책/실행 승인으로 자동 채택하지 않는다.
+- **W09/W14:** 부분 카드 철회 후 공개 snapshot은 남지만 `published_operation=null`이 되어 신규 신고가 거절되는 정적 불일치 확인. 다음은 새 신고자·operation으로 격리 재현·최소 수정. 운영 사례 재현/수정 완료는 아니다.
+- **W06/W17/D05:** 과거 sync 응답 본문 정리는 이미10/10 로컬12항목·test-only 적용 완료, 실제 제거0. 현재 운영 적용 근거는 잔여다. 기존 후보를 재작성하지 않고 함수/집계 대조 뒤 정확한 운영 후보로 준비한다.
+- **W15/W18:** 관리자 전역 전송2항목의 계정별 라벨 오류 확인. 첨부 patch 적용 가능성만 PASS, 실제 적용/UI검사0.
+- **W17/D04:** Vercel 이미지 본문·GitHub runner 평문/복호 처리·주간 생성/수동 세대 관리의 안내 보완 필요. 새 고정 KO/EN 문서/receipt 전환 후보로 다룬다. 기존 Public·국가·연령·요금·고정 문서 유지.
+- 새 사건 DB/자동메일/outbox/heartbeat·보관기간·8주 홍보는 제안으로 분리했다. 첨부가 인용한 research/dataflow_audit.md·research/legal.md와 관리자 mock은 미제공. 새 운영 장애·실제 메일 PASS로 기록하지 않는다.
+- 이번 앱·DB·운영 설정·예약·외부 발송·배포·push 변경0. 앞선 주간 백업/키·기본 복구 완료 및 W06/W18 사진 진단 잔여는 유지. [계획/8항 보고](01_RELEASE_EXECUTION_PLAN.md#gpt-pro-법적운영-검토안-인수--2026-10-18).
+
 ## 2026-10-18 GPT Pro 검토 세트 제공
 
 - 사용자 요청으로 직전 문서/코드 `dfa642661467f5169021de8baf2ebb27e29350a6` 고정 분석 ZIP을 준비했다. 이번 통합 안내·기존00/01/02/03·제품/정책 문서·실제 소스/검사/migration/workflow·핵심 evidence8개 포함. 읽기순서, 복사용 요청문, 코드 지도, source/live 차이, 파일별 manifest를 함께 제공한다.
@@ -861,6 +871,19 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 부분 철회 후 신규 신고 조건 불일치의 로컬 재현·최소 수정 준비.
+이번 실제 결과: Pro 첨부3개/ZIP33entry/문서3개 추출·현재소스·과거실행 대조. 신고 조건·한도 라벨 불일치 확인. 첨부patch apply --check PASS/미적용.
+보존 결함: DF-02는10/10 로컬12PASS·test-only 적용 완료; 운영 반영과 현재 영향은 미확인. 기존 후보/증거 재사용.
+고지: Vercel 이미지 처리·GitHub runner 백업 본문 처리 누락을 새 고지 후보에 연결. 고정문서·receipt·가입/공개 정책 변경0.
+운영 기준: 앞선10/18 master/www a65f557 재확인 및 첫주간 schedule/capture SUCCESS 근거 유지. 이번 새 원격조회·실행·배포0.
+새 제안: 사건테이블·자동메일·보관기간·8주홍보는 미확정. 첨부38개정책변수 null/게시준비false, 누락research와dedupe문서차이 기록.
+기존 잔여: W06/W18 개인사진 원인진단, master보호, 임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 설치 재요구 없음.
+다음 행동 하나: 격리 DB에서 2카드공개→1카드private→남은공개물 새신고를 재현하고 대상인정만 최소수정. 신규원격후보는 정확승인 경계 유지.
+```
+
+<details><summary>이전 현재 카드 — 10/18 예약 관찰·분석 세트 제공 직후</summary>
+
+```text
 현재 W: W17/D05 첫 주간 예약 관찰 마감. W06/W18 기존 개인 사진 로딩 진단으로 이어간다.
 이번 실제 결과: schedule39065955924 및 실제 capture SUCCESS. 10/18 05:15:40~05:20:18 JST/KST, 예정03:00 대비 지연. 정리2회 실제 단계/카탈로그 health run도 SUCCESS.
 운영 기준: master/www build-info commit·checkoutCommit a65f557/source vercel-git 재확인. 기존 공개 역할·컬렉션·UI 운영 인수 유지, 새 배포/DB/설정 변경0.
@@ -871,6 +894,8 @@
 제한: 추가Safari/실폰 오프라인 USER_WAIVED 유지. 현재 국가/권리/요금·고정 동의 문서는 바꾸지 않는다. 법적 조건을 일괄 본인인증/보호자 절차로 대체하지 않는다.
 다음 행동 하나: 현재 코드에서 기존 개인 사진 로딩 실패를 최소 재현하고 실패 지점을 특정한다. 재업로드/삭제·새 운영 변경으로 우회하지 않는다.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/18 PC 설정 직후</summary>
 

@@ -1,0 +1,26 @@
+{
+  "kind": "urgent",
+  "reportId": "OPS-001-revision-1",
+  "recipientKey": "operator-primary",
+  "periodStart": "2026-10-17T00:00:00Z",
+  "periodEnd": "2026-10-18T00:00:00Z",
+  "generatedAt": "2026-10-18T00:00:00Z",
+  "timezone": "Asia/Seoul",
+  "adminOrigin": "https://www.moemoa.xyz",
+  "synthetic": true,
+  "cases": [
+    {
+      "id": "OPS-001",
+      "type": "safety",
+      "severity": "P0",
+      "status": "ACTIVE",
+      "legalDueAt": "2026-10-19T23:00:00Z",
+      "internalDueAt": "2026-10-18T11:00:00Z",
+      "legalBasis": "TIDA_3",
+      "remainingCopies": 2,
+      "sourceAt": "2026-10-18T00:00:00Z",
+      "legalDeadlineState": "set"
+    }
+  ],
+  "metrics": []
+}

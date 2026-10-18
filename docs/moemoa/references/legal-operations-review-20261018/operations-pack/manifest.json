@@ -1,0 +1,164 @@
+{
+  "files": [
+    {
+      "path": "README.txt",
+      "bytes": 9974,
+      "sha256": "a3fc7269a88531b5cd196db32e5bdb4ed881bc35bf923653af49a79ff1c6225e"
+    },
+    {
+      "path": "admin-implementation-spec.html",
+      "bytes": 71662,
+      "sha256": "6320120b7287b8043f0e732893d68de19fac9a1cf6122e459550f1896816c9e4"
+    },
+    {
+      "path": "code/README.txt",
+      "bytes": 3845,
+      "sha256": "6d5bee7949648390575a081c4d9a42ee9b92c246ae2605fe50432669f41ae3b6"
+    },
+    {
+      "path": "code/examples/daily.json",
+      "bytes": 2251,
+      "sha256": "61b0abbd2210058e57ba7b8add0fb5e758d37d34dfee24680ff438e84d872197"
+    },
+    {
+      "path": "code/examples/urgent.json",
+      "bytes": 679,
+      "sha256": "a0f04d45baf7c69120659b2cb74eb3e65e823b9e8b3bb52225583580e641e2a0"
+    },
+    {
+      "path": "code/examples/weekly.json",
+      "bytes": 1313,
+      "sha256": "64ca6db5798bcf01c1c96b71947ecf9b0e19dfd065662c48d215dcc0a7a2b1af"
+    },
+    {
+      "path": "code/notification-renderer.mjs",
+      "bytes": 9995,
+      "sha256": "71ba3fcfcd5b5cbb5377aa4156ca87fe9d1087b9f2ee222b7f4070bf05b12aec"
+    },
+    {
+      "path": "code/notification-renderer.test.mjs",
+      "bytes": 2974,
+      "sha256": "74eb52d000252acda21ec268239232d0c6d36fe8cec20893f46d948ff7b116de"
+    },
+    {
+      "path": "code/render-samples.mjs",
+      "bytes": 710,
+      "sha256": "5f12e8b26592fac088c764e0812ed26d589ec5f3258913cad50ff345e01ed71a"
+    },
+    {
+      "path": "documents/MOEMOA_Operations_Strategy_20261018.docx",
+      "bytes": 59404,
+      "sha256": "4a9d24286050450fee86c256d01a505a6504f540dd539fa58380a994f6f52be3"
+    },
+    {
+      "path": "documents/MOEMOA_Public_Policies_Draft_20261018.docx",
+      "bytes": 74297,
+      "sha256": "3795f1e3312c63775497f3b173e96da5852e995c1f7284607cbeac8eca7ed771"
+    },
+    {
+      "path": "email-samples/daily.html",
+      "bytes": 3644,
+      "sha256": "050dd15f6bd48998ce83576433578b6c5d75960669e9bdd243558b3ff5ac52df"
+    },
+    {
+      "path": "email-samples/daily.txt",
+      "bytes": 1845,
+      "sha256": "bd748540f422165bd8db9acdcec0d80024352a60e1d48a74238bdd53bf574200"
+    },
+    {
+      "path": "email-samples/urgent.html",
+      "bytes": 2342,
+      "sha256": "393ba5f3ac49778e24940913209a71b5046f75222c24694c66f344735b9d0f1b"
+    },
+    {
+      "path": "email-samples/urgent.txt",
+      "bytes": 980,
+      "sha256": "464a94ca9f6e251a77a30df31bbbe76483430cdd0c459aa32fb70293d52133af"
+    },
+    {
+      "path": "email-samples/weekly.html",
+      "bytes": 2637,
+      "sha256": "f731f5daf9f6cd8f58a7c18eab20724a01c75c7a0aae13f6451fe67e4248f57e"
+    },
+    {
+      "path": "email-samples/weekly.txt",
+      "bytes": 1311,
+      "sha256": "6441b37a8a9a1e3eb8b15963ca478d9edbb75be48af2535f44fca8ae2bdbb4d6"
+    },
+    {
+      "path": "legal-operations-review.html",
+      "bytes": 110919,
+      "sha256": "e9a939e9829c4548b1eca0ddde37a50942862eaa394da4ccdeefccf834658d52"
+    },
+    {
+      "path": "market-research-and-campaigns.html",
+      "bytes": 49340,
+      "sha256": "232028ec7275a348744f401c18c95e16b096986c0b0888a247e95a802dfcaf4c"
+    },
+    {
+      "path": "patches/README.txt",
+      "bytes": 3377,
+      "sha256": "5073fd33f3a65d4a7d30e729e9bc95b8f41d31af7a6392bc458a562c303deeff"
+    },
+    {
+      "path": "patches/admin_quota_scope_labels.patch",
+      "bytes": 3556,
+      "sha256": "b1fbadbd2580e0624ba533ce8a64b2262afe76e9d3f8f082ed413cbec39e410d"
+    },
+    {
+      "path": "policy-decisions.json",
+      "bytes": 20710,
+      "sha256": "9e61e9d067c871716dd9f3d032734601269310dad29121a69ab4fec4a2aa279d"
+    },
+    {
+      "path": "public-documents/privacy.en.draft.html",
+      "bytes": 23876,
+      "sha256": "ea66abe1b93d5775a675dfcf9d8e4619f937fb9800a12ce7eba12ed80b98f9ee"
+    },
+    {
+      "path": "public-documents/privacy.ko.draft.html",
+      "bytes": 23000,
+      "sha256": "2623dda5f645a82a8701c6aabf035314f0cf0d1bf5fe1945a78f1c7cb9a76605"
+    },
+    {
+      "path": "public-documents/public-content.en.draft.html",
+      "bytes": 12315,
+      "sha256": "45a6eb0f89592fd5153efaf7053590491808c6d0e594190f7b95934e263fad80"
+    },
+    {
+      "path": "public-documents/public-content.ko.draft.html",
+      "bytes": 11963,
+      "sha256": "0acc53fc9a49a5b5fd0e317352001d49e715749ad97db6730f7fc27b2d66ddb8"
+    },
+    {
+      "path": "public-documents/rights-appeals.ko-en.draft.html",
+      "bytes": 8694,
+      "sha256": "320af166d83415bb40713f01a80e7fd0daadde21ffc1386a3b65b6ca34a62587"
+    },
+    {
+      "path": "public-documents/terms-privacy-public.en.draft.html",
+      "bytes": 48576,
+      "sha256": "ea1969d9c26b8c49827366071f0355dc544339a3a440073aee7b60b159ea2ca5"
+    },
+    {
+      "path": "public-documents/terms.en.draft.html",
+      "bytes": 14213,
+      "sha256": "16b998a27e12fcc9ac8df5395e5cddda48cd2a26e3d82ef0e19c48c28fb8d995"
+    },
+    {
+      "path": "public-documents/terms.ko.draft.html",
+      "bytes": 14250,
+      "sha256": "40d90a0100677b396f7f4f6e81094886f2e6b21ad06424b91709ef3f396f1306"
+    },
+    {
+      "path": "public-documents/urgent-removal.ko-en.draft.html",
+      "bytes": 10089,
+      "sha256": "767623bf9b698579b47a9e84d7d480ba788300c5a0c94bcaa039a40016e43d4c"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 1819,
+      "sha256": "653d54381be0f203e68950968512f3d6bb5f36697cb2441e129b4908329d0856"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "kind": "weekly",
+  "reportId": "2026-W42-review-2026-10-19",
+  "recipientKey": "operator-primary",
+  "periodStart": "2026-10-12T00:00:00Z",
+  "periodEnd": "2026-10-19T00:00:00Z",
+  "generatedAt": "2026-10-19T00:00:00Z",
+  "timezone": "Asia/Seoul",
+  "adminOrigin": "https://www.moemoa.xyz",
+  "synthetic": true,
+  "cases": [],
+  "metrics": [
+    {
+      "key": "cohort_size",
+      "value": null,
+      "unit": "count",
+      "scope": "cohort",
+      "source": "consented_cohort",
+      "observedAt": null,
+      "freshness": "unavailable",
+      "coverage": "unavailable"
+    },
+    {
+      "key": "first_memory",
+      "value": null,
+      "unit": "count",
+      "scope": "cohort",
+      "source": "consented_cohort",
+      "observedAt": null,
+      "freshness": "unavailable",
+      "coverage": "unavailable"
+    },
+    {
+      "key": "repeat_memory",
+      "value": null,
+      "unit": "count",
+      "scope": "cohort",
+      "source": "consented_cohort",
+      "observedAt": null,
+      "freshness": "unavailable",
+      "coverage": "unavailable"
+    },
+    {
+      "key": "meaningful_return",
+      "value": null,
+      "unit": "count",
+      "scope": "cohort",
+      "source": "consented_cohort",
+      "observedAt": null,
+      "freshness": "unavailable",
+      "coverage": "unavailable"
+    }
+  ]
+}

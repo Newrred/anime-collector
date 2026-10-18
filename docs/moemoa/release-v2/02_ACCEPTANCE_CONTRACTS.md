@@ -1,5 +1,13 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-18 Pro 검토안 인수 — 기존 계약의 빠진 조합
+
+- C03/C05/Q12/Q17: 2카드 공개→1카드 private→남은 공개 snapshot 읽기→**새 신고자·새 operation의 신고**를 함께 재현한다. 현재 정적 불일치는 [인수 보고](../reports/2026-10-18-pro-legal-operations-intake.md)에 있다. 이전 신고의 idempotent 반환을 신규 접수 PASS로 쓰지 않는다. 신고 quota/owner/숨김·철회 대상의 기존 정책은 유지한다.
+- C10/D05: 삭제 entity의 sync 응답 본문 scrub은10/10 로컬12항목·test-only 적용 근거가 있다. operation ID/hash/ACK·version/sequence 보존 및 활성·최근 entity 보호를 유지하며, 현재 운영 반영/영향 건수는 미확인이다. 계정 전체 삭제 실패/타계정 접근 문제로 확대하지 않는다.
+- C09: 관리자 scope 라벨은 전역 IMAGE_DELIVERY/IMAGE_DELIVERY_BYTES와 계정별 scope를 구분해야 한다. 표시만 고치며 한도/계산/권한을 바꾸지 않는다. 첨부 patch apply --check는 UI 검증이 아니다.
+- C02/C08/D04: 고지 개정은 새 고정 문서·registry triple·현재 receipt·공개 snapshot revision의 읽기/쓰기 영향과 함께 준비한다. 기존 읽기/철회/신고/private sync를 불필요하게 막지 않는다. 새 정책 변수38개·보관기한·계정 해지·메일 발신은 첨부 제안으로서 미확정이다.
+- 이번 인수는 문서/정적 대조다. 기존 운영 Public·주간 백업·키/기본 복구 인수를 취소하거나 새 SQL/UI/메일 PASS로 바꾸지 않는다.
+
 ## 2026-10-18 운영 관찰·법적 준비 대조 — 계약 범위 유지
 
 - C10/W17/D05: 첫 실제 schedule39065955924의 암호화 capture/checkpoint SUCCESS. 예정03:00/실제05:15~05:20 JST/KST, RPO/RTO 보장은 아님. 기존 외부 회수·격리 DB·독립키 완료 근거를 유지한다.

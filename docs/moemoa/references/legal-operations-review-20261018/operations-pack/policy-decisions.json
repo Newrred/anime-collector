@@ -1,0 +1,803 @@
+{
+  "schema_version": 1,
+  "purpose": "internal_review_registry_not_a_live_configuration",
+  "review_date": "2026-10-18",
+  "publication_ready": false,
+  "automatic_substitution_permitted": false,
+  "source_snapshot": {
+    "locator": "research/legal.md",
+    "sha256": "dd625f516f92ff74508d601e1065173aab6cd8da1ff1a65ca19d55a7baeae613",
+    "placeholder_pattern": "{{...}}",
+    "unique_tokens": 39,
+    "policy_variables": 38,
+    "illustrative_tokens": 1
+  },
+  "rules": [
+    "모든 정책 변수 값은 null이며 운영자 사실 확인 또는 해당 상품·계약·작동 경로 확인이 필요하다.",
+    "review_date는 검토일이다. 효력 발생일, 시행일 또는 게시일로 복사하지 않는다.",
+    "활동명 sinong, 서비스명 MOEMOA, 공개 이메일을 실제 법적 성명·사업자 등록·법정 대리인 표시로 치환하지 않는다.",
+    "확인된 이메일 문자열은 아래 verified_source에만 둔다. 정책 변수의 결정·발신 권한·수신 검증을 대신하지 않는다.",
+    "공급자의 일반 안내와 실제 사용 상품·국가·계정 계약·보존/삭제 동작을 구분한다.",
+    "새 URL·폼·version·revision은 구현·검증·정확한 적용 승인 전 확정값으로 쓰지 않는다.",
+    "원고를 수정하면 토큰 목록과 출처 hash를 다시 대조한다. KO/EN 대조 초안의 최종 일치도 확인한다."
+  ],
+  "registry": {
+    "APPEAL_RETENTION": {
+      "token": "{{APPEAL_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 65,
+          "column": 83
+        },
+        {
+          "line": 252,
+          "column": 42
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "BACKUP_RETENTION_RULE": {
+      "token": "{{BACKUP_RETENTION_RULE}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 66,
+          "column": 4
+        },
+        {
+          "line": 235,
+          "column": 203
+        },
+        {
+          "line": 255,
+          "column": 13
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "BUSINESS_REGISTRATION_DISPLAY": {
+      "token": "{{BUSINESS_REGISTRATION_DISPLAY}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 54,
+          "column": 4
+        },
+        {
+          "line": 94,
+          "column": 200
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "COPYRIGHT_PHONE_FAX": {
+      "token": "{{COPYRIGHT_PHONE_FAX}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 58,
+          "column": 73
+        },
+        {
+          "line": 318,
+          "column": 156
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "COPYRIGHT_POSTAL_ADDRESS": {
+      "token": "{{COPYRIGHT_POSTAL_ADDRESS}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 58,
+          "column": 41
+        },
+        {
+          "line": 318,
+          "column": 188
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "COPYRIGHT_RECIPIENT_NAME_DEPT": {
+      "token": "{{COPYRIGHT_RECIPIENT_NAME_DEPT}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 58,
+          "column": 4
+        },
+        {
+          "line": 318,
+          "column": 91
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "DELETION_LEDGER_RETENTION": {
+      "token": "{{DELETION_LEDGER_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 65,
+          "column": 107
+        },
+        {
+          "line": 254,
+          "column": 24
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "DMCA_AGENT_DISPLAY": {
+      "token": "{{DMCA_AGENT_DISPLAY}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "optional_registered_agent_verification",
+      "source_occurrences": [
+        {
+          "line": 59,
+          "column": 4
+        },
+        {
+          "line": 338,
+          "column": 44
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "DMCA_DIRECTORY_URL": {
+      "token": "{{DMCA_DIRECTORY_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "optional_registered_agent_verification",
+      "source_occurrences": [
+        {
+          "line": 59,
+          "column": 30
+        },
+        {
+          "line": 338,
+          "column": 75
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "EFFECTIVE_DATE": {
+      "token": "{{EFFECTIVE_DATE}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "effective_date_and_version_binding",
+      "source_occurrences": [
+        {
+          "line": 56,
+          "column": 4
+        },
+        {
+          "line": 88,
+          "column": 6
+        },
+        {
+          "line": 174,
+          "column": 6
+        },
+        {
+          "line": 289,
+          "column": 6
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "GOOGLE_DRIVE_CONTRACT_ENTITY_AND_CONTACT": {
+      "token": "{{GOOGLE_DRIVE_CONTRACT_ENTITY_AND_CONTACT}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 63,
+          "column": 70
+        },
+        {
+          "line": 235,
+          "column": 33
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "GOOGLE_DRIVE_COUNTRIES": {
+      "token": "{{GOOGLE_DRIVE_COUNTRIES}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 63,
+          "column": 118
+        },
+        {
+          "line": 235,
+          "column": 133
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "GOOGLE_LOGIN_COUNTRIES": {
+      "token": "{{GOOGLE_LOGIN_COUNTRIES}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 63,
+          "column": 40
+        },
+        {
+          "line": 234,
+          "column": 168
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "GOOGLE_LOGIN_PRIVACY_CONTACT": {
+      "token": "{{GOOGLE_LOGIN_PRIVACY_CONTACT}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 63,
+          "column": 4
+        },
+        {
+          "line": 234,
+          "column": 46
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "NCII_REQUEST_CHANNEL": {
+      "token": "{{NCII_REQUEST_CHANNEL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 64,
+          "column": 4
+        },
+        {
+          "line": 354,
+          "column": 51
+        },
+        {
+          "line": 375,
+          "column": 117
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "NCII_URL": {
+      "token": "{{NCII_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 65
+        },
+        {
+          "line": 136,
+          "column": 169
+        },
+        {
+          "line": 312,
+          "column": 52
+        },
+        {
+          "line": 398,
+          "column": 190
+        },
+        {
+          "line": 426,
+          "column": 368
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "OPERATOR_ADDRESS": {
+      "token": "{{OPERATOR_ADDRESS}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 53,
+          "column": 51
+        },
+        {
+          "line": 94,
+          "column": 158
+        },
+        {
+          "line": 180,
+          "column": 109
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "OPERATOR_LEGAL_NAME": {
+      "token": "{{OPERATOR_LEGAL_NAME}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 53,
+          "column": 4
+        },
+        {
+          "line": 94,
+          "column": 77
+        },
+        {
+          "line": 180,
+          "column": 1
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "OPERATOR_PHONE": {
+      "token": "{{OPERATOR_PHONE}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 53,
+          "column": 75
+        },
+        {
+          "line": 94,
+          "column": 180
+        },
+        {
+          "line": 180,
+          "column": 131
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PRIOR_VERSIONS_URL": {
+      "token": "{{PRIOR_VERSIONS_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 99
+        },
+        {
+          "line": 166,
+          "column": 52
+        },
+        {
+          "line": 281,
+          "column": 146
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PRIVACY_CONTACT_NAME": {
+      "token": "{{PRIVACY_CONTACT_NAME}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 55,
+          "column": 4
+        },
+        {
+          "line": 180,
+          "column": 173
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PRIVACY_URL": {
+      "token": "{{PRIVACY_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 21
+        },
+        {
+          "line": 96,
+          "column": 54
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PRIVACY_VERSION": {
+      "token": "{{PRIVACY_VERSION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "effective_date_and_version_binding",
+      "source_occurrences": [
+        {
+          "line": 56,
+          "column": 47
+        },
+        {
+          "line": 175,
+          "column": 8
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PROVIDER_TRANSFER_COUNTRIES_AND_CONTACTS": {
+      "token": "{{PROVIDER_TRANSFER_COUNTRIES_AND_CONTACTS}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 60,
+          "column": 4
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PUBLIC_POLICY_REVISION": {
+      "token": "{{PUBLIC_POLICY_REVISION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "effective_date_and_version_binding",
+      "source_occurrences": [
+        {
+          "line": 56,
+          "column": 99
+        },
+        {
+          "line": 290,
+          "column": 11
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "PUBLIC_POLICY_URL": {
+      "token": "{{PUBLIC_POLICY_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 40
+        },
+        {
+          "line": 96,
+          "column": 108
+        },
+        {
+          "line": 136,
+          "column": 30
+        },
+        {
+          "line": 182,
+          "column": 70
+        },
+        {
+          "line": 220,
+          "column": 106
+        },
+        {
+          "line": 398,
+          "column": 229
+        },
+        {
+          "line": 426,
+          "column": 484
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "REPORT_RETENTION": {
+      "token": "{{REPORT_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 65,
+          "column": 59
+        },
+        {
+          "line": 252,
+          "column": 20
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "RIGHTS_URL": {
+      "token": "{{RIGHTS_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 81
+        },
+        {
+          "line": 263,
+          "column": 112
+        },
+        {
+          "line": 330,
+          "column": 89
+        },
+        {
+          "line": 369,
+          "column": 110
+        },
+        {
+          "line": 390,
+          "column": 282
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "SECURITY_LOG_RETENTION": {
+      "token": "{{SECURITY_LOG_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 65,
+          "column": 29
+        },
+        {
+          "line": 253,
+          "column": 17
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "SIGNUP_POLICY_VERSION": {
+      "token": "{{SIGNUP_POLICY_VERSION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "effective_date_and_version_binding",
+      "source_occurrences": [
+        {
+          "line": 56,
+          "column": 70
+        },
+        {
+          "line": 90,
+          "column": 11
+        },
+        {
+          "line": 176,
+          "column": 12
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "SUPABASE_LOG_AND_PROVIDER_RETENTION": {
+      "token": "{{SUPABASE_LOG_AND_PROVIDER_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 61,
+          "column": 36
+        },
+        {
+          "line": 232,
+          "column": 205
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "SUPABASE_OTHER_COUNTRIES": {
+      "token": "{{SUPABASE_OTHER_COUNTRIES}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 61,
+          "column": 4
+        },
+        {
+          "line": 232,
+          "column": 139
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "SUPPORT_RETENTION": {
+      "token": "{{SUPPORT_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "retention_and_deletion_operating_rule",
+      "source_occurrences": [
+        {
+          "line": 65,
+          "column": 4
+        },
+        {
+          "line": 251,
+          "column": 17
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "TERMS_URL": {
+      "token": "{{TERMS_URL}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "verified_published_route_or_contact_channel",
+      "source_occurrences": [
+        {
+          "line": 57,
+          "column": 4
+        },
+        {
+          "line": 306,
+          "column": 105
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "TERMS_VERSION": {
+      "token": "{{TERMS_VERSION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "effective_date_and_version_binding",
+      "source_occurrences": [
+        {
+          "line": 56,
+          "column": 26
+        },
+        {
+          "line": 89,
+          "column": 8
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "TRADING_NAME": {
+      "token": "{{TRADING_NAME}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "operator_identity_and_contact",
+      "source_occurrences": [
+        {
+          "line": 53,
+          "column": 31
+        },
+        {
+          "line": 94,
+          "column": 101
+        },
+        {
+          "line": 180,
+          "column": 25
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "VERCEL_CDN_LOG_COUNTRIES": {
+      "token": "{{VERCEL_CDN_LOG_COUNTRIES}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 62,
+          "column": 4
+        },
+        {
+          "line": 233,
+          "column": 131
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "VERCEL_RETENTION": {
+      "token": "{{VERCEL_RETENTION}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "provider_contract_countries_contact_and_retention",
+      "source_occurrences": [
+        {
+          "line": 62,
+          "column": 36
+        },
+        {
+          "line": 233,
+          "column": 214
+        }
+      ],
+      "kind": "policy_variable"
+    },
+    "변수": {
+      "token": "{{변수}}",
+      "value": null,
+      "status": "operator_or_contract_confirmation_required",
+      "category": "illustrative_syntax",
+      "source_occurrences": [
+        {
+          "line": 49,
+          "column": 12
+        }
+      ],
+      "note": "내부 설명문에 쓰인 변수 문법 예시다. 실제 정책 항목이나 자동 치환할 운영값으로 해석하지 않는다.",
+      "kind": "illustrative_syntax"
+    }
+  },
+  "verified_source": {
+    "support_contact_email": {
+      "value": "godburgundy@gmail.com",
+      "status": "verified_in_supplied_source",
+      "verification_scope": "첨부된 현행 이용약관·개인정보처리방침·공개정책에 표시된 문의 이메일 문자열",
+      "provenance": [
+        {
+          "source": "supplied_repository/src/components/legal/Terms20261010.astro",
+          "lines": [
+            19,
+            20
+          ]
+        },
+        {
+          "source": "supplied_repository/src/components/legal/Privacy20261010.astro",
+          "lines": [
+            20,
+            21
+          ]
+        },
+        {
+          "source": "supplied_repository/src/pages/legal/public-sharing-2026-10-11.astro",
+          "lines": [
+            29,
+            50
+          ]
+        }
+      ],
+      "does_not_confirm": [
+        "운영자의 법적 성명·사업자등록·주소·전화·직위",
+        "현 메일함의 소유·수신 상태·응답 또는 긴급 상시 대응",
+        "SMTP·Gmail API 인증·자동 발신·도메인 인증",
+        "전용 접수 폼의 구현과 동작",
+        "DMCA 지정 대리인 등록이나 법정 수령인 요건의 완결"
+      ]
+    }
+  }
+}

@@ -1,0 +1,109 @@
+/**
+ * MOEMOA operations report renderer, candidate v0.1.
+ * Pure rendering only: no network, credentials, database access or message sending.
+ * Feed aggregate operational values only. Unknown fields are rejected.
+ */
+import { createHash } from 'node:crypto';
+
+const KINDS = new Set(['daily', 'weekly', 'urgent']);
+const LABELS = { daily: '일일 운영 보고', weekly: '주간 운영 검토', urgent: '긴급 운영 알림' };
+const CASE_TYPES = {
+  safety: '긴급 안전·권리 요청', copyright: '저작권 요청', privacy: '개인정보 권리 요청',
+  appeal: '조치 이의신청', image: '사진 표시 오류', backup: '백업 확인',
+  capacity: '용량 확인', mail: '메일 전송 확인'
+};
+const METRICS = {
+  cases_open: '미종결 사건', cases_due_24h: '24시간 안에 처리할 사건',
+  delivery_failure_rate: '사진 전달 실패율', private_reserved_bytes: '개인 사진 예약량',
+  private_observed_bytes: '개인 사진 실측량', public_reserved_bytes: '공개 사진 예약량',
+  backup_age_hours: '최근 백업 이후 경과', cleanup_age_hours: '최근 정리 이후 경과',
+  mail_dead: '전송 실패 후 확인 대기', cohort_size: '참여자 수',
+  first_memory: '첫 기억 작성자', repeat_memory: '다른 날 추가 작성자',
+  meaningful_return: '이전 기억을 다시 찾은 참여자', support_minutes: '문의·조치 소요 시간'
+};
+const SOURCES = new Set(['case_registry', 'quota_rpc', 'delivery_aggregate', 'backup_manifest', 'workflow_heartbeat', 'notification_outbox', 'consented_cohort']);
+const safeId = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$/;
+const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+
+function keys(obj, allowed, where) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new TypeError(where + ' must be an object');
+  for (const key of Object.keys(obj)) if (!allowed.includes(key)) throw new Error(where + ': unsupported field ' + key);
+}
+function id(value, label) { if (typeof value !== 'string' || !safeId.test(value)) throw new Error('Invalid ' + label); }
+function timestamp(value, label) { if (typeof value !== 'string' || !ISO.test(value) || !Number.isFinite(Date.parse(value))) throw new Error('Invalid UTC timestamp ' + label); }
+const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function validate(input) {
+  keys(input, ['kind','reportId','recipientKey','periodStart','periodEnd','generatedAt','timezone','adminOrigin','synthetic','cases','metrics'], 'report');
+  if (!KINDS.has(input.kind)) throw new Error('Invalid kind');
+  id(input.reportId, 'reportId'); id(input.recipientKey, 'recipientKey');
+  for (const k of ['periodStart','periodEnd','generatedAt']) timestamp(input[k], k);
+  if (Date.parse(input.periodStart) >= Date.parse(input.periodEnd)) throw new Error('Invalid reporting interval');
+  if (!['Asia/Seoul','Asia/Tokyo','UTC'].includes(input.timezone)) throw new Error('Unsupported display timezone');
+  if (typeof input.synthetic !== 'boolean') throw new Error('synthetic must be explicit');
+  const origin = new URL(input.adminOrigin);
+  if (origin.protocol !== 'https:' || origin.username || origin.password || origin.search || origin.hash || origin.pathname !== '/') throw new Error('adminOrigin must be a bare HTTPS origin');
+  if (!Array.isArray(input.cases) || input.cases.length > 30 || !Array.isArray(input.metrics) || input.metrics.length > 30) throw new Error('Invalid report length');
+  for (const c of input.cases) {
+    keys(c, ['id','type','severity','status','legalDeadlineState','legalDueAt','internalDueAt','legalBasis','remainingCopies','sourceAt'], 'case');
+    id(c.id, 'case id');
+    if (!CASE_TYPES[c.type] || !['P0','P1','P2'].includes(c.severity) || !['NEW','ACTIVE','WAITING_REQUESTER','FOLLOW_UP','RESOLVED','DUPLICATE'].includes(c.status)) throw new Error('Invalid case classification');
+    timestamp(c.sourceAt, 'case sourceAt');
+    for (const k of ['legalDueAt','internalDueAt']) if (c[k] !== null) timestamp(c[k], k);
+    if (![null,'TIDA_3','KR_COPYRIGHT_103','KR_PIPA_RIGHTS','OTHER_REVIEWED'].includes(c.legalBasis)) throw new Error('Invalid legal basis code');
+    if (!['not_applicable','review_required','set'].includes(c.legalDeadlineState)) throw new Error('Invalid legal deadline state');
+    if (c.legalDeadlineState === 'set' && (!c.legalDueAt || !c.legalBasis)) throw new Error('A legal deadline requires a reviewed basis and timestamp');
+    if (c.legalDeadlineState !== 'set' && c.legalDueAt !== null) throw new Error('Only a reviewed legal deadline can have a timestamp');
+    if (c.remainingCopies !== null && (!Number.isInteger(c.remainingCopies) || c.remainingCopies < 0)) throw new Error('Invalid remainingCopies');
+  }
+  for (const m of input.metrics) {
+    keys(m, ['key','value','unit','scope','source','observedAt','freshness','coverage'], 'metric');
+    if (!METRICS[m.key] || !SOURCES.has(m.source) || !['account','service','cohort'].includes(m.scope)) throw new Error('Invalid metric classification');
+    if (!['count','bytes','hours','minutes','percent'].includes(m.unit) || !['fresh','stale','unavailable'].includes(m.freshness) || !['complete','partial','unavailable'].includes(m.coverage)) throw new Error('Invalid metric metadata');
+    if (m.value !== null && (typeof m.value !== 'number' || !Number.isFinite(m.value) || m.value < 0)) throw new Error('Invalid metric value');
+    if (m.observedAt !== null) timestamp(m.observedAt, 'metric observedAt');
+    if (m.freshness === 'fresh' && (m.value === null || m.observedAt === null)) throw new Error('Fresh metric requires an observed value and timestamp');
+    if (m.freshness === 'unavailable' && m.value !== null) throw new Error('Unavailable metric cannot carry a value');
+  }
+}
+
+export function renderReport(input) {
+  validate(input);
+  const format = value => value === null ? '미확정' : new Intl.DateTimeFormat('ko-KR', {timeZone: input.timezone, dateStyle:'short', timeStyle:'short', hour12:false}).format(new Date(value));
+  const origin = new URL(input.adminOrigin).origin;
+  const tag = input.synthetic ? '[검토용 예시] ' : '';
+  const subject = tag + '[MOEMOA][' + input.kind.toUpperCase() + '] ' + LABELS[input.kind] + ' · ' + input.reportId;
+  const lines = [subject, '', '집계 구간: ' + format(input.periodStart) + ' 이상 ~ ' + format(input.periodEnd) + ' 미만', '표시 시간대: ' + input.timezone, '생성 시각: ' + format(input.generatedAt), '사건과 지표는 서로 다른 관측 시각을 가질 수 있습니다.'];
+  if (input.synthetic) lines.push('이 보고서는 합성 예시이며 실제 이용자·운영 지표를 나타내지 않습니다.');
+  lines.push('', '처리가 필요한 사건');
+  if (!input.cases.length) lines.push('제공된 사건 목록이 비어 있습니다. 전체 접수함이 정상임을 의미하지 않습니다.');
+  const sortedCases = [...input.cases].sort((a,b) => (a.legalDueAt || '9999').localeCompare(b.legalDueAt || '9999') || a.severity.localeCompare(b.severity) || (a.internalDueAt || '9999').localeCompare(b.internalDueAt || '9999'));
+  for (const c of sortedCases) {
+    lines.push(c.severity + ' · ' + c.id + ' · ' + CASE_TYPES[c.type] + ' · ' + c.status);
+    const legal = c.legalDeadlineState === 'not_applicable' ? '해당 없음(이 단계)' : c.legalDeadlineState === 'review_required' ? '적용 검토 중' : format(c.legalDueAt) + ' (' + c.legalBasis + ')';
+    lines.push('법정 기한: ' + legal + ' / 내부 목표: ' + format(c.internalDueAt));
+    if (c.remainingCopies !== null) lines.push('알려진 공개 사본 중 추가 확인·차단 필요: ' + c.remainingCopies + ' · 다른 알려진 원본의 법적 처리 범위는 별도 확인');
+    lines.push('확인 시각: ' + format(c.sourceAt));
+    lines.push(origin + '/admin/?case=' + encodeURIComponent(c.id));
+  }
+  lines.push('', '운영 지표');
+  for (const m of input.metrics) {
+    const value = m.value === null ? '미수집' : m.value.toLocaleString('ko-KR') + ' ' + m.unit;
+    const freshness = {fresh:'관측 유효', stale:'과거 관측·현재값 아님', unavailable:'수집 불가'}[m.freshness];
+    const scope = {account:'계정',service:'서비스 전체',cohort:'동의한 참여 집단'}[m.scope];
+    lines.push(METRICS[m.key] + ' · ' + value + ' · ' + scope + ' · ' + freshness + ' · 범위 ' + m.coverage + ' · ' + format(m.observedAt) + ' · ' + m.source);
+  }
+  lines.push('', '관리 화면: ' + origin + '/admin/', '민감한 신고 원문·이미지·개인 감상은 메일에 포함하지 않습니다. 관리 화면에서 권한을 확인한 뒤 필요한 범위만 열람합니다.');
+  const text = lines.join('\n');
+  const htmlRows = lines.map((line,i) => {
+    if (i === 0) return '<h1 style="font-size:20px;font-weight:600">' + escapeHtml(line) + '</h1>';
+    let content = line ? escapeHtml(line) : '&nbsp;';
+    if (line.startsWith(origin + '/admin/?case=')) content = '<a href="' + escapeHtml(line) + '">관리자에서 사건 확인</a>';
+    if (line === '관리 화면: ' + origin + '/admin/') content = '<a href="' + escapeHtml(origin + '/admin/') + '">운영 관리 화면 열기</a>';
+    return '<p style="margin:7px 0;line-height:1.6">' + content + '</p>';
+  }).join('\n');
+  const html = '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escapeHtml(subject) + '</title></head><body style="margin:0;background:#f6f4f5;color:#29242b;font-family:Arial,\'Noto Sans CJK KR\',sans-serif"><main style="max-width:740px;margin:24px auto;padding:24px;background:#fff">' + htmlRows + '</main></body></html>';
+  const identity = [input.kind, input.reportId, input.recipientKey, input.periodStart, input.periodEnd].join('|');
+  const dedupeKey = createHash('sha256').update(identity).digest('hex');
+  return { subject, text, html, dedupeKey };
+}

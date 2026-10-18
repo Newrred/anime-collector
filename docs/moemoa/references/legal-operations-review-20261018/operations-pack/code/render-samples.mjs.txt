@@ -1,0 +1,14 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { renderReport } from './notification-renderer.mjs';
+const here=dirname(fileURLToPath(import.meta.url));
+const output=resolve(here,'../email-samples');
+await mkdir(output,{recursive:true});
+for(const kind of ['daily','weekly','urgent']) {
+  const input=JSON.parse(await readFile(resolve(here,'examples/'+kind+'.json'),'utf8'));
+  const r=renderReport(input);
+  await writeFile(resolve(output,kind+'.html'),r.html);
+  await writeFile(resolve(output,kind+'.txt'),r.text);
+}
+process.stdout.write('Rendered 3 synthetic reports. No messages were sent.\n');
