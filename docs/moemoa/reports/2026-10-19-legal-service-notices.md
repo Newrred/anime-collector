@@ -40,3 +40,10 @@
 - 고의·중과실/부당 책임 전가 제한: [약관법7조](https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1025032399). 이용자가 자기 권리를 확인한다는 체크로 운영자의 모든 의무를 없애지 않는다.
 
 이번 고지는 위 법령의 조건부 설명을 담은 구현이며, 특정 사건의 법적 판단이나 모든 지역의 요건 충족 증명은 아니다.
+
+## 정확 운영 후보 인계
+
+- 후보: 3e1f9f3553f9a03d22670ef2edbfe48f8914414b, branch codex/legal-notices-20261019, 부모 운영981d13e. 앱8파일·검사2파일·문서/검토원문50파일이며 새 migration/API/의존성/workflow/정책설정은 없다.
+- 구현 commit: c285ca1dad9662f00494117c2f010a1a3264a375. 후보의 앱/검사10개 Git blob는 이 로컬 검증 소스와 모두 동일하다. 원본 패키지는 참고 텍스트로만 보존하며 샘플 스크립트 실행/메일 발송은 없다.
+- 승인 후 exact후보 branchCI 두job→master fast-forward→Vercel Git/Production/www exactSHA→실제 /terms /privacy /legal/service-operations-2026-10-19/와 가입 링크 확인. DB/환경 쓰기는 없다. master가다른SHA로이동했으면 덮지않고후보를대조한다.
+- 이 인계는 운영 승인이나 새 고지 배포 완료가 아니다.
