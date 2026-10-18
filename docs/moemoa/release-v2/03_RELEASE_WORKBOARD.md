@@ -914,6 +914,7 @@ DF-02 실측: 운영원본함수/test승인함수·같은ACL. 고아본문0/활�
 기존 잔여: DF-02 운영적용승인·quota라벨·사진진단·master보호·임계알림·전체복구 serving 유지.
 운영 완료 소스: 3e1f9f3553f9a03d22670ef2edbfe48f8914414b / master, 부모981d13e; 앱8·검사2·문서/참고원문50파일. 앱/검사blob는검증c285ca1과동일. 사용자정확승인수신·실행완료.
 DF-02 후보: supabase/migrations/20261019090000_memory_retention_response_cleanup.sql, releaseMOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01. 기존승인SQL본문/ACL동일. 수동purge없이기존일별정리에서부재entity본문만null, operation행/ID/hash/status/활성·최근본문보존. 이미정리된본문은함수복귀로복원불가.
+정확 후보SHA: 724eaddb252db6ee00ba272f10ee5c6940151330 / codex/df02-retention-production-20261019; 부모운영3e1f9f3. migration/도구/검사6·문서/근거11파일, 검증e8de0fa의6개sourceblob와동일. 원격CI/운영적용/배포미실행.
 다음 행동 하나: DF-02 정확 운영 후보 승인→CI/master Git/Vercel→함수/ledger·독립readback. 법률고지/신고승인재요청없음.
 ```
 

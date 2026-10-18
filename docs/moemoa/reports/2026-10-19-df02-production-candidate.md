@@ -22,3 +22,7 @@
 - 신규 기능·국가/요금·이미지 공개 범위·cron 시간 변경, 수동 purge, 원본/보관 기록/operation 행 삭제는 이번 후보에 없다.
 
 법률 고지 배포와 DF-01은 이미 운영 완료다. D04 사실표/법정 수령인, 사진 진단, quota 라벨 등 기존 잔여는 이 후보로 완료 처리하지 않는다.
+
+## 정확 후보 인계
+
+`724eaddb252db6ee00ba272f10ee5c6940151330` / `codex/df02-retention-production-20261019`, 부모운영3e1f9f3. migration/도구/검사6개와 문서/근거11개를 담았으며 검증한 개발 commit e8de0fa의6개sourceblob와 모두 동일하다. 직전 법률 고지의 운영 완료 문서/근거는 현재 시작문서의 링크가 끊어지지 않도록 포함했고 새 앱 수정은 없다. 원격CI·master push·운영 migration/수동purge는 실행하지 않았다.
