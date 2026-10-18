@@ -1,5 +1,10 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 법률 고지 운영 인수
+
+- C02/C10·W17/D04/W14: 승인3e1f9f3 exact CI39146108987 두 job→master/Vercel Production/실제 www 동일 SHA. 현재 약관·개인정보·보충 KO/EN와 가입 읽기 링크 실제 화면 확인, 고정 원문3개 raw HTML/본문 불변. [운영 근거](evidence/2026-10-19-legal-service-notices-production.json).
+- 기존 receipt/가입 tuple·공개 revision·DB/설정 변경0. 실제 Google/로그인 receipt/긴급 신고 접수·통지·삭제는 이번 인수 범위가 아니다. 공급자 정보·법정 수령인 등 미결 D04는 유지한다. 아래 로컬/미배포는 이전 증거다.
+
 ## 2026-10-19 운영 신고 적용과 법률 고지 로컬 인수
 
 - C03/C05/Q12/Q17: 승인981d13e exact CI 두job·Git/Vercel/www·운영 함수/ledger/별도readback 완료. [운영 근거](evidence/2026-10-19-partial-privacy-report-production-application.json). 실제 hosted 신규 신고 UI는 미실행이며 로컬 SQL 행동/hosted metadata를 구분한다.

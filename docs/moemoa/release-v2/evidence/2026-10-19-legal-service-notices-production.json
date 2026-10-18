@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "taskIds": [
+    "W17",
+    "D04",
+    "W14"
+  ],
+  "status": "APPROVED_GIT_PRODUCTION_DEPLOYMENT_AND_PUBLIC_PAGE_READ_VERIFIED",
+  "source": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+  "parent": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+  "approval": "User: 이 후보 운영 적용 승인",
+  "scope": {
+    "appFiles": 8,
+    "testFiles": 2,
+    "documentationFiles": 50,
+    "databaseChanges": 0,
+    "environmentChanges": 0,
+    "receiptWrites": 0,
+    "policyRevisionChanges": 0,
+    "externalMessages": 0
+  },
+  "ci": {
+    "id": 39146108987,
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/39146108987",
+    "event": "workflow_dispatch",
+    "sha": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117730170387,
+        "name": "verify",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117730170616,
+        "name": "publication-contract",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "verifiedBeforeMasterPush": true
+  },
+  "git": {
+    "branch": "master",
+    "fastForward": true,
+    "prePushExpectedParentMatched": true,
+    "remoteReadbackMatched": true
+  },
+  "vercel": {
+    "id": "dpl_6Ekgdu8FUhcEQdsfXvZL7U31MYsP",
+    "url": "https://vercel.com/newrreds-projects/anime-collector/6Ekgdu8FUhcEQdsfXvZL7U31MYsP",
+    "state": "READY",
+    "environment": "Production",
+    "currentDomain": "www.moemoa.xyz",
+    "browserReadback": true,
+    "githubDeployment": {
+      "id": 7157716192,
+      "sha": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+      "environment": "Production",
+      "created": "2026-10-18T16:56:35Z",
+      "creator": "vercel[bot]",
+      "statuses": [
+        {
+          "state": "success",
+          "environment": "Production",
+          "url": "https://anime-collector-3dqp7vdvd-newrreds-projects.vercel.app",
+          "logUrl": "https://anime-collector-3dqp7vdvd-newrreds-projects.vercel.app",
+          "created": "2026-10-18T16:56:35Z",
+          "description": "Deployment has completed"
+        }
+      ]
+    }
+  },
+  "live": {
+    "at": "2026-10-18T16:57:02.454Z",
+    "mode": "verify",
+    "buildInfo": {
+      "commit": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+      "checkoutCommit": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+      "builtAt": "2026-10-18T16:56:12.903Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "pages": [
+      {
+        "path": "/legal/terms-2026-10-10/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/legal/terms-2026-10-10/",
+        "bodySha256": "43da47e6910199fa37a412072e87cea8359b9d21e86736c2a39d848fa21aa96a",
+        "textSha256": "bdd14fa24a8624cbd5f7484ff373e4a094cc95db91ced87d1f6ae2b69ed927b1",
+        "unchangedText": true,
+        "checks": []
+      },
+      {
+        "path": "/legal/privacy-2026-10-10/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/legal/privacy-2026-10-10/",
+        "bodySha256": "eeaac76c7d769f9be1a32f4a9a91dc1f87350d96f86883da51a1a247dc8125cf",
+        "textSha256": "66e054c8038384620b947c0893f0022ea427d5a9d9b90435f117f8ecf4561063",
+        "unchangedText": true,
+        "checks": []
+      },
+      {
+        "path": "/legal/public-sharing-2026-10-11/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/legal/public-sharing-2026-10-11/",
+        "bodySha256": "9fb01f4933e6d4e10a7aba4f8deb93c64d032ab2ca24058286a70e395aa36caa",
+        "textSha256": "1dc6f50b12acf0f41f7e3cb8804215c2886ffa9177827900f024c8ed5ea57a39",
+        "unchangedText": true,
+        "checks": []
+      },
+      {
+        "path": "/terms/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/terms/",
+        "bodySha256": "625fedd1cb96545342f1b6580ee5b378b3ea3e24258fb794b7bd0b46547b2443",
+        "textSha256": "0679d826441cd752f0bb687ddb3f5c368fba4cd8ae2c8c68dfe7518185e8ac19",
+        "checks": [
+          {
+            "marker": "2026-10-19",
+            "present": true
+          },
+          {
+            "marker": "service-operations-2026-10-19",
+            "present": true
+          },
+          {
+            "marker": "legal/terms-2026-10-10",
+            "present": true
+          }
+        ]
+      },
+      {
+        "path": "/privacy/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/privacy/",
+        "bodySha256": "f5e8b62ed330f173bf505ad9b1d745d331096ced52b5b403b9d6b090e696e8f7",
+        "textSha256": "e8617185dc8d68192e145fcc0fa6715606db487e3d1eb4be259665a26d028531",
+        "checks": [
+          {
+            "marker": "2026-10-19",
+            "present": true
+          },
+          {
+            "marker": "Vercel",
+            "present": true
+          },
+          {
+            "marker": "GitHub",
+            "present": true
+          }
+        ]
+      },
+      {
+        "path": "/legal/service-operations-2026-10-19/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/legal/service-operations-2026-10-19/",
+        "bodySha256": "e40f9c499c8e7df32d2e228ce0979dc3b897837c66bb4a86d6d65cdd2410d2a7",
+        "textSha256": "9f392435f2c9eb5e041dd64b59985d867edc4a0b99921f060556d7d3885b9c64",
+        "checks": [
+          {
+            "marker": "GitHub",
+            "present": true
+          },
+          {
+            "marker": "48",
+            "present": true
+          },
+          {
+            "marker": "id=\"urgent\"",
+            "present": true
+          },
+          {
+            "marker": "id=\"withdrawal\"",
+            "present": true
+          },
+          {
+            "marker": "gross negligence",
+            "present": true
+          }
+        ]
+      },
+      {
+        "path": "/auth/start/",
+        "status": 200,
+        "url": "https://www.moemoa.xyz/auth/start/",
+        "bodySha256": "3d21b71eab6258b264b3920c3500d92ff10ed810a3055287f8a3eeb282732b3e",
+        "textSha256": "92a7ca1db95c84ab5bad41a17321de397402bd3a923c99d8bc82ba1637ff527c",
+        "checks": []
+      }
+    ],
+    "passed": true
+  },
+  "browser": {
+    "surface": "Actual public production site in in-app browser",
+    "checks": [
+      "Terms banner distinguishes fixed 2026-10-10 text from 2026-10-19 supplement",
+      "Terms to dated supplement link opens correct KO/EN page",
+      "Signup policy loading completed with fixed 2026-10-10 Terms/Privacy links",
+      "One unchecked signup agreement remains; no new agreement added",
+      "Current processing information link opens /privacy/ in new tab",
+      "Current Privacy shows 2026-10-19 provider, backup and rights guidance"
+    ],
+    "screenshot": "2026-10-19-legal-notice-production.png",
+    "formValuesEntered": false,
+    "agreementAccepted": false,
+    "googleLogin": false,
+    "signedInReceiptRead": false
+  },
+  "limits": [
+    "No actual urgent report, mail, notification or copy removal executed",
+    "No production account data or acceptance records inspected",
+    "Legal operational readiness is not certified; D04 unresolved facts remain",
+    "Master push auto-triggered duplicate same-SHA CI39147243120; required pre-push exact-SHA CI39146108987 succeeded"
+  ],
+  "nextAction": "DF-02: compare existing test-only synchronization response cleanup against production read-only, then prepare minimal exact candidate"
+}

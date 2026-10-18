@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-19 법률 고지 운영 완료:** 승인 `3e1f9f3553f9a03d22670ef2edbfe48f8914414b`를 정확 SHA CI39146108987 두 job 성공 후 master에 fast-forward했다. Vercel `dpl_6Ekgdu8FUhcEQdsfXvZL7U31MYsP` READY/Production/Current www와 실제 build-info 동일 SHA·vercel-git 확인. 현재 약관→보충 안내, 가입→현재 개인정보 링크와 고정 원문3개의 배포 전후 동일 내용 확인. DB·설정·기존 동의 변경0. [운영 8항 보고](docs/moemoa/reports/2026-10-19-legal-service-notices-production.md), [근거](docs/moemoa/release-v2/evidence/2026-10-19-legal-service-notices-production.json). 다음 하나는 **DF-02 기존 test-only 응답 본문 정리의 운영 read-only 대조·최소 후보 준비**다. 국외처리 필수표·법정 수령인·실제 긴급 대응 등 D04 미결은 유지한다. 아래 로컬/승인 대기는 당시 이력이다.
+
 > **법률 고지 정확 후보:** `3e1f9f3553f9a03d22670ef2edbfe48f8914414b` / `codex/legal-notices-20261019`, 운영981d13e 기준의 앱8·검사2·문서/첨부근거50파일. 구현 소스 c285ca1과 앱/검사 blob 일치, 로컬 검증 완료·원격 미반영. 다음은 이 후보의 정확 운영 승인 후 CI→master Git→Vercel/www 확인이며 DB/정책 변경은 없다. [상세 인계](docs/moemoa/reports/2026-10-19-legal-service-notices.md#정확-운영-후보-인계).
 
 > **2026-10-19 최신:** 승인981d13e의 master/Vercel/www 동일 SHA와 운영 신고 함수20261018090000·독립 readback 완료. [운영 결과](docs/moemoa/reports/2026-10-19-partial-privacy-report-production-application.md). 이어 첨부 법률 검토를 현재 약관·개인정보·가입/계정 안내에 반영한 로컬 후보를 준비했다. 과거 수락 원문/정책/공개 revision 보존, Chromium 관련4개·build34 PASS. [법률 고지 보고](docs/moemoa/reports/2026-10-19-legal-service-notices.md). 새 고지는 아직 운영 미배포이며 정확 후보 승인 경계를 유지한다. 아래 후보/미적용은 당시 이력이다.

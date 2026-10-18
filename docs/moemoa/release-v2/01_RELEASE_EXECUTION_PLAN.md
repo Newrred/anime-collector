@@ -2,6 +2,10 @@
 
 ## W17/D04·W14 법률 검토안 서비스 고지 반영 — 2026-10-19
 
+> **운영 완료:** 승인3e1f9f3의 CI39146108987 두 job SUCCESS→master981d13e에서 fast-forward→Vercel6Ekgdu8FU READY/Production/Current www→실제 build-info3e1f9f3/source vercel-git·semanticMatch 확인. 7개 공개 URL200, 고정 원문3개 raw HTML/본문 지문 불변, 실제 약관→보충 안내 및 가입→현재 개인정보 읽기 링크 확인. DB/환경/동의/메일 쓰기0. [실행 8항 보고](../reports/2026-10-19-legal-service-notices-production.md)와 [근거](evidence/2026-10-19-legal-service-notices-production.json). 아래 후보 준비와 승인 전 상태는 이력이며 이 후보의 승인 재요청은 없다.
+
+> **운영 실행 승인 — 2026-10-19:** 사용자가 정확 후보 `3e1f9f3553f9a03d22670ef2edbfe48f8914414b`에 “이 후보 운영 적용 승인”했다. 후보 branch push→동일 SHA Service quality 두 job→현재 master981d13e 확인 후 fast-forward→Vercel Git/Production/www 동일 SHA→현재 고지/고정 원문/가입 링크 읽기 확인 순서로 실행한다. 새 DB·설정·수락·발송은 없으며 후보 소스는 바꾸지 않는다. 실패 시 master 반영 전 중단하거나 해당 고지 변경만 복귀하는 기존 절차를 따른다.
+
 1. **목적/승인:** 사용자 “첨부했었던 약정, 법률등도 서비스 약관 등에 반영”에 따라 첨부검토안을 실제 서비스 약관/개인정보/공개정책과 대조하고 반영한다. 이미승인981d13e 신고배포는 별도그대로 마감한다.
 2. **결정:** KR14/US13/TH13·무료·일반공개·기존권리gate·주간증분/확정복구기준과 과거수락원문불변. 새국가축소/신분증/유료계약/자동메일/삭제기간을 임의확정하지 않는다.
 3. **근거:** 10/18 Pro인수보고와 첨부보존원문·현행 legal컴포넌트/가입receipt/실제데이터흐름·공식법률/공급자문서를 대조한다.
