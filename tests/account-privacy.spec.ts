@@ -35,6 +35,8 @@ test('own receipt history keeps old and new documents distinct; only new PH rece
  await expect(panel.getByRole('link',{name:'동의한 이용약관'})).toHaveCount(2);
  await expect(panel.getByRole('link',{name:'동의한 이용약관'}).nth(0)).toHaveAttribute('href','/legal/terms-2026-10-10-test/');
  await expect(panel.getByRole('link',{name:'동의한 이용약관'}).nth(1)).toHaveAttribute('href','/legal/terms-2026-10-09-draft/');
+ await expect(panel.getByRole('link',{name:'현재 개인정보 처리 안내와 연락처'})).toHaveAttribute('href','/privacy/#withdrawal');
+ await expect(panel.getByRole('link',{name:'이미지·백업 처리와 권리 요청 안내'})).toHaveAttribute('href','/legal/service-operations-2026-10-19/');
  await expect(panel.locator('li').nth(0)).toContainText('가입 연령 정보 처리 동의');
  await expect(panel.locator('li').nth(1)).not.toContainText('가입 연령 정보 처리 동의');
  await panel.getByRole('button',{name:'계정 탈퇴',exact:true}).click();
@@ -44,6 +46,35 @@ test('own receipt history keeps old and new documents distinct; only new PH rece
  await panel.screenshot({path:info.outputPath('account-delete-confirm-320.png')});
  await panel.getByRole('button',{name:'취소',exact:true}).click();
  expect(calls.filter(c=>c.path==='delete')).toHaveLength(0);
+});
+
+test('current legal notices remain separate from accepted documents and cause no account mutation',async({page},info)=>{
+ const calls=await setup(page);
+ await page.locator('#account-privacy').getByRole('link',{name:'현재 개인정보 처리 안내와 연락처'}).click();
+ await expect(page).toHaveURL(/\/privacy\/#withdrawal$/);
+ await expect(page.locator('#providers')).toContainText('GitHub');
+ await expect(page.locator('#retention')).toContainText('주간 증분');
+ await expect(page.locator('#current-notice-heading')).toBeAttached();
+ await page.getByRole('link',{name:'처리 경로·신고·이의제기 보충 안내 / Processing, reporting and appeal supplement'}).click();
+ await expect(page).toHaveURL(/\/legal\/service-operations-2026-10-19\/$/);
+ await expect(page.locator('#providers')).toContainText('GitHub Actions');
+ await expect(page.locator('#rights')).toContainText('이의제기');
+ await expect(page.locator('input,select,textarea,button[type=submit]')).toHaveCount(0);
+ for(const width of [1440,320]) {
+  await page.setViewportSize({width,height:900});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath(`legal-notice-${width}.png`)});
+ }
+ await page.goto('/terms/');
+ await expect(page.locator('#service')).toContainText('MOEMOA');
+ await expect(page.locator('#current-notice-heading')).toBeVisible();
+ await page.getByRole('link',{name:'2026-10-10 고정 원문',exact:true}).click();
+ await expect(page).toHaveURL(/\/legal\/terms-2026-10-10\/$/);
+ await expect(page.locator('#current-notice-heading')).toHaveCount(0);
+ await page.goto('/legal/privacy-2026-10-10/');
+ await expect(page.locator('#providers')).not.toContainText('GitHub Actions');
+ await expect(page.locator('#current-notice-heading')).toHaveCount(0);
+ expect(calls.filter(c=>c.path==='delete'||c.path==='start')).toHaveLength(0);
 });
 
 test('confirmed cloud deletion signs out and preserves unrelated local data',async({page})=>{

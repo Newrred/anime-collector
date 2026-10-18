@@ -1,10 +1,43 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
-## 2026-10-19 DF-01 운영 후보 준비
+## 2026-10-19 운영 신고 적용과 법률 고지 로컬 인수
 
-2026-10-19 DF-01 운영 후보 준비: 운영 함수는 old baseline, fix 이력 없음. 원격 master/www a65f557 일치. 검증한 SQL4파일과 운영 전용 실행 도구만 후보로 구성. 운영 쓰기/배포/원격 CI는 미실행이며 정확 후보 적용 승인 대기. 이전 기록은 보존하며 현재 상태는 이 후속 기록을 따른다.
+- C03/C05/Q12/Q17: 승인981d13e exact CI 두job·Git/Vercel/www·운영 함수/ledger/별도readback 완료. [운영 근거](evidence/2026-10-19-partial-privacy-report-production-application.json). 실제 hosted 신규 신고 UI는 미실행이며 로컬 SQL 행동/hosted metadata를 구분한다.
+- C02/C10·W17/D04/W14: 새 현재 안내와 고정 보충 문서의 KO/EN·가입/계정 링크를 구현했다. 구문서/receipt tuple·공개 revision·현재 국가/연령 불변. 합성 backend Chromium4개와 build34 PASS; 국외처리 필수표/법정 수령인/실제 조치 체계의 전체 완료는 아니다. [고지 근거](evidence/2026-10-19-legal-service-notices.json).
 
-[정확 범위·8항 보고·복귀](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json).
+
+## 2026-10-19 DF-01 운영 후보 인수
+
+- 운영 read-only에서 원본 body/권한·인자/default·SECURITY DEFINER/빈 search_path와 실제 prerequisite ledger를 확인했다. 수정 이력은 없고 원격 master/live는 a65f557이다. 이 조회가 실제 신고 성공을 뜻하지 않는다.
+- 후보는 검증한 a6a63b6의 migration·SQL 계약4파일을 그대로 이식한다. 기존 로컬 행동/복귀 및 test DB metadata 근거를 재사용하고, 운영 전용 실행 도구의 새 검증과 exact blob 대조는 [후보 근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json)에 별도로 기록한다.
+- 실제 운영 인수는 정확 승인 후 candidate CI2job·Git master/Vercel SHA·migration release/별도 readback까지 확인해야 한다. 현재는 **운영 미반영 / remote CI 미실행**이다. [범위·복귀·8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md).
+
+## 2026-10-18 DF-01 테스트 DB 정의·권한 인수
+
+- 사용자 승인한 test-only migration20261018090000/a6a63b6 반영 및 독립 연결 readback PASS. 현행 함수 정확 baseline 대조, 기존 ACL/owner/인자/default/search_path·설정·다른 함수·기존 migration 이력 보존을 확인했다.
+- [적용 증거](evidence/2026-10-18-partial-privacy-report-test-application.json). 앞선 C03/C05/Q12/Q17 로컬 행동 검증은 유지하며 이번 metadata 검사를 hosted UI/실신고 생성/운영 PASS로 바꾸지 않는다. 다음은 DF-01 운영 현행 읽기 대조와 정확 후보 준비다.
+
+## 2026-10-18 DF-01 로컬 회귀 인수
+
+- C03/C05/Q12/Q17: 실제 SQL 두 카드 게시→한 카드 비공개→익명 남은1장열람→새 신고자의 새 신고 경로에서 기존 NOT_FOUND를 재현했다. 후보 a6a63b6에서 접수 성공. 기존 receipt 재사용으로 우회한 검사가 아니다.
+- 신규 경계31항목과 기존 signup/sharing/락, publication 회귀 PASS. 최초 비공개·첫 preview·없는 ID·마지막 카드 제거의 거절, no-store·ACL·한도·중복·일반 철회 후 역사적 신고를 유지한다. 기존 함수 복귀/재적용도 검증했다.
+- [실행 근거](evidence/2026-10-18-partial-privacy-report-fix.json). **LOCAL SQL만 완료**, hosted/PostgREST/UI/운영 검증은 잔여다. 24개 QA 전체나 전체 출시 항목을 DONE으로 승격하지 않는다. 다음은 정확 후보의 테스트 DB 적용 승인이다.
+
+## 2026-10-18 Pro 검토안 인수 — 기존 계약의 빠진 조합
+
+- C03/C05/Q12/Q17: 2카드 공개→1카드 private→남은 공개 snapshot 읽기→**새 신고자·새 operation의 신고**를 함께 재현한다. 현재 정적 불일치는 [인수 보고](../reports/2026-10-18-pro-legal-operations-intake.md)에 있다. 이전 신고의 idempotent 반환을 신규 접수 PASS로 쓰지 않는다. 신고 quota/owner/숨김·철회 대상의 기존 정책은 유지한다.
+- C10/D05: 삭제 entity의 sync 응답 본문 scrub은10/10 로컬12항목·test-only 적용 근거가 있다. operation ID/hash/ACK·version/sequence 보존 및 활성·최근 entity 보호를 유지하며, 현재 운영 반영/영향 건수는 미확인이다. 계정 전체 삭제 실패/타계정 접근 문제로 확대하지 않는다.
+- C09: 관리자 scope 라벨은 전역 IMAGE_DELIVERY/IMAGE_DELIVERY_BYTES와 계정별 scope를 구분해야 한다. 표시만 고치며 한도/계산/권한을 바꾸지 않는다. 첨부 patch apply --check는 UI 검증이 아니다.
+- C02/C08/D04: 고지 개정은 새 고정 문서·registry triple·현재 receipt·공개 snapshot revision의 읽기/쓰기 영향과 함께 준비한다. 기존 읽기/철회/신고/private sync를 불필요하게 막지 않는다. 새 정책 변수38개·보관기한·계정 해지·메일 발신은 첨부 제안으로서 미확정이다.
+- 이번 인수는 문서/정적 대조다. 기존 운영 Public·주간 백업·키/기본 복구 인수를 취소하거나 새 SQL/UI/메일 PASS로 바꾸지 않는다.
+
+## 2026-10-18 운영 관찰·법적 준비 대조 — 계약 범위 유지
+
+- C10/W17/D05: 첫 실제 schedule39065955924의 암호화 capture/checkpoint SUCCESS. 예정03:00/실제05:15~05:20 JST/KST, RPO/RTO 보장은 아님. 기존 외부 회수·격리 DB·독립키 완료 근거를 유지한다.
+- C09/Q19의 새 용량 임계 경보 전달과 C10의 전체 앱/Storage HTTP 복구 serving은 별도 잔여다. master API protected:false 확인은 Q22의 새 사실이며 원격 설정 변경은 없다.
+- C02/C08/D04: [통합 안내의 법적 준비](../operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md#4-법적-준비--현재-운영과-확장을-구분)에 국외 처리 고지·긴급 이미지 요청·기존 연락/이의 절차·국가별 후속·공급자 조건을 정리했다. TIDA 적용/48시간 접수 대응을 일반 신고 구현만으로 완료 처리하지 않는다. 현재 KR14/US13/TH13, PH/유럽 후속, 전원 인증/보호자 메일 제외를 유지한다.
+- 고정 약관/동의 URL·receipt·국가·권리·비용 결정 변경0. 새 개정이 필요하면 별도 버전 후보로 준비하고 이미 수락한 본문은 덮어쓰지 않는다. 이 대조는 전체 법률 적합성 PASS가 아니다.
+- [10/18 읽기 근거](evidence/2026-10-18-scheduled-operations-observation.json). 코드·DB·운영 설정 변경0; 로컬 test server env 파일 ACL만 제한했다.
 
 ## 2026-10-13 수용 근거 대조 — 계약 변경 없음
 
@@ -506,7 +539,7 @@ PH의 [NPC2026-09-23 안내](https://privacy.gov.ph/public-advisory-npc-calls-on
 
 ## C01. 개인 기록과 기존 기능 보존
 
-작품 저장과 Memory 생성, Board 포함과 원본 복제를 구분한다. 저장한 작품만 있어도 되고 같은 작품에 기억만 여러 장 있어도 된다. 공식 표지는 명시적으로 선택하고 개인 기억 신호 조건을 충족할 때 Memory의 VisualAsset으로 사용한다. 시스템 디자인 대안과 사용자 이미지 흐름을 유지한다.
+작품 저장과 Memory 생성, Board 포함과 원본 복제를 구분한다. 저장한 작품만 있어도 되고 같은 작품에 기억만 여러 장 있어도 된다. 공식 표지는 명시적으로 선택하고 개인 기억 신호 조건을 충족할 때 Memory의 VisualAsset으로 사용한다. 10/8 확정 결정에 따라 신규 시스템 디자인 작성은 종료했고 기존 디자인 카드 표시·호환은 유지한다. 사용자 이미지와 명시 선택 공식 표지 흐름을 유지한다.
 
 기존 표지 그리드·장르/태그·열 크기·Poster/Memory 모드·Archive 검색·Home 재발견은 보존한다. 새 Public 기능을 위해 사적 원본 전체를 공개 모델로 갈아엎지 않는다. 카드 생성·삭제·Board 변경·작품 상태 변경의 독립성을 회귀 검사한다.
 

@@ -1,10 +1,66 @@
 # MOEMOA · 단일 출시 작업판
 
-## 2026-10-19 DF-01 운영 후보 준비
+## 2026-10-19 신고 운영 반영·법률 고지 구현
 
-2026-10-19 DF-01 운영 후보 준비: 운영 함수는 old baseline, fix 이력 없음. 원격 master/www a65f557 일치. 검증한 SQL4파일과 운영 전용 실행 도구만 후보로 구성. 운영 쓰기/배포/원격 CI는 미실행이며 정확 후보 적용 승인 대기. 이전 기록은 보존하며 현재 상태는 이 후속 기록을 따른다.
+승인981d13e Git/Vercel/운영DB 적용 완료. [운영 결과](../reports/2026-10-19-partial-privacy-report-production-application.md). 이어 첨부 법률 검토를 실제 안내 페이지/가입/계정 동선에 반영한 로컬 후보를 준비했다. [8항 보고](../reports/2026-10-19-legal-service-notices.md). 기존 M/W/C/Q/D를 유지하며 아래 과거 미반영 표시는 이력으로 보존한다.
 
-[정확 범위·8항 보고·복귀](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json).
+
+## 2026-10-19 W09/W14 DF-01 운영 대조·후보 준비
+
+- 정확 운영 후보 `981d13e0eb7a60e6ce86838f821f71c84d1d518b`, `codex/df01-report-production-20261019`. 운영 기준 a65f557 위 최소13파일이며 원격 push/적용 전이다.
+- 운영 원본 함수가 로컬 재현 baseline과 정확히 같고, 수정 migration 이력은 없다. 테스트의 timestamp alias와 달리 운영은 원본 migration version/name으로 기록되어 있다. 새 조회에서 원격 master와 live build-info는 a65f557/source vercel-git 일치.
+- [운영 반영 범위·실행 순서·복귀·8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md), [읽기/후보 증거](evidence/2026-10-19-partial-privacy-report-production-candidate.json). 기존 검증한 SQL4파일을 현재 master에만 이식하고 운영 전용 도구/관련 문서만 더한다. 개발 브랜치 전체 병합은 하지 않는다.
+- 운영 쓰기·master push·배포·hosted 새 신고는 미실행이다. 정확 후보와 다음 행동은 아래 현재 카드에 기록하며, 이전 테스트 완료와 다른 W/D 잔여는 그대로 보존한다.
+
+## 2026-10-18 W09/W14 DF-01 테스트 DB 적용 완료
+
+- 사용자의 “이 후보 테스트 DB에만 적용” 승인으로 a6a63b6/SQL20261018090000을 moemoa-test에 반영했다. 함수1개+release 이력1건이며 운영·UI배포·사용자행/원본·설정·권한 변경0.
+- 실제 14:35:15 UTC commit 이후 별도 연결 readback과 14:35:24 UTC 추가 읽기 PASS. 정확 new body/ledger와 기존 metadata/설정/다른 함수/기존 이력 보존. 과거 이력 version 차이는 정확 name/alias와 기존 body 일치로 대조했고 이력을 재작성하지 않았다.
+- [8항 보고](01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01-테스트-적용--실행-8항-보고), [근거](evidence/2026-10-18-partial-privacy-report-test-application.json). 복귀용 사전 함수 ignored cache 보존. 로컬 도구의 적용/별도읽기도 먼저 검증했다.
+- 이번 승인 범위 완료. hosted 실제 신고 생성·Google/UI·운영 PASS는 아니다. **다음 하나는 운영 현행 함수/이력 읽기 대조 후 DF-01만의 정확 운영 후보 준비**. 다른 W/D 잔여와 기존 완료 근거는 그대로다.
+
+## 2026-10-18 W09/W14 DF-01 로컬 수정 완료
+
+- 사용자 지시대로 문서상 첫 결함을 격리 PostgreSQL16에서 재현했다. 익명 남은1장열람 성공/새신고 NOT_FOUND → 후보 **a6a63b6** 적용 후 새신고 접수 성공.
+- 함수1개 대상 판정만 보완; 테이블/실자료/권한/flags·UI/운영 변경0. 실제 partial privacy가 지운 게시 retry token을 복구하지 않고 남은 공개 snapshot 상태를 인정한다. 최초 private/preview·없는ID·마지막카드제거의 신규 신고는 거절, 일반 철회 후 기존 역사적 신고는 유지한다.
+- 신규31항목, 기존 signup15/sharing16/독립락2, publication runner440 PASS notices. 함수 복귀·재적용2검사 PASS. 같은 검사를 중복 합산하지 않는다. 독립 코드 리뷰의 no-store 테스트 간섭1건 보완 후 PASS.
+- [계획·8항 보고](01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01--실행-8항-보고), [실제 근거](evidence/2026-10-18-partial-privacy-report-fix.json). **다음 하나는 a6a63b6의 함수 migration을 moemoa-test에 적용하는 정확 승인**. 이번 hosted·운영·master push·배포는 미실행이며 DF-02·고지·사진 등 기존 잔여는 그대로다.
+
+## 2026-10-18 Pro 법적·운영 검토안 인수
+
+- [첨부 대조 보고](../reports/2026-10-18-pro-legal-operations-intake.md)와 [참고 원문/출처 manifest](../references/legal-operations-review-20261018/README.md)를 추가했다. 원본3개·ZIP33개 entry 확인, 텍스트35개 보존. 새 정책/실행 승인으로 자동 채택하지 않는다.
+- **W09/W14:** 부분 카드 철회 후 공개 snapshot은 남지만 `published_operation=null`이 되어 신규 신고가 거절되는 정적 불일치 확인. 다음은 새 신고자·operation으로 격리 재현·최소 수정. 운영 사례 재현/수정 완료는 아니다.
+- **W06/W17/D05:** 과거 sync 응답 본문 정리는 이미10/10 로컬12항목·test-only 적용 완료, 실제 제거0. 현재 운영 적용 근거는 잔여다. 기존 후보를 재작성하지 않고 함수/집계 대조 뒤 정확한 운영 후보로 준비한다.
+- **W15/W18:** 관리자 전역 전송2항목의 계정별 라벨 오류 확인. 첨부 patch 적용 가능성만 PASS, 실제 적용/UI검사0.
+- **W17/D04:** Vercel 이미지 본문·GitHub runner 평문/복호 처리·주간 생성/수동 세대 관리의 안내 보완 필요. 새 고정 KO/EN 문서/receipt 전환 후보로 다룬다. 기존 Public·국가·연령·요금·고정 문서 유지.
+- 새 사건 DB/자동메일/outbox/heartbeat·보관기간·8주 홍보는 제안으로 분리했다. 첨부가 인용한 research/dataflow_audit.md·research/legal.md와 관리자 mock은 미제공. 새 운영 장애·실제 메일 PASS로 기록하지 않는다.
+- 이번 앱·DB·운영 설정·예약·외부 발송·배포·push 변경0. 앞선 주간 백업/키·기본 복구 완료 및 W06/W18 사진 진단 잔여는 유지. [계획/8항 보고](01_RELEASE_EXECUTION_PLAN.md#gpt-pro-법적운영-검토안-인수--2026-10-18).
+
+## 2026-10-18 GPT Pro 검토 세트 제공
+
+- 사용자 요청으로 직전 문서/코드 `dfa642661467f5169021de8baf2ebb27e29350a6` 고정 분석 ZIP을 준비했다. 이번 통합 안내·기존00/01/02/03·제품/정책 문서·실제 소스/검사/migration/workflow·핵심 evidence8개 포함. 읽기순서, 복사용 요청문, 코드 지도, source/live 차이, 파일별 manifest를 함께 제공한다.
+- `C:\Users\hongs\Downloads\MOEMOA_GPT_PRO_REVIEW_2026-10-18.zip` — 4,331,607bytes, SHA256 `29593b4f0453fbdf1f5724bba4e828be5e9bd3b7e86c71fbdd4b013ccaca6f6b`. source1,151/전체1,158파일, CRC·manifest SHA/길이·필수 경로 PASS. `.prompt.md`/`.sha256.txt`도 같은 폴더에 제공.
+- 실제 env/비밀키·개인 사진·DB dump/백업 ZIP·원시 로그·바이너리 제외. 비밀값 패턴과 일치한 테스트 문자열은 패키지의 테스트파일1개에만 제거 표시하며 원본은 그대로다. 운영/DB/설정/외부 업로드·Git push 없음.
+- 제품/검증 상태는 아래 current card 그대로다. Pro에게 확정 결함·검증 부족·문서 노후화·조건부 법적 준비를 구분하고 기존 W/C/Q/D로 최소 작업 지시를 돌려달라고 요청하도록 준비했다. 이 포장 작업을 새 출시/검사 PASS로 세지 않는다. [8항 보고](01_RELEASE_EXECUTION_PLAN.md#gpt-pro-검토-세트--실행-8항-보고).
+
+## 현재 결과 — 2026-10-18 예약 관찰·개발/운영 안내 마감
+
+- 문서상 다음 작업 W17/D05 첫 예약 관찰 완료. GitHub **39065955924 / schedule / SUCCESS**, 실제 `Capture encrypted delta and commit authenticated checkpoint` 단계 SUCCESS(skipped 아님). JST/KST 05:15:40~05:20:18, 예정03:00보다 늦게 시작했다. 미래 정시 실행/복구 보장은 아니다.
+- 정리·용량 갱신 예약39096810474와 직전 실행의 실제 처리 단계 SUCCESS, 카탈로그 health39084974960 run SUCCESS. 새 용량 수치·임계 경보 전달·Drive 본문/전체 복구 serving은 이번에 읽거나 검증하지 않았다.
+- master/build-info의 commit·checkoutCommit=`a65f557e84659a0638ee44a8c4a911173dd554b2`, source=`vercel-git` 재확인. 새 배포가 아니라 기존 운영 상태 읽기다. GitHub master API `protected:false` 확인, 설정은 변경하지 않았다.
+- [개발 일정·운영·법적 준비·환경/키 통합 안내](../operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md)를 새 작업판 대신 이 원장의 읽기용 안내로 추가했다. 현재 구조의 오래된 Public off와 신규 시스템 디자인 설명을 교정했고 과거 실행 로그는 보존했다.
+- 로컬 test server env 한 파일의 넓은 ACL만 기존 prod secret과 같은 현재 사용자/SYSTEM 전용으로 제한했다. 소유자/읽기 유지·넓은 허용0, 비밀값/원격 권한 변경0. 기존 ACL은 ignored 로컬 파일로 보존.
+- [실제 조회 근거](evidence/2026-10-18-scheduled-operations-observation.json), [계획·8항 보고](01_RELEASE_EXECUTION_PLAN.md#w17d05-2026-10-18-실행-8항-보고). 다음 행동 하나는 **W06/W18 기존 개인 사진 로딩 실패의 최소 재현·원인 진단**이다. 이미 완료한 백업 설치/독립키/기본 DB 복구를 다시 요구하지 않는다.
+
+아래 날짜별 현재/최신/다음은 당시 이력이다.
+
+## 현재 결과 — 2026-10-14 화면·이동 개선 운영 완료
+
+- 운영 source a65f557e84659a0638ee44a8c4a911173dd554b2. 정확 후보 Service quality38504504280 publication-contract/verify SUCCESS 후 master Git으로반영했다. Vercel dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D READY·www alias·Git/master SHA, 실제 build-info commit/checkoutCommit/source/semanticMatch 대조 완료.
+- 실제 guest 작품→기억→컬렉션 문서 이동3→0·동일메뉴, Back/Forward·동일주소·계정 버튼·1440/390/320·JS예외/넘침0. 합성운영자/실계정행동·실게시/동의변경없음. 짧은배포단위 error/fatal집계빈결과는관찰창만의근거다.
+- 최종local unit631/build33, Core/Channel/navigation/collection140PASS+기존5SKIP, 사진/모바일41PASS, 공개54PASS. 묶음/원본/재실행은중복합산하지않는다. Source Doctor34→34/536→531·신규rule/file0/기존진단잔존. CI에서발견한시험scope/주소/초안준비와실제준비iframe 안내·기존사진재시도를보완한뒤전체성공으로마감했다.
+- DB/API/정책/권한/한도/환경/flags/SDK/의존성/실자료변경0. 인계개발tool16개는개발에서보존하며master에전체병합하지않았다. 원본/queued consent/owner fenc​​e 유지.
+- [완료 근거](evidence/2026-10-14-ui-navigation-release.json), [8항 보고](../reports/2026-10-14-production-ui-navigation-release.md), 기존01 ExecPlan과상위 THIS_PC_HANDOFF를따른다. 다음작업은최신원격확인후진행하며현재UI배포승인을다시묻지않는다. 기존실제개인사진원인·전체복구/임계알림·실기기/미실행QA·10/18첫예약관찰은별도잔여다.
 
 ## 현재 작업 — 2026-10-14 화면·이동 개선 운영 반영
 
@@ -783,7 +839,7 @@
 | M1 | 기록·계정·복원을 신뢰할 수 있음 | VERIFY | W06의 미실행 승격/만료/지원 조합과 기존 비공개 사진 로딩 관찰 | 기존 sync·두 origin·99테이블 격리 복구 근거 유지. 최신 CI38369813151 통과; 전체 조합 완료 아님 |
 | M2 | 선택 보드를 타인이 보고 철회할 수 있음 | VERIFY | 복수 공개 위치·기존 캐시의 미실행 조합만 별도 유지 | ea8f388 운영 실제 게시/익명 이미지200·비공개/옛 full·thumb404/no-store·원본 보존 PASS. 운영 적용/이미지 전달 gate 해소 |
 | M3 | 미니홈에서 소개하고 팔로우해 재방문함 | VERIFY | 만료/거절 복귀·다기기 미실행 조합 | ea8f388 실제 home/다른 계정 follow/목록 재방문/해제 PASS. 5d544ad 컬렉션 선반 연결 운영 확인; 새 게시를 대신 하지 않음 |
-| M4 | 운영자가 조치·제한·갱신·복구함 | VERIFY | 첫 주간 예약 실행·실제 용량 임계 알림·전체 복구 serving 관찰/검증 | 운영 신고 HIDE/RESTORE/통지/감사·전송 한도 적용, 증분 DB/삭제 replay·키 독립 보관·카탈로그 외부 회수/주간 설치 완료 |
+| M4 | 운영자가 조치·제한·갱신·복구함 | VERIFY | 첫 주간 예약 실행 완료; 실제 용량 임계 알림·전체 복구 serving 관찰/검증 | 운영 신고 HIDE/RESTORE/통지/감사·전송 한도 적용, 증분 DB/삭제 replay·키 독립 보관·카탈로그 외부 회수/주간 설치 완료 |
 | M5 | 실제 역할·기기에서 검증한 후보가 출시됨 | LIVE_VERIFIED / BOUNDED_SCOPE | 전수 Q01~Q24·물리 기기까지 완료로 확대하지 않음 | ea8f388 필수 운영 역할 흐름 인수·5d544ad CI→master→Vercel→www 동일 SHA 및 컬렉션 연결 완료. Android/추가Safari 제외 유지 |
 
 한 M의 일부 W가 완료되어도 M전체를 DONE으로 바꾸지 않는다. 다음 단계의 독립 작업을 먼저 끝내도 현재 막힌 계약을 숨기지 않는다. M5는 `RC_VERIFIED → READY_FOR_DEPLOY → LIVE_VERIFIED`를 구분한다.
@@ -816,28 +872,134 @@
 | W14 | M4 | 신고·차단·관리자 조치 | C05,C07,C08 | W10, W11, W12 로컬 검증 | VERIFY | ea8f388 현재 고지/receipt 결속 아래 실제 신고·별도 운영자 HIDE/RESTORE·익명 전시0/1·이미지404/200·통지/감사2 PASS. 최종 신고CLOSED/hidden false. 운영 block은 도구 제한, 기존 hosted block/appeal 근거와 분리. 전역/기기 조합 자동 PASS 금지 |
 | W15 | M4 | 서버 한도·비용·중단 통제 | C09 | W05, W08, W12, W14 로컬 검증 | VERIFY | ea8f388 승인 운영 2,000GET/64MB/day·public20MiB·980MB 관측 경보 및 실제 차감 PASS. 기존 실패 알림 수신 사용자 확인. 10/13 예약 유지38327869839 SUCCESS. 새 용량 임계 알림 전달·미래 사용량은 지속 관찰; 한도 확대/결제0 |
 | W16 | M4 | 카탈로그 후보 게시·복구 루프 | C10 | W03 로컬 검증 | APPROVED_OPERATIONAL_SNAPSHOT_EXTERNAL_RECOVERY_VERIFIED | ACTIVE4292 입력/199source·표지4292 인증bytes·실복원DB4표 전필드/이전release 전환·복귀 PASS. 59,661metadata 암호화 snapshot Drive 보관→새 회수 SHA/AES-GCM PASS. 새 원격 수집/게시·전체 ingestion history 복구는 주장하지 않음 |
-| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | OPERATIONS_INSTALLED_MONITORING | 외부 증분 회수/99테이블·7확장/56삭제권리·RPC/RLS PASS, 키 독립 보관 사용자 확인. 운영 직전 증분38193002483 SUCCESS/chain3/기존 사본 삭제0. 주간 Sunday03:00 설치·weekly true/manual false(10/12). 첫 예정10/18 전 schedule0은 정상. 전체 복구 serving/RPO·RTO 보장은 별도 |
+| W17 | M4 | 복구·정책·연락처·운영 인수인계 | C08–C10 | W06, W14, W15, W16 로컬 검증 | OPERATIONS_INSTALLED_MONITORING | 외부 증분 회수/99테이블·7확장/56삭제권리·RPC/RLS PASS, 키 독립 보관 사용자 확인. 운영 직전 증분38193002483 SUCCESS/chain3/기존 사본 삭제0. 주간 Sunday03:00 설치·weekly true/manual false(10/12). 10/18 실제 schedule39065955924/capture SUCCESS, 예정03:00→05:15 지연. 체인16 전 새 기준 사본 계획 필요(현재 길이 미조회). 전체 복구 serving/RPO·RTO 보장은 별도 |
 | W18 | M5 | 전체 노출 화면·행동 계약 검증 | C11 | W04, W10, W13, W14, W15 로컬 검증 | VERIFY | 10/12 디자인18장면/42쌍/84PNG 합성 비교·운영 반영, 10/13 컬렉션 공개 연결5d544ad·CI38369813151·실계정 선반/표지 조회 PASS. 이번 증거 병합25키/공통키 보존. 기존 개인 이미지 로딩 실패 원인은 미확정; 전체 UX/접근성/24QA PASS 아님 |
 | W19 | M5 | 실제 역할·기기 end-to-end 검증 | C12 | W17, W18 로컬 검증 | REQUIRED_PRODUCTION_FLOW_PASS / BOUNDED_SCOPE | ea8f388 실제 익명 카드/home24×30·다른계정 follow/목록·신고/HIDE/RESTORE·전시0/1·이미지404/200·통지/감사2·최종 비공개/원본 보존 PASS. 5d544ad 컬렉션 운영 조회 추가. 운영 block 확인창·전체24QA/물리기기 미검증과 사용자 제외 유지 |
-| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | EXACT_APPROVED_DEPLOYED_REQUIRED_FLOW_ACCEPTED | ea8f388 exact 승인·Public 필수 역할 인수 완료. 후속 디자인 및5d544ad exact 승인·CI38369813151→master Git→Vercel9HTFhbbh9 READY/www 동일SHA·DB42/컬렉션flag1,true. 이전 실패/원복 보존. 10/13 read-only 재확인, 새 배포0 |
+| W20 | M5 | 후보 고정·승인 배포·운영 확인 | C10,C12 | W19 | EXACT_APPROVED_DEPLOYED_REQUIRED_FLOW_ACCEPTED | ea8f388 exact 승인·Public 필수 역할 인수 완료. 후속 디자인 및5d544ad exact 승인·CI38369813151→master Git→Vercel9HTFhbbh9 READY/www 동일SHA·DB42/컬렉션flag1,true. 이전 실패/원복 보존. 10/14 a65f557 UI·이동 개선 exact CI/master/Vercel/www 완료, 10/18 master/www SHA 재확인·새 배포0 |
 
 ### 작업 수의 변화와 진행률
 
 기본 20개 완료 수와 추가 필수 작업 수를 별도로 표시한다. 보류된 개선은 출시 분모에 넣지 않는다. 추가 작업이 있다고 기존에 검증한 완료 결과를 지우지 않는다. 최종 기준은 task 숫자가 아니라 M완료 계약과 필수 QA다.
 
+## 2026-10-18 이 PC 재개 설정
+
+사용자 지정 `MOEMOA-PC-HANDOFF-20261017.zip`과 Git을 대조해 기존 `E:\web\anime`에서 이어갈 환경을 준비했다. 새 기능이나 출시 작업으로 집계하지 않는다.
+
+1. **읽은 근거:** AGENTS, CODEX_START_HERE, 확정 결정, PLANS, 07/09, 기존 작업판과 10/14 운영 보고, package/lock/Astro 설정, ZIP의 README/THIS_PC_HANDOFF/VERIFICATION/실행 스크립트·manifest.
+2. **기준·가정:** ZIP은 실행 환경 자료이며 앱 소스는 원격 Git이 기준이다. `codex/continue-after-arena-20261012`를 `cc80819516be59782bb59be76359badc67064c3d`까지 fast-forward했다. fetch한 `origin/master`는 `a65f557e84659a0638ee44a8c4a911173dd554b2`; 앱/검사/의존성/DB 소스는 동일하다. 개발 도구16개를 포함한 전체 개발 branch의 운영 병합은 하지 않았다.
+3. **계획:** `.cache/pc-handoff-20261018-plan.md`의 보존→Git 갱신→환경 대조→의존성/빌드→로컬 화면→인계 순서. 앱 구현·schema 변경이 없는 작은 로컬 설정 작업이다.
+4. **변경·보존:** 기존 `codex/collection-scrapbook-20261013 @ 0a9f6b2`와 별도 worktree, `tools/operations/__pycache__/`를 보존했다. ZIP 1,999파일의 길이/SHA256와 Node OpenJS 서명을 확인하고 저장소 밖 `E:\web\.moemoa-pc-handoff-20261018`에 추출했다. ZIP SHA256은 `59b1af04674518f9965f2edad91d754e7189cc48f9231f8f52293151ff7e28fc`. 공개 카탈로그 env 2항목이 기존 로컬 설정과 같아 덮어쓰지 않았다. 저장소 안 변경은 이 기록과 시작 문서뿐이며, 밖에 `MOEMOA-START.cmd`/`MOEMOA-THIS-PC.md`를 준비했다.
+5. **데이터·복귀:** DB/Storage/운영 설정/개인 이미지 변경0. 전역 Node/PATH/의존성 설치 변경0. 복귀는 이 세션의 개발 서버를 종료하고 보존한 이전 branch로 전환하면 된다. 브라우저 개인 기록·로그인 세션은 ZIP/Git으로 이전되지 않는다.
+6. **실제 검증:** 번들 Node24.19.0/npm11.17.0에서 `npm ls --depth=0` exit0, `npm run test:unit` 631 PASS/실패0, `npm run build` 33페이지/postbuild exit0. 로그는 `.cache/pc-handoff-20261018-{dependencies,unit,build}.log`. 개발 서버 첫 화면은 초기 실행에서 timeout됐지만 기존 Node24.14.1로 Astro를 직접 실행한 시작 파일에서 `/` HTTP200·실제 컬렉션 메뉴·공개 작품 검색 결과/표지를 확인했다. 초기 실행 방식/런타임별 차이의 근본 원인은 확정하지 않았으며 패키지 Node 자체 결함으로 기록하지 않는다. 실제 사용한 시작 파일은 `127.0.0.1:4363`/strictPort, 프로세스 범위의 telemetry off/CI/개발 toolbar 숨김만 적용한다.
+7. **보안·권리·관측:** 비밀값 출력/커밋/전송0, env 파일 덮어쓰기0, 원본 업로드/계정 생성/대신 동의/게시0. localhost 읽기 결과를 Google/hosted/실기기/운영 PASS로 승격하지 않는다.
+8. **남는 조건:** 운영 배포·DB 작업·백업 실행은 이번 요청에 포함하지 않았다. 이번 문서 기록은 로컬에만 남기며 push하지 않는다. 새 변경의 원격 적용은 기존 정확 후보 승인 조건을 따른다. 문서상 다음 행동 하나는 아래 W17/D05 예약 실행 결과의 읽기 확인이다.
+
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-현재 W: W09/W14 DF-01 운영 read-only 대조·최소 후보 준비 완료; 운영 반영 승인 대기.
-후보: 현재 Git commit / codex/df01-report-production-20261019; 원본 SQL a6a63b6, 운영 기준 a65f557.
-실제 근거: 운영 oldbody724a91fd…b8cf1/이력없음, master/www commit 일치. 로컬 행동 회귀와 승인된 test 함수/ACL 인수 재사용.
-변경: migration20261018090000·SQL계약3개·운영전용도구·해당 문서/증거만. UI/API/의존성/가입/권한/flags/한도 변경 없음.
-복귀: 운영 직전 함수 보존·atomic guard·실패시rollback·불명확결과read-only 우선. Git revert만으로DB가 복귀되지 않음.
-한계: 운영apply/hosted새신고/원격CI/master push/Vercel새배포 미실행. 다른 W/D 잔여를 완료로 바꾸지 않음.
-다음 행동 하나: 이 정확 후보 승인 후 branch CI두job→master Git/Vercel exact SHA→production 함수1개/ledger1건 적용·별도readback.
+현재 W: W09/W14 DF-01 운영 반영 완료; W17/D04·W14 법률 검토 서비스 고지 로컬 구현/검증 완료.
+운영: master/www981d13e; CI39142736022 두jobPASS; Vercel7LYZRTeLm READY; DB20261018090000/releaseMOEMOA_DF01_REPORT_PROD_20261019_01; 독립readback01:13:39JST PASS.
+법률 고지: /terms·/privacy 현재본문, /legal/service-operations-2026-10-19/ 보충 KO/EN, 가입/계정 링크. Vercel 이미지/GitHub 평문/주간증분/수동정리, 일반권리/한국임시조치/조건부TIDA 절차 반영.
+보존: 과거 고정10/10 약관·개인정보/10/11 공개고지, 가입tuple/publicrevision/receipt, KR14/US13/TH13·무료·일반공개. 자동메일/실자료쓰기0.
+검증: 법률 타깃 Chromium4개·build34·최종문안compile PASS. build병행중 hydration4실패→코드추가수정없이단독4PASS, 원문/정책불변hash 확인.
+한계: 새 법률고지는 로컬/미배포. 실제 Google·실제 긴급조치/통지·신고UI를 합성PASS로 대체하지 않음.
+법적 잔여: 공급자별 국외처리 필수표/계약범위·보관종료기준, 저작권 법정수령인/반복침해 종료, 운영자의 긴급접수/기한관리 실제연결.
+기존 잔여: DF-02 운영대조·quota라벨·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 법률 고지의 정확 운영 후보를 검토·승인받아 Git 배포. 신고 후보 승인/완료를 다시 요구하지 않는다.
 ```
 
-<details><summary>이전 현재 카드 — DF-01 운영 후보 준비 이전</summary>
+<details><summary>이전 현재 카드 — 10/19 DF-01 운영 후보 준비 직후</summary>
+
+```text
+현재 W: W09/W14 DF-01 운영 현행 대조·최소 운영 후보 준비 완료. 실제 운영은 old 함수 유지.
+운영 후보: 981d13e0eb7a60e6ce86838f821f71c84d1d518b; branch codex/df01-report-production-20261019; base a65f557e84659a0638ee44a8c4a911173dd554b2.
+포함: 검증 a6a63b6과 동일한 SQL4파일 + 운영전용helper1개 + 관련문서8개 = 13파일. UI/API/의존성/workflow 변경0.
+실제 관측: 2026-10-18 15:27/15:32 UTC production read-only BASELINE_MATCH·fix ledger없음. origin/master와www a65f557 일치.
+검증: 기존local행동/복귀·test DBmetadata 인수 재사용, 신규helper 로컬33 PASS(운영OID/settings·Git mock 분리), 독립리뷰 차단0·정확4blob 일치.
+복귀: .cache/df01-production-20261019-rollback.sql, hash eede81fc…87ed15a. 미래실행 전 원본/metadata 재보관·atomic guard·불명확결과read-only 우선.
+실행 한계: candidate remote CI·push·master Git/Vercel신규배포·production DDL/ledger·실제hosted신고 미실행. 새키/사진/가입/정책/한도 변경 없음.
+기존 잔여: DF-02 운영대조·quota라벨·고지·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 정확 후보 981d13e 승인 후 branch CI두job→master Git/Vercel exact SHA→운영 함수1개/ledger1건 적용·별도readback. 준비 요청을 적용 승인으로 확대하지 않음.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/18 DF-01 테스트 적용 직후</summary>
+
+```text
+현재 W: W09/W14 DF-01 로컬 행동검증 + 승인된 테스트 DB 함수/이력 적용·권한검증 완료.
+코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; 적용도구 d222587; migration20261018090000.
+실제 대상/결과: moemoa-test(nmgkhknponvzcwliajyk), release MOEMOA_DF01_REPORT_TEST_20261018_01. commit/별도readback 2026-10-18 14:35:15 UTC, 추가read-only 14:35:24 UTC PASS.
+보존: 함수 OID/ACL/owner/인자/default/search_path·설정·다른함수·기존이력 그대로. 실사용자행/원본/운영/화면배포/master push0.
+복귀: .cache/df01-test-20261018T143513Z-rollback.sql; 원격oldbody가 원본정의와 일치하며 해시를 증거에 결속. 백업키/새인증 불필요.
+검증 한계: 로컬31신고경계/기존SQL회귀 PASS와 hosted metadata 인수 구분. 이번 hosted UI/신고행 생성은 미실행.
+기존 잔여: DF-02 운영대조·quota라벨·고지 후보·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 운영 현행 신고 함수/이력 읽기 대조 후 이 수정만의 정확 운영 후보 준비. 운영 변경/master push는 별도 정확 승인.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/18 DF-01 로컬 검증 직후</summary>
+
+```text
+현재 W: W09/W14 DF-01 로컬 재현·최소 수정·회귀·복귀 검증 완료. hosted 미적용.
+코드 후보: a6a63b687a8f29d748ffa8047a17e6d9f5826ee6; migration 20261018090000_memory_report_partial_privacy.sql.
+이번 실제 결과: 두카드공개→한카드private→익명남은1장→새신고 NOT_FOUND를 기존 함수에서 재현. 수정 후 접수 및 새 경계31항목 PASS.
+회귀/복귀: signup15/sharing16/독립락2, publication440 PASS notices. 이전함수복원→오류재현→새함수/ACL/owner/search_path 정확복구2항목 PASS. 반복 결과 중복 합산 안 함.
+변경 범위: submit_memory_report의 board 대상 predicate1곳; 테이블/실자료/권한/flags/가입/정책/UI/운영 변경0. 코드/문서 로컬 commit, 원격 push0.
+차단/조건: moemoa-test 현행 정의·migration 이력·복귀 후보 대조와 정확 적용 승인이 필요. 이번 hosted/PostgREST/UI/운영 PASS 아님.
+기존 잔여: DF-02 test-only의 운영대조, quota 라벨·고지 후보, W06/W18 사진 진단, master보호·임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 재요구 없음.
+다음 행동 하나: 후보 a6a63b6의 함수 migration1개를 moemoa-test에 적용하는 정확 승인. UI배포/새Public/가입·한도/원본 변경 제외.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/18 Pro 검토안 인수 직후</summary>
+
+```text
+현재 W: W09/W14 부분 철회 후 신규 신고 조건 불일치의 로컬 재현·최소 수정 준비.
+이번 실제 결과: Pro 첨부3개/ZIP33entry/문서3개 추출·현재소스·과거실행 대조. 신고 조건·한도 라벨 불일치 확인. 첨부patch apply --check PASS/미적용.
+보존 결함: DF-02는10/10 로컬12PASS·test-only 적용 완료; 운영 반영과 현재 영향은 미확인. 기존 후보/증거 재사용.
+고지: Vercel 이미지 처리·GitHub runner 백업 본문 처리 누락을 새 고지 후보에 연결. 고정문서·receipt·가입/공개 정책 변경0.
+운영 기준: 앞선10/18 master/www a65f557 재확인 및 첫주간 schedule/capture SUCCESS 근거 유지. 이번 새 원격조회·실행·배포0.
+새 제안: 사건테이블·자동메일·보관기간·8주홍보는 미확정. 첨부38개정책변수 null/게시준비false, 누락research와dedupe문서차이 기록.
+기존 잔여: W06/W18 개인사진 원인진단, master보호, 임계알림·전체복구 serving 유지. 완료된키/기본복구/예약 설치 재요구 없음.
+다음 행동 하나: 격리 DB에서 2카드공개→1카드private→남은공개물 새신고를 재현하고 대상인정만 최소수정. 신규원격후보는 정확승인 경계 유지.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/18 예약 관찰·분석 세트 제공 직후</summary>
+
+```text
+현재 W: W17/D05 첫 주간 예약 관찰 마감. W06/W18 기존 개인 사진 로딩 진단으로 이어간다.
+이번 실제 결과: schedule39065955924 및 실제 capture SUCCESS. 10/18 05:15:40~05:20:18 JST/KST, 예정03:00 대비 지연. 정리2회 실제 단계/카탈로그 health run도 SUCCESS.
+운영 기준: master/www build-info commit·checkoutCommit a65f557/source vercel-git 재확인. 기존 공개 역할·컬렉션·UI 운영 인수 유지, 새 배포/DB/설정 변경0.
+보안: master API protected:false는 운영 보호 후보 잔여. 로컬 test server env ACL만 현재 사용자/SYSTEM 전용으로 제한; 키 값/원격 권한 변경0.
+복구: 독립 키·외부 증분/격리99테이블·삭제권리 대조는 이미 완료. 첫 schedule 성공 추가. 전체 앱/Storage HTTP serving·최신 chainLength·임계 알림 수신은 미검증.
+안내: operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md에 개발 예상일·운영 루틴·법적 현재/확장 조건·키 최소 범위 정리. 이 PC 실제 키 경로는 E:\web\MOEMOA-KEY-FILES.md(값 없음).
+검토 인계: dfa6426 snapshot의 GPT Pro 분석 ZIP/복사 요청문/manifest 제공 완료. 제품 소스·기존 다음 개발 작업은 그대로 유지.
+제한: 추가Safari/실폰 오프라인 USER_WAIVED 유지. 현재 국가/권리/요금·고정 동의 문서는 바꾸지 않는다. 법적 조건을 일괄 본인인증/보호자 절차로 대체하지 않는다.
+다음 행동 하나: 현재 코드에서 기존 개인 사진 로딩 실패를 최소 재현하고 실패 지점을 특정한다. 재업로드/삭제·새 운영 변경으로 우회하지 않는다.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/18 PC 설정 직후</summary>
+
+```text
+현재 W: W18/D06 10/14 UI·이동 운영 반영 완료 근거 인계; W17/D05는 설치 후 관찰 단계.
+이번 실제 결과: 10/18 E:\web\anime의 개발 소스를 cc80819로 갱신하고 로컬 단위631/build33·화면/작품 검색 확인. 기존 작업/환경 보존.
+운영 기준: fetch한 origin/master a65f557. 10/14 exact Git/Vercel/www 인수 근거는 기존 보고·receipt를 유지하며 이번 새 hosted 검사로 세지 않음.
+복구: 기존 증분 외부 회수·격리 복구/삭제권리·키 독립보관·주간 workflow 설치 완료 근거 유지. 새 백업/예약 변경 없음.
+관측: 최초 예정 2026-10-18 03:00 JST/KST는 지났지만 이번 세션에서는 schedule 실행 결과를 조회하지 않음. 10/13 예약 유지 성공/수동 성공을 예약 성공으로 대체하지 않음.
+제한: 전체24QA/물리기기/전체 복구 serving/전체 ingestion history/새 용량 임계 알림 수신은 PASS 아님. 추가Safari 등 사용자 제외 유지. 개인 이미지 기존 관찰은 별도.
+다음 행동 하나: 기존 GitHub 주간 백업의 10/18 schedule 실행 결과를 읽기로 확인하고 W17/D05에 기록한다. 새 예약·수동 백업·중복 동의 요청 없음.
+```
+
+</details>
+
+<details><summary>이전 현재 카드 — 10/13 증거 복구 직후</summary>
 
 ```text
 현재 W: W18/D06 운영 반영 후 증거 대조 완료; W17/D05는 설치 후 관찰 단계.
@@ -1141,10 +1303,10 @@ NA 이유:
 |---|---|---|---|---|---|
 | D01 | 격리 환경·계정/Storage 권한·비밀값 경로 | PROVIDED / TEST_GUARD_RESTORED / A_B_RECEIPTS_CONFIRMED | PHONE_WEB_20260927_01·공개6flags true·10개/40MiB·신고10/operator1; A/B 현재 정책 확인·실제 Google 복귀 완료 | 기존20261010160000 test 적용/이력 보존. 직전 guard=false 원복; 10/11 A/B 게시·팔로우 guard=true 검사 후 guard=false 원복 확인. 신규20261011120000·간소화 UI52875c6은 이번 사용자 승인 후 test 적용/Ready·실제 상태/이미지 확인 완료. A 수락 재요청하지 않음 | evidence/2026-10-11-first-public-connection.json / 운영 승인 아님 |
 | D02 | 최종 배포 채널/순서 | VERIFIED — 첫 후보 WEB_ONLY | Web-first 확정 유지. Android·추가Safari/실폰 오프라인은 사용자 제외, PASS로 치환하지 않음 | ea8f388 필수 흐름 및5d544ad 운영 근거 결속 완료 | evidence/2026-09-25-d02-web-only.json / W20 |
-| D03 | 예산·정상 규모·quota·경보 | PRODUCTION_LIMITS_APPLIED / MONITORING | Free 유지·private100MB/월500MB·public20MiB·공개2,000GET/64MB/day·980MB 경보. ea8f388 승인 운영 적용/실제 차감 완료 | 기존 GitHub 실패 알림 실제 수신은 사용자 확인(10/11). 10/13 예약 유지38327869839 SUCCESS. 새 용량 임계 알림 수신·지속 사용량은 별도 관찰; 고의 경보 발송/결제 없음 | evidence/2026-10-11-public-capacity-closeout.json#firstPublicProductionApplication_04 / 이번 read-only 근거 |
-| D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_PUBLIC_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 기존 운영자·지원 및 KR14/US13/TH13 유지. ea8f388 exact 승인으로 일반 공개 고지/현재 receipt 연결·본인 동의·신고/조치 실제 확인 완료 | PH·EU/EEA·UK·CH 미활성 후속 유지. 국가/허용 이미지/인증을 이번에 변경하지 않음. 캡처·타인 팬아트 별도 권리 gate·성인 제외 유지. 다른 계정 본인 가입 이후 운영 역할 흐름은 확인됨 | evidence/2026-10-11-public-capacity-closeout.json#firstPublicProductionRoleVerification_20261012 |
-| D05 | 공개 철회 지연·보존/복구 목표·사본 | LOCAL_RECOVERY_KEY_EXTERNAL_INPUTS_VERIFIED / WEEKLY_INSTALLED | 외부 증분4310파일/918,359,762bytes·DB99테이블/7확장·최신 삭제/권리56계약/RPC/RLS·카탈로그 외부 회수 PASS. 키 독립 보관 사용자 확인10/12. 주간 증분/RPO7일·RTO24시간 목표, 자동 사본 삭제 없음 | 첫 예약10/18 03:00 관찰. populated Public/Storage HTTP 포함 전체 복구 serving·전체 ingestion history는 미검증; RPO/RTO 보장 아님. 이미 끝난 기본 DB 복원/키 보관 확인 재요청 금지 | evidence/2026-10-10-external-backup-recovery.json#thisPcIncrementalDatabaseRecovery20261012 / capacity application04 |
-| D06 | SHA·DB/catalog·flags의 운영 적용 | EXACT_APPROVED_DEPLOYED_REQUIRED_FLOW_ACCEPTED | ea8f388 exact 첫 Public 배포/필수 흐름 인수, 후속5d544ad exact 승인·master/Vercel/www 일치·DB42·컬렉션 연결flag 적용 완료 | 현재 승인 재요청 없음. 다음 새 운영 후보/범위가 생길 때만 정확한 대상과 영향 승인. 첫 예약/지속 관측·미실행 복구 serving을 배포 미완료로 혼동하지 않음 | evidence/2026-10-13-collection-home/production-retry-candidate.json / capacity roleVerification / 이번 reconciliation |
+| D03 | 예산·정상 규모·quota·경보 | PRODUCTION_LIMITS_APPLIED / MONITORING | Free 유지·private 전역저장100MB/월 전역전송500MB·public20MiB·공개2,000GET/64MB/day·980MB 경보. ea8f388 승인 운영 적용/실제 차감 완료 | 기존 GitHub 실패 알림 실제 수신은 사용자 확인(10/11). 10/13 예약 유지38327869839 SUCCESS. 새 용량 임계 알림 수신·지속 사용량은 별도 관찰; 고의 경보 발송/결제 없음 | evidence/2026-10-11-public-capacity-closeout.json#firstPublicProductionApplication_04 / 이번 read-only 근거 |
+| D04 | 운영주체/정책/권리·연령/지원 | KR14_US13_TH13_PUBLIC_APPROVED_ACTIVE / OTHER_REGIONS_FOLLOWUP | 기존 운영자·지원 및 KR14/US13/TH13 유지. ea8f388 exact 승인으로 일반 공개 고지/현재 receipt 연결·본인 동의·신고/조치 실제 확인 완료 | PH·EU/EEA·UK·CH 미활성 후속 유지. 국가/허용 이미지/인증 불변. 10/18 국외 처리 고지·긴급 이미지 요청/48시간 조건·무료 호스팅 계약 범위의 운영 대조를 통합 안내에 정리. 캡처·타인 팬아트 별도 권리 gate·성인 제외 유지. 다른 계정 본인 가입 이후 운영 역할 흐름은 확인됨 | evidence/2026-10-11-public-capacity-closeout.json#firstPublicProductionRoleVerification_20261012 |
+| D05 | 공개 철회 지연·보존/복구 목표·사본 | LOCAL_RECOVERY_KEY_EXTERNAL_INPUTS_VERIFIED / FIRST_WEEKLY_CAPTURE_PASS | 외부 증분4310파일/918,359,762bytes·DB99테이블/7확장·최신 삭제/권리56계약/RPC/RLS·카탈로그 외부 회수 PASS. 키 독립 보관 사용자 확인10/12. 주간 증분/RPO7일·RTO24시간 목표, 자동 사본 삭제 없음 | 첫 예약39065955924/schedule·실제 capture SUCCESS(05:15~05:20 JST). populated Public/Storage HTTP 포함 전체 복구 serving·전체 ingestion history는 미검증; RPO/RTO 보장 아님. 이미 끝난 기본 DB 복원/키 보관 확인 재요청 금지 | evidence/2026-10-10-external-backup-recovery.json#thisPcIncrementalDatabaseRecovery20261012 / capacity application04 |
+| D06 | SHA·DB/catalog·flags의 운영 적용 | EXACT_APPROVED_DEPLOYED_REQUIRED_FLOW_ACCEPTED | ea8f388 exact 첫 Public 배포/필수 흐름 인수, 후속5d544ad 컬렉션 연결·DB42/flags 인수와10/14 a65f557 UI·이동 exact CI/master/Vercel/www 완료; 10/18 SHA 재확인 | 현재 승인 재요청 없음. 다음 새 운영 후보/범위가 생길 때만 정확한 대상과 영향 승인. 첫 예약/지속 관측·미실행 복구 serving을 배포 미완료로 혼동하지 않음 | evidence/2026-10-13-collection-home/production-retry-candidate.json / capacity roleVerification / 이번 reconciliation |
 
 현재 대화로 **공개 보드+미니홈+팔로우 포함 목표는 승인됨**. 이 범위를 D질문으로 반복하지 않는다. D값은 저장소/기존 승인 기록으로 이미 해결되어 있을 수 있으므로 먼저 확인하고 있는 답을 다시 묻지 않는다.
 
@@ -1165,7 +1327,7 @@ NA 이유:
 | P03 | 새 ID·팔레트·영상 생성 | 기존 기록·전시 흐름 완료가 우선 | 정식 출시 뒤 실험 |
 | P04 | 자유형 미니홈/3D 공간 | 선택 전시로 최소 자기표현 충족 | 별도 기획 승인 |
 | P05 | 범용 관리자 대시보드 | 실제 조치 가능한 운영 명령으로 시작 | 반복 업무가 도구 비용을 정당화 |
-| P06 | private 이미지 자동 cloud backup | 명시 public rendition 업로드와 분리 | 비용·권리·정책을 포함한 별도 결정 |
+| P06 | 기존/Guest 로컬 사진 일괄 이전·원본 cloud backup·추가 자동화 | 로그인 후 새 개인 사진의 최적화 사본 자동 sync는 이미 운영; 명시 public 업로드와 별개 | 기존 자료 일괄 이전·원본 백업 확대만 비용·정책을 포함한 별도 결정 |
 | P07 | 새로운 디자인 시스템/갤러리 전면 교체 | 기존 표지·기억 보기 보존 | 출시 계약 밖의 증명된 문제 발생 시 |
 
 새 보류 항목은 한 줄만 추가한다. 아이디어의 상세 설계를 지금 하지 않는다.
@@ -1195,16 +1357,16 @@ NA 이유:
 | Q17 | LOCAL / HOSTED / PRODUCTION_MODERATION_PASS | ea8f388 실제 신고·기존 별도 운영자 HIDE/RESTORE·익명0/1·이미지404/200·작성자 통지/감사2·최종 비공개 PASS | capacity roleVerification20261012 | 운영 block 확인창은 도구 제한으로 미검증. 과거 hosted block/unblock PASS 보존, 모든 삭제/기기 조합 아님 |
 | Q18 | LOCAL PASS / HOSTED PARTIAL PASS | 실제 JWT 운영 RPC 제한/해제, owner 제품 이의·통지, stale 거부·권한 회수 거부 | w19-appeal-restriction JSON | 운영자=owner인 승인 A 테스트; 실제 별도 담당자/지원채널·정책/SLA D04 |
 | Q19 | LOCAL / HOSTED / PRODUCTION_LIMITS_APPLIED | ea8f388 승인 2,000GET/64MB/day·크기 차감·public20MiB 적용, 실제2GET/150B. 기존 실패 알림 실수신 사용자 확인. 예약 유지38327869839 SUCCESS | capacity application04/verification20261012 / 이번 read-only 근거 | 새 용량 임계 알림 전달·실제 HTTP429 모든 조합은 별도. 고의 경보 발송 없음 |
-| Q20 | EXTERNAL_INCREMENTAL_AND_ISOLATED_DB_VERIFIED | 외부 기준/증분/state 인증·4310파일/918,359,762bytes·99테이블/7확장·최신 삭제권리56계약·RPC/RLS·키 독립보관 확인. 주간 설치/수동 성공 보존 | recovery thisPcIncrementalDatabaseRecovery20261012 / independentKeyCustody20261012 / capacity application04 | 최초 예약10/18 03:00, 전체 Public/Storage HTTP 복구 serving·RPO/RTO 보장은 미검증. 기본 DB 복구·키 보관 재요청 불필요 |
+| Q20 | EXTERNAL_INCREMENTAL_AND_ISOLATED_DB_VERIFIED | 외부 기준/증분/state 인증·4310파일/918,359,762bytes·99테이블/7확장·최신 삭제권리56계약·RPC/RLS·키 독립보관 확인. 주간 설치/수동 성공 보존 | recovery thisPcIncrementalDatabaseRecovery20261012 / independentKeyCustody20261012 / capacity application04 | 최초 예약39065955924/schedule·capture SUCCESS. 전체 Public/Storage HTTP 복구 serving·RPO/RTO 보장은 미검증. 기본 DB 복구·키 보관 재요청 불필요 |
 | Q21 | APPROVED_SNAPSHOT_EXTERNAL_RECOVERY_VERIFIED | ACTIVE4292 입력/199source·4292cover 인증bytes·복원 DB4표 전필드/이전release 전환·복귀·59661metadata 외부 회수 PASS | capacity candidate04/application04 catalogRecoveryInputs·catalogExternalPreservation | 신규 원격 후보 수집/게시·전체 ingestion history 복원까지 검증한 것은 아님 |
-| Q22 | EXACT_APPROVED_GIT_DEPLOY_LIVE_VERIFIED | ea8f388 첫 Public 및5d544ad 컬렉션 exact 승인/CI38369813151→master→Vercel READY/www 동일SHA. 이번 읽기로 다시 대조 | capacity application04 / production-retry-candidate.json / 이번 reconciliation | branch protection 현행 적용은 별도 미확인. 실기기 제외를 다시 차단으로 만들지 않음 |
+| Q22 | EXACT_APPROVED_GIT_DEPLOY_LIVE_VERIFIED | ea8f388 첫 Public 및5d544ad 컬렉션 exact 승인/CI38369813151→master→Vercel READY/www 동일SHA. 후속a65f557 UI 운영 완료·10/18 master/www 재대조 | capacity application04 / production-retry-candidate.json / 2026-10-18-scheduled-operations-observation.json | 10/18 master API protected:false 확인; 필수 검사/force push·삭제 방지 후보 후 원격 적용 필요. 실기기 제외를 다시 차단으로 만들지 않음 |
 | Q23 | LOCAL PASS | 로컬 실제 SW·저장소 | service-worker/index | 최종 운영 후보 업데이트/롤백과 공개 캐시 경계 |
 | Q24 | LOCAL_WEB / REQUIRED_PRODUCTION_UI_PARTIAL | 기존20route 검사 보존. 10/12 디자인18장면/42쌍/84PNG 합성 비교·운영 적용, 10/13 실제 컬렉션/선반/표지 조회 PASS | arena-refinement-production / collection-home evidence | 전체 사람 이해/접근성의 미실행 범위 유지. Android·추가Safari/WebKit·실폰 오프라인 USER_WAIVED/NOT_RUN, PASS 아님 |
 
 
 ## route/action coverage 증거 위치
 
-- 현재 route inventory: 현재 `src/pages` 18개 경로. 위 15개 기준점은 과거 기록이다.
+- 현재 build route inventory: 2026-10-18 로컬 build **33페이지** 확인. 아래/위의 15·18·20 route 감사는 각 당시 검사 범위이며 현재 전체 UX PASS로 환산하지 않는다.
 - 역할·flag·상태별 action→handler/API→결과·취소·실패·복귀 지도: [W18 surface audit](../reports/2026-09-24-release-surface-audit.md).
 - UI evidence: W18 Chromium 로그, `.cache/w18-help-320.png`, `.cache/w18-composer-1440.png` 직접 열어 확인. 200% 검사는 320 CSS-pixel reflow 대리 검사이며 실제 OS/browser zoom 모든 조합이나 실기기 검증이 아니다.
 - 위 LOCAL/MOCK는 실계정·실기기 PASS가 아니다. 근거는 연속 실행 evidence 및 각 test source에 연결하며 이전 HEAD를 미커밋 후보 SHA로 사용하지 않는다.

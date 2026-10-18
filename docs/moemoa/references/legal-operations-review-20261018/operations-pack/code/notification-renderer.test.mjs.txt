@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { renderReport } from './notification-renderer.mjs';
+const base={kind:'daily',reportId:'2026-10-18',recipientKey:'operator-primary',periodStart:'2026-10-16T15:00:00Z',periodEnd:'2026-10-17T15:00:00Z',generatedAt:'2026-10-18T00:00:00Z',timezone:'Asia/Seoul',adminOrigin:'https://www.moemoa.xyz',synthetic:true,cases:[],metrics:[]};
+test('Rejects raw private content at both report and case boundaries',()=>{
+  assert.throws(()=>renderReport({...base,privateNote:'DO_NOT_EMAIL'}),/unsupported field/);
+  assert.throws(()=>renderReport({...base,cases:[{id:'OPS-001',reporterEmail:'DO_NOT_EMAIL'}]}),/unsupported field/);
+});
+test('Unknown metric values never become zero and stale observations remain explicit',()=>{
+  const m={key:'first_memory',value:null,unit:'count',scope:'cohort',source:'consented_cohort',observedAt:null,freshness:'unavailable',coverage:'unavailable'};
+  const a=renderReport({...base,metrics:[m]}).text;
+  assert.match(a,/미수집/);assert.doesNotMatch(a,/0 count/);
+  const b=renderReport({...base,metrics:[{...m,value:6,observedAt:'2026-10-15T00:00:00Z',freshness:'stale',coverage:'partial'}]}).text;
+  assert.match(b,/과거 관측·현재값 아님/);assert.match(b,/partial/);
+});
+test('Re-rendering the same logical report preserves its deduplication key',()=>{
+  assert.equal(renderReport(base).dedupeKey,renderReport({...base,generatedAt:'2026-10-18T00:05:00Z'}).dedupeKey);
+  assert.notEqual(renderReport(base).dedupeKey,renderReport({...base,recipientKey:'operator-backup'}).dedupeKey);
+});
+test('Rejects arbitrary URLs, HTML-bearing identifiers and unreviewed legal deadlines',()=>{
+  assert.throws(()=>renderReport({...base,adminOrigin:'javascript:alert(1)'}),/HTTPS/);
+  assert.throws(()=>renderReport({...base,reportId:'<img src=x>'}),/Invalid reportId/);
+  const c={id:'OPS-001',type:'safety',severity:'P0',status:'ACTIVE',legalDeadlineState:'set',legalDueAt:'2026-10-20T00:00:00Z',internalDueAt:null,legalBasis:null,remainingCopies:2,sourceAt:'2026-10-18T00:00:00Z'};
+  assert.throws(()=>renderReport({...base,cases:[c]}),/reviewed basis/);
+});
+test('An empty case list does not assert that the service is healthy',()=>{
+  assert.match(renderReport(base).text,/전체 접수함이 정상임을 의미하지 않습니다/);
+});
+test('Not-applicable and unreviewed deadlines are distinct, and admin links are explicit',()=>{
+  const c={id:'OPS-008',type:'mail',severity:'P1',status:'ACTIVE',legalDeadlineState:'not_applicable',legalDueAt:null,internalDueAt:'2026-10-18T01:00:00Z',legalBasis:null,remainingCopies:null,sourceAt:'2026-10-18T00:00:00Z'};
+  const a=renderReport({...base,cases:[c]});
+  assert.match(a.text,/해당 없음\(이 단계\)/);
+  assert.match(a.html,/<a href="https:\/\/www\.moemoa\.xyz\/admin\/\?case=OPS-008">/);
+  assert.match(renderReport({...base,cases:[{...c,legalDeadlineState:'review_required'}]}).text,/적용 검토 중/);
+});

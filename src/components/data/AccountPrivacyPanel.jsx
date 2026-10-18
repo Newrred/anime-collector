@@ -10,7 +10,6 @@ export default function AccountPrivacyPanel({user,locale='ko',base='/',canDelete
   const [stage,setStage]=useState('idle'),[error,setError]=useState('');
   const t=(ko,en)=>locale==='ko'?ko:en;
   const acceptedAgeProcessing=receipts?.some(row=>needsAgeProcessingConsent(row.country,resolveSignupDocuments(row,{allowTestDocuments:true})));
-  const latestDocuments=receipts?.map(row=>resolveSignupDocuments(row,{allowTestDocuments:true})).find(Boolean);
   async function load() {
     setReceiptError(false);
     try { const rows=await fetchOwnSignupReceipts(supabase,owner);if(live.current)setReceipts(rows); }
@@ -75,7 +74,8 @@ export default function AccountPrivacyPanel({user,locale='ko',base='/',canDelete
         </>:<span>{t('이 버전의 문서 링크는 준비 중입니다.','Links for this document version are not available.')}</span>}</li>;
       })}</ul>}
     {acceptedAgeProcessing&&<p className="small">{t('가입 연령 정보 처리 동의는 계정을 탈퇴해 철회할 수 있습니다. 기기에서만 사용하는 기능은 계속 이용할 수 있습니다.','You can withdraw consent to signup age processing by deleting your account. Local-only features remain available.')}</p>}
-    <a className="small" href={latestDocuments?`${base}legal/${latestDocuments.privacyVersion}/#withdrawal`:`${base}privacy/`}>{t('개인정보 처리 안내와 연락처','Privacy notice and contact')}</a>
+    <a className="small" href={`${base}privacy/#withdrawal`}>{t('현재 개인정보 처리 안내와 연락처','Current privacy information and contact')}</a>
+    <a className="small" href={`${base}legal/service-operations-2026-10-19/`}>{t('이미지·백업 처리와 권리 요청 안내','Image and backup processing; rights requests')}</a>
     {canDelete&&stage==='idle'&&<button className="btn btn--ghost" style={{width:'fit-content'}} onClick={()=>{setStage('confirm');setError('');}}>{t('계정 탈퇴','Delete account')}</button>}
     {canDelete&&(stage==='confirm'||stage==='deleting')&&<div className="list-stack" role="group" aria-labelledby="account-delete-title">
       <h3 id="account-delete-title" className="sectionTitle sectionTitle--small">{t('이 계정을 탈퇴할까요?','Delete this account?')}</h3>

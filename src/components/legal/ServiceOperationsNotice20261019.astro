@@ -1,0 +1,99 @@
+---
+// Dated factual supplement. This is not a replacement for an accepted document
+// or a new signup/publication policy revision.
+import '../../styles/simple-signup.css';
+const base = import.meta.env.BASE_URL;
+const terms = `${base}legal/terms-2026-10-10/`;
+const privacy = `${base}legal/privacy-2026-10-10/`;
+const sharing = `${base}legal/public-sharing-2026-10-11/`;
+const notice = `${base}legal/service-operations-2026-10-19/`;
+const heading = '서비스 처리·권리 요청 안내 · Service processing and rights requests';
+---
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex,nofollow" /><title>{heading} | MOEMOA</title></head>
+<body class="signup-page"><main class="signup-panel signup-legal">
+  <div class="signup-heading"><a href={base}>MOEMOA</a><a href={`${base}data/#account-privacy`}>계정 관리 · Account</a></div>
+  <h1>{heading}</h1>
+  <aside class="legal-current-documents" aria-labelledby="documents-heading">
+    <h2 id="documents-heading">가입 문서와 이번 안내 / Signup documents and this notice</h2>
+    <p>현재 가입 화면에 연결된 문서는 <a href={terms}>이용약관 (2026-10-10)</a>과 <a href={privacy}>개인정보 처리 안내 (2026-10-10)</a>입니다. <a href={sharing}>공개 안내 (2026-10-11)</a>는 공개를 선택할 때 별도로 확인합니다.</p>
+    <p lang="en">The signup screen currently links to the <a href={terms}>Terms (10 October 2026)</a> and <a href={privacy}>Privacy Notice (10 October 2026)</a>. The <a href={sharing}>Public Sharing Notice (11 October 2026)</a> is presented separately when you choose to publish.</p>
+    <p>아래는 <a href={notice}>2026-10-19 서비스 처리·권리 요청 보충 안내</a>입니다. 실제 정보 처리와 문의 방법을 더 자세히 설명합니다. 이 안내를 읽었다는 이유로 새 약관에 동의한 것으로 처리하지 않으며 다시 가입할 필요도 없습니다. 이전에 동의한 문서와 수락 이력은 그대로 보존합니다.</p>
+    <p lang="en">Below is the <a href={notice}>service processing and rights-request supplement dated 19 October 2026</a>. It explains processing and contact routes in more detail. Reading it does not record agreement to new Terms or require you to sign up again. Previously accepted documents and acceptance records are preserved.</p>
+  </aside>
+  <nav class="legal-contents" aria-label="문서 이동 / Contents">
+    <a href="#providers">처리 서비스 / Providers</a>
+    <a href="#retention">보관·삭제 / Retention</a>
+    <a href="#withdrawal">개인정보 요청 / Privacy requests</a>
+    <a href="#rights">권리·신고·이의 / Rights and appeals</a>
+    <a href="#urgent">긴급 신고 / Urgent reports</a>
+  </nav>
+  <section id="providers">
+    <h2>1. 기록과 이미지가 처리되는 곳 / How records and images are processed</h2>
+    <p>비공개 기록은 다른 이용자에게 공개되지 않습니다. 다만 표시·저장·동기화·백업을 수행하는 시스템은 내용을 처리할 수 있습니다. 서비스가 내용을 읽을 수 없는 종단간 암호화 방식은 아닙니다.</p>
+    <p lang="en">Private records are not shown to other users. Systems that display, store, synchronize and back them up can nevertheless process their contents. The service does not use end-to-end encryption that prevents it from reading the data.</p>
+    <ul>
+      <li><p><strong>Supabase:</strong> 계정, 가입 확인 기록, 동기화한 감상·카드·태그·보드와 이미지 사본의 인증·저장·조회에 사용합니다. 공개용 사본과 비공개 원본은 구분합니다.</p><p lang="en"><strong>Supabase:</strong> Supports authentication, storage and retrieval of accounts, signup receipts, synchronized reflections, cards, tags, Boards and image copies. Public copies are handled separately from private originals.</p></li>
+      <li><p><strong>Vercel:</strong> 웹페이지와 서버 요청을 처리합니다. 사진 저장 시 이미지 바이트를 받아 크기·형식을 변환하고 저장소에 전달하며, 개인 사진과 공개 이미지의 열람 시에도 저장소에서 받은 바이트를 중계할 수 있습니다. 별도의 영구 사진 보관소를 Vercel에 두지 않는다는 것과 이미지 내용을 처리하지 않는다는 것은 다릅니다.</p><p lang="en"><strong>Vercel:</strong> Serves web pages and server requests. When a photo is saved, server code receives image bytes, transforms size and format, and sends the result to storage. It can also relay bytes from storage when private photos and public images are viewed. Not maintaining a separate permanent photo repository on Vercel does not mean Vercel never processes image contents.</p></li>
+      <li><p><strong>GitHub Actions:</strong> 운영 복구용 백업을 만드는 임시 실행 환경입니다. 데이터베이스와 새로 추가되거나 변경된 이미지 사본을 암호화하기 전에 처리하고, 기존 암호화 사본을 복호화해 증분 백업의 연결과 내용을 확인합니다. 따라서 이 실행 중에는 복호화된 기록과 이미지가 처리될 수 있습니다. 작업 코드는 임시 작업 파일을 종료 시 정리하도록 구성되어 있습니다.</p><p lang="en"><strong>GitHub Actions:</strong> Provides the temporary environment used to create recovery backups. It processes database contents and new or changed image copies before encryption, and decrypts earlier backups to check the incremental chain and contents. Decrypted records and images can therefore be processed during a run. The job is configured to clean up its temporary working files on exit.</p></li>
+      <li><p><strong>Google:</strong> 선택한 Google 계정 로그인을 제공합니다. Google Drive에는 별도의 운영 복구용 암호화 파일을 비공개로 보관합니다. Drive에 암호문을 보관하는 과정과 GitHub 실행 환경에서 암호화 전·복호화 후 내용을 처리하는 과정은 서로 다릅니다.</p><p lang="en"><strong>Google:</strong> Provides the Google sign-in you choose. Google Drive separately holds private, encrypted recovery files. Storing ciphertext in Drive is different from processing contents before encryption or after decryption in the GitHub execution environment.</p></li>
+    </ul>
+    <p>제공처의 자체 계정·접속·보안 처리에는 각 제공처의 방침도 적용됩니다. 특정 서버의 설정 지역만으로 모든 처리·로그·백업이 그 나라에만 있다고 설명하지 않습니다. 처리 범위와 관련 보호조치에 관한 문의는 아래 연락처로 보낼 수 있습니다.</p>
+    <p lang="en">Providers also apply their own policies to account, connection and security processing. A configured server region does not mean all processing, logs and backups stay in that country. You can ask about processing and relevant safeguards using the contact below.</p>
+  </section>
+  <section id="retention">
+    <h2>2. 백업 생성과 삭제는 다릅니다 / Backup creation and deletion are separate</h2>
+    <p>복구용 백업은 주간 증분 방식으로 생성하도록 설정되어 있습니다. 데이터베이스는 실행마다 새 덤프를 만들고, 이미지 파일은 검증된 기존 사본을 재사용하면서 새로 추가되거나 변경된 파일을 추가합니다. 기존 이미지 전체를 매일 저장소에서 다시 받는 방식은 아닙니다. 예약 지연이나 실행 실패가 생길 수 있으며 정확한 실행 시각을 보장하지 않습니다.</p>
+    <p lang="en">Recovery backups are configured to run weekly using an incremental approach. Each run creates a new database dump; verified existing image copies are reused while new or changed files are added. Existing images are not all downloaded from storage again every day. Scheduling delays and failed runs can occur; exact execution times are not guaranteed.</p>
+    <p>백업의 자동 생성이 이전 사본의 자동 삭제를 뜻하지는 않습니다. 세대별 보관과 정리는 운영자가 수동으로 관리합니다. 계정이나 기록을 삭제해도 기존 백업의 해당 내용이 즉시 물리적으로 없어지지는 않습니다. 복구할 때는 최신 삭제 내역을 대조해 삭제된 내용을 다시 서비스하지 않도록 해야 합니다.</p>
+    <p lang="en">Automatic backup creation does not mean automatic deletion of older copies. The operator manages retention and cleanup of backup generations manually. Deleting an account or record does not immediately physically erase it from earlier backups. Before restoring service, the operator must apply current deletion and withdrawal records so that deleted or withdrawn content is not served again.</p>
+    <p>삭제 표시된 기억·보드와 동기화 변경 이력에는 30일 기준의 정리가 적용되지만, 이는 모든 데이터와 사본의 일괄 삭제 기한이 아닙니다. 사진 파일 정리, 동기화 재시도 응답 사본, 신고·조치 기록, 백업에는 서로 다른 처리 단계가 있습니다. 남은 참조, 안전 대기, 처리량 제한, 오류와 예약 지연으로 정리가 늦어질 수 있습니다.</p>
+    <p lang="en">Deleted Memories, Boards and synchronization changes are subject to cleanup using a 30-day threshold. This is not one deletion deadline for all data and copies. Photo cleanup, copies in synchronization retry responses, reports and action records, and backups have distinct processing stages. Remaining references, safety delays, processing limits, errors and scheduling delays can postpone cleanup.</p>
+    <p>클라우드에서 삭제해도 기기에 내려받은 사본이나 다른 사람이 보관한 공개 사본은 원격으로 지워지지 않습니다. 저장·삭제 범위는 <a href={`${privacy}#retention`}>기존 개인정보 안내</a>와 함께 확인해 주세요.</p>
+    <p lang="en">Cloud deletion does not remotely erase downloaded device copies or public copies kept by others. Read this together with the <a href={`${privacy}#retention`}>retention section of the existing Privacy Notice</a>.</p>
+  </section>
+  <section id="withdrawal">
+    <h2>3. 개인정보 요청과 연락처 / Privacy requests and contact</h2>
+    <p>운영자 sinong(개인 운영)에게 <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a>으로 열람·정정·삭제·이용 중단 등 개인정보 요청을 보낼 수 있습니다. MOEMOA 계정이 없거나 로그인할 수 없어도 이메일로 요청할 수 있습니다. <a href={`${base}data/#account-privacy`}>계정 관리</a>에서는 당시 동의한 문서와 수락 이력을 확인하고 클라우드 계정 탈퇴를 진행할 수 있습니다.</p>
+    <p lang="en">Send requests for access, correction, deletion, restriction or other privacy matters to sinong, the individual operator, at <a href="mailto:godburgundy@gmail.com">godburgundy@gmail.com</a>. You can contact this address without a MOEMOA account or if you cannot sign in. <a href={`${base}data/#account-privacy`}>Account settings</a> show your accepted documents and acceptance history and provide cloud-account closure.</p>
+    <p>요청의 대상과 원하는 조치, 답변받을 연락처를 알려 주세요. 계정 식별이나 요청 권한을 확인할 필요가 있으면 필요한 범위의 추가 정보를 안내합니다. 비밀번호·로그인 코드·인증키·토큰·신분증 원본을 이메일에 첨부하지 마세요.</p>
+    <p lang="en">Describe the subject of your request, the action you seek and how to contact you. If account identification or authority to make the request needs checking, the operator will explain what limited additional information is needed. Do not email passwords, sign-in codes, authentication keys, tokens or original identity documents.</p>
+  </section>
+  <section id="rights">
+    <h2>4. 콘텐츠 권리·신고·이의제기 / Content rights, reports and appeals</h2>
+    <p>직접 촬영하거나 그렸더라도 이미지 안에 다른 사람의 저작물·초상·개인정보 등이 포함될 수 있습니다. 직접 제작했다는 사실만으로 제3자의 모든 권리가 해결되지는 않습니다. 필요한 공개 권한을 확인해 주세요. 애니메이션 캡처·타인의 팬아트는 기존의 별도 공개 권한 확인 범위를 따릅니다.</p>
+    <p lang="en">Even an image you photograph or draw yourself may contain another person's work, likeness or personal information. Creating it yourself does not automatically resolve every third-party right. Check the permissions needed to publish. Anime screenshots and other people's fanart remain subject to the existing separate public-use permission checks.</p>
+    <p>공개 페이지의 신고 기능 또는 위 이메일로 저작권·사생활·명예·초상 등 권리 침해와 잘못된 조치에 대한 재검토를 요청할 수 있습니다. 공개 페이지 주소, 문제 부분과 이유, 본인 또는 대리인으로서 요청하는 권리, 원하는 조치를 알려 주세요. 관련 없는 개인정보나 원본 파일 전체를 보내지 않아도 됩니다.</p>
+    <p lang="en">Use a public page's report control or the email above to raise copyright, privacy, reputation, likeness or other rights concerns, or to request review of an action. Include the public page URL, the relevant part and reason, the right you are asserting for yourself or as an authorized representative, and the action sought. You need not send unrelated personal information or entire original files.</p>
+    <p>신고만으로 위반이 확정되는 것은 아닙니다. 운영자는 요청과 자료를 검토하며 필요한 경우 콘텐츠 접근을 제한하고 조치를 재검토합니다. 긴급한 경우 먼저 접근을 제한할 수 있습니다. 법률과 안전이 허용하는 범위에서 이유와 이의제기 방법을 안내합니다. 한 페이지를 가리는 조치와 알려진 다른 사본·저장 객체를 처리하는 것은 구분됩니다.</p>
+    <p lang="en">A report alone does not establish a violation. The operator reviews the request and supporting information, may restrict access where needed, and can review an action. Urgent cases may require restricting access first. Reasons and an appeal route are provided where law and safety permit. Hiding one page is distinct from addressing other known copies or stored objects.</p>
+    <p><a href="https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&amp;lsJoLnkSeq=1029562697">한국 정보통신망법 제44조의2</a>가 적용되는 사생활·명예 등 권리침해 요청에는 침해 사실을 확인할 수 있는 설명을 바탕으로 지체 없이 삭제·임시조치 등 필요한 조치를 하고 신청인과 게시자에게 조치 사실을 즉시 알립니다. 다른 이용자에게도 필요한 조치 사실을 알리되 신고자의 신원이나 신고 내용 전체를 공개하지 않습니다. 침해 여부를 판단하기 어렵거나 다툼이 예상되는 경우의 임시차단은 30일 이내이며, 이는 일반 신고의 답변 기한이나 자동 복원일이 아닙니다. 종료 전에 소명과 후속 조치 근거를 검토합니다.</p>
+    <p lang="en">For privacy, reputation or other rights requests covered by Article 44-2 of Korea's Information and Communications Network Act, we take necessary removal or temporary-access measures without delay and immediately notify the requester and poster. We also make the action known to users without unnecessarily disclosing the reporter's identity or report. Where infringement is unclear or a dispute is expected, temporary blocking under that provision lasts no more than 30 days. This is not a general response deadline or an automatic restoration date; we review the evidence and grounds for subsequent action before it ends.</p>
+    <p>콘텐츠의 권리는 이용자 또는 원래 권리자에게 남습니다. 약관 동의나 공개 체크는 타인의 권리를 부여하지 않으며, 운영자의 법적 책임을 모두 이용자에게 넘기는 면책 동의도 아닙니다. 장애·복구 한계에 관한 설명은 운영자의 고의·중과실이나 법률상 배제할 수 없는 책임을 면제하지 않습니다. 관련 법률이 보장하는 이용자의 권리는 유지됩니다.</p>
+    <p lang="en">Ownership remains with you or the original rights holder. Accepting the Terms or checking a publishing box does not grant someone else's rights or transfer all of the operator's legal responsibility to you. Descriptions of outages and recovery limitations do not exclude the operator's intentional misconduct, gross negligence or liability that cannot lawfully be excluded. Rights protected by applicable law remain intact.</p>
+  </section>
+  <section id="urgent">
+    <h2>5. 긴급한 피해 신고 / Urgent harm reports</h2>
+    <p>불법촬영물, 동의 없이 유포된 성적 이미지, 아동·청소년 성착취물 등 긴급한 피해는 위 이메일로 알려 주세요. 제목에 ‘긴급 신고’를 쓰면 분류에 도움이 되며 다른 제목의 요청도 접수합니다. 게시 주소와 문제가 되는 위치, 요청 사유, 연락처만 우선 제공해 주세요. 성적 이미지·영상의 원본이나 복제본을 이메일로 보내거나 추가로 유포하지 마세요.</p>
+    <p lang="en">For urgent harm involving illicit recordings, non-consensual intimate imagery or child sexual abuse material, email the address above. “Urgent report” in the subject helps triage; other subject lines are accepted too. Start with the page URL, location of the content, reason for the request and contact details. Do not email original or copied sexual images or videos, or redistribute them.</p>
+    <p>미국 <a href="https://www.govinfo.gov/content/pkg/PLAW-119publ12/html/PLAW-119publ12.htm">TAKE IT DOWN Act</a>에 따른 삭제 요청에는 본인 또는 권한 있는 대리인의 실제·전자서명, 대상 자료와 위치를 찾을 수 있는 정보, 동의 없이 게시되었다는 선의의 진술과 관련 설명, 연락처를 포함해 주세요. 해당 법률이 적용되는 유효한 요청에는 가능한 한 빨리, 늦어도 접수 후 48시간 안에 대상 자료를 제거하고 같은 기간에 서비스 안의 알려진 동일 사본을 찾아 제거하기 위한 합리적인 노력을 합니다. 기한은 내부 심사 완료 때부터 시작하지 않으며 이미 유효한 요청에 추가 설명을 요구해도 다시 시작되지 않습니다.</p>
+    <p lang="en">A removal request under the US TAKE IT DOWN Act should include your or your authorized representative's physical or electronic signature, information sufficient to identify and locate the material, a brief good-faith statement that it was published without consent with relevant information, and contact details. For a valid request covered by that Act, we remove the depiction as soon as possible and within 48 hours of receipt, and make reasonable efforts within that period to identify and remove known identical copies on the service. Internal review or requests for clarification do not restart an already valid request's deadline.</p>
+    <p><a href="https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&amp;lsJoLnkSeq=1029562969">한국법상 인지 후 지체 없는 조치</a>가 필요한 사건은 미국 요청서의 보완을 기다리지 않습니다. 경찰 신고나 이미지 저작권 소유 증명을 모든 긴급 요청의 공통 필수 조건으로 요구하지 않습니다.</p>
+    <p lang="en">We do not delay action required without delay under Korean law while awaiting completion of a US request. A police report or proof of copyright ownership is not a universal prerequisite for urgent requests.</p>
+    <p>운영자는 긴급성을 확인해 우선 검토하고 적용되는 법률에 따라 필요한 조치를 진행합니다. 이 이메일은 긴급구조기관의 연락처가 아닙니다. 신체에 즉각적인 위험이 있다면 해당 지역의 긴급구조기관에 연락해 주세요.</p>
+    <p lang="en">The operator prioritizes review based on urgency and takes necessary action under applicable law. This email address is not an emergency service. If there is an immediate physical danger, contact the emergency services in your location.</p>
+  </section>
+  <p>이 보충 안내는 가입 가능 국가·연령, 공개 허용 이미지, 용량·요금 또는 수락 기록을 변경하지 않습니다. 중요한 이용조건의 변경이나 새로운 동의가 필요한 처리는 별도로 안내합니다.</p>
+  <p lang="en">This supplement does not change available signup countries or ages, permitted public images, capacity, pricing or acceptance records. Material changes to service conditions or processing that requires new consent will be presented separately.</p>
+  <p><a href={terms}>가입 이용약관 · Signup Terms</a> · <a href={privacy}>가입 개인정보 안내 · Signup Privacy Notice</a> · <a href={sharing}>공개 안내 · Public Sharing Notice</a></p>
+</main></body>
+<style>
+  .legal-current-documents{padding:0 0 12px;border-bottom:1px solid #ddd}
+  .legal-current-documents h2{margin-top:22px}
+  .legal-contents{display:flex;flex-wrap:wrap;gap:8px 18px;padding:20px 0}
+  .legal-contents a{display:inline-flex;align-items:center;min-height:36px;font-size:14px}
+  section{scroll-margin-top:20px}li p{margin:10px 0}a{overflow-wrap:anywhere}
+  @media(prefers-color-scheme:dark){.legal-current-documents{border-color:#444}}
+</style>
+</html>

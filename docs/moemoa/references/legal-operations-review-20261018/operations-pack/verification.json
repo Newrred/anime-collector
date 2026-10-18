@@ -1,0 +1,68 @@
+{
+  "review_date": "2026-10-18",
+  "basis": "Provided MOEMOA review source snapshot and cited public sources; no new production measurements",
+  "source_snapshot_commit": "dfa642661467f5169021de8baf2ebb27e29350a6",
+  "original_repository_modified": false,
+  "production_modified": false,
+  "messages_or_emails_sent": false,
+  "policy_documents": {
+    "languages": [
+      "ko",
+      "en"
+    ],
+    "full_draft_types": 5,
+    "operator_contract_retention_and_effective_date_confirmed": false,
+    "translation_variable_names_and_counts_match": true,
+    "legal_signoff": false
+  },
+  "docx": {
+    "strategy_pages": 15,
+    "policy_pages": 30,
+    "all_pages_visually_reviewed": true,
+    "blocking_layout_issues": 0,
+    "minor_layout_note": "Some long variable names and URLs wrap across lines; text is preserved."
+  },
+  "report_renderer": {
+    "runtime": "Node.js built-in modules",
+    "tests": 6,
+    "passed": 6,
+    "network_requests": false,
+    "delivery_tested": false
+  },
+  "email_samples": {
+    "synthetic": true,
+    "types": [
+      "daily",
+      "weekly",
+      "urgent"
+    ],
+    "browser_viewport_cases": 9,
+    "widths_px": [
+      1024,
+      360,
+      320
+    ],
+    "horizontal_overflow": false,
+    "actual_email_client_rendering_tested": false
+  },
+  "admin_preview": {
+    "delivery": "Inline in the conversation; not embedded in this archive",
+    "synthetic_cases": 8,
+    "tabs": 5,
+    "widths_px": [
+      1024,
+      360,
+      320
+    ],
+    "dark_mode_checked": true,
+    "javascript_errors": 0,
+    "production_connections": false,
+    "real_mobile_device_tested": false
+  },
+  "patch": {
+    "file": "patches/admin_quota_scope_labels.patch",
+    "git_apply_check": "passed",
+    "applied_to_original_repository": false,
+    "post_apply_ui_build_production_tested": false
+  }
+}

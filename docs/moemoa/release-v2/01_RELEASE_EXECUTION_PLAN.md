@@ -1,5 +1,45 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W17/D04·W14 법률 검토안 서비스 고지 반영 — 2026-10-19
+
+1. **목적/승인:** 사용자 “첨부했었던 약정, 법률등도 서비스 약관 등에 반영”에 따라 첨부검토안을 실제 서비스 약관/개인정보/공개정책과 대조하고 반영한다. 이미승인981d13e 신고배포는 별도그대로 마감한다.
+2. **결정:** KR14/US13/TH13·무료·일반공개·기존권리gate·주간증분/확정복구기준과 과거수락원문불변. 새국가축소/신분증/유료계약/자동메일/삭제기간을 임의확정하지 않는다.
+3. **근거:** 10/18 Pro인수보고와 첨부보존원문·현행 legal컴포넌트/가입receipt/실제데이터흐름·공식법률/공급자문서를 대조한다.
+4. **범위:** 확인된 공급자처리·원본/공개/철회·신고/권리요청·책임범위 설명을 새고정KO/EN문서에 반영하고 실제진입/버전연결을 준비한다. 미확정약정/주소/보관기한은 발명하지 않는다.
+5. **흐름:** 첨부의사실/제안 분리→실제구현·공식근거 대조→새고지와시행/동의전환 설계→로컬연결/검증→필요한정확운영후보.
+6. **파일:** 기존법률라우트/컴포넌트/정책버전/관련검사 지도부터확인. 기존01/02/03에흡수하며 새작업판은만들지않는다.
+7. **데이터:** 과거수락문서·receipt는수정하지않는다. 운영version/revision전환필요시 정확후보로분리하고 동의위조·기존회원삭제 없음.
+8. **마일스톤:** 항목별근거표→실서비스문서구현→필요재동의/적용범위·미결명시→타깃검사→후보/인계.
+9. **검증:** 불변원문hash·KO/EN사실일치·링크/연령/고지버전·가입/기존회원회귀. 불필요한전체기능재검사금지.
+10. **보안/권리:** 키·본문·개인자료조회0. 직접제작이곧제3자권리해결이라는표현이나 blanket면책 금지. 실제없는자동조치/메일을 약속하지않는다.
+11. **관측:** 외부발송/법률적합성인증/자동파기보장으로과장하지않고 원문URL/조회일/구현근거만기록.
+12. **복귀:** 신규문서/진입변경만되돌릴수있게구성. 운영정책전환은 이전version/revision/receipt와함께 별도복귀계획.
+13. **위험:** 미결공급자처리국가/보관기간/운영자표시를 공란또는확정사실로게시하지않는다. 문구로실제법률의무를대체하지않는다.
+14. **결정:** 이번실서비스문서구현은승인됨. 자료의미결중 실제필요한값만 구체후보를준비한뒤질문. 새정확운영후보는기존10/11경계유지.
+15. **진행:** 신고981d13e 운영 마감 후 최신 약관/개인정보 본문·별도 KO/EN 처리/권리 안내·가입/계정 링크를 구현했다. 고정 원문3개와 정책 mapper/public revision 불변, 기존 Terms 본문 동일. Chromium4개·build34 PASS. 중간 build 병행 시 빈 hydration4실패 후 단독 재실행4PASS도 근거에 보존한다.
+16. **발견:** 첨부38개미결값/새보관기한/자동메일은 확정 사실이 아니다. 가입 tuple 단독교체는 기존회원 새 게시를 제한하고, public revision 교체는 구 공개물 reader를 가릴 수 있다. 이번은 현재 처리 사실·권리 요청 보충 안내로 반영하며 그 값을 바꾸지 않는다.
+17. **완료:** [8항 보고](../reports/2026-10-19-legal-service-notices.md)와 [검사/원문 지문](evidence/2026-10-19-legal-service-notices.json). 새 고지 운영 적용은 정확 후보 승인 후이며 법적 적합성 전체 완료로 처리하지 않는다.
+
+## W09/W14 DF-01 승인 후보 운영 실행 — 2026-10-19
+
+1. **목적/승인:** 사용자 “후보981d13e 운영 적용 승인. 문서대로 push·배포·DB 반영”에 따라 정확 SHA981d13e0eb7a60e6ce86838f821f71c84d1d518b를 실행한다.
+2. **결정:** 기존 공개/가입/권한/한도/원본 유지. 후보13파일 외 개발 브랜치 전체 병합 금지.
+3. **근거:** 아래 후보 준비17항·실제 운영 읽기·로컬33검사·test 인수. 현행 remote master/live/DB 기준을 실행 직전 재조회한다.
+4. **범위:** 후보 branch push/기존quality 실행→exact SHA두job성공→master fast-forward→Vercel Git READY/alias/live→운영 함수1개·ledger1건. 신규실신고/사진/정책/설정 쓰기 제외.
+5. **흐름:** 승인된 운영 후보 문서의 순서를 유지한다. CI/배포 실패·기준불일치 시 후속쓰기 중단, 원인확인 후 보고한다.
+6. **파일:** 후보는 변경하지 않는다. 기존 문서/작업판/운영적용 evidence만 실제결과로 갱신한다.
+7. **DB:** migration20261018090000, release MOEMOA_DF01_REPORT_PROD_20261019_01. exact committed helper와 migration/연결helper 검증 후 적용한다.
+8. **마일스톤:** remote기준일치→CI2job→Git/Vercel exactSHA→DB guard/apply/readback→문서인계.
+9. **검증:** 원격CI SHA/job, 배포 READY/alias/Git/live, DB baseline·ACL/metadata·원문hash·별도연결·설정/타함수/기존이력 보존. 실제hosted신고 UI와구분.
+10. **보안:** 기존인증만 재사용, 비밀값/원시오류/실자료 출력금지. 새키/권한/가입/사진/비용 변경0.
+11. **관측:** 단계별시간/ID/SHA/해시만 저장. 성공하지 않은단계는 PASS로 쓰지 않는다.
+12. **복귀:** commit전오류 atomicrollback. 불확실결과는 read-only우선. 적용직전함수/metadata 보존. Git복귀와DB복귀 별개, 사후역변경은 오류/정확영향에 따라 판단.
+13. **위험:** 동시master/DDL 변경, CI환경차이, Vercel지연. forcepush/CLI운영승격/미확인DB재실행 금지.
+14. **승인:** 현재정확후보의 push/배포/DB반영은 승인완료. 같은승인을 반복질문하지 않는다.
+15. **진행:** 정확 SHA CI39142736022 두job SUCCESS→master FF→Vercel dpl_7LYZRTeLmZ6PZJzGJt9qtRNcQN4K READY/Production/www exact SHA→01:13:29 JST DB적용/별도readback→01:13:39 독립읽기 CANDIDATE_PRESENT 완료. [8항 보고](../reports/2026-10-19-partial-privacy-report-production-application.md), [실제 근거](evidence/2026-10-19-partial-privacy-report-production-application.json). 사용자 기록/설정/타함수/기존ledger 보존.
+16. **발견:** 신규 codex branch push는 quality자동실행대상이아니므로 기존workflow_dispatch를 사용한다.
+17. **완료:** 실제Git/Vercel/DB결과와 남은한계·다음하나를 기존단일작업판에 기록한다.
+
 ## W09/W14 DF-01 운영 대조·후보 준비 — 2026-10-19
 
 1. **목적/승인:** 사용자 요청에 따라 운영 현행을 읽어 대조하고 신고 오류 수정의 정확한 운영 후보를 준비한다. 운영 쓰기·push·배포 승인이 아니다.
@@ -20,6 +60,160 @@
 16. **발견:** 새 codex branch push만으로 quality CI가 시작되지 않아 승인 후 workflow_dispatch/PR exact SHA 검사가 필요하다. 로컬 도구의 Git검사/운영OID·settings는 mock이고 실제SQL transaction/별도readback/rollback은 임시socket에서 실행했다. 첫 backup byte 검사는 테스트의 CRLF 정규화 문제로 실패했으나 제품 변경 없이 rawbytes 비교로 고쳐33항목 재통과했다.
 17. **완료 보고:** 운영 대조·도구·복귀 준비와 최소 후보를 [8항 보고](../reports/2026-10-19-partial-privacy-report-production-candidate.md)/[근거](evidence/2026-10-19-partial-privacy-report-production-candidate.json)에 결속한다. 정확 후보 SHA는 단일 작업판 현재 카드를 따른다. 다음 하나는 이 후보의 정확 운영 적용 승인이다. remote CI/push/DB apply/Vercel 배포·실신고 생성은 미실행이다.
 
+## W09/W14 DF-01 테스트 DB 적용 후속 — 2026-10-18
+
+1. **목적/승인:** 사용자 “이 후보 테스트 DB에만 적용”에 따라 검증 후보 a6a63b6의 신고 함수 migration1개를 moemoa-test에 반영한다.
+2. **확정 결정:** 기존 원본·정책·flags·가입·권한·Public 범위 유지. 이번 승인은 운영/master/화면 배포나 실사용자 신고 생성이 아니다.
+3. **현재 근거:** 로컬 cb955ed/a6a63b6, 앞선 DF-01 실제 SQL 재현·새 경계31·기존 회귀·복귀 검증 완료. 원격 함수 정의/이력은 지금 읽어 대조한다.
+4. **범위:** test ref `nmgkhknponvzcwliajyk`만, 현행 정의/이력 읽기→동일 기준 확인→복귀 정의 보존→함수/이력 atomic 적용→정의/ACL 재조회. 새 자료·게시·신고·모더레이션 실행·설정 변경 제외.
+5. **흐름:** 기존 test-only DB 연결 검증과 verify-full TLS를 재사용한다. env 값/원시 오류/원문 자료는 출력하지 않는다.
+6. **파일 지도:** 승인된 migration 불변, 기존 도구 패턴을 따른 bounded test 적용 도구, 기존01/02/03·시작/운영 안내·evidence 후속 절만 갱신한다.
+7. **데이터:** submit_memory_report CREATE OR REPLACE1개와 migration 이력1건. 테이블 스키마/행/설정/권한 쓰기 없음. release ID와 소스 SHA를 이력에 남긴다.
+8. **마일스톤:** preflight 일치 및 복귀 파일→정확 SQL 실행/트랜잭션 검증→commit 후 독립 연결 확인→인계. 불일치는 쓰기 전에 중단한다.
+9. **검증:** source hash/기존 prosrc·RPC signature·security definer/search_path·ACL/owner·prerequisite 이력, 전후 함수와 설정 지문. hosted 사용자 행을 만드는 기능 검사는 이번 범위에 포함하지 않는다.
+10. **보안/개인정보/권리:** test 대상 강제, SQL/키/실자료 본문 출력 금지. 관계없는 함수/권한·가입·신고 한도는 그대로 유지한다.
+11. **관측:** 익명화된 metadata/해시·명령·성공 상태만 기록. UI/Google/운영 행동 PASS로 확대하지 않는다.
+12. **복귀:** ignored cache에 사전 함수 정의 보존. commit 전 검사 실패는 transaction rollback. 통신 결과 불확실 시 읽기 점검부터 하고 재실행하지 않는다. commit 후 추가 역변경은 별도 필요가 있을 때 정확 범위를 확인한다.
+13. **위험:** 다른 작업의 선행 함수 변경/이미 적용/연결 대상 오류를 그대로 덮지 않는다. 코드가 승인 SHA와 다르면 실행하지 않는다.
+14. **결정:** 이 정확 test 후보는 승인 완료, 반복 승인 요청 없음. 운영 적용은 이 승인에 포함되지 않는다.
+15. **진행:** 적용 도구 d222587을 격리 PostgreSQL에서 먼저 검증했다. 14:35:15 UTC 실제 moemoa-test commit 후 별도 연결 exact body/이력·권한/owner/인자/default/search_path·설정/다른함수 유지 PASS. 14:35:24 UTC 추가 읽기에서도 CANDIDATE_PRESENT 확인.
+16. **발견:** 최초 read-only prerequisite 거절은 과거 ledger의 적용시각 version(20260924141324)/원본명(20260923213901_memory_moderation) 차이였다. 정확한 관측 alias와 기존 body 해시를 함께 고정했다. 로컬 도구 검사에서 CRLF와 기본값 AST의 문자 위치123→134가 의미 변경 없이 달라지는 점을 찾아, 줄바꿈만 정규화하고 기본값의 실제 표현을 대조했다. 원격 함수 원문/후보는 바꾸지 않았다.
+17. **완료 보고:** 이번 승인 범위인 test-only 함수 적용·정의/권한 readback 완료. 원격 실제 신규 신고 생성·Google/UI·운영 검사는 하지 않았다. 다음 하나는 운영 현행 정의/이력 읽기 대조 후 이 DF-01만의 정확 운영 후보 준비다. 현재 운영 쓰기 승인으로 확대하지 않는다.
+
+### W09/W14 DF-01 테스트 적용 — 실행 8항 보고
+
+1. **읽은 문서/파일:** AGENTS·시작·확정01·PLANS·위 DF-01 계획/8항 보고·기존01/02/03·운영 연결 안내, 승인된 migration과 기존 apply-simple-card-sharing-test/inspect-retention 도구. 앞선 로컬 회귀 결과를 재사용했다.
+2. **가정/미확정:** 이번 사용자 승인은 a6a63b6의 moemoa-test 함수 교체·이력/정의/권한 확인이다. 실제 신고행을 만드는 hosted 기능 검사나 운영 적용까지 승인됐다고 해석하지 않았다. 같은 함수에 비협조적인 동시 DDL이 들어오는 상황까지 직렬화를 보장하지 않는다.
+3. **계획:** 바로 위17항 후속 계획. 예상과 다른 source/ACL·불명확한 이력은 쓰기 전에 중단하고 읽기 확인부터 진행했다.
+4. **변경:** version-controlled 적용 도구 `d222587d7422c593ea897068ba612b6cf5bfcfcd`의 [apply-partial-privacy-report-test.py](../../../tools/publication-boundary/apply-partial-privacy-report-test.py). 기존 연결 helper의 test allowlist/TLS를 재사용하며 원시 오류·키를 출력하지 않는다. 승인 SQL a6a63b6/SHA256145ecdef…1c51161은 불변이다. 기존 문서·작업판·[적용 증거](evidence/2026-10-18-partial-privacy-report-test-application.json)를 후속 갱신한다.
+5. **DB/복귀:** test `nmgkhknponvzcwliajyk`에 function1개와 version20261018090000 이력1건을 단일 transaction으로 반영. release `MOEMOA_DF01_REPORT_TEST_20261018_01`. 사용자행/테이블/flags·권한/원본 변경0. 실제 사전 정의는 ignored `.cache/df01-test-20261018T143513Z-rollback.sql`, SHA256eede81fc…87ed15a에 보존. commit 전 guard 실패는 rollback이며 commit 후 역적용은 필요 시 해당 환경/이력까지 맞춘 정확 범위로 진행한다.
+6. **검증/명령:** `wsl.exe -d Ubuntu -e python3 /mnt/e/web/anime/tools/publication-boundary/apply-partial-privacy-report-test.py` 최초 읽기 PREREQUISITE_MISSING/쓰기0→관측 version/name alias 대조 후 BASELINE_MATCH. 최종 도구의 격리 socket apply/readback PASS(실제 hosted로 세지 않음). 같은 명령 `--apply` exit0/APPLIED_AND_READ_BACK, 추가 무옵션 읽기 exit0/CANDIDATE_PRESENT. old/new 함수 body SHA724a91fd…b8cf1→b7b58512…a7641. metadata SHAa017f676…010e4/설정hash13212612…7949 그대로. 함수 OID/ACL/owner·인자/default·SECURITY DEFINER/search_path, 다른함수·기존 migration 이력 보존 PASS. `git diff --check` PASS.
+7. **보안/개인정보/권리/관측:** 함수/이력 metadata와 설정 지문만 읽었다. 신규 신고/게시/사진/실사용자 row 접근·UI/Google·새 인증/권한·운영 DB·배포·push0. authenticated 실행 허용과 anon/PUBLIC 거절 확인, 다른 기존 role의 ACL은 변경하지 않았다. 코드 리뷰의 baseline pin·오류 allowlist·권한 결과 표현을 보완했다.
+8. **남은 위험/다음 게이트:** test 함수 반영은 완료됐지만 hosted 브라우저 신고 성공을 주장하지 않는다. 로컬 실제 SQL 행동 검증과 hosted 정의/권한 인수를 구분한다. **다음 하나는 운영 현행 함수·이력 읽기 대조 후 DF-01 운영 후보를 준비하는 것**이다. 운영 함수 교체/master push는 별도 정확 후보 승인 전 수행하지 않는다. DF-02/한도라벨/고지/사진 등 다른 잔여는 보존한다.
+
+## W09/W14 DF-01 부분 비공개 후 신규 신고 — 2026-10-18
+
+1. **목적:** 공개 보드의 일부 카드를 비공개로 바꾼 뒤 남은 공개 보드를 새 사용자가 신고할 수 있도록 현행 SQL 결함을 재현하고 최소 수정한다.
+2. **확정 결정:** 일반 Public·원본 비공개·신고/차단/철회·현행 국가/가입/정책과 정확 원격 후보 승인 경계를 유지한다. 사용자가 이번 로컬 재현·수정을 명시 요청했다.
+3. **현재 근거:** 시작 HEAD a54b149. `20260923213901_memory_moderation.sql`의 submit RPC는 board의 published_operation만 검사하지만 `20261011120000_simple_card_sharing.sql`은 일부 카드 제거 후 남은 published_snapshot을 보존하며 operation을 비운다.
+4. **범위:** 해당 대상 판정, additive migration, 기존 SQL 계약 회귀, 기존 문서/증거만 포함. DF-02 retention·새 관리자/메일·법적 문서 게시·실계정/원격/운영/배포는 제외한다.
+5. **흐름:** 합성 두 카드의 prepare→publish→한 카드 make_private→익명 남은 카드 읽기→새 신고자/operation의 submit을 동일 PostgreSQL에서 실행한다.
+6. **파일 지도:** 새 `supabase/migrations/20261018090000_memory_report_partial_privacy.sql`, `tools/publication-boundary/simple-card-sharing-contract.sql` 및 필요 시 같은 폴더의 focused 계약, 기존 `tools/identity/run-public-signup-local.sh`, 이 01/02/03과 근거 파일.
+7. **데이터:** 함수 하나 CREATE OR REPLACE만 계획. 테이블/자료/권한/flags/정책 변경 없음. 초기 migration은 수정하지 않는다.
+8. **마일스톤:** 기존 함수로 NOT_FOUND 재현→최소 조건 보완→같은 경로 성공 및 비공개/한도/멱등성/ACL 유지→독립 diff 검토와 인계.
+9. **검증:** Ubuntu PostgreSQL16의 임시 Unix socket cluster, 현행 migration 전체(retention의 pg_cron 제외), 기존 public-signup/simple-sharing 및 moderation 계약. 새 신고자·새 operation으로 기존 receipt 재사용 오판을 방지한다. 실제 hosted/Google/UI/운영 PASS로 표시하지 않는다.
+10. **보안/개인정보/권리:** id = target AND (기존 operation OR 유효한 공개 snapshot 상태)의 괄호 유지. home·report quota·락·no-store·SECURITY DEFINER/빈 search_path/ACL 보존. 비공개 본문 반환 없음.
+11. **관측:** 합성 PASS/FAIL·명령/해시만 문서화하고 실제 키·사진·본문·운영 DB를 읽지 않는다. 새 알림/예약/분석 이벤트 없음.
+12. **복귀:** 로컬에서 이전 submit 함수 정의로 되돌려 결함 재현, 새 migration 재적용으로 복구를 검증한다. 데이터 손실 없음. 원격 복귀도 함수만 대상으로 별도 정확 승인 시 수행한다.
+13. **위험:** 모든 철회물을 NOT_FOUND로 바꾸면 과거 공개 신고 계약이 깨진다. 기존 operation 경로는 유지하고 최초 preview만 있는 대상/없는 ID/마지막 카드까지 제거된 대상은 새 fallback에서 제외한다.
+14. **결정:** 현재 로컬 작업에는 추가 결정 없음. 원격 test/운영 migration·master push는 검증한 정확 후보를 제시한 후 별도 승인한다.
+15. **진행:** WSL PostgreSQL16에서 수정 전 익명1장열람 성공 뒤 신규 신고 NOT_FOUND 재현(exit1). additive 함수 적용 후 같은 경로 성공. 기존 signup/sharing15+16, 새 경계31, 독립세션락2항목 PASS. 기존 publication runner440개 PASS notice/exit0(중복 합산하지 않음). 함수 복귀·재적용2항목도 추가 통과했다.
+16. **발견:** 새 runner가 필요하지 않았다. 기존 CI의 `tools/identity/run-public-signup-local.sh`가 시간순 전체 migration과 simple-sharing 계약을 실행하므로 include1줄로 연결했다. 독립 diff 검토에서 헤더 검사의 이전 reader 영향 가능성을 찾아 신규 신고 직전 초기화로 보완했고 재검증했다. 기존 generic revoke는 operation을 보존해 철회 후 신고가 가능하며 이를 축소하지 않는다.
+17. **완료 보고:** DF-01 로컬 재현·SQL 수정·회귀·함수 복귀 검증 완료. 실제 hosted/Google/UI·운영 적용은 미실행이며 다음 하나는 정확 후보의 moemoa-test 함수 적용 승인이다. 세부 근거와 8항 보고는 아래 후속 완료 보고/단일 작업 카드에 결속한다.
+
+### W09/W14 DF-01 — 실행 8항 보고
+
+1. **읽은 문서/파일:** AGENTS·CODEX_START_HERE·확정01·PLANS·감사03·UGC05·설계06·QA07·변경09·기존 release01/02/03·Pro 인수 보고. 실제 [submit 원본 43–65행](../../../supabase/migrations/20260923213901_memory_moderation.sql), [부분 비공개 30–61행](../../../supabase/migrations/20261011120000_simple_card_sharing.sql), publication/mini-home reader·일반 revoke, PublicMemoryBoard의 MemorySafety 연결, 기존 signup/sharing/moderation 계약과 CI를 대조했다.
+2. **가정/미확정:** 사용자가 이번 로컬 재현·수정을 승인했다. 합성 Auth/Storage 모델을 쓴 PostgreSQL 결과이며 실제 hosted schema·PostgREST·UI·Google·운영 적용 확인은 아니다. 이미 공개됐던 일반 철회 대상의 신고 허용을 새 결함으로 취급하지 않는다.
+3. **계획:** 위17항 ExecPlan. 새 작업판/제품 결정/신고 정책을 만들지 않고 W09/W14·C03/C05·Q12/Q17의 빠진 조합을 닫는다.
+4. **변경:** 로컬 코드 후보 `a6a63b687a8f29d748ffa8047a17e6d9f5826ee6`. [새 migration 5–30행](../../../supabase/migrations/20261018090000_memory_report_partial_privacy.sql)은 submit 함수의 board 대상 조건만 변경한다. [새 회귀 계약](../../../tools/publication-boundary/partial-privacy-report-contract.sql)은 실제 두 카드 게시/부분 철회 뒤 실행되며 기존 simple-sharing include1줄로 CI에 연결했다. moderation 계약에 일반 Board/home 철회 신고 보존3검사를 추가했다. 현재 문서/증거는 후속 커밋으로 결속한다.
+5. **DB/복귀:** 테이블/실자료/flags/ACL 변경0, PostgreSQL 임시 cluster에서만 함수 CREATE OR REPLACE. 이전 함수 복원→같은 신규 신고 NOT_FOUND, 새 migration 재적용→정의/ACL/owner/search_path 정확 복구→신고 성공을 검증했다. 기존 migration 전체를 다시 실행하는 복귀 방식은 쓰지 않는다.
+6. **검증/명령:** `wsl.exe -d Ubuntu -u postgres -e env PG_BIN=/usr/lib/postgresql/16/bin bash /mnt/e/web/anime/tools/identity/run-public-signup-local.sh` 수정 전 exit1/NOT_FOUND, 수정 후 exit0. signup15·기존sharing16·새신고31·독립세션락2 PASS. `tools/publication-boundary/run-local-postgres.sh` exit0/440 PASS notices: 기존 신고 quota/동시 요청/관리자/권리/철회/복구 포함. ignored `.cache/df01-rollback-run.sh`는 동일 runner/최종 계약에 이전 함수 복귀·재적용2검사만 삽입해 exit0/66 PASS notices. 같은 검사의 재실행을 고유 합계에 더하지 않는다. 비교 스크립트의 첫 assertion은 조건행 공백까지 비교해 실패했고 보정 후 조건 외 본문 동일 PASS; 제품 코드 실패가 아니다. `git diff --check` PASS.
+7. **보안/개인정보/권리/관측:** target ID 괄호·auth·no-store·quota·락·멱등성·home 경로·부여 권한 그대로. report는 id/status만 반환하고 private 본문/owner를 노출하지 않는다. 부분 공개/재준비/숨김/읽기 중단 후 신고는 가능하지만 최초 private/preview만/없는ID/마지막카드제거는 신규 fallback 거절. 기존 general revoke의 역사적 신고 경로 유지. 독립 리뷰의 no-store 테스트 간섭 지적은 신고 직전 header 초기화로 해결·재검증했다. 새 로그/알림/분석 수집·원본 업로드 없음.
+8. **남은 위험/다음 게이트:** 원격/운영 미적용, 전체 프런트나 실제 신고 화면 PASS 주장은 없다. **다음 하나는 후보 a6a63b6의 migration `20261018090000_memory_report_partial_privacy.sql`을 moemoa-test에 적용하는 정확 승인**이다. 대상은 submit 함수1개이며 UI배포·Public 활성·가입/정책/요금·원본 변경을 포함하지 않는다. 적용 전 해당 환경의 현행 함수/이력 대조와 복귀 정의 확보 후 실행한다. 운영은 별도 정확 후보 승인·Git master 추적 절차를 따른다. [실제 근거](evidence/2026-10-18-partial-privacy-report-fix.json).
+
+## GPT Pro 법적·운영 검토안 인수 — 2026-10-18
+
+1. **목적:** 앞서 제공한 dfa6426 분석 세트에 대한 DOCX·수정안·운영 ZIP을 현행 소스와 완료 증거에 대조하고 실제 결함과 새 제안을 분리한다.
+2. **확정 결정:** 기존 국가·연령·무료·일반 Public·과거 수락 원문·단일 M/W/C/Q/D 및 정확 원격 후보 승인 경계를 유지한다. 첨부의 실행 제안은 별도 사용자 지시가 아니다.
+3. **현재 근거:** HEAD 9d151dd, 분석 기준 dfa6426. 앱/검사/DB 소스는 기존 운영 a65f557과 같고 그 이후 문서 변경만 존재한다. 이번 운영 DB 상태를 조회했다는 뜻은 아니다.
+4. **포함/제외:** 문서 추출·파일 해시·신고/보존/한도 표시의 정적 대조·공식 근거 재확인·내부 안내/작업판 정정 포함. 앱 수정·DB 실행·정책 게시·메일/예약·운영 설정·원격 push 제외.
+5. **흐름:** 첨부 원문→현행 정의와 호출자→과거 실제 검증→판정과 최소 후속→기존 W/D/Q에 연결한다.
+6. **파일 지도:** references/legal-operations-review-20261018의 비실행 참고자료, reports/2026-10-18-pro-legal-operations-intake.md, 기존 운영 안내·01/02/03·시작 문서. 별도 작업판을 만들지 않는다.
+7. **데이터:** migration/실자료 쓰기0. 기존 retention 후보의 test-only 이력을 보존하고 운영 반영을 추정하지 않는다.
+8. **마일스톤:** 세 첨부의 출처/완전성 확인; 결함·기존 완료·초안·미확인 구분; 최소 후속 및 다음 행동 하나 확정.
+9. **검증:** ZIP 경로/크기/CRC, 보존 텍스트 해시, 참조 경로·diff 검사. 첨부 quota patch는 apply --check만 수행하며 실제 적용/UI PASS가 아니다. 문서 접수 때문에 전체 앱 검사를 반복하지 않는다.
+10. **보안/권리:** 실제 키/개인 사진/운영 DB 본문을 읽거나 원문에 추가하지 않는다. 신고/권리 범위·운영 역할을 늘리지 않는다.
+11. **관측:** 주간 백업과 기존 실패 알림 완료는 유지. 새 메일 renderer·outbox·heartbeat는 연결되지 않은 제안으로 표시한다.
+12. **복귀:** 이번 문서 patch만 되돌릴 수 있다. 기존 로그·완료 증거는 보존한다. 첨부 코드는 references에만 두며 실행/앱 import하지 않는다.
+13. **위험:** Pro 정적 지적을 운영 사고로 단정하거나 테스트에 이미 있는 수정을 재작성하지 않는다. 초안의 보관기한/국가/유료 계약/8주 계획을 확정값으로 승격하지 않는다.
+14. **결정:** 최신 메시지에는 첨부만 있어 이번은 검토 인수와 사실 정정이다. 새 정책/계정 제재/발신 권한/자동화는 구체 범위가 정해질 때 다룬다. 기존에 허용된 최소 로컬 결함 수정은 다음 작업으로 연결한다.
+15. **진행:** 법률 원문·소스 경계·운영 제안을 읽기 전용 병렬 검토했다. DOCX는 bundled Python으로 문단/표 텍스트를 추출했다.
+16. **발견:** 부분 철회 뒤 신규 신고 조건 불일치, test-only 응답 본문 정리, 전역 quota의 계정별 라벨 오류 확인. research/dataflow_audit.md와 관리자 대화형 mock은 패키지에 없으며 메일 dedupe 설명도 두 문서가 다르다.
+17. **완료 보고:** 아래 보고·03 현재 카드에 실제 범위와 후속을 기록한다. 이번 인수의 다음 개발 제안은 W09/W14 부분 철회 신고의 격리 재현·최소 수정이며 W06/W18 사진 문제는 보존한다.
+
+### Pro 검토안 인수 — 실행 8항 보고
+
+1. **읽은 문서/파일:** AGENTS·시작 문서·확정01·PLANS·UGC05·QA07·변경09·기존release01/02/03·운영 안내, 사용자 첨부3개와 ZIP의 DOCX2개, 신고/부분 철회/reader·retention 후보/10월10일 실행 증거·관리자 quota·privacy/이미지/백업 처리 소스. 공식 법률·공급자 근거는 [인수 보고](../reports/2026-10-18-pro-legal-operations-intake.md)에 연결했다.
+2. **가정/미확정:** 첨부만 받은 메시지를 신규 구현/운영·정책 일괄 승인으로 해석하지 않았다. 현재 운영 SQL 정의/영향 집계, 공급자 실제 계정 계약과 처리 국가, 새 고지의 필수 사실값은 미확인이다.
+3. **계획:** 위17항 인수 ExecPlan. 새 대형 관리자/메일 시스템을 먼저 만들지 않고 기존 소스·증거에 해당하는 지적을 우선 판정했다.
+4. **변경:** 참고 텍스트35개/출처 manifest·README·바이트 보존 규칙, 인수 보고, 기존 시작·운영 안내·계획·수용 경계·단일 작업판만 수정. DF-01 정적 불일치/DF-02 test-only 완료/전역 quota 표시/고지 부족을 구분했다.
+5. **DB/복귀:** migration 작성/적용·실자료·원격 설정·고정 약관/receipt·배포·발신·예약 변경0. 이번 문서 patch 역적용으로 복귀하며 이전 로그/증거를 지우지 않는다.
+6. **검증/명령:** bundled Python ZIP/Word XML 추출로 ZIP33entry 경로·크기/CRC PASS, 보존35파일 SHA256/길이 및 stage Git blob SHA PASS, 고신뢰 credential 패턴0, 추가 로컬 링크13개 존재 PASS, 기존 작업ID68개 유지. `git apply --check` 제공 quota patch exit0/미적용. `git diff --name-only dfa6426 HEAD -- src api tests scripts supabase .github package.json package-lock.json`과 이번 해당경로 diff 모두 빈 결과. `git diff --check` PASS. stage 검사에서 원문 CRLF를 trailing whitespace로 인식해 참고 폴더만 CR-at-EOL 허용/바이트 보존 속성을 명시했고 `git diff --cached --check` exit0으로 재확인했다. JS 샘플3개는 .mjs.txt로 보관해 자동 테스트 탐색을 방지했다. 첨부 코드·SQL·브라우저·메일 테스트 실행0이며 과거 PASS를 새 PASS로 세지 않는다.
+7. **보안/권리/관측:** 실제 env/키·사용자 본문·사진·신고 사건 미조회. references의 코드/정책은 비실행 초안이며 앱 import 없음. 운영자 연락처 변수·보관기간·role·계정 제재·발신 권한을 확정하지 않았다. 누락 research/mock 및 dedupe 설명 차이를 기록했다.
+8. **결과/다음:** 접수·대조·내부 문서 정정 완료, 앱 수정/법률 적합성 인수/운영 반영 완료 아님. 다음 하나는 W09/W14 부분 철회 후 신규 신고의 격리 재현·최소 수정이다. W06/W18 사진 문제와 기존 운영 잔여 유지. 로컬 문서 커밋으로 보존하고 원격 push하지 않는다.
+
+## GPT Pro 검토 세트 제공 — 2026-10-18
+
+1. **목적:** 이번 개발·운영·법적 준비·키 안내를 GPT Pro가 실제 코드/기존 계약/증거와 대조할 수 있는 분석용 ZIP으로 제공한다.
+2. **확정 결정:** 기존 M/W/C/Q/D와 정확 후보 승인, 일반 공개·무료·현재 국가 범위 유지. 분석 패키지는 운영 실행 승인이 아니다.
+3. **기준:** 문서와 소스 snapshot `dfa642661467f5169021de8baf2ebb27e29350a6`. 앱/API/검사/DB/workflow는 운영a65f557과 동일, 별도 개발 도구16개는 개발 범위로 표시한다.
+4. **범위:** 추적된 문서·소스·검사·migration·workflow 중 분석용 텍스트, 이번 관측 포함 핵심 evidence, 읽기 순서·복사용 요청문·소스 지도·manifest. 로컬 env/키/DB dump/사용자 이미지/브라우저 세션·로그/기존 백업 ZIP은 제외.
+5. **흐름:** 고정 Git blob 선택→민감정보 패턴 검사→필요 부분의 패키지 한정 제거/기록→README/요청문 작성→ZIP CRC·목록·해시 대조→사용자에게 파일 제공.
+6. **파일 지도:** 기존01/03에 실행 기록, 패키지와 생성/검증 자료는 저장소 밖 또는 ignored cache. 저장소 소스 수정 없음.
+7. **DB:** migration 실행·데이터/운영 설정·원격 쓰기0.
+8. **마일스톤:** 새 통합 안내·기존 작업판·해당 소스/증거를 링크 없이도 ZIP에서 읽을 수 있고 제외한 파일/실행 한계가 분명하다.
+9. **검증:** Git blob 바이트/SHA 대조, ZIP 무결성, 필수 파일/상대 링크, 비밀 파일명·값 패턴, 운영과 개발 소스 차이 범위를 기록한다.
+10. **보안/권리:** 키는 이름·용도 문서만 포함. 원시 비밀값·개인 사진·동의/가입 실행 없음. GPT Pro로 직접 업로드/외부 발송하지 않고 사용자가 전달할 파일만 준비한다.
+11. **관측:** 10/18 조회 receipt 재사용, 새 운영 관측/백업 실행 없음.
+12. **복귀:** 새 패키지는 독립 파일이며 기존 패키지/작업을 덮어쓰지 않는다. 이번 문서 기록만 역적용 가능.
+13. **위험:** 과거 문서의 off/미완료를 현재로 오독하거나 전체 코드 스냅샷을 운영 실행 지시로 읽지 않도록 첫 안내에 구분한다.
+14. **결정:** 현재 요청으로 로컬 작성·제공 진행. 추가 승인/키 입력 불필요.
+15. **진행:** 핵심 문서·검토 질문을 병렬 대조했고 패키징/민감정보·무결성 검사를 진행한다.
+16. **발견:** 실행용 원본 자산/폰트/의존성은 분석에 불필요하며 제외를 명시한다. 오래된 시안 화면을 현재 운영 UI로 첨부하지 않는다.
+17. **완료 보고:** 실제 구성/크기/해시·검사·제외·제한·다음 작업을 기존03에 남긴다. 분석용 snapshot 이후의 포장 작업 로그는 제품 소스 변경이 아니다.
+
+### GPT Pro 검토 세트 — 실행 8항 보고
+
+1. **읽은 자료:** 기존 AGENTS/START/확정01/PLANS/보고09 및 직전 통합 안내·작업판·소스/근거 지도. 핵심 검토 질문을 별도 읽기 전용 대조로 확인했다.
+2. **가정/한계:** 사용자가 직접 Pro에 전달할 분석 자료다. 원격 실행/업로드를 대행하지 않는다. 자산·폰트·바이너리/개인자료가 없는 텍스트 snapshot이므로 실행용 clone/build 보장은 없다.
+3. **계획:** 위17항. source `dfa642661467f5169021de8baf2ebb27e29350a6`를 고정하고 이번 포장 작업 기록은 source 이후 문서 후속으로 분리했다.
+4. **파일:** 저장소 밖 README·복사 요청문·코드/근거 지도·Git context·설정 이름·제외/변형 목록·manifest와 source snapshot 생성. 기존01/03에 결과만 기록; 앱 소스 변경0.
+5. **데이터/복귀:** DB/Storage/환경/키/운영/원격 Git 변경0. 새 파일만 만들어 기존 ZIP/자료를 덮어쓰지 않았다. 패키지 제거가 필요하면 이 독립 산출물만 대상으로 한다.
+6. **검증:** 포함 source1,151파일·핵심 evidence8JSON·전체 archive1,158항목, ZIP CRC PASS, manifest 전파일 SHA256/길이 PASS, 필수 읽기순서 파일/명시 repository 경로 PASS. 앱/API/tests/scripts/DB/workflow/package 운영a65f557와 동일 확인. 고신뢰 credential 패턴을 검사해 테스트파일 `tools/operations/test_inspect_retention.py`의 일치 부분만 패키지 사본에서 제거 표시(원본 불변), 다른 source는 원본 blob 바이트 유지. 이 제거는 실제 노출 사고 판정이 아니다.
+7. **보안/관측:** 실제 env/키/인증서·개인 사진·DB dump/암호화 ZIP·원시 로그·브라우저 세션/의존성/바이너리 제외. `.env.production`도 제외하고 public 이름/boolean만 별도 추출. 원격 비밀값·현재 운영 자료 신규 조회0, 외부 발송0.
+8. **결과/다음:** `MOEMOA_GPT_PRO_REVIEW_2026-10-18.zip` 4,331,607bytes, SHA256 `29593b4f0453fbdf1f5724bba4e828be5e9bd3b7e86c71fbdd4b013ccaca6f6b`. Downloads에 ZIP·SHA256·독립 prompt 사본 제공. Pro의 정적 검토를 실제 hosted PASS로 바꾸지 않는다. 기존 다음 개발 W06/W18 개인 사진 로딩 최소 재현/진단은 유지하며 새 실행 승인 요청은 없다.
+
+## W17/D05 예약 확인·개발 및 운영 재개 안내 정리 — 2026-10-18
+
+1. **목적:** 문서상 다음 행동인 첫 주간 백업 결과를 확인하고, 남은 개발·운영·법적 준비와 키 관리의 현재 위치를 한눈에 읽을 수 있게 한다.
+2. **확정 결정:** KR14/US13/TH13 현행 범위, 무료·Web 우선, 단일 M/W/C/Q/D 작업판, 정확 후보별 원격 변경 승인 유지.
+3. **근거:** 개발 cc80819+문서 ab058e9, 운영 Git a65f557 및 기존10/14 receipt. 03은 첫10/18 예약을 미조회로 기록하고 있다.
+4. **범위:** GitHub 예약·정리 결과/운영 build-info 읽기, 현행 문서·코드 대조, 공식 법령·공급자 문서 재확인, 로컬 key 파일 이름·용도·존재/ignore 확인. 배포·DB/설정/예약 변경·백업 실행·파일 이동·외부 발송 제외.
+5. **흐름:** 실제 실행 단계 확인→기존 완료와 잔여 매핑→우선순위/예상 작업량→국가별 조건/운영 루틴→키의 최소 사용 범위 안내.
+6. **파일:** 기존01/02/03과 CODEX_START_HERE, 기존 evidence 디렉터리의 조회 receipt, operations의 읽기용 통합 안내. 새 작업판이나 제품 ID를 만들지 않는다.
+7. **데이터:** migration·실자료 쓰기0. 비밀값은 출력·복사·보고서 삽입하지 않는다.
+8. **마일스톤:** 실제 schedule/capture 단계 성공 여부 확정, 완료/개발/검증/법적 조건 구분, 현재 파일 위치·관리절차 안내와 다음 행동 하나 기록.
+9. **검증:** read-only API 결과의 event/SHA/job/step/시간 확인, source/문서 행과 상대 링크·ID·diff 검사. 앱 변경 없이 단위·브라우저 전체 검사를 반복하지 않는다.
+10. **보안/권리:** 키 값·사진·본문·이메일/계정 원문은 새 evidence에 넣지 않는다. 공개 권리 확대·회원 조건 변경0.
+11. **관측:** 기존 schedule 결과/용량 관측만 확인. 실패 알림 발생을 유도하거나 새 외부 메시지를 보내지 않는다.
+12. **복귀:** 문서 patch만 역적용 가능. 기존 로그·완료 증거는 보존한다.
+13. **위험:** job 전체 성공을 실제 백업 성공으로 오인, 과거 미완료를 현재 미완료로 재등록, 외국법 조건을 일괄 인증 의무로 과대해석하지 않는다.
+14. **사용자 결정:** 읽기·문서 정리는 현재 요청으로 진행. 새로운 운영 변경 후보/국가·권리·비용 확정은 기존 승인 조건을 적용한다.
+15. **진행:** 업무를 개발 잔여/법적 운영/키 inventory로 병렬 대조하고 예약 실행은 주 담당이 확인한다.
+16. **발견:** 실제 schedule/capture 성공과 master 보호 false를 확인했다. 로컬 test server env에 Users 읽기/Authenticated Users 수정 상속이 있어, 이 파일 한 개를 기존 production secret 파일과 동일한 사용자/SYSTEM 전용 ACL로 제한한다. 기존 ACL은 값 없는 로컬 복귀 자료로 보관하고 소유자 일치 확인 후 적용한다. 원격 권한/키 자체 변경은 없다. 기간은 견적이며 외부 확인 소요시간과 분리한다.
+17. **완료 보고:** 아래 실행 보고와03 현재 카드에 읽은 근거·수정·검증·남은 조건·다음 행동 하나를 남긴다.
+
+### W17/D05 2026-10-18 실행 8항 보고
+
+1. **읽은 문서/소스:** AGENTS·CODEX_START_HERE·확정01·PLANS·QA운영07·보고09·release-v2/01/02/03, 현재 구조·10/14 보고, 기존 공개/복구 evidence, weekly/cleanup/catalog workflow와 백업 runner·계정/catalog·signup/API env 경계·고정 법률 문서. 공식 법령/FTC·공급자 자료는 통합 안내에 링크했다.
+2. **가정/미확정:** 최신 앱은 운영a65f557과 같은 소스이며 현재 요청은 기존 다음 작업 및 개발/운영 준비 정리다. 실제 사진 오류 원인·전체 복구 serving·현재 chainLength·신규 용량 경보 전달은 미확정. 법적 조건을 전원 인증/임의 국가 축소로 바꾸지 않는다.
+3. **계획:** 위17항 ExecPlan. 문서상 다음 행동인 W17/D05 첫 예약 관찰을 먼저 마감하고 기존 작업판에 개발·운영·법적 절차·키 관리 잔여를 연결했다.
+4. **변경:** 읽기용 `operations/CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md`, sanitized 조회 JSON, 기존 시작/현재 구조/설정 지도/계획/계약/단일 작업판 갱신. 이 PC 밖 Git에 포함하지 않는 `E:\web\MOEMOA-KEY-FILES.md`와 기존 PC 안내 갱신. test server env의 넓은 파일 ACL을 기존 prod secret의 현재 사용자/SYSTEM 전용 template로 제한했다. 키 값/앱 기능 변경0.
+5. **DB/데이터·복귀:** migration/실자료/원격 설정/배포/수동 백업/전송/삭제0. 문서는 이번 patch 역적용 가능, 이전 로그 보존. ACL 이전 SDDL은 ignored `.cache/pc-handoff-20261018-test-server-acl.sddl`에만 보관; 내용/소유자 변경 없이 읽기 가능 확인. 광범위 권한 복귀는 기본 작업이 아니다.
+6. **검증:** 공개 GitHub API GET으로 주간39065955924 event=schedule와 실제 capture/checkpoint 단계 SUCCESS, 정리2회 실제 처리 단계 SUCCESS, catalog health39084974960 run SUCCESS 확인. master/www commit·checkoutCommit a65f557/source vercel-git 일치, master API protected:false. 이 조회에는 비밀값이 필요하지 않았다. 로그 API403으로 archive bytes/Drive 본문은 미조회. 추가/수정 문서의 로컬 링크25개 누락0, JSON 실제 단계·SHA·ACL assertion PASS, 기존 M/W/Q/D ID 보존, 새 문서의 고신뢰 비밀값 패턴0, `git diff --check` PASS. test server ACL 소유자/상속차단/넓은 허용0/template 일치와 관련 env/ACL 복귀 파일의 Git ignore를 재확인했다. 앱/DB 변경이 없어 이전 단위631/build33을 새 실행으로 세거나 반복하지 않는다.
+7. **보안/권리/관측:** 키 값·본문·사진·토큰 출력/문서 삽입0. 파일명/변수명/용도만 기록. 새 법적 안내는 내부 준비 자료로 고정 약관·receipt/회원조건은 불변. TIDA 요청의 48시간 기산·국외 처리 고지·공급자 조건과 실제 신고 처리의 추가 대조 필요를 구분했다. 강제 알림/외부 문의 발송0.
+8. **남은 위험/다음:** schedule 정시 보장과 전체 복구 완료는 아님. 체인16 전 새 기준 사본 계획, master 보호 설정 후보, 임계 경보 전달/복구 serving/국가별 운영 후속을 기존 W/D/Q에 유지한다. 다음 행동 하나는 **W06/W18 기존 개인 사진 로딩 실패 최소 재현·원인 특정**. 새 운영 설정/배포·실자료 변경은 정확 후보와 영향 승인 후 실행한다. 이번 문서는 로컬 커밋으로 보존하며 원격 push하지 않는다.
 
 ## W18/D06 운영 반영 후 잔여 대조 — 2026-10-13
 
@@ -2598,3 +2792,5 @@ Astro ClientRouter·공통 persisted 메뉴·기존 owner/dirty/busy 보호를 �
 다섯 번째18310f2/CI38502561444는공개54까지성공했다. signed composer21 중두번실패한private photo의상세진입재시도1개가실패(20PASS/1FAIL): durable intent와카드는보존됐지만post2에서멈췄다. 같은1개로컬FAIL 재현. persisted 메뉴의autoSync가새route에서재마운트되지않기때문에기존online/focus/45초간격만남았다. 기존startAutoMemorySync의onResume를astro:page-load에도등록/cleanup해이미사용자Save로승인·기록한queue만기존user/ready/online/visibility/pause/in-flight/owner/sessionfence를거쳐재시도한다. 신규사진선택·공개·권리·SDK/서버/DB변경없음. Supabase현재changelog·getSession공식문서/실제게이트를대조했다. SQL/metadata/photo권한을교체하지않고브라우저전송회귀/계정경계·모바일·quality/빌드를다시검사한다.
 ### 17. 완료 보고
 검사·배포 완료 전 SUCCESS로 쓰지 않는다. 결과는 reports/2026-10-14-production-ui-navigation-release.md와 상위 THIS_PC_HANDOFF에 기록한다.
+
+**완료 — 2026-10-14:** 정확source a65f557e84659a0638ee44a8c4a911173dd554b2의quality38504504280 publication-contract/verify 전체SUCCESS 후master Git push. Vercel dpl_Gkgq7kL4aMQTqX5wKLhKdwuYXP4D READY·Git/master·www alias와실제build-info commit/checkoutCommit/source/semanticMatch 일치. guest 주요3회 문서 이동3→0·같은메뉴, Back/Forward·동일주소/계정버튼·1440/390/320·JS예외/넘침0. 실제계정/게시/동의/DB/환경/한도변경0. deployment10분 error/fatal집계는빈결과이며전수역사/상시무오류보장은아니다. failure5후보는master에반영하지않았다. 로컬최종unit631/build33/Chrome core140+기존skip5/사진모바일41/공개54 및sourceDoctor34→34/신규rule-file0은중복합산하지않는다. 기존실사진/복구/물리기기·QA/임계알림/10월18일첫백업관찰잔여를유지한다. source/CI/배포/브라우저·영향·잔여는동일8항보고와evidence/2026-10-14-ui-navigation-release.json, 상위THIS_PC_HANDOFF·릴리스annotation에결속한다. 운영3문서와개발3문서의겹친추가영역은원본개발이력을포함한운영후보본문을보존해해결하며app/tests byte동일·개발tool16보존을확인한다.

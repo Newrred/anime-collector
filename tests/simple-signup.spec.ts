@@ -126,6 +126,9 @@ test('production PH teen guidance uses the same one agreement and resets after b
  const calls=await mockBackend(page,{signupPolicy});
  await page.setViewportSize({width:320,height:780});
  await page.goto('/auth/start/');await fill(page,'PH','2011-06-01');
+ await expect(page.getByRole('link',{name:'이용약관',exact:true})).toHaveAttribute('href','/legal/terms-2026-10-10/');
+ await expect(page.getByRole('link',{name:'현재 처리 안내',exact:true})).toHaveAttribute('href','/privacy/');
+ await expect(page.getByRole('link',{name:'이미지·백업 처리와 권리 요청',exact:true})).toHaveAttribute('href','/legal/service-operations-2026-10-19/');
  await expect(page.locator('#signup-guardian-notice')).toContainText('보호자와 함께');
  await expect(page.getByRole('checkbox')).toHaveCount(1);
  await expect(page.locator('form input,form select,form textarea')).toHaveCount(5);

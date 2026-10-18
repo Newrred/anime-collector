@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "timezone": "Asia/Tokyo",
+  "defect": "DF-01",
+  "taskIds": ["W09", "W14", "C03", "C05", "Q12", "Q17"],
+  "status": "APPROVED_PRODUCTION_GIT_DEPLOYMENT_AND_DATABASE_APPLICATION_COMPLETE",
+  "authorization": {
+    "userRequest": "후보981d13e 운영 적용 승인. 문서대로 push·배포·DB 반영",
+    "candidateCommit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "scope": "Exact candidate branch/CI, master Git/Vercel deployment, report function and migration ledger only",
+    "newHostedReportRowsApprovedOrCreated": false
+  },
+  "source": {
+    "repository": "Newrred/anime-collector",
+    "baseCommit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "productionCommit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "candidateBranch": "codex/df01-report-production-20261019",
+    "productionBranch": "master",
+    "masterUpdate": "FAST_FORWARD",
+    "originMasterReadback": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "verifiedSqlSourceCommit": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+    "sqlAndContractBlobsIdenticalToVerifiedSource": true,
+    "candidateFiles": 13,
+    "runtimeAppApiDependenciesAndWorkflowDiff": false,
+    "migrationSqlSha256": "145ecdefac5dfc0435e4ef16fc1e3b6ae1354e1e128152c7d7e0af1ce1c51161",
+    "productionHelperSha256": "49674db0a2eb2da1e689ad6862aa898de6b97548c96a05112159ac86645b3247"
+  },
+  "qualityGate": {
+    "workflow": "Service quality",
+    "runId": 39142736022,
+    "event": "workflow_dispatch",
+    "branch": "codex/df01-report-production-20261019",
+    "headSha": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/39142736022",
+    "createdAt": "2026-10-18T15:56:29Z",
+    "updatedAt": "2026-10-18T16:11:22Z",
+    "observedAt": "2026-10-18T16:11:32.800Z",
+    "jobs": [
+      {"name": "publication-contract", "id": 117720303147, "status": "completed", "conclusion": "success"},
+      {"name": "verify", "id": 117720302883, "status": "completed", "conclusion": "success"}
+    ],
+    "reportRegressionSteps": {
+      "tools/publication-boundary/run-local-postgres.sh": "success",
+      "tools/identity/run-public-signup-local.sh": "success"
+    },
+    "failureOnlyArtifactStepsSkippedAsExpected": true,
+    "masterPushDuplicateRun": {
+      "runId": 39143904413,
+      "observedAt": "2026-10-18T16:12:50.976Z",
+      "publicationContract": "success",
+      "verify": "in_progress",
+      "interpretation": "Redundant same-SHA push run at this observation; the complete approved exact-SHA quality gate above had already passed. No completion claim is made for this second run."
+    }
+  },
+  "deployment": {
+    "gitIntegration": "Vercel connected GitHub master",
+    "localCliProductionBuildOrPromotion": false,
+    "githubDeployment": {
+      "id": 7157184549,
+      "sha": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+      "environment": "Production",
+      "creator": "vercel[bot]",
+      "createdAt": "2026-10-18T16:12:31Z",
+      "status": "success",
+      "statusCreatedAt": "2026-10-18T16:12:32Z",
+      "url": "https://anime-collector-8ccmth2uz-newrreds-projects.vercel.app",
+      "observedAt": "2026-10-18T16:12:50.976Z"
+    },
+    "vercel": {
+      "id": "dpl_7LYZRTeLmZ6PZJzGJt9qtRNcQN4K",
+      "url": "https://vercel.com/newrreds-projects/anime-collector/7LYZRTeLmZ6PZJzGJt9qtRNcQN4K",
+      "status": "READY",
+      "environment": "Production",
+      "productionAlias": "www.moemoa.xyz",
+      "current": true,
+      "observationSource": "Executing root agent's in-app browser observation of Vercel; deployment success also recorded by GitHub Vercel status. Independent reviewer did not reconnect to Vercel."
+    },
+    "liveBuildInfo": {
+      "url": "https://www.moemoa.xyz/build-info.json",
+      "commit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+      "checkoutCommit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+      "builtAt": "2026-10-18T16:12:11.418Z",
+      "source": "vercel-git",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      }
+    }
+  },
+  "databaseApplication": {
+    "target": "okchpyagfucpzpyrfgol",
+    "environment": "production",
+    "migration": "20261018090000",
+    "releaseId": "MOEMOA_DF01_REPORT_PROD_20261019_01",
+    "verifiedSqlCandidate": "a6a63b687a8f29d748ffa8047a17e6d9f5826ee6",
+    "sourceCommit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "sqlSha256": "145ecdefac5dfc0435e4ef16fc1e3b6ae1354e1e128152c7d7e0af1ce1c51161",
+    "function": "public.submit_memory_report(text,uuid,text,uuid,text)",
+    "command": "python3 tools/publication-boundary/apply-partial-privacy-report-production.py --apply --expected-commit 981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "executionEnvironment": "WSL Ubuntu, exact approved checkout, existing production connection and verify-full TLS",
+    "mode": "APPLIED_AND_READ_BACK",
+    "state": "CANDIDATE_PRESENT",
+    "observedAt": "2026-10-18T16:13:29.132591+00:00",
+    "before": {
+      "functionBodySha256": "724a91fd4fdb97591b449cc55dedbf20b85746023e17f1840312bb6af00b8cf1",
+      "metadataSha256": "aa36896ae2bf60eec8d36749267a86ae5b42f9538664ee2758448b75d49b565d",
+      "settingsHash": "5bb899d6667f4fd86fd435abea263480",
+      "otherFunctionsHash": "f9771db3a9e45d53ae7341a4a7980c56",
+      "historyHash": "0812c49641a3de42c247d30b5e1222ab"
+    },
+    "after": {
+      "functionBodySha256": "b7b58512decade4d59ff4c993377778b0089d084023b55c77735bf3c937a7641",
+      "metadataSha256": "aa36896ae2bf60eec8d36749267a86ae5b42f9538664ee2758448b75d49b565d",
+      "settingsHash": "5bb899d6667f4fd86fd435abea263480",
+      "otherFunctionsHash": "f9771db3a9e45d53ae7341a4a7980c56",
+      "historyHash": "0812c49641a3de42c247d30b5e1222ab"
+    },
+    "exactFunctionAndReleaseLedgerVerified": true,
+    "prerequisitesMatch": true,
+    "authenticatedGranted": true,
+    "anonymousAndPublicDenied": true,
+    "metadataPreserved": true,
+    "settingsPreserved": true,
+    "otherFunctionsPreserved": true,
+    "otherMigrationHistoryPreserved": true,
+    "userDataWrites": false,
+    "writes": ["CREATE OR REPLACE report function", "Insert exact release migration ledger row"],
+    "rollback": {
+      "definitionPath": ".cache/df01-production-20261018T161327082881Z-rollback.sql",
+      "definitionSha256": "eede81fc8e11861bde71af4f7996865d76d8e7ce5a5f6790d13903f6587ed15a",
+      "metadataPath": ".cache/df01-production-20261018T161327082881Z-rollback.json",
+      "executed": false
+    }
+  },
+  "independentFinalReadback": {
+    "command": "python3 tools/publication-boundary/apply-partial-privacy-report-production.py --expected-commit 981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "mode": "READ_ONLY",
+    "state": "CANDIDATE_PRESENT",
+    "observedAt": "2026-10-18T16:13:39.638759+00:00",
+    "sourceCommit": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+    "releaseId": "MOEMOA_DF01_REPORT_PROD_20261019_01",
+    "allFingerprintsMatchApplicationAfterState": true,
+    "exactSourceLedgerMatch": true,
+    "authenticatedGranted": true,
+    "anonymousAndPublicDenied": true
+  },
+  "evidenceInputs": [
+    {"path": ".cache/df01-quality-approved-981d13e.json", "sha256": "48081764873d9be66b21d19beb1df81ed992d72568361f8cdd2b0d03c646b5f1"},
+    {"path": ".cache/df01-github-deployments.json", "sha256": "cba23eef05d1e0b4d87faa489c1dc0aeda76a7be75e8b1888efece7c7d3a6bba"},
+    {"path": ".cache/df01-production-live-build-info.json", "sha256": "577ca02c308fd49b2fc234092253b4e3f0943671fd258c5f42b8f58c55960873"},
+    {"path": ".cache/df01-production-applied.json", "sha256": "f10bfa4a551bbfad7efdab2782303b2768aaaa2a3968f8f8e63c64674969fc4e"},
+    {"path": ".cache/df01-production-final-readback.json", "sha256": "5967a5d30876c26db77fab45c2ccc2b8f14159a18f4e467e5ce9856198fdce47"}
+  ],
+  "verificationLimits": {
+    "localBehaviorEvidence": "2026-10-18-partial-privacy-report-fix.json; actual SQL reproduction and regression, not hosted user flow",
+    "testHostedMetadataEvidence": "2026-10-18-partial-privacy-report-test-application.json",
+    "productionHostedMetadata": "VERIFIED",
+    "newHostedReportRowOrBrowserReportingFlow": "NOT_EXECUTED",
+    "rawPrivateRowsOrImageBytesRead": false,
+    "newPolicyFlagsPermissionsQuotasOrAuthChanges": false,
+    "cleanWorkingTreeClaim": false,
+    "concurrentDDL": "Release lock does not serialize unrelated non-cooperating DDL",
+    "rollback": "Git revert alone does not revert committed DB function; uncertain outcome requires exact ledger/body read before retry"
+  },
+  "review": {
+    "scope": "Read-only comparison of recorded execution outputs, exact candidate blobs and local origin/master",
+    "result": "CONSISTENT_NO_BLOCKING_FINDING",
+    "reviewerRemoteActionsOrCredentialReads": false,
+    "canonicalWorkboardOwnedByExecutingAgent": true
+  },
+  "closure": "DF-01 approved production source deployment and function migration are complete. Do not describe the unexecuted hosted reporting UI as passed or treat the redundant master-push CI as a missing approval gate. Continue the current canonical workboard; other defects and legal work are not closed by this result."
+}
