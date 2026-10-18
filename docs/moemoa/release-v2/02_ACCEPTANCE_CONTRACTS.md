@@ -1,5 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 운영 신고 적용과 법률 고지 로컬 인수
+
+- C03/C05/Q12/Q17: 승인981d13e exact CI 두job·Git/Vercel/www·운영 함수/ledger/별도readback 완료. [운영 근거](evidence/2026-10-19-partial-privacy-report-production-application.json). 실제 hosted 신규 신고 UI는 미실행이며 로컬 SQL 행동/hosted metadata를 구분한다.
+- C02/C10·W17/D04/W14: 새 현재 안내와 고정 보충 문서의 KO/EN·가입/계정 링크를 구현했다. 구문서/receipt tuple·공개 revision·현재 국가/연령 불변. 합성 backend Chromium4개와 build34 PASS; 국외처리 필수표/법정 수령인/실제 조치 체계의 전체 완료는 아니다. [고지 근거](evidence/2026-10-19-legal-service-notices.json).
+
+
 ## 2026-10-19 DF-01 운영 후보 인수
 
 - 운영 read-only에서 원본 body/권한·인자/default·SECURITY DEFINER/빈 search_path와 실제 prerequisite ledger를 확인했다. 수정 이력은 없고 원격 master/live는 a65f557이다. 이 조회가 실제 신고 성공을 뜻하지 않는다.

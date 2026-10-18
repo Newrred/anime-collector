@@ -1,5 +1,8 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-19 최신:** 승인981d13e의 master/Vercel/www 동일 SHA와 운영 신고 함수20261018090000·독립 readback 완료. [운영 결과](docs/moemoa/reports/2026-10-19-partial-privacy-report-production-application.md). 이어 첨부 법률 검토를 현재 약관·개인정보·가입/계정 안내에 반영한 로컬 후보를 준비했다. 과거 수락 원문/정책/공개 revision 보존, Chromium 관련4개·build34 PASS. [법률 고지 보고](docs/moemoa/reports/2026-10-19-legal-service-notices.md). 새 고지는 아직 운영 미배포이며 정확 후보 승인 경계를 유지한다. 아래 후보/미적용은 당시 이력이다.
+
+
 > **2026-10-19 DF-01 운영 후보 준비 완료:** 정확 후보 `981d13e` (`codex/df01-report-production-20261019`). 운영 신고 함수는 재현 당시 old baseline이고 수정 이력은 없다. 새 읽기에서 origin/master와 www는 a65f557 일치. 현재 master 기준으로 검증한 SQL4파일과 운영 실행 도구·관련 문서만 후보에 담는다. [운영 후보·복귀·8항 보고](docs/moemoa/reports/2026-10-19-partial-privacy-report-production-candidate.md), [현재 단일 카드](docs/moemoa/release-v2/03_RELEASE_WORKBOARD.md#현재-작업-카드--새-파일-대신-이-위치를-갱신)를 우선한다. 이번은 read-only 대조/로컬 후보 준비이며 운영 migration·push·배포 승인은 아직 없다. 아래 ‘운영 후보 준비가 다음’은 이전 상태다.
 
 > **2026-10-18 DF-01 테스트 DB 적용 완료:** 승인 후보 a6a63b6의 `20261018090000`을 **moemoa-test에만** 반영했다. 함수·migration 이력과 별도 연결 readback, 기존 ACL/owner/인자·설정/다른 함수 보존 PASS. [적용 보고](docs/moemoa/release-v2/01_RELEASE_EXECUTION_PLAN.md#w09w14-df-01-테스트-적용--실행-8항-보고), [근거](docs/moemoa/release-v2/evidence/2026-10-18-partial-privacy-report-test-application.json). 다음 하나는 운영 현행 함수/이력 읽기 대조 후 이 수정만의 정확 운영 후보 준비다. 이번 운영/화면 배포·사용자 데이터 변경0, hosted UI 신고행 생성은 미실행. 아래 ‘테스트 적용 승인 대기’는 이전 상태다.

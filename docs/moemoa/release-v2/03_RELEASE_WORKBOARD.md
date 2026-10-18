@@ -1,5 +1,10 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-19 신고 운영 반영·법률 고지 구현
+
+승인981d13e Git/Vercel/운영DB 적용 완료. [운영 결과](../reports/2026-10-19-partial-privacy-report-production-application.md). 이어 첨부 법률 검토를 실제 안내 페이지/가입/계정 동선에 반영한 로컬 후보를 준비했다. [8항 보고](../reports/2026-10-19-legal-service-notices.md). 기존 M/W/C/Q/D를 유지하며 아래 과거 미반영 표시는 이력으로 보존한다.
+
+
 ## 2026-10-19 W09/W14 DF-01 운영 대조·후보 준비
 
 - 정확 운영 후보 `981d13e0eb7a60e6ce86838f821f71c84d1d518b`, `codex/df01-report-production-20261019`. 운영 기준 a65f557 위 최소13파일이며 원격 push/적용 전이다.
@@ -892,6 +897,20 @@
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
+현재 W: W09/W14 DF-01 운영 반영 완료; W17/D04·W14 법률 검토 서비스 고지 로컬 구현/검증 완료.
+운영: master/www981d13e; CI39142736022 두jobPASS; Vercel7LYZRTeLm READY; DB20261018090000/releaseMOEMOA_DF01_REPORT_PROD_20261019_01; 독립readback01:13:39JST PASS.
+법률 고지: /terms·/privacy 현재본문, /legal/service-operations-2026-10-19/ 보충 KO/EN, 가입/계정 링크. Vercel 이미지/GitHub 평문/주간증분/수동정리, 일반권리/한국임시조치/조건부TIDA 절차 반영.
+보존: 과거 고정10/10 약관·개인정보/10/11 공개고지, 가입tuple/publicrevision/receipt, KR14/US13/TH13·무료·일반공개. 자동메일/실자료쓰기0.
+검증: 법률 타깃 Chromium4개·build34·최종문안compile PASS. build병행중 hydration4실패→코드추가수정없이단독4PASS, 원문/정책불변hash 확인.
+한계: 새 법률고지는 로컬/미배포. 실제 Google·실제 긴급조치/통지·신고UI를 합성PASS로 대체하지 않음.
+법적 잔여: 공급자별 국외처리 필수표/계약범위·보관종료기준, 저작권 법정수령인/반복침해 종료, 운영자의 긴급접수/기한관리 실제연결.
+기존 잔여: DF-02 운영대조·quota라벨·사진진단·master보호·임계알림·전체복구 serving 유지.
+다음 행동 하나: 법률 고지의 정확 운영 후보를 검토·승인받아 Git 배포. 신고 후보 승인/완료를 다시 요구하지 않는다.
+```
+
+<details><summary>이전 현재 카드 — 10/19 DF-01 운영 후보 준비 직후</summary>
+
+```text
 현재 W: W09/W14 DF-01 운영 현행 대조·최소 운영 후보 준비 완료. 실제 운영은 old 함수 유지.
 운영 후보: 981d13e0eb7a60e6ce86838f821f71c84d1d518b; branch codex/df01-report-production-20261019; base a65f557e84659a0638ee44a8c4a911173dd554b2.
 포함: 검증 a6a63b6과 동일한 SQL4파일 + 운영전용helper1개 + 관련문서8개 = 13파일. UI/API/의존성/workflow 변경0.
@@ -902,6 +921,8 @@
 기존 잔여: DF-02 운영대조·quota라벨·고지·사진진단·master보호·임계알림·전체복구 serving 유지.
 다음 행동 하나: 정확 후보 981d13e 승인 후 branch CI두job→master Git/Vercel exact SHA→운영 함수1개/ledger1건 적용·별도readback. 준비 요청을 적용 승인으로 확대하지 않음.
 ```
+
+</details>
 
 <details><summary>이전 현재 카드 — 10/18 DF-01 테스트 적용 직후</summary>
 

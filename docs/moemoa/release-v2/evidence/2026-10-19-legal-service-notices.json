@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "taskIds": [
+    "W17",
+    "D04",
+    "W14"
+  ],
+  "status": "LOCAL_IMPLEMENTED_AND_TARGETED_BROWSER_VERIFIED_NOT_DEPLOYED",
+  "productionBase": "981d13e0eb7a60e6ce86838f821f71c84d1d518b",
+  "immutableSources": [
+    {
+      "path": "src/components/legal/Terms20261010.astro",
+      "sha256": "ddc41a109a9f2f1134a19040116f02d7d95ef0efa17fb71ec8f405ac0ccb1668",
+      "unchanged": true
+    },
+    {
+      "path": "src/components/legal/Privacy20261010.astro",
+      "sha256": "2545a9d0589ce3c33e96d406eb894f1287b76c5bff7ad26cb5adc05e1a1f3b04",
+      "unchanged": true
+    },
+    {
+      "path": "src/pages/legal/public-sharing-2026-10-11.astro",
+      "sha256": "72ffbcf83af732bba65c43d77096cd02b47f0c76c55f0d77ebb002b9949dfe5b",
+      "unchanged": true
+    },
+    {
+      "path": "src/features/auth/signupDocuments.js",
+      "sha256": "a6f8bce87185be3ff80e5b2f4f61cc62a120fed345d8b1ac9ca152cfb3a54756",
+      "unchanged": true
+    },
+    {
+      "path": "src/features/memory/domain/publicSharingPolicy.js",
+      "sha256": "cf05ecab56a7ad770fb34b4364a2a303be7627b148af98587769b70b98e5b8ca",
+      "unchanged": true
+    }
+  ],
+  "contractualTermsBodyUnchanged": true,
+  "sourceFiles": [
+    {
+      "path": "src/components/legal/TermsCurrent.astro",
+      "lfSha256": "e8bd64b4d63d1ce8394f2f9779cf3ed3ecc2df3cf9864f13c929e2d427a7d66a"
+    },
+    {
+      "path": "src/components/legal/PrivacyCurrent.astro",
+      "lfSha256": "b2b60337230b54e09d6c5ca8c5ec3c7cd3eecd23b9db79695d34d216ebc451a0"
+    },
+    {
+      "path": "src/components/legal/ServiceOperationsNotice20261019.astro",
+      "lfSha256": "83dbfe9dd23de142bc65e0d52d8d1f60f8c36e4fc8b649f4aed29c48f52be04e"
+    },
+    {
+      "path": "src/pages/legal/service-operations-2026-10-19.astro",
+      "lfSha256": "faa65c4bccd9335fc5a3ecd8c54fe10183bc189ce82e3ab1a0c89ba68ae03916"
+    },
+    {
+      "path": "src/pages/terms.astro",
+      "lfSha256": "ac02b6b78887c87ba2a41709e6ad64949653e0ecb7a4ebc0110ac84c52103677"
+    },
+    {
+      "path": "src/pages/privacy.astro",
+      "lfSha256": "4aa89342cfbfe076ab3acb1a6474f16cba7523cc4bdd79ee8f65e00745b7258d"
+    },
+    {
+      "path": "src/components/auth/SimpleSignup.jsx",
+      "lfSha256": "05ce3134c0a7e59ee706d509f90504e03445f6bc42657501915c0b18111fed38"
+    },
+    {
+      "path": "src/components/data/AccountPrivacyPanel.jsx",
+      "lfSha256": "2aa007e2acb37e8a49644d23231de772ee9d92d2554dc33ac1d388a2bd8d00f9"
+    },
+    {
+      "path": "tests/account-privacy.spec.ts",
+      "lfSha256": "9336ea13fbcd27f5807daae60d6354aae100d5d7fb1966375cd586b2be494b2d"
+    },
+    {
+      "path": "tests/simple-signup.spec.ts",
+      "lfSha256": "d2daa77d9f3f5dfc398bf13318aa960f489630ce7a0f0f993e12eb4625c2e4a7"
+    }
+  ],
+  "validation": {
+    "build": {
+      "command": "npm run build",
+      "pages": 34,
+      "result": "PASS",
+      "log": ".cache/legal-notice-build-20261019.log",
+      "note": "Final additional liability sentence compiled separately with @astrojs/compiler."
+    },
+    "browser": {
+      "command": "node scripts/run-simple-signup-e2e.mjs --grep 'own receipt history|current legal notices|production PH teen guidance|new PH test documents'",
+      "passed": 4,
+      "failed": 0,
+      "result": "PASS",
+      "log": ".cache/legal-notice-e2e-20261019-isolated.log",
+      "scope": "Isolated Chromium with synthetic account/signup backend, 320/1440px; original receipt links, current notices, unchanged single checkbox and policy tuple, no account mutation",
+      "notProven": [
+        "real Google signup",
+        "real notification delivery",
+        "actual urgent removal",
+        "production notice deployment"
+      ]
+    },
+    "intermediateFailure": {
+      "log": ".cache/legal-notice-e2e-20261019-final.log",
+      "failed": 4,
+      "observation": "Concurrent build/dev run produced empty hydrated main and missing account/signup controls. No app fix was made; rerun alone passed4. Suspected shared Astro build/cache interaction, not proven.",
+      "preserved": true
+    },
+    "diffCheck": "PASS"
+  },
+  "effects": {
+    "database": false,
+    "signupTuple": false,
+    "publicRevision": false,
+    "oldReceipts": false,
+    "countriesOrMinimumAges": false,
+    "externalMail": false,
+    "production": false
+  },
+  "remaining": [
+    "Provider-specific actual processing countries, retention/end criteria and applicable plan/contract scope are not a completed statutory international-transfer table.",
+    "Korean statutory copyright recipient/public contact and repeat-infringement account-termination implementation remain open.",
+    "Operator mailbox monitoring, time tracking and actual notification/removal are operational duties, not proven by page tests."
+  ],
+  "next": "Prepare bounded exact-source production candidate; remote push/deploy only after exact candidate approval under the user 10/11 instruction."
+}
