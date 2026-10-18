@@ -1,5 +1,7 @@
 # MOEMOA 운영 설정 지도
 
+> **2026-10-18 현재 안내:** 이 문서는 과거 날짜별 설정 snapshot이다. 현행 Public 운영·주간 예약 성공·환경/키의 역할은 [현재 개발·운영 안내](CURRENT_RELEASE_AND_OPERATIONS_GUIDE.md)를 먼저 읽는다. 아래 키 미보관/전체 DB 복원 대기/Public off는 당시 이력이며 현재 미완료로 재등록하지 않는다. 실제 작업 상태는 기존 release-v2/03 하나에서 관리한다.
+
 > **역사적 설정 기록 주의(2026-10-10):** 아래 각 시점의 '가입 schema 미설치/off', Analytics 기본 on, `admission_enabled=false` 복귀 설명은 현행 실행 지시가 아니다. 현재 KR14/US13/TH13 가입 schema·정책은 운영 활성, 공통 방문 분석은 제거됐다. 가입 pause는 `enabled=false`와 **admission=true 유지**로 직접 OAuth 우회를 차단한다. 실제 최신 설정/배포는 [가입 운영 보고](../release-v2/2026-10-10-first-signup-ui-release.md), [최신 배포 보고](../release-v2/2026-10-10-latest-production-release.md), [Pro 인덱스](../release-v2/2026-10-10-pro-review-index.md)를 우선한다. 본문은 이전 근거를 보존하며 이번 작업에서 DB/설정을 바꾸지 않았다.
 
 > **2026-10-10 D05 외부 사본 회수 검증:** 기존 Drive 다운로드 ZIP918,803,598bytes의 SHA256이 승인 업로드 원본과 일치했다. 새 비공개 quarantine에서 AES-GCM4,308파일/917,084,869bytes 인증·해시·크기 일치 PASS, PG17 클라이언트로 복원 dump 목차 읽기 PASS. 합성 안전검사6PASS. 이는 DB 재가동/삭제 재노출 방지 PASS가 아니다. 사용자 확인: 복구키는 아직 이 PC에만 있음. 로컬 PG17 서버는 있으나 pg_cron/supabase_vault 확장 부재로 전체 운영 dump import 미실행. 회전/RPO/RTO·최신 삭제 대조도 미완료, D05 PARTIAL 유지. 운영 DB/master/Public/추가 전송 변경0. 다음1개는 필요한 확장을 갖춘 격리 복구 환경에서 DB 재가동과 최신 삭제 대조 준비. 아래 기록은 각 실행 당시의 근거다.

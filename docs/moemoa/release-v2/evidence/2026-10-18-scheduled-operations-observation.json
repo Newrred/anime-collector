@@ -1,0 +1,341 @@
+{
+  "observedAtUtc": "2026-10-18T08:10:24.512708+00:00",
+  "scope": "Read-only GitHub public metadata, job-step outcome and public production build identity; no dispatch, secret access, Drive read or database access.",
+  "weeklyScheduleRunCount": 1,
+  "weekly": [
+    {
+      "id": 39065955924,
+      "head_sha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-17T20:15:40Z",
+      "updated_at": "2026-10-17T20:20:18Z",
+      "html_url": "https://github.com/Newrred/anime-collector/actions/runs/39065955924",
+      "jobs": [
+        {
+          "id": 117493548245,
+          "name": "backup",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-17T20:15:44Z",
+          "completed_at": "2026-10-17T20:20:18Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-17T20:15:45Z",
+              "completed_at": "2026-10-17T20:15:46Z"
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-17T20:15:46Z",
+              "completed_at": "2026-10-17T20:16:00Z"
+            },
+            {
+              "name": "Resolve separately approved scheduled or manual admission",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-17T20:16:00Z",
+              "completed_at": "2026-10-17T20:16:00Z"
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-17T20:16:00Z",
+              "completed_at": "2026-10-17T20:16:08Z"
+            },
+            {
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-10-17T20:16:08Z",
+              "completed_at": "2026-10-17T20:16:12Z"
+            },
+            {
+              "name": "Prepare isolated backup tools",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-10-17T20:16:12Z",
+              "completed_at": "2026-10-17T20:16:18Z"
+            },
+            {
+              "name": "Capture encrypted delta and commit authenticated checkpoint",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-17T20:16:18Z",
+              "completed_at": "2026-10-17T20:20:15Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12,
+              "started_at": "2026-10-17T20:20:15Z",
+              "completed_at": "2026-10-17T20:20:15Z"
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-10-17T20:20:15Z",
+              "completed_at": "2026-10-17T20:20:15Z"
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14,
+              "started_at": "2026-10-17T20:20:15Z",
+              "completed_at": "2026-10-17T20:20:15Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15,
+              "started_at": "2026-10-17T20:20:15Z",
+              "completed_at": "2026-10-17T20:20:15Z"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "maintenance": [
+    {
+      "id": 39096810474,
+      "head_sha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-18T04:21:35Z",
+      "updated_at": "2026-10-18T04:21:53Z",
+      "html_url": "https://github.com/Newrred/anime-collector/actions/runs/39096810474",
+      "jobs": [
+        {
+          "id": 117584869758,
+          "name": "cleanup",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-18T04:21:38Z",
+          "completed_at": "2026-10-18T04:21:53Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-18T04:21:39Z",
+              "completed_at": "2026-10-18T04:21:40Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-18T04:21:40Z",
+              "completed_at": "2026-10-18T04:21:44Z"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-18T04:21:44Z",
+              "completed_at": "2026-10-18T04:21:44Z"
+            },
+            {
+              "name": "Clean retired images and refresh observed capacity",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-18T04:21:44Z",
+              "completed_at": "2026-10-18T04:21:50Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-18T04:21:50Z",
+              "completed_at": "2026-10-18T04:21:50Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-10-18T04:21:50Z",
+              "completed_at": "2026-10-18T04:21:50Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-18T04:21:50Z",
+              "completed_at": "2026-10-18T04:21:50Z"
+            }
+          ]
+        },
+        {
+          "id": 117584870430,
+          "name": "phone-test-cleanup",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-18T04:21:36Z",
+          "completed_at": "2026-10-18T04:21:36Z",
+          "steps": []
+        }
+      ]
+    },
+    {
+      "id": 39067003984,
+      "head_sha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-17T20:30:31Z",
+      "updated_at": "2026-10-17T20:30:48Z",
+      "html_url": "https://github.com/Newrred/anime-collector/actions/runs/39067003984",
+      "jobs": [
+        {
+          "id": 117496644549,
+          "name": "cleanup",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-10-17T20:30:34Z",
+          "completed_at": "2026-10-17T20:30:48Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-10-17T20:30:34Z",
+              "completed_at": "2026-10-17T20:30:35Z"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-10-17T20:30:35Z",
+              "completed_at": "2026-10-17T20:30:39Z"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-10-17T20:30:39Z",
+              "completed_at": "2026-10-17T20:30:40Z"
+            },
+            {
+              "name": "Clean retired images and refresh observed capacity",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-10-17T20:30:40Z",
+              "completed_at": "2026-10-17T20:30:46Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-10-17T20:30:46Z",
+              "completed_at": "2026-10-17T20:30:46Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-10-17T20:30:46Z",
+              "completed_at": "2026-10-17T20:30:46Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-10-17T20:30:46Z",
+              "completed_at": "2026-10-17T20:30:46Z"
+            }
+          ]
+        },
+        {
+          "id": 117496645465,
+          "name": "phone-test-cleanup",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-10-17T20:30:32Z",
+          "completed_at": "2026-10-17T20:30:31Z",
+          "steps": []
+        }
+      ]
+    }
+  ],
+  "scheduledTimeJst": "2026-10-18T03:00:00+09:00",
+  "masterSha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+  "liveBuild": {
+    "commit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "checkoutCommit": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "source": "vercel-git",
+    "builtAt": "2026-10-14T03:20:42.693Z"
+  },
+  "liveMatchesMaster": true,
+  "weeklyResultLog": {
+    "read": false,
+    "httpStatus": 403,
+    "limit": "Public metadata and actual capture/checkpoint step success verified; archive bytes and Drive content not read."
+  },
+  "limits": [
+    "A successful scheduled capture/checkpoint job is not a restore-serving drill or RPO/RTO guarantee.",
+    "No new storage totals or quota-threshold notification delivery measured.",
+    "The original 03:00 schedule started later; no schedule change performed."
+  ],
+  "branchProtectionObservation": {
+    "observedAtUtc": "2026-10-18T08:17:37.336828+00:00",
+    "branch": "master",
+    "sha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "protected": false,
+    "scope": "Public branch API only; no settings mutation."
+  },
+  "catalogHealth": {
+    "id": 39084974960,
+    "event": "schedule",
+    "head_sha": "a65f557e84659a0638ee44a8c4a911173dd554b2",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-18T01:02:04Z",
+    "updated_at": "2026-10-18T01:02:41Z",
+    "html_url": "https://github.com/Newrred/anime-collector/actions/runs/39084974960",
+    "scope": "Run metadata only; job steps not inspected."
+  },
+  "localTestServerEnvAcl": {
+    "file": ".env.moemoatest.server.local",
+    "ownerUnchanged": true,
+    "inheritanceBlocked": true,
+    "broadAllowCount": 0,
+    "matchesProductionTemplate": true,
+    "readableAfter": true,
+    "contentsChanged": false,
+    "previousAclBackup": ".cache/pc-handoff-20261018-test-server-acl.sddl",
+    "scope": "Local file permission only; no secret values or remote permissions recorded."
+  }
+}
