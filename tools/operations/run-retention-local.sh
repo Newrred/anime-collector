@@ -20,4 +20,7 @@ sed '/^create extension /d; /^select cron.schedule(/,$d' "$root/supabase/migrati
 "${psql[@]}" -f "$work/existing.sql" >/dev/null
 "${psql[@]}" -f "$root/tools/operations/retention-response-contract.sql" > "$work/results.log" 2>&1 || { cat "$work/results.log"; exit 1; }
 grep 'PASS:' "$work/results.log"
+python3 "$root/tools/operations/prepare-retention-response-release-fixture.py" > "$work/production-release.sql"
+"${psql[@]}" -f "$work/production-release.sql" > "$work/production-results.log" 2>&1 || { cat "$work/production-results.log"; exit 1; }
+grep 'PASS:' "$work/production-results.log"
 echo 'LOCAL candidate only; no hosted mutation or scheduler execution.'

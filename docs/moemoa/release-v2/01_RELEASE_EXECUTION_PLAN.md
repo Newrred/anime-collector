@@ -1,6 +1,30 @@
 # MOEMOA · 공개 서비스 첫 출시 ExecPlan v2
 
+## W17/D05·D06 DF-02 운영 대조와 최소 후보 — 2026-10-19
+
+1. **목적/승인:** 사용자 “DF-02 삭제된 기록의 동기화 응답 사본 정리, 운영 상태 대조하고 필요한 수정 후보 준비”에 따라 운영은 읽기 전용으로 대조하고 최소 적용 후보를 준비한다.
+2. **결정:** 기존30일 entity 정리·owner 경계·operation 중복 방지·주간 백업·현재 법률 고지 유지. 새 TTL/전체 operation 삭제를 만들지 않는다.
+3. **근거:** 기존 ebdff44 SQL/12검사·test release MOEMOA_RETENTION_RESPONSE_TEST_20261010_01·10/18 인수보고와 실제 운영 함수/ACL/예약/집계를 대조한다.
+4. **범위:** 기존 후보 재사용, metadata/집계 읽기 도구·version-controlled migration 후보·관련 안전 검사·기존 문서와 증거.
+5. **흐름:** prod/test baseline 및 원격 master/live 확인→차이와 대상 수 집계→필요 후보/영향/복귀 준비→타깃 로컬 검증→정확 SHA 인계.
+6. **파일:** tools/operations/*retention*, 기존20260902055512 migration, 새 DF-02 migration 후보, 기존 release-v2/01~03·시작문서·보고/증거.
+7. **데이터:** 사용자 본문·ID·사진·cron 명령/오류 출력0. 운영 read-only transaction과 TLS verify-full. 이 작업은 purge 실행·DDL·ledger 쓰기를 포함하지 않는다.
+8. **마일스톤:** 실제 함수/이력/권한 판정→현재/다음 예약의 정리 대상 집계→검증된 최소 후보와 명시적 비가역 경계.
+9. **검증:** 기존12항목의 해당 SQL 실행·재시도/활성/최근/타계정 보존, 조회 도구 읽기/출력 제한, migration과 기존 검증 SQL 동일 본문 확인. 전체 Web 재검사 불필요.
+10. **보안/권리:** 원본·보관 중 entity·operationId/hash/status 유지. 제거된 응답 본문은 함수 원복으로 복구되지 않는다는 사실을 명시한다.
+11. **관측:** 본문 없는 집계·함수/ACL 지문·적용 이력 존재·예약 상태/최근 시각만 기록.
+12. **복귀:** 원래 함수 정의/ACL 보존, 적용 전 정확 baseline 재확인. 함수 복귀와 이미 정리된 본문 복원은 구분하며 보관 중 데이터/DB 전체 복원으로 삭제 본문을 되살리지 않는다.
+13. **위험:** 실제 함수 차이/알 수 없는 entity type이면 자동 적용 중단. 집계는 조회 시점이며 다음 예약 전 바뀔 수 있다. 대상 수0도 미래 정리의 비가역 경계를 없애지 않는다.
+14. **결정 게이트:** 후보 준비는 승인됨. 운영 migration·수동 purge·master push/배포는 이 후보의 정확 범위와 영향 승인 후 별도 실행한다.
+15. **진행:** 운영 원본/test 승인 함수·같은ACL, 기존예약 정상, 운영 고아본문0/활성38/삭제대기12·30일초과entity0 확인. 기존 SQL 동일 migration과 exact SHA 적용기/조회기 준비, 로컬 SQL15·안전7·동기화26 PASS. 초기 복귀 fixture의 CRLF 재구성 실패는 실제 캡처 정의 복귀로 수정해 검증했으며 운영 쓰기0.
+16. **발견:** 기존 정리는5종 owner entity의 실제 부재를 기준으로 remoteEntity만 null 처리한다. operation 생성일 일괄30일 TTL이 아니다.
+17. **완료 보고:** [8항 보고·영향·복귀](../reports/2026-10-19-df02-production-candidate.md), [실제 지문/집계](evidence/2026-10-19-df02-production-candidate.json). 정확 후보는 단일 작업판 현재 카드에 결속하며 다음 하나는 이 운영 후보 승인이다. 운영 DDL/수동purge/배포는 미실행.
+
 ## W17/D04·W14 법률 검토안 서비스 고지 반영 — 2026-10-19
+
+> **운영 완료:** 승인3e1f9f3의 CI39146108987 두 job SUCCESS→master981d13e에서 fast-forward→Vercel6Ekgdu8FU READY/Production/Current www→실제 build-info3e1f9f3/source vercel-git·semanticMatch 확인. 7개 공개 URL200, 고정 원문3개 raw HTML/본문 지문 불변, 실제 약관→보충 안내 및 가입→현재 개인정보 읽기 링크 확인. DB/환경/동의/메일 쓰기0. [실행 8항 보고](../reports/2026-10-19-legal-service-notices-production.md)와 [근거](evidence/2026-10-19-legal-service-notices-production.json). 아래 후보 준비와 승인 전 상태는 이력이며 이 후보의 승인 재요청은 없다.
+
+> **운영 실행 승인 — 2026-10-19:** 사용자가 정확 후보 `3e1f9f3553f9a03d22670ef2edbfe48f8914414b`에 “이 후보 운영 적용 승인”했다. 후보 branch push→동일 SHA Service quality 두 job→현재 master981d13e 확인 후 fast-forward→Vercel Git/Production/www 동일 SHA→현재 고지/고정 원문/가입 링크 읽기 확인 순서로 실행한다. 새 DB·설정·수락·발송은 없으며 후보 소스는 바꾸지 않는다. 실패 시 master 반영 전 중단하거나 해당 고지 변경만 복귀하는 기존 절차를 따른다.
 
 1. **목적/승인:** 사용자 “첨부했었던 약정, 법률등도 서비스 약관 등에 반영”에 따라 첨부검토안을 실제 서비스 약관/개인정보/공개정책과 대조하고 반영한다. 이미승인981d13e 신고배포는 별도그대로 마감한다.
 2. **결정:** KR14/US13/TH13·무료·일반공개·기존권리gate·주간증분/확정복구기준과 과거수락원문불변. 새국가축소/신분증/유료계약/자동메일/삭제기간을 임의확정하지 않는다.
@@ -18,7 +42,7 @@
 14. **결정:** 이번실서비스문서구현은승인됨. 자료의미결중 실제필요한값만 구체후보를준비한뒤질문. 새정확운영후보는기존10/11경계유지.
 15. **진행:** 신고981d13e 운영 마감 후 최신 약관/개인정보 본문·별도 KO/EN 처리/권리 안내·가입/계정 링크를 구현했다. 고정 원문3개와 정책 mapper/public revision 불변, 기존 Terms 본문 동일. Chromium4개·build34 PASS. 중간 build 병행 시 빈 hydration4실패 후 단독 재실행4PASS도 근거에 보존한다.
 16. **발견:** 첨부38개미결값/새보관기한/자동메일은 확정 사실이 아니다. 가입 tuple 단독교체는 기존회원 새 게시를 제한하고, public revision 교체는 구 공개물 reader를 가릴 수 있다. 이번은 현재 처리 사실·권리 요청 보충 안내로 반영하며 그 값을 바꾸지 않는다.
-17. **완료:** [8항 보고](../reports/2026-10-19-legal-service-notices.md)와 [검사/원문 지문](evidence/2026-10-19-legal-service-notices.json). 새 고지 운영 적용은 정확 후보 승인 후이며 법적 적합성 전체 완료로 처리하지 않는다.
+17. **완료:** [8항 보고](../reports/2026-10-19-legal-service-notices.md)와 [검사/원문 지문](evidence/2026-10-19-legal-service-notices.json). 정확 운영 후보3e1f9f3553f9a03d22670ef2edbfe48f8914414b는 부모981d13e에 앱8·검사2·문서/보존원문50파일만 이식했으며 검증c285ca1의 앱/검사 blob와 모두 동일하다. 새 고지 운영 적용은 이 후보 승인 후이며 법적 적합성 전체 완료로 처리하지 않는다.
 
 ## W09/W14 DF-01 승인 후보 운영 실행 — 2026-10-19
 
