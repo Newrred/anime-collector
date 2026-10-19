@@ -48,6 +48,7 @@
 .admin-limits thead th { color: var(--text-secondary); font-weight: 500; background: var(--bg-surface-2); }
 .admin-limits th:first-child { text-align: left; padding-left: 0; min-width: 130px; max-width: 240px; overflow-wrap: anywhere; }
 .admin-limits tbody th { font-weight: 500; }
+.admin-limits .admin-limit-scope { text-align: left; white-space: nowrap; }
 .admin-limits th:last-child, .admin-limits td:last-child { padding-right: 0; }
 .admin-sections > .admin-usage { padding-block: 8px; }
 .admin-usage > details > summary { font-weight: 600; }

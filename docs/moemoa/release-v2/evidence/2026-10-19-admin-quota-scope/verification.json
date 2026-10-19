@@ -1,0 +1,108 @@
+{
+  "status": "LOCAL_VERIFIED_NOT_DEPLOYED",
+  "date": "2026-10-19",
+  "baseDevelopmentCommit": "2d37e7e572694a450cf98e665822f60fd6e3ba4e",
+  "productionCommitUnchanged": "724eaddb252db6ee00ba272f10ee5c6940151330",
+  "codeFiles": [
+    "src/components/AdminDashboard.jsx",
+    "src/styles/admin.css",
+    "tests/admin-ui.spec.ts"
+  ],
+  "displayScopes": {
+    "service": [
+      "IMAGE_DELIVERY",
+      "IMAGE_DELIVERY_BYTES"
+    ],
+    "knownAccountScopes": 10,
+    "unknown": "Unspecified",
+    "policyChanges": 0
+  },
+  "verification": {
+    "adminUnitPassed": 8,
+    "builtBrowserPassed": 4,
+    "browserRetries": 0,
+    "languages": [
+      "ko",
+      "en"
+    ],
+    "viewports": [
+      1440,
+      320
+    ],
+    "tableColumns": 6,
+    "serviceRows": 2,
+    "accountRows": 10,
+    "keyboardHorizontalScroll": true,
+    "scopeHeaderFullyInViewport": true,
+    "documentOverflow": false,
+    "usageAndLimitFormatsPreserved": [
+      "2 MiB",
+      "100 MiB"
+    ],
+    "guestAndNonOperatorBoundariesVerified": true,
+    "normalBuildPages": 34,
+    "mockBuildPages": 34,
+    "realOperatorOrDatabaseWrites": 0,
+    "normalLocalDevHttp": 200
+  },
+  "reactDoctor": {
+    "version": "0.9.18",
+    "before": {
+      "errorCount": 0,
+      "warningCount": 8,
+      "affectedFileCount": 1,
+      "totalDiagnosticCount": 8,
+      "score": null,
+      "scoreLabel": null
+    },
+    "after": {
+      "errorCount": 0,
+      "warningCount": 8,
+      "affectedFileCount": 1,
+      "totalDiagnosticCount": 8,
+      "score": null,
+      "scoreLabel": null
+    },
+    "changed": {
+      "errorCount": 0,
+      "warningCount": 0,
+      "affectedFileCount": 0,
+      "totalDiagnosticCount": 0,
+      "score": null,
+      "scoreLabel": null
+    },
+    "matchedBefore": 8,
+    "newCount": 0,
+    "score": "not measured; external score API disabled",
+    "flags": "latest CLI current --scope changed --base baseline --verbose; offline no-supply-chain/no-telemetry; dependencies unchanged"
+  },
+  "screenshots": [
+    {
+      "file": "ko-desktop.png",
+      "bytes": 57080,
+      "sha256": "75d4a538331f7efcbfc36235c5f1ecd290ff2a36445541659e754a6c47931ee4"
+    },
+    {
+      "file": "ko-320.png",
+      "bytes": 28731,
+      "sha256": "fbaf2d928edb421dc929af39b59a5fb5f35f2dc291ec96a4aa79ed3bb3aa35e4"
+    },
+    {
+      "file": "en-desktop.png",
+      "bytes": 58706,
+      "sha256": "66cc8a9cf199af087a73d838f4a376dccd472e2a894d3a9b1139651ddc9d2c6d"
+    },
+    {
+      "file": "en-320.png",
+      "bytes": 29550,
+      "sha256": "f5b734533035086b81606891eeaf49985f919160494b5a6c6f4f29e2707265af"
+    }
+  ],
+  "limitations": [
+    "Default dev-based browser runner timed out before cases started twice on this PC; not reported as a passing default suite",
+    "Same source built with synthetic loopback settings; original four selected browser tests ran unchanged with retries0",
+    "Other admin/auth-callback browser cases not executed successfully in this task",
+    "Only synthetic screenshots; no actual account/login/session transfer",
+    "No production deployment, DB/schema/flags/quota/permission/dependency changes"
+  ]
+}

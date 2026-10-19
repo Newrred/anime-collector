@@ -113,24 +113,55 @@ test('admin works with Public off, shows linked documents, and fits desktop and 
   await expect(page.getByRole('link', {name: 'terms-2026-10-10-test', exact: true})).toHaveAttribute('href', '/legal/terms-2026-10-10-test/');
   await page.locator('.admin-usage summary').focus(); await page.keyboard.press('Enter');
   await expect(page.locator('.admin-limits tbody tr')).toHaveCount(12);
+  await expect(page.locator('.admin-limits thead th[scope="col"]')).toHaveCount(6);
+  await expect(page.getByRole('columnheader', {name: '한도 적용 범위', exact: true})).toBeVisible();
+  await expect(page.getByRole('columnheader', {name: '일일 한도', exact: true})).toBeVisible();
+  await expect(page.getByRole('columnheader', {name: '보유 한도', exact: true})).toBeVisible();
+  await expect(page.locator('.admin-limits td.admin-limit-scope').filter({hasText: /^서비스 전체$/})).toHaveCount(2);
+  await expect(page.locator('.admin-limits td.admin-limit-scope').filter({hasText: /^계정별$/})).toHaveCount(10);
+  await expect(page.getByRole('row', {name: /사진 불러오기/})).toContainText('서비스 전체');
+  await expect(page.getByRole('row', {name: /사진 전송량/})).toContainText('서비스 전체');
+  await expect(page.getByRole('row', {name: /사진 저장 시도/})).toContainText('계정별');
+  await expect(page.getByRole('row', {name: /연결 기기/})).toContainText('계정별');
   await expect(page.getByRole('row', {name: /사진 전송량/})).toContainText('2 MiB');
   await expect(page.getByRole('row', {name: /사진 전송량/})).toContainText('100 MiB');
   await page.locator('.admin-table-scroll').focus(); await expect(page.locator('.admin-table-scroll')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => page.locator('.admin-table-scroll').evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+  await page.getByRole('columnheader', {name: '한도 적용 범위', exact: true}).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('columnheader', {name: '한도 적용 범위', exact: true})).toBeInViewport({ratio: 1});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-mobile.png')});
   await page.setViewportSize({width: 1440, height: 1000});
   await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-desktop.png')});
 });
 
-test('English labels keep detailed usage out of the overview and accessible on mobile', async({page}) => {
+test('English labels keep detailed usage out of the overview and accessible on mobile', async({page}, info) => {
   await page.setViewportSize({width: 320, height: 780});
   await setup(page, {locale: 'en', detailed: true});
   await expect(page.getByRole('heading', {name: 'Accounts', exact: true})).toBeVisible();
   await expect(page.locator('.admin-countries')).toContainText('United States');
   await page.locator('.admin-usage summary').click();
-  await expect(page.getByRole('columnheader', {name: 'Daily limit per account', exact: true})).toBeVisible();
+  await expect(page.getByRole('columnheader', {name: 'Daily limit', exact: true})).toBeVisible();
+  await expect(page.getByRole('columnheader', {name: 'Live limit', exact: true})).toBeVisible();
+  await expect(page.getByRole('columnheader', {name: 'Limit scope', exact: true})).toBeVisible();
+  await expect(page.locator('.admin-limits td.admin-limit-scope').filter({hasText: /^Entire service$/})).toHaveCount(2);
+  await expect(page.locator('.admin-limits td.admin-limit-scope').filter({hasText: /^Per account$/})).toHaveCount(10);
+  await expect(page.getByRole('row', {name: /Image requests/})).toContainText('Entire service');
+  await expect(page.getByRole('row', {name: /Image delivery bytes/})).toContainText('Entire service');
+  await expect(page.getByRole('row', {name: /Image save attempts/})).toContainText('Per account');
+  await expect(page.getByRole('row', {name: /Connected devices/})).toContainText('Per account');
   await expect(page.getByRole('row', {name: /Image delivery bytes/})).toContainText('2 MiB');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('.admin-table-scroll').focus();
+  await expect(page.locator('.admin-table-scroll')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => page.locator('.admin-table-scroll').evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+  await page.getByRole('columnheader', {name: 'Limit scope', exact: true}).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('columnheader', {name: 'Limit scope', exact: true})).toBeInViewport({ratio: 1});
+  await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-mobile-en.png')});
+  await page.setViewportSize({width: 1440, height: 1000});
+  await page.locator('.admin-usage').screenshot({path: info.outputPath('admin-limits-desktop-en.png')});
 });
 
 test('initial setup is not described as a paused release', async({page}) => {
