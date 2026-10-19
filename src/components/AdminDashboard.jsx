@@ -17,6 +17,7 @@ const scopeLabels = {
   FOLLOW_WRITE: ['팔로우', 'Following'], IMAGE_ATTEMPT: ['사진 저장 시도', 'Image save attempts'],
   IMAGE_DELIVERY: ['사진 불러오기', 'Image requests'], IMAGE_DELIVERY_BYTES: ['사진 전송량', 'Image delivery bytes'],
 };
+const serviceWideLimitScopes = new Set(['IMAGE_DELIVERY', 'IMAGE_DELIVERY_BYTES']);
 const errorCopy = {
   ADMIN_REQUIRED: ['이 계정에는 운영 권한이 없습니다.', 'This account does not have admin access.'],
   ADMIN_REVISION_CONFLICT: ['다른 곳에서 설정이 바뀌었습니다. 최신 상태를 확인한 뒤 다시 선택해 주세요.', 'Settings changed elsewhere. Review the refreshed status before choosing again.'],
@@ -39,6 +40,8 @@ function Workspace({status, ko, base}) {
   const number = value => value.toLocaleString(ko ? 'ko-KR' : 'en-US');
   const bytes = value => `${(value / 1024 / 1024).toLocaleString(ko ? 'ko-KR' : 'en-US', {maximumFractionDigits: 1})} MiB`;
   const usageValue = (scope, value) => scope === 'IMAGE_DELIVERY_BYTES' ? bytes(value) : number(value);
+  const limitScope = scope => serviceWideLimitScopes.has(scope) ? t('서비스 전체', 'Entire service')
+    : Object.hasOwn(scopeLabels, scope) ? t('계정별', 'Per account') : t('범위 미확인', 'Unspecified');
   const time = value => new Date(value).toLocaleString(ko ? 'ko-KR' : 'en-GB');
   const cancel = () => { setConfirmation(null); triggerRef.current?.focus(); };
   const publicOn = data && Object.values(data.publication).filter(Boolean).length;
@@ -110,12 +113,13 @@ function Workspace({status, ko, base}) {
         {data.audit.length > 0 && <p className="admin-muted">{t('최근 20건', 'Latest 20 changes')}</p>}
       </section>
       <section className="admin-usage" aria-labelledby="admin-costs-heading"><details><summary id="admin-costs-heading">{t(`사용량·한도 ${data.costs.policies.length}개 항목`, `Usage and limits · ${data.costs.policies.length} items`)}</summary>
-        <p className="admin-muted">{t('오늘 사용량은 전체 계정 합계(UTC), 한도는 계정별 기준입니다. 이 화면에서는 한도를 바꿀 수 없습니다.', 'Today’s usage is across all accounts (UTC); limits apply per account. Limits are read-only here.')}</p>
+        <p className="admin-muted">{t('오늘 사용량은 전체 계정의 UTC 기준 하루 합계입니다. 한도는 표시된 범위에 적용되며 조회만 가능합니다.', 'Usage totals cover all accounts for the UTC day. Limits apply to the scope shown and are read-only.')}</p>
         {data.costs.policies.length ? <div className="admin-table-scroll" role="region" aria-labelledby="admin-costs-heading" tabIndex={0}><table className="admin-limits"><thead><tr>
-          <th scope="col">{t('항목', 'Feature')}</th><th scope="col">{t('상태', 'Status')}</th><th scope="col">{t('오늘 전체 사용', 'Today, all accounts')}</th><th scope="col">{t('계정별 일일 한도', 'Daily limit per account')}</th><th scope="col">{t('계정별 보유 한도', 'Live limit per account')}</th>
+          <th scope="col">{t('항목', 'Feature')}</th><th scope="col">{t('상태', 'Status')}</th><th scope="col">{t('오늘 전체 사용', 'Today, all accounts')}</th><th scope="col" className="admin-limit-scope">{t('한도 적용 범위', 'Limit scope')}</th><th scope="col">{t('일일 한도', 'Daily limit')}</th><th scope="col">{t('보유 한도', 'Live limit')}</th>
         </tr></thead><tbody>{data.costs.policies.map(row => <tr key={row.scope}><th scope="row">{scopeLabels[row.scope]?.[ko ? 0 : 1] || row.scope}</th>
           <td>{row.paused ? t('일시중지', 'Paused') : enabled(row.enabled)}</td>
           <td>{usageValue(row.scope, data.costs.usage.find(item => item.scope === row.scope)?.used ?? 0)}</td>
+          <td className="admin-limit-scope">{limitScope(row.scope)}</td>
           <td>{usageValue(row.scope, row.dailyLimit)}</td><td>{row.liveLimit === null ? t('별도 한도 없음', 'No separate limit') : usageValue(row.scope, row.liveLimit)}</td>
         </tr>)}</tbody></table></div> : <p>{t('설정된 한도가 없습니다.', 'No limits configured.')}</p>}
       </details></section>

@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-19 관리자 한도 표시 로컬 완료:** W15/W18 C09, 요청/전송량2행은 서비스 전체·기타 알려진10행은 계정별 범위로 표시하고 표/안내를 KO/EN으로 보완했다. 계산/권한/DB·운영 변경0. admin 단위8·같은 소스의 모의 built 화면4·build34 PASS, Doctor0.9.18 기존8→8/신규0. 기본 dev 검사 runner는 준비 timeout이 있어 전체 성공으로 보고하지 않는다. [8항 보고·합성 화면](docs/moemoa/reports/2026-10-19-admin-quota-scope-labels.md). 수정본은 개발/로컬이며 운영 source724eadd의 DF-02 완료는 유지한다.
+
 > **2026-10-19 DF-02 운영 적용 완료:** 사용자 승인 source `724eaddb252db6ee00ba272f10ee5c6940151330`, exact CI39151591067 두 job SUCCESS→master Git→Vercel dpl_J4RE2nQWFSxAa1GN6XaRAEwUKF81 READY/current www 같은 SHA·vercel-git/semanticMatch 확인→함수/migration20261019090000·release MOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01 적용·독립 함수/ledger readback PASS. 권한/예약·활성38/삭제대기12 보존, 고아본문0·수동purge0. [8항 보고](docs/moemoa/reports/2026-10-19-df02-production-application.md), [증거](docs/moemoa/release-v2/evidence/2026-10-19-df02-production-application.json). 다음 기존 예약은10/20 12:15 KST이며 새 함수의 hosted 정리 실행 PASS는 아직 아니다. 아래 후보/승인 대기/미적용은 당시 이력이다.
 
 > **DF-02 정확 운영 후보:** `724eaddb252db6ee00ba272f10ee5c6940151330` / `codex/df02-retention-production-20261019`, 운영3e1f9f3 부모. migration/운영도구/검사6파일·문서/근거11파일이며 앱/설정/가입/공개 변경0. 로컬 SQL15·안전7·sync26 PASS, 운영 읽기 대조 완료·미적용. [범위·복귀·8항 보고](docs/moemoa/reports/2026-10-19-df02-production-candidate.md). 다음은 이 후보의 정확 운영 승인이다.
