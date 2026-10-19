@@ -1,0 +1,236 @@
+{
+  "status": "APPLIED_AND_VERIFIED",
+  "approvedCommit": "724eaddb252db6ee00ba272f10ee5c6940151330",
+  "productionParent": "3e1f9f3553f9a03d22670ef2edbfe48f8914414b",
+  "approval": "User explicitly approved DF-02 candidate724eadd production application on2026-10-19",
+  "release": "MOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01",
+  "migrationVersion": "20261019090000",
+  "mode": "APPLIED_AND_INDEPENDENTLY_READ_BACK",
+  "manualPurge": false,
+  "exactCandidateCI": {
+    "run": 39151591067,
+    "conclusion": "success",
+    "jobs": [
+      "verify",
+      "publication-contract"
+    ],
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/39151591067"
+  },
+  "masterFollowupCI": {
+    "run": 39194782730,
+    "status": "in_progress_at_closeout_snapshot",
+    "sameHeadSha": "724eaddb252db6ee00ba272f10ee5c6940151330"
+  },
+  "deployment": {
+    "id": "dpl_J4RE2nQWFSxAa1GN6XaRAEwUKF81",
+    "name": "anime-collector",
+    "url": "anime-collector-5y8lwfgiv-newrreds-projects.vercel.app",
+    "type": "LAMBDAS",
+    "state": "READY",
+    "createdAt": 1792380454848,
+    "creator": {
+      "uid": "Zmk9vKFLud0w3KvIPA9r8Qin",
+      "username": "newrred"
+    },
+    "project": {
+      "id": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+      "name": "anime-collector",
+      "framework": "astro"
+    },
+    "meta": {
+      "githubCommitRef": "master",
+      "githubCommitSha": "724eaddb252db6ee00ba272f10ee5c6940151330",
+      "githubCommitMessage": "ops: prepare bounded DF-02 retention response release",
+      "githubRepo": "anime-collector",
+      "githubOrg": "Newrred"
+    },
+    "alias": [
+      "www.moemoa.xyz",
+      "anime-collector.vercel.app",
+      "moemoa.xyz",
+      "anime-collector-newrreds-projects.vercel.app",
+      "anime-collector-git-master-newrreds-projects.vercel.app"
+    ],
+    "target": "production",
+    "regions": [
+      "sin1"
+    ],
+    "buildingAt": 1792380455883,
+    "ready": 1792380504608,
+    "readyState": "READY",
+    "source": "git",
+    "aliasError": null
+  },
+  "publicBuildIdentity": {
+    "commit": "724eaddb252db6ee00ba272f10ee5c6940151330",
+    "checkoutCommit": "724eaddb252db6ee00ba272f10ee5c6940151330",
+    "builtAt": "2026-10-19T03:28:00.334Z",
+    "workingTreeDirty": true,
+    "deploymentConfig": {
+      "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+      "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+      "semanticMatch": true
+    },
+    "source": "vercel-git"
+  },
+  "localVerification": {
+    "sqlPassed": 15,
+    "safetyPassed": 7,
+    "syncPassed": 26,
+    "postgresVersion": "16.15",
+    "sourceUnchanged": true,
+    "runtime": "Node24.19.0",
+    "fixtureNote": "Only isolated runner paths and cluster superuser name configured; approved SQL and guards unchanged",
+    "initialFailures": [
+      "Server-only binaries absent on this PC",
+      "Portable package used existing matching psql client",
+      "OS user owner did not match guarded postgres baseline; isolated cluster created with postgres superuser"
+    ]
+  },
+  "before": {
+    "at": "2026-10-19T12:28:58.776837+09:00",
+    "job": {
+      "active": true,
+      "schedule": "15 3 * * *",
+      "latestRun": {
+        "ended": "2026-10-19T12:15:00.420031+09:00",
+        "status": "succeeded",
+        "started": "2026-10-19T12:15:00.224902+09:00"
+      },
+      "expectedCommand": true
+    },
+    "impact": {
+      "bodyRows": 50,
+      "orphanBodies": 0,
+      "activeEntityBodies": 38,
+      "deletedEntityBodies": 12,
+      "unknownEntityTypeBodies": 0
+    },
+    "metadata": {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "anon": false,
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "public": false,
+      "returns": "jsonb",
+      "arguments": "p_now timestamp with time zone DEFAULT now()",
+      "serviceRole": true,
+      "authenticated": false,
+      "securityDefiner": true
+    },
+    "expiredEntities": {
+      "MEMORY_CARD": 0,
+      "MEMORY_BOARD": 0,
+      "VISUAL_ASSET": 0,
+      "PRIVATE_TITLE": 0,
+      "MEMORY_BOARD_CARD": 0
+    },
+    "baseMigrationPresent": true,
+    "entityTypeConstraint": "CHECK ((entity_type = ANY (ARRAY['PRIVATE_TITLE'::text, 'MEMORY_CARD'::text, 'VISUAL_ASSET'::text, 'MEMORY_BOARD'::text, 'MEMORY_BOARD_CARD'::text])))",
+    "candidateMigrationPresent": false,
+    "target": "production",
+    "readOnly": true,
+    "bodyFingerprint": "1685c42612f6214296cf06258ab37e919244fbf11e5977701ce71f1e49a5ef9a",
+    "originalFunction": true,
+    "approvedTestFunction": false,
+    "metadataSha256": "5c24cef493b342844aeeaef5a02468c8b2b86de072feb3ba2d017eb57818d8ae",
+    "rollbackDefinitionSha256": "a4cf15bedd98d8b9a91a28de90170e7ba4f3f9ddbcb81aad1abbc0de4aa8fb22",
+    "rollbackDefinitionFile": "df02-production-function-a4cf15bedd98d8b9a91a28de90170e7ba4f3f9ddbcb81aad1abbc0de4aa8fb22.sql"
+  },
+  "after": {
+    "at": "2026-10-19T12:29:37.844032+09:00",
+    "job": {
+      "active": true,
+      "schedule": "15 3 * * *",
+      "latestRun": {
+        "ended": "2026-10-19T12:15:00.420031+09:00",
+        "status": "succeeded",
+        "started": "2026-10-19T12:15:00.224902+09:00"
+      },
+      "expectedCommand": true
+    },
+    "impact": {
+      "bodyRows": 50,
+      "orphanBodies": 0,
+      "activeEntityBodies": 38,
+      "deletedEntityBodies": 12,
+      "unknownEntityTypeBodies": 0
+    },
+    "metadata": {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "anon": false,
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "public": false,
+      "returns": "jsonb",
+      "arguments": "p_now timestamp with time zone DEFAULT now()",
+      "serviceRole": true,
+      "authenticated": false,
+      "securityDefiner": true
+    },
+    "expiredEntities": {
+      "MEMORY_CARD": 0,
+      "MEMORY_BOARD": 0,
+      "VISUAL_ASSET": 0,
+      "PRIVATE_TITLE": 0,
+      "MEMORY_BOARD_CARD": 0
+    },
+    "baseMigrationPresent": true,
+    "entityTypeConstraint": "CHECK ((entity_type = ANY (ARRAY['PRIVATE_TITLE'::text, 'MEMORY_CARD'::text, 'VISUAL_ASSET'::text, 'MEMORY_BOARD'::text, 'MEMORY_BOARD_CARD'::text])))",
+    "candidateMigrationPresent": true,
+    "target": "production",
+    "readOnly": true,
+    "bodyFingerprint": "fa71dc53eabf4fa9bd57558c7de3740177c6fc99eb92010bb4b23f81eea0b32d",
+    "originalFunction": false,
+    "approvedTestFunction": true,
+    "metadataSha256": "5c24cef493b342844aeeaef5a02468c8b2b86de072feb3ba2d017eb57818d8ae",
+    "rollbackDefinitionSha256": "80a31e93e702fa3d4827bcd45f50ecc68ad3f2b8ec59ea7549e519b89f5ed3cf",
+    "rollbackDefinitionFile": "df02-production-function-80a31e93e702fa3d4827bcd45f50ecc68ad3f2b8ec59ea7549e519b89f5ed3cf.sql"
+  },
+  "independentLedger": {
+    "readOnly": true,
+    "verified": true,
+    "ledgerRows": 1,
+    "nameMatches": true,
+    "sourceMatches": true,
+    "releaseMatches": true,
+    "migrationHashMatches": true
+  },
+  "publicPages": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/titles/",
+      "status": 200
+    },
+    {
+      "path": "/minihome/",
+      "status": 200
+    },
+    {
+      "path": "/terms/",
+      "status": 200
+    },
+    {
+      "path": "/privacy/",
+      "status": 200
+    },
+    {
+      "path": "/legal/service-operations-2026-10-19/",
+      "status": 200
+    }
+  ],
+  "nextExistingDailyRunKst": "2026-10-20 12:15:00 +09:00",
+  "schedulerObservation": "Latest observed success2026-10-19 12:15KST occurred before this application; new function has not been invoked by hosted cron during verification",
+  "limitations": [
+    "No manual hosted purge or user writes",
+    "Function rollback cannot restore subsequently scrubbed response bodies",
+    "Existing product/legal/recovery workboard gaps remain"
+  ]
+}

@@ -1,5 +1,11 @@
 # MOEMOA · 출시 행동 계약과 검증 기준
 
+## 2026-10-19 DF-02 운영 적용 인수
+
+- W17/D05/D06: 승인724eadd exact CI39151591067 두 job SUCCESS→master Git→Vercel J4RE2nQWFS READY/www 같은 SHA→함수·migration20261019090000/release 이력1건과 독립 readback PASS. [운영 근거](evidence/2026-10-19-df02-production-application.json).
+- SQL15·안전7·동기화26 PASS, 실제 source6blob/함수·권한/ledger 이름/release/sourceCommit/SQL hash 확인. 고아본문0·활성38/삭제대기12 보존, 기존 예약/권한 동일.
+- 수동 purge/원본·operation 행 삭제0.10/19 12:15 KST 최신 예약은 적용 전이며 새 함수의 기존 예약은10/20 12:15 KST부터 예정. 실제 hosted 본문 제거·사용자 재시도/브라우저 전체 PASS로 확대하지 않는다. 함수 복귀는 향후 정리된 본문을 복원하지 않는다. 아래 후보/미적용 표시는 당시 기록이다.
+
 ## 2026-10-19 DF-02 운영 대조·후보 인수
 
 - W17/D05/D06: 운영은 기존 함수·service-only/예약 정상, test는 승인 수정 함수. 고아 응답 본문0, 활성 연결38·삭제대기 연결12와30일 초과 entity0을 본문 없이 집계했다. [실제 근거](evidence/2026-10-19-df02-production-candidate.json).

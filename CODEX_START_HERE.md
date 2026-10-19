@@ -1,5 +1,7 @@
 # CODEX START HERE — MOEMOA
 
+> **2026-10-19 DF-02 운영 적용 완료:** 사용자 승인 source `724eaddb252db6ee00ba272f10ee5c6940151330`, exact CI39151591067 두 job SUCCESS→master Git→Vercel dpl_J4RE2nQWFSxAa1GN6XaRAEwUKF81 READY/current www 같은 SHA·vercel-git/semanticMatch 확인→함수/migration20261019090000·release MOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01 적용·독립 함수/ledger readback PASS. 권한/예약·활성38/삭제대기12 보존, 고아본문0·수동purge0. [8항 보고](docs/moemoa/reports/2026-10-19-df02-production-application.md), [증거](docs/moemoa/release-v2/evidence/2026-10-19-df02-production-application.json). 다음 기존 예약은10/20 12:15 KST이며 새 함수의 hosted 정리 실행 PASS는 아직 아니다. 아래 후보/승인 대기/미적용은 당시 이력이다.
+
 > **DF-02 정확 운영 후보:** `724eaddb252db6ee00ba272f10ee5c6940151330` / `codex/df02-retention-production-20261019`, 운영3e1f9f3 부모. migration/운영도구/검사6파일·문서/근거11파일이며 앱/설정/가입/공개 변경0. 로컬 SQL15·안전7·sync26 PASS, 운영 읽기 대조 완료·미적용. [범위·복귀·8항 보고](docs/moemoa/reports/2026-10-19-df02-production-candidate.md). 다음은 이 후보의 정확 운영 승인이다.
 
 > **2026-10-19 DF-02 운영 후보 준비:** 운영 함수는 수정 전, test는 기존 승인 수정본임을 read-only로 확인했다. 운영 고아 응답 본문0·활성 연결38·삭제대기 연결12, 기존 매일12:15 JST 정리 정상. 기존 승인SQL 그대로인 migration20261019090000과 기본읽기/정확SHA 적용 도구,15 SQL·7 안전·26 동기화 단위 PASS. [8항 보고·영향·복귀](docs/moemoa/reports/2026-10-19-df02-production-candidate.md), [근거](docs/moemoa/release-v2/evidence/2026-10-19-df02-production-candidate.json). 운영 쓰기/배포 미실행이며 다음 하나는 이 정확 후보의 운영 승인이다. 현재 운영 master/www3e1f9f3 유지. 아래 ‘DF-02 대조가 다음’은 이전 상태다.

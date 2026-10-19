@@ -1,6 +1,6 @@
 # DF-02 동기화 응답 본문 정리 · 운영 대조와 후보 — 2026-10-19
 
-**운영 읽기 대조·로컬 후보 검증 완료. 운영 적용/수동 정리/배포는 미실행.** 정확 후보 SHA는 기존 단일 작업판의 현재 카드에 결속한다. [실제 집계와 지문](../release-v2/evidence/2026-10-19-df02-production-candidate.json).
+**후속 운영 완료:** 사용자 승인724eadd의 exact CI/Git/Vercel/www 배포와 함수·migration 이력·독립 readback 완료. [적용 결과·복귀·한계](2026-10-19-df02-production-application.md). 수동 정리는 실행하지 않았으며 아래 미적용/승인 대기는 후보 준비 당시 이력이다. [당시 집계와 지문](../release-v2/evidence/2026-10-19-df02-production-candidate.json).
 
 ## 실행 8항 보고
 
