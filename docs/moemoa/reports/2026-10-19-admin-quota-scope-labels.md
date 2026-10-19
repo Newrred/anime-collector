@@ -1,6 +1,8 @@
 # 관리자 한도 적용 범위 표시 수정 — 2026-10-19
 
-**로컬 구현·검증 완료, 운영 미반영.** 사진 요청/전송량의 전역 한도를 계정별로 오인하게 하는 안내를 고쳤다.
+**후속 운영 완료:** 사용자 후속 승인으로 후보33decfe의 전체 CI/master Git/Vercel READY/www 동일 SHA와 실제 자산을 확인했다. [운영 결과](2026-10-19-admin-quota-scope-production.md). 아래는 로컬 구현 당시 검증/승인 경계를 보존한 기록이다.
+
+**로컬 구현·검증 완료.** 사진 요청/전송량의 전역 한도를 계정별로 오인하게 하는 안내를 고쳤다.
 [검증 JSON](../release-v2/evidence/2026-10-19-admin-quota-scope/verification.json),
 [한국어 PC](../release-v2/evidence/2026-10-19-admin-quota-scope/ko-desktop.png) ·
 [한국어320px](../release-v2/evidence/2026-10-19-admin-quota-scope/ko-320.png) ·

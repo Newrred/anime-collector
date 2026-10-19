@@ -1,5 +1,7 @@
 # MOEMOA 현재 개발·운영·법적 준비 안내
 
+**2026-10-19 관리자 한도 표시 운영 완료:** 정확 후보33decfe의 전체 CI 두 job SUCCESS/관리자21 PASS→master Git→Vercel9XzaAD9DRoV8664b3oos4GvSqtQs READY/Production/current www 같은 SHA 확인. 한도 범위2행 서비스 전체·기존10행 계정별로 구분하며 실제 숫자/계산·권한·DB/flags·환경 변경0. 실제 새 JS/CSS와6URL200·비로그인 gate 확인. [운영 결과·복귀·한계](../reports/2026-10-19-admin-quota-scope-production.md). 실운영자 표 검증과 합성21검사는 구분한다. DF-02의 함수/예약은 유지하며 아래 운영 source724eadd는 당시 이력이다.
+
 **2026-10-19 DF-02 운영 완료:** 승인724eadd의 exact CI/master Git/Vercel READY/www 동일 SHA와 함수·migration20261019090000·적용 이력/독립 readback 완료. 기존 service-only 권한/매일12:15 KST 예약·활성38/삭제대기12 본문 보존, 고아본문0. 수동 정리는 실행하지 않았다. [실제 8항 보고·복귀·한계](../reports/2026-10-19-df02-production-application.md). 다음 기존 예약10/20 12:15 KST의 새 함수 실행 관찰은 남으며, 아래 후보/승인 대기는 이전 기록이다.
 
 **2026-10-19 DF-02 후속:** 운영 read-only 대조와 최소 후보 준비 완료. 수정 전 운영/수정된test·현재 고아 본문0 확인, 기존 정리 예약 정상. [적용 범위·15/7/26검증·복귀·미적용 후보](../reports/2026-10-19-df02-production-candidate.md). 운영 적용은 정확 후보 승인 후이며, 기존 법률 고지 배포3e1f9f3은 유지한다. 삭제대기 응답12개는 entity가 남아 있는 동안 보존하며 모든 사본을 즉시 지우는 변경이 아니다.

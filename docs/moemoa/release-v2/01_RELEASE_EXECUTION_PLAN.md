@@ -8,17 +8,21 @@
 4. **범위:** 표시용 범위 열(전역2행/그 외 계정별), 짧은 합계 안내, 기존 admin 브라우저 검사와 필요한 표 CSS·문서. auth/API·일시중지 제어·실제 한도는 제외한다.
 5. **흐름:** 기존 모의 운영 상태 응답→서비스 decoder→동일12행의 범위 라벨/값 렌더→지역화·가로 스크롤 확인. 서버 응답/요청 변경0.
 6. **파일:** src/components/AdminDashboard.jsx, 필요 시 src/styles/admin.css, tests/admin-ui.spec.ts 및 기존 시작/계획/작업판·이번 보고.
-7. **데이터:** migration/실데이터/권한·flags·환경/의존성 변경0, 운영 배포0. 전역 저장량 요약과 한도 계산도 그대로다.
+7. **데이터:** migration/실데이터/권한·flags·환경/의존성 변경0. 초기 로컬 구현 후 사용자 후속 승인으로 UI 운영 배포1회 완료. 전역 저장량 요약과 한도 계산도 그대로다.
 8. **마일스톤:** 오류/계산 기준 확인→표시 보완→KO/EN·데스크톱/320px·키보드 검사→React Doctor 회귀 확인→검증/재개 문서 기록.
 9. **검증:** 기존 admin 검사의 비로그인/비운영자 경계와 KO/EN 화면4개를 동일 소스의 합성 설정 빌드에서 실행한다.12행 중 전역2/계정별10·원래 숫자/MiB 보존·6열 header/row scope, 좁은 화면 문서 overflow0와 키보드 가로 스크롤을 확인한다. 기본 dev runner 준비 실패와 나머지 미실행 검사는 별도 기록한다.
 10. **보안/권리:** 실제 운영 계정을 사용하지 않고 기존 합성 SDK/loopback 응답만 사용. 사용자 본문/키·실제 admin 쓰기0.
 11. **관측:** 테스트/정적 진단·전후 합성 표 스냅샷만 외부 .tools/검사 산출물로 보존한다.
 12. **복귀:** 이번 표시/검사 변경만 revert. DB 복원/한도 값 변경은 필요 없다.
 13. **위험:** 미래 새 전역 정책은 명시 분류 보완 필요. 오늘 사용량 합계와 정책 적용 범위를 구분하며 알 수 없는 정책을 서버에서 새로 허용하지 않는다.
-14. **승인 경계:** 로컬 표시 보완/검사 승인 충족. 앞선 DF-02 승인을 이번 UI 운영 배포 승인으로 재사용하지 않는다.
+14. **승인 경계:** 2026-10-19 사용자 “관리자 한도 표시 수정본 문제 없으면 운영에도 반영”으로 검증 후 이번 표시 수정의 운영 배포를 승인했다. DB/설정·권한/실제 한도는 범위 밖이다. 추가 승인을 반복 요청하지 않는다.
 15. **진행:** 구현/검사3파일 완료. 단위8·동일 소스 합성 built 화면4(재시도0)·일반 build34/postbuild PASS. Doctor0.9.18 오류0/기존8→8·변경 범위 신규0/기존 매칭8, 숫자 점수 미산출. 기본 dev runner는 서버 준비 timeout2회로 검사 시작 전 실패했으며 전체 admin suite 성공으로 확대하지 않는다.
 16. **발견:** 세부 표는 기본 접힘·독립 포커스 가능한 스크롤 region·row/column header를 이미 갖는다. 기존 접근성 구조를 유지한다.
-17. **완료 보고:** [8항 보고](../reports/2026-10-19-admin-quota-scope-labels.md), [합성 화면4개·검증 JSON](evidence/2026-10-19-admin-quota-scope/verification.json)과 현재 작업판에 기록. 320px 범위 열 전체 노출/키보드 스크롤 확인, 평소4363 개발 서버 HTTP200 복원. 로컬 완료/운영 미반영이며 DB·환경·권한·의존성·실제 한도 변경0.
+17. **완료 보고:** [로컬8항 보고](../reports/2026-10-19-admin-quota-scope-labels.md), [합성 화면4개·검증 JSON](evidence/2026-10-19-admin-quota-scope/verification.json) 보존. 후속 승인 운영 후보33decfe의 exact CI39206975015 두 job SUCCESS/관리자21 PASS→master Git→Vercel9XzaAD9DRoV8664b3oos4GvSqtQs READY/current www 같은 SHA→실제 JS/CSS와6URL·비로그인 gate 확인 완료. [운영8항 보고](../reports/2026-10-19-admin-quota-scope-production.md), [근거](evidence/2026-10-19-admin-quota-scope-production.json). DB·환경·권한·의존성·실제 한도 변경0. 중복 master CI는진행 중 마감이며 성공한 exact gate와 구분한다.
+
+### 승인된 운영 실행 — 2026-10-19
+
+최신 origin/master724eadd와 실제 www/Vercel Git source가 일치함을 재확인했다. 최소 후보33decfe에는 검증된2daff02의 구현/검사3파일과 이 계획·로컬 보고/합성 증거6파일을 반영했다. 후보3개 source blob 동일·변경 경계 확인→exact CI39206975015 두 job SUCCESS→master 부모 재확인 후 fast-forward Git push→Vercel Production READY/current www 및 build-info commit/checkoutCommit/source/semanticMatch 확인→실제 배포 admin JS/CSS/비로그인 경계와 주요6URL 읽기 확인을 완료했다. 기존 로컬 준비 timeout과 원격 관리자21 PASS를 구분한다. 실패 시 표시2파일만 Git revert/동일 배포 경로로 복귀한다. DB 복귀/수동 purge·새 cron은 없다. 완료 보고/증거와 인계 문서는 개발 브랜치에서 갱신해 배포 source를 보존한다.
 
 ## W17/D05·D06 DF-02 운영 대조와 최소 후보 — 2026-10-19
 

@@ -1,0 +1,157 @@
+{
+  "status": "PRODUCTION_COMPLETE",
+  "date": "2026-10-19",
+  "approval": "User requested production rollout after verification",
+  "candidate": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+  "previousProduction": "724eaddb252db6ee00ba272f10ee5c6940151330",
+  "source": {
+    "candidate": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+    "parent": "724eaddb252db6ee00ba272f10ee5c6940151330",
+    "branch": "codex/admin-quota-production-20261019",
+    "workflow": 39206975015,
+    "sourceBlobs": [
+      {
+        "path": "src/components/AdminDashboard.jsx",
+        "candidate": "34d22024f42f22ed7ef83875bb35e792f09188cc",
+        "verifiedDevelopment": "34d22024f42f22ed7ef83875bb35e792f09188cc"
+      },
+      {
+        "path": "src/styles/admin.css",
+        "candidate": "5b8ed631f145730b1beed7905fc5a56bba9dfa4a",
+        "verifiedDevelopment": "5b8ed631f145730b1beed7905fc5a56bba9dfa4a"
+      },
+      {
+        "path": "tests/admin-ui.spec.ts",
+        "candidate": "b0c2c59d71cfdbc4f5cb12b4670585f374b12ae1",
+        "verifiedDevelopment": "b0c2c59d71cfdbc4f5cb12b4670585f374b12ae1"
+      }
+    ],
+    "otherAppTestConfigDifferences": 0
+  },
+  "ci": {
+    "id": 39206975015,
+    "headSha": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+    "conclusion": "success",
+    "url": "https://github.com/Newrred/anime-collector/actions/runs/39206975015",
+    "jobs": [
+      {
+        "name": "publication-contract",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "verify",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "adminBrowserPassed": 21,
+    "adminBrowserSeconds": 18.6
+  },
+  "duplicateMasterCi": {
+    "id": 39208294469,
+    "headSha": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+    "statusAtCloseout": "in_progress",
+    "gate": "Existing exact-SHA CI39206975015 both jobs SUCCESS"
+  },
+  "deployment": {
+    "id": "dpl_9XzaAD9DRoV8664b3oos4GvSqtQs",
+    "readyState": "READY",
+    "target": "production",
+    "source": "git",
+    "projectId": "prj_po9LsTZRHWOYjAYD76O1EC04xa4x",
+    "commit": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+    "branch": "master",
+    "alias": [
+      "www.moemoa.xyz",
+      "anime-collector.vercel.app",
+      "moemoa.xyz",
+      "anime-collector-newrreds-projects.vercel.app",
+      "anime-collector-git-master-newrreds-projects.vercel.app"
+    ],
+    "url": "anime-collector-f2mjafxr8-newrreds-projects.vercel.app"
+  },
+  "publicReadback": {
+    "status": "PUBLIC_DEPLOYMENT_READBACK_PASS",
+    "checkedAt": "2026-10-19T06:10:30.001Z",
+    "expected": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+    "buildInfo": {
+      "commit": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+      "checkoutCommit": "33decfe9600c2a56b1cc3df4e249eda0049a4525",
+      "builtAt": "2026-10-19T06:09:56.608Z",
+      "workingTreeDirty": true,
+      "deploymentConfig": {
+        "trackedSha256": "9fc00c12f91c050a94c36dbdfa15771401fd09fd4004802792619e7cb5b0226a",
+        "buildSha256": "026de4c78b41d7c243fd2fa11ff74659de5c3118a21fa7f4abe32eb2acfd0d9d",
+        "semanticMatch": true
+      },
+      "source": "vercel-git"
+    },
+    "pages": [
+      {
+        "path": "/",
+        "status": 200
+      },
+      {
+        "path": "/admin/",
+        "status": 200
+      },
+      {
+        "path": "/data/",
+        "status": 200
+      },
+      {
+        "path": "/titles/",
+        "status": 200
+      },
+      {
+        "path": "/privacy/",
+        "status": 200
+      },
+      {
+        "path": "/terms/",
+        "status": 200
+      }
+    ],
+    "module": {
+      "path": "/_astro/AdminDashboard.cTdOFi5o.js",
+      "sha256": "4b3720ae5b45f72cd53cc9f136a6d95b05a19a836616d9294194d7c0e82a0fb9",
+      "labels": [
+        "서비스 전체",
+        "Entire service",
+        "계정별",
+        "Per account",
+        "한도 적용 범위",
+        "Limit scope",
+        "범위 미확인",
+        "Unspecified"
+      ],
+      "oldMisleadingLabelsAbsent": true
+    },
+    "scopeCss": [
+      {
+        "path": "/_astro/admin.Ck4BsTQu.css",
+        "sha256": "75438d413cc7c5c7446083af19fa68202fa27dce1a8e1b80bda299b7c0ffffb3"
+      }
+    ],
+    "authenticatedAdminUi": "Not exercised; public assets and signed-out browser checked separately",
+    "writes": 0
+  },
+  "browser": {
+    "url": "https://www.moemoa.xyz/admin/",
+    "surface": "in-app browser",
+    "state": "Signed-out Google admin sign-in gate remains; no aggregates or controls",
+    "authenticatedRealAdminTable": "Not exercised",
+    "mockAdminTable": "Same source, complete remote admin runner21 PASS"
+  },
+  "environmentFilesChecked": 4,
+  "environmentUnchanged": true,
+  "databaseWrites": 0,
+  "quotaPermissionFlagsChanges": 0,
+  "dependencyChanges": 0,
+  "rollback": "Git revert displayed UI source changes and pass same release workflow; no DB restore",
+  "remaining": [
+    "Personal image loading diagnosis",
+    "DF-02 scheduled observation 2026-10-20 12:15 KST; no new automation or manual purge"
+  ]
+}

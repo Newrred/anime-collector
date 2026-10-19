@@ -1,5 +1,9 @@
 # MOEMOA · 단일 출시 작업판
 
+## 2026-10-19 관리자 한도 범위 표시 — 운영 완료
+
+사용자 후속 승인→후보33decfe의 exact CI39206975015 두 job SUCCESS/관리자·계정 경계21 PASS→master Git→Vercel9XzaAD9DRoV8664b3oos4GvSqtQs Production READY/current www 동일 SHA→실제 새 JS/CSS·6URL200·비로그인 gate 확인 완료. [운영8항 보고](../reports/2026-10-19-admin-quota-scope-production.md), [근거](evidence/2026-10-19-admin-quota-scope-production.json). DB/환경·권한·실제 한도·의존성 변경0, DF-02 예약 유지. 아래 로컬/운영 미반영은 당시 이력이다.
+
 ## 2026-10-19 관리자 한도 범위 표시 — 로컬 완료·운영 미반영
 
 W15/W18 C09의 일괄 계정별 표기를 수정했다. 요청/전송량2행은 서비스 전체, 알려진 다른10행은 계정별, 알 수 없는 항목은 범위 미확인으로 표시한다. 단위8·동일 소스 모의 built 화면4·build34 PASS, Doctor 기존8→8/신규0. KO/EN·PC/320px·키보드 스크롤과 범위 열 노출 확인. 기본 dev runner는 서버 준비 timeout으로 전체 성공이 아니며 평소4363 서버는 복원했다. [8항 보고·합성 화면](../reports/2026-10-19-admin-quota-scope-labels.md), [검증 JSON](evidence/2026-10-19-admin-quota-scope/verification.json). 실제 정책/숫자·DB·권한·환경 변경0, 운영724eadd 유지. 아래10/18의 라벨 미구현은 당시 이력이며 구현 잔여에서 제거한다.
@@ -911,22 +915,23 @@ W15/W18 C09의 일괄 계정별 표기를 수정했다. 요청/전송량2행은 
 ## 현재 작업 카드 — 새 파일 대신 이 위치를 갱신
 
 ```text
-현재 W: W15/W18 C09 관리자 한도 범위 표시 로컬 완료·운영 미반영. DF-02/DF-01/법률고지 운영 완료 유지.
+현재 W: W15/W18 C09 관리자 한도 범위 표시 운영 완료. DF-02/DF-01/법률고지 운영 완료 유지.
 이번 표시: 요청/전송량2행 서비스 전체·다른 알려진10행 계정별·미지정 범위 미확인. KO/EN 6열 표와 짧은 안내. 계산/정책/API/권한/DB/환경/의존성 변경0.
 이번 검증: admin 단위8·합성 built 화면4(게스트/비운영자/KO/EN,PC/320px)·build34 PASS. 원래 MiB 값/키보드 스크롤/범위 열 전체 노출·문서 overflow0. Doctor 오류0·기존8→8/신규0·숫자점수 미산출.
-이번 한계: 기본 dev runner 준비 timeout2회, 나머지 admin/auth-callback 미실행. 전체 suite/실운영계정 검증으로 확대하지 않는다. 평소4363 서버 HTTP200 복원. 보고: ../reports/2026-10-19-admin-quota-scope-labels.md.
-운영: master/www724eadd; exactCI39151591067 두jobPASS; VercelJ4RE2nQWFS READY/Production/Currentwww. DB20261019090000/releaseMOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01 함수/이력 적용 완료. 앞선DF01 이력 보존.
+이번 운영 검증: exactCI39206975015 publication-contract/verify 두jobSUCCESS, 기본 관리자·계정 경계21 PASS/18.6초. Vercel9XzaAD9DRoV8664b3oos4GvSqtQs READY/Git/Production/currentwww33decfe; build-info commit/checkoutCommit/source/semanticMatch·새 JS/CSS·주요6URL200 확인.
+이번 한계: 이 PC 기본 dev runner 준비 timeout2회는 이력. 원격 전체21 PASS와 구분하며 실제 운영자 로그인 표 검증으로 확대하지 않는다. 실제 브라우저 비로그인 gate 확인. master 중복CI39208294469는 마감시진행중, 앞선 exact CI가배포gate. 보고: ../reports/2026-10-19-admin-quota-scope-production.md.
+운영: master/www33decfe. DB는앞선724eadd의20261019090000/releaseMOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01 함수/이력·독립readback완료유지. 이번DB조회/변경0. 앞선DF01 이력 보존.
 법률 고지: /terms·/privacy 현재본문, /legal/service-operations-2026-10-19/ 보충 KO/EN, 가입/계정 링크. Vercel 이미지/GitHub 평문/주간증분/수동정리, 일반권리/한국임시조치/조건부TIDA 절차 반영.
 보존: 과거 고정10/10 약관·개인정보/10/11 공개고지, 가입tuple/publicrevision/receipt, KR14/US13/TH13·무료·일반공개. 자동메일/실자료쓰기0.
 검증: exact원격CI 두jobPASS, livecommit/checkoutCommit/sourcevercel-git/semanticMatch확인, HTTP6URL200. DF02 SQL15·안전7·sync26, source6blob/함수·ACL·ledger1행의이름/release/sourceCommit/SQL hash 독립 확인PASS. 이전법률고지 링크/고정원문 검사 근거보존.
 한계: hosted수동purge/본문제거·실사용자재시도·Google/긴급조치/통지·신고UI는 이번 미검증. master중복동일SHA CI39194782730은앞서성공한필수CI와구분.10/19 12:15 KST 정기성공은적용전실행.
 법적 잔여: 공급자별 국외처리 필수표/계약범위·보관종료기준, 저작권 법정수령인/반복침해 종료, 운영자의 긴급접수/기한관리 실제연결.
 DF-02 실측: 운영/test승인함수일치·기존ACL/예약동일. 고아본문0/활성38/삭제대기12/30일초과entity0. SQL15·안전7·sync26 PASS, 함수/이력적용·독립readback완료·수동purge0.
-기존 잔여: 다음DF02정기실행관찰·사진진단·master보호·임계알림·전체복구 serving 유지. quota라벨 구현은 완료/운영반영 전. DF02적용 재승인 불필요.
-운영 완료 소스: 724eaddb252db6ee00ba272f10ee5c6940151330 / master, 부모3e1f9f3; migration/도구/검사6·문서/근거11파일. 앱/API/검사·설정/lock변경0. 사용자정확승인수신·실행완료.
+기존 잔여: 다음DF02정기실행관찰·사진진단·master보호·임계알림·전체복구 serving 유지. quota라벨은운영완료. DF02적용 재승인 불필요.
+DF-02 운영 완료 소스: 724eaddb252db6ee00ba272f10ee5c6940151330, 부모3e1f9f3; migration/도구/검사6·문서/근거11파일. 이번한도표시33decfe에서도이코드/설정/lock유지. 사용자정확승인수신·실행완료.
 DF-02 적용: supabase/migrations/20261019090000_memory_retention_response_cleanup.sql, releaseMOEMOA_DF02_RETENTION_RESPONSE_PROD_20261019_01. 기존승인SQL본문/ACL동일. 수동purge없이기존일별정리에서부재entity본문만null, operation행/ID/hash/status/활성·최근본문보존. 이미정리된본문은함수복귀로복원불가.
 정확 적용SHA: 724eaddb252db6ee00ba272f10ee5c6940151330 / codex/df02-retention-production-20261019 및 master. 검증e8de0fa의6개sourceblob와동일. 정확CI39151591067/GitVercel배포/운영함수·ledger/독립readback완료.
-다음 개발 하나: 기존 개인 사진 로딩 실패 최소 재현·원인 진단. 별도 운영 관찰은10/20 12:15 KST 기존정기실행후 새함수실행·대상/보존집계읽기. 새예약/수동purge없음. 이번 UI 운영배포 미승인·미실행, 법률고지/신고/DF02승인재요청없음.
+다음 개발 하나: 기존 개인 사진 로딩 실패 최소 재현·원인 진단. 별도 운영 관찰은10/20 12:15 KST 기존정기실행후 새함수실행·대상/보존집계읽기. 새예약/수동purge없음. 이번UI운영완료, 법률고지/신고/DF02승인재요청없음.
 ```
 
 <details><summary>이전 현재 카드 — 10/19 DF-01 운영 후보 준비 직후</summary>
